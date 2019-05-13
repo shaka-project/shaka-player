@@ -79,14 +79,14 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     }
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateLocalizedStrings_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateLocalizedStrings_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateLocalizedStrings_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateLocalizedStrings_();
+        });
 
     this.eventManager.listen(this.pipButton_, 'click', () => {
       this.onPipClick_();
@@ -241,4 +241,4 @@ shaka.ui.PipButton.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
-  'picture_in_picture', new shaka.ui.PipButton.Factory());
+    'picture_in_picture', new shaka.ui.PipButton.Factory());

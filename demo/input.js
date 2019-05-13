@@ -81,16 +81,16 @@ class ShakaDemoInput {
     return this.extra_;
   }
 
- /**
+  /**
   * @param {string} prefix
   * @return {string}
   * @private
   */
- static generateNewId_(prefix) {
-   const idNumber = ShakaDemoInput.lastId_;
-   ShakaDemoInput.lastId_ += 1;
-   return prefix + '-labeled-' + idNumber;
- }
+  static generateNewId_(prefix) {
+    const idNumber = ShakaDemoInput.lastId_;
+    ShakaDemoInput.lastId_ += 1;
+    return prefix + '-labeled-' + idNumber;
+  }
 }
 
 

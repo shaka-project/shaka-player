@@ -43,7 +43,7 @@ describe('CastUtils', () => {
     ];
 
     const castMembers = CastUtils.PlayerVoidMethods
-                          .concat(CastUtils.PlayerPromiseMethods);
+        .concat(CastUtils.PlayerPromiseMethods);
     for (const name in CastUtils.PlayerGetterMethods) {
       castMembers.push(name);
     }
@@ -95,7 +95,7 @@ describe('CastUtils', () => {
     it('transfers real Events', () => {
       // new Event() is not usable on IE11:
       const event =
-          /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
+      /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
       event.initCustomEvent('myEventType', false, false, null);
 
       // Properties that can definitely be transferred.

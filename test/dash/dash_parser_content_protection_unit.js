@@ -165,7 +165,7 @@ describe('DashParser ContentProtection', () => {
       it(name, async () => {
         const adaptationSetLines = uuids.map((uri) => {
           return sprintf('<ContentProtection schemeIdUri="urn:uuid:%s" />',
-                         uri);
+              uri);
         });
         const source = buildManifestText(adaptationSetLines, [], []);
         const drmInfos = keySystems.map((keySystem) => {
@@ -338,7 +338,7 @@ describe('DashParser ContentProtection', () => {
           buildDrmInfo('com.adobe.primetime'),
         ])));
     await testDashParser(source, expected, /* callback */ undefined,
-                         /* ignoreDrmInfo */ true);
+        /* ignoreDrmInfo */ true);
   });
 
   it('parses key IDs when ignoreDrmInfo flag is set', async () => {
@@ -365,7 +365,7 @@ describe('DashParser ContentProtection', () => {
           buildDrmInfo('com.adobe.primetime', keyIds),
         ]);
     await testDashParser(source, expected, /* callback */ undefined,
-                         /* ignoreDrmInfo */ true);
+        /* ignoreDrmInfo */ true);
   });
 
   it('inherits PSSH from generic CENC into all key systems', async () => {
@@ -502,12 +502,12 @@ describe('DashParser ContentProtection', () => {
     ], [], []);
     const expected = buildExpectedManifest([
       buildDrmInfo('', // placeholder: only unrecognized schemes found
-        [
+          [
           // Representation 1 key ID
-          'deadbeeffeedbaadf00d000008675309',
-          // Representation 2 key ID
-          'deadbeeffeedbaadf00d000008675309',
-        ]),
+            'deadbeeffeedbaadf00d000008675309',
+            // Representation 2 key ID
+            'deadbeeffeedbaadf00d000008675309',
+          ]),
     ]);
     await testDashParser(source, expected);
   });
@@ -761,7 +761,7 @@ describe('In-manifest PlayReady and Widevine', () => {
       expect(actual).toEqual(expected);
     });
 
-     it('ms:laurl without license url', () => {
+    it('ms:laurl without license url', () => {
       const input = {
         init: null,
         keyId: null,
@@ -777,7 +777,7 @@ describe('In-manifest PlayReady and Widevine', () => {
       expect(actual).toEqual(expected);
     });
 
-     it('no ms:laurl node', () => {
+    it('no ms:laurl node', () => {
       const input = {
         init: null,
         keyId: null,
@@ -818,10 +818,10 @@ describe('In-manifest PlayReady and Widevine', () => {
       const encodedPrObject =
         shaka.util.Uint8ArrayUtils.toBase64(new Uint8Array(prBytes.buffer));
       const input = {
-      init: null,
-      keyId: null,
-      schemeUri: '',
-      node:
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node:
         strToXml([
           '<test xmlns:mspr="urn:microsoft:playready">',
           '  <mspr:pro>' + encodedPrObject + '</mspr:pro>',

@@ -115,11 +115,11 @@ shaka.ui.TextDisplayer = class {
     }
 
     for (const cue of cuesToRemove) {
-        const captions = this.currentCuesMap_.get(cue);
-        if (captions) {
-          this.textContainer_.removeChild(captions);
-          this.currentCuesMap_.delete(cue);
-        }
+      const captions = this.currentCuesMap_.get(cue);
+      if (captions) {
+        this.textContainer_.removeChild(captions);
+        this.currentCuesMap_.delete(cue);
+      }
     }
 
     // Remove the cues out of the time range.
@@ -160,7 +160,7 @@ shaka.ui.TextDisplayer = class {
     // For each cue in the current cues map, if the cue's end time has passed,
     // remove the entry from the map, and remove the captions from the page.
     for (const cue of this.currentCuesMap_.keys()) {
-        if (!shouldCueBeDisplayed(cue)) {
+      if (!shouldCueBeDisplayed(cue)) {
         const captions = this.currentCuesMap_.get(cue);
         this.textContainer_.removeChild(captions);
         this.currentCuesMap_.delete(cue);

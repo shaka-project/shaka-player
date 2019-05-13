@@ -231,7 +231,7 @@ describe('StreamingEngine', () => {
       audio: {
         initSegments:
             [makeBuffer(initSegmentSizeAudio),
-             makeBuffer(initSegmentSizeAudio)],
+              makeBuffer(initSegmentSizeAudio)],
         segments: [],
         segmentStartTimes: [],
         segmentPeriodTimes: [],
@@ -240,7 +240,7 @@ describe('StreamingEngine', () => {
       video: {
         initSegments:
             [makeBuffer(initSegmentSizeVideo),
-             makeBuffer(initSegmentSizeVideo)],
+              makeBuffer(initSegmentSizeVideo)],
         segments: [],
         segmentStartTimes: [],
         segmentPeriodTimes: [],
@@ -351,7 +351,7 @@ describe('StreamingEngine', () => {
         segmentDurations);
 
     manifest.presentationTimeline =
-        /** @type {!shaka.media.PresentationTimeline} */ (timeline);
+      /** @type {!shaka.media.PresentationTimeline} */ (timeline);
     manifest.minBufferTime = 2;
 
     // Create InitSegmentReferences.
@@ -1359,11 +1359,11 @@ describe('StreamingEngine', () => {
         onTick.and.callFake(() => {
           // Verify that all buffers have been cleared.
           expect(mediaSourceEngine.clear)
-                .toHaveBeenCalledWith(ContentType.AUDIO);
+              .toHaveBeenCalledWith(ContentType.AUDIO);
           expect(mediaSourceEngine.clear)
-                .toHaveBeenCalledWith(ContentType.VIDEO);
+              .toHaveBeenCalledWith(ContentType.VIDEO);
           expect(mediaSourceEngine.clear)
-                .toHaveBeenCalledWith(ContentType.TEXT);
+              .toHaveBeenCalledWith(ContentType.TEXT);
           onTick.and.stub();
         });
 
@@ -1445,11 +1445,11 @@ describe('StreamingEngine', () => {
         onTick.and.callFake(() => {
           // Verify that all buffers have been cleared.
           expect(mediaSourceEngine.clear)
-                .toHaveBeenCalledWith(ContentType.AUDIO);
+              .toHaveBeenCalledWith(ContentType.AUDIO);
           expect(mediaSourceEngine.clear)
-                .toHaveBeenCalledWith(ContentType.VIDEO);
+              .toHaveBeenCalledWith(ContentType.VIDEO);
           expect(mediaSourceEngine.clear)
-                .toHaveBeenCalledWith(ContentType.TEXT);
+              .toHaveBeenCalledWith(ContentType.TEXT);
           onTick.and.stub();
         });
 
@@ -1983,7 +1983,7 @@ describe('StreamingEngine', () => {
       // Wrap the NetworkingEngine to cause errors.
       const targetUri = '1_audio_init';
       failFirstRequestForTarget(netEngine, targetUri,
-                                shaka.util.Error.Code.BAD_HTTP_STATUS);
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
@@ -2018,7 +2018,7 @@ describe('StreamingEngine', () => {
       // Wrap the NetworkingEngine to cause errors.
       const targetUri = '1_audio_init';
       failFirstRequestForTarget(netEngine, targetUri,
-                                shaka.util.Error.Code.BAD_HTTP_STATUS);
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
@@ -2053,7 +2053,7 @@ describe('StreamingEngine', () => {
       // Wrap the NetworkingEngine to cause errors.
       const targetUri = '1_audio_init';
       failFirstRequestForTarget(netEngine, targetUri,
-                                shaka.util.Error.Code.BAD_HTTP_STATUS);
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
@@ -2087,7 +2087,7 @@ describe('StreamingEngine', () => {
       // Wrap the NetworkingEngine to cause errors.
       const targetUri = '1_audio_init';
       failFirstRequestForTarget(netEngine, targetUri,
-                                shaka.util.Error.Code.BAD_HTTP_STATUS);
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
@@ -2130,7 +2130,7 @@ describe('StreamingEngine', () => {
       const targetUri = '1_audio_init';
       const originalNetEngineRequest = netEngine.request;
       failFirstRequestForTarget(netEngine, targetUri,
-                                shaka.util.Error.Code.BAD_HTTP_STATUS);
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
 
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
@@ -2945,14 +2945,14 @@ describe('StreamingEngine', () => {
     });
 
     it('doesn\'t abort if close to finished',
-       /** @suppress {accessControls} */ () => {
-         prepareForAbort();
-         lastResponse.bytesRemaining_.setBytes(3);
-         streamingEngine.switchVariant(
-             newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+        /** @suppress {accessControls} */ () => {
+          prepareForAbort();
+          lastResponse.bytesRemaining_.setBytes(3);
+          streamingEngine.switchVariant(
+              newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
 
-         bufferAndCheck(/* didAbort= */ false);
-       });
+          bufferAndCheck(/* didAbort= */ false);
+        });
 
     it('accounts for init segment size', () => {
       newVariant.video.initSegmentReference =

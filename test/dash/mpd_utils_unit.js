@@ -35,7 +35,7 @@ describe('MpdUtils', () => {
           MpdUtils.fillUriTemplate(
               '/example/$RepresentationID$.mp4',
               null, null, null, null).toString())
-                  .toBe('/example/$RepresentationID$.mp4');
+          .toBe('/example/$RepresentationID$.mp4');
     });
 
     it('handles a single Number identifier', () => {
@@ -53,7 +53,7 @@ describe('MpdUtils', () => {
           MpdUtils.fillUriTemplate(
               '/example/$Number$.mp4',
               null, null, null, null).toString())
-                  .toBe('/example/$Number$.mp4');
+          .toBe('/example/$Number$.mp4');
     });
 
     it('handles a single Bandwidth identifier', () => {
@@ -71,7 +71,7 @@ describe('MpdUtils', () => {
           MpdUtils.fillUriTemplate(
               '/example/$Bandwidth$.mp4',
               null, null, null, null).toString())
-                  .toBe('/example/$Bandwidth$.mp4');
+          .toBe('/example/$Bandwidth$.mp4');
     });
 
     it('handles a single Time identifier', () => {
@@ -89,7 +89,7 @@ describe('MpdUtils', () => {
           MpdUtils.fillUriTemplate(
               '/example/$Time$.mp4',
               null, null, null, null).toString())
-                  .toBe('/example/$Time$.mp4');
+          .toBe('/example/$Time$.mp4');
     });
 
     it('handles rounding errors for calculated Times', () => {
@@ -759,7 +759,7 @@ describe('MpdUtils', () => {
       const xml = parser.parseFromString(baseXMLString, 'text/xml')
           .documentElement;
       return MpdUtils.processXlinks(xml, retry, failGracefully, 'https://base',
-                                    fakeNetEngine).promise;
+          fakeNetEngine).promise;
     }
   });
 });

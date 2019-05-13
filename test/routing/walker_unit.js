@@ -30,13 +30,13 @@ describe('Walker', () => {
     uri: null,
   };
 
-   // The graph topology that we will be using for our tests.
-   //
-   //  [ A ] ---> [ B ] ---> [ E ]
-   //    ^          |
-   //    |          v
-   //  [ D ] <--- [ C ]
-   //
+  // The graph topology that we will be using for our tests.
+  //
+  //  [ A ] ---> [ B ] ---> [ E ]
+  //    ^          |
+  //    |          v
+  //  [ D ] <--- [ C ]
+  //
   /** @type {shaka.routing.Node} */
   const nodeA = {name: 'a'};
   /** @type {shaka.routing.Node} */

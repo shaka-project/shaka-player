@@ -99,31 +99,31 @@ shaka.test.Dash.testFails = async function(manifestText, expectedError) {
  */
 shaka.test.Dash.makeSimpleManifestText =
     function(lines, duration, startTime) {
-  let periodAttr = '';
-  let mpdAttr = 'type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"';
-  if (duration) {
-    periodAttr = 'duration="PT' + duration + 'S"';
-    mpdAttr = 'type="static"';
-  }
-  if (startTime) {
-    periodAttr += ' start="PT' + startTime + 'S"';
-  }
+      let periodAttr = '';
+      let mpdAttr = 'type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"';
+      if (duration) {
+        periodAttr = 'duration="PT' + duration + 'S"';
+        mpdAttr = 'type="static"';
+      }
+      if (startTime) {
+        periodAttr += ' start="PT' + startTime + 'S"';
+      }
 
-  const start = [
-    '<MPD ' + mpdAttr + '>',
-    '  <Period ' + periodAttr + '>',
-    '    <AdaptationSet mimeType="video/mp4">',
-    '      <Representation bandwidth="500">',
-    '        <BaseURL>http://example.com</BaseURL>',
-  ];
-  const end = [
-    '      </Representation>',
-    '    </AdaptationSet>',
-    '  </Period>',
-    '</MPD>',
-  ];
-  return start.concat(lines, end).join('\n');
-};
+      const start = [
+        '<MPD ' + mpdAttr + '>',
+        '  <Period ' + periodAttr + '>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+      ];
+      const end = [
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ];
+      return start.concat(lines, end).join('\n');
+    };
 
 
 /**

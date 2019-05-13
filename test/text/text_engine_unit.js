@@ -69,18 +69,18 @@ describe('TextEngine', () => {
     });
 
     it('reports support when it\'s closed captions and muxjs is available',
-          () => {
-        const closedCaptionsType =
+        () => {
+          const closedCaptionsType =
            shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
-        const originalMuxjs = window.muxjs;
-        expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(true);
-        try {
-          window['muxjs'] = null;
-          expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(false);
-        } finally {
-          window['muxjs'] = originalMuxjs;
-        }
-    });
+          const originalMuxjs = window.muxjs;
+          expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(true);
+          try {
+            window['muxjs'] = null;
+            expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(false);
+          } finally {
+            window['muxjs'] = originalMuxjs;
+          }
+        });
   });
 
   describe('appendBuffer', () => {
@@ -99,8 +99,8 @@ describe('TextEngine', () => {
 
       await textEngine.appendBuffer(dummyData, 0, 3);
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
-          new Uint8Array(dummyData),
-          {periodStart: 0, segmentStart: 0, segmentEnd: 3},
+        new Uint8Array(dummyData),
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3},
       ]);
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -272,9 +272,9 @@ describe('TextEngine', () => {
       mockParseMedia.and.callFake((data, time) => {
         return [
           createFakeCue(time.periodStart + 0,
-                        time.periodStart + 1),
+              time.periodStart + 1),
           createFakeCue(time.periodStart + 2,
-                        time.periodStart + 3),
+              time.periodStart + 3),
         ];
       });
 

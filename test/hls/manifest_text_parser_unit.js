@@ -27,14 +27,14 @@ describe('ManifestTextParser', () => {
   describe('parsePlaylist', () => {
     it('rejects invalid playlists', () => {
       verifyError('invalid playlist',
-                  shaka.util.Error.Code.HLS_PLAYLIST_HEADER_MISSING);
+          shaka.util.Error.Code.HLS_PLAYLIST_HEADER_MISSING);
 
       // This Master playlist is invalid cause it contains a segment tag.
       // All segment information should be in a Media playlist.
       verifyError('#EXTM3U\n' +
                   '#EXT-X-MEDIA:TYPE=AUDIO\n' +
                   '#EXTINF:6.00600',
-                  shaka.util.Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY);
+      shaka.util.Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY);
     });
 
     it('parses a Media Playlist', () => {
@@ -226,7 +226,7 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id */ 1, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('CODECS',
-                                            'avc1.64002a,mp4a.40.2,avc2.64000'),
+                        'avc1.64002a,mp4a.40.2,avc2.64000'),
                   ]),
             ],
           },
@@ -245,7 +245,7 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id */ 2, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('CODECS',
-                                            'avc1.64002a,mp4a.40.2'),
+                        'avc1.64002a,mp4a.40.2'),
                     new shaka.hls.Attribute('AUDIO', 'a1,a2'),
                   ]),
             ],
@@ -338,10 +338,10 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Segment('https://test/test.mp4',
                   [
                     new shaka.hls.Tag(
-                      /* id */ 2,
-                      'EXTINF',
-                      [new shaka.hls.Attribute('pid', '180')],
-                      '5.99467'
+                        /* id */ 2,
+                        'EXTINF',
+                        [new shaka.hls.Attribute('pid', '180')],
+                        '5.99467'
                     ),
                   ]),
             ],
@@ -366,15 +366,15 @@ describe('ManifestTextParser', () => {
             ],
             segments: [
               new shaka.hls.Segment('https://test/test.mp4',
-                [
-                  new shaka.hls.Tag(/* id */ 1, 'EXT-X-KEY',
-                    [
-                      new shaka.hls.Attribute('METHOD', 'AES-128'),
-                      new shaka.hls.Attribute('URI', 'http://key.com'),
-                      new shaka.hls.Attribute('IV', '123'),
-                    ]),
-                  new shaka.hls.Tag(/* id */ 3, 'EXTINF', [], '5.99467'),
-                ]),
+                  [
+                    new shaka.hls.Tag(/* id */ 1, 'EXT-X-KEY',
+                        [
+                          new shaka.hls.Attribute('METHOD', 'AES-128'),
+                          new shaka.hls.Attribute('URI', 'http://key.com'),
+                          new shaka.hls.Attribute('IV', '123'),
+                        ]),
+                    new shaka.hls.Tag(/* id */ 3, 'EXTINF', [], '5.99467'),
+                  ]),
             ],
           },
 
@@ -433,9 +433,9 @@ describe('ManifestTextParser', () => {
             ],
             segments: [
               new shaka.hls.Segment('https://test/uri',
-                                    [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
+                  [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
               new shaka.hls.Segment('https://test/uri2',
-                                    [new shaka.hls.Tag(3, 'EXTINF', [], '4')]),
+                  [new shaka.hls.Tag(3, 'EXTINF', [], '4')]),
             ],
           },
 
@@ -455,9 +455,9 @@ describe('ManifestTextParser', () => {
             ],
             segments: [
               new shaka.hls.Segment('https://test/uri',
-                                    [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
+                  [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
               new shaka.hls.Segment('https://test/uri2',
-                                    [new shaka.hls.Tag(3, 'EXTINF', [], '4')]),
+                  [new shaka.hls.Tag(3, 'EXTINF', [], '4')]),
             ],
           },
 

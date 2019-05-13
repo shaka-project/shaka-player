@@ -45,22 +45,22 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
     this.addTextLangMenu_();
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateLocalizedStrings_();
-        // If captions/subtitles are off, this string needs localization.
-        // TODO: is there a more efficient way of updating just the strings
-        // we need instead of running the whole language update?
-        this.updateTextLanguages_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateLocalizedStrings_();
+          // If captions/subtitles are off, this string needs localization.
+          // TODO: is there a more efficient way of updating just the strings
+          // we need instead of running the whole language update?
+          this.updateTextLanguages_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateLocalizedStrings_();
-        // If captions/subtitles are off, this string needs localization.
-        // TODO: is there a more efficient way of updating just the strings
-        // we need instead of running the whole language update?
-        this.updateTextLanguages_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateLocalizedStrings_();
+          // If captions/subtitles are off, this string needs localization.
+          // TODO: is there a more efficient way of updating just the strings
+          // we need instead of running the whole language update?
+          this.updateTextLanguages_();
+        });
 
     this.eventManager.listen(this.player, 'texttrackvisibility', () => {
       this.onCaptionStateChange_();
@@ -205,12 +205,12 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
     });
 
     shaka.ui.LanguageUtils.updateLanguages(tracks, this.textLangMenu_,
-      languages,
-      this.onTextLanguageSelected_.bind(this),
-      // Don't mark current text language as chosen unless captions are enabled
-      this.player.isTextTrackVisible(),
-      this.currentCaptions_,
-      this.localization);
+        languages,
+        this.onTextLanguageSelected_.bind(this),
+        // Don't mark current text language as chosen unless captions are enabled
+        this.player.isTextTrackVisible(),
+        this.currentCaptions_,
+        this.localization);
 
     // Add the Off button
     const offButton = shaka.util.Dom.createHTMLElement('button');

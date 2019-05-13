@@ -50,11 +50,11 @@ describe('Mp4SegmentIndexParser', () => {
     const result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 0);
     const references =
         [
-         {startTime: 0, endTime: 12, startByte: 92, endByte: 194960},
-         {startTime: 12, endTime: 24, startByte: 194961, endByte: 294059},
-         {startTime: 24, endTime: 36, startByte: 294060, endByte: 466352},
-         {startTime: 36, endTime: 48, startByte: 466353, endByte: 615511},
-         {startTime: 48, endTime: 60, startByte: 615512, endByte: 743301},
+          {startTime: 0, endTime: 12, startByte: 92, endByte: 194960},
+          {startTime: 12, endTime: 24, startByte: 194961, endByte: 294059},
+          {startTime: 24, endTime: 36, startByte: 294060, endByte: 466352},
+          {startTime: 36, endTime: 48, startByte: 466353, endByte: 615511},
+          {startTime: 48, endTime: 60, startByte: 615512, endByte: 743301},
         ];
 
     expect(result).toBeTruthy();
@@ -73,11 +73,11 @@ describe('Mp4SegmentIndexParser', () => {
     const result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 2);
     const references =
         [
-         {startTime: -2, endTime: 10},
-         {startTime: 10, endTime: 22},
-         {startTime: 22, endTime: 34},
-         {startTime: 34, endTime: 46},
-         {startTime: 46, endTime: 58},
+          {startTime: -2, endTime: 10},
+          {startTime: 10, endTime: 22},
+          {startTime: 22, endTime: 34},
+          {startTime: 34, endTime: 46},
+          {startTime: 46, endTime: 58},
         ];
 
     expect(result).toBeTruthy();

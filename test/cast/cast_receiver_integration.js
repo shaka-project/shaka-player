@@ -77,15 +77,15 @@ describe('CastReceiver', () => {
     return () => check(undefined);
   }
 
- /**
+  /**
   * Before running the test, check if this is Chrome or Chromecast, and if
   * Widevine is supported.
   * @param {function(function()=)} test
   * @return {function(function())}
   */
- function checkAndRunWithDrm(test) {
-   return checkAndRun(test, /* checkKeySystems */ true);
- }
+  function checkAndRunWithDrm(test) {
+    return checkAndRun(test, /* checkKeySystems */ true);
+  }
 
   beforeAll((done) => {
     const supportTest = shaka.media.DrmEngine.probeSupport()
@@ -107,7 +107,7 @@ describe('CastReceiver', () => {
     // Since we can't write to window.navigator or navigator.userAgent, we use
     // Object.defineProperty.
     Object.defineProperty(window['navigator'],
-                          'userAgent', {value: 'CrKey', configurable: true});
+        'userAgent', {value: 'CrKey', configurable: true});
 
     shaka.net.NetworkingEngine.registerScheme('test', shaka.test.TestScheme);
     shaka.media.ManifestParser.registerParserByMime(
@@ -182,7 +182,7 @@ describe('CastReceiver', () => {
     if (originalUserAgent) {
       window['cast'] = originalCast;
       Object.defineProperty(window['navigator'],
-                            'userAgent', {value: originalUserAgent});
+          'userAgent', {value: originalUserAgent});
     }
   });
 

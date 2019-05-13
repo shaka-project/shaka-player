@@ -56,4 +56,4 @@ shaka.ui.Spacer.Factory = class {
 };
 
 shaka.ui.Controls.registerElement(
-  'spacer', new shaka.ui.Spacer.Factory());
+    'spacer', new shaka.ui.Spacer.Factory());

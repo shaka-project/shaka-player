@@ -631,7 +631,7 @@ describe('DashParser Live', () => {
           fakeNetEngine.request.and.callFake((type, request) => {
             expect(type).toBe(manifestRequest);
             expect(request.uris).toEqual(
-              ['http://foobar', 'http://foobar2', 'dummy://foo/foobar3']);
+                ['http://foobar', 'http://foobar2', 'dummy://foo/foobar3']);
             const data = shaka.util.StringUtils.toUTF8(manifestText);
             return shaka.util.AbortableOperation.completed(
                 {uri: request.uris[0], data: data, headers: {}});

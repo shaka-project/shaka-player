@@ -19,10 +19,10 @@ describe('Player Src Equals', () => {
   // This asset needs to be (1) long and (2) high bitrate so that we can
   // invoke unbuffered seeks.
   const LARGE_MP4_CONTENT_URI = [
-      'https://storage.googleapis.com',
-      'shaka-demo-assets',
-      'sintel-mp4-only',
-      'v-2160p-17000k-libx264.mp4',
+    'https://storage.googleapis.com',
+    'shaka-demo-assets',
+    'sintel-mp4-only',
+    'v-2160p-17000k-libx264.mp4',
   ].join('/');
 
   /** @type {!HTMLVideoElement} */

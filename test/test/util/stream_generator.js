@@ -188,7 +188,7 @@ shaka.test.Mp4VodStreamGenerator.prototype.init = function() {
   return Promise.all(async).then(
       (results) => {
         goog.asserts.assert(results.length == 2,
-                            'did not load both segments');
+            'did not load both segments');
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
@@ -218,7 +218,7 @@ shaka.test.Mp4VodStreamGenerator.prototype.getSegment = function(
 
   // |position| must be an integer and >= 1.
   goog.asserts.assert((position % 1 === 0) && (position >= 1),
-                      'segment number must be an integer >= 1');
+      'segment number must be an integer >= 1');
 
   const segmentStartTime = (position - 1) * this.segmentDuration_;
 
@@ -327,7 +327,7 @@ shaka.test.Mp4LiveStreamGenerator.prototype.init = function() {
   return Promise.all(async).then(
       (results) => {
         goog.asserts.assert(results.length == 2,
-                            'did not load both segments');
+            'did not load both segments');
         this.initSegment_ = results[0];
         this.segmentTemplate_ = results[1];
         this.timescale_ = shaka.test.StreamGenerator.getTimescale_(
@@ -358,7 +358,7 @@ shaka.test.Mp4LiveStreamGenerator.prototype.getSegment = function(
 
   // |position| must be an integer and >= 1.
   goog.asserts.assert((position % 1 === 0) && (position >= 1),
-                      'segment number must be an integer >= 1');
+      'segment number must be an integer >= 1');
 
   const segmentStartTime = (position - 1) * this.segmentDuration_;
 
@@ -466,7 +466,7 @@ shaka.test.StreamGenerator.getTimescale_ = function(
 shaka.test.StreamGenerator.setBaseMediaDecodeTime_ = function(
     segment, tfdtOffset, baseMediaDecodeTime, timescale) {
   goog.asserts.assert(baseMediaDecodeTime * timescale < Math.pow(2, 32),
-                      'Specied baseMediaDecodeTime is too big.');
+      'Specied baseMediaDecodeTime is too big.');
 
   // NOTE from Microsoft on the lack of ArrayBuffer.prototype.slice in IE11:
   // "At this time we do not plan to fix this issue." ~ https://bit.ly/2ywEkpQ

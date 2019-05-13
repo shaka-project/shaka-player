@@ -265,13 +265,13 @@ describe('DrmEngine', () => {
    * @return {function(function())}
    */
   function checkAndRun(test) {
-   return function(done) {
-     if (!support['com.widevine.alpha'] &&
+    return function(done) {
+      if (!support['com.widevine.alpha'] &&
          !support['com.microsoft.playready']) {
-       pending('Skipping DrmEngine tests.');
-     } else {
-       test(done);
-     }
-   };
+        pending('Skipping DrmEngine tests.');
+      } else {
+        test(done);
+      }
+    };
   }
 });

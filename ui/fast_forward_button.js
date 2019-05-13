@@ -46,14 +46,14 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     this.updateAriaLabel_();
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateAriaLabel_();
-    });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateAriaLabel_();
-    });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(this.button_, 'click', () => {
       this.fastForward_();
@@ -99,4 +99,4 @@ shaka.ui.FastForwardButton.Factory = class {
 };
 
 shaka.ui.Controls.registerElement(
-  'fast_forward', new shaka.ui.FastForwardButton.Factory());
+    'fast_forward', new shaka.ui.FastForwardButton.Factory());

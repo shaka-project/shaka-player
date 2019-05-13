@@ -32,8 +32,8 @@ shaka.ui.LanguageUtils = class {
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
    */
-   // TODO: Do the benefits of having this common code in a method still
-   // outweigh the complexity of the parameter list?
+  // TODO: Do the benefits of having this common code in a method still
+  // outweigh the complexity of the parameter list?
   static updateLanguages(tracks, langMenu, languages, onLanguageSelected,
       updateChosen, currentSelectionElement, localization) {
     // Using array.filter(f)[0] as an alternative to array.find(f) which is
@@ -46,7 +46,7 @@ shaka.ui.LanguageUtils = class {
     // Remove old languages
     // 1. Save the back to menu button
     const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-      langMenu, 'shaka-back-to-overflow-button');
+        langMenu, 'shaka-back-to-overflow-button');
 
     // 2. Remove everything
     shaka.ui.Utils.removeAllChildren(langMenu);

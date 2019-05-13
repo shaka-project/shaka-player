@@ -120,7 +120,7 @@ class ShakaDemoConfig {
     const docLink = this.resolveExternLink_('.DrmConfiguration');
     this.addSection_('DRM', docLink)
         .addBoolInput_('Delay License Request Until Played',
-                       'drm.delayLicenseRequestUntilPlayed');
+            'drm.delayLicenseRequestUntilPlayed');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const robustnessSuggestions = [
       'SW_SECURE_CRYPTO',
@@ -169,20 +169,20 @@ class ShakaDemoConfig {
     this.addSection_('Manifest', docLink)
         .addBoolInput_('Ignore DASH DRM Info', 'manifest.dash.ignoreDrmInfo')
         .addBoolInput_('Auto-Correct DASH Drift',
-                       'manifest.dash.autoCorrectDrift')
+            'manifest.dash.autoCorrectDrift')
         .addBoolInput_('Xlink Should Fail Gracefully',
-                       'manifest.dash.xlinkFailGracefully')
+            'manifest.dash.xlinkFailGracefully')
         .addNumberInput_('Availability Window Override',
-                         'manifest.availabilityWindowOverride',
-                         /* canBeDecimal = */ true,
-                         /* canBeZero = */ false,
-                         /* canBeUnset = */ true)
+            'manifest.availabilityWindowOverride',
+            /* canBeDecimal = */ true,
+            /* canBeZero = */ false,
+            /* canBeUnset = */ true)
         .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
         .addBoolInput_('Ignore DRM Info', 'manifest.dash.ignoreDrmInfo')
         .addNumberInput_('Default Presentation Delay',
-                         'manifest.dash.defaultPresentationDelay')
+            'manifest.dash.defaultPresentationDelay')
         .addBoolInput_('Ignore Min Buffer Time',
-                       'manifest.dash.ignoreMinBufferTime');
+            'manifest.dash.ignoreMinBufferTime');
 
     this.addRetrySection_('manifest', 'Manifest');
   }
@@ -193,16 +193,16 @@ class ShakaDemoConfig {
     this.addSection_('Adaptation', docLink)
         .addBoolInput_('Enabled', 'abr.enabled')
         .addNumberInput_('Default Bandwidth Estimate',
-                         'abr.defaultBandwidthEstimate')
+            'abr.defaultBandwidthEstimate')
         .addNumberInput_('Bandwidth Downgrade Target',
-                         'abr.bandwidthDowngradeTarget',
-                         /* canBeDecimal = */ true)
+            'abr.bandwidthDowngradeTarget',
+            /* canBeDecimal = */ true)
         .addNumberInput_('Bandwidth Upgrade Target',
-                         'abr.bandwidthUpgradeTarget',
-                         /* canBeDecimal = */ true)
+            'abr.bandwidthUpgradeTarget',
+            /* canBeDecimal = */ true)
         .addNumberInput_('Switch Interval',
-                         'abr.switchInterval',
-                         /* canBeDecimal = */ true);
+            'abr.switchInterval',
+            /* canBeDecimal = */ true);
     this.addRetrictionsSection_('abr', 'Adaptation');
   }
 
@@ -238,17 +238,17 @@ class ShakaDemoConfig {
     this.addSection_(categoryName + ' Retry Parameters', docLink)
         .addNumberInput_('Max Attempts', prefix + 'maxAttempts')
         .addNumberInput_('Base Delay',
-                         prefix + 'baseDelay',
-                         /* canBeDecimal = */ true)
+            prefix + 'baseDelay',
+            /* canBeDecimal = */ true)
         .addNumberInput_('Backoff Factor',
-                         prefix + 'backoffFactor',
-                         /* canBeDecimal = */ true)
+            prefix + 'backoffFactor',
+            /* canBeDecimal = */ true)
         .addNumberInput_('Fuzz Factor',
-                         prefix + 'fuzzFactor',
-                         /* canBeDecimal = */ true)
+            prefix + 'fuzzFactor',
+            /* canBeDecimal = */ true)
         .addNumberInput_('Timeout',
-                         prefix + 'timeout',
-                         /* canBeDecimal = */ true);
+            prefix + 'timeout',
+            /* canBeDecimal = */ true);
   }
 
   /** @private */
@@ -256,7 +256,7 @@ class ShakaDemoConfig {
     const docLink = this.resolveExternLink_('.OfflineConfiguration');
     this.addSection_('Offline', docLink)
         .addBoolInput_('Use Persistent Licenses',
-                       'offline.usePersistentLicense');
+            'offline.usePersistentLicense');
   }
 
   /** @private */
@@ -264,21 +264,21 @@ class ShakaDemoConfig {
     const docLink = this.resolveExternLink_('.StreamingConfiguration');
     this.addSection_('Streaming', docLink)
         .addNumberInput_('Maximum Small Gap Size', 'streaming.smallGapLimit',
-                         /* canBeDecimal = */ true)
+            /* canBeDecimal = */ true)
         .addNumberInput_('Buffering Goal', 'streaming.bufferingGoal',
-                         /* canBeDecimal = */ true)
+            /* canBeDecimal = */ true)
         .addNumberInput_('Duration Backoff', 'streaming.durationBackoff',
-                         /* canBeDecimal = */ true)
+            /* canBeDecimal = */ true)
         .addNumberInput_('Rebuffering Goal', 'streaming.rebufferingGoal',
-                         /* canBeDecimal = */ true)
+            /* canBeDecimal = */ true)
         .addNumberInput_('Buffer Behind', 'streaming.bufferBehind',
-                         /* canBeDecimal = */ true)
+            /* canBeDecimal = */ true)
         .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekOffset',
-                         /* canBeDecimal = */ true)
+            /* canBeDecimal = */ true)
         .addNumberInput_('Stall Threshold', 'streaming.stallThreshold',
-                         /* canBeDecimal = */ true)
+            /* canBeDecimal = */ true)
         .addNumberInput_('Safe Skip Distance', 'streaming.stallSkip',
-                         /* canBeDecimal = */ true);
+            /* canBeDecimal = */ true);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');
@@ -295,9 +295,9 @@ class ShakaDemoConfig {
     this.addBoolInput_('Jump Large Gaps', 'streaming.jumpLargeGaps')
         .addBoolInput_('Force Transmux TS', 'streaming.forceTransmuxTS')
         .addBoolInput_('Start At Segment Boundary',
-                       'streaming.startAtSegmentBoundary')
+            'streaming.startAtSegmentBoundary')
         .addBoolInput_('Ignore Text Stream Failures',
-                       'streaming.ignoreTextStreamFailures')
+            'streaming.ignoreTextStreamFailures')
         .addBoolInput_('Stall Detector Enabled', 'streaming.stallEnabled');
     this.addRetrySection_('streaming', 'Streaming');
   }
@@ -314,7 +314,7 @@ class ShakaDemoConfig {
     this.addCustomTextInput_('Preferred UI Locale', onChange);
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
     this.addNumberInput_('Preferred Audio Channel Count',
-                         'preferredAudioChannelCount');
+        'preferredAudioChannelCount');
   }
 
   /** @private */
@@ -354,7 +354,7 @@ class ShakaDemoConfig {
     const setLevel = shaka['log']['setLevel'];
 
     const logLevels = {
-        'info': 'Info', 'debug': 'Debug', 'v': 'Verbose', 'vv': 'Very Verbose'};
+      'info': 'Info', 'debug': 'Debug', 'v': 'Verbose', 'vv': 'Very Verbose'};
     const onChange = (input) => {
       switch (input.value) {
         case 'info':
@@ -493,7 +493,7 @@ class ShakaDemoConfig {
    * @private
    */
   addNumberInput_(name, valueName, canBeDecimal = false, canBeZero = true,
-                  canBeUnset = false, tooltipMessage) {
+      canBeUnset = false, tooltipMessage) {
     const onChange = (input) => {
       shakaDemoMain.resetConfiguration(valueName);
       shakaDemoMain.remakeHash();
@@ -569,7 +569,7 @@ class ShakaDemoConfig {
     this.getLatestSection_().addRow(name, tooltipMessage || null);
   }
 
- /**
+  /**
    * Checks for config values that do not have corresponding fields.
    * @private
    */
@@ -619,7 +619,7 @@ class ShakaDemoConfig {
    */
   getLatestSection_() {
     goog.asserts.assert(this.sections_.length > 0,
-                        'Must have at least one section.');
+        'Must have at least one section.');
     return this.sections_[this.sections_.length - 1];
   }
 }

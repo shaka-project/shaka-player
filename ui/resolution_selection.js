@@ -44,30 +44,30 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     this.addResolutionMenu_();
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateLocalizedStrings_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateLocalizedStrings_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateLocalizedStrings_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateLocalizedStrings_();
+        });
 
     this.eventManager.listen(this.resolutionButton_, 'click', () => {
-          this.onResolutionClick_();
-      });
+      this.onResolutionClick_();
+    });
 
     this.eventManager.listen(this.player, 'variantchanged', () => {
-        this.updateResolutionSelection_();
-      });
+      this.updateResolutionSelection_();
+    });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
-        this.updateResolutionSelection_();
-      });
+      this.updateResolutionSelection_();
+    });
 
     this.eventManager.listen(this.player, 'abrstatuschanged', () => {
-        this.updateResolutionSelection_();
-      });
+      this.updateResolutionSelection_();
+    });
 
     this.updateResolutionSelection_();
 
@@ -110,7 +110,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
   /**
    * @private
    */
-   addResolutionMenu_() {
+  addResolutionMenu_() {
     /** @private {!HTMLElement}*/
     this.resolutionMenu_ = shaka.util.Dom.createHTMLElement('div');
     this.resolutionMenu_.classList.add('shaka-resolutions');
@@ -122,7 +122,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     this.backFromResolutionButton_ =
       shaka.util.Dom.createHTMLElement('button');
     this.backFromResolutionButton_.classList.add(
-      'shaka-back-to-overflow-button');
+        'shaka-back-to-overflow-button');
     this.resolutionMenu_.appendChild(this.backFromResolutionButton_);
 
     const backIcon = shaka.util.Dom.createHTMLElement('i');
@@ -293,4 +293,4 @@ shaka.ui.ResolutionSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
-  'quality', new shaka.ui.ResolutionSelection.Factory());
+    'quality', new shaka.ui.ResolutionSelection.Factory());

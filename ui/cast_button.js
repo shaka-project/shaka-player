@@ -61,7 +61,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     this.castCurrentSelectionSpan_ =
       shaka.util.Dom.createHTMLElement('span');
     this.castCurrentSelectionSpan_.classList.add(
-      'shaka-current-selection-span');
+        'shaka-current-selection-span');
     label.appendChild(this.castCurrentSelectionSpan_);
     this.castButton_.appendChild(label);
     this.parent.appendChild(this.castButton_);
@@ -73,26 +73,26 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     this.onCastStatusChange_();
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateLocalizedStrings_();
-    });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateLocalizedStrings_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateLocalizedStrings_();
-    });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateLocalizedStrings_();
+        });
 
     this.eventManager.listen(this.castButton_, 'click', () => {
-        this.onCastClick_();
-      });
+      this.onCastClick_();
+    });
 
     this.eventManager.listen(this.controls, 'caststatuschanged', () => {
-        this.onCastStatusChange_();
-      });
+      this.onCastStatusChange_();
+    });
   }
 
 
-    /** @private */
+  /** @private */
   async onCastClick_() {
     if (this.castProxy_.isCasting()) {
       this.castProxy_.suggestDisconnect();
@@ -182,4 +182,4 @@ shaka.ui.CastButton.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
-  'cast', new shaka.ui.CastButton.Factory());
+    'cast', new shaka.ui.CastButton.Factory());

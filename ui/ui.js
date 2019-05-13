@@ -110,7 +110,7 @@ shaka.ui.Overlay.prototype.getConfiguration = function() {
  */
 shaka.ui.Overlay.prototype.configure = function(config, value) {
   goog.asserts.assert(typeof(config) == 'object' || arguments.length == 2,
-                      'String configs should have values!');
+      'String configs should have values!');
 
   // ('fieldName', value) format
   if (arguments.length == 2 && typeof(config) == 'string') {
@@ -142,8 +142,8 @@ shaka.ui.Overlay.prototype.configure = function(config, value) {
   this.videoContainer_.appendChild(this.video_);
 
   shaka.util.ConfigUtils.mergeConfigObjects(
-        this.config_, config, this.defaultConfig_(),
-        /* overrides (only used for player config)*/ {}, /* path */ '');
+      this.config_, config, this.defaultConfig_(),
+      /* overrides (only used for player config)*/ {}, /* path */ '');
 
   // If a cast receiver app id has been given, add a cast button to the UI
   if (this.config_.castReceiverAppId &&
@@ -263,7 +263,7 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
     for (let i = 0; i < videos.length; i++) {
       const video = videos[i];
       goog.asserts.assert(video.tagName.toLowerCase() == 'video',
-        'Should be a video element!');
+          'Should be a video element!');
 
       const container = document.createElement('div');
       const videoParent = video.parentElement;
@@ -292,7 +292,7 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
     for (let i = 0; i < containers.length; i++) {
       const container = containers[i];
       goog.asserts.assert(container.tagName.toLowerCase() == 'div',
-        'Container should be a div!');
+          'Container should be a div!');
 
       let castAppId = '';
 
@@ -307,7 +307,7 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
       let video = null;
       for (let j = 0; j < videos.length; j++) {
         goog.asserts.assert(videos[j].tagName.toLowerCase() == 'video',
-          'Should be a video element!');
+            'Should be a video element!');
         if (videos[j].parentElement == container) {
           video = videos[j];
           break;
@@ -345,7 +345,7 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
 shaka.ui.Overlay.dispatchLoadedEvent_ = function(eventName) {
   // "Event" is not constructable on IE, so we use this CustomEvent pattern.
   const uiLoadedEvent = /** @type {!CustomEvent} */(
-      document.createEvent('CustomEvent'));
+    document.createEvent('CustomEvent'));
   uiLoadedEvent.initCustomEvent(eventName, false, false, null);
 
   document.dispatchEvent(uiLoadedEvent);

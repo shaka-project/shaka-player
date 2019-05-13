@@ -35,7 +35,7 @@ goog.require('shaka.util.Dom');
  * @final
  * @export
  */
- shaka.ui.OverflowMenu = class extends shaka.ui.Element {
+shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
@@ -74,7 +74,7 @@ goog.require('shaka.util.Dom');
         // overflow menu buttons, but oh well
         if (this.overflowMenu_.childNodes.length) {
           /** @type {!HTMLElement} */ (this.overflowMenu_.childNodes[0])
-            .focus();
+              .focus();
         }
 
         // Make sure controls are displayed
@@ -83,43 +83,43 @@ goog.require('shaka.util.Dom');
     }
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateAriaLabel_();
+        });
 
 
     this.eventManager.listen(
-      this.controls, 'submenuopen', () => {
+        this.controls, 'submenuopen', () => {
         // Hide the main overflow menu if one of the sub menus has
         // been opened.
-        shaka.ui.Utils.setDisplay(this.overflowMenu_, false);
-      });
+          shaka.ui.Utils.setDisplay(this.overflowMenu_, false);
+        });
 
 
     this.eventManager.listen(
-      this.overflowMenu_, 'touchstart', (event) => {
-        this.controls.setLastTouchEventTime(Date.now());
-        event.stopPropagation();
-      });
+        this.overflowMenu_, 'touchstart', (event) => {
+          this.controls.setLastTouchEventTime(Date.now());
+          event.stopPropagation();
+        });
 
     this.eventManager.listen(this.overflowMenuButton_, 'click', () => {
-        this.onOverflowMenuButtonClick_();
-      });
+      this.onOverflowMenuButtonClick_();
+    });
 
     this.eventManager.listen(
-      this.controlsContainer_, 'touchstart', (event) => {
+        this.controlsContainer_, 'touchstart', (event) => {
         // If the overflow menu is showing, hide it on a touch event
-        if (this.overflowMenu_.classList.contains('shaka-displayed')) {
-          shaka.ui.Utils.setDisplay(this.overflowMenu_, false);
-          // Stop this event from becoming a click event.
-          event.preventDefault();
-        }
-      });
+          if (this.overflowMenu_.classList.contains('shaka-displayed')) {
+            shaka.ui.Utils.setDisplay(this.overflowMenu_, false);
+            // Stop this event from becoming a click event.
+            event.preventDefault();
+          }
+        });
 
     this.updateAriaLabel_();
   }
@@ -186,7 +186,7 @@ goog.require('shaka.util.Dom');
         this.children_.push(factory.create(this.overflowMenu_, this.controls));
       } else {
         shaka.log.alwaysWarn('Unrecognized overflow menu element requested:',
-                             name);
+            name);
       }
     }
   }
@@ -239,7 +239,7 @@ shaka.ui.OverflowMenu.Factory = class {
 };
 
 shaka.ui.Controls.registerElement(
-  'overflow_menu', new shaka.ui.OverflowMenu.Factory());
+    'overflow_menu', new shaka.ui.OverflowMenu.Factory());
 
 
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */

@@ -153,4 +153,4 @@ shaka.ui.PresentationTimeTracker.Factory = class {
 };
 
 shaka.ui.Controls.registerElement(
-  'time_and_duration', new shaka.ui.PresentationTimeTracker.Factory());
+    'time_and_duration', new shaka.ui.PresentationTimeTracker.Factory());

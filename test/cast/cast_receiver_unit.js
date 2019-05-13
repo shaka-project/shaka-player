@@ -50,19 +50,19 @@ describe('CastReceiver', () => {
    * @return {function(function())}
    */
   function checkAndRun(test) {
-   const check = function(done) {
-     if (!isChromecast && !isChrome) {
-       pending(
-           'Skipping CastReceiver tests for non-Chrome and non-Chromecast');
-     } else {
-       test(done);
-     }
-   };
-   // Account for tests with a done argument, and tests without.
-   if (test.length == 1) {
-     return (done) => check(done);
-   }
-   return () => check(undefined);
+    const check = function(done) {
+      if (!isChromecast && !isChrome) {
+        pending(
+            'Skipping CastReceiver tests for non-Chrome and non-Chromecast');
+      } else {
+        test(done);
+      }
+    };
+    // Account for tests with a done argument, and tests without.
+    if (test.length == 1) {
+      return (done) => check(done);
+    }
+    return () => check(undefined);
   }
 
   beforeAll(() => {
@@ -86,7 +86,7 @@ describe('CastReceiver', () => {
     // Since we can't write to window.navigator or navigator.userAgent, we use
     // Object.defineProperty.
     Object.defineProperty(window['navigator'],
-                          'userAgent', {value: 'CrKey', configurable: true});
+        'userAgent', {value: 'CrKey', configurable: true});
   });
 
   beforeEach(checkAndRun(() => {
@@ -122,7 +122,7 @@ describe('CastReceiver', () => {
     if (originalUserAgent) {
       window['cast'] = originalCast;
       Object.defineProperty(window['navigator'],
-                            'userAgent', {value: originalUserAgent});
+          'userAgent', {value: originalUserAgent});
     }
   });
 
@@ -773,18 +773,18 @@ describe('CastReceiver', () => {
         return;
       }
       expect(mockGenericMessageBus.messages[0]).toEqual(
-        {
-          requestId: 0,
-          type: 'MEDIA_STATUS',
-          status: [jasmine.objectContaining({
-            media: {
-              contentId: expectedUri,
-              streamType: 'BUFFERED',
-              duration: expectedDuration,
-              contentType: '',
-            },
-          })],
-        }
+          {
+            requestId: 0,
+            type: 'MEDIA_STATUS',
+            status: [jasmine.objectContaining({
+              media: {
+                contentId: expectedUri,
+                streamType: 'BUFFERED',
+                duration: expectedDuration,
+                contentType: '',
+              },
+            })],
+          }
       );
       mockGenericMessageBus.messages.shift();
     }

@@ -76,8 +76,8 @@ shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {
  */
 shaka.test.ManifestParser.makeReference =
     function(uri, position, start, end, baseUri = '',
-             startByte = 0, endByte = null) {
-  const getUris = () => [baseUri + uri];
-  return new shaka.media.SegmentReference(
-      position, start, end, getUris, startByte, endByte);
-};
+        startByte = 0, endByte = null) {
+      const getUris = () => [baseUri + uri];
+      return new shaka.media.SegmentReference(
+          position, start, end, getUris, startByte, endByte);
+    };

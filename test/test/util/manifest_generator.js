@@ -287,10 +287,10 @@ shaka.test.ManifestGenerator.prototype.licenseServerUri = function(uri) {
  */
 shaka.test.ManifestGenerator.prototype.distinctiveIdentifierRequired =
     function() {
-  const drmInfo = this.currentDrmInfo_();
-  drmInfo.distinctiveIdentifierRequired = true;
-  return this;
-};
+      const drmInfo = this.currentDrmInfo_();
+      drmInfo.distinctiveIdentifierRequired = true;
+      return this;
+    };
 
 
 /**
@@ -482,7 +482,7 @@ shaka.test.ManifestGenerator.prototype.addPartialStream = function(type, id) {
   this.lastStreamAdded_ = stream;
 
   const streamObj =
-      /** @type {shaka.extern.Stream} */ (jasmine.objectContaining(stream));
+  /** @type {shaka.extern.Stream} */ (jasmine.objectContaining(stream));
   if (type == ContentType.TEXT) {
     const period = this.currentPeriod_();
     period.textStreams.push(streamObj);
@@ -510,60 +510,60 @@ shaka.test.ManifestGenerator.prototype.addPartialStream = function(type, id) {
  */
 shaka.test.ManifestGenerator.prototype.createStream_ =
     function(id, type, language) {
-  goog.asserts.assert(!this.isIdUsed_(id),
-                      'Streams should have unique ids!');
+      goog.asserts.assert(!this.isIdUsed_(id),
+          'Streams should have unique ids!');
 
-  const ContentType = shaka.util.ManifestParserUtils.ContentType;
-  let defaultMimeType = 'text/plain';
-  let defaultCodecs = '';
+      const ContentType = shaka.util.ManifestParserUtils.ContentType;
+      let defaultMimeType = 'text/plain';
+      let defaultCodecs = '';
 
-  if (type == ContentType.AUDIO) {
-    defaultMimeType = 'audio/mp4';
-    defaultCodecs = 'mp4a.40.2';
-  } else if (type == ContentType.VIDEO) {
-    defaultMimeType = 'video/mp4';
-    defaultCodecs = 'avc1.4d401f';
-  } else if (type == ContentType.TEXT) {
-    defaultMimeType = 'text/vtt';
-  }
+      if (type == ContentType.AUDIO) {
+        defaultMimeType = 'audio/mp4';
+        defaultCodecs = 'mp4a.40.2';
+      } else if (type == ContentType.VIDEO) {
+        defaultMimeType = 'video/mp4';
+        defaultCodecs = 'avc1.4d401f';
+      } else if (type == ContentType.TEXT) {
+        defaultMimeType = 'text/vtt';
+      }
 
-  const create =
+      const create =
       jasmine.createSpy('createSegmentIndex').and.callFake(() => {
         return Promise.resolve();
       });
-  const find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);
-  const get = jasmine.createSpy('getSegmentReference').and.returnValue(null);
+      const find = jasmine.createSpy('findSegmentPosition').and.returnValue(null);
+      const get = jasmine.createSpy('getSegmentReference').and.returnValue(null);
 
-  /** @type {shaka.extern.Stream} */
-  const stream = {
-    id: id,
-    originalId: null,
-    createSegmentIndex: shaka.test.Util.spyFunc(create),
-    findSegmentPosition: shaka.test.Util.spyFunc(find),
-    getSegmentReference: shaka.test.Util.spyFunc(get),
-    initSegmentReference: null,
-    presentationTimeOffset: 0,
-    mimeType: defaultMimeType,
-    codecs: defaultCodecs,
-    frameRate: undefined,
-    bandwidth: undefined,
-    width: undefined,
-    height: undefined,
-    kind: undefined,
-    encrypted: false,
-    keyId: null,
-    language: language,
-    label: null,
-    type: type,
-    primary: false,
-    trickModeVideo: null,
-    emsgSchemeIdUris: null,
-    roles: [],
-    channelsCount: null,
-    closedCaptions: null,
-  };
-  return stream;
-};
+      /** @type {shaka.extern.Stream} */
+      const stream = {
+        id: id,
+        originalId: null,
+        createSegmentIndex: shaka.test.Util.spyFunc(create),
+        findSegmentPosition: shaka.test.Util.spyFunc(find),
+        getSegmentReference: shaka.test.Util.spyFunc(get),
+        initSegmentReference: null,
+        presentationTimeOffset: 0,
+        mimeType: defaultMimeType,
+        codecs: defaultCodecs,
+        frameRate: undefined,
+        bandwidth: undefined,
+        width: undefined,
+        height: undefined,
+        kind: undefined,
+        encrypted: false,
+        keyId: null,
+        language: language,
+        label: null,
+        type: type,
+        primary: false,
+        trickModeVideo: null,
+        emsgSchemeIdUris: null,
+        roles: [],
+        channelsCount: null,
+        closedCaptions: null,
+      };
+      return stream;
+    };
 
 
 /**
@@ -610,7 +610,7 @@ shaka.test.ManifestGenerator.prototype.textStream = function(uri) {
 
   stream.createSegmentIndex = () => Promise.resolve();
   stream.findSegmentPosition = (time) =>
-      (time >= 0 && time < duration ? 1 : null);
+    (time >= 0 && time < duration ? 1 : null);
   stream.getSegmentReference = (position) => {
     if (position != 1) {
       return null;
@@ -644,8 +644,8 @@ shaka.test.ManifestGenerator.prototype.delayCreateSegmentIndex = function() {
 shaka.test.ManifestGenerator.prototype.anyInitSegment = function() {
   const stream = this.currentStream_();
   stream.initSegmentReference =
-      /** @type {shaka.media.InitSegmentReference} */ (
-          jasmine.any(this.shaka_.media.InitSegmentReference));
+    /** @type {shaka.media.InitSegmentReference} */ (
+      jasmine.any(this.shaka_.media.InitSegmentReference));
   return this;
 };
 
@@ -716,10 +716,10 @@ shaka.test.ManifestGenerator.prototype.mime = function(mime, codecs) {
  */
 shaka.test.ManifestGenerator.prototype.closedCaptions =
     function(closedCaptions) {
-  const stream = this.currentStream_();
-  stream.closedCaptions = closedCaptions;
-  return this;
-};
+      const stream = this.currentStream_();
+      stream.closedCaptions = closedCaptions;
+      return this;
+    };
 
 
 /**
@@ -847,7 +847,7 @@ shaka.test.ManifestGenerator.prototype.originalId = function(originalId) {
  */
 shaka.test.ManifestGenerator.prototype.currentPeriod_ = function() {
   goog.asserts.assert(this.manifest_.periods.length > 0,
-                      'Must call addPeriod() at least once.');
+      'Must call addPeriod() at least once.');
   return this.manifest_.periods[this.manifest_.periods.length - 1];
 };
 
@@ -861,7 +861,7 @@ shaka.test.ManifestGenerator.prototype.currentVariant_ = function() {
   const realObj_ = shaka.test.ManifestGenerator.realObj_;
   const period = this.currentPeriod_();
   goog.asserts.assert(period.variants.length > 0,
-                      'Must call addVariant() at least once.');
+      'Must call addVariant() at least once.');
   return realObj_(period.variants[period.variants.length - 1]);
 };
 
@@ -873,7 +873,7 @@ shaka.test.ManifestGenerator.prototype.currentVariant_ = function() {
  */
 shaka.test.ManifestGenerator.prototype.currentStreamOrVariant_ = function() {
   goog.asserts.assert(this.lastObjectAdded_,
-                      'Must call addVariant() or addTextStream()' +
+      'Must call addVariant() or addTextStream()' +
                       ' at least once.');
   return this.lastObjectAdded_;
 };
@@ -888,7 +888,7 @@ shaka.test.ManifestGenerator.prototype.currentDrmInfo_ = function() {
   const realObj_ = shaka.test.ManifestGenerator.realObj_;
   const variant = this.currentVariant_();
   goog.asserts.assert(variant.drmInfos.length > 0,
-                      'Must call addDrmInfo() at least once.');
+      'Must call addDrmInfo() at least once.');
   return realObj_(variant.drmInfos[variant.drmInfos.length - 1]);
 };
 
@@ -900,7 +900,7 @@ shaka.test.ManifestGenerator.prototype.currentDrmInfo_ = function() {
  */
 shaka.test.ManifestGenerator.prototype.currentStream_ = function() {
   goog.asserts.assert(this.lastStreamAdded_,
-                      'Must add at least one stream.');
+      'Must add at least one stream.');
   return this.lastStreamAdded_;
 };
 

@@ -40,7 +40,7 @@ const CACHE_NAME = 'shaka-player-v2.5+';
 const CACHE_NAME_PREFIX = 'shaka-player';
 
 console.assert(CACHE_NAME.startsWith(CACHE_NAME_PREFIX),
-               'Cache name does not match prefix!');
+    'Cache name does not match prefix!');
 
 
 /**
@@ -171,7 +171,7 @@ function onActivate(event) {
     // Note that caches are shared across the origin, so only remove
     // caches we are sure we created.
     const cleanTheseUp = cacheNames.filter((cacheName) =>
-        cacheName.startsWith(CACHE_NAME_PREFIX) && cacheName != CACHE_NAME);
+      cacheName.startsWith(CACHE_NAME_PREFIX) && cacheName != CACHE_NAME);
 
     const cleanUpPromises =
         cleanTheseUp.map((cacheName) => caches.delete(cacheName));

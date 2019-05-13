@@ -335,7 +335,7 @@ shaka.test.Util.setupCSS = async function(cssLink) {
   // stylesheet, so LESS can process it.
   less.registerStylesheetsImmediately();
   await less.refresh(/* reload */ true,
-    /* modifyVars*/ false, /* clearFileCache */ false);
+      /* modifyVars*/ false, /* clearFileCache */ false);
 };
 
 /**
@@ -379,54 +379,54 @@ shaka.test.Util.cleanupUI = async function() {
  */
 shaka.test.Util.waitForMovementOrFailOnTimeout =
     (eventManager, target, timeout) => {
-  // TODO: Refactor all the wait utils into a class that avoids repeated args
-  const timeGoal = target.currentTime + 1;
-  let goalMet = false;
-  const startTime = Date.now();
-  console.assert(!target.ended, 'Video should not be ended!');
-  shaka.log.info('Waiting for movement from', target.currentTime,
-                 'to', timeGoal);
+      // TODO: Refactor all the wait utils into a class that avoids repeated args
+      const timeGoal = target.currentTime + 1;
+      let goalMet = false;
+      const startTime = Date.now();
+      console.assert(!target.ended, 'Video should not be ended!');
+      shaka.log.info('Waiting for movement from', target.currentTime,
+          'to', timeGoal);
 
-  return new Promise((resolve, reject) => {
-    eventManager.listen(target, 'timeupdate', () => {
-      if (target.currentTime >= timeGoal || target.ended) {
-        goalMet = true;
-        const endTime = Date.now();
-        const seconds = ((endTime - startTime) / 1000).toFixed(2);
-        shaka.log.info('Movement goal met after ' + seconds + ' seconds');
+      return new Promise((resolve, reject) => {
+        eventManager.listen(target, 'timeupdate', () => {
+          if (target.currentTime >= timeGoal || target.ended) {
+            goalMet = true;
+            const endTime = Date.now();
+            const seconds = ((endTime - startTime) / 1000).toFixed(2);
+            shaka.log.info('Movement goal met after ' + seconds + ' seconds');
 
-        eventManager.unlisten(target, 'timeupdate');
-        resolve();
-      }
-    });
+            eventManager.unlisten(target, 'timeupdate');
+            resolve();
+          }
+        });
 
-    shaka.test.Util.delay(timeout).then(() => {
-      // This check is only necessary to supress the error log.  It's fine to
-      // unlisten twice or to reject after resolve.  Neither of those actions
-      // matter.  But the error log can be confusing during debugging if we
-      // have already met the movement goal.
-      if (!goalMet) {
-        const buffered = [];
-        for (let i = 0; i < target.buffered.length; ++i) {
-          buffered.push({
-            start: target.buffered.start(i),
-            end: target.buffered.end(i),
-          });
-        }
+        shaka.test.Util.delay(timeout).then(() => {
+          // This check is only necessary to supress the error log.  It's fine to
+          // unlisten twice or to reject after resolve.  Neither of those actions
+          // matter.  But the error log can be confusing during debugging if we
+          // have already met the movement goal.
+          if (!goalMet) {
+            const buffered = [];
+            for (let i = 0; i < target.buffered.length; ++i) {
+              buffered.push({
+                start: target.buffered.start(i),
+                end: target.buffered.end(i),
+              });
+            }
 
-        shaka.log.error('Timeout waiting for playback.',
-                        'current time', target.currentTime,
-                        'ready state', target.readyState,
-                        'playback rate', target.playbackRate,
-                        'paused', target.paused,
-                        'buffered', buffered);
+            shaka.log.error('Timeout waiting for playback.',
+                'current time', target.currentTime,
+                'ready state', target.readyState,
+                'playback rate', target.playbackRate,
+                'paused', target.paused,
+                'buffered', buffered);
 
-        eventManager.unlisten(target, 'timeupdate');
-        reject(new Error('Timeout while waiting for playback!'));
-      }
-    });
-  });
-};
+            eventManager.unlisten(target, 'timeupdate');
+            reject(new Error('Timeout while waiting for playback!'));
+          }
+        });
+      });
+    };
 
 /**
  * @param {shaka.util.EventManager} eventManager
@@ -437,41 +437,41 @@ shaka.test.Util.waitForMovementOrFailOnTimeout =
  */
 shaka.test.Util.waitUntilPlayheadReaches =
     (eventManager, target, playheadTime, timeout) => {
-  let goalMet = false;
+      let goalMet = false;
 
-  // TODO: Refactor all the wait utils into a class that avoids repeated args
-  return new Promise(((resolve, reject) => {
-    eventManager.listen(target, 'timeupdate', () => {
-      if (target.currentTime >= playheadTime) {
-        goalMet = true;
-        eventManager.unlisten(target, 'timeupdate');
-        resolve();
-      }
-    });
+      // TODO: Refactor all the wait utils into a class that avoids repeated args
+      return new Promise(((resolve, reject) => {
+        eventManager.listen(target, 'timeupdate', () => {
+          if (target.currentTime >= playheadTime) {
+            goalMet = true;
+            eventManager.unlisten(target, 'timeupdate');
+            resolve();
+          }
+        });
 
-    shaka.test.Util.delay(timeout).then(() => {
-      if (!goalMet) {
-        const buffered = [];
-        for (let i = 0; i < target.buffered.length; ++i) {
-          buffered.push({
-            start: target.buffered.start(i),
-            end: target.buffered.end(i),
-          });
-        }
+        shaka.test.Util.delay(timeout).then(() => {
+          if (!goalMet) {
+            const buffered = [];
+            for (let i = 0; i < target.buffered.length; ++i) {
+              buffered.push({
+                start: target.buffered.start(i),
+                end: target.buffered.end(i),
+              });
+            }
 
-        shaka.log.error('Timeout waiting for target time', playheadTime,
-                        'current time', target.currentTime,
-                        'ready state', target.readyState,
-                        'playback rate', target.playbackRate,
-                        'paused', target.paused,
-                        'buffered', buffered);
+            shaka.log.error('Timeout waiting for target time', playheadTime,
+                'current time', target.currentTime,
+                'ready state', target.readyState,
+                'playback rate', target.playbackRate,
+                'paused', target.paused,
+                'buffered', buffered);
 
-        eventManager.unlisten(target, 'timeupdate');
-        reject(new Error('Timeout waiting for time ' + playheadTime));
-      }
-    });
-  }));
-};
+            eventManager.unlisten(target, 'timeupdate');
+            reject(new Error('Timeout waiting for time ' + playheadTime));
+          }
+        });
+      }));
+    };
 
 /**
  * Wait for the video to end or for |timeout| seconds to pass, whichever

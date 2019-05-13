@@ -55,18 +55,18 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.videoContainer_ = this.controls.getVideoContainer();
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(this.button_, 'click', () => {
-        this.toggleFullScreen_();
-      });
+      this.toggleFullScreen_();
+    });
 
     if (screen.orientation) {
       this.eventManager.listen(screen.orientation, 'change', () => {
@@ -75,9 +75,9 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     }
 
     this.eventManager.listen(document, 'fullscreenchange', () => {
-        this.updateIcon_();
-        this.updateAriaLabel_();
-      });
+      this.updateIcon_();
+      this.updateAriaLabel_();
+    });
   }
 
   /**
@@ -157,5 +157,5 @@ shaka.ui.FullscreenButton.Factory = class {
 };
 
 shaka.ui.Controls.registerElement(
-  'fullscreen', new shaka.ui.FullscreenButton.Factory());
+    'fullscreen', new shaka.ui.FullscreenButton.Factory());
 

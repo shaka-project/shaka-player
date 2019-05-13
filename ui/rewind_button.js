@@ -48,14 +48,14 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
     this.updateAriaLabel_();
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(this.button_, 'click', () => {
       this.rewind_();
@@ -102,5 +102,5 @@ shaka.ui.RewindButton.Factory = class {
 };
 
 shaka.ui.Controls.registerElement(
-  'rewind', new shaka.ui.RewindButton.Factory());
+    'rewind', new shaka.ui.RewindButton.Factory());
 

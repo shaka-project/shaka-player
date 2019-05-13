@@ -56,7 +56,7 @@ describe('DashParser SegmentList', () => {
       '</SegmentList>',
     ], 30 /* duration */);
     const references = [ManifestParser.makeReference('s1.mp4', 1,
-                                                   0, 30, baseUri)];
+        0, 30, baseUri)];
     await Dash.testSegmentIndex(source, references);
   });
 

@@ -84,7 +84,7 @@ shaka.test.OfflineUtils.createSegmentData = function(data) {
  * @param {shaka.extern.SegmentDataDB} expected
  */
 shaka.test.OfflineUtils.expectSegmentsToContain = function(segments,
-                                                           expected) {
+    expected) {
   const actualData = segments.map((segment) => {
     expect(segment.data).toBeTruthy();
     return new Uint8Array(segment.data);

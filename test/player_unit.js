@@ -1769,7 +1769,7 @@ describe('Player', () => {
         const lang = languages[i];
         if (lang.charAt(0) == '*') {
           generator
-            .addVariant(i)
+              .addVariant(i)
               .primary()
               .language(lang.substr(1))
               .addAudio(i);
@@ -2171,25 +2171,25 @@ describe('Player', () => {
 
     it('throw CONTENT_UNSUPPORTED_BY_BROWSER when the only period is ' +
         'unplayable', async () => {
-          manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(0).bandwidth(500)
-                  .addVideo(0).mime('video/mp4', 'bad')
-              .build();
-          const parser = new shaka.test.FakeManifestParser(manifest);
-          const factory = () => parser;
-          try {
-            await player.load(fakeManifestUri, 0, factory);
-            fail();
-          } catch (error) {
-            shaka.test.Util.expectToEqualError(
-                error,
-                new shaka.util.Error(
-                    shaka.util.Error.Severity.CRITICAL,
-                    shaka.util.Error.Category.MANIFEST,
-                    shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER));
-          }
-        });
+      manifest = new shaka.test.ManifestGenerator()
+          .addPeriod(0)
+          .addVariant(0).bandwidth(500)
+          .addVideo(0).mime('video/mp4', 'bad')
+          .build();
+      const parser = new shaka.test.FakeManifestParser(manifest);
+      const factory = () => parser;
+      try {
+        await player.load(fakeManifestUri, 0, factory);
+        fail();
+      } catch (error) {
+        shaka.test.Util.expectToEqualError(
+            error,
+            new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.MANIFEST,
+                shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER));
+      }
+    });
 
     it('throw CONTENT_UNSUPPORTED_BY_BROWSER when all periods are unplayable',
         async () => {

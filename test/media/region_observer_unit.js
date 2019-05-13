@@ -85,8 +85,8 @@ describe('RegionObserver', () => {
     expect(onEnterRegion).toHaveBeenCalledOnceMoreWith([region, false]);
 
     poll(observer,
-      /* timeInSeconds= */ 8,
-      /* seeking= */ false);
+        /* timeInSeconds= */ 8,
+        /* seeking= */ false);
     expect(onEnterRegion).not.toHaveBeenCalled();
     expect(onExitRegion).not.toHaveBeenCalled();
     expect(onSkipRegion).not.toHaveBeenCalled();

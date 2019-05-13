@@ -47,14 +47,14 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.updateAriaLabel_();
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(this.button_, 'click', () => {
       this.video.muted = !this.video.muted;

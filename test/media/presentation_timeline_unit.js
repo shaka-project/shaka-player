@@ -128,15 +128,15 @@ describe('PresentationTimeline', () => {
    * @return {shaka.media.SegmentReference}
    */
   function makeSegmentReference(startTime, endTime) {
-      // start and end times are the only fields that matter to
-      // PresentationTimeline.
-      return new shaka.media.SegmentReference(
-          /* position */ 0,
-          startTime,
-          endTime,
-          /* uris */ (() => { return []; }),
-          /* startByte */ 0,
-          /* endByte */ null);
+    // start and end times are the only fields that matter to
+    // PresentationTimeline.
+    return new shaka.media.SegmentReference(
+        /* position */ 0,
+        startTime,
+        endTime,
+        /* uris */ (() => { return []; }),
+        /* startByte */ 0,
+        /* endByte */ null);
   }
 
   describe('getSegmentAvailabilityStart', () => {
@@ -208,7 +208,7 @@ describe('PresentationTimeline', () => {
       // See https://github.com/google/shaka-player/issues/999
       setElapsed(1000);
       timeline.notifySegments([ref1, ref2, ref3, ref4, ref5],
-                              /* periodStart */ 0);
+          /* periodStart */ 0);
 
       // last segment time (50) - availability (20)
       expect(timeline.getSegmentAvailabilityStart()).toBe(30);
@@ -226,7 +226,7 @@ describe('PresentationTimeline', () => {
 
       setElapsed(100);
       timeline.notifySegments([ref1, ref2, ref3, ref4, ref5],
-                              /* periodStart */ 0);
+          /* periodStart */ 0);
 
       // now (100) - max segment duration (10) - availability start time (0)
       expect(timeline.getSegmentAvailabilityEnd()).toBe(90);
@@ -309,7 +309,7 @@ describe('PresentationTimeline', () => {
       // See https://github.com/google/shaka-player/issues/999
       setElapsed(1000);
       timeline.notifySegments([ref1, ref2, ref3, ref4, ref5],
-                              /* periodStart */ 0);
+          /* periodStart */ 0);
 
       // last segment time (50)
       expect(timeline.getSegmentAvailabilityEnd()).toBe(50);
@@ -407,11 +407,11 @@ describe('PresentationTimeline', () => {
 
       // A reference from 30-40, + period start 0
       timeline.notifySegments([makeSegmentReference(30, 40)],
-                              /* periodStart */ 0);
+          /* periodStart */ 0);
 
       // A reference from 0-10, + period start 40
       timeline.notifySegments([makeSegmentReference(0, 10)],
-                              /* periodStart */ 40);
+          /* periodStart */ 40);
 
       // If we hadn't adjusted for period start, this would be 0.
       expect(timeline.getSeekRangeStart()).toBe(30);

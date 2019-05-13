@@ -169,9 +169,9 @@ describe('UI', () => {
 
       it('choosing caption language through UI has effect on player',
           async () => {
-        await verifyLanguageChangeViaUI(
-            'textchanged', () => player.getTextTracks());
-      });
+            await verifyLanguageChangeViaUI(
+                'textchanged', () => player.getTextTracks());
+          });
 
       it('choosing language through API has effect on UI', async () => {
         // Enable & verify the text, or else the text won't be streamed and the
@@ -244,9 +244,9 @@ describe('UI', () => {
           ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
 
       languagesToButtons = mapChoicesToButtons(
-        /* allButtons= */ languageButtons,
-        /* choices= */ langsFromContent,
-        /* modifier= */ getNativeName,
+          /* allButtons= */ languageButtons,
+          /* choices= */ langsFromContent,
+          /* modifier= */ getNativeName,
       );
     }
 
@@ -309,9 +309,9 @@ describe('UI', () => {
           ['shaka-back-to-overflow-button', 'shaka-turn-captions-off-button']);
 
       languagesToButtons = mapChoicesToButtons(
-        /* allButtons= */ languageButtons,
-        /* choices */ langsFromContent,
-        /* modifier */ getNativeName
+          /* allButtons= */ languageButtons,
+          /* choices */ langsFromContent,
+          /* modifier */ getNativeName
       );
 
       const button = languagesToButtons.get(newLanguage);
@@ -542,11 +542,11 @@ describe('UI', () => {
       });
 
       resolutionButtons = filterButtons(
-        /* buttons= */ resolutionsMenu.childNodes,
-        /* excludeClasses= */ [
-          'shaka-back-to-overflow-button',
-          'shaka-enable-abr-button',
-      ]);
+          /* buttons= */ resolutionsMenu.childNodes,
+          /* excludeClasses= */ [
+            'shaka-back-to-overflow-button',
+            'shaka-enable-abr-button',
+          ]);
 
       resolutionsToButtons = mapChoicesToButtons(
           /* buttons= */ resolutionButtons,

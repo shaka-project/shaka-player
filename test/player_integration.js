@@ -266,7 +266,7 @@ describe('Player', () => {
       const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
       const absoluteUri = locationUri.resolve(partialUri);
       await player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
-                                'text/vtt');
+          'text/vtt');
 
       const textTracks = player.getTextTracks();
       expect(textTracks).toBeTruthy();
@@ -646,17 +646,17 @@ describe('Player Load Path', () => {
 
   it('attach and initialize media source when constructed with media element',
       async () => {
-    expect(video.src).toBeFalsy();
+        expect(video.src).toBeFalsy();
 
-    createPlayer(/* attachedTo= */ video);
+        createPlayer(/* attachedTo= */ video);
 
-    // Wait until we enter the media source state.
-    await new Promise((resolve) => {
-      whenEnteringState('media-source', resolve);
-    });
+        // Wait until we enter the media source state.
+        await new Promise((resolve) => {
+          whenEnteringState('media-source', resolve);
+        });
 
-    expect(video.src).toBeTruthy();
-  });
+        expect(video.src).toBeTruthy();
+      });
 
   it('does not set video.src when no video is provided', async () => {
     expect(video.src).toBeFalsy();
@@ -672,43 +672,43 @@ describe('Player Load Path', () => {
 
   it('attach + initializeMediaSource=true will initialize media source',
       async () => {
-    createPlayer(/* attachedTo= */ null);
+        createPlayer(/* attachedTo= */ null);
 
-    expect(video.src).toBeFalsy();
-    await player.attach(video, /* initializeMediaSource= */ true);
-    expect(video.src).toBeTruthy();
-  });
+        expect(video.src).toBeFalsy();
+        await player.attach(video, /* initializeMediaSource= */ true);
+        expect(video.src).toBeTruthy();
+      });
 
   it('attach + initializeMediaSource=false will not intialize media source',
       async () => {
-    createPlayer(/* attachedTo= */ null);
+        createPlayer(/* attachedTo= */ null);
 
-    expect(video.src).toBeFalsy();
-    await player.attach(video, /* initializeMediaSource= */ false);
-    expect(video.src).toBeFalsy();
-  });
+        expect(video.src).toBeFalsy();
+        await player.attach(video, /* initializeMediaSource= */ false);
+        expect(video.src).toBeFalsy();
+      });
 
   it('unload + initializeMediaSource=false does not initialize media source',
       async () => {
-    createPlayer(/* attachedTo= */ null);
+        createPlayer(/* attachedTo= */ null);
 
-    await player.attach(video);
-    await player.load('test:sintel');
+        await player.attach(video);
+        await player.load('test:sintel');
 
-    await player.unload(/* initializeMediaSource= */ false);
-    expect(video.src).toBeFalsy();
-  });
+        await player.unload(/* initializeMediaSource= */ false);
+        expect(video.src).toBeFalsy();
+      });
 
   it('unload + initializeMediaSource=true initializes media source',
       async () => {
-    createPlayer(/* attachedTo= */ null);
+        createPlayer(/* attachedTo= */ null);
 
-    await player.attach(video);
-    await player.load('test:sintel');
+        await player.attach(video);
+        await player.load('test:sintel');
 
-    await player.unload(/* initializeMediaSource= */ true);
-    expect(video.src).toBeTruthy();
-  });
+        await player.unload(/* initializeMediaSource= */ true);
+        expect(video.src).toBeTruthy();
+      });
 
   // There was a bug when calling unload before calling load would cause
   // the load to continue before the (first) unload was complete.
@@ -961,29 +961,29 @@ describe('Player Load Path', () => {
   // pre-initialize media source engine, we do not re-create the media source
   // instance when loading.
   it('pre-initialized media source is used when player continues loading',
-    async () => {
-      createPlayer(/* attachedTo= */ null);
+      async () => {
+        createPlayer(/* attachedTo= */ null);
 
-      // After we attach and initialize media source, we should just see
-      // two states in our history.
-      await player.attach(video, /* initializeMediaSource= */ true);
-      expect(getVisitedStates()).toEqual([
-        'attach',
-        'media-source',
-      ]);
+        // After we attach and initialize media source, we should just see
+        // two states in our history.
+        await player.attach(video, /* initializeMediaSource= */ true);
+        expect(getVisitedStates()).toEqual([
+          'attach',
+          'media-source',
+        ]);
 
-      // When we load, the only change in the visited states should be that
-      // we added "load".
-      await player.load('test:sintel');
-      expect(getVisitedStates()).toEqual([
-        'attach',
-        'media-source',
-        'manifest-parser',
-        'manifest',
-        'drm-engine',
-        'load',
-      ]);
-    });
+        // When we load, the only change in the visited states should be that
+        // we added "load".
+        await player.load('test:sintel');
+        expect(getVisitedStates()).toEqual([
+          'attach',
+          'media-source',
+          'manifest-parser',
+          'manifest',
+          'drm-engine',
+          'load',
+        ]);
+      });
 
   // We want to make sure that we can interrupt the load process at key-points
   // in time. After each node in the graph, we should be able to reroute and do

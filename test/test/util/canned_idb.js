@@ -228,7 +228,7 @@ shaka.test.CannedIDB = class {
 
     await op.promise();
     shaka.log.debug('Dumped', savedStore.data.length, 'entries from store',
-                    name);
+        name);
     savedDatabase.stores[name] = savedStore;
   }
 
@@ -268,7 +268,7 @@ shaka.test.CannedIDB = class {
 
       request.onupgradeneeded = (event) => {
         shaka.log.debug('DB upgrade from', event.oldVersion, 'to',
-                        savedDatabase.version);
+            savedDatabase.version);
         const transaction = event.target.transaction;
         const db = transaction.db;
 
@@ -325,7 +325,7 @@ shaka.test.CannedIDB = class {
         const storeInfo = savedDatabase.stores[storeName];
 
         shaka.log.debug('Populating store', storeName, 'with',
-                        storeInfo.data.length, 'entries');
+            storeInfo.data.length, 'entries');
         storeInfo.data.forEach((item) => {
           // If this store uses an explicit keyPath, we can't specify a key.
           if (storeInfo.parameters.keyPath) {

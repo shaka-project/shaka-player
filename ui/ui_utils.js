@@ -27,7 +27,7 @@ goog.require('goog.asserts');
  * @return {!HTMLElement}
  * @export
  */
- // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
+// TODO: This can be replaced by shaka.util.Dom.getElementByClassName
 shaka.ui.Utils.getFirstDescendantWithClassName = function(element, className) {
   const descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
   goog.asserts.assert(descendant != null, 'Should not be null!');
@@ -62,7 +62,7 @@ shaka.ui.Utils.focusOnTheChosenItem = function(menu) {
     return;
   }
   const chosenItem = shaka.ui.Utils.getDescendantIfExists(
-    menu, 'shaka-chosen-item');
+      menu, 'shaka-chosen-item');
   if (chosenItem) {
     chosenItem.parentElement.focus();
   }
@@ -100,7 +100,7 @@ shaka.ui.Utils.setDisplay = function(element, display) {
   // elements on that browser.  It's better to find out on Chrome through an
   // assertion, rather than wait for a failed test pass later on IE.
   goog.asserts.assert(!(element instanceof SVGElement),
-                      'Do not use setDisplay with SVG elements!');
+      'Do not use setDisplay with SVG elements!');
 
   if (display) {
     element.classList.add('shaka-displayed');

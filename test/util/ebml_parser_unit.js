@@ -44,7 +44,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // Set size to 4 bytes.
     // Set the data to [0x09, 0x08, 0x07, 0x06].
     const data = new Uint8Array([0x81, 0x84, 0x01, 0x02, 0x03, 0x04, 0x82, 0x84,
-                               0x09, 0x08, 0x07, 0x06]);
+      0x09, 0x08, 0x07, 0x06]);
     const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
 
     const elem1 = parser.parseElement();

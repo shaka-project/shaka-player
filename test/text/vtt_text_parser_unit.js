@@ -174,38 +174,38 @@ describe('VttTextParser', () => {
 
   it('requires header', () => {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_HEADER,
-                '',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        '',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_HEADER,
-                '00:00:00.000 --> 00:00:00.020\nTest',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        '00:00:00.000 --> 00:00:00.020\nTest',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
   it('rejects invalid time values', () => {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                'WEBVTT\n\n00.020    --> 0:00.040\nTest',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        'WEBVTT\n\n00.020    --> 0:00.040\nTest',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                'WEBVTT\n\n0:00.020  --> 0:00.040\nTest',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        'WEBVTT\n\n0:00.020  --> 0:00.040\nTest',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                'WEBVTT\n\n00:00.20  --> 0:00.040\nTest',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        'WEBVTT\n\n00:00.20  --> 0:00.040\nTest',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                'WEBVTT\n\n00:100.20 --> 0:00.040\nTest',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        'WEBVTT\n\n00:100.20 --> 0:00.040\nTest',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                'WEBVTT\n\n00:00.020 --> 0:00.040\nTest',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        'WEBVTT\n\n00:00.020 --> 0:00.040\nTest',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                'WEBVTT\n\n00:00:00:00.020 --> 0:00.040\nTest',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        'WEBVTT\n\n00:00:00:00.020 --> 0:00.040\nTest',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                'WEBVTT\n\n00:61.020 --> 0:00.040\nTest',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        'WEBVTT\n\n00:61.020 --> 0:00.040\nTest',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                'WEBVTT\n\n61:00.020 --> 0:00.040\nTest',
-                {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        'WEBVTT\n\n61:00.020 --> 0:00.040\nTest',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
   it('supports vertical setting', () => {
@@ -635,9 +635,9 @@ describe('VttTextParser', () => {
    */
   function verifyRegion(expected, actual) {
     const properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
-                      'regionAnchorX', 'regionAnchorY', 'width', 'height',
-                      'heightUnits', 'widthUnits', 'viewportAnchorUnits',
-                      'scroll'];
+      'regionAnchorX', 'regionAnchorY', 'width', 'height',
+      'heightUnits', 'widthUnits', 'viewportAnchorUnits',
+      'scroll'];
     expect(actual).toBeTruthy();
 
     for (let i = 0; i < properties.length; i++) {

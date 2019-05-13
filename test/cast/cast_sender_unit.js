@@ -50,7 +50,7 @@ describe('CastSender', () => {
     onRemoteEvent = jasmine.createSpy('onRemoteEvent');
     onResumeLocal = jasmine.createSpy('onResumeLocal');
     onInitStateRequired = jasmine.createSpy('onInitStateRequired')
-                          .and.returnValue(fakeInitState);
+        .and.returnValue(fakeInitState);
 
     mockCastApi = createMockCastApi();
     // We're using quotes to access window.chrome because the compiler

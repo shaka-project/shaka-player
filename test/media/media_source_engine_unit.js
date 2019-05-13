@@ -354,7 +354,7 @@ describe('MediaSourceEngine', () => {
       mockVideo.error = {code: 5};
       try {
         await mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null,
-          null, /* hasClosedCaptions */ false);
+            null, /* hasClosedCaptions */ false);
         fail('not reached');
       } catch (error) {
         expect(error.code).toBe(
@@ -373,7 +373,7 @@ describe('MediaSourceEngine', () => {
       mockVideo.error = {code: 5};
       try {
         await mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null,
-          null, /* hasClosedCaptions */ false);
+            null, /* hasClosedCaptions */ false);
         fail('not reached');
       } catch (error) {
         expect(error.code).toBe(shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR);
@@ -386,15 +386,15 @@ describe('MediaSourceEngine', () => {
       mockVideo.error = {code: 5};
       mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null,
           /* hasClosedCaptions */ false).then(() => {
-            fail('not reached');
-            done();
-          }, (error) => {
-            expect(error.code).toBe(
-                shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
-            expect(error.data).toEqual([5]);
-            expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
-            done();
-          });
+        fail('not reached');
+        done();
+      }, (error) => {
+        expect(error.code).toBe(
+            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
+        expect(error.data).toEqual([5]);
+        expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+        done();
+      });
       audioSourceBuffer.error();
       audioSourceBuffer.updateend();
     });
@@ -576,31 +576,31 @@ describe('MediaSourceEngine', () => {
 
     it('appends closed caption data only when mux.js is available',
         async () => {
-      const originalMuxjs = window.muxjs;
+          const originalMuxjs = window.muxjs;
 
-      try {
-        window['muxjs'] = null;
-        const initObject = new Map();
-        initObject.set(ContentType.VIDEO, fakeVideoStream);
-        await mediaSourceEngine.init(initObject, false);
+          try {
+            window['muxjs'] = null;
+            const initObject = new Map();
+            initObject.set(ContentType.VIDEO, fakeVideoStream);
+            await mediaSourceEngine.init(initObject, false);
 
-        const appendBuffer = mediaSourceEngine.appendBuffer(
-            ContentType.VIDEO, buffer, null, null, true);
-        // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
-        // at the browser level, it's event-based.
-        // MediaSourceEngine waits for the 'updateend' event from the
-        // SourceBuffer, and uses that to resolve the appendBuffer Promise.
-        // Here, we must trigger the event on the fake/mock SourceBuffer before
-        // waiting on the appendBuffer Promise.
-        videoSourceBuffer.updateend();
-        await appendBuffer;
-        expect(mockClosedCaptionParser.initSpy).not.toHaveBeenCalled();
-        expect(mockTextEngine.storeAndAppendClosedCaptions).not
-            .toHaveBeenCalled();
-      } finally {
-        window['muxjs'] = originalMuxjs;
-      }
-    });
+            const appendBuffer = mediaSourceEngine.appendBuffer(
+                ContentType.VIDEO, buffer, null, null, true);
+            // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
+            // at the browser level, it's event-based.
+            // MediaSourceEngine waits for the 'updateend' event from the
+            // SourceBuffer, and uses that to resolve the appendBuffer Promise.
+            // Here, we must trigger the event on the fake/mock SourceBuffer before
+            // waiting on the appendBuffer Promise.
+            videoSourceBuffer.updateend();
+            await appendBuffer;
+            expect(mockClosedCaptionParser.initSpy).not.toHaveBeenCalled();
+            expect(mockTextEngine.storeAndAppendClosedCaptions).not
+                .toHaveBeenCalled();
+          } finally {
+            window['muxjs'] = originalMuxjs;
+          }
+        });
   });
 
   describe('remove', () => {
@@ -801,9 +801,9 @@ describe('MediaSourceEngine', () => {
       expect(mockTextEngine.setTimestampOffset).not.toHaveBeenCalled();
       expect(mockTextEngine.setAppendWindow).not.toHaveBeenCalled();
       await mediaSourceEngine.setStreamProperties(ContentType.TEXT,
-                                                  /* timestampOffset */ 10,
-                                                  /* appendWindowStart */ 0,
-                                                  /* appendWindowEnd */ 20);
+          /* timestampOffset */ 10,
+          /* appendWindowStart */ 0,
+          /* appendWindowEnd */ 20);
       expect(mockTextEngine.setTimestampOffset).toHaveBeenCalledWith(10);
       expect(mockTextEngine.setAppendWindow).toHaveBeenCalledWith(0, 20);
     });
@@ -1012,9 +1012,9 @@ describe('MediaSourceEngine', () => {
 
     it('waits for all operations to complete', async () => {
       mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null,
-        /* hasClosedCaptions */ false);
+          /* hasClosedCaptions */ false);
       mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null, null,
-        /* hasClosedCaptions */ false);
+          /* hasClosedCaptions */ false);
 
       /** @type {!shaka.test.StatusPromise} */
       const p = new shaka.test.StatusPromise(mediaSourceEngine.destroy());
@@ -1061,7 +1061,7 @@ describe('MediaSourceEngine', () => {
 
     it('cancels operations that have not yet started', async () => {
       mediaSourceEngine.appendBuffer(
-        ContentType.AUDIO, buffer, null, null, /* hasClosedCaptions */ false);
+          ContentType.AUDIO, buffer, null, null, /* hasClosedCaptions */ false);
       /** @type {!shaka.test.StatusPromise} */
       const rejected =
           new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(

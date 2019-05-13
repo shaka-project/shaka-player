@@ -86,43 +86,43 @@ shaka.test.FakeMediaSourceEngine = function(segmentData, drift) {
 
   /** @type {!jasmine.Spy} */
   this.setDuration = jasmine.createSpy('setDuration')
-                         .and.callFake(this.setDurationImpl_.bind(this));
+      .and.callFake(this.setDurationImpl_.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.getDuration = jasmine.createSpy('getDuration')
-                         .and.callFake(this.getDurationImpl_.bind(this));
+      .and.callFake(this.getDurationImpl_.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.appendBuffer = jasmine.createSpy('appendBuffer')
-                          .and.callFake(this.appendBufferImpl.bind(this));
+      .and.callFake(this.appendBufferImpl.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.clear = jasmine.createSpy('clear')
-                   .and.callFake(this.clearImpl_.bind(this));
+      .and.callFake(this.clearImpl_.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.bufferStart = jasmine.createSpy('bufferStart')
-                   .and.callFake(this.bufferStartImpl_.bind(this));
+      .and.callFake(this.bufferStartImpl_.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.bufferEnd = jasmine.createSpy('bufferEnd')
-                   .and.callFake(this.bufferEndImpl_.bind(this));
+      .and.callFake(this.bufferEndImpl_.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.isBuffered = jasmine.createSpy('isBuffered')
-                   .and.callFake(this.isBufferedImpl_.bind(this));
+      .and.callFake(this.isBufferedImpl_.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.bufferedAheadOf = jasmine.createSpy('bufferedAheadOf')
-                   .and.callFake(this.bufferedAheadOfImpl.bind(this));
+      .and.callFake(this.bufferedAheadOfImpl.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.setStreamProperties = jasmine.createSpy('setStreamProperties')
-                   .and.callFake(this.setStreamPropertiesImpl_.bind(this));
+      .and.callFake(this.setStreamPropertiesImpl_.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.remove = jasmine.createSpy('remove')
-                   .and.callFake(this.removeImpl.bind(this));
+      .and.callFake(this.removeImpl.bind(this));
 
   /** @type {!jasmine.Spy} */
   this.flush = jasmine.createSpy('flush').and.returnValue(Promise.resolve());
@@ -207,18 +207,18 @@ shaka.test.FakeMediaSourceEngine.prototype.bufferEndImpl_ = function(type) {
  */
 shaka.test.FakeMediaSourceEngine.prototype.isBufferedImpl_ =
     function(type, time) {
-  if (this.segments[type] === undefined) {
-    throw new Error('unexpected type');
-  }
+      if (this.segments[type] === undefined) {
+        throw new Error('unexpected type');
+      }
 
-  const first = this.segments[type].indexOf(true);
-  const last = this.segments[type].lastIndexOf(true);
-  if (first < 0 || last < 0) {
-    return false;
-  }
+      const first = this.segments[type].indexOf(true);
+      const last = this.segments[type].lastIndexOf(true);
+      if (first < 0 || last < 0) {
+        return false;
+      }
 
-  return time >= this.toTime_(type, first) && time < this.toTime_(type, last);
-};
+      return time >= this.toTime_(type, first) && time < this.toTime_(type, last);
+    };
 
 
 /**
@@ -283,7 +283,7 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
       // 'trickvideo' value is only used for testing.
       // Cast to the ContentType enum for compatibility.
       type = /** @type {shaka.util.ManifestParserUtils.ContentType} */(
-          'trickvideo');
+        'trickvideo');
     }
   }
   if (i >= 0) {
@@ -306,7 +306,7 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
       // 'trickvideo' value is only used for testing.
       // Cast to the ContentType enum for compatibility.
       type = /** @type {shaka.util.ManifestParserUtils.ContentType} */(
-          'trickvideo');
+        'trickvideo');
     }
   }
   if (i < 0) {
@@ -339,31 +339,31 @@ shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl = function(
  */
 shaka.test.FakeMediaSourceEngine.prototype.removeImpl =
     function(type, start, end) {
-  if (this.segments[type] === undefined) {
-    throw new Error('unexpected type');
-  }
+      if (this.segments[type] === undefined) {
+        throw new Error('unexpected type');
+      }
 
-  const first = this.toIndex_(type, start);
-  if (first < 0 || first >= this.segments[type].length) {
-    throw new Error('unexpected start');
-  }
+      const first = this.toIndex_(type, start);
+      if (first < 0 || first >= this.segments[type].length) {
+        throw new Error('unexpected start');
+      }
 
-  // Note: |end| is exclusive.
-  const last = this.toIndex_(type, end - 0.000001);
-  if (last < 0) {
-    throw new Error('unexpected end');
-  }
+      // Note: |end| is exclusive.
+      const last = this.toIndex_(type, end - 0.000001);
+      if (last < 0) {
+        throw new Error('unexpected end');
+      }
 
-  if (first > last) {
-    throw new Error('unexpected start and end');
-  }
+      if (first > last) {
+        throw new Error('unexpected start and end');
+      }
 
-  for (let i = first; i <= last; ++i) {
-    this.segments[type][i] = false;
-  }
+      for (let i = first; i <= last; ++i) {
+        this.segments[type][i] = false;
+      }
 
-  return Promise.resolve();
-};
+      return Promise.resolve();
+    };
 
 
 /**
@@ -388,7 +388,7 @@ shaka.test.FakeMediaSourceEngine.prototype.clearImpl_ = function(type) {
     // Cast to the ContentType enum for compatibility.
     this.clearImpl_(
         /** @type {shaka.util.ManifestParserUtils.ContentType} */(
-            'trickvideo'));
+          'trickvideo'));
   }
 
   return Promise.resolve();

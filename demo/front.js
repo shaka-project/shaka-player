@@ -80,10 +80,10 @@ class ShakaDemoFront {
       this.messageDiv_.appendChild(textElement);
     };
     makeMessage('body-2',
-                'This is a demo of Google\'s Shaka Player, a JavaScript ' +
+        'This is a demo of Google\'s Shaka Player, a JavaScript ' +
                 'library for adaptive video streaming.');
     makeMessage('body-1',
-                'Choose a video to playback; more assets are available via ' +
+        'Choose a video to playback; more assets are available via ' +
                 'the search tab.');
 
     const hideButton = document.createElement('button');

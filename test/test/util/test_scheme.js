@@ -420,13 +420,13 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
    */
   function addStreamInfo(manifestGenerator, data, contentType, name) {
     manifestGenerator
-      .presentationTimeOffset(data[contentType].presentationTimeOffset)
-      .mime(data[contentType].mimeType, data[contentType].codecs)
-      .initSegmentReference(
+        .presentationTimeOffset(data[contentType].presentationTimeOffset)
+        .mime(data[contentType].mimeType, data[contentType].codecs)
+        .initSegmentReference(
             ['test:' + name + '/' + contentType + '/init'], 0, null)
-      .useSegmentTemplate('test:' + name + '/' + contentType + '/%d',
-                          data[contentType].segmentDuration)
-      .closedCaptions(data[contentType].closedCaptions);
+        .useSegmentTemplate('test:' + name + '/' + contentType + '/%d',
+            data[contentType].segmentDuration)
+        .closedCaptions(data[contentType].closedCaptions);
 
     if (data[contentType].language) {
       manifestGenerator.language(data[contentType].language);
@@ -493,8 +493,8 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
 
     if (data.text) {
       gen.addTextStream(3)
-            .mime(data.text.mimeType, data.text.codecs)
-            .textStream(getAbsoluteUri(data));
+          .mime(data.text.mimeType, data.text.codecs)
+          .textStream(getAbsoluteUri(data));
 
       if (data.text.language) {
         gen.language(data.text.language);
@@ -560,14 +560,14 @@ shaka.test.TestScheme.createManifests = function(shaka, suffix) {
   addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
 
   gen.addTextStream(idCount++)
-     .mime(data.text.mimeType, data.text.codecs)
-     .textStream(getAbsoluteUri(data))
-     .language('zh');
+      .mime(data.text.mimeType, data.text.codecs)
+      .textStream(getAbsoluteUri(data))
+      .language('zh');
 
   gen.addTextStream(idCount++)
-     .mime(data.text.mimeType, data.text.codecs)
-     .textStream(getAbsoluteUri(data))
-     .language('fr');
+      .mime(data.text.mimeType, data.text.codecs)
+      .textStream(getAbsoluteUri(data))
+      .language('fr');
 
   MANIFESTS['sintel_multi_lingual_multi_res' + suffix] = gen.build();
 
@@ -595,30 +595,30 @@ shaka.test.TestScheme.ManifestParser.prototype.configure = function(config) {};
 /** @override */
 shaka.test.TestScheme.ManifestParser.prototype.start =
     function(uri, playerInterface) {
-  const re = /^test:([^/]+)$/;
-  const manifestParts = re.exec(uri);
-  if (!manifestParts) {
-    // Use expect so the URI is printed on errors.
-    expect(uri).toMatch(re);
-    return Promise.reject();
-  }
+      const re = /^test:([^/]+)$/;
+      const manifestParts = re.exec(uri);
+      if (!manifestParts) {
+        // Use expect so the URI is printed on errors.
+        expect(uri).toMatch(re);
+        return Promise.reject();
+      }
 
-  const manifest = shaka.test.TestScheme.MANIFESTS[manifestParts[1]];
-  expect(manifest).toBeTruthy();
-  if (!manifest) {
-    return Promise.reject();
-  }
+      const manifest = shaka.test.TestScheme.MANIFESTS[manifestParts[1]];
+      expect(manifest).toBeTruthy();
+      if (!manifest) {
+        return Promise.reject();
+      }
 
-  // Invoke filtering interfaces similar to how a real parser would.
-  // This makes sure the filtering functions are covered implicitly by tests.
-  // This covers regression https://github.com/google/shaka-player/issues/988
-  playerInterface.filterAllPeriods(manifest.periods);
-  manifest.periods.forEach((period) => {
-    playerInterface.filterNewPeriod(period);
-  });
+      // Invoke filtering interfaces similar to how a real parser would.
+      // This makes sure the filtering functions are covered implicitly by tests.
+      // This covers regression https://github.com/google/shaka-player/issues/988
+      playerInterface.filterAllPeriods(manifest.periods);
+      manifest.periods.forEach((period) => {
+        playerInterface.filterNewPeriod(period);
+      });
 
-  return Promise.resolve(manifest);
-};
+      return Promise.resolve(manifest);
+    };
 
 
 /** @override */

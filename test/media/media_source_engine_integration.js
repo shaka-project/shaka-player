@@ -300,9 +300,9 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
-                                                /* timestampOffset */ 0,
-                                                /* appendWindowStart */ 5,
-                                                /* appendWindowEnd */ 18);
+        /* timestampOffset */ 0,
+        /* appendWindowStart */ 5,
+        /* appendWindowEnd */ 18);
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
@@ -319,9 +319,9 @@ describe('MediaSourceEngine', () => {
     await appendInit(ContentType.VIDEO);
     // Simulate period 1, with 20 seconds of content, no timestamp offset
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
-                                                /* timestampOffset */ 0,
-                                                /* appendWindowStart */ 0,
-                                                /* appendWindowEnd */ 20);
+        /* timestampOffset */ 0,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ 20);
     await append(ContentType.VIDEO, 1);
     await append(ContentType.VIDEO, 2);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
@@ -331,9 +331,9 @@ describe('MediaSourceEngine', () => {
     // The 5 seconds of overlap should be trimmed off, and we should still
     // have a continuous stream with 35 seconds of content.
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
-                                                /* timestampOffset */ 15,
-                                                /* appendWindowStart */ 20,
-                                                /* appendWindowEnd */ 35);
+        /* timestampOffset */ 15,
+        /* appendWindowStart */ 20,
+        /* appendWindowEnd */ 35);
     await append(ContentType.VIDEO, 1);
     await append(ContentType.VIDEO, 2);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);

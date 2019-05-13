@@ -19,7 +19,7 @@ describe('OfflineManifestParser', () => {
   // The offline manifest parser does not need the player interface, so
   // this is a work around to avoid creating one.
   const playerInterface =
-      /** @type {shaka.extern.ManifestParser.PlayerInterface} */({});
+  /** @type {shaka.extern.ManifestParser.PlayerInterface} */({});
 
   // A session id that will be found in the manifest created by |makeManifest|.
   const sessionId = 'session-id';

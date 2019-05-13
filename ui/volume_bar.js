@@ -66,14 +66,14 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateAriaLabel_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateAriaLabel_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateAriaLabel_();
+        });
 
     // Initialize volume display with a fake event.
     this.onVolumeStateChange_();
@@ -85,9 +85,9 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
    */
   onVolumeStateChange_() {
     if (this.video.muted) {
-        this.bar_.value = 0;
+      this.bar_.value = 0;
     } else {
-        this.bar_.value = this.video.volume;
+      this.bar_.value = this.video.volume;
     }
 
     // TODO: Can we do this with LESS?

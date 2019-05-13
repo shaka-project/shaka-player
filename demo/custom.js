@@ -285,8 +285,8 @@ class ShakaDemoCustom {
     }));
     buttonsDiv.appendChild(this.makeButton_(
         'Cancel', /* isFAB = */ false, () => {
-      this.dialog_.close();
-    }));
+          this.dialog_.close();
+        }));
 
     // Update the componentHandler, to account for the new MDL elements.
     componentHandler.upgradeDom();
@@ -404,11 +404,11 @@ class ShakaDemoCustom {
         this.savedList_.appendChild(textElement);
       };
       makeMessage('title',
-                  'Try Shaka Player with your own content!');
+          'Try Shaka Player with your own content!');
       makeMessage('body-2',
-                  'Press the button below to add a custom asset.');
+          'Press the button below to add a custom asset.');
       makeMessage('body-1',
-                  'Custom assets will remain even after reloading the page.');
+          'Custom assets will remain even after reloading the page.');
     } else {
       // Make asset cards for the assets.
       this.assetCards_ = Array.from(this.assets_).map((asset) => {

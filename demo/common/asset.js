@@ -128,7 +128,7 @@ const ShakaDemoAssetInfo = class {
    */
   addFeature(feature) {
     goog.asserts.assert(feature != shakaAssets.Feature.STORED,
-                        'Assets should not be given the synthetic "STORED" ' +
+        'Assets should not be given the synthetic "STORED" ' +
                         'property!');
     this.features.push(feature);
     // Sort the features list, so that features are in a predictable order.
@@ -280,8 +280,8 @@ const ShakaDemoAssetInfo = class {
     if (this.licenseRequestHeaders.size) {
       const filter = (requestType, request) => {
         return this.addLicenseRequestHeaders_(this.licenseRequestHeaders,
-                                              requestType,
-                                              request);
+            requestType,
+            request);
       };
       networkingEngine.registerRequestFilter(filter);
     }
@@ -300,7 +300,7 @@ const ShakaDemoAssetInfo = class {
    */
   getConfiguration() {
     const config = /** @type {shaka.extern.PlayerConfiguration} */(
-        {drm: {}, manifest: {dash: {}}});
+      {drm: {}, manifest: {dash: {}}});
     if (this.licenseServers.size) {
       config.drm.servers = {};
       this.licenseServers.forEach((value, key) => {
@@ -350,10 +350,10 @@ const ShakaDemoAssetInfo = class {
   /** @return {!ShakaDemoAssetInfo} */
   static makeBlankAsset() {
     return new ShakaDemoAssetInfo(
-      /* name= */ '',
-      /* iconUri= */ '',
-      /* manifestUri= */ '',
-      /* source= */ shakaAssets.Source.CUSTOM);
+        /* name= */ '',
+        /* iconUri= */ '',
+        /* manifestUri= */ '',
+        /* source= */ shakaAssets.Source.CUSTOM);
   }
 
   /**

@@ -127,7 +127,7 @@ ShakaReceiver.prototype.appDataCallback_ = function(appData) {
 /** @private */
 ShakaReceiver.prototype.checkIdle_ = function() {
   console.debug('status changed',
-                'idle=', this.receiver_.isIdle());
+      'idle=', this.receiver_.isIdle());
 
   // If the app is idle, show the idle card and set a timer to close the app.
   // Otherwise, hide the idle card and cancel the timer.

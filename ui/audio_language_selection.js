@@ -45,14 +45,14 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
     this.addAudioLangMenu_();
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateLocalizedStrings_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateLocalizedStrings_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateLocalizedStrings_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateLocalizedStrings_();
+        });
 
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
@@ -152,10 +152,10 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
     const languages = this.player.getAudioLanguages();
 
     shaka.ui.LanguageUtils.updateLanguages(tracks, this.audioLangMenu_,
-      languages,
-      this.onAudioLanguageSelected_.bind(this), /* updateChosen */ true,
-      this.currentAudioLanguage_,
-      this.localization);
+        languages,
+        this.onAudioLanguageSelected_.bind(this), /* updateChosen */ true,
+        this.currentAudioLanguage_,
+        this.localization);
     shaka.ui.Utils.focusOnTheChosenItem(this.audioLangMenu_);
 
     // TODO: document this event
@@ -209,4 +209,4 @@ shaka.ui.AudioLanguageSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
-  'language', new shaka.ui.AudioLanguageSelection.Factory());
+    'language', new shaka.ui.AudioLanguageSelection.Factory());

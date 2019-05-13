@@ -222,7 +222,7 @@ function httpPluginTests(usingFetch) {
 
   it('gets redirect URLs with 302 status', (done) => {
     testSucceeds('https://foo.bar/302', done,
-                 'https://foo.bar/after/302');
+        'https://foo.bar/after/302');
     PromiseMock.flush();
   });
 

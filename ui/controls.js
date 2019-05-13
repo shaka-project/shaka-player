@@ -59,7 +59,7 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
 
   /** @private {!shaka.cast.CastProxy} */
   this.castProxy_ = new shaka.cast.CastProxy(
-    video, player, this.config_.castReceiverAppId);
+      video, player, this.config_.castReceiverAppId);
 
   /** @private {boolean} */
   this.castAllowed_ = true;
@@ -245,7 +245,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
  */
 
 
- /**
+/**
  * @event shaka.Controls.ResolutionSelectionUpdatedEvent
  * @description Fired when the resolution menu has finished updating.
  * @property {string} type
@@ -287,7 +287,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
  */
 
 
- /**
+/**
  * @event shaka.Controls.UIUpdatedEvent
  * @description Fired after a call to ui.configure() once the UI has finished
  *    updating.
@@ -343,7 +343,7 @@ shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
   this.enabled_ = enabled;
   if (enabled) {
     shaka.ui.Utils.setDisplay(
-      this.controlsButtonPanel_.parentElement, true);
+        this.controlsButtonPanel_.parentElement, true);
 
     // If we're hiding native controls, make sure the video element itself is
     // not tab-navigable.  Our custom controls will still be tab-navigable.
@@ -351,7 +351,7 @@ shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
     this.video_.controls = false;
   } else {
     shaka.ui.Utils.setDisplay(
-      this.controlsButtonPanel_.parentElement, false);
+        this.controlsButtonPanel_.parentElement, false);
   }
 
   // The effects of play state changes are inhibited while showing native
@@ -534,7 +534,7 @@ shaka.ui.Controls.prototype.updateLocalizedStrings_ = function() {
 
   if (this.seekBar_) {
     this.seekBar_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-          this.localization_.resolve(LocIds.SEEK));
+        this.localization_.resolve(LocIds.SEEK));
   }
 
   // Localize state-dependant labels
@@ -583,7 +583,7 @@ shaka.ui.Controls.prototype.createDOM_ = function() {
 
   /** @private {!Array.<!Element>} */
   this.settingsMenus_ = Array.from(
-    this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
+      this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
 
   // Settings menus need to be positioned lower, if the seekbar is absent.
   if (!this.seekBar_) {
@@ -627,14 +627,14 @@ shaka.ui.Controls.prototype.addPlayButton_ = function() {
  */
 shaka.ui.Controls.prototype.addBufferingSpinner_ = function() {
   goog.asserts.assert(this.playButtonContainer_,
-                      'Must have play button container before spinner!');
+      'Must have play button container before spinner!');
 
   // Svg elements have to be created with the svg xml namespace.
   const xmlns = 'http://www.w3.org/2000/svg';
 
   /** @private {!HTMLElement} */
   this.bufferingSpinner_ =
-      /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
+    /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
   // NOTE: SVG elements do not have a classList on IE, so use setAttribute.
   this.bufferingSpinner_.setAttribute('class', 'shaka-spinner-svg');
   this.bufferingSpinner_.setAttribute('viewBox', '0 0 30 30');
@@ -675,7 +675,7 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
       this.elements_.push(factory.create(this.controlsButtonPanel_, this));
     } else {
       shaka.log.alwaysWarn('Unrecognized control panel element requested:',
-                           name);
+          name);
     }
   }
 };
@@ -731,7 +731,7 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   for (let i = 0; i < noPropagationElements.length; i++) {
     const element = noPropagationElements[i];
     element.addEventListener(
-      'click', (event) => { event.stopPropagation(); });
+        'click', (event) => { event.stopPropagation(); });
   }
 
   // Keep showing controls if one of those elements is hovered
@@ -740,14 +740,14 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   for (let i = 0; i < showControlsElements.length; i++) {
     const element = showControlsElements[i];
     element.addEventListener(
-      'mouseover', () => {
-        this.overrideCssShowControls_ = true;
-      });
+        'mouseover', () => {
+          this.overrideCssShowControls_ = true;
+        });
 
     element.addEventListener(
-      'mouseleave', () => {
-       this.overrideCssShowControls_ = false;
-      });
+        'mouseleave', () => {
+          this.overrideCssShowControls_ = false;
+        });
   }
 
   this.videoContainer_.addEventListener(
@@ -990,11 +990,11 @@ shaka.ui.Controls.prototype.onPlayStateChange_ = function() {
   if (this.enabled_ && this.video_.paused && !this.isSeeking_) {
     this.playButton_.setAttribute('icon', 'play');
     this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-      this.localization_.resolve(shaka.ui.Locales.Ids.PLAY));
+        this.localization_.resolve(shaka.ui.Locales.Ids.PLAY));
   } else {
     this.playButton_.setAttribute('icon', 'pause');
     this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-      this.localization_.resolve(shaka.ui.Locales.Ids.PAUSE));
+        this.localization_.resolve(shaka.ui.Locales.Ids.PAUSE));
   }
 };
 
@@ -1102,7 +1102,7 @@ shaka.ui.Controls.prototype.onKeyUp_ = function(event) {
         this.onPlayPauseClick_();
       }
       break;
-    }
+  }
 };
 
 
@@ -1165,7 +1165,7 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     return;
   }
 
-    const Constants = shaka.ui.Constants;
+  const Constants = shaka.ui.Constants;
   let displayTime = this.isSeeking_ ?
       Number(this.seekBar_.value) :
       Number(this.video_.currentTime);
@@ -1269,7 +1269,7 @@ shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
     // navigation.
     this.controlsContainer_.classList.add('shaka-keyboard-navigation');
     this.eventManager_.listen(window, 'mousedown',
-                              this.onMouseDown_.bind(this));
+        this.onMouseDown_.bind(this));
   }
 
   // If escape key was pressed, close any open settings menus.
@@ -1279,10 +1279,10 @@ shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
 
   if (anySettingsMenusAreOpen &&
         this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_TAB)) {
-      // If Tab key or Shift+Tab keys are pressed when navigating through
-      // an overflow settings menu, keep the focus to loop inside the
-      // overflow menu.
-      this.keepFocusInMenu_(event);
+    // If Tab key or Shift+Tab keys are pressed when navigating through
+    // an overflow settings menu, keep the focus to loop inside the
+    // overflow menu.
+    this.keepFocusInMenu_(event);
   }
 };
 

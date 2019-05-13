@@ -125,7 +125,7 @@ class ShakaDemoMain {
     this.support_ = await shaka.Player.probeSupport();
 
     this.video_ =
-        /** @type {!HTMLVideoElement} */(document.getElementById('video'));
+      /** @type {!HTMLVideoElement} */(document.getElementById('video'));
     this.video_.poster = ShakaDemoMain.mainPoster_;
 
     if (navigator.serviceWorker) {
@@ -572,10 +572,10 @@ class ShakaDemoMain {
 
       // Construct a new asset.
       const asset = new ShakaDemoAssetInfo(
-        /* name= */ 'loaded asset',
-        /* iconUri= */ '',
-        /* manifestUri= */ manifest,
-        /* source= */ shakaAssets.Source.UNKNOWN);
+          /* name= */ 'loaded asset',
+          /* iconUri= */ '',
+          /* manifestUri= */ manifest,
+          /* source= */ shakaAssets.Source.UNKNOWN);
       if ('license' in params) {
         let drmSystems = ShakaDemoMain.commonDrmSystems;
         if ('drmSystem' in params) {
@@ -1108,9 +1108,9 @@ class ShakaDemoMain {
   dispatchEventWithName_(name) {
     const event = document.createEvent('CustomEvent');
     event.initCustomEvent(name,
-                          /* canBubble = */ false,
-                          /* cancelable = */ false,
-                          /* detail = */ null);
+        /* canBubble = */ false,
+        /* cancelable = */ false,
+        /* detail = */ null);
     document.dispatchEvent(event);
   }
 

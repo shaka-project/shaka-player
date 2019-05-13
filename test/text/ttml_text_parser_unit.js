@@ -63,7 +63,7 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     // Any other value is rejected as an error.
     errorHelper(shaka.util.Error.Code.INVALID_XML,
-                '<tt xml:space="invalid">' + ttBody + '</tt>');
+        '<tt xml:space="invalid">' + ttBody + '</tt>');
   });
 
   it('rejects invalid ttml', () => {
@@ -73,9 +73,9 @@ describe('TtmlTextParser', () => {
 
   it('rejects invalid time format', () => {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                '<tt><body><p begin="test" end="test"></p></body></tt>');
+        '<tt><body><p begin="test" end="test"></p></body></tt>');
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-                '<tt><body><p begin="3.45" end="1a"></p></body></tt>');
+        '<tt><body><p begin="3.45" end="1a"></p></body></tt>');
   });
 
   it('supports colon formatted time', () => {
@@ -286,17 +286,17 @@ describe('TtmlTextParser', () => {
     verifyHelper(
         [
           {
-           start: 62.05,
-           end: 3723.2,
-           payload: 'Test',
-           region: {
-             id: 'subtitleArea',
-             viewportAnchorX: 50,
-             viewportAnchorY: 16,
-             width: 100,
-             height: 100,
-           },
-         },
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 50,
+              viewportAnchorY: 16,
+              width: 100,
+              height: 100,
+            },
+          },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
@@ -310,16 +310,16 @@ describe('TtmlTextParser', () => {
     verifyHelper(
         [
           {
-           start: 62.05,
-           end: 3723.2,
-           payload: 'Test',
-           region: {
-             viewportAnchorX: 50,
-             viewportAnchorY: 16,
-             width: 100,
-             height: 100,
-           },
-         },
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            region: {
+              viewportAnchorX: 50,
+              viewportAnchorY: 16,
+              width: 100,
+              height: 100,
+            },
+          },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
@@ -334,16 +334,16 @@ describe('TtmlTextParser', () => {
     verifyHelper(
         [
           {
-           start: 62.05,
-           end: 3723.2,
-           payload: 'Test',
-           region: {
-             viewportAnchorX: 50,
-             viewportAnchorY: 16,
-             width: 100,
-             height: 100,
-           },
-         },
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            region: {
+              viewportAnchorX: 50,
+              viewportAnchorY: 16,
+              width: 100,
+              height: 100,
+            },
+          },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
@@ -361,23 +361,23 @@ describe('TtmlTextParser', () => {
     verifyHelper(
         [
           {
-           start: 62.05,
-           end: 3723.2,
-           payload: 'Test',
-           region: {
-             id: 'subtitleArea',
-             viewportAnchorX: 50,
-             viewportAnchorY: 16,
-             regionAnchorX: 0,
-             regionAnchorY: 0,
-             width: 100,
-             height: 100,
-             heightUnits: CueRegion.units.PERCENTAGE,
-             widthUnits: CueRegion.units.PERCENTAGE,
-             viewportAnchorUnits: CueRegion.units.PX,
-             scroll: CueRegion.scrollMode.NONE,
-           },
-         },
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 50,
+              viewportAnchorY: 16,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 100,
+              height: 100,
+              heightUnits: CueRegion.units.PERCENTAGE,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PX,
+              scroll: CueRegion.scrollMode.NONE,
+            },
+          },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
@@ -391,23 +391,23 @@ describe('TtmlTextParser', () => {
     verifyHelper(
         [
           {
-           start: 62.05,
-           end: 3723.2,
-           payload: 'Test',
-           region: {
-             id: 'subtitleArea',
-             viewportAnchorX: 0,
-             viewportAnchorY: 0,
-             regionAnchorX: 0,
-             regionAnchorY: 0,
-             width: 50,
-             height: 16,
-             heightUnits: CueRegion.units.PX,
-             widthUnits: CueRegion.units.PX,
-             viewportAnchorUnits: CueRegion.units.PERCENTAGE,
-             scroll: CueRegion.scrollMode.NONE,
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 0,
+              viewportAnchorY: 0,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 50,
+              height: 16,
+              heightUnits: CueRegion.units.PX,
+              widthUnits: CueRegion.units.PX,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.NONE,
             },
-         },
+          },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
@@ -425,17 +425,17 @@ describe('TtmlTextParser', () => {
     verifyHelper(
         [
           {
-           start: 62.05,
-           end: 3723.2,
-           payload: 'Test',
-           region: {
-             id: 'subtitleArea',
-             viewportAnchorX: 50,
-             viewportAnchorY: 16,
-             width: 100,
-             height: 100,
-           },
-         },
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 50,
+              viewportAnchorY: 16,
+              width: 100,
+              height: 100,
+            },
+          },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
@@ -450,16 +450,16 @@ describe('TtmlTextParser', () => {
     verifyHelper(
         [
           {
-           start: 62.05,
-           end: 3723.2,
-           payload: 'Test',
-           region: {
-             viewportAnchorX: 50,
-             viewportAnchorY: 16,
-             width: 100,
-             height: 100,
-           },
-         },
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            region: {
+              viewportAnchorX: 50,
+              viewportAnchorY: 16,
+              width: 100,
+              height: 100,
+            },
+          },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
@@ -474,16 +474,16 @@ describe('TtmlTextParser', () => {
     verifyHelper(
         [
           {
-           start: 62.05,
-           end: 3723.2,
-           payload: 'Test',
-           region: {
-             viewportAnchorX: 50,
-             viewportAnchorY: 16,
-             width: 100,
-             height: 100,
-           },
-         },
+            start: 62.05,
+            end: 3723.2,
+            payload: 'Test',
+            region: {
+              viewportAnchorX: 50,
+              viewportAnchorY: 16,
+              width: 100,
+              height: 100,
+            },
+          },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
@@ -746,7 +746,7 @@ describe('TtmlTextParser', () => {
             end: 3723.2,
             payload: 'Test',
             textDecoration: [Cue.textDecoration.UNDERLINE,
-                             Cue.textDecoration.OVERLINE],
+              Cue.textDecoration.OVERLINE],
           },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
@@ -800,9 +800,9 @@ describe('TtmlTextParser', () => {
     const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
     const result = new shaka.text.TtmlTextParser().parseMedia(data, time);
     const properties = ['textAlign', 'lineAlign', 'positionAlign', 'size',
-                      'line', 'position', 'direction', 'color', 'writingMode',
-                      'backgroundColor', 'fontWeight', 'fontFamily',
-                      'wrapLine', 'lineHeight', 'fontStyle', 'fontSize'];
+      'line', 'position', 'direction', 'color', 'writingMode',
+      'backgroundColor', 'fontWeight', 'fontFamily',
+      'wrapLine', 'lineHeight', 'fontStyle', 'fontSize'];
     expect(result).toBeTruthy();
     expect(result.length).toBe(cues.length);
     for (let i = 0; i < cues.length; i++) {
@@ -824,7 +824,7 @@ describe('TtmlTextParser', () => {
       if (cues[i].textDecoration) {
         for (let j = 0; j < cues[i].textDecoration.length; j++) {
           expect(/** @type {?} */ (result[i]).textDecoration[j])
-               .toBe(cues[i].textDecoration[j]);
+              .toBe(cues[i].textDecoration[j]);
         }
       }
     }
@@ -837,9 +837,9 @@ describe('TtmlTextParser', () => {
    */
   function verifyRegion(expected, actual) {
     const properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
-                      'regionAnchorX', 'regionAnchorY', 'width', 'height',
-                      'heightUnits', 'widthUnits', 'viewportAnchorUnits',
-                      'scroll'];
+      'regionAnchorX', 'regionAnchorY', 'width', 'height',
+      'heightUnits', 'widthUnits', 'viewportAnchorUnits',
+      'scroll'];
     expect(actual).toBeTruthy();
 
     for (let i = 0; i < properties.length; i++) {

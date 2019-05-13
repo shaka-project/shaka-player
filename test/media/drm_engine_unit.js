@@ -972,13 +972,13 @@ describe('DrmEngine', () => {
       });
 
       it('uses license server for "individualization-request" by default',
-         async () => {
-           config.advanced['drm.abc'] = createAdvancedConfig(null);
-           config.advanced['drm.abc'].individualizationServer = '';
+          async () => {
+            config.advanced['drm.abc'] = createAdvancedConfig(null);
+            config.advanced['drm.abc'].individualizationServer = '';
 
-           await sendMessageTest(
-               'http://abc.drm/license', 'individualization-request');
-         });
+            await sendMessageTest(
+                'http://abc.drm/license', 'individualization-request');
+          });
 
       it('dispatches an error if license request fails', async () => {
         onErrorSpy.and.stub();
@@ -1816,7 +1816,7 @@ describe('DrmEngine', () => {
         serverCertificate: serverCert,
         initData: ['blah', 'init data'],
         keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef',
-                 'eadbeefdeadbeefdeadbeefdeadbeefd'],
+          'eadbeefdeadbeefdeadbeefdeadbeefd'],
       };
       const returned = shaka.media.DrmEngine.getCommonDrmInfos([drmInfoVideo],
           [drmInfoAudio]);

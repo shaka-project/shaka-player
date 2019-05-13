@@ -78,8 +78,8 @@ describe('HlsParser', () => {
     // segment starts at 0s.
 
     selfInitializingSegmentData = shaka.util.Uint8ArrayUtils.concat(
-      new Uint8Array(initSegmentData),
-      new Uint8Array(segmentData)).buffer;
+        new Uint8Array(initSegmentData),
+        new Uint8Array(segmentData)).buffer;
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
@@ -1219,9 +1219,9 @@ describe('HlsParser', () => {
           const videoPosition = video.findSegmentPosition(0);
           const audioPosition = audio.findSegmentPosition(0);
           goog.asserts.assert(videoPosition != null,
-                              'Cannot find first video segment');
+              'Cannot find first video segment');
           goog.asserts.assert(audioPosition != null,
-                              'Cannot find first audio segment');
+              'Cannot find first audio segment');
 
           const videoReference = video.getSegmentReference(videoPosition);
           const audioReference = audio.getSegmentReference(audioPosition);
@@ -1397,11 +1397,11 @@ describe('HlsParser', () => {
           .setResponseValue('test:/main.mp4', segmentData);
 
       parser.start('test:/master', playerInterface)
-            .then(fail)
-            .catch((e) => {
-                shaka.test.Util.expectToEqualError(e, error);
-              })
-            .then(done);
+          .then(fail)
+          .catch((e) => {
+            shaka.test.Util.expectToEqualError(e, error);
+          })
+          .then(done);
     }
 
     it('if multiple init sections were provided', (done) => {
@@ -1933,12 +1933,12 @@ describe('HlsParser', () => {
     ].join('');
 
     fakeNetEngine
-          .setResponseText('test:/master', master)
-          .setResponseText('test:/video0', media)
-          .setResponseText('test:/video1', media)
-          .setResponseText('test:/audio', media)
-          .setResponseValue('test:/init.mp4', initSegmentData)
-          .setResponseValue('test:/main.mp4', segmentData);
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video0', media)
+        .setResponseText('test:/video1', media)
+        .setResponseText('test:/audio', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
 
     const manifest = await parser.start('test:/master', playerInterface);
     expect(manifest.periods[0].variants.length).toBe(2);
@@ -1970,11 +1970,11 @@ describe('HlsParser', () => {
     ].join('');
 
     fakeNetEngine
-          .setResponseText('media/master', master)  // Relative master URI
-          .setResponseText('http://foo/media/audio', media)
-          .setResponseText('http://foo/media/video', media)
-          .setResponseValue('http://foo/media/init.mp4', initSegmentData)
-          .setResponseValue('http://foo/media/main.mp4', segmentData);
+        .setResponseText('media/master', master)  // Relative master URI
+        .setResponseText('http://foo/media/audio', media)
+        .setResponseText('http://foo/media/video', media)
+        .setResponseValue('http://foo/media/init.mp4', initSegmentData)
+        .setResponseValue('http://foo/media/main.mp4', segmentData);
 
     fakeNetEngine.setResponseFilter((type, response) => {
       // Simulate support for relative URIs in the browser by setting the

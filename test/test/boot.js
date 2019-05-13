@@ -199,19 +199,19 @@ function getClientArg(name) {
     // Load required AMD modules, then proceed with tests.
     require(['promise-mock', 'sprintf-js', 'less'],
         (PromiseMock, sprintfJs, less) => {
-      window.PromiseMock = PromiseMock;
-      window.sprintf = sprintfJs.sprintf;
-      window.less = less;
+          window.PromiseMock = PromiseMock;
+          window.sprintf = sprintfJs.sprintf;
+          window.less = less;
 
-      // Patch a new convenience method into PromiseMock.
-      // See https://github.com/taylorhakes/promise-mock/issues/7
-      PromiseMock.flush = () => {
-        // Pass strict == false so it does not throw.
-        PromiseMock.runAll(false /* strict */);
-      };
+          // Patch a new convenience method into PromiseMock.
+          // See https://github.com/taylorhakes/promise-mock/issues/7
+          PromiseMock.flush = () => {
+            // Pass strict == false so it does not throw.
+            PromiseMock.runAll(false /* strict */);
+          };
 
-      done();
-    });
+          done();
+        });
   });
 
   const originalSetTimeout = window.setTimeout;

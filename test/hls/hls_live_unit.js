@@ -111,8 +111,8 @@ describe('HlsParser live', () => {
     rolloverOffset = (0x200000000 * 2) / 90000;
 
     selfInitializingSegmentData = shaka.util.Uint8ArrayUtils.concat(
-      new Uint8Array(initSegmentData),
-      new Uint8Array(segmentData)).buffer;
+        new Uint8Array(initSegmentData),
+        new Uint8Array(segmentData)).buffer;
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
@@ -152,7 +152,7 @@ describe('HlsParser live', () => {
    * @param {!Array} updatedReferences
    */
   function testUpdate(done, master, initialMedia, initialReferences,
-                      updatedMedia, updatedReferences) {
+      updatedMedia, updatedReferences) {
     fakeNetEngine
         .setResponseText('test:/master', master)
         .setResponseText('test:/video', initialMedia)
@@ -164,7 +164,7 @@ describe('HlsParser live', () => {
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
     parser.start('test:/master', playerInterface)
-      .then((manifest) => {
+        .then((manifest) => {
           const variants = manifest.periods[0].variants;
           for (let i = 0; i < variants.length; i++) {
             const video = variants[i].video;
@@ -225,12 +225,12 @@ describe('HlsParser live', () => {
           .setResponseValue('test:/main.mp4', segmentData);
 
       parser.start('test:/master', playerInterface)
-        .then((manifest) => {
+          .then((manifest) => {
             expect(manifest.presentationTimeline.isLive()).toBe(false);
             expect(manifest.presentationTimeline.isInProgress()).toBe(false);
           })
-        .catch(fail)
-        .then(done);
+          .catch(fail)
+          .then(done);
     });
 
     describe('update', () => {
@@ -247,12 +247,12 @@ describe('HlsParser live', () => {
 
       it('adds new segments when they appear', (done) => {
         const ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
+            0, 2, 4);
         const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+            1, 4, 6);
 
         testUpdate(done, master, media, [ref1],
-                   mediaWithAdditionalSegment, [ref1, ref2]);
+            mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
       it('updates all variants', (done) => {
@@ -264,12 +264,12 @@ describe('HlsParser live', () => {
 
         const masterWithTwoVariants = master + secondVariant;
         const ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
+            0, 2, 4);
         const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+            1, 4, 6);
 
         testUpdate(done, masterWithTwoVariants, media, [ref1],
-                   mediaWithAdditionalSegment, [ref1, ref2]);
+            mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
       it('updates all streams', (done) => {
@@ -280,12 +280,12 @@ describe('HlsParser live', () => {
 
         const masterWithAudio = master + audio;
         const ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
+            0, 2, 4);
         const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+            1, 4, 6);
 
         testUpdate(done, masterWithAudio, media, [ref1],
-                   mediaWithAdditionalSegment, [ref1, ref2]);
+            mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
       it('handles multiple updates', (done) => {
@@ -302,11 +302,11 @@ describe('HlsParser live', () => {
         const updatedMedia1 = media + newSegment1;
         const updatedMedia2 = updatedMedia1 + newSegment2;
         const ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
+            0, 2, 4);
         const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+            1, 4, 6);
         const ref3 = ManifestParser.makeReference('test:/main3.mp4',
-                                                2, 6, 8);
+            2, 6, 8);
 
         fakeNetEngine
             .setResponseText('test:/master', master)
@@ -315,7 +315,7 @@ describe('HlsParser live', () => {
             .setResponseValue('test:/main.mp4', segmentData);
 
         parser.start('test:/master', playerInterface)
-          .then((manifest) => {
+            .then((manifest) => {
               const video = manifest.periods[0].variants[0].video;
               ManifestParser.verifySegmentIndex(video, [ref1]);
 
@@ -348,7 +348,7 @@ describe('HlsParser live', () => {
           fakeNetEngine
               .setResponseText('test:/master', master)
               .setResponseText('test:/video',
-                               mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n');
+                  mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n');
 
           delayForUpdatePeriod();
           expect(manifest.presentationTimeline.isLive()).toBe(false);
@@ -358,10 +358,10 @@ describe('HlsParser live', () => {
 
       it('starts presentation as VOD when ENDLIST is present', (done) => {
         fakeNetEngine
-          .setResponseText('test:/master', master)
-          .setResponseText('test:/video', media + '#EXT-X-ENDLIST')
-          .setResponseValue('test:/init.mp4', initSegmentData)
-          .setResponseValue('test:/main.mp4', segmentData);
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media + '#EXT-X-ENDLIST')
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
 
         parser.start('test:/master', playerInterface).then((manifest) => {
           expect(manifest.presentationTimeline.isLive()).toBe(false);
@@ -447,10 +447,10 @@ describe('HlsParser live', () => {
 
     it('does not fail on a missing sequence number', (done) => {
       fakeNetEngine
-        .setResponseText('test:/master', master)
-        .setResponseText('test:/video', mediaWithoutSequenceNumber)
-        .setResponseValue('test:/init.mp4', initSegmentData)
-        .setResponseValue('test:/main.mp4', segmentData);
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithoutSequenceNumber)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
 
       parser.start('test:/master', playerInterface).catch(fail).then(done);
     });
@@ -544,27 +544,27 @@ describe('HlsParser live', () => {
 
       it('adds new segments when they appear', (done) => {
         const ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
+            0, 2, 4);
         const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+            1, 4, 6);
 
         testUpdate(done, master, media, [ref1],
-                   mediaWithAdditionalSegment, [ref1, ref2]);
+            mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
       it('evicts removed segments', (done) => {
         const ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
+            0, 2, 4);
         const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+            1, 4, 6);
 
         testUpdate(done, master, mediaWithAdditionalSegment, [ref1, ref2],
-                   mediaWithRemovedSegment, [ref2]);
+            mediaWithRemovedSegment, [ref2]);
       });
 
       it('handles updates with redirects', (done) => {
         const oldRef1 = ManifestParser.makeReference('test:/main.mp4',
-                                                   0, 2, 4);
+            0, 2, 4);
 
         const newRef1 =
             ManifestParser.makeReference('test:/redirected/main.mp4', 0, 2, 4);
@@ -585,7 +585,7 @@ describe('HlsParser live', () => {
         });
 
         testUpdate(done, master, media, [oldRef1],
-                   mediaWithAdditionalSegment, [newRef1, newRef2]);
+            mediaWithAdditionalSegment, [newRef1, newRef2]);
       });
 
       it('parses start time from mp4 segments', (done) => {
@@ -717,7 +717,7 @@ describe('HlsParser live', () => {
           'video\n',
         ].join('');
 
-       const textPlaylist1 = [
+        const textPlaylist1 = [
           '#EXTM3U\n',
           '#EXT-X-TARGETDURATION:5\n',
           '#EXT-X-MEDIA-SEQUENCE:0\n',
@@ -764,13 +764,13 @@ describe('HlsParser live', () => {
 
         const baseTime = 95443 + rolloverOffset;
         const ref1 = ManifestParser.makeReference('test:/main1.vtt',
-                                                /* position */ 0,
-                                                /* startTime */ baseTime,
-                                                /* endTime */ baseTime + 2);
+            /* position */ 0,
+            /* startTime */ baseTime,
+            /* endTime */ baseTime + 2);
         const ref2 = ManifestParser.makeReference('test:/main2.vtt',
-                                                /* position */ 1,
-                                                /* startTime */ baseTime + 2,
-                                                /* endTime */ baseTime + 4);
+            /* position */ 1,
+            /* startTime */ baseTime + 2,
+            /* endTime */ baseTime + 4);
 
         parser.start('test:/master', playerInterface).then((manifest) => {
           const text = manifest.periods[0].textStreams[0];

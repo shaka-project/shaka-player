@@ -43,7 +43,7 @@ describe('UI', () => {
 
     beforeEach(() => {
       videoContainer =
-          /** @type {!HTMLElement} */ (document.createElement('div'));
+        /** @type {!HTMLElement} */ (document.createElement('div'));
       document.body.appendChild(videoContainer);
 
       video = shaka.util.Dom.createVideoElement();
@@ -63,7 +63,7 @@ describe('UI', () => {
 
       beforeEach(() => {
         container =
-            /** @type {!HTMLElement} */ (document.createElement('div'));
+          /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
 
         createUIThroughDOMAutoSetup([container], /* videos */ []);
@@ -83,11 +83,11 @@ describe('UI', () => {
 
       beforeEach(() => {
         container1 =
-            /** @type {!HTMLElement} */ (document.createElement('div'));
+          /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container1);
 
         container2 =
-            /** @type {!HTMLElement} */ (document.createElement('div'));
+          /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container2);
 
         createUIThroughDOMAutoSetup([container1, container2], /* videos */ []);
@@ -151,7 +151,7 @@ describe('UI', () => {
 
       beforeEach(() => {
         container =
-            /** @type {!HTMLElement} */ (document.createElement('div'));
+          /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
 
         video = shaka.util.Dom.createVideoElement();
@@ -174,7 +174,7 @@ describe('UI', () => {
 
     beforeEach(() => {
       videoContainer =
-          /** @type {!HTMLElement} */ (document.createElement('div'));
+        /** @type {!HTMLElement} */ (document.createElement('div'));
       document.body.appendChild(videoContainer);
 
       video = shaka.util.Dom.createVideoElement();
@@ -182,7 +182,7 @@ describe('UI', () => {
     });
 
     describe('all the controls', () => {
-       /** @type {!HTMLElement} */
+      /** @type {!HTMLElement} */
       let controlsContainer;
 
       beforeEach(() => {
@@ -211,7 +211,7 @@ describe('UI', () => {
     });
 
     describe('overflow menu', () => {
-       /** @type {!HTMLElement} */
+      /** @type {!HTMLElement} */
       let overflowMenu;
 
       beforeEach(() => {
@@ -251,30 +251,30 @@ describe('UI', () => {
 
       it('allows picture-in-picture only when the content has video',
           async () => {
-        // Load fake content that contains only audio.
-        const manifest = new shaka.test.ManifestGenerator()
-            .addPeriod(/* startTime= */ 0)
-              .addVariant(/* id= */ 0)
+            // Load fake content that contains only audio.
+            const manifest = new shaka.test.ManifestGenerator()
+                .addPeriod(/* startTime= */ 0)
+                .addVariant(/* id= */ 0)
                 .addAudio(/* id= */ 1)
-            .build();
+                .build();
 
-        const parser = new shaka.test.FakeManifestParser(manifest);
-        const factory = () => parser;
+            const parser = new shaka.test.FakeManifestParser(manifest);
+            const factory = () => parser;
 
-        await player.load(/* uri= */ 'fake', /* startTime= */ 0, factory);
-        const pipButtons =
+            await player.load(/* uri= */ 'fake', /* startTime= */ 0, factory);
+            const pipButtons =
             videoContainer.getElementsByClassName('shaka-pip-button');
-        expect(pipButtons.length).toBe(1);
-        const pipButton = pipButtons[0];
+            expect(pipButtons.length).toBe(1);
+            const pipButton = pipButtons[0];
 
-        // The picture-in-picture button should not be shown when the content
-        // only has audio.
-        expect(pipButton.classList.contains('shaka-hidden')).toBe(true);
+            // The picture-in-picture button should not be shown when the content
+            // only has audio.
+            expect(pipButton.classList.contains('shaka-hidden')).toBe(true);
 
-        // The picture-in-picture window should not be open when the content
-        // only has audio.
-        expect(document.pictureInPictureElement).toBeFalsy();
-      });
+            // The picture-in-picture window should not be open when the content
+            // only has audio.
+            expect(document.pictureInPictureElement).toBeFalsy();
+          });
 
       it('is accessible', () => {
         for (const button of overflowMenu.childNodes) {
@@ -286,17 +286,17 @@ describe('UI', () => {
 
 
     describe('controls-button-panel', () => {
-       /** @type {!HTMLElement} */
+      /** @type {!HTMLElement} */
       let controlsButtonPanel;
 
       it('has default elements', () => {
         createUIThroughAPI(videoContainer, video);
         const controlsButtonPanels = videoContainer.getElementsByClassName(
-          'shaka-controls-button-panel');
+            'shaka-controls-button-panel');
         expect(controlsButtonPanels.length).toBe(1);
 
         controlsButtonPanel =
-            /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
+          /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
         confirmElementFound(controlsButtonPanel, 'shaka-current-time');
         confirmElementFound(controlsButtonPanel, 'shaka-mute-button');
@@ -326,11 +326,11 @@ describe('UI', () => {
 
         createUIThroughAPI(videoContainer, video, config);
         const controlsButtonPanels = videoContainer.getElementsByClassName(
-          'shaka-controls-button-panel');
+            'shaka-controls-button-panel');
         expect(controlsButtonPanels.length).toBe(1);
 
         controlsButtonPanel =
-            /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
+          /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
         confirmAriaLabel('shaka-mute-button');
         confirmAriaLabel('shaka-volume-bar');
@@ -342,7 +342,7 @@ describe('UI', () => {
     });
 
     describe('resolutions menu', () => {
-       /** @type {!HTMLElement} */
+      /** @type {!HTMLElement} */
       let resolutionsMenu;
 
       beforeEach(() => {
@@ -433,7 +433,7 @@ describe('UI', () => {
       shaka.log.warning = shaka.test.Util.spyFunc(warning);
       warning.calls.reset();
       container =
-          /** @type {!HTMLElement} */ (document.createElement('div'));
+        /** @type {!HTMLElement} */ (document.createElement('div'));
       document.body.appendChild(container);
 
       video = shaka.util.Dom.createVideoElement();
@@ -482,34 +482,34 @@ describe('UI', () => {
 
     it('settings menus are positioned lower when seek bar is absent',
         () => {
-      config = {addSeekBar: false};
-      createUIThroughAPI(container, video, config);
+          config = {addSeekBar: false};
+          createUIThroughAPI(container, video, config);
 
-      function confirmLowPosition(className) {
-        const elements =
+          function confirmLowPosition(className) {
+            const elements =
               container.getElementsByClassName(className);
-        expect(elements.length).toBe(1);
-        expect(elements[0].classList.contains('shaka-low-position')).toBe(true);
-      }
+            expect(elements.length).toBe(1);
+            expect(elements[0].classList.contains('shaka-low-position')).toBe(true);
+          }
 
-      confirmElementMissing(container, 'shaka-seek-bar');
+          confirmElementMissing(container, 'shaka-seek-bar');
 
-      confirmLowPosition('shaka-overflow-menu');
-      confirmLowPosition('shaka-resolutions');
-      confirmLowPosition('shaka-audio-languages');
-      confirmLowPosition('shaka-text-languages');
-    });
+          confirmLowPosition('shaka-overflow-menu');
+          confirmLowPosition('shaka-resolutions');
+          confirmLowPosition('shaka-audio-languages');
+          confirmLowPosition('shaka-text-languages');
+        });
 
     it('controls are created in specified order', () => {
       config = {controlPanelElements: ['mute', 'time_and_duration',
-          'fullscreen']};
+        'fullscreen']};
       createUIThroughAPI(container, video, config);
 
       const controlsButtonPanels =
           container.getElementsByClassName('shaka-controls-button-panel');
       expect(controlsButtonPanels.length).toBe(1);
       const controlsButtonPanel =
-          /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
+      /** @type {!HTMLElement} */ (controlsButtonPanels[0]);
 
       const buttons = controlsButtonPanel.childNodes;
       expect(buttons.length).toBe(3);

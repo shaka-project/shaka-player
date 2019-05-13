@@ -148,7 +148,7 @@ describe('XmlUtils', () => {
         '</Root>',
       ].join('\n');
       xml = /** @type {!Document} */ (
-          new DOMParser().parseFromString(xmlString, 'application/xml'));
+        new DOMParser().parseFromString(xmlString, 'application/xml'));
     });
 
     it('delegates to parser function', () => {

@@ -198,7 +198,7 @@ describe('StreamingEngine', () => {
   }
 
   function setupNetworkingEngine(firstPeriodStartTime, secondPeriodStartTime,
-                                 presentationDuration, segmentDurations) {
+      presentationDuration, segmentDurations) {
     const periodStartTimes = [firstPeriodStartTime, secondPeriodStartTime];
 
     const boundsCheckPosition =
@@ -263,7 +263,7 @@ describe('StreamingEngine', () => {
           video: metadata.video.segmentDuration});
 
     manifest.presentationTimeline =
-        /** @type {!shaka.media.PresentationTimeline} */ (timeline);
+      /** @type {!shaka.media.PresentationTimeline} */ (timeline);
     manifest.minBufferTime = 2;
 
     // Create InitSegmentReferences.
@@ -549,7 +549,7 @@ describe('StreamingEngine', () => {
                 expect(video.currentTime).toBeLessThan(20);
                 done();
               })
-              .catch(done.fail);
+                  .catch(done.fail);
             });
 
             // Let's go!

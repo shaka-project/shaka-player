@@ -58,7 +58,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     networkingEngine = new shaka.net.NetworkingEngine(Util.spyFunc(onProgress));
     resolveScheme = makeResolveScheme('resolve scheme');
     rejectScheme = jasmine.createSpy('reject scheme').and.callFake(() =>
-        shaka.util.AbortableOperation.failed(error));
+      shaka.util.AbortableOperation.failed(error));
     shaka.net.NetworkingEngine.registerScheme(
         'resolve', Util.spyFunc(resolveScheme),
         shaka.net.NetworkingEngine.PluginPriority.FALLBACK);
@@ -177,7 +177,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         } catch (e) {
           expect(deferSpy.calls.count()).toBe(1);
           expect(deferSpy).toHaveBeenCalledWith(baseDelay,
-                                                jasmine.any(Function));
+              jasmine.any(Function));
         }
       });
 
@@ -196,9 +196,9 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         } catch (e) {
           expect(deferSpy.calls.count()).toBe(2);
           expect(deferSpy).toHaveBeenCalledWith(baseDelay,
-                                                jasmine.any(Function));
+              jasmine.any(Function));
           expect(deferSpy).toHaveBeenCalledWith(baseDelay * 2,
-                                                jasmine.any(Function));
+              jasmine.any(Function));
         }
       });
 
@@ -220,7 +220,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           // delay * (1 + 0.5) = baseDelay * (1 + 0.5)
           expect(deferSpy.calls.count()).toBe(1);
           expect(deferSpy).toHaveBeenCalledWith(baseDelay * 1.5,
-                                                jasmine.any(Function));
+              jasmine.any(Function));
         }
       });
     });  // describe('backoff')
@@ -989,13 +989,13 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     it('is called on recoverable error', async () => {
       const error1 = new shaka.util.Error(
-        shaka.util.Error.Severity.RECOVERABLE,
-        shaka.util.Error.Category.NETWORK,
-        shaka.util.Error.Code.HTTP_ERROR);
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.HTTP_ERROR);
       const error2 = new shaka.util.Error(
-        shaka.util.Error.Severity.RECOVERABLE,
-        shaka.util.Error.Category.NETWORK,
-        shaka.util.Error.Code.BAD_HTTP_STATUS);
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
       const resolve = createResponse();
       rejectScheme.and.callFake(() => {
         switch (rejectScheme.calls.count()) {
