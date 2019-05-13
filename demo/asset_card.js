@@ -57,10 +57,25 @@ class AssetCard {
     titleDiv.appendChild(titleText);
 
     if (asset.iconUri) {
+      const picture = document.createElement('picture');
+
+      const webpSource = document.createElement('source');
+      webpSource.srcset = asset.iconUri.replace(/.png$/, '.webp');
+      webpSource.type = 'image/webp';
+
+      const pngSource = document.createElement('source');
+      pngSource.srcset = asset.iconUri;
+      pngSource.type = 'image/png';
+
       const img = document.createElement('img');
       img.src = asset.iconUri;
       img.alt = '';  // Not necessary to understand the page
-      this.card_.appendChild(img);
+
+      picture.appendChild(webpSource);
+      picture.appendChild(pngSource);
+      picture.appendChild(img);
+
+      this.card_.appendChild(picture);
     }
 
     if (asset.description && isFeatured) {
