@@ -96,7 +96,7 @@ HLS features supported:
  - VOD, Live, and Event types
  - Encrypted content with Widevine
  - ISO-BMFF / MP4 / CMAF support
- - MPEG-2 TS support (transmuxing provided by [mux.js][] v4.4+, must be separately included)
+ - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.1.3+, must be separately included)
  - WebVTT and TTML
  - CEA-608/708 captions
  - Encrypted content with FairPlay (Safari on macOS and iOS only)
@@ -146,7 +146,7 @@ Shaka Player supports:
     - Can parse [cueing data][] elements for DASH's SegmentBase@indexRange and SegmentTemplate@index
     - Not supported in HLS
   - MPEG-2 TS
-    - With help from [mux.js][] v4.4+, can be played on any browser which supports MP4
+    - With help from [mux.js][] v5.1.3+, can be played on any browser which supports MP4
     - Can find and parse timestamps to find segment start time in HLS
   - WebVTT
     - Supported in both text form and embedded in MP4

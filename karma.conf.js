@@ -82,7 +82,7 @@ module.exports = function(config) {
       'node_modules/babel-polyfill/dist/polyfill.js',
 
       // muxjs module next
-      'node_modules/mux.js/dist/mux.js',
+      'node_modules/mux.js/dist/mux.min.js',
 
       // load closure base, the deps tree, and the uncompiled library
       'third_party/closure/goog/base.js',
