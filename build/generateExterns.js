@@ -48,14 +48,6 @@ const fs = require('fs');
 // The annotations we will consider "exporting" a symbol.
 const EXPORT_REGEX = /@(?:export|exportInterface|expose)\b/;
 
-// Install ES6/ES7 polyfills for old versions of nodejs.
-if (!global.Set) {
-  require('es6-shim');
-}
-if (!Array.prototype.includes) {
-  require('array-includes').shim();
-}
-
 
 /**
  * Topological sort of general objects using a DFS approach.

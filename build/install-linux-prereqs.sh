@@ -56,11 +56,11 @@ sudo apt -y update
 sudo apt -y install git python2.7 default-jre-headless apache2
 
 # NodeJS in Ubuntu and Debian is often out of date, so we may need to grab a
-# newer version.  We require v6+.
+# newer version.  We require v8+.
 
-if node --version 2>/dev/null | grep -q 'v\([6-9]\|1[0-9]\)'; then
+if node --version 2>/dev/null | grep -q 'v\([89]\|1[0-9]\)'; then
   echo "*****" 1>&2
-  echo "NodeJS v6+ detected.  No update needed." 1>&2
+  echo "NodeJS v8+ detected.  No update needed." 1>&2
   echo "*****" 1>&2
 else
   if node --version &>/dev/null; then
@@ -99,7 +99,7 @@ else
       fi
     else
       echo "*****" 1>&2
-      echo "You will need to upgrade NodeJS yourself to v6+." 1>&2
+      echo "You will need to upgrade NodeJS yourself to v8+." 1>&2
       echo "*****" 1>&2
       exit 1
     fi
