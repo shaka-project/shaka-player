@@ -67,18 +67,18 @@ if (!Array.prototype.includes) {
  * @see https://en.wikipedia.org/wiki/Topological_sorting#Depth-first_search
  */
 function topologicalSort(list, getDeps) {
-  var sorted = [];
+  const sorted = [];
   const NOT_VISITED = 0;
   const MID_VISIT = 1;
   const COMPLETELY_VISITED = 2;
 
   // Mark all objects as not visited.
-  list.forEach(function(object) {
+  list.forEach((object) => {
     object.__mark = NOT_VISITED;
   });
 
   // Visit each object.
-  list.forEach(function(object) {
+  list.forEach((object) => {
     visit(object);
   });
 
@@ -156,7 +156,7 @@ function isRequireNode(node) {
  * @return {boolean} true if this is an exported symbol or property.
  */
 function isExportNode(node) {
-  var doc = getLeadingBlockComment(node);
+  const doc = getLeadingBlockComment(node);
   return doc && EXPORT_REGEX.test(doc);
 }
 
@@ -178,17 +178,21 @@ function getLeadingBlockComment(node) {
   //     { type: 'Block', value: '* @export ' },
   //   ],
   // }
-  if (!node.leadingComments || !node.leadingComments.length) return null;
+  if (!node.leadingComments || !node.leadingComments.length) {
+    return null;
+  }
 
   // Ignore non-block comments, since those are not jsdoc/Closure comments.
-  var blockComments = node.leadingComments.filter(function(comment) {
+  const blockComments = node.leadingComments.filter((comment) => {
     return comment.type == 'Block';
   });
-  if (!blockComments.length) return null;
+  if (!blockComments.length) {
+    return null;
+  }
 
   // In case there are multiple (for example, a file-level comment that also
   // preceeds the node), take the most recent one, which is closest to the node.
-  var mostRecentComment = blockComments[blockComments.length - 1];
+  const mostRecentComment = blockComments[blockComments.length - 1];
 
   // Reconstruct the original block comment by adding back /* and */.
   return '/*' + mostRecentComment.value + '*/';
@@ -233,7 +237,8 @@ function getIdentifierString(node) {
   //   },
   //   property: { type: 'Identifier', name: 'baz' },
   // }
-  return getIdentifierString(node.object) + '.' + getIdentifierString(node.property);
+  return getIdentifierString(node.object) + '.' +
+      getIdentifierString(node.property);
 }
 
 
@@ -261,7 +266,7 @@ function getFunctionParameters(node) {
   //   ],
   //   body: {...},
   // }
-  return node.params.map(function(param) {
+  return node.params.map((param) => {
     console.assert(param.type == 'Identifier' ||
                    param.type == 'AssignmentPattern' ||
                    param.type == 'RestElement');
@@ -271,6 +276,8 @@ function getFunctionParameters(node) {
       return param.left.name;
     } else if (param.type == 'RestElement') {
       return '...' + param.argument.name;
+    } else {
+      throw new Error('Unexpected parameter type: ' + param.type);
     }
   });
 }
@@ -285,11 +292,11 @@ function getFunctionParameters(node) {
  */
 function removeExportAnnotationsFromComment(comment) {
   // Remove @export annotations.
-  comment = comment.replace(EXPORT_REGEX, '')
+  comment = comment.replace(EXPORT_REGEX, '');
 
   // Split into lines, remove empty comment lines, then recombine.
   comment = comment.split('\n')
-      .filter(function(line) { return !/^ *\*? *$/.test(line); })
+      .filter((line) => !/^ *\*? *$/.test(line))
       .join('\n');
 
   return comment;
@@ -303,13 +310,13 @@ function removeExportAnnotationsFromComment(comment) {
  */
 function getAllExpressionStatements(node) {
   console.assert(node.body && node.body.body);
-  var expressionStatements = [];
-  node.body.body.forEach(function(childNode) {
+  const expressionStatements = [];
+  node.body.body.forEach((childNode) => {
     if (childNode.type == 'ExpressionStatement') {
       expressionStatements.push(childNode);
     } else if (childNode.body) {
-      var childExpressions = getAllExpressionStatements(childNode);
-      expressionStatements.push.apply(expressionStatements, childExpressions);
+      const childExpressions = getAllExpressionStatements(childNode);
+      expressionStatements.push(...childExpressions);
     }
   });
   return expressionStatements;
@@ -323,13 +330,13 @@ function getAllExpressionStatements(node) {
  */
 function createExternFromExportNode(names, node) {
   console.assert(node.type == 'ExpressionStatement',
-                 'Unknown node type: ' + node.type);
+      'Unknown node type: ' + node.type);
 
-  var comment = getLeadingBlockComment(node);
+  let comment = getLeadingBlockComment(node);
   comment = removeExportAnnotationsFromComment(comment);
 
-  var name;
-  var assignment;
+  let name;
+  let assignment;
 
   switch (node.expression.type) {
     case 'AssignmentExpression':
@@ -366,7 +373,7 @@ function createExternFromExportNode(names, node) {
   // Keep track of the names we've externed.
   names.add(name);
   // Generate the actual extern string.
-  var externString = comment + '\n' + name + assignment + ';\n';
+  let externString = comment + '\n' + name + assignment + ';\n';
 
   // Find this.foo = bar in the constructor, and potentially generate externs
   // for that, too.
@@ -399,7 +406,9 @@ function createExternMethod(node) {
   const id = getIdentifierString(node.key);
 
   let methodString = '  ' + comment + '\n  ';
-  if (node.static) methodString += 'static ';
+  if (node.static) {
+    methodString += 'static ';
+  }
   methodString += id + '(' + params + ') {}';
   return methodString;
 }
@@ -412,7 +421,7 @@ function createExternMethod(node) {
  */
 function createExternAssignment(name, node) {
   switch (node.type) {
-    case 'ClassExpression':
+    case 'ClassExpression': {
       // Example code: foo.bar = class bar2 extends foo.baz { /* ... */ };
       // Example node: {
       //   id: { name: 'bar' },   // or null
@@ -430,26 +439,28 @@ function createExternAssignment(name, node) {
       node.body.body.forEach((member) => {
         // Only look at exported members.  Constructors are exported implicitly
         // when the class is exported.
-        var comment = getLeadingBlockComment(member);
+        const comment = getLeadingBlockComment(member);
         if (!EXPORT_REGEX.test(comment) && member.key.name != 'constructor') {
           return;
         }
 
         console.assert(member.type == 'MethodDefinition',
-                       'Unexpected exported member type in exported class!');
+            'Unexpected exported member type in exported class!');
 
         classString += createExternMethod(member) + '\n';
       });
       classString += '}';
       return classString;
+    }
 
-    case 'FunctionExpression':
+    case 'FunctionExpression': {
       // Example code: foo.square = function(x) { return x * x; };
       // Example node: { params: [ { type: 'Identifier', name: 'x' } ] }
-      var params = getFunctionParameters(node);
+      const params = getFunctionParameters(node);
       return ' = function(' + params.join(', ') + ') {}';
+    }
 
-    case 'ObjectExpression':
+    case 'ObjectExpression': {
       // Example code: foo.Bar = { 'ABC': 1, DEF: 2 };
       // Example node: {
       //   properties: [ {
@@ -462,17 +473,19 @@ function createExternAssignment(name, node) {
       //     value: { type: 'Literal', value: 2 }
       //   } ]
       // }
-      var propertyStrings = node.properties.map(function(prop) {
+      const propertyStrings = node.properties.map((prop) => {
         console.assert(prop.kind == 'init');
-        console.assert(prop.key.type == 'Literal' || prop.key.type == 'Identifier');
+        console.assert(
+            prop.key.type == 'Literal' || prop.key.type == 'Identifier');
         // Literal indicates a quoted name in the source, while Identifier is
         // an unquoted name.  In the case of Literal, key.raw gets us the
         // unquoted name, we end up with an unquoted name in both cases.
-        var name = prop.key.type == 'Literal' ? prop.key.raw : prop.key.name;
+        const name = prop.key.type == 'Literal' ? prop.key.raw : prop.key.name;
         console.assert(prop.value.type == 'Literal');
         return '  ' + name + ': ' + prop.value.raw;
       });
       return ' = {\n' + propertyStrings.join(',\n') + '\n}';
+    }
 
     case 'Identifier':
       // Example code: /** @const {string} @export */ foo.version = VERSION;
@@ -485,7 +498,7 @@ function createExternAssignment(name, node) {
       return '';
 
     default:
-      console.assert(false, 'unknown export type: ' + node.type);
+      throw new Error('Unexpected export type: ' + node.type);
   }
 }
 
@@ -528,31 +541,33 @@ function createExternsFromConstructor(className, constructorNode) {
   //  */
   // Foo.prototype.bar;
 
-  var expressionStatements = getAllExpressionStatements(constructorNode);
-  var externString = '';
+  const expressionStatements = getAllExpressionStatements(constructorNode);
+  let externString = '';
 
-  expressionStatements.forEach(function(statement) {
-    var left = statement.expression.left;
-    var right = statement.expression.right;
+  expressionStatements.forEach((statement) => {
+    const left = statement.expression.left;
+    const right = statement.expression.right;
 
     // Skip anything that isn't an assignment to a member of "this".
     if (statement.expression.type != 'AssignmentExpression' ||
         left.type != 'MemberExpression' ||
-        left.object.type != 'ThisExpression')
+        left.object.type != 'ThisExpression') {
       return;
+    }
 
     console.assert(left);
     console.assert(right);
 
     // Skip anything that isn't exported.
-    var comment = getLeadingBlockComment(statement);
-    if (!EXPORT_REGEX.test(comment))
+    let comment = getLeadingBlockComment(statement);
+    if (!EXPORT_REGEX.test(comment)) {
       return;
+    }
 
     comment = removeExportAnnotationsFromComment(comment);
 
     console.assert(left.property.type == 'Identifier');
-    var name = className + '.prototype.' + left.property.name;
+    const name = className + '.prototype.' + left.property.name;
     externString += comment + '\n' + name + ';\n';
   });
 
@@ -572,19 +587,19 @@ function createExternsFromConstructor(className, constructorNode) {
  */
 function generateExterns(names, inputPath) {
   // Load and parse the code, with comments attached to the nodes.
-  var code = fs.readFileSync(inputPath, 'utf-8');
-  var program = esprima.parse(code, {attachComment: true});
+  const code = fs.readFileSync(inputPath, 'utf-8');
+  const program = esprima.parse(code, {attachComment: true});
   console.assert(program.type == 'Program');
 
-  var body = program.body;
-  var provides = program.body
-      .filter(isProvideNode).map(getArgumentFromCallNode.bind(null, 0));
-  var requires = program.body
-      .filter(isRequireNode).map(getArgumentFromCallNode.bind(null, 0));
+  const body = program.body;
+  const provides = program.body.filter(isProvideNode)
+      .map((node) => getArgumentFromCallNode(0, node));
+  const requires = program.body.filter(isRequireNode)
+      .map((node) => getArgumentFromCallNode(0, node));
 
-  var rawExterns = program.body
-      .filter(isExportNode).map(createExternFromExportNode.bind(null, names));
-  var externs = rawExterns.join('');
+  const rawExterns = program.body.filter(isExportNode)
+      .map((node) => createExternFromExportNode(names, node));
+  const externs = rawExterns.join('');
 
   return {
     path: inputPath,
@@ -603,10 +618,10 @@ function generateExterns(names, inputPath) {
  *   the script name itself.
  */
 function main(args) {
-  var inputPaths = [];
-  var outputPath;
+  const inputPaths = [];
+  let outputPath;
 
-  for (var i = 0; i < args.length; ++i) {
+  for (let i = 0; i < args.length; ++i) {
     if (args[i] == '--output') {
       outputPath = args[i + 1];
       ++i;
@@ -615,39 +630,39 @@ function main(args) {
     }
   }
   console.assert(outputPath,
-                 'You must specify output file with --output <EXTERNS>');
+      'You must specify output file with --output <EXTERNS>');
   console.assert(inputPaths.length,
-                 'You must specify at least one input file.');
+      'You must specify at least one input file.');
 
   // Generate externs for all input paths.
-  var names = new Set();
-  var results = inputPaths.map(generateExterns.bind(null, names));
+  const names = new Set();
+  const results = inputPaths.map((path) => generateExterns(names, path));
 
   // Sort them in dependency order.
-  var sorted = topologicalSort(results, /* getDeps */ function(object) {
-    return object.requires.map(function(id) {
-      var dep = results.find(function(x) { return x.provides.includes(id); });
+  const sorted = topologicalSort(results, /* getDeps */ (object) => {
+    return object.requires.map((id) => {
+      const dep = results.find((x) => x.provides.includes(id));
       console.assert(dep, 'Cannot find dependency: ' + id);
       return dep;
     });
   });
 
-  // Generate namespaces for all externs.  For example, if we extern foo.bar.baz,
-  // foo and foo.bar will both need to be declared first.
-  var namespaces = new Set();
-  var namespaceDeclarations = [];
-  names.forEach(function(name) {
-    // Add the full name "foo.bar.baz" and its prototype ahead of time.  We should
-    // never generate these as namespaces.
+  // Generate namespaces for all externs.  For example, if we extern
+  // foo.bar.baz, foo and foo.bar will both need to be declared first.
+  const namespaces = new Set();
+  const namespaceDeclarations = [];
+  names.forEach((name) => {
+    // Add the full name "foo.bar.baz" and its prototype ahead of time.  We
+    // should never generate these as namespaces.
     namespaces.add(name);
     namespaces.add(name + '.prototype');
 
     // For name "foo.bar.baz", iterate over partialName "foo" and "foo.bar".
-    var pieces = name.split('.');
-    for (var i = 1; i < pieces.length; ++i) {
-      var partialName = pieces.slice(0, i).join('.');
+    const pieces = name.split('.');
+    for (let i = 1; i < pieces.length; ++i) {
+      const partialName = pieces.slice(0, i).join('.');
       if (!namespaces.has(partialName)) {
-        var declaration;
+        let declaration;
         if (i == 1) {
           declaration = '/** @namespace */\n';
           declaration += 'window.';
@@ -662,15 +677,16 @@ function main(args) {
   });
 
   // Get externs.
-  var externs = sorted.map(function(x) { return x.externs; }).join('');
+  const externs = sorted.map((x) => x.externs).join('');
 
   // Output generated externs, with an appropriate header.
   fs.writeFileSync(outputPath,
       '/**\n' +
       ' * @fileoverview Generated externs.  DO NOT EDIT!\n' +
       ' * @externs\n' +
-      ' * @suppress {duplicate} To prevent compiler errors with the namespace\n' +
-      ' *   being declared both here and by goog.provide in the library.\n' +
+      ' * @suppress {duplicate} To prevent compiler errors with the\n' +
+      ' *   namespace being declared both here and by goog.provide in the\n' +
+      ' *   library.\n' +
       ' */\n\n' +
       namespaceDeclarations.join('') + '\n' + externs);
 }
