@@ -93,7 +93,6 @@ describe('MediaSourceEngine', () => {
       return type == 'video' || type == 'audio';
     };
 
-    shaka.text.TextEngine = createMockTextEngineCtor();
     shaka.media.Transmuxer.isSupported = function(mimeType, contentType) {
       return mimeType == 'tsMimetype';
     };
@@ -101,9 +100,6 @@ describe('MediaSourceEngine', () => {
 
   afterAll(() => {
     window.MediaSource.isTypeSupported = originalIsTypeSupported;
-    shaka.text.TextEngine = originalTextEngine;
-    shaka.media.MediaSourceEngine.prototype.createMediaSource =
-        originalCreateMediaSource;
     shaka.media.Transmuxer.isSupported = originalTransmuxerIsSupported;
   });
 
@@ -115,6 +111,8 @@ describe('MediaSourceEngine', () => {
       const type = mimeType.split('/')[0];
       return type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
     });
+
+    shaka.text.TextEngine = createMockTextEngineCtor();
 
     createMediaSourceSpy = jasmine.createSpy('createMediaSource');
     createMediaSourceSpy.and.callFake((p) => {
@@ -158,6 +156,9 @@ describe('MediaSourceEngine', () => {
 
   afterEach(() => {
     mockTextEngine = null;
+    shaka.text.TextEngine = originalTextEngine;
+    shaka.media.MediaSourceEngine.prototype.createMediaSource =
+        originalCreateMediaSource;
   });
 
   describe('constructor', () => {
