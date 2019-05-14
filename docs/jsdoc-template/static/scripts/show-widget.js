@@ -23,21 +23,20 @@
  */
 
 function onShowChange() {
-  var value = document.getElementById('show').value;
+  const value = document.getElementById('show').value;
   localStorage.setItem('show', value);
 
-
-  var setVisibilityByAccess = function(access, visible) {
-    var selector = '.access-' + access;
-    var list = document.querySelectorAll(selector);
+  const setVisibilityByAccess = (access, visible) => {
+    const selector = '.access-' + access;
+    const list = document.querySelectorAll(selector);
     // querySelectorAll returns an array-like object, not an array.
-    Array.prototype.forEach.call(list, function(element) {
+    for (const element of Array.from(list)) {
       if (visible) {
         element.classList.add('show');
       } else {
         element.classList.remove('show');
       }
-    });
+    }
   };
 
   if (value == 'exported') {
@@ -54,7 +53,7 @@ function onShowChange() {
 
 function initShowWidget() {
   // get the previous setting from storage and populate the form.
-  var storedSetting = localStorage.getItem('show');
+  const storedSetting = localStorage.getItem('show');
   document.getElementById('show').value = storedSetting;
 
   if (!document.getElementById('show').value) {
