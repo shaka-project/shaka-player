@@ -198,6 +198,19 @@ html, body {
   }
 }
 
+.asset-card-corner-button {
+  /* Move the button to the top-right. */
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.asset-card .mdl-card__title {
+  /* The maximum width of the title should be narrower than the width of the
+   * card itself, so that the title doesn't overlap with the store button. */
+  max-width: 280px;
+}
+
 .asset-card div {
   /* Override the default value of "stretch" for mdl cards. */
   justify-content: center;

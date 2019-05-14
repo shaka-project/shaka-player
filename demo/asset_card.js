@@ -173,6 +173,7 @@ class AssetCard {
    * Make a button that represents the lack of a working button.
    * @param {string} buttonName
    * @param {?string} unsupportedReason
+   * @return {!Element}
    * @private
    */
   makeUnsupportedButton_(buttonName, unsupportedReason) {
@@ -195,6 +196,8 @@ class AssetCard {
       this.actions_.appendChild(attachPoint);
       ShakaDemoTooltips.make(tooltipContainer, attachPoint, unsupportedReason);
     }
+
+    return button;
   }
 
   /**
@@ -222,25 +225,42 @@ class AssetCard {
    * custom behavior, such as the download bar.
    */
   addStoreButton() {
+    /**
+     * Makes the contents of the button into an MDL icon, and moves it into the
+     * upper-righthand corner with CSS styles.
+     * @param {!Element} button
+     * @param {string} iconText
+     */
+    const styleAsDownloadButton = (button, iconText) => {
+      button.classList.add('asset-card-corner-button');
+      const icon = document.createElement('i');
+      icon.textContent = iconText;
+      icon.classList.add('material-icons');
+      button.appendChild(icon);
+    };
+
     const unsupportedReason = shakaDemoMain.getAssetUnsupportedReason(
         this.asset_, /* needOffline= */ true);
     if (unsupportedReason || !this.asset_.storeCallback) {
       // This can't be stored.
-      this.makeUnsupportedButton_('Download', unsupportedReason);
+      const button = this.makeUnsupportedButton_('', unsupportedReason);
+      styleAsDownloadButton(button, 'get_app');
       return;
     }
     if (this.asset_.isStored()) {
-      const deleteButton = this.addButton('Delete', async () => {
+      const deleteButton = this.addButton('', async () => {
         deleteButton.disabled = true;
         await this.asset_.unstoreCallback();
         this.remakeButtons();
       });
+      styleAsDownloadButton(deleteButton, 'delete');
     } else {
-      const downloadButton = this.addButton('Download', async () => {
+      const downloadButton = this.addButton('', async () => {
         downloadButton.disabled = true;
         await this.asset_.storeCallback();
         this.remakeButtons();
       });
+      styleAsDownloadButton(downloadButton, 'get_app');
     }
   }
 

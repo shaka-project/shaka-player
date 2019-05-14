@@ -368,7 +368,7 @@ class ShakaDemoCustom {
         }
         this.showAssetDialog_(asset);
       });
-      c.addButton('Discard', async () => {
+      c.addButton('Delete', async () => {
         this.assets_.delete(asset);
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
