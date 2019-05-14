@@ -11,7 +11,6 @@
     }
   ],
   "devDependencies": {
-    "array-includes": "^3.0.3",
     "awesomplete": "^1.1.4",
     "babel-core": "^6.26.3",
     "babel-plugin-istanbul": "^4.1.6",
@@ -20,12 +19,10 @@
     "cajon": "^0.4.4",
     "dialog-polyfill": "^0.5.0",
     "es6-promise-polyfill": "^1.2.0",
-    "es6-shim": "^0.35.5",
     "eslint": "^5.16.0",
     "eslint-config-google": "^0.13.0",
     "esprima": "^4.0.1",
     "htmlhint": "^0.11.0",
-    "in-publish": "^2.0.0",
     "jasmine-ajax": "^4.0.0",
     "jasmine-core": "^3.4.0",
     "jsdoc": "github:joeyparrish/jsdoc#45c271fa",
@@ -64,6 +61,6 @@
   },
   "license": "Apache-2.0",
   "scripts": {
-    "prepublish": "in-publish && python build/checkversion.py && python build/all.py --force || not-in-publish"
+    "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
   }
 }

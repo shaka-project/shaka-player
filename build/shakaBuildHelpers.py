@@ -286,7 +286,7 @@ def update_node_modules():
   # Check the version of npm.
   version = execute_get_output([cmd, '-v']).decode('utf8')
 
-  if _parse_version(version) < _parse_version('1.3.12'):
+  if _parse_version(version) < _parse_version('5.0.0'):
     logging.error('npm version is too old, please upgrade.  e.g.:')
     logging.error('  npm install -g npm')
     return False
@@ -295,12 +295,9 @@ def update_node_modules():
   # Actually change directories instead of using npm --prefix.
   # See npm/npm#17027 and google/shaka-player#776 for more details.
   with InDir(base):
-    if _parse_version(version) >= _parse_version('5.0.0'):
-      # npm update seems to be the wrong thing in npm v5, so use install.
-      # See google/shaka-player#854 for more details.
-      execute_get_output([cmd, 'install'])
-    else:
-      execute_get_output([cmd, 'update'])
+    # npm update seems to be the wrong thing in npm v5, so use install.
+    # See google/shaka-player#854 for more details.
+    execute_get_output([cmd, 'install'])
 
   # Update the timestamp of the file that tracks when we last updated.
   open(_node_modules_last_update_path(), 'w').close()
