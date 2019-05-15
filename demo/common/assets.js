@@ -133,23 +133,31 @@ shakaAssets.ExtraText;
 
 
 // Custom callbacks {{{
+
+/**
+ * A prefix retrieved in a manifest response filter and used in a subsequent
+ * license request filter.  Necessary for VDMS content.
+ *
+ * @type {string}
+ */
+shakaAssets.lastUplynkPrefix = '';
+
 /**
  * A response filter for VDMS Uplynk manifest responses.
  * This allows us to get the license prefix that is necessary
  * to later generate a proper license response.
+ *
  * @param {shaka.net.NetworkingEngine.RequestType} type
  * @param {shaka.extern.Response} response
- * The uplynk_prefix attribute is set on the shakaAssets object
- * and is later referenced in the UplynkRequestFilter.
  */
-shakaAssets.UplynkResponseFilter = function(type, response) {
+shakaAssets.UplynkResponseFilter = (type, response) => {
   if (type == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
     // Parse a custom header that contains a value needed to build a proper
     // license server URL.
     if (response.headers['x-uplynk-prefix']) {
-      shakaAssets.uplynk_prefix = response.headers['x-uplynk-prefix'];
+      shakaAssets.lastUplynkPrefix = response.headers['x-uplynk-prefix'];
     } else {
-      shakaAssets.uplynk_prefix = '';
+      shakaAssets.lastUplynkPrefix = '';
     }
   }
 };
@@ -157,23 +165,19 @@ shakaAssets.UplynkResponseFilter = function(type, response) {
 
 /**
  * A license request filter for VDMS Uplynk license requests.
+ *
  * @param {shaka.net.NetworkingEngine.RequestType} type
  * @param {shaka.extern.Request} request
- * The uplynk_prefix variable is retrieved from the shakaAssets
- * object, and requires that the uplynk manifest response filter also be set.
  */
-shakaAssets.UplynkRequestFilter = function(type, request) {
+shakaAssets.UplynkRequestFilter = (type, request) => {
   if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
     // Modify the license request URL based on our cookie.
-    if (request.uris[0].includes('wv') &&
-        shakaAssets.uplynk_prefix) {
-      request.uris[0] = shakaAssets.uplynk_prefix.concat('/wv');
-    } else if (request.uris[0].includes('ck') &&
-               shakaAssets.uplynk_prefix) {
-      request.uris[0] = shakaAssets.uplynk_prefix.concat('/ck');
-    } else if (request.uris[0].includes('pr') &&
-               shakaAssets.uplynk_prefix) {
-      request.uris[0] = shakaAssets.uplynk_prefix.concat('/pr');
+    if (request.uris[0].includes('wv') && shakaAssets.lastUplynkPrefix) {
+      request.uris[0] = shakaAssets.lastUplynkPrefix.concat('/wv');
+    } else if (request.uris[0].includes('ck') && shakaAssets.lastUplynkPrefix) {
+      request.uris[0] = shakaAssets.lastUplynkPrefix.concat('/ck');
+    } else if (request.uris[0].includes('pr') && shakaAssets.lastUplynkPrefix) {
+      request.uris[0] = shakaAssets.lastUplynkPrefix.concat('/pr');
     }
   }
 };
