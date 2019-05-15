@@ -55,7 +55,7 @@ describe('DrmEngine', () => {
   /** @type {!ArrayBuffer} */
   let license;
 
-  beforeAll(() => {
+  beforeEach(() => {
     requestMediaKeySystemAccessSpy =
         jasmine.createSpy('requestMediaKeySystemAccess');
     navigator.requestMediaKeySystemAccess =
@@ -68,9 +68,7 @@ describe('DrmEngine', () => {
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
     onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
     onEventSpy = jasmine.createSpy('onEvent');
-  });
 
-  beforeEach(() => {
     /* eslint-disable indent */
     manifest = new shaka.test.ManifestGenerator()
         .addPeriod(0)
@@ -81,14 +79,6 @@ describe('DrmEngine', () => {
             .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
         .build();
     /* eslint-enable indent */
-
-    // Reset spies.
-    requestMediaKeySystemAccessSpy.calls.reset();
-    onErrorSpy.calls.reset();
-    logErrorSpy.calls.reset();
-    onKeyStatusSpy.calls.reset();
-    onExpirationSpy.calls.reset();
-    onEventSpy.calls.reset();
 
     // By default, error logs and callbacks result in failure.
     onErrorSpy.and.callFake(fail);
@@ -137,9 +127,7 @@ describe('DrmEngine', () => {
 
   afterEach(async () => {
     await drmEngine.destroy();
-  });
 
-  afterAll(() => {
     navigator.requestMediaKeySystemAccess =
         originalRequestMediaKeySystemAccess;
     shaka.log.error = originalLogError;
