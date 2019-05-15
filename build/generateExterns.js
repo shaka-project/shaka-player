@@ -65,14 +65,14 @@ function topologicalSort(list, getDeps) {
   const COMPLETELY_VISITED = 2;
 
   // Mark all objects as not visited.
-  list.forEach((object) => {
+  for (const object of list) {
     object.__mark = NOT_VISITED;
-  });
+  }
 
   // Visit each object.
-  list.forEach((object) => {
+  for (const object of list) {
     visit(object);
-  });
+  }
 
   // Return the sorted list.
   return sorted;
@@ -88,7 +88,9 @@ function topologicalSort(list, getDeps) {
       object.__mark = MID_VISIT;
 
       // Visit all dependencies.
-      getDeps(object).forEach(visit);
+      for (const dep of getDeps(object)) {
+        visit(dep);
+      }
 
       object.__mark = COMPLETELY_VISITED;
 
@@ -303,14 +305,14 @@ function removeExportAnnotationsFromComment(comment) {
 function getAllExpressionStatements(node) {
   console.assert(node.body && node.body.body);
   const expressionStatements = [];
-  node.body.body.forEach((childNode) => {
+  for (const childNode of node.body.body) {
     if (childNode.type == 'ExpressionStatement') {
       expressionStatements.push(childNode);
     } else if (childNode.body) {
       const childExpressions = getAllExpressionStatements(childNode);
       expressionStatements.push(...childExpressions);
     }
-  });
+  }
   return expressionStatements;
 }
 
@@ -428,19 +430,19 @@ function createExternAssignment(name, node) {
         classString += 'extends ' + getIdentifierString(node.superClass) + ' ';
       }
       classString += '{\n';
-      node.body.body.forEach((member) => {
+      for (const member of node.body.body) {
         // Only look at exported members.  Constructors are exported implicitly
         // when the class is exported.
         const comment = getLeadingBlockComment(member);
         if (!EXPORT_REGEX.test(comment) && member.key.name != 'constructor') {
-          return;
+          continue;
         }
 
         console.assert(member.type == 'MethodDefinition',
             'Unexpected exported member type in exported class!');
 
         classString += createExternMethod(member) + '\n';
-      });
+      }
       classString += '}';
       return classString;
     }
@@ -536,7 +538,7 @@ function createExternsFromConstructor(className, constructorNode) {
   const expressionStatements = getAllExpressionStatements(constructorNode);
   let externString = '';
 
-  expressionStatements.forEach((statement) => {
+  for (const statement of expressionStatements) {
     const left = statement.expression.left;
     const right = statement.expression.right;
 
@@ -544,7 +546,7 @@ function createExternsFromConstructor(className, constructorNode) {
     if (statement.expression.type != 'AssignmentExpression' ||
         left.type != 'MemberExpression' ||
         left.object.type != 'ThisExpression') {
-      return;
+      continue;
     }
 
     console.assert(left);
@@ -553,7 +555,7 @@ function createExternsFromConstructor(className, constructorNode) {
     // Skip anything that isn't exported.
     let comment = getLeadingBlockComment(statement);
     if (!EXPORT_REGEX.test(comment)) {
-      return;
+      continue;
     }
 
     comment = removeExportAnnotationsFromComment(comment);
@@ -561,7 +563,7 @@ function createExternsFromConstructor(className, constructorNode) {
     console.assert(left.property.type == 'Identifier');
     const name = className + '.prototype.' + left.property.name;
     externString += comment + '\n' + name + ';\n';
-  });
+  }
 
   return externString;
 }
@@ -643,7 +645,7 @@ function main(args) {
   // foo.bar.baz, foo and foo.bar will both need to be declared first.
   const namespaces = new Set();
   const namespaceDeclarations = [];
-  names.forEach((name) => {
+  for (const name of names) {
     // Add the full name "foo.bar.baz" and its prototype ahead of time.  We
     // should never generate these as namespaces.
     namespaces.add(name);
@@ -666,7 +668,7 @@ function main(args) {
         namespaces.add(partialName);
       }
     }
-  });
+  }
 
   // Get externs.
   const externs = sorted.map((x) => x.externs).join('');
