@@ -18,42 +18,46 @@
 // Karma configuration
 // Install required modules by running "npm install"
 
-var fs = require('fs');
-var path = require('path');
-var rimraf = require('rimraf');
-var which = require('which');
+const fs = require('fs');
+const path = require('path');
+const rimraf = require('rimraf');
+const which = require('which');
 
-module.exports = function(config) {
-  var SHAKA_LOG_MAP = {
+/**
+ * @param {Object} config
+ */
+module.exports = (config) => {
+  const SHAKA_LOG_MAP = {
     none: 0,
     error: 1,
     warning: 2,
     info: 3,
     debug: 4,
     v1: 5,
-    v2: 6
+    v2: 6,
   };
 
-  var KARMA_LOG_MAP = {
-    'disable': config.LOG_DISABLE,
-    'error': config.LOG_ERROR,
-    'warn': config.LOG_WARN,
-    'info': config.LOG_INFO,
-    'debug':  config.LOG_DEBUG
+  const KARMA_LOG_MAP = {
+    disable: config.LOG_DISABLE,
+    error: config.LOG_ERROR,
+    warn: config.LOG_WARN,
+    info: config.LOG_INFO,
+    debug: config.LOG_DEBUG,
   };
 
   // Find the settings JSON object in the command arguments
-  var args = process.argv;
-  var settingsIndex = args.indexOf('--settings');
-  var settings = settingsIndex >= 0 ? JSON.parse(args[settingsIndex + 1]) : {};
+  const args = process.argv;
+  const settingsIndex = args.indexOf('--settings');
+  const settings =
+      settingsIndex >= 0 ? JSON.parse(args[settingsIndex + 1]) : {};
 
   if (settings.browsers && settings.browsers.length == 1 &&
       settings.browsers[0] == 'help') {
     console.log('Available browsers:');
     console.log('===================');
-    allUsableBrowserLaunchers(config).forEach(function(name) {
+    for (const name of allUsableBrowserLaunchers(config)) {
       console.log('  ' + name);
-    });
+    }
     process.exit(1);
   }
 
@@ -145,7 +149,7 @@ module.exports = function(config) {
           // Some of our tests are not written with strict mode in mind, but the
           // plugin for commonjs modules enforces strict mode.  Since we do not
           // use modules, just disable them.
-          ['env', { modules: false }],
+          ['env', {modules: false}],
         ],
         // The source-map-support framework is necessary to make this work:
         sourceMap: 'inline',
@@ -230,7 +234,7 @@ module.exports = function(config) {
     coverageReporter: {
       includeAllSources: true,
       reporters: [
-        { type: 'text' },
+        {type: 'text'},
       ],
     },
 
@@ -238,10 +242,6 @@ module.exports = function(config) {
       suppressSkipped: true,
     },
   });
-
-  function getClientArgs() {
-    return config.client.args[0];
-  }
 
   if (settings.test_custom_asset) {
     // If testing custom assets, we don't serve other unit or integration tests.
@@ -264,11 +264,11 @@ module.exports = function(config) {
   // We just modified the config in-place.  No need for config.set() after we
   // push to config.files.
 
-  var reporters = [];
+  const reporters = [];
 
   if (settings.reporters) {
     // Explicit reporters, use these.
-    reporters.push.apply(reporters, settings.reporters);
+    reporters.push(...settings.reporters);
   } else if (settings.logging && settings.logging != 'none') {
     // With logging, default to 'spec', which makes logs easier to associate
     // with individual tests.
@@ -285,8 +285,8 @@ module.exports = function(config) {
     config.set({
       coverageReporter: {
         reporters: [
-          { type: 'html', dir: 'coverage' },
-          { type: 'cobertura', dir: 'coverage', file: 'coverage.xml' },
+          {type: 'html', dir: 'coverage'},
+          {type: 'cobertura', dir: 'coverage', file: 'coverage.xml'},
         ],
       },
     });
@@ -300,20 +300,26 @@ module.exports = function(config) {
   if (settings.random) {
     // If --seed was specified use that value, else generate a seed so that the
     // exact order can be reproduced if it catches an issue.
-    var seed = settings.seed == null ? new Date().getTime() : settings.seed;
+    const seed = settings.seed == null ? new Date().getTime() : settings.seed;
 
     // Run tests in a random order.
-    getClientArgs().random = true;
-    getClientArgs().seed = seed;
+    const clientArgs = config.client.args[0];
+    clientArgs.random = true;
+    clientArgs.seed = seed;
 
-    console.log("Using a random test order (--random) with --seed=" + seed);
+    console.log('Using a random test order (--random) with --seed=' + seed);
   }
 };
 
-// Determines which launchers and customLaunchers can be used and returns an
-// array of strings.
+/**
+ * Determines which launchers and customLaunchers can be used and returns an
+ * array of strings.
+ *
+ * @param {!Object} config
+ * @return {!Array.<string>}
+ */
 function allUsableBrowserLaunchers(config) {
-  var browsers = [];
+  const browsers = [];
 
   // Load all launcher plugins.
   // The format of the items in this list is something like:
@@ -324,41 +330,49 @@ function allUsableBrowserLaunchers(config) {
   // Where the launchers grouped together into one item were defined by a single
   // plugin, and the Functions in the inner array are the constructors for those
   // launchers.
-  var plugins = require('karma/lib/plugin').resolve(['karma-*-launcher']);
-  plugins.forEach(function(map) {
-    Object.keys(map).forEach(function(name) {
+  const plugins = require('karma/lib/plugin').resolve(['karma-*-launcher']);
+  for (const map of plugins) {
+    for (const name in map) {
       // Launchers should all start with 'launcher:', but occasionally we also
       // see 'test' come up for some reason.
-      if (!name.startsWith('launcher:')) return;
+      if (!name.startsWith('launcher:')) {
+        continue;
+      }
 
-      var browserName = name.split(':')[1];
-      var pluginConstructor = map[name][1];
+      const browserName = name.split(':')[1];
+      const pluginConstructor = map[name][1];
 
       // Most launchers requiring configuration through customLaunchers have
       // no DEFAULT_CMD.  Some launchers have DEFAULT_CMD, but not for this
       // platform.  Finally, WebDriver has DEFAULT_CMD, but still requires
       // configuration, so we simply blacklist it by name.
-      var DEFAULT_CMD = pluginConstructor.prototype.DEFAULT_CMD;
-      if (!DEFAULT_CMD || !DEFAULT_CMD[process.platform]) return;
-      if (browserName == 'WebDriver') return;
+      const DEFAULT_CMD = pluginConstructor.prototype.DEFAULT_CMD;
+      if (!DEFAULT_CMD || !DEFAULT_CMD[process.platform]) {
+        continue;
+      }
+      if (browserName == 'WebDriver') {
+        continue;
+      }
 
       // Now that we've filtered out the browsers that can't be launched without
       // custom config or that can't be launched on this platform, we filter out
       // the browsers you don't have installed.
-      var ENV_CMD = pluginConstructor.prototype.ENV_CMD;
-      var browserPath = process.env[ENV_CMD] || DEFAULT_CMD[process.platform];
+      const ENV_CMD = pluginConstructor.prototype.ENV_CMD;
+      const browserPath = process.env[ENV_CMD] || DEFAULT_CMD[process.platform];
 
       if (!fs.existsSync(browserPath) &&
-          !which.sync(browserPath, {nothrow: true})) return;
+          !which.sync(browserPath, {nothrow: true})) {
+        continue;
+      }
 
       browsers.push(browserName);
-    });
-  });
+    }
+  }
 
   // Once we've found the names of all the standard launchers, add to that list
   // the names of any custom launcher configurations.
   if (config.customLaunchers) {
-    browsers.push.apply(browsers, Object.keys(config.customLaunchers));
+    browsers.push(...Object.keys(config.customLaunchers));
   }
 
   return browsers;
