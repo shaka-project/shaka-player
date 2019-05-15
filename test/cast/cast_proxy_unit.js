@@ -33,18 +33,11 @@ describe('CastProxy', () => {
   /** @type {shaka.cast.CastProxy} */
   let proxy;
 
-  beforeAll(() => {
+  beforeEach(() => {
     mockCastSenderConstructor = jasmine.createSpy('CastSender constructor');
     mockCastSenderConstructor.and.callFake(createMockCastSender);
-
     shaka.cast.CastSender = Util.spyFunc(mockCastSenderConstructor);
-  });
 
-  afterAll(() => {
-    shaka.cast.CastSender = originalCastSender;
-  });
-
-  beforeEach(() => {
     mockVideo = new shaka.test.FakeVideo();
     mockPlayer = createMockPlayer();
     mockSender = null;
@@ -52,8 +45,12 @@ describe('CastProxy', () => {
     proxy = new CastProxy(mockVideo, mockPlayer, fakeAppId);
   });
 
-  afterEach((done) => {
-    proxy.destroy().catch(fail).then(done);
+  afterEach(async () => {
+    try {
+      await proxy.destroy();
+    } finally {
+      shaka.cast.CastSender = originalCastSender;
+    }
   });
 
   describe('constructor', () => {

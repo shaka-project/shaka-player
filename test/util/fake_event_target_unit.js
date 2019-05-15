@@ -24,19 +24,16 @@ describe('FakeEventTarget', () => {
   /** @type {!jasmine.Spy} */
   let logErrorSpy;
 
-  beforeAll(() => {
-    logErrorSpy = jasmine.createSpy('shaka.log.error');
-    shaka.log.error = Util.spyFunc(logErrorSpy);
-  });
-
-  afterAll(() => {
-    shaka.log.error = originalLogError;
-  });
-
   beforeEach(() => {
-    target = new shaka.util.FakeEventTarget();
-    logErrorSpy.calls.reset();
+    logErrorSpy = jasmine.createSpy('shaka.log.error');
     logErrorSpy.and.callFake(fail);
+    shaka.log.error = Util.spyFunc(logErrorSpy);
+
+    target = new shaka.util.FakeEventTarget();
+  });
+
+  afterEach(() => {
+    shaka.log.error = originalLogError;
   });
 
   it('sets target on dispatched events', (done) => {

@@ -18,17 +18,18 @@
 describe('VttTextParser', () => {
   const Cue = shaka.text.Cue;
   const CueRegion = shaka.text.CueRegion;
+  const originalLogWarning = shaka.log.warning;
 
   /** @type {!jasmine.Spy} */
   let logWarningSpy;
 
-  beforeAll(() => {
+  beforeEach(() => {
     logWarningSpy = jasmine.createSpy('shaka.log.warning');
     shaka.log.warning = shaka.test.Util.spyFunc(logWarningSpy);
   });
 
-  beforeEach(() => {
-    logWarningSpy.calls.reset();
+  afterEach(() => {
+    shaka.log.warning = originalLogWarning;
   });
 
   it('supports no cues', () => {

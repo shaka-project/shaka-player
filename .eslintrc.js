@@ -138,6 +138,22 @@ module.exports = {
         'allowSamePrecedence': false,
       },
     ],
+    'no-restricted-syntax': [
+      'error',
+      {
+        'selector': 'CallExpression[callee.name="beforeAll"] ' +
+                    ':matches(' +
+                    'CallExpression[callee.property.name="createSpy"],' +
+                    'CallExpression[callee.name="spyOn"])',
+        'message': 'Create spies in beforeEach, not beforeAll.',
+      },
+      {
+        'selector': 'CallExpression' +
+                    '[callee.name=/^([fx]?it|(before|after)(Each|All))$/] > ' +
+                    ':function[async=true][params.length>0]',
+        'message': 'Don\'t use both async and done.',
+      },
+    ],
     'no-whitespace-before-property': 'error',
     'nonblock-statement-body-position': ['error', 'below'],
     'operator-assignment': 'error',
