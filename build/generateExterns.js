@@ -393,11 +393,14 @@ function createExternMethod(node) {
   //   key: Identifier,
   //   value: FunctionExpression,
   // }
+  const id = getIdentifierString(node.key);
   let comment = getLeadingBlockComment(node);
+  if (!comment) {
+    throw new Error('No leading block comment for ' + id);
+  }
   comment = removeExportAnnotationsFromComment(comment);
 
   const params = getFunctionParameters(node.value);
-  const id = getIdentifierString(node.key);
 
   let methodString = '  ' + comment + '\n  ';
   if (node.static) {
