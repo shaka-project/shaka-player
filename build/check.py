@@ -41,7 +41,10 @@ def get_lint_files():
         os.path.join(base, *path_components), match)
   main_sources = (get('test') + get('lib') + get('externs') + get('demo') +
       get('ui'))
-  tool_sources = [os.path.join(base, 'build', 'generateExterns.js')]
+  tool_sources = [
+      os.path.join(base, 'build', 'generateExterns.js'),
+      os.path.join(base, 'docs', 'jsdoc-plugin.js'),
+  ]
   return main_sources + tool_sources
 
 
