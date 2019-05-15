@@ -61,20 +61,16 @@ describe('Player', function() {
   /** @type {!shaka.test.FakeVideo} */
   let video;
 
-  beforeAll(function() {
+  beforeEach(() => {
+    // By default, errors are a failure.
     logErrorSpy = jasmine.createSpy('shaka.log.error');
+    logErrorSpy.calls.reset();
     shaka.log.error = shaka.test.Util.spyFunc(logErrorSpy);
+
     logWarnSpy = jasmine.createSpy('shaka.log.warning');
+    logErrorSpy.and.callFake(fail);
     shaka.log.warning = shaka.test.Util.spyFunc(logWarnSpy);
     shaka.log.alwaysWarn = shaka.test.Util.spyFunc(logWarnSpy);
-  });
-
-  beforeEach(function() {
-    // By default, errors are a failure.
-    logErrorSpy.calls.reset();
-    logErrorSpy.and.callFake(fail);
-
-    logWarnSpy.calls.reset();
 
     // Since this is not an integration test, we don't want MediaSourceEngine to
     // fail assertions based on browser support for types.  Pretend that all
@@ -147,15 +143,15 @@ describe('Player', function() {
     player.addEventListener('error', shaka.test.Util.spyFunc(onError));
   });
 
-  afterEach(function(done) {
-    player.destroy().catch(fail).then(done);
-  });
-
-  afterAll(function() {
-    shaka.log.error = originalLogError;
-    shaka.log.warning = originalLogWarn;
-    shaka.log.alwaysWarn = originalLogAlwaysWarn;
-    window.MediaSource.isTypeSupported = originalIsTypeSupported;
+  afterEach(async () => {
+    try {
+      await player.destroy();
+    } finally {
+      shaka.log.error = originalLogError;
+      shaka.log.warning = originalLogWarn;
+      shaka.log.alwaysWarn = originalLogAlwaysWarn;
+      window.MediaSource.isTypeSupported = originalIsTypeSupported;
+    }
   });
 
   describe('destroy', function() {
