@@ -109,6 +109,8 @@ class ShakaDemoFront {
     this.assetCards_ = assets.map((asset) => {
       return this.createAssetCardFor_(asset, this.assetCardDiv_);
     });
+
+    this.updateSelected_();
   }
 
   /**
