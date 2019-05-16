@@ -198,12 +198,12 @@ class ShakaDemoMain {
     this.uiLocale_ = languages[0];
     // TODO(#1591): Support multiple language preferences
 
-    this.player_.addEventListener(
-        'error', (event) => this.onErrorEvent_(event));
+    const onErrorEvent = (event) => this.onErrorEvent_(event);
+    this.player_.addEventListener('error', onErrorEvent);
 
     // Listen to events on controls.
     this.controls_ = ui.getControls();
-    this.controls_.addEventListener('error', shakaDemoMain.onErrorEvent_);
+    this.controls_.addEventListener('error', onErrorEvent);
     this.controls_.addEventListener('caststatuschanged', (event) => {
       this.onCastStatusChange_(event['newStatus']);
     });
@@ -855,7 +855,7 @@ class ShakaDemoMain {
     } else {
       this.player_.configure('drm.advanced', config.drm.advanced);
     }
-    shakaDemoMain.remakeHash();
+    this.remakeHash();
   }
 
   /**
