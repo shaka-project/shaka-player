@@ -46,8 +46,8 @@ async function init() {
   // When using the UI, the player is made automatically by the UI object.
   const video = document.getElementById('video');
   const ui = video['ui'];
-  const player = ui.getPlayer();
   const controls = ui.getControls();
+  const player = controls.getPlayer();
 
   // Listen for error events.
   player.addEventListener('error', onPlayerErrorEvent);

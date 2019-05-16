@@ -57,21 +57,24 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   /** shaka.extern.UIConfiguration */
   this.config_ = config;
 
-  /** @private {!shaka.cast.CastProxy} */
+  /** @private {shaka.cast.CastProxy} */
   this.castProxy_ = new shaka.cast.CastProxy(
     video, player, this.config_.castReceiverAppId);
 
   /** @private {boolean} */
   this.castAllowed_ = true;
 
-  /** @private {!HTMLMediaElement} */
+  /** @private {HTMLMediaElement} */
   this.video_ = this.castProxy_.getVideo();
 
-  /** @private {!HTMLMediaElement} */
+  /** @private {HTMLMediaElement} */
   this.localVideo_ = video;
 
-  /** @private {!shaka.Player} */
+  /** @private {shaka.Player} */
   this.player_ = this.castProxy_.getPlayer();
+
+  /** @private {shaka.Player} */
+  this.localPlayer_ = player;
 
   /** @private {!HTMLElement} */
   this.videoContainer_ = videoContainer;
@@ -204,6 +207,22 @@ shaka.ui.Controls.prototype.destroy = async function() {
     this.timeAndSeekRangeTimer_.stop();
     this.timeAndSeekRangeTimer_ = null;
   }
+
+  if (this.castProxy_) {
+    await this.castProxy_.destroy();
+    this.castProxy_ = null;
+  }
+
+  if (this.localPlayer_) {
+    await this.localPlayer_.destroy();
+    this.localPlayer_ = null;
+  }
+  this.player_ = null;
+
+  this.localVideo_ = null;
+  this.video_ = null;
+
+  // TODO: remove any elements created
 
   this.localization_ = null;
   this.pressedKeys_.clear();
@@ -383,7 +402,7 @@ shaka.ui.Controls.prototype.setEnabledNativeControls = function(enabled) {
 
 /**
  * @export
- * @return {!shaka.cast.CastProxy}
+ * @return {shaka.cast.CastProxy}
  */
 shaka.ui.Controls.prototype.getCastProxy = function() {
   return this.castProxy_;
@@ -409,7 +428,7 @@ shaka.ui.Controls.prototype.getVideoContainer = function() {
 
 
 /**
- * @return {!HTMLMediaElement}
+ * @return {HTMLMediaElement}
  * @export
  */
 shaka.ui.Controls.prototype.getVideo = function() {
@@ -418,7 +437,7 @@ shaka.ui.Controls.prototype.getVideo = function() {
 
 
 /**
- * @return {!HTMLMediaElement}
+ * @return {HTMLMediaElement}
  * @export
  */
 shaka.ui.Controls.prototype.getLocalVideo = function() {
@@ -427,11 +446,20 @@ shaka.ui.Controls.prototype.getLocalVideo = function() {
 
 
 /**
- * @return {!shaka.Player}
+ * @return {shaka.Player}
  * @export
  */
 shaka.ui.Controls.prototype.getPlayer = function() {
   return this.player_;
+};
+
+
+/**
+ * @return {shaka.Player}
+ * @export
+ */
+shaka.ui.Controls.prototype.getLocalPlayer = function() {
+  return this.localPlayer_;
 };
 
 
