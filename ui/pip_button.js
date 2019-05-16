@@ -39,7 +39,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {!HTMLMediaElement} */
+    /** @private {HTMLMediaElement} */
     this.localVideo_ = this.controls.getLocalVideo();
 
     const LocIds = shaka.ui.Locales.Ids;

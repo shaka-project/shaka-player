@@ -19,6 +19,7 @@
 goog.provide('shaka.ui.Overlay');
 
 goog.require('goog.asserts');
+goog.require('shaka.Deprecate');
 goog.require('shaka.polyfill.installAll');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.TextDisplayer');
@@ -173,9 +174,15 @@ shaka.ui.Overlay.prototype.configure = function(config, value) {
 /**
  * @return {shaka.Player}
  * @export
+ * @deprecated Use getControls().getPlayer() instead.
  */
 shaka.ui.Overlay.prototype.getPlayer = function() {
-  return this.player_;
+  shaka.Deprecate.deprecateFeature(
+      2, 6,
+      'ui.Overlay.getPlayer()',
+      'Please use getControls().getPlayer() instead.');
+
+  return this.controls_.getPlayer();
 };
 
 

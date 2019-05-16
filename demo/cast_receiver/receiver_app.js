@@ -69,7 +69,14 @@ class ShakaReceiverApp {
       ],
     });
 
-    this.player_ = ui.getPlayer();
+    // We use the UI library on both sender and receiver, to get a consistent UI
+    // in both contexts.  The controls, therefore, have both a proxy player
+    // (getPlayer) and a local player (getLocalPlayer).  The proxy player is
+    // what the sender uses to send commands to the receiver when it's casting.
+    // Since this _is_ the receiver, we use the local player (local to this
+    // environment on the receiver).  This local player (local to the receiver)
+    // will be remotely controlled by the proxy on the sender side.
+    this.player_ = ui.getControls().getLocalPlayer();
     goog.asserts.assert(this.player_, 'Player should be available!');
 
     this.controlsElement_ = document.querySelector('.shaka-controls-container');

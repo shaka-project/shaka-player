@@ -172,7 +172,7 @@ class ShakaDemoMain {
   setupPlayer_() {
     const video = /** @type {!HTMLVideoElement} */ (this.video_);
     const ui = video['ui'];
-    this.player_ = ui.getPlayer();
+    this.player_ = ui.getControls().getPlayer();
 
     // Register custom controls to the UI.
     shaka.ui.Controls.registerElement('close', new CloseButton.Factory());

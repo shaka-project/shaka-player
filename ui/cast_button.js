@@ -39,7 +39,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {!shaka.cast.CastProxy} */
+    /** @private {shaka.cast.CastProxy} */
     this.castProxy_ = this.controls.getCastProxy();
 
     /** @private {!HTMLElement} */
