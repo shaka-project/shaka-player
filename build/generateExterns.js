@@ -243,7 +243,8 @@ function getIdentifierString(node) {
  * @return {!Array.<string>} a list of the parameter names.
  */
 function getFunctionParameters(node) {
-  assert.equal(node.type, 'FunctionExpression');
+  assert(node.type == 'FunctionExpression' ||
+         node.type == 'ArrowFunctionExpression');
   // Example code: function(x, y, z = null, ...varArgs) {...}
   // Example node: {
   //   params: [
@@ -489,6 +490,7 @@ function createExternAssignment(name, node) {
       return classString;
     }
 
+    case 'ArrowFunctionExpression':
     case 'FunctionExpression': {
       // Example code: foo.square = function(x) { return x * x; };
       // Example node: { params: [ { type: 'Identifier', name: 'x' } ] }

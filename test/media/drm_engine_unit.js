@@ -1275,7 +1275,7 @@ describe('DrmEngine', () => {
       // correctly formatted.
       fakeNetEngine.request.and.callFake((type, request) => {
         // eslint-disable-next-line new-cap
-        return shaka.net.DataUriPlugin(request.uris[0], request);
+        return shaka.net.DataUriPlugin.parse(request.uris[0], request);
       });
 
       await initAndAttach();
