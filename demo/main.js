@@ -163,7 +163,9 @@ class ShakaDemoMain {
     this.fullyLoaded_ = true;
     this.remakeHash();
 
-    if (asset) {
+    if (asset && !this.selectedAsset) {
+      // If an asset has begun loading in the meantime (for example, due to
+      // re-joining an existing cast session), don't play this.
       this.loadAsset(asset);
     }
   }
@@ -859,19 +861,30 @@ class ShakaDemoMain {
   }
 
   /**
+   * Performs all visual operations that should be performed when a new asset
+   * begins playing. The video bar is un-hidden, the screen is scrolled, and so
+   * on.
+   *
+   * @private
+   */
+  showPlayer_() {
+    const videoBar = document.getElementById('video-bar');
+    this.showNode_(videoBar);
+    this.closeError_();
+    this.video_.poster = ShakaDemoMain.mainPoster_;
+
+    // Scroll to the top of the page, so that if the page is scrolled down,
+    // the user won't need to manually scroll up to see the video.
+    videoBar.scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+
+  /**
    * @param {ShakaDemoAssetInfo} asset
    */
   async loadAsset(asset) {
     try {
       this.selectedAsset = asset;
-      const videoBar = document.getElementById('video-bar');
-      this.showNode_(videoBar);
-      this.closeError_();
-      this.video_.poster = ShakaDemoMain.mainPoster_;
-
-      // Scroll to the top of the page, so that if the page is scrolled down,
-      // the user won't need to manually scroll up to see the video.
-      videoBar.scrollIntoView({behavior: 'smooth', block: 'start'});
+      this.showPlayer_();
 
       // The currently-selected asset changed, so update asset cards.
       this.dispatchEventWithName_('shaka-main-selected-asset-changed');
@@ -1235,7 +1248,13 @@ class ShakaDemoMain {
    * @private
    */
   onCastStatusChange_(connected) {
-    // TODO: Handle.
+    if (connected && !this.selectedAsset) {
+      // You joined an existing session.
+      // The exact asset playing is unknown. Just have a selectedAsset, to show
+      // that this is playing something.
+      this.selectedAsset = ShakaDemoAssetInfo.makeBlankAsset();
+      this.showPlayer_();
+    }
   }
 }
 
