@@ -109,7 +109,6 @@ module.exports = function(config) {
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'ui/**/*.js', included: false},
-      {pattern: 'ui/**/*.css', included: false},
       {pattern: 'ui/**/*.less', included: false},
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
       {pattern: 'third_party/language-mapping-list/**/*.js', included: false},
