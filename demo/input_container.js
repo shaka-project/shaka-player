@@ -182,7 +182,7 @@ class ShakaDemoInputContainer {
 
     this.latestTooltip = tooltipString;
     if (tooltipString) {
-      ShakaDemoTooltips.make(this.table_, this.latestRow_, tooltipString);
+      ShakaDemoTooltips.make(this.latestRow_, tooltipString);
       // Keep the row from being focused.
       this.latestRow_.setAttribute('tabindex', -1);
       this.latestRow_.classList.add('borderless');

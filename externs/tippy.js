@@ -16,22 +16,15 @@
  */
 
 /**
- * Creates and contains the MDL elements of a tooltip.
+ * @fileoverview Externs for Tippy methods.
+ * @externs
  */
-class ShakaDemoTooltips {
-  /**
-   * @param {!Element} labeledElement
-   * @param {string} message
-   */
-  static make(labeledElement, message) {
-    tippy(labeledElement, {
-      content: message,
-      placement: 'bottom',
-      arrow: true,
-      animation: 'scale',
-      size: 'large',
-    });
-    // TODO: The tooltip should be unreadable by screen readers, and this
-    // tooltip info should instead be encoded into the object.
-  }
-}
+
+
+/**
+ * This is the subset of this method that we use in our demo code.
+ *
+ * @param {!Element} element
+ * @param {!Object} config
+ */
+const tippy = function(element, config) {};
