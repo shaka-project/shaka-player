@@ -400,12 +400,20 @@ function createExternMethod(node) {
   // }
   const id = getIdentifierString(node.key);
   let comment = getLeadingBlockComment(node);
-  assert(comment, 'No leading block comment for: ' + id);
+  if (!comment) {
+    if (id == 'constructor') {
+      // ES6 constructors don't necessarily need comments; a comment along the
+      // lines of "Creates a Foo object." doesn't really add anything.
+      comment = '';
+    } else {
+      throw new Error('No leading block comment for: ' + id);
+    }
+  }
   comment = removeExportAnnotationsFromComment(comment);
 
   const params = getFunctionParameters(node.value);
 
-  let methodString = '  ' + comment + '\n  ';
+  let methodString = (comment ? '  ' + comment + '\n' : '') + '  ';
   if (node.static) {
     methodString += 'static ';
   }
