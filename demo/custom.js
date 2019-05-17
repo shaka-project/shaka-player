@@ -97,7 +97,7 @@ class ShakaDemoCustom {
    */
   showAssetDialog_(assetInProgress) {
     // Remove buttons for any previous assets.
-    shaka.ui.Utils.removeAllChildren(this.dialog_);
+    shaka.util.Dom.removeAllChildren(this.dialog_);
 
     const inputDiv = document.createElement('div');
     this.dialog_.appendChild(inputDiv);
@@ -257,7 +257,7 @@ class ShakaDemoCustom {
       }
     };
     const iconOnChange = (input) => {
-      shaka.ui.Utils.removeAllChildren(iconDiv);
+      shaka.util.Dom.removeAllChildren(iconDiv);
       assetInProgress.iconUri = input.value;
       if (input.value) {
         const img = document.createElement('img');
@@ -392,7 +392,7 @@ class ShakaDemoCustom {
 
   /** @private */
   remakeSavedList_() {
-    shaka.ui.Utils.removeAllChildren(this.savedList_);
+    shaka.util.Dom.removeAllChildren(this.savedList_);
 
     if (this.assets_.size == 0) {
       // Add in a message telling you what to do.

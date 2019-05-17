@@ -215,7 +215,7 @@ class AssetCard {
 
   /** Remake the buttons of the card. */
   remakeButtons() {
-    shaka.ui.Utils.removeAllChildren(this.actions_);
+    shaka.util.Dom.removeAllChildren(this.actions_);
     this.remakeButtonsFn_(this);
   }
 

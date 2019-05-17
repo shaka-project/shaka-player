@@ -80,7 +80,7 @@ class ShakaDemoConfig {
 
   /** @private */
   reload_() {
-    shaka.ui.Utils.removeAllChildren(this.container_);
+    shaka.util.Dom.removeAllChildren(this.container_);
     this.sections_ = [];
 
     this.addMetaSection_();

@@ -111,7 +111,7 @@ class ShakaDemoSearch {
 
   /** @private */
   remakeResultsDiv_() {
-    shaka.ui.Utils.removeAllChildren(this.resultsDiv_);
+    shaka.util.Dom.removeAllChildren(this.resultsDiv_);
 
     const assets = this.searchResults_();
     this.assetCards_ = assets.map((asset) => this.createAssetCardFor_(asset));

@@ -49,7 +49,7 @@ shaka.ui.LanguageUtils = class {
         langMenu, 'shaka-back-to-overflow-button');
 
     // 2. Remove everything
-    shaka.ui.Utils.removeAllChildren(langMenu);
+    shaka.util.Dom.removeAllChildren(langMenu);
 
     // 3. Add the backTo Menu button back
     langMenu.appendChild(backButton);
