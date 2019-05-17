@@ -76,7 +76,9 @@ function httpPluginTests(usingFetch) {
                 try {
                   callback(event);
                 } catch (error) {
-                  fail('Uncaught error in XMLHttpRequest#' + eventHandlerName);
+                  fail(
+                      'Uncaught error in XMLHttpRequest#' + eventHandlerName +
+                      ', ' + error.message);
                 }
               };
             },
