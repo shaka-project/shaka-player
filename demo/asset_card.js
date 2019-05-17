@@ -116,7 +116,7 @@ class AssetCard {
     iconDiv.setAttribute('icon', icon);
     this.featureIconsContainer_.appendChild(iconDiv);
 
-    ShakaDemoTooltips.make(this.featureIconsContainer_, iconDiv, title);
+    ShakaDemoTooltips.make(iconDiv, title);
   }
 
   /**
@@ -180,13 +180,10 @@ class AssetCard {
     const button = this.addButton(buttonName, () => {});
     button.setAttribute('disabled', '');
 
-    // Place the tooltip into the parent container of the card, so that the
-    // tooltip won't be clipped by other asset cards.
-    // Also, tooltips don't work on disabled buttons (on some platforms), so
+    // Tooltips don't work on disabled buttons (on some platforms), so
     // the button itself has to be "uprooted" and placed in a synthetic div
     // specifically to attach the tooltip to.
-    const tooltipContainer = this.card_.parentElement;
-    if (tooltipContainer && unsupportedReason) {
+    if (unsupportedReason) {
       const attachPoint = document.createElement('div');
       if (button.parentElement) {
         button.parentElement.removeChild(button);
@@ -194,7 +191,7 @@ class AssetCard {
       attachPoint.classList.add('tooltip-attach-point');
       attachPoint.appendChild(button);
       this.actions_.appendChild(attachPoint);
-      ShakaDemoTooltips.make(tooltipContainer, attachPoint, unsupportedReason);
+      ShakaDemoTooltips.make(attachPoint, unsupportedReason);
     }
 
     return button;
@@ -229,10 +226,12 @@ class AssetCard {
      * Makes the contents of the button into an MDL icon, and moves it into the
      * upper-righthand corner with CSS styles.
      * @param {!Element} button
+     * @param {!Element} attachPoint If there is no attach point, just pass the
+     *  button in here.
      * @param {string} iconText
      */
-    const styleAsDownloadButton = (button, iconText) => {
-      button.classList.add('asset-card-corner-button');
+    const styleAsDownloadButton = (button, attachPoint, iconText) => {
+      attachPoint.classList.add('asset-card-corner-button');
       const icon = document.createElement('i');
       icon.textContent = iconText;
       icon.classList.add('material-icons');
@@ -244,7 +243,11 @@ class AssetCard {
     if (unsupportedReason || !this.asset_.storeCallback) {
       // This can't be stored.
       const button = this.makeUnsupportedButton_('', unsupportedReason);
-      styleAsDownloadButton(button, 'get_app');
+      // As this is a unsupported button, it is wrapped in an "attach point";
+      // that is the element this has to move with CSS, otherwise the tooltip
+      // will end up coming out of the wrong place.
+      const attachPoint = button.parentElement || button;
+      styleAsDownloadButton(button, attachPoint, 'get_app');
       return;
     }
     if (this.asset_.isStored()) {
@@ -253,14 +256,14 @@ class AssetCard {
         await this.asset_.unstoreCallback();
         this.remakeButtons();
       });
-      styleAsDownloadButton(deleteButton, 'delete');
+      styleAsDownloadButton(deleteButton, deleteButton, 'delete');
     } else {
       const downloadButton = this.addButton('', async () => {
         downloadButton.disabled = true;
         await this.asset_.storeCallback();
         this.remakeButtons();
       });
-      styleAsDownloadButton(downloadButton, 'get_app');
+      styleAsDownloadButton(downloadButton, downloadButton, 'get_app');
     }
   }
 
