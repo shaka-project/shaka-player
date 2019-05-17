@@ -92,17 +92,26 @@ shaka.test.Util.delay = function(seconds, realSetTimeout) {
 
 
 /**
- * @param {*} actual
- * @param {!Object} expected
+ * @param {!shaka.util.Error} error
+ * @return {*}
  */
-shaka.test.Util.expectToEqualError = function(actual, expected) {
+shaka.test.Util.jasmineError = function(error) {
   // NOTE: Safari will add extra properties to any thrown object, so we
   // wrap expectedError in jasmine.objectContaining to ignore them.
   // NOTE: We now add extra properties ourselves for the sake of formatting.
   // These, we delete from 'expected'.
-  delete expected['stack'];
-  delete expected['message'];
-  expect(actual).toEqual(jasmine.objectContaining(expected));
+  delete (/** @type {!Object} */ (error))['stack'];
+  delete (/** @type {!Object} */ (error))['message'];
+  return jasmine.objectContaining(error);
+};
+
+
+/**
+ * @param {*} actual
+ * @param {!shaka.util.Error} expected
+ */
+shaka.test.Util.expectToEqualError = function(actual, expected) {
+  expect(actual).toEqual(shaka.test.Util.jasmineError(expected));
 };
 
 
