@@ -50,8 +50,8 @@ describe('CastUtils', () => {
     for (const name in CastUtils.PlayerGetterMethodsThatRequireLive) {
       castMembers.push(name);
     }
-    const playerMembers = Object.keys(shaka.Player.prototype).filter(
-        (name) => {
+    const playerMembers = Object.getOwnPropertyNames(shaka.Player.prototype)
+        .filter((name) => {
           // Private members end with _.
           return !ignoredMembers.includes(name) && !name.endsWith('_');
         });
