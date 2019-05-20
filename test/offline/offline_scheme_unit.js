@@ -35,7 +35,7 @@ describe('OfflineScheme', () => {
             'mechanism', 'cell', 1024);
 
         // eslint-disable-next-line new-cap
-        const response = await shaka.offline.OfflineScheme(
+        const response = await shaka.offline.OfflineScheme.plugin(
             uri.toString(), request).promise;
 
         expect(response).toBeTruthy();
@@ -64,7 +64,7 @@ describe('OfflineScheme', () => {
     }
 
     // eslint-disable-next-line new-cap
-    const response = await shaka.offline.OfflineScheme(
+    const response = await shaka.offline.OfflineScheme.plugin(
         uri.toString(), request).promise;
 
     expect(response).toBeTruthy();
@@ -95,7 +95,7 @@ describe('OfflineScheme', () => {
 
     try {
       // eslint-disable-next-line new-cap
-      await shaka.offline.OfflineScheme(uri.toString(), request).promise;
+      await shaka.offline.OfflineScheme.plugin(uri.toString(), request).promise;
       fail();
     } catch (e) {
       expect(e.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
@@ -108,7 +108,7 @@ describe('OfflineScheme', () => {
 
     try {
       // eslint-disable-next-line new-cap
-      await shaka.offline.OfflineScheme(uri, request).promise;
+      await shaka.offline.OfflineScheme.plugin(uri, request).promise;
       fail();
     } catch (e) {
       expect(e.code).toBe(shaka.util.Error.Code.MALFORMED_OFFLINE_URI);
