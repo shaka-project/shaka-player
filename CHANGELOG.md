@@ -1,3 +1,50 @@
+## 2.5.1 (2019-05-20)
+
+New Features:
+  - Inline external CSS for quicker load
+    - You no longer need to include Material Design Icons font in your app
+  - Use clean-css plugin in less.js to minify CSS
+
+Bugfixes:
+  - Deprecate ui.getPlayer for controls.getPlayer
+    - https://github.com/google/shaka-player/issues/1941
+  - Fix switching text displayer mid-playback
+  - Improve french translations
+    - https://github.com/google/shaka-player/pull/1944
+  - Improve logic for aborting network requests
+  - Fix initial bandwidth estimate on Chrome
+  - Upgrade mux.js and use minified version
+  - Fix exception on network retry
+    - https://github.com/google/shaka-player/issues/1930
+  - Fix API-based UI setup with default config
+  - Allow two-argument configure() calls for UI and offline
+  - Add missing export on ui.Overlay.getConfiguration
+  - Various improvements in test reliability
+  - Various fixes for compatibility with newer compiler versions
+
+Demo App:
+  - Fix asset card highlight on reload
+  - Fix reconnection to cast sessions on reload
+    - https://github.com/google/shaka-player/issues/1948
+  - Fix handling of error events
+  - Fix centering of asset card titles
+  - Move download button to the corner of asset cards
+  - Add WebP variants for asset icons to reduce size by 88%
+  - Optimize app load time by pre-connecting to external origins
+  - Defer creating tab contents until shown
+  - Make name field in custom assets more permissive
+  - Add link to support page in footer
+  - Allow demo to load custom assets from hash
+  - Do not disable controls on startup
+  - Added missing config values
+  - Catch certificate errors in demo
+    - https://github.com/google/shaka-player/issues/1914
+  - Let demo load even if storage fails to load
+    - https://github.com/google/shaka-player/issues/1925
+  - Re-load current asset if page reloads
+  - Fix unsupported button tooltips
+
+
 ## 2.5.0 (2019-05-08)
 
 **The UI is now out of beta!  Use shaka-player.ui.js and see the UI tutorials.**
