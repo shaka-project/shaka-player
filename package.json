@@ -14,6 +14,7 @@
     "array-includes": "~3.0.3",
     "awesomplete": "~1.1.1",
     "babel-core": "^6.26.0",
+    "babel-plugin-istanbul": "^4.1.6",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "cajon": "^0.4.4",
