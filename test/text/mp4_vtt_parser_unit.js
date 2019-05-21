@@ -38,22 +38,21 @@ describe('Mp4VttParser', () => {
   /** @type {!Uint8Array} */
   let audioInitSegment;
 
-  beforeAll((done) => {
-    Promise.all([
+  beforeAll(async () => {
+    const responses = await Promise.all([
       shaka.test.Util.fetch(vttInitSegmentUri),
       shaka.test.Util.fetch(vttSegmentUri),
       shaka.test.Util.fetch(vttSegmentMultiPayloadUri),
       shaka.test.Util.fetch(vttSegSettingsUri),
       shaka.test.Util.fetch(vttSegNoDurationUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
-    ]).then((responses) => {
-      vttInitSegment = new Uint8Array(responses[0]);
-      vttSegment = new Uint8Array(responses[1]);
-      vttSegmentMultiPayload = new Uint8Array(responses[2]);
-      vttSegSettings = new Uint8Array(responses[3]);
-      vttSegNoDuration = new Uint8Array(responses[4]);
-      audioInitSegment = new Uint8Array(responses[5]);
-    }).catch(fail).then(done);
+    ]);
+    vttInitSegment = new Uint8Array(responses[0]);
+    vttSegment = new Uint8Array(responses[1]);
+    vttSegmentMultiPayload = new Uint8Array(responses[2]);
+    vttSegSettings = new Uint8Array(responses[3]);
+    vttSegNoDuration = new Uint8Array(responses[4]);
+    audioInitSegment = new Uint8Array(responses[5]);
   });
 
   it('parses init segment', () => {
@@ -183,18 +182,14 @@ describe('Mp4VttParser', () => {
   });
 
   it('rejects init segment with no vtt', () => {
-    const error = new shaka.util.Error(
+    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.TEXT,
-        shaka.util.Error.Code.INVALID_MP4_VTT);
-    try {
-      new shaka.text.Mp4VttParser().parseInit(audioInitSegment);
-      fail('Mp4 file with no vtt supported');
-    } catch (e) {
-      shaka.test.Util.expectToEqualError(e, error);
-    }
-  });
+        shaka.util.Error.Code.INVALID_MP4_VTT));
 
+    expect(() => new shaka.text.Mp4VttParser().parseInit(audioInitSegment))
+        .toThrow(error);
+  });
 
   function verifyHelper(expected, actual) {
     expect(actual).toBeTruthy();

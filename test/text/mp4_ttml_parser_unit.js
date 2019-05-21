@@ -31,18 +31,17 @@ describe('Mp4TtmlParser', () => {
   /** @type {!Uint8Array} */
   let audioInitSegment;
 
-  beforeAll((done) => {
-    Promise.all([
+  beforeAll(async () => {
+    const responses = await Promise.all([
       shaka.test.Util.fetch(ttmlInitSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentMultipleMDATUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
-    ]).then((responses) => {
-      ttmlInitSegment = new Uint8Array(responses[0]);
-      ttmlSegment = new Uint8Array(responses[1]);
-      ttmlSegmentMultipleMDAT = new Uint8Array(responses[2]);
-      audioInitSegment = new Uint8Array(responses[3]);
-    }).catch(fail).then(done);
+    ]);
+    ttmlInitSegment = new Uint8Array(responses[0]);
+    ttmlSegment = new Uint8Array(responses[1]);
+    ttmlSegmentMultipleMDAT = new Uint8Array(responses[2]);
+    audioInitSegment = new Uint8Array(responses[3]);
   });
 
   it('parses init segment', () => {
@@ -83,16 +82,12 @@ describe('Mp4TtmlParser', () => {
   });
 
   it('rejects init segment with no ttml', () => {
-    const error = new shaka.util.Error(
+    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.TEXT,
-        shaka.util.Error.Code.INVALID_MP4_TTML);
+        shaka.util.Error.Code.INVALID_MP4_TTML));
 
-    try {
-      new shaka.text.Mp4TtmlParser().parseInit(audioInitSegment);
-      fail('Mp4 file with no ttml supported');
-    } catch (e) {
-      shaka.test.Util.expectToEqualError(e, error);
-    }
+    expect(() => new shaka.text.Mp4TtmlParser().parseInit(audioInitSegment))
+        .toThrow(error);
   });
 });

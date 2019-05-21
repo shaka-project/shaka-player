@@ -814,8 +814,7 @@ describe('TtmlTextParser', () => {
         verifyRegion(cues[i].region, result[i].region);
       }
 
-      for (let j = 0; j < properties.length; j++) {
-        const property = properties[j];
+      for (const property of properties) {
         if (property in cues[i]) {
           expect(result[i][property]).toEqual(cues[i][property]);
         }
@@ -842,8 +841,7 @@ describe('TtmlTextParser', () => {
       'scroll'];
     expect(actual).toBeTruthy();
 
-    for (let i = 0; i < properties.length; i++) {
-      const property = properties[i];
+    for (const property of properties) {
       if (property in expected) {
         expect(actual[property]).toEqual(expected[property]);
       }
@@ -856,17 +854,14 @@ describe('TtmlTextParser', () => {
    * @param {string} text
    */
   function errorHelper(code, text) {
-    const error = new shaka.util.Error(
+    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
-        code);
+        code));
     const data = shaka.util.StringUtils.toUTF8(text);
-    try {
+    expect(() => {
       new shaka.text.TtmlTextParser().parseMedia(
           new Uint8Array(data),
           {periodStart: 0, segmentStart: 0, segmentEnd: 0});
-      fail('Invalid TTML file supported');
-    } catch (e) {
-      shaka.test.Util.expectToEqualError(e, error);
-    }
+    }).toThrow(error);
   }
 });

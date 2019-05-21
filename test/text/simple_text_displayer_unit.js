@@ -244,10 +244,8 @@ describe('SimpleTextDisplayer', () => {
       function FakeVTTCueWithoutAlignCenter(start, end, text) {
         let align = 'middle';
         Object.defineProperty(this, 'align', {
-          get: function() {
-            return align;
-          },
-          set: function(newValue) {
+          get: () => align,
+          set: (newValue) => {
             if (newValue != 'center') {
               align = newValue;
             }

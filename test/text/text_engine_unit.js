@@ -84,10 +84,11 @@ describe('TextEngine', () => {
   });
 
   describe('appendBuffer', () => {
-    it('works asynchronously', (done) => {
+    it('works asynchronously', async () => {
       mockParseMedia.and.returnValue([1, 2, 3]);
-      textEngine.appendBuffer(dummyData, 0, 3).catch(fail).then(done);
+      const p = textEngine.appendBuffer(dummyData, 0, 3);
       expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
+      await p;
     });
 
     it('calls displayer.append()', async () => {
@@ -123,10 +124,11 @@ describe('TextEngine', () => {
       ]);
     });
 
-    it('does not throw if called right before destroy', (done) => {
+    it('does not throw if called right before destroy', async () => {
       mockParseMedia.and.returnValue([1, 2, 3]);
-      textEngine.appendBuffer(dummyData, 0, 3).catch(fail).then(done);
+      const p = textEngine.appendBuffer(dummyData, 0, 3);
       textEngine.destroy();
+      await p;
     });
   });
 
@@ -247,23 +249,22 @@ describe('TextEngine', () => {
       mockParseMedia.and.returnValue([cue1, cue2, cue3]);
     });
 
-    it('works asynchronously', (done) => {
-      textEngine.appendBuffer(dummyData, 0, 3).then(() => {
-        const p = textEngine.remove(0, 1);
-        expect(mockDisplayer.removeSpy).not.toHaveBeenCalled();
-        return p;
-      }).catch(fail).then(done);
+    it('works asynchronously', async () => {
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      const p = textEngine.remove(0, 1);
+      expect(mockDisplayer.removeSpy).not.toHaveBeenCalled();
+      await p;
     });
 
-    it('calls displayer.remove()', (done) => {
-      textEngine.remove(0, 1).then(() => {
-        expect(mockDisplayer.removeSpy).toHaveBeenCalledWith(0, 1);
-      }).catch(fail).then(done);
+    it('calls displayer.remove()', async () => {
+      await textEngine.remove(0, 1);
+      expect(mockDisplayer.removeSpy).toHaveBeenCalledWith(0, 1);
     });
 
-    it('does not throw if called right before destroy', (done) => {
-      textEngine.remove(0, 1).catch(fail).then(done);
+    it('does not throw if called right before destroy', async () => {
+      const p = textEngine.remove(0, 1);
       textEngine.destroy();
+      await p;
     });
   });
 
@@ -319,52 +320,42 @@ describe('TextEngine', () => {
       expect(textEngine.bufferEnd()).toBe(null);
     });
 
-    it('reflect newly-added cues', (done) => {
-      textEngine.appendBuffer(dummyData, 0, 3).then(() => {
-        expect(textEngine.bufferStart()).toBe(0);
-        expect(textEngine.bufferEnd()).toBe(3);
+    it('reflect newly-added cues', async () => {
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferStart()).toBe(0);
+      expect(textEngine.bufferEnd()).toBe(3);
 
-        return textEngine.appendBuffer(dummyData, 3, 6);
-      }).then(() => {
-        expect(textEngine.bufferStart()).toBe(0);
-        expect(textEngine.bufferEnd()).toBe(6);
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      expect(textEngine.bufferStart()).toBe(0);
+      expect(textEngine.bufferEnd()).toBe(6);
 
-        return textEngine.appendBuffer(dummyData, 6, 10);
-      }).then(() => {
-        expect(textEngine.bufferStart()).toBe(0);
-        expect(textEngine.bufferEnd()).toBe(10);
-      }).catch(fail).then(done);
+      await textEngine.appendBuffer(dummyData, 6, 10);
+      expect(textEngine.bufferStart()).toBe(0);
+      expect(textEngine.bufferEnd()).toBe(10);
     });
 
-    it('reflect newly-removed cues', (done) => {
-      textEngine.appendBuffer(dummyData, 0, 3).then(() => {
-        return textEngine.appendBuffer(dummyData, 3, 6);
-      }).then(() => {
-        return textEngine.appendBuffer(dummyData, 6, 10);
-      }).then(() => {
-        expect(textEngine.bufferStart()).toBe(0);
-        expect(textEngine.bufferEnd()).toBe(10);
+    it('reflect newly-removed cues', async () => {
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      await textEngine.appendBuffer(dummyData, 6, 10);
+      expect(textEngine.bufferStart()).toBe(0);
+      expect(textEngine.bufferEnd()).toBe(10);
 
-        return textEngine.remove(0, 3);
-      }).then(() => {
-        expect(textEngine.bufferStart()).toBe(3);
-        expect(textEngine.bufferEnd()).toBe(10);
+      await textEngine.remove(0, 3);
+      expect(textEngine.bufferStart()).toBe(3);
+      expect(textEngine.bufferEnd()).toBe(10);
 
-        return textEngine.remove(8, 11);
-      }).then(() => {
-        expect(textEngine.bufferStart()).toBe(3);
-        expect(textEngine.bufferEnd()).toBe(8);
+      await textEngine.remove(8, 11);
+      expect(textEngine.bufferStart()).toBe(3);
+      expect(textEngine.bufferEnd()).toBe(8);
 
-        return textEngine.remove(11, 20);
-      }).then(() => {
-        expect(textEngine.bufferStart()).toBe(3);
-        expect(textEngine.bufferEnd()).toBe(8);
+      await textEngine.remove(11, 20);
+      expect(textEngine.bufferStart()).toBe(3);
+      expect(textEngine.bufferEnd()).toBe(8);
 
-        return textEngine.remove(0, Infinity);
-      }).then(() => {
-        expect(textEngine.bufferStart()).toBe(null);
-        expect(textEngine.bufferEnd()).toBe(null);
-      }).catch(fail).then(done);
+      await textEngine.remove(0, Infinity);
+      expect(textEngine.bufferStart()).toBe(null);
+      expect(textEngine.bufferEnd()).toBe(null);
     });
 
     it('does not use timestamp offset', async () => {
@@ -393,24 +384,21 @@ describe('TextEngine', () => {
       expect(textEngine.bufferedAheadOf(0)).toBe(0);
     });
 
-    it('returns 0 if |t| is not buffered', (done) => {
-      textEngine.appendBuffer(dummyData, 3, 6).then(() => {
-        expect(textEngine.bufferedAheadOf(6.1)).toBe(0);
-      }).catch(fail).then(done);
+    it('returns 0 if |t| is not buffered', async () => {
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      expect(textEngine.bufferedAheadOf(6.1)).toBe(0);
     });
 
-    it('ignores gaps in the content', (done) => {
-      textEngine.appendBuffer(dummyData, 3, 6).then(() => {
-        expect(textEngine.bufferedAheadOf(2)).toBe(3);
-      }).catch(fail).then(done);
+    it('ignores gaps in the content', async () => {
+      await textEngine.appendBuffer(dummyData, 3, 6);
+      expect(textEngine.bufferedAheadOf(2)).toBe(3);
     });
 
-    it('returns the distance to the end if |t| is buffered', (done) => {
-      textEngine.appendBuffer(dummyData, 0, 3).then(() => {
-        expect(textEngine.bufferedAheadOf(0)).toBe(3);
-        expect(textEngine.bufferedAheadOf(1)).toBe(2);
-        expect(textEngine.bufferedAheadOf(2.5)).toBeCloseTo(0.5);
-      }).catch(fail).then(done);
+    it('returns the distance to the end if |t| is buffered', async () => {
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferedAheadOf(0)).toBe(3);
+      expect(textEngine.bufferedAheadOf(1)).toBe(2);
+      expect(textEngine.bufferedAheadOf(2.5)).toBeCloseTo(0.5);
     });
 
     it('does not use timestamp offset', async () => {
@@ -453,35 +441,29 @@ describe('TextEngine', () => {
       ]);
     });
 
-    it('limits bufferStart', (done) => {
+    it('limits bufferStart', async () => {
       textEngine.setAppendWindow(1, 9);
-      textEngine.appendBuffer(dummyData, 0, 3).then(() => {
-        expect(textEngine.bufferStart()).toBe(1);
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferStart()).toBe(1);
 
-        return textEngine.remove(0, 9);
-      }).then(() => {
-        textEngine.setAppendWindow(2.1, 9);
-        return textEngine.appendBuffer(dummyData, 0, 3);
-      }).then(() => {
-        expect(textEngine.bufferStart()).toBe(2.1);
-      }).catch(fail).then(done);
+      await textEngine.remove(0, 9);
+      textEngine.setAppendWindow(2.1, 9);
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferStart()).toBe(2.1);
     });
 
-    it('limits bufferEnd', (done) => {
+    it('limits bufferEnd', async () => {
       textEngine.setAppendWindow(0, 1.9);
-      textEngine.appendBuffer(dummyData, 0, 3).then(() => {
-        expect(textEngine.bufferEnd()).toBe(1.9);
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferEnd()).toBe(1.9);
 
-        textEngine.setAppendWindow(0, 2.1);
-        return textEngine.appendBuffer(dummyData, 0, 3);
-      }).then(() => {
-        expect(textEngine.bufferEnd()).toBe(2.1);
+      textEngine.setAppendWindow(0, 2.1);
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferEnd()).toBe(2.1);
 
-        textEngine.setAppendWindow(0, 4.1);
-        return textEngine.appendBuffer(dummyData, 0, 3);
-      }).then(() => {
-        expect(textEngine.bufferEnd()).toBe(3);
-      }).catch(fail).then(done);
+      textEngine.setAppendWindow(0, 4.1);
+      await textEngine.appendBuffer(dummyData, 0, 3);
+      expect(textEngine.bufferEnd()).toBe(3);
     });
   });
 

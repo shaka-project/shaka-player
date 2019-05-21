@@ -641,8 +641,7 @@ describe('VttTextParser', () => {
       'scroll'];
     expect(actual).toBeTruthy();
 
-    for (let i = 0; i < properties.length; i++) {
-      const property = properties[i];
+    for (const property of properties) {
       if (property in expected) {
         expect(actual[property]).toEqual(expected[property]);
       }
@@ -655,15 +654,11 @@ describe('VttTextParser', () => {
    * @param {shaka.extern.TextParser.TimeContext} time
    */
   function errorHelper(code, text, time) {
-    const error = new shaka.util.Error(
+    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
-        code);
+        code));
     const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
-    try {
-      new shaka.text.VttTextParser().parseMedia(data, time);
-      fail('Invalid WebVTT file supported');
-    } catch (e) {
-      shaka.test.Util.expectToEqualError(e, error);
-    }
+    expect(() => new shaka.text.VttTextParser().parseMedia(data, time))
+        .toThrow(error);
   }
 });
