@@ -16,6 +16,8 @@
  */
 
 describe('Storage', () => {
+  const Util = shaka.test.Util;
+
   const englishUS = 'en-us';
   const frenchCanadian= 'fr-ca';
 
@@ -321,9 +323,9 @@ describe('Storage', () => {
           PlayerConfiguration.defaultTrackSelect(tracks, englishUS);
       expect(selected).toBeTruthy();
       expect(selected.length).toBe(2);
-      tracks.forEach((track) => {
+      for (const track of tracks) {
         expect(selected).toContain(track);
-      });
+      }
     });
 
     describe('language matching', () => {
@@ -406,6 +408,11 @@ describe('Storage', () => {
 
 
   describe('no support', () => {
+    const expectedError = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.STORAGE_NOT_SUPPORTED));
+
     /** @type {!shaka.Player} */
     let player;
     /** @type {!shaka.offline.Storage} */
@@ -426,30 +433,17 @@ describe('Storage', () => {
     });
 
     it('throws error using list', async () => {
-      try {
-        await storage.list();
-        fail();
-      } catch (e) {
-        expect(e.code).toBe(shaka.util.Error.Code.STORAGE_NOT_SUPPORTED);
-      }
+      await expectAsync(storage.list()).toBeRejectedWith(expectedError);
     });
 
     it('throws error using store', async () => {
-      try {
-        await storage.store('the-uri-wont-matter');
-        fail();
-      } catch (e) {
-        expect(e.code).toBe(shaka.util.Error.Code.STORAGE_NOT_SUPPORTED);
-      }
+      await expectAsync(storage.store('the-uri-wont-matter'))
+          .toBeRejectedWith(expectedError);
     });
 
     it('throws error using remove', async () => {
-      try {
-        await storage.remove('the-uri-wont-matter');
-        fail();
-      } catch (e) {
-        expect(e.code).toBe(shaka.util.Error.Code.STORAGE_NOT_SUPPORTED);
-      }
+      await expectAsync(storage.remove('the-uri-wont-matter'))
+          .toBeRejectedWith(expectedError);
     });
   });
 
@@ -755,9 +749,9 @@ describe('Storage', () => {
       expect(originalUris).toBeTruthy();
       expect(originalUris.length).toBe(3);
 
-      originalUris.forEach((uri) => {
+      for (const uri of originalUris) {
         expect(originalUris).toContain(uri);
-      });
+      }
     }));
 
     it('only stores chosen tracks', checkAndRun(async () => {
@@ -928,16 +922,15 @@ describe('Storage', () => {
               noMetadata,
               FakeManifestParser);
 
-          try {
-            await storage.store(
-                manifestWithoutPerStreamBandwidthUri,
-                noMetadata,
-                FakeManifestParser);
-            fail();
-          } catch (e) {
-            const Code = shaka.util.Error.Code;
-            expect(e.code).toBe(Code.STORE_ALREADY_IN_PROGRESS);
-          }
+          const expected = Util.jasmineError(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.STORAGE,
+              shaka.util.Error.Code.STORE_ALREADY_IN_PROGRESS));
+          await expectAsync(
+              storage.store(
+                  manifestWithoutPerStreamBandwidthUri,
+                  noMetadata, FakeManifestParser))
+              .toBeRejectedWith(expected);
 
           // Unblock the original store and wait for it to complete.
           hangingPromise.resolve();
@@ -946,15 +939,15 @@ describe('Storage', () => {
 
     it('throws an error if the content is a live stream',
         checkAndRun(async () => {
-          try {
-            await storage.store(
-                manifestWithLiveTimelineUri,
-                noMetadata,
-                FakeManifestParser);
-          } catch (e) {
-            const Code = shaka.util.Error.Code;
-            expect(e.code).toBe(Code.CANNOT_STORE_LIVE_OFFLINE);
-          }
+          const expected = Util.jasmineError(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.STORAGE,
+              shaka.util.Error.Code.CANNOT_STORE_LIVE_OFFLINE,
+              manifestWithLiveTimelineUri));
+          await expectAsync(
+              storage.store(
+                  manifestWithLiveTimelineUri, noMetadata, FakeManifestParser))
+              .toBeRejectedWith(expected);
         }));
 
     it('throws an error if DRM sessions are not ready',
@@ -973,12 +966,13 @@ describe('Storage', () => {
               drm,
               makeManifestWithPerStreamBandwidth());
 
-          try {
-            await storage.store(manifestWithPerStreamBandwidthUri);
-            fail();
-          } catch (e) {
-            expect(e.code).toBe(shaka.util.Error.Code.NO_INIT_DATA_FOR_OFFLINE);
-          }
+          const expected = Util.jasmineError(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.STORAGE,
+              shaka.util.Error.Code.NO_INIT_DATA_FOR_OFFLINE,
+              manifestWithPerStreamBandwidthUri));
+          await expectAsync(storage.store(manifestWithPerStreamBandwidthUri))
+              .toBeRejectedWith(expected);
         }));
 
     it('throws an error if destroyed mid-store', checkAndRun(async () => {
@@ -1005,44 +999,38 @@ describe('Storage', () => {
       await waitOnDestroy;
 
       // The store request should not resolve, but instead be rejected.
-      try {
-        await waitOnStore;
-        fail();
-      } catch (e) {
-        expect(e.code).toBe(shaka.util.Error.Code.OPERATION_ABORTED);
-      }
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.OPERATION_ABORTED));
+      await expectAsync(waitOnStore).toBeRejectedWith(expected);
     }));
 
     it('stops for networking errors', checkAndRun(async () => {
       // Force all network requests to fail.
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.HTTP_ERROR);
       netEngine.request.and.callFake(() => {
-        return shaka.util.AbortableOperation.failed(new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.NETWORK,
-            shaka.util.Error.Code.HTTP_ERROR
-        ));
+        return shaka.util.AbortableOperation.failed(error);
       });
 
-      try {
-        await storage.store(
-            manifestWithPerStreamBandwidthUri,
-            noMetadata,
-            FakeManifestParser);
-        fail();
-      } catch (e) {
-        expect(e.code).toBe(shaka.util.Error.Code.HTTP_ERROR);
-      }
+      await expectAsync(
+          storage.store(
+              manifestWithPerStreamBandwidthUri, noMetadata,
+              FakeManifestParser))
+          .toBeRejectedWith(Util.jasmineError(error));
     }));
 
     it('throws an error if removing malformed uri',
         checkAndRun(async () => {
           const badUri = 'this-is-an-invalid-uri';
-          try {
-            await storage.remove(badUri);
-            fail();
-          } catch (e) {
-            expect(e.code).toBe(shaka.util.Error.Code.MALFORMED_OFFLINE_URI);
-          }
+          const expected = Util.jasmineError(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.STORAGE,
+              shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
+              badUri));
+          await expectAsync(storage.remove(badUri)).toBeRejectedWith(expected);
         }));
 
     it('throws an error if removing missing manifest',
@@ -1057,12 +1045,13 @@ describe('Storage', () => {
           const missingManifestUri = shaka.offline.OfflineUri.manifest(
               storedUri.mechanism(), storedUri.cell(), storedUri.key() + 1);
 
-          try {
-            await storage.remove(missingManifestUri.toString());
-            fail();
-          } catch (e) {
-            expect(e.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
-          }
+          const expected = Util.jasmineError(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.STORAGE,
+              shaka.util.Error.Code.KEY_NOT_FOUND,
+              jasmine.any(String)));
+          await expectAsync(storage.remove(missingManifestUri.toString()))
+              .toBeRejectedWith(expected);
         }));
 
     it('removes manifest', checkAndRun(async () => {
@@ -1277,7 +1266,7 @@ describe('Storage', () => {
         .build();
     /* eslint-enable indent */
 
-    getAllStreams(manifest).forEach((stream) => {
+    for (const stream of getAllStreams(manifest)) {
       // Make a new copy each time as the segment index can modify
       // each reference.
       const refs = [
@@ -1288,7 +1277,7 @@ describe('Storage', () => {
       ];
 
       overrideSegmentIndex(stream, refs);
-    });
+    }
 
     return manifest;
   }
@@ -1300,9 +1289,9 @@ describe('Storage', () => {
     const manifest = makeManifestWithPerStreamBandwidth();
 
     // Remove the per stream bandwidth.
-    getAllStreams(manifest).forEach((stream) => {
+    for (const stream of getAllStreams(manifest)) {
       stream.bandwidth = undefined;
-    });
+    }
 
     return manifest;
   }
@@ -1315,7 +1304,7 @@ describe('Storage', () => {
 
     const manifest = makeManifestWithPerStreamBandwidth();
 
-    getAllStreams(manifest).forEach((stream) => {
+    for (const stream of getAllStreams(manifest)) {
       const refs = [
         new SegmentReference(0, 10, 11, uris(segment1Uri), 0, null),
         new SegmentReference(1, 11, 12, uris(segment2Uri), 0, null),
@@ -1324,7 +1313,7 @@ describe('Storage', () => {
       ];
 
       overrideSegmentIndex(stream, refs);
-    });
+    }
 
     return manifest;
   }
@@ -1346,19 +1335,19 @@ describe('Storage', () => {
   function getAllStreams(manifest) {
     const streams = [];
 
-    manifest.periods.forEach((period) => {
-      period.variants.forEach((variant) => {
+    for (const period of manifest.periods) {
+      for (const variant of period.variants) {
         if (variant.audio) {
           streams.push(variant.audio);
         }
         if (variant.video) {
           streams.push(variant.video);
         }
-      });
-      period.textStreams.forEach((stream) => {
+      }
+      for (const stream of period.textStreams) {
         streams.push(stream);
-      });
-    });
+      }
+    }
 
     return streams;
   }
@@ -1562,20 +1551,20 @@ describe('Storage', () => {
 
       if (!widevineSupport) {
         pending('Widevine is not supported on this platform');
-        return null;
+        return;
       }
 
       if (!widevineSupport.persistentState) {
         pending('Widevine persistent state is not supported on this platform');
-        return null;
+        return;
       }
 
       if (!storageSupport) {
         pending('Storage is not supported on this platform.');
-        return null;
+        return;
       }
 
-      return test();
+      await test();
     };
   }
 });

@@ -446,10 +446,7 @@ describe('ManifestConverter', () => {
    * @return {?shaka.extern.Variant}
    */
   function findVariant(variants, audioId, videoId) {
-    /** @type {?shaka.extern.Variant} */
-    let found = null;
-
-    variants.forEach((variant) => {
+    for (const variant of variants) {
       /** @type {?shaka.extern.Stream} */
       const audio = variant.audio;
       /** @type {?shaka.extern.Stream} */
@@ -461,10 +458,10 @@ describe('ManifestConverter', () => {
       const videoMatch = video ? videoId == video.id : videoId == null;
 
       if (audioMatch && videoMatch) {
-        found = variant;
+        return variant;
       }
-    });
+    }
 
-    return found;
+    return null;
   }
 });

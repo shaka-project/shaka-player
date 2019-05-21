@@ -19,6 +19,7 @@
 describe('IndexeddbStorageCell', () => {
   const IndexedDBUtils = shaka.test.IndexedDBUtils;
   const OfflineUtils = shaka.test.OfflineUtils;
+  const Util = shaka.test.Util;
 
   const dbName = 'shaka-storage-cell-test';
   const dbVersion = 1;
@@ -44,13 +45,12 @@ describe('IndexeddbStorageCell', () => {
 
     // Destroy the cells before killing any connections.
     await Promise.all(cells.map((cell) => cell.destroy()));
-    connections.forEach((connection) => connection.close());
+    for (const connection of connections) {
+      connection.close();
+    }
   });
 
-  it('can add, get, and remove segments', checkAndRun((done) => {
-    /** @type {shaka.extern.StorageCell} */
-    let cell;
-
+  it('can add, get, and remove segments', checkAndRun(async () => {
     /** @type {!Array.<shaka.extern.SegmentDataDB>} */
     const segments = [
       OfflineUtils.createSegmentData([0]),
@@ -58,42 +58,33 @@ describe('IndexeddbStorageCell', () => {
       OfflineUtils.createSegmentData([0, 1, 2]),
     ];
 
-    /** @type {!Array.<number>} */
-    let keys;
+    await IndexedDBUtils.deleteDB(dbName);
+    const connection = await makeConnection();
+    const cell = makeCell(connection);
 
-    IndexedDBUtils.deleteDB(dbName).then(() => {
-      return makeConnection();
-    }).then((connection) => {
-      cell = makeCell(connection);
-      return cell.addSegments(segments);
-    }).then((k) => {
-      keys = k;
+    const keys = await cell.addSegments(segments);
+    expect(keys).toBeTruthy();
+    expect(keys.length).toBe(segments.length);
 
-      expect(keys).toBeTruthy();
-      expect(keys.length).toBe(segments.length);
+    const found = await cell.getSegments(keys);
+    expect(found).toBeTruthy();
+    expect(found.length).toBe(segments.length);
+    OfflineUtils.expectSegmentToEqual(found[0], segments[0]);
+    OfflineUtils.expectSegmentToEqual(found[1], segments[1]);
+    OfflineUtils.expectSegmentToEqual(found[2], segments[2]);
 
-      return cell.getSegments(keys);
-    }).then((found) => {
-      expect(found).toBeTruthy();
-      expect(found.length).toBe(segments.length);
-      OfflineUtils.expectSegmentToEqual(found[0], segments[0]);
-      OfflineUtils.expectSegmentToEqual(found[1], segments[1]);
-      OfflineUtils.expectSegmentToEqual(found[2], segments[2]);
-
-      return cell.removeSegments(keys, noop);
-    }).then(() => {
-      // The get should fail as there should be no entries under the keys
-      // anymore.
-      return cell.getSegments(keys).then(fail).catch((error) => {
-        expect(error.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
-      });
-    }).catch(fail).then(done);
+    await cell.removeSegments(keys, noop);
+    // The get should fail as there should be no entries under the keys
+    // anymore.
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.KEY_NOT_FOUND,
+        jasmine.any(String)));
+    await expectAsync(cell.getSegments(keys)).toBeRejectedWith(expected);
   }));
 
-  it('can add, get, and remove manifests', checkAndRun((done) => {
-    /** @type {shaka.extern.StorageCell} */
-    let cell;
-
+  it('can add, get, and remove manifests', checkAndRun(async () => {
     /** @type {!Array.<shaka.extern.ManifestDB>} */
     const manifests = [
       OfflineUtils.createManifest('original-uri-1'),
@@ -101,42 +92,32 @@ describe('IndexeddbStorageCell', () => {
       OfflineUtils.createManifest('original-uri-3'),
     ];
 
-    /** @type {!Array.<number>} */
-    let keys;
+    await IndexedDBUtils.deleteDB(dbName);
+    const connection = await makeConnection();
+    const cell = makeCell(connection);
+    const keys = await cell.addManifests(manifests);
+    expect(keys).toBeTruthy();
+    expect(keys.length).toBe(manifests.length);
 
-    IndexedDBUtils.deleteDB(dbName).then(() => {
-      return makeConnection();
-    }).then((connection) => {
-      cell = makeCell(connection);
-      return cell.addManifests(manifests);
-    }).then((k) => {
-      keys = k;
+    const found = await cell.getManifests(keys);
+    expect(found).toBeTruthy();
+    expect(found.length).toBe(manifests.length);
+    expect(found[0]).toEqual(manifests[0]);
+    expect(found[1]).toEqual(manifests[1]);
+    expect(found[2]).toEqual(manifests[2]);
 
-      expect(keys).toBeTruthy();
-      expect(keys.length).toBe(manifests.length);
-
-      return cell.getManifests(keys);
-    }).then((found) => {
-      expect(found).toBeTruthy();
-      expect(found.length).toBe(manifests.length);
-      expect(found[0]).toEqual(manifests[0]);
-      expect(found[1]).toEqual(manifests[1]);
-      expect(found[2]).toEqual(manifests[2]);
-
-      return cell.removeManifests(keys, noop);
-    }).then(() => {
-      // The get should fail as there should be no entries under the keys
-      // anymore.
-      return cell.getManifests(keys).then(fail).catch((error) => {
-        expect(error.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
-      });
-    }).catch(fail).then(done);
+    await cell.removeManifests(keys, noop);
+    // The get should fail as there should be no entries under the keys
+    // anymore.
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.KEY_NOT_FOUND,
+        jasmine.any(String)));
+    await expectAsync(cell.getManifests(keys)).toBeRejectedWith(expected);
   }));
 
-  it('can add and get all manifests', checkAndRun((done) => {
-    /** @type {shaka.extern.StorageCell} */
-    let cell;
-
+  it('can add and get all manifests', checkAndRun(async () => {
     /** @type {!Array.<shaka.extern.ManifestDB>} */
     const manifests = [
       OfflineUtils.createManifest('original-uri-1'),
@@ -144,88 +125,65 @@ describe('IndexeddbStorageCell', () => {
       OfflineUtils.createManifest('original-uri-3'),
     ];
 
-    /** @type {!Array.<number>} */
-    let keys = [];
+    await IndexedDBUtils.deleteDB(dbName);
+    const connection = await makeConnection();
+    const cell = await makeCell(connection);
+    const keys = await cell.addManifests(manifests);
+    expect(keys).toBeTruthy();
+    expect(keys.length).toBe(manifests.length);
 
-    IndexedDBUtils.deleteDB(dbName).then(() => {
-      return makeConnection();
-    }).then((connection) => {
-      cell = makeCell(connection);
-      return cell.addManifests(manifests);
-    }).then((k) => {
-      keys = k;
+    const found = await cell.getAllManifests();
+    expect(found).toBeTruthy();
 
-      expect(keys).toBeTruthy();
-      expect(keys.length).toBe(manifests.length);
-
-      return cell.getAllManifests();
-    }).then((found) => {
-      expect(found).toBeTruthy();
-
-      const actual = keys.map((key) => found.get(key));
-      expect(actual[0]).toEqual(manifests[0]);
-      expect(actual[1]).toEqual(manifests[1]);
-      expect(actual[2]).toEqual(manifests[2]);
-    }).catch(fail).then(done);
+    const actual = keys.map((key) => found.get(key));
+    expect(actual[0]).toEqual(manifests[0]);
+    expect(actual[1]).toEqual(manifests[1]);
+    expect(actual[2]).toEqual(manifests[2]);
   }));
 
-  it('can add, get, and update manifests', checkAndRun((done) => {
-    /** @type {shaka.extern.StorageCell} */
-    let cell;
-
+  it('can add, get, and update manifests', checkAndRun(async () => {
     /** @type {shaka.extern.ManifestDB} */
     const originalManifest = OfflineUtils.createManifest('original');
     originalManifest.expiration = 1000;
 
-    /** @type {number} */
-    let key;
+    await IndexedDBUtils.deleteDB(dbName);
+    const connection = await makeConnection();
+    const cell = await makeCell(connection);
+    const keys = await cell.addManifests([originalManifest]);
+    expect(keys).toBeTruthy();
+    expect(keys.length).toBe(1);
 
-    IndexedDBUtils.deleteDB(dbName).then(() => {
-      return makeConnection();
-    }).then((connection) => {
-      cell = makeCell(connection);
-      return cell.addManifests([originalManifest]);
-    }).then((keys) => {
-      expect(keys).toBeTruthy();
-      expect(keys.length).toBe(1);
+    const key = keys[0];
+    const found = await cell.getManifests(keys);
+    expect(found).toBeTruthy();
+    expect(found.length).toBe(1);
+    expect(found[0]).toEqual(originalManifest);
 
-      key = keys[0];
+    await cell.updateManifestExpiration(key, 500);
+    const newFound = await cell.getManifests([key]);
+    expect(newFound).toBeTruthy();
+    expect(newFound.length).toBe(1);
 
-      return cell.getManifests(keys);
-    }).then((found) => {
-      expect(found).toBeTruthy();
-      expect(found.length).toBe(1);
-      expect(found[0]).toEqual(originalManifest);
-
-      return cell.updateManifestExpiration(key, 500);
-    }).then(() => {
-      return cell.getManifests([key]);
-    }).then((newFound) => {
-      expect(newFound).toBeTruthy();
-      expect(newFound.length).toBe(1);
-
-      expect(newFound[0]).not.toEqual(originalManifest);
-      originalManifest.expiration = 500;
-      expect(newFound[0]).toEqual(originalManifest);
-    }).catch(fail).then(done);
+    expect(newFound[0]).not.toEqual(originalManifest);
+    originalManifest.expiration = 500;
+    expect(newFound[0]).toEqual(originalManifest);
   }));
 
   /**
    * @return {!Promise.<IDBDatabase>}
    */
-  function makeConnection() {
+  async function makeConnection() {
     const upgrade = (db) => {
       db.createObjectStore(segmentStore, {autoIncrement: true});
       db.createObjectStore(manifestStore, {autoIncrement: true});
     };
 
-    return IndexedDBUtils.makeConnection(dbName, dbVersion, upgrade)
-        .then((connection) => {
-          // Track the connection so that we can close it when the test is
-          // over.
-          connections.push(connection);
-          return connection;
-        });
+    const connection =
+        await IndexedDBUtils.makeConnection(dbName, dbVersion, upgrade);
+    // Track the connection so that we can close it when the test is
+    // over.
+    connections.push(connection);
+    return connection;
   }
 
   /**
@@ -248,13 +206,13 @@ describe('IndexeddbStorageCell', () => {
   /**
    * Before running the test, check if indexeddb is support on this platform.
    *
-   * @param {function(function())} test
+   * @param {function():!Promise} test
    * @return {function(function())}
    */
   function checkAndRun(test) {
-    return function(done) {
+    return async () => {
       if (window.indexedDB) {
-        test(done);
+        await test();
       } else {
         pending('Indexeddb is not supported on this platform.');
       }

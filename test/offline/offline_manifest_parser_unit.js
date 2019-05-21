@@ -16,6 +16,7 @@
  */
 
 describe('OfflineManifestParser', () => {
+  const Util = shaka.test.Util;
   // The offline manifest parser does not need the player interface, so
   // this is a work around to avoid creating one.
   const playerInterface =
@@ -118,22 +119,25 @@ describe('OfflineManifestParser', () => {
       await muxer.destroy();
     }
 
-    try {
-      await parser.start(uri.toString(), playerInterface);
-    } catch (e) {
-      expect(e.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
-    }
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.KEY_NOT_FOUND,
+        jasmine.any(String)));
+    await expectAsync(parser.start(uri.toString(), playerInterface))
+        .toBeRejectedWith(expected);
   }));
 
   it('fails for invalid URI', checkAndRun(async () => {
     const uri = 'this-is-an-invalid-uri';
 
-    try {
-      await parser.start(uri, playerInterface);
-      fail();
-    } catch (e) {
-      expect(e.code).toBe(shaka.util.Error.Code.MALFORMED_OFFLINE_URI);
-    }
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
+        uri));
+    await expectAsync(parser.start(uri, playerInterface))
+        .toBeRejectedWith(expected);
   }));
 
   it('ignores update expiration when data is deleted',

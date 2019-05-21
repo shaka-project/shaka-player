@@ -22,6 +22,8 @@ describe('OfflineScheme', () => {
   // A dummy progress callback.
   const progressUpdated = (elapsedMs, bytes, bytesRemaining) => {};
 
+  const Util = shaka.test.Util;
+
   beforeEach(checkAndRun(async () => {
     // Make sure we start with a clean slate.
     await clearStorage();
@@ -97,28 +99,30 @@ describe('OfflineScheme', () => {
       await muxer.destroy();
     }
 
-    try {
-      const op = shaka.offline.OfflineScheme.plugin(
-          uri.toString(), request, requestType, progressUpdated);
-      await op.promise;
-      fail();
-    } catch (e) {
-      expect(e.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
-    }
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.KEY_NOT_FOUND,
+        jasmine.any(String)));
+    await expectAsync(
+        shaka.offline.OfflineScheme.plugin(
+            uri.toString(), request, requestType, progressUpdated).promise)
+        .toBeRejectedWith(expected);
   }));
 
   it('fails for invalid URI', checkAndRun(async () => {
     const request = createRequest();
     const uri = 'this-in-an-invalid-uri';
 
-    try {
-      const op = shaka.offline.OfflineScheme.plugin(
-          uri, request, requestType, progressUpdated);
-      await op.promise;
-      fail();
-    } catch (e) {
-      expect(e.code).toBe(shaka.util.Error.Code.MALFORMED_OFFLINE_URI);
-    }
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
+        uri));
+    await expectAsync(
+        shaka.offline.OfflineScheme.plugin(
+            uri, request, requestType, progressUpdated).promise)
+        .toBeRejectedWith(expected);
   }));
 
   /**

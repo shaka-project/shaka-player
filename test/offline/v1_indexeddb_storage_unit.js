@@ -17,6 +17,8 @@
 
 
 describe('V1IndexeddbStorageCell', () => {
+  const Util = shaka.test.Util;
+
   const dbImagePath = '/base/test/test/assets/db-dump-v1.json';
 
   const dbName = 'shaka-storage-cell-test';
@@ -48,12 +50,17 @@ describe('V1IndexeddbStorageCell', () => {
 
     // Destroy the cells before killing any connections.
     await Promise.all(cells.map((cell) => cell.destroy()));
-    connections.forEach((connection) => connection.close());
+    for (const connection of connections) {
+      connection.close();
+    }
   });
 
   it('cannot add new manifests', checkAndRun(async () => {
-    const expectedErrorCode =
-        shaka.util.Error.Code.NEW_KEY_OPERATION_NOT_SUPPORTED;
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.NEW_KEY_OPERATION_NOT_SUPPORTED,
+        jasmine.any(String)));
 
     const connection = await makeConnection();
     const cell = makeCell(connection);
@@ -64,17 +71,15 @@ describe('V1IndexeddbStorageCell', () => {
     expect(manifest).toBeTruthy();
 
     // Make sure that the request fails.
-    try {
-      await cell.addManifests([manifest]);
-      fail();
-    } catch (e) {
-      expect(e.code).toEqual(expectedErrorCode);
-    }
+    await expectAsync(cell.addManifests([manifest])).toBeRejectedWith(expected);
   }));
 
   it('cannot add new segment', checkAndRun(async () => {
-    const expectedErrorCode =
-        shaka.util.Error.Code.NEW_KEY_OPERATION_NOT_SUPPORTED;
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.NEW_KEY_OPERATION_NOT_SUPPORTED,
+        jasmine.any(String)));
 
     const connection = await makeConnection();
     const cell = makeCell(connection);
@@ -83,12 +88,7 @@ describe('V1IndexeddbStorageCell', () => {
     const segment = {data: new ArrayBuffer(16)};
 
     // Make sure that the request fails.
-    try {
-      await cell.addSegments([segment]);
-      fail();
-    } catch (e) {
-      expect(e.code).toEqual(expectedErrorCode);
-    }
+    await expectAsync(cell.addSegments([segment])).toBeRejectedWith(expected);
   }));
 
   it('can get all manifests', checkAndRun(async () => {
@@ -118,9 +118,9 @@ describe('V1IndexeddbStorageCell', () => {
     const segmentData = await cell.getSegments(dataKeys);
     expect(segmentData).toBeTruthy();
     expect(segmentData.length).toBe(6);
-    segmentData.forEach((segment) => {
+    for (const segment of segmentData) {
       expect(segment).toBeTruthy();
-    });
+    }
   }));
 
   it('can update expiration', checkAndRun(async () => {
@@ -171,22 +171,17 @@ describe('V1IndexeddbStorageCell', () => {
     await cell.removeManifests(manifestKeys, noop);
     await cell.removeSegments(segmentKeys, noop);
 
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.KEY_NOT_FOUND,
+        jasmine.any(String)));
     const checkMissingSegment = async (key) => {
-      try {
-        await cell.getSegments([key]);
-        fail();
-      } catch (e) {
-        expect(e.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
-      }
+      await expectAsync(cell.getSegments([key])).toBeRejectedWith(expected);
     };
 
     const checkMissingManifest = async (key) => {
-      try {
-        await cell.getManifests([key]);
-        fail();
-      } catch (e) {
-        expect(e.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
-      }
+      await expectAsync(cell.getManifests([key])).toBeRejectedWith(expected);
     };
 
     // Need to check each key on its own to ensure that each key is missing
@@ -211,17 +206,17 @@ describe('V1IndexeddbStorageCell', () => {
   function getAllSegmentKeys(manifest) {
     const keys = [];
 
-    manifest.periods.forEach((period) => {
-      period.streams.forEach((stream) => {
+    for (const period of manifest.periods) {
+      for (const stream of period.streams) {
         if (stream.initSegmentKey != null) {
           keys.push(stream.initSegmentKey);
         }
 
-        stream.segments.forEach((segment) => {
+        for (const segment of stream.segments) {
           keys.push(segment.dataKey);
-        });
-      });
-    });
+        }
+      }
+    }
 
     return keys;
   }
