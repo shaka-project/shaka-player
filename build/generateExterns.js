@@ -42,7 +42,11 @@
  */
 
 // Load required modules.
-const assert = require('assert').strict;
+let assert = require('assert');
+if (assert.strict) {
+  // The "strict" mode was added in v9.9, use that if available.
+  assert = assert.strict;
+}
 const esprima = require('esprima');
 const fs = require('fs');
 
