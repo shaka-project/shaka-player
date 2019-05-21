@@ -330,10 +330,7 @@ describe('Player Src Equals', () => {
         'main',
         'text/mp4');
 
-    try {
-      await pendingAdd;
-      fail();
-    } catch (e) {}
+    await expectAsync(pendingAdd).toBeRejected();
   });
 
   // Since we are not in-charge of streaming, calling |retryStreaming| should

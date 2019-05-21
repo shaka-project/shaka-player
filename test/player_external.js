@@ -231,7 +231,9 @@ describe('Player', () => {
       createAssetTest(asset);
     } else {
       // No custom assets? Create a test for each asset in the demo asset list.
-      shakaAssets.testAssets.forEach(createAssetTest);
+      for (const asset of shakaAssets.testAssets) {
+        createAssetTest(asset);
+      }
     }
   });
 

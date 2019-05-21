@@ -365,10 +365,10 @@ describe('Player', () => {
       await player.load('test:sintel_compiled');
       const languagesAndRoles = player.getTextLanguagesAndRoles();
       expect(languagesAndRoles.length).toBeTruthy();
-      languagesAndRoles.forEach((languageAndRole) => {
+      for (const languageAndRole of languagesAndRoles) {
         expect(languageAndRole.language).not.toBeUndefined();
         expect(languageAndRole.role).not.toBeUndefined();
-      });
+      }
     });
   });
 
@@ -378,33 +378,33 @@ describe('Player', () => {
     // interactions between Player and StreamingEngine, it is an integration
     // test and not a unit test.
     // https://github.com/google/shaka-player/issues/1119
-    it('allows early selection of specific tracks', (done) => {
+    it('allows early selection of specific tracks', async () => {
+      /** @type {!jasmine.Spy} */
       const streamingListener = jasmine.createSpy('listener');
 
       // Because this is an issue with failed assertions, destroy the existing
       // player from the compiled version, and create a new one using the
       // uncompiled version.  Then we will get assertions.
       eventManager.unlisten(player, 'error');
-      player.destroy().then(() => {
-        player = new shaka.Player(video);
-        player.configure({abr: {enabled: false}});
-        eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+      await player.destroy();
+      player = new shaka.Player(video);
+      player.configure({abr: {enabled: false}});
+      eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
 
-        // When 'streaming' fires, select the first track explicitly.
-        player.addEventListener('streaming', Util.spyFunc(streamingListener));
-        streamingListener.and.callFake(() => {
-          const tracks = player.getVariantTracks();
-          player.selectVariantTrack(tracks[0]);
-        });
+      // When 'streaming' fires, select the first track explicitly.
+      player.addEventListener('streaming', Util.spyFunc(streamingListener));
+      streamingListener.and.callFake(() => {
+        const tracks = player.getVariantTracks();
+        player.selectVariantTrack(tracks[0]);
+      });
 
-        // Now load the content.
-        return player.load('test:sintel');
-      }).then(() => {
-        // When the bug triggers, we fail assertions in Player.
-        // Make sure the listener was triggered, so that it could trigger the
-        // code path in this bug.
-        expect(streamingListener).toHaveBeenCalled();
-      }).catch(fail).then(done);
+      // Now load the content.
+      await player.load('test:sintel');
+
+      // When the bug triggers, we fail assertions in Player.
+      // Make sure the listener was triggered, so that it could trigger the
+      // code path in this bug.
+      expect(streamingListener).toHaveBeenCalled();
     });
 
     // After fixing the issue above, calling switch early during a second load()
@@ -413,43 +413,43 @@ describe('Player', () => {
     // between Player and StreamingEngine, it is an integration test and not a
     // unit test.
     // https://github.com/google/shaka-player/issues/1119
-    it('allows selection of tracks in subsequent loads', (done) => {
+    it('allows selection of tracks in subsequent loads', async () => {
+      /** @type {!jasmine.Spy} */
       const streamingListener = jasmine.createSpy('listener');
 
       // Because this is an issue with failed assertions, destroy the existing
       // player from the compiled version, and create a new one using the
       // uncompiled version.  Then we will get assertions.
       eventManager.unlisten(player, 'error');
-      player.destroy().then(() => {
-        player = new shaka.Player(video);
-        player.configure({abr: {enabled: false}});
-        eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
+      await player.destroy();
+      player = new shaka.Player(video);
+      player.configure({abr: {enabled: false}});
+      eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
 
-        // This bug only triggers when you do this on the second load.
-        // So we load one piece of content, then set up the streaming listener
-        // to change tracks, then we load a second piece of content.
-        return player.load('test:sintel');
-      }).then(() => {
-        // Give StreamingEngine time to complete all setup and to call back into
-        // the Player with canSwitch_.  If you move on too quickly to the next
-        // load(), the bug does not reproduce.
-        return shaka.test.Util.delay(1);
-      }).then(() => {
-        player.addEventListener('streaming', Util.spyFunc(streamingListener));
+      // This bug only triggers when you do this on the second load.
+      // So we load one piece of content, then set up the streaming listener
+      // to change tracks, then we load a second piece of content.
+      await player.load('test:sintel');
 
-        streamingListener.and.callFake(() => {
-          const track = player.getVariantTracks()[0];
-          player.selectVariantTrack(track);
-        });
+      // Give StreamingEngine time to complete all setup and to call back into
+      // the Player with canSwitch_.  If you move on too quickly to the next
+      // load(), the bug does not reproduce.
+      await shaka.test.Util.delay(1);
 
-        // Now load again to trigger the failed assertion.
-        return player.load('test:sintel');
-      }).then(() => {
-        // When the bug triggers, we fail assertions in StreamingEngine.
-        // So just make sure the listener was triggered, so that it could
-        // trigger the code path in this bug.
-        expect(streamingListener).toHaveBeenCalled();
-      }).catch(fail).then(done);
+      player.addEventListener('streaming', Util.spyFunc(streamingListener));
+
+      streamingListener.and.callFake(() => {
+        const track = player.getVariantTracks()[0];
+        player.selectVariantTrack(track);
+      });
+
+      // Now load again to trigger the failed assertion.
+      await player.load('test:sintel');
+
+      // When the bug triggers, we fail assertions in StreamingEngine.
+      // So just make sure the listener was triggered, so that it could
+      // trigger the code path in this bug.
+      expect(streamingListener).toHaveBeenCalled();
     });
   });
 });
@@ -484,6 +484,10 @@ describe('Player Stats', () => {
 // TODO: Any call to |load|, |attach|, etc. should abort manifest retries.
 //       Add the missing tests for |load| and |attach|.
 describe('Player Manifest Retries', () => {
+  const interruptedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+      shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.PLAYER,
+      shaka.util.Error.Code.LOAD_INTERRUPTED));
+
   /** @type {!HTMLVideoElement} */
   let video;
   /** @type {shaka.Player} */
@@ -525,41 +529,20 @@ describe('Player Manifest Retries', () => {
 
   it('unload prevents further manifest load retries', async () => {
     const loading = player.load('reject://www.foo.com/bar.mpd');
-
     entersState('manifest-parser', () => player.unload());
-
-    try {
-      await loading;
-      fail();
-    } catch (e) {
-      expect(e.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
-    }
+    await expectAsync(loading).toBeRejectedWith(interruptedError);
   });
 
   it('detach prevents further manifest load retries', async () => {
     const loading = player.load('reject://www.foo.com/bar.mpd');
-
     entersState('manifest-parser', () => player.detach());
-
-    try {
-      await loading;
-      fail();
-    } catch (e) {
-      expect(e.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
-    }
+    await expectAsync(loading).toBeRejectedWith(interruptedError);
   });
 
   it('destroy prevents further manifest load retries', async () => {
     const loading = player.load('reject://www.foo.com/bar.mpd');
-
     entersState('manifest-parser', () => player.destroy());
-
-    try {
-      await loading;
-      fail();
-    } catch (e) {
-      expect(e.code).toBe(shaka.util.Error.Code.LOAD_INTERRUPTED);
-    }
+    await expectAsync(loading).toBeRejectedWith(interruptedError);
   });
 
   /**
@@ -835,7 +818,7 @@ describe('Player Load Path', () => {
     const load2 = player.load('test:sintel');
 
     // Load 1 should have been interrupted because of load 2.
-    await rejected(load1);
+    await expectAsync(load1).toBeRejected();
     // Load 2 should finish with no issues.
     await load2;
   });
@@ -848,7 +831,7 @@ describe('Player Load Path', () => {
     const load = player.load('test:sintel');
     const unload = player.unload();
 
-    await rejected(load);
+    await expectAsync(load).toBeRejected();
     await unload;
 
     // We should never have gotten into the loaded state.
@@ -863,7 +846,7 @@ describe('Player Load Path', () => {
     const load = player.load('test:sintel');
     const destroy = player.destroy();
 
-    await rejected(load);
+    await expectAsync(load).toBeRejected();
     await destroy;
 
     // We should never have gotten into the loaded state.
@@ -1012,7 +995,7 @@ describe('Player Load Path', () => {
       // We attach manually so that we had time to override the state change
       // spy's action.
       await player.attach(video);
-      await rejected(player.load('test:sintel'));
+      await expectAsync(player.load('test:sintel')).toBeRejected();
 
       // By the time that |player.load| failed, we should have started
       // |player.unload|.
@@ -1061,7 +1044,7 @@ describe('Player Load Path', () => {
       const loadRequest = player.load('test:sintel');
 
       await attachRequest;
-      await rejected(loadRequest);
+      await expectAsync(loadRequest).toBeRejected();
 
       // Wait a couple interrupter cycles to allow the player to enter idle
       // state.
@@ -1461,7 +1444,7 @@ describe('Player Load Path', () => {
         player.unload().catch(() => {});
       }
 
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         let called = false;
 
         whenEnteringState(state, () => {
@@ -1474,7 +1457,7 @@ describe('Player Load Path', () => {
           // We need to call doThis in-sync with entering the state so that it
           // can start in the same interpreter cycle. If we did not do this, the
           // player could have changed states before |doThis| was called.
-          doThis().then(resolve);
+          doThis().then(resolve, reject);
         });
       });
     }
@@ -1517,22 +1500,6 @@ describe('Player Load Path', () => {
       expect(event.state).toBe(state);
     }
   });
-
-  /**
-   * Wait for |p| to be rejected. If |p| is not rejected, this will fail the
-   * test;
-   *
-   * @param {!Promise} p
-   * @return {!Promise}
-   */
-  async function rejected(p) {
-    try {
-      await p;
-      fail();
-    } catch (e) {
-      expect(e).toBeTruthy();
-    }
-  }
 
   /**
    * Get a list of all the states that the walker went through after

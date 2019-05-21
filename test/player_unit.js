@@ -75,7 +75,7 @@ describe('Player', () => {
     // Since this is not an integration test, we don't want MediaSourceEngine to
     // fail assertions based on browser support for types.  Pretend that all
     // video and audio types are supported.
-    window.MediaSource.isTypeSupported = function(mimeType) {
+    window.MediaSource.isTypeSupported = (mimeType) => {
       const type = mimeType.split('/')[0];
       return type == 'video' || type == 'audio';
     };
@@ -114,8 +114,8 @@ describe('Player', () => {
       mediaSourceEngine = {
         init: jasmine.createSpy('init').and.returnValue(Promise.resolve()),
         open: jasmine.createSpy('open').and.returnValue(Promise.resolve()),
-        destroy: jasmine.createSpy('destroy').and
-            .returnValue(Promise.resolve()),
+        destroy:
+            jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
         getTextDisplayer: () => textDisplayer,
@@ -156,9 +156,6 @@ describe('Player', () => {
     }
   });
 
-  afterAll(() => {
-  });
-
   describe('destroy', () => {
     it('cleans up all dependencies', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
@@ -181,11 +178,10 @@ describe('Player', () => {
       const parser = new shaka.test.FakeManifestParser(manifest);
       const factory = () => parser;
 
-      mediaSourceEngine.destroy.and.callFake(() => {
+      mediaSourceEngine.destroy.and.callFake(async () => {
         expect(drmEngine.destroy).not.toHaveBeenCalled();
-        return Util.delay(0.01).then(() => {
-          expect(drmEngine.destroy).not.toHaveBeenCalled();
-        });
+        await Util.delay(0.01);
+        expect(drmEngine.destroy).not.toHaveBeenCalled();
       });
 
       await player.load(fakeManifestUri, 0, factory);
@@ -197,8 +193,9 @@ describe('Player', () => {
 
     // TODO(vaage): Re-enable once the parser is integrated into the load graph
     //              better.
-    xit('destroys parser first when interrupting load', (done) => {
+    xit('destroys parser first when interrupting load', async () => {
       const p = shaka.test.Util.delay(0.3);
+      /** @type {!shaka.test.FakeManifestParser} */
       const parser = new shaka.test.FakeManifestParser(manifest);
       parser.start.and.returnValue(p);
       parser.stop.and.callFake(() => {
@@ -207,14 +204,13 @@ describe('Player', () => {
       });
       const factory = () => parser;
 
-      player.load(fakeManifestUri, 0, factory).then(fail).catch(() => {});
-      shaka.test.Util.delay(0.1).then(() => {
-        player.destroy().catch(fail).then(() => {
-          expect(abrManager.stop).toHaveBeenCalled();
-          expect(networkingEngine.destroy).toHaveBeenCalled();
-          expect(parser.stop).toHaveBeenCalled();
-        }).then(done);
-      });
+      const load = player.load(fakeManifestUri, 0, factory);
+      await shaka.test.Util.delay(0.1);
+      await player.destroy();
+      expect(abrManager.stop).toHaveBeenCalled();
+      expect(networkingEngine.destroy).toHaveBeenCalled();
+      expect(parser.stop).toHaveBeenCalled();
+      await expectAsync(load).toBeRejected();
     });
   });
 
@@ -520,9 +516,9 @@ describe('Player', () => {
     });
 
     it('checks the number of arguments to functions', () => {
-      const goodCustomScheme = function(node) {};
-      const badCustomScheme1 = function() {};  // too few args
-      const badCustomScheme2 = function(x, y) {};  // too many args
+      const goodCustomScheme = (node) => {};
+      const badCustomScheme1 = () => {};  // too few args
+      const badCustomScheme2 = (x, y) => {};  // too many args
 
       // Takes good callback.
       player.configure({
@@ -867,7 +863,7 @@ describe('Player', () => {
   });
 
   describe('filterTracks', () => {
-    it('retains only video+audio variants if they exist', (done) => {
+    it('retains only video+audio variants if they exist', async () => {
       /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
@@ -906,18 +902,17 @@ describe('Player', () => {
 
       const parser = new shaka.test.FakeManifestParser(manifest);
       const parserFactory = () => parser;
-      player.load(fakeManifestUri, 0, parserFactory).catch(fail).then(() => {
-        // Check the first period's variant tracks.
-        const actualVariantTracks1 = player.getVariantTracks();
-        expect(actualVariantTracks1).toEqual(variantTracks1);
+      await player.load(fakeManifestUri, 0, parserFactory);
+      // Check the first period's variant tracks.
+      const actualVariantTracks1 = player.getVariantTracks();
+      expect(actualVariantTracks1).toEqual(variantTracks1);
 
-        // Check the second period's variant tracks.
-        playhead.getTime.and.callFake(() => {
-          return 100;
-        });
-        const actualVariantTracks2 = player.getVariantTracks();
-        expect(actualVariantTracks2).toEqual(variantTracks2);
-      }).then(done);
+      // Check the second period's variant tracks.
+      playhead.getTime.and.callFake(() => {
+        return 100;
+      });
+      const actualVariantTracks2 = player.getVariantTracks();
+      expect(actualVariantTracks2).toEqual(variantTracks2);
     });
   });
 
@@ -1602,18 +1597,18 @@ describe('Player', () => {
 
       // See that AbrManager has a list of 2-channel tracks now.
       expect(abrManager.variants.length).toBeGreaterThan(0);
-      abrManager.variants.forEach((v) => {
+      for (const v of abrManager.variants) {
         expect(v.audio.channelsCount).toBe(2);
-      });
+      }
 
       // Re-enable ABR.
       player.configure({abr: {enabled: true}});
 
       // See that AbrManager still has a list of 2-channel tracks.
       expect(abrManager.variants.length).toBeGreaterThan(0);
-      abrManager.variants.forEach((v) => {
+      for (const v of abrManager.variants) {
         expect(v.audio.channelsCount).toBe(2);
-      });
+      }
       // See that we are still playing a 2-channel track.
       expect(getActiveVariantTrack().channelsCount).toBe(2);
     });
@@ -1622,12 +1617,12 @@ describe('Player', () => {
       // Simulate an encrypted stream.  Mark half of the audio streams with key
       // ID 'aaa', and the other half with 'bbb'.  Remove all roles, so that our
       // choices are limited only by channel count and key status.
-      manifest.periods[0].variants.forEach((variant) => {
+      for (const variant of manifest.periods[0].variants) {
         const keyId = (variant.audio.id % 2) ? 'aaa' : 'bbb';
         variant.audio.keyId = keyId;
         variant.video.roles = [];
         variant.audio.roles = [];
-      });
+      }
 
       streamingEngine.onCanSwitch();
 
@@ -1645,9 +1640,9 @@ describe('Player', () => {
 
       // See that AbrManager has a list of 2-channel tracks now.
       expect(abrManager.variants.length).toBeGreaterThan(0);
-      abrManager.variants.forEach((v) => {
+      for (const v of abrManager.variants) {
         expect(v.audio.channelsCount).toBe(2);
-      });
+      }
 
       // Simulate a key status event that would trigger the removal of some
       // tracks.
@@ -1658,9 +1653,9 @@ describe('Player', () => {
 
       // See that AbrManager still has a list of 2-channel tracks.
       expect(abrManager.variants.length).toBeGreaterThan(0);
-      abrManager.variants.forEach((v) => {
+      for (const v of abrManager.variants) {
         expect(v.audio.channelsCount).toBe(2);
-      });
+      }
       // See that we are still playing a 2-channel track.
       expect(getActiveVariantTrack().channelsCount).toBe(2);
     });
@@ -1761,7 +1756,7 @@ describe('Player', () => {
      * @param {number} expectedIndex
      * @return {!Promise}
      */
-    function runTest(languages, preference, expectedIndex) {
+    async function runTest(languages, preference, expectedIndex) {
       const generator = new shaka.test.ManifestGenerator().addPeriod(0);
 
       for (let i = 0; i < languages.length; i++) {
@@ -1786,9 +1781,8 @@ describe('Player', () => {
 
       const parser = new shaka.test.FakeManifestParser(manifest);
       const factory = () => parser;
-      return player.load(fakeManifestUri, 0, factory).then(() => {
-        expect(getActiveVariantTrack().id).toBe(expectedIndex);
-      });
+      await player.load(fakeManifestUri, 0, factory);
+      expect(getActiveVariantTrack().id).toBe(expectedIndex);
     }
   });
 
@@ -1858,7 +1852,7 @@ describe('Player', () => {
       expect(stats.decodedFrames).toBeNaN();
       expect(stats.droppedFrames).toBeNaN();
 
-      video.getVideoPlaybackQuality = function() {
+      video.getVideoPlaybackQuality = () => {
         return {
           corruptedVideoFrames: 0,
           creationTime: 0,
@@ -2108,9 +2102,8 @@ describe('Player', () => {
   describe('unplayable periods', () => {
     beforeEach(() => {
       // overriding for good / bad codecs.
-      window.MediaSource.isTypeSupported = function(mimeType) {
-        return mimeType.includes('good');
-      };
+      window.MediaSource.isTypeSupported =
+          (mimeType) => mimeType.includes('good');
     });
 
     it('success when one period is playable', async () => {
@@ -2739,7 +2732,7 @@ describe('Player', () => {
       expect(variants[2].video.codecs).toEqual('good');
     });
 
-    it('updates AbrManager about restricted variants', (done) => {
+    it('updates AbrManager about restricted variants', async () => {
       /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
           .addPeriod(0)
@@ -2750,20 +2743,20 @@ describe('Player', () => {
           .build();
       /* eslint-enable indent */
 
+      /** @type {!shaka.test.FakeAbrManager} */
       const abrManager = new shaka.test.FakeAbrManager();
       player.configure({abrFactory: () => abrManager});
-      setupPlayer().then(() => {
-        expect(player.getVariantTracks().length).toBe(2);
+      await setupPlayer();
+      expect(player.getVariantTracks().length).toBe(2);
 
-        // We have some key statuses, but not for the key IDs we know.
-        abrManager.setVariants.calls.reset();
-        onKeyStatus({'foo': 'usable'});
+      // We have some key statuses, but not for the key IDs we know.
+      abrManager.setVariants.calls.reset();
+      onKeyStatus({'foo': 'usable'});
 
-        expect(abrManager.setVariants).toHaveBeenCalled();
-        const variants = abrManager.setVariants.calls.argsFor(0)[0];
-        expect(variants.length).toBe(1);
-        expect(variants[0].id).toBe(2);
-      }).catch(fail).then(done);
+      expect(abrManager.setVariants).toHaveBeenCalled();
+      const variants = abrManager.setVariants.calls.argsFor(0)[0];
+      expect(variants.length).toBe(1);
+      expect(variants[0].id).toBe(2);
     });
 
     it('chooses codecs after considering 6-channel preference', async () => {
@@ -2795,13 +2788,12 @@ describe('Player', () => {
     /**
      * @return {!Promise}
      */
-    function setupPlayer() {
+    async function setupPlayer() {
       const parser = new shaka.test.FakeManifestParser(manifest);
       const parserFactory = () => parser;
-      return player.load(fakeManifestUri, 0, parserFactory).then(() => {
-        // Initialize the fake streams.
-        streamingEngine.onCanSwitch();
-      });
+      await player.load(fakeManifestUri, 0, parserFactory);
+      // Initialize the fake streams.
+      streamingEngine.onCanSwitch();
     }
   });
 
@@ -2829,19 +2821,16 @@ describe('Player', () => {
     });
   });
 
-  it('rejects empty manifests', (done) => {
+  it('rejects empty manifests', async () => {
     manifest = new shaka.test.ManifestGenerator().build();
     const emptyParser = new shaka.test.FakeManifestParser(manifest);
     const emptyFactory = () => emptyParser;
 
-    player.load(fakeManifestUri, 0, emptyFactory).then(fail).catch((error) => {
-      shaka.test.Util.expectToEqualError(
-          error,
-          new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.MANIFEST,
-              shaka.util.Error.Code.NO_PERIODS));
-    }).then(done);
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.MANIFEST,
+        shaka.util.Error.Code.NO_PERIODS));
+    await expectAsync(player.load(fakeManifestUri, 0, emptyFactory))
+        .toBeRejectedWith(expected);
   });
 
   it('does not assert when adapting', async () => {
@@ -3185,9 +3174,7 @@ describe('Player', () => {
    */
   function stringContaining(substring) {
     return {
-      asymmetricMatch: function(actual) {
-        return actual.includes(substring);
-      },
+      asymmetricMatch: (actual) => actual.includes(substring),
     };
   }
 
