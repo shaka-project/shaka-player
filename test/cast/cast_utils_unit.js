@@ -127,11 +127,12 @@ describe('CastUtils', () => {
       const fakeEvent = new FakeEvent(deserialized['type'], deserialized);
 
       // The fake event has the same type and properties as the original.
-      nativeProperties.forEach((k) => {
-        expect(fakeEvent[k]).toEqual(event[k]);
-      });
+      const asObj = /** @type {!Object} */ (fakeEvent);
+      for (const k of nativeProperties) {
+        expect(asObj[k]).toEqual(event[k]);
+      }
       for (const k in extraProperties) {
-        expect(fakeEvent[k]).toEqual(event[k]);
+        expect(asObj[k]).toEqual(event[k]);
       }
     });
 
@@ -151,8 +152,9 @@ describe('CastUtils', () => {
         'one': 1,
       };
 
+      const asObj = /** @type {!Object} */ (event);
       for (const k in extraProperties) {
-        event[k] = extraProperties[k];
+        asObj[k] = extraProperties[k];
       }
 
       const target = new shaka.util.FakeEventTarget();
@@ -169,10 +171,10 @@ describe('CastUtils', () => {
           // The deserialized event has the same type and properties as the
           // original.
           nativeProperties.forEach((k) => {
-            expect(deserialized[k]).toEqual(event[k]);
+            expect(deserialized[k]).toEqual(asObj[k]);
           });
           for (const k in extraProperties) {
-            expect(deserialized[k]).toEqual(event[k]);
+            expect(deserialized[k]).toEqual(asObj[k]);
           }
         } catch (exception) {
           fail(exception);
