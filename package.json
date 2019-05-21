@@ -13,6 +13,7 @@
   "devDependencies": {
     "awesomplete": "^1.1.4",
     "babel-core": "^6.26.3",
+    "babel-plugin-istanbul": "^4.1.6",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "cajon": "^0.4.4",

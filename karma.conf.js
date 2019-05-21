@@ -115,7 +115,7 @@ module.exports = (config) => {
       {pattern: 'ui/**/*.js', included: false},
       {pattern: 'ui/**/*.less', included: false},
       {pattern: 'third_party/closure/goog/**/*.js', included: false},
-      {pattern: 'third_party/language-mapping-list/**/*.js', included: false},
+      {pattern: 'third_party/language-mapping-list/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
@@ -127,31 +127,32 @@ module.exports = (config) => {
     proxies: {},
 
     preprocessors: {
-      // Compute coverage over everything but lib/debug/ or lib/polyfill/
-      'lib/!(debug|polyfill)/*.js': ['coverage'],
-      // Player is not matched by the above, so add it explicitly
-      'lib/player.js': ['coverage'],
-      // Compute coverage over UI, too
-      'ui/*.js': ['coverage'],
-
       // Convert ES6 to ES5 so we can still run tests on IE11 and Tizen.
-      'demo/common/*.js': ['babel'],
+      'demo/**/*.js': ['babel'],
       'lib/**/*.js': ['babel'],
       'ui/**/*.js': ['babel'],
       'test/**/*.js': ['babel'],
-      'third_party/language-mapping-list/**/*.js': ['babel'],
+      'third_party/language-mapping-list/*.js': ['babel'],
     },
 
     babelPreprocessor: {
       options: {
-        presets: [
-          // Some of our tests are not written with strict mode in mind, but the
-          // plugin for commonjs modules enforces strict mode.  Since we do not
-          // use modules, just disable them.
-          ['env', {modules: false}],
-        ],
-        // The source-map-support framework is necessary to make this work:
+        presets: ['env'],
+        // Add source maps so that backtraces refer to the original code.
+        // The source-map-support framework is necessary to make this work.
         sourceMap: 'inline',
+        // Add instrumentation for code coverage.
+        plugins: [
+          ['istanbul', {
+            // Don't instrument these parts of the codebase.
+            exclude: [
+              'demo/**/*.js',
+              'lib/(debug|deprecate|polyfill)/*.js',
+              'test/**/*.js',
+              'third_party/**/*.js',
+            ],
+          }],
+        ],
       },
     },
 
