@@ -242,7 +242,7 @@ describe('Player', () => {
       displayer.removeSpy.and.callFake(() => {
         cues = [];
       });
-      player.configure({textDisplayFactory: () => displayer});
+      player.configure('textDisplayFactory', Util.factoryReturns(displayer));
 
       const preferredTextLanguage = 'fa';  // The same as in the content itself
       player.configure({preferredTextLanguage: preferredTextLanguage});
@@ -354,7 +354,7 @@ describe('Player', () => {
       textDisplayer.destroySpy.and.returnValue(Promise.resolve());
       player.configure({
         // eslint-disable-next-line no-restricted-syntax
-        textDisplayFactory: function() { return textDisplayer; },
+        textDisplayFactory: Util.factoryReturns(textDisplayer),
       });
 
       // Make sure the configuration was taken.

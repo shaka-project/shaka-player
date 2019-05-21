@@ -17,6 +17,9 @@
 
 describe('UI', () => {
   const UiUtils = shaka.test.UiUtils;
+  const Util = shaka.test.Util;
+  const returnManifest = (manifest) =>
+    Util.factoryReturns(new shaka.test.FakeManifestParser(manifest));
 
   /** @type {shaka.Player} */
   let player;
@@ -263,9 +266,9 @@ describe('UI', () => {
                 .addAudio(/* id= */ 1)
                 .build();
 
-            const parser = new shaka.test.FakeManifestParser(manifest);
-            const factory = () => parser;
-            await player.load(/* uri= */ 'fake', /* startTime= */ 0, factory);
+            await player.load(
+                /* uri= */ 'fake', /* startTime= */ 0,
+                returnManifest(manifest));
             const pipButtons =
             videoContainer.getElementsByClassName('shaka-pip-button');
             expect(pipButtons.length).toBe(1);
@@ -395,10 +398,8 @@ describe('UI', () => {
             .build();
         /* eslint-enable indent */
 
-        const parser = new shaka.test.FakeManifestParser(manifest);
-        const factory = () => parser;
-
-        await player.load(/* uri */ 'fake', /* startTime */ 0, factory);
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, returnManifest(manifest));
 
         const selectVariantTrack = spyOn(player, 'selectVariantTrack');
 

@@ -386,6 +386,21 @@ shaka.test.Util = class {
     const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(timeout);
     return waiter.waitForEnd(target);
   }
+
+  /**
+   * Returns a function that can be used as a factory.  This factory returns
+   * the given static value.
+   *
+   * @param {T} value
+   * @return {function():T}
+   * @template T
+   */
+  static factoryReturns(value) {
+    // eslint-disable-next-line no-restricted-syntax
+    return function() {
+      return value;
+    };
+  }
 };
 
 /**
