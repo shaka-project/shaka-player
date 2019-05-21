@@ -89,15 +89,13 @@ describe('StringUtils', () => {
     });
 
     it('fails if unable to guess', () => {
-      try {
-        const arr = [0x01, 0x02, 0x03, 0x04];
-        const buffer = new Uint8Array(arr).buffer;
-        StringUtils.fromBytesAutoDetect(buffer);
-        fail('Should not be able to guess');
-      } catch (e) {
-        expect(e.category).toBe(shaka.util.Error.Category.TEXT);
-        expect(e.code).toBe(shaka.util.Error.Code.UNABLE_TO_DETECT_ENCODING);
-      }
+      const expected = shaka.test.Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.TEXT,
+          shaka.util.Error.Code.UNABLE_TO_DETECT_ENCODING));
+      const arr = [0x01, 0x02, 0x03, 0x04];
+      const buffer = new Uint8Array(arr).buffer;
+      expect(() => StringUtils.fromBytesAutoDetect(buffer)).toThrow(expected);
     });
   });
 

@@ -107,16 +107,12 @@ describe('Pssh', () => {
       fromHex(GENERIC_PSSH + TRUNCATED_PLAYREADY_PSSH),
     ];
 
-    for (let i = 0; i < psshs.length; ++i) {
-      try {
-        const pssh = new shaka.util.Pssh(psshs[i]);
-        expect(pssh).toBeTruthy();  // Closure: don't complain about unused vars
-        fail();
-      } catch (error) {
-        expect(error instanceof shaka.util.Error).toBe(true);
-        expect(error.code).toBe(
-            shaka.util.Error.Code.BUFFER_READ_OUT_OF_BOUNDS);
-      }
+    for (const pssh of psshs) {
+      const expected = shaka.test.Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.BUFFER_READ_OUT_OF_BOUNDS));
+      expect(() => new shaka.util.Pssh(pssh)).toThrow(expected);
     }
   });
 

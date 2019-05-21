@@ -16,7 +16,7 @@
  */
 
 describe('EbmlParser', /** @suppress {accessControls} */ () => {
-  const Code = shaka.util.Error.Code;
+  const Util = shaka.test.Util;
 
   it('parses one element', () => {
     // Set ID to 0x1.
@@ -173,9 +173,12 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
   });
 
   it('detects vints with too many bytes', () => {
-    let exception = null;
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MEDIA,
+        shaka.util.Error.Code.EBML_OVERFLOW));
 
-    try {
+    expect(() => {
       // 63-bit: 0000 0000, 1|000 0001, 0001 0001, 0001 0001, 0001 0001,
       //                                0001 0001, 0001 0001, 0001 0001,
       //                                0001 0001
@@ -183,63 +186,38 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
           [0x00, 0x81, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
       const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
       parser.parseVint_();
-    } catch (e) {
-      exception = e;
-    }
-
-    expect(exception).not.toBeNull();
-    expect(exception instanceof shaka.util.Error).toBe(true);
-    expect(exception.code).toBe(Code.EBML_OVERFLOW);
+    }).toThrow(expected);
   });
 
   it('detects vint values with too many bits', () => {
-    let exception = null;
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MEDIA,
+        shaka.util.Error.Code.JS_INTEGER_OVERFLOW));
 
-    try {
+    expect(() => {
       // 56-bit: 0000 0001 | 1000 0001, 0001 0001, 0001 0001, 0001 0001,
       //                     0001 0001, 0001 0001, 0001 0001
       const data = new Uint8Array(
           [0x01, 0x81, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
       shaka.util.EbmlParser.getVintValue_(data);
-    } catch (e) {
-      exception = e;
-    }
+    }).toThrow(expected);
 
-    expect(exception).not.toBeNull();
-    expect(exception instanceof shaka.util.Error).toBe(true);
-    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
-
-    exception = null;
-
-    try {
+    expect(() => {
       // 56-bit: 0000 0001 | 0100 0001, 0001 0001, 0001 0001, 0001 0001,
       //                     0001 0001, 0001 0001, 0001 0001
       const data = new Uint8Array(
           [0x01, 0x41, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
       shaka.util.EbmlParser.getVintValue_(data);
-    } catch (e) {
-      exception = e;
-    }
+    }).toThrow(expected);
 
-    expect(exception).not.toBeNull();
-    expect(exception instanceof shaka.util.Error).toBe(true);
-    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
-
-    exception = null;
-
-    try {
+    expect(() => {
       // 56-bit: 0000 0001 | 0010 0001, 0001 0001, 0001 0001, 0001 0001,
       //                     0001 0001, 0001 0001, 0001 0001
       const data = new Uint8Array(
           [0x01, 0x21, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
       shaka.util.EbmlParser.getVintValue_(data);
-    } catch (e) {
-      exception = e;
-    }
-
-    expect(exception).not.toBeNull();
-    expect(exception instanceof shaka.util.Error).toBe(true);
-    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
+    }).toThrow(expected);
   });
 
   it('detects the end of input while reading a vint', () => {
@@ -247,17 +225,11 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     const data = new Uint8Array([0x61]);
     const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
 
-    let exception = null;
-
-    try {
-      parser.parseVint_();
-    } catch (e) {
-      exception = e;
-    }
-
-    expect(exception).not.toBeNull();
-    expect(exception instanceof shaka.util.Error).toBe(true);
-    expect(exception.code).toBe(Code.BUFFER_READ_OUT_OF_BOUNDS);
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MEDIA,
+        shaka.util.Error.Code.BUFFER_READ_OUT_OF_BOUNDS));
+    expect(() => parser.parseVint_()).toThrow(expected);
   });
 
   it('parses a uint', () => {
@@ -283,17 +255,11 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     const elem = parser.parseElement();
     expect(elem.id).toBe(0x81);
 
-    let exception = null;
-
-    try {
-      elem.getUint();
-    } catch (e) {
-      exception = e;
-    }
-
-    expect(exception).not.toBeNull();
-    expect(exception instanceof shaka.util.Error).toBe(true);
-    expect(exception.code).toBe(Code.EBML_OVERFLOW);
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MEDIA,
+        shaka.util.Error.Code.EBML_OVERFLOW));
+    expect(() => elem.getUint()).toThrow(expected);
   });
 
   it('detects uints with too many bits', () => {
@@ -307,17 +273,11 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     const elem = parser.parseElement();
     expect(elem.id).toBe(0x81);
 
-    let exception = null;
-
-    try {
-      elem.getUint();
-    } catch (e) {
-      exception = e;
-    }
-
-    expect(exception).not.toBeNull();
-    expect(exception instanceof shaka.util.Error).toBe(true);
-    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MEDIA,
+        shaka.util.Error.Code.JS_INTEGER_OVERFLOW));
+    expect(() => elem.getUint()).toThrow(expected);
   });
 
   it('recognizes dynamic-sized values', () => {

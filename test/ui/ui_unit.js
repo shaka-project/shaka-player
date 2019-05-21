@@ -136,10 +136,10 @@ describe('UI', () => {
       });
 
       it('has all the basic elements', () => {
-        videos.forEach((video) => {
+        for (const video of videos) {
           checkBasicUIElements(
               /** @type {!HTMLVideoElement} */ (video.parentElement));
-        });
+        }
       });
     });
 
@@ -559,13 +559,13 @@ describe('UI', () => {
    * @suppress {visibility}
    */
   function createUIThroughDOMAutoSetup(containers, videos) {
-    containers.forEach((container) => {
+    for (const container of containers) {
       container.setAttribute('data-shaka-player-container', '');
-    });
+    }
 
-    videos.forEach((video) => {
+    for (const video of videos) {
       video.setAttribute('data-shaka-player', '');
-    });
+    }
 
     // Call UI's private method to scan the page for shaka
     // elements and create the UI.
@@ -592,4 +592,3 @@ describe('UI', () => {
     expect(elements.length).toBe(0);
   }
 });
-

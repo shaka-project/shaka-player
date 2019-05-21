@@ -303,18 +303,16 @@ describe('Mp4Parser', () => {
             box.parser.stop();
           });
 
-      try {
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.BUFFER_READ_OUT_OF_BOUNDS));
+      expect(() => {
         new shaka.util.Mp4Parser()
             .box('b003', Util.spyFunc(parentBox))
             .box('b032', Util.spyFunc(childBox1))
             .parse(partialBoxWithSampleDescription, false /* partialOkay */);
-        fail('Should not have been able to parse!');
-      } catch (error) {
-        Util.expectToEqualError(error, new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.MEDIA,
-            shaka.util.Error.Code.BUFFER_READ_OUT_OF_BOUNDS));
-      }
+      }).toThrow(expected);
 
       parentBox.calls.reset();
       childBox1.calls.reset();

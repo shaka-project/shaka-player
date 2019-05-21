@@ -36,17 +36,19 @@ describe('FakeEventTarget', () => {
     shaka.log.error = originalLogError;
   });
 
-  it('sets target on dispatched events', (done) => {
-    target.addEventListener('event', (event) => {
-      expect(event.target).toBe(target);
-      expect(event.currentTarget).toBe(target);
-      done();
-    });
+  it('sets target on dispatched events', () => {
+    return new Promise((resolve) => {
+      target.addEventListener('event', (event) => {
+        expect(event.target).toBe(target);
+        expect(event.currentTarget).toBe(target);
+        resolve();
+      });
 
-    target.dispatchEvent(new shaka.util.FakeEvent('event'));
+      target.dispatchEvent(new shaka.util.FakeEvent('event'));
+    });
   });
 
-  it('calls all event listeners', (done) => {
+  it('calls all event listeners', async () => {
     const listener1 = jasmine.createSpy('listener1');
     const listener2 = jasmine.createSpy('listener2');
 
@@ -55,14 +57,12 @@ describe('FakeEventTarget', () => {
 
     target.dispatchEvent(new shaka.util.FakeEvent('event'));
 
-    shaka.test.Util.delay(0.1).then(() => {
-      expect(listener1).toHaveBeenCalled();
-      expect(listener2).toHaveBeenCalled();
-      done();
-    });
+    await shaka.test.Util.delay(0.1);
+    expect(listener1).toHaveBeenCalled();
+    expect(listener2).toHaveBeenCalled();
   });
 
-  it('stops processing on stopImmediatePropagation', (done) => {
+  it('stops processing on stopImmediatePropagation', async () => {
     const listener1 = jasmine.createSpy('listener1');
     const listener2 = jasmine.createSpy('listener2');
 
@@ -75,14 +75,12 @@ describe('FakeEventTarget', () => {
 
     target.dispatchEvent(new shaka.util.FakeEvent('event'));
 
-    shaka.test.Util.delay(0.1).then(() => {
-      expect(listener1).toHaveBeenCalled();
-      expect(listener2).not.toHaveBeenCalled();
-      done();
-    });
+    await shaka.test.Util.delay(0.1);
+    expect(listener1).toHaveBeenCalled();
+    expect(listener2).not.toHaveBeenCalled();
   });
 
-  it('catches exceptions thrown from listeners', (done) => {
+  it('catches exceptions thrown from listeners', async () => {
     const listener1 = jasmine.createSpy('listener1');
     const listener2 = jasmine.createSpy('listener2');
 
@@ -94,21 +92,20 @@ describe('FakeEventTarget', () => {
 
     target.dispatchEvent(new shaka.util.FakeEvent('event'));
 
-    shaka.test.Util.delay(0.1).then(() => {
-      expect(listener1).toHaveBeenCalled();
-      expect(logErrorSpy).toHaveBeenCalled();
-      expect(listener2).toHaveBeenCalled();
-      done();
-    });
+    await shaka.test.Util.delay(0.1);
+    expect(listener1).toHaveBeenCalled();
+    expect(logErrorSpy).toHaveBeenCalled();
+    expect(listener2).toHaveBeenCalled();
   });
 
-  it('allows events to be re-dispatched', (done) => {
+  it('allows events to be re-dispatched', async () => {
     const listener1 = jasmine.createSpy('listener1');
     const listener2 = jasmine.createSpy('listener2');
 
     target.addEventListener('event', Util.spyFunc(listener1));
     target.addEventListener('event', Util.spyFunc(listener2));
 
+    /** @type {!shaka.util.FakeEventTarget} */
     const target2 = new shaka.util.FakeEventTarget();
     const target2Listener = jasmine.createSpy('target2Listener');
 
@@ -129,11 +126,9 @@ describe('FakeEventTarget', () => {
 
     target.dispatchEvent(new shaka.util.FakeEvent('event'));
 
-    shaka.test.Util.delay(0.1).then(() => {
-      expect(listener1).toHaveBeenCalled();
-      expect(listener2).toHaveBeenCalled();
-      expect(target2Listener).toHaveBeenCalled();
-      done();
-    });
+    await shaka.test.Util.delay(0.1);
+    expect(listener1).toHaveBeenCalled();
+    expect(listener2).toHaveBeenCalled();
+    expect(target2Listener).toHaveBeenCalled();
   });
 });

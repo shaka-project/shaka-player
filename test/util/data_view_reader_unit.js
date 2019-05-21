@@ -16,7 +16,7 @@
  */
 
 describe('DataViewReader', () => {
-  const Code = shaka.util.Error.Code;
+  const Util = shaka.test.Util;
 
   // |data| as interpreted as a 64 bit integer must not be larger than 2^53-1.
   // decimal digits.
@@ -249,40 +249,21 @@ describe('DataViewReader', () => {
     });
 
     function runTest(test) {
-      try {
-        test();
-        fail('Should throw exception');
-      } catch (e) {
-        expect(e).not.toBeNull();
-        expect(e instanceof shaka.util.Error).toBe(true);
-        expect(e.code).toBe(Code.BUFFER_READ_OUT_OF_BOUNDS);
-      }
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.BUFFER_READ_OUT_OF_BOUNDS));
+      expect(test).toThrow(expected);
     }
   });
 
   it('detects uint64s too large for JavaScript', () => {
-    let exception = null;
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.MEDIA,
+        shaka.util.Error.Code.JS_INTEGER_OVERFLOW));
 
-    try {
-      littleEndianReader.readUint64();
-    } catch (e) {
-      exception = e;
-    }
-
-    expect(exception).not.toBe(null);
-    expect(exception instanceof shaka.util.Error).toBe(true);
-    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
-
-    exception = null;
-
-    try {
-      bigEndianReader2.readUint64();
-    } catch (e) {
-      exception = e;
-    }
-
-    expect(exception).not.toBe(null);
-    expect(exception instanceof shaka.util.Error).toBe(true);
-    expect(exception.code).toBe(Code.JS_INTEGER_OVERFLOW);
+    expect(() => littleEndianReader.readUint64()).toThrow(expected);
+    expect(() => bigEndianReader2.readUint64()).toThrow(expected);
   });
 });
