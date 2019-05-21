@@ -201,9 +201,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
       this.controls.overrideCssShowControls();
       // If overflow menu has currently visible buttons, focus on the
       // first one, when the menu opens.
-      const isDisplayed = function(element) {
-        return element.classList.contains('shaka-hidden') == false;
-      };
+      const isDisplayed =
+          (element) => element.classList.contains('shaka-hidden') == false;
 
       const Iterables = shaka.util.Iterables;
       if (Iterables.some(this.overflowMenu_.childNodes, isDisplayed)) {

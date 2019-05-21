@@ -182,11 +182,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     const abrEnabled = this.player.getConfiguration().abr.enabled;
 
     // Add new ones
-    tracks.forEach((track) => {
+    for (const track of tracks) {
       const button = shaka.util.Dom.createHTMLElement('button');
       button.classList.add('explicit-resolution');
-      button.addEventListener('click',
-          this.onTrackSelected_.bind(this, track));
+      button.addEventListener('click', () => this.onTrackSelected_(track));
 
       const span = shaka.util.Dom.createHTMLElement('span');
       span.textContent = track.height + 'p';
@@ -200,7 +199,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
         this.currentResolution_.textContent = span.textContent;
       }
       this.resolutionMenu_.appendChild(button);
-    });
+    }
 
     // Add the Auto button
     const autoButton = shaka.util.Dom.createHTMLElement('button');

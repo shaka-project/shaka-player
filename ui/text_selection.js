@@ -206,7 +206,7 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 
     shaka.ui.LanguageUtils.updateLanguages(tracks, this.textLangMenu_,
         languages,
-        this.onTextLanguageSelected_.bind(this),
+        (lang) => this.onTextLanguageSelected_(lang),
 
         // Don't mark current text language as chosen unless captions are
         // enabled

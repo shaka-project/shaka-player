@@ -47,7 +47,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   constructor(player, videoContainer, video, config) {
     super();
-    shaka.util.FakeEventTarget.call(this);
 
     /** @private {boolean} */
     this.enabled_ = true;
@@ -718,7 +717,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for key down events to detect tab and enable outline
     // for focused elements.
-    this.eventManager_.listen(window, 'keydown', this.onKeyDown_.bind(this));
+    this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
 
     this.video_.addEventListener('play', () => {
       this.onPlayStateChange_();
@@ -1317,8 +1316,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Enable blue outline for focused elements for keyboard
       // navigation.
       this.controlsContainer_.classList.add('shaka-keyboard-navigation');
-      this.eventManager_.listen(window, 'mousedown',
-          this.onMouseDown_.bind(this));
+      this.eventManager_.listen(
+          window, 'mousedown', () => this.onMouseDown_());
     }
 
     // If escape key was pressed, close any open settings menus.
@@ -1396,7 +1395,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onMouseDown_() {
     this.eventManager_.unlisten(window, 'mousedown');
-    this.eventManager_.listen(window, 'keydown', this.onKeyDown_.bind(this));
+    this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
   }
 
 
