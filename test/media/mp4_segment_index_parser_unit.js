@@ -39,13 +39,15 @@ describe('Mp4SegmentIndexParser', () => {
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.MP4_SIDX_WRONG_BOX_TYPE));
     // eslint-disable-next-line new-cap
-    expect(() => shaka.media.Mp4SegmentIndexParser(mediaSegment, 0, [], 0))
+    expect(() =>
+      shaka.media.Mp4SegmentIndexParser.parse(mediaSegment, 0, [], 0))
         .toThrow(error);
   });
 
   it('parses index segment ', () => {
     // eslint-disable-next-line new-cap
-    const result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 0);
+    const result =
+        shaka.media.Mp4SegmentIndexParser.parse(indexSegment, 0, [], 0);
     const references =
         [
           {startTime: 0, endTime: 12, startByte: 92, endByte: 194960},
@@ -68,7 +70,8 @@ describe('Mp4SegmentIndexParser', () => {
 
   it('takes a scaled presentationTimeOffset in seconds', () => {
     // eslint-disable-next-line new-cap
-    const result = shaka.media.Mp4SegmentIndexParser(indexSegment, 0, [], 2);
+    const result =
+        shaka.media.Mp4SegmentIndexParser.parse(indexSegment, 0, [], 2);
     const references =
         [
           {startTime: -2, endTime: 10},
