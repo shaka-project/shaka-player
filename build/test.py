@@ -421,7 +421,8 @@ class Launcher:
     # Run the command.
     results = []
     for run in range(self.parsed_args.runs):
-      logging.info('Running test (%d / %d)...', run + 1, self.parsed_args.runs)
+      logging.info('Running test (%d / %d, %d failed so far)...',
+          run + 1, self.parsed_args.runs, len(results) - results.count(0))
       results.append(shakaBuildHelpers.execute_get_code(cmd))
 
     # Print a summary of the results.
