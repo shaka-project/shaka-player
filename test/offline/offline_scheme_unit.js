@@ -16,6 +16,12 @@
  */
 
 describe('OfflineScheme', () => {
+  // An arbitrary request type.
+  const requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+
+  // A dummy progress callback.
+  const progressUpdated = (elapsedMs, bytes, bytesRemaining) => {};
+
   beforeEach(checkAndRun(async () => {
     // Make sure we start with a clean slate.
     await clearStorage();
@@ -34,9 +40,8 @@ describe('OfflineScheme', () => {
         const uri = shaka.offline.OfflineUri.manifest(
             'mechanism', 'cell', 1024);
 
-        // eslint-disable-next-line new-cap
         const response = await shaka.offline.OfflineScheme.plugin(
-            uri.toString(), request).promise;
+            uri.toString(), request, requestType, progressUpdated).promise;
 
         expect(response).toBeTruthy();
         expect(response.uri).toBe(uri.toString());
@@ -63,9 +68,8 @@ describe('OfflineScheme', () => {
       await muxer.destroy();
     }
 
-    // eslint-disable-next-line new-cap
     const response = await shaka.offline.OfflineScheme.plugin(
-        uri.toString(), request).promise;
+        uri.toString(), request, requestType, progressUpdated).promise;
 
     expect(response).toBeTruthy();
     expect(response.data.byteLength).toBe(segment.data.byteLength);
@@ -94,8 +98,9 @@ describe('OfflineScheme', () => {
     }
 
     try {
-      // eslint-disable-next-line new-cap
-      await shaka.offline.OfflineScheme.plugin(uri.toString(), request).promise;
+      const op = shaka.offline.OfflineScheme.plugin(
+          uri.toString(), request, requestType, progressUpdated);
+      await op.promise;
       fail();
     } catch (e) {
       expect(e.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
@@ -107,8 +112,9 @@ describe('OfflineScheme', () => {
     const uri = 'this-in-an-invalid-uri';
 
     try {
-      // eslint-disable-next-line new-cap
-      await shaka.offline.OfflineScheme.plugin(uri, request).promise;
+      const op = shaka.offline.OfflineScheme.plugin(
+          uri, request, requestType, progressUpdated);
+      await op.promise;
       fail();
     } catch (e) {
       expect(e.code).toBe(shaka.util.Error.Code.MALFORMED_OFFLINE_URI);

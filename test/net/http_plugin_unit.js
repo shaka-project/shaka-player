@@ -25,6 +25,9 @@ function httpPluginTests(usingFetch) {
   // Neither plugin uses the request type, so this is arbitrary.
   const requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
 
+  // A dummy progress callback.
+  const progressUpdated = (elapsedMs, bytes, bytesRemaining) => {};
+
   /** @type {shaka.extern.RetryParameters} */
   let retryParameters;
 
@@ -172,7 +175,7 @@ function httpPluginTests(usingFetch) {
     request.method = 'POST';
     request.headers['BAZ'] = '123';
 
-    plugin(request.uris[0], request, requestType).promise
+    plugin(request.uris[0], request, requestType, progressUpdated).promise
         .then(() => {
           const actual = mostRecentRequest();
           expect(actual).toBeTruthy();
@@ -196,7 +199,7 @@ function httpPluginTests(usingFetch) {
       request.body = null;
       request.method = 'GET';
 
-      plugin(request.uris[0], request, requestType).promise
+      plugin(request.uris[0], request, requestType, progressUpdated).promise
           .then(() => {
             const actual = jasmine.Fetch.requests.mostRecent();
             expect(actual).toBeTruthy();
@@ -270,7 +273,7 @@ function httpPluginTests(usingFetch) {
   it('detects cache headers', (done) => {
     const request = shaka.net.NetworkingEngine.makeRequest(
         ['https://foo.bar/cache'], retryParameters);
-    plugin(request.uris[0], request, requestType).promise
+    plugin(request.uris[0], request, requestType, progressUpdated).promise
         .catch(fail)
         .then((response) => {
           expect(response).toBeTruthy();
@@ -287,7 +290,8 @@ function httpPluginTests(usingFetch) {
     if (usingFetch) {
       const request = shaka.net.NetworkingEngine.makeRequest(
           ['https://foo.bar/timeout'], retryParameters);
-      const operation = plugin(request.uris[0], request, requestType);
+      const operation = plugin(
+          request.uris[0], request, requestType, progressUpdated);
 
       /** @type {jasmine.Fetch.RequestStub} */
       const actual = jasmine.Fetch.requests.mostRecent();
@@ -329,7 +333,8 @@ function httpPluginTests(usingFetch) {
 
       const request = shaka.net.NetworkingEngine.makeRequest(
           ['https://foo.bar/'], retryParameters);
-      operation = plugin(request.uris[0], request, requestType);
+      operation = plugin(
+          request.uris[0], request, requestType, progressUpdated);
       requestPromise = operation.promise;
     }
 
@@ -362,7 +367,7 @@ function httpPluginTests(usingFetch) {
   function testSucceeds(uri, done, overrideUri) {
     const request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
-    plugin(uri, request, requestType).promise
+    plugin(uri, request, requestType, progressUpdated).promise
         .catch(fail)
         .then((response) => {
           expect(mostRecentRequest().url).toBe(uri);
@@ -388,7 +393,7 @@ function httpPluginTests(usingFetch) {
   function testFails(uri, done, severity, code, errorData) {
     const request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
-    plugin(uri, request, requestType).promise
+    plugin(uri, request, requestType, progressUpdated).promise
         .then(fail)
         .catch((error) => {
           expect(error).toBeTruthy();
@@ -417,7 +422,7 @@ function httpPluginTests(usingFetch) {
   function testSucceedsWithEmptyLine(uri, done, overrideUri) {
     const request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
-    plugin(uri, request, requestType).promise
+    plugin(uri, request, requestType, progressUpdated).promise
         .catch(fail)
         .then((response) => {
           expect(mostRecentRequest().url).toBe(uri);

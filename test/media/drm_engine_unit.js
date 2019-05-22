@@ -1274,8 +1274,13 @@ describe('DrmEngine', () => {
       // Not mocked.  Run data through real data URI parser to ensure that it is
       // correctly formatted.
       fakeNetEngine.request.and.callFake((type, request) => {
-        // eslint-disable-next-line new-cap
-        return shaka.net.DataUriPlugin.parse(request.uris[0], request);
+        const requestType = shaka.net.NetworkingEngine.RequestType.LICENSE;
+
+        // A dummy progress callback.
+        const progressUpdated = (elapsedMs, bytes, bytesRemaining) => {};
+
+        return shaka.net.DataUriPlugin.parse(
+            request.uris[0], request, requestType, progressUpdated);
       });
 
       await initAndAttach();

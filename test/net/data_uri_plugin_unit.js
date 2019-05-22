@@ -65,33 +65,40 @@ describe('DataUriPlugin', () => {
   });
 
   function testSucceeds(uri, contentType, text, done) {
+    // An arbitrary request type.
+    const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+    // A dummy progress callback.
+    const progressUpdated = (elapsedMs, bytes, bytesRemaining) => {};
+
     const request =
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
-    // eslint-disable-next-line new-cap
-    shaka.net.DataUriPlugin.parse(uri, request).promise
-        .then((response) => {
-          expect(response).toBeTruthy();
-          expect(response.uri).toBe(uri);
-          expect(response.data).toBeTruthy();
-          expect(response.headers['content-type']).toBe(contentType);
-          const data =
-              shaka.util.StringUtils.fromBytesAutoDetect(response.data);
-          expect(data).toBe(text);
-        })
-        .catch(fail)
-        .then(done);
+    const op = shaka.net.DataUriPlugin.parse(
+        uri, request, requestType, progressUpdated);
+    op.promise.then((response) => {
+      expect(response).toBeTruthy();
+      expect(response.uri).toBe(uri);
+      expect(response.data).toBeTruthy();
+      expect(response.headers['content-type']).toBe(contentType);
+      const data =
+          shaka.util.StringUtils.fromBytesAutoDetect(response.data);
+      expect(data).toBe(text);
+    }).catch(fail).then(done);
   }
 
   function testFails(uri, done, code) {
+    // An arbitrary request type.
+    const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+    // A dummy progress callback.
+    const progressUpdated = (elapsedMs, bytes, bytesRemaining) => {};
+
     const request =
         shaka.net.NetworkingEngine.makeRequest([uri], retryParameters);
-    // eslint-disable-next-line new-cap
-    shaka.net.DataUriPlugin.parse(uri, request).promise
+    const op = shaka.net.DataUriPlugin.parse(
+        uri, request, requestType, progressUpdated);
+    op.promise
         .then(fail)
         .catch((error) => { expect(error.code).toBe(code); })
-        .then(() => {
-          done();
-        });
+        .then(done);
   }
 });
 
