@@ -132,13 +132,16 @@ shaka.extern.Response;
  * @typedef {!function(string,
  *                     shaka.extern.Request,
  *                     shaka.net.NetworkingEngine.RequestType,
- *                     shaka.extern.ProgressUpdated=):
+ *                     shaka.extern.ProgressUpdated):
  *     !shaka.extern.IAbortableOperation.<shaka.extern.Response>}
  * @description
  * Defines a plugin that handles a specific scheme.
+ *
  * The functions accepts four parameters, uri string, request, request type,
- * and an optional progressUpdated function.
-
+ * and a progressUpdated function.  The progressUpdated function can be ignored
+ * by plugins that do not have this information, but it will always be provided
+ * by NetworkingEngine.
+ *
  * @exportDoc
  */
 shaka.extern.SchemePlugin;

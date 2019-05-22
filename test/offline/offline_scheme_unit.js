@@ -15,8 +15,14 @@
  * limitations under the License.
  */
 
-describe('OfflineScheme', function() {
-  beforeEach(checkAndRun(async function() {
+describe('OfflineScheme', () => {
+  // An arbitrary request type.
+  const requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+
+  // A dummy progress callback.
+  const progressUpdated = (elapsedMs, bytes, bytesRemaining) => {};
+
+  beforeEach(checkAndRun(async () => {
     // Make sure we start with a clean slate.
     await clearStorage();
   }));
@@ -35,8 +41,8 @@ describe('OfflineScheme', function() {
             'mechanism', 'cell', 1024);
 
         // eslint-disable-next-line new-cap
-        let response = await shaka.offline.OfflineScheme(
-            uri.toString(), request).promise;
+        const response = await shaka.offline.OfflineScheme(
+            uri.toString(), request, requestType, progressUpdated).promise;
 
         expect(response).toBeTruthy();
         expect(response.uri).toBe(uri.toString());
@@ -64,8 +70,8 @@ describe('OfflineScheme', function() {
     }
 
     // eslint-disable-next-line new-cap
-    let response = await shaka.offline.OfflineScheme(
-        uri.toString(), request).promise;
+    const response = await shaka.offline.OfflineScheme(
+        uri.toString(), request, requestType, progressUpdated).promise;
 
     expect(response).toBeTruthy();
     expect(response.data.byteLength).toBe(segment.data.byteLength);
@@ -95,7 +101,9 @@ describe('OfflineScheme', function() {
 
     try {
       // eslint-disable-next-line new-cap
-      await shaka.offline.OfflineScheme(uri.toString(), request).promise;
+      const op = shaka.offline.OfflineScheme(
+          uri.toString(), request, requestType, progressUpdated);
+      await op.promise;
       fail();
     } catch (e) {
       expect(e.code).toBe(shaka.util.Error.Code.KEY_NOT_FOUND);
@@ -108,7 +116,9 @@ describe('OfflineScheme', function() {
 
     try {
       // eslint-disable-next-line new-cap
-      await shaka.offline.OfflineScheme(uri, request).promise;
+      const op = shaka.offline.OfflineScheme(
+          uri, request, requestType, progressUpdated);
+      await op.promise;
       fail();
     } catch (e) {
       expect(e.code).toBe(shaka.util.Error.Code.MALFORMED_OFFLINE_URI);
