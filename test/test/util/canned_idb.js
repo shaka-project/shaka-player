@@ -40,7 +40,8 @@ shaka.test.CannedIDB = class {
    */
   static async dumpJSON(name, dummyArrayBuffers) {
     const savedDatabase = await this.dump(name, dummyArrayBuffers);
-    const replacer = this.replacer_.bind(null, dummyArrayBuffers);
+    const replacer =
+        (key, value) => this.replacer_(dummyArrayBuffers, key, value);
     return JSON.stringify(savedDatabase, replacer);
   }
 
@@ -326,14 +327,14 @@ shaka.test.CannedIDB = class {
 
         shaka.log.debug('Populating store', storeName, 'with',
             storeInfo.data.length, 'entries');
-        storeInfo.data.forEach((item) => {
+        for (const item of storeInfo.data) {
           // If this store uses an explicit keyPath, we can't specify a key.
           if (storeInfo.parameters.keyPath) {
             store.add(item.value);
           } else {
             store.add(item.value, item.key);
           }
-        });
+        }
       }
 
       transaction.oncomplete = (event) => {

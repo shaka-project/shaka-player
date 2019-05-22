@@ -18,95 +18,92 @@
 goog.provide('shaka.test.OfflineUtils');
 
 
-/**
- * @param {string} originalUri
- * @return {shaka.extern.ManifestDB}
- */
-shaka.test.OfflineUtils.createManifest = function(originalUri) {
-  return {
-    appMetadata: null,
-    drmInfo: null,
-    duration: 90,
-    expiration: Infinity,
-    originalManifestUri: originalUri,
-    periods: [],
-    sessionIds: [],
-    size: 1024,
-  };
-};
+shaka.test.OfflineUtils = class {
+  /**
+   * @param {string} originalUri
+   * @return {shaka.extern.ManifestDB}
+   */
+  static createManifest(originalUri) {
+    return {
+      appMetadata: null,
+      drmInfo: null,
+      duration: 90,
+      expiration: Infinity,
+      originalManifestUri: originalUri,
+      periods: [],
+      sessionIds: [],
+      size: 1024,
+    };
+  }
 
+  /**
+   * @param {number} id
+   * @param {string} type
+   * @return {shaka.extern.StreamDB}
+   */
+  static createStream(id, type) {
+    return {
+      id: id,
+      originalId: id.toString(),
+      primary: false,
+      presentationTimeOffset: 0,
+      contentType: type,
+      mimeType: '',
+      codecs: '',
+      frameRate: undefined,
+      kind: undefined,
+      language: '',
+      label: null,
+      width: null,
+      height: null,
+      initSegmentKey: null,
+      encrypted: false,
+      keyId: null,
+      segments: [],
+      variantIds: [],
+    };
+  }
 
-/**
- * @param {number} id
- * @param {string} type
- * @return {shaka.extern.StreamDB}
- */
-shaka.test.OfflineUtils.createStream = function(id, type) {
-  return {
-    id: id,
-    originalId: id.toString(),
-    primary: false,
-    presentationTimeOffset: 0,
-    contentType: type,
-    mimeType: '',
-    codecs: '',
-    frameRate: undefined,
-    kind: undefined,
-    language: '',
-    label: null,
-    width: null,
-    height: null,
-    initSegmentKey: null,
-    encrypted: false,
-    keyId: null,
-    segments: [],
-    variantIds: [],
-  };
-};
+  /**
+   * @param {!Array.<number>} data
+   * @return {shaka.extern.SegmentDataDB}
+   */
+  static createSegmentData(data) {
+    /** @type {Uint8Array} */
+    const array = new Uint8Array(data);
 
+    return {
+      data: array.buffer,
+    };
+  }
 
-/**
- * @param {!Array.<number>} data
- * @return {shaka.extern.SegmentDataDB}
- */
-shaka.test.OfflineUtils.createSegmentData = function(data) {
-  /** @type {Uint8Array} */
-  const array = new Uint8Array(data);
+  /**
+   * @param {!Array.<shaka.extern.SegmentDataDB>} segments
+   * @param {shaka.extern.SegmentDataDB} expected
+   */
+  static expectSegmentsToContain(segments, expected) {
+    const actualData = segments.map((segment) => {
+      expect(segment.data).toBeTruthy();
+      return new Uint8Array(segment.data);
+    });
 
-  return {
-    data: array.buffer,
-  };
-};
+    expect(expected.data).toBeTruthy();
+    const expectedData = new Uint8Array(expected.data);
 
+    expect(actualData).toContain(expectedData);
+  }
 
-/**
- * @param {!Array.<shaka.extern.SegmentDataDB>} segments
- * @param {shaka.extern.SegmentDataDB} expected
- */
-shaka.test.OfflineUtils.expectSegmentsToContain = function(segments,
-    expected) {
-  const actualData = segments.map((segment) => {
-    expect(segment.data).toBeTruthy();
-    return new Uint8Array(segment.data);
-  });
+  /**
+   * @param {shaka.extern.SegmentDataDB} actual
+   * @param {shaka.extern.SegmentDataDB} expected
+   */
+  static expectSegmentToEqual(actual, expected) {
+    expect(actual.data).toBeTruthy();
+    expect(expected.data).toBeTruthy();
 
-  expect(expected.data).toBeTruthy();
-  const expectedData = new Uint8Array(expected.data);
+    const actualData = new Uint8Array(actual.data);
+    const expectedData = new Uint8Array(expected.data);
 
-  expect(actualData).toContain(expectedData);
-};
-
-
-/**
- * @param {shaka.extern.SegmentDataDB} actual
- * @param {shaka.extern.SegmentDataDB} expected
- */
-shaka.test.OfflineUtils.expectSegmentToEqual = function(actual, expected) {
-  expect(actual.data).toBeTruthy();
-  expect(expected.data).toBeTruthy();
-
-  const actualData = new Uint8Array(actual.data);
-  const expectedData = new Uint8Array(expected.data);
-
-  expect(actualData).toEqual(expectedData);
+    expect(actualData).toEqual(expectedData);
+  }
 };

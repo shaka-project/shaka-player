@@ -109,7 +109,8 @@ describe('CastReceiver', () => {
     Object.defineProperty(window['navigator'],
         'userAgent', {value: 'CrKey', configurable: true});
 
-    shaka.net.NetworkingEngine.registerScheme('test', shaka.test.TestScheme);
+    shaka.net.NetworkingEngine.registerScheme(
+        'test', shaka.test.TestScheme.plugin);
     shaka.media.ManifestParser.registerParserByMime(
         'application/x-test-manifest',
         shaka.test.TestScheme.ManifestParser);

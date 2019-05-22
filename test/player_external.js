@@ -30,7 +30,7 @@ describe('Player', () => {
   let video;
   /** @type {shaka.Player} */
   let player;
-  /** @type {shaka.util.EventManager} */
+  /** @type {!shaka.util.EventManager} */
   let eventManager;
 
   let compiledShaka;
