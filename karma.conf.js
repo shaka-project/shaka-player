@@ -68,9 +68,8 @@ module.exports = (config) => {
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: [
-      'jasmine-ajax', 'jasmine',
-      // Fixes backtraces after Babel preprocessing
-      'source-map-support',
+      'jasmine-ajax',
+      'jasmine',
     ],
 
     plugins: [
@@ -127,19 +126,22 @@ module.exports = (config) => {
     proxies: {},
 
     preprocessors: {
-      // Convert ES6 to ES5 so we can still run tests on IE11 and Tizen.
-      'demo/**/*.js': ['babel'],
-      'lib/**/*.js': ['babel'],
-      'ui/**/*.js': ['babel'],
-      'test/**/*.js': ['babel'],
-      'third_party/language-mapping-list/*.js': ['babel'],
+      // Use babel to convert ES6 to ES5 so we can still run tests everywhere.
+      // Use sourcemap to read inline source maps from babel into karma.
+      'demo/**/*.js': ['babel', 'sourcemap'],
+      'lib/**/*.js': ['babel', 'sourcemap'],
+      'ui/**/*.js': ['babel', 'sourcemap'],
+      'test/**/*.js': ['babel', 'sourcemap'],
+      'third_party/language-mapping-list/*.js': ['babel', 'sourcemap'],
     },
 
     babelPreprocessor: {
       options: {
         presets: ['env'],
         // Add source maps so that backtraces refer to the original code.
-        // The source-map-support framework is necessary to make this work.
+        // Babel will output inline source maps, and the 'sourcemap'
+        // preprocessor will read them and feed them to Karma.  Karma will then
+        // use them to reformat stack traces in errors.
         sourceMap: 'inline',
         // Add instrumentation for code coverage.
         plugins: [

@@ -37,7 +37,7 @@
     "karma-jasmine-ajax": "^0.1.13",
     "karma-opera-launcher": "^1.0.0",
     "karma-safari-launcher": "^1.0.0",
-    "karma-source-map-support": "^1.4.0",
+    "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "0.0.32",
     "karma-webdriver-launcher": "^1.0.5",
     "less": "^3.9.0",
