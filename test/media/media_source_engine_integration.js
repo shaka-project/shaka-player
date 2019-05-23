@@ -193,32 +193,31 @@ describe('MediaSourceEngine', () => {
     expect(mediaSource.duration).toBeCloseTo(30);
   });
 
-  it('queues operations', (done) => {
+  it('queues operations', async () => {
+    /** @type {!Array.<number>} */
     const resolutionOrder = [];
+    /** @type {!Array.<!Promise>} */
     const requests = [];
 
     function checkOrder(p) {
       const nextIndex = requests.length;
-      requests.push(p);
-      p.then(() => {
+      requests.push(p.then(() => {
         resolutionOrder.push(nextIndex);
-      });
+      }));
     }
 
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
-    mediaSourceEngine.init(initObject, false).then(() => {
-      checkOrder(mediaSourceEngine.setDuration(presentationDuration));
-      checkOrder(appendInit(ContentType.VIDEO));
-      checkOrder(append(ContentType.VIDEO, 1));
-      checkOrder(append(ContentType.VIDEO, 2));
-      checkOrder(append(ContentType.VIDEO, 3));
-      checkOrder(mediaSourceEngine.endOfStream());
+    await mediaSourceEngine.init(initObject, false);
+    checkOrder(mediaSourceEngine.setDuration(presentationDuration));
+    checkOrder(appendInit(ContentType.VIDEO));
+    checkOrder(append(ContentType.VIDEO, 1));
+    checkOrder(append(ContentType.VIDEO, 2));
+    checkOrder(append(ContentType.VIDEO, 3));
+    checkOrder(mediaSourceEngine.endOfStream());
 
-      return Promise.all(requests);
-    }).then(() => {
-      expect(resolutionOrder).toEqual([0, 1, 2, 3, 4, 5]);
-    }).catch(fail).then(done);
+    await Promise.all(requests);
+    expect(resolutionOrder).toEqual([0, 1, 2, 3, 4, 5]);
   });
 
   it('buffers MP4 audio', async () => {
@@ -246,49 +245,39 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.init(initObject, false);
     await mediaSourceEngine.setDuration(presentationDuration);
 
-    const audioStreaming = appendInit(ContentType.AUDIO).then(() => {
-      return append(ContentType.AUDIO, 1);
-    }).then(() => {
+    const audioStreaming = async () => {
+      await appendInit(ContentType.AUDIO);
+      await append(ContentType.AUDIO, 1);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(10, 1);
-      return append(ContentType.AUDIO, 2);
-    }).then(() => {
+      await append(ContentType.AUDIO, 2);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(20, 1);
-      return append(ContentType.AUDIO, 3);
-    }).then(() => {
+      await append(ContentType.AUDIO, 3);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(30, 1);
-      return append(ContentType.AUDIO, 4);
-    }).then(() => {
+      await append(ContentType.AUDIO, 4);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(40, 1);
-      return append(ContentType.AUDIO, 5);
-    }).then(() => {
+      await append(ContentType.AUDIO, 5);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(50, 1);
-      return append(ContentType.AUDIO, 6);
-    }).then(() => {
+      await append(ContentType.AUDIO, 6);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(60, 1);
-    });
+    };
 
-    const videoStreaming = appendInit(ContentType.VIDEO).then(() => {
-      return append(ContentType.VIDEO, 1);
-    }).then(() => {
+    const videoStreaming = async () => {
+      await appendInit(ContentType.VIDEO);
+      await append(ContentType.VIDEO, 1);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(10);
-      return append(ContentType.VIDEO, 2);
-    }).then(() => {
+      await append(ContentType.VIDEO, 2);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20);
-      return append(ContentType.VIDEO, 3);
-    }).then(() => {
+      await append(ContentType.VIDEO, 3);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
-      return append(ContentType.VIDEO, 4);
-    }).then(() => {
+      await append(ContentType.VIDEO, 4);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(40);
-      return append(ContentType.VIDEO, 5);
-    }).then(() => {
+      await append(ContentType.VIDEO, 5);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(50);
-      return append(ContentType.VIDEO, 6);
-    }).then(() => {
+      await append(ContentType.VIDEO, 6);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(60);
-    });
+    };
 
-    await Promise.all([audioStreaming, videoStreaming]);
+    await Promise.all([audioStreaming(), videoStreaming()]);
     await mediaSourceEngine.endOfStream();
     expect(mediaSource.duration).toBeCloseTo(60, 1);
   });

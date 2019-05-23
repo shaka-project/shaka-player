@@ -471,8 +471,8 @@ describe('StreamingEngine', () => {
     streamingEngine.configure(config);
   }
 
-  afterEach((done) => {
-    streamingEngine.destroy().catch(fail).then(done);
+  afterEach(() => {
+    streamingEngine.destroy().catch(fail);
     PromiseMock.flush();
   });
 
@@ -683,7 +683,7 @@ describe('StreamingEngine', () => {
       setupFakeGetTime(100);
     });
 
-    onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+    onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
 
     // Here we go!
     streamingEngine.start();
@@ -817,7 +817,7 @@ describe('StreamingEngine', () => {
     createStreamingEngine();
 
     // Here we go!
-    onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+    onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
     streamingEngine.start();
 
     runTest();
@@ -831,7 +831,7 @@ describe('StreamingEngine', () => {
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
 
-    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onStartupComplete.and.callFake(() => setupFakeGetTime(0));
     onChooseStreams.and.callFake((period) => {
       const chosen = defaultOnChooseStreams(period);
       if (period == manifest.periods[0]) {
@@ -860,7 +860,7 @@ describe('StreamingEngine', () => {
     // not cause us to fallback to the Playhead time to determine which segment
     // to start streaming.
     const oldGet = textStream2.getSegmentReference;
-    textStream2.getSegmentReference = function(idx) {
+    textStream2.getSegmentReference = (idx) => {
       if (idx == 1) {
         textStream2.getSegmentReference = oldGet;
         return null;
@@ -871,7 +871,7 @@ describe('StreamingEngine', () => {
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
 
-    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onStartupComplete.and.callFake(() => setupFakeGetTime(0));
     onChooseStreams.and.callFake((period) => {
       const chosen = defaultOnChooseStreams(period);
       if (period == manifest.periods[0]) {
@@ -897,7 +897,7 @@ describe('StreamingEngine', () => {
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
 
-    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onStartupComplete.and.callFake(() => setupFakeGetTime(0));
     onChooseStreams.and.callFake(defaultOnChooseStreams);
 
     // When we can switch in the second Period, switch to the playing stream.
@@ -924,7 +924,7 @@ describe('StreamingEngine', () => {
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
 
-    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onStartupComplete.and.callFake(() => setupFakeGetTime(0));
     onChooseStreams.and.callFake((period) => {
       const chosen = defaultOnChooseStreams(period);
       if (period == manifest.periods[1]) {
@@ -949,7 +949,7 @@ describe('StreamingEngine', () => {
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
 
-    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onStartupComplete.and.callFake(() => setupFakeGetTime(0));
     onChooseStreams.and.callFake(defaultOnChooseStreams);
 
     mediaSourceEngine.endOfStream.and.callFake(() => {
@@ -975,7 +975,7 @@ describe('StreamingEngine', () => {
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
 
-    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onStartupComplete.and.callFake(() => setupFakeGetTime(0));
     onChooseStreams.and.callFake(defaultOnChooseStreams);
 
     mediaSourceEngine.endOfStream.and.callFake(() => {
@@ -1000,7 +1000,7 @@ describe('StreamingEngine', () => {
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
 
-    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onStartupComplete.and.callFake(() => setupFakeGetTime(0));
     onChooseStreams.and.callFake(defaultOnChooseStreams);
 
     // Here we go!
@@ -1010,9 +1010,7 @@ describe('StreamingEngine', () => {
     // The second Period starts at 20, so we should set the appendWindowStart to
     // 20, but reduced by a small fudge factor.
     const lt20 = {
-      asymmetricMatch: function(val) {
-        return val >= 19.9 && val < 20;
-      },
+      asymmetricMatch: (val) => val >= 19.9 && val < 20,
     };
     expect(mediaSourceEngine.setStreamProperties)
         .toHaveBeenCalledWith('video', 20, lt20, 40);
@@ -1040,11 +1038,11 @@ describe('StreamingEngine', () => {
       // Validate that no one media type got ahead of any other.
       let minBuffered = Infinity;
       let maxBuffered = 0;
-      ['audio', 'video', 'text'].forEach((t) => {
+      for (const t of ['audio', 'video', 'text']) {
         const buffered = mediaSourceEngine.bufferedAheadOfImpl(t, 0);
         minBuffered = Math.min(minBuffered, buffered);
         maxBuffered = Math.max(maxBuffered, buffered);
-      });
+      }
 
       // Sanity check.
       expect(maxBuffered).not.toBeLessThan(minBuffered);
@@ -1055,7 +1053,7 @@ describe('StreamingEngine', () => {
     });
 
     // Here we go!
-    onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+    onStartupComplete.and.callFake(() => setupFakeGetTime(0));
     onChooseStreams.and.callFake(defaultOnChooseStreams);
     streamingEngine.start();
 
@@ -1097,7 +1095,7 @@ describe('StreamingEngine', () => {
       // For these tests, we don't care about specific data appended.
       // Just return any old ArrayBuffer for any requested segment.
       netEngine = {
-        request: function(requestType, request) {
+        request: (requestType, request) => {
           const buffer = new ArrayBuffer(0);
           const response = {uri: request.uris[0], data: buffer, headers: {}};
           return shaka.util.AbortableOperation.completed(response);
@@ -1133,7 +1131,7 @@ describe('StreamingEngine', () => {
       presentationTimeInSeconds = 0;
       createStreamingEngine();
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
       onChooseStreams.and.callFake(() => {
         return {variant: initialVariant, text: initialTextStream};
       });
@@ -1180,7 +1178,7 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       onTick = jasmine.createSpy('onTick');
       onTick.and.stub();
@@ -1272,7 +1270,7 @@ describe('StreamingEngine', () => {
         return defaultOnChooseStreams(period);
       });
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       // Here we go!
       streamingEngine.start();
@@ -1419,7 +1417,7 @@ describe('StreamingEngine', () => {
       // Start from the second Period.
       presentationTimeInSeconds = 20;
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 20));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(20));
 
       onChooseStreams.and.callFake((period) => {
         expect(period).toBe(manifest.periods[1]);
@@ -1557,7 +1555,7 @@ describe('StreamingEngine', () => {
 
       // This happens after onInitialStreamsSetup(), so pass 15 so the playhead
       // resumes from 15.
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 15));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(15));
 
       // Here we go!
       streamingEngine.start();
@@ -1582,7 +1580,7 @@ describe('StreamingEngine', () => {
       // Start from the second segment in the second Period.
       presentationTimeInSeconds = 30;
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 20));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(20));
 
       onChooseStreams.and.callFake((period) => {
         expect(period).toBe(manifest.periods[1]);
@@ -1714,7 +1712,7 @@ describe('StreamingEngine', () => {
         return defaultOnChooseStreams(period);
       });
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       // Here we go!
       streamingEngine.start();
@@ -1740,7 +1738,7 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData, 0);
       createStreamingEngine();
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 100));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(100));
     });
 
     it('outside segment availability window', () => {
@@ -1843,8 +1841,8 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
-      streamingEngine.start().then(fail).catch(Util.spyFunc(onInitError));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
+      streamingEngine.start().then(fail, Util.spyFunc(onInitError));
 
       runTest();
       expect(onInitError).toHaveBeenCalled();
@@ -1866,7 +1864,7 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start().catch(fail);
       runTest();
       expect(onError).toHaveBeenCalled();
@@ -1978,7 +1976,7 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest();
@@ -2012,7 +2010,7 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest();
@@ -2047,7 +2045,7 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest();
@@ -2082,7 +2080,7 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest();
@@ -2121,7 +2119,7 @@ describe('StreamingEngine', () => {
       onError.and.stub();
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       const startTime = Date.now();
@@ -2158,7 +2156,7 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest();
@@ -2202,7 +2200,7 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest();
@@ -2226,7 +2224,7 @@ describe('StreamingEngine', () => {
         setupFakeGetTime(0);
       });
 
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       // Here we go!
@@ -2267,7 +2265,7 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine(config);
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       const originalRemove =
           shaka.test.FakeMediaSourceEngine.prototype.removeImpl
@@ -2291,7 +2289,7 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       // Since StreamingEngine is free to peform audio, video, and text updates
@@ -2337,8 +2335,8 @@ describe('StreamingEngine', () => {
       // Create StreamingEngine.
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine(config);
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest(() => {
@@ -2374,7 +2372,7 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine(config);
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       const originalAppendBuffer =
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
@@ -2402,7 +2400,7 @@ describe('StreamingEngine', () => {
           });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest();
@@ -2434,7 +2432,7 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine(config);
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       const originalAppendBuffer =
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
@@ -2466,7 +2464,7 @@ describe('StreamingEngine', () => {
       });
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       // Stop the playhead after 10 seconds since will not append any
@@ -2494,10 +2492,10 @@ describe('StreamingEngine', () => {
           new shaka.test.FakeMediaSourceEngine(segmentData, drift);
       createStreamingEngine();
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, drift));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(drift));
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest();
@@ -2527,7 +2525,7 @@ describe('StreamingEngine', () => {
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest();
@@ -2546,9 +2544,9 @@ describe('StreamingEngine', () => {
       });
     }
 
-    it('is handled for small + values', testPositiveDrift.bind(null, 3));
-    it('is handled for large + values', testPositiveDrift.bind(null, 12));
-    it('is handled for small - values', testNegativeDrift.bind(null, -3));
+    it('is handled for small + values', () => testPositiveDrift(3));
+    it('is handled for large + values', () => testPositiveDrift(12));
+    it('is handled for small - values', () => testNegativeDrift(-3));
   });
 
   describe('live drift', () => {
@@ -2566,10 +2564,10 @@ describe('StreamingEngine', () => {
 
       presentationTimeInSeconds = 100;
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 100));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(100));
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest(slideSegmentAvailabilityWindow);
@@ -2595,7 +2593,7 @@ describe('StreamingEngine', () => {
       }
     }
 
-    it('is handled for large - values', testNegativeDrift.bind(null, -12));
+    it('is handled for large - values', () => testNegativeDrift(-12));
   });
 
   describe('setTrickPlay', () => {
@@ -2610,10 +2608,10 @@ describe('StreamingEngine', () => {
       config.bufferingGoal = 1;
       createStreamingEngine(config);
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       // Here we go!
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
       streamingEngine.start();
 
       runTest(() => {
@@ -2719,8 +2717,8 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
-      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
+      onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
     });
 
     it('raises an event for registered embedded emsg boxes', () => {
@@ -2903,7 +2901,7 @@ describe('StreamingEngine', () => {
 
       getBandwidthEstimate.and.returnValue(1);  // very slow by default
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
       onChooseStreams.and.callFake(() => ({variant: initialVariant}));
     });
 

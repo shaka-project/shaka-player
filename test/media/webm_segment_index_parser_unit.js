@@ -33,29 +33,20 @@ describe('WebmSegmentIndexParser', () => {
   });
 
   it('rejects a non-index segment ', () => {
-    const error = new shaka.util.Error(
+    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
-        shaka.util.Error.Code.WEBM_CUES_ELEMENT_MISSING);
-    try {
-      parser.parse(initSegment, initSegment, [], 0);
-      fail('non-index segment is supported');
-    } catch (e) {
-      shaka.test.Util.expectToEqualError(e, error);
-    }
+        shaka.util.Error.Code.WEBM_CUES_ELEMENT_MISSING));
+    expect(() => parser.parse(initSegment, initSegment, [], 0)).toThrow(error);
   });
 
   it('rejects an invalid init segment ', () => {
-    const error = new shaka.util.Error(
+    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
-        shaka.util.Error.Code.WEBM_EBML_HEADER_ELEMENT_MISSING);
-    try {
-      parser.parse(indexSegment, indexSegment, [], 0);
-      fail('invalid init segment is supported');
-    } catch (e) {
-      shaka.test.Util.expectToEqualError(e, error);
-    }
+        shaka.util.Error.Code.WEBM_EBML_HEADER_ELEMENT_MISSING));
+    expect(() => parser.parse(indexSegment, indexSegment, [], 0))
+        .toThrow(error);
   });
 
   it('parses index segment ', () => {

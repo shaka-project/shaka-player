@@ -16,6 +16,8 @@
  */
 
 describe('Mp4SegmentIndexParser', () => {
+  const Util = shaka.test.Util;
+
   const indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
   const mediaSegmentUri = '/base/test/test/assets/sintel-audio-segment.mp4';
 
@@ -32,17 +34,13 @@ describe('Mp4SegmentIndexParser', () => {
   });
 
   it('rejects a non-index segment ', () => {
-    const error = new shaka.util.Error(
+    const error = Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.MEDIA,
-        shaka.util.Error.Code.MP4_SIDX_WRONG_BOX_TYPE);
-    try {
-      // eslint-disable-next-line new-cap
-      shaka.media.Mp4SegmentIndexParser(mediaSegment, 0, [], 0);
-      fail('non-index segment is supported');
-    } catch (e) {
-      shaka.test.Util.expectToEqualError(e, error);
-    }
+        shaka.util.Error.Code.MP4_SIDX_WRONG_BOX_TYPE));
+    // eslint-disable-next-line new-cap
+    expect(() => shaka.media.Mp4SegmentIndexParser(mediaSegment, 0, [], 0))
+        .toThrow(error);
   });
 
   it('parses index segment ', () => {

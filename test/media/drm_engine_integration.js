@@ -61,20 +61,17 @@ describe('DrmEngine', () => {
   let audioSegment;
 
   beforeAll(async () => {
-    const supportTest = shaka.media.DrmEngine.probeSupport()
-        .then((result) => { support = result; })
-        .catch(fail);
-
     video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
 
     const responses = await Promise.all([
-      supportTest,
+      shaka.media.DrmEngine.probeSupport(),
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
       shaka.test.Util.fetch(audioSegmentUri),
     ]);
+    support = responses[0];
     videoInitSegment = responses[1];
     videoSegment = responses[2];
     audioInitSegment = responses[3];
@@ -159,22 +156,24 @@ describe('DrmEngine', () => {
 
   describe('basic flow', () => {
     drmIt('gets a license and can play encrypted segments',
-        checkAndRun((done) => {
+        checkAndRun(async () => {
           // The error callback should not be invoked.
           onErrorSpy.and.callFake(fail);
 
-          const originalRequest =
-              networkingEngine.request.bind(networkingEngine);
+          const originalRequest = networkingEngine.request;
           let requestComplete;
+          /** @type {!jasmine.Spy} */
           const requestSpy = jasmine.createSpy('request');
+          /** @type {!shaka.util.PublicPromise} */
           const requestMade = new shaka.util.PublicPromise();
-          requestSpy.and.callFake(function() {
+          requestSpy.and.callFake((...args) => {
             requestMade.resolve();
-            requestComplete = originalRequest.apply(null, arguments);
+            requestComplete = originalRequest.call(networkingEngine, ...args);
             return requestComplete;
           });
           networkingEngine.request = shaka.test.Util.spyFunc(requestSpy);
 
+          /** @type {!shaka.util.PublicPromise} */
           const encryptedEventSeen = new shaka.util.PublicPromise();
           eventManager.listen(video, 'encrypted', () => {
             encryptedEventSeen.resolve();
@@ -190,6 +189,7 @@ describe('DrmEngine', () => {
             }
           });
 
+          /** @type {!shaka.util.PublicPromise} */
           const keyStatusEventSeen = new shaka.util.PublicPromise();
           onKeyStatusSpy.and.callFake(() => {
             keyStatusEventSeen.resolve();
@@ -198,79 +198,75 @@ describe('DrmEngine', () => {
           const periods = manifest.periods;
           const variants = shaka.util.Periods.getAllVariantsFrom(periods);
 
-          drmEngine.initForPlayback(
-              variants, manifest.offlineSessionIds).then(() => {
-            return drmEngine.attach(video);
-          }).then(() => {
-            return mediaSourceEngine.appendBuffer(ContentType.VIDEO,
-                videoInitSegment, null, null, /* hasClosedCaptions */ false);
-          }).then(() => {
-            return mediaSourceEngine.appendBuffer(ContentType.AUDIO,
-                audioInitSegment, null, null, /* hasClosedCaptions */ false);
-          }).then(() => {
-            return encryptedEventSeen;
-          }).then(() => {
-            // With PlayReady, a persistent license policy can cause a different
-            // chain of events.  In particular, the request is bypassed and we
-            // get a usable key right away.
-            return Promise.race([requestMade, keyStatusEventSeen]);
-          }).then(() => {
-            if (requestSpy.calls.count()) {
-              // We made a license request.
-              // Only one request should have been made.
-              expect(requestSpy.calls.count()).toBe(1);
-              // So it's reasonable to assume that this requestComplete Promise
-              // is waiting on the correct request.
-              return requestComplete;
-            } else {
-              // This was probably a PlayReady persistent license.
-              return null;
-            }
-          }).then(() => {
-            // Some platforms (notably 2017 Tizen TVs) do not fire key status
-            // events.
-            const keyStatusTimeout = shaka.test.Util.delay(5);
-            return Promise.race([keyStatusTimeout, keyStatusEventSeen]);
-          }).then(() => {
-            const call = onKeyStatusSpy.calls.mostRecent();
-            if (call) {
-              const map = /** @type {!Object} */ (call.args[0]);
-              expect(Object.keys(map).length).not.toBe(0);
-              for (const k in map) {
-                expect(map[k]).toBe('usable');
-              }
-            }
+          await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+          await drmEngine.attach(video);
+          await mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, videoInitSegment, null, null,
+              /* hasClosedCaptions */ false);
+          await mediaSourceEngine.appendBuffer(
+              ContentType.AUDIO, audioInitSegment, null, null,
+              /* hasClosedCaptions */ false);
+          await encryptedEventSeen;
+          // With PlayReady, a persistent license policy can cause a different
+          // chain of events.  In particular, the request is bypassed and we
+          // get a usable key right away.
+          await Promise.race([requestMade, keyStatusEventSeen]);
 
-            return mediaSourceEngine.appendBuffer(ContentType.VIDEO,
-                videoSegment, null, null, /* hasClosedCaptions */ false);
-          }).then(() => {
-            return mediaSourceEngine.appendBuffer(ContentType.AUDIO,
-                audioSegment, null, null, /* hasClosedCaptions */ false);
-          }).then(() => {
-            expect(video.buffered.end(0)).toBeGreaterThan(0);
-            video.play();
-            // Try to play for 5 seconds.
-            return shaka.test.Util.delay(5);
-          }).then(() => {
-            // Something should have played by now.
-            expect(video.readyState).toBeGreaterThan(1);
-            expect(video.currentTime).toBeGreaterThan(0);
-          }).catch(fail).then(done);
+          if (requestSpy.calls.count()) {
+            // We made a license request.
+            // Only one request should have been made.
+            expect(requestSpy.calls.count()).toBe(1);
+            // So it's reasonable to assume that this requestComplete Promise
+            // is waiting on the correct request.
+            await requestComplete;
+          } else {
+            // This was probably a PlayReady persistent license.
+          }
+
+          // Some platforms (notably 2017 Tizen TVs) do not fire key status
+          // events.
+          const keyStatusTimeout = shaka.test.Util.delay(5);
+          await Promise.race([keyStatusTimeout, keyStatusEventSeen]);
+
+          const call = onKeyStatusSpy.calls.mostRecent();
+          if (call) {
+            const map = /** @type {!Object} */ (call.args[0]);
+            expect(Object.keys(map).length).not.toBe(0);
+            for (const k in map) {
+              expect(map[k]).toBe('usable');
+            }
+          }
+
+          await mediaSourceEngine.appendBuffer(
+              ContentType.VIDEO, videoSegment, null, null,
+              /* hasClosedCaptions */ false);
+          await mediaSourceEngine.appendBuffer(
+              ContentType.AUDIO, audioSegment, null, null,
+              /* hasClosedCaptions */ false);
+
+          expect(video.buffered.end(0)).toBeGreaterThan(0);
+          video.play();
+          // Try to play for 5 seconds.
+          await shaka.test.Util.delay(5);
+
+          // Something should have played by now.
+          expect(video.readyState).toBeGreaterThan(1);
+          expect(video.currentTime).toBeGreaterThan(0);
         }));
   });  // describe('basic flow')
 
   /**
    * Before running the test, check if the appropriate keysystems are available.
-   * @param {function(function())} test
+   * @param {function():!Promise} test
    * @return {function(function())}
    */
   function checkAndRun(test) {
-    return function(done) {
+    return async () => {
       if (!support['com.widevine.alpha'] &&
          !support['com.microsoft.playready']) {
         pending('Skipping DrmEngine tests.');
       } else {
-        test(done);
+        await test();
       }
     };
   }

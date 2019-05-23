@@ -201,13 +201,17 @@ describe('StreamingEngine', () => {
       presentationDuration, segmentDurations) {
     const periodStartTimes = [firstPeriodStartTime, secondPeriodStartTime];
 
-    const boundsCheckPosition =
-        shaka.test.StreamingEngineUtil.boundsCheckPosition.bind(
-            null, periodStartTimes, presentationDuration, segmentDurations);
+    const boundsCheckPosition = (time, number, pos) => {
+      return shaka.test.StreamingEngineUtil.boundsCheckPosition(
+          periodStartTimes, presentationDuration, segmentDurations, time,
+          number, pos);
+    };
 
-    const getNumSegments =
-        shaka.test.StreamingEngineUtil.getNumSegments.bind(
-            null, periodStartTimes, presentationDuration, segmentDurations);
+    const getNumSegments = (type, number) => {
+      return shaka.test.StreamingEngineUtil.getNumSegments(
+          periodStartTimes, presentationDuration, segmentDurations, type,
+          number);
+    };
 
     // Create the fake NetworkingEngine. Note: the StreamingEngine should never
     // request a segment that does not exist.
@@ -533,30 +537,26 @@ describe('StreamingEngine', () => {
       expect(onEvent).toHaveBeenCalled();
     });
 
-    it('won\'t jump large gaps with preventDefault()', (done) => {
+    it('won\'t jump large gaps with preventDefault()', async () => {
       config.jumpLargeGaps = true;
-      setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true)
-          .then(() => {
-            onStartupComplete.and.callFake(() => {
-              video.currentTime = 8;
-              video.play();
-            });
+      await setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true);
+      onStartupComplete.and.callFake(() => {
+        video.currentTime = 8;
+        video.play();
+      });
 
-            onEvent.and.callFake((event) => {
-              event.preventDefault();
-              shaka.test.Util.delay(5).then(() => {
-                // IE/Edge somehow plays inside the gap.  Just make sure we
-                // don't jump the gap.
-                expect(video.currentTime).toBeLessThan(20);
-                done();
-              })
-                  .catch(done.fail);
-            });
+      onEvent.and.callFake((event) => {
+        event.preventDefault();
+      });
 
-            // Let's go!
-            onChooseStreams.and.callFake(defaultOnChooseStreams);
-            return streamingEngine.start();
-          }).catch(done.fail);
+      // Let's go!
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
+      await streamingEngine.start();
+
+      await shaka.test.Util.delay(5);
+      // IE/Edge somehow plays inside the gap.  Just make sure we
+      // don't jump the gap.
+      expect(video.currentTime).toBeLessThan(20);
     });
 
 
@@ -618,14 +618,15 @@ describe('StreamingEngine', () => {
             end += d;
           }
 
-          const getUris = (function(i) {
+          let cur = i;
+          const getUris = () => {
             // The times in the media are based on the URL; so to drop a
             // segment, we change the URL.
-            if (i >= 2 && dropSegment) {
-              i++;
+            if (cur >= 2 && dropSegment) {
+              cur++;
             }
-            return ['1_' + type + '_' + i];
-          }.bind(null, i));
+            return ['1_' + type + '_' + cur];
+          };
           refs.push(
               new shaka.media.SegmentReference(i, time, end, getUris, 0, null));
 
@@ -655,9 +656,9 @@ describe('StreamingEngine', () => {
             id: 1,
             video: {
               id: 2,
-              createSegmentIndex: Promise.resolve.bind(Promise),
-              findSegmentPosition: videoIndex.find.bind(videoIndex),
-              getSegmentReference: videoIndex.get.bind(videoIndex),
+              createSegmentIndex: () => Promise.resolve(),
+              findSegmentPosition: (t) => videoIndex.find(t),
+              getSegmentReference: (i) => videoIndex.get(i),
               initSegmentReference: createInit('video'),
               // Normally PTO adjusts the segment time backwards; so to make the
               // segment appear in the future, use a negative.
@@ -671,9 +672,9 @@ describe('StreamingEngine', () => {
             },
             audio: {
               id: 3,
-              createSegmentIndex: Promise.resolve.bind(Promise),
-              findSegmentPosition: audioIndex.find.bind(audioIndex),
-              getSegmentReference: audioIndex.get.bind(audioIndex),
+              createSegmentIndex: () => Promise.resolve(),
+              findSegmentPosition: (t) => audioIndex.find(t),
+              getSegmentReference: (i) => audioIndex.get(i),
               initSegmentReference: createInit('audio'),
               presentationTimeOffset: -gapAtStart,
               mimeType: 'audio/mp4',
