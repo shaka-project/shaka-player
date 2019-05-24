@@ -20,7 +20,7 @@ goog.provide('shaka.ui.Overlay');
 
 goog.require('goog.asserts');
 goog.require('shaka.Deprecate');
-goog.require('shaka.polyfill.installAll');
+goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.TextDisplayer');
 goog.require('shaka.util.Platform');
