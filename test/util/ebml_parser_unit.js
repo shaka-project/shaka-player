@@ -292,16 +292,16 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
       new Uint8Array([0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]),
     ];
 
-    const isDynamicSizeValue_ = shaka.util.EbmlParser.isDynamicSizeValue_;
+    const EbmlParser = shaka.util.EbmlParser;
 
-    expect(isDynamicSizeValue_(dynamicSizes[0])).toBe(true);
-    expect(isDynamicSizeValue_(dynamicSizes[1])).toBe(true);
-    expect(isDynamicSizeValue_(dynamicSizes[2])).toBe(true);
-    expect(isDynamicSizeValue_(dynamicSizes[3])).toBe(true);
-    expect(isDynamicSizeValue_(dynamicSizes[4])).toBe(true);
-    expect(isDynamicSizeValue_(dynamicSizes[5])).toBe(true);
-    expect(isDynamicSizeValue_(dynamicSizes[6])).toBe(true);
-    expect(isDynamicSizeValue_(dynamicSizes[7])).toBe(true);
+    expect(EbmlParser.isDynamicSizeValue_(dynamicSizes[0])).toBe(true);
+    expect(EbmlParser.isDynamicSizeValue_(dynamicSizes[1])).toBe(true);
+    expect(EbmlParser.isDynamicSizeValue_(dynamicSizes[2])).toBe(true);
+    expect(EbmlParser.isDynamicSizeValue_(dynamicSizes[3])).toBe(true);
+    expect(EbmlParser.isDynamicSizeValue_(dynamicSizes[4])).toBe(true);
+    expect(EbmlParser.isDynamicSizeValue_(dynamicSizes[5])).toBe(true);
+    expect(EbmlParser.isDynamicSizeValue_(dynamicSizes[6])).toBe(true);
+    expect(EbmlParser.isDynamicSizeValue_(dynamicSizes[7])).toBe(true);
   });
 });
 
