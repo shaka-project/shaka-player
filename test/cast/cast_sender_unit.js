@@ -63,12 +63,11 @@ describe('CastSender', function() {
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
         Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
-    resetClassVariables();
   });
 
-  afterEach(function(done) {
-    delete window.__onGCastApiAvailable;
-    sender.destroy().catch(fail).then(done);
+  afterEach(async () => {
+    await sender.destroy();
+    resetClassVariables();
   });
 
   afterAll(function() {
@@ -79,18 +78,16 @@ describe('CastSender', function() {
     it('installs a callback if the cast API is not available', function() {
       // Remove the mock cast API.
       delete window['chrome'].cast;
-      // This shouldn't exist yet.
-      expect(window.__onGCastApiAvailable).toBe(undefined);
 
-      // Init and expect the callback to be installed.
+      // Init and expect that apiReady is false and no status is available.
       sender.init();
-      expect(window.__onGCastApiAvailable).not.toBe(undefined);
       expect(sender.apiReady()).toBe(false);
       expect(onStatusChanged).not.toHaveBeenCalled();
 
       // Restore the mock cast API.
       window['chrome'].cast = mockCastApi;
-      window.__onGCastApiAvailable(true);
+      simulateSdkLoaded();
+
       // Expect the API to be ready and initialized.
       expect(sender.apiReady()).toBe(true);
       expect(sender.hasReceivers()).toBe(false);
@@ -896,11 +893,20 @@ describe('CastSender', function() {
 
   /**
    * @suppress {visibility}
+   * "suppress visibility" has function scope, so this is a mini-function that
+   * exists solely to suppress visibility rules for these actions.
    */
   function resetClassVariables() {
-    // @suppress visibility has function scope, so this is a mini-function that
-    // exists solely to suppress visibility for this call.
     CastSender.hasReceivers_ = false;
     CastSender.session_ = null;
+  }
+
+  /**
+   * @suppress {visibility}
+   * "suppress visibility" has function scope, so this is a mini-function that
+   * exists solely to suppress visibility rules for these actions.
+   */
+  function simulateSdkLoaded() {
+    shaka.cast.CastSender.onSdkLoaded_(true);
   }
 });
