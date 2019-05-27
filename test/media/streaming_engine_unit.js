@@ -446,7 +446,10 @@ describe('StreamingEngine', function() {
       config.bufferBehind = Infinity;
     }
 
-    let playerInterface = {
+    goog.asserts.assert(
+        presentationTimeInSeconds != undefined,
+        'All tests should have defined an initial presentation time by now!');
+    const playerInterface = {
       getPresentationTime: () => presentationTimeInSeconds,
       getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
       mediaSourceEngine: mediaSourceEngine,
@@ -1118,6 +1121,7 @@ describe('StreamingEngine', function() {
       });
 
       playing = false;
+      presentationTimeInSeconds = 0;
       createStreamingEngine();
 
       onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));

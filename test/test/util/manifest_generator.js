@@ -584,7 +584,8 @@ shaka.test.ManifestGenerator.prototype.useSegmentTemplate = function(
     return Math.floor(time / segmentDuration);
   };
   stream.getSegmentReference = (function(index) {
-    if (index < 0 || index >= segmentCount) {
+    goog.asserts.assert(!isNaN(index), 'Invalid index requested!');
+    if (index < 0 || index >= segmentCount || isNaN(index)) {
       return null;
     }
     let getUris = function() { return [sprintf(template, index)]; };
