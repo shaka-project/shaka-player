@@ -85,8 +85,8 @@ describe('HlsParser', () => {
 
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     playerInterface = {
-      filterNewPeriod: function() {},
-      filterAllPeriods: function() {},
+      filterNewPeriod: () => {},
+      filterAllPeriods: () => {},
       networkingEngine: fakeNetEngine,
       onError: fail,
       onEvent: fail,
@@ -121,7 +121,7 @@ describe('HlsParser', () => {
     return actual;
   }
 
-  it('parses manifest attributes', (done) => {
+  it('parses manifest attributes', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
@@ -196,9 +196,8 @@ describe('HlsParser', () => {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    parser.start('test:/master', playerInterface)
-        .then((actual) => { expect(actual).toEqual(manifest); })
-        .catch(fail).then(done);
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
   });
 
   it('ignores duplicate CODECS', async () => {
@@ -751,7 +750,7 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
-  it('should call filterAllPeriods for parsing', (done) => {
+  it('should call filterAllPeriods for parsing', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -775,13 +774,12 @@ describe('HlsParser', () => {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
+    /** @type {!jasmine.Spy} */
     const filterAllPeriods = jasmine.createSpy('filterAllPeriods');
     playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
 
-    parser.start('test:/master', playerInterface)
-        .then((manifest) => {
-          expect(filterAllPeriods.calls.count()).toBe(1);
-        }).catch(fail).then(done);
+    await parser.start('test:/master', playerInterface);
+    expect(filterAllPeriods.calls.count()).toBe(1);
   });
 
   it('gets mime type from header request', async () => {
@@ -1107,7 +1105,7 @@ describe('HlsParser', () => {
     expect(actual).toEqual(manifest);
   });
 
-  it('allows init segments in text streams', (done) => {
+  it('allows init segments in text streams', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
@@ -1146,9 +1144,8 @@ describe('HlsParser', () => {
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
-    parser.start('test:/master', playerInterface)
-        .then((actual) => { expect(actual).toEqual(manifest); })
-        .catch(fail).then(done);
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
   });
 
   it('parses video described by a media tag', async () => {
@@ -1185,7 +1182,7 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
-  it('constructs relative URIs', (done) => {
+  it('constructs relative URIs', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1211,31 +1208,30 @@ describe('HlsParser', () => {
         .setResponseValue('test:/host/video/init.mp4', initSegmentData)
         .setResponseValue('test:/host/video/segment.mp4', segmentData);
 
-    parser.start('test:/host/master.m3u8', playerInterface)
-        .then((actual) => {
-          const video = actual.periods[0].variants[0].video;
-          const audio = actual.periods[0].variants[0].audio;
+    const actual =
+        await parser.start('test:/host/master.m3u8', playerInterface);
+    const video = actual.periods[0].variants[0].video;
+    const audio = actual.periods[0].variants[0].audio;
 
-          const videoPosition = video.findSegmentPosition(0);
-          const audioPosition = audio.findSegmentPosition(0);
-          goog.asserts.assert(videoPosition != null,
-              'Cannot find first video segment');
-          goog.asserts.assert(audioPosition != null,
-              'Cannot find first audio segment');
+    const videoPosition = video.findSegmentPosition(0);
+    const audioPosition = audio.findSegmentPosition(0);
+    goog.asserts.assert(
+        videoPosition != null, 'Cannot find first video segment');
+    goog.asserts.assert(
+        audioPosition != null, 'Cannot find first audio segment');
 
-          const videoReference = video.getSegmentReference(videoPosition);
-          const audioReference = audio.getSegmentReference(audioPosition);
-          expect(videoReference).not.toBe(null);
-          expect(audioReference).not.toBe(null);
-          if (videoReference) {
-            expect(videoReference.getUris()[0])
-                .toEqual('test:/host/video/segment.mp4');
-          }
-          if (audioReference) {
-            expect(audioReference.getUris()[0])
-                .toEqual('test:/host/audio/segment.mp4');
-          }
-        }).catch(fail).then(done);
+    const videoReference = video.getSegmentReference(videoPosition);
+    const audioReference = audio.getSegmentReference(audioPosition);
+    expect(videoReference).not.toBe(null);
+    expect(audioReference).not.toBe(null);
+    if (videoReference) {
+      expect(videoReference.getUris()[0])
+          .toEqual('test:/host/video/segment.mp4');
+    }
+    if (audioReference) {
+      expect(audioReference.getUris()[0])
+          .toEqual('test:/host/audio/segment.mp4');
+    }
   });
 
   it('allows streams with no init segment', async () => {
@@ -1385,9 +1381,8 @@ describe('HlsParser', () => {
      * @param {string} master
      * @param {string} media
      * @param {!shaka.util.Error} error
-     * @param {function()} done
      */
-    function verifyError(master, media, error, done) {
+    async function verifyError(master, media, error) {
       fakeNetEngine
           .setResponseText('test:/master', master)
           .setResponseText('test:/audio', media)
@@ -1396,15 +1391,11 @@ describe('HlsParser', () => {
           .setResponseValue('test:/init.mp4', initSegmentData)
           .setResponseValue('test:/main.mp4', segmentData);
 
-      parser.start('test:/master', playerInterface)
-          .then(fail)
-          .catch((e) => {
-            shaka.test.Util.expectToEqualError(e, error);
-          })
-          .then(done);
+      await expectAsync(parser.start('test:/master', playerInterface))
+          .toBeRejectedWith(Util.jasmineError(error));
     }
 
-    it('if multiple init sections were provided', (done) => {
+    it('if multiple init sections were provided', async () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1428,10 +1419,10 @@ describe('HlsParser', () => {
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
 
-      verifyError(master, media, error, done);
+      await verifyError(master, media, error);
     });
 
-    it('if unable to guess mime type', (done) => {
+    it('if unable to guess mime type', async () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1454,10 +1445,10 @@ describe('HlsParser', () => {
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_COULD_NOT_GUESS_MIME_TYPE, 'exe');
 
-      verifyError(master, media, error, done);
+      await verifyError(master, media, error);
     });
 
-    it('if unable to guess codecs', (done) => {
+    it('if unable to guess codecs', async () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="aaa,bbb",',
@@ -1482,10 +1473,10 @@ describe('HlsParser', () => {
           Code.HLS_COULD_NOT_GUESS_CODECS,
           ['aaa', 'bbb']);
 
-      verifyError(master, media, error, done);
+      await verifyError(master, media, error);
     });
 
-    it('if all variants are encrypted with AES-128', (done) => {
+    it('if all variants are encrypted with AES-128', async () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -1510,7 +1501,7 @@ describe('HlsParser', () => {
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_AES_128_ENCRYPTION_NOT_SUPPORTED);
 
-      verifyError(master, media, error, done);
+      await verifyError(master, media, error);
     });
 
     describe('if required attributes are missing', () => {
@@ -1518,19 +1509,18 @@ describe('HlsParser', () => {
        * @param {string} master
        * @param {string} media
        * @param {string} attributeName
-       * @param {function()} done
        */
-      function verifyMissingAttribute(master, media, attributeName, done) {
+      async function verifyMissingAttribute(master, media, attributeName) {
         const error = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             Code.HLS_REQUIRED_ATTRIBUTE_MISSING,
             attributeName);
 
-        verifyError(master, media, error, done);
+        await verifyError(master, media, error);
       }
 
-      it('bandwidth', (done) => {
+      it('bandwidth', async () => {
         const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:CODECS="avc1,mp4a",',
@@ -1548,10 +1538,10 @@ describe('HlsParser', () => {
           'main.exe',
         ].join('');
 
-        verifyMissingAttribute(master, media, 'BANDWIDTH', done);
+        await verifyMissingAttribute(master, media, 'BANDWIDTH');
       });
 
-      it('uri', (done) => {
+      it('uri', async () => {
         const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:CODECS="avc1,mp4a",BANDWIDTH=200,',
@@ -1569,7 +1559,7 @@ describe('HlsParser', () => {
           'main.exe',
         ].join('');
 
-        verifyMissingAttribute(master, media, 'URI', done);
+        await verifyMissingAttribute(master, media, 'URI');
       });
     });
 
@@ -1578,19 +1568,18 @@ describe('HlsParser', () => {
        * @param {string} master
        * @param {string} media
        * @param {string} tagName
-       * @param {function()} done
        */
-      function verifyMissingTag(master, media, tagName, done) {
+      async function verifyMissingTag(master, media, tagName) {
         const error = new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.MANIFEST,
             Code.HLS_REQUIRED_TAG_MISSING,
             tagName);
 
-        verifyError(master, media, error, done);
+        await verifyError(master, media, error);
       }
 
-      it('EXTINF', (done) => {
+      it('EXTINF', async () => {
         const master = [
           '#EXTM3U\n',
           '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -1607,7 +1596,7 @@ describe('HlsParser', () => {
           'main.mp4',
         ].join('');
 
-        verifyMissingTag(master, media, 'EXTINF', done);
+        await verifyMissingTag(master, media, 'EXTINF');
       });
     });
   });  // Errors out
@@ -1770,13 +1759,12 @@ describe('HlsParser', () => {
         });
       });
 
-      try {
-        await parser.start('test:/master', playerInterface);
-        fail();
-      } catch (e) {
-        expect(e).toBeTruthy();
-        expect(e.code).toBe(shaka.util.Error.Code.OPERATION_ABORTED);
-      }
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.PLAYER,
+          shaka.util.Error.Code.OPERATION_ABORTED));
+      await expectAsync(parser.start('test:/master', playerInterface))
+          .toBeRejectedWith(expected);
     });
 
     it('sets duration with respect to presentation offset', async () => {

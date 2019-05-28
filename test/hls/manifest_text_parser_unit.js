@@ -102,16 +102,11 @@ describe('ManifestTextParser', () => {
      */
     function verifyError(string, code) {
       const data = shaka.util.StringUtils.toUTF8(string);
-      const error = new shaka.util.Error(
+      const error = shaka.test.Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
-          code);
-      try {
-        parser.parsePlaylist(data, /* uri */ '');
-        fail('Invalid HLS playlist should not be supported!');
-      } catch (e) {
-        shaka.test.Util.expectToEqualError(e, error);
-      }
+          code));
+      expect(() => parser.parsePlaylist(data, /* uri */ '')).toThrow(error);
     }
   });
 
@@ -260,18 +255,13 @@ describe('ManifestTextParser', () => {
     });
 
     it('rejects invalid tags', () => {
-      const error = new shaka.util.Error(
+      const error = shaka.test.Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.INVALID_HLS_TAG,
-          'invalid tag');
+          'invalid tag'));
       const text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
-      try {
-        parser.parsePlaylist(text, /* uri */ '');
-        fail('Invalid HLS tags should not be supported!');
-      } catch (e) {
-        shaka.test.Util.expectToEqualError(e, error);
-      }
+      expect(() => parser.parsePlaylist(text, /* uri */ '')).toThrow(error);
     });
   });
 
