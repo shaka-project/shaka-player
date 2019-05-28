@@ -174,7 +174,7 @@ class Build(object):
   def has_ui(self):
     """Returns True if the UI library is in the build."""
     for path in self.include:
-      if '/ui/' in path:
+      if 'ui' in path.split(os.path.sep):
         return True
     return False
 
