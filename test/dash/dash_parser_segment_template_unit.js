@@ -33,8 +33,8 @@ describe('DashParser SegmentTemplate', () => {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterNewPeriod: function() {},
-      filterAllPeriods: function() {},
+      filterNewPeriod: () => {},
+      filterAllPeriods: () => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
@@ -74,27 +74,25 @@ describe('DashParser SegmentTemplate', () => {
       await Dash.testSegmentIndex(source, references);
     });
 
-    it('honors presentationTimeOffset', (done) => {
+    it('honors presentationTimeOffset', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="10"',
         ' presentationTimeOffset="50" />',
       ], 30 /* duration */);
 
       fakeNetEngine.setResponseText('dummy://foo', source);
-      parser.start('dummy://foo', playerInterface)
-          .then((manifest) => {
-            expect(manifest.periods.length).toBe(1);
-            expect(manifest.periods[0].variants.length).toBe(1);
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
-            const stream = manifest.periods[0].variants[0].video;
-            expect(stream).toBeTruthy();
-            expect(stream.presentationTimeOffset).toBe(50);
-            expect(stream.getSegmentReference(0)).toEqual(
-                ManifestParser.makeReference('s1.mp4', 0, 0, 10, baseUri));
-            expect(stream.getSegmentReference(1)).toEqual(
-                ManifestParser.makeReference('s2.mp4', 1, 10, 20, baseUri));
-          })
-          .catch(fail).then(done);
+      expect(manifest.periods.length).toBe(1);
+      expect(manifest.periods[0].variants.length).toBe(1);
+
+      const stream = manifest.periods[0].variants[0].video;
+      expect(stream).toBeTruthy();
+      expect(stream.presentationTimeOffset).toBe(50);
+      expect(stream.getSegmentReference(0)).toEqual(
+          ManifestParser.makeReference('s1.mp4', 0, 0, 10, baseUri));
+      expect(stream.getSegmentReference(1)).toEqual(
+          ManifestParser.makeReference('s2.mp4', 1, 10, 20, baseUri));
     });
 
     it('handles segments larger than the period', async () => {
@@ -110,17 +108,14 @@ describe('DashParser SegmentTemplate', () => {
       await Dash.testSegmentIndex(source, references);
     });
 
-    it('presentation start is parsed correctly', (done) => {
+    it('presentation start is parsed correctly', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="60" />',
       ], 30 /* duration */, /* startTime */ 30);
 
       fakeNetEngine.setResponseText('dummy://foo', source);
-      parser.start('dummy://foo', playerInterface)
-          .then((manifest) => {
-            expect(manifest.presentationTimeline.getSeekRangeStart()).toBe(30);
-          })
-          .catch(fail).then(done);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.presentationTimeline.getSeekRangeStart()).toBe(30);
     });
   });
 

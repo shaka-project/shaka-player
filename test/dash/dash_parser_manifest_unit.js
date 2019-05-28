@@ -35,8 +35,8 @@ describe('DashParser Manifest', () => {
     onEventSpy = jasmine.createSpy('onEvent');
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterNewPeriod: function() {},
-      filterAllPeriods: function() {},
+      filterNewPeriod: () => {},
+      filterAllPeriods: () => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onError: fail,
@@ -727,12 +727,8 @@ describe('DashParser Manifest', () => {
 
       fakeNetEngine.request.and.returnValue(
           shaka.util.AbortableOperation.failed(expectedError));
-      try {
-        await parser.start('', playerInterface);
-        fail();
-      } catch (error) {
-        expect(error).toEqual(expectedError);
-      }
+      await expectAsync(parser.start('', playerInterface))
+          .toBeRejectedWith(shaka.test.Util.jasmineError(expectedError));
     });
 
     it('missing MPD element', async () => {
@@ -1023,7 +1019,8 @@ describe('DashParser Manifest', () => {
      *   value is the value attribute.
      * @return {!Promise}
      */
-    function testAudioChannelConfiguration(expectedNumChannels, schemeMap) {
+    async function testAudioChannelConfiguration(
+        expectedNumChannels, schemeMap) {
       const header = [
         '<MPD minBufferTime="PT75S">',
         '  <Period id="1" duration="PT30S">',
@@ -1053,14 +1050,12 @@ describe('DashParser Manifest', () => {
       parser = shaka.test.Dash.makeDashParser();
 
       fakeNetEngine.setResponseText('dummy://foo', source);
-      return parser.start('dummy://foo', playerInterface)
-          .then((manifest) => {
-            expect(manifest.periods.length).toBe(1);
-            expect(manifest.periods[0].variants.length).toBe(1);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.periods.length).toBe(1);
+      expect(manifest.periods[0].variants.length).toBe(1);
 
-            const variant = manifest.periods[0].variants[0];
-            expect(variant.audio.channelsCount).toEqual(expectedNumChannels);
-          }).catch(fail);
+      const variant = manifest.periods[0].variants[0];
+      expect(variant.audio.channelsCount).toEqual(expectedNumChannels);
     }
 
     it('parses outputChannelPositionList scheme', async () => {

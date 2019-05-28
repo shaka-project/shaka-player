@@ -29,14 +29,14 @@ describe('DashParser ContentProtection', () => {
    * @param {boolean=} ignoreDrmInfo
    * @return {!Promise}
    */
-  function testDashParser(manifestText, expected, callback,
+  async function testDashParser(manifestText, expected, callback,
       ignoreDrmInfo = false) {
     const netEngine = new shaka.test.FakeNetworkingEngine();
     netEngine.setDefaultText(manifestText);
     const dashParser = new shaka.dash.DashParser();
 
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.ignoreDrmInfo = ignoreDrmInfo;
+    config.dash.ignoreDrmInfo = ignoreDrmInfo || false;
     if (callback) {
       config.dash.customScheme = callback;
     }
@@ -44,15 +44,15 @@ describe('DashParser ContentProtection', () => {
 
     const playerEvents = {
       networkingEngine: netEngine,
-      filterNewPeriod: function() {},
-      filterAllPeriods: function() {},
+      filterNewPeriod: () => {},
+      filterAllPeriods: () => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
     };
 
-    return dashParser.start('http://example.com', playerEvents)
-        .then((actual) => { expect(actual).toEqual(expected); });
+    const actual = await dashParser.start('http://example.com', playerEvents);
+    expect(actual).toEqual(expected);
   }
 
   /**
@@ -449,7 +449,7 @@ describe('DashParser ContentProtection', () => {
      * @param {!Element} contentProtection
      * @return {Array.<shaka.extern.DrmInfo>}
      */
-    const callback = function(contentProtection) {
+    const callback = (contentProtection) => {
       const schemeIdUri = contentProtection.getAttribute('schemeIdUri');
       if (schemeIdUri == 'urn:uuid:feedbaad-f00d-2bee-baad-d00d00000000') {
         return [{
@@ -739,7 +739,7 @@ describe('DashParser ContentProtection', () => {
 
 describe('In-manifest PlayReady and Widevine', () => {
   const ContentProtection = shaka.dash.ContentProtection;
-  const strToXml = function(str) {
+  const strToXml = (str) => {
     const parser = new DOMParser();
     return parser.parseFromString(str, 'application/xml').documentElement;
   };

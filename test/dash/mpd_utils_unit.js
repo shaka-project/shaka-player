@@ -411,8 +411,7 @@ describe('MpdUtils', () => {
         presentationTimeOffset, periodDuration) {
       // Construct a SegmentTimeline Node object.
       const xmlLines = ['<?xml version="1.0"?>', '<SegmentTimeline>'];
-      for (let i = 0; i < points.length; i++) {
-        const p = points[i];
+      for (const p of points) {
         xmlLines.push('<S' +
                       (p.t != null ? ' t="' + p.t + '"' : '') +
                       (p.d != null ? ' d="' + p.d + '"' : '') +
@@ -649,7 +648,7 @@ describe('MpdUtils', () => {
       await testSucceeds(baseXMLString, desiredXMLString, 1);
     });
 
-    it('interrupts requests on abort', (done) => {
+    it('interrupts requests on abort', async () => {
       const baseXMLString = inBaseContainer(
           '<ToReplace xlink:href="https://xlink1" xlink:actuate="onLoad" />');
       // Create a few links.  This is few enough that it would succeed if we
@@ -660,34 +659,35 @@ describe('MpdUtils', () => {
 
         fakeNetEngine.setResponseText(key, value);
       }
+      /** @type {!shaka.util.PublicPromise} */
       const continuePromise = fakeNetEngine.delayNextRequest();
 
       const xml = parser.parseFromString(baseXMLString, 'text/xml')
           .documentElement;
+      /** @type {!shaka.extern.IAbortableOperation} */
       const operation = MpdUtils.processXlinks(
           xml, retry, failGracefully, 'https://base', fakeNetEngine);
 
-      shaka.test.Util.delay(0.1).then(() => {
+      const abort = async () => {
+        await shaka.test.Util.delay(0.1);
         // Only one request has been made so far.
         expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
         continuePromise.resolve();
 
         // Abort the operation.
         operation.abort();
-      });
+      };
 
-      operation.promise.then(fail).catch((error) => {
-        // Still only one request has been made.
-        expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      // The operation was aborted.
+      const expected = shaka.test.Util.jasmineError(new shaka.util.Error(
+          Error.Severity.CRITICAL,
+          Error.Category.PLAYER,
+          Error.Code.OPERATION_ABORTED));
+      const p = expectAsync(operation.promise).toBeRejectedWith(expected);
 
-        // The operation was aborted.
-        shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-            Error.Severity.CRITICAL,
-            Error.Category.PLAYER,
-            Error.Code.OPERATION_ABORTED));
-      });
-
-      operation.finally(done);
+      await Promise.all([abort(), p]);
+      // Still only one request has been made.
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
     });
 
     it('ignores SegmentTimeline children', async () => {
@@ -708,14 +708,14 @@ describe('MpdUtils', () => {
       expect(finalXML).toEqualElement(desiredXML);
     }
 
-    function testFails(baseXMLString, desiredError, desiredNetCalls) {
-      return testRequest(baseXMLString).then(fail).catch((error) => {
-        expect(fakeNetEngine.request).toHaveBeenCalledTimes(desiredNetCalls);
-        if (desiredError) {
-          shaka.test.Util.expectToEqualError(error, desiredError);
-        }
-        return Promise.resolve();
-      });
+    async function testFails(baseXMLString, desiredError, desiredNetCalls) {
+      if (desiredError) {
+        await expectAsync(testRequest(baseXMLString))
+            .toBeRejectedWith(shaka.test.Util.jasmineError(desiredError));
+      } else {
+        await expectAsync(testRequest(baseXMLString)).toBeRejected();
+      }
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(desiredNetCalls);
     }
 
     /**
