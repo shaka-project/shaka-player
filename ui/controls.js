@@ -353,6 +353,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   configure(config) {
     this.config_ = config;
 
+    this.castProxy_.changeReceiverId(config.castReceiverAppId);
+
     if (this.controlsContainer_) {
       // Deconstruct the old layout if applicable
       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
