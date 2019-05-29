@@ -169,21 +169,21 @@ describe('CastProxy', () => {
       }
     });
 
-    it('unloads the local player after casting is complete', (done) => {
+    it('unloads the local player after casting is complete', async () => {
+      /** @type {!shaka.util.PublicPromise} */
       const p = new shaka.util.PublicPromise();
       mockSender.cast.and.returnValue(p);
 
       proxy.cast();
-      shaka.test.Util.delay(0.1).then(() => {
-        // unload() has not been called yet.
-        expect(mockPlayer.unload).not.toHaveBeenCalled();
-        // Resolve the cast() promise.
-        p.resolve();
-        return shaka.test.Util.delay(0.1);
-      }).then(() => {
-        // unload() has now been called.
-        expect(mockPlayer.unload).toHaveBeenCalled();
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.1);
+      // unload() has not been called yet.
+      expect(mockPlayer.unload).not.toHaveBeenCalled();
+      // Resolve the cast() promise.
+      p.resolve();
+      await shaka.test.Util.delay(0.1);
+
+      // unload() has now been called.
+      expect(mockPlayer.unload).toHaveBeenCalled();
     });
   });
 
@@ -550,7 +550,7 @@ describe('CastProxy', () => {
       });
     });
 
-    it('transfers remote state back to local objects', (done) => {
+    it('transfers remote state back to local objects', async () => {
       // Nothing has been set yet:
       expect(mockPlayer.configure).not.toHaveBeenCalled();
       expect(mockPlayer.setTextTrackVisibility).not.toHaveBeenCalled();
@@ -569,12 +569,11 @@ describe('CastProxy', () => {
       expect(mockVideo.playbackRate).toBe(1);
 
       // The rest is done async:
-      shaka.test.Util.delay(0.1).then(() => {
-        expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-            cache.player.isTextTrackVisible);
-        expect(mockVideo.loop).toEqual(cache.video.loop);
-        expect(mockVideo.playbackRate).toEqual(cache.video.playbackRate);
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.1);
+      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
+          cache.player.isTextTrackVisible);
+      expect(mockVideo.loop).toEqual(cache.video.loop);
+      expect(mockVideo.playbackRate).toEqual(cache.video.playbackRate);
     });
 
     it('loads the manifest', () => {
@@ -598,7 +597,7 @@ describe('CastProxy', () => {
       expect(mockPlayer.load).toHaveBeenCalledWith('foo://bar', null);
     });
 
-    it('plays the video after loading', (done) => {
+    it('plays the video after loading', async () => {
       cache.player.getAssetUri = 'foo://bar';
       // Should play even if the video was paused remotely.
       cache.video.paused = true;
@@ -608,32 +607,30 @@ describe('CastProxy', () => {
 
       // Video autoplay inhibited:
       expect(mockVideo.autoplay).toBe(false);
-      shaka.test.Util.delay(0.1).then(() => {
-        expect(mockVideo.play).toHaveBeenCalled();
-        // Video autoplay restored:
-        expect(mockVideo.autoplay).toBe(true);
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.1);
+      expect(mockVideo.play).toHaveBeenCalled();
+      // Video autoplay restored:
+      expect(mockVideo.autoplay).toBe(true);
     });
 
-    it('does not load or play without a manifest URI', (done) => {
+    it('does not load or play without a manifest URI', async () => {
       cache.player.getAssetUri = null;
 
       mockSender.onResumeLocal();
 
-      shaka.test.Util.delay(0.1).then(() => {
-        // Nothing loaded or played:
-        expect(mockPlayer.load).not.toHaveBeenCalled();
-        expect(mockVideo.play).not.toHaveBeenCalled();
+      await shaka.test.Util.delay(0.1);
+      // Nothing loaded or played:
+      expect(mockPlayer.load).not.toHaveBeenCalled();
+      expect(mockVideo.play).not.toHaveBeenCalled();
 
-        // State was still transferred, though:
-        expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-            cache.player.isTextTrackVisible);
-        expect(mockVideo.loop).toEqual(cache.video.loop);
-        expect(mockVideo.playbackRate).toEqual(cache.video.playbackRate);
-      }).catch(fail).then(done);
+      // State was still transferred, though:
+      expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
+          cache.player.isTextTrackVisible);
+      expect(mockVideo.loop).toEqual(cache.video.loop);
+      expect(mockVideo.playbackRate).toEqual(cache.video.playbackRate);
     });
 
-    it('triggers an "error" event if load fails', (done) => {
+    it('triggers an "error" event if load fails', async () => {
       cache.player.getAssetUri = 'foo://bar';
       const fakeError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -643,35 +640,36 @@ describe('CastProxy', () => {
 
       mockSender.onResumeLocal();
 
-      shaka.test.Util.delay(0.1).then(() => {
-        expect(mockPlayer.load).toHaveBeenCalled();
-        expect(mockPlayer.dispatchEvent).toHaveBeenCalledWith(
-            jasmine.objectContaining({type: 'error', detail: fakeError}));
-      }).catch(fail).then(done);
+      await shaka.test.Util.delay(0.1);
+      expect(mockPlayer.load).toHaveBeenCalled();
+      expect(mockPlayer.dispatchEvent).toHaveBeenCalledWith(
+          jasmine.objectContaining({type: 'error', detail: fakeError}));
     });
   });
 
   describe('destroy', () => {
-    it('destroys the local player and the sender', (done) => {
+    it('destroys the local player and the sender', async () => {
       expect(mockPlayer.destroy).not.toHaveBeenCalled();
       expect(mockSender.destroy).not.toHaveBeenCalled();
       expect(mockSender.forceDisconnect).not.toHaveBeenCalled();
 
-      proxy.destroy().catch(fail).then(done);
+      const p = proxy.destroy();
 
       expect(mockPlayer.destroy).toHaveBeenCalled();
       expect(mockSender.destroy).toHaveBeenCalled();
       expect(mockSender.forceDisconnect).not.toHaveBeenCalled();
+      await p;
     });
 
-    it('optionally forces the sender to disconnect', (done) => {
+    it('optionally forces the sender to disconnect', async () => {
       expect(mockSender.destroy).not.toHaveBeenCalled();
       expect(mockSender.forceDisconnect).not.toHaveBeenCalled();
 
-      proxy.destroy(true).catch(fail).then(done);
+      const p = proxy.destroy(true);
 
       expect(mockSender.destroy).toHaveBeenCalled();
       expect(mockSender.forceDisconnect).toHaveBeenCalled();
+      await p;
     });
   });
 
@@ -724,10 +722,10 @@ describe('CastProxy', () => {
       setTextTrackVisibility: jasmine.createSpy('setTextTrackVisibility'),
       trickPlay: jasmine.createSpy('trickPlay'),
       destroy: jasmine.createSpy('destroy'),
-      addEventListener: function(eventName, listener) {
+      addEventListener: (eventName, listener) => {
         player.listeners[eventName] = listener;
       },
-      removeEventListener: function(eventName, listener) {
+      removeEventListener: (eventName, listener) => {
         delete player.listeners[eventName];
       },
       dispatchEvent: jasmine.createSpy('dispatchEvent'),

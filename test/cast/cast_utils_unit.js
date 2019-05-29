@@ -136,7 +136,8 @@ describe('CastUtils', () => {
       }
     });
 
-    it('transfers dispatched FakeEvents', (done) => {
+    it('transfers dispatched FakeEvents', async () => {
+      /** @type {!FakeEvent} */
       const event = new FakeEvent('custom');
 
       // Properties that can definitely be transferred.
@@ -157,31 +158,30 @@ describe('CastUtils', () => {
         asObj[k] = extraProperties[k];
       }
 
+      /** @type {!shaka.util.FakeEventTarget} */
       const target = new shaka.util.FakeEventTarget();
-      target.addEventListener(event.type, () => {
-        try {
-          // The event is turned into a string.
-          const serialized = CastUtils.serialize(event);
-          expect(typeof serialized).toBe('string');
-
-          // The string is turned back into an object.
-          const deserialized = CastUtils.deserialize(serialized);
-          expect(typeof deserialized).toBe('object');
-
-          // The deserialized event has the same type and properties as the
-          // original.
-          nativeProperties.forEach((k) => {
-            expect(deserialized[k]).toEqual(asObj[k]);
-          });
-          for (const k in extraProperties) {
-            expect(deserialized[k]).toEqual(asObj[k]);
-          }
-        } catch (exception) {
-          fail(exception);
-        }
-        done();
+      const p = new Promise((resolve) => {
+        target.addEventListener(event.type, resolve);
       });
       target.dispatchEvent(event);
+      await p;
+
+      // The event is turned into a string.
+      const serialized = CastUtils.serialize(event);
+      expect(typeof serialized).toBe('string');
+
+      // The string is turned back into an object.
+      const deserialized = CastUtils.deserialize(serialized);
+      expect(typeof deserialized).toBe('object');
+
+      // The deserialized event has the same type and properties as the
+      // original.
+      for (const k of nativeProperties) {
+        expect(deserialized[k]).toEqual(asObj[k]);
+      }
+      for (const k in extraProperties) {
+        expect(deserialized[k]).toEqual(asObj[k]);
+      }
     });
 
     describe('TimeRanges', () => {
@@ -197,7 +197,7 @@ describe('CastUtils', () => {
         document.body.appendChild(video);
       });
 
-      beforeEach((done) => {
+      beforeEach(async () => {
         // The TimeRanges constructor cannot be used directly, so we load a clip
         // to get ranges to use.
         const fakeVideoStream = {
@@ -225,17 +225,14 @@ describe('CastUtils', () => {
         const initObject = new Map();
         initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-        mediaSourceEngine.init(initObject, false).then(() => {
-          return shaka.test.Util.fetch(initSegmentUrl);
-        }).then((data) => {
-          return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
-              null, null, /* hasClosedCaptions */ false);
-        }).then(() => {
-          return shaka.test.Util.fetch(videoSegmentUrl);
-        }).then((data) => {
-          return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
-              null, null, /* hasClosedCaptions */ false);
-        }).catch(fail).then(done);
+        await mediaSourceEngine.init(initObject, false);
+        const data = await shaka.test.Util.fetch(initSegmentUrl);
+        await mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, data, null, null, /* hasClosedCaptions */ false);
+        const data2 = await shaka.test.Util.fetch(videoSegmentUrl);
+        await mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, data2, null, null,
+            /* hasClosedCaptions */ false);
       });
 
       afterEach(async () => {
