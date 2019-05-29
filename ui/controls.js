@@ -359,6 +359,8 @@ shaka.ui.Controls.prototype.loadComplete = function() {
 shaka.ui.Controls.prototype.configure = function(config) {
   this.config_ = config;
 
+  this.castProxy_.changeReceiverId(config.castReceiverAppId);
+
   if (this.controlsContainer_) {
     // Deconstruct the old layout if applicable
     shaka.util.Dom.removeAllChildren(this.controlsContainer_);
