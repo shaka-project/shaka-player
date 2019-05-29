@@ -38,12 +38,6 @@ shaka.ui.Overlay = function(player, videoContainer, video) {
   /** @private {shaka.Player} */
   this.player_ = player;
 
-  /** @private {!HTMLElement} */
-  this.videoContainer_ = videoContainer;
-
-  /** @private {!HTMLMediaElement} */
-  this.video_ = video;
-
   /** @private {!shaka.extern.UIConfiguration} */
   this.config_ = this.defaultConfig_();
 
@@ -56,6 +50,10 @@ shaka.ui.Overlay = function(player, videoContainer, video) {
   if (this.isMobile()) {
     videoContainer.classList.add('shaka-mobile');
   }
+
+  /** @private {shaka.ui.Controls} */
+  this.controls_ = new shaka.ui.Controls(
+      player, videoContainer, video, this.config_);
 
   // Run the initial setup so that no configure() call is required for default
   // settings.
@@ -120,28 +118,6 @@ shaka.ui.Overlay.prototype.configure = function(config, value) {
 
   goog.asserts.assert(typeof(config) == 'object', 'Should be an object!');
 
-  const DomUtils = shaka.util.Dom;
-  // Deconstruct the old layout.
-
-  // Save the text container, so subtitles can be displayed with
-  // the new layout.
-  const textContainer =
-    this.videoContainer_.querySelector('.shaka-text-container');
-
-  // Remember whether the controls were shown
-  let shown = false;
-  let controlsContainer =
-      this.videoContainer_.querySelector('.shaka-controls-container');
-  if (controlsContainer != null) {
-    shown = controlsContainer.getAttribute('shown');
-  }
-
-  // Destroy the old layout.
-  shaka.util.Dom.removeAllChildren(this.videoContainer_);
-
-  // Add the video back in
-  this.videoContainer_.appendChild(this.video_);
-
   shaka.util.ConfigUtils.mergeConfigObjects(
         this.config_, config, this.defaultConfig_(),
         /* overrides (only used for player config)*/ {}, /* path */ '');
@@ -154,18 +130,7 @@ shaka.ui.Overlay.prototype.configure = function(config, value) {
 
   goog.asserts.assert(this.player_ != null, 'Should have a player!');
 
-  /** @private {shaka.ui.Controls} */
-  this.controls_ = new shaka.ui.Controls(
-      this.player_, this.videoContainer_, this.video_, this.config_);
-
-  controlsContainer = DomUtils.getElementByClassName(
-      'shaka-controls-container', this.videoContainer_);
-  controlsContainer.setAttribute('shown', shown);
-
-  // Add the text container back.
-  if (textContainer) {
-    this.videoContainer_.appendChild(textContainer);
-  }
+  this.controls_.configure(this.config_);
 
   this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
 };

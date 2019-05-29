@@ -54,7 +54,7 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   /** @private {boolean} */
   this.overrideCssShowControls_ = false;
 
-  /** shaka.extern.UIConfiguration */
+  /** @private {shaka.extern.UIConfiguration} */
   this.config_ = config;
 
   /** @private {shaka.cast.CastProxy} */
@@ -145,12 +145,13 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   /** @private {shaka.ui.Localization} */
   this.localization_ = shaka.ui.Controls.createLocalization_();
 
-  this.createDOM_();
-
-  this.updateLocalizedStrings_();
-
   /** @private {shaka.util.EventManager} */
   this.eventManager_ = new shaka.util.EventManager();
+
+  // Configure and create the layout of the controls
+  this.configure(this.config_);
+
+  this.updateLocalizedStrings_();
 
   this.addEventListeners_();
 
@@ -348,6 +349,27 @@ shaka.ui.Controls.prototype.loadComplete = function() {
   // If we are on Android or if autoplay is false, video.paused should be true.
   // Otherwise, video.paused is false and the content is autoplaying.
   this.onPlayStateChange_();
+};
+
+
+/**
+ * @param {!shaka.extern.UIConfiguration} config
+ * @export
+ */
+shaka.ui.Controls.prototype.configure = function(config) {
+  this.config_ = config;
+
+  if (this.controlsContainer_) {
+    // Deconstruct the old layout if applicable
+    shaka.util.Dom.removeAllChildren(this.controlsContainer_);
+  } else {
+    this.addControlsContainer_();
+  }
+
+  // Create the new layout
+  this.createDOM_();
+
+  this.addEventListeners_();
 };
 
 
@@ -596,8 +618,6 @@ shaka.ui.Controls.prototype.createDOM_ = function() {
   this.videoContainer_.classList.add('shaka-video-container');
   this.video_.classList.add('shaka-video');
 
-  this.addControlsContainer_();
-
   this.addPlayButton_();
 
   this.addBufferingSpinner_();
@@ -630,6 +650,14 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
   this.controlsContainer_ = shaka.util.Dom.createHTMLElement('div');
   this.controlsContainer_.classList.add('shaka-controls-container');
   this.videoContainer_.appendChild(this.controlsContainer_);
+
+  this.controlsContainer_.addEventListener('touchstart', (e) => {
+    this.onContainerTouch_(e);
+  }, {passive: false});
+
+  this.controlsContainer_.addEventListener('click', (e) => {
+    this.onContainerClick_(e);
+  });
 };
 
 
@@ -645,8 +673,8 @@ shaka.ui.Controls.prototype.addPlayButton_ = function() {
   /** @private {!HTMLElement} */
   this.playButton_ = shaka.util.Dom.createHTMLElement('button');
   this.playButton_.classList.add('shaka-play-button');
-  this.playButton_.setAttribute('icon', 'play');
   this.playButtonContainer_.appendChild(this.playButton_);
+  this.onPlayStateChange_();
 };
 
 
@@ -747,11 +775,6 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
     this.seekBar_.addEventListener(
         'mouseup', this.onSeekEnd_.bind(this));
   }
-
-  this.controlsContainer_.addEventListener(
-      'touchstart', this.onContainerTouch_.bind(this), {passive: false});
-  this.controlsContainer_.addEventListener(
-      'click', this.onContainerClick_.bind(this));
 
   // Elements that should not propagate clicks (controls panel, menus)
   const noPropagationElements = this.videoContainer_.getElementsByClassName(
