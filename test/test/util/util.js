@@ -96,13 +96,12 @@ shaka.test.Util.delay = function(seconds, realSetTimeout) {
  * @return {*}
  */
 shaka.test.Util.jasmineError = function(error) {
-  // NOTE: Safari will add extra properties to any thrown object, so we
-  // wrap expectedError in jasmine.objectContaining to ignore them.
-  // NOTE: We now add extra properties ourselves for the sake of formatting.
-  // These, we delete from 'expected'.
-  delete (/** @type {!Object} */ (error))['stack'];
-  delete (/** @type {!Object} */ (error))['message'];
-  return jasmine.objectContaining(error);
+  // NOTE: Safari will add extra properties to any thrown object, and some of
+  // the properties we compute in debug builds are unhelpful and introduce
+  // inconsistency in tests.  Therefore we only capture the critical fields
+  // below.
+  const {severity, category, code, data} = error;
+  return jasmine.objectContaining({severity, category, code, data});
 };
 
 

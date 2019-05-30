@@ -124,7 +124,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
           });
     });
 
-    it('will fail overall', function(done) {
+    it('will fail overall', async () => {
       let request = createRequest('reject://foo', {
         maxAttempts: 3,
         baseDelay: 0,
@@ -132,13 +132,22 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
         fuzzFactor: 0,
         timeout: 0,
       });
-      networkingEngine.request(requestType, request).promise
-          .then(fail)
-          .catch(function(error) {
-            // It is expected to fail with the most recent error.
-            expect(error).toEqual(jasmine.any(shaka.util.Error));
-            expect(rejectScheme.calls.count()).toBe(3);
-          }).then(done);
+
+      // It is expected to fail with the most recent error, but at a CRITICAL
+      // severity, even though the original is at RECOVERABLE.
+
+      // Check our expectations.
+      expect(error.severity).toEqual(shaka.util.Error.Severity.RECOVERABLE);
+
+      // Modify the expected error.  Note that |expected| here is a wrapper
+      // created by jasmine, and |expected.sample| is the Object containing the
+      // expected values.
+      const expected = Util.jasmineError(error);
+      expected.sample.severity = shaka.util.Error.Severity.CRITICAL;
+
+      await expectAsync(networkingEngine.request(requestType, request).promise)
+          .toBeRejectedWith(expected);
+      expect(rejectScheme.calls.count()).toBe(3);
     });
 
     describe('backoff', function() {
