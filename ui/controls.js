@@ -356,6 +356,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.controlsContainer_) {
       // Deconstruct the old layout if applicable
       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
+      this.videoContainer_.removeChild(this.spinnerContainer_);
     } else {
       this.addControlsContainer_();
     }
@@ -378,16 +379,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   setEnabledShakaControls(enabled) {
     this.enabled_ = enabled;
     if (enabled) {
+      shaka.ui.Utils.setDisplay(this.controlsContainer_, true);
+
+      // Spinner lives outside of the main controls div
       shaka.ui.Utils.setDisplay(
-          this.controlsButtonPanel_.parentElement, true);
+          this.spinnerContainer_, this.player_.isBuffering());
 
       // If we're hiding native controls, make sure the video element itself is
       // not tab-navigable.  Our custom controls will still be tab-navigable.
       this.video_.tabIndex = -1;
       this.video_.controls = false;
     } else {
-      shaka.ui.Utils.setDisplay(
-          this.controlsButtonPanel_.parentElement, false);
+      shaka.ui.Utils.setDisplay(this.controlsContainer_, false);
+      // Spinner lives outside of the main controls div
+      shaka.ui.Utils.setDisplay(this.spinnerContainer_, false);
     }
 
     // The effects of play state changes are inhibited while showing native
@@ -677,19 +682,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   addBufferingSpinner_() {
-    goog.asserts.assert(this.playButtonContainer_,
-        'Must have play button container before spinner!');
+    /** @private {!HTMLElement} */
+    this.spinnerContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.spinnerContainer_.classList.add('shaka-spinner-container');
+    this.videoContainer_.appendChild(this.spinnerContainer_);
+
+    const spinner = shaka.util.Dom.createHTMLElement('div');
+    spinner.classList.add('shaka-spinner');
+    this.spinnerContainer_.appendChild(spinner);
 
     // Svg elements have to be created with the svg xml namespace.
     const xmlns = 'http://www.w3.org/2000/svg';
 
     /** @private {!HTMLElement} */
-    this.bufferingSpinner_ =
+    const svg =
       /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
     // NOTE: SVG elements do not have a classList on IE, so use setAttribute.
-    this.bufferingSpinner_.setAttribute('class', 'shaka-spinner-svg');
-    this.bufferingSpinner_.setAttribute('viewBox', '0 0 30 30');
-    this.playButton_.appendChild(this.bufferingSpinner_);
+    svg.setAttribute('class', 'shaka-spinner-svg');
+    svg.setAttribute('viewBox', '0 0 30 30');
+    spinner.appendChild(svg);
 
     // These coordinates are relative to the SVG viewBox above.  This is
     // distinct from the actual display size in the page, since the "S" is for
@@ -703,7 +714,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     spinnerCircle.setAttribute('fill', 'none');
     spinnerCircle.setAttribute('stroke-width', '1');
     spinnerCircle.setAttribute('stroke-miterlimit', '10');
-    this.bufferingSpinner_.appendChild(spinnerCircle);
+    svg.appendChild(spinnerCircle);
   }
 
 
@@ -712,12 +723,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   addControlsButtonPanel_() {
     /** @private {!HTMLElement} */
+    this.bottomControls_ = shaka.util.Dom.createHTMLElement('div');
+    this.bottomControls_.classList.add('shaka-bottom-controls');
+    this.controlsContainer_.appendChild(this.bottomControls_);
+
+    /** @private {!HTMLElement} */
     this.controlsButtonPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
     this.controlsButtonPanel_.classList.add('shaka-no-propagation');
     this.controlsButtonPanel_.classList.add(
         'shaka-show-controls-on-mouse-over');
-    this.controlsContainer_.appendChild(this.controlsButtonPanel_);
+    this.bottomControls_.appendChild(this.controlsButtonPanel_);
 
     // Create the elements specified by controlPanelElements
     for (let i = 0; i < this.config_.controlPanelElements.length; i++) {
@@ -871,7 +887,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.seekBar_.classList.add('shaka-show-controls-on-mouse-over');
 
     this.seekBarContainer_.appendChild(this.seekBar_);
-    this.controlsContainer_.appendChild(this.seekBarContainer_);
+    this.bottomControls_.appendChild(this.seekBarContainer_);
   }
 
 
@@ -1178,15 +1194,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onBufferingStateChange_() {
-    // Don't use setDisplay_ here, since the SVG spinner doesn't have classList
-    // on IE.
-    if (this.player_.isBuffering()) {
-      this.bufferingSpinner_.setAttribute(
-          'class', 'shaka-spinner-svg');
-    } else {
-      this.bufferingSpinner_.setAttribute(
-          'class', 'shaka-spinner-svg shaka-hidden');
+    if (!this.enabled_) {
+      return;
     }
+
+    shaka.ui.Utils.setDisplay(
+        this.spinnerContainer_, this.player_.isBuffering());
   }
 
 
