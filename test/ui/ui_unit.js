@@ -531,7 +531,7 @@ describe('UI', function() {
 
     confirmElementFound(container, 'shaka-play-button-container');
     confirmElementFound(container, 'shaka-play-button');
-    confirmElementFound(container, 'shaka-spinner-svg');
+    confirmElementFound(container, 'shaka-spinner');
     confirmElementFound(container, 'shaka-overflow-menu');
     confirmElementFound(container, 'shaka-controls-button-panel');
     confirmElementFound(container, 'shaka-seek-bar');
