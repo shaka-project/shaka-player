@@ -1376,8 +1376,9 @@ shaka.ui.Controls.prototype.keepFocusInMenu_ = function(event) {
 
 
 /**
- * Removes class for keyboard navigation if mouse navigation
- * is active.
+ * For keyboard navigation, we use blue borders to highlight the active
+ * element. If we detect that a mouse is being used, remove the blue border
+ * from the active element.
  * @private
  */
 shaka.ui.Controls.prototype.onMouseDown_ = function() {
