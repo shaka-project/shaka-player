@@ -22,16 +22,16 @@
 
 
 /** @const */
-const componentHandler = {};
-
-/** @const */
-componentHandler.upgradeDom = function() {};
+const componentHandler = class {
+  /** @const */
+  static upgradeDom() {}
+};
 
 
 /** @constructor */
-const MaterialLayout = function() {};
-
-MaterialLayout.prototype.toggleDrawer = function() {};
+const MaterialLayout = class {
+  toggleDrawer() {}
+};
 
 /** @const {?MaterialLayout} */
 Element.prototype.MaterialLayout;

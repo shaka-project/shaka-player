@@ -814,9 +814,10 @@ describe('TtmlTextParser', () => {
         verifyRegion(cues[i].region, result[i].region);
       }
 
+      const asObj = /** @type {!Object} */ (result[i]);
       for (const property of properties) {
         if (property in cues[i]) {
-          expect(result[i][property]).toEqual(cues[i][property]);
+          expect(asObj[property]).toEqual(cues[i][property]);
         }
       }
 
@@ -841,9 +842,10 @@ describe('TtmlTextParser', () => {
       'scroll'];
     expect(actual).toBeTruthy();
 
+    const asObj = /** @type {!Object} */ (actual);
     for (const property of properties) {
       if (property in expected) {
-        expect(actual[property]).toEqual(expected[property]);
+        expect(asObj[property]).toEqual(expected[property]);
       }
     }
   }

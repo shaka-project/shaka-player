@@ -46,40 +46,36 @@ shaka.extern.RestrictionInfo;
  * @interface
  * @exportDoc
  */
-shaka.extern.Error = function() {};
+shaka.extern.Error = class {
+  constructor() {
+    /**
+     * @type {shaka.util.Error.Severity}
+     * @exportDoc
+     */
+    this.severity;
 
+    /**
+     * @const {shaka.util.Error.Category}
+     * @exportDoc
+     */
+    this.category;
 
-/**
- * @type {shaka.util.Error.Severity}
- * @exportDoc
- */
-shaka.extern.Error.prototype.severity;
+    /**
+     * @const {shaka.util.Error.Code}
+     * @exportDoc
+     */
+    this.code;
 
+    /**
+     * @const {!Array.<*>}
+     * @exportDoc
+     */
+    this.data;
 
-/**
- * @const {shaka.util.Error.Category}
- * @exportDoc
- */
-shaka.extern.Error.prototype.category;
-
-
-/**
- * @const {shaka.util.Error.Code}
- * @exportDoc
- */
-shaka.extern.Error.prototype.code;
-
-
-/**
- * @const {!Array.<*>}
- * @exportDoc
- */
-shaka.extern.Error.prototype.data;
-
-
-/**
- * @type {boolean}
- * @exportDoc
- */
-shaka.extern.Error.prototype.handled;
-
+    /**
+     * @type {boolean}
+     * @exportDoc
+     */
+    this.handled;
+  }
+};

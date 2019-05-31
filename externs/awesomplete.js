@@ -21,16 +21,15 @@
  */
 
 
-/**
- * @param {!Element} input
- * @constructor
- */
-const Awesomplete = function(input) {};
+class Awesomplete {
+  /** @param {!Element} input */
+  constructor(input) {
+    /** @type {!Array.<string>} */
+    this.list;
 
-/** @type {!Array.<string>} */
-Awesomplete.prototype.list;
+    /** @type {number} */
+    this.minChars;
+  }
 
-/** @type {number} */
-Awesomplete.prototype.minChars;
-
-Awesomplete.prototype.evaluate = function() {};
+  evaluate() {}
+}

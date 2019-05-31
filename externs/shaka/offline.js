@@ -247,118 +247,108 @@ shaka.extern.EmeSessionDB;
  *
  * @interface
  */
-shaka.extern.StorageCell = function() {};
+shaka.extern.StorageCell = class {
+  constructor() {}
 
+  /**
+   * Free all resources used by this cell. This should not affect the stored
+   * content.
+   *
+   * @return {!Promise}
+   */
+  destroy() {}
 
-/**
- * Free all resources used by this cell. This should not affect the stored
- * content.
- *
- * @return {!Promise}
- */
-shaka.extern.StorageCell.prototype.destroy = function() {};
+  /**
+   * Check if the cell can support new keys. If a cell has a fixed key space,
+   * then all add-operations will fail as no new keys can be added. All
+   * remove-operations and update-operations should still work.
+   *
+   * @return {boolean}
+   */
+  hasFixedKeySpace() {}
 
+  /**
+   * Add a group of segments. Will return a promise that resolves with a list
+   * of keys for each segment. If one segment fails to be added, all segments
+   * should fail to be added.
+   *
+   * @param {!Array.<shaka.extern.SegmentDataDB>} segments
+   * @return {!Promise.<!Array.<number>>}
+   */
+  addSegments(segments) {}
 
-/**
- * Check if the cell can support new keys. If a cell has a fixed key space,
- * then all add-operations will fail as no new keys can be added. All
- * remove-operations and update-operations should still work.
- *
- * @return {boolean}
- */
-shaka.extern.StorageCell.prototype.hasFixedKeySpace = function() {};
+  /**
+   * Remove a group of segments using their keys to identify them. If a key
+   * is not found, then that removal should be considered successful.
+   *
+   * @param {!Array.<number>} keys
+   * @param {function(number)} onRemove A callback for when a segment is removed
+   *                                    from the cell. The key of the segment
+   *                                    will be passed to the callback.
+   * @return {!Promise}
+   */
+  removeSegments(keys, onRemove) {}
 
+  /**
+   * Get a group of segments using their keys to identify them. If any key is
+   * not found, the promise chain will be rejected.
+   *
+   * @param {!Array.<number>} keys
+   * @return {!Promise.<!Array.<shaka.extern.SegmentDataDB>>}
+   */
+  getSegments(keys) {}
 
-/**
- * Add a group of segments. Will return a promise that resolves with a list
- * of keys for each segment. If one segment fails to be added, all segments
- * should fail to be added.
- *
- * @param {!Array.<shaka.extern.SegmentDataDB>} segments
- * @return {!Promise.<!Array.<number>>}
- */
-shaka.extern.StorageCell.prototype.addSegments = function(segments) {};
+  /**
+   * Add a group of manifests. Will return a promise that resolves with a list
+   * of keys for each manifest. If one manifest fails to be added, all manifests
+   * should fail to be added.
+   *
+   * @param {!Array.<shaka.extern.ManifestDB>} manifests
+   * @return {!Promise<!Array.<number>>} keys
+   */
+  addManifests(manifests) {}
 
+  /**
+   * Replace the expiration time of the manifest stored under |key| with
+   * |newExpiration|. If no manifest is found under |key| then this should
+   * act as a no-op.
+   *
+   * @param {number} key
+   * @param {number} expiration
+   * @return {!Promise}
+   */
+  updateManifestExpiration(key, expiration) {}
 
-/**
- * Remove a group of segments using their keys to identify them. If a key
- * is not found, then that removal should be considered successful.
- *
- * @param {!Array.<number>} keys
- * @param {function(number)} onRemove A callback for when a segment is removed
- *                                    from the cell. The key of the segment
- *                                    will be passed to the callback.
- * @return {!Promise}
- */
-shaka.extern.StorageCell.prototype.removeSegments = function(keys, onRemove) {};
+  /**
+   * Remove a group of manifests using their keys to identify them. If a key
+   * is not found, then that removal should be considered successful.
+   *
+   * @param {!Array.<number>} keys
+   * @param {function(number)} onRemove A callback for when a manifest is
+   *                                    removed from the cell. The key of the
+   *                                    manifest will be passed to the callback.
+   * @return {!Promise}
+   */
+  removeManifests(keys, onRemove) {}
 
+  /**
+   * Get a group of manifests using their keys to identify them. If any key is
+   * not found, the promise chain will be rejected.
+   *
+   * @param {!Array.<number>} keys
+   * @return {!Promise<!Array.<shaka.extern.ManifestDB>>}
+   */
+  getManifests(keys) {}
 
-/**
- * Get a group of segments using their keys to identify them. If any key is
- * not found, the promise chain will be rejected.
- *
- * @param {!Array.<number>} keys
- * @return {!Promise.<!Array.<shaka.extern.SegmentDataDB>>}
- */
-shaka.extern.StorageCell.prototype.getSegments = function(keys) {};
-
-
-/**
- * Add a group of manifests. Will return a promise that resolves with a list
- * of keys for each manifest. If one manifest fails to be added, all manifests
- * should fail to be added.
- *
- * @param {!Array.<shaka.extern.ManifestDB>} manifests
- * @return {!Promise<!Array.<number>>} keys
- */
-shaka.extern.StorageCell.prototype.addManifests = function(manifests) {};
-
-
-/**
- * Replace the expiration time of the manifest stored under |key| with
- * |newExpiration|. If no manifest is found under |key| then this should
- * act as a no-op.
- *
- * @param {number} key
- * @param {number} expiration
- * @return {!Promise}
- */
-shaka.extern.StorageCell.prototype.updateManifestExpiration =
-    function(key, expiration) {};
-
-
-/**
- * Remove a group of manifests using their keys to identify them. If a key
- * is not found, then that removal should be considered successful.
- *
- * @param {!Array.<number>} keys
- * @param {function(number)} onRemove A callback for when a manifest is removed
- *                                    from the cell. The key of the manifest
- *                                    will be passed to the callback.
- * @return {!Promise}
- */
-shaka.extern.StorageCell.prototype.removeManifests =
-    function(keys, onRemove) {};
-
-
-/**
- * Get a group of manifests using their keys to identify them. If any key is
- * not found, the promise chain will be rejected.
- *
- * @param {!Array.<number>} keys
- * @return {!Promise<!Array.<shaka.extern.ManifestDB>>}
- */
-shaka.extern.StorageCell.prototype.getManifests = function(keys) {};
-
-
-/**
- * Get all manifests stored in this cell. Since manifests are small compared to
- * the asset they describe, it is assumed that it is feasible to have them all
- * in main memory at one time.
- *
- * @return {!Promise<!Map.<number, shaka.extern.ManifestDB>>}
- */
-shaka.extern.StorageCell.prototype.getAllManifests = function() {};
+  /**
+   * Get all manifests stored in this cell. Since manifests are small compared
+   * to the asset they describe, it is assumed that it is feasible to have them
+   * all in main memory at one time.
+   *
+   * @return {!Promise<!Map.<number, shaka.extern.ManifestDB>>}
+   */
+  getAllManifests() {}
+};
 
 
 /**
@@ -368,37 +358,35 @@ shaka.extern.StorageCell.prototype.getAllManifests = function() {};
  *
  * @interface
  */
-shaka.extern.EmeSessionStorageCell = function() {};
+shaka.extern.EmeSessionStorageCell = class {
+  constructor() {}
 
+  /**
+   * Free all resources used by this cell. This won't affect the stored content.
+   * @return {!Promise}
+   */
+  destroy() {}
 
-/**
- * Free all resources used by this cell. This won't affect the stored content.
- * @return {!Promise}
- */
-shaka.extern.EmeSessionStorageCell.prototype.destroy = function() {};
+  /**
+   * Gets the currently stored sessions.
+   * @return {!Promise.<!Array.<shaka.extern.EmeSessionDB>>}
+   */
+  getAll() {}
 
+  /**
+   * Adds the given sessions to the store.
+   * @param {!Array.<shaka.extern.EmeSessionDB>} sessions
+   * @return {!Promise}
+   */
+  add(sessions) {}
 
-/**
- * Gets the currently stored sessions.
- * @return {!Promise.<!Array.<shaka.extern.EmeSessionDB>>}
- */
-shaka.extern.EmeSessionStorageCell.prototype.getAll = function() {};
-
-
-/**
- * Adds the given sessions to the store.
- * @param {!Array.<shaka.extern.EmeSessionDB>} sessions
- * @return {!Promise}
- */
-shaka.extern.EmeSessionStorageCell.prototype.add = function(sessions) {};
-
-
-/**
- * Removes the given session IDs from the store.
- * @param {!Array.<string>} sessionIds
- * @return {!Promise}
- */
-shaka.extern.EmeSessionStorageCell.prototype.remove = function(sessionIds) {};
+  /**
+   * Removes the given session IDs from the store.
+   * @param {!Array.<string>} sessionIds
+   * @return {!Promise}
+   */
+  remove(sessionIds) {}
+};
 
 
 /**
@@ -413,52 +401,49 @@ shaka.extern.EmeSessionStorageCell.prototype.remove = function(sessionIds) {};
  *
  * @interface
  */
-shaka.extern.StorageMechanism = function() {};
+shaka.extern.StorageMechanism = class {
+  constructor() {}
 
+  /**
+   * Initialize the storage mechanism for first use. This should only be called
+   * once. Calling |init| multiple times has an undefined behaviour.
+   *
+   * @return {!Promise}
+   */
+  init() {}
 
-/**
- * Initialize the storage mechanism for first use. This should only be called
- * once. Calling |init| multiple times has an undefined behaviour.
- *
- * @return {!Promise}
- */
-shaka.extern.StorageMechanism.prototype.init = function() {};
+  /**
+   * Free all resources used by the storage mechanism and its cells. This should
+   * not affect the stored content.
+   *
+   * @return {!Promise}
+   */
+  destroy() {}
 
+  /**
+   * Get a map of all the cells managed by the storage mechanism. Editing the
+   * map should have no effect on the storage mechanism. The map key is the
+   * cell's address in the mechanism and should be consistent between calls to
+   * |getCells|.
+   *
+   * @return {!Map.<string, !shaka.extern.StorageCell>}
+   */
+  getCells() {}
 
-/**
- * Free all resources used by the storage mechanism and its cells. This should
- * not affect the stored content.
- *
- * @return {!Promise}
- */
-shaka.extern.StorageMechanism.prototype.destroy = function() {};
+  /**
+   * Get the current EME session storage cell.
+   * @return {!shaka.extern.EmeSessionStorageCell}
+   */
+  getEmeSessionCell() {}
 
-
-/**
- * Get a map of all the cells managed by the storage mechanism. Editing the map
- * should have no effect on the storage mechanism. The map key is the cell's
- * address in the mechanism and should be consistent between calls to
- * |getCells|.
- *
- * @return {!Map.<string, !shaka.extern.StorageCell>}
- */
-shaka.extern.StorageMechanism.prototype.getCells = function() {};
-
-
-/**
- * Get the current EME session storage cell.
- * @return {!shaka.extern.EmeSessionStorageCell}
- */
-shaka.extern.StorageMechanism.prototype.getEmeSessionCell = function() {};
-
-
-/**
- * Erase all content from storage and leave storage in an empty state. Erase may
- * be called with or without |init|.  This allows for storage to be wiped in
- * case of a version mismatch.
- *
- * After calling |erase|, the mechanism will be in an initialized state.
- *
- * @return {!Promise}
- */
-shaka.extern.StorageMechanism.prototype.erase = function() {};
+  /**
+   * Erase all content from storage and leave storage in an empty state. Erase
+   * may be called with or without |init|.  This allows for storage to be wiped
+   * in case of a version mismatch.
+   *
+   * After calling |erase|, the mechanism will be in an initialized state.
+   *
+   * @return {!Promise}
+   */
+  erase() {}
+};

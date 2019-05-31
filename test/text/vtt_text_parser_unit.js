@@ -641,9 +641,10 @@ describe('VttTextParser', () => {
       'scroll'];
     expect(actual).toBeTruthy();
 
+    const asObj = /** @type {!Object} */ (actual);
     for (const property of properties) {
       if (property in expected) {
-        expect(actual[property]).toEqual(expected[property]);
+        expect(asObj[property]).toEqual(expected[property]);
       }
     }
   }

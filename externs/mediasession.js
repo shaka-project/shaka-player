@@ -24,14 +24,12 @@
  */
 
 
-/**
- * @constructor
- */
-var MediaMetadata = function(options) {};
-
-
-/** @type {string} */
-MediaMetadata.prototype.title;
+const MediaMetadata = class {
+  constructor(options) {
+    /** @type {string} */
+    this.title;
+  }
+};
 
 
 /** @type {MediaMetadata} */

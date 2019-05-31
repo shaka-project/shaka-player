@@ -205,5 +205,13 @@ module.exports = {
         'lib/debug/asserts.js',
       ],
     },
+    {
+      'files': ['externs/*', 'externs/shaka/*'],
+      'rules': {
+        // Disable rules on useless constructors so we can use ES6 classes in
+        // externs.
+        'no-useless-constructor': 'off',
+      },
+    },
   ],
 };

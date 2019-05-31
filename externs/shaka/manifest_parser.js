@@ -50,7 +50,62 @@
  * @interface
  * @exportDoc
  */
-shaka.extern.ManifestParser = function() {};
+shaka.extern.ManifestParser = class {
+  constructor() {}
+
+  /**
+   * Called by the Player to provide an updated configuration any time the
+   * configuration changes.  Will be called at least once before start().
+   *
+   * @param {shaka.extern.ManifestConfiguration} config
+   * @exportDoc
+   */
+  configure(config) {}
+
+  /**
+   * Initialize and start the parser. When |start| resolves, it should return
+   * the initial version of the manifest. |start| will only be called once. If
+   * |stop| is called while |start| is pending, |start| should reject.
+   *
+   * @param {string} uri The URI of the manifest.
+   * @param {shaka.extern.ManifestParser.PlayerInterface} playerInterface
+   *    The player interface contains the callbacks and members that the parser
+   *    can use to communicate with the player and outside world.
+   * @return {!Promise.<shaka.extern.Manifest>}
+   * @exportDoc
+   */
+  start(uri, playerInterface) {}
+
+  /**
+   * Tell the parser that it must stop and free all internal resources as soon
+   * as possible. Only once all internal resources are stopped and freed will
+   * the promise resolve. Once stopped a parser will not be started again.
+   *
+   * The parser should support having |stop| called multiple times and the
+   * promise should always resolve.
+   *
+   * @return {!Promise}
+   * @exportDoc
+   */
+  stop() {}
+
+  /**
+   * Tells the parser to do a manual manifest update.  Implementing this is
+   * optional.  This is only called when 'emsg' boxes are present.
+   * @exportDoc
+   */
+  update() {}
+
+  /**
+   * Tells the parser that the expiration time of an EME session has changed.
+   * Implementing this is optional.
+   *
+   * @param {string} sessionId
+   * @param {number} expiration
+   * @exportDoc
+   */
+  onExpirationUpdated(sessionId, expiration) {}
+};
 
 
 /**
@@ -96,61 +151,3 @@ shaka.extern.ManifestParser.PlayerInterface;
  */
 shaka.extern.ManifestParser.Factory;
 
-
-/**
- * Called by the Player to provide an updated configuration any time the
- * configuration changes.  Will be called at least once before start().
- *
- * @param {shaka.extern.ManifestConfiguration} config
- * @exportDoc
- */
-shaka.extern.ManifestParser.prototype.configure = function(config) {};
-
-
-/**
- * Initialize and start the parser. When |start| resolves, it should return the
- * initial version of the manifest. |start| will only be called once. If |stop|
- * is called while |start| is pending, |start| should reject.
- *
- * @param {string} uri The URI of the manifest.
- * @param {shaka.extern.ManifestParser.PlayerInterface} playerInterface
- *    The player interface contains the callbacks and members that the parser
- *    can use to communicate with the player and outside world.
- * @return {!Promise.<shaka.extern.Manifest>}
- * @exportDoc
- */
-shaka.extern.ManifestParser.prototype.start = function(uri, playerInterface) {};
-
-
-/**
- * Tell the parser that it must stop and free all internal resources as soon as
- * possible. Only once all internal resources are stopped and freed will the
- * promise resolve. Once stopped a parser will not be started again.
- *
- * The parser should support having |stop| called multiple times and the promise
- * should always resolve.
- *
- * @return {!Promise}
- * @exportDoc
- */
-shaka.extern.ManifestParser.prototype.stop = function() {};
-
-
-/**
- * Tells the parser to do a manual manifest update.  Implementing this is
- * optional.  This is only called when 'emsg' boxes are present.
- * @exportDoc
- */
-shaka.extern.ManifestParser.prototype.update = function() {};
-
-
-/**
- * Tells the parser that the expiration time of an EME session has changed.
- * Implementing this is optional.
- *
- * @param {string} sessionId
- * @param {number} expiration
- * @exportDoc
- */
-shaka.extern.ManifestParser.prototype.onExpirationUpdated = function(
-    sessionId, expiration) {};

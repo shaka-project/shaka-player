@@ -22,16 +22,14 @@
 
 
 /** @const */
-var less = {};
+const less = class {
+  static registerStylesheetsImmediately() {}
 
-
-less.registerStylesheetsImmediately = function() {};
-
-/**
- * @param {boolean} reload
- * @param {boolean} modifyVars
- * @param {boolean} clearFileCache
- * @return {!Promise}
- */
-less.refresh = function(reload, modifyVars, clearFileCache) {};
-
+  /**
+   * @param {boolean} reload
+   * @param {boolean} modifyVars
+   * @param {boolean} clearFileCache
+   * @return {!Promise}
+   */
+  static refresh(reload, modifyVars, clearFileCache) {}
+};

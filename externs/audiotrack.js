@@ -49,18 +49,16 @@ AudioTrack.prototype.sourceBuffer;
  * @extends {EventTarget}
  * @interface
  */
-function AudioTrackList() {}
+class AudioTrackList {
+  /** @override */
+  addEventListener(type, listener, useCapture) {}
 
-/** @override */
-AudioTrackList.prototype.addEventListener =
-    function(type, listener, useCapture) {};
+  /** @override */
+  removeEventListener(type, listener, useCapture) {}
 
-/** @override */
-AudioTrackList.prototype.removeEventListener =
-    function(type, listener, useCapture) {};
-
-/** @override */
-AudioTrackList.prototype.dispatchEvent = function(event) {};
+  /** @override */
+  dispatchEvent(event) {}
+}
 
 
 /** @type {AudioTrackList} */

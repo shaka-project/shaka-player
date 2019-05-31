@@ -22,12 +22,10 @@
 
 
 /** @const */
-const dialogPolyfill = {};
-
-
-/**
- * @param {!Element} dialog
- * @const
- */
-dialogPolyfill.registerDialog = function(dialog) {};
-
+const dialogPolyfill = class {
+  /**
+   * @param {!Element} dialog
+   * @const
+   */
+  static registerDialog(dialog) {}
+};
