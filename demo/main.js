@@ -70,7 +70,7 @@ class ShakaDemoMain {
       // Exception to the exceptions we catch: ChromeVox (screenreader) always
       // throws an error as of Chrome 73.  Screen these out since they are
       // unrelated to our application and we can't control them.
-      if (event.message.includes('cvox.ApiImplementation')) {
+      if (event.message.includes('cvox.Api')) {
         return;
       }
 
