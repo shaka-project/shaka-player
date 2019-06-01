@@ -120,6 +120,7 @@ shaka.test.FakeNetworkingEngine = class {
       /** @type {shaka.extern.Response} */
       const response = {
         uri: requestedUri,
+        originalUri: requestedUri,
         data: result,
         headers: headers,
       };
