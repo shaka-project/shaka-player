@@ -199,9 +199,12 @@ function getClientArg(name) {
     // Load required AMD modules, then proceed with tests.
     require(['promise-mock', 'sprintf-js', 'less'],
         (PromiseMock, sprintfJs, less) => {
-      window.PromiseMock = PromiseMock;
-      window.sprintf = sprintfJs.sprintf;
-      window.less = less;
+      // These external interfaces are declared as "const" in the externs.
+      // Avoid "const"-ness complaints from the compiler by assigning these
+      // using bracket notation.
+      window['PromiseMock'] = PromiseMock;
+      window['sprintf'] = sprintfJs.sprintf;
+      window['less'] = less;
 
       // Patch a new convenience method into PromiseMock.
       // See https://github.com/taylorhakes/promise-mock/issues/7
