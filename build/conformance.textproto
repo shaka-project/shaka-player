@@ -107,6 +107,7 @@ requirement: {
   error_message: 'Using "console" is not allowed; '
                  'use shaka.log instead'
   whitelist_regexp: 'demo/'
+  whitelist_regexp: 'lib/debug/log.js'
   whitelist_regexp: 'third_party/closure/'
   whitelist_regexp: 'test/test/boot.js'
 }
