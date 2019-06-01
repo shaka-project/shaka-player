@@ -14,6 +14,8 @@ video and audio using modern browser technologies. We try to keep the library
 light, simple, and free from third-party dependencies. Everything you need to
 build and deploy is in the sources.
 
+For details on what's coming next, see our [development roadmap](roadmap.md).
+
 [DASH]: http://dashif.org/
 [HLS]: https://developer.apple.com/streaming/
 [MediaSource Extensions]: https://www.w3.org/TR/media-source/
@@ -164,6 +166,7 @@ attributes.
 
 ## Important Links ##
 
+ * [development roadmap](roadmap.md)
  * [hosted demo](http://shaka-player-demo.appspot.com) (sources in `demo/`)
  * [hosted builds on cdnjs](https://cdnjs.com/libraries/shaka-player)
  * [hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
