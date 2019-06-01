@@ -256,21 +256,21 @@ shaka.ui.TextDisplayer = class {
       if (cue.lineInterpretation == Cue.lineInterpretation.PERCENTAGE) {
         if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
           if (cue.lineAlign == Cue.lineAlign.START) {
-            this.textContainer_.top = cue.line + '%';
+            panelStyle.top = cue.line + '%';
           } else if (cue.lineAlign == Cue.lineAlign.END) {
-            this.textContainer_.bottom = cue.line + '%';
+            panelStyle.bottom = cue.line + '%';
           }
         } else if (cue.writingMode == Cue.writingMode.VERTICAL_LEFT_TO_RIGHT) {
           if (cue.lineAlign == Cue.lineAlign.START) {
-            this.textContainer_.left = cue.line + '%';
+            panelStyle.left = cue.line + '%';
           } else if (cue.lineAlign == Cue.lineAlign.END) {
-            this.textContainer_.right = cue.line + '%';
+            panelStyle.right = cue.line + '%';
           }
         } else {
           if (cue.lineAlign == Cue.lineAlign.START) {
-            this.textContainer_.right = cue.line + '%';
+            panelStyle.right = cue.line + '%';
           } else if (cue.lineAlign == Cue.lineAlign.END) {
-            this.textContainer_.left = cue.line + '%';
+            panelStyle.left = cue.line + '%';
           }
         }
       }
@@ -282,18 +282,18 @@ shaka.ui.TextDisplayer = class {
     // direction defined by the writing direction.
     if (cue.position) {
       if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
-        this.textContainer_.paddingLeft = cue.position;
+        panelStyle.paddingLeft = cue.position;
       } else {
-        this.textContainer_.paddingTop = cue.position;
+        panelStyle.paddingTop = cue.position;
       }
     }
 
     // The positionAlign attribute is an alignment for the text container in
     // the dimension of the writing direction.
     if (cue.positionAlign == Cue.positionAlign.LEFT) {
-      panelStyle.float = 'left';
+      panelStyle.cssFloat = 'left';
     } else if (cue.positionAlign == Cue.positionAlign.RIGHT) {
-      panelStyle.float = 'right';
+      panelStyle.cssFloat = 'right';
     } else {
       panelStyle.margin = 'auto';
     }
@@ -306,9 +306,9 @@ shaka.ui.TextDisplayer = class {
     // interpreted as a percentage of the video, as defined by the writing
     // direction.
     if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
-      this.textContainer_.width = cue.size + '%';
+      panelStyle.width = cue.size + '%';
     } else {
-      this.textContainer_.height = cue.size + '%';
+      panelStyle.height = cue.size + '%';
     }
   }
 };
