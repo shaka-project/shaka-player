@@ -110,6 +110,9 @@ shaka.extern.Request;
  * @property {string} uri
  *   The URI which was loaded.  Request filters and server redirects can cause
  *   this to be different from the original request URIs.
+ * @property {string} originalUri
+ *   The original URI passed to the browser for networking. This is before any
+ *   redirects, but after request filters are executed.
  * @property {ArrayBuffer} data
  *   The body of the response.
  * @property {!Object.<string, string>} headers

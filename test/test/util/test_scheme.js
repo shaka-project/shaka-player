@@ -33,6 +33,7 @@ shaka.test.TestScheme = function(uri, request, requestType) {
     /** @type {shaka.extern.Response} */
     let response = {
       uri: uri,
+      originalUri: uri,
       data: new ArrayBuffer(0),
       headers: {'content-type': 'application/x-test-manifest'},
     };
@@ -76,7 +77,7 @@ shaka.test.TestScheme = function(uri, request, requestType) {
   }
 
   /** @type {shaka.extern.Response} */
-  let ret = {uri: uri, data: responseData, headers: {}};
+  const ret = {uri: uri, originalUri: uri, data: responseData, headers: {}};
   return shaka.util.AbortableOperation.completed(ret);
 };
 
