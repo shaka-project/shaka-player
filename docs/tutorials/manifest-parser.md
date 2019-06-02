@@ -216,7 +216,7 @@ In order to support Live content, the manifest may need to be updated.  In the
 `setInterval`) to update the manifest.  Then it should re-parse the manifest
 periodically.  To add new segments to the streams, simply add them to the
 segment index.  Because the original manifest object is modified in-place,
-adding them to the index will allow the Player to use them. You *cannnot* add
+adding them to the index will allow the Player to use them. You *cannot* add
 new Variants or text streams to an existing Period.
 
 To add a new Period, you must first call `filterNewPeriod`. This will filter out
