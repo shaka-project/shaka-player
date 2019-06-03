@@ -251,12 +251,10 @@ class AssetCard {
       return;
     }
     if (this.asset_.isStored()) {
-      const deleteButton = this.addButton('', async () => {
-        deleteButton.disabled = true;
-        await this.asset_.unstoreCallback();
-        this.remakeButtons();
+      const deleteButton = this.addButton('', () => {
+        this.makeDeleteDialog_(deleteButton);
       });
-      styleAsDownloadButton(deleteButton, deleteButton, 'delete');
+      styleAsDownloadButton(deleteButton, deleteButton, 'offline_pin');
     } else {
       const downloadButton = this.addButton('', async () => {
         downloadButton.disabled = true;
@@ -265,6 +263,58 @@ class AssetCard {
       });
       styleAsDownloadButton(downloadButton, downloadButton, 'get_app');
     }
+  }
+
+  /**
+   * @param {!Element} deleteButton
+   * @private
+   */
+  makeDeleteDialog_(deleteButton) {
+    const parentDiv = this.card_.parentElement;
+    if (!parentDiv) {
+      return;
+    }
+
+    const dialog = document.createElement('dialog');
+    dialog.classList.add('mdl-dialog');
+    parentDiv.appendChild(dialog);
+    if (!dialog.showModal) {
+      dialogPolyfill.registerDialog(dialog);
+    }
+
+    const textElement = document.createElement('h2');
+    textElement.classList.add('mdl-typography--title');
+    // TODO: Localize these messages.
+    textElement.textContent = 'Delete the offline copy?';
+    dialog.appendChild(textElement);
+
+    const buttonsDiv = document.createElement('div');
+    dialog.appendChild(buttonsDiv);
+    const makeButton = (text, fn) => {
+      const button = document.createElement('button');
+      button.textContent = text;
+      button.classList.add('mdl-button');
+      button.classList.add('mdl-button--colored');
+      button.classList.add('mdl-js-button');
+      button.classList.add('mdl-js-ripple-effect');
+      button.addEventListener('click', () => {
+        fn();
+      });
+      buttonsDiv.appendChild(button);
+      button.blur();
+    };
+    // TODO: Localize these messages.
+    makeButton('Yes', async () => {
+      dialog.close();
+      deleteButton.disabled = true;
+      await this.asset_.unstoreCallback();
+      this.remakeButtons();
+    });
+    makeButton('No', () => {
+      dialog.close();
+    });
+
+    dialog.showModal();
   }
 
   /**
