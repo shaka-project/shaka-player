@@ -2522,7 +2522,7 @@ describe('StreamingEngine', () => {
           new shaka.test.FakeMediaSourceEngine(segmentData, drift);
       createStreamingEngine();
 
-      onStartupComplete.and.callFake(setupFakeGetTime.bind(null, 0));
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       // Here we go!
       onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
@@ -2851,13 +2851,15 @@ describe('StreamingEngine', () => {
           bytes.setBytes(200);
 
           delayedRequest = new shaka.util.PublicPromise();
-          let p = shouldDelayRequests ? delayedRequest : Promise.resolve();
-          p = p.then(() => {
+          const run = async () => {
+            if (shouldDelayRequests) {
+              await delayedRequest;
+            }
             // Only add if the segment was appended; if it was aborted this
             // won't be called.
             requestUris.push(request.uris[0]);
             return response;
-          });
+          };
           const abort = () => {
             delayedRequest.reject(new shaka.util.Error(
                 shaka.util.Error.Severity.CRITICAL,
@@ -2865,8 +2867,8 @@ describe('StreamingEngine', () => {
                 shaka.util.Error.Code.OPERATION_ABORTED));
             return Promise.resolve();
           };
-          const ret =
-              new shaka.net.NetworkingEngine.PendingRequest(p, abort, bytes);
+          const ret = new shaka.net.NetworkingEngine.PendingRequest(
+              run(), abort, bytes);
 
           spyOn(ret, 'abort').and.callThrough();
           lastResponse = ret;

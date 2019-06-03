@@ -32,7 +32,7 @@ function getClientArg(name) {
 
 // Executed before test utilities and tests are loaded, but after Shaka Player
 // is loaded in uncompiled mode.
-(function() {
+(() => {
   const realAssert = console.assert.bind(console);
 
   /**
@@ -133,7 +133,7 @@ function getClientArg(name) {
    * @return {jasmine.Callback}
    */
   function filterShim(callback, clientArg, skipMessage) {
-    return async function() {
+    return async () => {
       if (!getClientArg(clientArg)) {
         pending(skipMessage);
         return;
@@ -156,7 +156,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.drmIt = function(name, callback) {
+  window.drmIt = (name, callback) => {
     it(name, filterShim(callback, 'drm',
         'Skipping tests that use a DRM license server.'));
   };
@@ -167,7 +167,7 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.quarantinedIt = function(name, callback) {
+  window.quarantinedIt = (name, callback) => {
     it(name, filterShim(callback, 'quarantined',
         'Skipping tests that are quarantined.'));
   };

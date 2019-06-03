@@ -302,7 +302,7 @@ function httpPluginTests(usingFetch) {
         /** @type {function()} */
         this.onabort;
 
-        this.send = async function() {
+        this.send = async () => {
           // Delay the effects of send until after operation is defined.
           await Promise.resolve();
           expect(this.abort).not.toHaveBeenCalled();
