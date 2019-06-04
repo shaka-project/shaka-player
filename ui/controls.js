@@ -696,7 +696,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Svg elements have to be created with the svg xml namespace.
     const xmlns = 'http://www.w3.org/2000/svg';
 
-    /** @private {!HTMLElement} */
     const svg =
       /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
     // NOTE: SVG elements do not have a classList on IE, so use setAttribute.
