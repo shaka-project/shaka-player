@@ -60,7 +60,7 @@ async function init() {
     // This runs if the asynchronous load is successful.
     console.log('The video has now been loaded!');
   } catch (error) {
-    onError(error);
+    onPlayerError(error);
   }
 }
 
@@ -71,21 +71,24 @@ function onPlayerErrorEvent(errorEvent) {
 
 function onPlayerError(error) {
   // Handle player error
+  console.error('Error code', error.code, 'object', error);
 }
 
 function onUIErrorEvent(errorEvent) {
-  // Handle UI error
+  // Extract the shaka.util.Error object from the event.
+  onPlayerError(event.detail);
 }
 
 function initFailed() {
   // Handle the failure to load
+  console.error('Unable to load the UI library!');
 }
 
 // Listen to the custom shaka-ui-loaded event, to wait until the UI is loaded.
 document.addEventListener('shaka-ui-loaded', init);
 // Listen to the custom shaka-ui-load-failed event, in case Shaka Player fails
 // to load (e.g. due to lack of browser support).
-document.addEventListener('shaka-ui-load-failed, initFailed);
+document.addEventListener('shaka-ui-load-failed', initFailed);
 
 ```
 
@@ -116,6 +119,7 @@ Next, let's add a listener to the 'caststatuschanged' event in myapp.js:
   function onCastStatusChanged(event) {
     const newCastStatus = event['newStatus'];
     // Handle cast status change
+    console.log('The new cast status is: ' + newCastStatus);
   }
 
 ```
