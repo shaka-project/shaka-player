@@ -45,6 +45,12 @@
 .fullscreen-container() {
   .fill-container();
   background-color: black;
+
+  .shaka-text-container {
+    /* In fullscreen mode, the text displayer's font size should be relative to
+     * the window height instead of a fixed size. */
+    font-size: 4.4vh;
+  }
 }
 .shaka-video-container:fullscreen { .fullscreen-container(); }
 .shaka-video-container:-webkit-full-screen { .fullscreen-container(); }
@@ -217,11 +223,16 @@
   text-align: center;
   position: absolute;
 
+  /* These are defaults which are overridden by JS or cue styles. */
+  font-size: 20px;
+  line-height: 1.4;  // relative to font size.
+
   span {
-    font-size: 18px;
+    /* These are defaults which are overridden by JS or cue styles. */
+    background-color: rgba(0, 0, 0, 0.8);
     color: rgb(255, 255, 255);
     display: block;
-    max-width:95%;
+    max-width: 95%;
   }
 }
 

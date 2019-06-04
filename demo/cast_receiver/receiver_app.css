@@ -53,6 +53,14 @@ body {
   display: none;
 }
 
+/* The UI default style for fullscreen is to make the font size relative to the
+ * window height.  That is also appropriate for the cast receiver experience.
+ * Since playback here is not technically in fullscreen mode, we just duplicate
+ * the style. */
+.shaka-text-container {
+  font-size: 4.4vh;
+}
+
 #idle {
   position: absolute;
   top: 0;
