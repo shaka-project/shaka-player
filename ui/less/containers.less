@@ -119,6 +119,13 @@
 .shaka-bottom-controls {
   padding: 2%;
   width: 98%;
+
+  /* Position the bottom panel in front of other controls (play button and
+   * spinner containers).
+   * TODO: A different layout arrangement might be a better solution for this.
+   * Need to experiment.
+   */
+  z-index: 1;
 }
 
 /* This is the container for the horizontal row of controls above the seek bar.
