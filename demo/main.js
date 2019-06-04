@@ -35,6 +35,12 @@ class ShakaDemoMain {
     /** @type {?ShakaDemoAssetInfo} */
     this.selectedAsset = null;
 
+    /**
+     * The configuration asked for by the user. I.e., not from the asset.
+     * @private {shaka.extern.PlayerConfiguration}
+     */
+    this.desiredConfig_;
+
     /** @private {shaka.extern.PlayerConfiguration} */
     this.defaultConfig_;
 
@@ -194,9 +200,10 @@ class ShakaDemoMain {
 
     // Get default config.
     this.defaultConfig_ = this.player_.getConfiguration();
+    this.desiredConfig_ = this.player_.getConfiguration();
     const languages = navigator.languages || ['en-us'];
-    this.player_.configure('preferredAudioLanguage', languages[0]);
-    this.player_.configure('preferredTextLanguage', languages[0]);
+    this.configure('preferredAudioLanguage', languages[0]);
+    this.configure('preferredTextLanguage', languages[0]);
     this.uiLocale_ = languages[0];
     // TODO(#1591): Support multiple language preferences
 
@@ -620,7 +627,7 @@ class ShakaDemoMain {
             value = parseFloat(value);
           }
 
-          this.player_.configure(configName, value);
+          this.configure(configName, value);
         }
       };
       const config = this.player_.getConfiguration();
@@ -629,8 +636,8 @@ class ShakaDemoMain {
     if ('lang' in params) {
       // Load the legacy 'lang' hash value.
       const lang = params['lang'];
-      this.player_.configure('preferredAudioLanguage', lang);
-      this.player_.configure('preferredTextLanguage', lang);
+      this.configure('preferredAudioLanguage', lang);
+      this.configure('preferredTextLanguage', lang);
       this.setUILocale(lang);
     }
     if ('uilang' in params) {
@@ -638,10 +645,10 @@ class ShakaDemoMain {
       // TODO(#1591): Support multiple language preferences
     }
     if ('noadaptation' in params) {
-      this.player_.configure('abr.enabled', false);
+      this.configure('abr.enabled', false);
     }
     if ('jumpLargeGaps' in params) {
-      this.player_.configure('streaming.jumpLargeGaps', true);
+      this.configure('streaming.jumpLargeGaps', true);
     }
 
     // Add compiled/uncompiled links.
@@ -753,7 +760,7 @@ class ShakaDemoMain {
    * @return {*}
    */
   getCurrentConfigValue(valueName) {
-    const config = this.player_.getConfiguration();
+    const config = this.desiredConfig_;
     return this.getValueFromGivenConfig_(valueName, config);
   }
 
@@ -769,12 +776,17 @@ class ShakaDemoMain {
    * @param {*=} value
    */
   configure(config, value) {
+    if (arguments.length == 2 && typeof(config) == 'string') {
+      config = shaka.util.ConfigUtils.convertToConfigObject(config, value);
+    }
+    shaka.util.PlayerConfiguration.mergeConfigObjects(
+        this.desiredConfig_, config, this.defaultConfig_);
     this.player_.configure(config, value);
   }
 
   /** @return {!shaka.extern.PlayerConfiguration} */
   getConfiguration() {
-    return this.player_.getConfiguration();
+    return this.desiredConfig_;
   }
 
   /**
@@ -823,8 +835,11 @@ class ShakaDemoMain {
     if (storage) {
       storage.configure(assetConfig);
     } else {
-      this.player_.resetConfiguration();
+      // Re-apply the desired config, to remove previous asset configuration
+      // without removing previous user configuration.
+      this.player_.configure(this.desiredConfig_);
       this.player_.configure(assetConfig);
+      // This uses Player.configure so as to not change |this.desiredConfig_|.
     }
 
     const config = storage ?
