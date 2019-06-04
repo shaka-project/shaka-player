@@ -153,8 +153,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.updateLocalizedStrings_();
 
-    this.addEventListeners_();
-
     /**
      * The pressed keys set is used to record which keys are currently pressed
      * down, so we can know what keys are pressed at the same time.
@@ -600,7 +598,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /**
    * @private
    */
-  initOptionalElementsToNull_() {
+  createDOM_() {
     // TODO: encapsulate/abstract range inputs and their containers
 
     /** @private {HTMLElement} */
@@ -608,14 +606,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {HTMLInputElement} */
     this.seekBar_ = null;
-  }
-
-
-  /**
-   * @private
-   */
-  createDOM_() {
-    this.initOptionalElementsToNull_();
 
     this.videoContainer_.classList.add('shaka-video-container');
     this.video_.classList.add('shaka-video');
@@ -844,7 +834,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // However, clicks on controls panel don't propagate to the container,
     // so we have to explicitly hide the menus onclick here.
     this.controlsButtonPanel_.addEventListener('click', () => {
-      this.hideSettingsMenusTimer_.tickNow();
+      this.hideSettingsMenus();
     });
 
     this.castProxy_.addEventListener('caststatuschanged', () => {
