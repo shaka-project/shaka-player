@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-
-describe('IndexeddbStorageCell', () => {
+filterDescribe('IndexeddbStorageCell', () => window.indexedDB, () => {
   const IndexedDBUtils = shaka.test.IndexedDBUtils;
   const OfflineUtils = shaka.test.OfflineUtils;
   const Util = shaka.test.Util;
@@ -50,7 +49,7 @@ describe('IndexeddbStorageCell', () => {
     }
   });
 
-  it('can add, get, and remove segments', checkAndRun(async () => {
+  it('can add, get, and remove segments', async () => {
     /** @type {!Array.<shaka.extern.SegmentDataDB>} */
     const segments = [
       OfflineUtils.createSegmentData([0]),
@@ -82,9 +81,9 @@ describe('IndexeddbStorageCell', () => {
         shaka.util.Error.Code.KEY_NOT_FOUND,
         jasmine.any(String)));
     await expectAsync(cell.getSegments(keys)).toBeRejectedWith(expected);
-  }));
+  });
 
-  it('can add, get, and remove manifests', checkAndRun(async () => {
+  it('can add, get, and remove manifests', async () => {
     /** @type {!Array.<shaka.extern.ManifestDB>} */
     const manifests = [
       OfflineUtils.createManifest('original-uri-1'),
@@ -115,9 +114,9 @@ describe('IndexeddbStorageCell', () => {
         shaka.util.Error.Code.KEY_NOT_FOUND,
         jasmine.any(String)));
     await expectAsync(cell.getManifests(keys)).toBeRejectedWith(expected);
-  }));
+  });
 
-  it('can add and get all manifests', checkAndRun(async () => {
+  it('can add and get all manifests', async () => {
     /** @type {!Array.<shaka.extern.ManifestDB>} */
     const manifests = [
       OfflineUtils.createManifest('original-uri-1'),
@@ -139,9 +138,9 @@ describe('IndexeddbStorageCell', () => {
     expect(actual[0]).toEqual(manifests[0]);
     expect(actual[1]).toEqual(manifests[1]);
     expect(actual[2]).toEqual(manifests[2]);
-  }));
+  });
 
-  it('can add, get, and update manifests', checkAndRun(async () => {
+  it('can add, get, and update manifests', async () => {
     /** @type {shaka.extern.ManifestDB} */
     const originalManifest = OfflineUtils.createManifest('original');
     originalManifest.expiration = 1000;
@@ -167,7 +166,7 @@ describe('IndexeddbStorageCell', () => {
     expect(newFound[0]).not.toEqual(originalManifest);
     originalManifest.expiration = 500;
     expect(newFound[0]).toEqual(originalManifest);
-  }));
+  });
 
   /**
    * @return {!Promise.<IDBDatabase>}
@@ -201,21 +200,5 @@ describe('IndexeddbStorageCell', () => {
     cells.push(cell);
 
     return cell;
-  }
-
-  /**
-   * Before running the test, check if indexeddb is support on this platform.
-   *
-   * @param {function():!Promise} test
-   * @return {function(function())}
-   */
-  function checkAndRun(test) {
-    return async () => {
-      if (window.indexedDB) {
-        await test();
-      } else {
-        pending('Indexeddb is not supported on this platform.');
-      }
-    };
   }
 });

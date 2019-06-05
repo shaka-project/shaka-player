@@ -15,7 +15,14 @@
  * limitations under the License.
  */
 
-describe('CastReceiver', () => {
+// The receiver is only meant to run on the Chromecast, so we have the
+// ability to use modern APIs there that may not be available on all of the
+// browsers our library supports.  Because of this, CastReceiver tests will
+// only be run on Chrome and Chromecast.
+/** @return {boolean} */
+const castReceiverSupport =
+    () => shaka.util.Platform.isChrome() || shaka.util.Platform.isChromecast();
+filterDescribe('CastReceiver', castReceiverSupport, () => {
   const CastReceiver = shaka.cast.CastReceiver;
   const CastUtils = shaka.cast.CastUtils;
   const Util = shaka.test.Util;
@@ -39,42 +46,7 @@ describe('CastReceiver', () => {
   /** @type {shaka.cast.CastReceiver} */
   let receiver;
 
-  /** @type {boolean} */
-  let isChrome;
-  /** @type {boolean} */
-  let isChromecast;
-
-  /**
-   * Before running the test, check if this is Chrome or Chromecast.
-   * @param {function(function()=)} test
-   * @return {function():!Promise}
-   */
-  function checkAndRun(test) {
-    return async () => {
-      if (!isChromecast && !isChrome) {
-        pending(
-            'Skipping CastReceiver tests for non-Chrome and non-Chromecast');
-      } else {
-        await test();
-      }
-    };
-  }
-
   beforeAll(() => {
-    // The receiver is only meant to run on the Chromecast, so we have the
-    // ability to use modern APIs there that may not be available on all of the
-    // browsers our library supports.  Because of this, CastReceiver tests will
-    // only be run on Chrome and Chromecast.
-    isChromecast = navigator.userAgent.includes('CrKey');
-    const isEdge = navigator.userAgent.includes('Edge/');
-    // Edge also has "Chrome/" in its user agent string.
-    isChrome = navigator.userAgent.includes('Chrome/') && !isEdge;
-
-    // Don't do any more work here if the tests will not end up running.
-    if (!isChromecast && !isChrome) {
-      return;
-    }
-
     // In uncompiled mode, there is a UA check for Chromecast in order to make
     // manual testing easier.  For these automated tests, we want to act as if
     // we are running on the Chromecast, even in Chrome.
@@ -84,7 +56,7 @@ describe('CastReceiver', () => {
         'userAgent', {value: 'CrKey', configurable: true});
   });
 
-  beforeEach(checkAndRun(() => {
+  beforeEach(() => {
     mockReceiverApi = createMockReceiverApi();
     mockCanDisplayType = jasmine.createSpy('canDisplayType');
     mockCanDisplayType.and.returnValue(false);
@@ -103,7 +75,7 @@ describe('CastReceiver', () => {
     mockVideo = new shaka.test.FakeVideo();
     mockPlayer = createMockPlayer();
     mockAppDataCallback = jasmine.createSpy('appDataCallback');
-  }));
+  });
 
   afterEach(async () => {
     if (receiver) {
@@ -120,20 +92,20 @@ describe('CastReceiver', () => {
   });
 
   describe('constructor', () => {
-    it('starts the receiver manager', checkAndRun(() => {
+    it('starts the receiver manager', () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockReceiverManager.start).toHaveBeenCalled();
-    }));
+    });
 
-    it('listens for video and player events', checkAndRun(() => {
+    it('listens for video and player events', () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(Object.keys(mockVideo.on).length).toBeGreaterThan(0);
       expect(Object.keys(mockPlayer.listeners).length).toBeGreaterThan(0);
-    }));
+    });
 
-    it('limits streams to 1080p on Chromecast v1 and v2', checkAndRun(() => {
+    it('limits streams to 1080p on Chromecast v1 and v2', () => {
       // Simulate the canDisplayType reponse of Chromecast v1 or v2
       mockCanDisplayType.and.callFake((type) => {
         const matches = /height=(\d+)/.exec(type);
@@ -148,9 +120,9 @@ describe('CastReceiver', () => {
       expect(mockCanDisplayType).toHaveBeenCalled();
       expect(mockPlayer.setMaxHardwareResolution)
           .toHaveBeenCalledWith(1920, 1080);
-    }));
+    });
 
-    it('limits streams to 4k on Chromecast Ultra', checkAndRun(() => {
+    it('limits streams to 4k on Chromecast Ultra', () => {
       // Simulate the canDisplayType reponse of Chromecast Ultra
       mockCanDisplayType.and.callFake((type) => {
         const matches = /height=(\d+)/.exec(type);
@@ -165,14 +137,14 @@ describe('CastReceiver', () => {
       expect(mockCanDisplayType).toHaveBeenCalled();
       expect(mockPlayer.setMaxHardwareResolution)
           .toHaveBeenCalledWith(3840, 2160);
-    }));
+    });
 
-    it('does not start polling', checkAndRun(() => {
+    it('does not start polling', () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       expect(mockPlayer.getConfiguration).not.toHaveBeenCalled();
       expect(mockShakaMessageBus.messages.length).toBe(0);
-    }));
+    });
   });
 
   describe('isConnected', () => {
@@ -181,7 +153,7 @@ describe('CastReceiver', () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
-    it('is true when there are senders', checkAndRun(() => {
+    it('is true when there are senders', () => {
       expect(receiver.isConnected()).toBe(false);
       fakeConnectedSenders(1);
       expect(receiver.isConnected()).toBe(true);
@@ -191,7 +163,7 @@ describe('CastReceiver', () => {
       expect(receiver.isConnected()).toBe(true);
       fakeConnectedSenders(0);
       expect(receiver.isConnected()).toBe(false);
-    }));
+    });
   });
 
   describe('"caststatuschanged" event', () => {
@@ -200,7 +172,7 @@ describe('CastReceiver', () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
-    it('triggers when senders connect or disconnect', checkAndRun(async () => {
+    it('triggers when senders connect or disconnect', async () => {
       /** @type {!jasmine.Spy} */
       const listener = jasmine.createSpy('listener');
       receiver.addEventListener('caststatuschanged', Util.spyFunc(listener));
@@ -216,9 +188,9 @@ describe('CastReceiver', () => {
       await shaka.test.Util.delay(0.2);
 
       expect(listener).toHaveBeenCalled();
-    }));
+    });
 
-    it('triggers when idle state changes', checkAndRun(async () => {
+    it('triggers when idle state changes', async () => {
       /** @type {!jasmine.Spy} */
       const listener = jasmine.createSpy('listener');
       receiver.addEventListener('caststatuschanged', Util.spyFunc(listener));
@@ -260,7 +232,7 @@ describe('CastReceiver', () => {
 
       expect(listener).toHaveBeenCalled();
       expect(receiver.isIdle()).toBe(false);
-    }));
+    });
   });
 
   describe('local events', () => {
@@ -269,7 +241,7 @@ describe('CastReceiver', () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
-    it('trigger "update" and "event" messages', checkAndRun(() => {
+    it('trigger "update" and "event" messages', () => {
       fakeConnectedSenders(1);
 
       // No messages yet.
@@ -289,7 +261,7 @@ describe('CastReceiver', () => {
           event: jasmine.objectContaining(fakeEvent),
         },
       ]);
-    }));
+    });
   });
 
   describe('"init" message', () => {
@@ -317,7 +289,7 @@ describe('CastReceiver', () => {
       };
     });
 
-    it('sets initial state', checkAndRun(async () => {
+    it('sets initial state', async () => {
       expect(mockVideo.loop).toBe(false);
       expect(mockVideo.playbackRate).toBe(1);
       expect(mockPlayer.configure).not.toHaveBeenCalled();
@@ -344,9 +316,9 @@ describe('CastReceiver', () => {
       expect(mockVideo.loop).toEqual(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toEqual(
           fakeInitState.video.playbackRate);
-    }));
+    });
 
-    it('starts polling', checkAndRun(() => {
+    it('starts polling', () => {
       const fakeConfig = {key: 'value'};
       mockPlayer.getConfiguration.and.returnValue(fakeConfig);
 
@@ -370,9 +342,9 @@ describe('CastReceiver', () => {
           }),
         }),
       }));
-    }));
+    });
 
-    it('doesn\'t poll live methods while loading a VOD', checkAndRun(() => {
+    it('doesn\'t poll live methods while loading a VOD', () => {
       mockPlayer.getConfiguration.and.returnValue({key: 'value'});
       mockPlayer.isLive.and.returnValue(false);
 
@@ -386,9 +358,9 @@ describe('CastReceiver', () => {
       }, mockShakaMessageBus);
 
       expect(mockPlayer.getPlayheadTimeAsDate).not.toHaveBeenCalled();
-    }));
+    });
 
-    it('does poll live methods while loading a livestream', checkAndRun(() => {
+    it('does poll live methods while loading a livestream', () => {
       mockPlayer.getConfiguration.and.returnValue({key: 'value'});
       mockPlayer.isLive.and.returnValue(true);
 
@@ -402,9 +374,9 @@ describe('CastReceiver', () => {
       }, mockShakaMessageBus);
 
       expect(mockPlayer.getPlayheadTimeAsDate).toHaveBeenCalled();
-    }));
+    });
 
-    it('loads the manifest', checkAndRun(() => {
+    it('loads the manifest', () => {
       fakeInitState.startTime = 12;
       fakeInitState.manifest = 'foo://bar';
       expect(mockPlayer.load).not.toHaveBeenCalled();
@@ -416,9 +388,9 @@ describe('CastReceiver', () => {
       }, mockShakaMessageBus);
 
       expect(mockPlayer.load).toHaveBeenCalledWith('foo://bar', 12);
-    }));
+    });
 
-    it('plays the video after loading', checkAndRun(async () => {
+    it('plays the video after loading', async () => {
       fakeInitState.manifest = 'foo://bar';
       mockVideo.autoplay = true;
 
@@ -434,9 +406,9 @@ describe('CastReceiver', () => {
       expect(mockVideo.play).toHaveBeenCalled();
       // Video autoplay restored:
       expect(mockVideo.autoplay).toBe(true);
-    }));
+    });
 
-    it('does not load or play without a manifest URI', checkAndRun(async () => {
+    it('does not load or play without a manifest URI', async () => {
       fakeInitState.manifest = null;
 
       fakeIncomingMessage({
@@ -456,9 +428,9 @@ describe('CastReceiver', () => {
       expect(mockVideo.loop).toEqual(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toEqual(
           fakeInitState.video.playbackRate);
-    }));
+    });
 
-    it('triggers an "error" event if load fails', checkAndRun(async () => {
+    it('triggers an "error" event if load fails', async () => {
       fakeInitState.manifest = 'foo://bar';
       const fakeError = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -480,7 +452,7 @@ describe('CastReceiver', () => {
       expect(mockPlayer.load).toHaveBeenCalled();
       expect(mockPlayer.dispatchEvent).toHaveBeenCalledWith(
           jasmine.objectContaining({type: 'error', detail: fakeError}));
-    }));
+    });
   });
 
   describe('"appData" message', () => {
@@ -489,7 +461,7 @@ describe('CastReceiver', () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
-    it('triggers the app data callback', checkAndRun(() => {
+    it('triggers the app data callback', () => {
       expect(mockAppDataCallback).not.toHaveBeenCalled();
 
       const fakeAppData = {myFakeAppData: 1234};
@@ -499,7 +471,7 @@ describe('CastReceiver', () => {
       }, mockShakaMessageBus);
 
       expect(mockAppDataCallback).toHaveBeenCalledWith(fakeAppData);
-    }));
+    });
   });
 
   describe('"set" message', () => {
@@ -508,7 +480,7 @@ describe('CastReceiver', () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
-    it('sets local properties', checkAndRun(() => {
+    it('sets local properties', () => {
       expect(mockVideo.currentTime).toBe(0);
       fakeIncomingMessage({
         type: 'set',
@@ -526,9 +498,9 @@ describe('CastReceiver', () => {
         value: 'arbitraryValue',
       }, mockShakaMessageBus);
       expect(mockPlayer['arbitraryName']).toEqual('arbitraryValue');
-    }));
+    });
 
-    it('routes volume properties to the receiver manager', checkAndRun(() => {
+    it('routes volume properties to the receiver manager', () => {
       expect(mockVideo.volume).toBe(1);
       expect(mockVideo.muted).toBe(false);
       expect(mockReceiverManager.setSystemVolumeLevel).not.toHaveBeenCalled();
@@ -553,7 +525,7 @@ describe('CastReceiver', () => {
           .toHaveBeenCalledWith(0.5);
       expect(mockReceiverManager.setSystemVolumeMuted)
           .toHaveBeenCalledWith(true);
-    }));
+    });
   });
 
   describe('"call" message', () => {
@@ -562,7 +534,7 @@ describe('CastReceiver', () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
-    it('calls local methods', checkAndRun(() => {
+    it('calls local methods', () => {
       expect(mockVideo.play).not.toHaveBeenCalled();
       fakeIncomingMessage({
         type: 'call',
@@ -580,7 +552,7 @@ describe('CastReceiver', () => {
         args: [42],
       }, mockShakaMessageBus);
       expect(mockPlayer.configure).toHaveBeenCalledWith(42);
-    }));
+    });
   });
 
   describe('"asyncCall" message', () => {
@@ -609,12 +581,12 @@ describe('CastReceiver', () => {
       }, mockShakaMessageBus, fakeSenderId);
     });
 
-    it('calls local async methods', checkAndRun(() => {
+    it('calls local async methods', () => {
       expect(mockPlayer.load).toHaveBeenCalledWith('foo://bar', 12);
       p.resolve();
-    }));
+    });
 
-    it('sends "asyncComplete" replies when resolved', checkAndRun(async () => {
+    it('sends "asyncComplete" replies when resolved', async () => {
       // No messages have been sent, either broadcast  or privately.
       expect(mockShakaMessageBus.broadcast).not.toHaveBeenCalled();
       expect(mockShakaMessageBus.getCastChannel).not.toHaveBeenCalled();
@@ -632,9 +604,9 @@ describe('CastReceiver', () => {
         id: fakeCallId,
         error: null,
       }]);
-    }));
+    });
 
-    it('sends "asyncComplete" replies when rejected', checkAndRun(async () => {
+    it('sends "asyncComplete" replies when rejected', async () => {
       // No messages have been sent, either broadcast  or privately.
       expect(mockShakaMessageBus.broadcast).not.toHaveBeenCalled();
       expect(mockShakaMessageBus.getCastChannel).not.toHaveBeenCalled();
@@ -660,11 +632,11 @@ describe('CastReceiver', () => {
         const error = senderChannel.messages[0].error;
         shaka.test.Util.expectToEqualError(fakeError, error);
       }
-    }));
+    });
   });
 
   describe('sends duration', () => {
-    beforeEach(checkAndRun(async () => {
+    beforeEach(async () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       fakeConnectedSenders(1);
@@ -683,21 +655,21 @@ describe('CastReceiver', () => {
       await Util.delay(0.1);
       expectMediaInfo('URI A', 1);
       mockGenericMessageBus.messages = [];
-    }));
+    });
 
-    it('only once, if nothing else changes', checkAndRun(async () => {
+    it('only once, if nothing else changes', async () => {
       await Util.delay(0.5);
       expect(mockGenericMessageBus.messages.length).toBe(0);
-    }));
+    });
 
-    it('after new sender connects', checkAndRun(async () => {
+    it('after new sender connects', async () => {
       fakeConnectedSenders(1);
       await Util.delay(0.5);
       expectMediaInfo('URI A', 1);
       expect(mockGenericMessageBus.messages.length).toBe(0);
-    }));
+    });
 
-    it('for correct manifest after loading new', checkAndRun(async () => {
+    it('for correct manifest after loading new', async () => {
       // Change media information, but only after half a second.
       mockPlayer.load = async () => {
         await Util.delay(0.5);
@@ -716,9 +688,9 @@ describe('CastReceiver', () => {
       await Util.delay(1.0);
       expectMediaInfo('URI B', 2); // pollAttributes_
       expect(mockGenericMessageBus.messages.length).toBe(0);
-    }));
+    });
 
-    it('after LOAD system message', checkAndRun(async () => {
+    it('after LOAD system message', async () => {
       mockPlayer.load = () => {
         mockVideo.duration = 2;
         mockPlayer.getAssetUri = () => 'URI B';
@@ -741,7 +713,7 @@ describe('CastReceiver', () => {
       await Util.delay(0.5);
       expectMediaInfo('URI B', 2);
       expect(mockGenericMessageBus.messages.length).toBe(0);
-    }));
+    });
 
     function expectMediaInfo(expectedUri, expectedDuration) {
       expect(mockGenericMessageBus.messages.length).toBeGreaterThan(0);
@@ -773,20 +745,21 @@ describe('CastReceiver', () => {
       fakeConnectedSenders(1);
     });
 
-    it('get status', checkAndRun(() => {
+    it('get status', () => {
       const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'GET_STATUS',
       };
 
+      mockGenericMessageBus.broadcast.calls.reset();
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockGenericMessageBus.broadcast.calls.count()).toEqual(1);
       expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
           '"requestId":0,"type":"MEDIA_STATUS"')).toBe(true);
-    }));
+    });
 
-    it('play', checkAndRun(() => {
+    it('play', () => {
       const message = {
         // Arbitrary number
         'requestId': 0,
@@ -795,9 +768,9 @@ describe('CastReceiver', () => {
 
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockVideo.play).toHaveBeenCalled();
-    }));
+    });
 
-    it('pause', checkAndRun(() => {
+    it('pause', () => {
       const message = {
         // Arbitrary number
         'requestId': 0,
@@ -806,9 +779,9 @@ describe('CastReceiver', () => {
 
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockVideo.pause).toHaveBeenCalled();
-    }));
+    });
 
-    it('seek', checkAndRun(() => {
+    it('seek', () => {
       const message = {
         // Arbitrary number
         'requestId': 0,
@@ -820,9 +793,9 @@ describe('CastReceiver', () => {
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockVideo.play).toHaveBeenCalled();
       expect(mockVideo.currentTime).toBe(10);
-    }));
+    });
 
-    it('stop', checkAndRun(() => {
+    it('stop', () => {
       const message = {
         // Arbitrary number
         'requestId': 0,
@@ -831,9 +804,9 @@ describe('CastReceiver', () => {
 
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockPlayer.unload).toHaveBeenCalled();
-    }));
+    });
 
-    it('volume', checkAndRun(() => {
+    it('volume', () => {
       const message = {
         // Arbitrary number
         'requestId': 0,
@@ -847,9 +820,9 @@ describe('CastReceiver', () => {
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockVideo.volume).toBe(0.5);
       expect(mockVideo.muted).toBe(true);
-    }));
+    });
 
-    it('load', checkAndRun(() => {
+    it('load', () => {
       const message = {
         // Arbitrary number
         'requestId': 0,
@@ -865,15 +838,16 @@ describe('CastReceiver', () => {
 
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockPlayer.load).toHaveBeenCalled();
-    }));
+    });
 
-    it('dispatches error on unrecognized request type', checkAndRun(() => {
+    it('dispatches error on unrecognized request type', () => {
       const message = {
         // Arbitrary number
         'requestId': 0,
         'type': 'UNKNOWN_TYPE',
       };
 
+      mockGenericMessageBus.broadcast.calls.reset();
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockGenericMessageBus.broadcast.calls.count()).toEqual(1);
       expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
@@ -881,7 +855,7 @@ describe('CastReceiver', () => {
           '"type":"INVALID_REQUEST",' +
           '"reason":"INVALID_COMMAND"'))
           .toBe(true);
-    }));
+    });
   });
 
   describe('destroy', () => {
@@ -890,13 +864,13 @@ describe('CastReceiver', () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
     });
 
-    it('destroys the local player', checkAndRun(async () => {
+    it('destroys the local player', async () => {
       expect(mockPlayer.destroy).not.toHaveBeenCalled();
       await receiver.destroy();
       expect(mockPlayer.destroy).toHaveBeenCalled();
-    }));
+    });
 
-    it('stops polling', checkAndRun(async () => {
+    it('stops polling', async () => {
       // Start polling:
       fakeIncomingMessage({
         type: 'init',
@@ -917,13 +891,13 @@ describe('CastReceiver', () => {
 
       // We have not polled again since destruction.
       expect(mockPlayer.getConfiguration).not.toHaveBeenCalled();
-    }));
+    });
 
-    it('stops the receiver manager', checkAndRun(async () => {
+    it('stops the receiver manager', async () => {
       expect(mockReceiverManager.stop).not.toHaveBeenCalled();
       await receiver.destroy();
       expect(mockReceiverManager.stop).toHaveBeenCalled();
-    }));
+    });
   });
 
   function createMockReceiverApi() {

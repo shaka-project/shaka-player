@@ -15,7 +15,14 @@
  * limitations under the License.
  */
 
-describe('CastReceiver', () => {
+// The receiver is only meant to run on the Chromecast, so we have the
+// ability to use modern APIs there that may not be available on all of the
+// browsers our library supports.  Because of this, CastReceiver tests will
+// only be run on Chrome and Chromecast.
+/** @return {boolean} */
+const castReceiverIntegrationSupport =
+    () => shaka.util.Platform.isChrome() || shaka.util.Platform.isChromecast();
+filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   const CastReceiver = shaka.cast.CastReceiver;
   const CastUtils = shaka.cast.CastUtils;
 
@@ -48,50 +55,7 @@ describe('CastReceiver', () => {
 
   let fakeInitState;
 
-  /**
-   * Before running the test, check if this is Chrome or Chromecast, and maybe
-   * if Widevine is supported.
-   * @param {function(function()=)} test
-   * @param {boolean=} checkKeySystems
-   * @return {function():!Promise}
-   */
-  function checkAndRun(test, checkKeySystems) {
-    return async () => {
-      const Platform = shaka.util.Platform;
-
-      if (checkKeySystems && !support['com.widevine.alpha']) {
-        pending('Skipping DrmEngine tests.');
-      } else if (Platform.isChromecast()) {
-        await test();
-      } else if (Platform.isChrome()) {
-        await test();
-      } else {
-        pending(
-            'Skipping CastReceiver tests for non-Chrome and non-Chromecast');
-      }
-    };
-  }
-
-  /**
-  * Before running the test, check if this is Chrome or Chromecast, and if
-  * Widevine is supported.
-  * @param {function(function()=)} test
-  * @return {function():!Promise}
-  */
-  function checkAndRunWithDrm(test) {
-    return checkAndRun(test, /* checkKeySystems */ true);
-  }
-
   beforeAll(async () => {
-    // The receiver is only meant to run on the Chromecast, so we have the
-    // ability to use modern APIs there that may not be available on all of the
-    // browsers our library supports.  Because of this, CastReceiver tests will
-    // only be run on Chrome and Chromecast.
-    const Platform = shaka.util.Platform;
-    if (!(Platform.isChromecast() || Platform.isChrome())) {
-      return;
-    }
-
     // In uncompiled mode, there is a UA check for Chromecast in order to make
     // manual testing easier.  For these automated tests, we want to act as if
     // we are running on the Chromecast, even in Chrome.
@@ -110,7 +74,7 @@ describe('CastReceiver', () => {
     support = await shaka.media.DrmEngine.probeSupport();
   });
 
-  beforeEach(checkAndRun(() => {
+  beforeEach(() => {
     mockReceiverApi = createMockReceiverApi();
 
     const mockCanDisplayType = jasmine.createSpy('canDisplayType');
@@ -152,7 +116,7 @@ describe('CastReceiver', () => {
       manifest: 'test:sintel_no_text',
       startTime: 0,
     };
-  }));
+  });
 
   afterEach(async () => {
     for (const restoreCallback of toRestore) {
@@ -175,58 +139,60 @@ describe('CastReceiver', () => {
     }
   });
 
-  drmIt('sends reasonably-sized updates', checkAndRunWithDrm(async () => {
-    // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
-    fakeInitState.manifest = 'test:sintel-enc';
+  filterDescribe('with drm', () => support['com.widevine.alpha'], () => {
+    drmIt('sends reasonably-sized updates', async () => {
+      // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
+      fakeInitState.manifest = 'test:sintel-enc';
 
-    const p = waitForLoadedData();
+      const p = waitForLoadedData();
 
-    // Start the process of loading by sending a fake init message.
-    fakeConnectedSenders(1);
-    fakeIncomingMessage({
-      type: 'init',
-      initState: fakeInitState,
-      appData: {},
-    }, mockShakaMessageBus);
+      // Start the process of loading by sending a fake init message.
+      fakeConnectedSenders(1);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: {},
+      }, mockShakaMessageBus);
 
-    await p;
-    // Wait for an update message.
-    const message = await waitForUpdateMessage();
-    // Check that the update message is of a reasonable size. From previous
-    // testing we found that the socket would silently reject data that got
-    // too big. 5KB is safely below the limit.
-    expect(message.length).toBeLessThan(5 * 1024);
-  }));
-
-  drmIt('has reasonable average message size', checkAndRunWithDrm(async () => {
-    // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
-    fakeInitState.manifest = 'test:sintel-enc';
-
-    const p = waitForLoadedData();
-
-    // Start the process of loading by sending a fake init message.
-    fakeConnectedSenders(1);
-    fakeIncomingMessage({
-      type: 'init',
-      initState: fakeInitState,
-      appData: {},
-    }, mockShakaMessageBus);
-
-    await p;
-    // Collect 50 update messages, and average their length.
-    // Not all properties are passed along on every update message, so
-    // the average length is expected to be lower than the length of the first
-    // update message.
-    let totalLength = 0;
-    for (let i = 0; i < 50; i++) {
-      // eslint-disable-next-line no-await-in-loop
+      await p;
+      // Wait for an update message.
       const message = await waitForUpdateMessage();
-      totalLength += message.length;
-    }
-    expect(totalLength / 50).toBeLessThan(3000);
-  }));
+      // Check that the update message is of a reasonable size. From previous
+      // testing we found that the socket would silently reject data that got
+      // too big. 5KB is safely below the limit.
+      expect(message.length).toBeLessThan(5 * 1024);
+    });
 
-  it('sends update messages every stage of loading', checkAndRun(async () => {
+    drmIt('has reasonable average message size', async () => {
+      // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
+      fakeInitState.manifest = 'test:sintel-enc';
+
+      const p = waitForLoadedData();
+
+      // Start the process of loading by sending a fake init message.
+      fakeConnectedSenders(1);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: {},
+      }, mockShakaMessageBus);
+
+      await p;
+      // Collect 50 update messages, and average their length.
+      // Not all properties are passed along on every update message, so
+      // the average length is expected to be lower than the length of the first
+      // update message.
+      let totalLength = 0;
+      for (let i = 0; i < 50; i++) {
+        // eslint-disable-next-line no-await-in-loop
+        const message = await waitForUpdateMessage();
+        totalLength += message.length;
+      }
+      expect(totalLength / 50).toBeLessThan(3000);
+    });
+  });
+
+  it('sends update messages every stage of loading', async () => {
     // Add wrappers to various methods along player.load to make sure that,
     // at each stage, the cast receiver can form an update message without
     // causing an error.
@@ -259,7 +225,7 @@ describe('CastReceiver', () => {
 
     // Wait for a final update message before proceeding.
     await waitForUpdateMessage();
-  }));
+  });
 
   /**
    * Creates a wrapper around a method on a given prototype, which makes it

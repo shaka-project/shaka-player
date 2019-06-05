@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-describe('OfflineScheme', () => {
+/** @return {boolean} */
+const offlineSchemeSupport = () => shaka.offline.StorageMuxer.support();
+filterDescribe('OfflineScheme', offlineSchemeSupport, () => {
   // An arbitrary request type.
   const requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
 
@@ -24,33 +26,32 @@ describe('OfflineScheme', () => {
 
   const Util = shaka.test.Util;
 
-  beforeEach(checkAndRun(async () => {
+  beforeEach(async () => {
     // Make sure we start with a clean slate.
     await clearStorage();
-  }));
+  });
 
-  afterEach(checkAndRun(async () => {
+  afterEach(async () => {
     // Make sure that we don't waste storage by leaving stuff in storage.
     await clearStorage();
-  }));
+  });
 
-  it('returns special content-type header for manifests',
-      checkAndRun(async () => {
-        const expectedContentType = 'application/x-offline-manifest';
-        const request = createRequest();
-        /** @type {!shaka.offline.OfflineUri} */
-        const uri = shaka.offline.OfflineUri.manifest(
-            'mechanism', 'cell', 1024);
+  it('returns special content-type header for manifests', async () => {
+    const expectedContentType = 'application/x-offline-manifest';
+    const request = createRequest();
+    /** @type {!shaka.offline.OfflineUri} */
+    const uri = shaka.offline.OfflineUri.manifest(
+        'mechanism', 'cell', 1024);
 
-        const response = await shaka.offline.OfflineScheme.plugin(
-            uri.toString(), request, requestType, progressUpdated).promise;
+    const response = await shaka.offline.OfflineScheme.plugin(
+        uri.toString(), request, requestType, progressUpdated).promise;
 
-        expect(response).toBeTruthy();
-        expect(response.uri).toBe(uri.toString());
-        expect(response.headers['content-type']).toBe(expectedContentType);
-      }));
+    expect(response).toBeTruthy();
+    expect(response.uri).toBe(uri.toString());
+    expect(response.headers['content-type']).toBe(expectedContentType);
+  });
 
-  it('returns segment data from storage', checkAndRun(async () => {
+  it('returns segment data from storage', async () => {
     const request = createRequest();
     const segment = createSegment();
 
@@ -75,9 +76,9 @@ describe('OfflineScheme', () => {
 
     expect(response).toBeTruthy();
     expect(response.data.byteLength).toBe(segment.data.byteLength);
-  }));
+  });
 
-  it('fails if segment not found', checkAndRun(async () => {
+  it('fails if segment not found', async () => {
     const request = createRequest();
 
     /** @type {!shaka.offline.OfflineUri} */
@@ -108,9 +109,9 @@ describe('OfflineScheme', () => {
         shaka.offline.OfflineScheme.plugin(
             uri.toString(), request, requestType, progressUpdated).promise)
         .toBeRejectedWith(expected);
-  }));
+  });
 
-  it('fails for invalid URI', checkAndRun(async () => {
+  it('fails for invalid URI', async () => {
     const request = createRequest();
     const uri = 'this-in-an-invalid-uri';
 
@@ -123,7 +124,7 @@ describe('OfflineScheme', () => {
         shaka.offline.OfflineScheme.plugin(
             uri, request, requestType, progressUpdated).promise)
         .toBeRejectedWith(expected);
-  }));
+  });
 
   /**
    * @return {shaka.extern.Request}
@@ -160,23 +161,5 @@ describe('OfflineScheme', () => {
     } finally {
       await muxer.destroy;
     }
-  }
-
-  /**
-   * Before running the test, check if storage is supported on this
-   * platform.
-   *
-   * @param {function():!Promise} test
-   * @return {function():!Promise}
-   */
-  function checkAndRun(test) {
-    return async () => {
-      const hasSupport = shaka.offline.StorageMuxer.support();
-      if (hasSupport) {
-        await test();
-      } else {
-        pending('Storage is not supported on this platform.');
-      }
-    };
   }
 });

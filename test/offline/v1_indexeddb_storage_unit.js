@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-
-describe('V1IndexeddbStorageCell', () => {
+filterDescribe('V1IndexeddbStorageCell', () => window.indexedDB, () => {
   const Util = shaka.test.Util;
 
   const dbImagePath = '/base/test/test/assets/db-dump-v1.json';
@@ -55,7 +54,7 @@ describe('V1IndexeddbStorageCell', () => {
     }
   });
 
-  it('cannot add new manifests', checkAndRun(async () => {
+  it('cannot add new manifests', async () => {
     const expected = Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.STORAGE,
@@ -72,9 +71,9 @@ describe('V1IndexeddbStorageCell', () => {
 
     // Make sure that the request fails.
     await expectAsync(cell.addManifests([manifest])).toBeRejectedWith(expected);
-  }));
+  });
 
-  it('cannot add new segment', checkAndRun(async () => {
+  it('cannot add new segment', async () => {
     const expected = Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.STORAGE,
@@ -89,9 +88,9 @@ describe('V1IndexeddbStorageCell', () => {
 
     // Make sure that the request fails.
     await expectAsync(cell.addSegments([segment])).toBeRejectedWith(expected);
-  }));
+  });
 
-  it('can get all manifests', checkAndRun(async () => {
+  it('can get all manifests', async () => {
     const connection = await makeConnection();
     const cell = makeCell(connection);
 
@@ -100,9 +99,9 @@ describe('V1IndexeddbStorageCell', () => {
     expect(map).toBeTruthy();
     expect(map.size).toBe(1);
     expect(map.get(0)).toBeTruthy();
-  }));
+  });
 
-  it('can get manifest and all segments', checkAndRun(async () => {
+  it('can get manifest and all segments', async () => {
     const connection = await makeConnection();
     const cell = makeCell(connection);
 
@@ -121,9 +120,9 @@ describe('V1IndexeddbStorageCell', () => {
     for (const segment of segmentData) {
       expect(segment).toBeTruthy();
     }
-  }));
+  });
 
-  it('can update expiration', checkAndRun(async () => {
+  it('can update expiration', async () => {
     // Keys and old values are pulled directly from the db image.
     const manifestKey = 0;
     const oldExpiration = Infinity;
@@ -143,9 +142,9 @@ describe('V1IndexeddbStorageCell', () => {
     expect(updated).toBeTruthy();
     expect(updated[0]).toBeTruthy();
     expect(updated[0].expiration).toBe(newExpiration);
-  }));
+  });
 
-  it('can remove manifests and segments', checkAndRun(async () => {
+  it('can remove manifests and segments', async () => {
     const connection = await makeConnection();
     const cell = makeCell(connection);
 
@@ -195,7 +194,7 @@ describe('V1IndexeddbStorageCell', () => {
 
     await checkMissingSegments(/** @type {!Array.<number>} */(segmentKeys));
     await checkMissingManifests(/** @type {!Array.<number>} */(manifestKeys));
-  }));
+  });
 
   /**
    * Get the keys for each segment. This will include the init segments.
@@ -249,21 +248,5 @@ describe('V1IndexeddbStorageCell', () => {
     cells.push(cell);
 
     return cell;
-  }
-
-  /**
-   * Before running the test, check if indexeddb is supported on this platform.
-   *
-   * @param {function():!Promise} test
-   * @return {function():!Promise}
-   */
-  function checkAndRun(test) {
-    return async () => {
-      if (window.indexedDB) {
-        await test();
-      } else {
-        pending('Indexeddb is not supported on this platform.');
-      }
-    };
   }
 });

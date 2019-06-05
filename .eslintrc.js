@@ -18,6 +18,12 @@
 
 // ESlint config
 
+// This is a matcher (usable in no-restricted-syntax) that matches either a
+// test or a before/after block.
+const testNameRegex =
+    '/^([fx]?it|(drm|quarantined)It|(before|after)(Each|All))$/';
+const testCall = `CallExpression[callee.name=${testNameRegex}]`;
+
 module.exports = {
   'env': {
     'browser': true,
@@ -148,10 +154,12 @@ module.exports = {
         'message': 'Create spies in beforeEach, not beforeAll.',
       },
       {
-        'selector': 'CallExpression' +
-                    '[callee.name=/^([fx]?it|(before|after)(Each|All))$/] > ' +
-                    ':function[async=true][params.length>0]',
+        'selector': testCall + ' > :function[async=true][params.length>0]',
         'message': 'Don\'t use both async and done.',
+      },
+      {
+        'selector': testCall + ' > CallExpression',
+        'message': 'Use filterDescribe instead of checkAndRun calls',
       },
     ],
     'no-whitespace-before-property': 'error',
