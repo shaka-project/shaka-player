@@ -171,6 +171,7 @@ describe('DrmEngine', () => {
       const requestMade = new shaka.util.PublicPromise();
       requestSpy.and.callFake((...args) => {
         requestMade.resolve();
+        // eslint-disable-next-line no-restricted-syntax
         requestComplete = originalRequest.call(networkingEngine, ...args);
         return requestComplete;
       });

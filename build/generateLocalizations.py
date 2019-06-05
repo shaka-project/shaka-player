@@ -119,7 +119,7 @@ def AsQuotedString(input_string):
 def GenerateLocalizations(localizations, class_name):
   """Generates JavaScript code to insert the localization data.
 
-  This creates a function called "apply" in the class called |class_name| that,
+  This creates a function called "addTo" in the class called |class_name| that,
   when called, will insert the data from |localizations|.
 
   Args:
@@ -166,7 +166,7 @@ def GenerateLocalizations(localizations, class_name):
  * @param {!shaka.ui.Localization} localization
  */""")
 
-  doc.Code('%s.apply = function(localization) {' % class_name)
+  doc.Code('%s.addTo = function(localization) {' % class_name)
 
   message_ids = set()
 

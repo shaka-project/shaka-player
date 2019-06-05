@@ -1781,6 +1781,7 @@ describe('StreamingEngine', () => {
         // it needs the second segment) of the second Period when it becomes
         // available.
         const originalAppendBuffer =
+            // eslint-disable-next-line no-restricted-syntax
             shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
         mediaSourceEngine.appendBuffer.and.callFake(
             (type, data, startTime, endTime) => {
@@ -1788,6 +1789,7 @@ describe('StreamingEngine', () => {
               expect(timeline.getSegmentAvailabilityStart()).toBe(100);
               expect(timeline.getSegmentAvailabilityEnd()).toBe(120);
               playing = true;
+              // eslint-disable-next-line no-restricted-syntax
               const p = originalAppendBuffer.call(
                   mediaSourceEngine, type, data, startTime, endTime);
               mediaSourceEngine.appendBuffer.and.callFake(originalAppendBuffer);
@@ -1888,6 +1890,7 @@ describe('StreamingEngine', () => {
         const streamsByType = defaultOnChooseStreams(period);
 
         const originalAppendBuffer =
+            // eslint-disable-next-line no-restricted-syntax
             shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
         mediaSourceEngine.appendBuffer.and.callFake(
             (type, data, startTime, endTime) => {
@@ -1895,6 +1898,7 @@ describe('StreamingEngine', () => {
               if (data == segmentData[ContentType.VIDEO].initSegments[0]) {
                 return Promise.reject(expectedError);
               } else {
+                // eslint-disable-next-line no-restricted-syntax
                 return originalAppendBuffer.call(
                     mediaSourceEngine, type, data, startTime, endTime);
               }
@@ -1927,6 +1931,7 @@ describe('StreamingEngine', () => {
         const streamsByType = defaultOnChooseStreams(period);
 
         const originalAppendBuffer =
+            // eslint-disable-next-line no-restricted-syntax
             shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
         mediaSourceEngine.appendBuffer.and.callFake(
             (type, data, startTime, endTime) => {
@@ -1934,6 +1939,7 @@ describe('StreamingEngine', () => {
               if (data == segmentData[ContentType.AUDIO].segments[0]) {
                 return Promise.reject(expectedError);
               } else {
+                // eslint-disable-next-line no-restricted-syntax
                 return originalAppendBuffer.call(
                     mediaSourceEngine, type, data, startTime, endTime);
               }
@@ -2268,6 +2274,7 @@ describe('StreamingEngine', () => {
       onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       const originalRemove =
+          // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.removeImpl
               .bind(mediaSourceEngine);
 
@@ -2375,6 +2382,7 @@ describe('StreamingEngine', () => {
       onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       const originalAppendBuffer =
+          // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
       const appendBufferSpy = jasmine.createSpy('appendBuffer');
       mediaSourceEngine.appendBuffer = appendBufferSpy;
@@ -2393,6 +2401,7 @@ describe('StreamingEngine', () => {
                   shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
                   type);
             } else {
+              // eslint-disable-next-line no-restricted-syntax
               const p = originalAppendBuffer.call(
                   mediaSourceEngine, type, data, startTime, endTime);
               return p;
@@ -2435,6 +2444,7 @@ describe('StreamingEngine', () => {
       onStartupComplete.and.callFake(() => setupFakeGetTime(0));
 
       const originalAppendBuffer =
+          // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
       const appendBufferSpy = jasmine.createSpy('appendBuffer');
       mediaSourceEngine.appendBuffer = appendBufferSpy;
@@ -2450,6 +2460,7 @@ describe('StreamingEngine', () => {
                   shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
                   type);
             } else {
+              // eslint-disable-next-line no-restricted-syntax
               const p = originalAppendBuffer.call(
                   mediaSourceEngine, type, data, startTime, endTime);
               return p;
@@ -3145,6 +3156,7 @@ describe('StreamingEngine', () => {
    * @param {shaka.util.Error.Code} errorCode
    */
   function failFirstRequestForTarget(netEngine, targetUri, errorCode) {
+    // eslint-disable-next-line no-restricted-syntax
     const originalNetEngineRequest = netEngine.request.bind(netEngine);
 
     netEngine.attempts = 0;

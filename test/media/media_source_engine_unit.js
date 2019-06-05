@@ -51,6 +51,7 @@ describe('MediaSourceEngine', () => {
   const originalIsTypeSupported = window.MediaSource.isTypeSupported;
   const originalTextEngine = shaka.text.TextEngine;
   const originalCreateMediaSource =
+      // eslint-disable-next-line no-restricted-syntax
       shaka.media.MediaSourceEngine.prototype.createMediaSource;
   const originalTransmuxerIsSupported = shaka.media.Transmuxer.isSupported;
 
@@ -119,6 +120,7 @@ describe('MediaSourceEngine', () => {
       p.resolve();
       return mockMediaSource;
     });
+    // eslint-disable-next-line no-restricted-syntax
     shaka.media.MediaSourceEngine.prototype.createMediaSource =
         Util.spyFunc(createMediaSourceSpy);
 
@@ -157,6 +159,7 @@ describe('MediaSourceEngine', () => {
   afterEach(() => {
     mockTextEngine = null;
     shaka.text.TextEngine = originalTextEngine;
+    // eslint-disable-next-line no-restricted-syntax
     shaka.media.MediaSourceEngine.prototype.createMediaSource =
         originalCreateMediaSource;
   });

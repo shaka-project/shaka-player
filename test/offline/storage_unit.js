@@ -176,24 +176,22 @@ describe('Storage', () => {
       await shaka.test.Util.delay(3);
 
       // PART 4 - Check that the licenses were removed.
-      try {
-        await withDrm(player, manifest, (drm) => {
-          return Promise.all(
-              manifest.offlineSessionIds.map(async (session) => {
-                const notFoundSession =
-                    await loadOfflineSession(drm, session);
-                // TODO: This is failing.  The session is actually found,
-                // possibly due to http://crbug.com/690583, but this is
-                // unclear.
-                expect(notFoundSession).toBeFalsy();
-              }));
-        });
-
-        throw new Error('Expected drm to throw OFFLINE_SESSION_REMOVED');
-      } catch (e) {
-        expect(e).toBeTruthy();
-        expect(e.code).toBe(shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
-      }
+      const p = withDrm(player, manifest, (drm) => {
+        return Promise.all(
+            manifest.offlineSessionIds.map(async (session) => {
+              const notFoundSession =
+                  await loadOfflineSession(drm, session);
+              // TODO: This is failing.  The session is actually found,
+              // possibly due to http://crbug.com/690583, but this is
+              // unclear.
+              expect(notFoundSession).toBeFalsy();
+            }));
+      });
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.OFFLINE_SESSION_REMOVED));
+      await expectAsync(p).toBeRejectedWith(expected);
     });
 
     // TODO: Still failing in Chrome canary 73 on 2018-12-12.
@@ -270,21 +268,19 @@ describe('Storage', () => {
       // PART 6 - Check that the licenses were removed.
       const endSessions = await getEmeSessions();
       expect(endSessions).toEqual([]);
-      try {
-        await withDrm(player, manifest, (drm) => {
-          return Promise.all(
-              manifest.offlineSessionIds.map(async (session) => {
-                const notFoundSession =
-                    await loadOfflineSession(drm, session);
-                expect(notFoundSession).toBeFalsy();
-              }));
-        });
-
-        throw new Error('Expected drm to throw OFFLINE_SESSION_REMOVED');
-      } catch (e) {
-        expect(e).toBeTruthy();
-        expect(e.code).toBe(shaka.util.Error.Code.OFFLINE_SESSION_REMOVED);
-      }
+      const p = withDrm(player, manifest, (drm) => {
+        return Promise.all(
+            manifest.offlineSessionIds.map(async (session) => {
+              const notFoundSession =
+                  await loadOfflineSession(drm, session);
+              expect(notFoundSession).toBeFalsy();
+            }));
+      });
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.OFFLINE_SESSION_REMOVED));
+      await expectAsync(p).toBeRejectedWith(expected);
     });
   });
 

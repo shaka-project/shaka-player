@@ -64,6 +64,7 @@ function httpPluginTests(usingFetch) {
       jasmine.Ajax.uninstall();
 
       // Wrap event handlers to catch errors
+      // eslint-disable-next-line no-restricted-syntax
       const MockXHR = function() {
         const instance = new JasmineXHRMock();
 
@@ -80,7 +81,7 @@ function httpPluginTests(usingFetch) {
                 // we would leave the Promise in a pending state.
                 try {
                   callback(event);
-                } catch (error) {
+                } catch (error) {  // eslint-disable-line no-restricted-syntax
                   fail(
                       'Uncaught error in XMLHttpRequest#' + eventHandlerName +
                       ', ' + error.message);
@@ -294,6 +295,7 @@ function httpPluginTests(usingFetch) {
       // actually insert a call to abort in the middle.
       // Instead, install a very elementary mock.
       /** @constructor */
+      // eslint-disable-next-line no-restricted-syntax
       const NewXHRMock = function() {
         this.abort = Util.spyFunc(jasmine.createSpy('abort'));
 

@@ -33,6 +33,7 @@ function getClientArg(name) {
 // Executed before test utilities and tests are loaded, but after Shaka Player
 // is loaded in uncompiled mode.
 (() => {
+  // eslint-disable-next-line no-restricted-syntax
   const realAssert = console.assert.bind(console);
 
   /**
@@ -46,11 +47,7 @@ function getClientArg(name) {
     if (!condition) {
       message = message || 'Assertion failed.';
       console.error(message);
-      try {
-        throw new Error(message);
-      } catch (exception) {
-        fail(message);
-      }
+      fail(message);
     }
   }
   goog.asserts.assert = jasmineAssert;
@@ -217,7 +214,7 @@ function getClientArg(name) {
     });
   };
 
-  beforeAll((done) => {
+  beforeAll((done) => {  // eslint-disable-line no-restricted-syntax
     // Configure AMD modules and their dependencies.
     require.config({
       baseUrl: '/base/node_modules',
@@ -265,7 +262,7 @@ function getClientArg(name) {
   const originalSetTimeout = window.setTimeout;
   const delayTests = getClientArg('delayTests');
   if (delayTests) {
-    afterEach((done) => {
+    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
       console.log('Delaying test by ' + delayTests + ' seconds...');
       originalSetTimeout(done, delayTests * 1000);
     });
@@ -275,7 +272,7 @@ function getClientArg(name) {
   // Without this, Tizen's pipeline seems to hang in subsequent tests.
   // TODO: file a bug on Tizen
   if (shaka.util.Platform.isTizen()) {
-    afterEach((done) => {
+    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
       originalSetTimeout(done, 100 /* ms */);
     });
   }

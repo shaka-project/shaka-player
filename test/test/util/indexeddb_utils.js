@@ -50,7 +50,7 @@ shaka.test.IndexedDBUtils = class {
     for (let i = 0; i < 5; i++) {
       try {
         return await tryOpen();  // eslint-disable-line no-await-in-loop
-      } catch (e) {
+      } catch (e) {  // eslint-disable-line no-restricted-syntax
         lastError = e;
         await wait();  // eslint-disable-line no-await-in-loop
       }

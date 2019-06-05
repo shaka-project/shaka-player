@@ -339,6 +339,7 @@ shaka.ui.Overlay = class {
     // Arrow functions cannot be used with "new", so the factory must use
     // a "function" function.
     if (!video.controls) {
+      // eslint-disable-next-line no-restricted-syntax
       const textDisplayer = function() {
         return new shaka.ui.TextDisplayer(video, container);
       };

@@ -341,6 +341,7 @@ shaka.ui.Localization = class {
     localeOrder.add(fallbackLocale);
 
     // Add all the sibling maps.
+    /** @type {!Array.<!Map.<string, string>>} */
     const mergeOrder = [];
     for (const locale of localeOrder) {
       const map = localizations.get(locale);

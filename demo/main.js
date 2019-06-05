@@ -920,6 +920,7 @@ class ShakaDemoMain {
       // Make an alias for "this" so that it can be captured inside the
       // non-arrow function below.
       const self = this;
+      // eslint-disable-next-line no-restricted-syntax
       const textDisplayer = function() {
         if (self.nativeControlsEnabled_) {
           return new shaka.text.SimpleTextDisplayer(self.video_);

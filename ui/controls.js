@@ -1455,7 +1455,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @type {!shaka.ui.Localization} */
     const localization = new shaka.ui.Localization(fallbackLocale);
-    shaka.ui.Locales.apply(localization);
+    shaka.ui.Locales.addTo(localization);
     localization.changeLocale(navigator.languages || []);
 
     return localization;

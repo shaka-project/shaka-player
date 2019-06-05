@@ -2881,6 +2881,7 @@ describe('Player', () => {
     it('detects audio-only content', async () => {
       // This factory recreates the parser each time, so updates to |manifest|
       // affect the next load() call.
+      // eslint-disable-next-line no-restricted-syntax
       const parserFactory = function() {
         return new shaka.test.FakeManifestParser(manifest);
       };
@@ -2983,8 +2984,10 @@ describe('Player', () => {
        * @this {shaka.Player}
        * @return {!shaka.media.Playhead}
        */
+      // eslint-disable-next-line no-restricted-syntax
       player.createPlayhead = function() {
         realPlayhead =
+            // eslint-disable-next-line no-restricted-syntax
             shaka.Player.prototype.createPlayhead.apply(this, arguments);
         return realPlayhead;
       };
@@ -3002,6 +3005,7 @@ describe('Player', () => {
 
   describe('language methods', () => {
     let videoOnlyManifest;
+    // eslint-disable-next-line no-restricted-syntax
     const parserFactory = function() {
       return new shaka.test.FakeManifestParser(manifest);
     };

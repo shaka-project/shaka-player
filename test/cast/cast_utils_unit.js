@@ -50,6 +50,7 @@ describe('CastUtils', () => {
     for (const name in CastUtils.PlayerGetterMethodsThatRequireLive) {
       castMembers.push(name);
     }
+    // eslint-disable-next-line no-restricted-syntax
     const playerMembers = Object.getOwnPropertyNames(shaka.Player.prototype)
         .filter((name) => {
           // Private members end with _.

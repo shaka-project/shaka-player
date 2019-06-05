@@ -199,13 +199,17 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     waitForUpdateMessageWrapper(
         shaka.media.ManifestParser, 'ManifestParser', 'create');
     waitForUpdateMessageWrapper(
+        // eslint-disable-next-line no-restricted-syntax
         shaka.test.TestScheme.ManifestParser.prototype, 'ManifestParser',
         'start');
     waitForUpdateMessageWrapper(
+        // eslint-disable-next-line no-restricted-syntax
         shaka.media.DrmEngine.prototype, 'DrmEngine', 'initForPlayback');
     waitForUpdateMessageWrapper(
+        // eslint-disable-next-line no-restricted-syntax
         shaka.media.DrmEngine.prototype, 'DrmEngine', 'attach');
     waitForUpdateMessageWrapper(
+        // eslint-disable-next-line no-restricted-syntax
         shaka.media.StreamingEngine.prototype, 'StreamingEngine', 'start');
 
     const p = waitForLoadedData();
@@ -239,6 +243,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   function waitForUpdateMessageWrapper(prototype, name, methodName) {
     pendingWaitWrapperCalls += 1;
     const original = prototype[methodName];
+    // eslint-disable-next-line no-restricted-syntax
     prototype[methodName] = /** @this {Object} @return {*} */ async function() {
       pendingWaitWrapperCalls -= 1;
       shaka.log.debug(
@@ -246,6 +251,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
           name + '.' + methodName + '...');
       const originalArguments = Array.from(arguments);
       await waitForUpdateMessage();
+      // eslint-disable-next-line no-restricted-syntax
       return original.apply(this, originalArguments);
     };
     toRestore.push(() => {

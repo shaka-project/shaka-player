@@ -39,6 +39,7 @@ describe('TextEngine', () => {
   beforeEach(() => {
     mockParseInit = jasmine.createSpy('mockParseInit');
     mockParseMedia = jasmine.createSpy('mockParseMedia');
+    // eslint-disable-next-line no-restricted-syntax
     mockParserPlugIn = function() {
       return {
         parseInit: mockParseInit,
