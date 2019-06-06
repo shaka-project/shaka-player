@@ -200,10 +200,9 @@ describe('Playhead', () => {
           Util.spyFunc(onEvent));
 
       expect(video.addEventListener).toHaveBeenCalledWith(
-          'loadedmetadata', jasmine.any(Function), jasmine.any(Object));
+          'loadedmetadata', jasmine.any(Function), jasmine.anything());
       expect(video.addEventListener).not.toHaveBeenCalledWith(
-          'seeking', jasmine.any(Function), jasmine.any(Boolean),
-          jasmine.any(Object));
+          'seeking', jasmine.any(Function), jasmine.anything());
 
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(0);
@@ -212,7 +211,7 @@ describe('Playhead', () => {
       video.on['loadedmetadata']();
 
       expect(video.addEventListener).toHaveBeenCalledWith(
-          'seeking', jasmine.any(Function), jasmine.any(Object));
+          'seeking', jasmine.any(Function), jasmine.anything());
 
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(5);
@@ -315,7 +314,7 @@ describe('Playhead', () => {
           Util.spyFunc(onEvent));
 
       expect(video.addEventListener).toHaveBeenCalledWith(
-          'loadedmetadata', jasmine.any(Function), jasmine.any(Object));
+          'loadedmetadata', jasmine.any(Function), jasmine.anything());
 
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(0);
@@ -348,7 +347,7 @@ describe('Playhead', () => {
           Util.spyFunc(onEvent));
 
       expect(video.addEventListener).toHaveBeenCalledWith(
-          'loadedmetadata', jasmine.any(Function), jasmine.any(Object));
+          'loadedmetadata', jasmine.any(Function), jasmine.anything());
 
       expect(playhead.getTime()).toBe(60);
       expect(video.currentTime).toBe(0);

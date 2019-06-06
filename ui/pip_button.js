@@ -78,13 +78,13 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
     }
 
-    this.eventManager.listen(this.localization,
-        shaka.ui.Localization.LOCALE_UPDATED, () => {
+    this.eventManager.listen(
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
           this.updateLocalizedStrings_();
         });
 
-    this.eventManager.listen(this.localization,
-        shaka.ui.Localization.LOCALE_CHANGED, () => {
+    this.eventManager.listen(
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
           this.updateLocalizedStrings_();
         });
 
