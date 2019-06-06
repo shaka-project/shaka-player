@@ -780,8 +780,9 @@ class ShakaDemoMain {
     if (arguments.length == 2 && typeof(config) == 'string') {
       config = shaka.util.ConfigUtils.convertToConfigObject(config, value);
     }
+    const asObj = /** @type {!Object} */ (config);
     shaka.util.PlayerConfiguration.mergeConfigObjects(
-        this.desiredConfig_, config, this.defaultConfig_);
+        this.desiredConfig_, asObj, this.defaultConfig_);
     this.player_.configure(config, value);
   }
 
