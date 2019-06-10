@@ -74,7 +74,7 @@ const CRITICAL_RESOURCES = [
   '../node_modules/material-design-lite/dist/material.min.js',
 
   // MDL modal dialogs are enabled by including these:
-  '../node_modules/dialog-polyfill/dialog-polyfill.js',
+  '../node_modules/dialog-polyfill/dist/dialog-polyfill.js',
 
   // Datalist-like fields are enabled by including these:
   '../node_modules/awesomplete/awesomplete.min.js',
