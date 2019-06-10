@@ -50,11 +50,5 @@ def main(args):
   return 0
 
 
-# TODO: Remove this alias.  It is here for backward compatibility until private
-# scripts depending on it can be updated.
-def build_docs(args):
-  return main(args)
-
-
 if __name__ == '__main__':
   shakaBuildHelpers.run_main(main)
