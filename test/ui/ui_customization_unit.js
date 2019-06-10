@@ -131,4 +131,80 @@ describe('UI Customization', () => {
     expect( /** @type {!HTMLElement} */ (buttons[2]).className)
         .toContain('shaka-fullscreen');
   });
+
+  it('layout can be re-configured after the creation', async () => {
+    const config = {controlPanelElements: ['time_and_duration', 'mute']};
+    const ui = UiUtils.createUIThroughAPI(container, video, config);
+
+    // Only current time and mute button should've been created
+    UiUtils.confirmElementFound(container, 'shaka-current-time');
+    UiUtils.confirmElementFound(container, 'shaka-mute-button');
+    UiUtils.confirmElementFound(container, 'shaka-seek-bar');
+
+    UiUtils.confirmElementMissing(container, 'shaka-volume-bar');
+    UiUtils.confirmElementMissing(container, 'shaka-fullscreen-button');
+    UiUtils.confirmElementMissing(container, 'shaka-overflow-menu-button');
+
+    // Reconfigure the layout
+    const newConfig = {
+      controlPanelElements: [
+        'volume',
+        'fullscreen',
+      ],
+      addSeekBar: false,
+    };
+
+    const eventManager = new shaka.util.EventManager();
+    const waiter = new shaka.test.Waiter(eventManager);
+
+    const controls = ui.getControls();
+    goog.asserts.assert(controls != null, 'Should have a controls object!');
+
+    const p = waiter.waitForEvent(controls, 'uiupdated');
+    ui.configure(newConfig);
+
+    // Wait for the change to take effect
+    await p;
+
+    // New elements should be there
+    UiUtils.confirmElementFound(container, 'shaka-volume-bar');
+    UiUtils.confirmElementFound(container, 'shaka-fullscreen-button');
+
+    // Old elements should not be there
+    UiUtils.confirmElementMissing(container, 'shaka-current-time');
+    UiUtils.confirmElementMissing(container, 'shaka-mute-button');
+    UiUtils.confirmElementMissing(container, 'shaka-seek-bar');
+  });
+
+  // Regression for #1948
+  it('cast proxy and controls are unchanged by reconfiguration', async () => {
+    const config = {controlPanelElements: ['time_and_duration', 'mute']};
+    /** @type {!shaka.ui.Overlay} */
+    const ui = UiUtils.createUIThroughAPI(container, video, config);
+
+    const eventManager = new shaka.util.EventManager();
+    const waiter = new shaka.test.Waiter(eventManager);
+
+    // Save controls and cast proxy objects
+    const controls = ui.getControls();
+    const castProxy = controls.getCastProxy();
+
+    goog.asserts.assert(controls != null, 'Should have a controls object!');
+
+    const p = waiter.waitForEvent(controls, 'uiupdated');
+
+    const newConfig = {controlPanelElements: ['volume']};
+    ui.configure(newConfig);
+
+    // Wait for the change to take effect
+    // The fact that this resolves is implicit proof that the controls
+    // object stayed the same, but we check it again below to be explicit.
+    await p;
+
+    const newControls = ui.getControls();
+    const newCastProxy = newControls.getCastProxy();
+
+    expect(newControls).toBe(controls);
+    expect(newCastProxy).toBe(castProxy);
+  });
 });

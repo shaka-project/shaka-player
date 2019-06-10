@@ -24,7 +24,7 @@ shaka.test.UiUtils = class {
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
    * @param {!Object=} config
-   * @return {shaka.ui.Overlay}
+   * @return {!shaka.ui.Overlay}
    */
   static createUIThroughAPI(videoContainer, video, config) {
     const player = new shaka.Player(video);
