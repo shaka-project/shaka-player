@@ -75,7 +75,7 @@ function shakaUncompiledModeSupported() {
     script.defer = true;
     // Setting async = false is important to make sure the script is imported
     // before the 'load' event fires.
-    script.async = false;
+    script.async = false;  // eslint-disable-line id-blacklist
     document.head.appendChild(script);
   }
 

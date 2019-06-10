@@ -135,6 +135,7 @@ module.exports = {
     'array-bracket-newline': ['error', 'consistent'],
     'block-spacing': ['error', 'always'],
     'brace-style': ['error', '1tbs', {'allowSingleLine': true}],
+    'id-blacklist': ['error', 'async'],
     'lines-between-class-members': 'error',
     'max-statements-per-line': ['error', {'max': 1}],
     'new-parens': 'error',

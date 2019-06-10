@@ -166,12 +166,12 @@ shaka.test.Mp4VodStreamGenerator = class {
 
   /** @override */
   async init() {
-    const async = [
+    const fetch = [
       shaka.test.Util.fetch(this.initSegmentUri_),
       shaka.test.Util.fetch(this.segmentTemplateUri_),
     ];
 
-    const results = await Promise.all(async);
+    const results = await Promise.all(fetch);
     goog.asserts.assert(results.length == 2,
         'did not load both segments');
     this.initSegment_ = results[0];
@@ -297,12 +297,12 @@ shaka.test.Mp4LiveStreamGenerator = class {
 
   /** @override */
   async init() {
-    const async = [
+    const fetch = [
       shaka.test.Util.fetch(this.initSegmentUri_),
       shaka.test.Util.fetch(this.segmentTemplateUri_),
     ];
 
-    const results = await Promise.all(async);
+    const results = await Promise.all(fetch);
     goog.asserts.assert(results.length == 2,
         'did not load both segments');
     this.initSegment_ = results[0];

@@ -190,7 +190,7 @@ shaka.test.TestScheme = class {
       return locationUri.resolve(partialUri).toString();
     }
 
-    const async = [];
+    const promises = [];
     // Include 'window' to use uncompiled version version of the library.
     const DATA = windowShaka.test.TestScheme.DATA;
     const GENERATORS = windowShaka.test.TestScheme.GENERATORS;
@@ -204,7 +204,7 @@ shaka.test.TestScheme = class {
         if (data[type]) {
           const streamGen = createStreamGenerator(data[type]);
           GENERATORS[name + suffix][type] = streamGen;
-          async.push(streamGen.init());
+          promises.push(streamGen.init());
         }
       }
 
@@ -303,7 +303,7 @@ shaka.test.TestScheme = class {
 
     MANIFESTS['sintel_multi_lingual_multi_res' + suffix] = gen.build();
 
-    return Promise.all(async);
+    return Promise.all(promises);
   }
 };
 
