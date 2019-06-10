@@ -1,3 +1,37 @@
+## 2.5.2 (2019-06-10)
+
+Bugfixes:
+  - Avoid event listener leaks in the UI
+    - https://github.com/google/shaka-player/issues/1924
+  - Fix style errors in TextDisplayer
+    - https://github.com/google/shaka-player/issues/1852
+    - https://github.com/google/shaka-player/issues/1955
+  - Show spinner when buffering even if other controls are hidden
+    - https://github.com/google/shaka-player/issues/1921
+  - Don't recreate controls object on configure() calls
+    - https://github.com/google/shaka-player/issues/1948
+  - Fix UI compilation on Windows
+    - https://github.com/google/shaka-player/issues/1965
+
+New Features:
+  - Add originalUri as a property on shaka.extern.Response
+    - https://github.com/google/shaka-player/issues/1971
+    - https://github.com/google/shaka-player/pull/1972
+
+Demo App:
+  - Fix close button styling in compiled mode
+  - Fix config settings applied before playback begins
+    - https://github.com/google/shaka-player/issues/1976
+  - Change the style of the download/delete button
+  - Fix demo error display for large errors
+  - Improve cvox error check
+  - Switch to using tippy.js for tooltips
+
+Docs:
+  - Add a public roadmap document
+    - https://github.com/google/shaka-player/blob/master/roadmap.md
+
+
 ## 2.5.1 (2019-05-20)
 
 New Features:
