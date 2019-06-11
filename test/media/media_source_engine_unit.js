@@ -1042,6 +1042,8 @@ describe('MediaSourceEngine', () => {
       const rejected = mediaSourceEngine.appendBuffer(
           ContentType.AUDIO, buffer2, null, null,
           /* hasClosedCaptions */ false);
+      // Create the expectation first so we don't get unhandled rejection errors
+      const expected = expectAsync(rejected).toBeRejected();
 
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(buffer2);
@@ -1052,7 +1054,7 @@ describe('MediaSourceEngine', () => {
       expect(d.status).toBe('pending');
       await Util.delay(0.1);
       expect(d.status).toBe('pending');
-      await expectAsync(rejected).toBeRejected();
+      await expected;
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(buffer2);
       audioSourceBuffer.updateend();
