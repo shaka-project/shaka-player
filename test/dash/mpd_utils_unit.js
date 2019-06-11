@@ -669,7 +669,7 @@ describe('MpdUtils', () => {
           xml, retry, failGracefully, 'https://base', fakeNetEngine);
 
       const abort = async () => {
-        await shaka.test.Util.delay(0.1);
+        await shaka.test.Util.shortDelay();
         // Only one request has been made so far.
         expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
         continuePromise.resolve();

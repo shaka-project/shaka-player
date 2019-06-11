@@ -21,6 +21,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
   const originalGetLocationProtocol =
       shaka.net.NetworkingEngine.getLocationProtocol_;
+  const originalDefer = shaka.net.Backoff.defer;
 
   /** @type {string} */
   let fakeProtocol;
@@ -34,6 +35,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   let onProgress;
   /** @type {!shaka.util.Error} */
   let error;
+  /** @type {!jasmine.Spy} */
+  let deferSpy;
 
   beforeAll(() => {
     shaka.net.NetworkingEngine.getLocationProtocol_ = () => fakeProtocol;
@@ -62,6 +65,10 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     shaka.net.NetworkingEngine.registerScheme(
         'reject', Util.spyFunc(rejectScheme),
         shaka.net.NetworkingEngine.PluginPriority.FALLBACK);
+
+    deferSpy = jasmine.createSpy('defer');
+    deferSpy.and.callFake((delay, cb) => cb());
+    shaka.net.Backoff.defer = Util.spyFunc(deferSpy);
   });
 
   afterEach(() => {
@@ -72,6 +79,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   afterAll(() => {
     shaka.net.NetworkingEngine.getLocationProtocol_ =
         originalGetLocationProtocol;
+    shaka.net.Backoff.defer = originalDefer;
   });
 
   describe('retry', () => {
@@ -141,23 +149,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     describe('backoff', () => {
       const baseDelay = 200;
-      const originalDefer = shaka.net.Backoff.defer;
       const realRandom = Math.random;
-
-      /** @type {!jasmine.Spy} */
-      let deferSpy;
 
       afterAll(() => {
         Math.random = realRandom;
-        shaka.net.Backoff.defer = originalDefer;
       });
 
       beforeEach(() => {
         Math.random = () => 0.75;
-
-        deferSpy = jasmine.createSpy('defer');
-        deferSpy.and.callFake(originalDefer);
-        shaka.net.Backoff.defer = Util.spyFunc(deferSpy);
       });
 
       it('uses baseDelay', async () => {
@@ -426,7 +425,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       const r = new StatusPromise(
           networkingEngine.request(requestType, request).promise);
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(filter).toHaveBeenCalled();
       expect(resolveScheme).not.toHaveBeenCalled();
@@ -434,14 +433,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       expect(r.status).toBe('pending');
       p.resolve();
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(resolveScheme).toHaveBeenCalled();
       expect(responseFilter).toHaveBeenCalled();
       expect(r.status).toBe('pending');
       p2.resolve();
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
       expect(r.status).toBe('resolved');
     });
 
@@ -503,7 +502,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
             .toBe(true);
       };
       const resolve = async () => {
-        await Util.delay(0.1);
+        await Util.shortDelay();
         expect(filter).toHaveBeenCalled();
         expect(resolveScheme).not.toHaveBeenCalled();
         p.resolve();
@@ -679,7 +678,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         expect(response.data.byteLength).toBe(5);
       };
       const delay = async () => {
-        await Util.delay(0.1);
+        await Util.shortDelay();
         expect(filter).toHaveBeenCalled();
         expect(r.status).toBe('pending');
 
@@ -722,19 +721,19 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
       expect(r1.status).toBe('pending');
       expect(r2.status).toBe('pending');
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       /** @type {!shaka.test.StatusPromise} */
       const d = new StatusPromise(networkingEngine.destroy());
       expect(d.status).toBe('pending');
       expect(r1.status).toBe('pending');
       expect(r2.status).toBe('pending');
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(d.status).toBe('pending');
       p.resolve({});
       await d;
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(r1.status).not.toBe('pending');
       expect(r2.status).not.toBe('pending');
@@ -758,7 +757,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       /** @type {!shaka.test.StatusPromise} */
       const r = new StatusPromise(
           networkingEngine.request(requestType, request).promise);
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(filter).toHaveBeenCalled();
       expect(r.status).toBe('pending');
@@ -767,7 +766,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       const d = new StatusPromise(networkingEngine.destroy());
       p.resolve();
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(d.status).toBe('resolved');
       expect(r.status).toBe('rejected');
@@ -790,17 +789,17 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
       expect(r1.status).toBe('pending');
       expect(r2.status).toBe('pending');
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       /** @type {!shaka.test.StatusPromise} */
       const d = new StatusPromise(networkingEngine.destroy());
       expect(d.status).toBe('pending');
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(d.status).toBe('pending');
       p.reject(error);
       await d;
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(r1.status).toBe('rejected');
       expect(r2.status).toBe('rejected');
@@ -817,7 +816,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       /** @type {!shaka.test.StatusPromise} */
       const r = new StatusPromise(
           networkingEngine.request(requestType, request).promise);
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       // A new request has not been made.
       expect(resolveScheme.calls.count()).toBe(0);
@@ -849,13 +848,13 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       /** @type {!shaka.test.StatusPromise} */
       const r = new StatusPromise(
           networkingEngine.request(requestType, request).promise);
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(rejectScheme.calls.count()).toBe(1);
       /** @type {!shaka.test.StatusPromise} */
       const d = new StatusPromise(networkingEngine.destroy());
       expect(d.status).toBe('pending');
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(d.status).toBe('pending');
       expect(rejectScheme.calls.count()).toBe(1);
@@ -865,7 +864,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       // promise should not be used.
       p2.resolve();
       await d;
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       expect(d.status).toBe('resolved');
       // The request was never retried.
@@ -983,7 +982,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       /** @type {!shaka.test.StatusPromise} */
       const r = new StatusPromise(operation.promise);
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
       // The first filter has been called, but not the second, and not the
       // scheme plugin.
       expect(filter1Spy).toHaveBeenCalled();
@@ -996,7 +995,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       operation.abort();
 
       filter1Promise.resolve();
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       // The second filter has not been called, nor has the scheme plugin.
       // The filter chain was interrupted by abort().
@@ -1025,7 +1024,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       /** @type {!shaka.test.StatusPromise} */
       const r = new StatusPromise(operation.promise);
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
       // A request has been made, but not completed yet.
       expect(resolveScheme).toHaveBeenCalled();
       expect(r.status).toBe('pending');
@@ -1062,7 +1061,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       /** @type {!shaka.test.StatusPromise} */
       const r = new StatusPromise(operation.promise);
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
       // The scheme plugin has been called, and the first filter has been
       // called, but not the second.
       expect(resolveScheme).toHaveBeenCalled();
@@ -1075,7 +1074,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       operation.abort();
 
       filter1Promise.resolve();
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       // The second filter has still not been called.
       // The filter chain was interrupted by abort().
@@ -1103,7 +1102,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       /** @type {!shaka.test.StatusPromise} */
       const r = new StatusPromise(operation.promise);
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
       // A request has been made, but not completed yet.
       expect(resolveScheme).toHaveBeenCalled();
       expect(abortSpy).not.toHaveBeenCalled();
@@ -1138,7 +1137,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       /** @const {shaka.net.NetworkingEngine.PendingRequest} */
       const resp = networkingEngine.request(
           requestType, createRequest('resolve://'));
-      await Util.delay(0.01);  // Allow Promises to resolve.
+      await Util.shortDelay();  // Allow Promises to resolve.
       expect(onProgress).toHaveBeenCalledTimes(2);
       expect(onProgress).toHaveBeenCalledWith(1, 2);
       expect(onProgress).toHaveBeenCalledWith(4, 5);

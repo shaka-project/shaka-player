@@ -175,12 +175,12 @@ describe('CastProxy', () => {
       mockSender.cast.and.returnValue(p);
 
       proxy.cast();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       // unload() has not been called yet.
       expect(mockPlayer.unload).not.toHaveBeenCalled();
       // Resolve the cast() promise.
       p.resolve();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       // unload() has now been called.
       expect(mockPlayer.unload).toHaveBeenCalled();
@@ -569,7 +569,7 @@ describe('CastProxy', () => {
       expect(mockVideo.playbackRate).toBe(1);
 
       // The rest is done async:
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
           cache.player.isTextTrackVisible);
       expect(mockVideo.loop).toEqual(cache.video.loop);
@@ -607,7 +607,7 @@ describe('CastProxy', () => {
 
       // Video autoplay inhibited:
       expect(mockVideo.autoplay).toBe(false);
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(mockVideo.play).toHaveBeenCalled();
       // Video autoplay restored:
       expect(mockVideo.autoplay).toBe(true);
@@ -618,7 +618,7 @@ describe('CastProxy', () => {
 
       mockSender.onResumeLocal();
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       // Nothing loaded or played:
       expect(mockPlayer.load).not.toHaveBeenCalled();
       expect(mockVideo.play).not.toHaveBeenCalled();
@@ -640,7 +640,7 @@ describe('CastProxy', () => {
 
       mockSender.onResumeLocal();
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(mockPlayer.load).toHaveBeenCalled();
       expect(mockPlayer.dispatchEvent).toHaveBeenCalledWith(
           jasmine.objectContaining({type: 'error', detail: fakeError}));

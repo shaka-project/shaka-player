@@ -55,13 +55,13 @@ describe('AbortableOperation', () => {
       operation.abort().then(shaka.test.Util.spyFunc(abortComplete), fail);
 
       expect(abortComplete).not.toHaveBeenCalled();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       // Nothing has happened yet, so abort is not complete.
       expect(abortComplete).not.toHaveBeenCalled();
       // Resolve the underlying Promise.
       p.resolve();
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       // The abort is now complete.
       expect(abortComplete).toHaveBeenCalled();
     });
@@ -117,7 +117,7 @@ describe('AbortableOperation', () => {
         expect(value).toEqual(100);
       });
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       // Even though we called abort(), the operation hasn't completed
       // because it isn't abortable.  The abort() Promise hasn't been
       // resolved yet, either.
@@ -125,7 +125,7 @@ describe('AbortableOperation', () => {
       expect(isAborted).toBe(false);
 
       promise.resolve(100);
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       // Now that we resolved the underlying promise, the operation is
       // complete, and so is the abort() Promise.
@@ -157,21 +157,21 @@ describe('AbortableOperation', () => {
 
       all.promise.then(onSuccess, onError);
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(onSuccessSpy).not.toHaveBeenCalled();
       expect(onErrorSpy).not.toHaveBeenCalled();
       p1.resolve();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       expect(onSuccessSpy).not.toHaveBeenCalled();
       expect(onErrorSpy).not.toHaveBeenCalled();
       p2.resolve();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       expect(onSuccessSpy).not.toHaveBeenCalled();
       expect(onErrorSpy).not.toHaveBeenCalled();
       p3.resolve();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       expect(onSuccessSpy).toHaveBeenCalled();
       expect(onErrorSpy).not.toHaveBeenCalled();
@@ -198,16 +198,16 @@ describe('AbortableOperation', () => {
 
       all.promise.then(onSuccess, onError);
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(onSuccessSpy).not.toHaveBeenCalled();
       expect(onErrorSpy).not.toHaveBeenCalled();
       p1.resolve();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       expect(onSuccessSpy).not.toHaveBeenCalled();
       expect(onErrorSpy).not.toHaveBeenCalled();
       p2.reject('error');
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       expect(onSuccessSpy).not.toHaveBeenCalled();
       expect(onErrorSpy).toHaveBeenCalledWith('error');
@@ -245,7 +245,7 @@ describe('AbortableOperation', () => {
 
       all.promise.then(onSuccess, onError);
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(onSuccessSpy).not.toHaveBeenCalled();
       expect(onErrorSpy).not.toHaveBeenCalled();
 
@@ -254,7 +254,7 @@ describe('AbortableOperation', () => {
       expect(abort3Spy).not.toHaveBeenCalled();
 
       all.abort();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       expect(onSuccessSpy).not.toHaveBeenCalled();
       expect(onErrorSpy).toHaveBeenCalled();
@@ -276,11 +276,11 @@ describe('AbortableOperation', () => {
         isDone = true;
       });
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(isDone).toBe(false);
       promise.resolve(100);
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(isDone).toBe(true);
     });
 
@@ -294,11 +294,11 @@ describe('AbortableOperation', () => {
         isDone = true;
       });
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(isDone).toBe(false);
       promise.reject(0);
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(isDone).toBe(true);
     });
 
@@ -316,14 +316,14 @@ describe('AbortableOperation', () => {
         isDone = true;
       });
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(isDone).toBe(false);
       promise1.resolve();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       expect(isDone).toBe(false);
       promise2.resolve();
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       expect(isDone).toBe(true);
     });
@@ -341,10 +341,10 @@ describe('AbortableOperation', () => {
         isDone = true;
       });
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(isDone).toBe(false);
       promise1.reject(0);
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       expect(isDone).toBe(true);
     });
@@ -363,7 +363,7 @@ describe('AbortableOperation', () => {
         isDone = true;
       });
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
       expect(isDone).toBe(true);
     });
   });  // describe('finally')
@@ -387,7 +387,7 @@ describe('AbortableOperation', () => {
         values.push(value);
         expect(value).toBe(300);
         // Delayed Promise
-        return shaka.test.Util.delay(0.1).then(() => 400);
+        return shaka.test.Util.shortDelay().then(() => 400);
       }).chain((value) => {
         values.push(value);
         expect(value).toBe(400);
@@ -560,7 +560,7 @@ describe('AbortableOperation', () => {
       const operation =
           shaka.util.AbortableOperation.completed(100)
               .chain(() => {
-                shaka.test.Util.delay(0.1).then(() => {
+                shaka.test.Util.shortDelay().then(() => {
                   operation.abort();
                   p.resolve();
                 });

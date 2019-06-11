@@ -362,7 +362,7 @@ describe('Walker', () => {
     // to ensure that we are "stuck" on the abortable operation.
     const goingToD = startNewRoute(nodeD, /* interruptible */ true);
     await waitUntilEntering(goingToD, nodeC);
-    await shaka.test.Util.delay(0.1);
+    await shaka.test.Util.shortDelay();
 
     await completesRoute(startNewRoute(nodeE, /* interruptible */ true));
     expect(handleErrorSpy).toHaveBeenCalled();
@@ -384,7 +384,7 @@ describe('Walker', () => {
     // to ensure that we are "stuck" on the abortable operation.
     const goingToD = startNewRoute(nodeD, /* interruptible */ true);
     await waitUntilEntering(goingToD, nodeC);
-    await shaka.test.Util.delay(0.1);
+    await shaka.test.Util.shortDelay();
 
     // We are "stuck" in nodeC. We will now destroy the walker which should
     // abort the nodeC step, enter error recovery mode, and then shutdown.

@@ -514,7 +514,7 @@ describe('MediaSourceEngine', () => {
       // done.  Since transmuxing is done using Promises, we need to delay the
       // event until MediaSourceEngine calls appendBuffer.
       const delay = async () => {
-        await Util.delay(0.1);
+        await Util.shortDelay();
         videoSourceBuffer.updateend();
       };
       await Promise.all([init(), delay()]);
@@ -538,7 +538,7 @@ describe('MediaSourceEngine', () => {
       // done.  Since transmuxing is done using Promises, we need to delay the
       // event until MediaSourceEngine calls appendBuffer.
       const delay = async () => {
-        await Util.delay(0.1);
+        await Util.shortDelay();
         videoSourceBuffer.updateend();
       };
       await Promise.all([init(), delay()]);
@@ -887,7 +887,7 @@ describe('MediaSourceEngine', () => {
 
       await expectAsync(p1).toBeRejected();
       expect(mockMediaSource.endOfStream).toHaveBeenCalled();
-      await Util.delay(0.1);
+      await Util.shortDelay();
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(1);
       audioSourceBuffer.updateend();
     });
@@ -980,7 +980,7 @@ describe('MediaSourceEngine', () => {
 
       await expectAsync(p1).toBeRejected();
       expect(mockMediaSource.durationSetter_).toHaveBeenCalled();
-      await Util.delay(0.1);
+      await Util.shortDelay();
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       audioSourceBuffer.updateend();
     });
@@ -1006,10 +1006,10 @@ describe('MediaSourceEngine', () => {
       const d = new shaka.test.StatusPromise(mediaSourceEngine.destroy());
 
       expect(d.status).toBe('pending');
-      await Util.delay(0.1);
+      await Util.shortDelay();
       expect(d.status).toBe('pending');
       audioSourceBuffer.updateend();
-      await Util.delay(0.1);
+      await Util.shortDelay();
       expect(d.status).toBe('pending');
       videoSourceBuffer.updateend();
       await d;
@@ -1055,7 +1055,7 @@ describe('MediaSourceEngine', () => {
       const d = new shaka.test.StatusPromise(mediaSourceEngine.destroy());
 
       expect(d.status).toBe('pending');
-      await Util.delay(0.1);
+      await Util.shortDelay();
       expect(d.status).toBe('pending');
       await expected;
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);

@@ -21,6 +21,7 @@ describe('CastSender', () => {
   const Util = shaka.test.Util;
 
   const originalChrome = window['chrome'];
+  const originalStatusDelay = shaka.cast.CastSender.STATUS_DELAY;
 
   const fakeAppId = 'asdf';
   const fakeInitState = {
@@ -70,8 +71,13 @@ describe('CastSender', () => {
     resetClassVariables();
   });
 
+  beforeAll(() => {
+    shaka.cast.CastSender.STATUS_DELAY = 0;
+  });
+
   afterAll(() => {
     window['chrome'] = originalChrome;
+    shaka.cast.CastSender.STATUS_DELAY = originalStatusDelay;
   });
 
   describe('init', () => {
@@ -131,7 +137,7 @@ describe('CastSender', () => {
       sender.init();
       // You get an initial call to onStatusChanged when it initializes.
       expect(onStatusChanged).toHaveBeenCalledTimes(3);
-      await Util.delay(0.25);
+      await Util.shortDelay();
 
       // And then you get another call after it has 'discovered' the
       // existing receivers.
@@ -304,7 +310,7 @@ describe('CastSender', () => {
     fakeReceiverAvailability(true);
     fakeJoinExistingSession();
 
-    await Util.delay(0.1);
+    await Util.shortDelay();
     expect(onStatusChanged).toHaveBeenCalled();
     expect(sender.isCasting()).toBe(true);
     expect(onInitStateRequired).toHaveBeenCalled();
@@ -367,7 +373,7 @@ describe('CastSender', () => {
       fakeReceiverAvailability(true);
       fakeJoinExistingSession();
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
       expect(onFirstCastStateUpdate).not.toHaveBeenCalled();
 
       fakeSessionMessage({
@@ -396,7 +402,7 @@ describe('CastSender', () => {
       fakeReceiverAvailability(true);
       fakeJoinExistingSession();
 
-      await Util.delay(0.1);
+      await Util.shortDelay();
       fakeSessionMessage({
         type: 'update',
         update: {video: {currentTime: 12}, player: {isLive: false}},
@@ -413,7 +419,7 @@ describe('CastSender', () => {
 
       // Disconnect and then connect to another existing session.
       fakeJoinExistingSession();
-      await Util.delay(0.1);
+      await Util.shortDelay();
 
       fakeSessionMessage({
         type: 'update',
@@ -589,7 +595,7 @@ describe('CastSender', () => {
         const p = new shaka.test.StatusPromise(method(123, 'abc'));
 
         // Wait a tick for the Promise status to be set.
-        await Util.delay(0.1);
+        await Util.shortDelay();
         expect(p.status).toBe('pending');
         const id = mockSession.messages[mockSession.messages.length - 1].id;
         fakeSessionMessage({
@@ -598,10 +604,7 @@ describe('CastSender', () => {
           error: null,
         });
 
-        // Wait a tick for the Promise status to change.
-        await Util.delay(0.1);
-
-        expect(p.status).toBe('resolved');
+        await expectAsync(p).toBeResolved();
       });
 
       it('reject when "asyncComplete" messages have an error', async () => {
@@ -614,7 +617,7 @@ describe('CastSender', () => {
         const p = new shaka.test.StatusPromise(method(123, 'abc'));
 
         // Wait a tick for the Promise status to be set.
-        await Util.delay(0.1);
+        await Util.shortDelay();
         expect(p.status).toBe('pending');
         const id = mockSession.messages[mockSession.messages.length - 1].id;
         fakeSessionMessage({
@@ -631,7 +634,7 @@ describe('CastSender', () => {
         const p = new shaka.test.StatusPromise(method(123, 'abc'));
 
         // Wait a tick for the Promise status to be set.
-        await Util.delay(0.1);
+        await Util.shortDelay();
         expect(p.status).toBe('pending');
         fakeRemoteDisconnect();
 
@@ -731,7 +734,7 @@ describe('CastSender', () => {
       const p = new shaka.test.StatusPromise(method());
 
       // Wait a tick for the Promise status to be set.
-      await Util.delay(0.1);
+      await Util.shortDelay();
       expect(p.status).toBe('pending');
       sender.forceDisconnect();
       expect(mockSession.leave).not.toHaveBeenCalled();
@@ -765,7 +768,7 @@ describe('CastSender', () => {
       const p = new shaka.test.StatusPromise(method());
 
       // Wait a tick for the Promise status to be set.
-      await Util.delay(0.1);
+      await Util.shortDelay();
       expect(p.status).toBe('pending');
       const destroy = sender.destroy();
       expect(mockSession.leave).not.toHaveBeenCalled();

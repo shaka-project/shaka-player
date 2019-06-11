@@ -940,7 +940,7 @@ describe('DashParser Live', () => {
       parser.start('dummy://foo', playerInterface).then(fail, () => {});
       PromiseMock.flush();
 
-      await Util.delay(0.2, realTimeout);
+      await Util.shortDelay(realTimeout);
       // This is the initial manifest request.
       expect(fakeNetEngine.request.calls.count()).toBe(1);
       fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
@@ -948,7 +948,7 @@ describe('DashParser Live', () => {
       // Resolve the manifest request and wait on the UTCTiming request.
       delay.resolve();
       delay = fakeNetEngine.delayNextRequest();
-      await Util.delay(0.2, realTimeout);
+      await Util.shortDelay(realTimeout);
 
       // This is the first UTCTiming request.
       expect(fakeNetEngine.request.calls.count()).toBe(1);
@@ -957,7 +957,7 @@ describe('DashParser Live', () => {
       // Interrupt the parser, then fail the request.
       parser.stop();
       delay.reject();
-      await Util.delay(0.1, realTimeout);
+      await Util.shortDelay(realTimeout);
 
       // Wait for another update period.
       delayForUpdatePeriod();

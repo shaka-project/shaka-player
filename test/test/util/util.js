@@ -91,6 +91,19 @@ shaka.test.Util = class {
   }
 
   /**
+   * Returns a Promise which is resolved after a short delay.  This should be
+   * used for cases where we need to wait for a setTimeout(0) or a Promise to
+   * be handled.
+   *
+   * @param {function(function(), number)=} realSetTimeout
+   * @return {!Promise}
+   */
+  static shortDelay(realSetTimeout) {
+    const delay = 0.01;
+    return shaka.test.Util.delay(delay, realSetTimeout);
+  }
+
+  /**
    * @param {!shaka.util.Error} error
    * @return {*}
    */

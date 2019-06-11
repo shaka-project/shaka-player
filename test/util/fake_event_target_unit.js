@@ -57,7 +57,7 @@ describe('FakeEventTarget', () => {
 
     target.dispatchEvent(new shaka.util.FakeEvent('event'));
 
-    await shaka.test.Util.delay(0.1);
+    await shaka.test.Util.shortDelay();
     expect(listener1).toHaveBeenCalled();
     expect(listener2).toHaveBeenCalled();
   });
@@ -75,7 +75,7 @@ describe('FakeEventTarget', () => {
 
     target.dispatchEvent(new shaka.util.FakeEvent('event'));
 
-    await shaka.test.Util.delay(0.1);
+    await shaka.test.Util.shortDelay();
     expect(listener1).toHaveBeenCalled();
     expect(listener2).not.toHaveBeenCalled();
   });
@@ -92,7 +92,7 @@ describe('FakeEventTarget', () => {
 
     target.dispatchEvent(new shaka.util.FakeEvent('event'));
 
-    await shaka.test.Util.delay(0.1);
+    await shaka.test.Util.shortDelay();
     expect(listener1).toHaveBeenCalled();
     expect(logErrorSpy).toHaveBeenCalled();
     expect(listener2).toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe('FakeEventTarget', () => {
 
     target.dispatchEvent(new shaka.util.FakeEvent('event'));
 
-    await shaka.test.Util.delay(0.1);
+    await shaka.test.Util.shortDelay();
     expect(listener1).toHaveBeenCalled();
     expect(listener2).toHaveBeenCalled();
     expect(target2Listener).toHaveBeenCalled();

@@ -22,6 +22,7 @@ describe('DrmEngine', () => {
   const originalRequestMediaKeySystemAccess =
       navigator.requestMediaKeySystemAccess;
   const originalLogError = shaka.log.error;
+  const originalBatchTime = shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME;
 
   /** @type {!jasmine.Spy} */
   let requestMediaKeySystemAccessSpy;
@@ -55,6 +56,14 @@ describe('DrmEngine', () => {
   let session3;
   /** @type {!ArrayBuffer} */
   let license;
+
+  beforeAll(() => {
+    shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME = 0;
+  });
+
+  afterAll(() => {
+    shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME = originalBatchTime;
+  });
 
   beforeEach(() => {
     requestMediaKeySystemAccessSpy =
@@ -951,7 +960,7 @@ describe('DrmEngine', () => {
 
         const message = new Uint8Array(0);
         session1.on['message']({target: session1, message: message});
-        await shaka.test.Util.delay(0.5);
+        await shaka.test.Util.shortDelay();
 
         expect(onErrorSpy).toHaveBeenCalled();
         const error = onErrorSpy.calls.argsFor(0)[0];
@@ -1029,7 +1038,7 @@ describe('DrmEngine', () => {
         });
 
         session1.on['keystatuseschange']({target: session1});
-        await Util.delay(0.5);
+        await Util.shortDelay();
         expect(onKeyStatusSpy).toHaveBeenCalled();
       });
 
@@ -1097,13 +1106,13 @@ describe('DrmEngine', () => {
         // But even after some time has passed, we should not have invoked the
         // callback, because we don't have a status for session2 yet.
         session1.on['keystatuseschange']({target: session1});
-        await shaka.test.Util.delay(keyStatusBatchTime() + 0.5);
+        await shaka.test.Util.shortDelay();
         expect(onKeyStatusSpy).not.toHaveBeenCalled();
 
         // After both sessions have been loaded, we will finally invoke the
         // callback.
         session2.on['keystatuseschange']({target: session2});
-        await shaka.test.Util.delay(keyStatusBatchTime() + 0.5);
+        await shaka.test.Util.shortDelay();
         expect(onKeyStatusSpy).toHaveBeenCalled();
       });
 
@@ -1196,7 +1205,7 @@ describe('DrmEngine', () => {
         // Ignore the next key status event, sleep for one second, then
         // check to see if another error fired.
         onKeyStatusSpy.and.stub();
-        await shaka.test.Util.delay(1);
+        await shaka.test.Util.shortDelay();
         // Still only one error.
         expect(onErrorSpy.calls.count()).toEqual(1);
       });
@@ -1217,7 +1226,7 @@ describe('DrmEngine', () => {
       session1.on['message']({target: session1, message: message});
       session1.update.and.returnValue(Promise.resolve());
 
-      await shaka.test.Util.delay(0.5);
+      await shaka.test.Util.shortDelay();
       expect(session1.update).toHaveBeenCalledWith(license);
     });
 
@@ -1250,7 +1259,7 @@ describe('DrmEngine', () => {
       session1.on['message']({target: session1, message: message});
       session1.update.and.returnValue(Promise.resolve());
 
-      await shaka.test.Util.delay(0.5);
+      await shaka.test.Util.shortDelay();
       expect(session1.update.calls.count()).toBe(1);
       const licenseBuffer = session1.update.calls.argsFor(0)[0];
       const licenseJson =
@@ -1275,7 +1284,7 @@ describe('DrmEngine', () => {
       session1.on['message']({target: session1, message: message});
       session1.update.and.returnValue(Promise.resolve());
 
-      await shaka.test.Util.delay(0.5);
+      await shaka.test.Util.shortDelay();
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining({type: 'drmsessionupdate'}));
     });
@@ -1295,7 +1304,7 @@ describe('DrmEngine', () => {
       session1.on['message']({target: session1, message: message});
       session1.update.and.throwError('whoops!');
 
-      await shaka.test.Util.delay(0.5);
+      await shaka.test.Util.shortDelay();
       expect(onErrorSpy).toHaveBeenCalled();
       const error = onErrorSpy.calls.argsFor(0)[0];
       shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
@@ -1322,7 +1331,7 @@ describe('DrmEngine', () => {
       session2.on['message']({target: session2, message: message});
       session2.update.and.returnValue(Promise.resolve());
 
-      await shaka.test.Util.delay(0.5);
+      await shaka.test.Util.shortDelay();
       mockVideo.setMediaKeys.calls.reset();
       await drmEngine.destroy();
       expect(session1.close).toHaveBeenCalled();
@@ -1345,7 +1354,7 @@ describe('DrmEngine', () => {
       session2.on['message']({target: session2, message: message});
       session2.update.and.returnValue(Promise.resolve());
 
-      await shaka.test.Util.delay(0.5);
+      await shaka.test.Util.shortDelay();
       session1.close.and.returnValue(Promise.reject());
       session2.close.and.returnValue(Promise.reject());
       await drmEngine.destroy();
@@ -1366,7 +1375,7 @@ describe('DrmEngine', () => {
       session2.on['message']({target: session2, message: message});
       session2.update.and.returnValue(Promise.resolve());
 
-      await shaka.test.Util.delay(0.5);
+      await shaka.test.Util.shortDelay();
       mockVideo.setMediaKeys.and.returnValue(Promise.reject());
       await drmEngine.destroy();
     });
@@ -1382,7 +1391,7 @@ describe('DrmEngine', () => {
           variants, manifest.offlineSessionIds);
 
       // This flow should still return "success" when DrmEngine is destroyed.
-      await shaka.test.Util.delay(1.0);
+      await shaka.test.Util.shortDelay();
       // The first query has been made, which we are blocking.
       expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
@@ -1406,7 +1415,7 @@ describe('DrmEngine', () => {
       const init = drmEngine.initForPlayback(
           variants, manifest.offlineSessionIds);
 
-      await shaka.test.Util.delay(1.0);
+      await shaka.test.Util.shortDelay();
       // The first query has been made, which we are blocking.
       expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
@@ -1430,7 +1439,7 @@ describe('DrmEngine', () => {
       const init = drmEngine.initForPlayback(
           variants, manifest.offlineSessionIds);
 
-      await shaka.test.Util.delay(1.0);
+      await shaka.test.Util.shortDelay();
       // We are blocked on createMediaKeys:
       expect(mockMediaKeySystemAccess.createMediaKeys).toHaveBeenCalled();
       await drmEngine.destroy();
@@ -1449,7 +1458,7 @@ describe('DrmEngine', () => {
       // This chain should still return "success" when DrmEngine is destroyed.
       const init = initAndAttach();
 
-      await shaka.test.Util.delay(1.0);
+      await shaka.test.Util.shortDelay();
       // We are now blocked on setMediaKeys:
       expect(mockVideo.setMediaKeys.calls.count()).toBe(1);
       // DrmEngine.destroy also calls setMediaKeys.
@@ -1459,11 +1468,11 @@ describe('DrmEngine', () => {
 
       const destroy = drmEngine.destroy();
       const fail = async () => {
-        await shaka.test.Util.delay(0.5);
+        await shaka.test.Util.shortDelay();
         p1.reject();
       };
       const success = async () => {
-        await shaka.test.Util.delay(1);
+        await shaka.test.Util.shortDelay();
         p2.resolve();
       };
       await Promise.all([init, destroy, fail(), success()]);
@@ -1478,7 +1487,7 @@ describe('DrmEngine', () => {
       // This chain should still return "success" when DrmEngine is destroyed.
       const init = initAndAttach();
 
-      await shaka.test.Util.delay(1.0);
+      await shaka.test.Util.shortDelay();
       // We are now blocked on setMediaKeys:
       expect(mockVideo.setMediaKeys.calls.count()).toBe(1);
       // DrmEngine.destroy also calls setMediaKeys.
@@ -1488,11 +1497,11 @@ describe('DrmEngine', () => {
 
       const destroy = drmEngine.destroy();
       const resolve1 = async () => {
-        await shaka.test.Util.delay(0.5);
+        await shaka.test.Util.shortDelay();
         p1.resolve();
       };
       const resolve2 = async () => {
-        await shaka.test.Util.delay(1);
+        await shaka.test.Util.shortDelay();
         p2.resolve();
       };
       await Promise.all([init, destroy, resolve1(), resolve2()]);
@@ -1514,7 +1523,7 @@ describe('DrmEngine', () => {
       // This chain should still return "success" when DrmEngine is destroyed.
       const init = initAndAttach();
 
-      await shaka.test.Util.delay(1.0);
+      await shaka.test.Util.shortDelay();
       // We are now blocked on setServerCertificate:
       expect(mockMediaKeys.setServerCertificate.calls.count()).toBe(1);
       await drmEngine.destroy();
@@ -1536,7 +1545,7 @@ describe('DrmEngine', () => {
       // This chain should still return "success" when DrmEngine is destroyed.
       const init = initAndAttach();
 
-      await shaka.test.Util.delay(1.0);
+      await shaka.test.Util.shortDelay();
       // We are now blocked on setServerCertificate:
       expect(mockMediaKeys.setServerCertificate.calls.count()).toBe(1);
       await drmEngine.destroy();
@@ -1564,7 +1573,7 @@ describe('DrmEngine', () => {
       await drmEngine.destroy();
 
       p.reject();  // Fail generateRequest.
-      await Util.delay(0.1);  // Wait for any delayed errors.
+      await Util.shortDelay();  // Wait for any delayed errors.
       // onError is a failure by default.
     });
 
@@ -1593,7 +1602,7 @@ describe('DrmEngine', () => {
 
       // Unblock the license request.
       p.resolve({data: (new Uint8Array(0)).buffer});
-      await Util.delay(0.1);  // Ensure request is handled.
+      await Util.shortDelay();  // Ensure request is handled.
 
       // Due to the interruption, we never updated the session.
       expect(session1.update).not.toHaveBeenCalled();
@@ -1624,7 +1633,7 @@ describe('DrmEngine', () => {
 
       // Fail the license request.
       p.reject();
-      await Util.delay(0.1);
+      await Util.shortDelay();
     });
 
     it('does not trigger errors if it fails update', async () => {
@@ -1640,7 +1649,7 @@ describe('DrmEngine', () => {
       const message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
 
-      await shaka.test.Util.delay(0.1);
+      await shaka.test.Util.shortDelay();
 
       // We are now blocked on update:
       expect(session1.update.calls.count()).toBe(1);
@@ -1648,7 +1657,7 @@ describe('DrmEngine', () => {
 
       // Fail the update.
       p.reject();
-      await Util.delay(0.1);
+      await Util.shortDelay();
     });
 
     it('still completes if session is not callable', async () => {
@@ -1684,7 +1693,7 @@ describe('DrmEngine', () => {
       session2.on['message']({target: session2, message: message});
       session2.update.and.returnValue(Promise.resolve());
 
-      await shaka.test.Util.delay(0.5);
+      await shaka.test.Util.shortDelay();
       await drmEngine.destroy();
     });
   });  // describe('destroy')
@@ -1892,7 +1901,7 @@ describe('DrmEngine', () => {
 
     it('waits until update() is complete', async () => {
       const update = async () => {
-        await shaka.test.Util.delay(0.3);
+        await shaka.test.Util.shortDelay();
         updatePromise.resolve();
       };
 
@@ -2063,13 +2072,5 @@ describe('DrmEngine', () => {
       individualizationServer: '',
       videoRobustness: '',
     };
-  }
-
-  /**
-   * @suppress {visibility}
-   * @return {number}
-   */
-  function keyStatusBatchTime() {
-    return shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME_;
   }
 });
