@@ -130,10 +130,10 @@ shakaAssets.Feature = {
  *   (optional) The codecs string, if needed to refine the MIME type.
  */
 shakaAssets.ExtraText;
+// End types and enums }}}
 
 
 // Custom callbacks {{{
-
 /**
  * A prefix retrieved in a manifest response filter and used in a subsequent
  * license request filter.  Necessary for VDMS content.
@@ -181,7 +181,7 @@ shakaAssets.UplynkRequestFilter = (type, request) => {
     }
   }
 };
-// }}}
+// End custom callbacks }}}
 
 
 /** @const {!Array.<!ShakaDemoAssetInfo>} */
@@ -465,7 +465,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),
-  // }}}
+  // End Shaka assets }}}
 
   // Axinom assets {{{
   // Src: https://github.com/Axinom/dash-test-vectors
@@ -575,9 +575,9 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION),
-  // }}}
+  // End Axinom assets }}}
 
-  // Unified Streaming {{{
+  // Unified Streaming assets {{{
   // Src: http://demo.unified-streaming.com/features.html
   new ShakaDemoAssetInfo(
       /* name= */ 'Tears of Steel',
@@ -623,7 +623,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.TTML)
       .addFeature(shakaAssets.Feature.OFFLINE),
-  // }}}
+  // End Unified Streaming assets }}}
 
   // DASH-IF assets {{{
   // Src: http://dashif.org/test-vectors/
@@ -692,7 +692,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.TTML),
-  // }}}
+  // End DASH-IF Assets }}}
 
   // Wowza assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
@@ -704,7 +704,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),
-  // }}}
+  // End Wowza assets }}}
 
   // bitcodin assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
@@ -738,7 +738,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.OFFLINE),
-  // }}}
+  // End bitcodin assets }}}
 
   // Nimble Streamer assets {{{
   // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
@@ -753,7 +753,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION),
-  // }}}
+  // End Nimble Streamer assets }}}
 
   // Azure Media Services assets {{{
   // Src: http://amp.azure.net/libs/amp/latest/docs/samples.html
@@ -805,7 +805,7 @@ shakaAssets.testAssets = [
         kind: 'subtitle',
         mime: 'text/vtt',
       }),
-  // }}}
+  // End Azure Media Services assets }}}
 
   // GPAC assets {{{
   // Src: https://gpac.wp.mines-telecom.fr/2012/02/23/dash-sequences/
@@ -887,7 +887,7 @@ shakaAssets.testAssets = [
       .markAsDisabled()
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4),
-  // }}}
+  // End GPAC assets }}}
 
   // Verizon Digital Media Services (VDMS) assets {{{
   // Reliable Playready playback requires Edge 16+
@@ -966,5 +966,5 @@ shakaAssets.testAssets = [
       .addLicenseServer('com.widevine.alpha', 'https://content.uplynk.com/wv')
       .setRequestFilter(shakaAssets.UplynkRequestFilter)
       .setResponseFilter(shakaAssets.UplynkResponseFilter),
-  // }}}
+  // End Verizon Digital Media Services (VDMS) assets }}}
 ];
