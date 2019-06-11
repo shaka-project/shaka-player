@@ -21,6 +21,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 
 import generateLocalizations
 import shakaBuildHelpers
@@ -54,6 +55,14 @@ def _must_build(output, source_files):
   if any(os.path.getmtime(f) > build_time for f in source_files):
     # Some input files have changed, so we should build again.
     return True
+
+  # Look at all the Python modules that are loaded.  If any of them have
+  # changed, it may affect the build.
+  this_path = os.path.dirname(os.path.abspath(__file__))
+  for module in sys.modules.values():
+    path = getattr(module, '__file__', None)
+    if path and os.path.exists(path) and os.path.getmtime(path) > build_time:
+      return True
 
   logging.warning('No changes detected, skipping. Use --force to override.')
   return False
