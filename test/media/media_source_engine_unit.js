@@ -1066,6 +1066,8 @@ describe('MediaSourceEngine', function() {
           new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
               ContentType.AUDIO, buffer2, null, null,
               /* hasClosedCaptions */ false));
+      // Create the expectation first so we don't get unhandled rejection errors
+      const expected = expectAsync(rejected).toBeRejected();
 
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(buffer2);
@@ -1075,8 +1077,8 @@ describe('MediaSourceEngine', function() {
 
       expect(p.status).toBe('pending');
       await Util.delay(0.1);
-      expect(p.status).toBe('pending');
-      expect(rejected.status).toBe('rejected');
+      expect(d.status).toBe('pending');
+      await expected;
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(buffer2);
       audioSourceBuffer.updateend();
