@@ -20,6 +20,8 @@ This uses two environment variables to help with debugging the scripts:
   RAISE_INTERRUPT - Will raise keyboard interrupts rather than swallowing them.
 """
 
+from __future__ import print_function
+
 import errno
 import json
 import logging
@@ -321,6 +323,6 @@ def run_main(main):
   except KeyboardInterrupt:
     if os.environ.get('RAISE_INTERRUPT'):
       raise
-    print >> sys.stderr  # Clear the current line that has ^C on it.
+    print(file=sys.stderr)  # Clear the current line that has ^C on it.
     logging.error('Keyboard interrupt')
     sys.exit(1)
