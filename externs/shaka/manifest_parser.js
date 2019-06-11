@@ -59,6 +59,7 @@ shaka.extern.ManifestParser = function() {};
  *   filterNewPeriod: function(shaka.extern.Period),
  *   filterAllPeriods: function(!Array.<!shaka.extern.Period>),
  *   onTimelineRegionAdded: function(shaka.extern.TimelineRegionInfo),
+ *   onSegmentParsed: function(string, number, *),
  *   onEvent: function(!Event),
  *   onError: function(!shaka.util.Error)
  * }}
@@ -77,6 +78,8 @@ shaka.extern.ManifestParser = function() {};
  *   Should be called on all Periods so that they can be filtered.
  * @property {function(shaka.extern.TimelineRegionInfo)} onTimelineRegionAdded
  *   Should be called when a new timeline region is added.
+ * @property {function(string, number, *)} onSegmentParsed
+ *   Should be called with segment metadata when a new segment is parsed.
  * @property {function(!Event)} onEvent
  *   Should be called to raise events.
  * @property {function(!shaka.util.Error)} onError
