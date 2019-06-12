@@ -1936,6 +1936,26 @@ describe('StreamingEngine', function() {
       runTest();
       expect(onError).toHaveBeenCalled();
     });
+
+    it('from failed clear in switchVariant', () => {
+      const expectedError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED);
+      mediaSourceEngine.clear.and.returnValue(Promise.reject(expectedError));
+
+      onError.and.stub();
+      onChooseStreams.and.callFake((period) => defaultOnChooseStreams(period));
+      onStartupComplete.and.callFake(() => {
+        streamingEngine.switchVariant(
+            variant2, /* clear_buffer= */ true, /* safe_margin= */ 0);
+      });
+
+      // Here we go!
+      streamingEngine.start().catch(fail);
+      runTest();
+      expect(onError).toHaveBeenCalledWith(Util.jasmineError(expectedError));
+    });
   });
 
   describe('handles network errors', function() {
