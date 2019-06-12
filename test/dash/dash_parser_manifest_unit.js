@@ -38,6 +38,7 @@ describe('DashParser Manifest', () => {
       filterNewPeriod: () => {},
       filterAllPeriods: () => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onSegmentParsed: fail,
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onError: fail,
     };

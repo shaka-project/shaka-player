@@ -91,11 +91,22 @@ describe('HlsParser', () => {
       onError: fail,
       onEvent: fail,
       onTimelineRegionAdded: fail,
+      onSegmentParsed: fail,
     };
 
     parser = new shaka.hls.HlsParser();
     parser.configure(config);
   });
+
+  /** @type {!jasmine.Spy} */
+  let onSegmentParsedSpy;
+
+  beforeEach(() => {
+    onSegmentParsedSpy = jasmine.createSpy('onSegmentParsed');
+    playerInterface.onSegmentParsed =
+        shaka.test.Util.spyFunc(onSegmentParsedSpy);
+  });
+
 
   /**
    * @param {string} master

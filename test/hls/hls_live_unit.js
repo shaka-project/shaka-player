@@ -124,10 +124,20 @@ describe('HlsParser live', () => {
       onError: fail,
       onEvent: fail,
       onTimelineRegionAdded: fail,
+      onSegmentParsed: fail,
     };
 
     parser = new shaka.hls.HlsParser();
     parser.configure(config);
+  });
+
+  /** @type {!jasmine.Spy} */
+  let onSegmentParsedSpy;
+
+  beforeEach(() => {
+    onSegmentParsedSpy = jasmine.createSpy('onSegmentParsed');
+    playerInterface.onSegmentParsed =
+        shaka.test.Util.spyFunc(onSegmentParsedSpy);
   });
 
   afterEach(() => {
@@ -553,6 +563,67 @@ describe('HlsParser live', () => {
 
         testUpdate(
             master, media, [ref1], mediaWithAdditionalSegment, [ref1, ref2]);
+      });
+
+      it('triggers segment parsed callbacks as segments appear', () => {
+        const mediaWithAdditionalSegment = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:EVENT\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXTINF:2,\n',
+          'main.mp4\n',
+          '#EXT-X-CUE:DURATION="201.467",ID="0",TYPE="SpliceOut",',
+          'TIME="414.171"\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
+
+        const spy = jasmine.createSpy('start');
+        parser.start('test:/master', playerInterface)
+            .then(Util.spyFunc(spy), fail);
+        PromiseMock.flush();
+
+        expect(onSegmentParsedSpy).toHaveBeenCalledTimes(1);
+        expect(onSegmentParsedSpy).toHaveBeenCalledWith(
+            'application/vnd.apple.mpegurl',
+            1,
+            new shaka.hls.Segment(
+                'test:/main.mp4',
+                [
+                  new shaka.hls.Tag(/* id */ 1, 'EXTINF', [], '2'),
+                ])
+        );
+
+        // Replace the entries with the updated values.
+        fakeNetEngine
+            .setResponseText('test:/video', mediaWithAdditionalSegment);
+
+        delayForUpdatePeriod();
+
+        expect(onSegmentParsedSpy).toHaveBeenCalledTimes(2);
+        expect(onSegmentParsedSpy).toHaveBeenCalledWith(
+            'application/vnd.apple.mpegurl',
+            1,
+            new shaka.hls.Segment(
+                'test:/main2.mp4',
+                [
+                  new shaka.hls.Tag(/* id */ 1, 'EXTINF', [], '2'),
+                  new shaka.hls.Tag(/* id */ 2, 'EXT-X-CUE', [
+                    new shaka.hls.Attribute('DURATION', '201.467'),
+                    new shaka.hls.Attribute('ID', '0'),
+                    new shaka.hls.Attribute('TYPE', 'SpliceOut'),
+                    new shaka.hls.Attribute('TIME', '414.171'),
+                  ]),
+                ]
+            )
+        );
       });
 
       it('evicts removed segments', () => {

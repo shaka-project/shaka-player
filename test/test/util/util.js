@@ -227,6 +227,40 @@ shaka.test.Util = class {
   }
 
   /**
+   * Custom comparer for HLS segments.
+   * @param {*} first
+   * @param {*} second
+   * @return {boolean|undefined}
+   */
+
+  static compareHlsSegments(first, second) {
+    const isHlsSegment = first instanceof shaka.hls.Segment &&
+        second instanceof shaka.hls.Segment;
+
+    if (isHlsSegment) {
+      return first.absoluteUri === second.absoluteUri &&
+          compareTagsArray(first.tags, second.tags);
+    }
+
+    return undefined;
+
+
+    function compareTagsArray(tags1, tags2) {
+      if (tags1 instanceof Array && tags2 instanceof Array) {
+        try {
+          const tagsAsString = (tagsArray) => tagsArray.map((tags) =>
+            tags.toString()).sort().join(',');
+
+          return tagsAsString(tags1) === tagsAsString(tags2);
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    }
+  }
+
+  /**
    * Fetches the resource at the given URI.
    *
    * @param {string} uri
@@ -475,5 +509,6 @@ shaka.test.Util.customMatchers_ = {
 
 beforeEach(() => {
   jasmine.addCustomEqualityTester(shaka.test.Util.compareReferences);
+  jasmine.addCustomEqualityTester(shaka.test.Util.compareHlsSegments);
   jasmine.addMatchers(shaka.test.Util.customMatchers_);
 });

@@ -50,6 +50,7 @@ shaka.test.Dash = class {
       filterNewPeriod: () => {},
       filterAllPeriods: () => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onSegmentParsed: fail,
       onEvent: fail,
       onError: fail,
     };
@@ -77,6 +78,7 @@ shaka.test.Dash = class {
       filterNewPeriod: () => {},
       filterAllPeriods: () => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onSegmentParsed: fail,
       onEvent: fail,
       onError: fail,
     };
