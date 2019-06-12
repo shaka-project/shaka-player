@@ -18,8 +18,6 @@
 
 goog.provide('ShakaDemoAssetInfo');
 
-goog.require('goog.asserts');
-
 
 /**
  * An object that contains information about an asset.
@@ -127,9 +125,6 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   addFeature(feature) {
-    goog.asserts.assert(feature != shakaAssets.Feature.STORED,
-        'Assets should not be given the synthetic "STORED" ' +
-                        'property!');
     this.features.push(feature);
     // Sort the features list, so that features are in a predictable order.
     this.features.sort(ShakaDemoAssetInfo.caseLessAlphaComparator_);
