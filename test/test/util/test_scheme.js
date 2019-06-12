@@ -555,7 +555,7 @@ shaka.test.TestScheme.DATA = {
   'cea-708_ts': {
     video: {
       segmentUri: '/base/test/test/assets/captions-test.ts',
-      mimeType: 'video/mp2t',
+      mimeType: 'video/MP2T',
       codecs: 'avc1.64001e',
     },
     text: {
