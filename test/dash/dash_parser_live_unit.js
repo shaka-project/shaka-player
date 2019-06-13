@@ -19,7 +19,6 @@ describe('DashParser Live', () => {
   const Util = shaka.test.Util;
   const ManifestParser = shaka.test.ManifestParser;
 
-  const realTimeout = window.setTimeout;
   const oldNow = Date.now;
   const updateTime = 5;
   const originalUri = 'http://example.com/';
@@ -33,12 +32,6 @@ describe('DashParser Live', () => {
   let playerInterface;
 
   beforeEach(() => {
-    // First, fake the clock so we can control timers.
-    // This does not mock Date.now, which must be done separately.
-    jasmine.clock().install();
-    // This Promise mock is required for fakeEventLoop.
-    PromiseMock.install();
-
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser();
     parser.configure(shaka.util.PlayerConfiguration.createDefault().manifest);
@@ -55,26 +48,27 @@ describe('DashParser Live', () => {
   afterEach(() => {
     // Dash parser stop is synchronous.
     parser.stop();
-
-    // Uninstall the clock() first.  This also undoes mockDate(), and should be
-    // done afterEach, not afterAll.  Otherwise, we get conflicts when some
-    // tests use mockDate() and others directly overwrite Date.now.
-    jasmine.clock().uninstall();
-    // Replace Date.now with the browser built-in.  This must come AFTER we
-    // uninstall the clock() module, or else mockDate() doesn't get cleaned up
-    // correctly.
     Date.now = oldNow;
-    // Finally, uninstall the Promise mock.
-    PromiseMock.uninstall();
-    // TODO: Clean up this suite so that everyone uses mockDate().
   });
 
   /**
-   * Simulate time to trigger a manifest update.
+   * Trigger a manifest update.
+   * @suppress {accessControls}
    */
-  function delayForUpdatePeriod() {
-    // Tick the virtual clock to trigger an update and resolve all Promises.
-    Util.fakeEventLoop(updateTime);
+  async function updateManifest() {
+    if (parser.updateTimer_) {
+      parser.updateTimer_.tickNow();
+    }
+    await Util.shortDelay();  // Allow update to complete.
+  }
+
+  /**
+   * Gets a spy on the function that sets the update period.
+   * @return {!jasmine.Spy}
+   * @suppress {accessControls}
+   */
+  function updateTickSpy() {
+    return spyOn(parser.updateTimer_, 'tickAfter');
   }
 
   /**
@@ -136,25 +130,20 @@ describe('DashParser Live', () => {
      * @param {!Array.<!shaka.media.SegmentReference>} secondReferences The
      *   media references for the updated manifest.
      */
-    function testBasicUpdate(
+    async function testBasicUpdate(
         firstLines, firstReferences, secondLines, secondReferences) {
       const firstManifest = makeSimpleLiveManifestText(firstLines, updateTime);
       const secondManifest =
           makeSimpleLiveManifestText(secondLines, updateTime);
 
       fakeNetEngine.setResponseText('dummy://foo', firstManifest);
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-
-      const manifest = spy.calls.mostRecent().args[0];
+      const manifest = await parser.start('dummy://foo', playerInterface);
       const stream = manifest.periods[0].variants[0].video;
       ManifestParser.verifySegmentIndex(stream, firstReferences);
       expect(manifest.periods.length).toBe(1);
 
       fakeNetEngine.setResponseText('dummy://foo', secondManifest);
-      delayForUpdatePeriod();
+      await updateManifest();
       ManifestParser.verifySegmentIndex(stream, secondReferences);
       // In https://github.com/google/shaka-player/issues/963, we
       // duplicated periods during the first update.  This check covers
@@ -162,15 +151,16 @@ describe('DashParser Live', () => {
       expect(manifest.periods.length).toBe(1);
     }
 
-    it('basic support', () => {
-      testBasicUpdate(basicLines, basicRefs, updateLines, updateRefs);
+    it('basic support', async () => {
+      await testBasicUpdate(basicLines, basicRefs, updateLines, updateRefs);
     });
 
-    it('new manifests don\'t need to include old references', () => {
-      testBasicUpdate(basicLines, basicRefs, partialUpdateLines, updateRefs);
+    it('new manifests don\'t need to include old references', async () => {
+      await testBasicUpdate(
+          basicLines, basicRefs, partialUpdateLines, updateRefs);
     });
 
-    it('evicts old references for single-period live stream', () => {
+    it('evicts old references for single-period live stream', async () => {
       const template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT30S"',
@@ -191,11 +181,7 @@ describe('DashParser Live', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', text);
       Date.now = () => 0;
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-      const manifest = spy.calls.mostRecent().args[0];
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest).toBeTruthy();
       const stream = manifest.periods[0].variants[0].video;
@@ -211,13 +197,13 @@ describe('DashParser Live', () => {
       // manifest was parsed, the first segment should have fallen out of
       // the availability window.
       Date.now = () => 11 * 1000;
-      delayForUpdatePeriod();
+      await updateManifest();
       // The first reference should have been evicted.
       expect(stream.findSegmentPosition(0)).toBe(2);
       ManifestParser.verifySegmentIndex(stream, basicRefs.slice(1));
     });
 
-    it('evicts old references for multi-period live stream', () => {
+    it('evicts old references for multi-period live stream', async () => {
       const template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT60S"',
@@ -256,11 +242,7 @@ describe('DashParser Live', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', text);
       Date.now = () => 0;
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-      const manifest = spy.calls.mostRecent().args[0];
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
       const stream1 = manifest.periods[0].variants[0].video;
       const stream2 = manifest.periods[1].variants[0].video;
@@ -273,19 +255,19 @@ describe('DashParser Live', () => {
       // manifest was parsed, the first segment should have fallen out of
       // the availability window.
       Date.now = () => 11 * 1000;
-      delayForUpdatePeriod();
+      await updateManifest();
       // The first reference should have been evicted.
       ManifestParser.verifySegmentIndex(stream1, basicRefs.slice(1));
       ManifestParser.verifySegmentIndex(stream2, basicRefs);
 
       // Same as above, but 1 period length later
       Date.now = () => (11 + pStart) * 1000;
-      delayForUpdatePeriod();
+      await updateManifest();
       ManifestParser.verifySegmentIndex(stream1, []);
       ManifestParser.verifySegmentIndex(stream2, basicRefs.slice(1));
     });
 
-    it('sets infinite duration for single-period live streams', () => {
+    it('sets infinite duration for single-period live streams', async () => {
       const template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT1S"',
@@ -306,18 +288,14 @@ describe('DashParser Live', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', text);
       Date.now = () => 0;
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-      const manifest = spy.calls.mostRecent().args[0];
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest.periods.length).toBe(1);
       const timeline = manifest.presentationTimeline;
       expect(timeline.getDuration()).toBe(Infinity);
     });
 
-    it('sets infinite duration for multi-period live streams', () => {
+    it('sets infinite duration for multi-period live streams', async () => {
       const template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT1S"',
@@ -346,11 +324,7 @@ describe('DashParser Live', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', text);
       Date.now = () => 0;
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-      const manifest = spy.calls.mostRecent().args[0];
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest.periods.length).toBe(2);
       expect(manifest.periods[1].startTime).toBe(60);
@@ -359,7 +333,7 @@ describe('DashParser Live', () => {
     });
   }
 
-  it('can add Periods', () => {
+  it('can add Periods', async () => {
     const lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
@@ -381,17 +355,16 @@ describe('DashParser Live', () => {
         sprintf(template, {updateTime: updateTime, contents: lines.join('\n')});
     const firstManifest = makeSimpleLiveManifestText(lines, updateTime);
 
+    /** @type {!jasmine.Spy} */
     const filterNewPeriod = jasmine.createSpy('filterNewPeriod');
     playerInterface.filterNewPeriod = Util.spyFunc(filterNewPeriod);
 
+    /** @type {!jasmine.Spy} */
     const filterAllPeriods = jasmine.createSpy('filterAllPeriods');
     playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
 
     fakeNetEngine.setResponseText('dummy://foo', firstManifest);
-    const spy = jasmine.createSpy('start');
-    parser.start('dummy://foo', playerInterface).then(Util.spyFunc(spy), fail);
-    PromiseMock.flush();
-    const manifest = spy.calls.mostRecent().args[0];
+    const manifest = await parser.start('dummy://foo', playerInterface);
 
     expect(manifest.periods.length).toBe(1);
     // Should call filterAllPeriods for parsing the first manifest
@@ -399,7 +372,7 @@ describe('DashParser Live', () => {
     expect(filterAllPeriods.calls.count()).toBe(1);
 
     fakeNetEngine.setResponseText('dummy://foo', secondManifest);
-    delayForUpdatePeriod();
+    await updateManifest();
 
     // Should update the same manifest object.
     expect(manifest.periods.length).toBe(2);
@@ -408,7 +381,7 @@ describe('DashParser Live', () => {
     expect(filterNewPeriod.calls.count()).toBe(1);
   });
 
-  it('uses redirect URL for manifest BaseURL and updates', () => {
+  it('uses redirect URL for manifest BaseURL and updates', async () => {
     const template = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
       '    suggestedPresentationDelay="PT5S"',
@@ -439,10 +412,7 @@ describe('DashParser Live', () => {
           data: manifestData,
         }));
 
-    const spy = jasmine.createSpy('start');
-    parser.start(originalUri, playerInterface).then(Util.spyFunc(spy), fail);
-    PromiseMock.flush();
-    const manifest = spy.calls.mostRecent().args[0];
+    const manifest = await parser.start(originalUri, playerInterface);
 
     // The manifest request was made to the original URL.
     // But includes a redirect
@@ -457,17 +427,17 @@ describe('DashParser Live', () => {
     expect(segmentUri).toBe(redirectedUri + 's1.mp4');
   });
 
-  it('calls the error callback if an update fails', () => {
+  it('calls the error callback if an update fails', async () => {
     const lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
     const manifestText = makeSimpleLiveManifestText(lines, updateTime);
+    /** @type {!jasmine.Spy} */
     const onError = jasmine.createSpy('onError');
     playerInterface.onError = Util.spyFunc(onError);
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    parser.start('dummy://foo', playerInterface).catch(fail);
-    PromiseMock.flush();
+    await parser.start('dummy://foo', playerInterface);
 
     expect(fakeNetEngine.request.calls.count()).toBe(1);
 
@@ -478,65 +448,50 @@ describe('DashParser Live', () => {
     const operation = shaka.util.AbortableOperation.failed(error);
     fakeNetEngine.request.and.returnValue(operation);
 
-    delayForUpdatePeriod();
+    await updateManifest();
     expect(onError.calls.count()).toBe(1);
   });
 
-  it('uses @minimumUpdatePeriod', () => {
+  it('uses @minimumUpdatePeriod', async () => {
     const lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
     // updateTime parameter sets @minimumUpdatePeriod in the manifest.
     const manifestText = makeSimpleLiveManifestText(lines, updateTime);
 
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
+    Date.now = () => 0;
+
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    const spy = jasmine.createSpy('start');
-    parser.start('dummy://foo', playerInterface).then(Util.spyFunc(spy), fail);
-    PromiseMock.flush();
-    const manifest = spy.calls.mostRecent().args[0];
+    await parser.start('dummy://foo', playerInterface);
 
-    expect(fakeNetEngine.request.calls.count()).toBe(1);
-    expect(manifest).toBeTruthy();
-
-    const partialTime = updateTime * 1000 * 3 / 4;
-    const remainingTime = updateTime * 1000 - partialTime;
-    jasmine.clock().tick(partialTime);
-    PromiseMock.flush();
-
-    // Update period has not passed yet.
-    expect(fakeNetEngine.request.calls.count()).toBe(1);
-    jasmine.clock().tick(remainingTime);
-    PromiseMock.flush();
-
-    // Update period has passed.
-    expect(fakeNetEngine.request.calls.count()).toBe(2);
+    expect(tickAfter).toHaveBeenCalledTimes(1);
+    const delay = tickAfter.calls.mostRecent().args[0];
+    expect(delay).toBe(updateTime);
   });
 
-  it('still updates when @minimumUpdatePeriod is zero', () => {
+  it('still updates when @minimumUpdatePeriod is zero', async () => {
     const lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
     // updateTime parameter sets @minimumUpdatePeriod in the manifest.
     const manifestText = makeSimpleLiveManifestText(lines, /* updateTime */ 0);
 
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
+    Date.now = () => 0;
+
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    const spy = jasmine.createSpy('start');
-    parser.start('dummy://foo', playerInterface).then(Util.spyFunc(spy), fail);
-    PromiseMock.flush();
-    const manifest = spy.calls.mostRecent().args[0];
+    await parser.start('dummy://foo', playerInterface);
 
-    expect(manifest).toBeTruthy();
-    fakeNetEngine.request.calls.reset();
-
-    const waitTimeMs = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'] * 1000;
-    jasmine.clock().tick(waitTimeMs);
-    PromiseMock.flush();
-
-    // Update period has passed.
-    expect(fakeNetEngine.request).toHaveBeenCalled();
+    const waitTime = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'];
+    expect(tickAfter).toHaveBeenCalledTimes(1);
+    const delay = tickAfter.calls.mostRecent().args[0];
+    expect(delay).toBe(waitTime);
   });
 
-  it('does not update when @minimumUpdatePeriod is missing', () => {
+  it('does not update when @minimumUpdatePeriod is missing', async () => {
     const lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
@@ -544,75 +499,42 @@ describe('DashParser Live', () => {
     const manifestText =
         makeSimpleLiveManifestText(lines, /* updateTime */ null);
 
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
+
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    const spy = jasmine.createSpy('start');
-    parser.start('dummy://foo', playerInterface).then(Util.spyFunc(spy), fail);
-    PromiseMock.flush();
-    const manifest = spy.calls.mostRecent().args[0];
+    await parser.start('dummy://foo', playerInterface);
 
-    expect(manifest).toBeTruthy();
-    fakeNetEngine.request.calls.reset();
-
-    const waitTimeMs = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'] * 1000;
-    jasmine.clock().tick(waitTimeMs * 2);
-    PromiseMock.flush();
-
-    // Even though we have waited longer than the minimum update period,
-    // the missing attribute means "do not update".  So no update should
-    // have happened.
-    expect(fakeNetEngine.request).not.toHaveBeenCalled();
+    expect(tickAfter).not.toHaveBeenCalled();
   });
 
-  it('delays subsequent updates when an update is slow', () => {
-    // For this test, we want Date.now() to follow the ticks of the fake clock.
-    jasmine.clock().mockDate();
-
+  it('delays subsequent updates when an update is slow', async () => {
     const lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
+    const extraWaitTime = 15.0;
     const idealUpdateTime = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'];
     const manifestText = makeSimpleLiveManifestText(lines, idealUpdateTime);
 
+    let now = 0;
+    Date.now = () => now;
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
+
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    parser.start('dummy://foo', playerInterface).catch(fail);
-    PromiseMock.flush();
-
-    fakeNetEngine.request.calls.reset();
-
-    // Make the first update take a long time.
+    /** @type {!shaka.util.PublicPromise} */
     const delay = fakeNetEngine.delayNextRequest();
-
-    // Wait for the update to start.
-    jasmine.clock().tick(idealUpdateTime * 1000);
-    PromiseMock.flush();
-
-    // Update period has passed, so an update has been requested.
-    expect(fakeNetEngine.request).toHaveBeenCalled();
-    fakeNetEngine.request.calls.reset();
-
-    // Make the update take an extra 15 seconds, then end the delay.
-    const extraWaitTimeMs = 15.0;
-    jasmine.clock().tick(extraWaitTimeMs * 1000);
+    const p = parser.start('dummy://foo', playerInterface);
+    now += extraWaitTime * 1000;  // Make the update appear to take longer.
     delay.resolve();
-    PromiseMock.flush();
-    // No new calls, since we are still working on the same one.
-    expect(fakeNetEngine.request).not.toHaveBeenCalled();
-    fakeNetEngine.request.calls.reset();
+    await p;
 
-    // From now on, the updates should be farther apart.
-    jasmine.clock().tick(idealUpdateTime * 1000);
-    PromiseMock.flush();
-    // The update should not have happened yet.
-    expect(fakeNetEngine.request).not.toHaveBeenCalled();
-    fakeNetEngine.request.calls.reset();
-
-    // After waiting the extra time, the update request should fire.
-    jasmine.clock().tick(extraWaitTimeMs * 1000);
-    PromiseMock.flush();
-    expect(fakeNetEngine.request).toHaveBeenCalled();
+    // Check the last update was scheduled close to how long the update took.
+    const realDelay = tickAfter.calls.mostRecent().args[0];
+    expect(realDelay).toBeCloseTo(extraWaitTime, 0);
   });
 
-  it('uses Mpd.Location', () => {
+  it('uses Mpd.Location', async () => {
     const manifestText = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
       '    suggestedPresentationDelay="PT5S"',
@@ -632,8 +554,7 @@ describe('DashParser Live', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
     const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-    parser.start('dummy://foo', playerInterface).catch(fail);
-    PromiseMock.flush();
+    await parser.start('dummy://foo', playerInterface);
 
     expect(fakeNetEngine.request.calls.count()).toBe(1);
     fakeNetEngine.expectRequest('dummy://foo', manifestRequest);
@@ -651,11 +572,11 @@ describe('DashParser Live', () => {
           {uri: request.uris[0], data: data, headers: {}});
     });
 
-    delayForUpdatePeriod();
+    await updateManifest();
     expect(fakeNetEngine.request.calls.count()).toBe(1);
   });
 
-  it('uses @suggestedPresentationDelay', () => {
+  it('uses @suggestedPresentationDelay', async () => {
     const manifestText = [
       '<MPD type="dynamic" suggestedPresentationDelay="PT60S"',
       '    minimumUpdatePeriod="PT5S"',
@@ -675,10 +596,7 @@ describe('DashParser Live', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
     Date.now = () => 600000; /* 10 minutes */
-    const spy = jasmine.createSpy('start');
-    parser.start('dummy://foo', playerInterface).then(Util.spyFunc(spy), fail);
-    PromiseMock.flush();
-    const manifest = spy.calls.mostRecent().args[0];
+    const manifest = await parser.start('dummy://foo', playerInterface);
 
     expect(manifest).toBeTruthy();
     const timeline = manifest.presentationTimeline;
@@ -695,7 +613,7 @@ describe('DashParser Live', () => {
   });
 
   describe('availabilityWindowOverride', () => {
-    it('overrides @timeShiftBufferDepth', () => {
+    it('overrides @timeShiftBufferDepth', async () => {
       const manifestText = [
         '<MPD type="dynamic" suggestedPresentationDelay="PT60S"',
         '    minimumUpdatePeriod="PT5S"',
@@ -719,11 +637,7 @@ describe('DashParser Live', () => {
       parser.configure(config);
 
       Date.now = () => 600000; /* 10 minutes */
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-      const manifest = spy.calls.mostRecent().args[0];
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest).toBeTruthy();
       const timeline = manifest.presentationTimeline;
@@ -738,7 +652,7 @@ describe('DashParser Live', () => {
   });
 
   describe('maxSegmentDuration', () => {
-    it('uses @maxSegmentDuration', () => {
+    it('uses @maxSegmentDuration', async () => {
       const manifestText = [
         '<MPD type="dynamic" suggestedPresentationDelay="PT0S"',
         '    minimumUpdatePeriod="PT5S"',
@@ -758,11 +672,7 @@ describe('DashParser Live', () => {
       fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
       Date.now = () => 600000; /* 10 minutes */
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-      const manifest = spy.calls.mostRecent().args[0];
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest).toBeTruthy();
       const timeline = manifest.presentationTimeline;
@@ -770,7 +680,7 @@ describe('DashParser Live', () => {
       expect(timeline.getMaxSegmentDuration()).toBe(15);
     });
 
-    it('derived from SegmentTemplate w/ SegmentTimeline', () => {
+    it('derived from SegmentTemplate w/ SegmentTimeline', async () => {
       const lines = [
         '<SegmentTemplate media="s$Number$.mp4">',
         '  <SegmentTimeline>',
@@ -780,27 +690,27 @@ describe('DashParser Live', () => {
         '  </SegmentTimeline>',
         '</SegmentTemplate>',
       ];
-      testDerived(lines);
+      await testDerived(lines);
     });
 
-    it('derived from SegmentTemplate w/ @duration', () => {
+    it('derived from SegmentTemplate w/ @duration', async () => {
       const lines = [
         '<SegmentTemplate media="s$Number$.mp4" duration="8" />',
       ];
-      testDerived(lines);
+      await testDerived(lines);
     });
 
-    it('derived from SegmentList', () => {
+    it('derived from SegmentList', async () => {
       const lines = [
         '<SegmentList duration="8">',
         '  <SegmentURL media="s1.mp4" />',
         '  <SegmentURL media="s2.mp4" />',
         '</SegmentList>',
       ];
-      testDerived(lines);
+      await testDerived(lines);
     });
 
-    it('derived from SegmentList w/ SegmentTimeline', () => {
+    it('derived from SegmentList w/ SegmentTimeline', async () => {
       const lines = [
         '<SegmentList duration="8">',
         '  <SegmentTimeline>',
@@ -812,10 +722,10 @@ describe('DashParser Live', () => {
         '  <SegmentURL media="s2.mp4" />',
         '</SegmentList>',
       ];
-      testDerived(lines);
+      await testDerived(lines);
     });
 
-    function testDerived(lines) {
+    async function testDerived(lines) {
       const template = [
         '<MPD type="dynamic" suggestedPresentationDelay="PT0S"',
         '    minimumUpdatePeriod="PT5S"',
@@ -835,11 +745,7 @@ describe('DashParser Live', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', manifestText);
       Date.now = () => 600000; /* 10 minutes */
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-      const manifest = spy.calls.mostRecent().args[0];
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest).toBeTruthy();
       const timeline = manifest.presentationTimeline;
@@ -880,56 +786,53 @@ describe('DashParser Live', () => {
           .setResponseText('dummy://foo', manifest);
     });
 
-    it('stops updates', () => {
-      parser.start(manifestUri, playerInterface).catch(fail);
-      PromiseMock.flush();
+    it('stops updates', async () => {
+      await parser.start(manifestUri, playerInterface);
 
       fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
       fakeNetEngine.request.calls.reset();
 
       parser.stop();
-      delayForUpdatePeriod();
+      await updateManifest();
       expect(fakeNetEngine.request).not.toHaveBeenCalled();
     });
 
-    it('stops initial parsing', () => {
-      parser.start('dummy://foo', playerInterface).then(fail);
+    it('stops initial parsing', async () => {
+      const expectation =
+          expectAsync(parser.start('dummy://foo', playerInterface))
+              .toBeRejected();
       // start will only begin the network request, calling stop here will be
       // after the request has started but before any parsing has been done.
       expect(fakeNetEngine.request.calls.count()).toBe(1);
       parser.stop();
-      PromiseMock.flush();
+      await expectation;
 
       fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
       fakeNetEngine.request.calls.reset();
-      delayForUpdatePeriod();
+      await updateManifest();
       // An update should not occur.
       expect(fakeNetEngine.request).not.toHaveBeenCalled();
     });
 
-    it('interrupts manifest updates', () => {
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-      const manifest = spy.calls.mostRecent().args[0];
+    it('interrupts manifest updates', async () => {
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest).toBeTruthy();
       fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
       fakeNetEngine.request.calls.reset();
+      /** @type {!shaka.util.PublicPromise} */
       const delay = fakeNetEngine.delayNextRequest();
 
-      delayForUpdatePeriod();
+      await updateManifest();
       // The request was made but should not be resolved yet.
       expect(fakeNetEngine.request.calls.count()).toBe(1);
       fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
       fakeNetEngine.request.calls.reset();
       parser.stop();
       delay.resolve();
-      PromiseMock.flush();
 
       // Wait for another update period.
-      delayForUpdatePeriod();
+      await updateManifest();
       // A second update should not occur.
       expect(fakeNetEngine.request).not.toHaveBeenCalled();
     });
@@ -937,10 +840,11 @@ describe('DashParser Live', () => {
     it('interrupts UTCTiming requests', async () => {
       /** @type {!shaka.util.PublicPromise} */
       let delay = fakeNetEngine.delayNextRequest();
-      parser.start('dummy://foo', playerInterface).then(fail, () => {});
-      PromiseMock.flush();
+      const expectation =
+          expectAsync(parser.start('dummy://foo', playerInterface))
+              .toBeRejected();
 
-      await Util.shortDelay(realTimeout);
+      await Util.shortDelay();
       // This is the initial manifest request.
       expect(fakeNetEngine.request.calls.count()).toBe(1);
       fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
@@ -948,7 +852,7 @@ describe('DashParser Live', () => {
       // Resolve the manifest request and wait on the UTCTiming request.
       delay.resolve();
       delay = fakeNetEngine.delayNextRequest();
-      await Util.shortDelay(realTimeout);
+      await Util.shortDelay();
 
       // This is the first UTCTiming request.
       expect(fakeNetEngine.request.calls.count()).toBe(1);
@@ -957,10 +861,10 @@ describe('DashParser Live', () => {
       // Interrupt the parser, then fail the request.
       parser.stop();
       delay.reject();
-      await Util.shortDelay(realTimeout);
+      await expectation;
 
       // Wait for another update period.
-      delayForUpdatePeriod();
+      await updateManifest();
 
       // No more updates should occur.
       expect(fakeNetEngine.request).not.toHaveBeenCalled();
@@ -1107,16 +1011,12 @@ describe('DashParser Live', () => {
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
 
-    it('produces sane references without assertions', () => {
+    it('produces sane references without assertions', async () => {
       const manifestText =
           makeSimpleLiveManifestText(templateLines, updateTime);
 
       fakeNetEngine.setResponseText('dummy://foo', manifestText);
-      const spy = jasmine.createSpy('start');
-      parser.start('dummy://foo', playerInterface)
-          .then(Util.spyFunc(spy), fail);
-      PromiseMock.flush();
-      const manifest = spy.calls.mostRecent().args[0];
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest.periods.length).toBe(1);
       const stream = manifest.periods[0].variants[0].video;
@@ -1156,10 +1056,9 @@ describe('DashParser Live', () => {
           shaka.test.Util.spyFunc(onTimelineRegionAddedSpy);
     });
 
-    it('will parse EventStream nodes', () => {
+    it('will parse EventStream nodes', async () => {
       fakeNetEngine.setResponseText('dummy://foo', originalManifest);
-      parser.start('dummy://foo', playerInterface).catch(fail);
-      PromiseMock.flush();
+      await parser.start('dummy://foo', playerInterface);
 
       expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
 
@@ -1181,7 +1080,7 @@ describe('DashParser Live', () => {
       });
     });
 
-    it('will add timeline regions on manifest update', () => {
+    it('will add timeline regions on manifest update', async () => {
       const newManifest = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
@@ -1199,19 +1098,18 @@ describe('DashParser Live', () => {
       ].join('\n');
 
       fakeNetEngine.setResponseText('dummy://foo', originalManifest);
-      parser.start('dummy://foo', playerInterface).catch(fail);
-      PromiseMock.flush();
+      await parser.start('dummy://foo', playerInterface);
 
       expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
       onTimelineRegionAddedSpy.calls.reset();
 
       fakeNetEngine.setResponseText('dummy://foo', newManifest);
-      delayForUpdatePeriod();
+      await updateManifest();
 
       expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('will not let an event exceed the Period duration', () => {
+    it('will not let an event exceed the Period duration', async () => {
       const newManifest = [
         '<MPD>',
         '  <Period id="1" duration="PT30S">',
@@ -1230,8 +1128,7 @@ describe('DashParser Live', () => {
       ].join('\n');
 
       fakeNetEngine.setResponseText('dummy://foo', newManifest);
-      parser.start('dummy://foo', playerInterface).catch(fail);
-      PromiseMock.flush();
+      await parser.start('dummy://foo', playerInterface);
 
       expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(3);
       expect(onTimelineRegionAddedSpy)
@@ -1246,7 +1143,7 @@ describe('DashParser Live', () => {
     });
   });
 
-  it('honors clockSyncUri for in-progress recordings', () => {
+  it('honors clockSyncUri for in-progress recordings', async () => {
     const manifestText = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:05:00Z"',
       '      mediaPresentationDuration="PT3600S">',
@@ -1272,10 +1169,7 @@ describe('DashParser Live', () => {
     config.dash.clockSyncUri = 'dummy://time';
     parser.configure(config);
 
-    const spy = jasmine.createSpy('start');
-    parser.start('dummy://foo', playerInterface).then(Util.spyFunc(spy), fail);
-    PromiseMock.flush();
-    const manifest = spy.calls.mostRecent().args[0];
+    const manifest = await parser.start('dummy://foo', playerInterface);
 
     // Make sure we're testing what we think we're testing.
     // This should be seen as in-progress.
