@@ -273,7 +273,7 @@ class ShakaDemoSearch {
     this.makeSelectInput_(coreContainer, 'Manifest',
         [Feature.DASH, Feature.HLS], FEATURE);
     this.makeSelectInput_(coreContainer, 'Container',
-        [Feature.MP4, Feature.MP2TS, Feature.WEBM], FEATURE);
+        [Feature.MP4, Feature.mp2tS, Feature.WEBM], FEATURE);
     this.makeSelectInput_(coreContainer, 'DRM',
         Object.values(shakaAssets.KeySystem), DRM);
     this.makeSelectInput_(coreContainer, 'Source',

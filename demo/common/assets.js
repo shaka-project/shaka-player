@@ -88,7 +88,7 @@ shakaAssets.Feature = {
   // Set if the asset has at least one mp4 stream.
   MP4: 'MP4',
   // Set if the asset has at least one MPEG-2 TS stream.
-  MP2TS: 'MPEG-2 TS',
+  mp2tS: 'MPEG-2 TS',
   // Set if the asset has at least one TTML text track.
   TTML: 'TTML',
   // Set if the asset has at least one WEBVTT text track.
@@ -726,7 +726,7 @@ shakaAssets.testAssets = [
       .markAsDisabled()
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
-      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.mp2tS)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel (HLS, TS, 4k)',
@@ -736,7 +736,7 @@ shakaAssets.testAssets = [
       .markAsDisabled()
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
-      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.mp2tS)
       .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 

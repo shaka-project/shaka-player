@@ -20,8 +20,8 @@ describe('Transmuxer', () => {
   const videoSegmentUri = '/base/test/test/assets/video.ts';
   const audioSegmentUri = '/base/test/test/assets/audio.ts';
   const mp4MimeType = 'video/mp4; codecs="avc1.42E01E"';
-  const transportStreamVideoMimeType = 'video/MP2T; codecs="avc1.42E01E"';
-  const transportStreamAudioMimeType = 'video/MP2T; codecs="mp4a.40.2"';
+  const transportStreamVideoMimeType = 'video/mp2t; codecs="avc1.42E01E"';
+  const transportStreamAudioMimeType = 'video/mp2t; codecs="mp4a.40.2"';
 
   /** @type {!ArrayBuffer} */
   let videoSegment;
@@ -77,13 +77,13 @@ describe('Transmuxer', () => {
 
     it('converts legacy avc1 codec strings', () => {
       expect(convertTsCodecs(ContentType.VIDEO,
-          'video/MP2T; codecs="avc1.100.42"')).toEqual(
+          'video/mp2t; codecs="avc1.100.42"')).toEqual(
           'video/mp4; codecs="avc1.64002a"');
       expect(convertTsCodecs(ContentType.VIDEO,
-          'video/MP2T; codecs="avc1.77.80"')).toEqual(
+          'video/mp2t; codecs="avc1.77.80"')).toEqual(
           'video/mp4; codecs="avc1.4d0050"');
       expect(convertTsCodecs(ContentType.VIDEO,
-          'video/MP2T; codecs="avc1.66.1"')).toEqual(
+          'video/mp2t; codecs="avc1.66.1"')).toEqual(
           'video/mp4; codecs="avc1.420001"');
     });
   });

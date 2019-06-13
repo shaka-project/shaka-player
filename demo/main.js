@@ -481,8 +481,8 @@ class ShakaDemoMain {
     if (asset.features.includes(shakaAssets.Feature.MP4)) {
       mimeTypes.push('video/mp4');
     }
-    if (asset.features.includes(shakaAssets.Feature.MP2TS)) {
-      mimeTypes.push('video/MP2T');
+    if (asset.features.includes(shakaAssets.Feature.mp2tS)) {
+      mimeTypes.push('video/mp2t');
     }
     const hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
