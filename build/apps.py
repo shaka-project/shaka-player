@@ -107,7 +107,6 @@ def compile_receiver(force, is_debug):
   files = set(get('demo', 'common') +
               get('demo', 'cast_receiver') +
               get('externs') + get('ui', 'externs') +
-              get('lib', 'debug') +
               get('third_party', 'closure'))
 
   # Add in the generated externs, so that the receiver compilation knows the
@@ -116,6 +115,7 @@ def compile_receiver(force, is_debug):
              else 'shaka-player.ui.externs.js')
 
   files.add(os.path.join(base, 'dist', externs))
+  files.add(os.path.join(base, 'lib', 'debug', 'asserts.js'))
 
   name = 'receiver.compiled' + ('.debug' if is_debug else '')
 
