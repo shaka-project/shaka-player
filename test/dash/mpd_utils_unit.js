@@ -427,13 +427,8 @@ describe('MpdUtils', () => {
 
       const timeline = MpdUtils.createTimeline(
           segmentTimeline, timescale, presentationTimeOffset, periodDuration);
-
-      expect(timeline).toBeTruthy();
-      expect(timeline.length).toBe(expected.length);
-      for (let i = 0; i < expected.length; i++) {
-        expect(timeline[i].start).toBe(expected[i].start);
-        expect(timeline[i].end).toBe(expected[i].end);
-      }
+      expect(timeline).toEqual(
+          expected.map((c) => jasmine.objectContaining(c)));
     }
   });
 

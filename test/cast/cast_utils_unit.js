@@ -272,11 +272,9 @@ describe('CastUtils', () => {
         expect(deserialized.start).toEqual(jasmine.any(Function));
         expect(deserialized.end).toEqual(jasmine.any(Function));
 
-        for (let i = 0; i < deserialized.length; ++i) {
-          // Not exact because of the possibility of rounding errors.
-          expect(deserialized.start(i)).toBeCloseTo(buffered.start(i));
-          expect(deserialized.end(i)).toBeCloseTo(buffered.end(i));
-        }
+        const TimeRangesUtils = shaka.media.TimeRangesUtils;
+        expect(TimeRangesUtils.getBufferedInfo(deserialized))
+            .toEqual(TimeRangesUtils.getBufferedInfo(buffered));
       });
     });
   });

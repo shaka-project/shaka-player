@@ -62,13 +62,13 @@ describe('Mp4VttParser', () => {
   it('parses media segment', () => {
     const cues = [
       {
-        start: 111.8,
-        end: 115.8,
+        startTime: 111.8,
+        endTime: 115.8,
         payload: 'It has shed much innocent blood.\n',
       },
       {
-        start: 118,
-        end: 120,
+        startTime: 118,
+        endTime: 120,
         payload:
             'You\'re a fool for traveling alone,\nso completely unprepared.\n',
       },
@@ -84,20 +84,20 @@ describe('Mp4VttParser', () => {
   it('plays multiple payloads at one time if specified by size', () => {
     const cues = [
       {
-        start: 110,
-        end: 113,
+        startTime: 110,
+        endTime: 113,
         payload: 'Hello',
       },
       // This cue is part of the same presentation as the previous one, so it
       // shares the same start time and duration.
       {
-        start: 110,
-        end: 113,
+        startTime: 110,
+        endTime: 113,
         payload: 'and',
       },
       {
-        start: 113,
-        end: 116.276,
+        startTime: 113,
+        endTime: 116.276,
         payload: 'goodbye',
       },
     ];
@@ -113,16 +113,16 @@ describe('Mp4VttParser', () => {
     const Cue = shaka.text.Cue;
     const cues = [
       {
-        start: 111.8,
-        end: 115.8,
+        startTime: 111.8,
+        endTime: 115.8,
         payload: 'It has shed much innocent blood.\n',
-        align: 'right',
+        textAlign: 'right',
         size: 50,
         position: 10,
       },
       {
-        start: 118,
-        end: 120,
+        startTime: 118,
+        endTime: 120,
         payload:
             'You\'re a fool for traveling alone,\nso completely unprepared.\n',
         writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
@@ -140,16 +140,16 @@ describe('Mp4VttParser', () => {
   it('parses media segments without a sample duration', () => {
     // Regression test for https://github.com/google/shaka-player/issues/919
     const cues = [
-      {start: 10, end: 11, payload: 'cue 10'},
-      {start: 11, end: 12, payload: 'cue 11'},
-      {start: 12, end: 13, payload: 'cue 12'},
-      {start: 13, end: 14, payload: 'cue 13'},
-      {start: 14, end: 15, payload: 'cue 14'},
-      {start: 15, end: 16, payload: 'cue 15'},
-      {start: 16, end: 17, payload: 'cue 16'},
-      {start: 17, end: 18, payload: 'cue 17'},
-      {start: 18, end: 19, payload: 'cue 18'},
-      {start: 19, end: 20, payload: 'cue 19'},
+      {startTime: 10, endTime: 11, payload: 'cue 10'},
+      {startTime: 11, endTime: 12, payload: 'cue 11'},
+      {startTime: 12, endTime: 13, payload: 'cue 12'},
+      {startTime: 13, endTime: 14, payload: 'cue 13'},
+      {startTime: 14, endTime: 15, payload: 'cue 14'},
+      {startTime: 15, endTime: 16, payload: 'cue 15'},
+      {startTime: 16, endTime: 17, payload: 'cue 16'},
+      {startTime: 17, endTime: 18, payload: 'cue 17'},
+      {startTime: 18, endTime: 19, payload: 'cue 18'},
+      {startTime: 19, endTime: 20, payload: 'cue 19'},
     ];
 
     const parser = new shaka.text.Mp4VttParser();
@@ -162,13 +162,13 @@ describe('Mp4VttParser', () => {
   it('accounts for offset', () => {
     const cues = [
       {
-        start: 121.8,
-        end: 125.8,
+        startTime: 121.8,
+        endTime: 125.8,
         payload: 'It has shed much innocent blood.\n',
       },
       {
-        start: 128,
-        end: 130,
+        startTime: 128,
+        endTime: 130,
         payload:
             'You\'re a fool for traveling alone,\nso completely unprepared.\n',
       },
@@ -191,29 +191,7 @@ describe('Mp4VttParser', () => {
         .toThrow(error);
   });
 
-  function verifyHelper(expected, actual) {
-    expect(actual).toBeTruthy();
-    expect(actual.length).toBe(expected.length);
-    for (let i = 0; i < actual.length; i++) {
-      expect(actual[i].startTime).toBe(expected[i].start);
-      expect(actual[i].endTime).toBe(expected[i].end);
-      expect(actual[i].payload).toBe(expected[i].payload);
-
-      if ('line' in expected[i]) {
-        expect(actual[i].line).toBe(expected[i].line);
-      }
-      if ('writingMode' in expected[i]) {
-        expect(actual[i].writingMode).toBe(expected[i].writingMode);
-      }
-      if ('textAlign' in expected[i]) {
-        expect(actual[i].textAlign).toBe(expected[i].textAlign);
-      }
-      if ('size' in expected[i]) {
-        expect(actual[i].size).toBe(expected[i].size);
-      }
-      if ('position' in expected[i]) {
-        expect(actual[i].position).toBe(expected[i].position);
-      }
-    }
+  function verifyHelper(/** !Array */ expected, /** !Array */ actual) {
+    expect(actual).toEqual(expected.map((c) => jasmine.objectContaining(c)));
   }
 });

@@ -198,14 +198,8 @@ shaka.test.Waiter = class {
    * @private
    */
   logDebugInfoForMedia_(message, mediaElement) {
-    const buffered = [];
-    for (let i = 0; i < mediaElement.buffered.length; ++i) {
-      buffered.push({
-        start: mediaElement.buffered.start(i),
-        end: mediaElement.buffered.end(i),
-      });
-    }
-
+    const buffered =
+        shaka.media.TimeRangesUtils.getBufferedInfo(mediaElement.buffered);
     shaka.log.error(message,
         'current time', mediaElement.currentTime,
         'ready state', mediaElement.readyState,

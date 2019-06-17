@@ -63,8 +63,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         this.controls.getVideoContainer().getElementsByClassName(
             'shaka-back-to-overflow-button');
 
-    for (let i = 0; i < backToOverflowMenuButtons.length; i++) {
-      const button = backToOverflowMenuButtons[i];
+    for (const button of backToOverflowMenuButtons) {
       this.eventManager.listen(button, 'click', () => {
         // Hide the submenus, display the overflow menu
         this.controls.hideSettingsMenus();
@@ -177,8 +176,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    * @private
    */
   createChildren_() {
-    for (let i = 0; i < this.config_.overflowMenuButtons.length; i++) {
-      const name = this.config_.overflowMenuButtons[i];
+    for (const name of this.config_.overflowMenuButtons) {
       if (shaka.ui.OverflowMenu.elementNamesToFactories_.get(name)) {
         const factory =
             shaka.ui.OverflowMenu.elementNamesToFactories_.get(name);

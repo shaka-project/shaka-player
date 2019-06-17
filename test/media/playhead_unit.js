@@ -1280,18 +1280,18 @@ describe('Playhead', () => {
     }
 
     /**
-     * @param {!Array.<{start: number, end: number}>} b
+     * @param {!Array.<{start: number, end: number}>} buffers
      * @param {number} time
      * @return {number}
      */
-    function calculateReadyState(b, time) {
+    function calculateReadyState(buffers, time) {
       // See: https://bit.ly/2JYh8WX
-      for (let i = 0; i < b.length; i++) {
-        if (time >= b[i].start) {
-          if (time == b[i].end) {
+      for (const buffer of buffers) {
+        if (time >= buffer.start) {
+          if (time == buffer.end) {
             // The video has the current frame, but no data in the future.
             return HTMLMediaElement.HAVE_CURRENT_DATA;
-          } else if (time < b[i].end) {
+          } else if (time < buffer.end) {
             // The video has enough data to play forward.
             return HTMLMediaElement.HAVE_ENOUGH_DATA;
           }

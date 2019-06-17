@@ -726,8 +726,8 @@ shakaDemo.Main = class {
     /** @type {!Array.<string>} */
     const combined = fields.concat(fragments);
     const params = {};
-    for (let i = 0; i < combined.length; ++i) {
-      const kv = combined[i].split('=');
+    for (const line of combined) {
+      const kv = line.split('=');
       params[kv[0]] = kv.slice(1).join('=');
     }
     return params;

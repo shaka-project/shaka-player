@@ -56,15 +56,8 @@ shaka.test.FakeMediaSourceEngine = class {
     for (const type in segmentData) {
       const data = segmentData[type];
 
-      this.initSegments[type] = [];
-      for (let i = 0; i < data.initSegments.length; ++i) {
-        this.initSegments[type].push(false);
-      }
-
-      this.segments[type] = [];
-      for (let i = 0; i < data.segments.length; ++i) {
-        this.segments[type].push(false);
-      }
+      this.initSegments[type] = data.initSegments.map(() => false);
+      this.segments[type] = data.segments.map(() => false);
 
       this.timestampOffsets_[type] = 0;
     }
@@ -259,9 +252,8 @@ shaka.test.FakeMediaSourceEngine = class {
       // Update the list of which init segment was appended last.
       expect(startTime).toBe(null);
       expect(endTime).toBe(null);
-      for (let j = 0; j < this.segmentData[type].initSegments.length; ++j) {
-        this.initSegments[type][j] = false;
-      }
+      this.initSegments[type] =
+          this.segmentData[type].initSegments.map((c) => false);
       this.initSegments[type][i] = true;
       return Promise.resolve();
     }
@@ -343,9 +335,7 @@ shaka.test.FakeMediaSourceEngine = class {
       throw new Error('unexpected type');
     }
 
-    for (let i = 0; i < this.segments[type].length; ++i) {
-      this.segments[type][i] = false;
-    }
+    this.segments[type] = this.segments[type].map((c) => false);
 
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
 

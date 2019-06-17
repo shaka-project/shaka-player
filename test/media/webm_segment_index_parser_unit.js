@@ -62,15 +62,7 @@ describe('WebmSegmentIndexParser', () => {
           {startTime: 48, endTime: 60, startByte: 458818, endByte: null},
         ];
 
-    expect(result).toBeTruthy();
-    expect(result.length).toBe(references.length);
-    for (let i = 0; i < result.length; i++) {
-      expect(result[i].position).toBe(i);
-      expect(result[i].startTime).toBe(references[i].startTime);
-      expect(result[i].endTime).toBe(references[i].endTime);
-      expect(result[i].startByte).toBe(references[i].startByte);
-      expect(result[i].endByte).toBe(references[i].endByte);
-    }
+    expect(result).toEqual(references.map((o) => jasmine.objectContaining(o)));
   });
 
   it('takes a scaled presentationTimeOffset in seconds', () => {
@@ -85,12 +77,6 @@ describe('WebmSegmentIndexParser', () => {
           {startTime: 46, endTime: 58},
         ];
 
-    expect(result).toBeTruthy();
-    expect(result.length).toBe(references.length);
-    for (let i = 0; i < result.length; i++) {
-      expect(result[i].position).toBe(i);
-      expect(result[i].startTime).toBe(references[i].startTime);
-      expect(result[i].endTime).toBe(references[i].endTime);
-    }
+    expect(result).toEqual(references.map((o) => jasmine.objectContaining(o)));
   });
 });

@@ -289,10 +289,8 @@ jasmine.Fetch.Headers = class {
    * @param {Function} apply
    */
   forEach(apply) {
-    const contentsNames = Object.getOwnPropertyNames(this.contents);
-    for (let i = 0; i < contentsNames.length; i++) {
-      const contentsName = contentsNames[i];
-      apply(this.get(contentsName), contentsName, this);
+    for (const name of Object.getOwnPropertyNames(this.contents)) {
+      apply(this.get(name), name, this);
     }
   }
 

@@ -46,6 +46,10 @@ describe('SimpleTextDisplayer', () => {
       this.startTime = start;
       this.endTime = end;
       this.text = text;
+      this.snapToLines = true;
+      this.vertical = undefined;
+      this.line = 'auto';
+      this.position = 'auto';
     }
     window.VTTCue = /** @type {?} */(FakeVTTCue);
   });
@@ -59,9 +63,9 @@ describe('SimpleTextDisplayer', () => {
       // See: https://bit.ly/2K9VX3s
       verifyHelper(
           [
-            {start: 10, end: 20, text: 'Test1'},
-            {start: 20, end: 30, text: 'Test2'},
-            {start: 30, end: 40, text: 'Test3'},
+            {startTime: 10, endTime: 20, text: 'Test1'},
+            {startTime: 20, endTime: 30, text: 'Test2'},
+            {startTime: 30, endTime: 40, text: 'Test3'},
           ],
           [
             new shaka.text.Cue(20, 30, 'Test2'),
@@ -74,9 +78,9 @@ describe('SimpleTextDisplayer', () => {
       // Regression test for https://github.com/google/shaka-player/issues/848
       verifyHelper(
           [
-            {start: 20, end: 40, text: 'Test1'},
-            {start: 20, end: 40, text: 'Test2'},
-            {start: 20, end: 40, text: 'Test3'},
+            {startTime: 20, endTime: 40, text: 'Test1'},
+            {startTime: 20, endTime: 40, text: 'Test2'},
+            {startTime: 20, endTime: 40, text: 'Test3'},
           ],
           [
             new shaka.text.Cue(20, 40, 'Test3'),
@@ -126,7 +130,7 @@ describe('SimpleTextDisplayer', () => {
     it('converts shaka.text.Cues to VttCues', () => {
       verifyHelper(
           [
-            {start: 20, end: 40, text: 'Test'},
+            {startTime: 20, endTime: 40, text: 'Test'},
           ],
           [
             new shaka.text.Cue(20, 40, 'Test'),
@@ -145,8 +149,8 @@ describe('SimpleTextDisplayer', () => {
       verifyHelper(
           [
             {
-              start: 20,
-              end: 40,
+              startTime: 20,
+              endTime: 40,
               text: 'Test',
               lineAlign: 'start',
               positionAlign: 'line-left',
@@ -170,8 +174,8 @@ describe('SimpleTextDisplayer', () => {
       verifyHelper(
           [
             {
-              start: 30,
-              end: 50,
+              startTime: 30,
+              endTime: 50,
               text: 'Test',
               lineAlign: 'end',
               positionAlign: 'line-right',
@@ -191,8 +195,8 @@ describe('SimpleTextDisplayer', () => {
       verifyHelper(
           [
             {
-              start: 40,
-              end: 60,
+              startTime: 40,
+              endTime: 60,
               text: 'Test',
               lineAlign: 'center',
               positionAlign: 'center',
@@ -208,13 +212,11 @@ describe('SimpleTextDisplayer', () => {
       verifyHelper(
           [
             {
-              start: 40,
-              end: 60,
+              startTime: 40,
+              endTime: 60,
               text: 'Test',
-              // In a real VTTCue, these would be the default of "auto".
-              // With our mock, we leave them unset and they are undefined.
-              line: undefined,
-              position: undefined,
+              line: 'auto',
+              position: 'auto',
             },
           ], [cue4]);
 
@@ -225,8 +227,8 @@ describe('SimpleTextDisplayer', () => {
       verifyHelper(
           [
             {
-              start: 40,
-              end: 60,
+              startTime: 40,
+              endTime: 60,
               text: 'Test',
               line: 0,
               position: 0,
@@ -263,8 +265,8 @@ describe('SimpleTextDisplayer', () => {
       verifyHelper(
           [
             {
-              start: 20,
-              end: 40,
+              startTime: 20,
+              endTime: 40,
               text: 'Test',
               align: 'middle',
             },
@@ -293,32 +295,6 @@ describe('SimpleTextDisplayer', () => {
     displayer.append(shakaCues);
     const result = mockTrack.addCue.calls.allArgs().reduce(
         shaka.util.Functional.collapseArrays, []);
-    expect(result).toBeTruthy();
-    expect(result.length).toBe(vttCues.length);
-
-    for (let i = 0; i < vttCues.length; i++) {
-      expect(result[i].startTime).toBe(vttCues[i].start);
-      expect(result[i].endTime).toBe(vttCues[i].end);
-      expect(result[i].text).toBe(vttCues[i].text);
-
-      if ('id' in vttCues[i]) {
-        expect(result[i].id).toBe(vttCues[i].id);
-      }
-      if ('vertical' in vttCues[i]) {
-        expect(result[i].vertical).toBe(vttCues[i].vertical);
-      }
-      if ('line' in vttCues[i]) {
-        expect(result[i].line).toBe(vttCues[i].line);
-      }
-      if ('align' in vttCues[i]) {
-        expect(result[i].align).toBe(vttCues[i].align);
-      }
-      if ('size' in vttCues[i]) {
-        expect(result[i].size).toBe(vttCues[i].size);
-      }
-      if ('position' in vttCues[i]) {
-        expect(result[i].position).toBe(vttCues[i].position);
-      }
-    }
+    expect(result).toEqual(vttCues.map((c) => jasmine.objectContaining(c)));
   }
 });

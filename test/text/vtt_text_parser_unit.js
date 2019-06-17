@@ -63,7 +63,7 @@ describe('VttTextParser', () => {
   it('handles a blank line at the end of the file', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
@@ -74,7 +74,7 @@ describe('VttTextParser', () => {
   it('handles no blank line at the end of the file', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
@@ -86,7 +86,7 @@ describe('VttTextParser', () => {
   it('handles no newline after the final text payload', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
@@ -97,7 +97,7 @@ describe('VttTextParser', () => {
   it('ignores offset', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
@@ -108,8 +108,8 @@ describe('VttTextParser', () => {
   it('supports cues with no settings', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test', id: '1'},
-          {start: 40, end: 50, payload: 'Test2', id: '2'},
+          {startTime: 20, endTime: 40, payload: 'Test', id: '1'},
+          {startTime: 40, endTime: 50, payload: 'Test2', id: '2'},
         ],
         'WEBVTT\n\n' +
         '1\n' +
@@ -124,8 +124,8 @@ describe('VttTextParser', () => {
   it('supports cues with no ID', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
-          {start: 40, end: 50, payload: 'Test2'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
@@ -138,8 +138,8 @@ describe('VttTextParser', () => {
   it('supports comments within cues', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
-          {start: 40, end: 50, payload: 'Test2'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
@@ -154,7 +154,7 @@ describe('VttTextParser', () => {
   it('supports non-integer timecodes', () => {
     verifyHelper(
         [
-          {start: 20.1, end: 40.505, payload: 'Test'},
+          {startTime: 20.1, endTime: 40.505, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.100 --> 00:00:40.505\n' +
@@ -165,7 +165,7 @@ describe('VttTextParser', () => {
   it('supports large timecodes', () => {
     verifyHelper(
         [
-          {start: 20, end: 108000, payload: 'Test'},
+          {startTime: 20, endTime: 108000, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 30:00:00.000\n' +
@@ -213,14 +213,14 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 20,
-            end: 40,
+            startTime: 20,
+            endTime: 40,
             payload: 'Test',
             writingMode: Cue.writingMode.VERTICAL_RIGHT_TO_LEFT,
           },
           {
-            start: 40,
-            end: 50,
+            startTime: 40,
+            endTime: 50,
             payload: 'Test2',
             writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
@@ -237,19 +237,19 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 20, end: 40, payload: 'Test', line: 0,
+            startTime: 20, endTime: 40, payload: 'Test', line: 0,
             lineInterpretation: Cue.lineInterpretation.LINE_NUMBER,
           },
           {
-            start: 40, end: 50, payload: 'Test2', line: -1,
+            startTime: 40, endTime: 50, payload: 'Test2', line: -1,
             lineInterpretation: Cue.lineInterpretation.LINE_NUMBER,
           },
           {
-            start: 50, end: 60, payload: 'Test3', line: 45,
+            startTime: 50, endTime: 60, payload: 'Test3', line: 45,
             lineInterpretation: Cue.lineInterpretation.PERCENTAGE,
           },
           {
-            start: 55, end: 65, payload: 'Test4', line: 12.3,
+            startTime: 55, endTime: 65, payload: 'Test4', line: 12.3,
             lineInterpretation: Cue.lineInterpretation.PERCENTAGE,
           },
         ],
@@ -269,12 +269,12 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 20, end: 40, payload: 'Test', line: 10,
+            startTime: 20, endTime: 40, payload: 'Test', line: 10,
             lineInterpretation: Cue.lineInterpretation.PERCENTAGE,
             lineAlign: Cue.lineAlign.START,
           },
           {
-            start: 40, end: 50, payload: 'Test2', line: -1,
+            startTime: 40, endTime: 50, payload: 'Test2', line: -1,
             lineInterpretation: Cue.lineInterpretation.LINE_NUMBER,
             lineAlign: Cue.lineAlign.CENTER,
           },
@@ -290,8 +290,8 @@ describe('VttTextParser', () => {
   it('supports position setting', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test', position: 45},
-          {start: 25, end: 45, payload: 'Test2', position: 12.3},
+          {startTime: 20, endTime: 40, payload: 'Test', position: 45},
+          {startTime: 25, endTime: 45, payload: 'Test2', position: 12.3},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 position:45%\n' +
@@ -305,11 +305,11 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 20, end: 40, payload: 'Test', position: 45,
+            startTime: 20, endTime: 40, payload: 'Test', position: 45,
             positionAlign: Cue.positionAlign.LEFT,
           },
           {
-            start: 20, end: 40, payload: 'Test2', position: 45,
+            startTime: 20, endTime: 40, payload: 'Test2', position: 45,
             positionAlign: Cue.positionAlign.LEFT,
           },
         ],
@@ -324,8 +324,8 @@ describe('VttTextParser', () => {
   it('supports size setting', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test', size: 56},
-          {start: 25, end: 45, payload: 'Test2', size: 12.3},
+          {startTime: 20, endTime: 40, payload: 'Test', size: 56},
+          {startTime: 25, endTime: 45, payload: 'Test2', size: 12.3},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 size:56%\n' +
@@ -338,7 +338,7 @@ describe('VttTextParser', () => {
   it('supports align setting', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test', align: 'center'},
+          {startTime: 20, endTime: 40, payload: 'Test', textAlign: 'center'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 align:center\n' +
@@ -350,8 +350,8 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 20,
-            end: 40,
+            startTime: 20,
+            endTime: 40,
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
@@ -368,8 +368,8 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 20,
-            end: 40,
+            startTime: 20,
+            endTime: 40,
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
@@ -386,8 +386,8 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 20,
-            end: 40,
+            startTime: 20,
+            endTime: 40,
             payload: 'Test',
             textAlign: Cue.textAlign.CENTER,
             size: 56,
@@ -404,10 +404,10 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 20,
-            end: 40,
+            startTime: 20,
+            endTime: 40,
             payload: 'Test',
-            align: 'center',
+            textAlign: 'center',
             size: 56,
             writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
@@ -422,10 +422,10 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 40, // Note these are 20s off of the cue
-            end: 60,   // because using relative timestamps
+            startTime: 40, // Note these are 20s off of the cue
+            endTime: 60,   // because using relative timestamps
             payload: 'Test',
-            align: 'center',
+            textAlign: 'center',
             size: 56,
             writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
           },
@@ -441,10 +441,10 @@ describe('VttTextParser', () => {
     verifyHelper(
         [
           {
-            start: 20,
-            end: 40,
+            startTime: 20,
+            endTime: 40,
             payload: 'Test',
-            region: {
+            region: jasmine.objectContaining({
               id: 'reg1',
               viewportAnchorX: 10,
               viewportAnchorY: 90,
@@ -456,7 +456,7 @@ describe('VttTextParser', () => {
               widthUnits: CueRegion.units.PERCENTAGE,
               viewportAnchorUnits: CueRegion.units.PERCENTAGE,
               scroll: CueRegion.scrollMode.UP,
-            },
+            }),
           },
         ],
         'WEBVTT\n' +
@@ -472,7 +472,7 @@ describe('VttTextParser', () => {
 
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 vertical:es\n' +
@@ -481,7 +481,7 @@ describe('VttTextParser', () => {
 
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 vertical:\n' +
@@ -490,7 +490,7 @@ describe('VttTextParser', () => {
 
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 vertical\n' +
@@ -499,7 +499,7 @@ describe('VttTextParser', () => {
 
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 line:-3%\n' +
@@ -508,7 +508,7 @@ describe('VttTextParser', () => {
 
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 line:45%%\n' +
@@ -517,7 +517,7 @@ describe('VttTextParser', () => {
 
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 align:10\n' +
@@ -526,7 +526,7 @@ describe('VttTextParser', () => {
 
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 align:foo\n' +
@@ -539,8 +539,8 @@ describe('VttTextParser', () => {
   it('respects X-TIMESTAMP-MAP header in probes', () => {
     verifyHelper(
         [
-          {start: 30, end: 50, payload: 'Test'},
-          {start: 50, end: 60, payload: 'Test2'},
+          {startTime: 30, endTime: 50, payload: 'Test'},
+          {startTime: 50, endTime: 60, payload: 'Test2'},
         ],
         // 900000 = 10 sec, so expect every timestamp to be 10
         // seconds ahead of what is specified.
@@ -557,8 +557,8 @@ describe('VttTextParser', () => {
   it('ignores X-TIMESTAMP-MAP header when segment times are known', () => {
     verifyHelper(
         [
-          {start: 120, end: 140, payload: 'Test'},
-          {start: 140, end: 150, payload: 'Test2'},
+          {startTime: 120, endTime: 140, payload: 'Test'},
+          {startTime: 140, endTime: 150, payload: 'Test2'},
         ],
         // 900000 = 10 sec, so expect every timestamp to be 10
         // seconds ahead of what is specified.
@@ -576,8 +576,8 @@ describe('VttTextParser', () => {
   it('skips style blocks', () => {
     verifyHelper(
         [
-          {start: 20, end: 40, payload: 'Test'},
-          {start: 40, end: 50, payload: 'Test2'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
         ],
         'WEBVTT\n\n' +
         'STYLE\n::cue(.cyan) { color: cyan; }\n\n' +
@@ -598,44 +598,7 @@ describe('VttTextParser', () => {
     const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
 
     const result = new shaka.text.VttTextParser().parseMedia(data, time);
-    expect(result).toBeTruthy();
-    expect(result.length).toBe(cues.length);
-    for (let i = 0; i < cues.length; i++) {
-      expect(result[i].startTime).toBe(cues[i].start);
-      expect(result[i].endTime).toBe(cues[i].end);
-      expect(result[i].payload).toBe(cues[i].payload);
-
-      if ('id' in cues[i]) {
-        expect(result[i].id).toBe(cues[i].id);
-      }
-      if ('vertical' in cues[i]) {
-        expect(result[i].writingMode).toBe(cues[i].writingMode);
-      }
-      if ('line' in cues[i]) {
-        expect(result[i].line).toBe(cues[i].line);
-      }
-      if ('textAlign' in cues[i]) {
-        expect(result[i].textAlign).toBe(cues[i].textAlign);
-      }
-      if ('size' in cues[i]) {
-        expect(result[i].size).toBe(cues[i].size);
-      }
-      if ('position' in cues[i]) {
-        expect(result[i].position).toBe(cues[i].position);
-      }
-      if ('region' in cues[i]) {
-        verifyRegion(cues[i].region, result[i].region);
-      }
-    }
-  }
-
-
-  /**
-   * @param {!Object} expected
-   * @param {shaka.extern.CueRegion} actual
-   */
-  function verifyRegion(expected, actual) {
-    expect(actual).toEqual(jasmine.objectContaining(expected));
+    expect(result).toEqual(cues.map((c) => jasmine.objectContaining(c)));
   }
 
   /**

@@ -60,7 +60,7 @@ describe('Player Src Equals', () => {
     await loadWithSrcEquals(LARGE_MP4_CONTENT_URI);
 
     // Wait until we have more than enough data buffered.
-    for (let buffer = getBufferEnd(); buffer < 2; buffer = getBufferEnd()) {
+    while (getBufferEnd() < 2) {
       // eslint does not like await-in-loop because it could mean that you are
       // not using parallelism to its fullest. However we are not after
       // parallelism here, therefore we disable it.

@@ -727,8 +727,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.bottomControls_.appendChild(this.controlsButtonPanel_);
 
     // Create the elements specified by controlPanelElements
-    for (let i = 0; i < this.config_.controlPanelElements.length; i++) {
-      const name = this.config_.controlPanelElements[i];
+    for (const name of this.config_.controlPanelElements) {
       if (shaka.ui.ControlsPanel.elementNamesToFactories_.get(name)) {
         const factory =
             shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);

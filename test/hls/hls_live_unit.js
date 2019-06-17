@@ -169,16 +169,14 @@ describe('HlsParser live', () => {
     const manifest = spy.calls.mostRecent().args[0];
 
     const variants = manifest.periods[0].variants;
-    for (let i = 0; i < variants.length; i++) {
-      const video = variants[i].video;
-      const audio = variants[i].audio;
-      video.createSegmentIndex();
+    for (const variant of variants) {
+      variant.video.createSegmentIndex();
       PromiseMock.flush();
-      ManifestParser.verifySegmentIndex(video, initialReferences);
-      if (audio) {
-        audio.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(variant.video, initialReferences);
+      if (variant.audio) {
+        variant.audio.createSegmentIndex();
         PromiseMock.flush();
-        ManifestParser.verifySegmentIndex(audio, initialReferences);
+        ManifestParser.verifySegmentIndex(variant.audio, initialReferences);
       }
     }
 
@@ -190,12 +188,10 @@ describe('HlsParser live', () => {
         .setResponseText('test:/audio', updatedMedia);
 
     delayForUpdatePeriod();
-    for (let i = 0; i < variants.length; i++) {
-      const video = variants[i].video;
-      const audio = variants[i].audio;
-      ManifestParser.verifySegmentIndex(video, updatedReferences);
-      if (audio) {
-        ManifestParser.verifySegmentIndex(audio, updatedReferences);
+    for (const variant of variants) {
+      ManifestParser.verifySegmentIndex(variant.video, updatedReferences);
+      if (variant.audio) {
+        ManifestParser.verifySegmentIndex(variant.audio, updatedReferences);
       }
     }
   }
