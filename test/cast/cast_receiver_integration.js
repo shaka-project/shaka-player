@@ -183,7 +183,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       // the average length is expected to be lower than the length of the first
       // update message.
       let totalLength = 0;
-      for (let i = 0; i < 50; i++) {
+      for (const _ of shaka.util.Iterables.range(50)) {
+        shaka.util.Functional.ignored(_);
         // eslint-disable-next-line no-await-in-loop
         const message = await waitForUpdateMessage();
         totalLength += message.length;

@@ -5,6 +5,7 @@
     r'(?i)arti?fi?ci?ai?l': 'artificial',
     r'(?i)cur+ent': 'current',
     r'(?i)ful+screen': 'fullscreen',
+    r'(?i)interable': 'iterable',
     r'(?i)int(er|re)p(er|er)tation': 'interpretation',
     r'(?i)langauge': 'language',
     r'(?i)mananger': 'manager',

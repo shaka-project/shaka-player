@@ -256,7 +256,7 @@ describe('StreamingEngine', () => {
     };
 
     const segmentsInFirstPeriod = 12;
-    for (let i = 0; i < segmentsInFirstPeriod; ++i) {
+    for (const i of shaka.util.Iterables.range(segmentsInFirstPeriod)) {
       segmentData[ContentType.AUDIO].segments.push(
           makeBuffer(segmentSizes[ContentType.AUDIO]));
       segmentData[ContentType.VIDEO].segments.push(
@@ -274,7 +274,7 @@ describe('StreamingEngine', () => {
     }
 
     const segmentsInSecondPeriod = 2;
-    for (let i = 0; i < segmentsInSecondPeriod; ++i) {
+    for (const i of shaka.util.Iterables.range(segmentsInSecondPeriod)) {
       segmentData[ContentType.AUDIO].segments.push(
           makeBuffer(segmentSizes[ContentType.AUDIO]));
       segmentData[ContentType.VIDEO].segments.push(
@@ -695,16 +695,10 @@ describe('StreamingEngine', () => {
 
     // Since we started playback from segment 11, segments 10 through 14
     // should be buffered.
-    for (let i = 0; i <= 8; ++i) {
-      expect(mediaSourceEngine.segments[ContentType.AUDIO][i]).toBeFalsy();
-      expect(mediaSourceEngine.segments[ContentType.VIDEO][i]).toBeFalsy();
-      expect(mediaSourceEngine.segments[ContentType.TEXT][i]).toBeFalsy();
-    }
-
-    for (let i = 9; i <= 13; ++i) {
-      expect(mediaSourceEngine.segments[ContentType.AUDIO][i]).toBeTruthy();
-      expect(mediaSourceEngine.segments[ContentType.VIDEO][i]).toBeTruthy();
-      expect(mediaSourceEngine.segments[ContentType.TEXT][i]).toBeTruthy();
+    for (const i of shaka.util.Iterables.range(14)) {
+      expect(mediaSourceEngine.segments[ContentType.AUDIO][i]).toBe(i >= 9);
+      expect(mediaSourceEngine.segments[ContentType.VIDEO][i]).toBe(i >= 9);
+      expect(mediaSourceEngine.segments[ContentType.TEXT][i]).toBe(i >= 9);
     }
   });
 
@@ -1824,16 +1818,10 @@ describe('StreamingEngine', () => {
 
       // Since we performed an unbuffered seek into the second Period, the
       // first 12 segments should not be buffered.
-      for (let i = 0; i <= 11; ++i) {
-        expect(mediaSourceEngine.segments[ContentType.AUDIO][i]).toBeFalsy();
-        expect(mediaSourceEngine.segments[ContentType.VIDEO][i]).toBeFalsy();
-        expect(mediaSourceEngine.segments[ContentType.TEXT][i]).toBeFalsy();
-      }
-
-      for (let i = 12; i <= 13; ++i) {
-        expect(mediaSourceEngine.segments[ContentType.AUDIO][i]).toBeTruthy();
-        expect(mediaSourceEngine.segments[ContentType.VIDEO][i]).toBeTruthy();
-        expect(mediaSourceEngine.segments[ContentType.TEXT][i]).toBeTruthy();
+      for (const i of shaka.util.Iterables.range(14)) {
+        expect(mediaSourceEngine.segments[ContentType.AUDIO][i]).toBe(i >= 12);
+        expect(mediaSourceEngine.segments[ContentType.VIDEO][i]).toBe(i >= 12);
+        expect(mediaSourceEngine.segments[ContentType.TEXT][i]).toBe(i >= 12);
       }
     });
   });
@@ -2627,16 +2615,10 @@ describe('StreamingEngine', () => {
         text: [],
       });
 
-      for (let i = 0; i <= 8; ++i) {
-        expect(mediaSourceEngine.segments['audio'][i]).toBeFalsy();
-        expect(mediaSourceEngine.segments['video'][i]).toBeFalsy();
-        expect(mediaSourceEngine.segments['text'][i]).toBeFalsy();
-      }
-
-      for (let i = 9; i <= 13; ++i) {
-        expect(mediaSourceEngine.segments['audio'][i]).toBeTruthy();
-        expect(mediaSourceEngine.segments['video'][i]).toBeTruthy();
-        expect(mediaSourceEngine.segments['text'][i]).toBeTruthy();
+      for (const i of shaka.util.Iterables.range(14)) {
+        expect(mediaSourceEngine.segments['audio'][i]).toBe(i >= 9);
+        expect(mediaSourceEngine.segments['video'][i]).toBe(i >= 9);
+        expect(mediaSourceEngine.segments['text'][i]).toBe(i >= 9);
       }
     }
 

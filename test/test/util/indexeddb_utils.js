@@ -47,7 +47,8 @@ shaka.test.IndexedDBUtils = class {
     // connection after 5 attempts (with delays in between), just give
     // up.
     let lastError;
-    for (let i = 0; i < 5; i++) {
+    for (const _ of shaka.util.Iterables.range(5)) {
+      shaka.util.Functional.ignored(_);
       try {
         return await tryOpen();  // eslint-disable-line no-await-in-loop
       } catch (e) {  // eslint-disable-line no-restricted-syntax

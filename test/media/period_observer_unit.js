@@ -56,7 +56,7 @@ describe('PeriodObserver', () => {
     expect(onPeriodChanged).toHaveBeenCalledOnceMoreWith([manifest.periods[0]]);
 
     // Playing in period 0 (period 1 starts at 10).
-    for (let time = 1; time <= 9; time++) {
+    for (const time of shaka.util.Iterables.range(10)) {
       poll(observer, time);
       expect(onPeriodChanged).not.toHaveBeenCalled();
     }

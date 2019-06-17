@@ -246,7 +246,7 @@ shaka.test.TestScheme = class {
         .setPresentationDuration(periodDuration * numPeriods);
 
     let idCount = 1;
-    for (let i = 0; i < numPeriods; i++) {
+    for (const i of windowShaka.util.Iterables.range(numPeriods)) {
       gen.addPeriod(/* startTime= */ periodDuration * i);
 
       gen.addVariant(idCount++).language('en');

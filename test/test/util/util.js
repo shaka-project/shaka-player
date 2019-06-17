@@ -53,9 +53,10 @@ shaka.test.Util = class {
    */
   static async fakeEventLoop(duration, onTick) {
     // Run this synchronously:
-    for (let time = 0; time < duration; ++time) {
+    for (const time of shaka.util.Iterables.range(duration)) {
       // We shouldn't need more than 6 rounds.
-      for (let i = 0; i < 6; ++i) {
+      for (const _ of shaka.util.Iterables.range(6)) {
+        shaka.util.Functional.ignored(_);
         jasmine.clock().tick(0);
         await Promise.resolve();  // eslint-disable-line no-await-in-loop
       }
@@ -181,7 +182,7 @@ shaka.test.Util = class {
       if (actual.attributes.length != expected.attributes.length) {
         return prospectiveDiff + 'Different attribute list length.';
       }
-      for (let i = 0; i < actual.attributes.length; i++) {
+      for (const i of shaka.util.Iterables.range(actual.attributes.length)) {
         const aAttrib = actual.attributes[i].nodeName;
         const aAttribVal = actual.getAttribute(aAttrib);
         const eAttrib = expected.attributes[i].nodeName;
@@ -197,7 +198,7 @@ shaka.test.Util = class {
       if (actual.childNodes.length != expected.childNodes.length) {
         return prospectiveDiff + 'Different child node list length.';
       }
-      for (let i = 0; i < actual.childNodes.length; i++) {
+      for (const i of shaka.util.Iterables.range(actual.childNodes.length)) {
         const aNode = actual.childNodes[i];
         const eNode = expected.childNodes[i];
         const diff =

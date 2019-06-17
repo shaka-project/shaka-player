@@ -104,7 +104,7 @@ describe('DashParser ContentProtection', () => {
     }
 
     const variants = [];
-    for (let i = 0; i < numVariants; i++) {
+    for (const i of shaka.util.Iterables.range(numVariants)) {
       const variant = jasmine.objectContaining({
         drmInfos: drmInfos,
         video: jasmine.objectContaining({

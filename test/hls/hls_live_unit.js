@@ -406,7 +406,8 @@ describe('HlsParser live', () => {
       '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
     ].join('');
-    for (let i = 0; i < 1000; ++i) {
+    for (const _ of shaka.util.Iterables.range(1000)) {
+      shaka.util.Functional.ignored(_);
       mediaWithManySegments += '#EXTINF:2,\n';
       mediaWithManySegments += 'main.mp4\n';
     }

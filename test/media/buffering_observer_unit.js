@@ -123,7 +123,7 @@ describe('BufferingObserver', () => {
       /** @type {boolean} */
       let changed;
 
-      for (let lead = 0; lead <= 4; lead++) {
+      for (const lead of shaka.util.Iterables.range(5)) {
         changed = controller.update(lead, /* toEnd= */ false);
         expect(changed).toBeFalsy();
       }
