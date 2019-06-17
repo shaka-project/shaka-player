@@ -17,6 +17,8 @@
 
 goog.provide('shaka.test.StreamingEngineUtil');
 
+goog.require('shaka.util.Iterables');
+
 
 shaka.test.StreamingEngineUtil = class {
   /**
@@ -236,9 +238,10 @@ shaka.test.StreamingEngineUtil = class {
 
     // Populate the Manifest.
     let id = 0;
-    for (let i = 0; i < periodStartTimes.length; ++i) {
+    const enumerate = (it) => shaka.util.Iterables.enumerate(it);
+    for (const {i, item} of enumerate(periodStartTimes)) {
       const period = {
-        startTime: periodStartTimes[i],
+        startTime: item,
         variants: [],
         textStreams: [],
       };

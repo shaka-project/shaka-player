@@ -1759,8 +1759,8 @@ describe('Player', () => {
     async function runTest(languages, preference, expectedIndex) {
       const generator = new shaka.test.ManifestGenerator().addPeriod(0);
 
-      for (let i = 0; i < languages.length; i++) {
-        const lang = languages[i];
+      const enumerate = (it) => shaka.util.Iterables.enumerate(it);
+      for (const {i, item: lang} of enumerate(languages)) {
         if (lang.charAt(0) == '*') {
           generator
               .addVariant(i)
