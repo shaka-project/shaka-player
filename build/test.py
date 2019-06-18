@@ -379,6 +379,10 @@ class Launcher:
     if self.parsed_args.exclude_browsers and 'browsers' in self.karma_config:
       all_browsers = set(self.karma_config['browsers'])
       bad_browsers = set(self.parsed_args.exclude_browsers)
+      if bad_browsers - all_browsers:
+        raise RuntimeError('Attempting to exclude unselected browsers: %s' %
+                           ','.join(bad_browsers - all_browsers))
+
       good_browsers = all_browsers - bad_browsers
       self.karma_config['browsers'] = list(good_browsers)
 
