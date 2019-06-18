@@ -281,7 +281,6 @@ describe('Player', function() {
       expect(textTracks[0].language).toEqual('en');
     });
 
-
     it('while changing languages with short Periods', async () => {
       // See: https://github.com/google/shaka-player/issues/797
       player.configure({preferredAudioLanguage: 'en'});
@@ -306,6 +305,23 @@ describe('Player', function() {
       // Should have gotten past the next Period transition and still be
       // playing the new language.
       expect(getActiveLanguage()).toBe('es');
+    });
+
+    it('at higher playback rates', async () => {
+      await player.load('test:sintel_compiled');
+      video.play();
+      await waitUntilPlayheadReaches(eventManager, video, 1, 10);
+
+      // Enabling trick play should change our playback rate to the same rate.
+      player.trickPlay(2);
+      expect(video.playbackRate).toBe(2);
+
+      // Let playback continue playing for a bit longer.
+      await shaka.test.Util.delay(2);
+
+      // Cancelling trick play should return our playback rate to normal.
+      player.cancelTrickPlay();
+      expect(video.playbackRate).toBe(1);
     });
 
     /**
