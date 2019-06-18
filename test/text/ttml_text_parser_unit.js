@@ -44,7 +44,12 @@ describe('TtmlTextParser', () => {
     // When xml:space="default", ignore whitespace outside tags.
     verifyHelper(
         [
-          {startTime: 62.03, endTime: 62.05, payload: 'A B C'},
+          {
+            startTime: 62.03,
+            endTime: 62.05,
+            nestedCues: [{payload: 'A B C'}],
+            payload: '',
+          },
         ],
         '<tt xml:space="default">' + ttBody + '</tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
@@ -54,7 +59,8 @@ describe('TtmlTextParser', () => {
           {
             startTime: 62.03,
             endTime: 62.05,
-            payload: '\n       A    B   C  \n    ',
+            nestedCues: [{payload: ' A    B   C  '}],
+            payload: '',
           },
         ],
         '<tt xml:space="preserve">' + ttBody + '</tt>',
@@ -62,7 +68,12 @@ describe('TtmlTextParser', () => {
     // The default value for xml:space is "default".
     verifyHelper(
         [
-          {startTime: 62.03, endTime: 62.05, payload: 'A B C'},
+          {
+            startTime: 62.03,
+            endTime: 62.05,
+            nestedCues: [{payload: 'A B C'}],
+            payload: '',
+          },
         ],
         '<tt>' + ttBody + '</tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
@@ -78,9 +89,28 @@ describe('TtmlTextParser', () => {
 
   it('rejects invalid time format', () => {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-        '<tt><body><p begin="test" end="test"></p></body></tt>');
+        '<tt><body><p begin="test" end="test">My very own cue</p></body></tt>');
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
-        '<tt><body><p begin="3.45" end="1a"></p></body></tt>');
+        '<tt><body><p begin="3.45" end="1a">An invalid cue</p></body></tt>');
+  });
+
+  it('supports spans as nestedCues of paragraphs', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: '',
+            nestedCues: [
+              {payload: 'First cue'},
+              {payload: '', spacer: true},
+              {payload: 'Second cue'},
+            ],
+          },
+        ],
+        '<tt><body><p begin="01:02.05" end="01:02:03.200">' +
+        '<span>First cue</span><br /><span>Second cue</span></p></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
   it('supports colon formatted time', () => {
@@ -654,7 +684,12 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     verifyHelper(
         [
-          {startTime: 62.05, endTime: 3723.2, payload: 'Line1\nLine2'},
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            nestedCues: [{payload: 'Line1\nLine2'}],
+            payload: '',
+          },
         ],
         '<tt><body><p begin="01:02.05" ' +
         'end="01:02:03.200"><span>Line1<br/>Line2</span></p></body></tt>',
@@ -813,6 +848,13 @@ describe('TtmlTextParser', () => {
       if (cue.region) {
         cue.region = jasmine.objectContaining(cue.region);
       }
+
+      if (cue.nestedCues) {
+        cue.nestedCues = cue.nestedCues.map(
+            (nestedCue) => jasmine.objectContaining(nestedCue)
+        );
+      }
+
       return jasmine.objectContaining(cue);
     });
     expect(result).toEqual(expected);

@@ -316,6 +316,20 @@ shaka.extern.Cue = class {
      * @exportDoc
      */
     this.id;
+
+    /**
+     * Nested cues
+     * @type {Array.<!shaka.extern.Cue>}
+     * @exportDoc
+     */
+    this.nestedCues;
+
+    /**
+     * Whether or not the cue only acts as a spacer between two cues
+     * @type {boolean}
+     * @exportDoc
+     */
+    this.spacer;
   }
 };
 
