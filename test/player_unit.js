@@ -313,30 +313,30 @@ describe('Player', () => {
 
       it('load text stream if caption is visible', async () => {
         await player.load(fakeManifestUri, 0, returnManifest(manifest));
-        player.setTextTrackVisibility(true);
+        await player.setTextTrackVisibility(true);
         expect(streamingEngine.loadNewTextStream).toHaveBeenCalled();
         expect(streamingEngine.getBufferingText()).not.toBe(null);
       });
 
       it('does not load text stream if caption is invisible', async () => {
         await player.load(fakeManifestUri, 0, returnManifest(manifest));
-        player.setTextTrackVisibility(false);
+        await player.setTextTrackVisibility(false);
         expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
         expect(streamingEngine.getBufferingText()).toBe(null);
       });
 
       it('loads text stream if alwaysStreamText is set', async () => {
-        player.setTextTrackVisibility(false);
+        await player.setTextTrackVisibility(false);
         player.configure({streaming: {alwaysStreamText: true}});
 
         await player.load(fakeManifestUri, 0, returnManifest(manifest));
         expect(streamingEngine.getBufferingText()).not.toBe(null);
 
-        player.setTextTrackVisibility(true);
+        await player.setTextTrackVisibility(true);
         expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
         expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
 
-        player.setTextTrackVisibility(false);
+        await player.setTextTrackVisibility(false);
         expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
         expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
       });
@@ -1713,7 +1713,7 @@ describe('Player', () => {
       expect(player.isTextTrackVisible()).toBe(true);
 
       // Turn text back off.
-      player.setTextTrackVisibility(false);
+      await player.setTextTrackVisibility(false);
       expect(player.isTextTrackVisible()).toBe(false);
 
       // Change text languages after startup.
@@ -2872,8 +2872,8 @@ describe('Player', () => {
   });
 
   describe('setTextTrackVisibility', () => {
-    it('does not throw before load', () => {
-      player.setTextTrackVisibility(true);
+    it('does not throw before load', async () => {
+      await player.setTextTrackVisibility(true);
     });
   });
 

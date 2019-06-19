@@ -218,7 +218,8 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
     const offButton = shaka.util.Dom.createHTMLElement('button');
     offButton.classList.add('shaka-turn-captions-off-button');
     this.eventManager.listen(offButton, 'click', () => {
-      this.player.setTextTrackVisibility(false);
+      const p = this.player.setTextTrackVisibility(false);
+      p.catch(() => {});  // TODO(#1993): Handle possible errors.
       this.updateTextLanguages_();
     });
 

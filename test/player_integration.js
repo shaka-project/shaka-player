@@ -139,11 +139,11 @@ describe('Player', () => {
         // This should not be null initially.
         expect(textTrack.cues).not.toBe(null);
 
-        player.setTextTrackVisibility(true);
+        await player.setTextTrackVisibility(true);
         // This should definitely not be null when visible.
         expect(textTrack.cues).not.toBe(null);
 
-        player.setTextTrackVisibility(false);
+        await player.setTextTrackVisibility(false);
         // This should not transition to null when invisible.
         expect(textTrack.cues).not.toBe(null);
       }
