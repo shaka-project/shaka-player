@@ -1077,7 +1077,7 @@ describe('MediaSourceEngine', function() {
 
       expect(p.status).toBe('pending');
       await Util.delay(0.1);
-      expect(d.status).toBe('pending');
+      expect(p.status).toBe('pending');
       await expected;
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalledWith(buffer2);

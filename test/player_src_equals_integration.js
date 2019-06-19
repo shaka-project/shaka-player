@@ -278,10 +278,10 @@ describe('Player Src Equals', () => {
 
     expect(player.isTextTrackVisible()).toBe(false);
 
-    player.setTextTrackVisibility(true);
+    await player.setTextTrackVisibility(true);
     expect(player.isTextTrackVisible()).toBe(true);
 
-    player.setTextTrackVisibility(false);
+    await player.setTextTrackVisibility(false);
     expect(player.isTextTrackVisible()).toBe(false);
   });
 
