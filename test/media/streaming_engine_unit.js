@@ -578,11 +578,11 @@ describe('StreamingEngine', () => {
       expectedObject.set(ContentType.TEXT, textStream1);
       expect(mediaSourceEngine.init)
           .toHaveBeenCalledWith(expectedObject, false);
-      expect(mediaSourceEngine.init.calls.count()).toBe(1);
+      expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
       mediaSourceEngine.init.calls.reset();
 
+      expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
       expect(mediaSourceEngine.setDuration).toHaveBeenCalledWith(40);
-      expect(mediaSourceEngine.setDuration.calls.count()).toBe(1);
       mediaSourceEngine.setDuration.calls.reset();
 
       expect(audioStream1.createSegmentIndex).toHaveBeenCalled();
@@ -2006,7 +2006,7 @@ describe('StreamingEngine', () => {
       streamingEngine.start();
 
       runTest();
-      expect(onError.calls.count()).toBe(0);
+      expect(onError).not.toHaveBeenCalled();
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
     });
 
@@ -2040,7 +2040,7 @@ describe('StreamingEngine', () => {
       streamingEngine.start();
 
       runTest();
-      expect(onError.calls.count()).toBe(1);
+      expect(onError).toHaveBeenCalledTimes(1);
       expect(netEngine.attempts).toBeGreaterThan(1);
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(1);
     });
@@ -2075,7 +2075,7 @@ describe('StreamingEngine', () => {
       streamingEngine.start();
 
       runTest();
-      expect(onError.calls.count()).toBe(1);
+      expect(onError).toHaveBeenCalledTimes(1);
       expect(netEngine.attempts).toBe(1);
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(0);
     });
@@ -2110,7 +2110,7 @@ describe('StreamingEngine', () => {
       streamingEngine.start();
 
       runTest();
-      expect(onError.calls.count()).toBe(1);
+      expect(onError).toHaveBeenCalledTimes(1);
       expect(failureCallback).not.toHaveBeenCalled();
     });
 
@@ -2187,10 +2187,10 @@ describe('StreamingEngine', () => {
 
       runTest();
       // We definitely called onError().
-      expect(onError.calls.count()).toBe(1);
+      expect(onError).toHaveBeenCalledTimes(1);
       // We reset the request calls in onError() just before retry(), so this
       // count reflects new calls since retry().
-      expect(netEngine.request.calls.count()).toBeGreaterThan(0);
+      expect(netEngine.request).toHaveBeenCalled();
       // The retry worked, so we should have reached the end of the stream.
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(1);
     });
@@ -2232,11 +2232,11 @@ describe('StreamingEngine', () => {
       runTest();
 
       // We definitely called onError().
-      expect(onError.calls.count()).toBe(1);
+      expect(onError).toHaveBeenCalledTimes(1);
 
       // We reset the request calls in onError() just before retry(), so this
       // count reflects new calls since retry().
-      expect(netEngine.request.calls.count()).toBe(0);
+      expect(netEngine.request).not.toHaveBeenCalled();
       expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
     });
 
@@ -2267,7 +2267,7 @@ describe('StreamingEngine', () => {
 
       // We reset the request calls in onError() just before retry(), so this
       // count reflects new calls since retry().
-      expect(netEngine.request.calls.count()).toBe(0);
+      expect(netEngine.request).not.toHaveBeenCalled();
       expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
     });
   });

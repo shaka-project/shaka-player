@@ -468,7 +468,7 @@ describe('VttTextParser', () => {
   });
 
   it('ignores and logs invalid settings', () => {
-    expect(logWarningSpy.calls.count()).toBe(0);
+    expect(logWarningSpy).not.toHaveBeenCalled();
 
     verifyHelper(
         [
@@ -533,7 +533,7 @@ describe('VttTextParser', () => {
         'Test\n\n',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
 
-    expect(logWarningSpy.calls.count()).toBe(7);
+    expect(logWarningSpy).toHaveBeenCalledTimes(7);
   });
 
   it('respects X-TIMESTAMP-MAP header in probes', () => {

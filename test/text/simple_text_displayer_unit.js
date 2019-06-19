@@ -94,13 +94,13 @@ describe('SimpleTextDisplayer', () => {
       displayer.append([cue1, cue2, cue3]);
 
       displayer.remove(0, 1);
-      expect(mockTrack.removeCue.calls.count()).toBe(1);
+      expect(mockTrack.removeCue).toHaveBeenCalledTimes(1);
       expect(mockTrack.removeCue).toHaveBeenCalledWith(
           jasmine.objectContaining({startTime: 0, endTime: 1}));
       mockTrack.removeCue.calls.reset();
 
       displayer.remove(0.5, 1.001);
-      expect(mockTrack.removeCue.calls.count()).toBe(1);
+      expect(mockTrack.removeCue).toHaveBeenCalledTimes(1);
       expect(mockTrack.removeCue).toHaveBeenCalledWith(
           jasmine.objectContaining({startTime: 1, endTime: 2}));
       mockTrack.removeCue.calls.reset();
@@ -110,7 +110,7 @@ describe('SimpleTextDisplayer', () => {
       mockTrack.removeCue.calls.reset();
 
       displayer.remove(2.9999, Infinity);
-      expect(mockTrack.removeCue.calls.count()).toBe(1);
+      expect(mockTrack.removeCue).toHaveBeenCalledTimes(1);
       expect(mockTrack.removeCue).toHaveBeenCalledWith(
           jasmine.objectContaining({startTime: 2, endTime: 3}));
       mockTrack.removeCue.calls.reset();

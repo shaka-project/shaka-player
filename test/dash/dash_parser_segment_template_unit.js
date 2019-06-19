@@ -135,7 +135,7 @@ describe('DashParser SegmentTemplate', () => {
           Dash.makeManifestFromInit('init-500.mp4', 0, null));
       await Dash.callCreateSegmentIndex(manifest);
 
-      expect(fakeNetEngine.request.calls.count()).toBe(2);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
       fakeNetEngine.expectRangeRequest(
           'http://example.com/index-500.mp4', 0, null);
     });
@@ -159,7 +159,7 @@ describe('DashParser SegmentTemplate', () => {
           Dash.makeManifestFromInit('init-500.mp4', 0, null));
       await Dash.callCreateSegmentIndex(manifest);
 
-      expect(fakeNetEngine.request.calls.count()).toBe(2);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
       fakeNetEngine.expectRangeRequest(
           'http://example.com/index-500.mp4', 0, null);
     });
@@ -190,7 +190,7 @@ describe('DashParser SegmentTemplate', () => {
           Dash.makeManifestFromInit('init-500.webm', 0, null));
       await Dash.callCreateSegmentIndex(manifest);
 
-      expect(fakeNetEngine.request.calls.count()).toBe(3);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(3);
       fakeNetEngine.expectRangeRequest(
           'http://example.com/init-500.webm', 0, null);
       fakeNetEngine.expectRangeRequest(
@@ -220,7 +220,7 @@ describe('DashParser SegmentTemplate', () => {
           Dash.makeManifestFromInit('init-500.mp4', 0, null));
       await Dash.callCreateSegmentIndex(manifest);
 
-      expect(fakeNetEngine.request.calls.count()).toBe(2);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
       fakeNetEngine.expectRangeRequest(
           'http://example.com/index-500.mp4', 0, null);
     });
@@ -248,7 +248,7 @@ describe('DashParser SegmentTemplate', () => {
           Dash.makeManifestFromInit('init-500.mp4', 0, null));
       await Dash.callCreateSegmentIndex(manifest);
 
-      expect(fakeNetEngine.request.calls.count()).toBe(2);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
       fakeNetEngine.expectRangeRequest(
           'http://example.com/index-500.mp4', 0, null);
     });

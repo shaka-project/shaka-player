@@ -752,7 +752,7 @@ describe('MediaSourceEngine', () => {
       audioSourceBuffer.updateend();
 
       await p;
-      expect(audioSourceBuffer.remove.calls.count()).toBe(1);
+      expect(audioSourceBuffer.remove).toHaveBeenCalledTimes(1);
       expect(audioSourceBuffer.remove.calls.argsFor(0)[0]).toBe(0);
       expect(audioSourceBuffer.remove.calls.argsFor(0)[1] >= 20).toBeTruthy();
     });

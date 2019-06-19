@@ -762,7 +762,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
 
       mockGenericMessageBus.broadcast.calls.reset();
       fakeIncomingMessage(message, mockGenericMessageBus);
-      expect(mockGenericMessageBus.broadcast.calls.count()).toEqual(1);
+      expect(mockGenericMessageBus.broadcast).toHaveBeenCalledTimes(1);
       expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
           '"requestId":0,"type":"MEDIA_STATUS"')).toBe(true);
     });
@@ -857,7 +857,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
 
       mockGenericMessageBus.broadcast.calls.reset();
       fakeIncomingMessage(message, mockGenericMessageBus);
-      expect(mockGenericMessageBus.broadcast.calls.count()).toEqual(1);
+      expect(mockGenericMessageBus.broadcast).toHaveBeenCalledTimes(1);
       expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
           '"requestId":0,' +
           '"type":"INVALID_REQUEST",' +

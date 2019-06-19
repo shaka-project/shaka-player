@@ -99,7 +99,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         }
       });
       await networkingEngine.request(requestType, request).promise;
-      expect(rejectScheme.calls.count()).toBe(2);
+      expect(rejectScheme).toHaveBeenCalledTimes(2);
     });
 
     it('will retry twice', async () => {
@@ -118,7 +118,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         }
       });
       await networkingEngine.request(requestType, request).promise;
-      expect(rejectScheme.calls.count()).toBe(3);
+      expect(rejectScheme).toHaveBeenCalledTimes(3);
     });
 
     it('will fail overall', async () => {
@@ -144,7 +144,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
       await expectAsync(networkingEngine.request(requestType, request).promise)
           .toBeRejectedWith(expected);
-      expect(rejectScheme.calls.count()).toBe(3);
+      expect(rejectScheme).toHaveBeenCalledTimes(3);
     });
 
     describe('backoff', () => {
@@ -171,7 +171,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         await expectAsync(
             networkingEngine.request(requestType, request).promise)
             .toBeRejected();
-        expect(deferSpy.calls.count()).toBe(1);
+        expect(deferSpy).toHaveBeenCalledTimes(1);
         expect(deferSpy).toHaveBeenCalledWith(baseDelay, jasmine.any(Function));
       });
 
@@ -187,7 +187,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         await expectAsync(
             networkingEngine.request(requestType, request).promise)
             .toBeRejected();
-        expect(deferSpy.calls.count()).toBe(2);
+        expect(deferSpy).toHaveBeenCalledTimes(2);
         expect(deferSpy).toHaveBeenCalledWith(
             baseDelay, jasmine.any(Function));
         expect(deferSpy).toHaveBeenCalledWith(
@@ -209,7 +209,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         // (rand * 2.0) - 1.0 = (0.75 * 2.0) - 1.0 = 0.5
         // 0.5 * fuzzFactor = 0.5 * 1 = 0.5
         // delay * (1 + 0.5) = baseDelay * (1 + 0.5)
-        expect(deferSpy.calls.count()).toBe(1);
+        expect(deferSpy).toHaveBeenCalledTimes(1);
         expect(deferSpy).toHaveBeenCalledWith(
             baseDelay * 1.5, jasmine.any(Function));
       });
@@ -225,8 +225,8 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       });
       request.uris = ['reject://foo', 'resolve://foo'];
       await networkingEngine.request(requestType, request).promise;
-      expect(rejectScheme.calls.count()).toBe(1);
-      expect(resolveScheme.calls.count()).toBe(1);
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
+      expect(resolveScheme).toHaveBeenCalledTimes(1);
     });
 
     it('won\'t retry for CRITICAL error', async () => {
@@ -241,7 +241,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       error.severity = shaka.util.Error.Severity.CRITICAL;
       await expectAsync(networkingEngine.request(requestType, request).promise)
           .toBeRejected();
-      expect(rejectScheme.calls.count()).toBe(1);
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
     });
   });  // describe('retry')
 
@@ -536,7 +536,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       await expectAsync(networkingEngine.request(requestType, request).promise)
           .toBeRejected();
       expect(resolveScheme).not.toHaveBeenCalled();
-      expect(filter.calls.count()).toBe(1);
+      expect(filter).toHaveBeenCalledTimes(1);
     });
 
     it('if throws will stop requests', async () => {
@@ -552,7 +552,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       await expectAsync(networkingEngine.request(requestType, request).promise)
           .toBeRejected();
       expect(resolveScheme).not.toHaveBeenCalled();
-      expect(filter.calls.count()).toBe(1);
+      expect(filter).toHaveBeenCalledTimes(1);
     });
 
     it('causes no errors to remove an unused filter', () => {
@@ -819,7 +819,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       await Util.shortDelay();
 
       // A new request has not been made.
-      expect(resolveScheme.calls.count()).toBe(0);
+      expect(resolveScheme).not.toHaveBeenCalled();
 
       expect(d.status).toBe('resolved');
       expect(r.status).toBe('rejected');
@@ -850,14 +850,14 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           networkingEngine.request(requestType, request).promise);
       await Util.shortDelay();
 
-      expect(rejectScheme.calls.count()).toBe(1);
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
       /** @type {!shaka.test.StatusPromise} */
       const d = new StatusPromise(networkingEngine.destroy());
       expect(d.status).toBe('pending');
       await Util.shortDelay();
 
       expect(d.status).toBe('pending');
-      expect(rejectScheme.calls.count()).toBe(1);
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
       // Reject the initial request.
       p1.reject(error);
       // Resolve any retry, but since we have already been destroyed, this
@@ -869,7 +869,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       expect(d.status).toBe('resolved');
       // The request was never retried.
       expect(r.status).toBe('rejected');
-      expect(rejectScheme.calls.count()).toBe(1);
+      expect(rejectScheme).toHaveBeenCalledTimes(1);
     });
   });  // describe('destroy')
 
@@ -930,7 +930,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       });
       await networkingEngine.request(requestType, request).promise;
 
-      expect(retrySpy.calls.count()).toEqual(2);
+      expect(retrySpy).toHaveBeenCalledTimes(2);
       if (retrySpy.calls.count() == 2) {
         const event1 = retrySpy.calls.argsFor(0)[0];
         const event2 = retrySpy.calls.argsFor(1)[0];

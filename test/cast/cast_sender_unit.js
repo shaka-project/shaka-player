@@ -822,68 +822,51 @@ describe('CastSender', () => {
    * @param {boolean} yes If true, simulate receivers being available.
    */
   function fakeReceiverAvailability(yes) {
-    const calls = mockCastApi.ApiConfig.calls;
-    expect(calls.count()).toEqual(1);
-    if (calls.count()) {
-      const onReceiverStatusChanged = calls.argsFor(0)[2];
-      onReceiverStatusChanged(yes ? 'available' : 'unavailable');
-    }
+    expect(mockCastApi.ApiConfig).toHaveBeenCalledTimes(1);
+    const onReceiverStatusChanged = mockCastApi.ApiConfig.calls.argsFor(0)[2];
+    onReceiverStatusChanged(yes ? 'available' : 'unavailable');
   }
 
   function fakeSessionConnection() {
-    const calls = mockCastApi.requestSession.calls;
-    expect(calls.count()).toEqual(1);
-    if (calls.count()) {
-      const onSessionInitiated = calls.argsFor(0)[0];
-      mockSession = createMockCastSession();
-      onSessionInitiated(mockSession);
-    }
+    expect(mockCastApi.requestSession).toHaveBeenCalledTimes(1);
+    const onSessionInitiated = mockCastApi.requestSession.calls.argsFor(0)[0];
+    mockSession = createMockCastSession();
+    onSessionInitiated(mockSession);
   }
 
   /**
    * @param {string} code
    */
   function fakeSessionConnectionFailure(code) {
-    const calls = mockCastApi.requestSession.calls;
-    expect(calls.count()).toEqual(1);
-    if (calls.count()) {
-      const onSessionError = calls.argsFor(0)[1];
-      onSessionError({code: code});
-    }
+    expect(mockCastApi.requestSession).toHaveBeenCalledTimes(1);
+    const onSessionError = mockCastApi.requestSession.calls.argsFor(0)[1];
+    onSessionError({code: code});
   }
 
   /**
    * @param {?} message
    */
   function fakeSessionMessage(message) {
-    const calls = mockSession.addMessageListener.calls;
-    expect(calls.count()).toEqual(1);
-    if (calls.count()) {
-      const namespace = calls.argsFor(0)[0];
-      const listener = calls.argsFor(0)[1];
-      const serialized = CastUtils.serialize(message);
-      listener(namespace, serialized);
-    }
+    expect(mockSession.addMessageListener).toHaveBeenCalledTimes(1);
+    const namespace = mockSession.addMessageListener.calls.argsFor(0)[0];
+    const listener = mockSession.addMessageListener.calls.argsFor(0)[1];
+    const serialized = CastUtils.serialize(message);
+    listener(namespace, serialized);
   }
 
   function fakeRemoteDisconnect() {
     mockSession.status = 'disconnected';
-    const calls = mockSession.addUpdateListener.calls;
-    expect(calls.count()).toEqual(1);
-    if (calls.count()) {
-      const onConnectionStatus = calls.argsFor(0)[0];
-      onConnectionStatus();
-    }
+    expect(mockSession.addUpdateListener).toHaveBeenCalledTimes(1);
+    const onConnectionStatus =
+        mockSession.addUpdateListener.calls.argsFor(0)[0];
+    onConnectionStatus();
   }
 
   function fakeJoinExistingSession() {
-    const calls = mockCastApi.ApiConfig.calls;
-    expect(calls.count()).toEqual(1);
-    if (calls.count()) {
-      const onJoinExistingSession = calls.argsFor(0)[1];
-      mockSession = createMockCastSession();
-      onJoinExistingSession(mockSession);
-    }
+    expect(mockCastApi.ApiConfig).toHaveBeenCalledTimes(1);
+    const onJoinExistingSession = mockCastApi.ApiConfig.calls.argsFor(0)[1];
+    mockSession = createMockCastSession();
+    onJoinExistingSession(mockSession);
   }
 
   /**

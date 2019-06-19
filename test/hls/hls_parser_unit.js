@@ -779,7 +779,7 @@ describe('HlsParser', () => {
     playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
 
     await parser.start('test:/master', playerInterface);
-    expect(filterAllPeriods.calls.count()).toBe(1);
+    expect(filterAllPeriods).toHaveBeenCalledTimes(1);
   });
 
   it('gets mime type from header request', async () => {

@@ -368,8 +368,8 @@ describe('DashParser Live', () => {
 
     expect(manifest.periods.length).toBe(1);
     // Should call filterAllPeriods for parsing the first manifest
-    expect(filterNewPeriod.calls.count()).toBe(0);
-    expect(filterAllPeriods.calls.count()).toBe(1);
+    expect(filterNewPeriod).toHaveBeenCalledTimes(0);
+    expect(filterAllPeriods).toHaveBeenCalledTimes(1);
 
     fakeNetEngine.setResponseText('dummy://foo', secondManifest);
     await updateManifest();
@@ -377,8 +377,8 @@ describe('DashParser Live', () => {
     // Should update the same manifest object.
     expect(manifest.periods.length).toBe(2);
     // Should call filterNewPeriod for parsing the new manifest
-    expect(filterAllPeriods.calls.count()).toBe(1);
-    expect(filterNewPeriod.calls.count()).toBe(1);
+    expect(filterAllPeriods).toHaveBeenCalledTimes(1);
+    expect(filterNewPeriod).toHaveBeenCalledTimes(1);
   });
 
   it('uses redirect URL for manifest BaseURL and updates', async () => {
@@ -416,7 +416,7 @@ describe('DashParser Live', () => {
 
     // The manifest request was made to the original URL.
     // But includes a redirect
-    expect(fakeNetEngine.request.calls.count()).toBe(1);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
     const netRequest = fakeNetEngine.request.calls.argsFor(0)[1];
     expect(netRequest.uris).toEqual([redirectedUri, originalUri]);
 
@@ -439,7 +439,7 @@ describe('DashParser Live', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     await parser.start('dummy://foo', playerInterface);
 
-    expect(fakeNetEngine.request.calls.count()).toBe(1);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
 
     const error = new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
@@ -449,7 +449,7 @@ describe('DashParser Live', () => {
     fakeNetEngine.request.and.returnValue(operation);
 
     await updateManifest();
-    expect(onError.calls.count()).toBe(1);
+    expect(onError).toHaveBeenCalledTimes(1);
   });
 
   it('uses @minimumUpdatePeriod', async () => {
@@ -556,7 +556,7 @@ describe('DashParser Live', () => {
     const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
     await parser.start('dummy://foo', playerInterface);
 
-    expect(fakeNetEngine.request.calls.count()).toBe(1);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
     fakeNetEngine.expectRequest('dummy://foo', manifestRequest);
     fakeNetEngine.request.calls.reset();
 
@@ -573,7 +573,7 @@ describe('DashParser Live', () => {
     });
 
     await updateManifest();
-    expect(fakeNetEngine.request.calls.count()).toBe(1);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
   });
 
   it('uses @suggestedPresentationDelay', async () => {
@@ -803,7 +803,7 @@ describe('DashParser Live', () => {
               .toBeRejected();
       // start will only begin the network request, calling stop here will be
       // after the request has started but before any parsing has been done.
-      expect(fakeNetEngine.request.calls.count()).toBe(1);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       parser.stop();
       await expectation;
 
@@ -825,7 +825,7 @@ describe('DashParser Live', () => {
 
       await updateManifest();
       // The request was made but should not be resolved yet.
-      expect(fakeNetEngine.request.calls.count()).toBe(1);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
       fakeNetEngine.request.calls.reset();
       parser.stop();
@@ -846,7 +846,7 @@ describe('DashParser Live', () => {
 
       await Util.shortDelay();
       // This is the initial manifest request.
-      expect(fakeNetEngine.request.calls.count()).toBe(1);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
       fakeNetEngine.request.calls.reset();
       // Resolve the manifest request and wait on the UTCTiming request.
@@ -855,7 +855,7 @@ describe('DashParser Live', () => {
       await Util.shortDelay();
 
       // This is the first UTCTiming request.
-      expect(fakeNetEngine.request.calls.count()).toBe(1);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest(dateUri, dateRequestType);
       fakeNetEngine.request.calls.reset();
       // Interrupt the parser, then fail the request.

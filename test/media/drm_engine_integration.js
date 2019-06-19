@@ -219,7 +219,7 @@ describe('DrmEngine', () => {
       if (requestSpy.calls.count()) {
         // We made a license request.
         // Only one request should have been made.
-        expect(requestSpy.calls.count()).toBe(1);
+        expect(requestSpy).toHaveBeenCalledTimes(1);
         // So it's reasonable to assume that this requestComplete Promise
         // is waiting on the correct request.
         await requestComplete;

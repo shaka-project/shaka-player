@@ -72,7 +72,7 @@ describe('DashParser SegmentBase', () => {
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.webm', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
 
-    expect(fakeNetEngine.request.calls.count()).toBe(3);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(3);
     fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
     fakeNetEngine.expectRangeRequest('http://example.com/init.webm', 201, 300);
   });
@@ -100,7 +100,7 @@ describe('DashParser SegmentBase', () => {
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
 
-    expect(fakeNetEngine.request.calls.count()).toBe(2);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
   });
 
@@ -127,7 +127,7 @@ describe('DashParser SegmentBase', () => {
     expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
 
-    expect(fakeNetEngine.request.calls.count()).toBe(2);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
   });
 
@@ -155,7 +155,7 @@ describe('DashParser SegmentBase', () => {
     expect(manifest).toEqual(Dash.makeManifestFromInit('stream.mp4', 201, 300));
     await Dash.callCreateSegmentIndex(manifest);
 
-    expect(fakeNetEngine.request.calls.count()).toBe(2);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com/stream.mp4', 100, 200);
   });
 
@@ -190,7 +190,7 @@ describe('DashParser SegmentBase', () => {
         Dash.makeManifestFromInit('init.mp4', 201, 300, 10));
     await Dash.callCreateSegmentIndex(manifest);
 
-    expect(fakeNetEngine.request.calls.count()).toBe(2);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com/index.mp4', 5, 2000);
   });
 
@@ -224,7 +224,7 @@ describe('DashParser SegmentBase', () => {
         Dash.makeManifestFromInit('special.mp4', 0, null, 20));
     await Dash.callCreateSegmentIndex(manifest);
 
-    expect(fakeNetEngine.request.calls.count()).toBe(2);
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com', 30, 900);
   });
 

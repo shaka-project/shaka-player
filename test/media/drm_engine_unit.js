@@ -172,7 +172,7 @@ describe('DrmEngine', () => {
       expect(drmEngine.keySystem()).toBe('drm.abc');
 
       // Only one call, since the first key system worked.
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
     });
@@ -186,7 +186,7 @@ describe('DrmEngine', () => {
           drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
           .toBeRejected();
 
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
       // These should be in the same order as the key systems appear in the
       // manifest.
       const calls = requestMediaKeySystemAccessSpy.calls;
@@ -209,7 +209,7 @@ describe('DrmEngine', () => {
           drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
           .toBeRejected();
 
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
       // Although drm.def appears second in the manifest, it is queried first
       // because it has a server configured.
       const calls = requestMediaKeySystemAccessSpy.calls;
@@ -249,7 +249,7 @@ describe('DrmEngine', () => {
       // Although drm.def appears second in the manifest, it is queried first
       // because it has a server configured.  The manifest-supplied server for
       // drm.abc will not be used.
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
       const selectedDrmInfo = drmEngine.getDrmInfo();
       expect(selectedDrmInfo).not.toBe(null);
       expect(selectedDrmInfo.keySystem).toBe('drm.def');
@@ -283,7 +283,7 @@ describe('DrmEngine', () => {
       expect(drmEngine.keySystem()).toBe('drm.def');
 
       // Both key systems were tried, since the first one failed.
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
       expect(requestMediaKeySystemAccessSpy)
@@ -306,7 +306,7 @@ describe('DrmEngine', () => {
       expect(drmEngine.initialized()).toBe(false);
 
       // Both key systems were tried, since the first one failed.
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
       expect(requestMediaKeySystemAccessSpy)
@@ -330,7 +330,7 @@ describe('DrmEngine', () => {
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
       // Both key systems were tried, since the first one failed.
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
       expect(requestMediaKeySystemAccessSpy)
@@ -355,7 +355,7 @@ describe('DrmEngine', () => {
       expect(drmEngine.initialized()).toBe(false);
 
       // No key systems were tried, since the dummy placeholder was detected.
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(0);
+      expect(requestMediaKeySystemAccessSpy).not.toHaveBeenCalled();
     });
 
     it('fails to initialize if the CDM cannot be created', async () => {
@@ -374,7 +374,7 @@ describe('DrmEngine', () => {
 
       expect(drmEngine.initialized()).toBe(false);
 
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
     });
@@ -388,7 +388,7 @@ describe('DrmEngine', () => {
           .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
             // audioCapabilities not present.
@@ -420,7 +420,7 @@ describe('DrmEngine', () => {
           .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith('drm.abc', [
         jasmine.objectContaining({
           distinctiveIdentifier: 'optional',
@@ -450,7 +450,7 @@ describe('DrmEngine', () => {
           .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(2);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
             distinctiveIdentifier: 'required',
@@ -476,7 +476,7 @@ describe('DrmEngine', () => {
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(drmEngine.keySystem()).toBe('');
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(0);
+      expect(requestMediaKeySystemAccessSpy).not.toHaveBeenCalled();
     });
 
     it('makes queries for clear content if key is configured', async () => {
@@ -491,7 +491,7 @@ describe('DrmEngine', () => {
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(drmEngine.keySystem()).toBe('drm.abc');
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
     });
 
     it('uses advanced config to fill in DrmInfo', async () => {
@@ -524,7 +524,7 @@ describe('DrmEngine', () => {
           .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
             audioCapabilities: [jasmine.objectContaining({
@@ -578,7 +578,7 @@ describe('DrmEngine', () => {
           .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
             audioCapabilities: [jasmine.objectContaining({
@@ -680,7 +680,7 @@ describe('DrmEngine', () => {
       ];
 
       await initAndAttach();
-      expect(mockMediaKeys.createSession.calls.count()).toBe(3);
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(3);
       expect(session1.generateRequest)
           .toHaveBeenCalledWith('cenc', initData1.buffer);
       expect(session2.generateRequest)
@@ -707,7 +707,7 @@ describe('DrmEngine', () => {
       ];
 
       await initAndAttach();
-      expect(mockMediaKeys.createSession.calls.count()).toBe(1);
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
       expect(session1.generateRequest)
           .toHaveBeenCalledWith('cenc', initData1.buffer);
     });
@@ -727,7 +727,7 @@ describe('DrmEngine', () => {
 
       const session = createMockSession();
       mockMediaKeys.createSession.and.callFake(() => {
-        expect(mockMediaKeys.createSession.calls.count()).toBe(1);
+        expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
         return session;
       });
 
@@ -827,7 +827,7 @@ describe('DrmEngine', () => {
         mockVideo.on['encrypted'](
             {initDataType: 'cenc', initData: initData2, keyId: null});
 
-        expect(mockMediaKeys.createSession.calls.count()).toBe(2);
+        expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(2);
         expect(session1.generateRequest)
             .toHaveBeenCalledWith('webm', initData1.buffer);
         expect(session2.generateRequest)
@@ -844,7 +844,7 @@ describe('DrmEngine', () => {
         mockVideo.on['encrypted'](
             {initDataType: 'cenc', initData: initData2, keyId: null});
 
-        expect(mockMediaKeys.createSession.calls.count()).toBe(1);
+        expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
         expect(session1.generateRequest)
             .toHaveBeenCalledWith('webm', initData1.buffer);
       });
@@ -857,7 +857,7 @@ describe('DrmEngine', () => {
 
         await initAndAttach();
         // We already created a session for the init data override.
-        expect(mockMediaKeys.createSession.calls.count()).toBe(1);
+        expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
         // We aren't even listening for 'encrypted' events.
         expect(mockVideo.on['encrypted']).toBe(undefined);
       });
@@ -1157,7 +1157,7 @@ describe('DrmEngine', () => {
         // Both keys are expired, so we should have an error.
         expect(onErrorSpy).toHaveBeenCalled();
         // There should be exactly one error.
-        expect(onErrorSpy.calls.count()).toEqual(1);
+        expect(onErrorSpy).toHaveBeenCalledTimes(1);
         const error = onErrorSpy.calls.argsFor(0)[0];
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
@@ -1195,7 +1195,7 @@ describe('DrmEngine', () => {
         // Both keys are expired, so we should have an error.
         expect(onErrorSpy).toHaveBeenCalled();
         // There should be exactly one error.
-        expect(onErrorSpy.calls.count()).toEqual(1);
+        expect(onErrorSpy).toHaveBeenCalledTimes(1);
         const error = onErrorSpy.calls.argsFor(0)[0];
         shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
@@ -1207,7 +1207,7 @@ describe('DrmEngine', () => {
         onKeyStatusSpy.and.stub();
         await shaka.test.Util.shortDelay();
         // Still only one error.
-        expect(onErrorSpy.calls.count()).toEqual(1);
+        expect(onErrorSpy).toHaveBeenCalledTimes(1);
       });
     });  // describe('keystatuseschange')
   });  // describe('events')
@@ -1260,7 +1260,7 @@ describe('DrmEngine', () => {
       session1.update.and.returnValue(Promise.resolve());
 
       await shaka.test.Util.shortDelay();
-      expect(session1.update.calls.count()).toBe(1);
+      expect(session1.update).toHaveBeenCalledTimes(1);
       const licenseBuffer = session1.update.calls.argsFor(0)[0];
       const licenseJson =
           shaka.util.StringUtils.fromBytesAutoDetect(licenseBuffer);
@@ -1393,14 +1393,14 @@ describe('DrmEngine', () => {
       // This flow should still return "success" when DrmEngine is destroyed.
       await shaka.test.Util.shortDelay();
       // The first query has been made, which we are blocking.
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
           'drm.abc', jasmine.any(Array));
       await drmEngine.destroy();
       p.reject();  // Fail drm.abc.
       await expectAsync(init).toBeRejected();
       // A second query was not made.
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
       expect(drmEngine.initialized()).toBe(false);
     });
 
@@ -1416,7 +1416,7 @@ describe('DrmEngine', () => {
 
       await shaka.test.Util.shortDelay();
       // The first query has been made, which we are blocking.
-      expect(requestMediaKeySystemAccessSpy.calls.count()).toBe(1);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
           'drm.abc', jasmine.any(Array));
       await drmEngine.destroy();
@@ -1457,7 +1457,7 @@ describe('DrmEngine', () => {
 
       await shaka.test.Util.shortDelay();
       // We are now blocked on setMediaKeys:
-      expect(mockVideo.setMediaKeys.calls.count()).toBe(1);
+      expect(mockVideo.setMediaKeys).toHaveBeenCalledTimes(1);
       // DrmEngine.destroy also calls setMediaKeys.
       /** @type {!shaka.util.PublicPromise} */
       const p2 = new shaka.util.PublicPromise();
@@ -1485,7 +1485,7 @@ describe('DrmEngine', () => {
 
       await shaka.test.Util.shortDelay();
       // We are now blocked on setMediaKeys:
-      expect(mockVideo.setMediaKeys.calls.count()).toBe(1);
+      expect(mockVideo.setMediaKeys).toHaveBeenCalledTimes(1);
       // DrmEngine.destroy also calls setMediaKeys.
       /** @type {!shaka.util.PublicPromise} */
       const p2 = new shaka.util.PublicPromise();
@@ -1520,7 +1520,7 @@ describe('DrmEngine', () => {
 
       await shaka.test.Util.shortDelay();
       // We are now blocked on setServerCertificate:
-      expect(mockMediaKeys.setServerCertificate.calls.count()).toBe(1);
+      expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledTimes(1);
       await drmEngine.destroy();
 
       p.reject();  // Fail setServerCertificate.
@@ -1542,7 +1542,7 @@ describe('DrmEngine', () => {
 
       await shaka.test.Util.shortDelay();
       // We are now blocked on setServerCertificate:
-      expect(mockMediaKeys.setServerCertificate.calls.count()).toBe(1);
+      expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledTimes(1);
       await drmEngine.destroy();
 
       p.resolve();  // Success for setServerCertificate.
@@ -1563,7 +1563,7 @@ describe('DrmEngine', () => {
           {initDataType: 'webm', initData: initData1, keyId: null});
 
       // We are now blocked on generateRequest:
-      expect(session1.generateRequest.calls.count()).toBe(1);
+      expect(session1.generateRequest).toHaveBeenCalledTimes(1);
 
       await drmEngine.destroy();
 
@@ -1588,7 +1588,7 @@ describe('DrmEngine', () => {
       session1.update.and.returnValue(Promise.resolve());
 
       // We are now blocked on the license request:
-      expect(fakeNetEngine.request.calls.count()).toBe(1);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       expect(fakeNetEngine.request).toHaveBeenCalledWith(
           shaka.net.NetworkingEngine.RequestType.LICENSE,
           jasmine.anything());
@@ -1619,7 +1619,7 @@ describe('DrmEngine', () => {
       session1.update.and.returnValue(Promise.resolve());
 
       // We are now blocked on the license request:
-      expect(fakeNetEngine.request.calls.count()).toBe(1);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       expect(fakeNetEngine.request).toHaveBeenCalledWith(
           shaka.net.NetworkingEngine.RequestType.LICENSE,
           jasmine.anything());
@@ -1650,7 +1650,7 @@ describe('DrmEngine', () => {
       await shaka.test.Util.shortDelay();
 
       // We are now blocked on update:
-      expect(session1.update.calls.count()).toBe(1);
+      expect(session1.update).toHaveBeenCalledTimes(1);
       await drmEngine.destroy();
 
       // Fail the update.
@@ -1871,7 +1871,7 @@ describe('DrmEngine', () => {
             method: 'POST',
             body: message,
           }));
-      expect(fakeNetEngine.request.calls.count()).toBe(1);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
     });
   }); // describe('configure')
 
