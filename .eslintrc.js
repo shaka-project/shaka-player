@@ -216,6 +216,12 @@ module.exports = {
                         '[callee.object.property.name=calls]',
             'message': 'Use expect.toHaveBeenCalledTimes',
           },
+          {
+            'selector':
+                'CallExpression[callee.property.name=toHaveBeenCalledTimes] >' +
+                'Literal[value=0]',
+            'message': 'Use expect.not.toHaveBeenCalled',
+          },
           ...commonNoRestrictedSyntax,
         ],
       },

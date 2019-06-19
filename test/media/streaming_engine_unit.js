@@ -2077,7 +2077,7 @@ describe('StreamingEngine', () => {
       runTest();
       expect(onError).toHaveBeenCalledTimes(1);
       expect(netEngine.attempts).toBe(1);
-      expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(0);
+      expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
     });
 
     it('does not invoke the callback if the error is handled', () => {

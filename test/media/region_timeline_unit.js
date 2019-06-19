@@ -44,7 +44,7 @@ describe('RegionTimeline', () => {
     const differentEndTime = createRegion('my-region', 0, 5);
 
     // Make sure we are starting from a blank slate.
-    expect(onNewRegion).toHaveBeenCalledTimes(0);
+    expect(onNewRegion).not.toHaveBeenCalled();
 
     // When we add a region, we should get an event.
     timeline.addRegion(initialRegion);

@@ -368,7 +368,7 @@ describe('DashParser Live', () => {
 
     expect(manifest.periods.length).toBe(1);
     // Should call filterAllPeriods for parsing the first manifest
-    expect(filterNewPeriod).toHaveBeenCalledTimes(0);
+    expect(filterNewPeriod).not.toHaveBeenCalled();
     expect(filterAllPeriods).toHaveBeenCalledTimes(1);
 
     fakeNetEngine.setResponseText('dummy://foo', secondManifest);
