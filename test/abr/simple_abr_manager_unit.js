@@ -18,6 +18,7 @@
 describe('SimpleAbrManager', () => {
   const sufficientBWMultiplier = 1.06;
   const defaultBandwidthEstimate = 500e3; // 500kbps
+  const oldDateNow = Date.now;
 
   /** @type {shaka.extern.AbrConfiguration} */
   let config;
@@ -30,15 +31,8 @@ describe('SimpleAbrManager', () => {
   /** @type {!Array.<shaka.extern.Variant>} */
   let variants;
 
-
-  beforeAll(() => {
-    jasmine.clock().install();
-    jasmine.clock().mockDate();
-    // This mock is required for fakeEventLoop.
-    PromiseMock.install();
-  });
-
   beforeEach(() => {
+    Date.now = () => 0;
     switchCallback = jasmine.createSpy('switchCallback');
 
     // Keep unsorted.
@@ -81,11 +75,7 @@ describe('SimpleAbrManager', () => {
 
   afterEach(() => {
     abrManager.stop();
-  });
-
-  afterAll(() => {
-    PromiseMock.uninstall();
-    jasmine.clock().uninstall();
+    Date.now = oldDateNow;
   });
 
   it('can choose audio and video Streams right away', () => {
@@ -260,13 +250,13 @@ describe('SimpleAbrManager', () => {
     abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // Stay inside switch interval.
-    shaka.test.Util.fakeEventLoop(config.switchInterval - 2);
+    Date.now = () => (config.switchInterval - 2) * 1e3;
     abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     expect(switchCallback).not.toHaveBeenCalled();
 
     // Move outside switch interval.
-    shaka.test.Util.fakeEventLoop(3);
+    Date.now = () => (config.switchInterval + 2) * 1e3;
     abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     expect(switchCallback).toHaveBeenCalled();

@@ -1800,12 +1800,11 @@ describe('Player', () => {
   });
 
   describe('getStats', () => {
-    beforeAll(() => {
-      jasmine.clock().install();
-      jasmine.clock().mockDate();
-    });
+    const oldDateNow = Date.now;
 
     beforeEach(async () => {
+      Date.now = () => 0;
+
       // The media element may be paused in a test, make sure that it is reset
       // to avoid cross-test contamination.
       video.paused = false;
@@ -1841,8 +1840,8 @@ describe('Player', () => {
       streamingEngine.onCanSwitch();
     });
 
-    afterAll(() => {
-      jasmine.clock().uninstall();
+    afterEach(() => {
+      Date.now = oldDateNow;
     });
 
     it('tracks estimated bandwidth', () => {
@@ -1889,7 +1888,7 @@ describe('Player', () => {
 
         // Stop buffering and start "playing".
         forceBufferingTo(false);
-        jasmine.clock().tick(5000);
+        Date.now = () => 5000;
 
         stats = player.getStats();
         expect(stats.playTime).toBeCloseTo(5);
@@ -1902,7 +1901,7 @@ describe('Player', () => {
         expect(stats.bufferingTime).toBeCloseTo(0);
 
         forceBufferingTo(true);
-        jasmine.clock().tick(5000);
+        Date.now = () => 5000;
 
         stats = player.getStats();
         expect(stats.playTime).toBeCloseTo(0);
@@ -1911,13 +1910,13 @@ describe('Player', () => {
 
       it('tracks correct time when switching states', () => {
         forceBufferingTo(false);
-        jasmine.clock().tick(3000);
+        Date.now = () => 3000;
         forceBufferingTo(true);
-        jasmine.clock().tick(5000);
+        Date.now = () => 8000;
         forceBufferingTo(true);
-        jasmine.clock().tick(9000);
+        Date.now = () => 17000;
         forceBufferingTo(false);
-        jasmine.clock().tick(1000);
+        Date.now = () => 18000;
 
         const stats = player.getStats();
         expect(stats.playTime).toBeCloseTo(4);

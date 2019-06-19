@@ -16,21 +16,23 @@
  */
 
 describe('StateHistory', () => {
+  const oldDateNow = Date.now;
+
   /** @type {!shaka.util.StateHistory} */
   let history;
+  /** @type {number} */
+  let currentTime;
 
   beforeAll(() => {
-    // Mock the clock so that the timing logic inside the state history will be
-    // controlled by the test and not the system.
-    jasmine.clock().install();
-    jasmine.clock().mockDate();
+    Date.now = () => currentTime;
   });
 
   afterAll(() => {
-    jasmine.clock().uninstall();
+    Date.now = oldDateNow;
   });
 
   beforeEach(() => {
+    currentTime = 0;
     history = new shaka.util.StateHistory();
   });
 
@@ -38,7 +40,7 @@ describe('StateHistory', () => {
   // an update after (regardless of state) to update the duration.
   it('open entry have no duration', () => {
     history.update('a');
-    jasmine.clock().tick(5000);
+    currentTime += 5000;
 
     const entries = history.getCopy();
     expect(entries.length).toBe(1);
@@ -50,7 +52,7 @@ describe('StateHistory', () => {
   // entry.
   it('accumulates time', () => {
     history.update('a');
-    jasmine.clock().tick(5000);
+    currentTime += 5000;
     history.update('a');
 
     const entries = history.getCopy();
@@ -61,7 +63,7 @@ describe('StateHistory', () => {
 
   it('state changes update duration of last entry', () => {
     history.update('a');
-    jasmine.clock().tick(5000);
+    currentTime += 5000;
     history.update('b');
 
     const entries = history.getCopy();
@@ -83,22 +85,22 @@ describe('StateHistory', () => {
 
   it('sums all entries of one state', () => {
     history.update('a');
-    jasmine.clock().tick(1000);
+    currentTime += 1000;
 
     history.update('a');
-    jasmine.clock().tick(5000);
+    currentTime += 5000;
 
     history.update('b');
-    jasmine.clock().tick(3000);
+    currentTime += 3000;
 
     history.update('a');
-    jasmine.clock().tick(1500);
+    currentTime += 1500;
 
     history.update('c');
-    jasmine.clock().tick(4000);
+    currentTime += 4000;
 
     history.update('b');
-    jasmine.clock().tick(7500);
+    currentTime += 7500;
 
     // Add another 'b' entry so that the elapsed time will be updated.
     history.update('b');

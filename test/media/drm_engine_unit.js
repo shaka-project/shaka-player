@@ -1937,14 +1937,6 @@ describe('DrmEngine', () => {
   });
 
   describe('expiration', () => {
-    beforeAll(() => {
-      jasmine.clock().install();
-    });
-
-    afterAll(() => {
-      jasmine.clock().uninstall();
-    });
-
     beforeEach(async () => {
       session1.sessionId = 'abc';
       session1.expiration = NaN;
@@ -1956,27 +1948,25 @@ describe('DrmEngine', () => {
           {initDataType: 'webm', initData: initData, keyId: null});
       session1.on['message']({target: session1, message: message});
       session1.update.and.returnValue(Promise.resolve());
-
-      jasmine.clock().tick(1000);
     });
 
     it('calls the callback when the expiration changes', () => {
       onExpirationSpy.calls.reset();
 
       session1.expiration = 10000;
-      jasmine.clock().tick(1000);
+      checkExpiration();
       expect(onExpirationSpy).toHaveBeenCalledTimes(1);
       expect(onExpirationSpy).toHaveBeenCalledWith(session1.sessionId, 10000);
-
       onExpirationSpy.calls.reset();
+
       session1.expiration = 50;
-      jasmine.clock().tick(1000);
+      checkExpiration();
       expect(onExpirationSpy).toHaveBeenCalledTimes(1);
       expect(onExpirationSpy).toHaveBeenCalledWith(session1.sessionId, 50);
-
       onExpirationSpy.calls.reset();
+
       session1.expiration = NaN;
-      jasmine.clock().tick(1000);
+      checkExpiration();
       expect(onExpirationSpy).toHaveBeenCalledTimes(1);
       expect(onExpirationSpy)
           .toHaveBeenCalledWith(session1.sessionId, Infinity);
@@ -1988,6 +1978,11 @@ describe('DrmEngine', () => {
       session1.expiration = 12345;
       expect(drmEngine.getExpiration()).toBe(12345);
     });
+
+    /** @suppress {accessControls} */
+    function checkExpiration() {
+      drmEngine.expirationTimer_.tickNow();
+    }
   });
 
   async function initAndAttach() {
