@@ -163,7 +163,7 @@ jasmine.Fetch = class {
             clearInterval(interval);
             reject(jasmine.Fetch.makeAbortError_());
           }
-        }, 200);
+        }, 10);
       }));
     }
     throw new Error('no known action');
