@@ -635,18 +635,7 @@ describe('VttTextParser', () => {
    * @param {shaka.extern.CueRegion} actual
    */
   function verifyRegion(expected, actual) {
-    const properties = ['id', 'viewportAnchorX', 'viewportAnchorY',
-      'regionAnchorX', 'regionAnchorY', 'width', 'height',
-      'heightUnits', 'widthUnits', 'viewportAnchorUnits',
-      'scroll'];
-    expect(actual).toBeTruthy();
-
-    const asObj = /** @type {!Object} */ (actual);
-    for (const property of properties) {
-      if (property in expected) {
-        expect(asObj[property]).toEqual(expected[property]);
-      }
-    }
+    expect(actual).toEqual(jasmine.objectContaining(expected));
   }
 
   /**

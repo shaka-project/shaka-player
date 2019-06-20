@@ -104,6 +104,20 @@ shaka.test.Util = class {
   }
 
   /**
+   * Creates a custom matcher object that matches a number that is close to the
+   * given value.
+   * @param {number} val
+   * @return {!Object}
+   */
+  static closeTo(val) {
+    const E = 0.000001;
+    return {
+      asymmetricMatch: (other) => other >= val - E && other <= val + E,
+      jasmineToString: () => '<closeTo: ' + val + '>',
+    };
+  }
+
+  /**
    * @param {!shaka.util.Error} error
    * @return {*}
    */
