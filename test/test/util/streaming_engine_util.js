@@ -57,7 +57,7 @@ shaka.test.StreamingEngineUtil = class {
       const periodNumber = Number(parts[0]);
       expect(periodNumber).not.toBeNaN();
       expect(periodNumber).toBeGreaterThan(0);
-      expect(Math.floor(periodNumber)).toEqual(periodNumber);
+      expect(Math.floor(periodNumber)).toBe(periodNumber);
 
       const contentType = parts[1];
 
@@ -68,7 +68,7 @@ shaka.test.StreamingEngineUtil = class {
         const position = Number(parts[2]);
         expect(position).not.toBeNaN();
         expect(position).toBeGreaterThan(0);
-        expect(Math.floor(position)).toEqual(position);
+        expect(Math.floor(position)).toBe(position);
         buffer = getSegment(contentType, periodNumber, position);
       }
 

@@ -232,7 +232,7 @@ describe('DrmEngine', () => {
         // Make sure we didn't somehow choose manifest-supplied values that
         // match the config.  This would invalidate parts of the test.
         const configServer = config.servers[drmInfo.keySystem];
-        expect(drmInfo.licenseServerUri).not.toEqual(configServer);
+        expect(drmInfo.licenseServerUri).not.toBe(configServer);
       }
 
       // Remove the server URI for drm.abc from the config, so that only drm.def
@@ -1068,7 +1068,7 @@ describe('DrmEngine', () => {
         // changes yet.  This shows that we have solved the race between the
         // callback and any polling done by any other component.
         let keyIds = Object.keys(drmEngine.getKeyStatuses());
-        expect(keyIds.length).toEqual(0);
+        expect(keyIds.length).toBe(0);
 
         // Wait for the callback to occur, then end the test.
         await new Promise((resolve) => {
@@ -1077,7 +1077,7 @@ describe('DrmEngine', () => {
 
         // Now key statuses are available.
         keyIds = Object.keys(drmEngine.getKeyStatuses());
-        expect(keyIds.length).toEqual(2);
+        expect(keyIds.length).toBe(2);
       });
 
       // See https://github.com/google/shaka-player/issues/1541
@@ -1984,9 +1984,9 @@ describe('DrmEngine', () => {
 
     it('gets the current expiration times', () => {
       session1.expiration = NaN;
-      expect(drmEngine.getExpiration()).toEqual(Infinity);
+      expect(drmEngine.getExpiration()).toBe(Infinity);
       session1.expiration = 12345;
-      expect(drmEngine.getExpiration()).toEqual(12345);
+      expect(drmEngine.getExpiration()).toBe(12345);
     });
   });
 

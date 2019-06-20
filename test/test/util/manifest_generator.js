@@ -84,7 +84,7 @@ shaka.test.ManifestGenerator = class {
    */
   anyTimeline() {
     this.manifest_.presentationTimeline =
-        jasmine.any(this.shaka_.media.PresentationTimeline);
+      /** @type {?} */ (jasmine.any(this.shaka_.media.PresentationTimeline));
     return this;
   }
 

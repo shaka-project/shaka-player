@@ -119,7 +119,7 @@ shaka.test.Util = class {
 
   /**
    * @param {!shaka.util.Error} error
-   * @return {*}
+   * @return {!Object}
    */
   static jasmineError(error) {
     // NOTE: Safari will add extra properties to any thrown object, and some of

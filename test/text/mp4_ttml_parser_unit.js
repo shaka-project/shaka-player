@@ -77,8 +77,8 @@ describe('Mp4TtmlParser', () => {
     const ret2 = parser.parseMedia(ttmlSegment, time2);
     expect(ret2.length).toBeGreaterThan(0);
 
-    expect(ret2[0].startTime).toEqual(ret1[0].startTime + 7);
-    expect(ret2[0].endTime).toEqual(ret1[0].endTime + 7);
+    expect(ret2[0].startTime).toBe(ret1[0].startTime + 7);
+    expect(ret2[0].endTime).toBe(ret1[0].endTime + 7);
   });
 
   it('rejects init segment with no ttml', () => {

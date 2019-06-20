@@ -169,7 +169,7 @@ describe('StreamUtils', () => {
       // Which role is chosen is an implementation detail.
       // Each role is found on two text streams, so we should have two.
       expect(chosen.length).toBe(2);
-      expect(chosen[0].roles[0]).toEqual(chosen[1].roles[0]);
+      expect(chosen[0].roles[0]).toBe(chosen[1].roles[0]);
     });
 
     it('chooses only one role, even if all are primary', () => {
@@ -205,7 +205,7 @@ describe('StreamUtils', () => {
       // Which role is chosen is an implementation detail.
       // Each role is found on two text streams, so we should have two.
       expect(chosen.length).toBe(2);
-      expect(chosen[0].roles[0]).toEqual(chosen[1].roles[0]);
+      expect(chosen[0].roles[0]).toBe(chosen[1].roles[0]);
     });
 
     it('chooses only one language, even if all are primary', () => {
@@ -231,7 +231,7 @@ describe('StreamUtils', () => {
       // Which language is chosen is an implementation detail.
       // Each role is found on two variants, so we should have two.
       expect(chosen.length).toBe(2);
-      expect(chosen[0].language).toEqual(chosen[1].language);
+      expect(chosen[0].language).toBe(chosen[1].language);
     });
 
     it('chooses a role from among primary streams without language match',
@@ -267,7 +267,7 @@ describe('StreamUtils', () => {
           // Which role is chosen is an implementation detail.
           // Each role is found on two text streams, so we should have two.
           expect(chosen.length).toBe(2);
-          expect(chosen[0].roles[0]).toEqual(chosen[1].roles[0]);
+          expect(chosen[0].roles[0]).toBe(chosen[1].roles[0]);
 
           // Since nothing matches our language preference, we chose primary
           // text streams.

@@ -647,7 +647,7 @@ describe('DashParser Live', () => {
       // of 4 minutes.
       const end = timeline.getSegmentAvailabilityEnd();
       const start = timeline.getSegmentAvailabilityStart();
-      expect(end - start).toEqual(4 * 60);
+      expect(end - start).toBe(4 * 60);
     });
   });
 

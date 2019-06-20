@@ -97,7 +97,7 @@ describe('UI', () => {
     // For this event, we ignore a timeout, since we sometimes miss this event
     // on Tizen.  But expect that the video is ready anyway.
     await waiter.failOnTimeout(false).waitForEvent(video, 'canplay');
-    expect(video.readyState).not.toEqual(0);
+    expect(video.readyState).not.toBe(0);
 
     // All other events after this should fail on timeout (the default).
     await waiter.failOnTimeout(true);
@@ -278,14 +278,14 @@ describe('UI', () => {
      * @param {function():!Array.<!shaka.extern.Track>} getTracks
      */
     async function verifyLanguageChangeViaUI(playerEventName, getTracks) {
-      expect(getSelectedTrack(getTracks()).language).toEqual(oldLanguage);
+      expect(getSelectedTrack(getTracks()).language).toBe(oldLanguage);
 
       const button = languagesToButtons.get(newLanguage);
       button.click();
 
       // Wait for the change to take effect
       await waiter.waitForEvent(player, playerEventName);
-      expect(getSelectedTrack(getTracks()).language).toEqual(newLanguage);
+      expect(getSelectedTrack(getTracks()).language).toBe(newLanguage);
     }
 
 
@@ -296,7 +296,7 @@ describe('UI', () => {
      */
     async function verifyLanguageChangeViaAPI(
         controlsEventName, getTracks, selectLanguage) {
-      expect(getSelectedTrack(getTracks()).language).toEqual(oldLanguage);
+      expect(getSelectedTrack(getTracks()).language).toBe(oldLanguage);
 
       const p = waiter.waitForEvent(controls, controlsEventName);
 
@@ -382,7 +382,7 @@ describe('UI', () => {
       await waiter.waitForEvent(player, 'variantchanged');
       // Update the tracks
       tracks = player.getVariantTracks();
-      expect(getSelectedTrack(tracks).height).toEqual(oldResolution);
+      expect(getSelectedTrack(tracks).height).toBe(oldResolution);
 
       const button = resolutionsToButtons.get(newResolution);
       button.click();
@@ -391,7 +391,7 @@ describe('UI', () => {
       await waiter.waitForEvent(player, 'variantchanged');
       // Update the tracks
       tracks = player.getVariantTracks();
-      expect(getSelectedTrack(tracks).height).toEqual(newResolution);
+      expect(getSelectedTrack(tracks).height).toBe(newResolution);
     });
 
 
@@ -402,7 +402,7 @@ describe('UI', () => {
       // Wait for the change to take effect
       await waiter.waitForEvent(player, 'variantchanged');
       updateResolutionButtonsAndMap();
-      expect(getSelectedTrack(tracks).height).toEqual(oldResolution);
+      expect(getSelectedTrack(tracks).height).toBe(oldResolution);
 
       const p = waiter.waitForEvent(controls, 'resolutionselectionupdated');
 
@@ -414,7 +414,7 @@ describe('UI', () => {
 
       updateResolutionButtonsAndMap();
 
-      expect(getSelectedTrack(tracks).height).toEqual(newResolution);
+      expect(getSelectedTrack(tracks).height).toBe(newResolution);
 
       const button = resolutionsToButtons.get(newResolution);
       const isChosen = button.querySelector('.shaka-chosen-item');
@@ -576,7 +576,7 @@ describe('UI', () => {
     * @return {!Map.<string, !HTMLElement>|!Map.<number, !HTMLElement>}
     */
   function mapChoicesToButtons(buttons, choices, modifier) {
-    expect(buttons.length).toEqual(choices.length);
+    expect(buttons.length).toBe(choices.length);
 
     const map = new Map();
 

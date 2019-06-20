@@ -197,22 +197,22 @@ describe('TextEngine', () => {
       // {closed caption id -> {start and end time -> cues}}
       textEngine.storeAndAppendClosedCaptions(
           [caption0], /* startTime */ 0, /* endTime */ 1, /* offset */ 0);
-      expect(textEngine.getNumberOfClosedCaptionChannels()).toEqual(1);
-      expect(textEngine.getNumberOfClosedCaptionsInChannel('CC1')).toEqual(1);
+      expect(textEngine.getNumberOfClosedCaptionChannels()).toBe(1);
+      expect(textEngine.getNumberOfClosedCaptionsInChannel('CC1')).toBe(1);
 
       textEngine.storeAndAppendClosedCaptions(
           [caption1], /* startTime */ 1, /* endTime */ 2, /* offset */ 0);
       // Caption1 has the same stream id with caption0, but different start and
       // end time. The closed captions map should have 1 key CC1, and two values
       // for two start and end times.
-      expect(textEngine.getNumberOfClosedCaptionChannels()).toEqual(1);
-      expect(textEngine.getNumberOfClosedCaptionsInChannel('CC1')).toEqual(2);
+      expect(textEngine.getNumberOfClosedCaptionChannels()).toBe(1);
+      expect(textEngine.getNumberOfClosedCaptionsInChannel('CC1')).toBe(2);
 
       textEngine.storeAndAppendClosedCaptions(
           [caption2], /* startTime */ 1, /* endTime */ 2, /* offset */ 0);
       // Caption2 has a different stream id CC3, so the closed captions map
       // should have two different keys, CC1 and CC3.
-      expect(textEngine.getNumberOfClosedCaptionChannels()).toEqual(2);
+      expect(textEngine.getNumberOfClosedCaptionChannels()).toBe(2);
     });
 
     it('offsets closed captions to account for video offset', () => {

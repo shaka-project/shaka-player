@@ -134,7 +134,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       // severity, even though the original is at RECOVERABLE.
 
       // Check our expectations.
-      expect(error.severity).toEqual(shaka.util.Error.Severity.RECOVERABLE);
+      expect(error.severity).toBe(shaka.util.Error.Severity.RECOVERABLE);
 
       // Modify the expected error.  Note that |expected| here is a wrapper
       // created by jasmine, and |expected.sample| is the Object containing the
@@ -344,7 +344,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           (uri, requestPassed, requestTypePassed) => {
             expect(uri).toBe(request.uris[0]);
             expect(requestPassed).toEqual(request);
-            expect(requestTypePassed).toEqual(requestType);
+            expect(requestTypePassed).toBe(requestType);
             return shaka.util.AbortableOperation.completed(createResponse());
           });
       await networkingEngine.request(requestType, request).promise;

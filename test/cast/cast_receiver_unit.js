@@ -320,9 +320,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       await shaka.test.Util.shortDelay();
       expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
           fakeInitState['playerAfterLoad'].setTextTrackVisibility);
-      expect(mockVideo.loop).toEqual(fakeInitState.video.loop);
-      expect(mockVideo.playbackRate).toEqual(
-          fakeInitState.video.playbackRate);
+      expect(mockVideo.loop).toBe(fakeInitState.video.loop);
+      expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });
 
     it('starts polling', () => {
@@ -432,9 +431,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       // State was still transferred, though:
       expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
           fakeInitState['playerAfterLoad'].setTextTrackVisibility);
-      expect(mockVideo.loop).toEqual(fakeInitState.video.loop);
-      expect(mockVideo.playbackRate).toEqual(
-          fakeInitState.video.playbackRate);
+      expect(mockVideo.loop).toBe(fakeInitState.video.loop);
+      expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });
 
     it('triggers an "error" event if load fails', async () => {
@@ -495,7 +493,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         property: 'currentTime',
         value: 12,
       }, mockShakaMessageBus);
-      expect(mockVideo.currentTime).toEqual(12);
+      expect(mockVideo.currentTime).toBe(12);
 
       expect(mockPlayer['arbitraryName']).toBe(undefined);
       fakeIncomingMessage({
@@ -504,7 +502,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
         property: 'arbitraryName',
         value: 'arbitraryValue',
       }, mockShakaMessageBus);
-      expect(mockPlayer['arbitraryName']).toEqual('arbitraryValue');
+      expect(mockPlayer['arbitraryName']).toBe('arbitraryValue');
     });
 
     it('routes volume properties to the receiver manager', () => {

@@ -144,15 +144,15 @@ describe('CastProxy', () => {
       if (calls.count()) {
         const state = calls.argsFor(0)[0];
         // Video state goes directly:
-        expect(state.video.loop).toEqual(mockVideo.loop);
-        expect(state.video.playbackRate).toEqual(mockVideo.playbackRate);
+        expect(state.video.loop).toBe(mockVideo.loop);
+        expect(state.video.playbackRate).toBe(mockVideo.playbackRate);
         // Player state uses corresponding setter names:
         expect(state.player.configure).toEqual(fakeConfig);
         expect(state['playerAfterLoad'].setTextTrackVisibility).toBe(false);
         // Manifest URI:
-        expect(state.manifest).toEqual(fakeManifestUri);
+        expect(state.manifest).toBe(fakeManifestUri);
         // Start time:
-        expect(state.startTime).toEqual(mockVideo.currentTime);
+        expect(state.startTime).toBe(mockVideo.currentTime);
       }
     });
 
@@ -192,8 +192,8 @@ describe('CastProxy', () => {
       it('returns local values when we are playing back locally', () => {
         mockVideo.currentTime = 12;
         mockVideo.paused = true;
-        expect(proxy.getVideo().currentTime).toEqual(mockVideo.currentTime);
-        expect(proxy.getVideo().paused).toEqual(mockVideo.paused);
+        expect(proxy.getVideo().currentTime).toBe(mockVideo.currentTime);
+        expect(proxy.getVideo().paused).toBe(mockVideo.paused);
 
         expect(mockVideo.play).not.toHaveBeenCalled();
         proxy.getVideo().play();
@@ -218,14 +218,14 @@ describe('CastProxy', () => {
           play: jasmine.createSpy('play'),
         }};
         mockSender.get.and.callFake((targetName, property) => {
-          expect(targetName).toEqual('video');
+          expect(targetName).toBe('video');
           return cache.video[property];
         });
 
-        expect(proxy.getVideo().currentTime).not.toEqual(mockVideo.currentTime);
-        expect(proxy.getVideo().currentTime).toEqual(cache.video.currentTime);
-        expect(proxy.getVideo().paused).not.toEqual(mockVideo.paused);
-        expect(proxy.getVideo().paused).toEqual(cache.video.paused);
+        expect(proxy.getVideo().currentTime).not.toBe(mockVideo.currentTime);
+        expect(proxy.getVideo().currentTime).toBe(cache.video.currentTime);
+        expect(proxy.getVideo().paused).not.toBe(mockVideo.paused);
+        expect(proxy.getVideo().paused).toBe(cache.video.paused);
 
         // Call a method:
         expect(mockVideo.play).not.toHaveBeenCalled();
@@ -246,14 +246,14 @@ describe('CastProxy', () => {
         // Simulate remote method:
         const playSpy = jasmine.createSpy('play');
         mockSender.get.and.callFake((targetName, property) => {
-          expect(targetName).toEqual('video');
-          expect(property).toEqual('play');
+          expect(targetName).toBe('video');
+          expect(property).toBe('play');
           return playSpy;
         });
 
         // Without remote values, we should still return the local ones.
-        expect(proxy.getVideo().currentTime).toEqual(mockVideo.currentTime);
-        expect(proxy.getVideo().paused).toEqual(mockVideo.paused);
+        expect(proxy.getVideo().currentTime).toBe(mockVideo.currentTime);
+        expect(proxy.getVideo().paused).toBe(mockVideo.paused);
 
         // Call a method:
         expect(mockVideo.play).not.toHaveBeenCalled();
@@ -267,13 +267,13 @@ describe('CastProxy', () => {
     describe('set', () => {
       it('writes local values when we are playing back locally', () => {
         mockVideo.currentTime = 12;
-        expect(proxy.getVideo().currentTime).toEqual(12);
+        expect(proxy.getVideo().currentTime).toBe(12);
 
         // Writes to the proxy are reflected immediately in both the proxy and
         // the local video.
         proxy.getVideo().currentTime = 24;
-        expect(proxy.getVideo().currentTime).toEqual(24);
-        expect(mockVideo.currentTime).toEqual(24);
+        expect(proxy.getVideo().currentTime).toBe(24);
+        expect(mockVideo.currentTime).toBe(24);
       });
 
       it('writes values remotely when we are casting', () => {
@@ -289,7 +289,7 @@ describe('CastProxy', () => {
         expect(mockSender.set).toHaveBeenCalledWith('video', 'currentTime', 24);
 
         // The local value was unaffected.
-        expect(mockVideo.currentTime).toEqual(12);
+        expect(mockVideo.currentTime).toBe(12);
       });
     });
 
@@ -377,7 +377,7 @@ describe('CastProxy', () => {
           trickPlay: jasmine.createSpy('trickPlay'),
         }};
         mockSender.get.and.callFake((targetName, property) => {
-          expect(targetName).toEqual('player');
+          expect(targetName).toBe('player');
           const value = cache.player[property];
           if (typeof value == 'function') {
             // methods:
@@ -411,8 +411,8 @@ describe('CastProxy', () => {
         // Simulate remote method:
         const trickPlaySpy = jasmine.createSpy('trickPlay');
         mockSender.get.and.callFake((targetName, property) => {
-          expect(targetName).toEqual('player');
-          expect(property).toEqual('trickPlay');
+          expect(targetName).toBe('player');
+          expect(property).toBe('trickPlay');
           return trickPlaySpy;
         });
 
@@ -572,8 +572,8 @@ describe('CastProxy', () => {
       await shaka.test.Util.shortDelay();
       expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
           cache.player.isTextTrackVisible);
-      expect(mockVideo.loop).toEqual(cache.video.loop);
-      expect(mockVideo.playbackRate).toEqual(cache.video.playbackRate);
+      expect(mockVideo.loop).toBe(cache.video.loop);
+      expect(mockVideo.playbackRate).toBe(cache.video.playbackRate);
     });
 
     it('loads the manifest', () => {
@@ -626,8 +626,8 @@ describe('CastProxy', () => {
       // State was still transferred, though:
       expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
           cache.player.isTextTrackVisible);
-      expect(mockVideo.loop).toEqual(cache.video.loop);
-      expect(mockVideo.playbackRate).toEqual(cache.video.playbackRate);
+      expect(mockVideo.loop).toBe(cache.video.loop);
+      expect(mockVideo.playbackRate).toBe(cache.video.playbackRate);
     });
 
     it('triggers an "error" event if load fails', async () => {
@@ -684,7 +684,7 @@ describe('CastProxy', () => {
   function createMockCastSender(
       appId, onCastStatusChanged, onFirstCastStateUpdate,
       onRemoteEvent, onResumeLocal) {
-    expect(appId).toEqual(fakeAppId);
+    expect(appId).toBe(fakeAppId);
 
     mockSender = {
       init: jasmine.createSpy('init'),

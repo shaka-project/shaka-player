@@ -137,7 +137,7 @@ describe('DashParser Manifest', () => {
         new shaka.test.ManifestGenerator()
             .anyTimeline()
             .minBufferTime(75)
-            .addPeriod(jasmine.any(Number))
+            .addPeriod(/** @type {?} */ (jasmine.any(Number)))
               .addPartialVariant()
                 .language('en')
                 .bandwidth(200)
@@ -1055,7 +1055,7 @@ describe('DashParser Manifest', () => {
       expect(manifest.periods[0].variants.length).toBe(1);
 
       const variant = manifest.periods[0].variants[0];
-      expect(variant.audio.channelsCount).toEqual(expectedNumChannels);
+      expect(variant.audio.channelsCount).toBe(expectedNumChannels);
     }
 
     it('parses outputChannelPositionList scheme', async () => {
@@ -1160,9 +1160,9 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const variant = manifest.periods[0].variants[0];
     const textStream = manifest.periods[0].textStreams[0];
-    expect(variant.audio.originalId).toEqual('audio-en');
-    expect(variant.video.originalId).toEqual('video-sd');
-    expect(textStream.originalId).toEqual('text-en');
+    expect(variant.audio.originalId).toBe('audio-en');
+    expect(variant.video.originalId).toBe('video-sd');
+    expect(textStream.originalId).toBe('text-en');
   });
 
   it('override manifest value if ignoreMinBufferTime is true', async () => {
@@ -1186,7 +1186,7 @@ describe('DashParser Manifest', () => {
 
     const manifest = await parser.start('dummy://foo', playerInterface);
     const minBufferTime = manifest.minBufferTime;
-    expect(minBufferTime).toEqual(0);
+    expect(minBufferTime).toBe(0);
   });
 
   it('get manifest value if ignoreMinBufferTime is false', async () => {
@@ -1210,6 +1210,6 @@ describe('DashParser Manifest', () => {
 
     const manifest = await parser.start('dummy://foo', playerInterface);
     const minBufferTime = manifest.minBufferTime;
-    expect(minBufferTime).toEqual(75);
+    expect(minBufferTime).toBe(75);
   });
 });

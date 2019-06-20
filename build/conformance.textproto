@@ -95,6 +95,17 @@ requirement: {
                  'is not allowed; use an explicit comparison instead.'
 }
 
+requirement: {
+  type: BANNED_CODE_PATTERN
+  value: '/** @param {*} a'
+         '    @param {(number|string|boolean|null|undefined)} x */'
+         'function template(a, x) { expect(a).toEqual(x); }'
+  value: '/** @param {*} a'
+         '    @param {(number|string|boolean|null|undefined)} x */'
+         'function template(a, x) { expect(a).not.toEqual(x); }'
+  error_message: 'Use expect.toBe for primitives'
+}
+
 
 # Disallow console logging.
 requirement: {

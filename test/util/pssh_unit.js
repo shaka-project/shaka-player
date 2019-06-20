@@ -242,9 +242,9 @@ describe('Pssh', () => {
         pssh.dataBoundaries[2].start,
         pssh.dataBoundaries[2].end + 1);
 
-    expect(toHex(data1)).toEqual(GENERIC_PSSH);
-    expect(toHex(data2)).toEqual(WIDEVINE_PSSH);
-    expect(toHex(data3)).toEqual(PLAYREADY_PSSH);
+    expect(toHex(data1)).toBe(GENERIC_PSSH);
+    expect(toHex(data2)).toBe(WIDEVINE_PSSH);
+    expect(toHex(data3)).toBe(PLAYREADY_PSSH);
   });
 });
 

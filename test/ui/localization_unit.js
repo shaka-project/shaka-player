@@ -114,7 +114,7 @@ describe('Localization', () => {
     const testLocales = (locales, expectedValue) => {
       localization.changeLocale(locales);
       const value = localization.resolve(KEY);
-      expect(value).toEqual(expectedValue);
+      expect(value).toBe(expectedValue);
     };
 
     beforeEach(() => {

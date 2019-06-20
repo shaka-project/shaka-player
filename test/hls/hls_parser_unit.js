@@ -560,7 +560,7 @@ describe('HlsParser', () => {
         .addPeriod(0)
           .addPartialVariant()
             .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', jasmine.any(String))
+              .mime('video/mp4', /** @type {?} */ (jasmine.any(String)))
         .build();
     /* eslint-enable indent */
 
@@ -592,9 +592,9 @@ describe('HlsParser', () => {
         .addPeriod(0)
           .addPartialVariant()
             .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', jasmine.any(String))
+              .mime('video/mp4', /** @type {?} */ (jasmine.any(String)))
             .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', jasmine.any(String))
+              .mime('audio/mp4', /** @type {?} */ (jasmine.any(String)))
         .build();
     /* eslint-enable indent */
 
@@ -625,7 +625,7 @@ describe('HlsParser', () => {
         .addPeriod(0)
           .addPartialVariant()
             .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', jasmine.any(String))
+              .mime('video/mp4', /** @type {?} */ (jasmine.any(String)))
         .build();
     /* eslint-enable indent */
 
@@ -656,7 +656,7 @@ describe('HlsParser', () => {
         .addPeriod(0)
           .addPartialVariant()
             .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', jasmine.any(String))
+              .mime('audio/mp4', /** @type {?} */ (jasmine.any(String)))
         .build();
     /* eslint-enable indent */
 
@@ -1127,7 +1127,7 @@ describe('HlsParser', () => {
     /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
         .anyTimeline()
-        .addPeriod(jasmine.any(Number))
+        .addPeriod(/** @type {?} */ (jasmine.any(Number)))
           .addPartialVariant()
             .addPartialStream(ContentType.VIDEO)
           .addPartialStream(ContentType.TEXT)
@@ -1225,12 +1225,12 @@ describe('HlsParser', () => {
     expect(videoReference).not.toBe(null);
     expect(audioReference).not.toBe(null);
     if (videoReference) {
-      expect(videoReference.getUris()[0])
-          .toEqual('test:/host/video/segment.mp4');
+      expect(videoReference.getUris())
+          .toEqual(['test:/host/video/segment.mp4']);
     }
     if (audioReference) {
-      expect(audioReference.getUris()[0])
-          .toEqual('test:/host/audio/segment.mp4');
+      expect(audioReference.getUris())
+          .toEqual(['test:/host/audio/segment.mp4']);
     }
   });
 
@@ -1690,7 +1690,7 @@ describe('HlsParser', () => {
 
       // In VOD content, we set the presentationTimeOffset to align the
       // content to presentation time 0.
-      expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
+      expect(video.presentationTimeOffset).toBe(segmentDataStartTime);
     });
 
     it('parses start time from ts segments', async () => {
@@ -1723,7 +1723,7 @@ describe('HlsParser', () => {
 
       // In VOD content, we set the presentationTimeOffset to align the
       // content to presentation time 0.
-      expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
+      expect(video.presentationTimeOffset).toBe(segmentDataStartTime);
     });
 
     // We want to make sure that we can interrupt the parser while it is getting
@@ -1780,11 +1780,11 @@ describe('HlsParser', () => {
       const ref = video.getSegmentReference(0);
       expect(video.getSegmentReference(1)).toBe(null);  // No more references.
 
-      expect(video.presentationTimeOffset).toEqual(segmentDataStartTime);
+      expect(video.presentationTimeOffset).toBe(segmentDataStartTime);
       // The duration should be set to the sum of the segment durations (5),
       // even though the endTime of the segment is larger.
-      expect(ref.endTime - ref.startTime).toEqual(5);
-      expect(presentationTimeline.getDuration()).toEqual(5);
+      expect(ref.endTime - ref.startTime).toBe(5);
+      expect(presentationTimeline.getDuration()).toBe(5);
     });
   });
 

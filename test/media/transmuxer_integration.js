@@ -71,20 +71,21 @@ describe('Transmuxer', () => {
           convertTsCodecs(ContentType.AUDIO, transportStreamAudioMimeType);
       const expectedVideoCodecs = 'video/mp4; codecs="avc1.42E01E"';
       const expectedAudioCodecs = 'audio/mp4; codecs="mp4a.40.2"';
-      expect(convertedVideoCodecs).toEqual(expectedVideoCodecs);
-      expect(convertedAudioCodecs).toEqual(expectedAudioCodecs);
+      expect(convertedVideoCodecs).toBe(expectedVideoCodecs);
+      expect(convertedAudioCodecs).toBe(expectedAudioCodecs);
     });
 
     it('converts legacy avc1 codec strings', () => {
-      expect(convertTsCodecs(ContentType.VIDEO,
-          'video/mp2t; codecs="avc1.100.42"')).toEqual(
-          'video/mp4; codecs="avc1.64002a"');
-      expect(convertTsCodecs(ContentType.VIDEO,
-          'video/mp2t; codecs="avc1.77.80"')).toEqual(
-          'video/mp4; codecs="avc1.4d0050"');
-      expect(convertTsCodecs(ContentType.VIDEO,
-          'video/mp2t; codecs="avc1.66.1"')).toEqual(
-          'video/mp4; codecs="avc1.420001"');
+      expect(
+          convertTsCodecs(
+              ContentType.VIDEO, 'video/mp2t; codecs="avc1.100.42"'))
+          .toBe('video/mp4; codecs="avc1.64002a"');
+      expect(
+          convertTsCodecs(ContentType.VIDEO, 'video/mp2t; codecs="avc1.77.80"'))
+          .toBe('video/mp4; codecs="avc1.4d0050"');
+      expect(
+          convertTsCodecs(ContentType.VIDEO, 'video/mp2t; codecs="avc1.66.1"'))
+          .toBe('video/mp4; codecs="avc1.420001"');
     });
   });
 
@@ -157,7 +158,7 @@ describe('Transmuxer', () => {
           .parse(transmuxedData.data.buffer);
 
       expect(parsed).toBe(true);
-      expect(mp4Timestamp).toEqual(expectedMp4Timestamp);
+      expect(mp4Timestamp).toBe(expectedMp4Timestamp);
     });
   });
 });

@@ -27,7 +27,7 @@ describe('AbortableOperation', () => {
       promise.resolve(100);
 
       const value = await operation.promise;
-      expect(value).toEqual(100);
+      expect(value).toBe(100);
     });
   });
 
@@ -96,7 +96,7 @@ describe('AbortableOperation', () => {
     it('creates a completed operation with the given value', async () => {
       const operation = shaka.util.AbortableOperation.completed(100);
       const value = await operation.promise;
-      expect(value).toEqual(100);
+      expect(value).toBe(100);
     });
   });
 
@@ -114,7 +114,7 @@ describe('AbortableOperation', () => {
       let isComplete = false;
       operation.promise.catch(fail).then((value) => {
         isComplete = true;
-        expect(value).toEqual(100);
+        expect(value).toBe(100);
       });
 
       await shaka.test.Util.shortDelay();
@@ -453,7 +453,7 @@ describe('AbortableOperation', () => {
             shaka.test.Util.expectToEqualError(e, error3);
             return shaka.util.AbortableOperation.completed(400);
           }).chain((value) => {
-            expect(value).toEqual(400);
+            expect(value).toBe(400);
           }).finally((ok) => {
             expect(ok).toBe(true);
           });
@@ -504,7 +504,7 @@ describe('AbortableOperation', () => {
     it('does not need return when onSuccess omitted', async () => {
       const operation = shaka.util.AbortableOperation.completed(100)
           .chain(undefined, fail).chain(undefined, fail).chain((value) => {
-            expect(value).toEqual(100);
+            expect(value).toBe(100);
           }).finally((ok) => {
             expect(ok).toBe(true);
           });

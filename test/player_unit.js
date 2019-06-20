@@ -276,7 +276,7 @@ describe('Player', () => {
         streamingListener.and.callFake(() => {
           const activeTracks =
             player.getVariantTracks().filter((t) => t.active);
-          expect(activeTracks.length).toEqual(0);
+          expect(activeTracks.length).toBe(0);
         });
         await runTest();
       });
@@ -289,7 +289,7 @@ describe('Player', () => {
         streamingListener.and.callFake(() => {
           const tracks = player.getVariantTracks();
           // Either WebM, or MP4, but not both.
-          expect(tracks.length).toEqual(1);
+          expect(tracks.length).toBe(1);
         });
         await runTest();
       });
@@ -348,7 +348,7 @@ describe('Player', () => {
       const config1 = player.getConfiguration();
       config1.streaming.bufferBehind = -99;
       const config2 = player.getConfiguration();
-      expect(config1.streaming.bufferBehind).not.toEqual(
+      expect(config1.streaming.bufferBehind).not.toBe(
           config2.streaming.bufferBehind);
     });
   });
@@ -722,7 +722,7 @@ describe('Player', () => {
       expect(player.configure(changes)).toBe(false);
 
       const newConfig = player.getConfiguration();
-      expect(newConfig.streaming.bufferBehind).toEqual(77);
+      expect(newConfig.streaming.bufferBehind).toBe(77);
     });
 
     // https://github.com/google/shaka-player/issues/1524
@@ -731,14 +731,14 @@ describe('Player', () => {
       player.configure('drm.advanced.bar', {});
       const fooConfig1 = player.getConfiguration().drm.advanced.foo;
       const barConfig1 = player.getConfiguration().drm.advanced.bar;
-      expect(fooConfig1.distinctiveIdentifierRequired).toEqual(false);
-      expect(barConfig1.distinctiveIdentifierRequired).toEqual(false);
+      expect(fooConfig1.distinctiveIdentifierRequired).toBe(false);
+      expect(barConfig1.distinctiveIdentifierRequired).toBe(false);
 
       player.configure('drm.advanced.foo.distinctiveIdentifierRequired', true);
       const fooConfig2 = player.getConfiguration().drm.advanced.foo;
       const barConfig2 = player.getConfiguration().drm.advanced.bar;
-      expect(fooConfig2.distinctiveIdentifierRequired).toEqual(true);
-      expect(barConfig2.distinctiveIdentifierRequired).toEqual(false);
+      expect(fooConfig2.distinctiveIdentifierRequired).toBe(true);
+      expect(barConfig2.distinctiveIdentifierRequired).toBe(false);
     });
   });
 
@@ -1394,7 +1394,7 @@ describe('Player', () => {
 
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       const variant = streamingEngine.switchVariant.calls.argsFor(0)[0];
-      expect(variant.id).toEqual(newTrack.id);
+      expect(variant.id).toBe(newTrack.id);
     });
 
     it('still switches streams if called during startup', () => {
@@ -1411,7 +1411,7 @@ describe('Player', () => {
       streamingEngine.onCanSwitch();
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       const variant = streamingEngine.switchVariant.calls.argsFor(0)[0];
-      expect(variant.id).toEqual(newTrack.id);
+      expect(variant.id).toBe(newTrack.id);
     });
 
     it('still switches streams if called while switching Periods', () => {
@@ -1435,7 +1435,7 @@ describe('Player', () => {
       streamingEngine.onCanSwitch();
       expect(streamingEngine.switchVariant).toHaveBeenCalled();
       const variant = streamingEngine.switchVariant.calls.argsFor(0)[0];
-      expect(variant.id).toEqual(newTrack.id);
+      expect(variant.id).toBe(newTrack.id);
     });
 
     it('switching audio doesn\'t change selected text track', () => {
@@ -2727,9 +2727,9 @@ describe('Player', () => {
       // We've already chosen codecs, so only 3 tracks should remain.
       expect(variants.length).toBe(3);
       // They should be the low-bandwidth ones.
-      expect(variants[0].video.codecs).toEqual('good');
-      expect(variants[1].video.codecs).toEqual('good');
-      expect(variants[2].video.codecs).toEqual('good');
+      expect(variants[0].video.codecs).toBe('good');
+      expect(variants[1].video.codecs).toBe('good');
+      expect(variants[2].video.codecs).toBe('good');
     });
 
     it('updates AbrManager about restricted variants', async () => {
@@ -2781,8 +2781,8 @@ describe('Player', () => {
       // We've chosen codecs, so only 1 track should remain.
       expect(abrManager.variants.length).toBe(1);
       // It should be the 6-channel variant, based on our preference.
-      expect(abrManager.variants[0].audio.channelsCount).toEqual(6);
-      expect(abrManager.variants[0].audio.codecs).toEqual('ac-3');
+      expect(abrManager.variants[0].audio.channelsCount).toBe(6);
+      expect(abrManager.variants[0].audio.codecs).toBe('ac-3');
     });
 
     /**
@@ -2887,7 +2887,7 @@ describe('Player', () => {
       };
 
       // False before we've loaded anything.
-      expect(player.isAudioOnly()).toEqual(false);
+      expect(player.isAudioOnly()).toBe(false);
 
       /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
@@ -2899,7 +2899,7 @@ describe('Player', () => {
       /* eslint-enable indent */
       await player.load(fakeManifestUri, 0, parserFactory);
       // We have audio & video tracks, so this is not audio-only.
-      expect(player.isAudioOnly()).toEqual(false);
+      expect(player.isAudioOnly()).toBe(false);
 
       /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
@@ -2910,7 +2910,7 @@ describe('Player', () => {
       /* eslint-enable indent */
       await player.load(fakeManifestUri, 0, parserFactory);
       // We have video-only tracks, so this is not audio-only.
-      expect(player.isAudioOnly()).toEqual(false);
+      expect(player.isAudioOnly()).toBe(false);
 
       /* eslint-disable indent */
       manifest = new shaka.test.ManifestGenerator()
@@ -2921,11 +2921,11 @@ describe('Player', () => {
       /* eslint-enable indent */
       await player.load(fakeManifestUri, 0, parserFactory);
       // We have audio-only tracks, so this is audio-only.
-      expect(player.isAudioOnly()).toEqual(true);
+      expect(player.isAudioOnly()).toBe(true);
 
       await player.unload();
       // When we have nothing loaded, we go back to not audio-only status.
-      expect(player.isAudioOnly()).toEqual(false);
+      expect(player.isAudioOnly()).toBe(false);
     });
   });
 

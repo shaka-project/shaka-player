@@ -164,7 +164,7 @@ describe('Player', () => {
         await player.load(asset.manifestUri);
         if (asset.features) {
           const isLive = asset.features.includes(Feature.LIVE);
-          expect(player.isLive()).toEqual(isLive);
+          expect(player.isLive()).toBe(isLive);
         }
         video.play();
 

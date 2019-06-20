@@ -117,9 +117,9 @@ describe('Mp4Parser', () => {
     it('reads box header', () => {
       const callback = jasmine.createSpy('parser callback').and.callFake(
           (box) => {
-            expect(box.size).toEqual(12);
-            expect(box.version).toEqual(null);
-            expect(box.flags).toEqual(null);
+            expect(box.size).toBe(12);
+            expect(box.version).toBe(null);
+            expect(box.flags).toBe(null);
           });
 
       new shaka.util.Mp4Parser()
@@ -131,9 +131,9 @@ describe('Mp4Parser', () => {
     it('reads full box header', () => {
       const callback = jasmine.createSpy('parser callback').and.callFake(
           (box) => {
-            expect(box.size).toEqual(16);
-            expect(box.version).toEqual(1);
-            expect(box.flags).toEqual(0x123456);
+            expect(box.size).toBe(16);
+            expect(box.version).toBe(1);
+            expect(box.flags).toBe(0x123456);
           });
 
       new shaka.util.Mp4Parser()
@@ -150,16 +150,16 @@ describe('Mp4Parser', () => {
 
       const childBox1 = jasmine.createSpy('child box 1').and.callFake(
           (box) => {
-            expect(box.size).toEqual(12);
-            expect(box.version).toEqual(null);
-            expect(box.flags).toEqual(null);
+            expect(box.size).toBe(12);
+            expect(box.version).toBe(null);
+            expect(box.flags).toBe(null);
           });
 
       const childBox2 = jasmine.createSpy('child box 2').and.callFake(
           (box) => {
-            expect(box.size).toEqual(12);
-            expect(box.version).toEqual(null);
-            expect(box.flags).toEqual(null);
+            expect(box.size).toBe(12);
+            expect(box.version).toBe(null);
+            expect(box.flags).toBe(null);
           });
 
       new shaka.util.Mp4Parser()
@@ -202,11 +202,11 @@ describe('Mp4Parser', () => {
                 payload = data;
               })).parse(boxData);
 
-      expect(payload.length).toEqual(4);
-      expect(payload[0]).toEqual(0x00);
-      expect(payload[1]).toEqual(0x11);
-      expect(payload[2]).toEqual(0x22);
-      expect(payload[3]).toEqual(0x33);
+      expect(payload.length).toBe(4);
+      expect(payload[0]).toBe(0x00);
+      expect(payload[1]).toBe(0x11);
+      expect(payload[2]).toBe(0x22);
+      expect(payload[3]).toBe(0x33);
     });
 
     it('reads sample description definition', () => {

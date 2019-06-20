@@ -206,7 +206,7 @@ describe('MediaSourceEngine', () => {
 
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
-      expect(mockVideo.src).toEqual('blob:foo');
+      expect(mockVideo.src).toBe('blob:foo');
     });
   });
 

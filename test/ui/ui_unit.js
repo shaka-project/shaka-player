@@ -209,8 +209,8 @@ describe('UI', () => {
         const overflowMenuButton = overflowMenuButtons[0];
 
         overflowMenuButton.click();
-        expect(overflowMenu.style.display).not.toEqual('none');
-        expect(controlsContainer.style.display).not.toEqual('none');
+        expect(overflowMenu.style.display).not.toBe('none');
+        expect(controlsContainer.style.display).not.toBe('none');
       });
     });
 
@@ -242,7 +242,7 @@ describe('UI', () => {
 
       it('becomes visible if overflowMenuButton was clicked', () => {
         let display = window.getComputedStyle(overflowMenu, null).display;
-        expect(display).toEqual('none');
+        expect(display).toBe('none');
 
         const overflowMenuButtons =
             videoContainer.getElementsByClassName('shaka-overflow-menu-button');
@@ -251,7 +251,7 @@ describe('UI', () => {
 
         overflowMenuButton.click();
         display = overflowMenu.style.display;
-        expect(display).not.toEqual('none');
+        expect(display).not.toBe('none');
       });
 
       it('allows picture-in-picture only when the content has video',
@@ -372,7 +372,7 @@ describe('UI', () => {
 
       it('becomes visible if resolutionButton was clicked', () => {
         let display = window.getComputedStyle(resolutionsMenu, null).display;
-        expect(display).toEqual('none');
+        expect(display).toBe('none');
 
         const resolutionButtons =
             videoContainer.getElementsByClassName('shaka-resolution-button');
@@ -381,7 +381,7 @@ describe('UI', () => {
 
         resolutionButton.click();
         display = resolutionsMenu.style.display;
-        expect(display).not.toEqual('none');
+        expect(display).not.toBe('none');
       });
 
       it('clears the buffer when changing resolutions', async () => {

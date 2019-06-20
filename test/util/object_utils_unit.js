@@ -69,7 +69,7 @@ describe('ObjectUtils', () => {
       a.length = 10;
       const copy = cloneObject(a);
       expect(copy).toEqual(a);
-      expect(copy.length).toEqual(10);
+      expect(copy.length).toBe(10);
     });
 
     it('ignores cyclic objects', () => {

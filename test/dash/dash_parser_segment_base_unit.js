@@ -253,8 +253,8 @@ describe('DashParser SegmentBase', () => {
     await video.createSegmentIndex();  // real data, should succeed
 
     const reference = video.getSegmentReference(0);
-    expect(reference.startTime).toEqual(-2);
-    expect(reference.endTime).toEqual(10);  // would be 12 without PTO
+    expect(reference.startTime).toBe(-2);
+    expect(reference.endTime).toBe(10);  // would be 12 without PTO
   });
 
   describe('fails for', () => {

@@ -269,25 +269,25 @@ describe('ManifestTextParser', () => {
     it('recreates valid tag with attributes', () => {
       const text = '#EXT-X-MEDIA:CODECS="avc1.64002a,mp4a.40.2",AUDIO="a1,a2"';
       const tag = shaka.hls.ManifestTextParser.parseTag(0, text);
-      expect(text).toEqual(tag.toString());
+      expect(text).toBe(tag.toString());
     });
 
     it('recreates valid tag with value', () => {
       const text = '#EXT-X-PLAYLIST-TYPE:VOD';
       const tag = shaka.hls.ManifestTextParser.parseTag(0, text);
-      expect(text).toEqual(tag.toString());
+      expect(text).toBe(tag.toString());
     });
 
     it('recreates valid tag with no value', () => {
       const text = '#EXTM3U';
       const tag = shaka.hls.ManifestTextParser.parseTag(0, text);
-      expect(text).toEqual(tag.toString());
+      expect(text).toBe(tag.toString());
     });
 
     it('recreates valid tag with both value and attributes', () => {
       const text = '#EXTINF:5.99467,pid=180';
       const tag = shaka.hls.ManifestTextParser.parseTag(0, text);
-      expect(text).toEqual(tag.toString());
+      expect(text).toBe(tag.toString());
     });
   });
 
@@ -462,7 +462,7 @@ describe('ManifestTextParser', () => {
 
   // TODO(#1672): Get a better type than "Object" here.
   /**
-   * @param {Object} expectedPlaylist
+   * @param {!Object} expectedPlaylist
    * @param {string} playlistText
    * @param {string} absoluteManifestUri
    */
@@ -471,16 +471,6 @@ describe('ManifestTextParser', () => {
     const actualPlaylist =
         parser.parsePlaylist(playlistBuffer, absoluteManifestUri);
 
-    expect(actualPlaylist).toBeTruthy();
-    expect(actualPlaylist.type).toEqual(expectedPlaylist.type);
-    expect(actualPlaylist.tags).toEqual(expectedPlaylist.tags);
-
-    if (expectedPlaylist.segments) {
-      expect(actualPlaylist.segments).toEqual(expectedPlaylist.segments);
-    }
-
-    if (expectedPlaylist.absoluteUri) {
-      expect(actualPlaylist.absoluteUri).toEqual(expectedPlaylist.absoluteUri);
-    }
+    expect(actualPlaylist).toEqual(jasmine.objectContaining(expectedPlaylist));
   }
 });

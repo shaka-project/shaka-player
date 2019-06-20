@@ -2151,7 +2151,7 @@ describe('StreamingEngine', () => {
       const startTime = Date.now();
       runTest();
       expect(failureCallback).toHaveBeenCalled();
-      expect(callbackTime - startTime).toEqual(10000);  // baseDelay == 10000
+      expect(callbackTime - startTime).toBe(10000);  // baseDelay == 10000
     });
   });
 

@@ -103,7 +103,7 @@ describe('SimpleAbrManager', () => {
   it('can handle empty variants', () => {
     abrManager.setVariants([]);
     const chosen = abrManager.chooseVariant();
-    expect(chosen).toEqual(null);
+    expect(chosen).toBe(null);
   });
 
   it('can choose from audio only variants', () => {

@@ -197,6 +197,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     it('three references into zero references', () => {
       const index1 = new shaka.media.SegmentIndex([]);
 
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references2 = [actual1, actual2, actual3];
 
       index1.merge(references2);
@@ -205,6 +206,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     it('zero references into three references', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references1 = [actual1, actual2, actual3];
       const index1 = new shaka.media.SegmentIndex(references1);
 
@@ -214,9 +216,11 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     it('one reference into one reference at end', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references1 = [makeReference(1, 10, 20, uri(10))];
       const index1 = new shaka.media.SegmentIndex(references1);
 
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references2 = [makeReference(2, 20, 30, uri(20))];
 
       index1.merge(references2);
@@ -226,12 +230,14 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     it('one reference into two references at end', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references1 = [
         makeReference(1, 10, 20, uri(10)),
         makeReference(2, 20, 30, uri(20)),
       ];
       const index1 = new shaka.media.SegmentIndex(references1);
 
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references2 = [makeReference(3, 30, 40, uri(30))];
 
       index1.merge(references2);
@@ -242,9 +248,11 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     it('two references into one reference at end', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references1 = [makeReference(2, 20, 30, uri(20))];
       const index1 = new shaka.media.SegmentIndex(references1);
 
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references2 = [
         makeReference(3, 30, 40, uri(30)),
         makeReference(4, 40, 50, uri(40)),
@@ -258,6 +266,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     it('last live stream reference when period change', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references1 = [
         makeReference(1, 10, 20, uri(10)),
         makeReference(2, 20, 30, uri(20)),
@@ -268,6 +277,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       // When the period is changed, fit() will expand last segment to the start
       // of the next the period.  This simulates an update in which fit() has
       // done that.
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references2 = [
         makeReference(2, 20, 30, uri(20)),
         makeReference(3, 30, 50, uri(30)),
@@ -284,6 +294,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     // position numbers.
     // https://github.com/google/shaka-player/pull/838
     it('last live stream reference with corrected position', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references1 = [
         makeReference(1, 10, 20, uri(10)),
         makeReference(2, 20, 30, uri(20)),
@@ -292,6 +303,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const index1 = new shaka.media.SegmentIndex(references1);
 
       // segment position always start from 1 for time-based segment templates
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references2 = [
         makeReference(1, 20, 30, uri(20)),
         makeReference(2, 30, 50, uri(30)),

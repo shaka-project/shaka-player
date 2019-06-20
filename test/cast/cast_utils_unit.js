@@ -89,7 +89,11 @@ describe('CastUtils', () => {
       // The deserialized object matches the original.
       const deserialized = CastUtils.deserialize(serialized);
       for (const k in orig) {
-        expect(deserialized[k]).toEqual(orig[k]);
+        if (typeof orig[k] == 'number' && isNaN(orig[k])) {
+          expect(deserialized[k]).toBeNaN();
+        } else {
+          expect(deserialized[k]).toBe(orig[k]);
+        }
       }
     });
 
@@ -130,10 +134,10 @@ describe('CastUtils', () => {
       // The fake event has the same type and properties as the original.
       const asObj = /** @type {!Object} */ (fakeEvent);
       for (const k of nativeProperties) {
-        expect(asObj[k]).toEqual(event[k]);
+        expect(asObj[k]).toBe(event[k]);
       }
       for (const k in extraProperties) {
-        expect(asObj[k]).toEqual(event[k]);
+        expect(asObj[k]).toBe(event[k]);
       }
     });
 
@@ -178,10 +182,10 @@ describe('CastUtils', () => {
       // The deserialized event has the same type and properties as the
       // original.
       for (const k of nativeProperties) {
-        expect(deserialized[k]).toEqual(asObj[k]);
+        expect(deserialized[k]).toBe(asObj[k]);
       }
       for (const k in extraProperties) {
-        expect(deserialized[k]).toEqual(asObj[k]);
+        expect(deserialized[k]).toBe(asObj[k]);
       }
     });
 
@@ -264,7 +268,7 @@ describe('CastUtils', () => {
 
         // Expect the deserialized version to look like the original.
         const deserialized = CastUtils.deserialize(serialized);
-        expect(deserialized.length).toEqual(buffered.length);
+        expect(deserialized.length).toBe(buffered.length);
         expect(deserialized.start).toEqual(jasmine.any(Function));
         expect(deserialized.end).toEqual(jasmine.any(Function));
 

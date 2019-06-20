@@ -613,7 +613,7 @@ describe('HlsParser live', () => {
         ManifestParser.verifySegmentIndex(video, [ref]);
 
         // In live content, we do not set presentationTimeOffset.
-        expect(video.presentationTimeOffset).toEqual(0);
+        expect(video.presentationTimeOffset).toBe(0);
       });
 
       it('gets start time on update without segment request', () => {
@@ -680,7 +680,7 @@ describe('HlsParser live', () => {
         const video = manifest.periods[0].variants[0].video;
         ManifestParser.verifySegmentIndex(video, [ref]);
         // In live content, we do not set presentationTimeOffset.
-        expect(video.presentationTimeOffset).toEqual(0);
+        expect(video.presentationTimeOffset).toBe(0);
       });
 
       it('gets start time of segments with byte range', () => {

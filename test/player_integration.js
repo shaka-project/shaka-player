@@ -174,10 +174,10 @@ describe('Player', () => {
       // invalidate the test setup.
       expect(player.getTextTracks().length).not.toBe(0);
       const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).toEqual(preferredTextLanguage);
+      expect(textTrack.language).toBe(preferredTextLanguage);
 
       const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).not.toEqual(textTrack.language);
+      expect(variantTrack.language).not.toBe(textTrack.language);
     });
 
     it('is not called automatically without language pref match', async () => {
@@ -200,10 +200,10 @@ describe('Player', () => {
       // would invalidate the test setup.
       expect(player.getTextTracks().length).not.toBe(0);
       const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).not.toEqual(preferredTextLanguage);
+      expect(textTrack.language).not.toBe(preferredTextLanguage);
 
       const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).not.toEqual(textTrack.language);
+      expect(variantTrack.language).not.toBe(textTrack.language);
     });
 
     it('is not called automatically with audio and text match', async () => {
@@ -225,10 +225,10 @@ describe('Player', () => {
       // underlying content that would invalidate the test setup.
       expect(player.getTextTracks().length).not.toBe(0);
       const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).toEqual(preferredTextLanguage);
+      expect(textTrack.language).toBe(preferredTextLanguage);
 
       const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).toEqual(textTrack.language);
+      expect(variantTrack.language).toBe(textTrack.language);
     });
 
     // Repro for https://github.com/google/shaka-player/issues/1879.
@@ -273,7 +273,7 @@ describe('Player', () => {
       expect(textTracks.length).toBe(1);
 
       expect(textTracks[0].active).toBe(true);
-      expect(textTracks[0].language).toEqual('en');
+      expect(textTracks[0].language).toBe('en');
     });
 
     it('with cea closed captions', async () => {
@@ -282,7 +282,7 @@ describe('Player', () => {
       const textTracks = player.getTextTracks();
       expect(textTracks).toBeTruthy();
       expect(textTracks.length).toBe(1);
-      expect(textTracks[0].language).toEqual('en');
+      expect(textTracks[0].language).toBe('en');
     });
 
     it('while changing languages with short Periods', async () => {
