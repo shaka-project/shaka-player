@@ -75,8 +75,8 @@ Please note that custom layouts might need CSS adjustments to look good.
 <!-- TODO: Is there a better way to do this? (The actual thing, not the tutorial) -->
 The seek bar consists of three segments: past (already played part of the presentation),
 future-buffered and future-unbuffered. The segments colors are set when the seek bar is created.
-To customize the colors, change the values of `shaka.ui.Controls.SEEK_BAR_BASE_COLOR_` ,
-`shaka.ui.Controls.SEEK_BAR_PLAYED_COLOR_`, and `shaka.ui.Controls.SEEK_BAR_BUFFERED_COLOR_` in ui/controls.js
+To customize the colors, change the values of `shaka.ui.Constants.SEEK_BAR_BASE_COLOR` ,
+`shaka.ui.Constants.SEEK_BAR_PLAYED_COLOR`, and `shaka.ui.Constants.SEEK_BAR_BUFFERED_COLOR` in ui/controls.js
 
 
 #### Creating custom elements and adding them to the UI
