@@ -988,6 +988,27 @@ describe('StreamingEngine', function() {
     expect(timeline.setDuration).not.toHaveBeenCalled();
   });
 
+  // https://github.com/google/shaka-player/issues/1967
+  it('does not change duration when 0', () => {
+    setupVod();
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    onStartupComplete.and.callFake(() => setupFakeGetTime(0));
+    onChooseStreams.and.callFake(defaultOnChooseStreams);
+
+    // The duration can spuriously be set to 0, so we should ignore this and not
+    // update the duration.
+    mediaSourceEngine.getDuration.and.returnValue(0);
+
+    // Here we go!
+    streamingEngine.start();
+
+    runTest();
+    expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+    expect(timeline.setDuration).not.toHaveBeenCalled();
+  });
+
   it('applies fudge factor for appendWindowStart', function() {
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
