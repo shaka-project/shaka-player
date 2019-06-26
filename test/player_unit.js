@@ -1579,6 +1579,19 @@ describe('Player', () => {
       expect(getActiveTextTrack().language).toBe('en');
     });
 
+    // https://github.com/google/shaka-player/issues/2010
+    it('changing text lang changes active stream when not streaming', () => {
+      streamingEngine.onCanSwitch();
+      player.setTextTrackVisibility(false);
+
+      expect(getActiveTextTrack().language).not.toBe('en');
+      expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
+      player.selectTextLanguage('en');
+
+      expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
+      expect(getActiveTextTrack().language).toBe('en');
+    });
+
     it('remembers the channel count when ABR is reenabled', () => {
       streamingEngine.onCanSwitch();
 
