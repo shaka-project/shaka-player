@@ -657,8 +657,7 @@ describe('StreamingEngine', () => {
             video: {
               id: 2,
               createSegmentIndex: () => Promise.resolve(),
-              findSegmentPosition: (t) => videoIndex.find(t),
-              getSegmentReference: (i) => videoIndex.get(i),
+              segmentIndex: videoIndex,
               initSegmentReference: createInit('video'),
               // Normally PTO adjusts the segment time backwards; so to make the
               // segment appear in the future, use a negative.
@@ -673,8 +672,7 @@ describe('StreamingEngine', () => {
             audio: {
               id: 3,
               createSegmentIndex: () => Promise.resolve(),
-              findSegmentPosition: (t) => audioIndex.find(t),
-              getSegmentReference: (i) => audioIndex.get(i),
+              segmentIndex: audioIndex,
               initSegmentReference: createInit('audio'),
               presentationTimeOffset: -gapAtStart,
               mimeType: 'audio/mp4',

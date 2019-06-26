@@ -185,7 +185,12 @@ shakaDemo.Config = class {
         .addNumberInput_('Default Presentation Delay',
             'manifest.dash.defaultPresentationDelay')
         .addBoolInput_('Ignore Min Buffer Time',
-            'manifest.dash.ignoreMinBufferTime');
+            'manifest.dash.ignoreMinBufferTime')
+        .addNumberInput_('Initial Segment Limit',
+            'manifest.dash.initialSegmentLimit',
+            /* canBeDecimal = */ false,
+            /* canBeZero = */ false,
+            /* canBeUnset = */ true);
 
     this.addRetrySection_('manifest', 'Manifest');
   }

@@ -159,20 +159,10 @@ This is called first before any other method.  This allows an index to be
 fetched over the network, if needed.  This method should return a Promise that
 will resolve when the segment index is ready.  This is only ever called once.
 
-#### findSegmentPosition(time:number):(number|null)
+#### segmentIndex
 
-This is passed in a time (in seconds) relative to the start of this Period and
-should return the position of the segment that contains that time, or null
-if it is not found.
-
-*NB: This is independent of segment availability for live streams.*
-
-#### getSegmentReference(position:number):(shaka.media.SegmentReference|null)
-
-This is passed the position (number) of the segment and should return a
-`shaka.media.SegmentReference` that is at that index, or null if not found.
-
-*NB: This is independent of segment availability for live streams.*
+This is *not* a function, but a {@link shaka.media.SegmentIndex} tracking all
+available segments.
 
 #### initSegmentReference
 
@@ -184,12 +174,13 @@ contains info about how to fetch the initialization segment.  This can be
 ## shaka.media.SegmentIndex
 
 To help in handling segment references, there is a
-{@link shaka.media.SegmentIndex} type.  This is given an array of references,
-handles merging new segments, and has the required segment functions.  All you
-need to do is create an array of references and pass it to the constructor.  For
-updates, simply create a new array of segments and call `merge`.  Any existing
-segments will be updated and new segments will be added.  You can also call
-`evict` to remove old references to reduce the memory footprint.
+{@link shaka.media.SegmentIndex} type.  This is given an array of references.
+It handles merging new segments, and expanding the list of segments for live
+streams.
+
+To merge updates, simply create a new array of segments and call `merge`.  Any
+existing segments will be updated and new segments will be added.  You can also
+call `evict` to remove old references to reduce the memory footprint.
 
 ```js
 var references = refs.map(function(r, i) {
@@ -201,11 +192,22 @@ var references = refs.map(function(r, i) {
 });
 
 var index = new shaka.media.SegmentIndex(references);
-var streamFunctions = {
-  createSegmentIndex: function() { return Promise.resolve(); },
-  findSegmentPosition: index.find.bind(index),
-  getSegmentReference: index.get.bind(index)
-};
+```
+
+To expand the list of references on a timer, as is done for DASH's
+SegmentTemplate, call `index.updateEvery` with a callback that evicts old
+references and returns an array of new references.
+
+```js
+index.updateEvery(updateIntervalSeconds, () => {
+  // Evict old references
+  index.evict(windowStartTime);
+
+  // Generate new references to append to the end of the index
+  const references = [];
+  // ...
+  return references;
+});
 ```
 
 
@@ -294,8 +296,7 @@ MyManifestParser.prototype.loadStream_ = function(type) {
   return {
     id: this.curId_++,  // globally unique ID
     createSegmentIndex:     function() { return Promise.resolve(); },
-    findSegmentPosition:    index.find.bind(index),
-    getSegmentReference:    index.get.bind(index),
+    segmentIndex:           index,
     initSegmentReference:   init,
     presentationTimeOffset: 0,  // seconds
     mimeType: type == 'video' ?

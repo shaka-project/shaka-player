@@ -55,6 +55,7 @@ shaka.test.Dash = class {
     };
     const manifest = await dashParser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
+    await stream.createSegmentIndex();
     shaka.test.ManifestParser.verifySegmentIndex(stream, references);
   }
 
@@ -153,7 +154,6 @@ shaka.test.Dash = class {
       video: jasmine.objectContaining({
         presentationTimeOffset: (pto || 0),
         createSegmentIndex: jasmine.any(Function),
-        findSegmentPosition: jasmine.any(Function),
         initSegmentReference: new shaka.media.InitSegmentReference(
             () => ['http://example.com/' + uri], startByte, endByte),
       }),

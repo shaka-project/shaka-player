@@ -1346,8 +1346,7 @@ describe('Storage', () => {
    */
   function overrideSegmentIndex(stream, segments) {
     const index = new shaka.media.SegmentIndex(segments);
-    stream.findSegmentPosition = (time) => index.find(time);
-    stream.getSegmentReference = (time) => index.get(time);
+    stream.segmentIndex = index;
   }
 
   /** @return {!shaka.test.FakeNetworkingEngine} */

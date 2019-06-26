@@ -497,22 +497,17 @@ shaka.test.ManifestGenerator = class {
       defaultMimeType = 'text/vtt';
     }
 
-    const create =
-    jasmine.createSpy('createSegmentIndex').and.callFake(() => {
+    const create = jasmine.createSpy('createSegmentIndex').and.callFake(() => {
       return Promise.resolve();
     });
-    const find =
-        jasmine.createSpy('findSegmentPosition').and.returnValue(null);
-    const get =
-        jasmine.createSpy('getSegmentReference').and.returnValue(null);
+    const segmentIndex = new shaka.test.FakeSegmentIndex();
 
     /** @type {shaka.extern.Stream} */
     const stream = {
       id: id,
       originalId: null,
       createSegmentIndex: shaka.test.Util.spyFunc(create),
-      findSegmentPosition: shaka.test.Util.spyFunc(find),
-      getSegmentReference: shaka.test.Util.spyFunc(get),
+      segmentIndex: segmentIndex,
       initSegmentReference: null,
       presentationTimeOffset: 0,
       mimeType: defaultMimeType,
@@ -551,8 +546,8 @@ shaka.test.ManifestGenerator = class {
     const totalDuration = this.manifest_.presentationTimeline.getDuration();
     const segmentCount = totalDuration / segmentDuration;
     stream.createSegmentIndex = () => Promise.resolve();
-    stream.findSegmentPosition = (time) => Math.floor(time / segmentDuration);
-    stream.getSegmentReference = (index) => {
+    stream.segmentIndex.find = (time) => Math.floor(time / segmentDuration);
+    stream.segmentIndex.get = (index) => {
       goog.asserts.assert(!isNaN(index), 'Invalid index requested!');
       if (index < 0 || index >= segmentCount || isNaN(index)) {
         return null;
@@ -576,19 +571,12 @@ shaka.test.ManifestGenerator = class {
   textStream(uri) {
     const stream = this.currentStream_();
     const duration = this.manifest_.presentationTimeline.getDuration();
-    const getUris = () => [uri];
 
-    stream.createSegmentIndex = () => Promise.resolve();
-    stream.findSegmentPosition = (time) =>
-      (time >= 0 && time < duration ? 1 : null);
-    stream.getSegmentReference = (position) => {
-      if (position != 1) {
-        return null;
-      }
-      const startTime = 0;
-      return new this.shaka_.media.SegmentReference(
-          position, startTime, duration, getUris, 0, null);
+    stream.createSegmentIndex = () => {
+      return Promise.resolve();
     };
+    stream.segmentIndex =
+        this.shaka_.media.SegmentIndex.forSingleSegment(duration, [uri]);
 
     return this;
   }

@@ -21,6 +21,7 @@ goog.provide('shaka.test.FakeManifestParser');
 goog.provide('shaka.test.FakePlayhead');
 goog.provide('shaka.test.FakePlayheadObserver');
 goog.provide('shaka.test.FakePresentationTimeline');
+goog.provide('shaka.test.FakeSegmentIndex');
 goog.provide('shaka.test.FakeStreamingEngine');
 goog.provide('shaka.test.FakeTextTrack');
 goog.provide('shaka.test.FakeTransmuxer');
@@ -427,6 +428,40 @@ shaka.test.FakeClosedCaptionParser = class {
   /** @override */
   reset() {
     return shaka.test.Util.invokeSpy(this.resetSpy);
+  }
+};
+
+
+/** @extends {shaka.media.SegmentIndex} */
+shaka.test.FakeSegmentIndex = class {
+  constructor() {
+    /** @type {!jasmine.Spy} */
+    this.destroy =
+        jasmine.createSpy('destroy').and.returnValue(Promise.resolve());
+
+    /** @type {!jasmine.Spy} */
+    this.find = jasmine.createSpy('find').and.returnValue(null);
+
+    /** @type {!jasmine.Spy} */
+    this.get = jasmine.createSpy('get').and.returnValue(null);
+
+    /** @type {!jasmine.Spy} */
+    this.offset = jasmine.createSpy('offset');
+
+    /** @type {!jasmine.Spy} */
+    this.merge = jasmine.createSpy('merge');
+
+    /** @type {!jasmine.Spy} */
+    this.replace = jasmine.createSpy('replace');
+
+    /** @type {!jasmine.Spy} */
+    this.evict = jasmine.createSpy('evict');
+
+    /** @type {!jasmine.Spy} */
+    this.fit = jasmine.createSpy('fit');
+
+    /** @type {!jasmine.Spy} */
+    this.updateEvery = jasmine.createSpy('updateEvery');
   }
 };
 

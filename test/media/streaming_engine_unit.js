@@ -402,8 +402,8 @@ describe('StreamingEngine', () => {
     alternateVideoStream1 =
         shaka.test.StreamingEngineUtil.createMockVideoStream(8);
     alternateVideoStream1.createSegmentIndex.and.returnValue(Promise.resolve());
-    alternateVideoStream1.findSegmentPosition.and.returnValue(null);
-    alternateVideoStream1.getSegmentReference.and.returnValue(null);
+    alternateVideoStream1.segmentIndex.find.and.returnValue(null);
+    alternateVideoStream1.segmentIndex.get.and.returnValue(null);
     const variant = {
       audio: null,
       video: /** @type {shaka.extern.Stream} */ (alternateVideoStream1),
@@ -859,10 +859,10 @@ describe('StreamingEngine', () => {
     // For the first update, indicate the segment isn't available.  This should
     // not cause us to fallback to the Playhead time to determine which segment
     // to start streaming.
-    const oldGet = textStream2.getSegmentReference;
-    textStream2.getSegmentReference = (idx) => {
+    const oldGet = textStream2.segmentIndex.get;
+    textStream2.segmentIndex.get = (idx) => {
       if (idx == 1) {
-        textStream2.getSegmentReference = oldGet;
+        textStream2.segmentIndex.get = oldGet;
         return null;
       }
       return oldGet(idx);
@@ -2987,9 +2987,11 @@ describe('StreamingEngine', () => {
     it('still aborts if previous segment size unknown', () => {
       // This should use the "bytes remaining" from the request instead of the
       // previous stream's size.
-      const oldGet = manifest.periods[0].variants[0].video.getSegmentReference;
-      manifest.periods[0].variants[0].video.getSegmentReference = (idx) => {
-        const seg = oldGet(idx);
+      const segmentIndex = manifest.periods[0].variants[0].video.segmentIndex;
+      const oldGet = segmentIndex.get;
+      manifest.periods[0].variants[0].video.segmentIndex.get = (idx) => {
+        // eslint-disable-next-line no-restricted-syntax
+        const seg = oldGet.call(segmentIndex, idx);
         if (seg) {
           // With endByte being null, we won't know the segment size.
           return new shaka.media.SegmentReference(

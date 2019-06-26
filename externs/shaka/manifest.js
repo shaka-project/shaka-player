@@ -259,35 +259,11 @@ shaka.extern.CreateSegmentIndexFunction;
 
 
 /**
- * Finds the position of the segment for the given time, in seconds, relative
- * to the start of a particular Period; returns null if the position of the
- * segment could not be determined. Note: the position of a segment is unique
- * only among segments within the same Period.
- *
- * @typedef {function(number): ?number}
- * @exportDoc
- */
-shaka.extern.FindSegmentPositionFunction;
-
-
-/**
- * Gets the SegmentReference for the segment at the given position; returns
- * null if no such SegmentReference exists. Note: the position of a segment is
- * unique only among segments within the same Period.
- *
- * @typedef {function(number): shaka.media.SegmentReference}
- * @exportDoc
- */
-shaka.extern.GetSegmentReferenceFunction;
-
-
-/**
  * @typedef {{
  *   id: number,
  *   originalId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
- *   findSegmentPosition: shaka.extern.FindSegmentPositionFunction,
- *   getSegmentReference: shaka.extern.GetSegmentReferenceFunction,
+ *   segmentIndex: shaka.media.SegmentIndex,
  *   initSegmentReference: shaka.media.InitSegmentReference,
  *   presentationTimeOffset: (number|undefined),
  *   mimeType: string,
@@ -323,17 +299,10 @@ shaka.extern.GetSegmentReferenceFunction;
  *   this is the "NAME" attribute.
  * @property {shaka.extern.CreateSegmentIndexFunction} createSegmentIndex
  *   <i>Required.</i> <br>
- *   Creates the Stream's SegmentIndex (asynchronously).
- * @property {shaka.extern.FindSegmentPositionFunction} findSegmentPosition
+ *   Creates the Stream's segmentIndex (asynchronously).
+ * @property {shaka.media.SegmentIndex} segmentIndex
  *   <i>Required.</i> <br>
- *   Finds the position of the segment for the given time. The caller must call
- *   createSegmentIndex() and wait until the returned Promise resolves before
- *   calling this function.
- * @property {shaka.extern.GetSegmentReferenceFunction} getSegmentReference
- *   <i>Required.</i> <br>
- *   Gets the SegmentReference for the segment at the given position. The
- *   caller must call createSegmentIndex() and wait until the returned Promise
- *   resolves before calling this function.
+ *   May be null until createSegmentIndex() is complete.
  * @property {shaka.media.InitSegmentReference} initSegmentReference
  *   The Stream's initialization segment metadata, or null if the segments are
  *   self-initializing.

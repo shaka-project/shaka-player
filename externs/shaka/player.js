@@ -522,7 +522,8 @@ shaka.extern.DrmConfiguration;
  *   xlinkFailGracefully: boolean,
  *   defaultPresentationDelay: number,
  *   ignoreMinBufferTime: boolean,
- *   autoCorrectDrift: boolean
+ *   autoCorrectDrift: boolean,
+ *   initialSegmentLimit: number
  * }}
  *
  * @property {shaka.extern.DashContentProtectionCallback} customScheme
@@ -554,7 +555,10 @@ shaka.extern.DrmConfiguration;
  *   the segments to determine the live edge.  This allows us to play streams
  *   that have a lot of drift.  If false, we can't play content where the
  *   manifest specifies segments in the future. Defaults to true.
- *
+ * @property {number} initialSegmentLimit
+ *   The maximum number of initial segments to generate for SegmentTemplate with
+ *   fixed-duration segments.  This is limited to avoid excessive memory
+ *   consumption with very large timeShiftBufferDepth values.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;

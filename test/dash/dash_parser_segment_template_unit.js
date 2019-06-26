@@ -88,10 +88,11 @@ describe('DashParser SegmentTemplate', () => {
 
       const stream = manifest.periods[0].variants[0].video;
       expect(stream).toBeTruthy();
+      await stream.createSegmentIndex();
       expect(stream.presentationTimeOffset).toBe(50);
-      expect(stream.getSegmentReference(0)).toEqual(
+      expect(stream.segmentIndex.get(0)).toEqual(
           ManifestParser.makeReference('s1.mp4', 0, 0, 10, baseUri));
-      expect(stream.getSegmentReference(1)).toEqual(
+      expect(stream.segmentIndex.get(1)).toEqual(
           ManifestParser.makeReference('s2.mp4', 1, 10, 20, baseUri));
     });
 
@@ -347,23 +348,27 @@ describe('DashParser SegmentTemplate', () => {
       const variants = actual.periods[0].variants;
       expect(variants.length).toBe(3);
 
-      expect(variants[0].video.findSegmentPosition(0)).toBe(0);
-      expect(variants[0].video.getSegmentReference(0)).toEqual(
+      await variants[0].video.createSegmentIndex();
+      await variants[1].video.createSegmentIndex();
+      await variants[2].video.createSegmentIndex();
+
+      expect(variants[0].video.segmentIndex.find(0)).toBe(0);
+      expect(variants[0].video.segmentIndex.get(0)).toEqual(
           ManifestParser.makeReference('1-0-100.mp4', 0, 0, 10, baseUri));
-      expect(variants[0].video.findSegmentPosition(12)).toBe(1);
-      expect(variants[0].video.getSegmentReference(1)).toEqual(
+      expect(variants[0].video.segmentIndex.find(12)).toBe(1);
+      expect(variants[0].video.segmentIndex.get(1)).toEqual(
           ManifestParser.makeReference('2-10-100.mp4', 1, 10, 20, baseUri));
-      expect(variants[1].video.findSegmentPosition(0)).toBe(0);
-      expect(variants[1].video.getSegmentReference(0)).toEqual(
+      expect(variants[1].video.segmentIndex.find(0)).toBe(0);
+      expect(variants[1].video.segmentIndex.get(0)).toEqual(
           ManifestParser.makeReference('1-0-200.mp4', 0, 0, 10, baseUri));
-      expect(variants[1].video.findSegmentPosition(12)).toBe(1);
-      expect(variants[1].video.getSegmentReference(1)).toEqual(
+      expect(variants[1].video.segmentIndex.find(12)).toBe(1);
+      expect(variants[1].video.segmentIndex.get(1)).toEqual(
           ManifestParser.makeReference('2-10-200.mp4', 1, 10, 20, baseUri));
-      expect(variants[2].video.findSegmentPosition(0)).toBe(0);
-      expect(variants[2].video.getSegmentReference(0)).toEqual(
+      expect(variants[2].video.segmentIndex.find(0)).toBe(0);
+      expect(variants[2].video.segmentIndex.get(0)).toEqual(
           ManifestParser.makeReference('1-0-300.mp4', 0, 0, 10, baseUri));
-      expect(variants[2].video.findSegmentPosition(12)).toBe(1);
-      expect(variants[2].video.getSegmentReference(1)).toEqual(
+      expect(variants[2].video.segmentIndex.find(12)).toBe(1);
+      expect(variants[2].video.segmentIndex.get(1)).toEqual(
           ManifestParser.makeReference('2-10-300.mp4', 1, 10, 20, baseUri));
     });
   });

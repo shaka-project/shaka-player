@@ -500,9 +500,10 @@ describe('HlsParser', () => {
     const stream = manifest.periods[0].variants[0].video;
     // baseMediaDecodeTime (655360) / timescale (1000)
     expect(stream.presentationTimeOffset).toBe(655.36);
-    const pos = stream.findSegmentPosition(0);
+    await stream.createSegmentIndex();
+    const pos = stream.segmentIndex.find(0);
     expect(pos).not.toBe(null);
-    expect(stream.getSegmentReference(pos).startTime).toBe(0);
+    expect(stream.segmentIndex.get(pos).startTime).toBe(0);
     expect(presentationTimeline.getSeekRangeStart()).toBe(0);
     expect(presentationTimeline.getSeekRangeEnd()).toBe(5);
   });
@@ -1214,15 +1215,18 @@ describe('HlsParser', () => {
     const video = actual.periods[0].variants[0].video;
     const audio = actual.periods[0].variants[0].audio;
 
-    const videoPosition = video.findSegmentPosition(0);
-    const audioPosition = audio.findSegmentPosition(0);
+    await video.createSegmentIndex();
+    await audio.createSegmentIndex();
+
+    const videoPosition = video.segmentIndex.find(0);
+    const audioPosition = audio.segmentIndex.find(0);
     goog.asserts.assert(
         videoPosition != null, 'Cannot find first video segment');
     goog.asserts.assert(
         audioPosition != null, 'Cannot find first audio segment');
 
-    const videoReference = video.getSegmentReference(videoPosition);
-    const audioReference = audio.getSegmentReference(audioPosition);
+    const videoReference = video.segmentIndex.get(videoPosition);
+    const audioReference = audio.segmentIndex.get(audioPosition);
     expect(videoReference).not.toBe(null);
     expect(audioReference).not.toBe(null);
     if (videoReference) {
@@ -1680,6 +1684,7 @@ describe('HlsParser', () => {
 
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.periods[0].variants[0].video;
+      await video.createSegmentIndex();
       ManifestParser.verifySegmentIndex(video, [ref]);
 
       // Make sure the segment data was fetched with the correct byte
@@ -1713,6 +1718,7 @@ describe('HlsParser', () => {
 
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.periods[0].variants[0].video;
+      await video.createSegmentIndex();
       ManifestParser.verifySegmentIndex(video, [ref]);
 
       // Make sure the segment data was fetched with the correct byte
@@ -1778,8 +1784,9 @@ describe('HlsParser', () => {
       const manifest = await parser.start('test:/master', playerInterface);
       const presentationTimeline = manifest.presentationTimeline;
       const video = manifest.periods[0].variants[0].video;
-      const ref = video.getSegmentReference(0);
-      expect(video.getSegmentReference(1)).toBe(null);  // No more references.
+      await video.createSegmentIndex();
+      const ref = video.segmentIndex.get(0);
+      expect(video.segmentIndex.get(1)).toBe(null);  // No more references.
 
       expect(video.presentationTimeOffset).toBe(segmentDataStartTime);
       // The duration should be set to the sum of the segment durations (5),

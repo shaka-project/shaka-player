@@ -391,8 +391,7 @@ describe('ManifestConverter', () => {
       id: jasmine.any(Number),
       originalId: jasmine.any(String),
       createSegmentIndex: jasmine.any(Function),
-      findSegmentPosition: jasmine.any(Function),
-      getSegmentReference: jasmine.any(Function),
+      segmentIndex: jasmine.any(shaka.media.SegmentIndex),
       initSegmentReference: streamDb.initSegmentKey != null ?
           jasmine.any(shaka.media.InitSegmentReference) :
           null,
@@ -424,11 +423,11 @@ describe('ManifestConverter', () => {
       const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
 
-      expect(stream.findSegmentPosition(segmentDb.startTime)).toBe(i);
-      expect(stream.findSegmentPosition(segmentDb.endTime - 0.1)).toBe(i);
+      expect(stream.segmentIndex.find(segmentDb.startTime)).toBe(i);
+      expect(stream.segmentIndex.find(segmentDb.endTime - 0.1)).toBe(i);
 
       /** @type {shaka.media.SegmentReference} */
-      const segment = stream.getSegmentReference(i);
+      const segment = stream.segmentIndex.get(i);
       expect(segment).toBeTruthy();
       expect(segment.position).toBe(i);
       expect(segment.startTime).toBe(segmentDb.startTime);

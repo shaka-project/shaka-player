@@ -139,6 +139,7 @@ describe('DashParser Live', () => {
       fakeNetEngine.setResponseText('dummy://foo', firstManifest);
       const manifest = await parser.start('dummy://foo', playerInterface);
       const stream = manifest.periods[0].variants[0].video;
+      await stream.createSegmentIndex();
       ManifestParser.verifySegmentIndex(stream, firstReferences);
       expect(manifest.periods.length).toBe(1);
 
@@ -187,8 +188,9 @@ describe('DashParser Live', () => {
       const stream = manifest.periods[0].variants[0].video;
       expect(stream).toBeTruthy();
 
-      expect(stream.findSegmentPosition).toBeTruthy();
-      expect(stream.findSegmentPosition(0)).toBe(1);
+      await stream.createSegmentIndex();
+      expect(stream.segmentIndex).toBeTruthy();
+      expect(stream.segmentIndex.find(0)).toBe(1);
       ManifestParser.verifySegmentIndex(stream, basicRefs);
 
       // The 30 second availability window is initially full in all cases
@@ -199,7 +201,7 @@ describe('DashParser Live', () => {
       Date.now = () => 11 * 1000;
       await updateManifest();
       // The first reference should have been evicted.
-      expect(stream.findSegmentPosition(0)).toBe(2);
+      expect(stream.segmentIndex.find(0)).toBe(2);
       ManifestParser.verifySegmentIndex(stream, basicRefs.slice(1));
     });
 
@@ -246,6 +248,8 @@ describe('DashParser Live', () => {
 
       const stream1 = manifest.periods[0].variants[0].video;
       const stream2 = manifest.periods[1].variants[0].video;
+      await stream1.createSegmentIndex();
+      await stream2.createSegmentIndex();
       ManifestParser.verifySegmentIndex(stream1, basicRefs);
       ManifestParser.verifySegmentIndex(stream2, basicRefs);
 
@@ -423,7 +427,8 @@ describe('DashParser Live', () => {
     // Since the manifest request was redirected, the segment refers to
     // the redirected base.
     const stream = manifest.periods[0].variants[0].video;
-    const segmentUri = stream.getSegmentReference(1).getUris()[0];
+    await stream.createSegmentIndex();
+    const segmentUri = stream.segmentIndex.get(1).getUris()[0];
     expect(segmentUri).toBe(redirectedUri + 's1.mp4');
   });
 
@@ -1020,10 +1025,15 @@ describe('DashParser Live', () => {
 
       expect(manifest.periods.length).toBe(1);
       const stream = manifest.periods[0].variants[0].video;
+      await stream.createSegmentIndex();
+
+      const liveEdge =
+          manifest.presentationTimeline.getSegmentAvailabilityEnd();
+      const idx = stream.segmentIndex.find(liveEdge);
 
       // In https://github.com/google/shaka-player/issues/1204, this
       // failed an assertion and returned endTime == 0.
-      const ref = stream.getSegmentReference(1);
+      const ref = stream.segmentIndex.get(idx);
       expect(ref.endTime).toBeGreaterThan(0);
     });
   });

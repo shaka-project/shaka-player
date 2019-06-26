@@ -253,9 +253,9 @@ shaka.test.StreamingEngineUtil = class {
         const stream =
             shaka.test.StreamingEngineUtil.createMockStream(type, id++);
         stream.createSegmentIndex.and.returnValue(Promise.resolve());
-        stream.findSegmentPosition.and.callFake(
+        stream.segmentIndex.find.and.callFake(
             (time) => find(type, i + 1, time));
-        stream.getSegmentReference.and.callFake((pos) => get(type, i + 1, pos));
+        stream.segmentIndex.get.and.callFake((pos) => get(type, i + 1, pos));
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         if (type == ContentType.TEXT) {
@@ -345,8 +345,7 @@ shaka.test.StreamingEngineUtil = class {
     return {
       id: id,
       createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-      findSegmentPosition: jasmine.createSpy('findSegmentPosition'),
-      getSegmentReference: jasmine.createSpy('getSegmentReference'),
+      segmentIndex: new shaka.test.FakeSegmentIndex(),
       initSegmentReference: null,
       presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
@@ -367,8 +366,7 @@ shaka.test.StreamingEngineUtil = class {
     return {
       id: id,
       createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-      findSegmentPosition: jasmine.createSpy('findSegmentPosition'),
-      getSegmentReference: jasmine.createSpy('getSegmentReference'),
+      segmentIndex: new shaka.test.FakeSegmentIndex(),
       initSegmentReference: null,
       presentationTimeOffset: 0,
       mimeType: 'video/mp4',
@@ -391,8 +389,7 @@ shaka.test.StreamingEngineUtil = class {
     return {
       id: id,
       createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-      findSegmentPosition: jasmine.createSpy('findSegmentPosition'),
-      getSegmentReference: jasmine.createSpy('getSegmentReference'),
+      segmentIndex: new shaka.test.FakeSegmentIndex(),
       initSegmentReference: null,
       presentationTimeOffset: 0,
       mimeType: 'text/vtt',
