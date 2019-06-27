@@ -818,7 +818,7 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
-  it('parses manifest with text streams', async () => {
+  it('parses manifest with SUBTITLES', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
@@ -887,6 +887,7 @@ describe('HlsParser', () => {
   });
 
   it('parses manifest with text streams without SUBTITLES', async () => {
+    // The variant tag doesn't contain a 'SUBTITLES' attribute.
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
