@@ -16,7 +16,7 @@
  */
 
 
-goog.provide('ShakaDemoInputContainer');
+goog.provide('shakaDemo.InputContainer');
 
 
 /**
@@ -27,16 +27,16 @@ goog.provide('ShakaDemoInputContainer');
  * It also has an optional header, which can contain style-dependent
  * functionality.
  */
-const ShakaDemoInputContainer = class {
+shakaDemo.InputContainer = class {
   /**
    * @param {!Element} parentDiv
    * @param {?string} headerText The text to be displayed by the header. If
    *   null, there will be no header.
-   * @param {!ShakaDemoInputContainer.Style} style
+   * @param {!shakaDemo.InputContainer.Style} style
    * @param {?string} docLink
    */
   constructor(parentDiv, headerText, style, docLink) {
-    /** @private {!ShakaDemoInputContainer.Style} */
+    /** @private {!shakaDemo.InputContainer.Style} */
     this.style_ = style;
 
     /** @private {?Element} */
@@ -61,7 +61,7 @@ const ShakaDemoInputContainer = class {
       this.createHeader_(parentDiv, headerText);
     }
     this.table_.classList.add(style);
-    if (style == ShakaDemoInputContainer.Style.ACCORDION) {
+    if (style == shakaDemo.InputContainer.Style.ACCORDION) {
       this.table_.classList.add('hidden');
     }
     parentDiv.appendChild(this.table_);
@@ -74,7 +74,7 @@ const ShakaDemoInputContainer = class {
    * @return {boolean} true if this is an open accordion menu, false otherwise
    */
   getIsOpen() {
-    if (this.style_ == ShakaDemoInputContainer.Style.ACCORDION) {
+    if (this.style_ == shakaDemo.InputContainer.Style.ACCORDION) {
       return this.table_.classList.contains('show');
     }
     return false;
@@ -82,7 +82,7 @@ const ShakaDemoInputContainer = class {
 
   /** If this is an accordion menu, open it. */
   open() {
-    if (!this.style_ == ShakaDemoInputContainer.Style.ACCORDION) {
+    if (!this.style_ == shakaDemo.InputContainer.Style.ACCORDION) {
       return;
     }
     this.table_.classList.remove('hidden');
@@ -94,7 +94,7 @@ const ShakaDemoInputContainer = class {
 
   /** If this is an accordion menu, close it. */
   close() {
-    if (this.style_ != ShakaDemoInputContainer.Style.ACCORDION) {
+    if (this.style_ != shakaDemo.InputContainer.Style.ACCORDION) {
       return;
     }
     this.table_.classList.remove('show');
@@ -110,7 +110,7 @@ const ShakaDemoInputContainer = class {
    * @private
    */
   createHeader_(parentDiv, headerText) {
-    if (this.style_ == ShakaDemoInputContainer.Style.ACCORDION) {
+    if (this.style_ == shakaDemo.InputContainer.Style.ACCORDION) {
       this.header_ = document.createElement('button');
       this.header_.classList.add('mdl-button--raised');
       this.header_.classList.add('mdl-button');
@@ -186,7 +186,7 @@ const ShakaDemoInputContainer = class {
 
     this.latestTooltip = tooltipString;
     if (tooltipString) {
-      ShakaDemoTooltips.make(this.latestRow_, tooltipString);
+      shakaDemo.Tooltips.make(this.latestRow_, tooltipString);
       // Keep the row from being focused.
       this.latestRow_.setAttribute('tabindex', -1);
       this.latestRow_.classList.add('borderless');
@@ -195,7 +195,7 @@ const ShakaDemoInputContainer = class {
 };
 
 /** @enum {string} */
-ShakaDemoInputContainer.Style = {
+shakaDemo.InputContainer.Style = {
   VERTICAL: 'input-container-style-vertical',
   ACCORDION: 'input-container-style-accordion',
   FLEX: 'input-container-style-flex',

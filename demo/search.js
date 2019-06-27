@@ -16,23 +16,23 @@
  */
 
 
-goog.provide('ShakaDemoSearch');
+goog.provide('shakaDemo.Search');
 
 
-/** @type {?ShakaDemoSearch} */
+/** @type {?shakaDemo.Search} */
 let shakaDemoSearch;
 
 
 /**
  * Shaka Player demo, feature discovery page layout.
  */
-const ShakaDemoSearch = class {
+shakaDemo.Search = class {
   /**
    * Register the page configuration.
    */
   static init() {
     const container = shakaDemoMain.addNavButton('search');
-    shakaDemoSearch = new ShakaDemoSearch(container);
+    shakaDemoSearch = new shakaDemo.Search(container);
   }
 
   /** @param {!Element} container */
@@ -48,7 +48,7 @@ const ShakaDemoSearch = class {
 
     this.makeSearchDiv_(container);
 
-    /** @private {!Array.<!AssetCard>} */
+    /** @private {!Array.<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
 
     this.resultsDiv_ = document.createElement('div');
@@ -72,12 +72,13 @@ const ShakaDemoSearch = class {
 
   /**
    * @param {!ShakaDemoAssetInfo} asset
-   * @return {!AssetCard}
+   * @return {!shakaDemo.AssetCard}
    * @private
    */
   createAssetCardFor_(asset) {
     const resultsDiv = this.resultsDiv_;
-    return new AssetCard(resultsDiv, asset, /* isFeatured = */ false, (c) => {
+    const isFeatured = false;
+    return new shakaDemo.AssetCard(resultsDiv, asset, isFeatured, (c) => {
       const unsupportedReason = shakaDemoMain.getAssetUnsupportedReason(
           asset, /* needOffline= */ false);
       if (unsupportedReason) {
@@ -122,20 +123,20 @@ const ShakaDemoSearch = class {
   }
 
   /**
-   * @param {!ShakaDemoSearch.SearchTerm} term
-   * @param {ShakaDemoSearch.TermType} type
-   * @param {!Array.<!ShakaDemoSearch.SearchTerm>} others
+   * @param {!shakaDemo.Search.SearchTerm} term
+   * @param {shakaDemo.Search.TermType} type
+   * @param {!Array.<!shakaDemo.Search.SearchTerm>} others
    * @private
    */
   addDesiredTerm_(term, type, others) {
     switch (type) {
-      case ShakaDemoSearch.TermType.DRM:
+      case shakaDemo.Search.TermType.DRM:
         this.desiredDRM_ = /** @type {shakaAssets.KeySystem} */ (term);
         break;
-      case ShakaDemoSearch.TermType.SOURCE:
+      case shakaDemo.Search.TermType.SOURCE:
         this.desiredSource_ = /** @type {shakaAssets.Source} */ (term);
         break;
-      case ShakaDemoSearch.TermType.FEATURE:
+      case shakaDemo.Search.TermType.FEATURE:
         // Only this term should be in the desired features.
         for (const term of others) {
           const index = this.desiredFeatures_.indexOf(
@@ -150,20 +151,20 @@ const ShakaDemoSearch = class {
   }
 
   /**
-   * @param {!ShakaDemoSearch.SearchTerm} term
-   * @param {ShakaDemoSearch.TermType} type
+   * @param {!shakaDemo.Search.SearchTerm} term
+   * @param {shakaDemo.Search.TermType} type
    * @private
    */
   removeDesiredTerm_(term, type) {
     let index;
     switch (type) {
-      case ShakaDemoSearch.TermType.DRM:
+      case shakaDemo.Search.TermType.DRM:
         this.desiredDRM_ = null;
         break;
-      case ShakaDemoSearch.TermType.SOURCE:
+      case shakaDemo.Search.TermType.SOURCE:
         this.desiredSource_ = null;
         break;
-      case ShakaDemoSearch.TermType.FEATURE:
+      case shakaDemo.Search.TermType.FEATURE:
         index = this.desiredFeatures_.indexOf(
             /** @type {shakaAssets.Feature} */ (term));
         if (index != -1) {
@@ -175,10 +176,10 @@ const ShakaDemoSearch = class {
 
   /**
    * Creates an input for a single search term.
-   * @param {!ShakaDemoInputContainer} searchContainer
-   * @param {!ShakaDemoSearch.SearchTerm} choice
+   * @param {!shakaDemo.InputContainer} searchContainer
+   * @param {!shakaDemo.Search.SearchTerm} choice
    * The term this represents.
-   * @param {ShakaDemoSearch.TermType} type
+   * @param {shakaDemo.Search.TermType} type
    * The type of term that this term is.
    * @private
    */
@@ -198,17 +199,17 @@ const ShakaDemoSearch = class {
       componentHandler.upgradeDom();
     };
     // eslint-disable-next-line no-new
-    new ShakaDemoBoolInput(searchContainer, choice, onChange);
+    new shakaDemo.BoolInput(searchContainer, choice, onChange);
   }
 
   /**
    * Creates an input for a group of related but mutually-exclusive search
    * terms.
-   * @param {!ShakaDemoInputContainer} searchContainer
+   * @param {!shakaDemo.InputContainer} searchContainer
    * @param {string} name
-   * @param {!Array.<!ShakaDemoSearch.SearchTerm>} choices
+   * @param {!Array.<!shakaDemo.Search.SearchTerm>} choices
    * An array of the terms in this term group.
-   * @param {ShakaDemoSearch.TermType} type
+   * @param {shakaDemo.Search.TermType} type
    * The type of term that this term group contains. All of the
    * terms in the "choices" array must be of this type.
    * @private
@@ -253,7 +254,7 @@ const ShakaDemoSearch = class {
       // Notably, tooltips.
       componentHandler.upgradeDom();
     };
-    const input = new ShakaDemoSelectInput(
+    const input = new shakaDemo.SelectInput(
         searchContainer, name, onChange, valuesObject);
     input.extra().textContent = name;
     input.input().value = nullOption;
@@ -265,13 +266,13 @@ const ShakaDemoSearch = class {
    */
   makeSearchDiv_(container) {
     const Feature = shakaAssets.Feature;
-    const FEATURE = ShakaDemoSearch.TermType.FEATURE;
-    const DRM = ShakaDemoSearch.TermType.DRM;
-    const SOURCE = ShakaDemoSearch.TermType.SOURCE;
+    const FEATURE = shakaDemo.Search.TermType.FEATURE;
+    const DRM = shakaDemo.Search.TermType.DRM;
+    const SOURCE = shakaDemo.Search.TermType.SOURCE;
 
     // Core term inputs.
-    const coreContainer = new ShakaDemoInputContainer(
-        container, /* headerText = */ null, ShakaDemoInputContainer.Style.FLEX,
+    const coreContainer = new shakaDemo.InputContainer(
+        container, /* headerText = */ null, shakaDemo.InputContainer.Style.FLEX,
         /* docLink = */ null);
     this.makeSelectInput_(coreContainer, 'Manifest',
         [Feature.DASH, Feature.HLS], FEATURE);
@@ -284,8 +285,8 @@ const ShakaDemoSearch = class {
         SOURCE);
 
     // Special terms.
-    const containerStyle = ShakaDemoInputContainer.Style.FLEX;
-    const specialContainer = new ShakaDemoInputContainer(
+    const containerStyle = shakaDemo.InputContainer.Style.FLEX;
+    const specialContainer = new shakaDemo.InputContainer(
         container, /* headerText = */ null, containerStyle,
         /* docLink = */ null);
     this.makeBooleanInput_(specialContainer, Feature.LIVE, FEATURE);
@@ -329,15 +330,15 @@ const ShakaDemoSearch = class {
 
 
 /** @typedef {shakaAssets.Feature|shakaAssets.Source} */
-ShakaDemoSearch.SearchTerm;
+shakaDemo.Search.SearchTerm;
 
 
 /** @enum {string} */
-ShakaDemoSearch.TermType = {
+shakaDemo.Search.TermType = {
   FEATURE: 'Feature',
   DRM: 'DRM',
   SOURCE: 'Source',
 };
 
 
-document.addEventListener('shaka-main-loaded', ShakaDemoSearch.init);
+document.addEventListener('shaka-main-loaded', shakaDemo.Search.init);

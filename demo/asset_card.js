@@ -16,20 +16,20 @@
  */
 
 
-goog.provide('AssetCard');
+goog.provide('shakaDemo.AssetCard');
 
 
 /**
  * Creates and contains an MDL card that presents info about the given asset.
  * @final
  */
-const AssetCard = class {
+shakaDemo.AssetCard = class {
   /**
    * @param {!Element} parentDiv
    * @param {!ShakaDemoAssetInfo} asset
    * @param {boolean} isFeatured True if this card should use the "featured"
    *   style, which use the asset's short name and have descriptions.
-   * @param {function(!AssetCard)} remakeButtonsFn
+   * @param {function(!shakaDemo.AssetCard)} remakeButtonsFn
    */
   constructor(parentDiv, asset, isFeatured, remakeButtonsFn) {
     /** @private {!Element} */
@@ -42,7 +42,7 @@ const AssetCard = class {
     this.featureIconsContainer_ = document.createElement('div');
     /** @private {!Element} */
     this.progressBar_ = document.createElement('progress');
-    /** @private {function(!AssetCard)} */
+    /** @private {function(!shakaDemo.AssetCard)} */
     this.remakeButtonsFn_ = remakeButtonsFn;
 
     // Lay out the card.
@@ -119,7 +119,7 @@ const AssetCard = class {
     iconDiv.setAttribute('icon', icon);
     this.featureIconsContainer_.appendChild(iconDiv);
 
-    ShakaDemoTooltips.make(iconDiv, title);
+    shakaDemo.Tooltips.make(iconDiv, title);
   }
 
   /**
@@ -194,7 +194,7 @@ const AssetCard = class {
       attachPoint.classList.add('tooltip-attach-point');
       attachPoint.appendChild(button);
       this.actions_.appendChild(attachPoint);
-      ShakaDemoTooltips.make(attachPoint, unsupportedReason);
+      shakaDemo.Tooltips.make(attachPoint, unsupportedReason);
     }
 
     return button;

@@ -16,10 +16,10 @@
  */
 
 
-goog.provide('ShakaDemoUtils');
+goog.provide('shakaDemo.Utils');
 
 
-const ShakaDemoUtils = class {
+shakaDemo.Utils = class {
   /**
    * Goes through the various values in shaka.extern.PlayerConfiguration, and
    * calls the given callback on them so that they can be stored to or read from

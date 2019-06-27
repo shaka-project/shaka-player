@@ -16,7 +16,7 @@
  */
 
 
-goog.provide('ShakaDemoMain');
+goog.provide('shakaDemo.Main');
 
 
 /**
@@ -25,7 +25,7 @@ goog.provide('ShakaDemoMain');
  * be shared by multiple page layouts (loading assets, setting/checking
  * configuration, etc).
  */
-const ShakaDemoMain = class {
+shakaDemo.Main = class {
   constructor() {
     /** @private {HTMLMediaElement} */
     this.video_ = null;
@@ -74,7 +74,7 @@ const ShakaDemoMain = class {
    */
   initCommon_() {
     // Display uncaught exceptions.  Note that this doesn't seem to work in IE.
-    // See ShakaDemoMain.initWrapper for a failsafe that works for init-time
+    // See shakaDemo.Main.initWrapper for a failsafe that works for init-time
     // errors on IE.
     window.addEventListener('error', (event) => {
       // Exception to the exceptions we catch: ChromeVox (screenreader) always
@@ -139,7 +139,7 @@ const ShakaDemoMain = class {
 
     this.video_ =
       /** @type {!HTMLVideoElement} */(document.getElementById('video'));
-    this.video_.poster = ShakaDemoMain.mainPoster_;
+    this.video_.poster = shakaDemo.Main.mainPoster_;
 
     this.container_ = /** @type {!HTMLElement} */(
       document.getElementsByClassName('video-container')[0]);
@@ -187,7 +187,8 @@ const ShakaDemoMain = class {
     this.player_ = ui.getControls().getPlayer();
 
     // Register custom controls to the UI.
-    shaka.ui.Controls.registerElement('close', new CloseButton.Factory());
+    const factory = new shakaDemo.CloseButton.Factory();
+    shaka.ui.Controls.registerElement('close', factory);
 
     // Configure UI.
     const uiConfig = ui.getConfiguration();
@@ -596,7 +597,7 @@ const ShakaDemoMain = class {
           /* manifestUri= */ manifest,
           /* source= */ shakaAssets.Source.UNKNOWN);
       if ('license' in params) {
-        let drmSystems = ShakaDemoMain.commonDrmSystems;
+        let drmSystems = shakaDemo.Main.commonDrmSystems;
         if ('drmSystem' in params) {
           drmSystems = [params['drmSystem']];
         }
@@ -635,7 +636,7 @@ const ShakaDemoMain = class {
         }
       };
       const config = this.player_.getConfiguration();
-      ShakaDemoUtils.runThroughHashParams(readParam, config);
+      shakaDemo.Utils.runThroughHashParams(readParam, config);
     }
     if ('lang' in params) {
       // Load the legacy 'lang' hash value.
@@ -688,7 +689,7 @@ const ShakaDemoMain = class {
     this.nativeControlsEnabled_ = 'nativecontrols' in params;
 
     // Check if uncompiled mode is supported.
-    if (!ShakaDemoUtils.browserSupportsUncompiledMode()) {
+    if (!shakaDemo.Utils.browserSupportsUncompiledMode()) {
       const uncompiledLink = document.getElementById('uncompiled-link');
       uncompiledLink.setAttribute('disabled', '');
       uncompiledLink.removeAttribute('href');
@@ -813,7 +814,7 @@ const ShakaDemoMain = class {
     this.selectedAsset = null;
     const videoBar = document.getElementById('video-bar');
     this.hideNode_(videoBar);
-    this.video_.poster = ShakaDemoMain.mainPoster_;
+    this.video_.poster = shakaDemo.Main.mainPoster_;
 
     this.player_.unload();
 
@@ -891,7 +892,7 @@ const ShakaDemoMain = class {
     const videoBar = document.getElementById('video-bar');
     this.showNode_(videoBar);
     this.closeError_();
-    this.video_.poster = ShakaDemoMain.mainPoster_;
+    this.video_.poster = shakaDemo.Main.mainPoster_;
 
     // Scroll to the top of the page, so that if the page is scrolled down,
     // the user won't need to manually scroll up to see the video.
@@ -940,7 +941,7 @@ const ShakaDemoMain = class {
                            null) || asset.manifestUri;
       await this.player_.load(manifestUri);
       if (this.player_.isAudioOnly()) {
-        this.video_.poster = ShakaDemoMain.audioOnlyPoster_;
+        this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
     } catch (reason) {
       const error = /** @type {!shaka.util.Error} */ (reason);
@@ -980,7 +981,7 @@ const ShakaDemoMain = class {
         }
       };
       const config = this.player_.getConfiguration();
-      ShakaDemoUtils.runThroughHashParams(setParam, config);
+      shakaDemo.Utils.runThroughHashParams(setParam, config);
     }
     if (!this.getCurrentConfigValue('abr.enabled')) {
       params.push('noadaptation');
@@ -997,7 +998,7 @@ const ShakaDemoMain = class {
         const uri = this.selectedAsset.licenseServers.values().next().value;
         params.push('license=' + uri);
         for (const drmSystem of this.selectedAsset.licenseServers.keys()) {
-          if (!ShakaDemoMain.commonDrmSystems.includes(drmSystem)) {
+          if (!shakaDemo.Main.commonDrmSystems.includes(drmSystem)) {
             params.push('drmSystem=' + drmSystem);
             break;
           }
@@ -1281,7 +1282,7 @@ const ShakaDemoMain = class {
 
 
 /** @type {!Array.<string>} */
-ShakaDemoMain.commonDrmSystems = [
+shakaDemo.Main.commonDrmSystems = [
   'com.widevine.alpha',
   'com.microsoft.playready',
   'com.apple.fps.1_0',
@@ -1290,14 +1291,14 @@ ShakaDemoMain.commonDrmSystems = [
 ];
 
 
-const shakaDemoMain = new ShakaDemoMain();
+const shakaDemoMain = new shakaDemo.Main();
 
 
 /**
  * @private
  * @const {string}
  */
-ShakaDemoMain.mainPoster_ =
+shakaDemo.Main.mainPoster_ =
     'https://shaka-player-demo.appspot.com/assets/poster.jpg';
 
 
@@ -1305,7 +1306,7 @@ ShakaDemoMain.mainPoster_ =
  * @private
  * @const {string}
  */
-ShakaDemoMain.audioOnlyPoster_ =
+shakaDemo.Main.audioOnlyPoster_ =
     'https://shaka-player-demo.appspot.com/assets/audioOnly.gif';
 
 
@@ -1318,7 +1319,7 @@ ShakaDemoMain.audioOnlyPoster_ =
  * @return {!Promise}
  * @suppress {accessControls}
  */
-ShakaDemoMain.initWrapper = async (initFn) => {
+shakaDemo.Main.initWrapper = async (initFn) => {
   try {
     await initFn();
   } catch (error) {
@@ -1327,8 +1328,8 @@ ShakaDemoMain.initWrapper = async (initFn) => {
   }
 };
 document.addEventListener('shaka-ui-loaded', () => {
-  ShakaDemoMain.initWrapper(() => shakaDemoMain.init());
+  shakaDemo.Main.initWrapper(() => shakaDemoMain.init());
 });
 document.addEventListener('shaka-ui-load-failed', (event) => {
-  ShakaDemoMain.initWrapper(() => shakaDemoMain.initFailed());
+  shakaDemo.Main.initWrapper(() => shakaDemoMain.initFailed());
 });

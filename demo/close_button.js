@@ -16,7 +16,7 @@
  */
 
 
-goog.provide('CloseButton');
+goog.provide('shakaDemo.CloseButton');
 
 
 /**
@@ -25,7 +25,7 @@ goog.provide('CloseButton');
  * at load-time when in uncompiled mode.
  * @extends {shaka.ui.Element}
  */
-CloseButton = class extends shaka.ui.Element {
+shakaDemo.CloseButton = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
@@ -62,13 +62,13 @@ CloseButton = class extends shaka.ui.Element {
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-CloseButton.Factory = class {
+shakaDemo.CloseButton.Factory = class {
   /** @override */
   create(rootElement, controls) {
-    return new CloseButton(rootElement, controls);
+    return new shakaDemo.CloseButton(rootElement, controls);
   }
 };
 
-// This button is registered inside setup in ShakaDemoMain, rather than
+// This button is registered inside setup in shakaDemo.Main, rather than
 // statically here, since shaka.ui.Controls does not exist in this stage of the
 // load process.
