@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-goog.provide('ShakaDemoBoolInput');
-goog.provide('ShakaDemoDatalistInput');
-goog.provide('ShakaDemoInput');
-goog.provide('ShakaDemoNumberInput');
-goog.provide('ShakaDemoSelectInput');
-goog.provide('ShakaDemoTextInput');
+goog.provide('shakaDemo.BoolInput');
+goog.provide('shakaDemo.DatalistInput');
+goog.provide('shakaDemo.Input');
+goog.provide('shakaDemo.NumberInput');
+goog.provide('shakaDemo.SelectInput');
+goog.provide('shakaDemo.TextInput');
 
 /**
  * Creates and contains the MDL elements of a type of input.
  */
-const ShakaDemoInput = class {
+shakaDemo.Input = class {
   /**
-   * @param {!ShakaDemoInputContainer} parentContainer
+   * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} inputType The element type for the input object.
    * @param {string} containerType The element type for the container containing
    *   the input object.
@@ -43,7 +43,7 @@ const ShakaDemoInput = class {
     /** @private {!Element} */
     this.input_ = document.createElement(inputType);
     this.input_.onchange = () => { onChange(this.input_); };
-    this.input_.id = ShakaDemoInput.generateNewId_('input');
+    this.input_.id = shakaDemo.Input.generateNewId_('input');
     this.container_.appendChild(this.input_);
 
     if (parentContainer.latestTooltip) {
@@ -53,7 +53,7 @@ const ShakaDemoInput = class {
       const extraInfo = document.createElement('span');
       extraInfo.textContent = parentContainer.latestTooltip;
       extraInfo.classList.add('hidden');
-      extraInfo.id = ShakaDemoInput.generateNewId_('extra-info');
+      extraInfo.id = shakaDemo.Input.generateNewId_('extra-info');
       this.container_.appendChild(extraInfo);
       this.input_.setAttribute('aria-describedby', extraInfo.id);
     }
@@ -92,23 +92,23 @@ const ShakaDemoInput = class {
   * @private
   */
  static generateNewId_(prefix) {
-   const idNumber = ShakaDemoInput.lastId_;
-   ShakaDemoInput.lastId_ += 1;
+   const idNumber = shakaDemo.Input.lastId_;
+   shakaDemo.Input.lastId_ += 1;
    return prefix + '-labeled-' + idNumber;
  }
 };
 
 
 /** @private {number} */
-ShakaDemoInput.lastId_ = 0;
+shakaDemo.Input.lastId_ = 0;
 
 
 /**
  * Creates and contains the MDL elements of a select input.
  */
-const ShakaDemoSelectInput = class extends ShakaDemoInput {
+shakaDemo.SelectInput = class extends shakaDemo.Input {
   /**
-   * @param {!ShakaDemoInputContainer} parentContainer
+   * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
    * @param {function(!Element)} onChange
    * @param {!Object.<string, string>} values
@@ -134,9 +134,9 @@ const ShakaDemoSelectInput = class extends ShakaDemoInput {
 /**
  * Creates and contains the MDL elements of a bool input.
  */
-const ShakaDemoBoolInput = class extends ShakaDemoInput {
+shakaDemo.BoolInput = class extends shakaDemo.Input {
   /**
-   * @param {!ShakaDemoInputContainer} parentContainer
+   * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
    * @param {function(!Element)} onChange
    */
@@ -156,9 +156,9 @@ const ShakaDemoBoolInput = class extends ShakaDemoInput {
 /**
  * Creates and contains the MDL elements of a text input.
  */
-const ShakaDemoTextInput = class extends ShakaDemoInput {
+shakaDemo.TextInput = class extends shakaDemo.Input {
   /**
-   * @param {!ShakaDemoInputContainer} parentContainer
+   * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
    * @param {function(!Element)} onChange
    */
@@ -177,9 +177,9 @@ const ShakaDemoTextInput = class extends ShakaDemoInput {
 /**
  * Creates and contains the MDL elements of a datalist input.
  */
-const ShakaDemoDatalistInput = class extends ShakaDemoTextInput {
+shakaDemo.DatalistInput = class extends shakaDemo.TextInput {
   /**
-   * @param {!ShakaDemoInputContainer} parentContainer
+   * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
    * @param {function(!Element)} onChange
    * @param {!Array.<string>} values
@@ -206,9 +206,9 @@ const ShakaDemoDatalistInput = class extends ShakaDemoTextInput {
 /**
  * Creates and contains the MDL elements of a number input.
  */
-const ShakaDemoNumberInput = class extends ShakaDemoTextInput {
+shakaDemo.NumberInput = class extends shakaDemo.TextInput {
   /**
-   * @param {!ShakaDemoInputContainer} parentContainer
+   * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
    * @param {function(!Element)} onChange
    * @param {boolean} canBeDecimal

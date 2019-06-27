@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-goog.require('AssetCard');
-goog.require('CloseButton');
-goog.require('ShakaDemoConfig');
-goog.require('ShakaDemoCustom');
-goog.require('ShakaDemoUtils');
-goog.require('ShakaDemoFront');
-goog.require('ShakaDemoBoolInput');
-goog.require('ShakaDemoDatalistInput');
-goog.require('ShakaDemoInput');
-goog.require('ShakaDemoNumberInput');
-goog.require('ShakaDemoSelectInput');
-goog.require('ShakaDemoTextInput');
-goog.require('ShakaDemoInputContainer');
-goog.require('ShakaDemoMain');
-goog.require('ShakaDemoSearch');
-goog.require('ShakaDemoTooltips');
+goog.require('shakaDemo.AssetCard');
+goog.require('shakaDemo.CloseButton');
+goog.require('shakaDemo.Config');
+goog.require('shakaDemo.Custom');
+goog.require('shakaDemo.Utils');
+goog.require('shakaDemo.Front');
+goog.require('shakaDemo.BoolInput');
+goog.require('shakaDemo.DatalistInput');
+goog.require('shakaDemo.Input');
+goog.require('shakaDemo.NumberInput');
+goog.require('shakaDemo.SelectInput');
+goog.require('shakaDemo.TextInput');
+goog.require('shakaDemo.InputContainer');
+goog.require('shakaDemo.Main');
+goog.require('shakaDemo.Search');
+goog.require('shakaDemo.Tooltips');

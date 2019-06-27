@@ -16,23 +16,23 @@
  */
 
 
-goog.provide('ShakaDemoConfig');
+goog.provide('shakaDemo.Config');
 
 
-/** @type {?ShakaDemoConfig} */
+/** @type {?shakaDemo.Config} */
 let shakaDemoConfig;
 
 
 /**
  * Shaka Player demo, configuration page layout.
  */
-const ShakaDemoConfig = class {
+shakaDemo.Config = class {
   /**
    * Register the page configuration.
    */
   static init() {
     const container = shakaDemoMain.getHamburgerMenu();
-    shakaDemoConfig = new ShakaDemoConfig(container);
+    shakaDemoConfig = new shakaDemo.Config(container);
   }
 
   /** @param {!Element} container */
@@ -42,13 +42,13 @@ const ShakaDemoConfig = class {
 
     /**
      * A list of all sections.
-     * @private {!Array.<!ShakaDemoInputContainer>}
+     * @private {!Array.<!shakaDemo.InputContainer>}
      */
     this.sections_ = [];
 
     /**
      * The input object for the control currently being constructed.
-     * @private {?ShakaDemoInput}
+     * @private {?shakaDemo.Input}
      */
     this.latestInput_ = null;
 
@@ -136,7 +136,7 @@ const ShakaDemoConfig = class {
       // All robustness fields of a given type are set at once.
       this.addDatalistInput_(name, robustnessSuggestions, (input) => {
         // Add in any common drmSystem not currently in advanced.
-        for (const drmSystem of ShakaDemoMain.commonDrmSystems) {
+        for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           if (!(drmSystem in advanced)) {
             advanced[drmSystem] = {
               distinctiveIdentifierRequired: false,
@@ -396,14 +396,14 @@ const ShakaDemoConfig = class {
   /**
    * @param {string} name
    * @param {?string} docLink
-   * @return {!ShakaDemoConfig}
+   * @return {!shakaDemo.Config}
    * @private
    */
   addSection_(name, docLink) {
     const style = name ?
-                  ShakaDemoInputContainer.Style.ACCORDION :
-                  ShakaDemoInputContainer.Style.VERTICAL;
-    this.sections_.push(new ShakaDemoInputContainer(
+                  shakaDemo.InputContainer.Style.ACCORDION :
+                  shakaDemo.InputContainer.Style.VERTICAL;
+    this.sections_.push(new shakaDemo.InputContainer(
         this.container_, name, style, docLink));
 
     return this;
@@ -413,7 +413,7 @@ const ShakaDemoConfig = class {
    * @param {string} name
    * @param {string} valueName
    * @param {string=} tooltipMessage
-   * @return {!ShakaDemoConfig}
+   * @return {!shakaDemo.Config}
    * @private
    */
   addBoolInput_(name, valueName, tooltipMessage) {
@@ -433,12 +433,12 @@ const ShakaDemoConfig = class {
    * @param {string} name
    * @param {function(!Element)} onChange
    * @param {string=} tooltipMessage
-   * @return {!ShakaDemoConfig}
+   * @return {!shakaDemo.Config}
    * @private
    */
   addCustomBoolInput_(name, onChange, tooltipMessage) {
     this.createRow_(name, tooltipMessage);
-    this.latestInput_ = new ShakaDemoBoolInput(
+    this.latestInput_ = new shakaDemo.BoolInput(
         this.getLatestSection_(), name, onChange);
     return this;
   }
@@ -447,7 +447,7 @@ const ShakaDemoConfig = class {
    * @param {string} name
    * @param {string} valueName
    * @param {string=} tooltipMessage
-   * @return {!ShakaDemoConfig}
+   * @return {!shakaDemo.Config}
    * @private
    */
   addTextInput_(name, valueName, tooltipMessage) {
@@ -466,12 +466,12 @@ const ShakaDemoConfig = class {
    * @param {string} name
    * @param {function(!Element)} onChange
    * @param {string=} tooltipMessage
-   * @return {!ShakaDemoConfig}
+   * @return {!shakaDemo.Config}
    * @private
    */
   addCustomTextInput_(name, onChange, tooltipMessage) {
     this.createRow_(name, tooltipMessage);
-    this.latestInput_ = new ShakaDemoTextInput(
+    this.latestInput_ = new shakaDemo.TextInput(
         this.getLatestSection_(), name, onChange);
     return this;
   }
@@ -483,7 +483,7 @@ const ShakaDemoConfig = class {
    * @param {boolean=} canBeZero
    * @param {boolean=} canBeUnset
    * @param {string=} tooltipMessage
-   * @return {!ShakaDemoConfig}
+   * @return {!shakaDemo.Config}
    * @private
    */
   addNumberInput_(name, valueName, canBeDecimal = false, canBeZero = true,
@@ -512,7 +512,7 @@ const ShakaDemoConfig = class {
       }
     };
     this.createRow_(name, tooltipMessage);
-    this.latestInput_ = new ShakaDemoNumberInput(
+    this.latestInput_ = new shakaDemo.NumberInput(
         this.getLatestSection_(), name, onChange, canBeDecimal, canBeZero,
         canBeUnset);
     this.latestInput_.input().value =
@@ -529,12 +529,12 @@ const ShakaDemoConfig = class {
    * @param {!Array.<string>} values
    * @param {function(!Element)} onChange
    * @param {string=} tooltipMessage
-   * @return {!ShakaDemoConfig}
+   * @return {!shakaDemo.Config}
    * @private
    */
   addDatalistInput_(name, values, onChange, tooltipMessage) {
     this.createRow_(name, tooltipMessage);
-    this.latestInput_ = new ShakaDemoDatalistInput(
+    this.latestInput_ = new shakaDemo.DatalistInput(
         this.getLatestSection_(), name, onChange, values);
     return this;
   }
@@ -544,12 +544,12 @@ const ShakaDemoConfig = class {
    * @param {!Object.<string, string>} values
    * @param {function(!Element)} onChange
    * @param {string=} tooltipMessage
-   * @return {!ShakaDemoConfig}
+   * @return {!shakaDemo.Config}
    * @private
    */
   addSelectInput_(name, values, onChange, tooltipMessage) {
     this.createRow_(name, tooltipMessage);
-    this.latestInput_ = new ShakaDemoSelectInput(
+    this.latestInput_ = new shakaDemo.SelectInput(
         this.getLatestSection_(), name, onChange, values);
     return this;
   }
@@ -608,7 +608,7 @@ const ShakaDemoConfig = class {
   /**
    * Gets the latest section. Results in a failed assert if there is no latest
    * section.
-   * @return {!ShakaDemoInputContainer}
+   * @return {!shakaDemo.InputContainer}
    * @private
    */
   getLatestSection_() {
@@ -619,4 +619,4 @@ const ShakaDemoConfig = class {
 };
 
 
-document.addEventListener('shaka-main-loaded', ShakaDemoConfig.init);
+document.addEventListener('shaka-main-loaded', shakaDemo.Config.init);

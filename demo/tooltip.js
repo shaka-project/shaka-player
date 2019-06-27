@@ -16,13 +16,13 @@
  */
 
 
-goog.provide('ShakaDemoTooltips');
+goog.provide('shakaDemo.Tooltips');
 
 
 /**
  * Creates and contains the MDL elements of a tooltip.
  */
-const ShakaDemoTooltips = class {
+shakaDemo.Tooltips = class {
   /**
    * @param {!Element} labeledElement
    * @param {string} message

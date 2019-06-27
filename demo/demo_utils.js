@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-goog.provide('ShakaDemoUtils');
+goog.provide('shakaDemo.Utils');
 
 /** @namespace */
-let ShakaDemoUtils = {};
+shakaDemo.Utils = {};
 
 /**
  * Goes through the various values in shaka.extern.PlayerConfiguration, and
@@ -33,7 +33,7 @@ let ShakaDemoUtils = {};
  *   checked only to determine the shape and structure of a PlayerConfiguration
  *   object.
  */
-ShakaDemoUtils.runThroughHashParams = (callback, config) => {
+shakaDemo.Utils.runThroughHashParams = (callback, config) => {
   // Override the "natural" name for a config value in the hash.
   // This exists for legacy reasons; the previous demo page had some hash values
   // set to names that did not match the names of their corresponding config
@@ -108,7 +108,7 @@ ShakaDemoUtils.runThroughHashParams = (callback, config) => {
 /**
  * @return {boolean} True if the browser would support the uncompiled build.
  */
-ShakaDemoUtils.browserSupportsUncompiledMode = () => {
+shakaDemo.Utils.browserSupportsUncompiledMode = () => {
   // Check if ES6 arrow function syntax and ES7 async are usable.  Both are
   // needed for uncompiled builds to work.
   try {
