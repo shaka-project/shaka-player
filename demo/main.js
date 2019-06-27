@@ -15,13 +15,17 @@
  * limitations under the License.
  */
 
+
+goog.provide('ShakaDemoMain');
+
+
 /**
  * Shaka Player demo, main section.
  * This controls the header and the footer, and contains all methods that should
  * be shared by multiple page layouts (loading assets, setting/checking
  * configuration, etc).
  */
-class ShakaDemoMain {
+const ShakaDemoMain = class {
   constructor() {
     /** @private {HTMLMediaElement} */
     this.video_ = null;
@@ -1273,7 +1277,7 @@ class ShakaDemoMain {
       this.showPlayer_();
     }
   }
-}
+};
 
 
 /** @type {!Array.<string>} */

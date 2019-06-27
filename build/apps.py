@@ -53,6 +53,8 @@ def compile_demo(force, is_debug):
   files.remove(os.path.join(base, 'demo', 'load.js'))
   # Remove service_worker.js as well.  This executes in a different context.
   files.remove(os.path.join(base, 'demo', 'service_worker.js'))
+  # Don't compile in the uncompiled require file.
+  files.remove(os.path.join(base, 'demo', 'demo_uncompiled.js'))
   # Add lib/debug/asserts.js, which is required for goog.assert.
   # TODO: This file should be inside third_party/closure instead.
   files.add(os.path.join(base, 'lib', 'debug', 'asserts.js'))

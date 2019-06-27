@@ -15,10 +15,17 @@
  * limitations under the License.
  */
 
+goog.provide('ShakaDemoBoolInput');
+goog.provide('ShakaDemoDatalistInput');
+goog.provide('ShakaDemoInput');
+goog.provide('ShakaDemoNumberInput');
+goog.provide('ShakaDemoSelectInput');
+goog.provide('ShakaDemoTextInput');
+
 /**
  * Creates and contains the MDL elements of a type of input.
  */
-class ShakaDemoInput {
+const ShakaDemoInput = class {
   /**
    * @param {!ShakaDemoInputContainer} parentContainer
    * @param {string} inputType The element type for the input object.
@@ -91,7 +98,7 @@ class ShakaDemoInput {
     ShakaDemoInput.lastId_ += 1;
     return prefix + '-labeled-' + idNumber;
   }
-}
+};
 
 
 /** @private {number} */
@@ -101,7 +108,7 @@ ShakaDemoInput.lastId_ = 0;
 /**
  * Creates and contains the MDL elements of a select input.
  */
-class ShakaDemoSelectInput extends ShakaDemoInput {
+const ShakaDemoSelectInput = class extends ShakaDemoInput {
   /**
    * @param {!ShakaDemoInputContainer} parentContainer
    * @param {string} name
@@ -123,13 +130,13 @@ class ShakaDemoSelectInput extends ShakaDemoInput {
       this.input_.appendChild(option);
     }
   }
-}
+};
 
 
 /**
  * Creates and contains the MDL elements of a bool input.
  */
-class ShakaDemoBoolInput extends ShakaDemoInput {
+const ShakaDemoBoolInput = class extends ShakaDemoInput {
   /**
    * @param {!ShakaDemoInputContainer} parentContainer
    * @param {string} name
@@ -145,13 +152,13 @@ class ShakaDemoBoolInput extends ShakaDemoInput {
     this.input_.classList.add('mdl-switch__input');
     this.extra_.classList.add('mdl-switch__label');
   }
-}
+};
 
 
 /**
  * Creates and contains the MDL elements of a text input.
  */
-class ShakaDemoTextInput extends ShakaDemoInput {
+const ShakaDemoTextInput = class extends ShakaDemoInput {
   /**
    * @param {!ShakaDemoInputContainer} parentContainer
    * @param {string} name
@@ -166,13 +173,13 @@ class ShakaDemoTextInput extends ShakaDemoInput {
     this.extra_.classList.add('mdl-textfield__label');
     this.extra_.setAttribute('for', this.input_.id);
   }
-}
+};
 
 
 /**
  * Creates and contains the MDL elements of a datalist input.
  */
-class ShakaDemoDatalistInput extends ShakaDemoTextInput {
+const ShakaDemoDatalistInput = class extends ShakaDemoTextInput {
   /**
    * @param {!ShakaDemoInputContainer} parentContainer
    * @param {string} name
@@ -195,13 +202,13 @@ class ShakaDemoDatalistInput extends ShakaDemoTextInput {
       awesomplete.evaluate();
     });
   }
-}
+};
 
 
 /**
  * Creates and contains the MDL elements of a number input.
  */
-class ShakaDemoNumberInput extends ShakaDemoTextInput {
+const ShakaDemoNumberInput = class extends ShakaDemoTextInput {
   /**
    * @param {!ShakaDemoInputContainer} parentContainer
    * @param {string} name
@@ -237,4 +244,4 @@ class ShakaDemoNumberInput extends ShakaDemoTextInput {
       this.input_.pattern += '?';
     }
   }
-}
+};

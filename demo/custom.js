@@ -16,6 +16,9 @@
  */
 
 
+goog.provide('ShakaDemoCustom');
+
+
 /** @type {?ShakaDemoCustom} */
 let shakaDemoCustom;
 
@@ -23,7 +26,7 @@ let shakaDemoCustom;
 /**
  * Shaka Player demo, custom asset page layout.
  */
-class ShakaDemoCustom {
+const ShakaDemoCustom = class {
   /**
    * Register the page configuration.
    */
@@ -417,7 +420,7 @@ class ShakaDemoCustom {
       this.updateSelected_();
     }
   }
-}
+};
 
 
 /**

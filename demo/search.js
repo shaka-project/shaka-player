@@ -16,6 +16,9 @@
  */
 
 
+goog.provide('ShakaDemoSearch');
+
+
 /** @type {?ShakaDemoSearch} */
 let shakaDemoSearch;
 
@@ -23,7 +26,7 @@ let shakaDemoSearch;
 /**
  * Shaka Player demo, feature discovery page layout.
  */
-class ShakaDemoSearch {
+const ShakaDemoSearch = class {
   /**
    * Register the page configuration.
    */
@@ -322,7 +325,7 @@ class ShakaDemoSearch {
       return true;
     });
   }
-}
+};
 
 
 /** @typedef {shakaAssets.Feature|shakaAssets.Source} */

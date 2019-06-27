@@ -16,6 +16,9 @@
  */
 
 
+goog.provide('ShakaDemoFront');
+
+
 /** @type {?ShakaDemoFront} */
 let shakaDemoFront;
 
@@ -23,7 +26,7 @@ let shakaDemoFront;
 /**
  * Shaka Player demo, front page layout.
  */
-class ShakaDemoFront {
+const ShakaDemoFront = class {
   /**
    * Register the page configuration.
    */
@@ -154,7 +157,7 @@ class ShakaDemoFront {
       card.selectByAsset(shakaDemoMain.selectedAsset);
     }
   }
-}
+};
 
 
 document.addEventListener('shaka-main-loaded', ShakaDemoFront.init);
