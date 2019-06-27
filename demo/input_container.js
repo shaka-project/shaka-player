@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+
+goog.provide('ShakaDemoInputContainer');
+
+
 /**
  * Creates elements for containing inputs. It represents a single "section" of
  * input.
@@ -23,7 +27,7 @@
  * It also has an optional header, which can contain style-dependent
  * functionality.
  */
-class ShakaDemoInputContainer {
+const ShakaDemoInputContainer = class {
   /**
    * @param {!Element} parentDiv
    * @param {?string} headerText The text to be displayed by the header. If
@@ -188,7 +192,7 @@ class ShakaDemoInputContainer {
       this.latestRow_.classList.add('borderless');
     }
   }
-}
+};
 
 /** @enum {string} */
 ShakaDemoInputContainer.Style = {

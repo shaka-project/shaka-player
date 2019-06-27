@@ -15,27 +15,19 @@
  * limitations under the License.
  */
 
-
-goog.provide('ShakaDemoTooltips');
-
-
-/**
- * Creates and contains the MDL elements of a tooltip.
- */
-const ShakaDemoTooltips = class {
-  /**
-   * @param {!Element} labeledElement
-   * @param {string} message
-   */
-  static make(labeledElement, message) {
-    tippy(labeledElement, {
-      content: message,
-      placement: 'bottom',
-      arrow: true,
-      animation: 'scale',
-      size: 'large',
-    });
-    // TODO: The tooltip should be unreadable by screen readers, and this
-    // tooltip info should instead be encoded into the object.
-  }
-};
+goog.require('AssetCard');
+goog.require('CloseButton');
+goog.require('ShakaDemoConfig');
+goog.require('ShakaDemoCustom');
+goog.require('ShakaDemoUtils');
+goog.require('ShakaDemoFront');
+goog.require('ShakaDemoBoolInput');
+goog.require('ShakaDemoDatalistInput');
+goog.require('ShakaDemoInput');
+goog.require('ShakaDemoNumberInput');
+goog.require('ShakaDemoSelectInput');
+goog.require('ShakaDemoTextInput');
+goog.require('ShakaDemoInputContainer');
+goog.require('ShakaDemoMain');
+goog.require('ShakaDemoSearch');
+goog.require('ShakaDemoTooltips');

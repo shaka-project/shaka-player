@@ -16,11 +16,14 @@
  */
 
 
+goog.provide('AssetCard');
+
+
 /**
  * Creates and contains an MDL card that presents info about the given asset.
  * @final
  */
-class AssetCard {
+const AssetCard = class {
   /**
    * @param {!Element} parentDiv
    * @param {!ShakaDemoAssetInfo} asset
@@ -357,4 +360,4 @@ class AssetCard {
     this.actions_.appendChild(button);
     return button;
   }
-}
+};

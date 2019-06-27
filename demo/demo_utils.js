@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+goog.provide('ShakaDemoUtils');
 
 /** @namespace */
 let ShakaDemoUtils = {};
