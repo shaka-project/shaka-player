@@ -34,37 +34,37 @@ shaka.ui.Element = class {
   constructor(parent, controls) {
     /**
      * @protected {HTMLElement}
-     * @exportDoc
+     * @exportInterface
      */
     this.parent = parent;
 
     /**
      * @protected {shaka.ui.Controls}
-     * @exportDoc
+     * @exportInterface
      */
     this.controls = controls;
 
     /**
      * @protected {shaka.util.EventManager}
-     * @exportDoc
+     * @exportInterface
      */
     this.eventManager = new shaka.util.EventManager();
 
     /**
      * @protected {shaka.ui.Localization}
-     * @exportDoc
+     * @exportInterface
      */
     this.localization = this.controls.getLocalization();
 
     /**
      * @protected {shaka.Player}
-     * @exportDoc
+     * @exportInterface
      */
     this.player = this.controls.getPlayer();
 
     /**
      * @protected {HTMLMediaElement}
-     * @exportDoc
+     * @exportInterface
      */
     this.video = this.controls.getVideo();
   }

@@ -23,17 +23,15 @@ goog.provide('CloseButton');
  * A custom UI button, to allow users to close the video element.
  * This cannot actually extend shaka.ui.Element, as that class does not exist
  * at load-time when in uncompiled mode.
- * @implements {shaka.extern.IUIElement}
+ * @extends {shaka.ui.Element}
  */
-const CloseButton = class {
+CloseButton = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    /** @protected {!HTMLElement} */
-    this.parent = parent;
-
+    super(parent, controls);
     this.button_ = document.createElement('button');
     this.button_.classList.add('material-icons');
     this.button_.classList.add('close-button');
