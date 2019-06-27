@@ -47,6 +47,11 @@ const commonNoRestrictedSyntax = [
     'selector': 'MemberExpression[property.name="prototype"]',
     'message': 'Use ES6 classes not .prototype.',
   },
+  {
+    'selector': 'BinaryExpression[operator=/^([<>!=]=?)$/] > ' +
+                'CallExpression[callee.property.name=indexOf]',
+    'message': 'Use Array.includes instead of indexOf.',
+  },
 ];
 
 module.exports = {
