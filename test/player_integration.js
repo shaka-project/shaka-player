@@ -36,10 +36,10 @@ describe('Player', () => {
     document.body.appendChild(video);
 
     compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
-    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
     player = new compiledShaka.Player(video);
 
     // Grab event manager from the uncompiled library:
@@ -125,6 +125,7 @@ describe('Player', () => {
     // Using mode='disabled' on TextTrack causes cues to go null, which leads
     // to a crash in TextEngine.  This validates that we do not trigger this
     // behavior when changing visibility of text.
+
     it('does not cause cues to be null', async () => {
       await player.load('test:sintel_compiled');
       video.play();
@@ -239,9 +240,7 @@ describe('Player', () => {
       displayer.appendSpy.and.callFake((added) => {
         cues = cues.concat(added);
       });
-      displayer.removeSpy.and.callFake(() => {
-        cues = [];
-      });
+
       player.configure('textDisplayFactory', Util.factoryReturns(displayer));
 
       const preferredTextLanguage = 'fa';  // The same as in the content itself
@@ -249,6 +248,43 @@ describe('Player', () => {
 
       await player.load('test:sintel_realistic_compiled');
       await Util.delay(1);  // Allow the first segments to be appended.
+
+      expect(player.isTextTrackVisible()).toBe(true);
+      expect(displayer.isTextVisible()).toBe(true);
+      expect(cues.length).toBeGreaterThan(0);
+    });
+
+    it('actually appends cues for external text', async () => {
+      let cues = [];
+      /** @const {!shaka.test.FakeTextDisplayer} */
+      const displayer = new shaka.test.FakeTextDisplayer();
+      displayer.appendSpy.and.callFake((added) => {
+        cues = cues.concat(added);
+      });
+
+      player.configure({textDisplayFactory: () => displayer});
+
+      const eventManager = new shaka.util.EventManager();
+      /** @type {shaka.test.Waiter} */
+      const waiter = new shaka.test.Waiter(eventManager);
+
+
+      await player.load('test:sintel_no_text_compiled');
+      const locationUri = new goog.Uri(location.href);
+      const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
+      const absoluteUri = locationUri.resolve(partialUri);
+      await player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
+          'text/vtt');
+
+      const textTracks = player.getTextTracks();
+      expect(textTracks).toBeTruthy();
+      expect(textTracks.length).toBe(1);
+
+      player.setTextTrackVisibility(true);
+      await waiter.waitForEvent(player, 'texttrackvisibility');
+      // Wait for the text cues to get appended.
+      // TODO: this should be based on an event instead.
+      await Util.delay(1);
 
       expect(player.isTextTrackVisible()).toBe(true);
       expect(displayer.isTextVisible()).toBe(true);

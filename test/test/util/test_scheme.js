@@ -234,7 +234,6 @@ shaka.test.TestScheme = class {
 
       MANIFESTS[name + suffix] = gen.build();
     }
-
     // Custom generators:
 
     const data = DATA['sintel'];
@@ -600,13 +599,13 @@ shaka.test.TestScheme.ManifestParser = class {
     if (!manifestParts) {
       // Use expect so the URI is printed on errors.
       expect(uri).toMatch(re);
-      return Promise.reject();
+      throw new Error('Malformed uri!');
     }
 
     const manifest = shaka.test.TestScheme.MANIFESTS[manifestParts[1]];
     expect(manifest).toBeTruthy();
     if (!manifest) {
-      return Promise.reject();
+      throw new Error('Unknown manifest!');
     }
 
     // Invoke filtering interfaces similar to how a real parser would.
