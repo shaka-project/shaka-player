@@ -1215,4 +1215,33 @@ describe('DashParser Manifest', function() {
     const minBufferTime = manifest.minBufferTime;
     expect(minBufferTime).toEqual(75);
   });
+
+  it('does not set presentationDelay to NaN', async () => {
+    // NOTE: This is a regression test for #2015. It ensures that, if
+    // ignoreMinBufferTime is true and there is no suggestedPresentationDelay,
+    // we do not erroneously set presentationDelay to NaN.
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreMinBufferTime = true;
+    parser.configure(config);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const presentationTimeline = manifest.presentationTimeline;
+    const presentationDelay = presentationTimeline.getDelay();
+    expect(presentationDelay).not.toBeNaN();
+    expect(presentationDelay).toBe(config.dash.defaultPresentationDelay);
+  });
 });
