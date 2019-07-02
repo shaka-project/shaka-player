@@ -114,7 +114,8 @@ shaka.test.FakeNetworkingEngine = class {
         throw new shaka.util.Error(
             shaka.util.Error.Severity.CRITICAL,
             shaka.util.Error.Category.NETWORK,
-            shaka.util.Error.Code.UNEXPECTED_TEST_REQUEST);
+            shaka.util.Error.Code.UNEXPECTED_TEST_REQUEST,
+            requestedUri);
       }
 
       /** @type {shaka.extern.Response} */

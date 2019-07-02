@@ -122,42 +122,35 @@ shaka.test.Dash = class {
   }
 
   /**
-   * Makes a simple manifest object for jasmine.toEqual; this does not do any
-   * checking.  This only constructs one period with the given stream sets.
-   *
-   * @param {!Array.<shaka.extern.Variant>} variants
-   * @return {shaka.extern.Manifest}
+   * @param {shaka.extern.Manifest} manifest
+   * @return {!Promise.<shaka.media.SegmentReference>}
    */
-  static makeManifestFromVariants(variants) {
-    return /** @type {shaka.extern.Manifest} */ (jasmine.objectContaining({
-      periods: [
-        jasmine.objectContaining({
-          variants: variants,
-        }),
-      ],
-    }));
-  }
+  static async getFirstVideoSegmentReference(manifest) {
+    const period = manifest.periods[0];
+    expect(period).not.toBe(null);
+    if (!period) {
+      return null;
+    }
 
-  /**
-   * Makes a simple manifest object for jasmine.toEqual; this does not do any
-   * checking.  This only constructs one period with one stream with the given
-   * initialization segment data.
-   *
-   * @param {string} uri The URI of the initialization segment.
-   * @param {number} startByte
-   * @param {?number} endByte
-   * @param {number=} pto The presentationTimeOffset of the stream.
-   * @return {shaka.extern.Manifest}
-   */
-  static makeManifestFromInit(uri, startByte, endByte, pto) {
-    return shaka.test.Dash.makeManifestFromVariants([jasmine.objectContaining({
-      video: jasmine.objectContaining({
-        presentationTimeOffset: (pto || 0),
-        createSegmentIndex: jasmine.any(Function),
-        initSegmentReference: new shaka.media.InitSegmentReference(
-            () => ['http://example.com/' + uri], startByte, endByte),
-      }),
-    })]);
+    const variant = period.variants[0];
+    expect(variant).not.toBe(null);
+    if (!variant) {
+      return null;
+    }
+
+    const video = variant.video;
+    expect(video).not.toBe(null);
+    if (!video) {
+      return null;
+    }
+
+    await video.createSegmentIndex();
+    const position = video.segmentIndex.find(0);
+    expect(position).not.toBe(null);
+
+    const reference = video.segmentIndex.get(position);
+    expect(reference).not.toBe(null);
+    return reference;
   }
 
   /**

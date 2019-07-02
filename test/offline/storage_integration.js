@@ -622,8 +622,6 @@ describe('Storage', () => {
      * @return {shaka.extern.Manifest}
      */
     function makeWithStreamBandwidth() {
-      const SegmentReference = shaka.media.SegmentReference;
-
       /* eslint-disable indent */
       const manifest = new shaka.test.ManifestGenerator()
           .setPresentationDuration(20)
@@ -637,19 +635,19 @@ describe('Storage', () => {
       const audio = manifest.periods[0].variants[0].audio;
       goog.asserts.assert(audio, 'Created manifest with audio, where is it?');
       overrideSegmentIndex(audio, [
-        new SegmentReference(0, 0, 1, uris(audioSegment1Uri), 0, null),
-        new SegmentReference(1, 1, 2, uris(audioSegment2Uri), 0, null),
-        new SegmentReference(2, 2, 3, uris(audioSegment3Uri), 0, null),
-        new SegmentReference(3, 3, 4, uris(audioSegment4Uri), 0, null),
+        makeSegmentReference(0, 0, 1, audioSegment1Uri),
+        makeSegmentReference(1, 1, 2, audioSegment2Uri),
+        makeSegmentReference(2, 2, 3, audioSegment3Uri),
+        makeSegmentReference(3, 3, 4, audioSegment4Uri),
       ]);
 
       const video = manifest.periods[0].variants[0].video;
       goog.asserts.assert(video, 'Created manifest with video, where is it?');
       overrideSegmentIndex(video, [
-        new SegmentReference(0, 0, 1, uris(videoSegment1Uri), 0, null),
-        new SegmentReference(1, 1, 2, uris(videoSegment2Uri), 0, null),
-        new SegmentReference(2, 2, 3, uris(videoSegment3Uri), 0, null),
-        new SegmentReference(3, 3, 4, uris(videoSegment4Uri), 0, null),
+        makeSegmentReference(0, 0, 1, videoSegment1Uri),
+        makeSegmentReference(1, 1, 2, videoSegment2Uri),
+        makeSegmentReference(2, 2, 3, videoSegment3Uri),
+        makeSegmentReference(3, 3, 4, videoSegment4Uri),
       ]);
 
       return manifest;
@@ -1205,19 +1203,9 @@ describe('Storage', () => {
   }
 
   /**
-   * @param {string} uri
-   * @return {function():!Array.<string>}
-   */
-  function uris(uri) {
-    return () => [uri];
-  }
-
-  /**
    * @return {shaka.extern.Manifest}
    */
   function makeManifestWithPerStreamBandwidth() {
-    const SegmentReference = shaka.media.SegmentReference;
-
     /* eslint-disable indent */
     const manifest = new shaka.test.ManifestGenerator()
         .setPresentationDuration(20)
@@ -1235,10 +1223,10 @@ describe('Storage', () => {
       // Make a new copy each time as the segment index can modify
       // each reference.
       const refs = [
-        new SegmentReference(0, 0, 1, uris(segment1Uri), 0, null),
-        new SegmentReference(1, 1, 2, uris(segment2Uri), 0, null),
-        new SegmentReference(2, 2, 3, uris(segment3Uri), 0, null),
-        new SegmentReference(3, 3, 4, uris(segment4Uri), 0, null),
+        makeSegmentReference(0, 0, 1, segment1Uri),
+        makeSegmentReference(1, 1, 2, segment2Uri),
+        makeSegmentReference(2, 2, 3, segment3Uri),
+        makeSegmentReference(3, 3, 4, segment4Uri),
       ];
 
       overrideSegmentIndex(stream, refs);
@@ -1262,19 +1250,36 @@ describe('Storage', () => {
   }
 
   /**
+   * @param {number} position
+   * @param {number} startTime
+   * @param {number} endTime
+   * @param {string} uri
+   * @return {!shaka.media.SegmentReference}
+   */
+  function makeSegmentReference(position, startTime, endTime, uri) {
+    return new shaka.media.SegmentReference(
+        position,
+        startTime,
+        endTime,
+        () => [uri],
+        /* startByte */ 0,
+        /* endByte */ null,
+        /* initSegmentReference */ null,
+        /* presentationTimeOffset */ 0);
+  }
+
+  /**
    * @return {shaka.extern.Manifest}
    */
   function makeManifestWithNonZeroStart() {
-    const SegmentReference = shaka.media.SegmentReference;
-
     const manifest = makeManifestWithPerStreamBandwidth();
 
     for (const stream of getAllStreams(manifest)) {
       const refs = [
-        new SegmentReference(0, 10, 11, uris(segment1Uri), 0, null),
-        new SegmentReference(1, 11, 12, uris(segment2Uri), 0, null),
-        new SegmentReference(2, 12, 13, uris(segment3Uri), 0, null),
-        new SegmentReference(3, 13, 14, uris(segment4Uri), 0, null),
+        makeSegmentReference(0, 10, 11, segment1Uri),
+        makeSegmentReference(1, 11, 12, segment2Uri),
+        makeSegmentReference(2, 12, 13, segment3Uri),
+        makeSegmentReference(3, 13, 14, segment4Uri),
       ];
 
       overrideSegmentIndex(stream, refs);

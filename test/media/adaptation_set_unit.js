@@ -179,7 +179,6 @@ describe('AdaptationSet', () => {
       encrypted: false,
       segmentIndex: null,
       id: id,
-      initSegmentReference: null,
       keyId: null,
       label: null,
       language: '',

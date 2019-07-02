@@ -76,6 +76,7 @@ shaka.test.ManifestParser = class {
       startByte = 0, endByte = null) {
     const getUris = () => [baseUri + uri];
     return new shaka.media.SegmentReference(
-        position, start, end, getUris, startByte, endByte);
+        position, start, end, getUris, startByte, endByte,
+        /* initSegmentReference */ null, /* presentationTimeOffset */ 0);
   }
 };

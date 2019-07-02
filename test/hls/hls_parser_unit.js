@@ -161,26 +161,20 @@ describe('HlsParser', () => {
             .bandwidth(200)
             .addPartialStream(ContentType.VIDEO)
               .anyInitSegment()
-              .presentationTimeOffset(0)
               .mime('video/mp4', 'avc1')
               .frameRate(60)
               .size(960, 540)
             .addPartialStream(ContentType.AUDIO)
               .language('en')
               .anyInitSegment()
-              .presentationTimeOffset(0)
               .mime('audio/mp4', 'mp4a')
               .channelsCount(2)
           .addPartialStream(ContentType.TEXT)
             .language('en')
-            .nullInitSegment()
-            .presentationTimeOffset(0)
             .mime('text/vtt', '')
             .kind(TextStreamKind.SUBTITLE)
           .addPartialStream(ContentType.TEXT)
             .language('es')
-            .nullInitSegment()
-            .presentationTimeOffset(0)
             .mime('text/vtt', '')
             .kind(TextStreamKind.SUBTITLE)
         .build();
@@ -532,12 +526,15 @@ describe('HlsParser', () => {
     const manifest = await parser.start('test:/master', playerInterface);
     const presentationTimeline = manifest.presentationTimeline;
     const stream = manifest.periods[0].variants[0].video;
-    // baseMediaDecodeTime (655360) / timescale (1000)
-    expect(stream.presentationTimeOffset).toBe(655.36);
     await stream.createSegmentIndex();
+
     const pos = stream.segmentIndex.find(0);
     expect(pos).not.toBe(null);
-    expect(stream.segmentIndex.get(pos).startTime).toBe(0);
+    const ref = stream.segmentIndex.get(pos);
+
+    expect(ref.startTime).toBe(0);
+    // baseMediaDecodeTime (655360) / timescale (1000)
+    expect(ref.presentationTimeOffset).toBe(655.36);
     expect(presentationTimeline.getSeekRangeStart()).toBe(0);
     expect(presentationTimeline.getSeekRangeEnd()).toBe(5);
   });
@@ -1297,10 +1294,8 @@ describe('HlsParser', () => {
         .addPeriod(0)
           .addPartialVariant()
             .addPartialStream(ContentType.VIDEO)
-              .nullInitSegment()
               .mime('video/mp4', 'avc1')
             .addPartialStream(ContentType.AUDIO)
-              .nullInitSegment()
               .mime('audio/mp4', 'mp4a')
         .build();
     /* eslint-enable indent */
@@ -1707,7 +1702,7 @@ describe('HlsParser', () => {
           .setResponseValue('test:/init.mp4', initSegmentData)
           .setResponseValue('test:/main.mp4', segmentData);
 
-      const ref = ManifestParser.makeReference(
+      const expectedRef = ManifestParser.makeReference(
           'test:/main.mp4' /* uri */,
           0 /* position */,
           0 /* startTime */,
@@ -1719,7 +1714,7 @@ describe('HlsParser', () => {
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.periods[0].variants[0].video;
       await video.createSegmentIndex();
-      ManifestParser.verifySegmentIndex(video, [ref]);
+      ManifestParser.verifySegmentIndex(video, [expectedRef]);
 
       // Make sure the segment data was fetched with the correct byte
       // range.
@@ -1730,7 +1725,9 @@ describe('HlsParser', () => {
 
       // In VOD content, we set the presentationTimeOffset to align the
       // content to presentation time 0.
-      expect(video.presentationTimeOffset).toBe(segmentDataStartTime);
+      const position = video.segmentIndex.find(0);
+      const ref = video.segmentIndex.get(position);
+      expect(ref.presentationTimeOffset).toBe(segmentDataStartTime);
     });
 
     it('parses start time from ts segments', async () => {
@@ -1741,7 +1738,7 @@ describe('HlsParser', () => {
           .setResponseText('test:/video', tsMediaPlaylist)
           .setResponseValue('test:/main.ts', tsSegmentData);
 
-      const ref = ManifestParser.makeReference(
+      const expectedRef = ManifestParser.makeReference(
           'test:/main.ts' /* uri */,
           0 /* position */,
           0 /* startTime */,
@@ -1753,7 +1750,7 @@ describe('HlsParser', () => {
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.periods[0].variants[0].video;
       await video.createSegmentIndex();
-      ManifestParser.verifySegmentIndex(video, [ref]);
+      ManifestParser.verifySegmentIndex(video, [expectedRef]);
 
       // Make sure the segment data was fetched with the correct byte
       // range.
@@ -1764,7 +1761,9 @@ describe('HlsParser', () => {
 
       // In VOD content, we set the presentationTimeOffset to align the
       // content to presentation time 0.
-      expect(video.presentationTimeOffset).toBe(segmentDataStartTime);
+      const position = video.segmentIndex.find(0);
+      const ref = video.segmentIndex.get(position);
+      expect(ref.presentationTimeOffset).toBe(segmentDataStartTime);
     });
 
     // We want to make sure that we can interrupt the parser while it is getting
@@ -1822,7 +1821,7 @@ describe('HlsParser', () => {
       const ref = video.segmentIndex.get(0);
       expect(video.segmentIndex.get(1)).toBe(null);  // No more references.
 
-      expect(video.presentationTimeOffset).toBe(segmentDataStartTime);
+      expect(ref.presentationTimeOffset).toBe(segmentDataStartTime);
       // The duration should be set to the sum of the segment durations (5),
       // even though the endTime of the segment is larger.
       expect(ref.endTime - ref.startTime).toBe(5);

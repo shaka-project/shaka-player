@@ -19,6 +19,7 @@
 describe('DashParser Manifest', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Dash = shaka.test.Dash;
+  const mp4IndexSegmentUri = '/base/test/test/assets/index-segment.mp4';
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
   let fakeNetEngine;
@@ -28,6 +29,12 @@ describe('DashParser Manifest', () => {
   let onEventSpy;
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
+  /** @type {!ArrayBuffer} */
+  let mp4Index;
+
+  beforeAll(async () => {
+    mp4Index = await shaka.test.Util.fetch(mp4IndexSegmentUri);
+  });
 
   beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
@@ -143,14 +150,12 @@ describe('DashParser Manifest', () => {
                 .bandwidth(200)
                 .primary()
                 .addPartialStream(ContentType.VIDEO)
-                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1.4d401f')
                   .bandwidth(100)
                   .frameRate(1000000 / 42000)
                   .size(768, 576)
                 .addPartialStream(ContentType.AUDIO)
                   .bandwidth(100)
-                  .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a.40.29')
                   .primary()
                   .roles(['main'])
@@ -159,14 +164,12 @@ describe('DashParser Manifest', () => {
                 .bandwidth(150)
                 .primary()
                 .addPartialStream(ContentType.VIDEO)
-                  .presentationTimeOffset(0)
                   .mime('video/mp4', 'avc1.4d401f')
                   .bandwidth(50)
                   .frameRate(1000000 / 42000)
                   .size(576, 432)
                 .addPartialStream(ContentType.AUDIO)
                   .bandwidth(100)
-                  .presentationTimeOffset(0)
                   .mime('audio/mp4', 'mp4a.40.29')
                   .primary()
                   .roles(['main'])
@@ -174,7 +177,6 @@ describe('DashParser Manifest', () => {
                 .language('es')
                 .label('spanish')
                 .primary()
-                .presentationTimeOffset(0)
                 .mime('text/vtt')
                 .bandwidth(100)
                 .kind('caption')
@@ -255,9 +257,12 @@ describe('DashParser Manifest', () => {
     ]);
 
     fakeNetEngine.setResponseText('dummy://foo', source);
+    fakeNetEngine.setResponseValue('http://example.com', mp4Index);
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
-    expect(stream.presentationTimeOffset).toBe(1);
+    await stream.createSegmentIndex();
+    const ref = stream.segmentIndex.get(0);
+    expect(ref.presentationTimeOffset).toBe(1);
   });
 
   it('defaults to SegmentList with SegmentTemplate', async () => {
@@ -278,7 +283,10 @@ describe('DashParser Manifest', () => {
     fakeNetEngine.setResponseText('dummy://foo', source);
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
-    expect(stream.presentationTimeOffset).toBe(2);
+    await stream.createSegmentIndex();
+    const position = stream.segmentIndex.find(0);
+    const ref = stream.segmentIndex.get(position);
+    expect(ref.presentationTimeOffset).toBe(2);
   });
 
   it('generates a correct index for non-segmented text', async () => {
@@ -304,12 +312,16 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].textStreams[0];
     await stream.createSegmentIndex();
-    expect(stream.initSegmentReference).toBe(null);
     expect(stream.segmentIndex.find(0)).toBe(1);
-    expect(stream.segmentIndex.get(1))
-        .toEqual(new shaka.media.SegmentReference(1, 0, 30, (() => {
-          return ['http://example.com/de.vtt'];
-        }), 0, null));
+    expect(stream.segmentIndex.get(1)).toEqual(new shaka.media.SegmentReference(
+        /* position */ 1,
+        /* startTime */ 0,
+        /* endTime */ 30,
+        /* getUris */ () => ['http://example.com/de.vtt'],
+        /* startByte */ 0,
+        /* endBytes */ null,
+        /* initSegmentReference */ null,
+        /* presentationTimeOffset */ 0));
   });
 
   it('correctly parses closed captions with channels and languages',
@@ -430,7 +442,9 @@ describe('DashParser Manifest', () => {
     const variant = manifest.periods[0].variants[0];
     const stream = manifest.periods[0].variants[0].audio;
     await stream.createSegmentIndex();
-    expect(stream.initSegmentReference.getUris()[0])
+    const position = stream.segmentIndex.find(0);
+    const segment = stream.segmentIndex.get(position);
+    expect(segment.initSegmentReference.getUris()[0])
         .toBe('http://example.com/%C8%A7.mp4');
     expect(variant.language).toBe('\u2603');
   });

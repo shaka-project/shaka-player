@@ -116,11 +116,15 @@ describe('DashParser SegmentBase', () => {
 
     fakeNetEngine
         .setResponseText('dummy://foo', source)
-        .setResponseText('http://example.com', '');
+        .setResponseValue('http://example.com', indexSegment);
 
     const manifest = await parser.start('dummy://foo', playerInterface);
-    expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
-    await Dash.callCreateSegmentIndex(manifest);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/init.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(201);
+    expect(initSegmentReference.getEndByte()).toBe(300);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
@@ -143,11 +147,15 @@ describe('DashParser SegmentBase', () => {
 
     fakeNetEngine
         .setResponseText('dummy://foo', source)
-        .setResponseText('http://example.com', '');
+        .setResponseValue('http://example.com', indexSegment);
 
     const manifest = await parser.start('dummy://foo', playerInterface);
-    expect(manifest).toEqual(Dash.makeManifestFromInit('init.mp4', 201, 300));
-    await Dash.callCreateSegmentIndex(manifest);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/init.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(201);
+    expect(initSegmentReference.getEndByte()).toBe(300);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
@@ -171,11 +179,15 @@ describe('DashParser SegmentBase', () => {
 
     fakeNetEngine
         .setResponseText('dummy://foo', source)
-        .setResponseText('http://example.com/stream.mp4', '');
+        .setResponseValue('http://example.com/stream.mp4', indexSegment);
 
     const manifest = await parser.start('dummy://foo', playerInterface);
-    expect(manifest).toEqual(Dash.makeManifestFromInit('stream.mp4', 201, 300));
-    await Dash.callCreateSegmentIndex(manifest);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/stream.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(201);
+    expect(initSegmentReference.getEndByte()).toBe(300);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com/stream.mp4', 100, 200);
@@ -205,12 +217,16 @@ describe('DashParser SegmentBase', () => {
 
     fakeNetEngine
         .setResponseText('dummy://foo', source)
-        .setResponseText('http://example.com/index.mp4', '');
+        .setResponseValue('http://example.com/index.mp4', indexSegment);
 
     const manifest = await parser.start('dummy://foo', playerInterface);
-    expect(manifest).toEqual(
-        Dash.makeManifestFromInit('init.mp4', 201, 300, 10));
-    await Dash.callCreateSegmentIndex(manifest);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/init.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(201);
+    expect(initSegmentReference.getEndByte()).toBe(300);
+    expect(segmentReference.presentationTimeOffset).toBe(10);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com/index.mp4', 5, 2000);
@@ -239,12 +255,16 @@ describe('DashParser SegmentBase', () => {
 
     fakeNetEngine
         .setResponseText('dummy://foo', source)
-        .setResponseText('http://example.com', '');
+        .setResponseValue('http://example.com', indexSegment);
 
     const manifest = await parser.start('dummy://foo', playerInterface);
-    expect(manifest).toEqual(
-        Dash.makeManifestFromInit('special.mp4', 0, null, 20));
-    await Dash.callCreateSegmentIndex(manifest);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/special.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(0);
+    expect(initSegmentReference.getEndByte()).toBe(null);
+    expect(segmentReference.presentationTimeOffset).toBe(20);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com', 30, 900);

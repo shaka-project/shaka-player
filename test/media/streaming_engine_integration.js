@@ -173,8 +173,7 @@ describe('StreamingEngine', () => {
         metadata.mdhdOffset,
         metadata.segmentUri,
         metadata.tfdtOffset,
-        metadata.segmentDuration,
-        metadata.presentationTimeOffset);
+        metadata.segmentDuration);
     generators[type] = generator;
     return generator.init();
   }
@@ -189,7 +188,6 @@ describe('StreamingEngine', () => {
         metadata.segmentUri,
         metadata.tfdtOffset,
         metadata.segmentDuration,
-        metadata.presentationTimeOffset,
         now - 295 /* broadcastStartTime */,
         now - 295 /* availabilityStartTime */,
         timeShiftBufferDepth);
@@ -263,25 +261,18 @@ describe('StreamingEngine', () => {
       firstPeriodStartTime, secondPeriodStartTime, presentationDuration) {
     manifest = shaka.test.StreamingEngineUtil.createManifest(
         [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
-        {audio: metadata.audio.segmentDuration,
-          video: metadata.video.segmentDuration});
+        /* segmentDurations */ {
+          audio: metadata.audio.segmentDuration,
+          video: metadata.video.segmentDuration,
+        },
+        /* initSegmentRanges */ {
+          audio: [0, null],
+          video: [0, null],
+        });
 
     manifest.presentationTimeline =
       /** @type {!shaka.media.PresentationTimeline} */ (timeline);
     manifest.minBufferTime = 2;
-
-    // Create InitSegmentReferences.
-    function makeUris(uri) {
-      return () => [uri];
-    }
-    manifest.periods[0].variants[0].audio.initSegmentReference =
-        new shaka.media.InitSegmentReference(makeUris('1_audio_init'), 0, null);
-    manifest.periods[0].variants[0].video.initSegmentReference =
-        new shaka.media.InitSegmentReference(makeUris('1_video_init'), 0, null);
-    manifest.periods[1].variants[0].audio.initSegmentReference =
-        new shaka.media.InitSegmentReference(makeUris('2_audio_init'), 0, null);
-    manifest.periods[1].variants[0].video.initSegmentReference =
-        new shaka.media.InitSegmentReference(makeUris('2_video_init'), 0, null);
 
     variant1 = manifest.periods[0].variants[0];
     variant2 = manifest.periods[1].variants[0];
@@ -584,8 +575,10 @@ describe('StreamingEngine', () => {
           0 /* firstPeriodStartTime */,
           30 /* secondPeriodStartTime */,
           30 /* presentationDuration */,
-          {audio: metadata.audio.segmentDuration,
-            video: metadata.video.segmentDuration});
+          {
+            audio: metadata.audio.segmentDuration,
+            video: metadata.video.segmentDuration,
+          });
 
       manifest = setupGappyManifest(gapAtStart, dropSegment);
       variant1 = manifest.periods[0].variants[0];
@@ -603,9 +596,10 @@ describe('StreamingEngine', () => {
     function setupGappyManifest(gapAtStart, dropSegment) {
       /**
        * @param {string} type
+       * @param {shaka.media.InitSegmentReference} initSegmentReference
        * @return {!shaka.media.SegmentIndex}
        */
-      function createIndex(type) {
+      function createIndex(type, initSegmentReference) {
         const d = metadata[type].segmentDuration;
         const refs = [];
         let i = 1;
@@ -627,8 +621,17 @@ describe('StreamingEngine', () => {
             }
             return ['1_' + type + '_' + cur];
           };
-          refs.push(
-              new shaka.media.SegmentReference(i, time, end, getUris, 0, null));
+          refs.push(new shaka.media.SegmentReference(
+              /* position */ i,
+              /* startTime */ time,
+              /* endTime */ end,
+              getUris,
+              /* startByte */ 0,
+              /* endByte */ null,
+              initSegmentReference,
+              // Normally PTO adjusts the segment time backwards; so to make the
+              // segment appear in the future, use a negative.
+              /* presentationTimeOffset */ -gapAtStart));
 
           i++;
           time = end;
@@ -643,8 +646,10 @@ describe('StreamingEngine', () => {
         return new shaka.media.InitSegmentReference(getUris, 0, null);
       }
 
-      const videoIndex = createIndex('video');
-      const audioIndex = createIndex('audio');
+      const videoInit = createInit('video');
+      const videoIndex = createIndex('video', videoInit);
+      const audioInit = createInit('audio');
+      const audioIndex = createIndex('audio', audioInit);
       return {
         presentationTimeline: timeline,
         offlineSessionIds: [],
@@ -658,10 +663,6 @@ describe('StreamingEngine', () => {
               id: 2,
               createSegmentIndex: () => Promise.resolve(),
               segmentIndex: videoIndex,
-              initSegmentReference: createInit('video'),
-              // Normally PTO adjusts the segment time backwards; so to make the
-              // segment appear in the future, use a negative.
-              presentationTimeOffset: -gapAtStart,
               mimeType: 'video/mp4',
               codecs: 'avc1.42c01e',
               bandwidth: 5000000,
@@ -673,8 +674,6 @@ describe('StreamingEngine', () => {
               id: 3,
               createSegmentIndex: () => Promise.resolve(),
               segmentIndex: audioIndex,
-              initSegmentReference: createInit('audio'),
-              presentationTimeOffset: -gapAtStart,
               mimeType: 'audio/mp4',
               codecs: 'mp4a.40.2',
               bandwidth: 192000,

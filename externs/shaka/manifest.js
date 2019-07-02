@@ -264,8 +264,6 @@ shaka.extern.CreateSegmentIndexFunction;
  *   originalId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
  *   segmentIndex: shaka.media.SegmentIndex,
- *   initSegmentReference: shaka.media.InitSegmentReference,
- *   presentationTimeOffset: (number|undefined),
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
@@ -303,19 +301,6 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {shaka.media.SegmentIndex} segmentIndex
  *   <i>Required.</i> <br>
  *   May be null until createSegmentIndex() is complete.
- * @property {shaka.media.InitSegmentReference} initSegmentReference
- *   The Stream's initialization segment metadata, or null if the segments are
- *   self-initializing.
- * @property {(number|undefined)} presentationTimeOffset
- *   <i>Defaults to 0.</i> <br>
- *   The amount of time, in seconds, that the stream's presentation timestamps
- *   are offset from the start of the Stream's Period, i.e., this value should
- *   equal the first presentation timestamp of the first frame/sample in the
- *   period. <br>
- *   <br>
- *   For example, for MP4 based streams, this value should equal the first
- *   segment's tfdt box's 'baseMediaDecodeTime' field (after it has been
- *   converted to seconds).
  * @property {string} mimeType
  *   <i>Required.</i> <br>
  *   The Stream's MIME type, e.g., 'audio/mp4', 'video/webm', or 'text/vtt'.

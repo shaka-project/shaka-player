@@ -134,9 +134,11 @@ describe('PresentationTimeline', () => {
         /* position */ 0,
         startTime,
         endTime,
-        /* uris */ (() => { return []; }),
+        /* uris */ () => [],
         /* startByte */ 0,
-        /* endByte */ null);
+        /* endByte */ null,
+        /* initSegmentReference */ null,
+        /* presentationTimeOffset */ 0);
   }
 
   describe('getSegmentAvailabilityStart', () => {

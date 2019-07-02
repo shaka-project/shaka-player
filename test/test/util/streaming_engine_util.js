@@ -192,10 +192,13 @@ shaka.test.StreamingEngineUtil = class {
    * @param {number} presentationDuration
    * @param {!Object.<string, number>} segmentDurations The duration of each
    *   type of segment.
+   * @param {!Object.<string, !Array.<number>>} initSegmentRanges The byte
+   *   ranges for each type of init segment.
    * @return {shaka.extern.Manifest}
    */
   static createManifest(
-      periodStartTimes, presentationDuration, segmentDurations) {
+      periodStartTimes, presentationDuration, segmentDurations,
+      initSegmentRanges) {
     const boundsCheckPosition = (time, period, pos) =>
       shaka.test.StreamingEngineUtil.boundsCheckPosition(
           periodStartTimes, presentationDuration, segmentDurations, time,
@@ -224,10 +227,27 @@ shaka.test.StreamingEngineUtil = class {
         return null;
       }
 
+      const initSegmentUri = periodNumber + '_' + type + '_init';
+
+      // The type can be 'text', 'audio', 'video', or 'trickvideo',
+      // but we pull video init segment metadata from the 'video' part of the
+      // structure for trick-mode videos.  Here we normalize the type so that
+      // 'trickvideo' becomes 'video' when we access the init segment range.
+      const normalizedType = type == 'trickvideo' ? 'video' : type;
+      const initRange = initSegmentRanges[normalizedType];
+
+      let initSegmentReference = null;
+      if (initRange) {
+        initSegmentReference = new shaka.media.InitSegmentReference(
+            () => [initSegmentUri], initRange[0], initRange[1]);
+      }
+
       const d = segmentDurations[type];
       const getUris = () => [periodNumber + '_' + type + '_' + position];
       return new shaka.media.SegmentReference(
-          position, (position - 1) * d, position * d, getUris, 0, null);
+          position, (position - 1) * d, position * d, getUris,
+          /* startByte */ 0, /* endByte */ null,
+          initSegmentReference, /* presentationTimeOffset */ 0);
     };
 
     const manifest = {
@@ -239,9 +259,9 @@ shaka.test.StreamingEngineUtil = class {
     // Populate the Manifest.
     let id = 0;
     const enumerate = (it) => shaka.util.Iterables.enumerate(it);
-    for (const {i, item} of enumerate(periodStartTimes)) {
+    for (const {i, item: startTime} of enumerate(periodStartTimes)) {
       const period = {
-        startTime: item,
+        startTime,
         variants: [],
         textStreams: [],
       };
@@ -346,8 +366,6 @@ shaka.test.StreamingEngineUtil = class {
       id: id,
       createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
       segmentIndex: new shaka.test.FakeSegmentIndex(),
-      initSegmentReference: null,
-      presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
       bandwidth: 192000,
@@ -367,8 +385,6 @@ shaka.test.StreamingEngineUtil = class {
       id: id,
       createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
       segmentIndex: new shaka.test.FakeSegmentIndex(),
-      initSegmentReference: null,
-      presentationTimeOffset: 0,
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
       bandwidth: 5000000,
@@ -390,8 +406,6 @@ shaka.test.StreamingEngineUtil = class {
       id: id,
       createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
       segmentIndex: new shaka.test.FakeSegmentIndex(),
-      initSegmentReference: null,
-      presentationTimeOffset: 0,
       mimeType: 'text/vtt',
       kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
       type: ManifestParserUtils.ContentType.TEXT,

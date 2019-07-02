@@ -164,12 +164,6 @@ will resolve when the segment index is ready.  This is only ever called once.
 This is *not* a function, but a {@link shaka.media.SegmentIndex} tracking all
 available segments.
 
-#### initSegmentReference
-
-This is *not* a function, but a {@link shaka.media.InitSegmentReference} that
-contains info about how to fetch the initialization segment.  This can be
-`null` if the stream is self-initializing.
-
 
 ## shaka.media.SegmentIndex
 
@@ -178,21 +172,27 @@ To help in handling segment references, there is a
 It handles merging new segments, and expanding the list of segments for live
 streams.
 
-To merge updates, simply create a new array of segments and call `merge`.  Any
-existing segments will be updated and new segments will be added.  You can also
-call `evict` to remove old references to reduce the memory footprint.
-
 ```js
-var references = refs.map(function(r, i) {
+var references = refs.map(function(r, position) {
   // Should return an array of possible URI choices; this is used for failover
   // in the event of network error.  This is a function to defer calculations.
   var getUris = function() { return [r.uri]; };
 
-  return new shaka.media.SegmentReference(i, r.start, r.end, getUris, 0, null);
+  return new shaka.media.SegmentReference(
+      position,
+      r.start, r.end, getUris,
+      /* startByte */ 0,
+      /* endByte */ null,
+      initSegmentReference,
+      /* presentationTimeOffset */ 0);
 });
 
 var index = new shaka.media.SegmentIndex(references);
 ```
+
+To merge updates, simply create a new array of segments and call `merge`.  Any
+existing segments will be updated and new segments will be added.  You can also
+call `evict` to remove old references to reduce the memory footprint.
 
 To expand the list of references on a timer, as is done for DASH's
 SegmentTemplate, call `index.updateEvery` with a callback that evicts old
@@ -284,7 +284,8 @@ MyManifestParser.prototype.loadVariant_ = function(hasVideo, hasAudio) {
 
 MyManifestParser.prototype.loadStream_ = function(type) {
   var getUris = function() { return ['https://example.com/init']; };
-  var init = new shaka.media.InitSegmentReference(getUris, 0, null);
+  var initSegmentReference =
+      new shaka.media.InitSegmentReference(getUris, 0, null);
 
   var index = new shaka.media.SegmentIndex([
     // Times are in seconds, relative to the Period
@@ -297,8 +298,6 @@ MyManifestParser.prototype.loadStream_ = function(type) {
     id: this.curId_++,  // globally unique ID
     createSegmentIndex:     function() { return Promise.resolve(); },
     segmentIndex:           index,
-    initSegmentReference:   init,
-    presentationTimeOffset: 0,  // seconds
     mimeType: type == 'video' ?
         'video/webm' : (type == 'audio' ? 'audio/webm' : 'text/vtt'),
     codecs:    type == 'video' ? 'vp9' : (type == 'audio' ? 'vorbis' : ''),
@@ -320,9 +319,15 @@ MyManifestParser.prototype.loadStream_ = function(type) {
   };
 };
 
-MyManifestParser.prototype.loadReference_ = function(i, start, end) {
-  var getUris = function() { return ['https://example.com/ref_' + i]; };
-  return new shaka.media.SegmentReference(i, start, end, getUris, 0, null);
+MyManifestParser.prototype.loadReference_ =
+    function(position, start, end, initSegmentReference) {
+  var getUris = function() { return ['https://example.com/ref_' + position]; };
+  return new shaka.media.SegmentReference(
+      position, start, end, getUris,
+      /* startByte */ 0,
+      /* endByte */ null,
+      initSegmentReference,
+      /* presentationTimeOffset */ 0);
 };
 ```
 

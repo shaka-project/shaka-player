@@ -32,8 +32,11 @@ describe('ManifestConverter', () => {
         createStreamDB(3, videoType, [1]),
       ];
 
+      const timeline = createTimeline();
+
       /** @type {!Map.<number, shaka.extern.Variant>} */
-      const variants = createConverter().createVariants(audios, videos);
+      const variants = createConverter().createVariants(
+          audios, videos, timeline, /* periodStart */ 0);
       expect(variants.size).toBe(2);
 
       expect(variants.has(0)).toBeTruthy();
@@ -54,8 +57,11 @@ describe('ManifestConverter', () => {
       /** @type {!Array.<shaka.extern.StreamDB>} */
       const videos = [];
 
+      const timeline = createTimeline();
+
       /** @type {!Map.<number, shaka.extern.Variant>} */
-      const variants = createConverter().createVariants(audios, videos);
+      const variants = createConverter().createVariants(
+          audios, videos, timeline, /* periodStart */ 0);
       expect(variants.size).toBe(2);
     });
 
@@ -68,8 +74,11 @@ describe('ManifestConverter', () => {
         createStreamDB(3, videoType, [1]),
       ];
 
+      const timeline = createTimeline();
+
       /** @type {!Map.<number, shaka.extern.Variant>} */
-      const variants = createConverter().createVariants(audios, videos);
+      const variants = createConverter().createVariants(
+          audios, videos, timeline, /* periodStart */ 0);
       expect(variants.size).toBe(2);
     });
   }); // describe('createVariants')
@@ -392,10 +401,6 @@ describe('ManifestConverter', () => {
       originalId: jasmine.any(String),
       createSegmentIndex: jasmine.any(Function),
       segmentIndex: jasmine.any(shaka.media.SegmentIndex),
-      initSegmentReference: streamDb.initSegmentKey != null ?
-          jasmine.any(shaka.media.InitSegmentReference) :
-          null,
-      presentationTimeOffset: streamDb.presentationTimeOffset,
       mimeType: streamDb.mimeType,
       codecs: streamDb.codecs,
       frameRate: streamDb.frameRate,
@@ -419,6 +424,11 @@ describe('ManifestConverter', () => {
 
     // Assume that we don't have to call createSegmentIndex.
 
+    const initSegmentReference = streamDb.initSegmentKey != null ?
+        jasmine.any(shaka.media.InitSegmentReference) :
+        null;
+    const presentationTimeOffset = streamDb.presentationTimeOffset;
+
     streamDb.segments.forEach((segmentDb, i) => {
       const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
@@ -435,6 +445,8 @@ describe('ManifestConverter', () => {
       expect(segment.startByte).toBe(0);
       expect(segment.endByte).toBe(null);
       expect(segment.getUris()).toEqual([uri.toString()]);
+      expect(segment.initSegmentReference).toEqual(initSegmentReference);
+      expect(segment.presentationTimeOffset).toBe(presentationTimeOffset);
     });
   }
 

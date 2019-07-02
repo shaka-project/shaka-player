@@ -48,6 +48,9 @@ shaka.test.ManifestGenerator = class {
 
     /** @private {?shaka.extern.Stream} */
     this.lastStreamAdded_ = null;
+
+    /** @private {shaka.media.InitSegmentReference} */
+    this.lastInitSegmentReference_ = null;
   }
 
   /** @return {shaka.extern.Manifest} */
@@ -114,6 +117,7 @@ shaka.test.ManifestGenerator = class {
         });
     this.lastObjectAdded_ = null;
     this.lastStreamAdded_ = null;
+    this.lastInitSegmentReference_ = null;
     return this;
   }
 
@@ -140,6 +144,7 @@ shaka.test.ManifestGenerator = class {
     period.variants.push(variant);
     this.lastObjectAdded_ = variant;
     this.lastStreamAdded_ = null;
+    this.lastInitSegmentReference_ = null;
     return this;
   }
 
@@ -163,6 +168,7 @@ shaka.test.ManifestGenerator = class {
     }
     this.lastObjectAdded_ = variant;
     this.lastStreamAdded_ = null;
+    this.lastInitSegmentReference_ = null;
     period.variants.push(/** @type {shaka.extern.Variant} */ (
       jasmine.objectContaining(variant)));
 
@@ -356,8 +362,9 @@ shaka.test.ManifestGenerator = class {
     const stream = this.createStream_(id, ContentType.VIDEO, 'und');
 
     this.currentVariant_().video = stream;
-    this.lastStreamAdded_ = stream;
     this.lastObjectAdded_ = stream;
+    this.lastStreamAdded_ = stream;
+    this.lastInitSegmentReference_ = null;
 
     return this;
   }
@@ -376,8 +383,9 @@ shaka.test.ManifestGenerator = class {
     const stream = this.createStream_(id, ContentType.AUDIO, variant.language);
 
     variant.audio = stream;
-    this.lastStreamAdded_ = stream;
     this.lastObjectAdded_ = stream;
+    this.lastStreamAdded_ = stream;
+    this.lastInitSegmentReference_ = null;
 
     return this;
   }
@@ -397,6 +405,7 @@ shaka.test.ManifestGenerator = class {
     this.currentPeriod_().textStreams.push(stream);
     this.lastObjectAdded_ = stream;
     this.lastStreamAdded_ = stream;
+    this.lastInitSegmentReference_ = null;
 
     return this;
   }
@@ -431,6 +440,7 @@ shaka.test.ManifestGenerator = class {
     // their properties.
     this.lastObjectAdded_ = null;
     this.lastStreamAdded_ = null;
+    this.lastInitSegmentReference_ = null;
     return this;
   }
 
@@ -452,6 +462,7 @@ shaka.test.ManifestGenerator = class {
     }
     this.lastObjectAdded_ = stream;
     this.lastStreamAdded_ = stream;
+    this.lastInitSegmentReference_ = null;
 
     const streamObj =
     /** @type {shaka.extern.Stream} */ (jasmine.objectContaining(stream));
@@ -508,8 +519,6 @@ shaka.test.ManifestGenerator = class {
       originalId: null,
       createSegmentIndex: shaka.test.Util.spyFunc(create),
       segmentIndex: segmentIndex,
-      initSegmentReference: null,
-      presentationTimeOffset: 0,
       mimeType: defaultMimeType,
       codecs: defaultCodecs,
       frameRate: undefined,
@@ -538,25 +547,32 @@ shaka.test.ManifestGenerator = class {
    * @param {string} template An sprintf template that will take the segment
    *   index and give a URI.
    * @param {number} segmentDuration
-   * @param {?number=} segmentSize
+   * @param {?number=} endByte
    * @return {!shaka.test.ManifestGenerator}
    */
-  useSegmentTemplate(template, segmentDuration, segmentSize = null) {
+  useSegmentTemplate(template, segmentDuration, endByte = null) {
     const stream = this.currentStream_();
     const totalDuration = this.manifest_.presentationTimeline.getDuration();
     const segmentCount = totalDuration / segmentDuration;
+    const initSegmentReference = this.lastInitSegmentReference_;
     stream.createSegmentIndex = () => Promise.resolve();
     stream.segmentIndex.find = (time) => Math.floor(time / segmentDuration);
-    stream.segmentIndex.get = (index) => {
-      goog.asserts.assert(!isNaN(index), 'Invalid index requested!');
-      if (index < 0 || index >= segmentCount || isNaN(index)) {
+    stream.segmentIndex.get = (position) => {
+      goog.asserts.assert(!isNaN(position), 'Invalid position requested!');
+      if (position < 0 || position >= segmentCount || isNaN(position)) {
         return null;
       }
-      const getUris = () => [sprintf(template, index)];
-      const start = index * segmentDuration;
-      const end = Math.min(totalDuration, (index + 1) * segmentDuration);
+      const getUris = () => [sprintf(template, position)];
+      const startTime = position * segmentDuration;
+      const endTime = Math.min(totalDuration, (position + 1) * segmentDuration);
       return new this.shaka_.media.SegmentReference(
-          index, start, end, getUris, 0, segmentSize);
+          position,
+          startTime, endTime,
+          getUris,
+          /* startByte */ 0,
+          endByte,
+          initSegmentReference,
+          /* presentationTimeOffset */ 0);
     };
     return this;
   }
@@ -598,8 +614,7 @@ shaka.test.ManifestGenerator = class {
    * @return {!shaka.test.ManifestGenerator}
    */
   anyInitSegment() {
-    const stream = this.currentStream_();
-    stream.initSegmentReference =
+    this.lastInitSegmentReference_ =
       /** @type {shaka.media.InitSegmentReference} */ (
         jasmine.any(this.shaka_.media.InitSegmentReference));
     return this;
@@ -611,8 +626,7 @@ shaka.test.ManifestGenerator = class {
    * @return {!shaka.test.ManifestGenerator}
    */
   nullInitSegment() {
-    const stream = this.currentStream_();
-    stream.initSegmentReference = null;
+    this.lastInitSegmentReference_ = null;
     return this;
   }
 
@@ -625,22 +639,9 @@ shaka.test.ManifestGenerator = class {
    * @return {!shaka.test.ManifestGenerator}
    */
   initSegmentReference(uris, startByte, endByte) {
-    const stream = this.currentStream_();
     const getUris = () => uris;
-    stream.initSegmentReference =
+    this.lastInitSegmentReference_ =
         new this.shaka_.media.InitSegmentReference(getUris, startByte, endByte);
-    return this;
-  }
-
-  /**
-   * Sets the presentation time offset of the current stream.
-   *
-   * @param {number} pto
-   * @return {!shaka.test.ManifestGenerator}
-   */
-  presentationTimeOffset(pto) {
-    const stream = this.currentStream_();
-    stream.presentationTimeOffset = pto;
     return this;
   }
 

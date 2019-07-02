@@ -124,17 +124,13 @@ shaka.test.Mp4VodStreamGenerator = class {
    * @param {number} tfdtOffset The offset of the segment's tfdt box.
    * @param {number} segmentDuration The duration of a single segment in
    *   seconds.
-   * @param {number} presentationTimeOffset The presentation time offset
-   *   in seconds.
    */
   constructor(
       initSegmentUri, mdhdOffset, segmentTemplateUri, tfdtOffset,
-      segmentDuration, presentationTimeOffset) {
+      segmentDuration) {
     goog.asserts.assert(mdhdOffset >= 0, 'mdhd offset invalid');
     goog.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
     goog.asserts.assert(segmentDuration > 0, 'segment duration invalid');
-    goog.asserts.assert(
-        presentationTimeOffset >= 0, 'presentation time offset invalid');
 
     /** @private {string} */
     this.initSegmentUri_ = initSegmentUri;
@@ -150,9 +146,6 @@ shaka.test.Mp4VodStreamGenerator = class {
 
     /** @private {number} */
     this.segmentDuration_ = segmentDuration;
-
-    /** @private {number} */
-    this.presentationTimeOffset_ = presentationTimeOffset;
 
     /** @private {ArrayBuffer} */
     this.initSegment_ = null;
@@ -203,10 +196,8 @@ shaka.test.Mp4VodStreamGenerator = class {
 
     const segmentStartTime = (position - 1) * this.segmentDuration_;
 
-    const mediaTimestamp = segmentStartTime + this.presentationTimeOffset_;
-
     return shaka.test.StreamGenerator.setBaseMediaDecodeTime_(
-        this.segmentTemplate_, this.tfdtOffset_, mediaTimestamp,
+        this.segmentTemplate_, this.tfdtOffset_, segmentStartTime,
         this.timescale_);
   }
 };
@@ -226,8 +217,6 @@ shaka.test.Mp4LiveStreamGenerator = class {
    * @param {number} tfdtOffset The offset of the segment's TFDT box.
    * @param {number} segmentDuration The duration of a single segment in
    *   seconds.
-   * @param {number} presentationTimeOffset The presentation time offset
-   *   in seconds.
    * @param {number} broadcastStartTime The wall-clock time in seconds when the
    *   stream began or will begin to broadcast.
    * @param {number} availabilityStartTime The wall-clock time in seconds when
@@ -241,13 +230,11 @@ shaka.test.Mp4LiveStreamGenerator = class {
    */
   constructor(
       initSegmentUri, mdhdOffset, segmentTemplateUri, tfdtOffset,
-      segmentDuration, presentationTimeOffset, broadcastStartTime,
-      availabilityStartTime, timeShiftBufferDepth) {
+      segmentDuration, broadcastStartTime, availabilityStartTime,
+      timeShiftBufferDepth) {
     goog.asserts.assert(mdhdOffset >= 0, 'mdhd offset invalid');
     goog.asserts.assert(tfdtOffset >= 0, 'tfdt offset invalid');
     goog.asserts.assert(segmentDuration > 0, 'segment duration invalid');
-    goog.asserts.assert(
-        presentationTimeOffset >= 0, 'presentation time offset invalid');
     goog.asserts.assert(
         broadcastStartTime >= 0, 'broadcast start time invalid');
     goog.asserts.assert(
@@ -272,9 +259,6 @@ shaka.test.Mp4LiveStreamGenerator = class {
 
     /** @private {number} */
     this.segmentDuration_ = segmentDuration;
-
-    /** @private {number} */
-    this.presentationTimeOffset_ = presentationTimeOffset;
 
     /** @private {number} */
     this.broadcastStartTime_ = broadcastStartTime;
@@ -366,7 +350,6 @@ shaka.test.Mp4LiveStreamGenerator = class {
     const artificialPresentationTimeOffset =
         this.broadcastStartTime_ - this.availabilityStartTime_;
     const mediaTimestamp = segmentStartTime +
-                         this.presentationTimeOffset_ +
                          artificialPresentationTimeOffset;
 
     return shaka.test.StreamGenerator.setBaseMediaDecodeTime_(

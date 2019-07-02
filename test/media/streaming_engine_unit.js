@@ -348,47 +348,11 @@ describe('StreamingEngine', () => {
     }
     manifest = shaka.test.StreamingEngineUtil.createManifest(
         [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
-        segmentDurations);
+        segmentDurations, initSegmentRanges);
 
     manifest.presentationTimeline =
       /** @type {!shaka.media.PresentationTimeline} */ (timeline);
     manifest.minBufferTime = 2;
-
-    // Create InitSegmentReferences.
-    manifest.periods[0].variants[0].audio.initSegmentReference =
-        new shaka.media.InitSegmentReference(
-            (() => { return ['1_audio_init']; }),
-            initSegmentRanges[ContentType.AUDIO][0],
-            initSegmentRanges[ContentType.AUDIO][1]);
-    manifest.periods[0].variants[0].video.initSegmentReference =
-        new shaka.media.InitSegmentReference(
-            (() => { return ['1_video_init']; }),
-            initSegmentRanges[ContentType.VIDEO][0],
-            initSegmentRanges[ContentType.VIDEO][1]);
-    if (manifest.periods[0].variants[0].video.trickModeVideo) {
-      manifest.periods[0].variants[0].video.trickModeVideo
-          .initSegmentReference = new shaka.media.InitSegmentReference(
-              (() => { return ['1_trickvideo_init']; }),
-              initSegmentRanges[ContentType.VIDEO][0],
-              initSegmentRanges[ContentType.VIDEO][1]);
-    }
-    manifest.periods[1].variants[0].audio.initSegmentReference =
-        new shaka.media.InitSegmentReference(
-            (() => { return ['2_audio_init']; }),
-            initSegmentRanges[ContentType.AUDIO][0],
-            initSegmentRanges[ContentType.AUDIO][1]);
-    manifest.periods[1].variants[0].video.initSegmentReference =
-        new shaka.media.InitSegmentReference(
-            (() => { return ['2_video_init']; }),
-            initSegmentRanges[ContentType.VIDEO][0],
-            initSegmentRanges[ContentType.VIDEO][1]);
-    if (manifest.periods[1].variants[0].video.trickModeVideo) {
-      manifest.periods[1].variants[0].video.trickModeVideo
-          .initSegmentReference = new shaka.media.InitSegmentReference(
-              (() => { return ['2_trickvideo_init']; }),
-              initSegmentRanges[ContentType.VIDEO][0],
-              initSegmentRanges[ContentType.VIDEO][1]);
-    }
 
     audioStream1 = manifest.periods[0].variants[0].audio;
     videoStream1 = manifest.periods[0].variants[0].video;
@@ -2974,7 +2938,8 @@ describe('StreamingEngine', () => {
           // With endByte being null, we won't know the segment size.
           return new shaka.media.SegmentReference(
               seg.position, seg.startTime, seg.endTime, seg.getUris,
-              /* startByte= */ 0, /* endByte= */ null);
+              /* startByte= */ 0, /* endByte= */ null,
+              /* initSegmentReference */ null, /* presentationTimeOffset */ 0);
         } else {
           return seg;
         }
@@ -2997,8 +2962,9 @@ describe('StreamingEngine', () => {
     });
 
     it('doesn\'t abort if init segment is too large', async () => {
-      newVariant.video.initSegmentReference =
+      const initSegmentReference =
           new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 500);
+      overrideInitSegment(newVariant.video, initSegmentReference);
 
       await prepareForAbort();
       streamingEngine.switchVariant(
@@ -3008,8 +2974,9 @@ describe('StreamingEngine', () => {
     });
 
     it('still aborts with small init segment', async () => {
-      newVariant.video.initSegmentReference =
+      const initSegmentReference =
           new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 5);
+      overrideInitSegment(newVariant.video, initSegmentReference);
 
       await prepareForAbort();
       streamingEngine.switchVariant(
@@ -3020,8 +2987,9 @@ describe('StreamingEngine', () => {
 
     it('aborts if we can finish the new one on time', async () => {
       // Very large init segment
-      newVariant.video.initSegmentReference =
+      const initSegmentReference =
           new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 5e6);
+      overrideInitSegment(newVariant.video, initSegmentReference);
 
       await prepareForAbort();
 
@@ -3200,5 +3168,27 @@ describe('StreamingEngine', () => {
           }
           return originalNetEngineRequest(requestType, request);
         });
+  }
+
+  /**
+   * Override the init segment on all segment references for this Stream.
+   *
+   * @param {?shaka.extern.Stream} stream
+   * @param {shaka.media.InitSegmentReference} initSegmentReference
+   */
+  function overrideInitSegment(stream, initSegmentReference) {
+    if (!stream) {
+      return;
+    }
+
+    const originalGet = stream.segmentIndex.get;
+    stream.segmentIndex.get = (position) => {
+      // eslint-disable-next-line no-restricted-syntax
+      const segmentReference = originalGet.call(stream.segmentIndex, position);
+      if (segmentReference) {
+        segmentReference.initSegmentReference = initSegmentReference;
+      }
+      return segmentReference;
+    };
   }
 });

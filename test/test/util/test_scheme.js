@@ -137,8 +137,7 @@ shaka.test.TestScheme = class {
       }
       return new windowShaka.test.Mp4VodStreamGenerator(
           metadata.initSegmentUri, metadata.mdhdOffset, metadata.segmentUri,
-          metadata.tfdtOffset, metadata.segmentDuration,
-          metadata.presentationTimeOffset);
+          metadata.tfdtOffset, metadata.segmentDuration);
     }
 
     /**
@@ -151,7 +150,6 @@ shaka.test.TestScheme = class {
      */
     function addStreamInfo(manifestGenerator, data, contentType, name) {
       manifestGenerator
-          .presentationTimeOffset(data[contentType].presentationTimeOffset)
           .mime(data[contentType].mimeType, data[contentType].codecs)
           .initSegmentReference(
               ['test:' + name + '/' + contentType + '/init'], 0, null)
@@ -330,7 +328,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10,
-      presentationTimeOffset: 0,
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
     },
@@ -340,7 +337,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10.005,
-      presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
     },
@@ -360,7 +356,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10,
-      presentationTimeOffset: 0,
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
       delaySetup: true,  // Necessary to repro #1696
@@ -371,7 +366,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10.005,
-      presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
       language: 'uk',  // Necessary to repro #1696
@@ -395,7 +389,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10.005,
-      presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
     },
@@ -409,7 +402,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10,
-      presentationTimeOffset: 0,
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
     },
@@ -419,7 +411,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10.005,
-      presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
     },
@@ -433,7 +424,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/encrypted-sintel-video-segment.mp4',
       tfdtOffset: 0x38,
       segmentDuration: 10,
-      presentationTimeOffset: 0,
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
       initData:
@@ -447,7 +437,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/encrypted-sintel-audio-segment.mp4',
       tfdtOffset: 0x3c,
       segmentDuration: 10.005,
-      presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
       initData:
@@ -472,7 +461,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
       tfdtOffset: 0x78,
       segmentDuration: 4,
-      presentationTimeOffset: 0,
       mimeType: 'video/mp4',
       codecs: 'avc1.64001e',
       initData:
@@ -485,7 +473,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
       tfdtOffset: 0x7c,
       segmentDuration: 4,
-      presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
       initData:
@@ -520,7 +507,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
       tfdtOffset: 0x78,
       segmentDuration: 4,
-      presentationTimeOffset: 0,
       mimeType: 'video/mp4',
       codecs: 'avc1.64001e',
     },
@@ -530,7 +516,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
       tfdtOffset: 0x7c,
       segmentDuration: 4,
-      presentationTimeOffset: 0,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
     },
@@ -570,7 +555,6 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/cea-segment.mp4',
       tfdtOffset: 0x48,
       segmentDuration: 2,
-      presentationTimeOffset: 0,
       mimeType: 'video/mp4',
       codecs: 'avc1.64001e',
       closedCaptions: new Map([['CC1', 'en']]),
