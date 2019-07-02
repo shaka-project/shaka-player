@@ -222,14 +222,6 @@ function getClientArg(name) {
       baseUrl: '/base/node_modules',
       packages: [
         {
-          name: 'promise-mock',
-          main: 'lib/index',
-        },
-        {
-          name: 'promise-polyfill',  // Used by promise-mock.
-          main: 'lib/index',
-        },
-        {
           name: 'sprintf-js',
           main: 'src/sprintf',
         },
@@ -241,21 +233,13 @@ function getClientArg(name) {
     });
 
     // Load required AMD modules, then proceed with tests.
-    require(['promise-mock', 'sprintf-js', 'less'],
-        (PromiseMock, sprintfJs, less) => {
+    require(['sprintf-js', 'less'],
+        (sprintfJs, less) => {
           // These external interfaces are declared as "const" in the externs.
           // Avoid "const"-ness complaints from the compiler by assigning these
           // using bracket notation.
-          window['PromiseMock'] = PromiseMock;
           window['sprintf'] = sprintfJs.sprintf;
           window['less'] = less;
-
-          // Patch a new convenience method into PromiseMock.
-          // See https://github.com/taylorhakes/promise-mock/issues/7
-          PromiseMock.flush = () => {
-            // Pass strict == false so it does not throw.
-            PromiseMock.runAll(false /* strict */);
-          };
 
           done();
         });

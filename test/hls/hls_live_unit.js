@@ -164,17 +164,16 @@ describe('HlsParser live', () => {
 
     const manifest = await parser.start('test:/master', playerInterface);
 
+    /** @type {!Array.<shaka.extern.Variant>} */
     const variants = manifest.periods[0].variants;
-    for (const variant of variants) {
-      variant.video.createSegmentIndex();
-      PromiseMock.flush();
+    await Promise.all(variants.map(async (variant) => {
+      await variant.video.createSegmentIndex();
       ManifestParser.verifySegmentIndex(variant.video, initialReferences);
       if (variant.audio) {
-        variant.audio.createSegmentIndex();
-        PromiseMock.flush();
+        await variant.audio.createSegmentIndex();
         ManifestParser.verifySegmentIndex(variant.audio, initialReferences);
       }
-    }
+    }));
 
     // Replace the entries with the updated values.
     fakeNetEngine
@@ -300,8 +299,7 @@ describe('HlsParser live', () => {
         const manifest = await parser.start('test:/master', playerInterface);
 
         const video = manifest.periods[0].variants[0].video;
-        video.createSegmentIndex();
-        PromiseMock.flush();
+        await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [ref1]);
 
         fakeNetEngine
@@ -572,8 +570,7 @@ describe('HlsParser live', () => {
 
         const manifest = await parser.start('test:/master', playerInterface);
         const video = manifest.periods[0].variants[0].video;
-        video.createSegmentIndex();
-        PromiseMock.flush();
+        await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [ref]);
 
         // In live content, we do not set presentationTimeOffset.
@@ -597,8 +594,7 @@ describe('HlsParser live', () => {
 
         const manifest = await parser.start('test:/master', playerInterface);
         const video = manifest.periods[0].variants[0].video;
-        video.createSegmentIndex();
-        PromiseMock.flush();
+        await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
 
         fakeNetEngine
@@ -636,8 +632,7 @@ describe('HlsParser live', () => {
 
         const manifest = await parser.start('test:/master', playerInterface);
         const video = manifest.periods[0].variants[0].video;
-        video.createSegmentIndex();
-        PromiseMock.flush();
+        await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [ref]);
         // In live content, we do not set presentationTimeOffset.
         expect(video.presentationTimeOffset).toBe(0);
@@ -664,8 +659,7 @@ describe('HlsParser live', () => {
 
         const manifest = await parser.start('test:/master', playerInterface);
         const video = manifest.periods[0].variants[0].video;
-        video.createSegmentIndex();
-        PromiseMock.flush();
+        await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [ref]);
 
         // There should have been a range request for this segment to get the
@@ -742,8 +736,7 @@ describe('HlsParser live', () => {
 
         const manifest = await parser.start('test:/master', playerInterface);
         const text = manifest.periods[0].textStreams[0];
-        text.createSegmentIndex();
-        PromiseMock.flush();
+        await text.createSegmentIndex();
         ManifestParser.verifySegmentIndex(text, [ref1]);
 
         // Change the entries that are affected by the roll over.

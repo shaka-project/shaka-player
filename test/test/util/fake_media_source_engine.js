@@ -122,6 +122,11 @@ shaka.test.FakeMediaSourceEngine = class {
 
     /** @type {!jasmine.Spy} */
     this.flush = jasmine.createSpy('flush').and.returnValue(Promise.resolve());
+
+    /** @type {!jasmine.Spy} */
+    this.getTextDisplayer =
+        jasmine.createSpy('getTextDisplayer')
+            .and.returnValue(new shaka.test.FakeTextDisplayer());
   }
 
   /** @override */

@@ -31,7 +31,7 @@ shaka.test.StatusPromise = class {
     /** @type {string} */
     this.status;
 
-    // TODO: investigate using PromiseMock for this when possible.
+    // TODO: investigate using expectAsync() for this when possible.
     p.status = 'pending';
     p.then(() => {
       p.status = 'resolved';
@@ -51,22 +51,21 @@ shaka.test.Util = class {
    * @param {number} duration The number of seconds of simulated time.
    * @param {function(number)=} onTick
    */
-  static fakeEventLoop(duration, onTick) {
-    expect(window.Promise).toBe(PromiseMock);
-
+  static async fakeEventLoop(duration, onTick) {
     // Run this synchronously:
     for (let time = 0; time < duration; ++time) {
       // We shouldn't need more than 6 rounds.
       for (let i = 0; i < 6; ++i) {
         jasmine.clock().tick(0);
-        PromiseMock.flush();
+        await Promise.resolve();  // eslint-disable-line no-await-in-loop
       }
 
       if (onTick) {
-        onTick(time);
+        await onTick(time);  // eslint-disable-line no-await-in-loop
       }
       jasmine.clock().tick(1000);
-      PromiseMock.flush();
+      // eslint-disable-next-line no-await-in-loop
+      await Promise.resolve();
     }
   }
 
@@ -82,10 +81,6 @@ shaka.test.Util = class {
       const timeout = realSetTimeout || setTimeout;
       timeout(() => {
         resolve();
-        // Play nicely with PromiseMock by flushing automatically.
-        if (window.Promise == PromiseMock) {
-          PromiseMock.flush();
-        }
       }, seconds * 1000.0);
     }));
   }
