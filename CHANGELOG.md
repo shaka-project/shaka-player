@@ -1,3 +1,39 @@
+## 2.5.3 (2019-07-03)
+
+Bugfixes:
+  - Fix DASH bug when ignoring minBufferTime
+    - https://github.com/google/shaka-player/issues/2015
+  - Avoid changing variant when switching text lang
+    - https://github.com/google/shaka-player/issues/2010
+  - Work around platform bug when seeking to end
+    - https://github.com/google/shaka-player/issues/1967
+  - Allow apps to extend shaka.ui.Element
+    - https://github.com/google/shaka-player/issues/2011
+  - Fix bug when adding text streams while not streaming text
+    - https://github.com/google/shaka-player/issues/1938
+  - Fix edge case when switching text in multi-Period content
+    - https://github.com/google/shaka-player/issues/1774
+  - Fix playback rate bug on IE11
+  - Make fast forwarding work when video is paused
+    - https://github.com/google/shaka-player/issues/1801
+  - Fix stack overflow in StringUtils on some platforms
+    - https://github.com/google/shaka-player/issues/1985
+    - https://github.com/google/shaka-player/issues/1994
+  - Fix reading customData from standard Cast LOAD message
+    - https://github.com/google/shaka-player/issues/1989
+
+Docs:
+  - Fix constant name in UI tutorials
+    - https://github.com/google/shaka-player/issues/2005
+  - Update build output name in docs
+    - https://github.com/google/shaka-player/issues/1929
+
+New Features:
+  - Use trick play for fast forward when browser doesn't support high
+    playbackRate
+    - https://github.com/google/shaka-player/issues/1957
+
+
 ## 2.5.2 (2019-06-10)
 
 Bugfixes:
