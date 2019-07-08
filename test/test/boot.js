@@ -102,8 +102,10 @@ function getClientArg(name) {
   // the first time it needs to schedule something.
   Promise.resolve().then(function() {});
 
-  // Set the default timeout to 120s for all asynchronous tests.
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
+  const timeout = getClientArg('testTimeout');
+  if (timeout) {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = Number(timeout);
+  }
 
   let logLevel = getClientArg('logLevel');
   if (logLevel) {
