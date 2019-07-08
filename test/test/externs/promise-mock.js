@@ -55,7 +55,7 @@ PromiseMock.uninstall = function uninstall() {};
 /**
  * Get the result of a Promise synchronously, throws on Promise reject.
  * @param {Promise} promise
- * @returns {*}
+ * @return {*}
  */
 PromiseMock.getResult = function result(promise) {};
 

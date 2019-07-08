@@ -110,6 +110,66 @@ def check_complete(_):
   return True
 
 
+def check_spelling(_):
+  """Checks that source files don't have any common misspellings."""
+  logging.info('Checking for common misspellings...')
+
+  complete = build.Build()
+  # Normally we don't need to include @core, but because we look at the build
+  # object directly, we need to include it here.  When using main(), it will
+  # call addCore which will ensure core is included.
+  if not complete.parse_build(['+@complete', '+@core'], os.getcwd()):
+    logging.error('Error parsing complete build')
+    return False
+  base = shakaBuildHelpers.get_source_base()
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'test'), re.compile(r'.*\.js$')))
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'demo'), re.compile(r'.*\.js$')))
+
+  # A map of a regex to the suggested replacement.  The replacement can include
+  # capture groups from the regex and will be ignored if the replacement is the
+  # same as the match.
+  misspellings = {
+      r'(?i)cur+ent': 'current',
+      r'(?i)ful+screen': 'fullscreen',
+      r'(?i)int(er|re)p(er|er)tation': 'interpretation',
+      r'(?i)langauge': 'language',
+      r'(?i)mananger': 'manager',
+      r'(?i)mil+isecond': 'millisecond',
+      r'(?i)oc+ur+(?!ed|ing|ence)': 'occur',
+      r'(?i)oc+ur+(ed|ing|ence)': r'occurr\1',
+      r'(?i)oc+ur+ance': 'occurrence',
+      r'(?i)parrent': 'parent',
+      r'(?i)pol+yfil+': 'polyfill',
+      r'(?i)propogate': 'propagate',
+      r'(?i)refrence': 'reference',
+      r'(?i)substract': 'subtract',
+      r'(?i)uncomplied': 'uncompiled',
+      r'(?i)wether': 'whether',
+      r'(?i)@returns': '@return',
+  }
+  has_error = False
+  for path in complete.include:
+    with open(path) as f:
+      for i, line in enumerate(f):
+        for regex, replace_pattern in misspellings.items():
+          match = re.search(regex, line)
+          if match:
+            repl = match.expand(replace_pattern)
+            if match.group(0).lower() == repl:
+              continue  # No-op suggestion
+
+            if not has_error:
+              logging.error('The following file(s) have misspellings:')
+            logging.error(
+                '  %s:%d:%d: Did you mean %r?' %
+                (os.path.relpath(path, base), i + 1, match.start() + 1, repl))
+            has_error = True
+
+  return not has_error
+
+
 def check_eslint_disable(_):
   """Checks that source files correctly use "eslint-disable".
 
@@ -250,6 +310,7 @@ def main(args):
       check_js_lint,
       check_html_lint,
       check_complete,
+      check_spelling,
       check_eslint_disable,
       check_tests,
   ]
