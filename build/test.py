@@ -198,8 +198,8 @@ class Launcher:
         dest='runs')
     running_commands.add_argument(
         '--uncompiled',
-        help='Use the uncompiled source code when running the tests. This can be '
-             'used to make debugging easier.',
+        help='Use the uncompiled source code when running the tests. This can '
+             'be used to make debugging easier.',
         action='store_true')
     running_commands.add_argument(
         '--auto-watch',
@@ -220,7 +220,7 @@ class Launcher:
         default=60000)
     running_commands.add_argument(
         '--delay-tests',
-        help='Insert an artifical delay between tests [s]. '
+        help='Insert an artificial delay between tests(s). '
              'This can be helpful when tracking down asynchronous test '
              'pollution, in which an async process belonging to one test may '
              'trigger a failure after other tests have begun. '
@@ -267,8 +267,8 @@ class Launcher:
         action='store_true')
     logging_commands.add_argument(
         '--enable-logging',
-        help='Print log messages from tests and limits the type of log messages '
-             'printed. If no value is given "info" will be used. If '
+        help='Print log messages from tests and limits the type of log '
+             'messages printed. If no value is given "info" will be used. If '
              '--enable-logging is not used, logging will default to "none".',
         choices=['none', 'error', 'warning', 'info', 'debug', 'v1', 'v2'],
         default='none',
@@ -278,8 +278,8 @@ class Launcher:
     logging_commands.add_argument(
         '--reporters',
         help='Specify which reporters to use as a space-separated or '
-             'comma-separated list. Possible options are dots, progress, junit, '
-             'growl, or coverage.',
+             'comma-separated list. Possible options are dots, progress, '
+             'junit, growl, or coverage.',
         action=_HandleMixedListsAction,
         nargs='+')
     logging_commands.add_argument(

@@ -1,0 +1,23 @@
+# A map of a regex to the suggested replacement.  The replacement can include
+# capture groups from the regex and will be ignored if the replacement is the
+# same as the match.
+{
+    r'(?i)arti?fi?ci?ai?l': 'artificial',
+    r'(?i)cur+ent': 'current',
+    r'(?i)ful+screen': 'fullscreen',
+    r'(?i)int(er|re)p(er|er)tation': 'interpretation',
+    r'(?i)langauge': 'language',
+    r'(?i)mananger': 'manager',
+    r'(?i)mil+isecond': 'millisecond',
+    r'(?i)oc+ur+(?!ed|ing|ence)': 'occur',
+    r'(?i)oc+ur+(ed|ing|ence)': r'occurr\1',
+    r'(?i)oc+ur+ance': 'occurrence',
+    r'(?i)parrent': 'parent',
+    r'(?i)pol+yfil+': 'polyfill',
+    r'(?i)propogate': 'propagate',
+    r'(?i)refrence': 'reference',
+    r'(?i)substract': 'subtract',
+    r'(?i)uncomplied': 'uncompiled',
+    r'(?i)wether': 'whether',
+    r'(?i)@returns': '@return',
+}

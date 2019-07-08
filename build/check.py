@@ -23,6 +23,7 @@ This checks:
 """
 
 import argparse
+import ast
 import logging
 import os
 import re
@@ -126,29 +127,11 @@ def check_spelling(_):
       os.path.join(base, 'test'), re.compile(r'.*\.js$')))
   complete.include.update(shakaBuildHelpers.get_all_files(
       os.path.join(base, 'demo'), re.compile(r'.*\.js$')))
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'build'), re.compile(r'.*\.(js|py)$')))
 
-  # A map of a regex to the suggested replacement.  The replacement can include
-  # capture groups from the regex and will be ignored if the replacement is the
-  # same as the match.
-  misspellings = {
-      r'(?i)cur+ent': 'current',
-      r'(?i)ful+screen': 'fullscreen',
-      r'(?i)int(er|re)p(er|er)tation': 'interpretation',
-      r'(?i)langauge': 'language',
-      r'(?i)mananger': 'manager',
-      r'(?i)mil+isecond': 'millisecond',
-      r'(?i)oc+ur+(?!ed|ing|ence)': 'occur',
-      r'(?i)oc+ur+(ed|ing|ence)': r'occurr\1',
-      r'(?i)oc+ur+ance': 'occurrence',
-      r'(?i)parrent': 'parent',
-      r'(?i)pol+yfil+': 'polyfill',
-      r'(?i)propogate': 'propagate',
-      r'(?i)refrence': 'reference',
-      r'(?i)substract': 'subtract',
-      r'(?i)uncomplied': 'uncompiled',
-      r'(?i)wether': 'whether',
-      r'(?i)@returns': '@return',
-  }
+  with open(os.path.join(base, 'build', 'misspellings.txt')) as f:
+    misspellings = ast.literal_eval(f.read())
   has_error = False
   for path in complete.include:
     with open(path) as f:
