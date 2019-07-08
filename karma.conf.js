@@ -200,6 +200,9 @@ module.exports = (config) => {
         // Run playback tests on a custom manifest URI.
         testCustomAsset: settings.test_custom_asset,
         testCustomLicenseServer: settings.test_custom_license_server,
+
+        // Overrides the default test timeout value.
+        testTimeout: settings.test_timeout,
       }],
     },
 
