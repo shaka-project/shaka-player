@@ -50,12 +50,19 @@ describe('DashParser SegmentBase', () => {
   it('requests init data for WebM', async () => {
     const source = [
       '<MPD mediaPresentationDuration="PT75S">',
+      '  <BaseURL>http://example.com</BaseURL>',
       '  <Period>',
       '    <AdaptationSet mimeType="video/webm">',
-      '      <Representation bandwidth="1">',
-      '        <BaseURL>http://example.com</BaseURL>',
+      '      <Representation id="1" bandwidth="1">',
+      '        <BaseURL>media-1.webm</BaseURL>',
       '        <SegmentBase indexRange="100-200" timescale="9000">',
-      '          <Initialization sourceURL="init.webm" range="201-300" />',
+      '          <Initialization sourceURL="init-1.webm" range="201-300" />',
+      '        </SegmentBase>',
+      '      </Representation>',
+      '      <Representation id="2" bandwidth="1">',
+      '        <BaseURL>media-2.webm</BaseURL>',
+      '        <SegmentBase indexRange="1100-1200" timescale="9000">',
+      '          <Initialization sourceURL="init-2.webm" range="1201-1300" />',
       '        </SegmentBase>',
       '      </Representation>',
       '    </AdaptationSet>',
@@ -65,16 +72,31 @@ describe('DashParser SegmentBase', () => {
 
     fakeNetEngine
         .setResponseText('dummy://foo', source)
-        .setResponseText('http://example.com', '')
-        .setResponseText('http://example.com/init.webm', '');
+        .setResponseText('http://example.com/media-1.webm', '')
+        .setResponseText('http://example.com/media-2.webm', '')
+        .setResponseText('http://example.com/init-1.webm', '')
+        .setResponseText('http://example.com/init-2.webm', '');
 
     const manifest = await parser.start('dummy://foo', playerInterface);
-    expect(manifest).toEqual(Dash.makeManifestFromInit('init.webm', 201, 300));
-    await Dash.callCreateSegmentIndex(manifest);
 
-    expect(fakeNetEngine.request).toHaveBeenCalledTimes(3);
-    fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
-    fakeNetEngine.expectRangeRequest('http://example.com/init.webm', 201, 300);
+    // Call createSegmentIndex() on each stream to make the requests, but expect
+    // failure from the actual parsing, since the data is bogus.
+    const stream1 = manifest.periods[0].variants[0].video;
+    await expectAsync(stream1.createSegmentIndex()).toBeRejected();
+    const stream2 = manifest.periods[0].variants[1].video;
+    await expectAsync(stream2.createSegmentIndex()).toBeRejected();
+
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(5);
+
+    // Expect calls to fetch part of the media and init segments of each stream.
+    fakeNetEngine.expectRangeRequest(
+        'http://example.com/media-1.webm', 100, 200);
+    fakeNetEngine.expectRangeRequest(
+        'http://example.com/init-1.webm', 201, 300);
+    fakeNetEngine.expectRangeRequest(
+        'http://example.com/media-2.webm', 1100, 1200);
+    fakeNetEngine.expectRangeRequest(
+        'http://example.com/init-2.webm', 1201, 1300);
   });
 
   it('inherits from Period', async () => {
