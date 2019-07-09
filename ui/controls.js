@@ -1248,7 +1248,8 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
     // Hide seekbar seek window is very small.
     const seekRange = this.player_.seekRange();
     const seekWindow = seekRange.end - seekRange.start;
-    if (seekWindow < Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
+    if (this.player_.isLive() &&
+        seekWindow < Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
       shaka.ui.Utils.setDisplay(this.seekBarContainer_, false);
       for (let menu of this.settingsMenus_) {
         menu.classList.add('shaka-low-position');
