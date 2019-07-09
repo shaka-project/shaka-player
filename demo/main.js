@@ -437,6 +437,11 @@ shakaDemo.Main = class {
    * @return {?string} unsupportedReason Null if asset is supported.
    */
   getAssetUnsupportedReason(asset, needOffline) {
+    if (needOffline &&
+        (!shaka.offline.Storage.support() || !this.initialStoredList_)) {
+      return 'Your browser does not support offline storage.';
+    }
+
     if (asset.source == shakaAssets.Source.CUSTOM) {
       // We can't be sure if custom assets are supported or not. Just assume
       // they are.
@@ -450,10 +455,6 @@ shakaDemo.Main = class {
 
     if (needOffline && !asset.features.includes(shakaAssets.Feature.OFFLINE)) {
       return 'This asset cannot be downloaded.';
-    }
-
-    if (needOffline && !shaka.offline.Storage.support()) {
-      return 'Your browser does not support offline storage.';
     }
 
     if (!asset.drm.includes(shakaAssets.KeySystem.CLEAR)) {
