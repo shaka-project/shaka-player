@@ -59,6 +59,12 @@ describe('Transmuxer', function() {
       expect(isSupported(transportStreamVideoMimeType, ContentType.VIDEO))
           .toBe(true);
     });
+
+    // Issue #1991
+    it('handles upper-case MIME types', () => {
+      const mimeType = transportStreamVideoMimeType.replace('mp2t', 'MP2T');
+      expect(isSupported(mimeType, ContentType.VIDEO)).toBe(true);
+    });
   });
 
   describe('convertTsCodecs', function() {
@@ -85,6 +91,13 @@ describe('Transmuxer', function() {
       expect(convertTsCodecs(ContentType.VIDEO,
           'video/mp2t; codecs="avc1.66.1"')).toEqual(
           'video/mp4; codecs="avc1.420001"');
+    });
+
+    // Issue #1991
+    it('handles upper-case MIME types', () => {
+      expect(convertTsCodecs(
+          ContentType.VIDEO, 'video/MP2T; codecs="avc1.420001"'))
+          .toBe('video/mp4; codecs="avc1.420001"');
     });
   });
 
