@@ -165,7 +165,7 @@ shakaDemo.AssetCard = class {
 
   /**
    * Modify an asset to make it clear that it is unsupported.
-   * @param {?string} unsupportedReason
+   * @param {string} unsupportedReason
    */
   markAsUnsupported(unsupportedReason) {
     this.card_.classList.add('asset-card-unsupported');
@@ -175,7 +175,7 @@ shakaDemo.AssetCard = class {
   /**
    * Make a button that represents the lack of a working button.
    * @param {string} buttonName
-   * @param {?string} unsupportedReason
+   * @param {string} unsupportedReason
    * @return {!Element}
    * @private
    */
@@ -186,16 +186,14 @@ shakaDemo.AssetCard = class {
     // Tooltips don't work on disabled buttons (on some platforms), so
     // the button itself has to be "uprooted" and placed in a synthetic div
     // specifically to attach the tooltip to.
-    if (unsupportedReason) {
-      const attachPoint = document.createElement('div');
-      if (button.parentElement) {
-        button.parentElement.removeChild(button);
-      }
-      attachPoint.classList.add('tooltip-attach-point');
-      attachPoint.appendChild(button);
-      this.actions_.appendChild(attachPoint);
-      shakaDemo.Tooltips.make(attachPoint, unsupportedReason);
+    const attachPoint = document.createElement('div');
+    if (button.parentElement) {
+      button.parentElement.removeChild(button);
     }
+    attachPoint.classList.add('tooltip-attach-point');
+    attachPoint.appendChild(button);
+    this.actions_.appendChild(attachPoint);
+    shakaDemo.Tooltips.make(attachPoint, unsupportedReason);
 
     return button;
   }
@@ -243,7 +241,11 @@ shakaDemo.AssetCard = class {
 
     const unsupportedReason = shakaDemoMain.getAssetUnsupportedReason(
         this.asset_, /* needOffline= */ true);
-    if (unsupportedReason || !this.asset_.storeCallback) {
+    if (!unsupportedReason) {
+      goog.asserts.assert(this.asset_.storeCallback,
+          'A storage callback is expected for all supported assets!');
+    }
+    if (unsupportedReason) {
       // This can't be stored.
       const button = this.makeUnsupportedButton_('', unsupportedReason);
       // As this is a unsupported button, it is wrapped in an "attach point";
