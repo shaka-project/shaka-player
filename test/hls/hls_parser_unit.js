@@ -352,6 +352,40 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('parses audio+video variant with legacy codecs', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a.40.34",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    /* eslint-disable indent */
+    const manifest = new shaka.test.ManifestGenerator()
+        .anyTimeline()
+        .addPeriod(0)
+          .addPartialVariant()
+            .addPartialStream(ContentType.VIDEO)
+              .mime('video/mp4', 'avc1')
+            .addPartialStream(ContentType.AUDIO)
+              .mime('audio/mp4', '')
+        .build();
+    /* eslint-enable indent */
+
+    await testHlsParser(master, media, manifest);
+  });
+
   it('parses audio+video variant with closed captions', async () => {
     const master = [
       '#EXTM3U\n',
