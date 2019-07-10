@@ -37,7 +37,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
 
     this.currentTime_ = shaka.util.Dom.createHTMLElement('button');
     this.currentTime_.classList.add('shaka-current-time');
-    this.currentTime_.textContent = '0:00';
+    this.setValue_('0:00');
     this.parent.appendChild(this.currentTime_);
 
     this.eventManager.listen(this.currentTime_, 'click', () => {
@@ -56,10 +56,18 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     });
   }
 
+  /** @private */
+  setValue_(value) {
+    // To avoid constant updates to the DOM, which makes debugging more
+    // difficult, only set the value if it has changed.  If we don't do this
+    // check, the DOM updates constantly, this element flashes in the debugger
+    // in Chrome, and you can't make changes in the CSS panel.
+    if (value != this.currentTime_.textContent) {
+      this.currentTime_.textContent = value;
+    }
+  }
 
-  /**
-   * @private
-   */
+  /** @private */
   updateTime_() {
     const isSeeking = this.controls.isSeeking();
     let displayTime = this.controls.getDisplayTime();
@@ -80,24 +88,21 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
       // The button should only be clickable when it's live stream content, and
       // the current play time is behind live edge.
       if ((displayTime >= 1) || isSeeking) {
-        this.currentTime_.textContent =
-            '- ' + this.buildTimeString_(displayTime, showHour);
+        this.setValue_('- ' + this.buildTimeString_(displayTime, showHour));
         this.currentTime_.disabled = false;
       } else {
-        this.currentTime_.textContent =
-            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+        this.setValue_(this.localization.resolve(shaka.ui.Locales.Ids.LIVE));
         this.currentTime_.disabled = true;
       }
     } else {
       const showHour = duration >= 3600;
 
-      this.currentTime_.textContent =
-          this.buildTimeString_(displayTime, showHour);
-
+      let value = this.buildTimeString_(displayTime, showHour);
       if (duration) {
-        this.currentTime_.textContent += ' / ' +
+        value += ' / ' +
             this.buildTimeString_(duration, showHour);
       }
+      this.setValue_(value);
       this.currentTime_.disabled = true;
     }
   }
