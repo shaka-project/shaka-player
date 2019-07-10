@@ -202,6 +202,10 @@
   justify-content: center;
   align-items: center;
   position: absolute;
+  /* Specify left and top for IE's sake.  Otherwise, the container ends up below
+   * and to the right of where it should be. */
+  top: 0;
+  left: 0;
 }
 
 .shaka-text-container {
