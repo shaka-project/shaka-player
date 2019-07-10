@@ -18,95 +18,51 @@
 
 goog.provide('shaka.ui.VolumeBar');
 
-goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.RangeElement');
 
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {shaka.ui.RangeElement}
  * @final
  * @export
  */
-shaka.ui.VolumeBar = class extends shaka.ui.Element {
+shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls);
+    super(parent, controls,
+        ['shaka-volume-bar-container'], ['shaka-volume-bar']);
 
-    // This container is to support IE 11.  See detailed notes in
-    // less/range_elements.less for a complete explanation.
-    // TODO: Factor this into a range-element component.
-    /** @private {!HTMLElement} */
-    this.container_ = shaka.util.Dom.createHTMLElement('div');
-    this.container_.classList.add('shaka-volume-bar-container');
+    this.eventManager.listen(this.video,
+        'volumechange',
+        () => this.onVolumeStateChange_());
 
-    this.bar_ =
-      /** @type {!HTMLInputElement} */ (document.createElement('input'));
-    this.bar_.classList.add('shaka-volume-bar');
-    this.bar_.setAttribute('type', 'range');
-    // NOTE: step=any causes keyboard nav problems on IE 11.
-    this.bar_.setAttribute('step', 'any');
-    this.bar_.setAttribute('min', '0');
-    this.bar_.setAttribute('max', '1');
-    this.bar_.setAttribute('value', '0');
+    this.eventManager.listen(this.localization,
+        shaka.ui.Localization.LOCALE_UPDATED,
+        () => this.updateAriaLabel_());
 
-    this.container_.appendChild(this.bar_);
-    this.parent.appendChild(this.container_);
-    this.updateAriaLabel_();
+    this.eventManager.listen(this.localization,
+        shaka.ui.Localization.LOCALE_CHANGED,
+        () => this.updateAriaLabel_());
 
-    this.eventManager.listen(this.video, 'volumechange', () => {
-      this.onVolumeStateChange_();
-    });
-
-    this.eventManager.listen(this.bar_, 'input', () => {
-      this.onVolumeInput_();
-    });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-          this.updateAriaLabel_();
-        });
-
-    this.eventManager.listen(
-        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-          this.updateAriaLabel_();
-        });
-
-    // Initialize volume display with a fake event.
+    // Initialize volume display and label.
     this.onVolumeStateChange_();
+    this.updateAriaLabel_();
   }
 
-
   /**
-   * @private
+   * Update the video element's state to match the input element's state.
+   * Called by the base class when the input element changes.
+   *
+   * @override
    */
-  onVolumeStateChange_() {
-    if (this.video.muted) {
-      this.bar_.value = 0;
-    } else {
-      this.bar_.value = this.video.volume;
-    }
-
-    // TODO: Can we do this with LESS?
-    const gradient = ['to right'];
-    gradient.push(shaka.ui.Constants.VOLUME_BAR_VOLUME_LEVEL_COLOR +
-                 (this.bar_.value * 100) + '%');
-    gradient.push(shaka.ui.Constants.VOLUME_BAR_BASE_COLOR +
-                 (this.bar_.value * 100) + '%');
-    gradient.push(shaka.ui.Constants.VOLUME_BAR_BASE_COLOR + '100%');
-    this.container_.style.background =
-        'linear-gradient(' + gradient.join(',') + ')';
-  }
-
-
-  /**
-   * @private
-   */
-  onVolumeInput_() {
-    this.video.volume = parseFloat(this.bar_.value);
+  onChange() {
+    this.video.volume = this.getValue();
     if (this.video.volume == 0) {
       this.video.muted = true;
     } else {
@@ -114,12 +70,28 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
     }
   }
 
+  /** @private */
+  onVolumeStateChange_() {
+    if (this.video.muted) {
+      this.setValue(0);
+    } else {
+      this.setValue(this.video.volume);
+    }
 
-  /**
-   * @private
-   */
+    const gradient = ['to right'];
+    gradient.push(shaka.ui.Constants.VOLUME_BAR_VOLUME_LEVEL_COLOR +
+                 (this.getValue() * 100) + '%');
+    gradient.push(shaka.ui.Constants.VOLUME_BAR_BASE_COLOR +
+                 (this.getValue() * 100) + '%');
+    gradient.push(shaka.ui.Constants.VOLUME_BAR_BASE_COLOR + '100%');
+
+    this.container.style.background =
+        'linear-gradient(' + gradient.join(',') + ')';
+  }
+
+  /** @private */
   updateAriaLabel_() {
-    this.bar_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+    this.bar.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(shaka.ui.Locales.Ids.VOLUME));
   }
 };

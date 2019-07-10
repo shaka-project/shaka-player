@@ -19,12 +19,12 @@
 goog.provide('shaka.ui.Controls');
 goog.provide('shaka.ui.ControlsPanel');
 
-goog.require('goog.asserts');
 goog.require('shaka.log');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
@@ -79,19 +79,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.videoContainer_ = videoContainer;
 
+    /** @private {shaka.ui.SeekBar} */
+    this.seekBar_ = null;
+
     /** @private {boolean} */
     this.isSeeking_ = false;
 
-    /**
-     * This timer is used to introduce a delay between the user scrubbing across
-     * the seek bar and the seek being sent to the player.
-     *
-     * @private {shaka.util.Timer}
-     */
-    this.seekTimer_ = new shaka.util.Timer(() => {
-      goog.asserts.assert(this.seekBar_ != null, 'Seekbar should not be null!');
-      this.video_.currentTime = parseFloat(this.seekBar_.value);
-    });
+    /** @private {!Array.<!Element>} */
+    this.settingsMenus_ = [];
 
     /**
      * This timer is used to detect when the user has stopped moving the mouse
@@ -133,7 +128,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.timeAndSeekRangeTimer_ = new shaka.util.Timer(() => {
-      this.updateTimeAndSeekRange_();
+      // Suppress timer-based updates if the controls are hidden.
+      if (this.isOpaque_()) {
+        this.updateTimeAndSeekRange_();
+      }
     });
 
     /** @private {?number} */
@@ -170,7 +168,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.timeAndSeekRangeTimer_.tickEvery(/* seconds= */ 0.125);
   }
 
-
   /**
    * @override
    * @export
@@ -179,11 +176,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.eventManager_) {
       this.eventManager_.release();
       this.eventManager_ = null;
-    }
-
-    if (this.seekTimer_) {
-      this.seekTimer_.stop();
-      this.seekTimer_ = null;
     }
 
     if (this.mouseStillTimer_) {
@@ -222,6 +214,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     await Promise.all(this.elements_.map((element) => element.destroy()));
     this.elements_ = [];
+
+    if (this.seekBar_) {
+      await this.seekBar_.destroy();
+    }
   }
 
 
@@ -318,7 +314,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     shaka.ui.ControlsPanel.elementNamesToFactories_.set(name, factory);
   }
 
-
   /**
    * This allows the application to inhibit casting.
    *
@@ -329,7 +324,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.castAllowed_ = allow;
     this.onCastStatusChange_();
   }
-
 
   /**
    * Used by the application to notify the controls that a load operation is
@@ -342,7 +336,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // true. Otherwise, video.paused is false and the content is autoplaying.
     this.onPlayStateChange_();
   }
-
 
   /**
    * @param {!shaka.extern.UIConfiguration} config
@@ -367,8 +360,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.addEventListeners_();
   }
 
-
-  /**
   /**
    * Enable or disable the custom controls. Enabling disables native
    * browser controls.
@@ -400,7 +391,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.onPlayStateChange_();
   }
 
-
   /**
    * Enable or disable native browser controls. Enabling disables shaka
    * controls.
@@ -421,7 +411,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-
   /**
    * @export
    * @return {shaka.cast.CastProxy}
@@ -429,7 +418,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   getCastProxy() {
     return this.castProxy_;
   }
-
 
   /**
    * @return {shaka.ui.Localization}
@@ -439,7 +427,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return this.localization_;
   }
 
-
   /**
    * @return {!HTMLElement}
    * @export
@@ -447,7 +434,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   getVideoContainer() {
     return this.videoContainer_;
   }
-
 
   /**
    * @return {HTMLMediaElement}
@@ -457,7 +443,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return this.video_;
   }
 
-
   /**
    * @return {HTMLMediaElement}
    * @export
@@ -465,7 +450,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   getLocalVideo() {
     return this.localVideo_;
   }
-
 
   /**
    * @return {shaka.Player}
@@ -475,7 +459,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return this.player_;
   }
 
-
   /**
    * @return {shaka.Player}
    * @export
@@ -483,7 +466,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   getLocalPlayer() {
     return this.localPlayer_;
   }
-
 
   /**
    * @return {!HTMLElement}
@@ -493,7 +475,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return this.controlsContainer_;
   }
 
-
   /**
    * @return {!shaka.extern.UIConfiguration}
    * @export
@@ -501,7 +482,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   getConfig() {
     return this.config_;
   }
-
 
   /**
    * @return {boolean}
@@ -511,7 +491,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return this.isSeeking_;
   }
 
-
   /**
    * @return {boolean}
    * @export
@@ -520,19 +499,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return this.castAllowed_;
   }
 
-
   /**
    * @return {number}
    * @export
    */
   getDisplayTime() {
-    const displayTime = this.isSeeking_ ?
-          Number(this.seekBar_.value) :
-          Number(this.video_.currentTime);
-
-    return displayTime;
+    return this.seekBar_ ? this.seekBar_.getValue() : this.video_.currentTime;
   }
-
 
   /**
    * @param {?number} time
@@ -541,7 +514,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   setLastTouchEventTime(time) {
     this.lastTouchEventTime_ = time;
   }
-
 
   /**
    * Display controls even if css says overwise.
@@ -557,7 +529,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.overrideCssShowControls_ = true;
   }
 
-
   /**
    * @return {boolean}
    * @export
@@ -567,25 +538,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         (menu) => menu.classList.contains('shaka-displayed'));
   }
 
-
-  /**
-   * @export
-   */
+  /** @export */
   hideSettingsMenus() {
     this.hideSettingsMenusTimer_.tickNow();
   }
 
-
-  /**
-   * @private
-   */
+  /** @private */
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
-
-    if (this.seekBar_) {
-      this.seekBar_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-          this.localization_.resolve(LocIds.SEEK));
-    }
 
     // Localize state-dependant labels
     const makePlayNotPause = this.video_.paused && !this.isSeeking_;
@@ -594,18 +554,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.localization_.resolve(playButtonAriaLabelId));
   }
 
-
-  /**
-   * @private
-   */
+  /** @private */
   createDOM_() {
-    // TODO: encapsulate/abstract range inputs and their containers
-
-    /** @private {HTMLElement} */
-    this.seekBarContainer_ = null;
-
-    /** @private {HTMLInputElement} */
-    this.seekBar_ = null;
+    if (this.seekBar_) {
+      this.seekBar_.destroy();
+      this.seekBar_ = null;
+    }
 
     this.videoContainer_.classList.add('shaka-video-container');
     this.video_.classList.add('shaka-video');
@@ -616,27 +570,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.addControlsButtonPanel_();
 
-    // Seek bar
-    if (this.config_.addSeekBar) {
-      this.addSeekBar_();
-    }
-
-    /** @private {!Array.<!Element>} */
     this.settingsMenus_ = Array.from(
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
 
-    // Settings menus need to be positioned lower, if the seekbar is absent.
-    if (!this.seekBar_) {
+    if (this.config_.addSeekBar) {
+      this.seekBar_ = new shaka.ui.SeekBar(this.bottomControls_, this);
+    } else {
+      // Settings menus need to be positioned lower if the seekbar is absent.
       for (const menu of this.settingsMenus_) {
         menu.classList.add('shaka-low-position');
       }
     }
   }
 
-
-  /**
-   * @private
-   */
+  /** @private */
   addControlsContainer_() {
     /** @private {!HTMLElement} */
     this.controlsContainer_ = shaka.util.Dom.createHTMLElement('div');
@@ -652,10 +599,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
   }
 
-
-  /**
-   * @private
-   */
+  /** @private */
   addPlayButton_() {
     /** @private {!HTMLElement} */
     this.playButtonContainer_ = shaka.util.Dom.createHTMLElement('div');
@@ -669,10 +613,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.onPlayStateChange_();
   }
 
-
-  /**
-   * @private
-   */
+  /** @private */
   addBufferingSpinner_() {
     /** @private {!HTMLElement} */
     this.spinnerContainer_ = shaka.util.Dom.createHTMLElement('div');
@@ -708,10 +649,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     svg.appendChild(spinnerCircle);
   }
 
-
-  /**
-   * @private
-   */
+  /** @private */
   addControlsButtonPanel_() {
     /** @private {!HTMLElement} */
     this.bottomControls_ = shaka.util.Dom.createHTMLElement('div');
@@ -739,10 +677,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-
-  /**
- * @private
- */
+  /** @private */
   addEventListeners_() {
     this.eventManager_.listen(this.player_, 'buffering', () => {
       this.onBufferingStateChange_();
@@ -767,28 +702,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.eventManager_.listen(this.video_, 'ended', () => {
       this.onPlayStateChange_();
     });
-
-    if (this.seekBar_) {
-      this.eventManager_.listen(this.seekBar_, 'mousedown', () => {
-        this.onSeekStart_();
-      });
-
-      this.eventManager_.listen(this.seekBar_, 'touchstart', () => {
-        this.onSeekStart_();
-      }, {passive: true});
-
-      this.eventManager_.listen(this.seekBar_, 'input', () => {
-        this.onSeekInput_();
-      });
-
-      this.eventManager_.listen(this.seekBar_, 'touchend', () => {
-        this.onSeekEnd_();
-      });
-
-      this.eventManager_.listen(this.seekBar_, 'mouseup', () => {
-        this.onSeekEnd_();
-      });
-    }
 
     // Elements that should not propagate clicks (controls panel, menus)
     const noPropagationElements = this.videoContainer_.getElementsByClassName(
@@ -853,34 +766,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         (e) => this.updateLocalizedStrings_());
   }
 
-
-  /**
-   * @private
-   */
-  addSeekBar_() {
-    // This container is to support IE 11.  See detailed notes in
-    // less/range_elements.less for a complete explanation.
-    // TODO: Factor this into a range-element component.
-    this.seekBarContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.seekBarContainer_.classList.add('shaka-seek-bar-container');
-
-    this.seekBar_ =
-      /** @type {!HTMLInputElement} */ (document.createElement('input'));
-    this.seekBar_.classList.add('shaka-seek-bar');
-    this.seekBar_.type = 'range';
-    // NOTE: step=any causes keyboard nav problems on IE 11.
-    this.seekBar_.setAttribute('step', 'any');
-    this.seekBar_.setAttribute('min', '0');
-    this.seekBar_.setAttribute('max', '1');
-    this.seekBar_.value = '0';
-    this.seekBar_.classList.add('shaka-no-propagation');
-    this.seekBar_.classList.add('shaka-show-controls-on-mouse-over');
-
-    this.seekBarContainer_.appendChild(this.seekBar_);
-    this.bottomControls_.appendChild(this.seekBarContainer_);
-  }
-
-
   /**
    * Hiding the cursor when the mouse stops moving seems to be the only
    * decent UX in fullscreen mode.  Since we can't use pure CSS for that,
@@ -917,8 +802,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Make sure we are not about to hide the settings menus and then force them
     // open.
     this.hideSettingsMenusTimer_.stop();
-    this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
-    this.updateTimeAndSeekRange_();
+
+    if (!this.isOpaque_()) {
+      // Only update the time and seek range on mouse movement if it's the very
+      // first movement and we're about to show the controls.  Otherwise, the
+      // seek bar will be updated much more rapidly during mouse movement.  Do
+      // this right before making it visible.
+      this.updateTimeAndSeekRange_();
+      this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
+    }
 
     // Hide the cursor when the mouse stops moving.
     // Only applies while the cursor is over the video container.
@@ -931,7 +823,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.mouseStillTimer_.tickAfter(/* seconds= */ 3);
     }
   }
-
 
   /** @private */
   onMouseLeave_() {
@@ -946,7 +837,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // the opacity in CSS and force the controls to stay visible.
     this.mouseStillTimer_.tickNow();
   }
-
 
   /**
    * This callback is for when we are pretty sure that the mouse has stopped
@@ -970,7 +860,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-
   /**
    * @param {!Event} event
    * @private
@@ -993,10 +882,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-
-  /**
-   * @private
-   */
+  /** @private */
   onContainerClick_() {
     if (!this.enabled_) {
       return;
@@ -1008,7 +894,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onPlayPauseClick_();
     }
   }
-
 
   /** @private */
   onPlayPauseClick_() {
@@ -1030,10 +915,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-
-  /**
-   * @private
-   */
+  /** @private */
   onCastStatusChange_() {
     const isCasting = this.castProxy_.isCasting();
     this.dispatchEvent(new shaka.util.FakeEvent('caststatuschanged', {
@@ -1046,7 +928,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.controlsContainer_.removeAttribute('casting');
     }
   }
-
 
   /** @private */
   onPlayStateChange_() {
@@ -1068,60 +949,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           this.localization_.resolve(shaka.ui.Locales.Ids.PAUSE));
     }
   }
-
-
-  /** @private */
-  onSeekStart_() {
-    if (!this.enabled_) {
-      return;
-    }
-
-    this.isSeeking_ = true;
-    this.video_.pause();
-  }
-
-
-  /** @private */
-  onSeekInput_() {
-    if (!this.enabled_) {
-      return;
-    }
-
-    if (!this.video_.duration) {
-      // Can't seek yet.  Ignore.
-      return;
-    }
-
-    // Update the UI right away.
-    this.updateTimeAndSeekRange_();
-
-    // We want to wait until the user has stopped moving the seek bar for a
-    // little bit to avoid the number of times we ask the player to seek.
-    //
-    // To do this, we will start a timer that will fire in a little bit, but if
-    // we see another seek bar change, we will cancel that timer and re-start
-    // it.
-    //
-    // Calling |start| on an already pending timer will cancel the old request
-    // and start the new one.
-    this.seekTimer_.tickAfter(/* seconds= */ 0.125);
-  }
-
-
-  /** @private */
-  onSeekEnd_() {
-    if (!this.enabled_) {
-      return;
-    }
-
-    // They just let go of the seek bar, so cancel the timer and manually
-    // call the event so that we can respond immediately.
-    this.seekTimer_.tickNow();
-
-    this.isSeeking_ = false;
-    this.video_.play();
-  }
-
 
   /**
    * Support controls with keyboard inputs.
@@ -1177,7 +1004,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-
   /**
    * Called both as an event listener and directly by the controls to initialize
    * the buffering state.
@@ -1191,7 +1017,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     shaka.ui.Utils.setDisplay(
         this.spinnerContainer_, this.player_.isBuffering());
   }
-
 
   /**
    * @return {boolean}
@@ -1211,7 +1036,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return this.controlsContainer_.getAttribute('shown') != null;
   }
 
-
   /**
    * Update the video's current time based on the keyboard operations.
    * @param {number} currentTime
@@ -1220,106 +1044,34 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   seek_(currentTime, event) {
     this.video_.currentTime = currentTime;
-    this.updateTimeAndSeekRange_();
+    if (this.isOpaque_()) {
+      // Only update the time and seek range if it's visible.
+      this.updateTimeAndSeekRange_();
+    }
   }
-
 
   /**
    * Called when the seek range or current time need to be updated.
    * @private
    */
   updateTimeAndSeekRange_() {
-    // Suppress updates if the controls are hidden.
-    if (!this.isOpaque_()) {
-      return;
-    }
-
-    const Constants = shaka.ui.Constants;
-    let displayTime = this.isSeeking_ ?
-        Number(this.seekBar_.value) :
-        Number(this.video_.currentTime);
-    const bufferedLength = this.video_.buffered.length;
-    const bufferedStart = bufferedLength ? this.video_.buffered.start(0) : 0;
-    const bufferedEnd =
-        bufferedLength ? this.video_.buffered.end(bufferedLength - 1) : 0;
-    const seekRange = this.player_.seekRange();
-    const seekRangeSize = seekRange.end - seekRange.start;
-
     if (this.seekBar_) {
-      this.seekBar_.min = seekRange.start;
-      this.seekBar_.max = seekRange.end;
-    }
+      this.seekBar_.setValue(this.video_.currentTime);
+      this.seekBar_.update();
 
-    if (this.player_.isLive()) {
-      // The amount of time we are behind the live edge.
-      const behindLive = Math.floor(seekRange.end - displayTime);
-      displayTime = Math.max(0, behindLive);
-
-      if (!this.isSeeking_ && this.seekBar_) {
-        this.seekBar_.value = seekRange.end - displayTime;
-      }
-    } else {
-      if (!this.isSeeking_ && this.seekBar_) {
-        this.seekBar_.value = displayTime;
-      }
-    }
-
-    if (this.seekBar_) {
-      // Hide seekbar seek window is very small.
-      const seekRange = this.player_.seekRange();
-      const seekWindow = seekRange.end - seekRange.start;
-      if (this.player_.isLive() &&
-          seekWindow < Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
-        shaka.ui.Utils.setDisplay(this.seekBarContainer_, false);
-        for (const menu of this.settingsMenus_) {
-          menu.classList.add('shaka-low-position');
-        }
-      } else {
-        shaka.ui.Utils.setDisplay(this.seekBarContainer_, true);
+      if (this.seekBar_.isShowing()) {
         for (const menu of this.settingsMenus_) {
           menu.classList.remove('shaka-low-position');
         }
-
-        const gradient = ['to right'];
-        if (bufferedLength == 0) {
-          gradient.push('#000 0%');
-        } else {
-          const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
-          const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
-
-          const bufferStartDistance =
-              clampedBufferStart - seekRange.start;
-          const bufferEndDistance =
-              clampedBufferEnd - seekRange.start;
-          const playheadDistance = displayTime - seekRange.start;
-
-          // NOTE: the fallback to zero eliminates NaN.
-          const bufferStartFraction =
-              (bufferStartDistance / seekRangeSize) || 0;
-          const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
-          const playheadFraction = (playheadDistance / seekRangeSize) || 0;
-
-          gradient.push(Constants.SEEK_BAR_BASE_COLOR + ' ' +
-                       (bufferStartFraction * 100) + '%');
-          gradient.push(Constants.SEEK_BAR_PLAYED_COLOR + ' ' +
-                       (bufferStartFraction * 100) + '%');
-          gradient.push(Constants.SEEK_BAR_PLAYED_COLOR + ' ' +
-                       (playheadFraction * 100) + '%');
-          gradient.push(Constants.SEEK_BAR_BUFFERED_COLOR + ' ' +
-                       (playheadFraction * 100) + '%');
-          gradient.push(Constants.SEEK_BAR_BUFFERED_COLOR + ' ' +
-                       (bufferEndFraction * 100) + '%');
-          gradient.push(Constants.SEEK_BAR_BASE_COLOR + ' ' +
-                       (bufferEndFraction * 100) + '%');
+      } else {
+        for (const menu of this.settingsMenus_) {
+          menu.classList.add('shaka-low-position');
         }
-        this.seekBarContainer_.style.background =
-            'linear-gradient(' + gradient.join(',') + ')';
       }
     }
 
     this.dispatchEvent(new shaka.util.FakeEvent('timeandseekrangeupdated'));
   }
-
 
   /**
    * Add behaviors for keyboard navigation.
@@ -1357,7 +1109,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.keepFocusInMenu_(event);
     }
   }
-
 
   /**
    * When the user is using keyboard to navigate inside the overflow settings
@@ -1411,7 +1162,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-
   /**
    * For keyboard navigation, we use blue borders to highlight the active
    * element. If we detect that a mouse is being used, remove the blue border
@@ -1422,7 +1172,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.eventManager_.unlisten(window, 'mousedown');
     this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
   }
-
 
   /**
    * @param {!shaka.ui.Enums.Opacity} opacity
@@ -1440,7 +1189,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.hideSettingsMenusTimer_.tickAfter(/* seconds= */ 2);
     }
   }
-
 
   /**
    * Create a localization instance already pre-loaded with all the locales that
