@@ -17,8 +17,10 @@
 +../../ui/pip_button.js
 +../../ui/play_pause_button.js
 +../../ui/presentation_time.js
++../../ui/range_element.js
 +../../ui/resolution_selection.js
 +../../ui/rewind_button.js
++../../ui/seek_bar.js
 +../../ui/spacer.js
 +../../ui/text_displayer.js
 +../../ui/text_selection.js
