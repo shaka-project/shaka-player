@@ -1029,11 +1029,18 @@ describe('DashParser Live', () => {
 
       const liveEdge =
           manifest.presentationTimeline.getSegmentAvailabilityEnd();
-      const idx = stream.segmentIndex.find(liveEdge);
 
-      // In https://github.com/google/shaka-player/issues/1204, this
-      // failed an assertion and returned endTime == 0.
+      // In https://github.com/google/shaka-player/issues/1204, a get on the
+      // final segment failed an assertion and returned endTime == 0.
+      // Find the last segment by looking just before the live edge.  Looking
+      // right on the live edge creates test flake, and the segments are 2
+      // seconds in duration.
+      const idx = stream.segmentIndex.find(liveEdge - 0.5);
+      expect(idx).not.toBe(null);
+
+      // This should not throw an assertion.
       const ref = stream.segmentIndex.get(idx);
+      // The segment's endTime should definitely not be 0.
       expect(ref.endTime).toBeGreaterThan(0);
     });
   });
