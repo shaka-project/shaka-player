@@ -220,10 +220,11 @@
 
   /* Set the captions in the middle horizontally by default. */
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 
   /* Set the captions at the bottom by default. */
-  align-items: flex-end;
+  justify-content: flex-end;
 
   /* If the captions are too long to fit in the video container, hide the
    * overflow content. */
@@ -237,8 +238,7 @@
     /* These are defaults which are overridden by JS or cue styles. */
     background-color: rgba(0, 0, 0, 0.8);
     color: rgb(255, 255, 255);
-    display: block;
-    max-width: 95%;
+    display: inline-block;
   }
 }
 

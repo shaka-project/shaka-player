@@ -181,10 +181,53 @@ shaka.ui.TextDisplayer = class {
     });
 
     for (const cue of currentCues) {
+      this.displayCue_(this.textContainer_, cue);
+    }
+  }
+
+  /**
+   * Displays a nested cue
+   *
+   * @param {Element} container
+   * @param {!shaka.extern.Cue} cue
+   * @return {Element} the created captions container
+   * @private
+   */
+  displayNestedCue_(container, cue) {
       const captions = shaka.util.Dom.createHTMLElement('span');
+
+    if (cue.spacer) {
+      captions.style.display = 'block';
+    } else {
       this.setCaptionStyles_(captions, cue);
-      this.currentCuesMap_.set(cue, captions);
-      this.textContainer_.appendChild(captions);
+    }
+
+    container.appendChild(captions);
+
+    return captions;
+  }
+
+  /**
+   * Displays a cue
+   *
+   * @param {Element} container
+   * @param {!shaka.extern.Cue} cue
+   * @private
+   */
+  displayCue_(container, cue) {
+    if (cue.nestedCues.length) {
+      const nestedCuesContainer = shaka.util.Dom.createHTMLElement('p');
+      nestedCuesContainer.style.width = '100%';
+      this.setCaptionStyles_(nestedCuesContainer, cue);
+
+      for (let i = 0; i < cue.nestedCues.length; i++) {
+        this.displayNestedCue_(nestedCuesContainer, cue.nestedCues[i]);
+      }
+
+      container.appendChild(nestedCuesContainer);
+      this.currentCuesMap_.set(cue, nestedCuesContainer);
+    } else {
+      this.currentCuesMap_.set(cue, this.displayNestedCue_(container, cue));
     }
   }
 
@@ -226,11 +269,11 @@ shaka.ui.TextDisplayer = class {
     // captions inside the text container. Before means at the top of the
     // text container, and after means at the bottom.
     if (cue.displayAlign == Cue.displayAlign.BEFORE) {
-      panelStyle.alignItems = 'flex-start';
+      panelStyle.justifyContent = 'flex-start';
     } else if (cue.displayAlign == Cue.displayAlign.CENTER) {
-      panelStyle.alignItems = 'flex-top';
+      panelStyle.justifyContent = 'center';
     } else {
-      panelStyle.alignItems = 'flex-end';
+      panelStyle.justifyContent = 'flex-end';
     }
 
     captionsStyle.fontFamily = cue.fontFamily;

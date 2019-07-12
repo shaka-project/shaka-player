@@ -349,6 +349,20 @@ shaka.extern.Cue.prototype.wrapLine;
  */
 shaka.extern.Cue.prototype.id;
 
+/**
+ * Nested cues
+ * @type {Array.<!shaka.extern.Cue>}
+ * @exportDoc
+ */
+shaka.extern.Cue.prototype.nestedCues;
+
+/**
+ * Whether or not the cue only acts as a spacer between two cues
+ * @type {boolean}
+ * @exportDoc
+ */
+shaka.extern.Cue.prototype.spacer;
+
 
 /**
  * An interface for plugins that parse text tracks.
