@@ -353,7 +353,6 @@ describe('Player', () => {
       });
       textDisplayer.destroySpy.and.returnValue(Promise.resolve());
       player.configure({
-        // eslint-disable-next-line no-restricted-syntax
         textDisplayFactory: Util.factoryReturns(textDisplayer),
       });
 
