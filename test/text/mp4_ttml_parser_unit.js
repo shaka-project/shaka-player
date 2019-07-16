@@ -90,4 +90,16 @@ describe('Mp4TtmlParser', () => {
     expect(() => new shaka.text.Mp4TtmlParser().parseInit(audioInitSegment))
         .toThrow(error);
   });
+
+  it('can parse individual cues', () => {
+    const parser = new shaka.text.Mp4TtmlParser();
+    parser.parseInit(ttmlInitSegment);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    // The parseFirstCue method also has to support partial segments.
+    const partialSegment = ttmlSegment.subarray(0, 1150);
+    const ret = parser.parseFirstCue(partialSegment, time);
+    expect(ret.startTime).toBe(23);
+    expect(ret.endTime).toBe(24.5);
+    expect(ret.payload).toBe('You\'re a jerk, Thom.');
+  });
 });

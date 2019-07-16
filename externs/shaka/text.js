@@ -365,6 +365,21 @@ shaka.extern.TextParser = class {
    * @exportDoc
    */
   parseMedia(data, timeContext) {}
+
+  /**
+   * Parse a media segment and return the first cue. The provided segment may be
+   * a partial segment.
+   *
+   * @param {!Uint8Array} data
+   *    The next section of buffer.
+   * @param {shaka.extern.TextParser.TimeContext} timeContext
+   *    The time information that should be used to adjust the times values
+   *    for each cue.
+   * @return {!shaka.extern.Cue}
+   *
+   * @exportDoc
+   */
+  parseFirstCue(data, timeContext) {}
 };
 
 

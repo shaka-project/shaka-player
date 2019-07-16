@@ -877,6 +877,33 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('can parse multiple cues', () => {
+    verifyHelper(
+        [
+          {startTime: 1, endTime: 2, payload: 'First cue'},
+          {startTime: 3, endTime: 4, payload: 'Second cue'},
+        ],
+        '<tt><body>' +
+        '<p begin="00:01.00" end="00:02.00">First cue</p>' +
+        '<p begin="00:03.00" end="00:04.00">Second cue</p>' +
+        '</body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('can parse individual cues', () => {
+    // The parseFirstCue method also has to support partial segments.
+    const text =
+        '<tt><body>' +
+        '<p begin="00:01.00" end="00:02.00">First cue</p>' +
+        '<p begin="00:03.00" end="00:04.00">Sec   ';
+    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const cue = new shaka.text.TtmlTextParser().parseFirstCue(data, time);
+    expect(cue.startTime).toBe(1);
+    expect(cue.endTime).toBe(2);
+    expect(cue.payload).toBe('First cue');
+  });
+
 
   /**
    * @param {!Array} cues

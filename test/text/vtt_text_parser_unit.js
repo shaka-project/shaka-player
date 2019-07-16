@@ -588,6 +588,21 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('can parse individual cues', () => {
+    // The parseFirstCue method also has to support partial segments.
+    const text =
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n\n' +
+        '00:00:40.000 -';
+    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const cue = new shaka.text.VttTextParser().parseFirstCue(data, time);
+    expect(cue.startTime).toBe(20);
+    expect(cue.endTime).toBe(40);
+    expect(cue.payload).toBe('Test');
+  });
+
 
   /**
    * @param {!Array} cues
