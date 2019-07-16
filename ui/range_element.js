@@ -78,8 +78,9 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       this.onChangeStart();
     });
 
-    this.eventManager.listen(this.bar, 'touchstart', () => {
+    this.eventManager.listen(this.bar, 'touchstart', (e) => {
       this.isChanging_ = true;
+      this.setBarValueForTouch_(e);
       this.onChangeStart();
     }, {passive: true});
 
@@ -87,8 +88,14 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       this.onChange();
     });
 
-    this.eventManager.listen(this.bar, 'touchend', () => {
+    this.eventManager.listen(this.bar, 'touchmove', (e) => {
+      this.setBarValueForTouch_(e);
+      this.onChange();
+    });
+
+    this.eventManager.listen(this.bar, 'touchend', (e) => {
       this.isChanging_ = false;
+      this.setBarValueForTouch_(e);
       this.onChangeEnd();
     });
 
@@ -135,6 +142,33 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     // The user interaction overrides any external values being pushed in.
     if (this.isChanging_) {
       return;
+    }
+
+    this.bar.value = value;
+  }
+
+  /**
+   * Synchronize the touch position with the range value.
+   * Comes in handy on iOS, where users have to grab the handle in order
+   * to start seeking.
+   * @param {Event} event
+   * @private
+   */
+  setBarValueForTouch_(event) {
+    event.preventDefault();
+
+    const changedTouch = /** @type {TouchEvent} */ (event).changedTouches[0];
+    const rect = this.bar.getBoundingClientRect();
+
+    // Calculate the range value based on the touch position.
+    let value = (this.bar.max / rect.width) *
+      (changedTouch.clientX - rect.left);
+
+    // Keep value within bounds.
+    if (value < this.bar.min) {
+      value = this.bar.min;
+    } else if (value > this.bar.max) {
+      value = this.bar.max;
     }
 
     this.bar.value = value;
