@@ -137,8 +137,7 @@ def check_spelling(_):
     with open(path) as f:
       for i, line in enumerate(f):
         for regex, replace_pattern in misspellings.items():
-          match = re.search(regex, line)
-          if match:
+          for match in re.finditer(regex, line):
             repl = match.expand(replace_pattern)
             if match.group(0).lower() == repl:
               continue  # No-op suggestion
