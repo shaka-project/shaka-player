@@ -253,6 +253,9 @@ shaka.ui.TextDisplayer = class {
       captionsStyle.backgroundRepeat = 'no-repeat';
       captionsStyle.backgroundSize = 'contain';
       captionsStyle.backgroundPosition = 'center';
+      if (cue.backgroundColor == '') {
+        captionsStyle.backgroundColor = 'transparent';
+      }
     }
     if (cue.backgroundImage && cue.region) {
       const percentageUnit = shaka.text.CueRegion.units.PERCENTAGE;
