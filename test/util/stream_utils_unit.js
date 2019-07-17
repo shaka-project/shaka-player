@@ -25,17 +25,19 @@ describe('StreamUtils', () => {
 
   describe('filterStreamsByLanguageAndRole', () => {
     it('chooses text streams in user\'s preferred language', () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addTextStream(1)
-              .language('en')
-            .addTextStream(2)
-              .language('es')
-            .addTextStream(3)
-              .language('en')
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addTextStream(1, (stream) => {
+            stream.language = 'en';
+          });
+          period.addTextStream(2, (stream) => {
+            stream.language = 'es';
+          });
+          period.addTextStream(3, (stream) => {
+            stream.language = 'en';
+          });
+        });
+      });
 
       const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
@@ -47,16 +49,17 @@ describe('StreamUtils', () => {
     });
 
     it('chooses primary text streams', () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addTextStream(1)
-            .addTextStream(2)
-              .primary()
-            .addTextStream(3)
-              .primary()
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addTextStream(1);
+          period.addTextStream(2, (stream) => {
+            stream.primary = true;
+          });
+          period.addTextStream(3, (stream) => {
+            stream.primary = true;
+          });
+        });
+      });
 
       const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
@@ -68,19 +71,21 @@ describe('StreamUtils', () => {
     });
 
     it('chooses text streams in preferred language and role', () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addTextStream(1)
-              .language('en')
-              .roles(['main', 'commentary'])
-            .addTextStream(2)
-              .language('es')
-            .addTextStream(3)
-              .language('en')
-              .roles(['caption'])
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addTextStream(1, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['main', 'commentary'];
+          });
+          period.addTextStream(2, (stream) => {
+            stream.language = 'es';
+          });
+          period.addTextStream(3, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['caption'];
+          });
+        });
+      });
 
       const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
@@ -91,19 +96,21 @@ describe('StreamUtils', () => {
     });
 
     it('prefers no-role streams if there is no preferred role', () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addTextStream(0)
-              .language('en')
-              .roles(['commentary'])
-            .addTextStream(1)
-              .language('en')
-            .addTextStream(2)
-              .language('en')
-              .roles(['secondary'])
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addTextStream(0, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['commentary'];
+          });
+          period.addTextStream(1, (stream) => {
+            stream.language = 'en';
+          });
+          period.addTextStream(2, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['secondary'];
+          });
+        });
+      });
 
       const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
@@ -114,19 +121,21 @@ describe('StreamUtils', () => {
     });
 
     it('ignores no-role streams if there is a preferred role', () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addTextStream(0)
-              .language('en')
-              .roles(['commentary'])
-            .addTextStream(1)
-              .language('en')
-            .addTextStream(2)
-              .language('en')
-              .roles(['secondary'])
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addTextStream(0, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['commentary'];
+          });
+          period.addTextStream(1, (stream) => {
+            stream.language = 'en';
+          });
+          period.addTextStream(2, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['secondary'];
+          });
+        });
+      });
 
       const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
@@ -138,29 +147,34 @@ describe('StreamUtils', () => {
 
     it('chooses only one role, even if none is preferred', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addTextStream(0)
-              .language('en')
-              .roles(['commentary'])
-            .addTextStream(1)
-              .language('en')
-              .roles(['commentary'])
-            .addTextStream(2)
-              .language('en')
-              .roles(['secondary'])
-            .addTextStream(3)
-              .language('en')
-              .roles(['secondary'])
-            .addTextStream(4)
-              .language('en')
-              .roles(['main'])
-            .addTextStream(5)
-              .language('en')
-              .roles(['main'])
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addTextStream(0, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['commentary'];
+          });
+          period.addTextStream(1, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['commentary'];
+          });
+          period.addTextStream(2, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['secondary'];
+          });
+          period.addTextStream(3, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['secondary'];
+          });
+          period.addTextStream(4, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['main'];
+          });
+          period.addTextStream(5, (stream) => {
+            stream.language = 'en';
+            stream.roles = ['main'];
+          });
+        });
+      });
 
       const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
@@ -174,29 +188,40 @@ describe('StreamUtils', () => {
 
     it('chooses only one role, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addTextStream(0)
-              .language('en').primary()
-              .roles(['commentary'])
-            .addTextStream(1)
-              .language('en').primary()
-              .roles(['commentary'])
-            .addTextStream(2)
-              .language('en').primary()
-              .roles(['secondary'])
-            .addTextStream(3)
-              .language('en').primary()
-              .roles(['secondary'])
-            .addTextStream(4)
-              .language('en').primary()
-              .roles(['main'])
-            .addTextStream(5)
-              .language('en').primary()
-              .roles(['main'])
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addTextStream(0, (stream) => {
+            stream.language = 'en';
+            stream.primary = true;
+            stream.roles = ['commentary'];
+          });
+          period.addTextStream(1, (stream) => {
+            stream.language = 'en';
+            stream.primary = true;
+            stream.roles = ['commentary'];
+          });
+          period.addTextStream(2, (stream) => {
+            stream.language = 'en';
+            stream.primary = true;
+            stream.roles = ['secondary'];
+          });
+          period.addTextStream(3, (stream) => {
+            stream.language = 'en';
+            stream.primary = true;
+            stream.roles = ['secondary'];
+          });
+          period.addTextStream(4, (stream) => {
+            stream.language = 'en';
+            stream.primary = true;
+            stream.roles = ['main'];
+          });
+          period.addTextStream(5, (stream) => {
+            stream.language = 'en';
+            stream.primary = true;
+            stream.roles = ['main'];
+          });
+        });
+      });
 
       const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
@@ -210,19 +235,26 @@ describe('StreamUtils', () => {
 
     it('chooses only one language, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/918
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addTextStream(0)
-              .language('en').primary()
-            .addTextStream(1)
-              .language('en').primary()
-            .addTextStream(2)
-              .language('es').primary()
-            .addTextStream(3)
-              .language('es').primary()
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addTextStream(0, (stream) => {
+            stream.language = 'en';
+            stream.primary = true;
+          });
+          period.addTextStream(1, (stream) => {
+            stream.language = 'en';
+            stream.primary = true;
+          });
+          period.addTextStream(2, (stream) => {
+            stream.language = 'es';
+            stream.primary = true;
+          });
+          period.addTextStream(3, (stream) => {
+            stream.language = 'es';
+            stream.primary = true;
+          });
+        });
+      });
 
       const chosen = filterStreamsByLanguageAndRole(
           manifest.periods[0].textStreams,
@@ -236,29 +268,38 @@ describe('StreamUtils', () => {
 
     it('chooses a role from among primary streams without language match',
         () => {
-          /* eslint-disable indent */
-          manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addTextStream(0)
-                  .language('en').primary()
-                  .roles(['commentary'])
-                .addTextStream(1)
-                  .language('en').primary()
-                  .roles(['commentary'])
-                .addTextStream(2)
-                  .language('en')
-                  .roles(['secondary'])
-                .addTextStream(3)
-                  .language('en')
-                  .roles(['secondary'])
-                .addTextStream(4)
-                  .language('en').primary()
-                  .roles(['main'])
-                .addTextStream(5)
-                  .language('en').primary()
-                  .roles(['main'])
-              .build();
-          /* eslint-enable indent */
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addPeriod(0, (period) => {
+              period.addTextStream(0, (stream) => {
+                stream.language = 'en';
+                stream.primary = true;
+                stream.roles = ['commentary'];
+              });
+              period.addTextStream(1, (stream) => {
+                stream.language = 'en';
+                stream.primary = true;
+                stream.roles = ['commentary'];
+              });
+              period.addTextStream(2, (stream) => {
+                stream.language = 'en';
+                stream.roles = ['secondary'];
+              });
+              period.addTextStream(3, (stream) => {
+                stream.language = 'en';
+                stream.roles = ['secondary'];
+              });
+              period.addTextStream(4, (stream) => {
+                stream.language = 'en';
+                stream.primary = true;
+                stream.roles = ['main'];
+              });
+              period.addTextStream(5, (stream) => {
+                stream.language = 'en';
+                stream.primary = true;
+                stream.roles = ['main'];
+              });
+            });
+          });
 
           const chosen = filterStreamsByLanguageAndRole(
               manifest.periods[0].textStreams,
@@ -277,29 +318,38 @@ describe('StreamUtils', () => {
 
     it('chooses a role from best language match, in spite of primary',
         () => {
-          /* eslint-disable indent */
-          manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addTextStream(0)
-                  .language('en').primary()
-                  .roles(['commentary'])
-                .addTextStream(1)
-                  .language('en').primary()
-                  .roles(['commentary'])
-                .addTextStream(2)
-                  .language('zh')
-                  .roles(['secondary'])
-                .addTextStream(3)
-                  .language('zh')
-                  .roles(['secondary'])
-                .addTextStream(4)
-                  .language('en').primary()
-                  .roles(['main'])
-                .addTextStream(5)
-                  .language('en').primary()
-                  .roles(['main'])
-              .build();
-          /* eslint-enable indent */
+          manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addPeriod(0, (period) => {
+              period.addTextStream(0, (stream) => {
+                stream.language = 'en';
+                stream.primary = true;
+                stream.roles = ['commentary'];
+              });
+              period.addTextStream(1, (stream) => {
+                stream.language = 'en';
+                stream.primary = true;
+                stream.roles = ['commentary'];
+              });
+              period.addTextStream(2, (stream) => {
+                stream.language = 'zh';
+                stream.roles = ['secondary'];
+              });
+              period.addTextStream(3, (stream) => {
+                stream.language = 'zh';
+                stream.roles = ['secondary'];
+              });
+              period.addTextStream(4, (stream) => {
+                stream.language = 'en';
+                stream.primary = true;
+                stream.roles = ['main'];
+              });
+              period.addTextStream(5, (stream) => {
+                stream.language = 'en';
+                stream.primary = true;
+                stream.roles = ['main'];
+              });
+            });
+          });
 
           const chosen = filterStreamsByLanguageAndRole(
               manifest.periods[0].textStreams,
@@ -315,17 +365,25 @@ describe('StreamUtils', () => {
 
   describe('filterVariantsByAudioChannelCount', () => {
     it('chooses variants with preferred audio channels count', () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addAudio(0).channelsCount(2)
-            .addVariant(1)
-              .addAudio(1).channelsCount(6)
-            .addVariant(2)
-              .addAudio(2).channelsCount(2)
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addAudio(0, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          period.addVariant(1, (variant) => {
+            variant.addAudio(1, (stream) => {
+              stream.channelsCount = 6;
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.addAudio(2, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+        });
+      });
 
       const chosen = filterVariantsByAudioChannelCount(
           manifest.periods[0].variants, 2);
@@ -336,17 +394,25 @@ describe('StreamUtils', () => {
 
     it('chooses variants with largest audio channel count less than config' +
         ' when no exact audio channel count match is possible', () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addAudio(0).channelsCount(2)
-            .addVariant(1)
-              .addAudio(1).channelsCount(8)
-            .addVariant(2)
-              .addAudio(2).channelsCount(2)
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addAudio(0, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          period.addVariant(1, (variant) => {
+            variant.addAudio(1, (stream) => {
+              stream.channelsCount = 8;
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.addAudio(2, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+        });
+      });
 
       const chosen = filterVariantsByAudioChannelCount(
           manifest.periods[0].variants, 6);
@@ -357,17 +423,25 @@ describe('StreamUtils', () => {
 
     it('chooses variants with fewest audio channels when none fit in the ' +
         'config', () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addAudio(0).channelsCount(6)
-            .addVariant(1)
-              .addAudio(1).channelsCount(8)
-            .addVariant(2)
-              .addAudio(2).channelsCount(6)
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addAudio(0, (stream) => {
+              stream.channelsCount = 6;
+            });
+          });
+          period.addVariant(1, (variant) => {
+            variant.addAudio(1, (stream) => {
+              stream.channelsCount = 8;
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.addAudio(2, (stream) => {
+              stream.channelsCount = 6;
+            });
+          });
+        });
+      });
 
       const chosen = filterVariantsByAudioChannelCount(
           manifest.periods[0].variants, 2);
@@ -385,15 +459,22 @@ describe('StreamUtils', () => {
     });
 
     it('filters text streams with the full MIME type', () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addTextStream(1).mime('text/vtt')
-            .addTextStream(2).mime('application/mp4', 'wvtt')
-            .addTextStream(3).mime('text/bogus')
-            .addTextStream(4).mime('application/mp4', 'bogus')
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addTextStream(1, (stream) => {
+            stream.mimeType = 'text/vtt';
+          });
+          period.addTextStream(2, (stream) => {
+            stream.mime('application/mp4', 'wvtt');
+          });
+          period.addTextStream(3, (stream) => {
+            stream.mimeType = 'text/bogus';
+          });
+          period.addTextStream(4, (stream) => {
+            stream.mime('application/mp4', 'bogus');
+          });
+        });
+      });
 
       const noAudio = null;
       const noVideo = null;

@@ -140,49 +140,55 @@ describe('DashParser Manifest', () => {
           '  </Period>',
           '</MPD>',
         ],
-        /* eslint-disable indent */
-        new shaka.test.ManifestGenerator()
-            .anyTimeline()
-            .minBufferTime(75)
-            .addPeriod(/** @type {?} */ (jasmine.any(Number)))
-              .addPartialVariant()
-                .language('en')
-                .bandwidth(200)
-                .primary()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1.4d401f')
-                  .bandwidth(100)
-                  .frameRate(1000000 / 42000)
-                  .size(768, 576)
-                .addPartialStream(ContentType.AUDIO)
-                  .bandwidth(100)
-                  .mime('audio/mp4', 'mp4a.40.29')
-                  .primary()
-                  .roles(['main'])
-              .addPartialVariant()
-                .language('en')
-                .bandwidth(150)
-                .primary()
-                .addPartialStream(ContentType.VIDEO)
-                  .mime('video/mp4', 'avc1.4d401f')
-                  .bandwidth(50)
-                  .frameRate(1000000 / 42000)
-                  .size(576, 432)
-                .addPartialStream(ContentType.AUDIO)
-                  .bandwidth(100)
-                  .mime('audio/mp4', 'mp4a.40.29')
-                  .primary()
-                  .roles(['main'])
-              .addPartialStream(ContentType.TEXT)
-                .language('es')
-                .label('spanish')
-                .primary()
-                .mime('text/vtt')
-                .bandwidth(100)
-                .kind('caption')
-                .roles(['caption', 'main'])
-          .build());
-        /* eslint-enable indent */
+        shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.anyTimeline();
+          manifest.minBufferTime = 75;
+          manifest.addPeriod(null, (period) => {
+            period.addPartialVariant((variant) => {
+              variant.language = 'en';
+              variant.bandwidth = 200;
+              variant.primary = true;
+              variant.addPartialStream(ContentType.VIDEO, (stream) => {
+                stream.bandwidth = 100;
+                stream.frameRate = 1000000 / 42000;
+                stream.size(768, 576);
+                stream.mime('video/mp4', 'avc1.4d401f');
+              });
+              variant.addPartialStream(ContentType.AUDIO, (stream) => {
+                stream.bandwidth = 100;
+                stream.primary = true;
+                stream.roles = ['main'];
+                stream.mime('audio/mp4', 'mp4a.40.29');
+              });
+            });
+            period.addPartialVariant((variant) => {
+              variant.language = 'en';
+              variant.bandwidth = 150;
+              variant.primary = true;
+              variant.addPartialStream(ContentType.VIDEO, (stream) => {
+                stream.bandwidth = 50;
+                stream.frameRate = 1000000 / 42000;
+                stream.size(576, 432);
+                stream.mime('video/mp4', 'avc1.4d401f');
+              });
+              variant.addPartialStream(ContentType.AUDIO, (stream) => {
+                stream.bandwidth = 100;
+                stream.primary = true;
+                stream.roles = ['main'];
+                stream.mime('audio/mp4', 'mp4a.40.29');
+              });
+            });
+            period.addPartialTextStream((stream) => {
+              stream.language = 'es';
+              stream.label = 'spanish';
+              stream.primary = true;
+              stream.mimeType = 'text/vtt';
+              stream.bandwidth = 100;
+              stream.kind = 'caption';
+              stream.roles = ['caption', 'main'];
+            });
+          });
+        }));
   });
 
   it('skips any periods after one without duration', async () => {

@@ -28,11 +28,11 @@ describe('PeriodObserver', () => {
   beforeEach(() => {
     onPeriodChanged = jasmine.createSpy('onPeriodChanged');
 
-    manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-        .addPeriod(10)
-        .addPeriod(20)
-        .build();
+    manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.addPeriod(0);
+      manifest.addPeriod(10);
+      manifest.addPeriod(20);
+    });
 
     observer = new shaka.media.PeriodObserver(manifest);
     observer.setListeners(shaka.test.Util.spyFunc(onPeriodChanged));

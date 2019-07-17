@@ -77,16 +77,22 @@ describe('DrmEngine', () => {
     onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
     onEventSpy = jasmine.createSpy('onEvent');
 
-    /* eslint-disable indent */
-    manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .addDrmInfo('drm.abc')
-            .addDrmInfo('drm.def')
-            .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-            .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-        .build();
-    /* eslint-enable indent */
+    manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.addPeriod(0, (period) => {
+        period.addVariant(0, (variant) => {
+          variant.addDrmInfo('drm.abc');
+          variant.addDrmInfo('drm.def');
+          variant.addVideo(1, (stream) => {
+            stream.encrypted = true;
+            stream.mime('video/foo', 'vbar');
+          });
+          variant.addAudio(2, (stream) => {
+            stream.encrypted = true;
+            stream.mime('audio/foo', 'abar');
+          });
+        });
+      });
+    });
 
     // By default, error logs and callbacks result in failure.
     onErrorSpy.and.callFake(fail);
@@ -142,15 +148,18 @@ describe('DrmEngine', () => {
 
   describe('supportsVariants', () => {
     it('supports all clear variants', async () => {
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addDrmInfo('drm.abc')
-              .addDrmInfo('drm.def')
-              .addVideo(1).mime('video/foo', 'vbar').encrypted(false)
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addDrmInfo('drm.abc');
+            variant.addDrmInfo('drm.def');
+            variant.addVideo(1, (stream) => {
+              stream.encrypted = false;
+              stream.mime('video/foo', 'vbar');
+            });
+          });
+        });
+      });
 
       const variants = Periods.getAllVariantsFrom(manifest.periods);
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
@@ -312,14 +321,18 @@ describe('DrmEngine', () => {
     });
 
     it('silences errors for unencrypted assets', async () => {
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addVideo(1).mime('video/foo', 'vbar')
-              .addAudio(2).mime('audio/foo', 'abar')
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.mime('video/foo', 'vbar');
+            });
+            variant.addAudio(2, (stream) => {
+              stream.mime('audio/foo', 'abar');
+            });
+          });
+        });
+      });
 
       // Accept no key systems.
       setRequestMediaKeySystemAccessSpy([]);
@@ -494,15 +507,17 @@ describe('DrmEngine', () => {
 
     it('uses advanced config to fill in DrmInfo', async () => {
       // Leave only one drmInfo
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addDrmInfo('drm.abc')
-              .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-              .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addDrmInfo('drm.abc');
+            variant.addVideo(1, (stream) => {
+              stream.encrypted = true;
+            });
+            variant.addAudio(2);
+          });
+        });
+      });
 
       setRequestMediaKeySystemAccessSpy([]);
 
@@ -538,15 +553,17 @@ describe('DrmEngine', () => {
 
     it('prefers advanced config from manifest if present', async () => {
       // Leave only one drmInfo
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addDrmInfo('drm.abc')
-              .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-              .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addDrmInfo('drm.abc');
+            variant.addVideo(1, (stream) => {
+              stream.encrypted = true;
+            });
+            variant.addAudio(2);
+          });
+        });
+      });
 
       setRequestMediaKeySystemAccessSpy([]);
 
@@ -611,15 +628,19 @@ describe('DrmEngine', () => {
   describe('attach', () => {
     beforeEach(() => {
       // Both audio and video with the same key system:
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addDrmInfo('drm.abc')
-              .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-              .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addDrmInfo('drm.abc');
+            variant.addVideo(1, (stream) => {
+              stream.encrypted = true;
+            });
+            variant.addAudio(2, (stream) => {
+              stream.encrypted = true;
+            });
+          });
+        });
+      });
     });
 
     it('does nothing for unencrypted content', async () => {
@@ -1697,15 +1718,19 @@ describe('DrmEngine', () => {
   describe('getDrmInfo', () => {
     it('includes correct info', async () => {
       // Leave only one drmInfo
-      /* eslint-disable indent */
-      manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(0)
-              .addDrmInfo('drm.abc')
-              .addVideo(1).mime('video/foo', 'vbar').encrypted(true)
-              .addAudio(2).mime('audio/foo', 'abar').encrypted(true)
-          .build();
-      /* eslint-enable indent */
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addDrmInfo('drm.abc');
+            variant.addVideo(1, (stream) => {
+              stream.encrypted = true;
+            });
+            variant.addAudio(2, (stream) => {
+              stream.encrypted = true;
+            });
+          });
+        });
+      });
       setRequestMediaKeySystemAccessSpy(['drm.abc']);
 
       // Key IDs in manifest

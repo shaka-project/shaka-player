@@ -151,33 +151,35 @@ describe('HlsParser', () => {
       'main.vtt',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .language('en')
-            .bandwidth(200)
-            .addPartialStream(ContentType.VIDEO)
-              .anyInitSegment()
-              .mime('video/mp4', 'avc1')
-              .frameRate(60)
-              .size(960, 540)
-            .addPartialStream(ContentType.AUDIO)
-              .language('en')
-              .anyInitSegment()
-              .mime('audio/mp4', 'mp4a')
-              .channelsCount(2)
-          .addPartialStream(ContentType.TEXT)
-            .language('en')
-            .mime('text/vtt', '')
-            .kind(TextStreamKind.SUBTITLE)
-          .addPartialStream(ContentType.TEXT)
-            .language('es')
-            .mime('text/vtt', '')
-            .kind(TextStreamKind.SUBTITLE)
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.language = 'en';
+          variant.bandwidth = 200;
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.frameRate = 60;
+            stream.mime('video/mp4', 'avc1');
+            stream.size(960, 540);
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'en';
+            stream.channelsCount = 2;
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+        period.addPartialTextStream((stream) => {
+          stream.language = 'en';
+          stream.kind = TextStreamKind.SUBTITLE;
+          stream.mime('text/vtt', '');
+        });
+        period.addPartialTextStream((stream) => {
+          stream.language = 'es';
+          stream.kind = TextStreamKind.SUBTITLE;
+          stream.mime('text/vtt', '');
+        });
+      });
+    });
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -210,15 +212,16 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1.4d001e')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1.4d001e');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -240,15 +243,16 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -269,15 +273,16 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -298,15 +303,16 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', 'mp4a')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -330,17 +336,19 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', 'mp4a')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1');
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -364,17 +372,19 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', '')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1');
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', '');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -401,18 +411,20 @@ describe('HlsParser', () => {
     ].join('');
 
     const closedCaptions = new Map([['CC1', 'en']]);
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-              .closedCaptions(closedCaptions)
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', 'mp4a')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.closedCaptions = closedCaptions;
+            stream.mime('video/mp4', 'avc1');
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -438,17 +450,19 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', 'mp4a')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1');
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -471,15 +485,16 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', 'mp4a')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -555,15 +570,16 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1,mp4a')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1,mp4a');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -585,15 +601,16 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', /** @type {?} */ (jasmine.any(String)))
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', /** @type {?} */ (jasmine.any(String)));
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -617,17 +634,19 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', /** @type {?} */ (jasmine.any(String)))
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', /** @type {?} */ (jasmine.any(String)))
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', /** @type {?} */ (jasmine.any(String)));
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', /** @type {?} */ (jasmine.any(String)));
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -650,15 +669,16 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', /** @type {?} */ (jasmine.any(String)))
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', /** @type {?} */ (jasmine.any(String)));
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -681,15 +701,16 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', /** @type {?} */ (jasmine.any(String)))
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', /** @type {?} */ (jasmine.any(String)));
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -718,24 +739,29 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .bandwidth(200)
-            .addPartialStream(ContentType.VIDEO)
-              .size(960, 540)
-            .addPartialStream(ContentType.AUDIO)
-              .language('en')
-          .addPartialVariant()
-            .bandwidth(300)
-            .addPartialStream(ContentType.VIDEO)
-              .size(960, 540)
-            .addPartialStream(ContentType.AUDIO)
-              .language('fr')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.bandwidth = 200;
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.size(960, 540);
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'en';
+          });
+        });
+        period.addPartialVariant((variant) => {
+          variant.bandwidth = 300;
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.size(960, 540);
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'fr';
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -761,22 +787,25 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .language('en')
-            .addPartialStream(ContentType.VIDEO)
-            .addPartialStream(ContentType.AUDIO)
-              .language('en')
-          .addPartialVariant()
-            .language('fr')
-            .addPartialStream(ContentType.VIDEO)
-            .addPartialStream(ContentType.AUDIO)
-              .language('fr')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.language = 'en';
+          variant.addPartialStream(ContentType.VIDEO);
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'en';
+          });
+        });
+        period.addPartialVariant((variant) => {
+          variant.language = 'fr';
+          variant.addPartialStream(ContentType.VIDEO);
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'fr';
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -830,15 +859,16 @@ describe('HlsParser', () => {
       'main.test',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1');
+          });
+        });
+      });
+    });
 
     // The extra parameters should be stripped by the parser.
     fakeNetEngine.setHeaders(
@@ -883,25 +913,29 @@ describe('HlsParser', () => {
       'main.vtt',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', 'mp4a')
-          .addPartialStream(ContentType.TEXT)
-            .language('en')
-            .mime('text/vtt', '')
-            .kind(TextStreamKind.SUBTITLE)
-          .addPartialStream(ContentType.TEXT)
-            .language('es')
-            .mime('text/vtt', '')
-            .kind(TextStreamKind.SUBTITLE)
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1');
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+        period.addPartialTextStream((stream) => {
+          stream.language = 'en';
+          stream.kind = TextStreamKind.SUBTITLE;
+          stream.mime('text/vtt', '');
+        });
+        period.addPartialTextStream((stream) => {
+          stream.language = 'es';
+          stream.kind = TextStreamKind.SUBTITLE;
+          stream.mime('text/vtt', '');
+        });
+      });
+    });
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -949,21 +983,23 @@ describe('HlsParser', () => {
       'main.vtt',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-            .addPartialStream(ContentType.AUDIO)
-          .addPartialStream(ContentType.TEXT)
-            .mime('text/vtt', '')
-            .kind(TextStreamKind.SUBTITLE)
-          .addPartialStream(ContentType.TEXT)
-            .mime('text/vtt', '')
-            .kind(TextStreamKind.SUBTITLE)
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO);
+          variant.addPartialStream(ContentType.AUDIO);
+        });
+        period.addPartialTextStream((stream) => {
+          stream.kind = TextStreamKind.SUBTITLE;
+          stream.mime('text/vtt', '');
+        });
+        period.addPartialTextStream((stream) => {
+          stream.kind = TextStreamKind.SUBTITLE;
+          stream.mime('text/vtt', '');
+        });
+      });
+    });
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1062,17 +1098,18 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-          .addPartialStream(ContentType.TEXT)
-            .language('en')
-            .mime('application/mp4', 'stpp.TTML.im1t')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO);
+        });
+        period.addPartialTextStream((stream) => {
+          stream.language = 'en';
+          stream.mime('application/mp4', 'stpp.TTML.im1t');
+        });
+      });
+    });
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1113,16 +1150,17 @@ describe('HlsParser', () => {
       'main.foo',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-          .addPartialStream(ContentType.TEXT)
-            .mime('text/vtt', 'vtt')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO);
+        });
+        period.addPartialTextStream((stream) => {
+          stream.mime('text/vtt', 'vtt');
+        });
+      });
+    });
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1156,17 +1194,17 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(/** @type {?} */ (jasmine.any(Number)))
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-          .addPartialStream(ContentType.TEXT)
-            .anyInitSegment()
-            .kind(TextStreamKind.SUBTITLE)
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(/** @type {?} */ (jasmine.any(Number)), (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO);
+        });
+        period.addPartialTextStream((stream) => {
+          stream.kind = TextStreamKind.SUBTITLE;
+        });
+      });
+    });
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1207,14 +1245,14 @@ describe('HlsParser', () => {
       'main.foo',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO);
+        });
+      });
+    });
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1248,18 +1286,19 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-              .frameRate(60)
-              .size(960, 540)
-            .addPartialStream(ContentType.AUDIO)
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.frameRate = 60;
+            stream.mime('video/mp4', 'avc1');
+            stream.size(960, 540);
+          });
+          variant.addPartialStream(ContentType.AUDIO);
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -1337,17 +1376,19 @@ describe('HlsParser', () => {
       'selfInit.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addPartialStream(ContentType.VIDEO)
-              .mime('video/mp4', 'avc1')
-            .addPartialStream(ContentType.AUDIO)
-              .mime('audio/mp4', 'mp4a')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.mime('video/mp4', 'avc1');
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -1387,18 +1428,20 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .bandwidth(200)
-            .addPartialStream(ContentType.VIDEO)
-              .size(960, 540)
-            .addPartialStream(ContentType.AUDIO)
-              .language('en')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.bandwidth = 200;
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.size(960, 540);
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'en';
+          });
+        });
+      });
+    });
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1442,17 +1485,19 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .addDrmInfo('com.widevine.alpha')
-              .addCencInitData(initDataBase64)
-            .addPartialStream(ContentType.VIDEO)
-              .encrypted(true)
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.addDrmInfo('com.widevine.alpha', (drmInfo) => {
+            drmInfo.addCencInitData(initDataBase64);
+          });
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.encrypted = true;
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });
@@ -2096,36 +2141,47 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .anyTimeline()
-        .addPeriod(0)
-          .addPartialVariant()
-            .language('en')
-            .addPartialStream(ContentType.VIDEO)
-              .size(1280, 720)
-            .addPartialStream(ContentType.AUDIO)
-              .language('en')
-          .addPartialVariant()
-            .language('fr')
-            .addPartialStream(ContentType.VIDEO)
-              .size(1280, 720)
-            .addPartialStream(ContentType.AUDIO)
-              .language('fr')
-          .addPartialVariant()
-            .language('en')
-            .addPartialStream(ContentType.VIDEO)
-              .size(1920, 1080)
-            .addPartialStream(ContentType.AUDIO)
-              .language('en')
-          .addPartialVariant()
-            .language('fr')
-            .addPartialStream(ContentType.VIDEO)
-              .size(1920, 1080)
-            .addPartialStream(ContentType.AUDIO)
-              .language('fr')
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        period.addPartialVariant((variant) => {
+          variant.language = 'en';
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.size(1280, 720);
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'en';
+          });
+        });
+        period.addPartialVariant((variant) => {
+          variant.language = 'fr';
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.size(1280, 720);
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'fr';
+          });
+        });
+        period.addPartialVariant((variant) => {
+          variant.language = 'en';
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.size(1920, 1080);
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'en';
+          });
+        });
+        period.addPartialVariant((variant) => {
+          variant.language = 'fr';
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.size(1920, 1080);
+          });
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.language = 'fr';
+          });
+        });
+      });
+    });
 
     await testHlsParser(master, media, manifest);
   });

@@ -282,11 +282,14 @@ describe('UI', () => {
       it('allows picture-in-picture only when the content has video',
           async () => {
             // Load fake content that contains only audio.
-            const manifest = new shaka.test.ManifestGenerator()
-                .addPeriod(/* startTime= */ 0)
-                .addVariant(/* id= */ 0)
-                .addAudio(/* id= */ 1)
-                .build();
+            const manifest =
+                shaka.test.ManifestGenerator.generate((manifest) => {
+                  manifest.addPeriod(/* startTime= */ 0, (period) => {
+                    period.addVariant(/* id= */ 0, (variant) => {
+                      variant.addAudio(/* id= */ 1);
+                    });
+                  });
+                });
 
             await player.load(
                 /* uri= */ 'fake', /* startTime= */ 0,
@@ -414,14 +417,18 @@ describe('UI', () => {
 
       it('clears the buffer when changing resolutions', async () => {
         // Load fake content that has more than one quality level.
-        /* eslint-disable indent */
-        const manifest = new shaka.test.ManifestGenerator()
-            .addPeriod(0)
-              .addVariant(0)
-                .addVideo(1).size(320, 240)
-                .addVideo(2).size(640, 480)
-            .build();
-        /* eslint-enable indent */
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addPeriod(0, (period) => {
+            period.addVariant(0, (variant) => {
+              variant.addVideo(1, (stream) => {
+                stream.size(320, 240);
+              });
+              variant.addVideo(2, (stream) => {
+                stream.size(640, 480);
+              });
+            });
+          });
+        });
 
         await player.load(
             /* uri= */ 'fake', /* startTime= */ 0, returnManifest(manifest));
@@ -443,39 +450,68 @@ describe('UI', () => {
       });
 
       it('displays resolutions based on current stream', async () => {
-        /* eslint-disable indent */
         // A manifest with different resolutions at different
         // languages/channel-counts to test the current resolution list is
         // filtered.
-        const manifest = new shaka.test.ManifestGenerator()
-            .addPeriod(0)
-              .addVariant(0)
-                .primary()
-                .language('en')
-                .addVideo(1).size(320, 240)
-                .addAudio(3).channelsCount(2)
-              .addVariant(4)
-                .language('en')
-                .addVideo(5).size(640, 480)
-                .addAudio(6).channelsCount(2)
-              .addVariant(7)  // Duplicate with 4
-                .language('en')
-                .addVideo(8).size(640, 480)
-                .addAudio(9).channelsCount(2)
-              .addVariant(10)
-                .language('en')
-                .addVideo(11).size(1280, 720)
-                .addAudio(12).channelsCount(1)
-              .addVariant(13)
-                .language('es')
-                .addVideo(14).size(960, 540)
-                .addAudio(15).channelsCount(2)
-              .addVariant(16)
-                .language('fr')
-                .addVideo(17).size(256, 144)
-                .addAudio(18).channelsCount(2)
-            .build();
-        /* eslint-enable indent */
+        const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addPeriod(0, (period) => {
+            period.addVariant(0, (variant) => {
+              variant.primary = true;
+              variant.language = 'en';
+              variant.addVideo(1, (stream) => {
+                stream.size(320, 240);
+              });
+              variant.addAudio(3, (stream) => {
+                stream.channelsCount = 2;
+              });
+            });
+            period.addVariant(4, (variant) => {
+              variant.language = 'en';
+              variant.addVideo(5, (stream) => {
+                stream.size(640, 480);
+              });
+              variant.addAudio(6, (stream) => {
+                stream.channelsCount = 2;
+              });
+            });
+            period.addVariant(7, (variant) => {  // Duplicate with 4
+              variant.language = 'en';
+              variant.addVideo(8, (stream) => {
+                stream.size(640, 480);
+              });
+              variant.addAudio(9, (stream) => {
+                stream.channelsCount = 2;
+              });
+            });
+            period.addVariant(10, (variant) => {
+              variant.language = 'en';
+              variant.addVideo(11, (stream) => {
+                stream.size(1280, 720);
+              });
+              variant.addAudio(12, (stream) => {
+                stream.channelsCount = 1;
+              });
+            });
+            period.addVariant(13, (variant) => {
+              variant.language = 'es';
+              variant.addVideo(14, (stream) => {
+                stream.size(960, 540);
+              });
+              variant.addAudio(15, (stream) => {
+                stream.channelsCount = 2;
+              });
+            });
+            period.addVariant(16, (variant) => {
+              variant.language = 'fr';
+              variant.addVideo(17, (stream) => {
+                stream.size(256, 144);
+              });
+              variant.addAudio(18, (stream) => {
+                stream.channelsCount = 2;
+              });
+            });
+          });
+        });
         const getResolutions = () => {
           const resolutionButtons = videoContainer.querySelectorAll(
               'button.explicit-resolution > span');

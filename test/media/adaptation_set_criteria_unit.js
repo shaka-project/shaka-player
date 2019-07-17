@@ -22,17 +22,19 @@ describe('AdaptationSetCriteria', () => {
     }
 
     it('chooses variants in user\'s preferred language', () => {
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(1)
-              .language('es')
-            .addVariant(2)
-              .language('en')
-            .addVariant(3)
-              .language('en')
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.language = 'es';
+          });
+          period.addVariant(2, (variant) => {
+            variant.language = 'en';
+          });
+          period.addVariant(3, (variant) => {
+            variant.language = 'en';
+          });
+        });
+      });
 
       const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0);
       const set = builder.create(variants(manifest));
@@ -44,17 +46,18 @@ describe('AdaptationSetCriteria', () => {
     });
 
     it('prefers primary variants', () => {
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-           .addVariant(1)
-              .primary()
-           .addVariant(2)
-           .addVariant(3)
-           .addVariant(4)
-              .primary()
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.primary = true;
+          });
+          period.addVariant(2);
+          period.addVariant(3);
+          period.addVariant(4, (variant) => {
+            variant.primary = true;
+          });
+        });
+      });
 
       const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0);
       const set = builder.create(variants(manifest));
@@ -66,20 +69,28 @@ describe('AdaptationSetCriteria', () => {
     });
 
     it('chooses variants in preferred language and role', () => {
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(1)
-              .language('en')
-              .addAudio(10).roles(['main', 'commentary'])
-            .addVariant(2)
-              .language('en')
-              .addAudio(20).roles(['secondary'])
-            .addVariant(3)
-              .language('es')
-              .addAudio(30).roles(['main'])
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(10, (stream) => {
+              stream.roles = ['main', 'commentary'];
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(20, (stream) => {
+              stream.roles = ['secondary'];
+            });
+          });
+          period.addVariant(3, (variant) => {
+            variant.language = 'es';
+            variant.addAudio(30, (stream) => {
+              stream.roles = ['main'];
+            });
+          });
+        });
+      });
 
       const builder = new shaka.media.PreferenceBasedCriteria('en', 'main', 0);
       const set = builder.create(variants(manifest));
@@ -91,29 +102,46 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses only one role, even if none is preferred', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(1)
-              .language('en')
-              .addAudio(10).roles(['commentary'])
-            .addVariant(2)
-              .language('en')
-              .addAudio(20).roles(['commentary'])
-            .addVariant(3)
-              .language('en')
-              .addAudio(30).roles(['secondary'])
-            .addVariant(4)
-              .language('en')
-              .addAudio(40).roles(['secondary'])
-            .addVariant(5)
-              .language('en')
-              .addAudio(50).roles(['main'])
-            .addVariant(6)
-              .language('en')
-              .addAudio(60).roles(['main'])
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(10, (stream) => {
+              stream.roles = ['commentary'];
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(20, (stream) => {
+              stream.roles = ['commentary'];
+            });
+          });
+          period.addVariant(3, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(30, (stream) => {
+              stream.roles = ['secondary'];
+            });
+          });
+          period.addVariant(4, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(40, (stream) => {
+              stream.roles = ['secondary'];
+            });
+          });
+          period.addVariant(5, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(50, (stream) => {
+              stream.roles = ['main'];
+            });
+          });
+          period.addVariant(6, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(60, (stream) => {
+              stream.roles = ['main'];
+            });
+          });
+        });
+      });
 
       const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0);
       const set = builder.create(variants(manifest));
@@ -128,29 +156,52 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses only one role, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/949
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(1)
-              .language('en').primary()
-              .addAudio(10).roles(['commentary'])
-            .addVariant(2)
-              .language('en').primary()
-              .addAudio(20).roles(['commentary'])
-            .addVariant(3)
-              .language('en').primary()
-              .addAudio(30).roles(['secondary'])
-            .addVariant(4)
-              .language('en').primary()
-              .addAudio(40).roles(['secondary'])
-            .addVariant(5)
-              .language('en').primary()
-              .addAudio(50).roles(['main'])
-            .addVariant(6)
-              .language('en').primary()
-              .addAudio(60).roles(['main'])
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.language = 'en';
+            variant.primary = true;
+            variant.addAudio(10, (stream) => {
+              stream.roles = ['commentary'];
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.language = 'en';
+            variant.primary = true;
+            variant.addAudio(20, (stream) => {
+              stream.roles = ['commentary'];
+            });
+          });
+          period.addVariant(3, (variant) => {
+            variant.language = 'en';
+            variant.primary = true;
+            variant.addAudio(30, (stream) => {
+              stream.roles = ['secondary'];
+            });
+          });
+          period.addVariant(4, (variant) => {
+            variant.language = 'en';
+            variant.primary = true;
+            variant.addAudio(40, (stream) => {
+              stream.roles = ['secondary'];
+            });
+          });
+          period.addVariant(5, (variant) => {
+            variant.language = 'en';
+            variant.primary = true;
+            variant.addAudio(50, (stream) => {
+              stream.roles = ['main'];
+            });
+          });
+          period.addVariant(6, (variant) => {
+            variant.language = 'en';
+            variant.primary = true;
+            variant.addAudio(60, (stream) => {
+              stream.roles = ['main'];
+            });
+          });
+        });
+      });
 
       const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0);
       const set = builder.create(variants(manifest));
@@ -165,23 +216,30 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses only one language, even if all are primary', () => {
       // Regression test for https://github.com/google/shaka-player/issues/918
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(1)
-              .language('en').primary()
-              .addAudio(10)
-            .addVariant(2)
-              .language('en').primary()
-              .addAudio(20)
-            .addVariant(3)
-              .language('es').primary()
-              .addAudio(30)
-            .addVariant(4)
-              .language('es').primary()
-              .addAudio(40)
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.language = 'en';
+            variant.primary = true;
+            variant.addAudio(10);
+          });
+          period.addVariant(2, (variant) => {
+            variant.language = 'en';
+            variant.primary = true;
+            variant.addAudio(20);
+          });
+          period.addVariant(3, (variant) => {
+            variant.language = 'es';
+            variant.primary = true;
+            variant.addAudio(30);
+          });
+          period.addVariant(4, (variant) => {
+            variant.language = 'es';
+            variant.primary = true;
+            variant.addAudio(40);
+          });
+        });
+      });
 
       const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0);
       const set = builder.create(variants(manifest));
@@ -196,29 +254,50 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses a role from among primary variants without language match',
         () => {
-          /* eslint-disable indent */
-          const manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(1)
-                  .language('en').primary()
-                  .addAudio(10).roles(['commentary'])
-                .addVariant(2)
-                  .language('en').primary()
-                  .addAudio(20).roles(['commentary'])
-                .addVariant(3)
-                  .language('en')
-                  .addAudio(30).roles(['secondary'])
-                .addVariant(4)
-                  .language('en')
-                  .addAudio(40).roles(['secondary'])
-                .addVariant(5)
-                  .language('en').primary()
-                  .addAudio(50).roles(['main'])
-                .addVariant(6)
-                  .language('en').primary()
-                  .addAudio(60).roles(['main'])
-              .build();
-          /* eslint-enable indent */
+          const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addPeriod(0, (period) => {
+              period.addVariant(1, (variant) => {
+                variant.language = 'en';
+                variant.primary = true;
+                variant.addAudio(10, (stream) => {
+                  stream.roles = ['commentary'];
+                });
+              });
+              period.addVariant(2, (variant) => {
+                variant.language = 'en';
+                variant.primary = true;
+                variant.addAudio(20, (stream) => {
+                  stream.roles = ['commentary'];
+                });
+              });
+              period.addVariant(3, (variant) => {
+                variant.language = 'en';
+                variant.addAudio(30, (stream) => {
+                  stream.roles = ['secondary'];
+                });
+              });
+              period.addVariant(4, (variant) => {
+                variant.language = 'en';
+                variant.addAudio(40, (stream) => {
+                  stream.roles = ['secondary'];
+                });
+              });
+              period.addVariant(5, (variant) => {
+                variant.language = 'en';
+                variant.primary = true;
+                variant.addAudio(50, (stream) => {
+                  stream.roles = ['main'];
+                });
+              });
+              period.addVariant(6, (variant) => {
+                variant.language = 'en';
+                variant.primary = true;
+                variant.addAudio(60, (stream) => {
+                  stream.roles = ['main'];
+                });
+              });
+            });
+          });
 
           const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0);
           const set = builder.create(variants(manifest));
@@ -234,29 +313,50 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses a role from best language match, in spite of primary',
         () => {
-          /* eslint-disable indent */
-          const manifest = new shaka.test.ManifestGenerator()
-              .addPeriod(0)
-                .addVariant(1)
-                  .language('en').primary()
-                  .addAudio(10).roles(['commentary'])
-                .addVariant(2)
-                  .language('en').primary()
-                  .addAudio(20).roles(['commentary'])
-                .addVariant(3)
-                  .language('zh')
-                  .addAudio(30).roles(['secondary'])
-                .addVariant(4)
-                  .language('zh')
-                  .addAudio(40).roles(['secondary'])
-                .addVariant(5)
-                  .language('en').primary()
-                  .addAudio(50).roles(['main'])
-                .addVariant(6)
-                  .language('en').primary()
-                  .addAudio(60).roles(['main'])
-              .build();
-          /* eslint-enable indent */
+          const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addPeriod(0, (period) => {
+              period.addVariant(1, (variant) => {
+                variant.language = 'en';
+                variant.primary = true;
+                variant.addAudio(10, (stream) => {
+                  stream.roles = ['commentary'];
+                });
+              });
+              period.addVariant(2, (variant) => {
+                variant.language = 'en';
+                variant.primary = true;
+                variant.addAudio(20, (stream) => {
+                  stream.roles = ['commentary'];
+                });
+              });
+              period.addVariant(3, (variant) => {
+                variant.language = 'zh';
+                variant.addAudio(30, (stream) => {
+                  stream.roles = ['secondary'];
+                });
+              });
+              period.addVariant(4, (variant) => {
+                variant.language = 'zh';
+                variant.addAudio(40, (stream) => {
+                  stream.roles = ['secondary'];
+                });
+              });
+              period.addVariant(5, (variant) => {
+                variant.language = 'en';
+                variant.primary = true;
+                variant.addAudio(50, (stream) => {
+                  stream.roles = ['main'];
+                });
+              });
+              period.addVariant(6, (variant) => {
+                variant.language = 'en';
+                variant.primary = true;
+                variant.addAudio(60, (stream) => {
+                  stream.roles = ['main'];
+                });
+              });
+            });
+          });
 
           const builder = new shaka.media.PreferenceBasedCriteria('zh', '', 0);
           const set = builder.create(variants(manifest));
@@ -268,17 +368,25 @@ describe('AdaptationSetCriteria', () => {
         });
 
     it('chooses variants with preferred audio channels count', () => {
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(1)
-              .addAudio(10).channelsCount(2)
-            .addVariant(2)
-              .addAudio(20).channelsCount(6)
-            .addVariant(3)
-              .addAudio(30).channelsCount(2)
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.addAudio(10, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.addAudio(20, (stream) => {
+              stream.channelsCount = 6;
+            });
+          });
+          period.addVariant(3, (variant) => {
+            variant.addAudio(30, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+        });
+      });
 
       const builder = new shaka.media.PreferenceBasedCriteria('', '', 2);
       const set = builder.create(variants(manifest));
@@ -291,17 +399,25 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses variants with largest audio channel count less than config' +
         ' when no exact audio channel count match is possible', () => {
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(1)
-              .addAudio(10).channelsCount(2)
-            .addVariant(2)
-              .addAudio(20).channelsCount(8)
-            .addVariant(3)
-              .addAudio(30).channelsCount(2)
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.addAudio(10, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.addAudio(20, (stream) => {
+              stream.channelsCount = 8;
+            });
+          });
+          period.addVariant(3, (variant) => {
+            variant.addAudio(30, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+        });
+      });
 
       const builder = new shaka.media.PreferenceBasedCriteria('', '', 6);
       const set = builder.create(variants(manifest));
@@ -314,17 +430,25 @@ describe('AdaptationSetCriteria', () => {
 
     it('chooses variants with fewest audio channels when none fit in the ' +
         'config', () => {
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .addPeriod(0)
-            .addVariant(1)
-              .addAudio(10).channelsCount(6)
-            .addVariant(2)
-              .addAudio(20).channelsCount(8)
-            .addVariant(3)
-              .addAudio(30).channelsCount(6)
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.addAudio(10, (stream) => {
+              stream.channelsCount = 6;
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.addAudio(20, (stream) => {
+              stream.channelsCount = 8;
+            });
+          });
+          period.addVariant(3, (variant) => {
+            variant.addAudio(30, (stream) => {
+              stream.channelsCount = 6;
+            });
+          });
+        });
+      });
 
       const builder = new shaka.media.PreferenceBasedCriteria('', '', 2);
       const set = builder.create(variants(manifest));

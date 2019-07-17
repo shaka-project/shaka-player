@@ -115,16 +115,20 @@ describe('DrmEngine', () => {
         'https://drm-playready-licensing.axtest.net/AcquireLicense';
     drmEngine.configure(config);
 
-    /* eslint-disable indent */
-    manifest = new shaka.test.ManifestGenerator()
-        .addPeriod(0)
-          .addVariant(0)
-            .addDrmInfo('com.widevine.alpha')
-            .addDrmInfo('com.microsoft.playready')
-            .addVideo(1).mime('video/mp4', 'avc1.640015').encrypted(true)
-            .addAudio(2).mime('audio/mp4', 'mp4a.40.2').encrypted(true)
-        .build();
-    /* eslint-enable indent */
+    manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.addPeriod(0, (period) => {
+        period.addVariant(0, (variant) => {
+          variant.addDrmInfo('com.widevine.alpha');
+          variant.addDrmInfo('com.microsoft.playready');
+          variant.addVideo(1, (stream) => {
+            stream.encrypted = true;
+          });
+          variant.addAudio(2, (stream) => {
+            stream.encrypted = true;
+          });
+        });
+      });
+    });
 
     const videoStream = manifest.periods[0].variants[0].video;
     const audioStream = manifest.periods[0].variants[0].audio;

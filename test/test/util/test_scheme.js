@@ -146,35 +146,38 @@ shaka.test.TestScheme = class {
     /**
      * Not for simulating non-segmented text streams.
      *
-     * @param {shaka.test.ManifestGenerator} manifestGenerator
+     * @param {!shaka.test.ManifestGenerator.Stream} stream
+     * @param {!shaka.test.ManifestGenerator.Variant} variant
      * @param {Object} data
      * @param {shaka.util.ManifestParserUtils.ContentType} contentType
      * @param {string} name
      */
-    function addStreamInfo(manifestGenerator, data, contentType, name) {
-      manifestGenerator
-          .mime(data[contentType].mimeType, data[contentType].codecs)
-          .initSegmentReference(
-              ['test:' + name + '/' + contentType + '/init'], 0, null)
-          .useSegmentTemplate('test:' + name + '/' + contentType + '/%d',
-              data[contentType].segmentDuration)
-          .closedCaptions(data[contentType].closedCaptions);
+    function addStreamInfo(stream, variant, data, contentType, name) {
+      stream.mime = data[contentType].mimeType;
+      stream.codecs = data[contentType].codecs;
+      stream.setInitSegmentReference(
+          ['test:' + name + '/' + contentType + '/init'], 0, null);
+      stream.useSegmentTemplate(
+          'test:' + name + '/' + contentType + '/%d',
+          data[contentType].segmentDuration);
+      stream.closedCaptions = data[contentType].closedCaptions;
 
       if (data[contentType].language) {
-        manifestGenerator.language(data[contentType].language);
+        stream.language = data[contentType].language;
       }
 
       if (data[contentType].delaySetup) {
-        manifestGenerator.delayCreateSegmentIndex();
+        stream.createSegmentIndex = () => windowShaka.test.Util.delay(1);
       }
 
       if (data.licenseServers) {
         for (const keySystem in data.licenseServers) {
-          manifestGenerator.addDrmInfo(keySystem)
-              .licenseServerUri(data.licenseServers[keySystem]);
-          if (data[contentType].initData) {
-            manifestGenerator.addCencInitData(data[contentType].initData);
-          }
+          variant.addDrmInfo(keySystem, (drmInfo) => {
+            drmInfo.licenseServerUri = data.licenseServers[keySystem];
+            if (data[contentType].initData) {
+              drmInfo.addCencInitData(data[contentType].initData);
+            }
+          });
         }
       }
     }
@@ -209,31 +212,39 @@ shaka.test.TestScheme = class {
         }
       }
 
-      const gen = new windowShaka.test.ManifestGenerator(shaka)
-          .setPresentationDuration(data.duration)
-          .addPeriod(/* startTime= */ data.periodStart || 0)
-          .addVariant(0);
+      const manifest =
+          windowShaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.presentationTimeline.setDuration(data.duration);
+            manifest.addPeriod(/* startTime= */ 0, (period) => {
+              period.addVariant(0, (variant) => {
+                if (data[ContentType.VIDEO]) {
+                  variant.addVideo(1, (stream) => {
+                    addStreamInfo(
+                        stream, variant, data, ContentType.VIDEO, name);
+                  });
+                }
+                if (data[ContentType.AUDIO]) {
+                  variant.addAudio(2, (stream) => {
+                    addStreamInfo(
+                        stream, variant, data, ContentType.AUDIO, name);
+                  });
+                }
+              });
 
-      if (data[ContentType.VIDEO]) {
-        gen.addVideo(1);
-        addStreamInfo(gen, data, ContentType.VIDEO, name);
-      }
-      if (data[ContentType.AUDIO]) {
-        gen.addAudio(2);
-        addStreamInfo(gen, data, ContentType.AUDIO, name);
-      }
+              if (data.text) {
+                period.addTextStream(3, (stream) => {
+                  stream.mime = data.text.mimeType;
+                  stream.codecs = data.text.codecs;
+                  stream.textStream(getAbsoluteUri(data));
 
-      if (data.text) {
-        gen.addTextStream(3)
-            .mime(data.text.mimeType, data.text.codecs)
-            .textStream(getAbsoluteUri(data));
-
-        if (data.text.language) {
-          gen.language(data.text.language);
-        }
-      }
-
-      MANIFESTS[name + suffix] = gen.build();
+                  if (data.text.language) {
+                    stream.language = data.text.language;
+                  }
+                });
+              }
+            });
+          }, shaka);
+      MANIFESTS[name + suffix] = manifest;
     }
     // Custom generators:
 
@@ -242,66 +253,103 @@ shaka.test.TestScheme = class {
 
     // Multi-period
     const numPeriods = 10;
-    let gen = new windowShaka.test.ManifestGenerator(shaka)
-        .setPresentationDuration(periodDuration * numPeriods);
+    let manifest = windowShaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.presentationTimeline.setDuration(periodDuration * numPeriods);
 
-    let idCount = 1;
-    for (const i of windowShaka.util.Iterables.range(numPeriods)) {
-      gen.addPeriod(/* startTime= */ periodDuration * i);
+      let idCount = 1;
+      for (const i of windowShaka.util.Iterables.range(numPeriods)) {
+        manifest.addPeriod(
+            /* startTime= */ periodDuration * i,
+            (period) => {
+              period.addVariant(idCount++, (variant) => {
+                variant.language = 'en';
+                variant.addVideo(idCount++, (stream) => {
+                  addStreamInfo(
+                      stream, variant, data, ContentType.VIDEO, 'sintel');
+                });
+                variant.addAudio(idCount++, (stream) => {
+                  addStreamInfo(
+                      stream, variant, data, ContentType.AUDIO, 'sintel');
+                });
+              });
 
-      gen.addVariant(idCount++).language('en');
-      gen.addVideo(idCount++);
-      addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
-      gen.addAudio(idCount++);
-      addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
+              period.addVariant(idCount++, (variant) => {
+                variant.language = 'es';
+                variant.addVideo(idCount++, (stream) => {
+                  addStreamInfo(
+                      stream, variant, data, ContentType.VIDEO, 'sintel');
+                });
+                variant.addAudio(idCount++, (stream) => {
+                  addStreamInfo(
+                      stream, variant, data, ContentType.AUDIO, 'sintel');
+                });
+              });
+            });
+      }
+    }, shaka);
+    MANIFESTS['sintel_short_periods' + suffix] = manifest;
 
-      gen.addVariant(idCount++).language('es');
-      gen.addVideo(idCount++);
-      addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
-      gen.addAudio(idCount++);
-      addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
-    }
-
-    MANIFESTS['sintel_short_periods' + suffix] = gen.build();
 
     // Multi-stream. Different languages and resolutions.
-    idCount = 1;
-    gen = new windowShaka.test.ManifestGenerator(shaka)
-        .setPresentationDuration(periodDuration);
-    gen.addPeriod(/* startTime= */ 0);
+    let idCount = 1;
+    manifest = windowShaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.presentationTimeline.setDuration(periodDuration);
+      manifest.addPeriod(/* startTime= */ 0, (period) => {
+        // Variant in English, res 426x182
+        period.addVariant(idCount++, (variant) => {
+          variant.language = 'en';
+          variant.addVideo(idCount++, (stream) => {
+            stream.size(426, 182);
+            addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
+          });
+          variant.addAudio(idCount++, (stream) => {
+            stream.language = 'en';
+            addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
+          });
+        });
 
-    // Variant in English, res 426x182
-    gen.addVariant(idCount++).language('en');
-    gen.addVideo(idCount++).size(426, 182);
-    addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
-    gen.addAudio(idCount++).language('en');
-    addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
+        // Same language, different resolution
+        period.addVariant(idCount++, (variant) => {
+          variant.language = 'en';
+          variant.addVideo(idCount++, (stream) => {
+            stream.size(640, 272);
+            addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
+          });
+          variant.addAudio(idCount++, (stream) => {
+            stream.language = 'en';
+            addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
+          });
+        });
 
-    // Same language, different resolution
-    gen.addVariant(idCount++).language('en');
-    gen.addVideo(idCount++).size(640, 272);
-    addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
-    gen.addAudio(idCount++).language('en');
-    addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
+        // Same resolution, different language
+        period.addVariant(idCount++, (variant) => {
+          variant.language = 'es';
+          variant.addVideo(idCount++, (stream) => {
+            stream.size(640, 272);
+            addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
+          });
+          variant.addAudio(idCount++, (stream) => {
+            stream.language = 'es';
+            addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
+          });
+        });
 
-    // Same resolution, different language
-    gen.addVariant(idCount++).language('es');
-    gen.addVideo(idCount++).size(640, 272);
-    addStreamInfo(gen, data, ContentType.VIDEO, 'sintel');
-    gen.addAudio(idCount++).language('es');
-    addStreamInfo(gen, data, ContentType.AUDIO, 'sintel');
+        period.addTextStream(idCount++, (stream) => {
+          stream.language = 'zh';
+          stream.mime = data.text.mimeType;
+          stream.codecs = data.text.codecs;
+          stream.textStream(getAbsoluteUri(data));
+        });
 
-    gen.addTextStream(idCount++)
-        .mime(data.text.mimeType, data.text.codecs)
-        .textStream(getAbsoluteUri(data))
-        .language('zh');
-
-    gen.addTextStream(idCount++)
-        .mime(data.text.mimeType, data.text.codecs)
-        .textStream(getAbsoluteUri(data))
-        .language('fr');
-
-    MANIFESTS['sintel_multi_lingual_multi_res' + suffix] = gen.build();
+        period.addTextStream(idCount++, (stream) => {
+          stream.language = 'fr';
+          stream.mime = data.text.mimeType;
+          stream.codecs = data.text.codecs;
+          stream.textStream(getAbsoluteUri(data));
+        });
+      });
+    }, shaka);
+    MANIFESTS['sintel_multi_lingual_multi_res' + suffix] = manifest;
 
     return Promise.all(promises);
   }

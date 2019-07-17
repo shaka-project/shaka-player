@@ -622,15 +622,23 @@ describe('Storage', () => {
      * @return {shaka.extern.Manifest}
      */
     function makeWithStreamBandwidth() {
-      /* eslint-disable indent */
-      const manifest = new shaka.test.ManifestGenerator()
-          .setPresentationDuration(20)
-          .addPeriod(0)
-              .addVariant(0).language(englishUS).bandwidth(kbps(13))
-                  .addVideo(1).size(100, 200).bandwidth(kbps(10))
-                  .addAudio(2).language(englishUS).bandwidth(kbps(3))
-          .build();
-      /* eslint-enable indent */
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline.setDuration(20);
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.language = englishUS;
+            variant.bandwidth = kbps(13);
+            variant.addVideo(1, (stream) => {
+              stream.bandwidth = kbps(10);
+              stream.size(100, 200);
+            });
+            variant.addAudio(2, (stream) => {
+              stream.language = englishUS;
+              stream.bandwidth = kbps(3);
+            });
+          });
+        });
+      });
 
       const audio = manifest.periods[0].variants[0].audio;
       goog.asserts.assert(audio, 'Created manifest with audio, where is it?');
@@ -1230,18 +1238,35 @@ describe('Storage', () => {
    * @return {shaka.extern.Manifest}
    */
   function makeManifestWithPerStreamBandwidth() {
-    /* eslint-disable indent */
-    const manifest = new shaka.test.ManifestGenerator()
-        .setPresentationDuration(20)
-        .addPeriod(0)
-            .addVariant(0).language(englishUS).bandwidth(kbps(13))
-                .addVideo(1).size(100, 200).bandwidth(kbps(10))
-                .addAudio(2).language(englishUS).bandwidth(kbps(3))
-            .addVariant(3).language(frenchCanadian).bandwidth(kbps(13))
-                .addVideo(4).size(100, 200).bandwidth(kbps(10))
-                .addAudio(5).language(frenchCanadian).bandwidth(kbps(3))
-        .build();
-    /* eslint-enable indent */
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.presentationTimeline.setDuration(20);
+      manifest.addPeriod(0, (period) => {
+        period.addVariant(0, (variant) => {
+          variant.language = englishUS;
+          variant.bandwidth = kbps(13);
+          variant.addVideo(1, (stream) => {
+            stream.bandwidth = kbps(10);
+            stream.size(100, 200);
+          });
+          variant.addAudio(2, (stream) => {
+            stream.language = englishUS;
+            stream.bandwidth = kbps(3);
+          });
+        });
+        period.addVariant(3, (variant) => {
+          variant.language = frenchCanadian;
+          variant.bandwidth = kbps(13);
+          variant.addVideo(4, (stream) => {
+            stream.bandwidth = kbps(10);
+            stream.size(100, 200);
+          });
+          variant.addAudio(5, (stream) => {
+            stream.language = frenchCanadian;
+            stream.bandwidth = kbps(3);
+          });
+        });
+      });
+    });
 
     for (const stream of getAllStreams(manifest)) {
       // Make a new copy each time as the segment index can modify
