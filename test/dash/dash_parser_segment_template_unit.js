@@ -371,6 +371,44 @@ describe('DashParser SegmentTemplate', () => {
       expect(variants[2].video.segmentIndex.get(1)).toEqual(
           ManifestParser.makeReference('2-10-300.mp4', 1, 10, 20, baseUri));
     });
+
+    it('create correct Uris when multiple representations', async () => {
+      const source = [
+        '<MPD>',
+        '  <Period duration="PT60S">',
+        '    <AdaptationSet mimeType="video/webm">',
+        '      <BaseURL>http://example.com</BaseURL>',
+        '      <SegmentTemplate timescale="1000"',
+        '         initialization="segment-$RepresentationID$.dash"',
+        '          media="segment-$RepresentationID$-$Time$.dash">',
+        '        <SegmentTimeline>',
+        '           <S t="0" d="6000" r="1176" />',
+        '         <S d="4520" />',
+        '       </SegmentTimeline>',
+        '      </SegmentTemplate>',
+        '      <Representation id="test1" bandwidth="100" />',
+        '      <Representation id="test2" bandwidth="200" />',
+        '      <Representation id="test3" bandwidth="300" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      const actual = await parser.start('dummy://foo', playerInterface);
+      expect(actual).toBeTruthy();
+
+      const variants = actual.periods[0].variants;
+      expect(variants.length).toBe(3);
+      await variants[0].video.createSegmentIndex();
+      await variants[1].video.createSegmentIndex();
+      await variants[2].video.createSegmentIndex();
+
+      expect(variants[0].video.segmentIndex.find(2)).toBe(1);
+      expect(variants[0].video.segmentIndex.get(1).getUris()).toEqual(['http://example.com/segment-test1-0.dash']);
+      expect(variants[1].video.segmentIndex.get(1).getUris()).toEqual(['http://example.com/segment-test2-0.dash']);
+      expect(variants[2].video.segmentIndex.get(1).getUris()).toEqual(['http://example.com/segment-test3-0.dash']);
+    });
   });
 
   describe('rejects streams with', () => {
