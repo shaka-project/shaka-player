@@ -1,3 +1,33 @@
+## 2.5.4 (2019-07-19)
+
+Bugfixes:
+  - Default to transparent SMPTE-TT subtitle background
+    - https://github.com/google/shaka-player/pull/2033
+  - Fix seek bar on iOS
+    - https://github.com/google/shaka-player/issues/1918
+    - https://github.com/google/shaka-player/pull/2036
+  - Allow whitespace in TTML subtitles
+    - https://github.com/google/shaka-player/issues/2028
+    - https://github.com/google/shaka-player/pull/2030
+  - Fix play button positioning on IE 11
+    - https://github.com/google/shaka-player/issues/2026
+  - Match UI style with Chrome's native controls
+  - Stop constant spurious time updates in UI
+  - Fix volume slider jumping around while casting
+    - https://github.com/google/shaka-player/issues/1913
+  - Fix missing seek bar in short VOD clips
+    - https://github.com/google/shaka-player/issues/2018
+  - Fix demo app in Firefox private mode
+    - https://github.com/google/shaka-player/issues/1926
+  - Ignore case in MIME type checks
+    - https://github.com/google/shaka-player/issues/1991
+  - Fix problems with casting
+    - https://github.com/google/shaka-player/issues/1948
+
+New Features:
+  - Add command-line arg to change the test timeout.
+
+
 ## 2.5.3 (2019-07-03)
 
 Bugfixes:
