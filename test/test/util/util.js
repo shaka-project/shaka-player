@@ -384,7 +384,8 @@ shaka.test.Util = class {
    * @return {!Promise}
    */
   static waitForEndOrTimeout(eventManager, target, timeout) {
-    const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(timeout);
+    const waiter = new shaka.test.Waiter(eventManager)
+        .failOnTimeout(false).timeoutAfter(timeout);
     return waiter.waitForEnd(target);
   }
 

@@ -91,7 +91,7 @@ describe('Player', () => {
 
       const wit = asset.focus ? fit : it;
       wit(testName, async () => {
-        if (asset.drm.length &&
+        if (!asset.isClear() &&
             !asset.drm.some((keySystem) => support.drm[keySystem])) {
           pending('None of the required key systems are supported.');
         }
@@ -104,7 +104,8 @@ describe('Player', () => {
           if (asset.features.includes(Feature.MP4)) {
             mimeTypes.push('video/mp4');
           }
-          if (!mimeTypes.some((type) => support.media[type])) {
+          if (mimeTypes.length &&
+              !mimeTypes.some((type) => support.media[type])) {
             pending('None of the required MIME types are supported.');
           }
         }
