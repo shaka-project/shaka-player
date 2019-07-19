@@ -457,7 +457,7 @@ shakaDemo.Main = class {
       return 'This asset cannot be downloaded.';
     }
 
-    if (!asset.drm.includes(shakaAssets.KeySystem.CLEAR)) {
+    if (!asset.isClear()) {
       const hasSupportedDRM = asset.drm.some((drm) => {
         return this.support_.drm[drm];
       });

@@ -136,7 +136,7 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   addKeySystem(keySystem) {
-    if (this.drm.length == 1 && this.drm[0] == shakaAssets.KeySystem.CLEAR) {
+    if (this.isClear()) {
       // Once an asset has an actual key system, it's no longer a CLEAR asset.
       this.drm = [];
     }
@@ -144,6 +144,11 @@ const ShakaDemoAssetInfo = class {
     // Sort the drm list, so that key systems are in a predictable order.
     this.drm.sort(ShakaDemoAssetInfo.caseLessAlphaComparator_);
     return this;
+  }
+
+  /** @return {boolean} */
+  isClear() {
+    return this.drm.length == 1 && this.drm[0] == shakaAssets.KeySystem.CLEAR;
   }
 
   /**
