@@ -169,7 +169,9 @@ class Build(object):
     core_files = core_build.include
     if self.exclude & core_files:
       logging.error('Cannot exclude files from core')
+      return False
     self.include |= core_files
+    return True
 
   def has_ui(self):
     """Returns True if the UI library is in the build."""
@@ -264,7 +266,8 @@ class Build(object):
       True on success; False on failure.
     """
     self.add_closure()
-    self.add_core()
+    if not self.add_core():
+      return False
     if self.has_ui():
       self.generate_localizations(locales, force)
 
