@@ -3,6 +3,8 @@
 +../../third_party/language-mapping-list/language-mapping-list.js
 +../../ui/audio_language_selection.js
 +../../ui/externs/ui.js
++../../ui/play_button.js
++../../ui/big_play_button.js
 +../../ui/cast_button.js
 +../../ui/controls.js
 +../../ui/constants.js
@@ -15,7 +17,7 @@
 +../../ui/mute_button.js
 +../../ui/overflow_menu.js
 +../../ui/pip_button.js
-+../../ui/play_pause_button.js
++../../ui/small_play_button.js
 +../../ui/presentation_time.js
 +../../ui/range_element.js
 +../../ui/resolution_selection.js

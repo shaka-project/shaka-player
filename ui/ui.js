@@ -193,6 +193,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
       'cast',
     ],
     addSeekBar: true,
+    addBigPlayButton: true,
     castReceiverAppId: '',
   };
 };

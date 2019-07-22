@@ -16,10 +16,9 @@
  */
 
 
-goog.provide('shaka.ui.PlayPauseButton');
+goog.provide('shaka.ui.PlayButton');
 
 goog.require('shaka.ui.Element');
-goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
@@ -27,10 +26,9 @@ goog.require('shaka.util.Dom');
 
 /**
  * @extends {shaka.ui.Element}
- * @final
  * @export
  */
-shaka.ui.PlayPauseButton = class extends shaka.ui.Element {
+shaka.ui.PlayButton = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
@@ -38,37 +36,30 @@ shaka.ui.PlayPauseButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {!HTMLElement} */
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
-    this.button_.classList.add('shaka-play-pause-button');
-    this.button_.classList.add('material-icons');
-    this.parent.appendChild(this.button_);
-
-    this.updateIcon_();
-    this.updateAriaLabel_();
+    /** @protected {!HTMLElement} */
+    this.button = shaka.util.Dom.createHTMLElement('button');
+    this.parent.appendChild(this.button);
 
     const LOCALE_UPDATED = shaka.ui.Localization.LOCALE_UPDATED;
     this.eventManager.listen(this.localization, LOCALE_UPDATED, () => {
-      this.updateAriaLabel_();
+      this.updateAriaLabel();
     });
 
     const LOCALE_CHANGED = shaka.ui.Localization.LOCALE_CHANGED;
     this.eventManager.listen(this.localization, LOCALE_CHANGED, () => {
-      this.updateAriaLabel_();
+      this.updateAriaLabel();
     });
 
     this.eventManager.listen(this.video, 'play', () => {
-      this.updateAriaLabel_();
-      this.updateIcon_();
+      this.updateAriaLabel();
     });
 
     this.eventManager.listen(this.video, 'pause', () => {
-      this.updateAriaLabel_();
-      this.updateIcon_();
+      this.updateAriaLabel();
     });
 
-    this.eventManager.listen(this.button_, 'click', () => {
-      if (this.isPaused_()) {
+    this.eventManager.listen(this.button, 'click', () => {
+      if (this.isPaused()) {
         this.video.play();
       } else {
         this.video.pause();
@@ -78,41 +69,20 @@ shaka.ui.PlayPauseButton = class extends shaka.ui.Element {
 
   /**
    * @return {boolean}
-   * @private
+   * @protected
    */
-  isPaused_() {
+  isPaused() {
     // The video element is in a paused state while seeking, but we don't count
     // that.
     return this.video.paused && !this.controls.isSeeking();
   }
 
-  /** @private */
-  updateAriaLabel_() {
+  /** @protected */
+  updateAriaLabel() {
     const LocIds = shaka.ui.Locales.Ids;
-    const label = this.isPaused_() ? LocIds.PLAY : LocIds.PAUSE;
+    const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
 
-    this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(label));
   }
-
-  /** @private */
-  updateIcon_() {
-    const Icons = shaka.ui.Enums.MaterialDesignIcons;
-    this.button_.textContent = this.isPaused_() ? Icons.PLAY : Icons.PAUSE;
-  }
 };
-
-
-/**
- * @implements {shaka.extern.IUIElement.Factory}
- * @final
- */
-shaka.ui.PlayPauseButton.Factory = class {
-  /** @override */
-  create(rootElement, controls) {
-    return new shaka.ui.PlayPauseButton(rootElement, controls);
-  }
-};
-
-shaka.ui.Controls.registerElement(
-    'play_pause', new shaka.ui.PlayPauseButton.Factory());

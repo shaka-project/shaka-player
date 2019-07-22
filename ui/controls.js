@@ -149,8 +149,6 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   // Configure and create the layout of the controls
   this.configure(this.config_);
 
-  this.updateLocalizedStrings_();
-
   this.addEventListeners_();
 
   /**
@@ -358,8 +356,18 @@ shaka.ui.Controls.prototype.configure = function(config) {
 
   this.castProxy_.changeReceiverId(config.castReceiverAppId);
 
+  // Deconstruct the old layout if applicable
+  if (this.seekBar_) {
+    this.seekBar_.destroy();
+    this.seekBar_ = null;
+  }
+
+  if (this.playButton_) {
+    this.playButton_.destroy();
+    this.playButton_ = null;
+  }
+
   if (this.controlsContainer_) {
-    // Deconstruct the old layout if applicable
     shaka.util.Dom.removeAllChildren(this.controlsContainer_);
     this.videoContainer_.removeChild(this.spinnerContainer_);
   } else {
@@ -368,6 +376,9 @@ shaka.ui.Controls.prototype.configure = function(config) {
 
   // Create the new layout
   this.createDOM_();
+
+  // Init the play state
+  this.onPlayStateChange_();
 
   this.addEventListeners_();
 };
@@ -606,30 +617,13 @@ shaka.ui.Controls.prototype.hideSettingsMenus = function() {
 /**
  * @private
  */
-shaka.ui.Controls.prototype.updateLocalizedStrings_ = function() {
-  const LocIds = shaka.ui.Locales.Ids;
-
-  // Localize state-dependant labels
-  const makePlayNotPause = this.video_.paused && !this.isSeeking_;
-  const playButtonAriaLabelId = makePlayNotPause ? LocIds.PLAY : LocIds.PAUSE;
-  this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-      this.localization_.resolve(playButtonAriaLabelId));
-};
-
-
-/**
- * @private
- */
 shaka.ui.Controls.prototype.createDOM_ = function() {
-  if (this.seekBar_) {
-    this.seekBar_.destroy();
-    this.seekBar_ = null;
-  }
-
   this.videoContainer_.classList.add('shaka-video-container');
   this.video_.classList.add('shaka-video');
 
-  this.addPlayButton_();
+  if (this.config_.addBigPlayButton) {
+    this.addPlayButton_();
+  }
 
   this.addBufferingSpinner_();
 
@@ -672,16 +666,13 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addPlayButton_ = function() {
-  /** @private {!HTMLElement} */
-  this.playButtonContainer_ = shaka.util.Dom.createHTMLElement('div');
-  this.playButtonContainer_.classList.add('shaka-play-button-container');
-  this.controlsContainer_.appendChild(this.playButtonContainer_);
+  const playButtonContainer = shaka.util.Dom.createHTMLElement('div');
+  playButtonContainer.classList.add('shaka-play-button-container');
+  this.controlsContainer_.appendChild(playButtonContainer);
 
-  /** @private {!HTMLElement} */
-  this.playButton_ = shaka.util.Dom.createHTMLElement('button');
-  this.playButton_.classList.add('shaka-play-button');
-  this.playButtonContainer_.appendChild(this.playButton_);
-  this.onPlayStateChange_();
+  /** @private {shaka.ui.BigPlayButton} */
+  this.playButton_ =
+      new shaka.ui.BigPlayButton(playButtonContainer, this);
 };
 
 
@@ -853,14 +844,6 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
 
   this.eventManager_.listen(this.videoContainer_,
       'keyup', this.onKeyUp_.bind(this));
-
-  this.eventManager_.listen(this.localization_,
-      shaka.ui.Localization.LOCALE_UPDATED,
-      (e) => this.updateLocalizedStrings_());
-
-  this.eventManager_.listen(this.localization_,
-      shaka.ui.Localization.LOCALE_CHANGED,
-      (e) => this.updateLocalizedStrings_());
 
   if (screen.orientation) {
     this.eventManager_.listen(screen.orientation, 'change', () => {
@@ -1044,17 +1027,6 @@ shaka.ui.Controls.prototype.onPlayStateChange_ = function() {
   // pause the video if that happens.
   if (this.video_.ended && !this.video_.paused) {
     this.video_.pause();
-  }
-
-  // Video is paused during seek, so don't show the play arrow while seeking:
-  if (this.enabled_ && this.video_.paused && !this.isSeeking_) {
-    this.playButton_.setAttribute('icon', 'play');
-    this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-      this.localization_.resolve(shaka.ui.Locales.Ids.PLAY));
-  } else {
-    this.playButton_.setAttribute('icon', 'pause');
-    this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-      this.localization_.resolve(shaka.ui.Locales.Ids.PAUSE));
   }
 };
 
