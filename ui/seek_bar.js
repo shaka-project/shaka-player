@@ -86,6 +86,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @override
    */
   onChangeStart() {
+    this.controls.setSeeking(true);
     this.video.pause();
   }
 
@@ -126,7 +127,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // They just let go of the seek bar, so cancel the timer and manually
     // call the event so that we can respond immediately.
     this.seekTimer_.tickNow();
-
+    this.controls.setSeeking(false);
     this.video.play();
   }
 

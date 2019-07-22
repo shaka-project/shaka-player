@@ -406,6 +406,15 @@ shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
 
 
 /**
+ * @param {boolean} seeking
+ * @export
+ */
+shaka.ui.Controls.prototype.setSeeking = function(seeking) {
+  this.isSeeking_ = seeking;
+};
+
+
+/**
  * Enable or disable native browser controls. Enabling disables shaka
  * controls.
  *
