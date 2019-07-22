@@ -491,6 +491,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return this.isSeeking_;
   }
 
+
+  /**
+   * @param {boolean} seeking
+   * @export
+   */
+  setSeeking(seeking) {
+    this.isSeeking_ = seeking;
+  }
+
   /**
    * @return {boolean}
    * @export
