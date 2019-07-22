@@ -543,6 +543,26 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.hideSettingsMenusTimer_.tickNow();
   }
 
+
+  /** @export */
+  async toggleFullScreen() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      // If we are in PiP mode, leave PiP mode first.
+      try {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        }
+      } catch (error) {
+        this.dispatchEvent(new shaka.util.FakeEvent('error', {
+          detail: error,
+        }));
+      }
+      await this.videoContainer_.requestFullscreen();
+    }
+  }
+
   /** @private */
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
@@ -689,6 +709,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // for focused elements.
     this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
 
+    this.eventManager_.listen(this.controlsContainer_, 'dblclick',
+        () => this.toggleFullScreen());
+
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
     });
@@ -764,7 +787,35 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.eventManager_.listen(this.localization_,
         shaka.ui.Localization.LOCALE_CHANGED,
         (e) => this.updateLocalizedStrings_());
+
+    if (screen.orientation) {
+      this.eventManager_.listen(screen.orientation, 'change', () => {
+        this.onScreenRotation_();
+      });
+    }
   }
+
+
+  /**
+   * When a mobile device is rotated to landscape layout, and the video is
+   * loaded, make the demo app go into fullscreen.
+   * Similarly, exit fullscreen when the device is rotated to portrait layout.
+   * @private
+   */
+  onScreenRotation_() {
+    if (!this.video_ ||
+        this.video_.readyState == 0 ||
+        this.castProxy_.isCasting()) { return; }
+
+    if (screen.orientation.type.includes('landscape') &&
+        !document.fullscreenElement) {
+      this.videoContainer_.requestFullscreen();
+    } else if (screen.orientation.type.includes('portrait') &&
+        document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  }
+
 
   /**
    * Hiding the cursor when the mouse stops moving seems to be the only
