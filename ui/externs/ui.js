@@ -34,6 +34,7 @@ shaka.extern = {};
  *   controlPanelElements: !Array.<string>,
  *   overflowMenuButtons: !Array.<string>,
  *   addSeekBar: boolean,
+ *   addBigPlayButton: boolean,
  *   castReceiverAppId: string
  * }}
  *
@@ -43,6 +44,9 @@ shaka.extern = {};
  *   The ordered list of the overflow menu buttons.
  * @property {boolean} addSeekBar
  *   Whether or not a seek bar should be part of the UI.
+ * @property {boolean} addBigPlayButton
+ *   Whether or not a big play button in the center of the video
+ *   should be part of the UI.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
  * @exportDoc
