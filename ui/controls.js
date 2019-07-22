@@ -443,6 +443,24 @@ shaka.ui.Controls.prototype.getLocalization = function() {
   return this.localization_;
 };
 
+/** @export */
+shaka.ui.Controls.prototype.toggleFullScreen = async function() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    // If we are in PiP mode, leave PiP mode first.
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      }
+    } catch (error) {
+      this.dispatchEvent(new shaka.util.FakeEvent('error', {
+        detail: error,
+      }));
+    }
+    await this.videoContainer_.requestFullscreen();
+  }
+};
 
 /**
  * @return {!HTMLElement}
@@ -727,6 +745,27 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
 
 
 /**
+ * When a mobile device is rotated to landscape layout, and the video is
+ * loaded, make the demo app go into fullscreen.
+ * Similarly, exit fullscreen when the device is rotated to portrait layout.
+ * @private
+ */
+shaka.ui.Controls.prototype.onScreenRotation_ = function() {
+  if (!this.video_ ||
+      this.video_.readyState == 0 ||
+      this.castProxy_.isCasting()) { return; }
+
+  if (screen.orientation.type.includes('landscape') &&
+      !document.fullscreenElement) {
+    this.videoContainer_.requestFullscreen();
+  } else if (screen.orientation.type.includes('portrait') &&
+      document.fullscreenElement) {
+    document.exitFullscreen();
+  }
+};
+
+
+/**
  * @private
  */
 shaka.ui.Controls.prototype.addEventListeners_ = function() {
@@ -741,6 +780,9 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // Listen for key down events to detect tab and enable outline
   // for focused elements.
   this.eventManager_.listen(window, 'keydown', this.onKeyDown_.bind(this));
+
+  this.eventManager_.listen(this.controlsContainer_, 'dblclick',
+      () => this.toggleFullScreen());
 
   this.eventManager_.listen(this.video_,
       'play', this.onPlayStateChange_.bind(this));
@@ -810,6 +852,12 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   this.eventManager_.listen(this.localization_,
       shaka.ui.Localization.LOCALE_CHANGED,
       (e) => this.updateLocalizedStrings_());
+
+  if (screen.orientation) {
+    this.eventManager_.listen(screen.orientation, 'change', () => {
+      this.onScreenRotation_();
+    });
+  }
 };
 
 

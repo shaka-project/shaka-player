@@ -51,9 +51,6 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
 
-    /** @private {!HTMLElement} */
-    this.videoContainer_ = this.controls.getVideoContainer();
-
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
         this.updateAriaLabel_();
@@ -65,14 +62,8 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
       });
 
     this.eventManager.listen(this.button_, 'click', () => {
-        this.toggleFullScreen_();
-      });
-
-    if (screen.orientation) {
-      this.eventManager.listen(screen.orientation, 'change', () => {
-        this.onScreenRotation_();
-      });
-    }
+      this.controls.toggleFullScreen();
+    });
 
     this.eventManager.listen(document, 'fullscreenchange', () => {
         this.updateIcon_();
@@ -100,47 +91,6 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
       document.fullscreenElement ?
       shaka.ui.Enums.MaterialDesignIcons.EXIT_FULLSCREEN :
       shaka.ui.Enums.MaterialDesignIcons.FULLSCREEN;
-  }
-
-  /**
-   * @private
-   */
-  async toggleFullScreen_() {
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      // If you are in PiP mode, leave PiP mode first.
-      try {
-        if (document.pictureInPictureElement) {
-          await document.exitPictureInPicture();
-        }
-      } catch (error) {
-        this.controls.dispatchEvent(new shaka.util.FakeEvent('error', {
-          detail: error,
-        }));
-      }
-      await this.videoContainer_.requestFullscreen();
-    }
-  }
-
-  /**
-   * When a mobile device is rotated to landscape layout, and the video is
-   * loaded, make the demo app go into fullscreen.
-   * Similarly, exit fullscreen when the device is rotated to portrait layout.
-   * @private
-   */
-  onScreenRotation_() {
-    if (!this.video ||
-        this.video.readyState == 0 ||
-        this.controls.getCastProxy().isCasting()) return;
-
-    if (screen.orientation.type.includes('landscape') &&
-        !document.fullscreenElement) {
-      this.videoContainer_.requestFullscreen();
-    } else if (screen.orientation.type.includes('portrait') &&
-        document.fullscreenElement) {
-      document.exitFullscreen();
-    }
   }
 };
 
