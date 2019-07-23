@@ -380,6 +380,16 @@ shaka.extern.TextParser = class {
    * @exportDoc
    */
   parseFirstCue(data, timeContext) {}
+
+  /**
+   * Get if the parser supports reading partial segments. If this is not true,
+   * it will not be passed partial segments.
+   *
+   * @return {boolean}
+   *
+   * @exportDoc
+   */
+  supportsPartial() {}
 };
 
 
