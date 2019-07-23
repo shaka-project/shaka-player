@@ -193,6 +193,18 @@ describe('MediaSourceEngine', function() {
     expect(mediaSource.duration).toBeCloseTo(30);
   });
 
+  it('does not throw if endOfStrem called more than once', async () => {
+    const initObject = new Map();
+    initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
+    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.setDuration(presentationDuration);
+    await appendInit(ContentType.VIDEO);
+    await append(ContentType.VIDEO, 1);
+    // Call endOfStream twice. There should be no exception.
+    await mediaSourceEngine.endOfStream();
+    await mediaSourceEngine.endOfStream();
+  });
+
   it('queues operations', function(done) {
     let resolutionOrder = [];
     let requests = [];
