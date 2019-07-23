@@ -68,6 +68,9 @@ The following buttons can be added to the overflow menu:
   that support it. Button is invisible on other browsers.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
+The presense of the seek bar and the big play button in the center of the video element can be
+customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
+
 UI layout can be reconfigured at any point after it's been created.
 Please note that custom layouts might need CSS adjustments to look good.
 
