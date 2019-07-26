@@ -65,6 +65,9 @@ shakaDemo.Main = class {
 
     /** @private {string} */
     this.uiLocale_ = '';
+
+    /** @private {boolean} */
+    this.noInput_ = false;
   }
 
   /**
@@ -91,8 +94,8 @@ shakaDemo.Main = class {
     document.getElementById('error-display-close-button').addEventListener(
         'click', (event) => this.closeError_());
 
-    // Set up version string.
-    this.setUpVersionString_();
+    // Set up version strings in the appropriate divs.
+    this.setUpVersionStrings_();
   }
 
   /**
@@ -155,15 +158,35 @@ shakaDemo.Main = class {
       }
     }
 
+    // Optionally enter noinput mode. This has to happen before setting up the
+    // player.
+    this.noInput_ = 'noinput' in this.getParams_();
     this.setupPlayer_();
     this.readHash_();
     window.addEventListener('hashchange', () => this.hashChanged_());
 
     await this.setupStorage_();
 
-    // The main page is loaded. Dispatch an event, so the various
-    // configurations will load themselves.
-    this.dispatchEventWithName_('shaka-main-loaded');
+    if (this.noInput_) {
+      // Set the page to noInput mode, disabling the header and footer.
+      const hideClass = 'should-hide-in-no-input-mode';
+      for (const element of document.getElementsByClassName(hideClass)) {
+        this.hideNode_(element);
+      }
+      const showClass = 'should-show-in-no-input-mode';
+      for (const element of document.getElementsByClassName(showClass)) {
+        this.showNode_(element);
+      }
+      // Also fullscreen the container.
+      this.container_.classList.add('no-input-sized');
+      document.getElementById('video-bar').classList.add('no-input-sized');
+    } else {
+      // The main page is loaded. Dispatch an event, so the various
+      // configurations will load themselves.
+      // But don't dispatch the event if in noInput mode; we don't need the
+      // side-tabs to be set up.
+      this.dispatchEventWithName_('shaka-main-loaded');
+    }
 
     // Update the componentHandler, to account for any new MDL elements added.
     componentHandler.upgradeDom();
@@ -186,14 +209,19 @@ shakaDemo.Main = class {
     const ui = video['ui'];
     this.player_ = ui.getControls().getPlayer();
 
-    // Register custom controls to the UI.
-    const factory = new shakaDemo.CloseButton.Factory();
-    shaka.ui.Controls.registerElement('close', factory);
+    if (!this.noInput_) {
+      // Don't add the close button if in noInput mode; it doesn't make much
+      // sense to stop playing a video if you can't start playing other videos.
 
-    // Configure UI.
-    const uiConfig = ui.getConfiguration();
-    uiConfig.controlPanelElements.push('close');
-    ui.configure(uiConfig);
+      // Register custom controls to the UI.
+      const factory = new shakaDemo.CloseButton.Factory();
+      shaka.ui.Controls.registerElement('close', factory);
+
+      // Configure UI.
+      const uiConfig = ui.getConfiguration();
+      uiConfig.controlPanelElements.push('close');
+      ui.configure(uiConfig);
+    }
 
     // Add application-level default configs here.  These are not the library
     // defaults, but they are the application defaults.  This will affect the
@@ -1024,6 +1052,10 @@ shakaDemo.Main = class {
       }
     }
 
+    if (this.noInput_) {
+      params.push('noinput');
+    }
+
     if (this.nativeControlsEnabled_) {
       params.push('nativecontrols');
     }
@@ -1160,8 +1192,12 @@ shakaDemo.Main = class {
     document.dispatchEvent(event);
   }
 
-  /** @private */
-  setUpVersionString_() {
+  /**
+   * Sets the "version-string" divs to a version string.
+   * For example, "v2.5.4-master (uncompiled)".
+   * @private
+   */
+  setUpVersionStrings_() {
     const version = shaka.Player.version;
     let split = version.split('-');
     let inParen = [];
@@ -1176,10 +1212,12 @@ shakaDemo.Main = class {
     }
 
     // Put the version into the version string div.
-    const versionStringDiv = document.getElementById('version-string');
-    versionStringDiv.textContent = split.join('-');
-    if (inParen.length > 0) {
-      versionStringDiv.textContent += ' (' + inParen.join(', ') + ')';
+    const versionStringDivs = document.getElementsByClassName('version-string');
+    for (const div of versionStringDivs) {
+      div.textContent = split.join('-');
+      if (inParen.length > 0) {
+        div.textContent += ' (' + inParen.join(', ') + ')';
+      }
     }
   }
 
