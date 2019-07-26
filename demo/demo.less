@@ -382,6 +382,22 @@ footer .mdl-mega-footer__link-list {
    * mobile screens. */
   max-width: 100%;
 }
+#video-bar.no-input-sized {
+  /* Add some additional padding so that TV overscan doesn't cut off the version
+   * number or other information we might need. */
+  padding: 2.5em 2em;
+
+  /* Constrain the body to its size minus margin and padding, so that nested
+   * elements can constrain to the body. */
+  width: 100%;
+  width: calc(100% - 4em);
+  height: 100%;
+  height: calc(100% - 5em);
+}
+.video-container.no-input-sized {
+  width: 100%;
+  height: 100%;
+}
 
 #video {
   /* Fill whatever space we're given, whether fullscreen or not. */

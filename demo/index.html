@@ -84,18 +84,21 @@ UNCOMPILED_JS = [
   </head>
   <body>
     <div id="main-layout" class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-      <header class="app-header mdl-layout__header">
+      <header class="app-header mdl-layout__header should-hide-in-no-input-mode">
         <header class="mdl-layout__header-row" id="nav-button-container">
           <img alt="Shaka Player Logo" src="shaka_logo_trans.png" class="logo" />
           <button id="nav-button-front" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" defaultselected>HOME</button>
           <button id="nav-button-search" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">SEARCH</button>
           <button id="nav-button-custom" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">CUSTOM CONTENT</button>
           <div class="mdl-layout-spacer"></div>
-          <div id="version-block">
-            <span id="version-string"></span>
+          <div class="version-block">
+            <span class="version-string"></span>
           </div>
         </header>
       </header>
+      <div class="version-block hidden should-show-in-no-input-mode">
+        <span class="version-string"></span>
+      </div>
       <div class="mdl-layout__drawer hamburger-menu">
         <div id="hamburger-menu-title" class="mdl-layout-title">
           Shaka Player Demo Config
@@ -116,7 +119,7 @@ UNCOMPILED_JS = [
           </div>
         </div>
         <div id="contents"></div>
-        <footer class="mdl-mega-footer">
+        <footer class="mdl-mega-footer should-hide-in-no-input-mode">
           <div class="mdl-mega-footer__middle-section">
 
             <div class="mdl-mega-footer__drop-down-section">
