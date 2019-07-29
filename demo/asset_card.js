@@ -41,7 +41,14 @@ shakaDemo.AssetCard = class {
     /** @private {!Element} */
     this.featureIconsContainer_ = document.createElement('div');
     /** @private {!Element} */
-    this.progressBar_ = document.createElement('progress');
+    this.progressCircle_ = document.createElement('div');
+    const svgns = 'http://www.w3.org/2000/svg';
+    /** @private {!Element} */
+    this.progressCircleSvg_ = document.createElementNS(svgns, 'svg');
+    /** @private {!Element} */
+    this.progressCircleBack_ = document.createElementNS(svgns, 'circle');
+    /** @private {!Element} */
+    this.progressCircleBar_ = document.createElementNS(svgns, 'circle');
     /** @private {function(!shakaDemo.AssetCard)} */
     this.remakeButtonsFn_ = remakeButtonsFn;
 
@@ -95,17 +102,39 @@ shakaDemo.AssetCard = class {
     this.actions_.classList.add('mdl-card--border');
     this.card_.appendChild(this.actions_);
 
-    const progressContainer = document.createElement('div');
-    this.progressBar_.classList.add('hidden');
-    this.progressBar_.setAttribute('max', 1);
-    this.progressBar_.setAttribute('value', asset.storedProgress);
-    progressContainer.appendChild(this.progressBar_);
-    this.card_.appendChild(progressContainer);
+    this.progressCircle_.classList.add('hidden');
+    this.progressCircle_.classList.add('progress-circle');
+    this.card_.appendChild(this.progressCircle_);
+    this.progressCircleSvg_.appendChild(this.progressCircleBack_);
+    this.progressCircleSvg_.appendChild(this.progressCircleBar_);
+    this.progressCircle_.appendChild(this.progressCircleSvg_);
+    // You can't use access the classList of an svg on IE, so set the class
+    // attribute instead.
+    this.progressCircleSvg_.setAttribute('class', 'progress-circle-svg');
+    this.progressCircleBack_.setAttribute('class', 'progress-circle-back');
+    this.progressCircleBar_.setAttribute('class', 'progress-circle-bar');
 
     parentDiv.appendChild(this.card_);
     // Remake buttons AFTER appending to parent div, so that any tooltips can
     // be placed.
     this.remakeButtons();
+  }
+
+  /**
+   * @param {number} progress
+   * @private
+   */
+  styleProgressCircle_(progress) {
+    const svg = this.progressCircleSvg_;
+    const bar = this.progressCircleBar_;
+    const circleSize = 45;
+    const circleThickness = 5;
+    const circleRadius = (circleSize - circleThickness) / 2;
+    const circumference = 2 * Math.PI * circleRadius;
+
+    svg.setAttribute('viewBox', '0 0 ' + circleSize + ' ' + circleSize);
+    bar.setAttribute('stroke-dasharray', circumference);
+    bar.setAttribute('stroke-dashoffset', (circumference * (1 - progress)));
   }
 
   /**
@@ -327,17 +356,17 @@ shakaDemo.AssetCard = class {
    */
   updateProgress() {
     if (this.asset_.storedProgress < 1) {
-      this.progressBar_.classList.remove('hidden');
+      this.progressCircle_.classList.remove('hidden');
       for (const button of this.actions_.childNodes) {
         button.disabled = true;
       }
     } else {
-      this.progressBar_.classList.add('hidden');
+      this.progressCircle_.classList.add('hidden');
       for (const button of this.actions_.childNodes) {
         button.disabled = false;
       }
     }
-    this.progressBar_.setAttribute('value', this.asset_.storedProgress);
+    this.styleProgressCircle_(this.asset_.storedProgress);
   }
 
   /**
