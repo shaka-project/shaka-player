@@ -472,9 +472,10 @@ describe('HlsParser live', () => {
     it('offsets VTT text with rolled over TS timestamps', async () => {
       const masterWithVtt = [
         '#EXTM3U\n',
-        '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="text"\n',
+        '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="text",',
+        'GROUP-ID="sub1"\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
         'video\n',
       ].join('');
 
@@ -683,9 +684,10 @@ describe('HlsParser live', () => {
       it('handles rollover on update', async () => {
         const masterWithVtt = [
           '#EXTM3U\n',
-          '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="text"\n',
+          '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="text",',
+          'GROUP-ID="sub1"\n',
           '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
-          'RESOLUTION=960x540,FRAME-RATE=60\n',
+          'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
           'video\n',
         ].join('');
 

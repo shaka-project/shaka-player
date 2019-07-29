@@ -1569,7 +1569,7 @@ describe('HlsParser', () => {
           '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
           '#EXTINF:5,\n',
           '#EXT-X-BYTERANGE:121090@616\n',
-          'main.exe',
+          'main.mp4',
         ].join('');
 
         await verifyMissingAttribute(master, media, 'BANDWIDTH');
