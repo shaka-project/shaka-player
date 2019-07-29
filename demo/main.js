@@ -844,6 +844,12 @@ shakaDemo.Main = class {
     this.hideNode_(videoBar);
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture();
+    }
     this.player_.unload();
 
     // The currently-selected asset changed, so update asset cards.
