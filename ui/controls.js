@@ -712,8 +712,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // for focused elements.
     this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
 
-    this.eventManager_.listen(this.controlsContainer_, 'dblclick',
-        () => this.toggleFullScreen());
+    this.eventManager_.listen(
+        this.controlsContainer_, 'dblclick', () => this.toggleFullScreen());
+
+    // If double-clicking on the bottom bar, don't allow the click to propagate
+    // to toggle fullscreen above.
+    this.eventManager_.listen(
+        this.bottomControls_, 'dblclick', (e) => e.stopPropagation());
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
