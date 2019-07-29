@@ -39,12 +39,6 @@ shakaDemo.CloseButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.button_);
 
     this.button_.addEventListener('click', () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-      if (document.pictureInPictureElement) {
-        document.exitPictureInPicture();
-      }
       shakaDemoMain.unload();
     });
 
