@@ -15,6 +15,7 @@
   { "architecture": { "title": "Architecture Diagrams" } },
   { "service-worker": { "title": "Service Worker Caching" } },
   { "offline": { "title": "Offline Storage and Playback" } },
+  { "fairplay": { "title": "FairPlay support" } },
   { "faq": { "title": "Frequently Asked Questions" } },
   { "upgrade": {
       "title": "Upgrade Guide",
