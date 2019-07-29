@@ -26,12 +26,10 @@
 @drawer-width: 550px;
 
 @mdl-footer-link-color: #9e9e9e;  /* copied from MDL stylesheet */
-@mdl-button-color: rgb(68,138,255);  /* copied from MDL stylesheet */
+@mdl-button-color: rgb(63,81,181);  /* copied from MDL stylesheet */
 
-/* The default color from MDL is too low-contrast on a white background. */
-.mdl-button--accent.mdl-button--accent {
-  color: darken(@mdl-button-color, 20%);
-}
+@progress-circle-size: 45px;
+@progress-circle-thickness: 5px;
 
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
  * class with the same name, which can be used in the application directly. */
@@ -207,6 +205,45 @@ html, body {
   position: absolute;
   top: 5px;
   right: 5px;
+}
+
+.progress-circle {
+  position: absolute;
+  top: 0px;
+  right: 14px;
+  width: @progress-circle-size;
+  height: @progress-circle-size;
+  /* This should be unclickable, so that you can click the button beneath. */
+  pointer-events: none;
+}
+
+.progress-circle-svg {
+  /* In rotation, 0 degrees is the right side. That means that the progress
+   * circle "starts at" the right side. Normally, you expect the circle to
+   * "start at" the top, like a clock; this rotates the circle, so it behaves
+   * thusly. */
+  transform: rotate(-90deg);
+}
+
+.progress-circle-circle() {
+  /* Set the position and radius of the circle, so it is in the center of the
+   * svg's canvas. */
+  cx: @progress-circle-size / 2;
+  cy: @progress-circle-size / 2;
+  r: (@progress-circle-size - @progress-circle-thickness) / 2;
+  fill: none;
+  stroke-width: @progress-circle-thickness;
+}
+
+.progress-circle-bar {
+  .progress-circle-circle();
+  stroke: @mdl-button-color;
+  stroke-linecap: round;
+}
+
+.progress-circle-back {
+  .progress-circle-circle();
+  stroke: #eee;
 }
 
 .asset-card .mdl-card__title {
