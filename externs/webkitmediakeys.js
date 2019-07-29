@@ -61,6 +61,10 @@ WebKitMediaKeySession.prototype.update = function(message) {};
 WebKitMediaKeySession.prototype.close = function() {};
 
 
+/** @type {string} */
+WebKitMediaKeySession.prototype.sessionId;
+
+
 /** @type {WebKitMediaKeyError} */
 WebKitMediaKeySession.prototype.error;
 

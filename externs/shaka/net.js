@@ -60,7 +60,8 @@ shaka.extern.RetryParameters;
  *   headers: !Object.<string, string>,
  *   allowCrossSiteCredentials: boolean,
  *   retryParameters: !shaka.extern.RetryParameters,
- *   licenseRequestType: ?string
+ *   licenseRequestType: ?string,
+ *   sessionId: ?string
  * }}
  *
  * @description
@@ -87,6 +88,9 @@ shaka.extern.RetryParameters;
  *   request it is (not the type of license).  This is the |messageType| field
  *   of the EME message.  For example, this could be 'license-request' or
  *   'license-renewal'.
+ * @property {?string} sessionId
+ *   If this is a LICENSE request, this field contains the session ID of the
+ *   EME session that made the request.
  *
  * @exportDoc
  */
