@@ -160,3 +160,4 @@ values for other key systems are not known to us at this time.
 #### Continue the Tutorials
 
 Next, check out {@tutorial license-server-auth}.
+Or check out {@tutorial fairplay}.
