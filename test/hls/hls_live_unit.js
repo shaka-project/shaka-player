@@ -254,12 +254,18 @@ describe('HlsParser live', () => {
       });
 
       it('updates all streams', async () => {
+        const masterlist = [
+          '#EXTM3U\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",AUDIO="aud1",',
+          'RESOLUTION=960x540,FRAME-RATE=60\n',
+          'video\n',
+        ].join('');
         const audio = [
           '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
           'URI="audio"\n',
         ].join('');
 
-        const masterWithAudio = master + audio;
+        const masterWithAudio = masterlist + audio;
         const ref1 = ManifestParser.makeReference('test:/main.mp4',
             0, 2, 4);
         const ref2 = ManifestParser.makeReference('test:/main2.mp4',
