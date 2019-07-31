@@ -198,8 +198,8 @@ shaka.ui.TextDisplayer = class {
     const captionsStyle = captions.style;
     const panelStyle = this.textContainer_.style;
 
-    // Set white-space to 'pre' to enable showing line breaks in the text.
-    captionsStyle.whiteSpace = 'pre';
+    // Set white-space to 'pre-line' to enable showing line breaks in the text.
+    captionsStyle.whiteSpace = 'pre-line';
     captions.textContent = cue.payload;
     captionsStyle.backgroundColor = cue.backgroundColor;
     captionsStyle.color = cue.color;

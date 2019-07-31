@@ -48,8 +48,9 @@
 
   .shaka-text-container {
     /* In fullscreen mode, the text displayer's font size should be relative to
-     * the window height instead of a fixed size. */
-    font-size: 4.4vh;
+     * the either window height or width (whichever is smaller), instead of a
+     * fixed size. */
+    font-size: 4.4vmin;
   }
 }
 .shaka-video-container:fullscreen { .fullscreen-container(); }
