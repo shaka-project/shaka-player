@@ -19,6 +19,8 @@ Set up controls with HTML data attributes:
     <script src="dist/shaka-player.ui.js"></script>
     <!-- Shaka Player ui compiled library default CSS: -->
     <link rel="stylesheet" type="text/css" href="dist/controls.css">
+    <!-- Chromecast SDK (if you want Chromecast support for your app): -->
+    <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
     <!-- Your application source: -->
     <script src="myapp.js"></script>
   </head>
@@ -27,7 +29,7 @@ Set up controls with HTML data attributes:
          The data-shaka-player-cast-receiver-id tag allows you to provide a Cast Application ID that
            the cast button will cast to; the value provided here is the sample cast receiver. -->
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="A15A181D">
+         data-shaka-player-cast-receiver-id="7B25EC44">
        <!-- The data-shaka-player tag will make the UI library use this video element.
             If no video is provided, the UI will automatically make one inside the container div. -->
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"></video>
