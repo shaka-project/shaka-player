@@ -235,6 +235,11 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
     // Just the video elements were provided.
     for (let i = 0; i < videos.length; i++) {
       const video = videos[i];
+      // If the app has already manually created a UI for this element,
+      // don't create another one.
+      if (video['ui']) {
+        continue;
+      }
       goog.asserts.assert(video.tagName.toLowerCase() == 'video',
         'Should be a video element!');
 
@@ -264,6 +269,11 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
   } else {
     for (let i = 0; i < containers.length; i++) {
       const container = containers[i];
+      // If the app has already manually created a UI for this element,
+      // don't create another one.
+      if (container['ui']) {
+        continue;
+      }
       goog.asserts.assert(container.tagName.toLowerCase() == 'div',
         'Container should be a div!');
 
