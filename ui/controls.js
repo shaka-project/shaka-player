@@ -358,7 +358,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (this.controlsContainer_) {
       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
-      this.videoContainer_.removeChild(this.spinnerContainer_);
       this.releaseChildElements_();
     } else {
       this.addControlsContainer_();
@@ -467,6 +466,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   getVideoContainer() {
     return this.videoContainer_;
   }
+
+
+  /**
+   * @return {!HTMLElement}
+   * @export
+   */
+  getAdContainer() {
+    return this.adContainer_;
+  }
+
 
   /**
    * @return {HTMLMediaElement}
@@ -605,6 +614,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
+  /** @export */
+  showAdUI() {
+    // TODO
+  }
+
+  /** @export */
+  hideAdUI() {
+    // TODO
+  }
+
   /** @private */
   createDOM_() {
     this.videoContainer_.classList.add('shaka-video-container');
@@ -614,7 +633,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addPlayButton_();
     }
 
-    this.addBufferingSpinner_();
+    if (!this.spinnerContainer_) {
+      this.addBufferingSpinner_();
+    }
+
+    if (!this.adContainer_) {
+      this.addAdContainer_();
+    }
 
     this.addControlsButtonPanel_();
 
@@ -658,6 +683,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.playButton_ =
         new shaka.ui.BigPlayButton(playButtonContainer, this);
     this.elements_.push(this.playButton_);
+  }
+
+
+  /** @private */
+  addAdContainer_() {
+    /** @private {!HTMLElement} */
+    this.adContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.adContainer_.classList.add('shaka-ad-container');
+    this.videoContainer_.appendChild(this.adContainer_);
   }
 
   /** @private */

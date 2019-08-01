@@ -21,6 +21,7 @@ goog.provide('shaka.ui.Overlay');
 goog.require('goog.asserts');
 goog.require('shaka.Deprecate');
 goog.require('shaka.polyfill');
+goog.require('shaka.ui.AdManager');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.TextDisplayer');
 goog.require('shaka.util.Platform');
@@ -74,6 +75,12 @@ shaka.ui.Overlay = class {
 
     videoContainer['ui'] = this;
     video['ui'] = this;
+
+    this.adManager_ = null;
+
+    if (window['google'] && google.ima) {
+      this.adManager_ = new shaka.ui.AdManager(this.controls_);
+    }
   }
 
 
@@ -112,6 +119,15 @@ shaka.ui.Overlay = class {
         ret, this.config_, this.defaultConfig_(),
         /* overrides (only used for player config)*/ {}, /* path */ '');
     return ret;
+  }
+
+
+  /**
+   * @return {shaka.ui.AdManager}
+   * @export
+   */
+  getAdManager() {
+    return this.adManager_;
   }
 
 

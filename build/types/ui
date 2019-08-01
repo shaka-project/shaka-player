@@ -1,6 +1,8 @@
 # UI library.
 
 +../../third_party/language-mapping-list/language-mapping-list.js
++../../ui/client_side_ad_manager.js
++../../ui/ad_manager.js
 +../../ui/audio_language_selection.js
 +../../ui/externs/ui.js
 +../../ui/play_button.js
@@ -24,6 +26,7 @@
 +../../ui/rewind_button.js
 +../../ui/seek_bar.js
 +../../ui/settings_menu.js
++../../ui/skip_ad_button.js
 +../../ui/spacer.js
 +../../ui/text_displayer.js
 +../../ui/text_selection.js
