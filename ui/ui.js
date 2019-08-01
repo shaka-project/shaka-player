@@ -236,6 +236,11 @@ shaka.ui.Overlay = class {
     } else if (videos.length && !containers.length) {
       // Just the video elements were provided.
       for (const video of videos) {
+        // If the app has already manually created a UI for this element,
+        // don't create another one.
+        if (video['ui']) {
+          continue;
+        }
         goog.asserts.assert(video.tagName.toLowerCase() == 'video',
             'Should be a video element!');
 
@@ -264,6 +269,11 @@ shaka.ui.Overlay = class {
       }
     } else {
       for (const container of containers) {
+        // If the app has already manually created a UI for this element,
+        // don't create another one.
+        if (container['ui']) {
+          continue;
+        }
         goog.asserts.assert(container.tagName.toLowerCase() == 'div',
             'Container should be a div!');
 
