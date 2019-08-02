@@ -862,6 +862,11 @@ shakaDemo.Main = class {
     // The currently-selected asset changed, so update asset cards.
     this.dispatchEventWithName_('shaka-main-selected-asset-changed');
 
+    // Unset media session title, but only if the browser supports that API.
+    if (navigator.mediaSession) {
+      navigator.mediaSession.metadata = null;
+    }
+
     // Remake hash, to change the current asset.
     this.remakeHash();
   }
@@ -983,6 +988,18 @@ shakaDemo.Main = class {
       await this.player_.load(manifestUri);
       if (this.player_.isAudioOnly()) {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+      }
+
+      // Set media session title, but only if the browser supports that API.
+      if (navigator.mediaSession) {
+        const metadata = {
+          title: asset.name,
+          artwork: [{src: asset.iconUri}],
+        };
+        if (asset.source != shakaAssets.Source.UNKNOWN) {
+          metadata.artist = asset.source;
+        }
+        navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
     } catch (reason) {
       const error = /** @type {!shaka.util.Error} */ (reason);

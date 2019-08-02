@@ -28,9 +28,23 @@ const MediaMetadata = class {
   constructor(options) {
     /** @type {string} */
     this.title;
+
+    /** @type {string} */
+    this.artist;
+
+    /** @type {!Object} */
+    this.artwork;
   }
 };
 
 
-/** @type {MediaMetadata} */
+const MediaSession = class {
+  constructor() {
+    /** @type {?MediaMetadata} */
+    this.metadata;
+  }
+};
+
+
+/** @type {MediaSession} */
 Navigator.prototype.mediaSession;
