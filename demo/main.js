@@ -186,6 +186,12 @@ shakaDemo.Main = class {
       // But don't dispatch the event if in noInput mode; we don't need the
       // side-tabs to be set up.
       this.dispatchEventWithName_('shaka-main-loaded');
+
+      // Wait for one interruptor cycle, so that the tabs have time to load.
+      // This ensures that, for example, if there is an asset playing at page
+      // load time, the video will scroll into view second, and the page won't
+      // scroll away from the video.
+      await Promise.resolve();
     }
 
     // Update the componentHandler, to account for any new MDL elements added.
