@@ -34,5 +34,20 @@ var MediaMetadata = function(options) {};
 MediaMetadata.prototype.title;
 
 
-/** @type {MediaMetadata} */
+/** @type {string} */
+MediaMetadata.prototype.artist;
+
+
+/** @type {string} */
+MediaMetadata.prototype.artwork;
+
+
+/** @constructor */
+var MediaSession = function() {};
+
+/** @type {?MediaMetadata} */
+MediaSession.prototype.metadata;
+
+
+/** @type {MediaSession} */
 Navigator.prototype.mediaSession;
