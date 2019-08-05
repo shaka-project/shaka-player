@@ -306,6 +306,46 @@ class Linter(object):
     return True
 
 
+class CssLinter(object):
+  def __init__(self, source_files, config_path):
+    self.source_files = _canonicalize_source_files(source_files)
+    self.config_path = config_path
+    self.output = _get_source_path('dist/.csslintstamp')
+
+  def lint(self, fix=False, force=False):
+    """Run CSS linter checks on the files in |self.source_files|.
+
+    Args:
+      fix: If True, ask the linter to fix what errors it can automatically.
+      force: Run linter checks even if the inputs have not changed.
+
+    Returns:
+      True on success; False on failure.
+    """
+    deps = self.source_files + [self.config_path]
+    if not force and not _must_build(self.output, deps):
+      return True
+
+    stylelint = shakaBuildHelpers.get_node_binary('stylelint')
+    cmd_line = stylelint + ['--config', self.config_path] + self.source_files
+    # Disables globbing, since that messes up our nightly tests, and we don't
+    # use it anyway.
+    # This is currently a flag added in a fork we maintain, but there is a pull
+    # request in progress for this.
+    # See: https://github.com/stylelint/stylelint/issues/4193
+    cmd_line += ['--disable-globbing'];
+
+    if fix:
+      cmd_line += ['--fix']
+
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+      return False
+
+    # Update the timestamp of the file that tracks when we last updated.
+    _update_timestamp(self.output)
+    return True
+
+
 class HtmlLinter(object):
   def __init__(self, source_files, config_path):
     self.source_files = _canonicalize_source_files(source_files)

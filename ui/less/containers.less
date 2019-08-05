@@ -17,6 +17,8 @@
 
 /* All of the top-level containers into which various visible features go. */
 
+@transparent: rgba(0, 0, 0, 0);
+
 /* A container for the entire video + controls combo.  This is the auto-setup
  * div which we populate. */
 .shaka-video-container {
@@ -31,6 +33,7 @@
   .material-icons {
     font-family: 'Material Icons';
   }
+
   * {
     font-family: Roboto-Regular, Roboto, sans-serif;
   }
@@ -44,6 +47,7 @@
  * pseudo-class they don't support. */
 .fullscreen-container() {
   .fill-container();
+
   background-color: black;
 
   .shaka-text-container {
@@ -78,18 +82,18 @@
 
   /* A flex container, to make layout of children easier to reason about. */
   display: flex;
+
   /* Defines in which direction the children should flow. */
   flex-direction: column;
+
   /* Pushes the children toward the bottom of the container. */
   justify-content: flex-end;
+
   /* Centers children horizontally. */
   align-items: center;
 
   /* A black gradient at the bottom, behind the controls, but only so high. */
-  background: linear-gradient(
-      to top,
-      rgba(0, 0, 0, 1) 0,
-      rgba(0, 0, 0, 0) 92px);
+  background: linear-gradient(to top, rgba(0, 0, 0, 1) 0, @transparent 92px);
 
   /* By default, do not allow any of our controls to shrink.
    * Specific controls can use .shrinkable() to override. */
@@ -99,7 +103,7 @@
   opacity: 0;
 
   /* When we show/hide this, do it gradually using cubic-bezier timing. */
-  transition: opacity cubic-bezier(0.4, 0.0, 0.6, 1) 600ms;
+  transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 600ms;
 
   /* Position the controls container in front of the text container, so that
    * the text container doesn't interfere with the control buttons. */
@@ -119,7 +123,6 @@
     }
   }
 }
-
 
 /* Container for controls positioned at the bottom of the video container:
  * controls button panel and the seek bar. */
@@ -149,8 +152,10 @@
   /* This is itself a flex container, with children layed out horizontally. */
   display: flex;
   flex-direction: row;
+
   /* Push children to the right. */
   justify-content: flex-end;
+
   /* Center children vertically. */
   align-items: center;
 
@@ -203,6 +208,7 @@
   justify-content: center;
   align-items: center;
   position: absolute;
+
   /* Specify left and top for IE's sake.  Otherwise, the container ends up below
    * and to the right of where it should be. */
   top: 0;
@@ -215,6 +221,8 @@
   left: 0;
   width: 100%;
   min-width: 48px;
+  text-align: center;
+  position: absolute;
 
   /* Set the captions in the middle horizontally by default. */
   display: flex;
@@ -226,9 +234,6 @@
   /* If the captions are too long to fit in the video container, hide the
    * overflow content. */
   overflow: hidden;
-
-  text-align: center;
-  position: absolute;
 
   /* These are defaults which are overridden by JS or cue styles. */
   font-size: 20px;
@@ -243,10 +248,10 @@
   }
 }
 
-
 /* The buffering spinner. */
 .shaka-spinner-container {
   position: absolute;
+
   .fill-container();
 
   flex-shrink: 1;
@@ -263,8 +268,9 @@
   for the detailed explanation. */
 
   /* For the padding thing to work, spinner div needs to be an
-  overlay-parent and spinner svg - an overlay child.*/
+  overlay-parent and spinner svg - an overlay child. */
   .overlay-parent();
+
   margin: 0;
   box-sizing: border-box;
   padding: @spinner-size-percentage / 2;

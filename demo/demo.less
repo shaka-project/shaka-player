@@ -51,6 +51,7 @@
   position: absolute;
   top: 10px;
   right: 10px;
+
   /* Give the button a round background, meant to look like the play button. */
   border-radius: 50%;
   width: 32px;
@@ -65,11 +66,16 @@ html, body {
 
 /* Give the FAB a drop shadow, that expands a little bit when moused over. */
 .mdl-button--fab {
-  filter: drop-shadow(0 2px 5px #333333);
+  filter: drop-shadow(0 2px 5px #333);
   transition: 0.2s ease-in-out;
 }
+
 .mdl-button--fab:hover {
-  filter: drop-shadow(0 2px 8px #333333);
+  filter: drop-shadow(0 2px 8px #333);
+}
+
+.input-container-label {
+  padding-right: 1em;
 }
 
 /* Remove vertical padding on MDL text fields, but only while they are in
@@ -79,22 +85,27 @@ html, body {
   // The default width of 300px is a bit too wide for us.
   width: 200px;
 }
+
 .hamburger-menu .mdl-textfield__label {
   top: 4px;
 }
+
 .hamburger-menu .mdl-textfield__label:after {
   bottom: 0;
 }
+
 .hamburger-menu .mdl-layout-title {
   /* The line-height style in mdl-layout-title looks weird on narrow displays,
    * so remove it in the hamburger menu. */
   line-height: unset;
 }
+
 .hamburger-menu .input-container-label {
   /* Give the labels for input rows a left margin. This keeps them from directly
    * touching the left side of the screen, for improved readability. */
   margin-left: 1em;
 }
+
 .hamburger-menu .mdl-button--raised {
   /* Left-align the text content of the section header buttons. */
   text-align: left;
@@ -125,7 +136,7 @@ html, body {
   color: white;
   position: relative;
   padding: 0 0;
-  top: 0em;
+  top: 0;
   right: 1em;
   float: right;
   font-size: 24px;
@@ -139,6 +150,7 @@ html, body {
   display: inline-block;
   margin: 1em;
 }
+
 .asset-card-unsupported {
   display: inline-block;
   margin: 1em;
@@ -152,41 +164,53 @@ html, body {
   background-size: contain;
   background-repeat: no-repeat;
   display: inline-block;
+
   /* features */
   &[icon="high_definition"] {
     background-image: data-uri('icons/custom_high_definition.svg');
   }
+
   &[icon="ultra_high_definition"] {
     background-image: data-uri('icons/custom_ultra_high_definition.svg');
   }
+
   &[icon="subtitles"] {
     background-image: data-uri('icons/baseline-subtitles-24px.svg');
   }
+
   &[icon="closed_caption"] {
     background-image: data-uri('icons/baseline-closed_caption-24px.svg');
   }
+
   &[icon="live"] {
     background-image: data-uri('icons/baseline-live_tv-24px.svg');
   }
+
   &[icon="trick_mode"] {
     background-image: data-uri('icons/baseline-fast_forward-24px.svg');
   }
+
   &[icon="surround_sound"] {
     background-image: data-uri('icons/baseline-surround_sound-24px.svg');
   }
+
   &[icon="multiple_languages"] {
     background-image: data-uri('icons/baseline-language-24px.svg');
   }
+
   &[icon="audio_only"] {
     background-image: data-uri('icons/baseline-audiotrack-24px.svg');
   }
+
   /* key systems */
   &[icon="widevine"] {
     background-image: data-uri('icons/custom_widevine.svg');
   }
+
   &[icon="clear_key"] {
     background-image: data-uri('icons/custom_clear_key.svg');
   }
+
   &[icon="playready"] {
     background-image: data-uri('icons/custom_playready.svg');
   }
@@ -209,10 +233,11 @@ html, body {
 
 .progress-circle {
   position: absolute;
-  top: 0px;
+  top: 0;
   right: 14px;
   width: @progress-circle-size;
   height: @progress-circle-size;
+
   /* This should be unclickable, so that you can click the button beneath. */
   pointer-events: none;
 }
@@ -237,12 +262,14 @@ html, body {
 
 .progress-circle-bar {
   .progress-circle-circle();
+
   stroke: @mdl-button-color;
   stroke-linecap: round;
 }
 
 .progress-circle-back {
   .progress-circle-circle();
+
   stroke: #eee;
 }
 
@@ -261,9 +288,9 @@ html, body {
 .asset-card img {
   /* Icons are 300px by 210px (10:7 aspect ratio). */
   width: 300px;
+
   /* Constrain to space if necessary. */
   max-width: 100%;
-
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -292,6 +319,7 @@ html, body {
     height: auto;
     flex-wrap: wrap;
   }
+
   /* The spacer should be hidden in this mode, so that the version number is no
    * longer being forced to the right. */
   .app-header .mdl-layout-spacer {
@@ -334,6 +362,7 @@ footer .mdl-mega-footer__link-list {
     /* The default color was low-contrast on this dark background. */
     color: lighten(@mdl-footer-link-color, 20%);
   }
+
   a[disabled] {
     /* Making the disabled version even darker would be even worse in terms of
      * contrast, so use a strikethrough style instead. */
@@ -403,6 +432,7 @@ footer .mdl-mega-footer__link-list {
   /* The video bar fills the horizontal space, but its height depends on the
    * contents. */
   width: 100%;
+
   /* Add a little bit of padding on top, to make the video not look cropped. */
   padding-top: 1em;
 }
@@ -419,6 +449,7 @@ footer .mdl-mega-footer__link-list {
    * mobile screens. */
   max-width: 100%;
 }
+
 #video-bar.no-input-sized {
   /* Add some additional padding so that TV overscan doesn't cut off the version
    * number or other information we might need. */
@@ -431,6 +462,7 @@ footer .mdl-mega-footer__link-list {
   height: 100%;
   height: calc(100% - 5em);
 }
+
 .video-container.no-input-sized {
   width: 100%;
   height: 100%;
@@ -453,26 +485,28 @@ footer .mdl-mega-footer__link-list {
 .input-container-row {
   display: inline-block;
 }
+
 .input-container-style-flex {
   display: flex;
   flex-wrap: wrap;
 }
+
 .input-container-style-vertical {
   text-align: left;
 }
+
 .input-container-style-accordion {
   text-align: left;
   opacity: 0;
-  max-height: 0px;
+  max-height: 0;
   transition: 0.3s ease-in-out;
 }
+
 .input-container-style-accordion.show {
   opacity: 1;
+
   /* If the max-height is too high (e.g. set to 100%), the "sliding out"
    * animation is too fast to make out with the eye.
    * So give it a fixed maximum instead. */
   max-height: 1000px;
-}
-.input-container-label {
-  padding-right: 1em;
 }

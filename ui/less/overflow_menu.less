@@ -29,7 +29,7 @@
 
   /* Styles for the menu itself. */
   background: white;
-  box-shadow: 0 1px 9px 0 rgba(0,0,0,0.40);
+  box-shadow: 0 1px 9px 0 rgba(0, 0, 0, 0.4);
   border-radius: 2px;
   max-height: 250px;
   min-width: 180px;
@@ -64,20 +64,21 @@
     &:hover {
       background: rgb(224, 224, 224);
     }
+
     .shaka-keyboard-navigation &:focus {
       background: rgb(224, 224, 224);
     }
   }
 
-  /* These are the elements which contain the material design icons. */
-  /* TODO: Pull MD icon details out of JS. */
+  /* These are the elements which contain the material design icons.
+   * TODO: Pull MD icon details out of JS. */
   i {
     /* TODO(b/116651454): eliminate hard-coded offsets */
     padding-left: 10px;
   }
 
-  /* If the seekbar is missing, this is positioned lower. */
-  /* TODO: Solve with flex layout instead? */
+  /* If the seekbar is missing, this is positioned lower.
+   * TODO: Solve with flex layout instead? */
   &.shaka-low-position {
     /* TODO(b/116651454): eliminate hard-coded offsets */
     bottom: 15px;
@@ -93,6 +94,7 @@
 .shaka-overflow-menu span {
   text-align: left;
   position: relative;
+
   /* TODO(b/116651454): eliminate hard-coded offsets */
   left: 13px;
 }
@@ -101,6 +103,7 @@
  * right of MD icons. */
 .shaka-overflow-button-label {
   position: relative;
+
   /* This is a flex container, whose children flow vertically. */
   display: flex;
   flex-direction: column;
@@ -114,12 +117,10 @@
   color: rgba(0, 0, 0, 0.54);
 }
 
-/* These three submenus have somewhat different margins inside them. */
-/* TODO: This is all submenus, but not the top-level menu.  Is there a better
+/* These three submenus have somewhat different margins inside them.
+ * TODO: This is all submenus, but not the top-level menu.  Is there a better
  * way to express this? */
-.shaka-resolutions,
-.shaka-audio-languages,
-.shaka-text-languages {
+.shaka-resolutions, .shaka-audio-languages, .shaka-text-languages {
   span {
     /* TODO(b/116651454): eliminate hard-coded offsets */
     margin-left: 54px;
