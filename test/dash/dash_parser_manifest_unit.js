@@ -1244,4 +1244,35 @@ describe('DashParser Manifest', function() {
     expect(presentationDelay).not.toBeNaN();
     expect(presentationDelay).toBe(config.dash.defaultPresentationDelay);
   });
+
+  it('converts Accessibility element to "kind"', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" contentType="text">',
+      '      <Accessibility schemeIdUri="urn:mpeg:dash:role:2011" ',
+      '          value="captions" />',
+      '      <Accessibility schemeIdUri="urn:mpeg:dash:role:2011" ',
+      '          value="foo" />',
+      '      <Accessibility schemeIdUri="foobar" value="bar" />',
+      '      <Representation id="text-en" mimeType="text/webvtt">',
+      '        <BaseURL>t-en.vtt</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const textStream = manifest.periods[0].textStreams[0];
+    expect(textStream.roles).toEqual(['captions', 'foo']);
+    expect(textStream.kind).toBe('caption');
+  });
 });
