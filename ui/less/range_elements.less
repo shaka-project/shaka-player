@@ -51,8 +51,10 @@
 
   /* Vertical margins to occupy the same space as the thumb. */
   margin: (@thumb-size - @track-height)/2 6px;
+
   /* Smaller height to contain the background for the virtual track. */
   height: @track-height;
+
   /* Rounded ends on the virtual track. */
   border-radius: @track-height;
 
@@ -123,6 +125,7 @@
   &::-webkit-slider-runnable-track {
     .track();
   }
+
   &::-webkit-slider-thumb {
     .thumb();
   }
@@ -131,6 +134,7 @@
   &::-moz-range-track {
     .track();
   }
+
   &::-moz-range-thumb {
     .thumb();
   }
@@ -139,6 +143,7 @@
   &::-ms-track {
     .track();
   }
+
   &::-ms-thumb {
     .thumb();
   }
@@ -152,6 +157,7 @@
   &::-ms-fill-lower {
     .hidden();
   }
+
   &::-ms-fill-upper {
     .hidden();
   }

@@ -41,7 +41,7 @@
   border-radius: 50%;
 
   /* A small drop shadow below the button. */
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 20px 0px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 0 20px 0;
 
   /* No border. */
   border: none;
@@ -52,8 +52,9 @@
   background-size: 50%;
   background-repeat: no-repeat;
   background-position: center center;
+
   /* A background color behind the play arrow. */
-  background-color: rgba(255, 255, 255, .9);
+  background-color: rgba(255, 255, 255, 0.9);
 
   /* Actual icon images for the two states this could be in.
    * These will be inlined as data URIs when compiled, and so do not need to be
@@ -62,6 +63,7 @@
   &[icon="play"] {
     background-image: data-uri('images/play_arrow.svg');
   }
+
   &[icon="pause"] {
     background-image: data-uri('images/pause.svg');
   }
@@ -91,11 +93,11 @@
 
 /* Use a consistent outline focus style across browsers. */
 .shaka-controls-container {
-  button:focus,
-  input:focus {
+  button:focus, input:focus {
     /* Most browsers will fall back to "Highlight" (system setting) color for
      * the focus outline. */
     outline: 1px solid Highlight;
+
     /* WebKit-based and Blink-based browsers have this as their default outline
      * color. */
     outline: 1px solid -webkit-focus-ring-color;
@@ -103,8 +105,7 @@
 
   /* Disable this Mozilla-specific focus ring, since we have an outline defined
    * for focus. */
-  button::-moz-focus-inner,
-  input::-moz-focus-outer {
+  button:-moz-focus-inner, input:-moz-focus-outer {
     outline: none;
     border: 0;
   }
@@ -114,8 +115,7 @@
  * it doesn't look great. This removes the outline for
  * mouse users while leaving it for keyboard users. */
 .shaka-controls-container:not(.shaka-keyboard-navigation) {
-  button:focus,
-  input:focus {
+  button:focus, input:focus {
     outline: none;
     border: 0;
   }

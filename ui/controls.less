@@ -22,7 +22,6 @@
 @import "less/spinner.less";
 @import "less/other_elements.less";
 @import "less/overflow_menu.less";
-
 @import (css, inline) "https://fonts.googleapis.com/css?family=Roboto";
 @import (css, inline) "https://fonts.googleapis.com/icon?family=Material+Icons";
 
@@ -35,6 +34,7 @@
   font-size: 150%;
   padding: 5px;
 
+  /* dimensions */
   bottom: 50px;
   left: 0;
   right: 0;
@@ -53,12 +53,10 @@ to make them override display setting previously set in
 .overflowMenu button.
 See https://goo.gl/egXAJY for explanation of
 how CSS cascade rules work. */
-button.shaka-hidden,
-.shaka-hidden {
+button.shaka-hidden, .shaka-hidden {
   .hidden();
 }
 
-button.shaka-displayed,
-.shaka-displayed {
+button.shaka-displayed, .shaka-displayed {
   display: flex;
 }
