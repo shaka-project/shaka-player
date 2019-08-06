@@ -488,7 +488,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   servers: !Object.<string, string>,
  *   clearKeys: !Object.<string, string>,
  *   delayLicenseRequestUntilPlayed: boolean,
- *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>
+ *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
+ *   initDataTransform: ((function(!Uint8Array):!Uint8Array)|undefined)
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -508,6 +509,12 @@ shaka.extern.AdvancedDrmConfiguration;
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
  *   those key systems.
+ * @property {((function(!Uint8Array):!Uint8Array)|undefined)}
+ *   initDataTransform
+ *   <i>Optional.</i><br>
+ *   If given, this function is called with the init data from the
+ *   manifest/media and should return the (possibly transformed) init data to
+ *   pass to the browser.
  *
  * @exportDoc
  */

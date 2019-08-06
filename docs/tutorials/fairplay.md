@@ -18,33 +18,25 @@ player.configure('drm.advanced.com\\.apple\\.fps\\.1_0.serverCertificate',
 ```
 
 
+## Content ID
+
+Some FairPlay content use custom signaling for the content ID.  The content ID
+is used by the browser to generate the license request.  If you don't use the
+default content ID derivation, you need to specify a custom init data transform:
+
+```js
+player.configure('drm.initDataTransform', (initData) => {
+  const contentId = getMyContentId(initData);
+  const cert = player.drmInfo().serverCertificate;
+  return shaka.util.FairPlayUtils.initDataTransform(initData, contentId, cert);
+});
+```
+
 ## License wrapping
 
-Many FairPlay servers require wrapping the license request/response.  Check out
-the general {@tutorial license-wrapping} tutorial for more info.
-
-The request object contains the `sessionId` of the session that made the
-request.  The `body` contains the init data as an `Uint8Array`.  The init data
-format is:
-
-```
-[4 bytes] initDataLen
-[initDataLen bytes] initData
-[4 bytes] contentIdLen
-[contentIdLen bytes] contentId
-[4 bytes] certLen
-[certLen bytes] serverCertificate
-```
-
-The content ID is extracted from the init data.  The init data is provided by
-the browser.  This data can be further altered using a request filter before it
-is sent to your license server.
-
-Similarly, if the response isn't what the browser expects, you may need to write
-a response filter to alter the data from the server.
-
-
-## Example filters
+Some FairPlay servers need to accept the license request in a different format
+or give the response in a different format.  For more info, see the general
+{@tutorial license-wrapping} tutorial:
 
 ```js
 player.getNetworkingEngine().registerRequestFilter((type, request) => {
