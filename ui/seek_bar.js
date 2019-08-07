@@ -162,9 +162,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     } else {
       shaka.ui.Utils.setDisplay(this.container, true);
 
-      const gradient = ['to right'];
       if (bufferedLength == 0) {
-        gradient.push('#000 0%');
+        this.container.style.background = Constants.SEEK_BAR_BASE_COLOR;
       } else {
         const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
         const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
@@ -181,21 +180,19 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
         const playheadFraction = (playheadDistance / seekRangeSize) || 0;
 
-        gradient.push(Constants.SEEK_BAR_BASE_COLOR + ' ' +
-                     (bufferStartFraction * 100) + '%');
-        gradient.push(Constants.SEEK_BAR_PLAYED_COLOR + ' ' +
-                     (bufferStartFraction * 100) + '%');
-        gradient.push(Constants.SEEK_BAR_PLAYED_COLOR + ' ' +
-                     (playheadFraction * 100) + '%');
-        gradient.push(Constants.SEEK_BAR_BUFFERED_COLOR + ' ' +
-                     (playheadFraction * 100) + '%');
-        gradient.push(Constants.SEEK_BAR_BUFFERED_COLOR + ' ' +
-                     (bufferEndFraction * 100) + '%');
-        gradient.push(Constants.SEEK_BAR_BASE_COLOR + ' ' +
-                     (bufferEndFraction * 100) + '%');
+        const makeColor = (color, fract) => color + ' ' + (fract * 100) + '%';
+        const gradient = [
+          'to right',
+          makeColor(Constants.SEEK_BAR_BASE_COLOR, bufferStartFraction),
+          makeColor(Constants.SEEK_BAR_PLAYED_COLOR, bufferStartFraction),
+          makeColor(Constants.SEEK_BAR_PLAYED_COLOR, playheadFraction),
+          makeColor(Constants.SEEK_BAR_BUFFERED_COLOR, playheadFraction),
+          makeColor(Constants.SEEK_BAR_BUFFERED_COLOR, bufferEndFraction),
+          makeColor(Constants.SEEK_BAR_BASE_COLOR, bufferEndFraction),
+        ];
+        this.container.style.background =
+            'linear-gradient(' + gradient.join(',') + ')';
       }
-      this.container.style.background =
-          'linear-gradient(' + gradient.join(',') + ')';
     }
   }
 
