@@ -56,7 +56,7 @@ shaka.extern.RetryParameters;
  * @typedef {{
  *   uris: !Array.<string>,
  *   method: string,
- *   body: ArrayBuffer,
+ *   body: ?BufferSource,
  *   headers: !Object.<string, string>,
  *   allowCrossSiteCredentials: boolean,
  *   retryParameters: !shaka.extern.RetryParameters,
@@ -74,7 +74,7 @@ shaka.extern.RetryParameters;
  *   given.
  * @property {string} method
  *   The HTTP method to use for the request.
- * @property {ArrayBuffer} body
+ * @property {?BufferSource} body
  *   The body of the request.
  * @property {!Object.<string, string>} headers
  *   A mapping of headers for the request.  e.g.: {'HEADER': 'VALUE'}
@@ -100,7 +100,7 @@ shaka.extern.Request;
 /**
  * @typedef {{
  *   uri: string,
- *   data: ArrayBuffer,
+ *   data: BufferSource,
  *   headers: !Object.<string, string>,
  *   timeMs: (number|undefined),
  *   fromCache: (boolean|undefined)
@@ -117,7 +117,7 @@ shaka.extern.Request;
  * @property {string} originalUri
  *   The original URI passed to the browser for networking. This is before any
  *   redirects, but after request filters are executed.
- * @property {ArrayBuffer} data
+ * @property {BufferSource} data
  *   The body of the response.
  * @property {!Object.<string, string>} headers
  *   A map of response headers, if supported by the underlying protocol.

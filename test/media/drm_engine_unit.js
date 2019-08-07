@@ -682,11 +682,11 @@ describe('DrmEngine', () => {
       await initAndAttach();
       expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(3);
       expect(session1.generateRequest)
-          .toHaveBeenCalledWith('cenc', initData1.buffer);
+          .toHaveBeenCalledWith('cenc', initData1);
       expect(session2.generateRequest)
-          .toHaveBeenCalledWith('webm', initData2.buffer);
+          .toHaveBeenCalledWith('webm', initData2);
       expect(session3.generateRequest)
-          .toHaveBeenCalledWith('cenc', initData3.buffer);
+          .toHaveBeenCalledWith('cenc', initData3);
     });
 
     it('ignores duplicate init data overrides', async () => {
@@ -709,7 +709,7 @@ describe('DrmEngine', () => {
       await initAndAttach();
       expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
       expect(session1.generateRequest)
-          .toHaveBeenCalledWith('cenc', initData1.buffer);
+          .toHaveBeenCalledWith('cenc', initData1);
     });
 
     it('uses clearKeys config to override DrmInfo', async () => {
@@ -739,7 +739,7 @@ describe('DrmEngine', () => {
           .toBe('org.w3.clearkey');
 
       expect(session.generateRequest)
-          .toHaveBeenCalledWith('keyids', jasmine.any(ArrayBuffer));
+          .toHaveBeenCalledWith('keyids', jasmine.any(Uint8Array));
 
       const initData = JSON.parse(shaka.util.StringUtils.fromUTF8(
           session.generateRequest.calls.argsFor(0)[1]));
@@ -829,9 +829,9 @@ describe('DrmEngine', () => {
 
         expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(2);
         expect(session1.generateRequest)
-            .toHaveBeenCalledWith('webm', initData1.buffer);
+            .toHaveBeenCalledWith('webm', initData1);
         expect(session2.generateRequest)
-            .toHaveBeenCalledWith('cenc', initData2.buffer);
+            .toHaveBeenCalledWith('cenc', initData2);
       });
 
       it('suppresses duplicate initDatas', async () => {
@@ -846,7 +846,7 @@ describe('DrmEngine', () => {
 
         expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
         expect(session1.generateRequest)
-            .toHaveBeenCalledWith('webm', initData1.buffer);
+            .toHaveBeenCalledWith('webm', initData1);
       });
 
       it('is ignored when init data is in DrmInfo', async () => {

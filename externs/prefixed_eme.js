@@ -90,14 +90,14 @@ MediaKeyEvent.prototype.sessionId;
 
 
 /**
- * @type {Uint8Array}
+ * @type {!Uint8Array}
  * @const
  */
 MediaKeyEvent.prototype.initData;
 
 
 /**
- * @type {Uint8Array}
+ * @type {!Uint8Array}
  * @const
  */
 MediaKeyEvent.prototype.message;

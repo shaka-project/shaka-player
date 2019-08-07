@@ -80,6 +80,9 @@ shaka.test.TestScheme = class {
       const index = Number(segmentParts[3]);
       responseData = generator.getSegment(index + 1, 0, 0);
     }
+    if (!responseData) {
+      return shaka.util.AbortableOperation.failed(malformed);
+    }
 
     /** @type {shaka.extern.Response} */
     const ret = {uri: uri, originalUri: uri, data: responseData, headers: {}};
