@@ -423,7 +423,21 @@ shaka.extern.TextParserPlugin;
 
 
 /**
+ * @summary
  * An interface for plugins that display text.
+ *
+ * @description
+ * This should handle displaying the text cues on the page.  This is given the
+ * cues to display and told when to start and stop displaying.  This should only
+ * display the cues it is given and remove cues when told to.
+ *
+ * <p>
+ * This should only change whether it is displaying the cues through the
+ * <code>setTextVisibility</code> function; the app should not change the text
+ * visibility outside the top-level Player methods.  If you really want to
+ * control text visibility outside the Player methods, you must set the
+ * <code>streaming.alwaysStreamText</code> Player configuration value to
+ * <code>true</code>.
  *
  * @interface
  * @extends {shaka.util.IDestroyable}
@@ -448,9 +462,10 @@ shaka.extern.TextDisplayer = class {
 
   /**
    * Remove all cues that are fully contained by the given time range (relative
-   * to the presentation). |endTime| will be greater to equal to |startTime|.
-   * |remove| should only return |false| if the displayer has been destroyed. If
-   * the displayer has not been destroyed |remove| should return |true|.
+   * to the presentation). <code>endTime</code> will be greater to equal to
+   * <code>startTime</code>.  <code>remove</code> should only return
+   * <code>false</code> if the displayer has been destroyed. If the displayer
+   * has not been destroyed <code>remove</code> should return <code>true</code>.
    *
    * @param {number} startTime
    * @param {number} endTime
