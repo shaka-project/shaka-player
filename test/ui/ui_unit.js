@@ -365,6 +365,8 @@ describe('UI', function() {
     describe('resolutions menu', function() {
        /** @type {!HTMLElement} */
       let resolutionsMenu;
+      /** @type {shaka.ui.Controls} */
+      let controls;
 
       beforeEach(function() {
         let config = {
@@ -375,7 +377,9 @@ describe('UI', function() {
             'quality',
           ],
         };
-        createUIThroughAPI(videoContainer, video, config);
+        const ui = createUIThroughAPI(videoContainer, video, config);
+        controls = ui.getControls();
+        player = controls.getLocalPlayer();
 
         let resolutionsMenus =
             videoContainer.getElementsByClassName('shaka-resolutions');
@@ -427,8 +431,107 @@ describe('UI', function() {
             jasmine.any(Object), true);
       });
 
-      // TODO: integration test to ensure all resolutions are
-      // correctly represented
+      it('displays resolutions based on current stream', async () => {
+        /* eslint-disable indent */
+        // A manifest with different resolutions at different
+        // languages/channel-counts to test the current resolution list is
+        // filtered.
+        const manifest = new shaka.test.ManifestGenerator()
+            .addPeriod(0)
+              .addVariant(0)
+                .primary()
+                .language('en')
+                .addVideo(1).size(320, 240)
+                .addAudio(3).channelsCount(2)
+              .addVariant(4)
+                .language('en')
+                .addVideo(5).size(640, 480)
+                .addAudio(6).channelsCount(2)
+              .addVariant(7)  // Duplicate with 4
+                .language('en')
+                .addVideo(8).size(640, 480)
+                .addAudio(9).channelsCount(2)
+              .addVariant(10)
+                .language('en')
+                .addVideo(11).size(1280, 720)
+                .addAudio(12).channelsCount(6)
+              .addVariant(13)
+                .language('es')
+                .addVideo(14).size(1920, 1080)
+                .addAudio(15).channelsCount(2)
+              .addVariant(16)
+                .language('fr')
+                .addVideo(17).size(2560, 1440)
+                .addAudio(18).channelsCount(2)
+            .build();
+        /* eslint-enable indent */
+        const getResolutions = () => {
+          const resolutionButtons = videoContainer.querySelectorAll(
+              'button.explicit-resolution > span');
+          return Array.from(resolutionButtons)
+              .map((btn) => btn.innerText)
+              .sort();
+        };
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, function() {
+              return new shaka.test.FakeManifestParser(manifest);
+            });
+        player.configure('abr.enabled', false);
+
+        const tracks = player.getVariantTracks();
+        const en2 =
+            tracks.find((t) => t.language == 'en' && t.channelsCount == 2);
+        const en6 =
+            tracks.find((t) => t.language == 'en' && t.channelsCount == 6);
+        const es = tracks.find((t) => t.language == 'es');
+
+        // There are 3 variants with English 2-channel, but one is a duplicate
+        // and shouldn't appear in the list.
+        goog.asserts.assert(en2, 'Unable to find tracks');
+        player.selectVariantTrack(en2, true);
+        await updateResolutionMenu();
+        expect(getResolutions()).toEqual(['240p', '480p']);
+
+        // There is 1 variant with English 6-channel.
+        goog.asserts.assert(en6, 'Unable to find tracks');
+        player.selectVariantTrack(en6, true);
+        await updateResolutionMenu();
+        expect(getResolutions()).toEqual(['720p']);
+
+        // There is 1 variant with Spanish 2-channel.
+        goog.asserts.assert(es, 'Unable to find tracks');
+        player.selectVariantTrack(es, true);
+        await updateResolutionMenu();
+        expect(getResolutions()).toEqual(['1080p']);
+      });
+
+      /**
+       * Use internals to update the resolution menu.  Our fake manifest can
+       * cause problems with startup where the Player will get stuck using
+       * "deferred" switches, so we won't get events and the resolution menu
+       * won't update.
+       *
+       * @suppress {accessControls}
+       */
+      async function updateResolutionMenu() {
+        await shaka.test.Util.delay(0.1);
+        // TODO(#2089): We should be able to stop once we find one, but since
+        // there are multiple ResolutionMenu objects, we need to update all of
+        // them.
+        let found = false;
+        for (const elem of controls.elements_) {
+          if (elem instanceof shaka.ui.OverflowMenu) {
+            for (const child of elem.children_) {
+              if (child instanceof shaka.ui.ResolutionSelection) {
+                child.updateResolutionSelection_();
+                found = true;
+              }
+            }
+          }
+        }
+        goog.asserts.assert(found, 'Unable to find resolution menu');
+      }
     });
 
     // TODO: integration test to test audio language menu.

@@ -141,6 +141,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
   /** @private */
   updateResolutionSelection_() {
+    /** @type {!Array.<shaka.extern.Track>} */
     let tracks = this.player.getVariantTracks();
 
     // Hide resolution menu and button for audio-only content and src= content
@@ -153,20 +154,28 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     // Otherwise, restore it.
     shaka.ui.Utils.setDisplay(this.resolutionButton_, true);
 
-    tracks.sort(function(t1, t2) {
-      return t1.height - t2.height;
+    tracks.sort((t1, t2) => {
+      return t2.height - t1.height;
     });
-    tracks.reverse();
 
     // If there is a selected variant track, then we filter out any tracks in
     // a different language.  Then we use those remaining tracks to display the
     // available resolutions.
     const selectedTrack = tracks.find((track) => track.active);
     if (selectedTrack) {
-      const language = selectedTrack.language;
-      // Filter by current audio language.
-      tracks = tracks.filter((track) => track.language == language);
+      // Filter by current audio language and channel count.
+      tracks = tracks.filter(
+          (track) => track.language == selectedTrack.language &&
+              track.channelsCount == selectedTrack.channelsCount);
     }
+
+    // Remove duplicate entries with the same height.  This can happen if
+    // we have multiple resolutions of audio.  Pick an arbitrary one.
+    tracks = tracks.filter((track, idx) => {
+      // Keep the first one with the same height.
+      const otherIdx = tracks.findIndex((t) => t.height == track.height);
+      return otherIdx == idx;
+    });
 
     // Remove old shaka-resolutions
     // 1. Save the back to menu button
