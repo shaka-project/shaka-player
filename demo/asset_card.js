@@ -63,7 +63,8 @@ shakaDemo.AssetCard = class {
     this.card_.appendChild(titleDiv);
     const titleText = document.createElement('h2');
     titleText.classList.add('mdl-card__title-text');
-    titleText.textContent = asset.shortName || asset.name;
+    titleText.textContent =
+        isFeatured ? (asset.shortName || asset.name) : asset.name;
     titleDiv.appendChild(titleText);
 
     if (asset.iconUri) {
