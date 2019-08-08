@@ -1221,8 +1221,7 @@ describe('HlsParser', () => {
   it('drops failed text streams when configured to', async () => {
     const master = [
       '#EXTM3U\n',
-      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
-      'URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng"\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,vtt",',
       'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
       'video\n',
@@ -1235,14 +1234,6 @@ describe('HlsParser', () => {
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
       'main.mp4',
-    ].join('');
-
-    const textMedia = [
-      '#EXTM3U\n',
-      '#EXT-X-PLAYLIST-TYPE:VOD\n',
-      '#EXTINF:5,\n',
-      '#EXT-X-BYTERANGE:121090@616\n',
-      'main.foo',
     ].join('');
 
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -1258,8 +1249,6 @@ describe('HlsParser', () => {
         .setResponseText('test:/master', master)
         .setResponseText('test:/audio', media)
         .setResponseText('test:/video', media)
-        .setResponseText('test:/text', textMedia)
-        .setResponseText('test:/main.foo', '')
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
 
@@ -1684,9 +1673,31 @@ describe('HlsParser', () => {
           '#EXT-X-MAP:URI="init.mp4"\n',
           '#EXTINF:5,\n',
           '#EXT-X-BYTERANGE:121090@616\n',
-          'main.exe',
+          'main.mp4',
         ].join('');
 
+        await verifyMissingAttribute(master, media, 'URI');
+      });
+
+      it('text uri if not ignoring text stream failure', async () => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng"\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,vtt",',
+          'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
+          'video\n',
+        ].join('');
+
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXTINF:5,\n',
+          '#EXT-X-BYTERANGE:121090@616\n',
+          'main.mp4',
+        ].join('');
+
+        config.hls.ignoreTextStreamFailures = false;
         await verifyMissingAttribute(master, media, 'URI');
       });
     });

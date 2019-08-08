@@ -48,13 +48,6 @@ describe('Mp4TtmlParser', () => {
     new shaka.text.Mp4TtmlParser().parseInit(ttmlInitSegment);
   });
 
-  it('parses media segment', () => {
-    const parser = new shaka.text.Mp4TtmlParser();
-    parser.parseInit(ttmlInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    const ret = parser.parseMedia(ttmlSegment, time);
-    expect(ret.length).toBe(10);
-  });
 
   it('handles media segments with multiple mdats', () => {
     const parser = new shaka.text.Mp4TtmlParser();
@@ -91,17 +84,70 @@ describe('Mp4TtmlParser', () => {
         .toThrow(error);
   });
 
-  it('can parse individual cues', () => {
+  it('parses media segment', () => {
+    const cues = [
+      {
+        startTime: 23,
+        endTime: 24.5,
+        payload: 'You\'re a jerk, Thom.',
+      },
+      {
+        startTime: 25,
+        endTime: 27,
+        payload: 'Look Celia, we have to follow our passions;',
+      },
+      {
+        startTime: 27,
+        endTime: 30.5,
+        payload: '...you have your robotics, and I\n'+
+            'just want to be awesome in space.',
+      },
+      {
+        startTime: 30.8,
+        endTime: 34,
+        payload: 'Why don\'t you just admit that\nyou\'re freaked out by my' +
+            ' robot hand?',
+      },
+      {
+        startTime: 34.5,
+        endTime: 36,
+        payload: 'I\'m not freaked out by- it\'s...',
+      },
+      {
+        startTime: 37,
+        endTime: 38,
+        payload: '...alright! Fine!',
+      },
+      {
+        startTime: 38,
+        endTime: 41,
+        payload: 'I\'m freaked out! I have nightmares\nthat I\'m being' +
+            ' chased...',
+      },
+      {
+        startTime: 41,
+        endTime: 42,
+        payload: '...by these giant robotic claws of death...',
+      },
+      {
+        startTime: 42.2,
+        endTime: 45,
+        payload: '"Fourty years later"\nWhatever, Thom. We\'re done.',
+      },
+      {
+        startTime: 50,
+        endTime: 53.5,
+        payload: 'Robot\'s memory synced and locked!',
+      },
+    ];
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
     const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let segment = ttmlSegment;
-    if (parser.supportsPartial()) {
-      segment = segment.subarray(0, 1150);
-    }
-    const ret = parser.parseFirstCue(segment, time);
-    expect(ret.startTime).toBe(23);
-    expect(ret.endTime).toBe(24.5);
-    expect(ret.payload).toBe('You\'re a jerk, Thom.');
+    const result = parser.parseMedia(ttmlSegment, time);
+    verifyHelper(cues, result);
   });
+
+  function verifyHelper(/** !Array */ expected, /** !Array */ actual) {
+    expect(actual).toEqual(expected.map((c) => jasmine.objectContaining(c)));
+  }
 });

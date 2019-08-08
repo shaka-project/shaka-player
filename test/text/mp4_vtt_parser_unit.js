@@ -191,20 +191,6 @@ describe('Mp4VttParser', () => {
         .toThrow(error);
   });
 
-  it('can parse individual cues', () => {
-    const parser = new shaka.text.Mp4VttParser();
-    parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let segment = vttSegment;
-    if (parser.supportsPartial()) {
-      segment = segment.subarray(0, 190);
-    }
-    const result = parser.parseFirstCue(segment, time);
-    expect(result.startTime).toBe(111.8);
-    expect(result.endTime).toBe(115.8);
-    expect(result.payload).toBe('It has shed much innocent blood.\n');
-  });
-
   function verifyHelper(/** !Array */ expected, /** !Array */ actual) {
     expect(actual).toEqual(expected.map((c) => jasmine.objectContaining(c)));
   }
