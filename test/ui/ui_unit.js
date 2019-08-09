@@ -188,6 +188,27 @@ describe('UI', () => {
       videoContainer.appendChild(video);
     });
 
+    it('goes into fullscreen on double click', async () => {
+      const config = {
+        controlPanelElements: [
+          'overflow_menu',
+        ],
+        overflowMenuButtons: [
+          'quality',
+        ],
+      };
+      const ui = UiUtils.createUIThroughAPI(videoContainer, video, config);
+      const controls = ui.getControls();
+
+      const spy = spyOn(controls, 'toggleFullScreen');
+
+      const controlsContainer =
+          videoContainer.querySelector('.shaka-controls-container');
+      UiUtils.simulateEvent(controlsContainer, 'dblclick');
+      await Util.shortDelay();
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
     describe('all the controls', () => {
       /** @type {!HTMLElement} */
       let controlsContainer;

@@ -148,6 +148,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Configure and create the layout of the controls
     this.configure(this.config_);
+    this.addEventListeners_();
 
     /**
      * The pressed keys set is used to record which keys are currently pressed
@@ -368,7 +369,27 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Init the play state
     this.onPlayStateChange_();
 
-    this.addEventListeners_();
+    // Elements that should not propagate clicks (controls panel, menus)
+    const noPropagationElements = this.videoContainer_.getElementsByClassName(
+        'shaka-no-propagation');
+    for (const element of noPropagationElements) {
+      const cb = (event) => event.stopPropagation();
+      this.eventManager_.listen(element, 'click', cb);
+      this.eventManager_.listen(element, 'dblclick', cb);
+    }
+
+    // Keep showing controls if one of those elements is hovered
+    const showControlsElements = this.videoContainer_.getElementsByClassName(
+        'shaka-show-controls-on-mouse-over');
+    for (const element of showControlsElements) {
+      this.eventManager_.listen(element, 'mouseover', () => {
+        this.overrideCssShowControls_ = true;
+      });
+
+      this.eventManager_.listen(element, 'mouseleave', () => {
+        this.overrideCssShowControls_ = false;
+      });
+    }
   }
 
   /**
@@ -574,12 +595,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (document.pictureInPictureElement) {
           await document.exitPictureInPicture();
         }
+        await this.videoContainer_.requestFullscreen();
       } catch (error) {
         this.dispatchEvent(new shaka.util.FakeEvent('error', {
           detail: error,
         }));
       }
-      await this.videoContainer_.requestFullscreen();
     }
   }
 
@@ -687,6 +708,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         'shaka-show-controls-on-mouse-over');
     this.bottomControls_.appendChild(this.controlsButtonPanel_);
 
+    // Overflow menus are supposed to hide once you click elsewhere
+    // on the video element. The code in onContainerClick_ ensures that.
+    // However, clicks on controls panel don't propagate to the container,
+    // so we have to explicitly hide the menus onclick here.
+    this.eventManager_.listen(this.controlsButtonPanel_, 'click', () => {
+      this.hideSettingsMenus();
+    });
+
     // Create the elements specified by controlPanelElements
     for (const name of this.config_.controlPanelElements) {
       if (shaka.ui.ControlsPanel.elementNamesToFactories_.get(name)) {
@@ -700,7 +729,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
-  /** @private */
+  /**
+   * Adds static event listeners.  This should only add event listeners to
+   * things that don't change (e.g. Player).  Dynamic elements (e.g. controls)
+   * should have their event listeners added when they are created.
+   *
+   * @private
+   */
   addEventListeners_() {
     this.eventManager_.listen(this.player_, 'buffering', () => {
       this.onBufferingStateChange_();
@@ -714,11 +749,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(
         this.controlsContainer_, 'dblclick', () => this.toggleFullScreen());
-
-    // If double-clicking on the bottom bar, don't allow the click to propagate
-    // to toggle fullscreen above.
-    this.eventManager_.listen(
-        this.bottomControls_, 'dblclick', (e) => e.stopPropagation());
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
@@ -734,28 +764,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onPlayStateChange_();
     });
 
-    // Elements that should not propagate clicks (controls panel, menus)
-    const noPropagationElements = this.videoContainer_.getElementsByClassName(
-        'shaka-no-propagation');
-    for (const element of noPropagationElements) {
-      this.eventManager_.listen(element, 'click', (event) => {
-        event.stopPropagation();
-      });
-    }
-
-    // Keep showing controls if one of those elements is hovered
-    const showControlsElements = this.videoContainer_.getElementsByClassName(
-        'shaka-show-controls-on-mouse-over');
-    for (const element of showControlsElements) {
-      this.eventManager_.listen(element, 'mouseover', () => {
-        this.overrideCssShowControls_ = true;
-      });
-
-      this.eventManager_.listen(element, 'mouseleave', () => {
-        this.overrideCssShowControls_ = false;
-      });
-    }
-
     this.eventManager_.listen(this.videoContainer_, 'mousemove', (e) => {
       this.onMouseMove_(e);
     });
@@ -770,14 +778,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(this.videoContainer_, 'mouseleave', () => {
       this.onMouseLeave_();
-    });
-
-    // Overflow menus are supposed to hide once you click elsewhere
-    // on the video element. The code in onContainerClick_ ensures that.
-    // However, clicks on controls panel don't propagate to the container,
-    // so we have to explicitly hide the menus onclick here.
-    this.eventManager_.listen(this.controlsButtonPanel_, 'click', () => {
-      this.hideSettingsMenus();
     });
 
     this.eventManager_.listen(this.castProxy_, 'caststatuschanged', () => {

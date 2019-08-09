@@ -31,6 +31,7 @@ shaka.test.UiUtils = class {
     // Create UI
     config = config || {};
     const ui = new shaka.ui.Overlay(player, videoContainer, video);
+    ui.getControls().addEventListener('error', (/** * */ e) => fail(e.detail));
     ui.configure(config);
     return ui;
   }
@@ -120,5 +121,24 @@ shaka.test.UiUtils = class {
     less.registerStylesheetsImmediately();
     await less.refresh(/* reload */ true,
         /* modifyVars*/ false, /* clearFileCache */ false);
+  }
+
+  /**
+   * Simulates a native event (e.g. 'click') on the given element.
+   *
+   * @param {EventTarget} target
+   * @param {string} name
+   */
+  static simulateEvent(target, name) {
+    const type = {
+      'click': 'MouseEvent',
+      'dblclick': 'MouseEvent',
+    }[name] || 'CustomEvent';
+
+    // Note we can't use the MouseEvent constructor since it isn't supported on
+    // IE11.
+    const event = document.createEvent(type);
+    event.initEvent(name, true, true);
+    target.dispatchEvent(event);
   }
 };
