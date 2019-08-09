@@ -181,6 +181,27 @@ describe('UI', function() {
       videoContainer.appendChild(video);
     });
 
+    it('goes into fullscreen on double click', async () => {
+      const config = {
+        controlPanelElements: [
+          'overflow_menu',
+        ],
+        overflowMenuButtons: [
+          'quality',
+        ],
+      };
+      const ui = createUIThroughAPI(videoContainer, video, config);
+      const controls = ui.getControls();
+
+      const spy = spyOn(controls, 'toggleFullScreen');
+
+      const controlsContainer =
+          videoContainer.querySelector('.shaka-controls-container');
+      shaka.test.UiUtils.simulateEvent(controlsContainer, 'dblclick');
+      await shaka.test.Util.delay(0.1);
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
     describe('all the controls', function() {
        /** @type {!HTMLElement} */
       let controlsContainer;
@@ -541,6 +562,7 @@ describe('UI', function() {
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
    * @param {!Object=} config
+   * @return {!shaka.ui.Overlay}
    */
   function createUIThroughAPI(videoContainer, video, config) {
     player = new shaka.Player(video);
@@ -548,6 +570,7 @@ describe('UI', function() {
     config = config || {};
     const ui = new shaka.ui.Overlay(player, videoContainer, video);
     ui.configure(config);
+    return ui;
   }
 
   /**

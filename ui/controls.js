@@ -380,9 +380,28 @@ shaka.ui.Controls.prototype.configure = function(config) {
   // Init the play state
   this.onPlayStateChange_();
 
-  this.addEventListeners_();
-};
+  // Elements that should not propagate clicks (controls panel, menus)
+  const noPropagationElements = this.videoContainer_.getElementsByClassName(
+      'shaka-no-propagation');
+  for (const element of noPropagationElements) {
+    const cb = (event) => event.stopPropagation();
+    this.eventManager_.listen(element, 'click', cb);
+    this.eventManager_.listen(element, 'dblclick', cb);
+  }
 
+  // Keep showing controls if one of those elements is hovered
+  const showControlsElements = this.videoContainer_.getElementsByClassName(
+      'shaka-show-controls-on-mouse-over');
+  for (const element of showControlsElements) {
+    this.eventManager_.listen(element, 'mouseover', () => {
+      this.overrideCssShowControls_ = true;
+    });
+
+    this.eventManager_.listen(element, 'mouseleave', () => {
+      this.overrideCssShowControls_ = false;
+    });
+  }
+};
 
 /**
  * Enable or disable the custom controls. Enabling disables native
@@ -730,6 +749,14 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
   this.controlsButtonPanel_.classList.add('shaka-show-controls-on-mouse-over');
   this.bottomControls_.appendChild(this.controlsButtonPanel_);
 
+  // Overflow menus are supposed to hide once you click elsewhere
+  // on the video element. The code in onContainerClick_ ensures that.
+  // However, clicks on controls panel don't propagate to the container,
+  // so we have to explicitly hide the menus onclick here.
+  this.eventManager_.listen(this.controlsButtonPanel_, 'click', () => {
+    this.hideSettingsMenus();
+  });
+
   // Create the elements specified by controlPanelElements
   for (let i = 0; i < this.config_.controlPanelElements.length; i++) {
     const name = this.config_.controlPanelElements[i];
@@ -766,6 +793,9 @@ shaka.ui.Controls.prototype.onScreenRotation_ = function() {
 
 
 /**
+ * Adds static event listeners.  This should only add event listeners to
+ * things that don't change (e.g. Player).  Dynamic elements (e.g. controls)
+ * should have their event listeners added when they are created.
  * @private
  */
 shaka.ui.Controls.prototype.addEventListeners_ = function() {
@@ -784,11 +814,6 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   this.eventManager_.listen(
       this.controlsContainer_, 'dblclick', () => this.toggleFullScreen());
 
-  // If double-clicking on the bottom bar, don't allow the click to propagate
-  // to toggle fullscreen above.
-  this.eventManager_.listen(
-      this.bottomControls_, 'dblclick', (e) => e.stopPropagation());
-
   this.eventManager_.listen(this.video_,
       'play', this.onPlayStateChange_.bind(this));
   this.eventManager_.listen(this.video_,
@@ -799,32 +824,6 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   this.eventManager_.listen(this.video_,
       'ended', this.onPlayStateChange_.bind(this));
 
-
-  // Elements that should not propagate clicks (controls panel, menus)
-  const noPropagationElements = this.videoContainer_.getElementsByClassName(
-      'shaka-no-propagation');
-  for (let i = 0; i < noPropagationElements.length; i++) {
-    let element = noPropagationElements[i];
-    this.eventManager_.listen(element,
-      'click', function(event) { event.stopPropagation(); });
-  }
-
-  // Keep showing controls if one of those elements is hovered
-  let showControlsElements = this.videoContainer_.getElementsByClassName(
-      'shaka-show-controls-on-mouse-over');
-  for (let i = 0; i < showControlsElements.length; i++) {
-    let element = showControlsElements[i];
-    this.eventManager_.listen(element,
-      'mouseover', () => {
-        this.overrideCssShowControls_ = true;
-      });
-
-    this.eventManager_.listen(element,
-      'mouseleave', () => {
-       this.overrideCssShowControls_ = false;
-      });
-  }
-
   this.eventManager_.listen(this.videoContainer_,
       'mousemove', this.onMouseMove_.bind(this));
   this.eventManager_.listen(this.videoContainer_,
@@ -833,14 +832,6 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
       'touchend', this.onMouseMove_.bind(this), {passive: true});
   this.eventManager_.listen(this.videoContainer_,
       'mouseleave', this.onMouseLeave_.bind(this));
-
-  // Overflow menus are supposed to hide once you click elsewhere
-  // on the video element. The code in onContainerClick_ ensures that.
-  // However, clicks on controls panel don't propagate to the container,
-  // so we have to explicitly hide the menus onclick here.
-  this.eventManager_.listen(this.controlsButtonPanel_, 'click', () => {
-    this.hideSettingsMenusTimer_.tickNow();
-  });
 
   this.eventManager_.listen(this.castProxy_,
       'caststatuschanged', (e) => {
