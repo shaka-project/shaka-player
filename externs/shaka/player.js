@@ -573,9 +573,22 @@ shaka.extern.DashManifestConfiguration;
 
 /**
  * @typedef {{
+ *   ignoreTextStreamFailures: boolean
+ * }}
+ *
+ * @property {boolean} ignoreTextStreamFailures
+ *   If true, ignore any errors in a text stream and filter out those streams.
+ * @exportDoc
+ */
+shaka.extern.HlsManifestConfiguration;
+
+
+/**
+ * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   availabilityWindowOverride: number,
- *   dash: shaka.extern.DashManifestConfiguration
+ *   dash: shaka.extern.DashManifestConfiguration,
+ *   hls: shaka.extern.HlsManifestConfiguration
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -587,6 +600,8 @@ shaka.extern.DashManifestConfiguration;
  *   this parameter.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
+ * @property {shaka.extern.HlsManifestConfiguration} hls
+ *   Advanced parameters used by the HLS manifest parser.
  *
  * @exportDoc
  */
