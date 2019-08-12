@@ -32,16 +32,17 @@
  *
  * @property {number} timestamp
  *   The timestamp the choice was made, in seconds since 1970
- *   (i.e. Date.now() / 1000).
+ *   (i.e. <code>Date.now() / 1000</code>).
  * @property {number} id
  *   The id of the track that was chosen.
  * @property {string} type
- *   The type of track chosen ('variant' or 'text').
+ *   The type of track chosen (<code>'variant'</code> or <code>'text'</code>).
  * @property {boolean} fromAdaptation
- *   True if the choice was made by AbrManager for adaptation; false if it
- *   was made by the application through selectTrack.
+ *   <code>true</code> if the choice was made by AbrManager for adaptation;
+ *   <code>false</code> if it was made by the application through
+ *   <code>selectTrack</code>.
  * @property {?number} bandwidth
- *   The bandwidth of the chosen track (null for text).
+ *   The bandwidth of the chosen track (<code>null</code> for text).
  * @exportDoc
  */
 shaka.extern.TrackChoice;
@@ -56,10 +57,10 @@ shaka.extern.TrackChoice;
  *
  * @property {number} timestamp
  *   The timestamp the state was entered, in seconds since 1970
- *   (i.e. Date.now() / 1000).
+ *   (i.e. <code>Date.now() / 1000</code>).
  * @property {string} state
- *   The state the player entered.  This could be 'buffering', 'playing',
- *   'paused', or 'ended'.
+ *   The state the player entered.  This could be <code>'buffering'</code>,
+ *   <code>'playing'</code>, <code>'paused'</code>, or <code>'ended'</code>.
  * @property {number} duration
  *   The number of seconds the player was in this state.  If this is the last
  *   entry in the list, the player is still in this state, so the duration will
@@ -91,7 +92,8 @@ shaka.extern.StateChange;
  * @description
  * Contains statistics and information about the current state of the player.
  * This is meant for applications that want to log quality-of-experience (QoE)
- * or other stats.  These values will reset when load() is called again.
+ * or other stats.  These values will reset when <code>load()</code> is called
+ * again.
  *
  * @property {number} width
  *   The width of the current video track.
@@ -101,18 +103,18 @@ shaka.extern.StateChange;
  *   The bandwidth required for the current streams (total, in bit/sec).
  *
  * @property {number} decodedFrames
- *   The total number of frames decoded by the Player.  This may be NaN if this
- *   is not supported by the browser.
+ *   The total number of frames decoded by the Player.  This may be
+ *   <code>NaN</code> if this is not supported by the browser.
  * @property {number} droppedFrames
- *   The total number of frames dropped by the Player.  This may be NaN if this
- *   is not supported by the browser.
+ *   The total number of frames dropped by the Player.  This may be
+ *   <code>NaN</code> if this is not supported by the browser.
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
  *
  * @property {number} loadLatency
  *   This is the number of seconds it took for the video element to have enough
  *   data to begin playback.  This is measured from the time load() is called to
- *   the time the 'loadeddata' event is fired by the media element.
+ *   the time the <code>'loadeddata'</code> event is fired by the media element.
  * @property {number} playTime
  *   The total time spent in a playing state in seconds.
  * @property {number} pauseTime
@@ -159,7 +161,8 @@ shaka.extern.BufferedRange;
  * Contains information about the current buffered ranges.
  *
  * @property {!Array.<shaka.extern.BufferedRange>} total
- *   The combined audio/video buffered ranges, reported by |video.buffered|.
+ *   The combined audio/video buffered ranges, reported by
+ *   <code>video.buffered</code>.
  * @property {!Array.<shaka.extern.BufferedRange>} audio
  *   The buffered ranges for audio content.
  * @property {!Array.<shaka.extern.BufferedRange>} video
@@ -215,18 +218,18 @@ shaka.extern.BufferedInfo;
  *   visible/audible in the buffer).
  *
  * @property {string} type
- *   The type of track, either 'variant' or 'text'.
+ *   The type of track, either <code>'variant'</code> or <code>'text'</code>.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  *
  * @property {string} language
- *   The language of the track, or 'und' if not given.  This is the exact
- *   value provided in the manifest; it may need to be normalized.
+ *   The language of the track, or <code>'und'</code> if not given.  This is the
+ *   exact value provided in the manifest; it may need to be normalized.
  * @property {?string} label
  *   The track label, which is unique text that should describe the track.
  * @property {?string} kind
- *   (only for text tracks) The kind of text track, either 'caption' or
- *   'subtitle'.
+ *   (only for text tracks) The kind of text track, either
+ *   <code>'caption'</code> or <code>'subtitle'</code>.
  * @property {?number} width
  *   The video width provided in the manifest, if present.
  * @property {?number} height
@@ -248,10 +251,12 @@ shaka.extern.BufferedInfo;
  *   indicates which track Shaka will use when the user's language preference
  *   cannot be satisfied.
  * @property {!Array.<string>} roles
- *   The roles of the track, e.g. 'main', 'caption', or 'commentary'.
+ *   The roles of the track, e.g. <code>'main'</code>, <code>'caption'</code>,
+ *   or <code>'commentary'</code>.
  * @property {Array.<string>} audioRoles
- *   The roles of the audio in the track, e.g. 'main' or 'commentary'.
- *   Will be null for text tracks or variant tracks without audio.
+ *   The roles of the audio in the track, e.g. <code>'main'</code> or
+ *   <code>'commentary'</code>. Will be null for text tracks or variant tracks
+ *   without audio.
  * @property {?number} videoId
  *   (only for variant tracks) The video stream id.
  * @property {?number} audioId
@@ -308,9 +313,11 @@ shaka.extern.Track;
  * @property {number} maxHeight
  *   The maximum height of a video track, in pixels.
  * @property {number} minPixels
- *   The minimum number of total pixels in a video track (i.e. width * height).
+ *   The minimum number of total pixels in a video track (i.e.
+ *   <code>width * height</code>).
  * @property {number} maxPixels
- *   The maximum number of total pixels in a video track (i.e. width * height).
+ *   The maximum number of total pixels in a video track (i.e.
+ *   <code>width * height</code>).
  *
  * @property {number} minBandwidth
  *   The minimum bandwidth of a variant track, in bit/sec.
@@ -351,8 +358,8 @@ shaka.extern.DrmSupportType;
  *   The keys are media MIME types.
  * @property {!Object.<string, ?shaka.extern.DrmSupportType>} drm
  *   A map of supported key systems.
- *   The keys are the key system names.  The value is null if it is not
- *   supported.  Key systems not probed will not be in this dictionary.
+ *   The keys are the key system names.  The value is <code>null</code> if it is
+ *   not supported.  Key systems not probed will not be in this dictionary.
  *
  * @exportDoc
  */
@@ -460,22 +467,23 @@ shaka.extern.DashContentProtectionCallback;
  * @property {string} videoRobustness
  *   A key-system-specific string that specifies a required security level for
  *   video.
- *   <i>Defaults to '', i.e., no specific robustness required.</i> <br>
+ *   <i>Defaults to <code>''</code>, i.e., no specific robustness required.</i>
  * @property {string} audioRobustness
  *   A key-system-specific string that specifies a required security level for
  *   audio.
- *   <i>Defaults to '', i.e., no specific robustness required.</i> <br>
+ *   <i>Defaults to <code>''</code>, i.e., no specific robustness required.</i>
  * @property {Uint8Array} serverCertificate
  *   <i>Defaults to null.</i> <br>
- *   <i>An empty certificate (byteLength 0) will be treated as null.</i> <br>
+ *   <i>An empty certificate (<code>byteLength==0</code>) will be treated as
+ *   <code>null</code>.</i> <br>
  *   <i>A certificate will be requested from the license server if
  *   required.</i> <br>
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
  * @property {string} individualizationServer
- *   The server that handles an 'individualiation-request'.  If the server isn't
- *   given, it will default to the license server.
+ *   The server that handles an <code>'individualiation-request'</code>.  If the
+ *   server isn't given, it will default to the license server.
  *
  * @exportDoc
  */
@@ -497,7 +505,8 @@ shaka.extern.AdvancedDrmConfiguration;
  * @property {!Object.<string, string>} servers
  *   <i>Required for all but the clear key CDM.</i> <br>
  *   A dictionary which maps key system IDs to their license servers.
- *   For example, {'com.widevine.alpha': 'https://example.com/drm'}.
+ *   For example,
+ *   <code>{'com.widevine.alpha': 'https://example.com/drm'}</code>.
  * @property {!Object.<string, string>} clearKeys
  *   <i>Forces the use of the Clear Key CDM.</i>
  *   A map of key IDs (hex) to keys (hex).
@@ -539,8 +548,8 @@ shaka.extern.DrmConfiguration;
  *   ContentProtection node.  Return null if not recognized.
  * @property {string} clockSyncUri
  *   A default clock sync URI to be used with live streams which do not
- *   contain any clock sync information.  The "Date" header from this URI
- *   will be used to determine the current time.
+ *   contain any clock sync information.  The <code>Date</code> header from this
+ *   URI will be used to determine the current time.
  * @property {boolean} ignoreDrmInfo
  *   If true will cause DASH parser to ignore DRM information specified
  *   by the manifest and treat it as if it signaled no particular key
@@ -551,21 +560,25 @@ shaka.extern.DrmConfiguration;
  *   to the application and will result in a playback failure. Defaults to
  *   false if not provided.
  * @property {number} defaultPresentationDelay
- *   A default presentationDelay if suggestedPresentationDelay is missing
- *   in the MPEG DASH manifest. This has to be bigger than minBufferTime * 1.5.
+ *   A default <code>presentationDelay</code> if
+ *   <code>suggestedPresentationDelay</code> is missing in the MPEG DASH
+ *   manifest. This has to be bigger than <code>minBufferTime * 1.5</code>.
  * @property {boolean} ignoreMinBufferTime
- *   If true will cause DASH parser to ignore minBufferTime from manifest.
- *   It allows player config to take precedence over manifest for
- *   rebufferingGoal. Defaults to false if not provided.
+ *   If true will cause DASH parser to ignore <code>minBufferTime</code> from
+ *   manifest. It allows player config to take precedence over manifest for
+ *   <code>rebufferingGoal</code>. Defaults to <code>false</code> if not
+ *   provided.
  * @property {boolean} autoCorrectDrift
- *   If true, ignore the availabilityStartTime in the manifest and instead use
- *   the segments to determine the live edge.  This allows us to play streams
- *   that have a lot of drift.  If false, we can't play content where the
- *   manifest specifies segments in the future. Defaults to true.
+ *   If <code>true</code>, ignore the <code>availabilityStartTime</code> in the
+ *   manifest and instead use the segments to determine the live edge.  This
+ *   allows us to play streams that have a lot of drift.  If <code>false</code>,
+ *   we can't play content where the manifest specifies segments in the future.
+ *   Defaults to <code>true</code>.
  * @property {number} initialSegmentLimit
- *   The maximum number of initial segments to generate for SegmentTemplate with
- *   fixed-duration segments.  This is limited to avoid excessive memory
- *   consumption with very large timeShiftBufferDepth values.
+ *   The maximum number of initial segments to generate for
+ *   <code>SegmentTemplate</code> with fixed-duration segments.  This is limited
+ *   to avoid excessive memory consumption with very large
+ *   <code>timeShiftBufferDepth</code> values.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -577,7 +590,8 @@ shaka.extern.DashManifestConfiguration;
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
- *   If true, ignore any errors in a text stream and filter out those streams.
+ *   If <code>true</code>, ignore any errors in a text stream and filter out
+ *   those streams.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -595,9 +609,9 @@ shaka.extern.HlsManifestConfiguration;
  *   Retry parameters for manifest requests.
  * @property {number} availabilityWindowOverride
  *   A number, in seconds, that overrides the availability window in the
- *   manifest, or NaN if the default value should be used.  This is enforced by
- *   the manifest parser, so custom manifest parsers should take care to honor
- *   this parameter.
+ *   manifest, or <code>NaN</code> if the default value should be used.  This is
+ *   enforced by the manifest parser, so custom manifest parsers should take
+ *   care to honor this parameter.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
@@ -650,27 +664,29 @@ shaka.extern.ManifestConfiguration;
  *   in buffer behind the playhead when it appends a new media segment.
  *   The StreamingEngine will evict content to meet this limit.
  * @property {boolean} ignoreTextStreamFailures
- *   If true, the player will ignore text stream failures and continue playing
- *   other streams.
+ *   If <code>true</code>, the player will ignore text stream failures and
+ *   continue playing other streams.
  * @property {boolean} alwaysStreamText
- *   If true, always stream text tracks, regardless of whether or not they are
- *   shown.  This is necessary when using the browser's built-in controls, which
- *   are not capable of signaling display state changes back to Shaka Player.
- *   Defaults to false.
+ *   If <code>true</code>, always stream text tracks, regardless of whether or
+ *   not they are shown.  This is necessary when using the browser's built-in
+ *   controls, which are not capable of signaling display state changes back to
+ *   Shaka Player.
+ *   Defaults to <code>false</code>.
  * @property {boolean} startAtSegmentBoundary
- *   If true, adjust the start time backwards so it is at the start of a
- *   segment. This affects both explicit start times and calculated start time
- *   for live streams. This can put us further from the live edge. Defaults to
- *   false.
+ *   If <code>true</code>, adjust the start time backwards so it is at the start
+ *   of a segment. This affects both explicit start times and calculated start
+ *   time for live streams. This can put us further from the live edge. Defaults
+ *   to <code>false</code>.
  * @property {number} smallGapLimit
  *   The limit (in seconds) for a gap in the media to be considered "small".
  *   Small gaps are jumped automatically without events.  Large gaps result
  *   in a Player event and can be jumped.
  * @property {boolean} jumpLargeGaps
- *   If true, jump large gaps in addition to small gaps.  The event will be
- *   raised first.  Then, if the app doesn't call preventDefault() on the event,
- *   the Player will jump the gap.  If false, then the event will be raised,
- *   but the gap will not be jumped.
+ *   If <code>true</code>, jump large gaps in addition to small gaps.  A
+ *   <code>largegap</code> event will be raised first.  Then, if the app doesn't
+ *   call <code>preventDefault()</code> on the event, the Player will jump the
+ *   gap.  If <code>false</code>, then the event will be raised, but the gap
+ *   will not be jumped.
  * @property {number} durationBackoff
  *   By default, we will not allow seeking to exactly the duration of a
  *   presentation.  This field is the number of seconds before duration we will
@@ -678,11 +694,11 @@ shaka.extern.ManifestConfiguration;
  *   To disable this behavior, the config can be set to 0.  We recommend using
  *   the default value unless you have a good reason not to.
  * @property {boolean} forceTransmuxTS
- *   If this is true, we will transmux TS content even if not strictly necessary
- *   for the assets to be played.  Shaka Player currently only supports CEA 708
- *   captions by transmuxing, so this value is necessary for enabling them on
- *   platforms with native TS support like Edge or Chromecast.
- *   This value defaults to false.
+ *   If this is <code>true</code>, we will transmux TS content even if not
+ *   strictly necessary for the assets to be played.  Shaka Player currently
+ *   only supports CEA 708 captions by transmuxing, so this value is necessary
+ *   for enabling them on platforms with native TS support like Edge or
+ *   Chromecast. This value defaults to <code>false</code>.
  * @property {number} safeSeekOffset
  *   The amount of seconds that should be added when repositioning the playhead
  *   after falling out of the availability window or seek. This gives the player
@@ -690,9 +706,9 @@ shaka.extern.ManifestConfiguration;
  *   jump in the stream skipping more content. This is helpful for lower
  *   bandwidth scenarios. Defaults to 5 if not provided.
  * @property {boolean} stallEnabled
- *   When set to |true|, the stall detector logic will run, skipping forward
- *   |stallSkip| seconds whenever the playhead stops moving for |stallThreshold|
- *   seconds.
+ *   When set to <code>true</code>, the stall detector logic will run, skipping
+ *   forward <code>stallSkip</code> seconds whenever the playhead stops moving
+ *   for <code>stallThreshold</code> seconds.
  * @property {number} stallThreshold
  *   The maximum number of seconds that may elapse without the playhead moving
  *   (when playback is expected) before it will be labeled as a stall.
@@ -723,10 +739,10 @@ shaka.extern.StreamingConfiguration;
  *   The restrictions to apply to ABR decisions.  These are "soft" restrictions.
  *   Any track that fails to meet these restrictions will not be selected
  *   automatically, but will still appear in the track list and can still be
- *   selected via selectVariantTrack().  If no tracks meet these restrictions,
- *   AbrManager should not fail, but choose a low-res or low-bandwidth variant
- *   instead.  It is the responsibiliy of AbrManager implementations to follow
- *   these rules and implement this behavior.
+ *   selected via <code>selectVariantTrack()</code>.  If no tracks meet these
+ *   restrictions, AbrManager should not fail, but choose a low-res or
+ *   low-bandwidth variant instead.  It is the responsibiliy of AbrManager
+ *   implementations to follow these rules and implement this behavior.
  * @property {number} switchInterval
  *   The minimum amount of time that must pass between switches, in
  *   seconds. This keeps us from changing too often and annoying the user.
@@ -751,19 +767,21 @@ shaka.extern.AbrConfiguration;
  *
  * @property {function(!Array.<shaka.extern.Track>):!Array.<shaka.extern.Track>}
  *     trackSelectionCallback
- *   Called inside store() to determine which tracks to save from a manifest.
- *   It is passed an array of Tracks from the manifest and it should return
- *   an array of the tracks to store.  This is called for each Period in the
- *   manifest (in order).
+ *   Called inside <code>store()</code> to determine which tracks to save from a
+ *   manifest. It is passed an array of Tracks from the manifest and it should
+ *   return an array of the tracks to store.  This is called for each Period in
+ *   the manifest (in order).
  * @property {function(shaka.extern.StoredContent,number)} progressCallback
- *   Called inside store() to give progress info back to the app.  It is given
- *   the current manifest being stored and the progress of it being stored.
+ *   Called inside <code>store()</code> to give progress info back to the app.
+ *   It is given the current manifest being stored and the progress of it being
+ *   stored.
  * @property {boolean} usePersistentLicense
- *   If true, store protected content with a persistent license so that no
- *   network is required to view.
- *   If false, store protected content without a persistent license.  A network
- *   will be required to retrieve a temporary license to view.
- *   Defaults to true.
+ *   If <code>true</code>, store protected content with a persistent license so
+ *   that no network is required to view.
+ *   If <code>false</code>, store protected content without a persistent
+ *   license.  A network will be required to retrieve a temporary license to
+ *   view.
+ *   Defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.OfflineConfiguration;
@@ -802,7 +820,7 @@ shaka.extern.OfflineConfiguration;
  *   Offline configuration and settings.
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
- *   the 'main' track.
+ *   the <code>'main'</code> track.
  *   Changing this during playback will not affect the current playback.
  * @property {string} preferredTextLanguage
  *   The preferred language to use for text tracks.  If a matching text track
@@ -843,8 +861,8 @@ shaka.extern.PlayerConfiguration;
  * @property {string} language
  *    The language code for the stream.
  * @property {string} role
- *    The role name for the stream. If the stream has no role, |role| will be
- *    ''.
+ *    The role name for the stream. If the stream has no role, <code>role</code>
+ *    will be <code>''</code>.
  * @exportDoc
  */
 shaka.extern.LanguageRole;
