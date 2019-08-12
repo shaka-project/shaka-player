@@ -202,27 +202,21 @@
   margin: 0;
   .fill-container();
   .shrinkable();
+  .absolute-position();
 
   /* Keep the play button in the middle of this container. */
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
-
-  /* Specify left and top for IE's sake.  Otherwise, the container ends up below
-   * and to the right of where it should be. */
-  top: 0;
-  left: 0;
 }
 
 .shaka-text-container {
+  .absolute-position();
+
   bottom: 15%;
-  top: 0;
-  left: 0;
   width: 100%;
   min-width: 48px;
   text-align: center;
-  position: absolute;
 
   /* Set the captions in the middle horizontally by default. */
   display: flex;
@@ -250,8 +244,7 @@
 
 /* The buffering spinner. */
 .shaka-spinner-container {
-  position: absolute;
-
+  .absolute-position();
   .fill-container();
 
   flex-shrink: 1;
