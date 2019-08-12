@@ -504,6 +504,81 @@ describe('Player', () => {
       expect(streamingListener).toHaveBeenCalled();
     });
   });
+
+  describe('tracks', () => {
+    // This is a regression test for b/138941217, in which tracks briefly
+    // vanished during the loading process.  On Chromecast devices, where the
+    // timing is very different from on desktop, this could occur such that
+    // there were no tracks after load() is resolved.
+    // This is an integration test so that we can check the behavior of the
+    // Player against actual platform behavior on all supported platforms.
+    it('remain available at every stage of loading', async () => {
+      let tracksFound = false;
+
+      /**
+       * @param {string} when When the check takes place.
+       *
+       * Will fail the test if tracks disappear after they first become
+       * available.
+       */
+      const checkTracks = (when) => {
+        // If tracks have already been found, expect them to still be found.
+        const tracksNow = player.getVariantTracks().length != 0;
+        if (tracksFound) {
+          expect(tracksNow).withContext(when).toBe(true);
+        } else {
+          // If tracks are now found, they should not, at any point during
+          // the loading process, disappear again.
+          if (tracksNow) {
+            tracksFound = true;
+          }
+        }
+        shaka.log.debug(
+            'checkTracks', when,
+            'tracksFound=', tracksFound,
+            'tracksNow=', tracksNow);
+      };
+
+      /** @param {Event} event */
+      const checkOnEvent = (event) => {
+        checkTracks(event.type + ' event');
+      };
+
+      // On each of these events, we will notice when tracks first appear, and
+      // verify that they never disappear at any point in the loading sequence.
+      eventManager.listen(video, 'canplay', checkOnEvent);
+      eventManager.listen(video, 'canplaythrough', checkOnEvent);
+      eventManager.listen(video, 'durationchange', checkOnEvent);
+      eventManager.listen(video, 'emptied', checkOnEvent);
+      eventManager.listen(video, 'loadeddata', checkOnEvent);
+      eventManager.listen(video, 'loadedmetadata', checkOnEvent);
+      eventManager.listen(video, 'loadstart', checkOnEvent);
+      eventManager.listen(video, 'pause', checkOnEvent);
+      eventManager.listen(video, 'play', checkOnEvent);
+      eventManager.listen(video, 'playing', checkOnEvent);
+      eventManager.listen(video, 'seeked', checkOnEvent);
+      eventManager.listen(video, 'seeking', checkOnEvent);
+      eventManager.listen(video, 'stalled', checkOnEvent);
+      eventManager.listen(video, 'waiting', checkOnEvent);
+      eventManager.listen(player, 'trackschanged', checkOnEvent);
+
+      const waiter = (new shaka.test.Waiter(eventManager)).timeoutAfter(10);
+      const canPlayThrough = waiter.waitForEvent(video, 'canplaythrough');
+
+      // Important: use a stream that starts somewhere other than zero, so that
+      // the video element's time is initially different from the start time of
+      // playback, and there is no content at time zero.
+      await player.load('test:sintel_start_at_3_compiled', 5);
+      shaka.log.debug('load resolved');
+
+      // When load is resolved(), tracks should definitely exist.
+      expect(tracksFound).toBe(true);
+
+      // Let the test keep running until we can play through.  In the original
+      // bug, tracks would disappear _after_ load() on some platforms.
+      await canPlayThrough;
+    });
+  });
 });
 
 // TODO(vaage): Try to group the stat tests together.

@@ -208,7 +208,7 @@ shaka.test.TestScheme = class {
 
       const gen = new windowShaka.test.ManifestGenerator(shaka)
           .setPresentationDuration(data.duration)
-          .addPeriod(/* startTime= */ 0)
+          .addPeriod(/* startTime= */ data.periodStart || 0)
           .addVariant(0);
 
       if (data[ContentType.VIDEO]) {
@@ -322,6 +322,35 @@ shaka.test.TestScheme.GENERATORS = {};
 /** @const */
 shaka.test.TestScheme.DATA = {
   'sintel': {
+    video: {
+      initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
+      mdhdOffset: 0x1ba,
+      segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
+      tfdtOffset: 0x38,
+      segmentDuration: 10,
+      mimeType: 'video/mp4',
+      codecs: 'avc1.42c01e',
+    },
+    audio: {
+      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
+      mdhdOffset: 0x1b6,
+      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
+      tfdtOffset: 0x3c,
+      segmentDuration: 10.005,
+      mimeType: 'audio/mp4',
+      codecs: 'mp4a.40.2',
+    },
+    text: {
+      uri: '/base/test/test/assets/text-clip.vtt',
+      mimeType: 'text/vtt',
+    },
+    duration: 30,
+  },
+
+  // Like 'sintel' above, but with a non-zero period start time.
+  // This helps expose edge cases around startup and live streams.
+  'sintel_start_at_3': {
+    periodStart: 3,
     video: {
       initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
       mdhdOffset: 0x1ba,
