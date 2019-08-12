@@ -77,6 +77,17 @@
   .fill-container();
 }
 
+.absolute-position() {
+  /* When setting "position: absolute" it uses the left,right,top,bottom
+   * properties to determine the positioning.  We should set all these
+   * properties to ensure it is positioned properly on all platforms. */
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
 /* For things that should not shrink inside a flex container.
  * This will be used for all controls by default. */
 .unshrinkable() {
