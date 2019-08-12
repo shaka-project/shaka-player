@@ -212,6 +212,7 @@ describe('Playhead', function() {
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'seeking', jasmine.any(Function), jasmine.anything());
+      video.on['seeking']();
 
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(5);
@@ -239,6 +240,7 @@ describe('Playhead', function() {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      video.on['seeking']();
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(5);
 

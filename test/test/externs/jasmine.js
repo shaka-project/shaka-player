@@ -187,6 +187,12 @@ jasmine.Matchers.prototype.toHaveBeenCalledOnceMore = function() {};
  */
 jasmine.Matchers.prototype.toHaveBeenCalledOnceMoreWith = function(args) {};
 
+/**
+ * @param {string} message
+ * @return {!jasmine.Matchers}
+ */
+jasmine.Matchers.prototype.withContext = function(message) {};
+
 
 /** @type {!jasmine.MatchersAsync} */
 jasmine.MatchersAsync.prototype.not;
