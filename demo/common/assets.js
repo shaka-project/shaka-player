@@ -42,6 +42,8 @@ shakaAssets.Source = {
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
   GPAC: 'GPAC',
   UPLYNK: 'Verizon Digital Media Services',
+  APPLE: 'Apple',
+  IRT: 'IRT',
 };
 
 
@@ -585,6 +587,17 @@ shakaAssets.testAssets = [
     .addFeature(shakaAssets.Feature.MP4)
     .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel (HLS, Subtitles)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-multiple-subtitles.ism/.m3u8',
+      /* source= */ shakaAssets.Source.UNIFIED_STREAMING)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.WEBVTT)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Tears of Steel (Widevine)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
       /* manifestUri= */ 'https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel-dash-widevine.ism/.mpd',
@@ -948,19 +961,64 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
       /* manifestUri= */ 'https://content.uplynk.com/1eb40d8e64234f5c9879db7045c3d48c.mpd?ad=cleardash&rays=cdefg',
       /* source= */ shakaAssets.Source.UPLYNK)
-    // Disabled until we figure out the CORS errors and PlayReady status.
-    .markAsDisabled()
-    .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
-    .addFeature(shakaAssets.Feature.DASH)
-    .addFeature(shakaAssets.Feature.MP4)
-    .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
-    .addFeature(shakaAssets.Feature.MULTIPERIOD)
-    .addFeature(shakaAssets.Feature.MULTIKEY)
-    .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-    .addFeature(shakaAssets.Feature.AESCTR_16_BYTE_IV)
-    .addFeature(shakaAssets.Feature.ENCRYPTED_WITH_CLEAR)
-    .addLicenseServer('com.widevine.alpha', 'https://content.uplynk.com/wv')
-    .setRequestFilter(shakaAssets.UplynkRequestFilter)
-    .setResponseFilter(shakaAssets.UplynkResponseFilter),
+  // Disabled until we figure out the CORS errors and PlayReady status.
+      .markAsDisabled()
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.MULTIPERIOD)
+      .addFeature(shakaAssets.Feature.MULTIKEY)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.AESCTR_16_BYTE_IV)
+      .addFeature(shakaAssets.Feature.ENCRYPTED_WITH_CLEAR)
+      .addLicenseServer('com.widevine.alpha', 'https://content.uplynk.com/wv')
+      .setRequestFilter(shakaAssets.UplynkRequestFilter)
+      .setResponseFilter(shakaAssets.UplynkResponseFilter),
+  // End Verizon Digital Media Services (VDMS) assets }}}
+
+  // Apple assets {{{
+  // Src: https://developer.apple.com/streaming/examples/
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Apple Advanced HLS Stream (fMP4)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/apple-advanced-stream-fmp4/master.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.CAPTIONS)
+      .addFeature(shakaAssets.Feature.WEBVTT)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Apple Advanced HLS Stream (TS)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/apple-advanced-stream-ts/master.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.CAPTIONS)
+      .addFeature(shakaAssets.Feature.WEBVTT)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  // }}}
+
+  // IRT assets {{{
+  // Src: http://subtitling.irt.de/cmaf/#urls
+  // Note: According to the website, these assets may not be available 24/7.
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Bayerischer Rundfunk Recorded Loop (DASH)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bayerischer_rundfunk.png',
+      /* manifestUri= */ 'https://irtdashreference-i.akamaihd.net/dash/live/901161/keepixo1/manifestBR2.mpd',
+      /* source= */ shakaAssets.Source.IRT)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Bayerischer Rundfunk Recorded Loop (HLS)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/bayerischer_rundfunk.png',
+      /* manifestUri= */ 'https://irtdashreference-i.akamaihd.net/dash/live/901161/keepixo1/playlistBR2.m3u8',
+      /* source= */ shakaAssets.Source.IRT)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE),
   // }}}
 ];
