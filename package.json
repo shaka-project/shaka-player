@@ -21,6 +21,7 @@
     "es6-promise-polyfill": "^1.2.0",
     "eslint": "^5.16.0",
     "eslint-config-google": "^0.13.0",
+    "eslint-plugin-shaka-rules": "file:./build/eslint-plugin-shaka-rules",
     "esprima": "^4.0.1",
     "htmlhint": "^0.11.0",
     "jasmine-ajax": "^4.0.0",

@@ -62,7 +62,7 @@ module.exports = {
   'parserOptions': {
     'ecmaVersion': 2017,
   },
-  'extends': ['eslint:recommended', 'google'],
+  'extends': ['eslint:recommended', 'google', 'plugin:shaka-rules/config'],
   'rules': {
     // Things the compiler already takes care of, with more precision: {{{
     'no-console': 'off',
