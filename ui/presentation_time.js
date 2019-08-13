@@ -135,6 +135,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
 
   /**
    * Set the aria label to be 'Live' when the content is live stream.
+   * @private
    */
   onTracksChanged_() {
     if (this.player.isLive()) {
