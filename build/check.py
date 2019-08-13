@@ -33,6 +33,16 @@ import compiler
 import shakaBuildHelpers
 
 
+_CHECKS = []
+
+def _Check(name):
+  """A decorator for checks."""
+  def decorator(func):
+    _CHECKS.append((name, func))
+    return func
+  return decorator
+
+
 def get_lint_files():
   """Returns the absolute paths to all the files to run the linter over."""
   match = re.compile(r'.*\.js$')
@@ -51,6 +61,7 @@ def get_lint_files():
   return main_sources + tool_sources
 
 
+@_Check('js_lint')
 def check_js_lint(args):
   """Runs the JavaScript linter."""
   # TODO: things not enforced: property doc requirements
@@ -63,6 +74,7 @@ def check_js_lint(args):
   return linter.lint(fix=args.fix, force=args.force)
 
 
+@_Check('css_lint')
 def check_css_lint(args):
   """Runs the CSS linter."""
   logging.info('Linting CSS...')
@@ -79,6 +91,7 @@ def check_css_lint(args):
   return linter.lint(fix=args.fix, force=args.force)
 
 
+@_Check('html_lint')
 def check_html_lint(args):
   """Runs the HTML linter."""
   logging.info('Linting HTML...')
@@ -92,6 +105,7 @@ def check_html_lint(args):
   return htmllinter.lint(force=args.force)
 
 
+@_Check('complete')
 def check_complete(_):
   """Checks whether the 'complete' build references every file.
 
@@ -114,8 +128,10 @@ def check_complete(_):
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
   all_files = set()
-  all_files.update(shakaBuildHelpers.get_all_files(os.path.join(base, 'lib'), match))
-  all_files.update(shakaBuildHelpers.get_all_files(os.path.join(base, 'ui'), match))
+  all_files.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'lib'), match))
+  all_files.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'ui'), match))
   missing_files = all_files - complete.include
 
   if missing_files:
@@ -127,6 +143,7 @@ def check_complete(_):
   return True
 
 
+@_Check('spelling')
 def check_spelling(_):
   """Checks that source files don't have any common misspellings."""
   logging.info('Checking for common misspellings...')
@@ -168,6 +185,7 @@ def check_spelling(_):
   return not has_error
 
 
+@_Check('eslint_disable')
 def check_eslint_disable(_):
   """Checks that source files correctly use "eslint-disable".
 
@@ -241,6 +259,7 @@ def check_eslint_disable(_):
   return not has_error
 
 
+@_Check('test_type')
 def check_tests(args):
   """Runs an extra compile pass over the test code to check for type errors.
 
@@ -298,6 +317,12 @@ def main(args):
       '-f',
       help='Force checks even if no files have changed.',
       action='store_true')
+  parser.add_argument(
+      '--filter',
+      metavar='CHECK',
+      nargs='+',
+      choices=[i[0] for i in _CHECKS],
+      help='Run only the given checks (choices: %(choices)s).')
 
   parsed_args = parser.parse_args(args)
 
@@ -305,18 +330,10 @@ def main(args):
   if not shakaBuildHelpers.update_node_modules():
     return 1
 
-  steps = [
-      check_js_lint,
-      check_html_lint,
-      check_css_lint,
-      check_complete,
-      check_spelling,
-      check_eslint_disable,
-      check_tests,
-  ]
-  for step in steps:
-    if not step(parsed_args):
-      return 1
+  for name, step in _CHECKS:
+    if not parsed_args.filter or name in parsed_args.filter:
+      if not step(parsed_args):
+        return 1
   return 0
 
 
