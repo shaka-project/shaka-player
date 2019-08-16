@@ -18,30 +18,29 @@
 
 goog.provide('shaka.ui.ResolutionSelection');
 
-goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
+goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.util.Dom');
 
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {shaka.ui.SettingsMenu}
  * @final
  * @export
  */
-shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
+shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls);
+    super(parent, controls, shaka.ui.Enums.MaterialDesignIcons.RESOLUTION);
 
-    this.addResolutionButton_();
-
-    this.addResolutionMenu_();
+    this.button.classList.add('shaka-resolution-button');
+    this.menu.classList.add('shaka-resolutions');
 
     this.eventManager.listen(
       this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
@@ -53,9 +52,6 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
         this.updateLocalizedStrings_();
       });
 
-    this.eventManager.listen(this.resolutionButton_, 'click', () => {
-          this.onResolutionClick_();
-      });
 
     this.eventManager.listen(this.player, 'variantchanged', () => {
         this.updateResolutionSelection_();
@@ -76,69 +72,6 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
   }
 
 
-  /**
-   * @private
-   */
-  addResolutionButton_() {
-    /** @private {!HTMLElement}*/
-    this.resolutionButton_ = shaka.util.Dom.createHTMLElement('button');
-
-    this.resolutionButton_.classList.add('shaka-resolution-button');
-
-    const icon = shaka.util.Dom.createHTMLElement('i');
-    icon.classList.add('material-icons');
-    icon.textContent = shaka.ui.Enums.MaterialDesignIcons.RESOLUTION;
-    this.resolutionButton_.appendChild(icon);
-
-    const label = shaka.util.Dom.createHTMLElement('label');
-    label.classList.add('shaka-overflow-button-label');
-
-    /** @private {!HTMLElement}*/
-    this.resolutionNameSpan_ = shaka.util.Dom.createHTMLElement('span');
-    label.appendChild(this.resolutionNameSpan_);
-
-    /** @private {!HTMLElement}*/
-    this.currentResolution_ = shaka.util.Dom.createHTMLElement('span');
-    this.currentResolution_.classList.add('shaka-current-selection-span');
-    label.appendChild(this.currentResolution_);
-    this.resolutionButton_.appendChild(label);
-
-    this.parent.appendChild(this.resolutionButton_);
-  }
-
-
-  /**
-   * @private
-   */
-   addResolutionMenu_() {
-    /** @private {!HTMLElement}*/
-    this.resolutionMenu_ = shaka.util.Dom.createHTMLElement('div');
-    this.resolutionMenu_.classList.add('shaka-resolutions');
-    this.resolutionMenu_.classList.add('shaka-no-propagation');
-    this.resolutionMenu_.classList.add('shaka-show-controls-on-mouse-over');
-    this.resolutionMenu_.classList.add('shaka-settings-menu');
-
-    /** @private {!HTMLElement}*/
-    this.backFromResolutionButton_ =
-      shaka.util.Dom.createHTMLElement('button');
-    this.backFromResolutionButton_.classList.add(
-      'shaka-back-to-overflow-button');
-    this.resolutionMenu_.appendChild(this.backFromResolutionButton_);
-
-    const backIcon = shaka.util.Dom.createHTMLElement('i');
-    backIcon.classList.add('material-icons');
-    backIcon.textContent = shaka.ui.Enums.MaterialDesignIcons.BACK;
-    this.backFromResolutionButton_.appendChild(backIcon);
-
-    /** @private {!HTMLElement}*/
-    this.backFromResolutionSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.backFromResolutionButton_.appendChild(this.backFromResolutionSpan_);
-
-    const controlsContainer = this.controls.getControlsContainer();
-    controlsContainer.appendChild(this.resolutionMenu_);
-  }
-
-
   /** @private */
   updateResolutionSelection_() {
     /** @type {!Array.<shaka.extern.Track>} */
@@ -146,13 +79,15 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
     // Hide resolution menu and button for audio-only content and src= content
     // without resolution information.
+    // TODO: for audio-only content, this should be a bitrate selection menu
+    // instead.
     if (tracks.length && !tracks[0].height) {
-      shaka.ui.Utils.setDisplay(this.resolutionMenu_, false);
-      shaka.ui.Utils.setDisplay(this.resolutionButton_, false);
+      shaka.ui.Utils.setDisplay(this.menu, false);
+      shaka.ui.Utils.setDisplay(this.button, false);
       return;
     }
     // Otherwise, restore it.
-    shaka.ui.Utils.setDisplay(this.resolutionButton_, true);
+    shaka.ui.Utils.setDisplay(this.button, true);
 
     tracks.sort((t1, t2) => {
       return t2.height - t1.height;
@@ -180,13 +115,13 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
     // Remove old shaka-resolutions
     // 1. Save the back to menu button
     const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-        this.resolutionMenu_, 'shaka-back-to-overflow-button');
+        this.menu, 'shaka-back-to-overflow-button');
 
     // 2. Remove everything
-    shaka.ui.Utils.removeAllChildren(this.resolutionMenu_);
+    shaka.ui.Utils.removeAllChildren(this.menu);
 
     // 3. Add the backTo Menu button back
-    this.resolutionMenu_.appendChild(backButton);
+    this.menu.appendChild(backButton);
 
     const abrEnabled = this.player.getConfiguration().abr.enabled;
 
@@ -206,9 +141,9 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
         button.setAttribute('aria-selected', 'true');
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
-        this.currentResolution_.textContent = span.textContent;
+        this.currentSelection.textContent = span.textContent;
       }
-      this.resolutionMenu_.appendChild(button);
+      this.menu.appendChild(button);
     });
 
     // Add the Auto button
@@ -234,23 +169,16 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
       this.abrOnSpan_.classList.add('shaka-chosen-item');
 
-      this.currentResolution_.textContent =
+      this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
     }
 
-    this.resolutionMenu_.appendChild(autoButton);
-    shaka.ui.Utils.focusOnTheChosenItem(this.resolutionMenu_);
+    this.menu.appendChild(autoButton);
+    shaka.ui.Utils.focusOnTheChosenItem(this.menu);
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('resolutionselectionupdated'));
   }
 
-
-  /** @private */
-  onResolutionClick_() {
-    this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
-    shaka.ui.Utils.setDisplay(this.resolutionMenu_, true);
-    shaka.ui.Utils.focusOnTheChosenItem(this.resolutionMenu_);
-  }
 
   /**
    * @param {!shaka.extern.Track} track
@@ -271,19 +199,19 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.resolutionButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(LocIds.RESOLUTION));
-    this.backFromResolutionButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+    this.backButton.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(LocIds.RESOLUTION));
-    this.backFromResolutionSpan_.textContent =
+    this.backSpan.textContent =
         this.localization.resolve(LocIds.RESOLUTION);
-    this.resolutionNameSpan_.textContent =
+    this.nameSpan.textContent =
         this.localization.resolve(LocIds.RESOLUTION);
     this.abrOnSpan_.textContent =
         this.localization.resolve(LocIds.AUTO_QUALITY);
 
     if (this.player.getConfiguration().abr.enabled) {
-      this.currentResolution_.textContent =
+      this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
     }
   }

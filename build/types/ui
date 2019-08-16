@@ -23,6 +23,7 @@
 +../../ui/resolution_selection.js
 +../../ui/rewind_button.js
 +../../ui/seek_bar.js
++../../ui/settings_menu.js
 +../../ui/spacer.js
 +../../ui/text_displayer.js
 +../../ui/text_selection.js
