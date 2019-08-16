@@ -35,7 +35,8 @@ shaka.extern = {};
  *   overflowMenuButtons: !Array.<string>,
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
- *   castReceiverAppId: string
+ *   castReceiverAppId: string,
+ *   clearBufferOnQualityChange: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -49,7 +50,14 @@ shaka.extern = {};
  *   should be part of the UI.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
- * @exportDoc
+ * @property {boolean} clearBufferOnQualityChange
+ *   Only applicable if the resolution selection is part of the UI.
+ *   Whether buffer should be cleared when changing resolution
+ *   via UI. Clearing buffer would result in immidiate change of quality,
+ *   but playback may flicker/stall for a sec as the content in new
+ *   resolution is being buffered. Not clearing the buffer will mean
+ *   we play the content in the previously selected resolution that we
+ *   already have buffered before switching to the new resolution.
  */
 shaka.extern.UIConfiguration;
 
