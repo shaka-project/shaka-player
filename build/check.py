@@ -236,6 +236,7 @@ def check_eslint_disable(_):
       for rule in disabled:
         logging.error('%s:%d Rule %r still disabled at end of file',
                       rel_path, i + 1, rule)
+        has_error = True
 
   return not has_error
 
