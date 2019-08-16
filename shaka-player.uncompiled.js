@@ -65,6 +65,7 @@ goog.require('shaka.text.TtmlTextParser');
 goog.require('shaka.text.VttTextParser');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.PlayButton');
+goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.AudioLanguageSelection');
 goog.require('shaka.ui.BigPlayButton');

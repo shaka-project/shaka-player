@@ -18,31 +18,28 @@
 
 goog.provide('shaka.ui.AudioLanguageSelection');
 
-goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
-goog.require('shaka.util.Dom');
-
+goog.require('shaka.ui.SettingsMenu');
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {shaka.ui.SettingsMenu}
  * @final
  * @export
  */
-shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
+shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
    */
   constructor(parent, controls) {
-    super(parent, controls);
+    super(parent, controls, shaka.ui.Enums.MaterialDesignIcons.LANGUAGE);
 
-    this.addLanguagesButton_();
-
-    this.addAudioLangMenu_();
+    this.button.classList.add('shaka-language-button');
+    this.menu.classList.add('shaka-audio-languages');
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
@@ -63,10 +60,6 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
       this.updateAudioLanguages_();
     });
 
-    this.eventManager.listen(this.languagesButton_, 'click', () => {
-      this.onLanguagesClick_();
-    });
-
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
 
@@ -74,89 +67,17 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
   }
 
 
-  /**
-   * @private
-   */
-  addAudioLangMenu_() {
-    /** @private {!HTMLElement} */
-    this.audioLangMenu_ = shaka.util.Dom.createHTMLElement('div');
-    this.audioLangMenu_.classList.add('shaka-audio-languages');
-    this.audioLangMenu_.classList.add('shaka-no-propagation');
-    this.audioLangMenu_.classList.add('shaka-show-controls-on-mouse-over');
-    this.audioLangMenu_.classList.add('shaka-settings-menu');
-
-    /** @private {!HTMLElement} */
-    this.backFromLanguageButton_ = shaka.util.Dom.createHTMLElement('button');
-    this.backFromLanguageButton_.classList.add('shaka-back-to-overflow-button');
-    this.audioLangMenu_.appendChild(this.backFromLanguageButton_);
-
-    const backIcon = shaka.util.Dom.createHTMLElement('i');
-    backIcon.classList.add('material-icons');
-    backIcon.textContent = shaka.ui.Enums.MaterialDesignIcons.BACK;
-    this.backFromLanguageButton_.appendChild(backIcon);
-
-    /** @private {!HTMLElement} */
-    this.backFromLanguageSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.backFromLanguageButton_.appendChild(this.backFromLanguageSpan_);
-
-    const controlsContainer = this.controls.getControlsContainer();
-    controlsContainer.appendChild(this.audioLangMenu_);
-  }
-
-
-  /**
-   * @private
-   */
-  addLanguagesButton_() {
-    /** @private {!HTMLElement} */
-    this.languagesButton_ = shaka.util.Dom.createHTMLElement('button');
-    this.languagesButton_.classList.add('shaka-language-button');
-
-    const icon = shaka.util.Dom.createHTMLElement('i');
-    icon.classList.add('material-icons');
-    icon.textContent = shaka.ui.Enums.MaterialDesignIcons.LANGUAGE;
-    this.languagesButton_.appendChild(icon);
-
-    const label = shaka.util.Dom.createHTMLElement('label');
-    label.classList.add('shaka-overflow-button-label');
-
-    /** @private {!HTMLElement} */
-    this.languageNameSpan_ = shaka.util.Dom.createHTMLElement('span');
-    this.languageNameSpan_.classList.add('languageSpan');
-    label.appendChild(this.languageNameSpan_);
-
-    /** @private {!HTMLElement} */
-    this.currentAudioLanguage_ = shaka.util.Dom.createHTMLElement('span');
-    this.currentAudioLanguage_.classList.add('shaka-current-selection-span');
-    const language = this.player.getConfiguration().preferredAudioLanguage;
-    this.currentAudioLanguage_.textContent =
-      shaka.ui.LanguageUtils.getLanguageName(language, this.localization);
-    label.appendChild(this.currentAudioLanguage_);
-
-    this.languagesButton_.appendChild(label);
-
-    this.parent.appendChild(this.languagesButton_);
-  }
-
-  /** @private */
-  onLanguagesClick_() {
-    this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
-    shaka.ui.Utils.setDisplay(this.audioLangMenu_, true);
-    // Focus on the currently selected language button.
-    shaka.ui.Utils.focusOnTheChosenItem(this.audioLangMenu_);
-  }
-
   /** @private */
   updateAudioLanguages_() {
     const tracks = this.player.getVariantTracks();
     const languages = this.player.getAudioLanguages();
 
-    shaka.ui.LanguageUtils.updateLanguages(tracks, this.audioLangMenu_,
+    shaka.ui.LanguageUtils.updateLanguages(tracks, this.menu,
         languages,
         (lang) => this.onAudioLanguageSelected_(lang), /* updateChosen */ true,
-        this.currentAudioLanguage_,
+        this.currentSelection,
         this.localization);
-    shaka.ui.Utils.focusOnTheChosenItem(this.audioLangMenu_);
+    shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 
     // TODO: document this event
     this.controls.dispatchEvent(
@@ -166,7 +87,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
   /** @private */
   onTracksChanged_() {
     const hasVariants = this.player.getVariantTracks().length > 0;
-    shaka.ui.Utils.setDisplay(this.languagesButton_, hasVariants);
+    shaka.ui.Utils.setDisplay(this.button, hasVariants);
     this.updateAudioLanguages_();
   }
 
@@ -185,13 +106,13 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.Element {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.backFromLanguageButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+    this.backButton.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(LocIds.BACK));
-    this.languagesButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(LocIds.LANGUAGE));
-    this.languageNameSpan_.textContent =
+    this.nameSpan.textContent =
         this.localization.resolve(LocIds.LANGUAGE);
-    this.backFromLanguageSpan_.textContent =
+    this.backSpan.textContent =
         this.localization.resolve(LocIds.LANGUAGE);
   }
 };
