@@ -197,6 +197,7 @@ shaka.ui.Overlay = class {
       addSeekBar: true,
       addBigPlayButton: true,
       castReceiverAppId: '',
+      clearBufferOnQualityChange: true,
     };
   }
 
