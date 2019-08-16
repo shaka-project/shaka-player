@@ -367,7 +367,6 @@ shaka.test.StreamGenerator = class {
    * @param {number} mdhdOffset The byte offset of the initialization segment's
    *   mdhd box.
    * @return {number} The timescale parameter.
-   * @throws RangeError
    * @private
    */
   static getTimescale_(initSegment, mdhdOffset) {
@@ -415,7 +414,6 @@ shaka.test.StreamGenerator = class {
    *   in the segment.
    * @param {number} timescale
    * @return {!ArrayBuffer} The modified segment.
-   * @throws RangeError
    * @private
    */
   static setBaseMediaDecodeTime_(
