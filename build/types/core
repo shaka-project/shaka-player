@@ -72,6 +72,7 @@
 +../../lib/util/i_releasable.js
 +../../lib/util/iterables.js
 +../../lib/util/language_utils.js
++../../lib/util/lazy.js
 +../../lib/util/manifest_filter.js
 +../../lib/util/manifest_parser_utils.js
 +../../lib/util/map_utils.js
