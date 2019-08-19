@@ -49,8 +49,6 @@ describe('StreamingEngine', () => {
   let manifest;
 
   /** @type {!jasmine.Spy} */
-  let onBuffering;
-  /** @type {!jasmine.Spy} */
   let onChooseStreams;
   /** @type {!jasmine.Spy} */
   let onCanSwitch;
@@ -244,7 +242,6 @@ describe('StreamingEngine', () => {
   }
 
   function setupPlayhead() {
-    onBuffering = jasmine.createSpy('onBuffering');
     const onSeek = () => {
       streamingEngine.seeked();
     };
@@ -320,19 +317,14 @@ describe('StreamingEngine', () => {
       onStartupComplete.and.callFake(() => {
         startupComplete = true;
         video.play();
-      });
-
-      onBuffering.and.callFake((buffering) => {
-        if (!buffering) {
-          expect(startupComplete).toBeTruthy();
-          video.playbackRate = 10;
-        }
+        video.playbackRate = 10;
       });
 
       // Let's go!
       onChooseStreams.and.callFake(defaultOnChooseStreams);
       await streamingEngine.start();
       await reachesTheEnd();
+      expect(startupComplete).toBe(true);
     });
 
     it('can handle buffered seeks', async () => {
