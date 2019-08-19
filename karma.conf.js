@@ -125,39 +125,6 @@ module.exports = (config) => {
     // option, which is necessary for some of our lab testing.
     proxies: {},
 
-    preprocessors: {
-      // Use babel to convert ES6 to ES5 so we can still run tests everywhere.
-      // Use sourcemap to read inline source maps from babel into karma.
-      'demo/**/*.js': ['babel', 'sourcemap'],
-      'lib/**/*.js': ['babel', 'sourcemap'],
-      'ui/**/*.js': ['babel', 'sourcemap'],
-      'test/**/*.js': ['babel', 'sourcemap'],
-      'third_party/language-mapping-list/*.js': ['babel', 'sourcemap'],
-    },
-
-    babelPreprocessor: {
-      options: {
-        presets: ['env'],
-        // Add source maps so that backtraces refer to the original code.
-        // Babel will output inline source maps, and the 'sourcemap'
-        // preprocessor will read them and feed them to Karma.  Karma will then
-        // use them to reformat stack traces in errors.
-        sourceMap: 'inline',
-        // Add instrumentation for code coverage.
-        plugins: [
-          ['istanbul', {
-            // Don't instrument these parts of the codebase.
-            exclude: [
-              'demo/**/*.js',
-              'lib/(debug|deprecate|polyfill)/*.js',
-              'test/**/*.js',
-              'third_party/**/*.js',
-            ],
-          }],
-        ],
-      },
-    },
-
     // to avoid DISCONNECTED messages on Safari:
     browserDisconnectTimeout: 10 * 1000,  // 10s to reconnect
     browserDisconnectTolerance: 1,  // max of 1 disconnect is OK
@@ -247,6 +214,43 @@ module.exports = (config) => {
       suppressSkipped: true,
     },
   });
+
+  if (settings.babel) {
+    config.set({
+      preprocessors: {
+        // Use babel to convert ES6 to ES5 so we can still run tests everywhere.
+        // Use sourcemap to read inline source maps from babel into karma.
+        'demo/**/*.js': ['babel', 'sourcemap'],
+        'lib/**/*.js': ['babel', 'sourcemap'],
+        'ui/**/*.js': ['babel', 'sourcemap'],
+        'test/**/*.js': ['babel', 'sourcemap'],
+        'third_party/language-mapping-list/*.js': ['babel', 'sourcemap'],
+      },
+
+      babelPreprocessor: {
+        options: {
+          presets: ['env'],
+          // Add source maps so that backtraces refer to the original code.
+          // Babel will output inline source maps, and the 'sourcemap'
+          // preprocessor will read them and feed them to Karma.  Karma will
+          // then use them to reformat stack traces in errors.
+          sourceMap: 'inline',
+          // Add instrumentation for code coverage.
+          plugins: [
+            ['istanbul', {
+              // Don't instrument these parts of the codebase.
+              exclude: [
+                'demo/**/*.js',
+                'lib/(debug|deprecate|polyfill)/*.js',
+                'test/**/*.js',
+                'third_party/**/*.js',
+              ],
+            }],
+          ],
+        },
+      },
+    });
+  }
 
   if (settings.test_custom_asset) {
     // If testing custom assets, we don't serve other unit or integration tests.

@@ -262,7 +262,7 @@ describe('Player', () => {
         cues = cues.concat(added);
       });
 
-      player.configure({textDisplayFactory: () => displayer});
+      player.configure('textDisplayFactory', Util.factoryReturns(displayer));
 
       const eventManager = new shaka.util.EventManager();
       /** @type {shaka.test.Waiter} */

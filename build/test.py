@@ -248,6 +248,11 @@ class Launcher:
         dest='test_timeout',
         default=120000,
         type=int)
+    running_commands.add_argument(
+        '--no-babel',
+        help="Don't use Babel to convert ES6 to ES5.",
+        dest='babel',
+        action='store_false')
 
 
     logging_commands.add_argument(
@@ -334,6 +339,7 @@ class Launcher:
 
     pass_through = [
       'auto_watch',
+      'babel',
       'capture_timeout',
       'colors',
       'drm',
