@@ -128,8 +128,6 @@ requirement: {
          'function template(a) { new Float64Array(a) }'
   error_message: 'Use shaka.util.BufferUtils.view* instead.'
   whitelist_regexp: 'lib/util/buffer_utils.js'
-  whitelist_regexp: 'lib/util/uint8array_utils.js'
-  whitelist_regexp: 'test/'
 }
 
 # Disallow console logging.
@@ -165,7 +163,7 @@ requirement: {
                  'handle sub-arrays'
   whitelist_regexp: 'lib/util/buffer_utils.js'
   whitelist_regexp: 'lib/util/object_utils.js'
-  whitelist_regexp: 'test/'
+  whitelist_regexp: 'test/util/buffer_utils_unit.js'
 }
 
 

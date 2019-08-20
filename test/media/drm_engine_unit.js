@@ -54,8 +54,6 @@ describe('DrmEngine', () => {
   let session1;
   let session2;
   let session3;
-  /** @type {!ArrayBuffer} */
-  let license;
 
   beforeAll(() => {
     shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME = 0;
@@ -114,7 +112,7 @@ describe('DrmEngine', () => {
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
-    license = (new Uint8Array(0)).buffer;
+    const license = new Uint8Array(0);
     fakeNetEngine.setResponseValue('http://abc.drm/license', license);
 
     const playerInterface = {
@@ -1021,8 +1019,8 @@ describe('DrmEngine', () => {
         mockVideo.on['encrypted'](
             {initDataType: 'webm', initData: initData, keyId: null});
 
-        const keyId1 = (new Uint8Array(1)).buffer;
-        const keyId2 = (new Uint8Array(2)).buffer;
+        const keyId1 = makeKeyId(1);
+        const keyId2 = makeKeyId(2);
         const status1 = 'usable';
         const status2 = 'expired';
         session1.keyStatuses.forEach.and.callFake((callback) => {
@@ -1032,8 +1030,8 @@ describe('DrmEngine', () => {
 
         onKeyStatusSpy.and.callFake((statusMap) => {
           expect(statusMap).toEqual({
-            '00': status1,
-            '0000': status2,
+            '01': status1,
+            '02': status2,
           });
         });
 
@@ -1050,8 +1048,8 @@ describe('DrmEngine', () => {
         mockVideo.on['encrypted'](
             {initDataType: 'webm', initData: initData, keyId: null});
 
-        const keyId1 = (new Uint8Array(1)).buffer;
-        const keyId2 = (new Uint8Array(2)).buffer;
+        const keyId1 = makeKeyId(1);
+        const keyId2 = makeKeyId(2);
         const status1 = 'usable';
         const status2 = 'expired';
         session1.keyStatuses.forEach.and.callFake((callback) => {
@@ -1091,8 +1089,8 @@ describe('DrmEngine', () => {
           {initData: initData2, initDataType: 'cenc', keyId: null},
         ];
 
-        const keyId1 = (new Uint8Array(1)).buffer;
-        const keyId2 = (new Uint8Array(2)).buffer;
+        const keyId1 = makeKeyId(1);
+        const keyId2 = makeKeyId(2);
         session1.keyStatuses.forEach.and.callFake((callback) => {
           callback(keyId1, 'usable');
         });
@@ -1126,8 +1124,8 @@ describe('DrmEngine', () => {
         mockVideo.on['encrypted'](
             {initDataType: 'webm', initData: initData, keyId: null});
 
-        const keyId1 = (new Uint8Array(1)).buffer;
-        const keyId2 = (new Uint8Array(2)).buffer;
+        const keyId1 = makeKeyId(1);
+        const keyId2 = makeKeyId(2);
 
         // Expire one key.
         session1.keyStatuses.forEach.and.callFake((callback) => {
@@ -1175,8 +1173,8 @@ describe('DrmEngine', () => {
         mockVideo.on['encrypted'](
             {initDataType: 'webm', initData: initData, keyId: null});
 
-        const keyId1 = (new Uint8Array(1)).buffer;
-        const keyId2 = (new Uint8Array(2)).buffer;
+        const keyId1 = makeKeyId(1);
+        const keyId2 = makeKeyId(2);
 
         // Expire both keys at once.
         session1.keyStatuses.forEach.and.callFake((callback) => {
@@ -1214,7 +1212,7 @@ describe('DrmEngine', () => {
 
   describe('update', () => {
     it('receives a license', async () => {
-      const license = (new Uint8Array(0)).buffer;
+      const license = new Uint8Array(0);
 
       await initAndAttach();
       const initData = new Uint8Array(0);
@@ -1292,7 +1290,7 @@ describe('DrmEngine', () => {
     it('dispatches an error if update fails', async () => {
       onErrorSpy.and.stub();
 
-      const license = (new Uint8Array(0)).buffer;
+      const license = new Uint8Array(0);
 
       await initAndAttach();
       const initData = new Uint8Array(0);
@@ -1596,7 +1594,7 @@ describe('DrmEngine', () => {
       await drmEngine.destroy();
 
       // Unblock the license request.
-      p.resolve({data: (new Uint8Array(0)).buffer});
+      p.resolve({data: new Uint8Array(0)});
       await Util.shortDelay();  // Ensure request is handled.
 
       // Due to the interruption, we never updated the session.
@@ -2065,5 +2063,13 @@ describe('DrmEngine', () => {
       individualizationServer: '',
       videoRobustness: '',
     };
+  }
+
+  /**
+   * @param {number} id
+   * @return {!ArrayBuffer}
+   */
+  function makeKeyId(id) {
+    return shaka.util.BufferUtils.toArrayBuffer(new Uint8Array([id]));
   }
 });

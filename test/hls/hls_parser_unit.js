@@ -36,11 +36,11 @@ describe('HlsParser', () => {
   let playerInterface;
   /** @type {shaka.extern.ManifestConfiguration} */
   let config;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let initSegmentData;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let segmentData;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
 
   beforeEach(() => {
@@ -60,7 +60,7 @@ describe('HlsParser', () => {
       0x00, 0x00, 0x00, 0x00, // creation time (0)
       0x00, 0x00, 0x00, 0x00, // modification time (0)
       0x00, 0x00, 0x03, 0xe8, // timescale (1000)
-    ]).buffer;
+    ]);
 
     segmentData = new Uint8Array([
       0x00, 0x00, 0x00, 0x24, // size (36)
@@ -74,12 +74,11 @@ describe('HlsParser', () => {
 
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes (0)
       0x00, 0x00, 0x00, 0x00,  // baseMediaDecodeTime last 4 bytes (0)
-    ]).buffer;
+    ]);
     // segment starts at 0s.
 
-    selfInitializingSegmentData = shaka.util.Uint8ArrayUtils.concat(
-        new Uint8Array(initSegmentData),
-        new Uint8Array(segmentData)).buffer;
+    selfInitializingSegmentData =
+        shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
@@ -515,7 +514,7 @@ describe('HlsParser', () => {
 
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes (0)
       0x00, 0x0A, 0x00, 0x00,  // baseMediaDecodeTime last 4 bytes (655360)
-    ]).buffer;
+    ]);
 
     fakeNetEngine
         .setResponseText('test:/master', master)
@@ -1688,7 +1687,7 @@ describe('HlsParser', () => {
   describe('getStartTime_', () => {
     /** @type {number} */
     let segmentDataStartTime;
-    /** @type {!ArrayBuffer} */
+    /** @type {!Uint8Array} */
     let tsSegmentData;
 
     const master = [
@@ -1727,7 +1726,7 @@ describe('HlsParser', () => {
 
         0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
         0x00, 0x00, 0x07, 0xd0,  // baseMediaDecodeTime last 4 bytes (2000)
-      ]).buffer;
+      ]);
       tsSegmentData = new Uint8Array([
         0x47, // TS sync byte (fixed value)
         0x41, 0x01, // not corrupt, payload follows, packet ID 257
@@ -1739,7 +1738,7 @@ describe('HlsParser', () => {
         0x80, // PTS only, no DTS, other flags 0 (don't matter)
         0x05, // remaining PES header length == 5 (one timestamp)
         0x21, 0x00, 0x0b, 0x7e, 0x41, // PTS = 180000, encoded into 5 bytes
-      ]).buffer;
+      ]);
       // 180000 (TS PTS) divided by fixed TS timescale (90000) = 2s.
       // 2000 (MP4 PTS) divided by parsed MP4 timescale (1000) = 2s.
       segmentDataStartTime = 2;

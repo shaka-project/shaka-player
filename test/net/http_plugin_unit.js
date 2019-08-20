@@ -135,7 +135,8 @@ function httpPluginTests(usingFetch) {
       'status': 403,
     });
     stubRequest('https://foo.bar/404').andReturn({
-      'response': new Uint8Array([65, 66, 67]).buffer, // "ABC"
+      'response': shaka.util.BufferUtils.toArrayBuffer(
+          new Uint8Array([65, 66, 67])),  // "ABC"
       'status': 404,
       'responseHeaders': {'FOO': 'BAR'},
     });

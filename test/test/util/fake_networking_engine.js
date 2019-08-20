@@ -39,7 +39,7 @@ shaka.test.FakeNetworkingEngine = class {
     /** @private {!Map.<string, !Object.<string, string>>} */
     this.headersMap_ = new Map();
 
-    /** @private {ArrayBuffer} */
+    /** @private {?BufferSource} */
     this.defaultResponse_ = null;
 
     /** @private {?shaka.util.PublicPromise} */
@@ -205,7 +205,7 @@ shaka.test.FakeNetworkingEngine = class {
    * Set a callback for when the given uri is called.
    *
    * @param {string} uri
-   * @param {function():!Promise<!ArrayBuffer>} callback
+   * @param {function():!Promise<BufferSource>} callback
    * @return {!shaka.test.FakeNetworkingEngine}
    */
   setResponse(uri, callback) {
@@ -217,7 +217,7 @@ shaka.test.FakeNetworkingEngine = class {
    * Set a single value in the response map.
    *
    * @param {string} uri
-   * @param {!ArrayBuffer} value
+   * @param {BufferSource} value
    * @return {!shaka.test.FakeNetworkingEngine}
    */
   setResponseValue(uri, value) {
@@ -254,7 +254,7 @@ shaka.test.FakeNetworkingEngine = class {
   /**
    * Sets the default return value.
    *
-   * @param {!ArrayBuffer} defaultResponse The default value to return.
+   * @param {BufferSource} defaultResponse The default value to return.
    * @return {!shaka.test.FakeNetworkingEngine}
    */
   setDefaultValue(defaultResponse) {
@@ -338,6 +338,6 @@ shaka.test.FakeNetworkingEngine = class {
 
 
 /**
- * @typedef {function():!Promise.<!ArrayBuffer>}
+ * @typedef {function():!Promise.<BufferSource>}
  */
 shaka.test.FakeNetworkingEngine.MockedResponse;

@@ -55,7 +55,8 @@ describe('Cue', () => {
    * @return {!Array.<!shaka.extern.Cue>}
    */
   function parseVtt(text, time) {
-    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const data =
+        shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     return new shaka.text.VttTextParser().parseMedia(data, time);
   }
 });

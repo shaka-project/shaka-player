@@ -31,7 +31,7 @@ describe('Mp4Parser', () => {
       0x00, 0x00, 0x00, 0x0C, // size
       0x62, 0x30, 0x30, 0x31, // type
       0x00, 0x11, 0x22, 0x33,  // payload
-    ]).buffer;
+    ]);
 
     fullBoxData = new Uint8Array([
       0x00, 0x00, 0x00, 0x10, // size
@@ -39,7 +39,7 @@ describe('Mp4Parser', () => {
       0x01,                   // version
       0x12, 0x34, 0x56,       // flags
       0x00, 0x11, 0x22, 0x33,  // payload
-    ]).buffer;
+    ]);
 
     boxWithChildData = new Uint8Array([
       0x00, 0x00, 0x00, 0x14, // size
@@ -50,7 +50,7 @@ describe('Mp4Parser', () => {
       0x00, 0x00, 0x00, 0x0C, // child [1] size
       0x62, 0x30, 0x33, 0x32, // child [1] type
       0x44, 0x55, 0x66, 0x77,  // child [1] payload
-    ]).buffer;
+    ]);
 
     boxWithSampleDescription = new Uint8Array([
       0x00, 0x00, 0x00, 0x24, // size
@@ -62,7 +62,7 @@ describe('Mp4Parser', () => {
       0x00, 0x00, 0x00, 0x0C, // child [1] size
       0x62, 0x30, 0x33, 0x33, // child [1] type
       0x44, 0x55, 0x66, 0x77,  // child [1] payload
-    ]).buffer;
+    ]);
 
     partialBoxWithSampleDescription = new Uint8Array([
       0x00, 0x00, 0x00, 0x24, // size
@@ -72,7 +72,7 @@ describe('Mp4Parser', () => {
       0x62, 0x30, 0x33, 0x32, // child [0] type
       0x00, 0x11, 0x22, 0x33,  // child [0] payload
       // Omit child [1]
-    ]).buffer;
+    ]);
 
     multipleSingleLevelBoxes = new Uint8Array([
       0x00, 0x00, 0x00, 0x0C, // box [0] size
@@ -87,7 +87,7 @@ describe('Mp4Parser', () => {
       0x00, 0x00, 0x00, 0x0C, // box [3] size
       0x62, 0x30, 0x30, 0x34, // box [3] type
       0x00, 0x11, 0x22, 0x33,  // box [3] payload
-    ]).buffer;
+    ]);
 
     twoLevelBoxStructure = new Uint8Array([
       0x00, 0x00, 0x00, 0x14, // box [0] size
@@ -110,7 +110,7 @@ describe('Mp4Parser', () => {
       0x00, 0x00, 0x00, 0x0C, // box [3] [0] size
       0x62, 0x30, 0x34, 0x31, // box [3] [0] type
       0x00, 0x11, 0x22, 0x33,  // box [3] [0] payload
-    ]).buffer;
+    ]);
   });
 
   describe('headerDefinitions', () => {

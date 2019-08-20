@@ -903,7 +903,8 @@ describe('TtmlTextParser', () => {
              '<p begin="00:03.00" end="00:04.00">Second cue</p>' +
              '</body></tt>';
     }
-    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const data =
+        shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
     const cue = parser.parseFirstCue(data, time);
     expect(cue.startTime).toBe(1);
@@ -918,7 +919,8 @@ describe('TtmlTextParser', () => {
    * @param {shaka.extern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
-    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const data =
+        shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     const result = new shaka.text.TtmlTextParser().parseMedia(data, time);
 
     const expected = cues.map((cue) => {
@@ -949,7 +951,7 @@ describe('TtmlTextParser', () => {
     const data = shaka.util.StringUtils.toUTF8(text);
     expect(() => {
       new shaka.text.TtmlTextParser().parseMedia(
-          new Uint8Array(data),
+          shaka.util.BufferUtils.toUint8(data),
           {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     }).toThrow(error);
   }

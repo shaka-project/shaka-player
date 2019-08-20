@@ -47,12 +47,12 @@ describe('Mp4VttParser', () => {
       shaka.test.Util.fetch(vttSegNoDurationUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
     ]);
-    vttInitSegment = new Uint8Array(responses[0]);
-    vttSegment = new Uint8Array(responses[1]);
-    vttSegmentMultiPayload = new Uint8Array(responses[2]);
-    vttSegSettings = new Uint8Array(responses[3]);
-    vttSegNoDuration = new Uint8Array(responses[4]);
-    audioInitSegment = new Uint8Array(responses[5]);
+    vttInitSegment = shaka.util.BufferUtils.toUint8(responses[0]);
+    vttSegment = shaka.util.BufferUtils.toUint8(responses[1]);
+    vttSegmentMultiPayload = shaka.util.BufferUtils.toUint8(responses[2]);
+    vttSegSettings = shaka.util.BufferUtils.toUint8(responses[3]);
+    vttSegNoDuration = shaka.util.BufferUtils.toUint8(responses[4]);
+    audioInitSegment = shaka.util.BufferUtils.toUint8(responses[5]);
   });
 
   it('parses init segment', () => {

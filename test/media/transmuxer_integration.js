@@ -113,9 +113,9 @@ describe('Transmuxer', () => {
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
-            expect(data.buffer.byteLength).toBeGreaterThan(0);
+            expect(data.byteLength).toBeGreaterThan(0);
           }))
-          .parse(transmuxedData.data.buffer);
+          .parse(transmuxedData.data);
       expect(sawMDAT).toBeTruthy();
     });
 
@@ -128,9 +128,9 @@ describe('Transmuxer', () => {
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
-            expect(data.buffer.byteLength).toBeGreaterThan(0);
+            expect(data.byteLength).toBeGreaterThan(0);
           }))
-          .parse(transmuxedData.data.buffer);
+          .parse(transmuxedData.data);
       expect(sawMDAT).toBeTruthy();
     });
 
@@ -144,7 +144,7 @@ describe('Transmuxer', () => {
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
           }))
-          .parse(transmuxedData.data.buffer);
+          .parse(transmuxedData.data);
       expect(sawMDAT).toBeFalsy();
     });
 
@@ -168,7 +168,7 @@ describe('Transmuxer', () => {
                 box.reader.readUint64();
             parsed = true;
           })
-          .parse(transmuxedData.data.buffer);
+          .parse(transmuxedData.data);
 
       expect(parsed).toBe(true);
       expect(mp4Timestamp).toBe(expectedMp4Timestamp);

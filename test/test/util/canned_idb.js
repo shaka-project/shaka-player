@@ -157,7 +157,8 @@ shaka.test.CannedIDB = class {
    */
   static reviver_(key, value) {
     if (value && value.__type__ == 'ArrayBuffer') {
-      return shaka.util.Uint8ArrayUtils.fromBase64(value.__value__).buffer;
+      return shaka.util.BufferUtils.toArrayBuffer(
+          shaka.util.Uint8ArrayUtils.fromBase64(value.__value__));
     }
     return value;
   }

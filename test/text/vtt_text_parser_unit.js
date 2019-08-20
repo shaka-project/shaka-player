@@ -603,7 +603,8 @@ describe('VttTextParser', () => {
              '00:00:40.000 --> 00:00:50.000\n' +
              'Test2';
     }
-    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const data =
+        shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
     const cue = parser.parseFirstCue(data, time);
     expect(cue.startTime).toBe(20);
@@ -618,7 +619,8 @@ describe('VttTextParser', () => {
    * @param {shaka.extern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
-    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const data =
+        shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
 
     const result = new shaka.text.VttTextParser().parseMedia(data, time);
     expect(result).toEqual(cues.map((c) => jasmine.objectContaining(c)));
@@ -633,7 +635,8 @@ describe('VttTextParser', () => {
     const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
         code));
-    const data = new Uint8Array(shaka.util.StringUtils.toUTF8(text));
+    const data =
+        shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     expect(() => new shaka.text.VttTextParser().parseMedia(data, time))
         .toThrow(error);
   }

@@ -33,15 +33,15 @@ describe('HlsParser live', () => {
   let playerInterface;
   /** @type {shaka.extern.ManifestConfiguration} */
   let config;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let initSegmentData;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let segmentData;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let tsSegmentData;
-  /** @type {!ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let pastRolloverSegmentData;
   /** @type {number} */
   let rolloverOffset;
@@ -65,7 +65,7 @@ describe('HlsParser live', () => {
       0x00, 0x00, 0x00, 0x00, // creation time (0)
       0x00, 0x00, 0x00, 0x00, // modification time (0)
       0x00, 0x00, 0x03, 0xe8, // timescale (1000)
-    ]).buffer;
+    ]);
     segmentData = new Uint8Array([
       0x00, 0x00, 0x00, 0x24, // size (36)
       0x6D, 0x6F, 0x6F, 0x66, // type (moof)
@@ -76,7 +76,7 @@ describe('HlsParser live', () => {
       0x01, 0x00, 0x00, 0x00, // version and flags
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
       0x00, 0x00, 0x07, 0xd0,  // baseMediaDecodeTime last 4 bytes (2000)
-    ]).buffer;
+    ]);
     tsSegmentData = new Uint8Array([
       0x47, // TS sync byte (fixed value)
       0x41, 0x01, // not corrupt, payload follows, packet ID 257
@@ -88,7 +88,7 @@ describe('HlsParser live', () => {
       0x80, // PTS only, no DTS, other flags 0 (don't matter)
       0x05, // remaining PES header length == 5 (one timestamp)
       0x21, 0x00, 0x0b, 0x7e, 0x41, // PTS = 180000, encoded into 5 bytes
-    ]).buffer;
+    ]);
     // 180000 divided by TS timescale (90000) = segment starts at 2s.
     segmentDataStartTime = 2;
 
@@ -102,15 +102,14 @@ describe('HlsParser live', () => {
       0x01, 0x00, 0x00, 0x00, // version and flags
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
       0x0b, 0x60, 0xbc, 0x28,  // baseMediaDecodeTime last 4 bytes (190889000)
-    ]).buffer;
+    ]);
 
     // The timestamp above would roll over twice, so this rollover offset should
     // be applied.
     rolloverOffset = (0x200000000 * 2) / 90000;
 
-    selfInitializingSegmentData = shaka.util.Uint8ArrayUtils.concat(
-        new Uint8Array(initSegmentData),
-        new Uint8Array(segmentData)).buffer;
+    selfInitializingSegmentData =
+        shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 

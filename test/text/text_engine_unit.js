@@ -18,7 +18,7 @@
 describe('TextEngine', () => {
   const TextEngine = shaka.text.TextEngine;
 
-  const dummyData = new ArrayBuffer(0);
+  const dummyData = new Uint8Array(0);
   const dummyMimeType = 'text/fake';
 
   /** @type {!Function} */
@@ -101,7 +101,7 @@ describe('TextEngine', () => {
 
       await textEngine.appendBuffer(dummyData, 0, 3);
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
-        new Uint8Array(dummyData),
+        dummyData,
         {periodStart: 0, segmentStart: 0, segmentEnd: 3},
       ]);
 
@@ -116,7 +116,7 @@ describe('TextEngine', () => {
       await textEngine.appendBuffer(dummyData, 3, 5);
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
-        new Uint8Array(dummyData),
+        dummyData,
         {periodStart: 0, segmentStart: 3, segmentEnd: 5},
       ]);
 
@@ -283,7 +283,7 @@ describe('TextEngine', () => {
       await textEngine.appendBuffer(dummyData, 0, 3);
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
-        new Uint8Array(dummyData),
+        dummyData,
         {periodStart: 0, segmentStart: 0, segmentEnd: 3},
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -297,7 +297,7 @@ describe('TextEngine', () => {
       await textEngine.appendBuffer(dummyData, 4, 7);
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
-        new Uint8Array(dummyData),
+        dummyData,
         {periodStart: 4, segmentStart: 4, segmentEnd: 7},
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([

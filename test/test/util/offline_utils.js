@@ -69,11 +69,8 @@ shaka.test.OfflineUtils = class {
    * @return {shaka.extern.SegmentDataDB}
    */
   static createSegmentData(data) {
-    /** @type {Uint8Array} */
-    const array = new Uint8Array(data);
-
     return {
-      data: array.buffer,
+      data: shaka.util.BufferUtils.toArrayBuffer(new Uint8Array(data)),
     };
   }
 
@@ -84,11 +81,11 @@ shaka.test.OfflineUtils = class {
   static expectSegmentsToContain(segments, expected) {
     const actualData = segments.map((segment) => {
       expect(segment.data).toBeTruthy();
-      return new Uint8Array(segment.data);
+      return shaka.util.BufferUtils.toUint8(segment.data);
     });
 
     expect(expected.data).toBeTruthy();
-    const expectedData = new Uint8Array(expected.data);
+    const expectedData = shaka.util.BufferUtils.toUint8(expected.data);
 
     expect(actualData).toContain(expectedData);
   }
@@ -101,8 +98,8 @@ shaka.test.OfflineUtils = class {
     expect(actual.data).toBeTruthy();
     expect(expected.data).toBeTruthy();
 
-    const actualData = new Uint8Array(actual.data);
-    const expectedData = new Uint8Array(expected.data);
+    const actualData = shaka.util.BufferUtils.toUint8(actual.data);
+    const expectedData = shaka.util.BufferUtils.toUint8(expected.data);
 
     expect(actualData).toEqual(expectedData);
   }

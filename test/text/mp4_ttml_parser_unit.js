@@ -38,10 +38,10 @@ describe('Mp4TtmlParser', () => {
       shaka.test.Util.fetch(ttmlSegmentMultipleMDATUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
     ]);
-    ttmlInitSegment = new Uint8Array(responses[0]);
-    ttmlSegment = new Uint8Array(responses[1]);
-    ttmlSegmentMultipleMDAT = new Uint8Array(responses[2]);
-    audioInitSegment = new Uint8Array(responses[3]);
+    ttmlInitSegment = shaka.util.BufferUtils.toUint8(responses[0]);
+    ttmlSegment = shaka.util.BufferUtils.toUint8(responses[1]);
+    ttmlSegmentMultipleMDAT = shaka.util.BufferUtils.toUint8(responses[2]);
+    audioInitSegment = shaka.util.BufferUtils.toUint8(responses[3]);
   });
 
   it('parses init segment', () => {

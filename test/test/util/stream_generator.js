@@ -423,13 +423,10 @@ shaka.test.StreamGenerator = class {
     goog.asserts.assert(baseMediaDecodeTime * timescale < Math.pow(2, 32),
         'Specied baseMediaDecodeTime is too big.');
 
-    // NOTE from Microsoft on the lack of ArrayBuffer.prototype.slice in IE11:
-    // "At this time we do not plan to fix this issue." ~ https://bit.ly/2ywEkpQ
-    // This is the best replacement for segment.slice(0) I could come up with:
-    const buffer = new ArrayBuffer(segment.byteLength);
-    (new Uint8Array(buffer)).set(new Uint8Array(segment));
+    // This will create a copy of the given buffer.
+    const buffer = shaka.util.Uint8ArrayUtils.concat(segment);
 
-    const dataView = new DataView(buffer);
+    const dataView = shaka.util.BufferUtils.toDataView(buffer);
     const reader = new shaka.util.DataViewReader(
         dataView, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
     reader.skip(tfdtOffset);
@@ -461,6 +458,6 @@ shaka.test.StreamGenerator = class {
       dataView.setUint32(pos + 4, baseMediaDecodeTime * timescale);
     }
 
-    return buffer;
+    return shaka.util.BufferUtils.toArrayBuffer(buffer);
   }
 };
