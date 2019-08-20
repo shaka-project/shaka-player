@@ -206,19 +206,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.localVideo_ = null;
     this.video_ = null;
 
-    // TODO: remove any elements created
+    this.releaseChildElements_();
 
     this.localization_ = null;
     this.pressedKeys_.clear();
-
-    await Promise.all(this.elements_.map((element) => element.destroy()));
-    this.elements_ = [];
-
-    if (this.seekBar_) {
-      await this.seekBar_.destroy();
-    }
   }
 
+
+  /** @private */
+  releaseChildElements_() {
+    for (const element of this.elements_) {
+      element.release();
+    }
+
+    this.elements_ = [];
+  }
 
   /**
    * @event shaka.Controls.CastStatusChangedEvent
@@ -347,18 +349,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Deconstruct the old layout if applicable
     if (this.seekBar_) {
-      this.seekBar_.destroy();
       this.seekBar_ = null;
     }
 
     if (this.playButton_) {
-      this.playButton_.destroy();
       this.playButton_ = null;
     }
 
     if (this.controlsContainer_) {
       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
       this.videoContainer_.removeChild(this.spinnerContainer_);
+      this.releaseChildElements_();
     } else {
       this.addControlsContainer_();
     }
@@ -622,6 +623,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (this.config_.addSeekBar) {
       this.seekBar_ = new shaka.ui.SeekBar(this.bottomControls_, this);
+      this.elements_.push(this.seekBar_);
     } else {
       // Settings menus need to be positioned lower if the seekbar is absent.
       for (const menu of this.settingsMenus_) {
@@ -655,6 +657,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.ui.BigPlayButton} */
     this.playButton_ =
         new shaka.ui.BigPlayButton(playButtonContainer, this);
+    this.elements_.push(this.playButton_);
   }
 
   /** @private */

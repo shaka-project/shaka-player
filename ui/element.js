@@ -73,7 +73,7 @@ shaka.ui.Element = class {
    * @override
    * @export
    */
-  destroy() {
+  release() {
     this.eventManager.release();
 
     this.parent = null;
@@ -82,7 +82,5 @@ shaka.ui.Element = class {
     this.localization = null;
     this.player = null;
     this.video = null;
-
-    return Promise.resolve();
   }
 };

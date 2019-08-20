@@ -65,7 +65,7 @@ shaka.extern.UIConfiguration;
 /**
  * Interface for UI elements.
  *
- * @extends {shaka.util.IDestroyable}
+ * @extends {shaka.util.IReleasable}
  * @interface
  * @exportDoc
  */
@@ -115,7 +115,7 @@ shaka.extern.IUIElement = class {
   /**
    * @override
    */
-  destroy() {}
+  release() {}
 };
 
 

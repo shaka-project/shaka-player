@@ -70,13 +70,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   }
 
   /** @override */
-  async destroy() {
+  release() {
     if (this.seekTimer_) {
       this.seekTimer_.stop();
       this.seekTimer_ = null;
     }
 
-    await super.destroy();
+    super.release();
   }
 
   /**

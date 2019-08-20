@@ -124,13 +124,15 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
   }
 
   /** @override */
-  async destroy() {
+  release() {
     this.controlsContainer_ = null;
 
-    await Promise.all(this.children_.map((child) => child.destroy()));
-    this.children_ = [];
+    for (const element of this.children_) {
+      element.release();
+    }
 
-    await super.destroy();
+    this.children_ = [];
+    super.release();
   }
 
   /**
