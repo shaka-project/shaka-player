@@ -140,7 +140,6 @@ requirement: {
                  'handle sub-arrays'
   whitelist_regexp: 'lib/util/buffer_utils.js'
   whitelist_regexp: 'lib/util/object_utils.js'
-  whitelist_regexp: 'lib/util/uint8array_utils.js'
   whitelist_regexp: 'test/'
 }
 

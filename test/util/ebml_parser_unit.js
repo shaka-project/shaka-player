@@ -23,7 +23,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // Set size to 4 bytes.
     // Set the data to [0x01, 0x02, 0x03, 0x04].
     const data = new Uint8Array([0x81, 0x84, 0x01, 0x02, 0x03, 0x04]);
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
 
     const elem = parser.parseElement();
     expect(elem.id).toBe(0x81);
@@ -43,9 +43,10 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // Set ID to 0x2.
     // Set size to 4 bytes.
     // Set the data to [0x09, 0x08, 0x07, 0x06].
-    const data = new Uint8Array([0x81, 0x84, 0x01, 0x02, 0x03, 0x04, 0x82, 0x84,
-      0x09, 0x08, 0x07, 0x06]);
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const data = new Uint8Array([
+      0x81, 0x84, 0x01, 0x02, 0x03, 0x04, 0x82, 0x84, 0x09, 0x08, 0x07, 0x06,
+    ]);
+    const parser = new shaka.util.EbmlParser(data);
 
     const elem1 = parser.parseElement();
     expect(elem1.id).toBe(0x81);
@@ -70,7 +71,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // The size should be 5 bytes.
     // Set the data to [0xaa, 0xbb, 0xcc, 0xdd, 0xee].
     const data = new Uint8Array([0x81, 0xff, 0xaa, 0xbb, 0xcc, 0xdd, 0xee]);
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
     const element = parser.parseElement();
 
     expect(element).toBeTruthy();
@@ -84,7 +85,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // Extract the variable sized integer from |data|. Note that since
     // |data| contains exactly one variable sized integer, |vint| should be
     // identical to |data|.
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
     const vint = parser.parseVint_();
 
     expect(shaka.util.EbmlParser.getVintValue_(data)).toBe(0x41);
@@ -95,7 +96,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // 14-bit: 01|10 0001, 0001 1001
     const data = new Uint8Array([0x61, 0x19]);
 
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
     const vint = parser.parseVint_();
 
     expect(shaka.util.EbmlParser.getVintValue_(data)).toBe(0x2119);
@@ -106,7 +107,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // 21-bit: 001|1 0001, 0010 0001, 0001 0011
     const data = new Uint8Array([0x31, 0x21, 0x13]);
 
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
     const vint = parser.parseVint_();
 
     expect(shaka.util.EbmlParser.getVintValue_(data)).toBe(0x112113);
@@ -117,7 +118,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // 28-bit: 0001 | 1000, 0001 0001, 0001 0001, 0001 0101
     const data = new Uint8Array([0x18, 0x11, 0x11, 0x15]);
 
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
     const vint = parser.parseVint_();
 
     expect(shaka.util.EbmlParser.getVintValue_(data)).toBe(0x8111115);
@@ -128,7 +129,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // 35-bit: 0000 1|100, 0001 0001, 0001 0001, 0001 0001, 0001 1001
     const data = new Uint8Array([0x0c, 0x11, 0x11, 0x11, 0x19]);
 
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
     const vint = parser.parseVint_();
 
     expect(shaka.util.EbmlParser.getVintValue_(data)).toBe(0x411111119);
@@ -140,7 +141,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     //                     0001 1000
     const data = new Uint8Array([0x06, 0x12, 0x11, 0x11, 0x11, 0x18]);
 
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
     const vint = parser.parseVint_();
 
     expect(shaka.util.EbmlParser.getVintValue_(data)).toBe(0x21211111118);
@@ -152,7 +153,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     //                     0001 0001, 1001 0001
     const data = new Uint8Array([0x03, 0x12, 0x11, 0x11, 0x11, 0x11, 0x91]);
 
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
     const vint = parser.parseVint_();
 
     expect(shaka.util.EbmlParser.getVintValue_(data)).toBe(0x1121111111191);
@@ -165,7 +166,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     const data =
         new Uint8Array([0x01, 0x12, 0x14, 0x18, 0x11, 0x11, 0x19, 0x31]);
 
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
     const vint = parser.parseVint_();
 
     expect(shaka.util.EbmlParser.getVintValue_(data)).toBe(0x12141811111931);
@@ -184,7 +185,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
       //                                0001 0001
       const data = new Uint8Array(
           [0x00, 0x81, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11]);
-      const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+      const parser = new shaka.util.EbmlParser(data);
       parser.parseVint_();
     }).toThrow(expected);
   });
@@ -223,7 +224,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
   it('detects the end of input while reading a vint', () => {
     // 14-bit: 01|10 0001, 0001 0001
     const data = new Uint8Array([0x61]);
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
 
     const expected = Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
@@ -237,7 +238,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // Set size to 4 bytes.
     // Set the data to [0x01, 0x02, 0x03, 0x04].
     const data = new Uint8Array([0x81, 0x84, 0x01, 0x02, 0x03, 0x04]);
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
 
     const elem = parser.parseElement();
     expect(elem.id).toBe(0x81);
@@ -250,7 +251,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // Set the data to [0x01, 0x02, 0x03, ..., 0x09].
     const data = new Uint8Array(
         [0x81, 0x89, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09]);
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
 
     const elem = parser.parseElement();
     expect(elem.id).toBe(0x81);
@@ -268,7 +269,7 @@ describe('EbmlParser', /** @suppress {accessControls} */ () => {
     // Set the data to [0x2f, 0xff, 0xff, ..., 0xff].
     const data = new Uint8Array(
         [0x81, 0x88, 0x2f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]);
-    const parser = new shaka.util.EbmlParser(new DataView(data.buffer));
+    const parser = new shaka.util.EbmlParser(data);
 
     const elem = parser.parseElement();
     expect(elem.id).toBe(0x81);

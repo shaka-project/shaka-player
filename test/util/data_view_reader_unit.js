@@ -38,17 +38,13 @@ describe('DataViewReader', () => {
 
   beforeEach(() => {
     bigEndianReader = new shaka.util.DataViewReader(
-        new DataView(data.buffer),
-        shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+        data, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
     bigEndianReader2 = new shaka.util.DataViewReader(
-        new DataView(data2.buffer),
-        shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+        data2, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
     littleEndianReader = new shaka.util.DataViewReader(
-        new DataView(data.buffer),
-        shaka.util.DataViewReader.Endianness.LITTLE_ENDIAN);
+        data, shaka.util.DataViewReader.Endianness.LITTLE_ENDIAN);
     littleEndianReader2 = new shaka.util.DataViewReader(
-        new DataView(data2.buffer),
-        shaka.util.DataViewReader.Endianness.LITTLE_ENDIAN);
+        data2, shaka.util.DataViewReader.Endianness.LITTLE_ENDIAN);
   });
 
   it('reads a uint8 in big endian', () => {
