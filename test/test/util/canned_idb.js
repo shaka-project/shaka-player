@@ -136,7 +136,7 @@ shaka.test.CannedIDB = class {
       if (dummyArrayBuffers) {
         data = '';
       } else {
-        data = shaka.util.Uint8ArrayUtils.toBase64(new Uint8Array(value));
+        data = shaka.util.Uint8ArrayUtils.toBase64(value);
       }
       return {
         __type__: 'ArrayBuffer',

@@ -812,8 +812,7 @@ describe('In-manifest PlayReady and Widevine', () => {
         // value
       ].concat(laurlCodes));
 
-      const encodedPrObject =
-        shaka.util.Uint8ArrayUtils.toBase64(new Uint8Array(prBytes.buffer));
+      const encodedPrObject = shaka.util.Uint8ArrayUtils.toBase64(prBytes);
       const input = {
         init: null,
         keyId: null,
