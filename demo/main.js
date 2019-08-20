@@ -903,7 +903,7 @@ shakaDemo.Main = class {
       // Fetch the certificate, and apply it to the configuration.
       const certificate = await this.requestCertificate_(
           asset.certificateUri, netEngine);
-      const certArray = new Uint8Array(certificate);
+      const certArray = shaka.util.BufferUtils.toUint8(certificate);
       for (const drmSystem of asset.licenseServers.keys()) {
         config.drm.advanced[drmSystem] = config.drm.advanced[drmSystem] || {};
         config.drm.advanced[drmSystem].serverCertificate = certArray;

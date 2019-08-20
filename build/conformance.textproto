@@ -106,6 +106,31 @@ requirement: {
   error_message: 'Use expect.toBe for primitives'
 }
 
+requirement: {
+  type: BANNED_CODE_PATTERN
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Uint8Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Int8Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Uint8ClampedArray(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Unt16Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Int16Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Uint32Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Int32Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Float32Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Float64Array(a) }'
+  error_message: 'Use shaka.util.BufferUtils.view* instead.'
+  whitelist_regexp: 'lib/util/buffer_utils.js'
+  whitelist_regexp: 'lib/util/uint8array_utils.js'
+  whitelist_regexp: 'test/'
+}
 
 # Disallow console logging.
 requirement: {
