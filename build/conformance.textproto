@@ -138,6 +138,7 @@ requirement: {
   value: 'TypedArray.prototype.buffer'
   error_message: 'Using "TypedArray.buffer" is not safe since it doesn\'t '
                  'handle sub-arrays'
+  whitelist_regexp: 'lib/util/buffer_utils.js'
   whitelist_regexp: 'lib/util/object_utils.js'
   whitelist_regexp: 'lib/util/uint8array_utils.js'
   whitelist_regexp: 'test/'
