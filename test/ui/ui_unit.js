@@ -454,14 +454,14 @@ describe('UI', function() {
               .addVariant(10)
                 .language('en')
                 .addVideo(11).size(1280, 720)
-                .addAudio(12).channelsCount(6)
+                .addAudio(12).channelsCount(1)
               .addVariant(13)
                 .language('es')
-                .addVideo(14).size(1920, 1080)
+                .addVideo(14).size(960, 540)
                 .addAudio(15).channelsCount(2)
               .addVariant(16)
                 .language('fr')
-                .addVideo(17).size(2560, 1440)
+                .addVideo(17).size(256, 144)
                 .addAudio(18).channelsCount(2)
             .build();
         /* eslint-enable indent */
@@ -482,8 +482,8 @@ describe('UI', function() {
         const tracks = player.getVariantTracks();
         const en2 =
             tracks.find((t) => t.language == 'en' && t.channelsCount == 2);
-        const en6 =
-            tracks.find((t) => t.language == 'en' && t.channelsCount == 6);
+        const en1 =
+            tracks.find((t) => t.language == 'en' && t.channelsCount == 1);
         const es = tracks.find((t) => t.language == 'es');
 
         // There are 3 variants with English 2-channel, but one is a duplicate
@@ -493,9 +493,9 @@ describe('UI', function() {
         await updateResolutionMenu();
         expect(getResolutions()).toEqual(['240p', '480p']);
 
-        // There is 1 variant with English 6-channel.
-        goog.asserts.assert(en6, 'Unable to find tracks');
-        player.selectVariantTrack(en6, true);
+        // There is 1 variant with English 1-channel.
+        goog.asserts.assert(en1, 'Unable to find tracks');
+        player.selectVariantTrack(en1, true);
         await updateResolutionMenu();
         expect(getResolutions()).toEqual(['720p']);
 
@@ -503,7 +503,7 @@ describe('UI', function() {
         goog.asserts.assert(es, 'Unable to find tracks');
         player.selectVariantTrack(es, true);
         await updateResolutionMenu();
-        expect(getResolutions()).toEqual(['1080p']);
+        expect(getResolutions()).toEqual(['540p']);
       });
 
       /**
