@@ -87,40 +87,34 @@ function shakaUncompiledModeSupported() {
   fragments = fragments ? fragments.split(';') : [];
   var combined = fields.concat(fragments);
 
-  var scripts = window['UNCOMPILED_JS'];
   var buildType = 'uncompiled';
   var buildSpecified = false;
 
   if (!shakaUncompiledModeSupported()) {
     // If uncompiled mode is not supported, default to the compiled debug
     // version, which should still work.
-    scripts = window['COMPILED_DEBUG_JS'];
     buildType = 'debug_compiled';
   }
 
   if (!navigator.onLine) {
     // If we're offline, default to the compiled version, which may have been
     // cached by the service worker.
-    scripts = window['COMPILED_JS'];
     buildType = 'compiled';
   }
 
   // Very old browsers do not have Array.prototype.indexOf, so we loop.
   for (var i = 0; i < combined.length; ++i) {
     if (combined[i] == 'build=compiled') {
-      scripts = window['COMPILED_JS'];
       buildType = 'compiled';
       buildSpecified = true;
       break;
     }
     if (combined[i] == 'build=debug_compiled') {
-      scripts = window['COMPILED_DEBUG_JS'];
       buildType = 'debug_compiled';
       buildSpecified = true;
       break;
     }
     if (combined[i] == 'build=uncompiled') {
-      scripts = window['UNCOMPILED_JS'];
       buildType = 'uncompiled';
       buildSpecified = true;
       break;
@@ -131,7 +125,6 @@ function shakaUncompiledModeSupported() {
     // The URL says uncompiled, but we know it won't work.  This URL was
     // probably copied from some other browser, but it won't work in this one.
     // Force the use of the compiled debug build and update the hash.
-    scripts = window['COMPILED_DEBUG_JS'];
     buildType = 'debug_compiled';
 
     // Replace the build type in either the hash or the URL parameters.
@@ -159,6 +152,11 @@ function shakaUncompiledModeSupported() {
 
   // The application must define its list of compiled and uncompiled sources
   // before including this loader.  The URLs should be relative to the page.
+  var scripts = {
+    'compiled': window['COMPILED_JS'],
+    'debug_compiled': window['COMPILED_DEBUG_JS'],
+    'uncompiled': window['UNCOMPILED_JS'],
+  }[buildType];
   for (var j = 0; j < scripts.length; ++j) {
     loadRelativeScript(scripts[j]);
   }
