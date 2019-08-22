@@ -34,6 +34,10 @@ player.configure('drm.initDataTransform', (initData) => {
 
 ## License wrapping
 
+For v2.5.x, we provide a default license request/response filter that mirrors
+the FairPlay examples.  You can remove these by setting the
+`drm.fairPlayTransform` configuration to `false`.
+
 Some FairPlay servers need to accept the license request in a different format
 or give the response in a different format.  For more info, see the general
 {@tutorial license-wrapping} tutorial:

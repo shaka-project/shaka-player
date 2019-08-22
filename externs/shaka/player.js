@@ -497,7 +497,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   clearKeys: !Object.<string, string>,
  *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
- *   initDataTransform: ((function(!Uint8Array):!Uint8Array)|undefined)
+ *   initDataTransform: ((function(!Uint8Array):!Uint8Array)|undefined),
+ *   fairPlayTransform: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -524,6 +525,13 @@ shaka.extern.AdvancedDrmConfiguration;
  *   If given, this function is called with the init data from the
  *   manifest/media and should return the (possibly transformed) init data to
  *   pass to the browser.
+ * @property {boolean} fairPlayTransform
+ *   <i>Optional.</i><br>
+ *   <b>Temporary, for v2.5.x only.</b><br>
+ *   If true, transform the FairPlay license request/response according to the
+ *   FairPlay examples; if false, don't transform.  Defaults to
+ *   <code>true</code>.  Starting in v2.6 this will go away and we will never
+ *   provide default license request/response transforms.
  *
  * @exportDoc
  */
