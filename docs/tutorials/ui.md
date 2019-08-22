@@ -38,6 +38,7 @@ Set up controls with HTML data attributes:
 </html>
 ```
 
+
 ```js
 // myapp.js
 
@@ -129,6 +130,51 @@ Next, let's add a listener to the 'caststatuschanged' event in myapp.js:
   }
 
 ```
+#### Providing source(s) for auto load.
+
+It's also possible to provide an 'src' attribute on the <video>  element
+or a <source> tag inside it to enable auto loading of the specified content.
+
+```html
+    <div data-shaka-player-container style="max-width:40em"
+         data-shaka-player-cast-receiver-id="7B25EC44">
+      <!-- The manifest url in the src attribute will be automatically loaded -->
+      <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
+       src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
+    </div>
+
+```
+
+or
+
+```html
+    <div data-shaka-player-container style="max-width:40em"
+         data-shaka-player-cast-receiver-id="7B25EC44">
+      <video autoplay data-shaka-player id="video" style="width:100%;height:100%">
+        <!-- The manifest url in the src attribute will be auto loaded -->
+       <source src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"/>
+      </video>
+    </div>
+
+```
+
+Use several <source> tags to provide backup manifest urls in case the load()
+call to the first one fails.
+
+```html
+    <div data-shaka-player-container style="max-width:40em"
+         data-shaka-player-cast-receiver-id="7B25EC44">
+      <video autoplay data-shaka-player id="video" style="width:100%;height:100%">
+        <!-- Try this first -->
+        <source src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"/>
+        <!-- Try this if the first one has failed -->
+        <source src="https://storage.googleapis.com/shaka-demo-assets/angel-one-hls-apple/master.m3u8"/>
+      </video>
+    </div>
+
+```
+NOTE: Please DO NOT specify both an 'src' attribute on the <video> tag AND
+a <source> tag inside it.
 
 <!-- TODO: Also mention the download button, once we add it. -->
 #### Continue the Tutorials

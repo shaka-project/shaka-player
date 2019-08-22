@@ -66,12 +66,12 @@ describe('UI', () => {
       /** @type {!HTMLElement} */
       let container;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         container =
           /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
 
-        UiUtils.createUIThroughDOMAutoSetup([container], /* videos */ []);
+        await UiUtils.createUIThroughDOMAutoSetup([container], /* videos */ []);
       });
 
       it('has all the basic elements', () => {
@@ -86,7 +86,7 @@ describe('UI', () => {
       /** @type {!HTMLElement} */
       let container2;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         container1 =
           /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container1);
@@ -95,7 +95,7 @@ describe('UI', () => {
           /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container2);
 
-        UiUtils.createUIThroughDOMAutoSetup([container1, container2],
+        await UiUtils.createUIThroughDOMAutoSetup([container1, container2],
             /* videos */ []);
       });
 
@@ -109,11 +109,11 @@ describe('UI', () => {
       /** @type {!HTMLVideoElement} */
       let video;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         video = shaka.util.Dom.createVideoElement();
         document.body.appendChild(video);
 
-        UiUtils.createUIThroughDOMAutoSetup(/* containers */ [], [video]);
+        await UiUtils.createUIThroughDOMAutoSetup(/* containers */ [], [video]);
       });
 
       it('has all the basic elements', () => {
@@ -126,7 +126,7 @@ describe('UI', () => {
       /** @type {!Array.<!HTMLVideoElement>} */
       const videos = [];
 
-      beforeEach(() => {
+      beforeEach(async () => {
         // Four is just a random number I (ismena) came up with to test a
         // multi-video use case. It could be replaces with any other
         // (reasonable) number.
@@ -139,7 +139,7 @@ describe('UI', () => {
           videos.push(video);
         }
 
-        UiUtils.createUIThroughDOMAutoSetup(/* containers */ [], videos);
+        await UiUtils.createUIThroughDOMAutoSetup(/* containers */ [], videos);
       });
 
       it('has all the basic elements', () => {
@@ -156,7 +156,7 @@ describe('UI', () => {
       /** @type {!HTMLVideoElement} */
       let video;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         container =
           /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
@@ -164,7 +164,7 @@ describe('UI', () => {
         video = shaka.util.Dom.createVideoElement();
         container.appendChild(video);
 
-        UiUtils.createUIThroughDOMAutoSetup([container], [video]);
+        await UiUtils.createUIThroughDOMAutoSetup([container], [video]);
       });
 
       it('has all the basic elements', () => {

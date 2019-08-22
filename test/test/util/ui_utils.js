@@ -42,7 +42,9 @@ shaka.test.UiUtils = class {
    * @param {!Array.<!Element>} videos
    * @suppress {visibility}
    */
-  static createUIThroughDOMAutoSetup(containers, videos) {
+  static async createUIThroughDOMAutoSetup(containers, videos) {
+    const eventManager = new shaka.util.EventManager();
+    const waiter = new shaka.test.Waiter(eventManager);
     for (const container of containers) {
       container.setAttribute('data-shaka-player-container', '');
     }
@@ -54,6 +56,7 @@ shaka.test.UiUtils = class {
     // Call UI's private method to scan the page for shaka
     // elements and create the UI.
     shaka.ui.Overlay.scanPageForShakaElements_();
+    await waiter.failOnTimeout(false).waitForEvent(document, 'shaka-ui-loaded');
   }
 
   /**
