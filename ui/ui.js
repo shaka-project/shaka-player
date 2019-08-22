@@ -203,7 +203,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
 /**
  * @private
  */
-shaka.ui.Overlay.scanPageForShakaElements_ = function() {
+shaka.ui.Overlay.scanPageForShakaElements_ = async function() {
   // Install built-in polyfills to patch browser incompatibilities.
   shaka.polyfill.installAll();
   // Check to see if the browser supports the basic APIs Shaka needs.
@@ -249,23 +249,7 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
       videoParent.replaceChild(container, video);
       container.appendChild(video);
 
-      let castAppId = '';
-
-      // If cast receiver application id was provided, pass it to the
-      // UI constructor.
-      if (video['dataset'] && video['dataset']['shakaPlayerCastReceiverId']) {
-        castAppId = video['dataset']['shakaPlayerCastReceiverId'];
-      }
-
-      const ui = shaka.ui.Overlay.createUI_(
-          shaka.util.Dom.asHTMLElement(container),
-          shaka.util.Dom.asHTMLMediaElement(video));
-
-      ui.configure({castReceiverAppId: castAppId});
-
-      if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
-        ui.getControls().setEnabledNativeControls(true);
-      }
+        shaka.ui.Overlay.setupUIandAutoLoad_(container, video);
     }
   } else {
     for (let i = 0; i < containers.length; i++) {
@@ -278,15 +262,6 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
       goog.asserts.assert(container.tagName.toLowerCase() == 'div',
         'Container should be a div!');
 
-      let castAppId = '';
-
-      // Cast receiver id can be specified on either container or video.
-      // It should not be provided on both. If it was, we will use the last
-      // one we saw.
-      if (container['dataset'] &&
-          container['dataset']['shakaPlayerCastReceiverId']) {
-        castAppId = container['dataset']['shakaPlayerCastReceiverId'];
-      }
 
       let video = null;
       for (let j = 0; j < videos.length; j++) {
@@ -304,14 +279,8 @@ shaka.ui.Overlay.scanPageForShakaElements_ = function() {
         container.appendChild(video);
       }
 
-      if (video['dataset'] && video['dataset']['shakaPlayerCastReceiverId']) {
-        castAppId = video['dataset']['shakaPlayerCastReceiverId'];
-      }
-      const ui = shaka.ui.Overlay.createUI_(
-          shaka.util.Dom.asHTMLElement(container),
-          shaka.util.Dom.asHTMLMediaElement(video));
-
-      ui.configure({castReceiverAppId: castAppId});
+      // eslint-disable-next-line no-await-in-loop
+      await shaka.ui.Overlay.setupUIandAutoLoad_(container, video);
     }
   }
 
@@ -333,6 +302,66 @@ shaka.ui.Overlay.dispatchLoadedEvent_ = function(eventName) {
   uiLoadedEvent.initCustomEvent(eventName, false, false, null);
 
   document.dispatchEvent(uiLoadedEvent);
+};
+
+
+/**
+ * @param {!Element} container
+ * @param {!Element} video
+ * @private
+ */
+shaka.ui.Overlay.setupUIandAutoLoad_ = async function(container, video) {
+  // Create the UI
+  const ui = shaka.ui.Overlay.createUI_(
+      shaka.util.Dom.asHTMLElement(container),
+      shaka.util.Dom.asHTMLMediaElement(video));
+
+  // Get and configure cast app id.
+  let castAppId = '';
+
+  // Cast receiver id can be specified on either container or video.
+  // It should not be provided on both. If it was, we will use the last
+  // one we saw.
+  if (container['dataset'] &&
+      container['dataset']['shakaPlayerCastReceiverId']) {
+    castAppId = container['dataset']['shakaPlayerCastReceiverId'];
+  } else if (video['dataset'] &&
+             video['dataset']['shakaPlayerCastReceiverId']) {
+    castAppId = video['dataset']['shakaPlayerCastReceiverId'];
+  }
+
+  if (castAppId.length) {
+    ui.configure({castReceiverAppId: castAppId});
+  }
+
+  if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
+    ui.getControls().setEnabledNativeControls(true);
+  }
+
+  // Get the source and load it
+  // Source can be specified either on the video element:
+  //  <video src='foo.m2u8'></video>
+  // or as a separate element inside the video element:
+  //  <video>
+  //    <source src='foo.m2u8'/>
+  //  </video>
+  // It should not be specified on both.
+  const src = video.getAttribute('src');
+  if (src) {
+    const sourceElem = document.createElement('source');
+    sourceElem.setAttribute('src', src);
+    video.appendChild(sourceElem);
+    video.removeAttribute('src');
+  }
+
+  for (const elem of video.querySelectorAll('source')) {
+    try { // eslint-disable-next-line no-await-in-loop
+      await ui.getControls().getPlayer().load(elem.getAttribute('src'));
+      break;
+    } catch (e) {
+      shaka.log.error('Error auto-loading asset', e);
+    }
+  }
 };
 
 
