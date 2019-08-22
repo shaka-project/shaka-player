@@ -51,6 +51,10 @@ async function init() {
   const controls = ui.getControls();
   const player = controls.getPlayer();
 
+  // Attach player and ui to the window to make it easy to access in the JS console.
+  window.player = player;
+  window.ui = ui;
+
   // Listen for error events.
   player.addEventListener('error', onPlayerErrorEvent);
   controls.addEventListener('error', onUIErrorEvent);
