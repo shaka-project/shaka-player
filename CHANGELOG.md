@@ -1,3 +1,59 @@
+## 2.5.5 (2019-08-23)
+
+New Features:
+  - Conditionally remove FairPlay formatting
+    - https://github.com/google/shaka-player/issues/1951
+  - Add sessionId field to network request
+  - Make it easier to add custom overflow menu items
+    - https://github.com/google/shaka-player/issues/2091
+  - Add clearBufferOnQualityChange field to UI config
+    - https://github.com/google/shaka-player/issues/1733
+  - Allow filtering out failed HLS text tracks
+    - https://github.com/google/shaka-player/issues/2065
+  - Parse Accessibility tag into text "kind"
+    - https://github.com/google/shaka-player/issues/2060
+  - Re-add MediaSession API
+    - https://github.com/google/shaka-player/issues/1934
+  - Skip WebM streams in HLS instead of throwing
+    - https://github.com/google/shaka-player/issues/2108
+  - Convert `<mspr:pro>` elements to `pssh` init data
+    - https://github.com/google/shaka-player/pull/2106
+    - https://github.com/google/shaka-player/issues/2058
+
+Bugfixes:
+  - Fix duplicate resolution entries in UI menu
+    - https://github.com/google/shaka-player/issues/2085
+  - Fix missing tracks, race on time during startup
+    - https://github.com/google/shaka-player/issues/2045
+  - Fix spinner position on IE11
+    - https://github.com/google/shaka-player/issues/2084
+  - Fix seek bar coloring when nothing buffered
+  - Fix scroll behavior on page load
+    - https://github.com/google/shaka-player/issues/2063
+  - Don't create a UI if the app already has one
+    - https://github.com/google/shaka-player/issues/2073
+  - Fix text display styling when fullscreen
+    - https://github.com/google/shaka-player/issues/2051
+  - Don't enter fullscreen on double click on bottom bar
+    - https://github.com/google/shaka-player/issues/2053
+  - Avoid errors when video ends
+    - https://github.com/google/shaka-player/issues/2050
+  - Fix fullscreen behavior on double click and rotate
+    - https://github.com/google/shaka-player/issues/2043
+  - Fix bug when clicking PIP button while casting
+    - https://github.com/google/shaka-player/issues/2044
+  - Fix CEA captions with multi-Period content
+    - https://github.com/google/shaka-player/issues/2075
+    - https://github.com/google/shaka-player/issues/2094
+
+Demo App:
+  - Added more HLS demo assets
+    - https://github.com/google/shaka-player/issues/2035
+  - Exit PIP on unload in the demo
+    - https://github.com/google/shaka-player/issues/2055
+  - Re-added hidden 'noinput' param to demo
+
+
 ## 2.5.4 (2019-07-19)
 
 Bugfixes:
