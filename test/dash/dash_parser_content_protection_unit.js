@@ -68,7 +68,8 @@ describe('DashParser ContentProtection', () => {
       adaptationSetLines, representation1Lines, representation2Lines) {
     const template = [
       '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
-      '    xmlns:cenc="urn:mpeg:cenc:2013">',
+      '    xmlns:cenc="urn:mpeg:cenc:2013"',
+      '    xmlns:mspr="urn:microsoft:playready">',
       '  <Period duration="PT30S">',
       '    <SegmentTemplate media="s.mp4" duration="2" />',
       '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
@@ -292,6 +293,50 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.widevine.alpha', [], [
         'ZmFrZSBXaWRldmluZSBQU1NI',
       ]),
+      buildDrmInfo('com.microsoft.playready', [], [
+        'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5',
+      ]),
+    ]);
+    await testDashParser(source, expected);
+  });
+
+  it('extracts embedded PSSHs with mspr:pro', async () => {
+    const source = buildManifestText([
+      // AdaptationSet lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
+      '  <mspr:pro>ZmFrZSBQbGF5cmVhZHkgUFJP</mspr:pro>',
+      '</ContentProtection>',
+    ], [], []);
+
+    const proText = 'ZmFrZSBQbGF5cmVhZHkgUFJP';
+    const data = shaka.util.Uint8ArrayUtils.fromBase64(proText);
+    const systemId = new Uint8Array([
+      0x9a, 0x04, 0xf0, 0x79, 0x98, 0x40, 0x42, 0x86,
+      0xab, 0x92, 0xe6, 0x5b, 0xe0, 0x88, 0x5f, 0x95,
+    ]); // Playready
+    const pssh = shaka.util.Pssh.getPSSHFromMsprPro(data, systemId);
+
+    const expected = buildExpectedManifest([
+      buildDrmInfo('com.microsoft.playready', [], [
+        shaka.util.Uint8ArrayUtils.toBase64(pssh),
+      ]),
+    ]);
+    await testDashParser(source, expected);
+  });
+
+
+
+  it('extracts embedded PSSHs with mspr:pro and cenc:pssh and prefer cenc:pssh', async () => {
+    const source = buildManifestText([
+      // AdaptationSet lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
+      '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
+      '  <mspr:pro>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</mspr:pro>',
+      '</ContentProtection>',
+    ], [], []);
+    const expected = buildExpectedManifest([
       buildDrmInfo('com.microsoft.playready', [], [
         'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5',
       ]),
