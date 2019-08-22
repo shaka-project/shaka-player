@@ -325,8 +325,6 @@ describe('DashParser ContentProtection', () => {
     await testDashParser(source, expected);
   });
 
-
-
   it('extracts embedded PSSHs with mspr:pro and cenc:pssh and prefer cenc:pssh', async () => {
     const source = buildManifestText([
       // AdaptationSet lines
