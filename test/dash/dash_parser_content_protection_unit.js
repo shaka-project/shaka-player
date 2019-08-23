@@ -331,7 +331,7 @@ describe('DashParser ContentProtection', () => {
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
       '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
-      '  <mspr:pro>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</mspr:pro>',
+      '  <mspr:pro>ZmFrZSBQbGF5cmVhZHkgUFJP</mspr:pro>',
       '</ContentProtection>',
     ], [], []);
     const expected = buildExpectedManifest([
