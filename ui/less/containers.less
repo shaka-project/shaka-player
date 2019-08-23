@@ -269,4 +269,8 @@
   padding: @spinner-size-percentage / 2;
   width: 0;
   height: 0;
+
+  /* Add a bit of a white shadow to keep our black spinner visible
+  on a black background. */
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
 }
