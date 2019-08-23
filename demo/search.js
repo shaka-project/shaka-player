@@ -297,6 +297,7 @@ shakaDemo.Search = class {
     this.makeBooleanInput_(specialContainer, Feature.SURROUND, FEATURE);
     this.makeBooleanInput_(specialContainer, Feature.OFFLINE, FEATURE);
     this.makeBooleanInput_(specialContainer, Feature.STORED, FEATURE);
+    this.makeBooleanInput_(specialContainer, Feature.AUDIO_ONLY, FEATURE);
   }
 
   /**

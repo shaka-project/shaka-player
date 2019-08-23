@@ -78,7 +78,7 @@ shakaAssets.Feature = {
   // Set if the asset has multiple audio languages.
   MULTIPLE_LANGUAGES: 'multiple languages',
   // Set if the asset is audio-only.
-  AUDIO_ONLY: 'audio only',
+  AUDIO_ONLY: 'Audio only',
   OFFLINE: 'Downloadable',
   // A synthetic property used in the search tab. Should not be given to assets.
   STORED: 'Downloaded',
