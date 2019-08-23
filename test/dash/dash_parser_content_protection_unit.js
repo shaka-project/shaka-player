@@ -68,7 +68,8 @@ describe('DashParser ContentProtection', () => {
       adaptationSetLines, representation1Lines, representation2Lines) {
     const template = [
       '<MPD xmlns="urn:mpeg:DASH:schema:MPD:2011"',
-      '    xmlns:cenc="urn:mpeg:cenc:2013">',
+      '    xmlns:cenc="urn:mpeg:cenc:2013"',
+      '    xmlns:mspr="urn:microsoft:playready">',
       '  <Period duration="PT30S">',
       '    <SegmentTemplate media="s.mp4" duration="2" />',
       '    <AdaptationSet mimeType="video/mp4" codecs="avc1.4d401f">',
@@ -292,6 +293,39 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.widevine.alpha', [], [
         'ZmFrZSBXaWRldmluZSBQU1NI',
       ]),
+      buildDrmInfo('com.microsoft.playready', [], [
+        'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5',
+      ]),
+    ]);
+    await testDashParser(source, expected);
+  });
+
+  it('extracts embedded PSSHs with mspr:pro', async () => {
+    const source = buildManifestText([
+      // AdaptationSet lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
+      '  <mspr:pro>UGxheXJlYWR5</mspr:pro>',
+      '</ContentProtection>',
+    ], [], []);
+    const expected = buildExpectedManifest([
+      buildDrmInfo('com.microsoft.playready', [], [
+        'AAAAKXBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAAlQbGF5cmVhZHk=',
+      ]),
+    ]);
+    await testDashParser(source, expected);
+  });
+
+  it('extracts embedded PSSHs and prefer cenc:pssh over mspr:pro', async () => {
+    const source = buildManifestText([
+      // AdaptationSet lines
+      '<ContentProtection',
+      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95">',
+      '  <cenc:pssh>bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5</cenc:pssh>',
+      '  <mspr:pro>ZmFrZSBQbGF5cmVhZHkgUFJP</mspr:pro>',
+      '</ContentProtection>',
+    ], [], []);
+    const expected = buildExpectedManifest([
       buildDrmInfo('com.microsoft.playready', [], [
         'bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5',
       ]),
