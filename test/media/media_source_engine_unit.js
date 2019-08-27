@@ -386,6 +386,31 @@ describe('MediaSourceEngine', () => {
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
     });
 
+    it('handles QuotaExceededError for pending operations', async () => {
+      const fakeDOMException = {name: 'QuotaExceededError'};
+      audioSourceBuffer.appendBuffer.and.callFake(() => {
+        if (audioSourceBuffer.appendBuffer.calls.count() > 1) {
+          throw fakeDOMException;
+        }
+      });
+      mockVideo.error = {code: 5};
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
+          ContentType.AUDIO));
+
+      const p1 = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, null,
+          /* hasClosedCaptions */ false);
+      const p2 = mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, buffer, null, null,
+          /* hasClosedCaptions */ false);
+      audioSourceBuffer.updateend();
+      await expectAsync(p1).toBeResolved();
+      await expectAsync(p2).toBeRejectedWith(expected);
+    });
+
     it('rejects the promise if this operation fails async', async () => {
       mockVideo.error = {code: 5};
       const p = mediaSourceEngine.appendBuffer(
