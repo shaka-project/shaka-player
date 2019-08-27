@@ -167,6 +167,8 @@ shakaDemo.Main = class {
 
     await this.setupStorage_();
 
+    this.setupBugButton_();
+
     if (this.noInput_) {
       // Set the page to noInput mode, disabling the header and footer.
       const hideClass = 'should-hide-in-no-input-mode';
@@ -207,6 +209,71 @@ shakaDemo.Main = class {
     }
   }
 
+  /**
+   * @param {string} url
+   * @return {!Promise.<string>}
+   * @private
+   */
+  async loadText_(url) {
+    const netEngine = new shaka.net.NetworkingEngine();
+    const retryParams = shaka.net.NetworkingEngine.defaultRetryParameters();
+    const request = shaka.net.NetworkingEngine.makeRequest([url], retryParams);
+    const requestType = shaka.net.NetworkingEngine.RequestType.APP;
+    const operation = netEngine.request(requestType, request);
+    const response = await operation.promise;
+    const text = shaka.util.StringUtils.fromUTF8(response.data);
+    await netEngine.destroy();
+    return text;
+  }
+
+  /** @private */
+  async reportBug_() {
+    // Fetch the special bug template.
+    let text = await this.loadText_('autoTemplate.txt');
+
+    // Fill in what parts of the template we can.
+    const fillInTemplate = (replaceString, value) => {
+      text = text.replace(replaceString, value);
+    };
+    fillInTemplate('RE:player', shaka.Player.version);
+    fillInTemplate('RE:link', window.location.href);
+    fillInTemplate('RE:browser', navigator.userAgent);
+    if (this.selectedAsset &&
+        this.selectedAsset.source == shakaAssets.Source.CUSTOM) {
+      // This is a custom asset, so add a comment warning about custom assets.
+      const warning = await this.loadText_('customWarning.txt');
+      fillInTemplate('RE:customwarning', warning);
+    } else {
+      // No need for any warnings. So remove it (and the newline after it).
+      fillInTemplate('RE:customwarning\n', '');
+    }
+
+    // Navigate to the github issue opening interface, with the
+    // partially-filled template as a preset body.
+    let url = 'https://github.com/google/shaka-player/issues/new?';
+    url += 'body=' + encodeURIComponent(text);
+    // Open in another tab.
+    window.open(url, '_blank');
+  }
+
+  /** @private */
+  setupBugButton_() {
+    const bugButton = document.getElementById('bug-button');
+    bugButton.addEventListener('click', () => this.reportBug_());
+
+    // The button should be disabled when offline, as we can't report bugs in
+    // that state.
+    if (!navigator.onLine) {
+      bugButton.setAttribute('disabled', '');
+    }
+    window.addEventListener('online', () => {
+      bugButton.removeAttribute('disabled');
+    });
+    window.addEventListener('offline', () => {
+      bugButton.setAttribute('disabled', '');
+    });
+  }
+
   /** @private */
   setupPlayer_() {
     const video = /** @type {!HTMLVideoElement} */ (this.video_);
@@ -218,8 +285,8 @@ shakaDemo.Main = class {
       // sense to stop playing a video if you can't start playing other videos.
 
       // Register custom controls to the UI.
-      const factory = new shakaDemo.CloseButton.Factory();
-      shaka.ui.Controls.registerElement('close', factory);
+      const closeFactory = new shakaDemo.CloseButton.Factory();
+      shaka.ui.Controls.registerElement('close', closeFactory);
 
       // Configure UI.
       const uiConfig = ui.getConfiguration();
