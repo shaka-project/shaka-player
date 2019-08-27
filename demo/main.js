@@ -885,8 +885,9 @@ shakaDemo.Main = class {
     if (storage) {
       storage.configure(assetConfig);
     } else {
-      // Re-apply the desired config, to remove previous asset configuration
-      // without removing previous user configuration.
+      // Remove all not-player-applied configurations, by resetting the
+      // configuration then re-applying the desired configuration.
+      this.player_.resetConfiguration();
       this.player_.configure(this.desiredConfig_);
       this.player_.configure(assetConfig);
       // This uses Player.configure so as to not change |this.desiredConfig_|.
