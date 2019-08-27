@@ -287,7 +287,7 @@ shakaDemo.AssetCard = class {
     }
     if (this.asset_.isStored()) {
       const deleteButton = this.addButton('', () => {
-        this.makeDeleteDialog_(deleteButton);
+        this.attachDeleteDialog_(deleteButton);
       });
       styleAsDownloadButton(deleteButton, deleteButton, 'offline_pin');
     } else {
@@ -304,12 +304,27 @@ shakaDemo.AssetCard = class {
    * @param {!Element} deleteButton
    * @private
    */
-  makeDeleteDialog_(deleteButton) {
+  attachDeleteDialog_(deleteButton) {
     const parentDiv = this.card_.parentElement;
     if (!parentDiv) {
       return;
     }
 
+    // TODO: Localize these messages.
+    const deleteMessage = 'Delete the offline copy?';
+    this.makeYesNoDialogue_(parentDiv, deleteMessage, async () => {
+      deleteButton.disabled = true;
+      await this.asset_.unstoreCallback();
+    });
+  }
+
+  /**
+   * @param {!Element} parentDiv
+   * @param {string} text
+   * @param {function():Promise} callback
+   * @private
+   */
+  makeYesNoDialogue_(parentDiv, text, callback) {
     const dialog = document.createElement('dialog');
     dialog.classList.add('mdl-dialog');
     parentDiv.appendChild(dialog);
@@ -319,8 +334,7 @@ shakaDemo.AssetCard = class {
 
     const textElement = document.createElement('h2');
     textElement.classList.add('mdl-typography--title');
-    // TODO: Localize these messages.
-    textElement.textContent = 'Delete the offline copy?';
+    textElement.textContent = text;
     dialog.appendChild(textElement);
 
     const buttonsDiv = document.createElement('div');
@@ -341,8 +355,7 @@ shakaDemo.AssetCard = class {
     // TODO: Localize these messages.
     makeButton('Yes', async () => {
       dialog.close();
-      deleteButton.disabled = true;
-      await this.asset_.unstoreCallback();
+      await callback();
       this.remakeButtons();
     });
     makeButton('No', () => {
@@ -375,9 +388,10 @@ shakaDemo.AssetCard = class {
    * clicked. For example, a play or delete button.
    * @param {string} name
    * @param {function()} onclick
+   * @param {string=} yesNoDialogText
    * @return {!Element}
    */
-  addButton(name, onclick) {
+  addButton(name, onclick, yesNoDialogText) {
     const button = document.createElement('button');
     button.classList.add('mdl-button');
     button.classList.add('mdl-button--colored');
@@ -386,7 +400,11 @@ shakaDemo.AssetCard = class {
     button.textContent = name;
     button.addEventListener('click', () => {
       if (!button.hasAttribute('disabled')) {
-        onclick();
+        if (yesNoDialogText) {
+          this.makeYesNoDialogue_(this.actions_, yesNoDialogText, onclick);
+        } else {
+          onclick();
+        }
       }
     });
     this.actions_.appendChild(button);

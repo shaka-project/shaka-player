@@ -372,6 +372,8 @@ shakaDemo.Custom = class {
         }
         this.showAssetDialog_(asset);
       });
+      // TODO: Localize these messages.
+      const deleteDialog = 'Delete this custom asset?';
       c.addButton('Delete', async () => {
         this.assets_.delete(asset);
         if (asset.unstoreCallback) {
@@ -379,7 +381,7 @@ shakaDemo.Custom = class {
         }
         this.saveAssetInfos_(this.assets_);
         this.remakeSavedList_();
-      });
+      }, deleteDialog);
       c.addStoreButton();
     });
   }
