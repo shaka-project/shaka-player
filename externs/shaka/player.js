@@ -639,7 +639,8 @@ shaka.extern.ManifestConfiguration;
  *   safeSeekOffset: number,
  *   stallEnabled: boolean,
  *   stallThreshold: number,
- *   stallSkip: number
+ *   stallSkip: number,
+ *   useNativeHlsOnSafari: boolean
  * }}
  *
  * @description
@@ -715,6 +716,11 @@ shaka.extern.ManifestConfiguration;
  * @property {number} stallSkip
  *   The number of seconds that the player will skip forward when a stall has
  *   been detected.
+ * @property {boolean} useNativeHlsOnSafari
+ *   Desktop Safari has both MediaSource and their native HLS implementation.
+ *   Depending on the application's needs, it may prefer one over the other.
+ *   Examples: FairPlay is only supported via Safari's native HLS, but it
+ *   doesn't have an API for selecting specific tracks.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
