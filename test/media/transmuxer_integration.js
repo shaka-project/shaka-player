@@ -138,8 +138,7 @@ describe('Transmuxer', () => {
       let sawMDAT = false;
       const transmuxedData = await transmuxer.transmux(emptySegment);
       expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-      expect(transmuxedData.data.length).toBeGreaterThan(0);
-      expect(transmuxedData.captions).toEqual(jasmine.any(Array));
+      expect(transmuxedData.captions).toEqual([]);
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
