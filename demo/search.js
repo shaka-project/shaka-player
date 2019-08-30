@@ -181,12 +181,13 @@ shakaDemo.Search = class {
    * The term this represents.
    * @param {shakaDemo.Search.TermType} type
    * The type of term that this term is.
+   * @param {string} tooltip
    * @private
    */
-  makeBooleanInput_(searchContainer, choice, type) {
+  makeBooleanInput_(searchContainer, choice, type, tooltip) {
     // Give the container a significant amount of right padding, to make
     // it clearer which toggle corresponds to which label.
-    searchContainer.addRow(choice, null, 'significant-right-padding');
+    searchContainer.addRow(choice, tooltip, 'significant-right-padding');
     const onChange = (input) => {
       if (input.checked) {
         this.addDesiredTerm_(choice, type, [choice]);
@@ -289,15 +290,26 @@ shakaDemo.Search = class {
     const specialContainer = new shakaDemo.InputContainer(
         container, /* headerText = */ null, containerStyle,
         /* docLink = */ null);
-    this.makeBooleanInput_(specialContainer, Feature.LIVE, FEATURE);
-    this.makeBooleanInput_(specialContainer, Feature.HIGH_DEFINITION, FEATURE);
-    this.makeBooleanInput_(specialContainer, Feature.XLINK, FEATURE);
-    this.makeBooleanInput_(specialContainer, Feature.SUBTITLES, FEATURE);
-    this.makeBooleanInput_(specialContainer, Feature.TRICK_MODE, FEATURE);
-    this.makeBooleanInput_(specialContainer, Feature.SURROUND, FEATURE);
-    this.makeBooleanInput_(specialContainer, Feature.OFFLINE, FEATURE);
-    this.makeBooleanInput_(specialContainer, Feature.STORED, FEATURE);
-    this.makeBooleanInput_(specialContainer, Feature.AUDIO_ONLY, FEATURE);
+    this.makeBooleanInput_(specialContainer, Feature.LIVE, FEATURE,
+        'Filters for assets that are live.');
+    this.makeBooleanInput_(specialContainer, Feature.HIGH_DEFINITION, FEATURE,
+        'Filters for assets with at least one high-definition video stream.');
+    this.makeBooleanInput_(specialContainer, Feature.XLINK, FEATURE,
+        'Filters for assets that have XLINK tags in their manifests, ' +
+        'so that they can be broken into multiple files.');
+    this.makeBooleanInput_(specialContainer, Feature.SUBTITLES, FEATURE,
+        'Filters for assets with caption tracks, or embedded captions.');
+    this.makeBooleanInput_(specialContainer, Feature.TRICK_MODE, FEATURE,
+        'Filters for assets that have special video tracks to be used in ' +
+        'trick mode playback (aka fast-forward).');
+    this.makeBooleanInput_(specialContainer, Feature.SURROUND, FEATURE,
+        'Filters for assets with at least one surround sound audio track.');
+    this.makeBooleanInput_(specialContainer, Feature.OFFLINE, FEATURE,
+        'Filters for assets that can be stored offline.');
+    this.makeBooleanInput_(specialContainer, Feature.STORED, FEATURE,
+        'Filters for assets that have been stored offline.');
+    this.makeBooleanInput_(specialContainer, Feature.AUDIO_ONLY, FEATURE,
+        'Filters for assets that do not have video streams.');
   }
 
   /**
