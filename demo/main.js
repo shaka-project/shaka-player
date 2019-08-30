@@ -1291,9 +1291,9 @@ shakaDemo.Main = class {
   dispatchEventWithName_(name) {
     const event = document.createEvent('CustomEvent');
     event.initCustomEvent(name,
-        /* canBubble = */ false,
-        /* cancelable = */ false,
-        /* detail = */ null);
+        /* canBubble= */ false,
+        /* cancelable= */ false,
+        /* detail= */ null);
     document.dispatchEvent(event);
   }
 

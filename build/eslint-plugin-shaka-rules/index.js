@@ -26,6 +26,7 @@ module.exports = {
 };
 
 const RULES = [
+  'arg-comment-spacing',
   'private',
 ];
 for (const rule of RULES) {

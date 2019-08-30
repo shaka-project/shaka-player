@@ -58,7 +58,7 @@ shakaDemo.Custom = class {
     addButtonContainer.classList.add('add-button-container');
     container.appendChild(addButtonContainer);
     // Style it as an MDL Floating Action Button (FAB).
-    const addButton = this.makeButton_('add', /* isFAB = */ true, () => {
+    const addButton = this.makeButton_('add', /* isFAB= */ true, () => {
       this.showAssetDialog_(ShakaDemoAssetInfo.makeBlankAsset());
     });
     addButtonContainer.appendChild(addButton);
@@ -137,8 +137,8 @@ shakaDemo.Custom = class {
 
     const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
     const container = new shakaDemo.InputContainer(
-        inputDiv, /* headerText = */ null, containerStyle,
-        /* docLink = */ null);
+        inputDiv, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
 
     /**
      * A utility to simplify the creation of fields on the dialog.
@@ -274,7 +274,7 @@ shakaDemo.Custom = class {
     // Create the buttons at the bottom of the dialog.
     const buttonsDiv = document.createElement('tr');
     inputDiv.appendChild(buttonsDiv);
-    buttonsDiv.appendChild(this.makeButton_('Save', /* isFAB = */ false, () => {
+    buttonsDiv.appendChild(this.makeButton_('Save', /* isFAB= */ false, () => {
       for (const input of inputsToCheck) {
         if (!input.validity.valid) {
           return;
@@ -287,7 +287,7 @@ shakaDemo.Custom = class {
       this.dialog_.close();
     }));
     buttonsDiv.appendChild(this.makeButton_(
-        'Cancel', /* isFAB = */ false, () => {
+        'Cancel', /* isFAB= */ false, () => {
           this.dialog_.close();
         }));
 

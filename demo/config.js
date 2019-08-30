@@ -177,9 +177,9 @@ shakaDemo.Config = class {
             'manifest.dash.xlinkFailGracefully')
         .addNumberInput_('Availability Window Override',
             'manifest.availabilityWindowOverride',
-            /* canBeDecimal = */ true,
-            /* canBeZero = */ false,
-            /* canBeUnset = */ true)
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true)
         .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
         .addBoolInput_('Ignore DRM Info', 'manifest.dash.ignoreDrmInfo')
         .addNumberInput_('Default Presentation Delay',
@@ -188,9 +188,9 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreMinBufferTime')
         .addNumberInput_('Initial Segment Limit',
             'manifest.dash.initialSegmentLimit',
-            /* canBeDecimal = */ false,
-            /* canBeZero = */ false,
-            /* canBeUnset = */ true);
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true);
 
     this.addRetrySection_('manifest', 'Manifest');
   }
@@ -204,13 +204,13 @@ shakaDemo.Config = class {
             'abr.defaultBandwidthEstimate')
         .addNumberInput_('Bandwidth Downgrade Target',
             'abr.bandwidthDowngradeTarget',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Bandwidth Upgrade Target',
             'abr.bandwidthUpgradeTarget',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Switch Interval',
             'abr.switchInterval',
-            /* canBeDecimal = */ true);
+            /* canBeDecimal= */ true);
     this.addRetrictionsSection_('abr', 'Adaptation');
   }
 
@@ -247,16 +247,16 @@ shakaDemo.Config = class {
         .addNumberInput_('Max Attempts', prefix + 'maxAttempts')
         .addNumberInput_('Base Delay',
             prefix + 'baseDelay',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Backoff Factor',
             prefix + 'backoffFactor',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Fuzz Factor',
             prefix + 'fuzzFactor',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Timeout',
             prefix + 'timeout',
-            /* canBeDecimal = */ true);
+            /* canBeDecimal= */ true);
   }
 
   /** @private */
@@ -272,21 +272,21 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.StreamingConfiguration');
     this.addSection_('Streaming', docLink)
         .addNumberInput_('Maximum Small Gap Size', 'streaming.smallGapLimit',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Buffering Goal', 'streaming.bufferingGoal',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Duration Backoff', 'streaming.durationBackoff',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Rebuffering Goal', 'streaming.rebufferingGoal',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Buffer Behind', 'streaming.bufferBehind',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Safe Seek Offset', 'streaming.safeSeekOffset',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Stall Threshold', 'streaming.stallThreshold',
-            /* canBeDecimal = */ true)
+            /* canBeDecimal= */ true)
         .addNumberInput_('Safe Skip Distance', 'streaming.stallSkip',
-            /* canBeDecimal = */ true);
+            /* canBeDecimal= */ true);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_('Always Stream Text', 'streaming.alwaysStreamText');
@@ -327,7 +327,7 @@ shakaDemo.Config = class {
 
   /** @private */
   addMetaSection_() {
-    this.addSection_(/* name = */ '', /* docLink = */ null);
+    this.addSection_(/* name= */ '', /* docLink= */ null);
 
     this.addCustomBoolInput_('Shaka Controls', (input) => {
       shakaDemoMain.setNativeControlsEnabled(!input.checked);

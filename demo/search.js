@@ -273,8 +273,8 @@ shakaDemo.Search = class {
 
     // Core term inputs.
     const coreContainer = new shakaDemo.InputContainer(
-        container, /* headerText = */ null, shakaDemo.InputContainer.Style.FLEX,
-        /* docLink = */ null);
+        container, /* headerText= */ null, shakaDemo.InputContainer.Style.FLEX,
+        /* docLink= */ null);
     this.makeSelectInput_(coreContainer, 'Manifest',
         [Feature.DASH, Feature.HLS], FEATURE);
     this.makeSelectInput_(coreContainer, 'Container',
@@ -288,8 +288,8 @@ shakaDemo.Search = class {
     // Special terms.
     const containerStyle = shakaDemo.InputContainer.Style.FLEX;
     const specialContainer = new shakaDemo.InputContainer(
-        container, /* headerText = */ null, containerStyle,
-        /* docLink = */ null);
+        container, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
     this.makeBooleanInput_(specialContainer, Feature.LIVE, FEATURE,
         'Filters for assets that are live.');
     this.makeBooleanInput_(specialContainer, Feature.HIGH_DEFINITION, FEATURE,

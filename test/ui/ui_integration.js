@@ -553,7 +553,7 @@ describe('UI', () => {
       resolutionsToButtons = mapChoicesToButtons(
           /* buttons= */ resolutionButtons,
           /* choices= */ resolutionsFromContent,
-          /* modifier=*/ formatResolution);
+          /* modifier= */ formatResolution);
     }
   });
 
