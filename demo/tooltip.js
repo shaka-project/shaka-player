@@ -20,7 +20,7 @@ goog.provide('shakaDemo.Tooltips');
 
 
 /**
- * Creates and contains the MDL elements of a tooltip.
+ * Creates and contains a tooltip.
  */
 shakaDemo.Tooltips = class {
   /**
