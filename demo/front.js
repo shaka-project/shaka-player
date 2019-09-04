@@ -162,3 +162,6 @@ shakaDemo.Front = class {
 
 
 document.addEventListener('shaka-main-loaded', shakaDemo.Front.init);
+document.addEventListener('shaka-main-cleanup', () => {
+  shakaDemoFront = null;
+});

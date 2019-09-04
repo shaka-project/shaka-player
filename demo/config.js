@@ -52,9 +52,6 @@ shakaDemo.Config = class {
      */
     this.latestInput_ = null;
 
-    /** @private {!Set.<string>} */
-    this.addedFields_ = new Set();
-
     this.reload_();
 
     // Listen to external config changes (i.e. from hash changes).
@@ -94,8 +91,6 @@ shakaDemo.Config = class {
     this.addStreamingSection_();
     this.addManifestSection_();
     this.addRetrictionsSection_('', '');
-    this.checkSectionCompleteness_();
-    this.checkSectionValidity_();
   }
 
   /**
@@ -176,6 +171,8 @@ shakaDemo.Config = class {
                        'manifest.dash.autoCorrectDrift')
         .addBoolInput_('Xlink Should Fail Gracefully',
                        'manifest.dash.xlinkFailGracefully')
+        .addBoolInput_('Ignore HLS Text Stream Failures',
+            'manifest.hls.ignoreTextStreamFailures')
         .addNumberInput_('Availability Window Override',
                          'manifest.availabilityWindowOverride',
                          /* canBeDecimal = */ true,
@@ -302,7 +299,9 @@ shakaDemo.Config = class {
                        'streaming.startAtSegmentBoundary')
         .addBoolInput_('Ignore Text Stream Failures',
                        'streaming.ignoreTextStreamFailures')
-        .addBoolInput_('Stall Detector Enabled', 'streaming.stallEnabled');
+        .addBoolInput_('Stall Detector Enabled', 'streaming.stallEnabled')
+        .addBoolInput_('Use native HLS on Safari',
+            'streaming.useNativeHlsOnSafari');
     this.addRetrySection_('streaming', 'Streaming');
   }
 
@@ -425,7 +424,6 @@ shakaDemo.Config = class {
     if (shakaDemoMain.getCurrentConfigValue(valueName)) {
       this.latestInput_.input().checked = true;
     }
-    this.addedFields_.add(valueName);
     return this;
   }
 
@@ -458,7 +456,6 @@ shakaDemo.Config = class {
     this.addCustomTextInput_(name, onChange, tooltipMessage);
     this.latestInput_.input().value =
         shakaDemoMain.getCurrentConfigValue(valueName);
-    this.addedFields_.add(valueName);
     return this;
   }
 
@@ -520,7 +517,6 @@ shakaDemo.Config = class {
     if (isNaN(Number(this.latestInput_.input().value)) && canBeUnset) {
       this.latestInput_.input().value = '';
     }
-    this.addedFields_.add(valueName);
     return this;
   }
 
@@ -564,48 +560,6 @@ shakaDemo.Config = class {
   }
 
  /**
-   * Checks for config values that do not have corresponding fields.
-   * @private
-   */
-  checkSectionCompleteness_() {
-    const configPrimitives = new Set(['number', 'string', 'boolean']);
-
-    /**
-     * Recursively checks all of the sections of the config object.
-     * @param {!Object} section
-     * @param {string} accumulatedName
-     */
-    const check = (section, accumulatedName) => {
-      for (const key in section) {
-        const name = (accumulatedName) ? (accumulatedName + '.' + key) : (key);
-        const value = section[key];
-        if (configPrimitives.has(typeof value)) {
-          if (!this.addedFields_.has(name)) {
-            console.warn('WARNING: Does not have config field for ' + name);
-          }
-        } else {
-          // It's a sub-section.
-          check(value, name);
-        }
-      }
-    };
-    check(shakaDemoMain.getConfiguration(), '');
-  }
-
-  /**
-   * Checks for config fields that point to invalid/obsolete config values.
-   * @private
-   */
-  checkSectionValidity_() {
-    for (const field of this.addedFields_) {
-      const value = shakaDemoMain.getCurrentConfigValue(field);
-      if (value == undefined) {
-        console.warn('WARNING: Invalid config field ' + field);
-      }
-    }
-  }
-
-  /**
    * Gets the latest section. Results in a failed assert if there is no latest
    * section.
    * @return {!shakaDemo.InputContainer}
@@ -620,3 +574,6 @@ shakaDemo.Config = class {
 
 
 document.addEventListener('shaka-main-loaded', shakaDemo.Config.init);
+document.addEventListener('shaka-main-cleanup', () => {
+  shakaDemoConfig = null;
+});
