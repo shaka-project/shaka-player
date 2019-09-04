@@ -355,3 +355,6 @@ shakaDemo.Search.TermType = {
 
 
 document.addEventListener('shaka-main-loaded', shakaDemo.Search.init);
+document.addEventListener('shaka-main-cleanup', () => {
+  shakaDemoSearch = null;
+});

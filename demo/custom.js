@@ -435,3 +435,6 @@ shakaDemo.Custom.saveId_ = 'shakaPlayerDemoSavedAssets';
 
 
 document.addEventListener('shaka-main-loaded', shakaDemo.Custom.init);
+document.addEventListener('shaka-main-cleanup', () => {
+  shakaDemoCustom = null;
+});

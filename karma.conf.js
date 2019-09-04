@@ -109,6 +109,9 @@ module.exports = (config) => {
       // if --quick *is not* present, we will add integration tests.
       // if --external *is* present, we will add external asset tests.
 
+      // load relevant demo files
+      {pattern: 'demo/!(main|load|demo_uncompiled).js', included: true},
+
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'ui/**/*.js', included: false},
