@@ -26,6 +26,12 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports empty text string', () => {
+    verifyHelper([],
+        '',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('supports div with no cues but whitespace', () => {
     verifyHelper(
         [],
