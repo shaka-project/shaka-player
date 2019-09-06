@@ -2573,6 +2573,38 @@ describe('Player', () => {
       expect(tracks[0].id).toBe(2);
     });
 
+    // https://github.com/google/shaka-player/issues/2135
+    it('updates key statuses for multi-Period content', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.keyId = 'abc';
+            });
+          });
+        });
+        manifest.addPeriod(10, (period) => {
+          period.addVariant(2, (variant) => {
+            variant.addVideo(3, (stream) => {
+              stream.keyId = 'abc';
+            });
+          });
+          period.addVariant(4, (variant) => {
+            variant.addVideo(5, (stream) => {
+              stream.keyId = 'def';
+            });
+          });
+        });
+      });
+
+      await setupPlayer();
+      onKeyStatus({'abc': 'usable'});
+
+      expect(manifest.periods[0].variants[0].allowedByKeySystem).toBe(true);
+      expect(manifest.periods[1].variants[0].allowedByKeySystem).toBe(true);
+      expect(manifest.periods[1].variants[1].allowedByKeySystem).toBe(false);
+    });
+
     it('does not restrict if no key statuses are available', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addPeriod(0, (period) => {
