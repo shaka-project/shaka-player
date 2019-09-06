@@ -2440,6 +2440,27 @@ describe('Player', function() {
       expect(tracks[0].id).toBe(2);
     });
 
+    // https://github.com/google/shaka-player/issues/2135
+    it('updates key statuses for multi-Period content', async () => {
+      manifest = new shaka.test.ManifestGenerator()
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(1).keyId('abc')
+          .addPeriod(10)
+            .addVariant(2)
+              .addVideo(3).keyId('abc')
+            .addVariant(4)
+              .addVideo(5).keyId('def')
+          .build();
+
+      await setupPlayer();
+      onKeyStatus({'abc': 'usable'});
+
+      expect(manifest.periods[0].variants[0].allowedByKeySystem).toBe(true);
+      expect(manifest.periods[1].variants[0].allowedByKeySystem).toBe(true);
+      expect(manifest.periods[1].variants[1].allowedByKeySystem).toBe(false);
+    });
+
     it('does not restrict if no key statuses are available', async () => {
       manifest = new shaka.test.ManifestGenerator()
               .addPeriod(0)
