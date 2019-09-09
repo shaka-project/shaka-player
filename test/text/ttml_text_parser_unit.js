@@ -90,7 +90,6 @@ describe('TtmlTextParser', () => {
 
   it('rejects invalid ttml', () => {
     errorHelper(shaka.util.Error.Code.INVALID_XML, '<test></test>');
-    errorHelper(shaka.util.Error.Code.INVALID_XML, '');
   });
 
   it('rejects invalid time format', () => {
