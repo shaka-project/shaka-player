@@ -696,11 +696,9 @@ describe('Player Load Path', () => {
   /** @type {!jasmine.Spy} */
   let stateIdleSpy;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     video = shaka.util.Dom.createVideoElement();
     document.body.appendChild(video);
-
-    await shaka.test.TestScheme.createManifests(shaka, '_compiled');
   });
 
   afterAll(() => {
