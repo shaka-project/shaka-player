@@ -53,10 +53,14 @@ shaka.test.UiUtils = class {
       video.setAttribute('data-shaka-player', '');
     }
 
+    // Create the waiter first so we can catch a synchronous event.
+    const p =
+        waiter.failOnTimeout(false).waitForEvent(document, 'shaka-ui-loaded');
+
     // Call UI's private method to scan the page for shaka
     // elements and create the UI.
     shaka.ui.Overlay.scanPageForShakaElements_();
-    await waiter.failOnTimeout(false).waitForEvent(document, 'shaka-ui-loaded');
+    await p;
   }
 
   /**
