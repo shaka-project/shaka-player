@@ -18,6 +18,11 @@
 // Test DRM-related parsing.
 describe('DashParser ContentProtection', () => {
   const Dash = shaka.test.Dash;
+  const ContentProtection = shaka.dash.ContentProtection;
+  const strToXml = (str) => {
+    const parser = new DOMParser();
+    return parser.parseFromString(str, 'application/xml').documentElement;
+  };
 
   /**
    * Tests that the parser produces the correct results.
@@ -769,14 +774,6 @@ describe('DashParser ContentProtection', () => {
         shaka.util.Error.Code.DASH_MULTIPLE_KEY_IDS_NOT_SUPPORTED);
     await Dash.testFails(source, expected);
   });
-});
-
-describe('In-manifest PlayReady and Widevine', () => {
-  const ContentProtection = shaka.dash.ContentProtection;
-  const strToXml = (str) => {
-    const parser = new DOMParser();
-    return parser.parseFromString(str, 'application/xml').documentElement;
-  };
 
   describe('getWidevineLicenseUrl', () => {
     it('valid ms:laurl node', () => {
