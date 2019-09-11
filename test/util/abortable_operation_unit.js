@@ -561,5 +561,63 @@ describe('AbortableOperation', () => {
               });
       await operation.promise;
     });
+
+    it('aborts nested AbortableOperation objects', async () => {
+      /** @type {!shaka.util.PublicPromise} */
+      const promise = new shaka.util.PublicPromise();
+      const abort = jasmine.createSpy('abort');
+
+      /** @type {!shaka.util.AbortableOperation} */
+      const operation = shaka.util.AbortableOperation.completed(0).chain(() => {
+        return shaka.util.AbortableOperation.completed(1)
+            .chain(() => 2)
+            .chain(() => {
+              return new shaka.util.AbortableOperation(
+                  promise, Util.spyFunc(abort));
+            })
+            .chain(() => 3);
+      });
+      await Util.shortDelay();  // Ensure we are waiting on the "promise".
+      operation.abort();
+      promise.resolve();
+      await expectAsync(operation.promise).toBeRejected();
+      expect(abort).toHaveBeenCalled();
+    });
+
+    it('aborts even with a failure callback', async () => {
+      /** @type {!shaka.util.PublicPromise} */
+      const promise = new shaka.util.PublicPromise();
+
+      /** @type {!shaka.util.AbortableOperation} */
+      const operation = shaka.util.AbortableOperation.completed(0)
+          .chain(() => promise)
+          .chain(
+              () => fail('Promise should be rejected'),
+              () => {});
+      await Util.shortDelay();  // Ensure we are waiting on the "promise".
+      operation.abort();
+      promise.reject();
+      await expectAsync(operation.promise).toBeRejected();
+    });
+
+    it('abort waits for plain Promise to be resolved', async () => {
+      /** @type {!shaka.util.PublicPromise} */
+      const promise = new shaka.util.PublicPromise();
+      const resolved = jasmine.createSpy('resolve');
+
+      /** @type {!shaka.util.AbortableOperation} */
+      const operation = shaka.util.AbortableOperation.completed(0)
+          .chain(() => promise);
+      await Util.shortDelay();  // Ensure we are waiting on the "promise".
+      const p = operation.abort().then(
+          Util.spyFunc(resolved), Util.spyFunc(resolved));
+      // Even after waiting for some Promises, the abort() promise should not
+      // get resolved until the "promise" is finished.
+      await Util.shortDelay();
+      expect(resolved).not.toHaveBeenCalled();
+      // Now the abort() can get resolved.
+      promise.resolve();
+      await p;
+    });
   });  // describe('chain')
 });  // describe('AbortableOperation')
