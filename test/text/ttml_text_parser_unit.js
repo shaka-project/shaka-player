@@ -26,6 +26,12 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports empty text string', () => {
+    verifyHelper([],
+        '',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('supports div with no cues but whitespace', () => {
     verifyHelper(
         [],
@@ -84,7 +90,6 @@ describe('TtmlTextParser', () => {
 
   it('rejects invalid ttml', () => {
     errorHelper(shaka.util.Error.Code.INVALID_XML, '<test></test>');
-    errorHelper(shaka.util.Error.Code.INVALID_XML, '');
   });
 
   it('rejects invalid time format', () => {
