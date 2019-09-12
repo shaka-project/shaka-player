@@ -105,25 +105,11 @@ shaka.ui.TextDisplayer = class {
       return false;
     }
 
-    // Remove the cues out of the time range from the map, and remove the
-    // captions from the page.
-    const cuesToRemove = new Set();
-    for (const cue of this.cues_) {
-      if (cue.startTime > start && cue.endTime < end) {
-        cuesToRemove.add(cue);
-      }
-    }
-
-    for (const cue of cuesToRemove) {
-        const captions = this.currentCuesMap_.get(cue);
-        if (captions) {
-          this.textContainer_.removeChild(captions);
-          this.currentCuesMap_.delete(cue);
-        }
-    }
-
     // Remove the cues out of the time range.
-    this.cues_ = this.cues_.filter((cue) => !cuesToRemove.has(cue));
+    this.cues_ = this.cues_.filter(
+        (cue) => cue.startTime < start || cue.endTime >= end);
+    this.updateCaptions_();
+
     return true;
   }
 
@@ -153,17 +139,26 @@ shaka.ui.TextDisplayer = class {
 
     // Return true if the cue should be displayed at the current time point.
     const shouldCueBeDisplayed = (cue) => {
-      return this.isTextVisible_ &&
+      return this.cues_.includes(cue) && this.isTextVisible_ &&
              cue.startTime <= currentTime && cue.endTime >= currentTime;
     };
 
     // For each cue in the current cues map, if the cue's end time has passed,
     // remove the entry from the map, and remove the captions from the page.
     for (const cue of this.currentCuesMap_.keys()) {
-        if (!shouldCueBeDisplayed(cue)) {
+      if (!shouldCueBeDisplayed(cue)) {
         const captions = this.currentCuesMap_.get(cue);
         this.textContainer_.removeChild(captions);
         this.currentCuesMap_.delete(cue);
+      }
+    }
+
+    // Sometimes we don't remove a cue element correctly.  So check all the
+    // child nodes and remove any that don't have an associated cue.
+    const expectedChildren = new Set(this.currentCuesMap_.values());
+    for (const child of Array.from(this.textContainer_.childNodes)) {
+      if (!expectedChildren.has(child)) {
+        this.textContainer_.removeChild(child);
       }
     }
 
@@ -194,7 +189,7 @@ shaka.ui.TextDisplayer = class {
    * @private
    */
   displayNestedCue_(container, cue) {
-      const captions = shaka.util.Dom.createHTMLElement('span');
+    const captions = shaka.util.Dom.createHTMLElement('span');
 
     if (cue.spacer) {
       captions.style.display = 'block';
