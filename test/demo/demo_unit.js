@@ -19,7 +19,18 @@ describe('Demo', () => {
   beforeEach(() => {
     // Make mock versions of misc third-party libraries.
     window['tippy'] = () => {};
-    window['Awesomplete'] = class {};
+    window['Awesomplete'] = class {
+      constructor() {
+        this.list = [];
+        this.minChars = 0;
+      }
+
+      evaluate() {}
+    };
+    window['componentHandler'] = class {
+      upgradeDom() {}
+    };
+    window['dialogPolyfill'] = {registerDialog: (dialog) => {}};
 
     // Make the FakeDemoMain, which will trigger the various tabs to load.
     shaka.test.FakeDemoMain.setup();
@@ -28,6 +39,8 @@ describe('Demo', () => {
   afterEach(async () => {
     delete window['tippy'];
     delete window['Awesomplete'];
+    delete window['componentHandler'];
+    delete window['dialogPolyfill'];
     await shakaDemoMain.cleanup();
   });
 
