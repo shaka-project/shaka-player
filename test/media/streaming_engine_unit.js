@@ -3071,6 +3071,132 @@ describe('StreamingEngine', function() {
     }
   });
 
+  describe('embedded text tracks', () => {
+    beforeEach(() => {
+      // Set up a manifest with multiple Periods and text streams.
+      manifest = new shaka.test.ManifestGenerator()
+          .addPeriod(0)
+            .addVariant(0)
+              .addVideo(110).useSegmentTemplate('video-110-%d.mp4', 10)
+            .addTextStream(120)
+              .useSegmentTemplate('video-120-%d.mp4', 10)
+            .addTextStream(121)
+              .mime(shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE)
+          .addPeriod(10)
+            .addVariant(1)
+              .addVideo(210).useSegmentTemplate('video-210-%d.mp4', 10)
+            .addTextStream(220)
+              .useSegmentTemplate('text-220-%d.mp4', 10)
+            .addTextStream(221)
+              .mime(shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE)
+          .build();
+
+      // For these tests, we don't care about specific data appended.
+      // Just return any old ArrayBuffer for any requested segment.
+      netEngine = {
+        request: (requestType, request) => {
+          const buffer = new ArrayBuffer(0);
+          const response = {uri: request.uris[0], data: buffer, headers: {}};
+          return shaka.util.AbortableOperation.completed(response);
+        },
+      };
+
+      // For these tests, we also don't need FakeMediaSourceEngine to verify
+      // its input data.
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine({});
+      mediaSourceEngine.clear.and.returnValue(Promise.resolve());
+      mediaSourceEngine.bufferedAheadOf.and.returnValue(0);
+      mediaSourceEngine.bufferStart.and.returnValue(0);
+      mediaSourceEngine.setStreamProperties.and.returnValue(Promise.resolve());
+      mediaSourceEngine.remove.and.returnValue(Promise.resolve());
+      mediaSourceEngine.setSelectedClosedCaptionId =
+        /** @type {?} */ (jasmine.createSpy('setSelectedClosedCaptionId'));
+
+      const bufferEnd = {audio: 0, video: 0, text: 0};
+      mediaSourceEngine.appendBuffer.and.callFake(
+          (type, data, start, end) => {
+            bufferEnd[type] = end;
+            return Promise.resolve();
+          });
+      mediaSourceEngine.bufferEnd.and.callFake((type) => {
+        return bufferEnd[type];
+      });
+      mediaSourceEngine.bufferedAheadOf.and.callFake((type, start) => {
+        return Math.max(0, bufferEnd[type] - start);
+      });
+      mediaSourceEngine.isBuffered.and.callFake((type, time) => {
+        return time >= 0 && time < bufferEnd[type];
+      });
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.rebufferingGoal = 20;
+      config.bufferingGoal = 20;
+      config.alwaysStreamText = true;
+      config.ignoreTextStreamFailures = true;
+
+      playing = false;
+      presentationTimeInSeconds = 0;
+      createStreamingEngine(config);
+
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
+    });
+
+    describe('period transition', () => {
+      it('initializes new embedded captions', () => {
+        onChooseStreams.and.callFake((period) => {
+          if (period == manifest.periods[0]) {
+            return {variant: period.variants[0]};
+          } else {
+            return {variant: period.variants[0], text: period.textStreams[1]};
+          }
+        });
+        runEmbeddedCaptionTest();
+      });
+
+      it('initializes embedded captions from external text', () => {
+        onChooseStreams.and.callFake((period) => {
+          if (period == manifest.periods[0]) {
+            return {variant: period.variants[0], text: period.textStreams[0]};
+          } else {
+            return {variant: period.variants[0], text: period.textStreams[1]};
+          }
+        });
+        runEmbeddedCaptionTest();
+      });
+
+      it('switches to external text after embedded captions', () => {
+        onChooseStreams.and.callFake((period) => {
+          if (period == manifest.periods[0]) {
+            return {variant: period.variants[0], text: period.textStreams[1]};
+          } else {
+            return {variant: period.variants[0], text: period.textStreams[0]};
+          }
+        });
+        runEmbeddedCaptionTest();
+      });
+
+      it('doesn\'t re-initialize', () => {
+        onChooseStreams.and.callFake((period) => {
+          return {variant: period.variants[0], text: period.textStreams[1]};
+        });
+        runEmbeddedCaptionTest();
+      });
+
+      function runEmbeddedCaptionTest() {
+        streamingEngine.start().catch(fail);
+        Util.fakeEventLoop(10);
+
+        // We have buffered through the Period transition.
+        expect(onChooseStreams).toHaveBeenCalledTimes(2);
+        expect(Util.invokeSpy(mediaSourceEngine.bufferEnd, 'video'))
+            .toBeGreaterThan(12);
+
+        expect(mediaSourceEngine.setSelectedClosedCaptionId)
+            .toHaveBeenCalledTimes(1);
+      }
+    });
+  });
+
   /**
    * Verifies calls to NetworkingEngine.request(). Expects every segment
    * in the given Period to have been requested.
