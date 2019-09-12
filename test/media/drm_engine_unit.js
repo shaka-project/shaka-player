@@ -770,6 +770,33 @@ describe('DrmEngine', () => {
       expect(keyId2).toBe('02030507011013017019023029031037');
     });
 
+    // Regression test for #2139, in which we suppressed errors if drmInfos was
+    // empty and clearKeys config was given
+    it('fails if clearKeys config fails', async () => {
+      manifest.periods[0].variants[0].drmInfos = [];
+
+      // Make it so that clear key setup fails by pretending we don't have it.
+      // In reality, it was failing because of missing codec info, but any
+      // failure should do for testing purposes.
+      setRequestMediaKeySystemAccessSpy([]);
+
+      // Configure clear keys (map of hex key IDs to keys)
+      config.clearKeys = {
+        'deadbeefdeadbeefdeadbeefdeadbeef': '18675309186753091867530918675309',
+        '02030507011013017019023029031037': '03050701302303204201080425098033',
+      };
+      drmEngine.configure(config);
+
+      const variants = Periods.getAllVariantsFrom(manifest.periods);
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE));
+      await expectAsync(drmEngine.initForPlayback(variants, []))
+          .toBeRejectedWith(expected);
+    });
+
     it('fails with an error if setMediaKeys fails', async () => {
       // Fail setMediaKeys.
       mockVideo.setMediaKeys.and.returnValue(Promise.reject({
