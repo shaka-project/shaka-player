@@ -106,7 +106,10 @@ module.exports = function(config) {
       // if --external *is* present, we will add external asset tests.
 
       // load relevant demo files
-      {pattern: 'demo/!(main|load|demo_uncompiled).js', included: true},
+      {
+        pattern: 'demo/!(main|load|demo_uncompiled|service_worker).js',
+        included: true,
+      },
 
       // source files - these are only watched and served
       {pattern: 'lib/**/*.js', included: false},
