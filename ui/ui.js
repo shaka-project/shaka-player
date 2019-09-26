@@ -58,6 +58,20 @@ shaka.ui.Overlay = function(player, videoContainer, video) {
   // Run the initial setup so that no configure() call is required for default
   // settings.
   this.configure({});
+
+  // If the browser's native controls are disabled, use UI TextDisplayer.
+  // Arrow functions cannot be used with "new", so the factory must use
+  // a "function" function.
+  if (!video.controls) {
+    // eslint-disable-next-line no-restricted-syntax
+    const textDisplayer = function() {
+      return new shaka.ui.TextDisplayer(video, videoContainer);
+    };
+    player.configure('textDisplayFactory', textDisplayer);
+  }
+
+  videoContainer['ui'] = this;
+  video['ui'] = this;
 };
 
 
@@ -312,7 +326,9 @@ shaka.ui.Overlay.dispatchLoadedEvent_ = function(eventName) {
  */
 shaka.ui.Overlay.setupUIandAutoLoad_ = async function(container, video) {
   // Create the UI
-  const ui = shaka.ui.Overlay.createUI_(
+    const player = new shaka.Player(
+        shaka.util.Dom.asHTMLMediaElement(video));
+    const ui = new shaka.ui.Overlay(player,
       shaka.util.Dom.asHTMLElement(container),
       shaka.util.Dom.asHTMLMediaElement(video));
 
@@ -362,31 +378,6 @@ shaka.ui.Overlay.setupUIandAutoLoad_ = async function(container, video) {
       shaka.log.error('Error auto-loading asset', e);
     }
   }
-};
-
-
-/**
- * @param {!HTMLElement} container
- * @param {!HTMLMediaElement} video
- * @return {!shaka.ui.Overlay}
- * @private
- */
-shaka.ui.Overlay.createUI_ = function(container, video) {
-  const player = new shaka.Player(video);
-  const ui = new shaka.ui.Overlay(player, container, video);
-
-  // If the browser's native controls are disabled, use UI TextDisplayer. Right
-  // now because the factory must be a constructor and () => {} can't be a
-  // constructor.
-  if (!video.controls) {
-    player.configure(
-        'textDisplayFactory',
-        function() { return new shaka.ui.TextDisplayer(video, container); });
-  }
-
-  container['ui'] = ui;
-  video['ui'] = ui;
-  return ui;
 };
 
 
