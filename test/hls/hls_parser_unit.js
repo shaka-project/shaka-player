@@ -842,6 +842,58 @@ describe('HlsParser', () => {
     expect(filterAllPeriods).toHaveBeenCalledTimes(1);
   });
 
+  it('fetch the start time for one audio/video stream and reuse for the others',
+      async () => {
+        const SEGMENT = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+          'CHANNELS="2",URI="audio"\n',
+          '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+          'URI="text"\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+          'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+          'video\n',
+        ].join('');
+
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXTINF:5,\n',
+          '#EXT-X-BYTERANGE:121090@616\n',
+          'main.mp4',
+        ].join('');
+
+        const textMedia = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:VOD\n',
+          '#EXTINF:5,\n',
+          '#EXT-X-BYTERANGE:121090@616\n',
+          'main.vtt',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/audio', media)
+            .setResponseText('test:/video', media)
+            .setResponseText('test:/text', textMedia)
+            .setResponseText('test:/main.vtt', vttText)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
+
+        await parser.start('test:/master', playerInterface);
+        // The start time of audio should be fetched first, and then video and
+        // text streams should reuse the start time from audio.
+        // Thus, there should be 2 segment requests, for fetching audio init
+        // and main segments, and not for video and text segments.
+        expect(fakeNetEngine.request.calls.allArgs().filter((args) => {
+          return args[0] == SEGMENT;
+        }).length).toBe(2);
+        fakeNetEngine.expectRequest('test:/init.mp4', SEGMENT);
+        fakeNetEngine.expectRequest('test:/main.mp4', SEGMENT);
+      });
+
   it('gets mime type from header request', async () => {
     const master = [
       '#EXTM3U\n',
