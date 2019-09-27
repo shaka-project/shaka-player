@@ -948,30 +948,6 @@ describe('Storage', () => {
           .toBeRejectedWith(expected);
     });
 
-    it('throws an error if DRM sessions are not ready', async () => {
-      const drmInfo = makeDrmInfo();
-      const noSessions = [];
-
-      // TODO(vaage): Is there a way we can set the session ids without
-      //              needing to overload an internal call in storage.
-      const drm = new shaka.test.FakeDrmEngine();
-      drm.setDrmInfo(drmInfo);
-      drm.setSessionIds(noSessions);
-
-      overrideDrmAndManifest(
-          storage,
-          drm,
-          makeManifestWithPerStreamBandwidth());
-
-      const expected = Util.jasmineError(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.NO_INIT_DATA_FOR_OFFLINE,
-          manifestWithPerStreamBandwidthUri));
-      await expectAsync(storage.store(manifestWithPerStreamBandwidthUri))
-          .toBeRejectedWith(expected);
-    });
-
     it('throws an error if destroyed mid-store', async () => {
       const manifest = makeManifestWithPerStreamBandwidth();
 
