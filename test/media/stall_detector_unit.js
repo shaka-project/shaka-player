@@ -149,4 +149,30 @@ describe('StallDetector', () => {
 
     expect(onStall).not.toHaveBeenCalled();
   });
+
+  it('does not call onStall multiple times for same stall', () => {
+    implementation.shouldMakeProgress = true;
+    implementation.presentationSeconds = 0;
+    implementation.wallSeconds = 0;
+    detector.poll();
+    expect(onStall).not.toHaveBeenCalled();
+
+    implementation.wallSeconds = 10;
+    detector.poll();
+    expect(onStall).toHaveBeenCalled();
+    onStall.calls.reset();
+
+    // This is the same stall, should not be called again.
+    implementation.wallSeconds = 20;
+    detector.poll();
+    expect(onStall).not.toHaveBeenCalled();
+
+    // Now that we changed time, we should get another call.
+    implementation.presentationSeconds = 10;
+    implementation.wallSeconds = 30;
+    detector.poll();
+    implementation.wallSeconds = 40;
+    detector.poll();
+    expect(onStall).toHaveBeenCalled();
+  });
 });
