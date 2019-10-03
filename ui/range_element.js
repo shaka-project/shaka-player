@@ -82,7 +82,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
       this.isChanging_ = true;
       this.setBarValueForTouch_(e);
       this.onChangeStart();
-    }, {passive: true});
+    });
 
     this.eventManager.listen(this.bar, 'input', () => {
       this.onChange();
