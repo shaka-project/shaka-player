@@ -285,6 +285,18 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ function() {
       testResolve(resolveScheme).then(done);
     });
 
+    it('treats schemes as case-insensitive', async () => {
+      await networkingEngine
+          .request(requestType, createRequest('Resolve://foo'))
+          .promise;
+      await networkingEngine
+          .request(requestType, createRequest('RESOLVE://foo'))
+          .promise;
+      await networkingEngine
+          .request(requestType, createRequest('rEsOlVe://foo'))
+          .promise;
+    });
+
     it('uses registered scheme plugins in order of priority', function(done) {
       let applicationResolveScheme =
           makeResolveScheme('application resolve scheme');
