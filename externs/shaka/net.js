@@ -166,6 +166,7 @@ shaka.extern.SchemePlugin;
  * time.
  * The third argument is the number of bytes remaining to be loaded in a
  * segment.
+ * The fourth argument is the total size of a segment in bytes.
  * @exportDoc
  */
 shaka.extern.ProgressUpdated;
