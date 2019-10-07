@@ -373,15 +373,14 @@ shaka.extern.TextParser = class {
  *
  * @typedef {{
  *   periodStart: number,
- *   segmentStart: ?number,
+ *   segmentStart: number,
  *   segmentEnd: number
  * }}
  *
  * @property {number} periodStart
  *     The absolute start time of the period in seconds.
- * @property {?number} segmentStart
+ * @property {number} segmentStart
  *     The absolute start time of the segment in seconds.
- *     Null if the manifest does not provide this information, such as in HLS.
  * @property {number} segmentEnd
  *     The absolute end time of the segment in seconds.
  *

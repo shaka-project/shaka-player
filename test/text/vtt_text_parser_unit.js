@@ -536,7 +536,7 @@ describe('VttTextParser', () => {
     expect(logWarningSpy).toHaveBeenCalledTimes(7);
   });
 
-  it('respects X-TIMESTAMP-MAP header in probes', () => {
+  it('parses X-TIMESTAMP-MAP header', () => {
     verifyHelper(
         [
           {startTime: 30, endTime: 50, payload: 'Test'},
@@ -550,27 +550,36 @@ describe('VttTextParser', () => {
         'Test\n\n' +
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
-        // segmentStart of null marks this as a probe.
-        {periodStart: 0, segmentStart: null, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 25, segmentEnd: 65});
   });
 
-  it('ignores X-TIMESTAMP-MAP header when segment times are known', () => {
+  it('handles timestamp rollover with X-TIMESTAMP-MAP header', () => {
     verifyHelper(
         [
-          {startTime: 120, endTime: 140, payload: 'Test'},
-          {startTime: 140, endTime: 150, payload: 'Test2'},
+          {startTime: 95443, endTime: 95445, payload: 'Test'},
         ],
-        // 900000 = 10 sec, so expect every timestamp to be 10
+        // 8589870000/900000 = 95443 sec, so expect every timestamp to be 95443
         // seconds ahead of what is specified.
         'WEBVTT\n' +
-        'X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000\n\n' +
-        '00:00:20.000 --> 00:00:40.000 line:0\n' +
-        'Test\n\n' +
-        '00:00:40.000 --> 00:00:50.000 line:-1\n' +
-        'Test2',
+        'X-TIMESTAMP-MAP=MPEGTS:8589870000,LOCAL:00:00:00.000\n\n' +
+        '00:00:00.000 --> 00:00:02.000 line:0\n' +
+        'Test',
         // Non-null segmentStart takes precedence over X-TIMESTAMP-MAP.
         // This protects us from rollover in the MPEGTS field.
-        {periodStart: 0, segmentStart: 100, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 95440, segmentEnd: 95550});
+
+    verifyHelper(
+        [
+          {startTime: 95552, endTime: 95554, payload: 'Test2'},
+        ],
+        // 95550 is larger than the roll over timestamp, so the timestamp offset
+        // gets rolled over.
+        // (9745408 + 0x200000000) / 90000 = 95552 sec
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:9745408,LOCAL:00:00:00.000\n\n' +
+        '00:00:00.000 --> 00:00:02.000 line:0\n' +
+        'Test2',
+        {periodStart: 0, segmentStart: 95550, segmentEnd: 95560});
   });
 
   it('skips style blocks', () => {
