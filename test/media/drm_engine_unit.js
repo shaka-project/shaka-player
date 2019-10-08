@@ -176,7 +176,8 @@ describe('DrmEngine', () => {
       const variants = Periods.getAllVariantsFrom(manifest.periods);
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
-      expect(drmEngine.keySystem()).toBe('drm.abc');
+      expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
+          .toBe('drm.abc');
 
       // Only one call, since the first key system worked.
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
@@ -287,7 +288,8 @@ describe('DrmEngine', () => {
       const variants = Periods.getAllVariantsFrom(manifest.periods);
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
-      expect(drmEngine.keySystem()).toBe('drm.def');
+      expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
+          .toBe('drm.def');
 
       // Both key systems were tried, since the first one failed.
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
@@ -486,7 +488,7 @@ describe('DrmEngine', () => {
       const variants = Periods.getAllVariantsFrom(manifest.periods);
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
-      expect(drmEngine.keySystem()).toBe('');
+      expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo())).toBe('');
       expect(requestMediaKeySystemAccessSpy).not.toHaveBeenCalled();
     });
 
@@ -501,7 +503,8 @@ describe('DrmEngine', () => {
       const variants = Periods.getAllVariantsFrom(manifest.periods);
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
-      expect(drmEngine.keySystem()).toBe('drm.abc');
+      expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
+          .toBe('drm.abc');
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -1469,7 +1472,7 @@ describe('DrmEngine', () => {
       p.resolve();  // Success for drm.abc.
       await expectAsync(init).toBeRejected();
       // Due to the interruption, we never created MediaKeys.
-      expect(drmEngine.keySystem()).toBe('');
+      expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo())).toBe('');
       expect(drmEngine.initialized()).toBe(false);
     });
 
