@@ -33,44 +33,46 @@ describe('RegionTimeline', () => {
     timeline.release();
   });
 
-  it('only fires added-event for unique regions', () => {
-    const initialRegion = createRegion('my-region', 0, 10);
-    const similarRegion = createRegion('my-region', 0, 10);
-
-    // Have regions that only differ in one of the three parameters that are
-    // used in the similarity check.
-    const differentId = createRegion('my-other-region', 0, 10);
-    const differentStartTime = createRegion('my-region', 5, 10);
-    const differentEndTime = createRegion('my-region', 0, 5);
-
-    // Make sure we are starting from a blank slate.
-    expect(onNewRegion).toHaveBeenCalledTimes(0);
-
-    // When we add a region, we should get an event.
-    timeline.addRegion(initialRegion);
-    expect(onNewRegion).toHaveBeenCalledTimes(1);
-
-    // When we add a region that is similar to an existing region, we should
-    // not see another event.
-    timeline.addRegion(similarRegion);
-    expect(onNewRegion).toHaveBeenCalledTimes(1);
-
-    // We should see it called for each of our "slightly different" regions.
-    timeline.addRegion(differentId);
+  it('stores unique scheme id uri', () => {
+    // Add regions with unique scheme id uri
+    timeline.addRegion(createRegion('urn:foo', 'my-region', 0, 10));
+    timeline.addRegion(createRegion('urn:bar', 'my-region', 0, 10));
     expect(onNewRegion).toHaveBeenCalledTimes(2);
-
-    timeline.addRegion(differentStartTime);
-    expect(onNewRegion).toHaveBeenCalledTimes(3);
-
-    timeline.addRegion(differentEndTime);
-    expect(onNewRegion).toHaveBeenCalledTimes(4);
   });
 
-  it('stores only unique regions', () => {
-    // Create a few regions, but only regions 1 and 3 are unique.
-    const region1 = createRegion('my-region', 0, 10);
-    const region2 = createRegion('my-region', 0, 10);
-    const region3 = createRegion('my-region', 5, 10);
+  it('stores unique event id', () => {
+    // Add regions with unique event id
+    timeline.addRegion(createRegion('urn:foo', 'my-region-1', 0, 10));
+    timeline.addRegion(createRegion('urn:foo', 'my-region-2', 0, 10));
+    expect(onNewRegion).toHaveBeenCalledTimes(2);
+  });
+
+  it('stores unique start time', () => {
+    // Add regions with unique start time
+    timeline.addRegion(createRegion('urn:foo', 'my-region', 0, 10));
+    timeline.addRegion(createRegion('urn:foo', 'my-region', 5, 10));
+    expect(onNewRegion).toHaveBeenCalledTimes(2);
+  });
+
+  it('stores unique end time', () => {
+    // Add regions with unique end time
+    timeline.addRegion(createRegion('urn:foo', 'my-region', 0, 10));
+    timeline.addRegion(createRegion('urn:foo', 'my-region', 0, 15));
+    expect(onNewRegion).toHaveBeenCalledTimes(2);
+  });
+
+  it('dedups identical regions', () => {
+    // Add two identical regions and verify only one is stored
+    timeline.addRegion(createRegion('urn:foo', 'my-region', 0, 10));
+    timeline.addRegion(createRegion('urn:foo', 'my-region', 0, 10));
+    expect(onNewRegion).toHaveBeenCalledTimes(1);
+  });
+
+  it('verifies region data integrity', () => {
+    // Add a few regions and verify data integrity
+    const region1 = createRegion('urn:foo', 'my-region-1', 0, 10);
+    const region2 = createRegion('urn:foo', 'my-region-2', 11, 20);
+    const region3 = createRegion('urn:foo', 'my-region-3', 21, 30);
 
     timeline.addRegion(region1);
     timeline.addRegion(region2);
@@ -79,23 +81,25 @@ describe('RegionTimeline', () => {
     const uniqueRegions = Array.from(timeline.regions());
     expect(uniqueRegions).toEqual([
       region1,
+      region2,
       region3,
     ]);
   });
 
   /**
+   * @param {string} schemeIdUri
    * @param {string} id
    * @param {number} startTimeSeconds
    * @param {number} endTimeSeconds
    * @return {shaka.extern.TimelineRegionInfo}
    */
-  function createRegion(id, startTimeSeconds, endTimeSeconds) {
+  function createRegion(schemeIdUri, id, startTimeSeconds, endTimeSeconds) {
     return {
-      schemeIdUri: id,
+      schemeIdUri: schemeIdUri,
+      id: id,
       value: '',
       startTime: startTimeSeconds,
       endTime: endTimeSeconds,
-      id: '',
       eventElement: null,
     };
   }
