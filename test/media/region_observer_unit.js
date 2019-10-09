@@ -319,18 +319,18 @@ describe('RegionObserver', () => {
   });
 
   /**
-   * @param {string} schemeId
+   * @param {string} id
    * @param {number} startTimeSeconds
    * @param {number} endTimeSeconds
    * @return {shaka.extern.TimelineRegionInfo}
    */
-  function createRegion(schemeId, startTimeSeconds, endTimeSeconds) {
+  function createRegion(id, startTimeSeconds, endTimeSeconds) {
     return {
-      schemeIdUri: schemeId,
+      schemeIdUri: 'urn:foo',
+      id: id,
       value: '',
       startTime: startTimeSeconds,
       endTime: endTimeSeconds,
-      id: '',
       eventElement: null,
     };
   }

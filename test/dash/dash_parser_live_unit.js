@@ -1158,6 +1158,35 @@ describe('DashParser Live', () => {
           .toHaveBeenCalledWith(
               jasmine.objectContaining({startTime: 30, endTime: 30}));
     });
+
+    it('will parse multiple events at same offset', async () => {
+      const newManifest = [
+        '<MPD>',
+        '  <Period id="1" duration="PT30S">',
+        '    <EventStream schemeIdUri="http://example.com" timescale="1">',
+        '      <Event id="1" presentationTime="10" duration="15"/>',
+        '      <Event id="2" presentationTime="10" duration="15"/>',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentBase indexRange="100-200" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', newManifest);
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
+      expect(onTimelineRegionAddedSpy)
+          .toHaveBeenCalledWith(
+              jasmine.objectContaining({id: '1', startTime: 10, endTime: 25}));
+      expect(onTimelineRegionAddedSpy)
+          .toHaveBeenCalledWith(
+              jasmine.objectContaining({id: '2', startTime: 10, endTime: 25}));
+    });
   });
 
   it('honors clockSyncUri for in-progress recordings', async () => {
