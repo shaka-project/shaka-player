@@ -180,7 +180,8 @@
     height: 32px;
 
     /* Consistent margins (external) and padding (internal) between controls. */
-    margin: 1px 6px;
+    .bottom-panels-elements-margin();
+
     padding: 0;
 
     /* Transparent backgrounds, no borders, and a pointer when you mouse over
@@ -271,10 +272,4 @@
   /* Add a bit of a white shadow to keep our black spinner visible
   on a black background. */
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
-}
-
-/* Ad container */
-.shaka-ad-container {
-  .absolute-position();
-  .fill-container();
 }

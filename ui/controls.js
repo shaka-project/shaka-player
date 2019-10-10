@@ -685,13 +685,31 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.elements_.push(this.playButton_);
   }
 
-
   /** @private */
   addAdContainer_() {
+    // Ad container. IMA will use this div to display client-side ads.
     /** @private {!HTMLElement} */
     this.adContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.adContainer_.classList.add('shaka-ad-container');
     this.videoContainer_.appendChild(this.adContainer_);
+  }
+
+  /** @private */
+  addAdControls_() {
+    /** @private {!HTMLElement} */
+    this.adPanel_ = shaka.util.Dom.createHTMLElement('div');
+    this.adPanel_.classList.add('shaka-ad-controls');
+    this.adPanel_.classList.add('shaka-hidden');
+    this.bottomControls_.appendChild(this.adPanel_);
+
+    const adCounter = new shaka.ui.AdCounter(this.adPanel_, this);
+    this.elements_.push(adCounter);
+
+    const spacer = new shaka.ui.Spacer(this.adPanel_, this);
+    this.elements_.push(spacer);
+
+    const skipButton = new shaka.ui.SkipAdButton(this.adPanel_, this);
+    this.elements_.push(skipButton);
   }
 
   /** @private */
@@ -735,23 +753,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.bottomControls_ = shaka.util.Dom.createHTMLElement('div');
     this.bottomControls_.classList.add('shaka-bottom-controls');
+    this.bottomControls_.classList.add('shaka-no-propagation');
     this.controlsContainer_.appendChild(this.bottomControls_);
+
+    // Overflow menus are supposed to hide once you click elsewhere
+    // on the video element. The code in onContainerClick_ ensures that.
+    // However, clicks on the bottom controls don't propagate to the container,
+    // so we have to explicitly hide the menus onclick here.
+    this.eventManager_.listen(this.bottomControls_, 'click', () => {
+      this.hideSettingsMenus();
+    });
+
+    this.addAdControls_();
 
     /** @private {!HTMLElement} */
     this.controlsButtonPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
-    this.controlsButtonPanel_.classList.add('shaka-no-propagation');
     this.controlsButtonPanel_.classList.add(
         'shaka-show-controls-on-mouse-over');
     this.bottomControls_.appendChild(this.controlsButtonPanel_);
-
-    // Overflow menus are supposed to hide once you click elsewhere
-    // on the video element. The code in onContainerClick_ ensures that.
-    // However, clicks on controls panel don't propagate to the container,
-    // so we have to explicitly hide the menus onclick here.
-    this.eventManager_.listen(this.controlsButtonPanel_, 'click', () => {
-      this.hideSettingsMenus();
-    });
 
     // Create the elements specified by controlPanelElements
     for (const name of this.config_.controlPanelElements) {

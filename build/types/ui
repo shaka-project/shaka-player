@@ -3,6 +3,7 @@
 +../../third_party/language-mapping-list/language-mapping-list.js
 +../../ui/client_side_ad_manager.js
 +../../ui/ad_manager.js
++../../ui/ad_counter.js
 +../../ui/audio_language_selection.js
 +../../ui/externs/ui.js
 +../../ui/play_button.js

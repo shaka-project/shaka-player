@@ -16,7 +16,7 @@
  */
 
 
-goog.provide('shaka.ui.SkipAdButton');
+goog.provide('shaka.ui.AdCounter');
 
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Localization');
@@ -28,7 +28,7 @@ goog.require('shaka.util.Dom');
  * @final
  * @export
  */
-shaka.ui.SkipAdButton = class extends shaka.ui.Element {
+shaka.ui.AdCounter = class extends shaka.ui.Element {
   /**
    * @param {!HTMLElement} parent
    * @param {!shaka.ui.Controls} controls
@@ -37,11 +37,16 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     super(parent, controls);
 
     /** @private {!HTMLElement} */
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
-    this.button_.classList.add('shaka-skip-ad-button');
-    this.button_.classList.add('shaka-no-propagation');
-    this.button_.textContent = 'Skip Ad'; // TODO: localize
-    this.parent.appendChild(this.button_);
+    this.container_ = shaka.util.Dom.createHTMLElement('div');
+    this.container_.classList.add('shaka-ad-counter');
+    this.parent.appendChild(this.container_);
+
+    /** @private {!HTMLElement} */
+    this.span_ = shaka.util.Dom.createHTMLElement('span');
+    // FIXME: placeholder
+    // TODO: localize the 'Ad' part
+    this.span_.textContent = 'Ad 0:10';
+    this.container_.appendChild(this.span_);
     this.updateAriaLabel_();
 
     this.eventManager.listen(
