@@ -88,6 +88,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!Array.<!Element>} */
     this.settingsMenus_ = [];
 
+    /** @private {!Array.<!Element>} */
+    this.fadeOutControls_ = [];
+
     /**
      * This timer is used to detect when the user has stopped moving the mouse
      * and we should fade out the ui.
@@ -655,6 +658,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         menu.classList.add('shaka-low-position');
       }
     }
+
+    this.fadeOutControls_ = Array.from(
+        this.videoContainer_.getElementsByClassName(
+            'shaka-fade-out-on-mouse-out'));
   }
 
   /** @private */
@@ -769,6 +776,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.controlsButtonPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
+    this.controlsButtonPanel_.classList.add('shaka-fade-out-on-mouse-out');
     this.controlsButtonPanel_.classList.add(
         'shaka-show-controls-on-mouse-over');
     this.bottomControls_.appendChild(this.controlsButtonPanel_);
@@ -1130,7 +1138,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return true;
     }
 
-    return this.controlsContainer_.getAttribute('shown') != null;
+    return this.fadeOutControls_.some((c) => c.getAttribute('shown') != null);
   }
 
   /**
@@ -1275,10 +1283,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   setControlsOpacity_(opacity) {
-    if (opacity == shaka.ui.Enums.Opacity.OPAQUE) {
-      this.controlsContainer_.setAttribute('shown', 'true');
-    } else {
-      this.controlsContainer_.removeAttribute('shown');
+    for (const el of this.fadeOutControls_) {
+      if (opacity == shaka.ui.Enums.Opacity.OPAQUE) {
+        el.setAttribute('shown', 'true');
+      } else {
+        el.removeAttribute('shown');
+      }
+    }
+
+    if (opacity == shaka.ui.Enums.Opacity.TRANSPARENT) {
       // If there's an overflow menu open, keep it this way for a couple of
       // seconds in case a user immediately initiates another mouse move to
       // interact with the menus. If that didn't happen, go ahead and hide

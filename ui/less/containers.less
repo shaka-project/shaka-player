@@ -99,18 +99,13 @@
    * Specific controls can use .shrinkable() to override. */
   * { .unshrinkable(); }
 
-  /* Transparent unless explicitly made opaque through "shown=true" attribute */
-  opacity: 0;
-
-  /* When we show/hide this, do it gradually using cubic-bezier timing. */
-  transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 600ms;
-
   /* Position the controls container in front of the text container, so that
    * the text container doesn't interfere with the control buttons. */
   z-index: 1;
 
-  &[shown="true"] {
-    opacity: 1;
+  /* Opacity transition for controls. */
+  & > .shaka-fade-out-on-mouse-out {
+    .opacity-transition();
   }
 
   /* Always show controls while casting. */
@@ -169,6 +164,8 @@
 
   /* Make sure contents cannot be selected. */
   .unselectable();
+
+  .opacity-transition();
 
   /* All buttons, divs, and other controls directly inside this panel should
    * have these characteristics by default. */

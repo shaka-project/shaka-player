@@ -38,7 +38,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    */
   constructor(parent, controls) {
     super(parent, controls,
-        ['shaka-seek-bar-container'],
+        [
+          'shaka-seek-bar-container',
+          'shaka-fade-out-on-mouse-out',
+        ],
         [
           'shaka-seek-bar',
           'shaka-no-propagation',
