@@ -84,11 +84,13 @@ describe('TtmlTextParser', function() {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
     // Any other value is rejected as an error.
     errorHelper(shaka.util.Error.Code.INVALID_XML,
-                '<tt xml:space="invalid">' + ttBody + '</tt>');
+        '<tt xml:space="invalid">' + ttBody + '</tt>',
+        jasmine.any(String));
   });
 
-  it('rejects invalid ttml', function() {
-    errorHelper(shaka.util.Error.Code.INVALID_XML, '<test></test>');
+  it('rejects invalid ttml', () => {
+    const anyString = jasmine.any(String);
+    errorHelper(shaka.util.Error.Code.INVALID_XML, '<test></test>', anyString);
   });
 
   it('rejects invalid time format', function() {
@@ -973,19 +975,27 @@ describe('TtmlTextParser', function() {
   /**
    * @param {shaka.util.Error.Code} code
    * @param {string} text
+   * @param {*=} errorData
    */
-  function errorHelper(code, text) {
-    let error = new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
-        code);
-    let data = shaka.util.StringUtils.toUTF8(text);
+  function errorHelper(code, text, errorData = undefined) {
+    let shakaError;
+    if (errorData) {
+      shakaError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
+          code, errorData);
+    } else {
+      shakaError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
+          code);
+    }
+    const data = shaka.util.StringUtils.toUTF8(text);
     try {
       new shaka.text.TtmlTextParser().parseMedia(
           new Uint8Array(data),
           {periodStart: 0, segmentStart: 0, segmentEnd: 0});
       fail('Invalid TTML file supported');
     } catch (e) {
-      shaka.test.Util.expectToEqualError(e, error);
+      shaka.test.Util.expectToEqualError(e, shakaError);
     }
   }
 });
