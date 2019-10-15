@@ -53,22 +53,22 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.addOffOption_();
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
-        this.updateLocalizedStrings_();
-        // If captions/subtitles are off, this string needs localization.
-        // TODO: is there a more efficient way of updating just the strings
-        // we need instead of running the whole language update?
-        this.updateTextLanguages_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateLocalizedStrings_();
+          // If captions/subtitles are off, this string needs localization.
+          // TODO: is there a more efficient way of updating just the strings
+          // we need instead of running the whole language update?
+          this.updateTextLanguages_();
+        });
 
     this.eventManager.listen(
-      this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
-        this.updateLocalizedStrings_();
-        // If captions/subtitles are off, this string needs localization.
-        // TODO: is there a more efficient way of updating just the strings
-        // we need instead of running the whole language update?
-        this.updateTextLanguages_();
-      });
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateLocalizedStrings_();
+          // If captions/subtitles are off, this string needs localization.
+          // TODO: is there a more efficient way of updating just the strings
+          // we need instead of running the whole language update?
+          this.updateTextLanguages_();
+        });
 
     this.eventManager.listen(this.player, 'texttrackvisibility', () => {
       this.onCaptionStateChange_();
@@ -122,7 +122,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.button.setAttribute('aria-pressed', 'false');
     }
 
-    // TODO: document this event
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('captionselectionupdated'));
   }
@@ -169,7 +168,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 
-    // TODO: document this event
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('captionselectionupdated'));
   }
