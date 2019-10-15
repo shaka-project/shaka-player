@@ -122,7 +122,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.button.setAttribute('aria-pressed', 'false');
     }
 
-    // TODO: document this event
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('captionselectionupdated'));
   }
@@ -169,7 +168,6 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 
-    // TODO: document this event
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('captionselectionupdated'));
   }
