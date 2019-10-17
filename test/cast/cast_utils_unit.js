@@ -22,6 +22,7 @@ describe('CastUtils', () => {
   it('includes every Player member', () => {
     const ignoredMembers = [
       'constructor',  // JavaScript added field
+      'getAdManager',  // Handled specially
       'getSharedConfiguration',  // Handled specially
       'getNetworkingEngine',  // Handled specially
       'getMediaElement',  // Handled specially
