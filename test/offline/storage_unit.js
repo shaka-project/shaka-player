@@ -942,31 +942,7 @@ describe('Storage', function() {
           }
         }));
 
-    it('throws an error if DRM sessions are not ready',
-        checkAndRun(async function() {
-          const drmInfo = makeDrmInfo();
-          const noSessions = [];
-
-          // TODO(vaage): Is there a way we can set the session ids without
-          //              needing to overload an internal call in storage.
-          let drm = new shaka.test.FakeDrmEngine();
-          drm.setDrmInfo(drmInfo);
-          drm.setSessionIds(noSessions);
-
-          overrideDrmAndManifest(
-              storage,
-              drm,
-              makeManifestWithPerStreamBandwidth());
-
-          try {
-            await storage.store(manifestWithPerStreamBandwidthUri);
-            fail();
-          } catch (e) {
-            expect(e.code).toBe(shaka.util.Error.Code.NO_INIT_DATA_FOR_OFFLINE);
-          }
-        }));
-
-    it('throws an error if destroyed mid-store', checkAndRun(async function() {
+    it('throws an error if destroyed mid-store', checkAndRun(async () => {
       const manifest = makeManifestWithPerStreamBandwidth();
 
       /**
