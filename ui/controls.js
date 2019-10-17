@@ -640,6 +640,8 @@ shaka.ui.Controls.prototype.createDOM_ = function() {
   this.videoContainer_.classList.add('shaka-video-container');
   this.video_.classList.add('shaka-video');
 
+  this.addSkimContainer_();
+
   if (this.config_.addBigPlayButton) {
     this.addPlayButton_();
   }
@@ -692,6 +694,16 @@ shaka.ui.Controls.prototype.addPlayButton_ = function() {
   /** @private {shaka.ui.BigPlayButton} */
   this.playButton_ =
       new shaka.ui.BigPlayButton(playButtonContainer, this);
+};
+
+/** @private */
+shaka.ui.Controls.prototype.addSkimContainer_ = function() {
+  // This is the container that gets styled by CSS to have the
+  // black gradient skim at the end of the controls.
+  const skimContainer = shaka.util.Dom.createHTMLElement('div');
+  skimContainer.classList.add('shaka-skim-container');
+  skimContainer.classList.add('shaka-fade-out-on-mouse-out');
+  this.controlsContainer_.appendChild(skimContainer);
 };
 
 

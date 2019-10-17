@@ -92,9 +92,6 @@
   /* Centers children horizontally. */
   align-items: center;
 
-  /* A black gradient at the bottom, behind the controls, but only so high. */
-  background: linear-gradient(to top, rgba(0, 0, 0, 1) 0, @transparent 92px);
-
   /* By default, do not allow any of our controls to shrink.
    * Specific controls can use .shrinkable() to override. */
   * { .unshrinkable(); }
@@ -191,7 +188,7 @@
   }
 }
 
-/* The container for the giant play button and spinner.  Sits above (Y axis) the
+/* The container for the giant play button.  Sits above (Y axis) the
  * other video controls and seek bar, in the middle of the video frame, on top
  * of (Z axis) the video. */
 .shaka-play-button-container {
@@ -206,6 +203,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.shaka-skim-container {
+  margin: 0;
+  .fill-container();
+  .shrinkable();
+  .absolute-position();
+
+  /* A black gradient at the bottom, behind the controls, but only so high. */
+  background: linear-gradient(to top, rgba(0, 0, 0, 1) 0, @transparent 92px);
 }
 
 .shaka-text-container {
