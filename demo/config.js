@@ -187,7 +187,9 @@ shakaDemo.Config = class {
             'manifest.dash.initialSegmentLimit',
             /* canBeDecimal= */ false,
             /* canBeZero= */ false,
-            /* canBeUnset= */ true);
+            /* canBeUnset= */ true)
+        .addBoolInput_('Disable audio',
+            'manifest.disableAudio');
 
     this.addRetrySection_('manifest', 'Manifest');
   }
