@@ -194,7 +194,7 @@ shaka.ui.TextDisplayer = class {
     if (cue.spacer) {
       captions.style.display = 'block';
     } else {
-      this.setCaptionStyles_(captions, cue);
+      this.setCaptionStyles_(captions, cue, /* isNested= */ true);
     }
 
     container.appendChild(captions);
@@ -213,7 +213,7 @@ shaka.ui.TextDisplayer = class {
     if (cue.nestedCues.length) {
       const nestedCuesContainer = shaka.util.Dom.createHTMLElement('p');
       nestedCuesContainer.style.width = '100%';
-      this.setCaptionStyles_(nestedCuesContainer, cue);
+      this.setCaptionStyles_(nestedCuesContainer, cue, /* isNested= */ false);
 
       for (let i = 0; i < cue.nestedCues.length; i++) {
         this.displayNestedCue_(nestedCuesContainer, cue.nestedCues[i]);
@@ -229,9 +229,10 @@ shaka.ui.TextDisplayer = class {
   /**
    * @param {!HTMLElement} captions
    * @param {!shaka.extern.Cue} cue
+   * @param {boolean} isNested
    * @private
    */
-  setCaptionStyles_(captions, cue) {
+  setCaptionStyles_(captions, cue, isNested) {
     const Cue = shaka.text.Cue;
     const captionsStyle = captions.style;
     const panelStyle = this.textContainer_.style;
@@ -264,11 +265,16 @@ shaka.ui.TextDisplayer = class {
     // captions inside the text container. Before means at the top of the
     // text container, and after means at the bottom.
     if (cue.displayAlign == Cue.displayAlign.BEFORE) {
-      panelStyle.justifyContent = 'flex-start';
+      captionsStyle.justifyContent = 'flex-start';
     } else if (cue.displayAlign == Cue.displayAlign.CENTER) {
-      panelStyle.justifyContent = 'center';
+      captionsStyle.justifyContent = 'center';
     } else {
-      panelStyle.justifyContent = 'flex-end';
+      captionsStyle.justifyContent = 'flex-end';
+    }
+    if (cue.nestedCues.length) {
+      captionsStyle.display = 'flex';
+      captionsStyle.flexDirection = 'column';
+      captionsStyle.margin = '0';
     }
 
     captionsStyle.fontFamily = cue.fontFamily;
@@ -315,6 +321,17 @@ shaka.ui.TextDisplayer = class {
           }
         }
       }
+    } else if (cue.region && cue.region.id && !isNested) {
+      const percentageUnit = shaka.text.CueRegion.units.PERCENTAGE;
+      const heightUnit = cue.region.heightUnits == percentageUnit ? '%' : 'px';
+      const widthUnit = cue.region.widthUnits == percentageUnit ? '%' : 'px';
+      const viewportAnchorUnit =
+          cue.region.viewportAnchorUnits == percentageUnit ? '%' : 'px';
+      captionsStyle.height = cue.region.height + heightUnit;
+      captionsStyle.width = cue.region.width + widthUnit;
+      captionsStyle.top = cue.region.viewportAnchorY + viewportAnchorUnit;
+      captionsStyle.left = cue.region.viewportAnchorX + viewportAnchorUnit;
+      captionsStyle.position = 'absolute';
     }
 
     captionsStyle.lineHeight = cue.lineHeight;
