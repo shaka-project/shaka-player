@@ -433,6 +433,10 @@ shakaDemo.Main = class {
       return;
     }
 
+    // If the list of stored content does not contain this asset, then make sure
+    // that the asset's |storedContent| value is null. Custom assets that were
+    // once stored might have that object serialized with their other data.
+    asset.storedContent = null;
     for (const storedContent of this.initialStoredList_) {
       const identifier = storedContent.appMetadata['identifier'];
       if (this.getIdentifierFromAsset_(asset) == identifier) {
