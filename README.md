@@ -40,13 +40,13 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 
 NOTES:
  - ¹: Only the latest stable version is tested and supported. Older releases may still be usable, and we will accept pull requests for them, but they will not be officially tested or supported.
- - ²: Latest stable Chromecast firmware is tested. Both sender and receiver can be implemented with Shaka Player.
+ - ²: The latest stable Chromecast firmware is tested. Both sender and receiver can be implemented with Shaka Player.
  - ³: Tizen 2017 model is actively tested and supported by the Shaka Player team. Tizen 2016 model is community-supported and untested by us.
  - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11 can play clear content on Windows 8.0. IE 11 does not support adaptive playback on Windows 7 and under.
  - ⁵: These are expected to work, but are not actively tested by the Shaka Player team.
 
 We support iOS through Apple's native HLS player.  We provide the same top-level
-API, but we just set the video's `src` element to the manfiest/media.  So we are
+API, but we just set the video's `src` element to the manifest/media.  So we are
 dependent on the browser supporting the manifests.
 
 ### Shaka Player Embedded (for native iOS)
