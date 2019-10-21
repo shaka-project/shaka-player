@@ -67,6 +67,12 @@ shaka.ui.Element = class {
      * @exportInterface
      */
     this.video = this.controls.getVideo();
+
+    /**
+     * @protected {shaka.ads.AdManager}
+     * @exportInterface
+     */
+    this.adManager = this.player.getAdManager();
   }
 
   /**
@@ -82,5 +88,6 @@ shaka.ui.Element = class {
     this.localization = null;
     this.player = null;
     this.video = null;
+    this.adManager = null;
   }
 };

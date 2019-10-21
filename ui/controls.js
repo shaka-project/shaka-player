@@ -79,6 +79,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.videoContainer_ = videoContainer;
 
+    /** @private {shaka.ads.AdManager} */
+    this.adManager_ = this.player_.getAdManager();
+
     /** @private {shaka.ui.SeekBar} */
     this.seekBar_ = null;
 
@@ -619,12 +622,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @export */
   showAdUI() {
-    // TODO
+    // TODO: other ad states (seek bar display etc)
+    shaka.ui.Utils.setDisplay(this.adPanel_, true);
   }
 
   /** @export */
   hideAdUI() {
-    // TODO
+    // TODO: other ad states (seek bar display etc)
+    shaka.ui.Utils.setDisplay(this.adPanel_, false);
   }
 
   /** @private */
@@ -718,7 +723,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.adPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.adPanel_.classList.add('shaka-ad-controls');
-    this.adPanel_.classList.add('shaka-hidden');
+    shaka.ui.Utils.setDisplay(this.adPanel_, false);
     this.bottomControls_.appendChild(this.adPanel_);
 
     const adCounter = new shaka.ui.AdCounter(this.adPanel_, this);
@@ -864,6 +869,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
       this.onKeyUp_(e);
     });
+
+    this.eventManager_.listen(
+        this.adManager_, shaka.ads.AdManager.AD_STARTED, () => {
+          this.showAdUI();
+        });
+
+    this.eventManager_.listen(
+        this.adManager_, shaka.ads.AdManager.AD_COMPLETE, () => {
+          this.hideAdUI();
+        });
+
+    this.eventManager_.listen(
+        this.adManager_, shaka.ads.AdManager.AD_SKIPPED, () => {
+          this.hideAdUI();
+        });
 
     if (screen.orientation) {
       this.eventManager_.listen(screen.orientation, 'change', () => {

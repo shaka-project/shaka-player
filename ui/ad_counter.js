@@ -18,6 +18,7 @@
 
 goog.provide('shaka.ui.AdCounter');
 
+goog.require('goog.asserts');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
@@ -43,10 +44,20 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.span_ = shaka.util.Dom.createHTMLElement('span');
-    // FIXME: placeholder
-    // TODO: localize the 'Ad' part
-    this.span_.textContent = 'Ad 0:10';
     this.container_.appendChild(this.span_);
+
+    /** @private {shaka.extern.IAd} */
+    this.currentAd_ = null;
+
+    /**
+     * The timer that tracks down the ad progress.
+     *
+     * @private {shaka.util.Timer}
+     */
+    this.timer_ = new shaka.util.Timer(() => {
+      this.onTimerTick_();
+    });
+
     this.updateAriaLabel_();
 
     this.eventManager.listen(
@@ -58,6 +69,21 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
         this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
           this.updateAriaLabel_();
         });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STARTED, (e) => {
+          this.onAdStarted_(/** @type {!shaka.util.FakeEvent} */ (e));
+        });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_COMPLETE, () => {
+          this.reset_();
+        });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_SKIPPED, () => {
+          this.reset_();
+        });
   }
 
   /**
@@ -65,6 +91,47 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
    */
   updateAriaLabel_() {
     // TODO
+  }
+
+  /**
+   * @param {!shaka.util.FakeEvent} e
+   * @private
+   */
+  onAdStarted_(e) {
+    this.currentAd_ = (/** @type {!Object} */ (e))['ad'];
+    // Init the counter now, then check the remaining ad time
+    // every half a second. This should also take care of any pauses/resumes.
+    this.timer_.tickNow();
+    this.timer_.tickEvery(0.5);
+  }
+
+  /**
+   * @private
+   */
+  onTimerTick_() {
+    goog.asserts.assert(this.currentAd_ != null,
+        'currentAd should exist at this point');
+
+    const secondsLeft = Math.round(this.currentAd_.getRemainingTime());
+    if (secondsLeft > 0) {
+      // TODO: This should be formatted and localized according to the
+      // loc team's guidelines on the localization of expressions.
+      // e.g. the string should be something like 'Ad: %remainingAdTime%.'
+      this.span_.textContent = 'Ad: ' + secondsLeft;
+    } else {
+      this.reset_();
+    }
+  }
+
+  /**
+   * @private
+   */
+  reset_() {
+    this.timer_.stop();
+    this.currentAd_ = null;
+    // Controls are going to hide the whole ad panel once the ad is over,
+    // this is just a safeguard.
+    this.span_.textContent = '';
   }
 };
 
