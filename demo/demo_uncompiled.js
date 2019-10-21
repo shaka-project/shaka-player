@@ -24,6 +24,7 @@ goog.require('shakaDemo.Front');
 goog.require('shakaDemo.BoolInput');
 goog.require('shakaDemo.DatalistInput');
 goog.require('shakaDemo.Input');
+goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.NumberInput');
 goog.require('shakaDemo.SelectInput');
 goog.require('shakaDemo.TextInput');

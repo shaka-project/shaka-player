@@ -30,8 +30,8 @@ goog.provide('shakaDemo.InputContainer');
 shakaDemo.InputContainer = class {
   /**
    * @param {!Element} parentDiv
-   * @param {?string} headerText The text to be displayed by the header. If
-   *   null, there will be no header.
+   * @param {?shakaDemo.MessageIds} headerText The text to be displayed by
+   *   the header. If null, there will be no header.
    * @param {!shakaDemo.InputContainer.Style} style
    * @param {?string} docLink
    */
@@ -51,7 +51,7 @@ shakaDemo.InputContainer = class {
     /** @type {?Element} */
     this.latestElementContainer;
 
-    /** @type {?string} */
+    /** @type {?shakaDemo.MessageIds} */
     this.latestTooltip;
 
     /** @private {number} */
@@ -106,7 +106,7 @@ shakaDemo.InputContainer = class {
 
   /**
    * @param {!Element} parentDiv
-   * @param {string} headerText
+   * @param {shakaDemo.MessageIds} headerText
    * @private
    */
   createHeader_(parentDiv, headerText) {
@@ -127,7 +127,7 @@ shakaDemo.InputContainer = class {
     } else {
       this.header_ = document.createElement('h3');
     }
-    this.header_.textContent = headerText;
+    this.header_.textContent = shakaDemoMain.getLocalizedString(headerText);
     parentDiv.appendChild(this.header_);
   }
 
@@ -154,8 +154,8 @@ shakaDemo.InputContainer = class {
 
   /**
    * Makes a row, for storing an input.
-   * @param {?string} labelString
-   * @param {?string} tooltipString
+   * @param {?shakaDemo.MessageIds} labelString
+   * @param {?shakaDemo.MessageIds} tooltipString
    * @param {string=} rowClass
    */
   addRow(labelString, tooltipString, rowClass) {
@@ -173,7 +173,7 @@ shakaDemo.InputContainer = class {
       label.setAttribute('for', elementId);
       label.classList.add('input-container-label');
       const labelText = document.createElement('b');
-      labelText.textContent = labelString;
+      labelText.textContent = shakaDemoMain.getLocalizedString(labelString);
       label.appendChild(labelText);
       this.latestRow_.appendChild(label);
     }

@@ -80,6 +80,10 @@ shaka.test.FakeDemoMain = class {
     });
 
     /** @type {!jasmine.Spy} */
+    this.getLocalizedString = jasmine.createSpy('getLocalizedString');
+    this.getLocalizedString.and.callFake((name) => name);
+
+    /** @type {!jasmine.Spy} */
     this.loadAsset = jasmine.createSpy('loadAsset');
     this.loadAsset.and.returnValue(Promise.resolve());
 

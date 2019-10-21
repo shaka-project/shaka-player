@@ -111,7 +111,7 @@ shakaDemo.Input.lastId_ = 0;
 shakaDemo.SelectInput = class extends shakaDemo.Input {
   /**
    * @param {!shakaDemo.InputContainer} parentContainer
-   * @param {string} name
+   * @param {?shakaDemo.MessageIds} name
    * @param {function(!Element)} onChange
    * @param {!Object.<string, string>} values
    */
@@ -123,6 +123,9 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
     this.input_.classList.add('mdl-textfield__input');
     this.extra_.classList.add('mdl-textfield__label');
     this.extra_.setAttribute('for', this.input_.id);
+    if (name) {
+      this.extra_.textContent = shakaDemoMain.getLocalizedString(name);
+    }
     for (const value of Object.keys(values)) {
       const option = document.createElement('option');
       option.textContent = values[value];
@@ -227,20 +230,29 @@ shakaDemo.NumberInput = class extends shakaDemo.TextInput {
     error.classList.add('mdl-textfield__error');
     this.container_.appendChild(error);
 
-    error.textContent = 'Must be a positive';
+    const MessageIds = shakaDemo.MessageIds;
+    const localize = (name) => shakaDemoMain.getLocalizedString(name);
+    if (canBeZero && canBeDecimal) {
+      error.textContent = localize(MessageIds.NUMBER_DECIMAL_WARNING);
+    } else if (canBeZero) {
+      error.textContent = localize(MessageIds.NUMBER_INTEGER_WARNING);
+    } else if (canBeDecimal) {
+      error.textContent =
+          localize(MessageIds.NUMBER_NONZERO_DECIMAL_WARNING);
+    } else {
+      error.textContent =
+          localize(MessageIds.NUMBER_NONZERO_INTEGER_WARNING);
+    }
+
     this.input_.pattern = '(Infinity|';
     if (canBeZero) {
       this.input_.pattern += '[0-9]*';
     } else {
       this.input_.pattern += '[0-9]*[1-9][0-9]*';
-      error.textContent += ', nonzero';
     }
     if (canBeDecimal) {
       // TODO: Handle commas as decimal delimeters, for appropriate regions?
       this.input_.pattern += '(.[0-9]+)?';
-      error.textContent += ' number.';
-    } else {
-      error.textContent += ' integer.';
     }
     this.input_.pattern += ')';
     if (canBeUnset) {

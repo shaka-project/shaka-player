@@ -18,6 +18,8 @@
 
 goog.provide('ShakaDemoAssetInfo');
 
+goog.require('shakaDemo.MessageIds');
+
 
 /**
  * An object that contains information about an asset.
@@ -39,7 +41,7 @@ const ShakaDemoAssetInfo = class {
     this.iconUri = iconUri;
     /** @type {string} */
     this.manifestUri = manifestUri;
-    /** @type {string} */
+    /** @type {!shakaAssets.Source} */
     this.source = source;
 
     // Optional members.
@@ -51,8 +53,8 @@ const ShakaDemoAssetInfo = class {
     this.extraText = [];
     /** @type {?string} */
     this.certificateUri = null;
-    /** @type {string} */
-    this.description = '';
+    /** @type {?string} */
+    this.description = null;
     /** @type {boolean} */
     this.isFeatured = false;
     /** @type {!Array.<!shakaAssets.KeySystem>} */
@@ -104,9 +106,9 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * A sort comparator for comparing two strings, ignoring case.
-   * @param {string} a
-   * @param {string} b
+   * A sort comparator for comparing two message Ids, ignoring case.
+   * @param {shakaDemo.MessageIds} a
+   * @param {shakaDemo.MessageIds} b
    * @return {number}
    * @private
    */

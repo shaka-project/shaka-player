@@ -102,6 +102,7 @@ module.exports = (config) => {
       'test/test/util/*.js',
 
       // list of test assets next
+      'demo/common/message_ids.js',
       'demo/common/asset.js',
       'demo/common/assets.js',
 

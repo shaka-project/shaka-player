@@ -79,6 +79,7 @@ UNCOMPILED_JS = [
   // Enable less, the CSS pre-processor.
   '../node_modules/less/dist/less.js',
   // These are the individual parts of the demo app.
+  'common/message_ids.js',
   'common/asset.js',
   'common/assets.js',
   'demo_uncompiled.js',
@@ -93,11 +94,11 @@ UNCOMPILED_JS = [
       <header class="app-header mdl-layout__header should-hide-in-no-input-mode">
         <header class="mdl-layout__header-row" id="nav-button-container">
           <img alt="Shaka Player Logo" src="shaka_logo_trans.png" class="logo" />
-          <button id="nav-button-front" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" defaultselected>HOME</button>
-          <button id="nav-button-search" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">SEARCH</button>
-          <button id="nav-button-custom" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">CUSTOM CONTENT</button>
+          <button id="nav-button-front" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" defaultselected localized-string="HOME" tab-identifier="HOME"></button>
+          <button id="nav-button-search" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="SEARCH" tab-identifier="SEARCH"></button>
+          <button id="nav-button-custom" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="CUSTOM_CONTENT" tab-identifier="CUSTOM CONTENT"></button>
           <div class="mdl-layout-spacer"></div>
-          <button id="bug-button" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">REPORT BUG</button>
+          <button id="bug-button" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="DEMO_REPORT_BUG"></button>
           <div class="version-block">
             <span class="version-string"></span>
           </div>
@@ -108,7 +109,7 @@ UNCOMPILED_JS = [
       </div>
       <div class="mdl-layout__drawer hamburger-menu">
         <div id="hamburger-menu-title" class="mdl-layout-title">
-          Shaka Player Demo Config
+          <div localized-string="CONFIG"></div>
           <div class="mdl-layout-spacer"></div>
           <button id="drawer-close-button" class="mdl-button mdl-js-button mdl-button--icon should-disable-on-fail"><i class="material-icons">close</i></button>
         </div>
@@ -130,29 +131,29 @@ UNCOMPILED_JS = [
           <div class="mdl-mega-footer__middle-section">
 
             <div class="mdl-mega-footer__drop-down-section">
-              <h1 class="mdl-mega-footer__heading">PROJECT LINKS</h1>
+              <h1 class="mdl-mega-footer__heading" localized-string="PROJECT_LINKS_HEADER"></h1>
               <ul class="mdl-mega-footer__link-list">
-                <li><a rel="noopener" target="_blank" href="../docs/api/index.html">Documentation</a></li>
-                <li><a rel="noopener" target="_blank" href="https://www.apache.org/licenses/LICENSE-2.0">Apache License</a></li>
-                <li><a rel="noopener" target="_blank" href="https://github.com/google/shaka-player">Source on GitHub</a></li>
-                <li><a rel="noopener" target="_blank" href="https://www.npmjs.com/package/shaka-player">Package on NPM</a></li>
-                <li><a rel="noopener" target="_blank" href="../support.html">Browser Support Test</a></li>
+                <li><a rel="noopener" target="_blank" href="../docs/api/index.html" localized-string="DOCUMENTATION"></a></li>
+                <li><a rel="noopener" target="_blank" href="https://www.apache.org/licenses/LICENSE-2.0" localized-string="LICENSE"></a></li>
+                <li><a rel="noopener" target="_blank" href="https://github.com/google/shaka-player" localized-string="SOURCE"></a></li>
+                <li><a rel="noopener" target="_blank" href="https://www.npmjs.com/package/shaka-player" localized-string="NPM"></a></li>
+                <li><a rel="noopener" target="_blank" href="../support.html" localized-string="SUPPORT"></a></li>
               </ul>
             </div>
             <div class="mdl-mega-footer__drop-down-section">
-              <h1 class="mdl-mega-footer__heading">CDN</h1>
+              <h1 class="mdl-mega-footer__heading" localized-string="CDN_HEADER"></h1>
               <ul class="mdl-mega-footer__link-list">
-                <li><a rel="noopener" target="_blank" href="https://developers.google.com/speed/libraries/#shaka-player">Google Hosted Libraries</a></li>
-                <li><a rel="noopener" target="_blank" href="https://www.jsdelivr.com/package/npm/shaka-player">jsDelivr</a></li>
-                <li><a rel="noopener" target="_blank" href="https://cdnjs.com/libraries/shaka-player">CDNJS</a></li>
+                <li><a rel="noopener" target="_blank" href="https://developers.google.com/speed/libraries/#shaka-player" localized-string="LIBRARIES"></a></li>
+                <li><a rel="noopener" target="_blank" href="https://www.jsdelivr.com/package/npm/shaka-player" localized-string="JSDELIVR"></a></li>
+                <li><a rel="noopener" target="_blank" href="https://cdnjs.com/libraries/shaka-player" localized-string="CDNJS"></a></li>
               </ul>
             </div>
             <div class="mdl-mega-footer__drop-down-section">
-              <h1 class="mdl-mega-footer__heading">DEMO MODE</h1>
+              <h1 class="mdl-mega-footer__heading" localized-string="DEMO_MODE_HEADER"></h1>
               <ul class="mdl-mega-footer__link-list" id="compiled-links">
-                <li><a href="#build=compiled" id="compiled-link">Compiled (Release)</a></li>
-                <li><a href="#build=debug_compiled" id="debug-compiled-link">Compiled (Debug)</a></li>
-                <li><a href="#build=uncompiled" id="uncompiled-link">Uncompiled</a></li>
+                <li><a href="#build=compiled" id="compiled-link" localized-string="COMPILED_RELEASE"></a></li>
+                <li><a href="#build=debug_compiled" id="debug-compiled-link" localized-string="COMPILED_DEBUG"></a></li>
+                <li><a href="#build=uncompiled" id="uncompiled-link" localized-string="UNCOMPILED"></a></li>
               </ul>
             </div>
           </div>

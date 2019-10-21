@@ -91,8 +91,9 @@ describe('Player', () => {
 
       const wit = asset.focus ? fit : it;
       wit(testName, async () => {
+        const idFor = shakaAssets.identifierForKeySystem;
         if (!asset.isClear() &&
-            !asset.drm.some((keySystem) => support.drm[keySystem])) {
+            !asset.drm.some((keySystem) => support.drm[idFor(keySystem)])) {
           pending('None of the required key systems are supported.');
         }
 

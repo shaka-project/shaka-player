@@ -25,11 +25,11 @@ goog.provide('shakaDemo.Tooltips');
 shakaDemo.Tooltips = class {
   /**
    * @param {!Element} labeledElement
-   * @param {string} message
+   * @param {shakaDemo.MessageIds} message
    */
   static make(labeledElement, message) {
     tippy(labeledElement, {
-      content: message,
+      content: shakaDemoMain.getLocalizedString(message),
       placement: 'bottom',
       arrow: true,
       animation: 'scale',

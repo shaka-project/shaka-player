@@ -279,6 +279,7 @@ def check_tests(args):
               get('third_party', 'language-mapping-list'))
   files.add(os.path.join(base, 'demo', 'common', 'asset.js'))
   files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
+  files.add(os.path.join(base, 'demo', 'common', 'message_ids.js'))
 
   localizations = compiler.GenerateLocalizations(None)
   localizations.generate(args.force)
