@@ -38,6 +38,9 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     super(parent, controls,
         ['shaka-volume-bar-container'], ['shaka-volume-bar']);
 
+    /** @private {!shaka.extern.UIConfiguration} */
+    this.config_ = this.controls.getConfig();
+
     this.eventManager.listen(this.video,
         'volumechange',
         () => this.onVolumeStateChange_());
@@ -78,12 +81,11 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
       this.setValue(this.video.volume);
     }
 
+    const colors = this.config_.volumeBarColors;
     const gradient = ['to right'];
-    gradient.push(shaka.ui.Constants.VOLUME_BAR_VOLUME_LEVEL_COLOR +
-                 (this.getValue() * 100) + '%');
-    gradient.push(shaka.ui.Constants.VOLUME_BAR_BASE_COLOR +
-                 (this.getValue() * 100) + '%');
-    gradient.push(shaka.ui.Constants.VOLUME_BAR_BASE_COLOR + '100%');
+    gradient.push(colors.level + (this.getValue() * 100) + '%');
+    gradient.push(colors.base + (this.getValue() * 100) + '%');
+    gradient.push(colors.base + '100%');
 
     this.container.style.background =
         'linear-gradient(' + gradient.join(',') + ')';

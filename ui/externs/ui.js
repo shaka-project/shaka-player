@@ -28,6 +28,39 @@ var shaka = {};
 /** @namespace */
 shaka.extern = {};
 
+/**
+ * @typedef {{
+ *   base: string,
+ *   buffered: string,
+ *   played: string
+ * }}
+ *
+ * @property {string} base
+ *   The CSS background color applied to the base of the seek bar, on top of
+ *   which the buffer level and playback position are shown.
+ * @property {string} buffered
+ *   The CSS background color applied to the portion of the seek bar showing
+ *   what has been buffered ahead of the playback position.
+ * @property {string} played
+ *   The CSS background color applied to the portion of the seek bar showing
+ *   what has been played already.
+ */
+shaka.extern.UISeekBarColors;
+
+/**
+ * @typedef {{
+ *   base: string,
+ *   level: string
+ * }}
+ *
+ * @property {string} base
+ *   The CSS background color applied to the base of the volume bar, on top of
+ *   which the volume level is shown.
+ * @property {string} level
+ *   The CSS background color applied to the portion of the volume bar showing
+ *   the volume level.
+ */
+shaka.extern.UIVolumeBarColors;
 
 /**
  * @typedef {{
@@ -36,7 +69,9 @@ shaka.extern = {};
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
  *   castReceiverAppId: string,
- *   clearBufferOnQualityChange: boolean
+ *   clearBufferOnQualityChange: boolean,
+ *   seekBarColors: shaka.extern.UISeekBarColors,
+ *   volumeBarColors: shaka.extern.UIVolumeBarColors
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -58,6 +93,14 @@ shaka.extern = {};
  *   resolution is being buffered. Not clearing the buffer will mean
  *   we play the content in the previously selected resolution that we
  *   already have buffered before switching to the new resolution.
+ * @property {shaka.extern.UISeekBarColors} seekBarColors
+ *   The CSS colors applied to the seek bar.  This allows you to override the
+ *   colors used in the linear gradient constructed in JavaScript, since you
+ *   cannot easily do this in pure CSS.
+ * @property {shaka.extern.UIVolumeBarColors} volumeBarColors
+ *   The CSS colors applied to the volume bar.  This allows you to override the
+ *   colors used in the linear gradient constructed in JavaScript, since you
+ *   cannot do this in pure CSS.
  */
 shaka.extern.UIConfiguration;
 
