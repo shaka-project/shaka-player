@@ -48,6 +48,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           'shaka-show-controls-on-mouse-over',
         ]);
 
+    /** @private {!shaka.extern.UIConfiguration} */
+    this.config_ = this.controls.getConfig();
+
     /**
      * This timer is used to introduce a delay between the user scrubbing across
      * the seek bar and the seek being sent to the player.
@@ -145,8 +148,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * Also called internally when the user interacts with the input element.
    */
   update() {
-    const Constants = shaka.ui.Constants;
-
+    const colors = this.config_.seekBarColors;
     const currentTime = this.getValue();
     const bufferedLength = this.video.buffered.length;
     const bufferedStart = bufferedLength ? this.video.buffered.start(0) : 0;
@@ -160,13 +162,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     // Hide seekbar if the seek window is very small.
     if (this.player.isLive() &&
-        seekRangeSize < Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
+        seekRangeSize < shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
       shaka.ui.Utils.setDisplay(this.container, false);
     } else {
       shaka.ui.Utils.setDisplay(this.container, true);
 
       if (bufferedLength == 0) {
-        this.container.style.background = Constants.SEEK_BAR_BASE_COLOR;
+        this.container.style.background = colors.base;
       } else {
         const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
         const clampedBufferEnd = Math.min(bufferedEnd, seekRange.end);
@@ -186,12 +188,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         const makeColor = (color, fract) => color + ' ' + (fract * 100) + '%';
         const gradient = [
           'to right',
-          makeColor(Constants.SEEK_BAR_BASE_COLOR, bufferStartFraction),
-          makeColor(Constants.SEEK_BAR_PLAYED_COLOR, bufferStartFraction),
-          makeColor(Constants.SEEK_BAR_PLAYED_COLOR, playheadFraction),
-          makeColor(Constants.SEEK_BAR_BUFFERED_COLOR, playheadFraction),
-          makeColor(Constants.SEEK_BAR_BUFFERED_COLOR, bufferEndFraction),
-          makeColor(Constants.SEEK_BAR_BASE_COLOR, bufferEndFraction),
+          makeColor(colors.base, bufferStartFraction),
+          makeColor(colors.played, bufferStartFraction),
+          makeColor(colors.played, playheadFraction),
+          makeColor(colors.buffered, playheadFraction),
+          makeColor(colors.buffered, bufferEndFraction),
+          makeColor(colors.base, bufferEndFraction),
         ];
         this.container.style.background =
             'linear-gradient(' + gradient.join(',') + ')';
