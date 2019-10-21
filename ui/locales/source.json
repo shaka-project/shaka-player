@@ -41,11 +41,11 @@
   },
   "SKIP_TO_LIVE": {
     "message": "Skip ahead to live",
-    "description": "Label for a button used to skip ahead to the live edge of a live video stream."
+    "description": "Label for a button used to skip ahead to the live broadcast."
   },
   "LIVE": {
     "message": "Live",
-    "description": "Label to indicate that a video is already playing at the live edge of a live video stream."
+    "description": "Label to indicate that a video is already playing at the live broadcast."
   },
   "MORE_SETTINGS": {
     "message": "More settings",
