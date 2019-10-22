@@ -163,11 +163,12 @@ def check_spelling(_):
   complete.include.update(shakaBuildHelpers.get_all_files(
       os.path.join(base, 'build'), re.compile(r'.*\.(js|py)$')))
 
-  with open(os.path.join(base, 'build', 'misspellings.txt')) as f:
+  with shakaBuildHelpers.open_file(
+      os.path.join(base, 'build', 'misspellings.txt')) as f:
     misspellings = ast.literal_eval(f.read())
   has_error = False
   for path in complete.include:
-    with open(path) as f:
+    with shakaBuildHelpers.open_file(path) as f:
       for i, line in enumerate(f):
         for regex, replace_pattern in misspellings.items():
           for match in re.finditer(regex, line):
@@ -216,7 +217,7 @@ def check_eslint_disable(_):
     # The stack of rules that are disabled.
     disabled = []
 
-    with open(path, 'r') as f:
+    with shakaBuildHelpers.open_file(path, 'r') as f:
       rel_path = os.path.relpath(path, base)
       for i, line in enumerate(f):
         match = re.match(r'^\s*/\* eslint-(disable|enable) ([\w-]*) \*/$', line)
