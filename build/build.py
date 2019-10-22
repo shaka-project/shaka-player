@@ -225,7 +225,7 @@ class Build(object):
         build_path = self._get_build_file_path(line, root)
         if not build_path:
           return False
-        lines = open(build_path).readlines()
+        lines = shakaBuildHelpers.open_file(build_path).readlines()
         sub_root = os.path.dirname(build_path)
 
         # If this is a build file, then recurse and combine the builds.

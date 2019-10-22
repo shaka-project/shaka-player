@@ -70,7 +70,7 @@ def _must_build(output, source_files):
 def _update_timestamp(path):
   # This creates the file if it does not exist, and updates the timestamp if it
   # does.
-  open(path, 'w').close()
+  open(path, 'wb').close()
 
 
 class ClosureCompiler(object):
@@ -153,7 +153,7 @@ class ClosureCompiler(object):
       # Add a special source-mapping comment so that Chrome and Firefox can map
       # line and character numbers from the compiled library back to the
       # original source locations.
-      with open(self.compiled_js_path, 'a') as f:
+      with shakaBuildHelpers.open_file(self.compiled_js_path, 'a') as f:
         f.write('//# sourceMappingURL=%s' % os.path.basename(
             self.source_map_path))
 
@@ -172,8 +172,8 @@ class ClosureCompiler(object):
     wrapper_input_path = _get_source_path('build/wrapper.template.js')
     wrapper_output_path = _get_source_path('dist/wrapper.js')
 
-    with open(wrapper_input_path, 'rb') as f:
-      wrapper_code = f.read().decode('utf8').replace('%output%', '"%output%"')
+    with shakaBuildHelpers.open_file(wrapper_input_path, 'r') as f:
+      wrapper_code = f.read().replace('%output%', '"%output%"')
 
     jar = _get_source_path('third_party/closure/compiler.jar')
     cmd_line = ['java', '-jar', jar, '-O', 'WHITESPACE_ONLY']
@@ -186,9 +186,9 @@ class ClosureCompiler(object):
     if proc.returncode != 0:
       raise RuntimeError('Failed to strip whitespace from wrapper!')
 
-    with open(wrapper_output_path, 'wb') as f:
+    with shakaBuildHelpers.open_file(wrapper_output_path, 'w') as f:
       code = stripped_wrapper_code.decode('utf8')
-      f.write(code.replace('"%output%"', '%output%').encode('utf8'))
+      f.write(code.replace('"%output%"', '%output%'))
 
     return ['--output_wrapper_file=%s' % wrapper_output_path]
 
@@ -259,11 +259,11 @@ class Less(object):
       return False
 
     # We need to prepend the license header to the compiled CSS.
-    with open(_get_source_path('build/license-header'), 'r') as f:
+    with open(_get_source_path('build/license-header'), 'rb') as f:
       license_header = f.read()
-    with open(self.output, 'r') as f:
+    with open(self.output, 'rb') as f:
       contents = f.read()
-    with open(self.output, 'w') as f:
+    with open(self.output, 'wb') as f:
       f.write(license_header)
       f.write(contents)
 
@@ -447,7 +447,7 @@ class GenerateLocalizations(object):
     last_locales = None
     try:
       prefix = '// LOCALES: '
-      with open(self.output, 'r') as f:
+      with shakaBuildHelpers.open_file(self.output, 'r') as f:
         for line in f:
           if line.startswith(prefix):
             last_locales = line.replace(prefix, '').strip().split(', ')

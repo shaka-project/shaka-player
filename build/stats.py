@@ -737,7 +737,7 @@ def process(text, options):
   data = json.loads(text)
   # Paths are relative to the output directory.
   base = os.path.join(shakaBuildHelpers.get_source_base(), 'dist')
-  with open(os.path.join(base, data['file']), 'r') as f:
+  with shakaBuildHelpers.open_file(os.path.join(base, data['file']), 'r') as f:
     file_lines = f.readlines()
   names = data['names']
   mappings = data['mappings']
@@ -807,7 +807,7 @@ def main(args):
       logging.error('"%s" not found; build Shaka first.', name)
       return 1
 
-  with open(name, 'r') as f:
+  with shakaBuildHelpers.open_file(name, 'r') as f:
     process(f.read(), options)
   return 0
 

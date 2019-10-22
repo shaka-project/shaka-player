@@ -28,7 +28,7 @@ import shakaBuildHelpers
 def player_version():
   """Gets the version of the library from player.js."""
   path = os.path.join(shakaBuildHelpers.get_source_base(), 'lib', 'player.js')
-  with open(path, 'r') as f:
+  with shakaBuildHelpers.open_file(path, 'r') as f:
     match = re.search(r'shaka\.Player\.version = \'(.*)\'', f.read())
     return match.group(1) if match else ''
 
@@ -36,7 +36,7 @@ def player_version():
 def changelog_version():
   """Gets the version of the library from the CHANGELOG."""
   path = os.path.join(shakaBuildHelpers.get_source_base(), 'CHANGELOG.md')
-  with open(path, 'r') as f:
+  with shakaBuildHelpers.open_file(path, 'r') as f:
     match = re.search(r'## (.*) \(', f.read())
     return match.group(1) if match else ''
 

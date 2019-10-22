@@ -119,6 +119,18 @@ def quote_argument(arg):
   return arg
 
 
+def open_file(*args, **kwargs):
+  """Opens a file with the given mode and options."""
+  if sys.version_info[0] == 2:
+    # Python 2 returns byte strings even in text mode, so the encoding doesn't
+    # matter.
+    return open(*args, **kwargs)
+  else:
+    # Python 3 requires setting an encoding so it reads strings.  The default
+    # is based on the platform, which on Windows, isn't UTF-8.
+    return open(encoding='utf8', *args, **kwargs)
+
+
 def execute_subprocess(args, **kwargs):
   """Executes the given command using subprocess.
 
@@ -255,7 +267,7 @@ def get_node_binary(module_name, bin_name=None):
   path = os.path.join(base, 'node_modules', module_name)
   if os.path.isdir(path):
     json_path = os.path.join(path, 'package.json')
-    package_data = json.load(open(json_path, 'r'))
+    package_data = json.load(open_file(json_path, 'r'))
     bin_path = os.path.join(path, package_data['bin'][bin_name])
     return ['node', bin_path]
 
@@ -302,7 +314,7 @@ def update_node_modules():
     execute_get_output([cmd, 'install'])
 
   # Update the timestamp of the file that tracks when we last updated.
-  open(_node_modules_last_update_path(), 'w').close()
+  open(_node_modules_last_update_path(), 'wb').close()
   return True
 
 
