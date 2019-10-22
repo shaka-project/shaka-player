@@ -605,6 +605,7 @@ shaka.extern.HlsManifestConfiguration;
  * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   availabilityWindowOverride: number,
+ *   disableAudio: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
  * }}
@@ -616,6 +617,9 @@ shaka.extern.HlsManifestConfiguration;
  *   manifest, or <code>NaN</code> if the default value should be used.  This is
  *   enforced by the manifest parser, so custom manifest parsers should take
  *   care to honor this parameter.
+ * @property {boolean} disableAudio
+ *   If <code>true</code>, the audio tracks are ignored.
+ *   Defaults to <code>false</code>.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls

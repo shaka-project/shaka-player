@@ -183,7 +183,9 @@ shakaDemo.Config = class {
         .addNumberInput_('Default Presentation Delay',
                          'manifest.dash.defaultPresentationDelay')
         .addBoolInput_('Ignore Min Buffer Time',
-                       'manifest.dash.ignoreMinBufferTime');
+            'manifest.dash.ignoreMinBufferTime')
+        .addBoolInput_('Disable audio',
+            'manifest.disableAudio');
 
     this.addRetrySection_('manifest', 'Manifest');
   }
