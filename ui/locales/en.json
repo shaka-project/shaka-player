@@ -26,5 +26,9 @@
   "EXIT_PICTURE_IN_PICTURE": "Exit Picture-in-Picture",
   "PICTURE_IN_PICTURE": "Picture-in-Picture",
   "ON": "On",
-  "OFF": "Off"
+  "OFF": "Off",
+  "AD": "Ad",
+  "OF": "of",
+  "SKIP_AD": "Skip Ad",
+  "AD_DURATION": "Ad duration"
 }

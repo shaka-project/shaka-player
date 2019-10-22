@@ -120,5 +120,21 @@
   "OFF": {
     "message": "Off",
     "description": "Title beneath a button showing that this feature of the video player is not currently enabled.  Currently used for Cast, Picture-in-Picture, and Captions/Subtitles, but could apply to other features in the future."
+  },
+  "AD": {
+    "message": "Ad",
+    "description": "The title of the ad countdown element that shows how long the current ad is going to last. the format is 'Ad: 10', where 10 means that the ad is 10 seconds long."
+  },
+  "OF": {
+    "message": "of",
+    "description": "The preposition in the sentence 'Ad n of m', explaining how many ads are in the ad-sequence and which one is playing now. Example: 'Ad 1 of 3': a total of 3 ads will be played, the currently playing one is the first of the three."
+  },
+  "SKIP_AD": {
+    "message": "Skip Ad",
+    "description": "The title of the Skip Ad button, that skips currently playing ad, when clicked."
+  },
+  "AD_DURATION": {
+    "message": "Ad duration",
+    "description": "An aria label for the ad countdown element that shows how long the current ad is going to last."
   }
 }
