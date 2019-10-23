@@ -1,0 +1,21 @@
+{
+  "FULL_SCREEN": "Tela cheia",
+  "EXIT_FULL_SCREEN": "Sair do modo tela cheia",
+  "REWIND": "Retroceder",
+  "MUTE": "Desativar som",
+  "UNMUTE": "Ativar som",
+  "PAUSE": "Pausar",
+  "PLAY": "Reproduzir",
+  "SEEK": "Procurar",
+  "VOLUME": "Volume",
+  "LIVE": "Ao vivo",
+  "MORE_SETTINGS": "Mais definições",
+  "CAPTIONS": "Legendas",
+  "CAST": "Transmitir...",
+  "LANGUAGE": "Idioma",
+  "UNRECOGNIZED_LANGUAGE": "Não reconhecido",
+  "EXIT_PICTURE_IN_PICTURE": "Sair de picture-in-picture",
+  "PICTURE_IN_PICTURE": "Picture-in-picture",
+  "ON": "Ativado",
+  "OFF": "Desativado"
+}
