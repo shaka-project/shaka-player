@@ -40,6 +40,9 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     this.button = shaka.util.Dom.createHTMLElement('button');
     this.parent.appendChild(this.button);
 
+    /** @protected {shaka.extern.IAd} */
+    this.ad_ = null;
+
     const LOCALE_UPDATED = shaka.ui.Localization.LOCALE_UPDATED;
     this.eventManager.listen(this.localization, LOCALE_UPDATED, () => {
       this.updateAriaLabel();
@@ -58,11 +61,15 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
       this.updateAriaLabel();
     });
 
+    this.eventManager.listen(this.video, 'pause', () => {
+      this.updateAriaLabel();
+    });
+
     this.eventManager.listen(this.button, 'click', () => {
-      if (this.isPaused()) {
-        this.video.play();
+      if (this.ad) {
+        this.playPauseAd();
       } else {
-        this.video.pause();
+        this.playPausePresentation();
       }
     });
   }
@@ -75,6 +82,28 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     // The video element is in a paused state while seeking, but we don't count
     // that.
     return this.video.paused && !this.controls.isSeeking();
+  }
+
+  /**
+   * @protected
+   */
+  playPausePresentation() {
+    if (this.isPaused()) {
+      this.video.play();
+    } else {
+      this.video.pause();
+    }
+  }
+
+  /**
+   * @protected
+   */
+  playPauseAd() {
+    if (this.ad.isPaused()) {
+      this.ad.play();
+    } else {
+      this.ad.pause();
+    }
   }
 
   /** @protected */

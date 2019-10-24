@@ -46,9 +46,6 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
     this.span_ = shaka.util.Dom.createHTMLElement('span');
     this.container_.appendChild(this.span_);
 
-    /** @private {shaka.extern.IAd} */
-    this.currentAd_ = null;
-
     /**
      * The timer that tracks down the ad progress.
      *
@@ -71,17 +68,12 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_STARTED, (e) => {
-          this.onAdStarted_(/** @type {!shaka.util.FakeEvent} */ (e));
+        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+          this.onAdStarted_();
         });
 
     this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_COMPLETE, () => {
-          this.reset_();
-        });
-
-    this.eventManager.listen(
-        this.adManager, shaka.ads.AdManager.AD_SKIPPED, () => {
+        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
           this.reset_();
         });
   }
@@ -94,13 +86,9 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
   }
 
   /**
-   * @param {!shaka.util.FakeEvent} e
    * @private
    */
-  onAdStarted_(e) {
-    this.currentAd_ = (/** @type {!Object} */ (e))['ad'];
-    // Init the counter now, then check the remaining ad time
-    // every half a second. This should also take care of any pauses/resumes.
+  onAdStarted_() {
     this.timer_.tickNow();
     this.timer_.tickEvery(0.5);
   }
@@ -109,10 +97,10 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
    * @private
    */
   onTimerTick_() {
-    goog.asserts.assert(this.currentAd_ != null,
-        'currentAd should exist at this point');
+    goog.asserts.assert(this.ad != null,
+        'this.ad should exist at this point');
 
-    const secondsLeft = Math.round(this.currentAd_.getRemainingTime());
+    const secondsLeft = Math.round(this.ad.getRemainingTime());
     if (secondsLeft > 0) {
       // TODO: This should be formatted and localized according to the
       // loc team's guidelines on the localization of expressions.
@@ -128,7 +116,6 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
    */
   reset_() {
     this.timer_.stop();
-    this.currentAd_ = null;
     // Controls are going to hide the whole ad panel once the ad is over,
     // this is just a safeguard.
     this.span_.textContent = '';

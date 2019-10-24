@@ -69,6 +69,17 @@ google.ima.AdsManager = class {
    */
   getRemainingTime() {}
 
+  pause() {}
+
+  resume() {}
+
+  getVolume() {}
+
+  /**
+   * @param {number} volume
+   */
+  setVolume(volume) {}
+
   /** @override */
   addEventListener() {}
 
@@ -131,6 +142,10 @@ google.ima.AdEvent.Type = {
   CONTENT_PAUSE_REQUESTED: 'CONTENT_PAUSE_REQUESTED',
   CONTENT_RESUME_REQUESTED: 'CONTENT_RESUME_REQUESTED',
   AD_ERROR: 'AD_ERROR',
+  PAUSED: 'PAUSED',
+  RESUMED: 'RESUMED',
+  VOLUME_CHANGED: 'VOLUME_CHANGED',
+  VOLUME_MUTED: 'VOLUME_MUTED',
 };
 
 

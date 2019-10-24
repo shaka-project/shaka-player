@@ -876,12 +876,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         });
 
     this.eventManager_.listen(
-        this.adManager_, shaka.ads.AdManager.AD_COMPLETE, () => {
-          this.hideAdUI();
-        });
-
-    this.eventManager_.listen(
-        this.adManager_, shaka.ads.AdManager.AD_SKIPPED, () => {
+        this.adManager_, shaka.ads.AdManager.AD_STOPPED, () => {
           this.hideAdUI();
         });
 

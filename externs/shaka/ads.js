@@ -38,4 +38,33 @@ shaka.extern.IAd = class {
    * @return {number}
    */
   getRemainingTime() {}
+
+  /**
+   * @return {boolean}
+   */
+  isPaused() {}
+
+  play() {}
+
+  pause() {}
+
+  /**
+   * @return {number}
+   */
+  getVolume() {}
+
+  /**
+   * @param {number} volume
+   */
+  setVolume(volume) {}
+
+  /**
+   * @return {boolean}
+   */
+  isMuted() {}
+
+  /**
+   * @param {boolean} muted
+   */
+  setMuted(muted) {}
 };
