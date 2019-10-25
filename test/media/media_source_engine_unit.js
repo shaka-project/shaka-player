@@ -52,7 +52,7 @@ describe('MediaSourceEngine', function() {
   const originalTextEngine = shaka.text.TextEngine;
   const originalCreateMediaSource =
       shaka.media.MediaSourceEngine.prototype.createMediaSource;
-  const originalTransmuxerIsSupported = shaka.media.Transmuxer.isSupported;
+  const originalTransmuxer = shaka.media.Transmuxer;
 
   // Jasmine Spies don't handle toHaveBeenCalledWith well with objects, so use
   // some numbers instead.
@@ -77,6 +77,8 @@ describe('MediaSourceEngine', function() {
   let mockTextDisplayer;
   /** @type {!shaka.test.FakeClosedCaptionParser} */
   let mockClosedCaptionParser;
+  /** @type {!shaka.test.FakeTransmuxer} */
+  let mockTransmuxer;
 
   /** @type {!jasmine.Spy} */
   let createMediaSourceSpy;
@@ -92,15 +94,11 @@ describe('MediaSourceEngine', function() {
       let type = mimeType.split('/')[0];
       return type == 'video' || type == 'audio';
     };
-
-    shaka.media.Transmuxer.isSupported = function(mimeType, contentType) {
-      return mimeType == 'tsMimetype';
-    };
   });
 
   afterAll(function() {
     window.MediaSource.isTypeSupported = originalIsTypeSupported;
-    shaka.media.Transmuxer.isSupported = originalTransmuxerIsSupported;
+    shaka.media.Transmuxer = originalTransmuxer;
   });
 
   beforeEach(/** @suppress {invalidCasts} */ function() {
@@ -111,6 +109,14 @@ describe('MediaSourceEngine', function() {
       let type = mimeType.split('/')[0];
       return type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
     });
+    mockTransmuxer = new shaka.test.FakeTransmuxer();
+
+    let func = function() { return mockTransmuxer; };
+    shaka.media.Transmuxer = /** @type {?} */ (func);
+    shaka.media.Transmuxer.convertTsCodecs = originalTransmuxer.convertTsCodecs;
+    shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
+      return mimeType == 'tsMimetype';
+    };
 
     shaka.text.TextEngine = createMockTextEngineCtor();
 
@@ -502,6 +508,12 @@ describe('MediaSourceEngine', function() {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeTransportStream);
 
+      const output = {
+        data: new Uint8Array(1),
+        captions: [{}],
+      };
+      mockTransmuxer.transmux.and.returnValue(Promise.resolve(output));
+
       mediaSourceEngine.init(initObject, false).then(() => {
         return mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null, null,
@@ -523,6 +535,12 @@ describe('MediaSourceEngine', function() {
     it('appends only transmuxed data without embedded text', function(done) {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeTransportStream);
+
+      const output = {
+        data: new Uint8Array(1),
+        captions: [],
+      };
+      mockTransmuxer.transmux.and.returnValue(Promise.resolve(output));
 
       mediaSourceEngine.init(initObject, false).then(() => {
         return mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null,
