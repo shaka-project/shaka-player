@@ -53,7 +53,7 @@ describe('MediaSourceEngine', () => {
   const originalCreateMediaSource =
       // eslint-disable-next-line no-restricted-syntax
       shaka.media.MediaSourceEngine.prototype.createMediaSource;
-  const originalTransmuxerIsSupported = shaka.media.Transmuxer.isSupported;
+  const originalTransmuxer = shaka.media.Transmuxer;
 
   // Jasmine Spies don't handle toHaveBeenCalledWith well with objects, so use
   // some numbers instead.
@@ -78,6 +78,8 @@ describe('MediaSourceEngine', () => {
   let mockTextDisplayer;
   /** @type {!shaka.test.FakeClosedCaptionParser} */
   let mockClosedCaptionParser;
+  /** @type {!shaka.test.FakeTransmuxer} */
+  let mockTransmuxer;
 
   /** @type {!jasmine.Spy} */
   let createMediaSourceSpy;
@@ -93,15 +95,11 @@ describe('MediaSourceEngine', () => {
       const type = mimeType.split('/')[0];
       return type == 'video' || type == 'audio';
     };
-
-    shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
-      return mimeType == 'tsMimetype';
-    };
   });
 
   afterAll(() => {
     window.MediaSource.isTypeSupported = originalIsTypeSupported;
-    shaka.media.Transmuxer.isSupported = originalTransmuxerIsSupported;
+    shaka.media.Transmuxer = originalTransmuxer;
   });
 
   beforeEach(/** @suppress {invalidCasts} */ () => {
@@ -112,6 +110,14 @@ describe('MediaSourceEngine', () => {
       const type = mimeType.split('/')[0];
       return type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
     });
+    mockTransmuxer = new shaka.test.FakeTransmuxer();
+
+    shaka.media.Transmuxer = /** @type {?} */ (
+      shaka.test.Util.factoryReturns(mockTransmuxer));
+    shaka.media.Transmuxer.convertTsCodecs = originalTransmuxer.convertTsCodecs;
+    shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
+      return mimeType == 'tsMimetype';
+    };
 
     shaka.text.TextEngine = createMockTextEngineCtor();
 
@@ -525,6 +531,12 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeTransportStream);
 
+      const output = {
+        data: new Uint8Array(1),
+        captions: [{}],
+      };
+      mockTransmuxer.transmux.and.returnValue(Promise.resolve(output));
+
       const init = async () => {
         await mediaSourceEngine.init(initObject, false);
         await mediaSourceEngine.appendBuffer(
@@ -549,13 +561,22 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeTransportStream);
 
+      const output = {
+        data: new Uint8Array(1),
+        captions: [],
+      };
+      mockTransmuxer.transmux.and.returnValue(Promise.resolve(output));
+
       const init = async () => {
         await mediaSourceEngine.init(initObject, false);
         await mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null, null,
             /* hasClosedCaptions */ false);
         expect(mockTextEngine.appendCues).not.toHaveBeenCalled();
-        expect(videoSourceBuffer.appendBuffer).toHaveBeenCalled();
+        expect(mockTextEngine.storeAndAppendClosedCaptions)
+            .not.toHaveBeenCalled();
+        expect(videoSourceBuffer.appendBuffer)
+            .toHaveBeenCalledWith(output.data);
       };
 
       // The 'updateend' event fires once the data is done appending to the
