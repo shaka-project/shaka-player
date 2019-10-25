@@ -64,6 +64,11 @@ google.ima.AdsManager = class {
    */
   init(width, height, viewMode) {}
 
+  /**
+   * @return {number}
+   */
+  getRemainingTime() {}
+
   /** @override */
   addEventListener() {}
 
@@ -106,7 +111,17 @@ google.ima.AdsManagerLoadedEvent.Type = {
 
 
 /** @const */
-google.ima.AdEvent = {};
+google.ima.AdEvent = class extends Event {
+  /** @return {!google.ima.Ad } */
+  getAd() {}
+};
+
+
+/** @const */
+google.ima.Ad = class {
+  /** @return {number} */
+  getDuration() {}
+};
 
 
 /**
