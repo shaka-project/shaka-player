@@ -15,38 +15,34 @@
  * limitations under the License.
  */
 
+const testGetMimeType = async (expertedMimeType, contentType) => {
+  const netEngine = new shaka.test.FakeNetworkingEngine()
+      .setHeaders('dummy://foo', {'content-type': contentType});
+  const mimeType = await shaka.media.ManifestParser
+      .getMimeType('dummy://foo', netEngine,
+          shaka.net.NetworkingEngine.defaultRetryParameters());
+  expect(mimeType).toBe(expertedMimeType);
+};
+
 describe('ManifestParser', () => {
-    describe('getMimeType', () => {
-        it('returns the correct mimeType', async () => {
-            const netEngine = new shaka.test.FakeNetworkingEngine()
-                .setHeaders('dummy://foo', { 'content-type' : 'application/dash+xml'});
-            const mimeType = await shaka.media.ManifestParser
-                .getMimeType('dummy://foo', netEngine, 3);
-            expect(mimeType).toBe('application/dash+xml');
-        });
-
-        it('returns the correct mimeType has charset', async () => {
-            const netEngine = new shaka.test.FakeNetworkingEngine()
-                .setHeaders('dummy://foo', { 'content-type' : 'application/dash+xml;charset=UTF-8'});
-            const mimeType = await shaka.media.ManifestParser
-                .getMimeType('dummy://foo', netEngine, 3);
-            expect(mimeType).toBe('application/dash+xml');
-        });
-
-        it('returns the correct mimeType if content-type has uppercase letters', async () => {
-            const netEngine = new shaka.test.FakeNetworkingEngine()
-                .setHeaders('dummy://foo', { 'content-type' : 'Application/Dash+XML'});
-            const mimeType = await shaka.media.ManifestParser
-                .getMimeType('dummy://foo', netEngine, 3);
-            expect(mimeType).toBe('application/dash+xml');
-        });
-
-        it('returns the correct mimeType if content-type has uppercase letters and charset', async () => {
-            const netEngine = new shaka.test.FakeNetworkingEngine()
-                .setHeaders('dummy://foo', { 'content-type' : 'Text/HTML;Charset="utf-8"'});
-            const mimeType = await shaka.media.ManifestParser
-                .getMimeType('dummy://foo', netEngine, 3);
-            expect(mimeType).toBe('text/html');
-        });
+  describe('getMimeType', () => {
+    it('test correct mimeType', () => {
+      testGetMimeType('application/dash+xml', 'application/dash+xml');
     });
+
+    it('test mimeType with charset', () => {
+      testGetMimeType('application/dash+xml',
+          'application/dash+xml;charset=UTF-8');
+    });
+
+    it('test content-type with uppercase letters', () => {
+      testGetMimeType('application/dash+xml',
+          'Application/Dash+XML');
+    });
+
+    it('test content-type with uppercase letters and charset', () => {
+      testGetMimeType('text/html',
+          'Text/HTML;Charset="utf-8"');
+    });
+  });
 });
