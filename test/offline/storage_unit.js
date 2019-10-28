@@ -123,6 +123,11 @@ describe('Storage', function() {
       await player.destroy();
     });
 
+    // TODO: Make a test to ensure that setting delayLicenseRequestUntilPlayed
+    // to true doesn't break storage, once we have working tests for storing DRM
+    // content.
+    // See issue #2218.
+
     // TODO: Still failing in Chrome canary 73 on 2018-12-12.
     // Some combination of these bugs is preventing this test from working:
     //   http://crbug.com/690583
