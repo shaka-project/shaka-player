@@ -24,7 +24,7 @@ describe('Player', () => {
 
   /** @type {!HTMLVideoElement} */
   let video;
-  /** @type {shaka.Player} */
+  /** @type {!shaka.Player} */
   let player;
   /** @type {!shaka.util.EventManager} */
   let eventManager;
@@ -593,5 +593,138 @@ describe('Player', () => {
       // bug, tracks would disappear _after_ load() on some platforms.
       await canPlayThrough;
     });
+  });
+
+  describe('buffering', () => {
+    const startBuffering = jasmine.objectContaining({buffering: true});
+    const endBuffering = jasmine.objectContaining({buffering: false});
+    /** @type {!jasmine.Spy} */
+    let onBuffering;
+    /** @type {!shaka.test.Waiter} */
+    let waiter;
+
+    beforeEach(() => {
+      onBuffering = jasmine.createSpy('onBuffering');
+      player.addEventListener('buffering', Util.spyFunc(onBuffering));
+
+      waiter = new shaka.test.Waiter(eventManager)
+          .timeoutAfter(10)
+          .failOnTimeout(true);
+    });
+
+    it('enters/exits buffering state at start', async () => {
+      // Set a large rebuffer goal to ensure we can see the buffering before
+      // we start playing.
+      player.configure('streaming.rebufferingGoal', 30);
+
+      await player.load('test:sintel_no_text_compiled');
+      video.pause();
+      expect(onBuffering).toHaveBeenCalledTimes(1);
+      expect(onBuffering).toHaveBeenCalledWith(startBuffering);
+      onBuffering.calls.reset();
+
+      await waiter.waitForEvent(player, 'buffering');
+      expect(onBuffering).toHaveBeenCalledTimes(1);
+      expect(onBuffering).toHaveBeenCalledWith(endBuffering);
+
+      expect(getBufferedAhead()).toBeGreaterThanOrEqual(30);
+    });
+
+    it('enters/exits buffering state while playing', async () => {
+      player.configure('streaming.rebufferingGoal', 1);
+      player.configure('streaming.bufferingGoal', 10);
+
+      await player.load('test:sintel_long_compiled');
+      video.pause();
+      if (player.isBuffering()) {
+        await waiter.waitForEvent(player, 'buffering');
+      }
+      onBuffering.calls.reset();
+
+      player.configure('streaming.rebufferingGoal', 30);
+      video.currentTime = 70;
+      await waiter.waitForEvent(player, 'buffering');
+      expect(onBuffering).toHaveBeenCalledTimes(1);
+      expect(onBuffering).toHaveBeenCalledWith(startBuffering);
+      onBuffering.calls.reset();
+
+      expect(getBufferedAhead()).toBeLessThan(30);
+
+      await waiter.waitForEvent(player, 'buffering');
+      expect(onBuffering).toHaveBeenCalledTimes(1);
+      expect(onBuffering).toHaveBeenCalledWith(endBuffering);
+
+      expect(getBufferedAhead()).toBeGreaterThanOrEqual(30);
+    });
+
+    it('buffers ahead of the playhead', async () => {
+      player.configure('streaming.bufferingGoal', 10);
+
+      await player.load('test:sintel_long_compiled');
+      video.pause();
+      await waitUntilBuffered(10);
+
+      player.configure('streaming.bufferingGoal', 30);
+      await waitUntilBuffered(30);
+
+      player.configure('streaming.bufferingGoal', 60);
+      await waitUntilBuffered(60);
+      await Util.delay(0.2);
+      expect(getBufferedAhead()).toBeLessThan(70);  // 60 + segment_size
+
+      // We don't remove buffered content ahead of the playhead, so seek to
+      // clear the buffer.
+      player.configure('streaming.bufferingGoal', 10);
+      video.currentTime = 120;
+      await waitUntilBuffered(10);
+      await Util.delay(0.2);
+      expect(getBufferedAhead()).toBeLessThan(20);  // 10 + segment_size
+    });
+
+    it('clears buffer behind playhead', async () => {
+      player.configure('streaming.bufferingGoal', 30);
+      player.configure('streaming.bufferBehind', 30);
+
+      await player.load('test:sintel_long_compiled');
+      video.pause();
+      await waitUntilBuffered(30);
+      video.currentTime = 20;
+      await waitUntilBuffered(30);
+
+      expect(getBufferedBehind()).toBe(20);  // Buffered to start still.
+      video.currentTime = 50;
+      await waitUntilBuffered(30);
+      expect(getBufferedBehind()).toBeLessThan(30);
+
+      player.configure('streaming.bufferBehind', 10);
+      // We only evict content when we append a segment, so increase the
+      // buffering goal so we append another segment.
+      player.configure('streaming.bufferingGoal', 40);
+      await waitUntilBuffered(40);
+      expect(getBufferedBehind()).toBeLessThan(10);
+    });
+
+    function getBufferedAhead() {
+      const end = shaka.media.TimeRangesUtils.bufferEnd(video.buffered);
+      return end - video.currentTime;
+    }
+
+    function getBufferedBehind() {
+      const start = shaka.media.TimeRangesUtils.bufferStart(video.buffered);
+      return video.currentTime - start;
+    }
+
+    async function waitUntilBuffered(amount) {
+      for (const _ of shaka.util.Iterables.range(10)) {
+        shaka.util.Functional.ignored(_);
+        // We buffer from an internal segment, so this shouldn't take long to
+        // buffer.
+        await Util.delay(0.1);  // eslint-disable-line no-await-in-loop
+        if (getBufferedAhead() >= amount) {
+          return;
+        }
+      }
+      throw new Error('Timeout waiting to buffer');
+    }
   });
 });
