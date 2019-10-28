@@ -415,6 +415,7 @@ shakaDemo.Main = class {
         this.dispatchEventWithName_('shaka-main-offline-progress');
       }
     };
+    storage.configure(this.desiredConfig_);
     storage.configure('offline.progressCallback', progressCallback);
 
     return storage;
