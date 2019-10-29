@@ -128,14 +128,10 @@ describe('Storage', function() {
     // content.
     // See issue #2218.
 
-    // TODO: Still failing in Chrome canary 73 on 2018-12-12.
-    // Some combination of these bugs is preventing this test from working:
-    //   http://crbug.com/690583
-    //   http://crbug.com/887535
-    //   http://crbug.com/887635
-    //   http://crbug.com/883895
-    quarantinedIt('removes persistent license',
-        drmCheckAndRun(async function() {
+    // Quarantined due to http://crbug.com/1019298 where a load cannot happen
+    // immediately after a remove.  This can sometimes be fixed with a delay,
+    // but it is extremely flaky, so these are disabled until the bug is fixed.
+    quarantinedIt('removes persistent license', drmCheckAndRun(async () => {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
 
       // PART 1 - Download and store content that has a persistent license
@@ -152,17 +148,10 @@ describe('Storage', function() {
       expect(manifest.offlineSessionIds).toBeTruthy();
       expect(manifest.offlineSessionIds.length).toBeTruthy();
 
-      // Work around http://crbug.com/887535 in which load cannot happen right
-      // after close.  Experimentally, we seem to need a ~1s delay, so we're
-      // using a 3s delay to ensure it doesn't flake.  Without this, we get
-      // error 6005 (FAILED_TO_CREATE_SESSION) with system code 70.
-      // TODO: Remove when Chrome is fixed
-      await shaka.test.Util.delay(3);
-
       // PART 2 - Check that the licences are stored.
       await withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
-          let foundSession = await loadOfflineSession(drm, session);
+          const foundSession = await loadOfflineSession(drm, session);
           expect(foundSession).toBeTruthy();
         }));
       });
@@ -171,20 +160,11 @@ describe('Storage', function() {
       // sessions.
       await storage.remove(uri.toString());
 
-      // Work around http://crbug.com/887535 in which load cannot happen right
-      // after close.  Experimentally, we seem to need a ~1s delay, so we're
-      // using a 3s delay to ensure it doesn't flake.  Without this, we get
-      // error 6005 (FAILED_TO_CREATE_SESSION) with system code 70.
-      // TODO: Remove when Chrome is fixed
-      await shaka.test.Util.delay(3);
-
       // PART 4 - Check that the licenses were removed.
       try {
         await withDrm(player, manifest, (drm) => {
           return Promise.all(manifest.offlineSessionIds.map(async (session) => {
             let notFoundSession = await loadOfflineSession(drm, session);
-            // TODO: This is failing.  The session is actually found, possibly
-            // due to http://crbug.com/690583, but this is unclear.
             expect(notFoundSession).toBeFalsy();
           }));
         });
@@ -196,30 +176,9 @@ describe('Storage', function() {
       }
     }));
 
-    // TODO: Still failing in Chrome canary 73 on 2018-12-12.
-    // Some combination of these bugs is preventing this test from working:
-    //   http://crbug.com/690583
-    //   http://crbug.com/887535
-    //   http://crbug.com/887635
-    //   http://crbug.com/883895
-    quarantinedIt('defers removing licenses on error',
-        drmCheckAndRun(async function() {
+    quarantinedIt('defers removing licenses on error', drmCheckAndRun(
+      async () => {
       const TestManifestParser = shaka.test.TestScheme.ManifestParser;
-      const getEmeSessions = async () => {
-        /** @type {!shaka.offline.StorageMuxer} */
-        const muxer = new shaka.offline.StorageMuxer();
-        await muxer.init();
-
-        /** @type {!Array.<!Promise>} */
-        const promises = [];
-        muxer.forEachEmeSessionCell((cell) => promises.push(cell.getAll()));
-        const cellByMechanism = await Promise.all(promises);
-        await muxer.destroy();
-        return cellByMechanism.reduce(shaka.util.Functional.collapseArrays, []);
-      };
-
-      const oldSessions = await getEmeSessions();
-      expect(oldSessions).toEqual([]);
 
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
@@ -248,17 +207,12 @@ describe('Storage', function() {
       const storedContents = await storage.list();
       expect(storedContents).toEqual([]);
 
-      // TODO: Chrome has a bug that prevents loading the session a second time,
-      // so we can't check EME for the session.  Instead, check the database.
-      // This can be changed when http://crbug.com/887635 is fixed.
-      // TODO: Whether checking the database or loading the EME session, this
-      // will fail because of another Chrome bug.  Calling remove() causes the
-      // session to be removed without waiting for update.  So this entire
-      // feature is non-functional on Chrome.  The test can probably be made to
-      // pass once https://crbug.com/883895 is fixed, possibly after using a
-      // delay to work around http://crbug.com/887535 .
-      const sessions = await getEmeSessions();
-      expect(sessions.length).toBeGreaterThan(0);
+      await withDrm(player, manifest, (drm) => {
+        return Promise.all(manifest.offlineSessionIds.map(async (session) => {
+          const foundSession = await loadOfflineSession(drm, session);
+          expect(foundSession).toBeTruthy();
+        }));
+      });
 
       // PART 5 - Disable the error and remove the EME session.
       storage.getNetworkingEngine().clearAllRequestFilters();
@@ -266,8 +220,6 @@ describe('Storage', function() {
       expect(didRemoveAll).toBe(true);
 
       // PART 6 - Check that the licenses were removed.
-      const endSessions = await getEmeSessions();
-      expect(endSessions).toEqual([]);
       try {
         await withDrm(player, manifest, (drm) => {
           return Promise.all(manifest.offlineSessionIds.map(async (session) => {
