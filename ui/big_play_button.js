@@ -38,21 +38,13 @@ shaka.ui.BigPlayButton = class extends shaka.ui.PlayButton {
     this.button.classList.add('shaka-no-propagation');
     this.button.classList.add('shaka-fade-out-on-mouse-out');
 
-    this.updateIcon_();
+    this.updateIcon();
     this.updateAriaLabel();
-
-    this.eventManager.listen(this.video, 'play', () => {
-      this.updateIcon_();
-    });
-
-    this.eventManager.listen(this.video, 'pause', () => {
-      this.updateIcon_();
-    });
   }
 
 
-  /** @private */
-  updateIcon_() {
+  /** @override */
+  updateIcon() {
     if (this.isPaused()) {
       this.button.setAttribute('icon', 'play');
     } else {

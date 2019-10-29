@@ -875,14 +875,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(
         this.adManager_, shaka.ads.AdManager.AD_STARTED, (e) => {
-          this.showAdUI();
           this.ad_ = (/** @type {!Object} */ (e))['ad'];
+          this.showAdUI();
         });
 
     this.eventManager_.listen(
         this.adManager_, shaka.ads.AdManager.AD_STOPPED, () => {
-          this.hideAdUI();
           this.ad_ = null;
+          this.hideAdUI();
         });
 
     if (screen.orientation) {
@@ -1004,10 +1004,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Hide the cursor.  (NOTE: not supported on IE)
     this.videoContainer_.style.cursor = 'none';
 
-    // Keep showing the controls if video is paused or one of the control menus
-    // is hovered.
-    if ((this.video_.paused && !this.isSeeking_) ||
-         this.overrideCssShowControls_) {
+    const adIsPaused = this.ad_ ? this.ad_.isPaused() : false;
+    const videoIsPaused = this.video_.paused && !this.isSeeking_;
+
+    // Keep showing the controls if ad or video is paused or one of
+    // the control menus is hovered.
+    if (adIsPaused ||
+       (!this.ad_ && videoIsPaused) || this.overrideCssShowControls_) {
       this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
     } else {
       this.setControlsOpacity_(shaka.ui.Enums.Opacity.TRANSPARENT);

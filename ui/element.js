@@ -80,7 +80,6 @@ shaka.ui.Element = class {
      */
     this.ad = null;
 
-
     const AD_STARTED = shaka.ads.AdManager.AD_STARTED;
     this.eventManager.listen(this.adManager, AD_STARTED, (e) => {
       this.ad = (/** @type {!Object} */ (e))['ad'];
