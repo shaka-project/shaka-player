@@ -196,10 +196,10 @@ jasmine.Matchers.prototype.toHaveBeenCalledOnceMore = function() {};
 jasmine.Matchers.prototype.toHaveBeenCalledOnceMoreWith = function(args) {};
 
 /**
- * @param {string} message
+ * @param {?} context
  * @return {!jasmine.Matchers}
  */
-jasmine.Matchers.prototype.withContext = function(message) {};
+jasmine.Matchers.prototype.withContext = function(context) {};
 
 
 /** @type {!jasmine.MatchersAsync} */
@@ -224,10 +224,10 @@ jasmine.MatchersAsync.prototype.toBeResolved = function() {};
 jasmine.MatchersAsync.prototype.toBeResolvedTo = function(expected) {};
 
 /**
- * @param {string} message
+ * @param {?} context
  * @return {!jasmine.MatchersAsync}
  */
-jasmine.MatchersAsync.prototype.withContext = function(message) {};
+jasmine.MatchersAsync.prototype.withContext = function(context) {};
 
 
 /**
