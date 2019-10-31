@@ -617,7 +617,7 @@ describe('Player', () => {
       // we start playing.
       player.configure('streaming.rebufferingGoal', 30);
 
-      await player.load('test:sintel_no_text_compiled');
+      await player.load('test:sintel_long_compiled');
       video.pause();
       expect(onBuffering).toHaveBeenCalledTimes(1);
       expect(onBuffering).toHaveBeenCalledWith(startBuffering);
@@ -715,7 +715,7 @@ describe('Player', () => {
     }
 
     async function waitUntilBuffered(amount) {
-      for (const _ of shaka.util.Iterables.range(10)) {
+      for (const _ of shaka.util.Iterables.range(25)) {
         shaka.util.Functional.ignored(_);
         // We buffer from an internal segment, so this shouldn't take long to
         // buffer.
