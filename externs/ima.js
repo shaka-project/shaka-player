@@ -80,6 +80,13 @@ google.ima.AdsManager = class {
    */
   setVolume(volume) {}
 
+  /**
+   * @param {number} width
+   * @param {number} height
+   * @param {google.ima.ViewMode} viewMode
+   */
+  resize(width, height, viewMode) {}
+
   /** @override */
   addEventListener() {}
 

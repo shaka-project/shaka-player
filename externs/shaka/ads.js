@@ -67,4 +67,10 @@ shaka.extern.IAd = class {
    * @param {boolean} muted
    */
   setMuted(muted) {}
+
+  /**
+   * @param {number} width
+   * @param {number} height
+   */
+  resize(width, height) {}
 };

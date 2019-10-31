@@ -61,8 +61,8 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
           this.updateAriaLabel_();
         });
 
-    this.eventManager.listen(this.button_, 'click', () => {
-      this.controls.toggleFullScreen();
+    this.eventManager.listen(this.button_, 'click', async () => {
+      await this.controls.toggleFullScreen();
     });
 
     this.eventManager.listen(document, 'fullscreenchange', () => {

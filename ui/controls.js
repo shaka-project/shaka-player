@@ -82,6 +82,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.ads.AdManager} */
     this.adManager_ = this.player_.getAdManager();
 
+    /** @private {shaka.extern.IAd} */
+    this.ad_ = null;
+
     /** @private {shaka.ui.SeekBar} */
     this.seekBar_ = null;
 
@@ -604,7 +607,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   async toggleFullScreen() {
     if (document.fullscreenElement) {
-      document.exitFullscreen();
+      await document.exitFullscreen();
     } else {
       // If we are in PiP mode, leave PiP mode first.
       try {
@@ -871,20 +874,28 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(
-        this.adManager_, shaka.ads.AdManager.AD_STARTED, () => {
+        this.adManager_, shaka.ads.AdManager.AD_STARTED, (e) => {
           this.showAdUI();
+          this.ad_ = (/** @type {!Object} */ (e))['ad'];
         });
 
     this.eventManager_.listen(
         this.adManager_, shaka.ads.AdManager.AD_STOPPED, () => {
           this.hideAdUI();
+          this.ad_ = null;
         });
 
     if (screen.orientation) {
-      this.eventManager_.listen(screen.orientation, 'change', () => {
-        this.onScreenRotation_();
+      this.eventManager_.listen(screen.orientation, 'change', async () => {
+        await this.onScreenRotation_();
       });
     }
+
+    this.eventManager_.listen(document, 'fullscreenchange', () => {
+      if (this.ad_) {
+        this.ad_.resize(this.video_.offsetWidth, this.video_.offsetHeight);
+      }
+    });
   }
 
 
@@ -894,17 +905,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * Similarly, exit fullscreen when the device is rotated to portrait layout.
    * @private
    */
-  onScreenRotation_() {
+  async onScreenRotation_() {
     if (!this.video_ ||
         this.video_.readyState == 0 ||
         this.castProxy_.isCasting()) { return; }
 
     if (screen.orientation.type.includes('landscape') &&
         !document.fullscreenElement) {
-      this.videoContainer_.requestFullscreen();
+      await this.videoContainer_.requestFullscreen();
     } else if (screen.orientation.type.includes('portrait') &&
         document.fullscreenElement) {
-      document.exitFullscreen();
+      await document.exitFullscreen();
     }
   }
 
