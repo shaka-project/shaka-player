@@ -562,7 +562,7 @@ describe('Player', function() {
       // we start playing.
       player.configure('streaming.rebufferingGoal', 30);
 
-      await player.load('test:sintel_no_text_compiled');
+      await player.load('test:sintel_long_compiled');
       video.pause();
       expect(onBuffering).toHaveBeenCalledTimes(1);
       expect(onBuffering).toHaveBeenCalledWith(startBuffering);
