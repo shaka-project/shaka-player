@@ -635,6 +635,52 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
   }
 
+  /**
+   * Play or pause the current presentation.
+   */
+  playPausePresentation() {
+    if (!this.enabled_) {
+      return;
+    }
+
+    if (!this.video_.duration) {
+      // Can't play yet.  Ignore.
+      return;
+    }
+
+    this.player_.cancelTrickPlay();
+
+    if (this.presentationIsPaused()) {
+      this.video_.play();
+    } else {
+      this.video_.pause();
+    }
+  }
+
+  /**
+   * Play or pause the current ad.
+   */
+  playPauseAd() {
+    if (this.ad_ && this.ad_.isPaused()) {
+      this.ad_.play();
+    } else if (this.ad_) {
+      this.ad_.pause();
+    }
+  }
+
+
+  /**
+   * Return true if the presentation is paused.
+   *
+   * @return {boolean}
+   */
+  presentationIsPaused() {
+    // The video element is in a paused state while seeking, but we don't count
+    // that.
+    return this.video_.paused && !this.isSeeking();
+  }
+
+
   /** @private */
   createDOM_() {
     this.videoContainer_.classList.add('shaka-video-container');
@@ -1054,21 +1100,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onPlayPauseClick_() {
-    if (!this.enabled_) {
-      return;
-    }
-
-    if (!this.video_.duration) {
-      // Can't play yet.  Ignore.
-      return;
-    }
-
-    this.player_.cancelTrickPlay();
-
-    if (this.video_.paused) {
-      this.video_.play();
+    if (this.ad_) {
+      this.playPauseAd();
     } else {
-      this.video_.pause();
+      this.playPausePresentation();
     }
   }
 

@@ -79,9 +79,9 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
 
     this.eventManager.listen(this.button, 'click', () => {
       if (this.ad) {
-        this.playPauseAd();
+        this.controls.playPauseAd();
       } else {
-        this.playPausePresentation();
+        this.controls.playPausePresentation();
       }
     });
   }
@@ -91,35 +91,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
    * @protected
    */
   isPaused() {
-    if (this.ad) {
-      return this.ad.isPaused();
-    }
-
-    // The video element is in a paused state while seeking, but we don't count
-    // that.
-    return this.video.paused && !this.controls.isSeeking();
-  }
-
-  /**
-   * @protected
-   */
-  playPausePresentation() {
-    if (this.isPaused()) {
-      this.video.play();
-    } else {
-      this.video.pause();
-    }
-  }
-
-  /**
-   * @protected
-   */
-  playPauseAd() {
-    if (this.ad.isPaused()) {
-      this.ad.play();
-    } else {
-      this.ad.pause();
-    }
+    return this.controls.presentationIsPaused();
   }
 
   /** @protected */
