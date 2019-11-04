@@ -33,7 +33,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Edge¹      |**Y**     | -       | -       | -       | -        | -      | -   |
 |IE ≤ 10    | N        | -       | -       | -       | -        | -      | -   |
 |IE 11      |**Y** ⁴   | -       | -       | -       | -        | -      | -   |
-|Safari¹    | -        |**Y**    | -       | -       |**iOS 13 on iPad<br>Native**| - | - |
+|Safari¹    | -        |**Y**    | -       | -       |**iPadOS 13<br>Native**| - | - |
 |Opera¹     |untested⁵ |untested⁵|untested⁵|untested⁵|**Native**| -      | -   |
 |Chromecast²| -        | -       | -       | -       | -        | -      |**Y**|
 |Tizen TV³  | -        | -       | -       | -       | -        | -      |**Y**|
