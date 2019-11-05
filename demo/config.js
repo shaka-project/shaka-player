@@ -113,6 +113,18 @@ shakaDemo.Config = class {
     componentHandler.upgradeDom();
   }
 
+  /** @return {!shaka.extern.AdvancedDrmConfiguration} */
+  static emptyAdvancedConfiguration() {
+    return {
+      distinctiveIdentifierRequired: false,
+      persistentStateRequired: false,
+      videoRobustness: '',
+      audioRobustness: '',
+      serverCertificate: new Uint8Array(0),
+      individualizationServer: '',
+    };
+  }
+
   /** @private */
   addDrmSection_() {
     const docLink = this.resolveExternLink_('.DrmConfiguration');
@@ -133,14 +145,7 @@ shakaDemo.Config = class {
         // Add in any common drmSystem not currently in advanced.
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           if (!(drmSystem in advanced)) {
-            advanced[drmSystem] = {
-              distinctiveIdentifierRequired: false,
-              persistentStateRequired: false,
-              videoRobustness: '',
-              audioRobustness: '',
-              serverCertificate: null,
-              individualizationServer: '',
-            };
+            advanced[drmSystem] = shakaDemo.Config.emptyAdvancedConfiguration();
           }
         }
         // Set the robustness.

@@ -742,6 +742,20 @@ shakaDemo.Main = class {
       };
       const config = this.player_.getConfiguration();
       shakaDemo.Utils.runThroughHashParams(readParam, config);
+      const advanced = this.getCurrentConfigValue('drm.advanced');
+      if (advanced) {
+        for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
+          if (!advanced[drmSystem]) {
+            advanced[drmSystem] = shakaDemo.Config.emptyAdvancedConfiguration();
+          }
+          if ('videoRobustness' in params) {
+            advanced[drmSystem].videoRobustness = params['videoRobustness'];
+          }
+          if ('audioRobustness' in params) {
+            advanced[drmSystem].audioRobustness = params['audioRobustness'];
+          }
+        }
+      }
     }
     if ('lang' in params) {
       // Load the legacy 'lang' hash value.
@@ -1111,6 +1125,21 @@ shakaDemo.Main = class {
       };
       const config = this.player_.getConfiguration();
       shakaDemo.Utils.runThroughHashParams(setParam, config);
+      const advanced = this.getCurrentConfigValue('drm.advanced');
+      if (advanced) {
+        for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
+          const advancedFor = advanced[drmSystem];
+          if (advancedFor) {
+            if (advancedFor.videoRobustness) {
+              params.push('videoRobustness=' + advancedFor.videoRobustness);
+            }
+            if (advancedFor.audioRobustness) {
+              params.push('audioRobustness=' + advancedFor.audioRobustness);
+            }
+            break;
+          }
+        }
+      }
     }
     if (!this.getCurrentConfigValue('abr.enabled')) {
       params.push('noadaptation');
