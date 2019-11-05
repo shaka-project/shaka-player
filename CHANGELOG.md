@@ -1,3 +1,71 @@
+## 2.5.6 (2019-11-06)
+
+Bugfixes:
+  - Fix storing content with delayLicenseRequestUntilPlayed
+    - https://github.com/google/shaka-player/issues/2218
+  - Fix check for captions in appendBuffer
+    - https://github.com/google/shaka-player/issues/2187
+  - Allow 'rebufferingGoal' to change after startup
+    - https://github.com/google/shaka-player/issues/2217
+  - Fix default encoding when reading files
+    - https://github.com/google/shaka-player/issues/2206
+  - Throw for invalid TTML
+    - https://github.com/google/shaka-player/issues/2157
+  - Fix FairPlay default initDataTransform
+    - https://github.com/google/shaka-player/issues/2136
+  - Fix live seekbar on Android
+    - https://github.com/google/shaka-player/issues/2169
+  - Fix undefined value in HLS request filters
+    - https://github.com/google/shaka-player/issues/2156
+  - Fix Period transitions with embedded captions
+    - https://github.com/google/shaka-player/issues/2076
+  - Throw error for clear-key content with src=
+    - https://github.com/google/shaka-player/issues/2139
+  - Fix support for empty TTML data
+    - https://github.com/google/shaka-player/pull/1960
+  - Fix multi-Period handling of key statuses
+    - https://github.com/google/shaka-player/issues/2135
+  - Fix stall at end with src=
+    - https://github.com/google/shaka-player/issues/2117
+  - Fix ttml background image support
+    - https://github.com/google/shaka-player/pull/2034
+
+New Features:
+  - Add config to use MSE playback on Safari
+    - https://github.com/google/shaka-player/issues/2116
+  - Support storing protected content without init data in manifest
+    - https://github.com/google/shaka-player/issues/1531
+    - https://github.com/google/shaka-player/pull/2164
+  - Allow disable audio/video in manifest parsers
+    - https://github.com/google/shaka-player/pull/2196
+  - Enhance ttml rendering
+    - https://github.com/google/shaka-player/pull/1962
+  - Include event ID in DASH Event checks
+    - https://github.com/google/shaka-player/issues/2077
+    - https://github.com/google/shaka-player/pull/2175
+  - Add support for Label element in DASH
+    - https://github.com/google/shaka-player/issues/2178
+    - https://github.com/google/shaka-player/pull/2197
+  - Treat URL schemes as case-insensitive
+    - https://github.com/google/shaka-player/issues/2173
+  - Forward change event from src= playback
+    - https://github.com/google/shaka-player/pull/2134
+  - Export getMaxSegmentDuration() on presentationTimeline
+    - https://github.com/google/shaka-player/issues/2124
+  - Ignore MIME parameters in Content-Type check
+    - https://github.com/google/shaka-player/issues/1946
+    - https://github.com/google/shaka-player/pull/2215
+  - Make seek & volume bar colors configurable
+    - https://github.com/google/shaka-player/issues/2203
+
+Demo App:
+  - Improve mobile Safari PWA support in demo
+    - https://github.com/google/shaka-player/issues/2143
+  - Added tooltips to the search filters on the demo
+  - Added "report bug" button to demo
+
+
+
 ## 2.5.5 (2019-08-23)
 
 New Features:
