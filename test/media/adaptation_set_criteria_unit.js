@@ -312,6 +312,58 @@ describe('AdaptationSetCriteria', function() {
         manifest.periods[0].variants[2],
       ]);
     });
+
+    it('chooses variants with preferred label', () => {
+      const manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(1)
+            .addAudio(10).label('preferredLabel')
+          .addVariant(2)
+            .addAudio(20).label('otherLabel')
+          .addVariant(3)
+            .addAudio(30).label('preferredLabel')
+        .build();
+
+      const builder =
+          new shaka.media.PreferenceBasedCriteria('', '', 0, 'preferredLabel');
+      const set = builder.create(variants(manifest));
+
+      checkSet(set, [
+        manifest.periods[0].variants[0],
+        manifest.periods[0].variants[2],
+      ]);
+    });
+
+    it('chooses variants with preferred label and language', () => {
+      const manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          // Preferred language and label
+          .addVariant(1)
+            .language('zh')
+            .addAudio(10).label('preferredLabel')
+          // Same language, a different label
+          .addVariant(2)
+            .language('zh')
+            .addAudio(20).label('otherLabel')
+          // Same language and label
+          .addVariant(3)
+            .language('zh')
+            .addAudio(30).label('preferredLabel')
+          // Same label different language
+          .addVariant(4)
+            .language('pt')
+            .addAudio(40).label('preferredLabel')
+        .build();
+
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          'zh', '', 0, 'preferredLabel');
+      const set = builder.create(variants(manifest));
+
+      checkSet(set, [
+        manifest.periods[0].variants[0],
+        manifest.periods[0].variants[2],
+      ]);
+    });
   });
 
   /**
