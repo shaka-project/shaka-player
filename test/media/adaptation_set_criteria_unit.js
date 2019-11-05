@@ -458,6 +458,81 @@ describe('AdaptationSetCriteria', () => {
         manifest.periods[0].variants[2],
       ]);
     });
+
+    it('chooses variants with preferred label', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          period.addVariant(1, (variant) => {
+            variant.addAudio(10, (stream) => {
+              stream.label = 'preferredLabel';
+            });
+          });
+          period.addVariant(2, (variant) => {
+            variant.addAudio(20, (stream) => {
+              stream.label = 'otherLabel';
+            });
+          });
+          period.addVariant(3, (variant) => {
+            variant.addAudio(30, (stream) => {
+              stream.label = 'preferredLabel';
+            });
+          });
+        });
+      });
+
+      const builder =
+          new shaka.media.PreferenceBasedCriteria('', '', 0, 'preferredLabel');
+      const set = builder.create(variants(manifest));
+
+      checkSet(set, [
+        manifest.periods[0].variants[0],
+        manifest.periods[0].variants[2],
+      ]);
+    });
+
+    it('chooses variants with preferred label and language', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addPeriod(0, (period) => {
+          // Preferred language and label
+          period.addVariant(1, (variant) => {
+            variant.language = 'zh';
+            variant.addAudio(10, (stream) => {
+              stream.label = 'preferredLabel';
+            });
+          });
+          // Same language, a different label
+          period.addVariant(2, (variant) => {
+            variant.language = 'zh';
+            variant.addAudio(20, (stream) => {
+              stream.label = 'otherLabel';
+            });
+          });
+          // Same language and label
+          period.addVariant(3, (variant) => {
+            variant.language = 'zh';
+            variant.addAudio(30, (stream) => {
+              stream.label = 'preferredLabel';
+            });
+          });
+          // Same label different language
+          period.addVariant(4, (variant) => {
+            variant.language = 'pt';
+            variant.addAudio(40, (stream) => {
+              stream.label = 'preferredLabel';
+            });
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria(
+          'zh', '', 0, 'preferredLabel');
+      const set = builder.create(variants(manifest));
+
+      checkSet(set, [
+        manifest.periods[0].variants[0],
+        manifest.periods[0].variants[2],
+      ]);
+    });
   });
 
   /**
