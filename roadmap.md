@@ -21,7 +21,7 @@ Candidate features for future release cycles
  - IMA SDK ad integration demo
  - Ad controls in the UI
 
-v2.6 - 2019 Q3 (estimated)
+v2.6 - 2019 Q4 (estimated)
  - Code health release
  - Finish conversion to ES6
  - Isolate DASH periods to the DASH parser
