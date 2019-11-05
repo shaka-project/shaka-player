@@ -141,6 +141,15 @@ describe('BufferUtils', () => {
       expect(value.byteLength).toBe(5);
     });
 
+    it('allows a negative offset', () => {
+      const buffer = new ArrayBuffer(10);
+      const view = new Uint8Array(buffer, 5, 5);
+      const value = BufferUtils.toUint8(view, -5);
+      expect(value.buffer).toBe(buffer);
+      expect(value.byteOffset).toBe(0);
+      expect(value.byteLength).toBe(10);
+    });
+
     it('clamps offset to buffer', () => {
       const buffer = new ArrayBuffer(10);
       const value = BufferUtils.toUint8(buffer, 12);
@@ -149,12 +158,29 @@ describe('BufferUtils', () => {
       expect(value.byteLength).toBe(0);
     });
 
+    it('clamps negative offset to buffer', () => {
+      const buffer = new ArrayBuffer(10);
+      const value = BufferUtils.toUint8(buffer, -5);
+      expect(value.buffer).toBe(buffer);
+      expect(value.byteOffset).toBe(0);
+      expect(value.byteLength).toBe(10);
+    });
+
     it('clamps offset to view', () => {
       const buffer = new ArrayBuffer(20);
       const view = new Uint8Array(buffer, 5, 10);
       const value = BufferUtils.toUint8(view, 12);
       expect(value.buffer).toBe(buffer);
       expect(value.byteOffset).toBe(15);
+      expect(value.byteLength).toBe(0);
+    });
+
+    it('clamps offset to view when added to offset', () => {
+      const buffer = new ArrayBuffer(20);
+      const view = new Uint8Array(buffer, 5, 15);
+      const value = BufferUtils.toUint8(view, 25);
+      expect(value.buffer).toBe(buffer);
+      expect(value.byteOffset).toBe(20);
       expect(value.byteLength).toBe(0);
     });
 

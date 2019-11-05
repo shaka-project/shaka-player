@@ -228,23 +228,10 @@ describe('Pssh', () => {
 
     const pssh = new shaka.util.Pssh(psshData);
 
-    expect(pssh.dataBoundaries.length).toBe(3);
-
-    const data1 = psshData.subarray(
-        pssh.dataBoundaries[0].start,
-        pssh.dataBoundaries[0].end + 1);
-
-    const data2 = psshData.subarray(
-        pssh.dataBoundaries[1].start,
-        pssh.dataBoundaries[1].end + 1);
-
-    const data3 = psshData.subarray(
-        pssh.dataBoundaries[2].start,
-        pssh.dataBoundaries[2].end + 1);
-
-    expect(toHex(data1)).toBe(GENERIC_PSSH);
-    expect(toHex(data2)).toBe(WIDEVINE_PSSH);
-    expect(toHex(data3)).toBe(PLAYREADY_PSSH);
+    expect(pssh.data.length).toBe(3);
+    expect(toHex(pssh.data[0])).toBe(GENERIC_PSSH);
+    expect(toHex(pssh.data[1])).toBe(WIDEVINE_PSSH);
+    expect(toHex(pssh.data[2])).toBe(PLAYREADY_PSSH);
   });
 });
 
