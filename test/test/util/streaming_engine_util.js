@@ -272,10 +272,16 @@ shaka.test.StreamingEngineUtil = class {
       for (const type in segmentDurations) {
         const stream =
             shaka.test.StreamingEngineUtil.createMockStream(type, id++);
-        stream.createSegmentIndex.and.returnValue(Promise.resolve());
-        stream.segmentIndex.find.and.callFake(
+
+        const segmentIndex = new shaka.test.FakeSegmentIndex();
+        segmentIndex.find.and.callFake(
             (time) => find(type, i + 1, time));
-        stream.segmentIndex.get.and.callFake((pos) => get(type, i + 1, pos));
+        segmentIndex.get.and.callFake((pos) => get(type, i + 1, pos));
+
+        stream.createSegmentIndex.and.callFake(() => {
+          stream.segmentIndex = segmentIndex;
+          return Promise.resolve();
+        });
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         if (type == ContentType.TEXT) {
@@ -365,7 +371,7 @@ shaka.test.StreamingEngineUtil = class {
     return {
       id: id,
       createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-      segmentIndex: new shaka.test.FakeSegmentIndex(),
+      segmentIndex: null,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
       bandwidth: 192000,
@@ -384,7 +390,7 @@ shaka.test.StreamingEngineUtil = class {
     return {
       id: id,
       createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-      segmentIndex: new shaka.test.FakeSegmentIndex(),
+      segmentIndex: null,
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
       bandwidth: 5000000,
@@ -405,7 +411,7 @@ shaka.test.StreamingEngineUtil = class {
     return {
       id: id,
       createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
-      segmentIndex: new shaka.test.FakeSegmentIndex(),
+      segmentIndex: null,
       mimeType: 'text/vtt',
       kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
       type: ManifestParserUtils.ContentType.TEXT,

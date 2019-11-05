@@ -366,12 +366,9 @@ describe('StreamingEngine', () => {
     textStream1 = manifest.periods[0].textStreams[0];
 
     // This Stream is only used to verify that StreamingEngine can setup
-    // Streams correctly. It does not have init or media segments.
+    // Streams correctly.
     alternateVideoStream1 =
         shaka.test.StreamingEngineUtil.createMockVideoStream(8);
-    alternateVideoStream1.createSegmentIndex.and.returnValue(Promise.resolve());
-    alternateVideoStream1.segmentIndex.find.and.returnValue(null);
-    alternateVideoStream1.segmentIndex.get.and.returnValue(null);
     alternateVariant1 = {
       audio: null,
       video: /** @type {shaka.extern.Stream} */ (alternateVideoStream1),
@@ -808,6 +805,7 @@ describe('StreamingEngine', () => {
     // For the first update, indicate the segment isn't available.  This should
     // not cause us to fallback to the Playhead time to determine which segment
     // to start streaming.
+    await textStream2.createSegmentIndex();
     const oldGet = textStream2.segmentIndex.get;
     textStream2.segmentIndex.get = (idx) => {
       if (idx == 1) {
@@ -1805,28 +1803,24 @@ describe('StreamingEngine', () => {
       createStreamingEngine();
     });
 
-    it('from initial Stream setup', async () => {
+    it('from Stream setup', async () => {
       // Don't use returnValue with Promise.reject, or it may be detected as an
       // unhandled Promise rejection.
       videoStream1.createSegmentIndex.and.callFake(
           () => Promise.reject('FAKE_ERROR'));
 
-      const onInitError = jasmine.createSpy('onInitError');
-      onInitError.and.callFake((error) => {
-        expect(onInitialStreamsSetup).not.toHaveBeenCalled();
-        expect(onStartupComplete).not.toHaveBeenCalled();
+      onError.and.callFake((error) => {
         expect(error).toBe('FAKE_ERROR');
       });
 
       onChooseStreams.and.callFake((p) => defaultOnChooseStreams(p));
 
       // Here we go!
-      streamingEngine.start().then(fail, Util.spyFunc(onInitError));
+      streamingEngine.start();
       await runTest();
 
       expect(videoStream1.createSegmentIndex).toHaveBeenCalled();
-      expect(onInitError).toHaveBeenCalled();
-      expect(onError).not.toHaveBeenCalled();
+      expect(onError).toHaveBeenCalled();
     });
 
     it('from Stream setup on switch', async () => {
@@ -2955,9 +2949,11 @@ describe('StreamingEngine', () => {
     it('still aborts if previous segment size unknown', async () => {
       // This should use the "bytes remaining" from the request instead of the
       // previous stream's size.
-      const segmentIndex = manifest.periods[0].variants[0].video.segmentIndex;
+      const videoStream = manifest.periods[0].variants[0].video;
+      await videoStream.createSegmentIndex();
+      const segmentIndex = videoStream.segmentIndex;
       const oldGet = segmentIndex.get;
-      manifest.periods[0].variants[0].video.segmentIndex.get = (idx) => {
+      videoStream.segmentIndex.get = (idx) => {
         // eslint-disable-next-line no-restricted-syntax
         const seg = oldGet.call(segmentIndex, idx);
         if (seg) {
@@ -2990,6 +2986,7 @@ describe('StreamingEngine', () => {
     it('doesn\'t abort if init segment is too large', async () => {
       const initSegmentReference =
           new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 500);
+      await newVariant.video.createSegmentIndex();
       overrideInitSegment(newVariant.video, initSegmentReference);
 
       await prepareForAbort();
@@ -3002,6 +2999,7 @@ describe('StreamingEngine', () => {
     it('still aborts with small init segment', async () => {
       const initSegmentReference =
           new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 5);
+      await newVariant.video.createSegmentIndex();
       overrideInitSegment(newVariant.video, initSegmentReference);
 
       await prepareForAbort();
@@ -3015,6 +3013,7 @@ describe('StreamingEngine', () => {
       // Very large init segment
       const initSegmentReference =
           new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 5e6);
+      await newVariant.video.createSegmentIndex();
       overrideInitSegment(newVariant.video, initSegmentReference);
 
       await prepareForAbort();
