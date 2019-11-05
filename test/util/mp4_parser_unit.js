@@ -21,6 +21,7 @@ describe('Mp4Parser', () => {
   let boxData;
   let fullBoxData;
   let boxWithChildData;
+  let fullBoxWithChildData;
   let boxWithSampleDescription;
   let partialBoxWithSampleDescription;
   let multipleSingleLevelBoxes;
@@ -44,6 +45,19 @@ describe('Mp4Parser', () => {
     boxWithChildData = new Uint8Array([
       0x00, 0x00, 0x00, 0x14, // size
       0x62, 0x30, 0x30, 0x33, // type
+      0x00, 0x00, 0x00, 0x0C, // child [0] size
+      0x62, 0x30, 0x33, 0x31, // child [0] type
+      0x00, 0x11, 0x22, 0x33, // child [0] payload
+      0x00, 0x00, 0x00, 0x0C, // child [1] size
+      0x62, 0x30, 0x33, 0x32, // child [1] type
+      0x44, 0x55, 0x66, 0x77,  // child [1] payload
+    ]);
+
+    fullBoxWithChildData = new Uint8Array([
+      0x00, 0x00, 0x00, 0x18, // size
+      0x62, 0x30, 0x30, 0x33, // type
+      0x01,                   // version
+      0x12, 0x34, 0x56,       // flags
       0x00, 0x00, 0x00, 0x0C, // child [0] size
       0x62, 0x30, 0x33, 0x31, // child [0] type
       0x00, 0x11, 0x22, 0x33, // child [0] payload
@@ -117,6 +131,7 @@ describe('Mp4Parser', () => {
     it('reads box header', () => {
       const callback = jasmine.createSpy('parser callback').and.callFake(
           (box) => {
+            expect(box.start).toBe(0);
             expect(box.size).toBe(12);
             expect(box.version).toBe(null);
             expect(box.flags).toBe(null);
@@ -131,6 +146,7 @@ describe('Mp4Parser', () => {
     it('reads full box header', () => {
       const callback = jasmine.createSpy('parser callback').and.callFake(
           (box) => {
+            expect(box.start).toBe(0);
             expect(box.size).toBe(16);
             expect(box.version).toBe(1);
             expect(box.flags).toBe(0x123456);
@@ -148,19 +164,8 @@ describe('Mp4Parser', () => {
       const parentBox = jasmine.createSpy('parent box').and.callFake(
           shaka.util.Mp4Parser.children);
 
-      const childBox1 = jasmine.createSpy('child box 1').and.callFake(
-          (box) => {
-            expect(box.size).toBe(12);
-            expect(box.version).toBe(null);
-            expect(box.flags).toBe(null);
-          });
-
-      const childBox2 = jasmine.createSpy('child box 2').and.callFake(
-          (box) => {
-            expect(box.size).toBe(12);
-            expect(box.version).toBe(null);
-            expect(box.flags).toBe(null);
-          });
+      const childBox1 = jasmine.createSpy('child box 1');
+      const childBox2 = jasmine.createSpy('child box 2');
 
       new shaka.util.Mp4Parser()
           .box('b003', Util.spyFunc(parentBox))
@@ -168,8 +173,45 @@ describe('Mp4Parser', () => {
           .box('b032', Util.spyFunc(childBox2)).parse(boxWithChildData);
 
       expect(parentBox).toHaveBeenCalled();
-      expect(childBox1).toHaveBeenCalled();
-      expect(childBox2).toHaveBeenCalled();
+      expect(childBox1).toHaveBeenCalledWith(jasmine.objectContaining({
+        start: 8,
+        size: 12,
+        version: null,
+        flags: null,
+      }));
+      expect(childBox2).toHaveBeenCalledWith(jasmine.objectContaining({
+        start: 20,
+        size: 12,
+        version: null,
+        flags: null,
+      }));
+    });
+
+    it('reads children definition with full boxes', () => {
+      const parentBox = jasmine.createSpy('parent box').and.callFake(
+          shaka.util.Mp4Parser.children);
+
+      const childBox1 = jasmine.createSpy('child box 1');
+      const childBox2 = jasmine.createSpy('child box 2');
+
+      new shaka.util.Mp4Parser()
+          .fullBox('b003', Util.spyFunc(parentBox))
+          .box('b031', Util.spyFunc(childBox1))
+          .box('b032', Util.spyFunc(childBox2)).parse(fullBoxWithChildData);
+
+      expect(parentBox).toHaveBeenCalled();
+      expect(childBox1).toHaveBeenCalledWith(jasmine.objectContaining({
+        start: 12,
+        size: 12,
+        version: null,
+        flags: null,
+      }));
+      expect(childBox2).toHaveBeenCalledWith(jasmine.objectContaining({
+        start: 24,
+        size: 12,
+        version: null,
+        flags: null,
+      }));
     });
 
     it('stops reading children when asked to', () => {
@@ -222,7 +264,19 @@ describe('Mp4Parser', () => {
 
       expect(parentBox).toHaveBeenCalledTimes(1);
       expect(childBox1).toHaveBeenCalledTimes(1);
+      expect(childBox1).toHaveBeenCalledWith(jasmine.objectContaining({
+        start: 12,
+        size: 12,
+        version: null,
+        flags: null,
+      }));
       expect(childBox2).toHaveBeenCalledTimes(1);
+      expect(childBox2).toHaveBeenCalledWith(jasmine.objectContaining({
+        start: 24,
+        size: 12,
+        version: null,
+        flags: null,
+      }));
     });
 
     it('stops reading sample description when asked to', () => {
