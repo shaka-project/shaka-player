@@ -201,6 +201,9 @@ shakaDemo.DatalistInput = class extends shakaDemo.TextInput {
       // This manually updates the suggestions, so that they will show up.
       awesomplete.evaluate();
     });
+    this.input_.addEventListener('awesomplete-selectcomplete', () => {
+      onChange(this.input_);
+    });
   }
 };
 
