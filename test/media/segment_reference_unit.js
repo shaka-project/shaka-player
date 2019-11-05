@@ -35,7 +35,7 @@ describe('SegmentReference', () => {
     expect(reference.getPosition()).toBe(1);
     expect(reference.getStartTime()).toBe(2);
     expect(reference.getEndTime()).toBe(3);
-    expect(reference.createUris()).toEqual(['x', 'y']);
+    expect(reference.getUris()).toEqual(['x', 'y']);
     expect(reference.getStartByte()).toBe(4);
     expect(reference.getEndByte()).toBe(5);
     expect(reference.initSegmentReference).toBe(initSegmentReference);
@@ -50,7 +50,7 @@ describe('InitSegmentReference', () => {
         /* startByte */ 4,
         /* endByte */ 5);
 
-    expect(reference.createUris()).toEqual(['x', 'y']);
+    expect(reference.getUris()).toEqual(['x', 'y']);
     expect(reference.getStartByte()).toBe(4);
     expect(reference.getEndByte()).toBe(5);
   });
