@@ -27,4 +27,5 @@
     r'(?i)uncomplied': 'uncompiled',
     r'(?i)wether': 'whether',
     r'(?i)@returns': '@return',
+    r'(?i)varint': 'variant',
 }
