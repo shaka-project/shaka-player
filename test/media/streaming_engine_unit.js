@@ -3027,6 +3027,32 @@ describe('StreamingEngine', () => {
       await bufferAndCheck(/* didAbort= */ true, /* hasInit= */ true);
     });
 
+    it('aborts pending requests after fetching new segment index', async () => {
+      await prepareForAbort();
+
+      /** @type {shaka.net.NetworkingEngine.PendingRequest} */
+      const secondRequest = lastPendingRequest;
+
+      // Simulate a segment index which is not yet available.  This is
+      // necessary because the fake content used in this test is in the style
+      // of a segment template, where the index is already known.
+      const segmentIndex = newVariant.video.segmentIndex;
+      expect(segmentIndex).not.toBe(null);
+      newVariant.video.segmentIndex = null;
+      newVariant.video.createSegmentIndex = () => {
+        newVariant.video.segmentIndex = segmentIndex;
+        return Promise.resolve();
+      };
+
+      // This should abort the pending request for the second segment.
+      streamingEngine.switchVariant(
+          newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+
+      await bufferAndCheck(/* didAbort= */ true);
+
+      expect(secondRequest.abort).toHaveBeenCalled();
+    });
+
     function flushDelayedRequests() {
       for (const delay of delayedRequests) {
         delay.resolve();
