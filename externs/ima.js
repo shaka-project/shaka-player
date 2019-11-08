@@ -76,6 +76,13 @@ google.ima.AdsManager = class {
   getVolume() {}
 
   /**
+   * @return {boolean}
+   */
+  getAdSkippableState() {}
+
+  skip() {}
+
+  /**
    * @param {number} volume
    */
   setVolume(volume) {}
@@ -139,6 +146,9 @@ google.ima.AdEvent = class extends Event {
 google.ima.Ad = class {
   /** @return {number} */
   getDuration() {}
+
+  /** @return {number} */
+  getSkipTimeOffset() {}
 };
 
 
@@ -153,6 +163,7 @@ google.ima.AdEvent.Type = {
   RESUMED: 'RESUMED',
   VOLUME_CHANGED: 'VOLUME_CHANGED',
   VOLUME_MUTED: 'VOLUME_MUTED',
+  SKIPPABLE_STATE_CHANGED: 'SKIPPABLE_STATE_CHANGED',
 };
 
 

@@ -58,9 +58,26 @@ shaka.extern.IAd = class {
   getRemainingTime() {}
 
   /**
+   * @return {number}
+   */
+  getTimeUntilSkippable() {}
+
+  /**
    * @return {boolean}
    */
   isPaused() {}
+
+  /**
+   * @return {boolean}
+   */
+  isSkippable() {}
+
+  /**
+   * @return {boolean}
+   */
+  canSkipNow() {}
+
+  skip() {}
 
   play() {}
 

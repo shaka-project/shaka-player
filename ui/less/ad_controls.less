@@ -19,6 +19,12 @@
 .shaka-ad-container {
   .absolute-position();
   .fill-container();
+
+  /* IMA SDK ads their own ad UI into an iframe element.
+  Hide it, so only our UI is visible. */
+  iframe {
+    display: none;
+  }
 }
 
 .shaka-ad-controls {
@@ -35,7 +41,7 @@
     font-size: initial;
   }
 
-  div {
+  div:not(.shaka-skip-ad-counter) {
     .bottom-panels-elements-margin();
   }
 }
@@ -48,7 +54,7 @@
   text-shadow: 1px 1px 4px black;
 }
 
-.shaka-skip-ad-button {
+.shaka-skip-ad-container {
   /* Skip button is positioned at the very right edge of the
   video container unlike the rest of the bottom controls. */
   position: relative;
@@ -61,7 +67,23 @@
   move the button from its normal position to the right by that percentage.
   */
   right: (100 - @bottom-controls-width) / 2 * -1;
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+}
+
+.shaka-skip-ad-button {
   padding: 5px 15px;
   background: rgba(0, 0, 0, 0.7);
   border: none;
+
+  &:disabled {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+.shaka-skip-ad-counter {
+  padding: 5px 5px;
+  background: rgba(0, 0, 0, 0.7);
+  margin: 0;
 }
