@@ -57,7 +57,7 @@ particular key system at all, but instead state that any CENC system will do:
 
 If this is the only `<ContentProtection>` element in the manifest, Shaka will
 try all key systems it knows.  (Based on
-{@linksource shaka.dash.ContentProtection.defaultKeySystems\_}.)
+{@linksource shaka.dash.ContentProtection.defaultKeySystems_}.)
 If the browser supports it and you configured a license server URL for it, we'll
 use it.
 
@@ -111,7 +111,7 @@ player.configure({
 
 #### Advanced DRM Configuration
 
-We have several {@link shakaExtern.AdvancedDrmConfiguration advanced options}
+We have several {@link shaka.extern.AdvancedDrmConfiguration advanced options}
 available to give you access to the full EME configuration.  The config field
 `drm.advanced` is an object mapping key system IDs to their advanced settings.
 For example, to require hardware security in Widevine:
@@ -160,3 +160,4 @@ values for other key systems are not known to us at this time.
 #### Continue the Tutorials
 
 Next, check out {@tutorial license-server-auth}.
+Or check out {@tutorial fairplay}.

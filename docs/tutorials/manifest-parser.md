@@ -39,7 +39,8 @@ MyManifestParser.prototype.stop = function() {
 
 
 shaka.media.ManifestParser.registerParserByExtension('json', MyManifestParser);
-shaka.media.ManifestParser.registerParserByMime('application/json', MyManifestParser);
+shaka.media.ManifestParser.registerParserByMime(
+    'application/json', MyManifestParser);
 ```
 
 First, this defines a constructor called `MyManifestParser`.  This is called by
@@ -49,18 +50,19 @@ the `Player` to create new parser instances.  A new instance is created for
 #### configure
 
 This method is called right after creating the object and when the configuration
-changes.  This is passed a {@link shakaExtern.ManifestConfiguration} object
+changes.  This is passed a {@link shaka.extern.ManifestConfiguration} object
 from the Player.
 
 #### start
 
 This method is called to load the manifest.  This is called with a string URI
-that is passed to `load()` and a {@link shakaExtern.ManifestParser.PlayerInterface}
-object.  The interface object contains a number of fields that are used to
-interact with the Player.  This includes the `NetworkingEngine` instance to make
-network requests.  This also includes callback methods that allow the parser to
-raise Player events and filter Periods.  This method should return a Promise
-that will resolve with the parsed manifest.
+that is passed to `load()` and a
+{@link shaka.extern.ManifestParser.PlayerInterface} object.  The interface object
+contains a number of fields that are used to interact with the Player.  This
+includes the `NetworkingEngine` instance to make network requests.  This also
+includes callback methods that allow the parser to raise Player events and
+filter Periods.  This method should return a Promise that will resolve with the
+parsed manifest.
 
 #### stop
 
@@ -157,53 +159,55 @@ This is called first before any other method.  This allows an index to be
 fetched over the network, if needed.  This method should return a Promise that
 will resolve when the segment index is ready.  This is only ever called once.
 
-#### findSegmentPosition(time:number):(number|null)
+#### segmentIndex
 
-This is passed in a time (in seconds) relative to the start of this Period and
-should return the position of the segment that contains that time, or null
-if it is not found.
-
-*NB: This is independent of segment availability for live streams.*
-
-#### getSegmentReference(position:number):(shaka.media.SegmentReference|null)
-
-This is passed the position (number) of the segment and should return a
-`shaka.media.SegmentReference` that is at that index, or null if not found.
-
-*NB: This is independent of segment availability for live streams.*
-
-#### initSegmentReference
-
-This is *not* a function, but a {@link shaka.media.InitSegmentReference} that
-contains info about how to fetch the initialization segment.  This can be
-`null` if the stream is self-initializing.
+This is *not* a function, but a {@link shaka.media.SegmentIndex} tracking all
+available segments.
 
 
 ## shaka.media.SegmentIndex
 
 To help in handling segment references, there is a
-{@link shaka.media.SegmentIndex} type.  This is given an array of references,
-handles merging new segments, and has the required segment functions.  All you
-need to do is create an array of references and pass it to the constructor.  For
-updates, simply create a new array of segments and call `merge`.  Any existing
-segments will be updated and new segments will be added.  You can also call
-`evict` to remove old references to reduce the memory footprint.
+{@link shaka.media.SegmentIndex} type.  This is given an array of references.
+It handles merging new segments, and expanding the list of segments for live
+streams.
 
 ```js
-var references = refs.map(function(r, i) {
+var references = refs.map(function(r, position) {
   // Should return an array of possible URI choices; this is used for failover
   // in the event of network error.  This is a function to defer calculations.
   var getUris = function() { return [r.uri]; };
 
-  return new shaka.media.SegmentReference(i, r.start, r.end, getUris, 0, null);
+  return new shaka.media.SegmentReference(
+      position,
+      r.start, r.end, getUris,
+      /* startByte */ 0,
+      /* endByte */ null,
+      initSegmentReference,
+      /* presentationTimeOffset */ 0);
 });
 
 var index = new shaka.media.SegmentIndex(references);
-var streamFunctions = {
-  createSegmentIndex: function() { return Promise.resolve(); },
-  findSegmentPosition: index.find.bind(index),
-  getSegmentReference: index.get.bind(index)
-};
+```
+
+To merge updates, simply create a new array of segments and call `merge`.  Any
+existing segments will be updated and new segments will be added.  You can also
+call `evict` to remove old references to reduce the memory footprint.
+
+To expand the list of references on a timer, as is done for DASH's
+SegmentTemplate, call `index.updateEvery` with a callback that evicts old
+references and returns an array of new references.
+
+```js
+index.updateEvery(updateIntervalSeconds, () => {
+  // Evict old references
+  index.evict(windowStartTime);
+
+  // Generate new references to append to the end of the index
+  const references = [];
+  // ...
+  return references;
+});
 ```
 
 
@@ -214,7 +218,7 @@ In order to support Live content, the manifest may need to be updated.  In the
 `setInterval`) to update the manifest.  Then it should re-parse the manifest
 periodically.  To add new segments to the streams, simply add them to the
 segment index.  Because the original manifest object is modified in-place,
-adding them to the index will allow the Player to use them. You *cannnot* add
+adding them to the index will allow the Player to use them. You *cannot* add
 new Variants or text streams to an existing Period.
 
 To add a new Period, you must first call `filterNewPeriod`. This will filter out
@@ -280,7 +284,8 @@ MyManifestParser.prototype.loadVariant_ = function(hasVideo, hasAudio) {
 
 MyManifestParser.prototype.loadStream_ = function(type) {
   var getUris = function() { return ['https://example.com/init']; };
-  var init = new shaka.media.InitSegmentReference(getUris, 0, null);
+  var initSegmentReference =
+      new shaka.media.InitSegmentReference(getUris, 0, null);
 
   var index = new shaka.media.SegmentIndex([
     // Times are in seconds, relative to the Period
@@ -292,11 +297,9 @@ MyManifestParser.prototype.loadStream_ = function(type) {
   return {
     id: this.curId_++,  // globally unique ID
     createSegmentIndex:     function() { return Promise.resolve(); },
-    findSegmentPosition:    index.find.bind(index),
-    getSegmentReference:    index.get.bind(index),
-    initSegmentReference:   init,
-    presentationTimeOffset: 0,  // seconds
-    mimeType : type == 'video' ? 'video/webm' : (type == 'audio' ? 'audio/webm' : 'text/vtt'),
+    segmentIndex:           index,
+    mimeType: type == 'video' ?
+        'video/webm' : (type == 'audio' ? 'audio/webm' : 'text/vtt'),
     codecs:    type == 'video' ? 'vp9' : (type == 'audio' ? 'vorbis' : ''),
     frameRate: type == 'video' ? 24 : undefined,
     bandwidth: 4000,  // bits/sec
@@ -316,9 +319,15 @@ MyManifestParser.prototype.loadStream_ = function(type) {
   };
 };
 
-MyManifestParser.prototype.loadReference_ = function(i, start, end) {
-  var getUris = function() { return ['https://example.com/ref_' + i]; };
-  return new shaka.media.SegmentReference(i, start, end, getUris, 0, null);
+MyManifestParser.prototype.loadReference_ =
+    function(position, start, end, initSegmentReference) {
+  var getUris = function() { return ['https://example.com/ref_' + position]; };
+  return new shaka.media.SegmentReference(
+      position, start, end, getUris,
+      /* startByte */ 0,
+      /* endByte */ null,
+      initSegmentReference,
+      /* presentationTimeOffset */ 0);
 };
 ```
 
@@ -327,7 +336,7 @@ MyManifestParser.prototype.loadReference_ = function(i, start, end) {
 
 If your content is encrypted, there are a few changes to the manifest you need
 to do.  First, for each Variant that contains encrypted content, you need to set
-`variant.drmInfos` to an array of {@link shakaExtern.DrmInfo} objects.  All the
+`variant.drmInfos` to an array of {@link shaka.extern.DrmInfo} objects.  All the
 fields (except the key-system name) can be set to the default and will be
 replaced by settings from the Player configuration.  If the `drmInfos` array
 is empty, the content is expected to be clear.

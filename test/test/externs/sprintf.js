@@ -23,7 +23,7 @@
 
 /**
  * @param {string} format
- * @param {...*} var_args
+ * @param {...*} varArgs
  * @return {string}
  */
-var sprintf = function(format, var_args) {};
+var sprintf = function(format, varArgs) {};

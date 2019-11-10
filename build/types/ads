@@ -1,0 +1,5 @@
+# Ad Insertion Functionality
+
++../../lib/ads/ad_manager.js
++../../lib/ads/client_side_ad.js
++../../lib/ads/client_side_ad_manager.js

@@ -26,3 +26,8 @@ Document.prototype.msExitFullscreen = function() {};
 
 Document.prototype.webkitExitFullscreen = function() {};
 
+/**
+ * @return {!boolean}
+ */
+Document.prototype.webkitSupportsFullscreen = function() {};
+

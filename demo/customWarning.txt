@@ -1,0 +1,8 @@
+<!--
+Note: This auto-filled issue template contains the manifest and license server
+of the asset you were playing at the time you pressed the bug report button.
+We have detected that you were playing a custom asset.
+If this asset's URL is confidential, you might instead want to fill out an issue
+template manually:
+https://github.com/google/shaka-player/issues/new/choose
+-->

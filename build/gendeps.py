@@ -26,11 +26,16 @@ import shakaBuildHelpers
 
 deps_args = [
     '--root_with_prefix=lib ../../../lib',
-    '--root_with_prefix=third_party/closure ../../../third_party/closure'
+    '--root_with_prefix=ui ../../../ui',
+    '--root_with_prefix=third_party/closure ../../../third_party/closure',
+    '--root_with_prefix=third_party/language-mapping-list ' +
+        '../../../third_party/language-mapping-list',
+    '--root_with_prefix=dist ../../../dist',
+    '--root_with_prefix=demo ../../../demo',
 ]
 
 
-def gen_deps(_):
+def main(_):
   """Generates the uncompiled dependencies files."""
   logging.info('Generating Closure dependencies...')
 
@@ -46,7 +51,7 @@ def gen_deps(_):
   try:
     cmd_line = [sys.executable or 'python', deps_writer] + deps_args
     deps = shakaBuildHelpers.execute_get_output(cmd_line)
-    with open(os.path.join(base, 'dist', 'deps.js'), 'w') as f:
+    with open(os.path.join(base, 'dist', 'deps.js'), 'wb') as f:
       f.write(deps)
     return 0
   except subprocess.CalledProcessError as e:
@@ -54,4 +59,4 @@ def gen_deps(_):
 
 
 if __name__ == '__main__':
-  shakaBuildHelpers.run_main(gen_deps)
+  shakaBuildHelpers.run_main(main)

@@ -22,12 +22,12 @@
 
 /**
  * The name of the cache for this version of the application.
- * This should be updated when old, unneded application resources could be
+ * This should be updated when old, unneeded application resources could be
  * cleaned up by a newer version of the application.
  *
  * @const {string}
  */
-var CACHE_NAME = 'shaka-player-v2';
+const CACHE_NAME = 'shaka-player-v2.5+';
 
 
 /**
@@ -37,11 +37,10 @@ var CACHE_NAME = 'shaka-player-v2';
  *
  * @const {string}
  */
-var CACHE_NAME_PREFIX = 'shaka-player';
+const CACHE_NAME_PREFIX = 'shaka-player';
 
-
-console.assert(CACHE_NAME.indexOf(CACHE_NAME_PREFIX) == 0,
-               'Cache name does not match prefix!');
+console.assert(CACHE_NAME.startsWith(CACHE_NAME_PREFIX),
+    'Cache name does not match prefix!');
 
 
 /**
@@ -50,7 +49,7 @@ console.assert(CACHE_NAME.indexOf(CACHE_NAME_PREFIX) == 0,
  *
  * @const {number}
  */
-var NETWORK_TIMEOUT = 2;
+const NETWORK_TIMEOUT = 2;
 
 
 /**
@@ -59,46 +58,49 @@ var NETWORK_TIMEOUT = 2;
  *
  * @const {!Array.<string>}
  */
-var CRITICAL_RESOURCES = [
-  '.',  // this resolves to the page
-  'index.html',  // another way to access the page
+const CRITICAL_RESOURCES = [
+  '.',  // This resolves to the page.
+  'index.html',  // Another way to access the page.
   'app_manifest.json',
-
-  'demo.css',
-  'https://fonts.googleapis.com/css?family=Roboto',
-  'https://fonts.googleapis.com/css?family=Roboto+Condensed',
-
-  'common/controls.css',
-  'https://fonts.googleapis.com/icon?family=Material+Icons',
+  'shaka_logo_trans.png',
 
   'load.js',
-  '../dist/shaka-player.compiled.js',
-  '../dist/demo.compiled.js'
+  '../dist/shaka-player.ui.js',
+  '../dist/demo.compiled.js',
+  '../dist/controls.css',
+  '../dist/demo.css',
+
+  // These files are required for the demo to include MDL.
+  '../node_modules/material-design-lite/dist/material.min.js',
+
+  // MDL modal dialogs are enabled by including these:
+  '../node_modules/dialog-polyfill/dist/dialog-polyfill.js',
+
+  // Datalist-like fields are enabled by including these:
+  '../node_modules/awesomplete/awesomplete.min.js',
 ];
 
 
 /**
  * An array of resources that SHOULD be cached, but which are not critical.
  *
- * @const {!Array.<string>}
- */
-var OPTIONAL_RESOURCES = [
-  'favicon.ico',
-  '//shaka-player-demo.appspot.com/assets/poster.jpg',
-  '//shaka-player-demo.appspot.com/assets/audioOnly.gif',
-  '../node_modules/mux.js/dist/mux.js'
-];
-
-
-/**
- * An array of resources that SHOULD be cached, but which must use the no-cors
- * flag because of CORS restrictions.  They will be cached as "opaque" resources
- * whose contents cannot be read by JavaScript.
+ * The application does not need to read these, so these can use the no-cors
+ * flag and be cached as "opaque" resources.  This is critical for the cast
+ * sender SDK below.
  *
  * @const {!Array.<string>}
  */
-var NO_CORS_RESOURCES = [
-  '//www.gstatic.com/cv/js/sender/v1/cast_sender.js'
+const OPTIONAL_RESOURCES = [
+  // Optional graphics.  Without these, the site won't be broken.
+  'favicon.ico',
+  'https://shaka-player-demo.appspot.com/assets/poster.jpg',
+  'https://shaka-player-demo.appspot.com/assets/audioOnly.gif',
+
+  // The mux.js transmuxing library for MPEG-2 TS and CEA support.
+  '../node_modules/mux.js/dist/mux.min.js',
+
+  // The cast sender SDK.
+  'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
 ];
 
 
@@ -109,58 +111,76 @@ var NO_CORS_RESOURCES = [
  *
  * @const {!Array.<string>}
  */
-var CACHE_FIRST = [
+const CACHEABLE_URL_PREFIXES = [
+  // Anything associated with this application is fair game to cache.
+  // This would not be necessary if this demo were always served from the same
+  // location and always used absolute URLs in the resources lists above.
+  location.origin,
+
   // Google Web Fonts should be cached when first seen, without being explicitly
   // listed, and should be preferred from cache for speed.
-  'https://fonts.googleapis.com/'
+  'https://fonts.gstatic.com/',
+  // Same goes for asset icons.
+  'https://storage.googleapis.com/shaka-asset-icons/',
 ];
 
 
 /**
  * This event fires when the service worker is installed.
+ *
  * @param {!InstallEvent} event
  */
 function onInstall(event) {
-  event.waitUntil(caches.open(CACHE_NAME).then(function(cache) {
-    // Optional resources: failure on these will NOT fail the Promise chain.
-    cache.addAll(OPTIONAL_RESOURCES).catch(function() {});
+  const preCacheApplication = async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // Fetching these with addAll fails for CORS-restricted content, so we use
+    // fetchAndCache with no-cors mode to work around it.
 
-    // No-cors resources: failure on these will NOT fail the Promise chain.
-    // For some reason, this doesn't work with addAll, so we use fetchAndCache.
-    NO_CORS_RESOURCES.forEach(function(url) {
-      fetchAndCache(cache, new Request(url, { mode: 'no-cors' }));
-    });
+    // Optional resources: failure on these will NOT fail the Promise chain.
+    // We will also not wait for them to be installed.
+    for (const url of OPTIONAL_RESOURCES) {
+      const request = new Request(url, {mode: 'no-cors'});
+      fetchAndCache(cache, request).catch(() => {});
+    }
 
     // Critical resources: failure on these will fail the Promise chain.
-    return cache.addAll(CRITICAL_RESOURCES);
-  }));
-}
+    // The installation will not be complete until these are all cached.
+    const criticalFetches = [];
+    for (const url of CRITICAL_RESOURCES) {
+      const request = new Request(url, {mode: 'no-cors'});
+      criticalFetches.push(fetchAndCache(cache, request));
+    }
+    return Promise.all(criticalFetches);
+  };
 
+  event.waitUntil(preCacheApplication());
+}
 
 /**
  * This event fires when the service worker is activated.
- * This can be after installation installation or upgrade.
+ * This can be after installation or upgrade.
  *
  * @param {!ExtendableEvent} event
  */
 function onActivate(event) {
   // Delete old caches to save space.
-  event.waitUntil(caches.keys().then(function(cacheNames) {
-    return Promise.all(cacheNames.filter(function(cacheName) {
-      // Return true on all the caches we want to clean up.
-      // Note that caches are shared across the origin, so only remove
-      // caches we are sure we created.
-      if (cacheName.indexOf(CACHE_NAME_PREFIX) == 0 &&
-          cacheName != CACHE_NAME) {
-        return true;
-      }
-      return false;
-    }).map(function(cacheName) {
-      return caches.delete(cacheName);
-    }));
-  }));
-}
+  const dropOldCaches = async () => {
+    const cacheNames = await caches.keys();
 
+    // Return true on all the caches we want to clean up.
+    // Note that caches are shared across the origin, so only remove
+    // caches we are sure we created.
+    const cleanTheseUp = cacheNames.filter((cacheName) =>
+      cacheName.startsWith(CACHE_NAME_PREFIX) && cacheName != CACHE_NAME);
+
+    const cleanUpPromises =
+        cleanTheseUp.map((cacheName) => caches.delete(cacheName));
+
+    await Promise.all(cleanUpPromises);
+  };
+
+  event.waitUntil(dropOldCaches());
+}
 
 /**
  * This event fires when any resource is fetched.
@@ -169,53 +189,72 @@ function onActivate(event) {
  * @param {!FetchEvent} event
  */
 function onFetch(event) {
-  event.respondWith(caches.open(CACHE_NAME).then(function(cache) {
-    return cache.match(event.request).then(function(cachedResponse) {
-      var preferCache = false;
-      CACHE_FIRST.forEach(function(prefix) {
-        if (event.request.referrer.startsWith(prefix)) {
-          preferCache = true;
-        }
-      });
+  // Make sure this is a request we should be handling in the first place.
+  // If it's not, it's important to leave it alone and not call respondWith.
+  let useCache = false;
+  for (const prefix of CACHEABLE_URL_PREFIXES) {
+    if (event.request.url.startsWith(prefix)) {
+      useCache = true;
+      break;
+    }
+  }
 
-      if (cachedResponse || preferCache) {
-        // This is one of our cached resources, or it should be cached when
-        // first seen.
+  // Now we need to check our resource lists.  The list of prefixes above won't
+  // cover everything that was installed initially, and those things still need
+  // to be read from cache.  So we check if this request URL matches one of
+  // those lists.
+  // The resource lists contain some relative URLs and some absolute URLs.  The
+  // check here will only be able to match the absolute ones, but that's enough,
+  // because the relative ones are covered by the loop above.
+  if (!useCache) {
+    if (CRITICAL_RESOURCES.includes(event.request.url) ||
+        OPTIONAL_RESOURCES.includes(event.request.url)) {
+      useCache = true;
+    }
+  }
 
-        if (!navigator.onLine) {
-          // We are offline, and we know it.  Just return the cached response,
-          // to avoid a bunch of pointless errors in the JS console that will
-          // confuse us developers.
-          return cachedResponse;
-        }
-
-        if (preferCache && cachedResponse) {
-          // We have it in cache, and we prefer the cached version.
-          // Try to update the cache with a new version, but return right away
-          // with whatever was already in cache.
-          fetchAndCache(cache, event.request).catch(function() {});
-          return cachedResponse;
-        }
-
-        // Try to fetch a live version and update the cache, but limit how long
-        // we will wait for the updated version.
-        return timeout(NETWORK_TIMEOUT, fetchAndCache(cache, event.request))
-            .catch(function() {
-              // We tried to fetch a live version, but it either failed or took
-              // too long.  If it took too long, the fetch and cache operation
-              // will continue in the background.  In both cases, we should go
-              // ahead with a cached version.
-              return cachedResponse;
-            });
-      } else {
-        // This is not one of our cached resources.  Fetch a live version and
-        // do not cache it.
-        return fetch(event.request);
-      }
-    });
-  }));
+  if (useCache) {
+    event.respondWith(fetchCacheableResource(event.request));
+  }
 }
 
+/**
+ * Fetch a cacheable resource.  Decide whether to request from the network,
+ * the cache, or both, and return the appropriate version of the resource.
+ *
+ * @param {!Request} request
+ * @return {!Promise.<!Response>}
+ */
+async function fetchCacheableResource(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cachedResponse = await cache.match(request);
+
+  if (!navigator.onLine) {
+    // We are offline, and we know it.  Just return the cached response, to
+    // avoid a bunch of pointless errors in the JS console that will confuse
+    // us developers.  If there is no cached response, this will just be a
+    // failed request.
+    return cachedResponse;
+  }
+
+  if (cachedResponse) {
+    // We have it in cache.  Try to fetch a live version and update the cache,
+    // but limit how long we will wait for the updated version.
+    try {
+      return timeout(NETWORK_TIMEOUT, fetchAndCache(cache, request));
+    } catch (error) {
+      // We tried to fetch a live version, but it either failed or took too
+      // long.  If it took too long, the fetch and cache operation will continue
+      // in the background.  In both cases, we should go ahead with a cached
+      // version.
+      return cachedResponse;
+    }
+  } else {
+    // We should have this in cache, but we don't.  Fetch and cache a fresh
+    // copy and then return it.
+    return fetchAndCache(cache, request);
+  }
+}
 
 /**
  * Fetch the resource from the network, then store this new version in the
@@ -225,13 +264,11 @@ function onFetch(event) {
  * @param {!Request} request
  * @return {!Promise.<!Response>}
  */
-function fetchAndCache(cache, request) {
-  return fetch(request).then(function(response) {
-    cache.put(request, response.clone());
-    return response;
-  });
+async function fetchAndCache(cache, request) {
+  const response = await fetch(request);
+  cache.put(request, response.clone());
+  return response;
 }
-
 
 /**
  * Returns a Promise which is resolved only if |asyncProcess| is resolved, and
@@ -252,12 +289,11 @@ function fetchAndCache(cache, request) {
 function timeout(seconds, asyncProcess) {
   return Promise.race([
     asyncProcess,
-    new Promise(function(_, reject) {
+    new Promise(((_, reject) => {
       setTimeout(reject, seconds * 1000);
-    })
+    })),
   ]);
 }
-
 
 self.addEventListener('install', /** @type {function(!Event)} */(onInstall));
 self.addEventListener('activate', /** @type {function(!Event)} */(onActivate));

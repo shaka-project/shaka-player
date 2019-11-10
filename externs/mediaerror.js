@@ -32,7 +32,7 @@ MediaError.prototype.message;
 
 
 /**
- * A Microsoft Edge & IE extension to add a Windows error code.
+ * A Microsoft Edge and IE extension to add a Windows error code.
  * @type {number}
  */
 MediaError.prototype.msExtendedCode;

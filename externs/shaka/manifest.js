@@ -16,13 +16,15 @@
  */
 
 
-/** @externs */
+/**
+ * @externs
+ */
 
 
 /**
  * @typedef {{
  *   presentationTimeline: !shaka.media.PresentationTimeline,
- *   periods: !Array.<!shakaExtern.Period>,
+ *   periods: !Array.<!shaka.extern.Period>,
  *   offlineSessionIds: !Array.<string>,
  *   minBufferTime: number
  * }}
@@ -48,7 +50,7 @@
  * <p>
  * The presentation timeline is divided into one or more Periods, and each of
  * these Periods contains its own collection of Variants and text streams.
- * Variant is a combination of an audio and a video streams that can be played
+ * A variant is a combination of an audio and a video streams that can be played
  * together.
  * </p>
  *
@@ -57,14 +59,14 @@
  * difference between the two is their quality. For example, an SD video stream
  * and an HD video stream that depict the same scene have the same logical
  * content; whereas an English audio stream and a French audio stream have
- * different logical content. The player can automatically switch between
+ * different logical contents. The player can automatically switch between
  * streams which have the same logical content to adapt to network conditions.
  * </p>
  *
  * @property {!shaka.media.PresentationTimeline} presentationTimeline
  *   <i>Required.</i> <br>
  *   The presentation timeline.
- * @property {!Array.<!shakaExtern.Period>} periods
+ * @property {!Array.<!shaka.extern.Period>} periods
  *   <i>Required.</i> <br>
  *   The presentation's Periods. There must be at least one Period.
  * @property {!Array.<string>} offlineSessionIds
@@ -78,14 +80,14 @@
  *
  * @exportDoc
  */
-shakaExtern.Manifest;
+shaka.extern.Manifest;
 
 
 /**
  * @typedef {{
  *   startTime: number,
- *   variants: !Array.<shakaExtern.Variant>,
- *   textStreams: !Array.<shakaExtern.Stream>
+ *   variants: !Array.<shaka.extern.Variant>,
+ *   textStreams: !Array.<shaka.extern.Stream>
  * }}
  *
  * @description
@@ -98,16 +100,16 @@ shakaExtern.Manifest;
  *   presentation. The Period ends immediately before the next Period's start
  *   time or exactly at the end of the presentation timeline. Periods which
  *   begin after the end of the presentation timeline are ignored.
- * @property {!Array.<shakaExtern.Variant>} variants
+ * @property {!Array.<shaka.extern.Variant>} variants
  *   <i>Required.</i> <br>
  *   The Period's Variants. There must be at least one Variant.
- * @property {!Array.<shakaExtern.Stream>} textStreams
+ * @property {!Array.<shaka.extern.Stream>} textStreams
  *   <i>Required.</i> <br>
  *   The Period's text streams.
  *
  * @exportDoc
  */
-shakaExtern.Period;
+shaka.extern.Period;
 
 
 /**
@@ -120,7 +122,7 @@ shakaExtern.Period;
  * @description
  * Explicit initialization data, which override any initialization data in the
  * content. The initDataType values and the formats that they correspond to
- * are specified {@link https://goo.gl/TNjYwn here}.
+ * are specified {@link https://bit.ly/EmeInitTypes here}.
  *
  * @property {!Uint8Array} initData
  *   Initialization data in the format indicated by initDataType.
@@ -131,7 +133,7 @@ shakaExtern.Period;
  *
  * @exportDoc
  */
-shakaExtern.InitDataOverride;
+shaka.extern.InitDataOverride;
 
 
 /**
@@ -143,7 +145,7 @@ shakaExtern.InitDataOverride;
  *   audioRobustness: string,
  *   videoRobustness: string,
  *   serverCertificate: Uint8Array,
- *   initData: Array.<!shakaExtern.InitDataOverride>,
+ *   initData: Array.<!shaka.extern.InitDataOverride>,
  *   keyIds: Array.<string>
  * }}
  *
@@ -178,17 +180,17 @@ shakaExtern.InitDataOverride;
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
- * @property {Array.<!shakaExtern.InitDataOverride>} initData
+ * @property {Array.<!shaka.extern.InitDataOverride>} initData
  *   <i>Defaults to [], e.g., no override.</i> <br>
  *   A list of initialization data which override any initialization data found
- *   in the content.  See also shakaExtern.InitDataOverride.
+ *   in the content.  See also shaka.extern.InitDataOverride.
  * @property {Array.<string>} keyIds
  *   <i>Defaults to []</i> <br>
  *   If not empty, contains the default key IDs for this key system, as
  *   lowercase hex strings.
  * @exportDoc
  */
-shakaExtern.DrmInfo;
+shaka.extern.DrmInfo;
 
 
 /**
@@ -196,10 +198,10 @@ shakaExtern.DrmInfo;
  *   id: number,
  *   language: string,
  *   primary: boolean,
- *   audio: ?shakaExtern.Stream,
- *   video: ?shakaExtern.Stream,
+ *   audio: ?shaka.extern.Stream,
+ *   video: ?shaka.extern.Stream,
  *   bandwidth: number,
- *   drmInfos: !Array.<!shakaExtern.DrmInfo>,
+ *   drmInfos: !Array.<shaka.extern.DrmInfo>,
  *   allowedByApplication: boolean,
  *   allowedByKeySystem: boolean
  * }}
@@ -219,16 +221,16 @@ shakaExtern.DrmInfo;
  *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm}
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
- *   True indicates that the player should use this Variant over others of
- *   the in the same Period. However, the player may use another
- *   Variant to meet application preferences.
- * @property {?shakaExtern.Stream} audio
+ *   True indicates that the player should use this Variant over others in the
+ *   same Period. The player may still use another Variant to meet application
+ *   preferences.
+ * @property {?shaka.extern.Stream} audio
  *   The audio stream of the variant.
- * @property {?shakaExtern.Stream} video
+ * @property {?shaka.extern.Stream} video
  *   The video stream of the variant.
  * @property {number} bandwidth
  *   The variant's required bandwidth in bits per second.
- * @property {!Array.<!shakaExtern.DrmInfo>} drmInfos
+ * @property {!Array.<!shaka.extern.DrmInfo>} drmInfos
  *   <i>Defaults to [] (i.e., no DRM).</i> <br>
  *   An array of DrmInfo objects which describe DRM schemes are compatible with
  *   the content.
@@ -243,7 +245,7 @@ shakaExtern.DrmInfo;
  *
  * @exportDoc
  */
-shakaExtern.Variant;
+shaka.extern.Variant;
 
 
 /**
@@ -253,40 +255,15 @@ shakaExtern.Variant;
  * @typedef {function(): !Promise}
  * @exportDoc
  */
-shakaExtern.CreateSegmentIndexFunction;
-
-
-/**
- * Finds the position of the segment for the given time, in seconds, relative
- * to the start of a particular Period; returns null if the position of the
- * segment could not be determined. Note: the position of a segment is unique
- * only among segments within the same Period.
- *
- * @typedef {function(number): ?number}
- * @exportDoc
- */
-shakaExtern.FindSegmentPositionFunction;
-
-
-/**
- * Gets the SegmentReference for the segment at the given position; returns
- * null if no such SegmentReference exists. Note: the position of a segment is
- * unique only among segments within the same Period.
-
- * @typedef {function(number): shaka.media.SegmentReference}
- * @exportDoc
- */
-shakaExtern.GetSegmentReferenceFunction;
+shaka.extern.CreateSegmentIndexFunction;
 
 
 /**
  * @typedef {{
  *   id: number,
- *   createSegmentIndex: shakaExtern.CreateSegmentIndexFunction,
- *   findSegmentPosition: shakaExtern.FindSegmentPositionFunction,
- *   getSegmentReference: shakaExtern.GetSegmentReferenceFunction,
- *   initSegmentReference: shaka.media.InitSegmentReference,
- *   presentationTimeOffset: (number|undefined),
+ *   originalId: ?string,
+ *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
+ *   segmentIndex: shaka.media.SegmentIndex,
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
@@ -300,10 +277,11 @@ shakaExtern.GetSegmentReferenceFunction;
  *   label: ?string,
  *   type: string,
  *   primary: boolean,
- *   trickModeVideo: ?shakaExtern.Stream,
- *   containsEmsgBoxes: boolean,
+ *   trickModeVideo: ?shaka.extern.Stream,
+ *   emsgSchemeIdUris: ?Array.<string>,
  *   roles: !Array.<string>,
- *   channelsCount: ?number
+ *   channelsCount: ?number,
+ *   closedCaptions: Map.<string, string>
  * }}
  *
  * @description
@@ -312,32 +290,17 @@ shakaExtern.GetSegmentReferenceFunction;
  * @property {number} id
  *   <i>Required.</i> <br>
  *   A unique ID among all Stream objects within the same Manifest.
- * @property {shakaExtern.CreateSegmentIndexFunction} createSegmentIndex
+ * @property {?string} originalId
+ *   <i>Optional.</i> <br>
+ *   The original ID, if any, that appeared in the manifest.  For example, in
+ *   DASH, this is the "id" attribute of the Representation element.  In HLS,
+ *   this is the "NAME" attribute.
+ * @property {shaka.extern.CreateSegmentIndexFunction} createSegmentIndex
  *   <i>Required.</i> <br>
- *   Creates the Stream's SegmentIndex (asynchronously).
- * @property {shakaExtern.FindSegmentPositionFunction} findSegmentPosition
+ *   Creates the Stream's segmentIndex (asynchronously).
+ * @property {shaka.media.SegmentIndex} segmentIndex
  *   <i>Required.</i> <br>
- *   Finds the position of the segment for the given time. The caller must call
- *   createSegmentIndex() and wait until the returned Promise resolves before
- *   calling this function.
- * @property {shakaExtern.GetSegmentReferenceFunction} getSegmentReference
- *   <i>Required.</i> <br>
- *   Gets the SegmentReference for the segment at the given position. The
- *   caller must call createSegmentIndex() and wait until the returned Promise
- *   resolves before calling this function.
- * @property {shaka.media.InitSegmentReference} initSegmentReference
- *   The Stream's initialization segment metadata, or null if the segments are
- *   self-initializing.
- * @property {(number|undefined)} presentationTimeOffset
- *   <i>Defaults to 0.</i> <br>
- *   The amount of time, in seconds, that the stream's presentation timestamps
- *   are offset from the start of the Stream's Period, i.e., this value should
- *   equal the first presentation timestamp of the first frame/sample in the
- *   period. <br>
- *   <br>
- *   For example, for MP4 based streams, this value should equal the first
- *   segment's tfdt box's 'baseMediaDecodeTime' field (after it has been
- *   converted to seconds).
+ *   May be null until createSegmentIndex() is complete.
  * @property {string} mimeType
  *   <i>Required.</i> <br>
  *   The Stream's MIME type, e.g., 'audio/mp4', 'video/webm', or 'text/vtt'.
@@ -361,15 +324,14 @@ shakaExtern.GetSegmentReferenceFunction;
  * @property {(string|undefined)} kind
  *   <i>Text streams only.</i> <br>
  *   The kind of text stream.  For example, 'caption' or 'subtitle'.
- *   @see https://goo.gl/k1HWA6
+ *   @see https://bit.ly/TextKind
  * @property {boolean} encrypted
  *   <i>Defaults to false.</i><br>
  *   True if the stream is encrypted.
  * @property {?string} keyId
  *   <i>Defaults to null (i.e., unencrypted or key ID unknown).</i> <br>
  *   The stream's key ID as a lowercase hex string. This key ID identifies the
- *   encryption key that the browser (key system) can use to decrypt the
- *   stream.
+ *   encryption key that the browser (key system) can use to decrypt the stream.
  * @property {string} language
  *   The Stream's language, specified as a language code. <br>
  *   Audio stream's language must be identical to the language of the containing
@@ -382,20 +344,26 @@ shakaExtern.GetSegmentReferenceFunction;
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
  *   True indicates that the player should prefer this Stream over others
- *   in the same Period. However, the player may use another
- *   Stream to meet application preferences.
- * @property {?shakaExtern.Stream} trickModeVideo
+ *   in the same Period. The player may still use another Stream to meet
+ *   application preferences.
+ * @property {?shaka.extern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.
- * @property {boolean} containsEmsgBoxes
- *   <i>Defaults to false.</i><br>
- *   Whether the stream contains embedded 'emsg' boxes that should result in
+ * @property {?Array.<string>} emsgSchemeIdUris
+ *   <i>Defaults to empty.</i><br>
+ *   Array of registered emsg box scheme_id_uri that should result in
  *   Player events.
  * @property {!Array.<string>} roles
  *   The roles of the stream as they appear on the manifest,
  *   e.g. 'main', 'caption', or 'commentary'.
  * @property {?number} channelsCount
  *   The channel count information for the audio stream.
+ * @property {Map.<string, string>} closedCaptions
+ *   A map containing the description of closed captions, with the caption
+ *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
+ *   as the value. If the channel number is not provided by the description,
+ *   we'll set an 0-based index as the key.
+ *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
  * @exportDoc
  */
-shakaExtern.Stream;
+shaka.extern.Stream;

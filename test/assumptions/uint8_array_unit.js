@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-describe('Uint8Array', function() {
-  it('checks equality', function() {
-    var subject = new Uint8Array([0, 1, 2, 3]);
-    var same = new Uint8Array([0, 1, 2, 3]);
-    var different = new Uint8Array([4, 5, 6, 7]);
+describe('Uint8Array', () => {
+  it('checks equality', () => {
+    const subject = new Uint8Array([0, 1, 2, 3]);
+    const same = new Uint8Array([0, 1, 2, 3]);
+    const different = new Uint8Array([4, 5, 6, 7]);
 
     expect(subject).toBe(subject);
     expect(subject).toEqual(subject);

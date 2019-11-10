@@ -1,10 +1,5 @@
 closure/compiler.jar
-  The closure compiler, v20171203, by Google.
-  Apache v2.0 license.
-  https://github.com/google/closure-compiler
-
-closure/linter.jar
-  The closure compiler linter, v20171203, by Google.
+  The closure compiler, v20180402, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-compiler
 
@@ -19,3 +14,8 @@ closure/deps
   The closure dependency generator, part of the closure library, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-library
+
+language-mapping-list
+  A map of languages to their names, v0.0.16, by Ali Al Dallal / Mozilla.
+  MIT license.
+  https://github.com/mozilla/language-mapping-list

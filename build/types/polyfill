@@ -3,12 +3,14 @@
 +../../lib/polyfill/fullscreen.js
 +../../lib/polyfill/indexed_db.js
 +../../lib/polyfill/input_event.js
++../../lib/polyfill/languages.js
 +../../lib/polyfill/mathround.js
-+../../lib/polyfill/mediakeys.js
 +../../lib/polyfill/mediasource.js
++../../lib/polyfill/patchedmediakeys_apple.js
 +../../lib/polyfill/patchedmediakeys_ms.js
 +../../lib/polyfill/patchedmediakeys_nop.js
 +../../lib/polyfill/patchedmediakeys_webkit.js
++../../lib/polyfill/pip_webkit.js
 +../../lib/polyfill/video_play_promise.js
 +../../lib/polyfill/videoplaybackquality.js
 +../../lib/polyfill/vttcue.js

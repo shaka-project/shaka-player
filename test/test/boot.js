@@ -19,44 +19,57 @@
 /**
  * Gets the value of an argument passed from karma.
  * @param {string} name
- * @return {?string|boolean}
+ * @return {?}
  */
 function getClientArg(name) {
-  if (window.__karma__ && __karma__.config.args.length)
+  if (window.__karma__ && __karma__.config.args.length) {
     return __karma__.config.args[0][name] || null;
-  else
+  } else {
     return null;
+  }
 }
 
 
 // Executed before test utilities and tests are loaded, but after Shaka Player
 // is loaded in uncompiled mode.
-(function() {
-  var realAssert = console.assert.bind(console);
+(() => {
+  // eslint-disable-next-line no-restricted-syntax
+  const realAssert = console.assert.bind(console);
 
   /**
    * A version of assert() which hooks into jasmine and converts all failed
    * assertions into failed tests.
    * @param {*} condition
-   * @param {string=} opt_message
+   * @param {string=} message
    */
-  function jasmineAssert(condition, opt_message) {
-    realAssert(condition, opt_message);
+  function jasmineAssert(condition, message) {
+    realAssert(condition, message);
     if (!condition) {
-      var message = opt_message || 'Assertion failed.';
+      message = message || 'Assertion failed.';
       console.error(message);
-      try {
-        throw new Error(message);
-      } catch (exception) {
-        fail(message);
-      }
+      fail(message);
     }
   }
   goog.asserts.assert = jasmineAssert;
   console.assert = /** @type {?} */(jasmineAssert);
 
+  // As of Feb 2018, this is only implemented in Chrome.
+  // https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection
+  window.addEventListener('unhandledrejection', (event) => {
+    /** @type {?} */
+    const error = event.reason;
+    let message = 'Unhandled rejection in Promise: ' + error;
+
+    // Shaka errors have the stack trace in their toString() already, so don't
+    // add it again.  For native errors, we need to see where it came from.
+    if (error && error.stack && !(error instanceof shaka.util.Error)) {
+      message += '\n' + error.stack;
+    }
+    fail(message);
+  });
+
   // Use a RegExp if --specFilter is set, else empty string will match all.
-  var specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
+  const specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
 
   /**
    * A filter over all Jasmine specs.
@@ -84,12 +97,14 @@ function getClientArg(name) {
   // seems to be OK.  I suspect Edge's Promise implementation is actually not in
   // native code, but rather something like a polyfill that binds to timer calls
   // the first time it needs to schedule something.
-  Promise.resolve().then(function() {});
+  Promise.resolve().then(() => {});
 
-  // Set the default timeout to 120s for all asynchronous tests.
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
+  const timeout = getClientArg('testTimeout');
+  if (timeout) {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = Number(timeout);
+  }
 
-  var logLevel = getClientArg('logLevel');
+  const logLevel = getClientArg('logLevel');
   if (logLevel) {
     shaka.log.setLevel(Number(logLevel));
   } else {
@@ -100,7 +115,7 @@ function getClientArg(name) {
   if (getClientArg('random')) {
     jasmine.getEnv().randomizeTests(true);
 
-    var seed = getClientArg('seed');
+    const seed = getClientArg('seed');
     if (seed) {
       jasmine.getEnv().seed(seed.toString());
     }
@@ -108,47 +123,35 @@ function getClientArg(name) {
 
   /**
    * Returns a Jasmine callback which shims the real callback and checks for
-   * a certain client arg.  The test will only be run if that argument is
-   * specified on the command-line.
+   * a certain condition.  The test will only be run if the condition is true.
    *
    * @param {jasmine.Callback} callback  The test callback.
-   * @param {string} clientArg  The command-line arg that must be present.
-   * @param {string} skipMessage  The message used when skipping a test.
+   * @param {function():*} cond
+   * @param {?string} skipMessage  The message used when skipping a test; or
+   *   null to not use pending().  This should only be null for before/after
+   *   blocks.
    * @return {jasmine.Callback}
    */
-  function filterShim(callback, clientArg, skipMessage) {
-    if (callback.length) {
-      // This callback is for an async test.  Replace it with an async shim.
-      return function(done) {
-        if (getClientArg(clientArg)) {
-          callback(done);
-        } else {
-          pending(skipMessage);
-          done();
-        }
-      };
-    } else {
-      // This callback is for a synchronous test.  Use a synchronous shim.
-      return function() {
-        if (getClientArg(clientArg)) {
-          callback();
-        } else {
+  function filterShim(callback, cond, skipMessage) {
+    return async () => {
+      const val = await cond();
+      if (!val) {
+        if (skipMessage) {
           pending(skipMessage);
         }
-      };
-    }
-  }
+        return;
+      }
 
-  /**
-   * Run a test that uses external content.
-   *
-   * @param {string} name
-   * @param {jasmine.Callback} callback
-   */
-  window.external_it = function(name, callback) {
-    it(name, filterShim(callback, 'external',
-        'Skipping tests that use external content.'));
-  };
+      if (callback.length) {
+        // If this has a done callback, wrap in a Promise so we can await it.
+        await new Promise((resolve) => callback(resolve));
+      } else {
+        // If this is an async test, this will wait for it to complete; if this
+        // is a synchronous test, await will do nothing.
+        await callback();
+      }
+    };
+  }
 
   /**
    * Run a test that uses a DRM license server.
@@ -156,9 +159,11 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.drm_it = function(name, callback) {
-    it(name, filterShim(callback, 'drm',
-        'Skipping tests that use a DRM license server.'));
+  window.drmIt = (name, callback) => {
+    const shim = filterShim(
+        callback, () => getClientArg('drm'),
+        'Skipping tests that use a DRM license server.');
+    it(name, shim);
   };
 
   /**
@@ -167,46 +172,104 @@ function getClientArg(name) {
    * @param {string} name
    * @param {jasmine.Callback} callback
    */
-  window.quarantined_it = function(name, callback) {
-    it(name, filterShim(callback, 'quarantined',
-        'Skipping tests that are quarantined.'));
+  window.quarantinedIt = (name, callback) => {
+    const shim = filterShim(
+        callback, () => getClientArg('quarantined'),
+        'Skipping tests that are quarantined.');
+    it(name, shim);
   };
 
-  beforeAll((done) => {
+  /**
+   * Run contained tests when the condition is true.
+   *
+   * @param {string} describeName  The name of the describe() block.
+   * @param {function():*} cond A function for the condition; if this returns
+   *   a truthy value, the tests will run, falsy will skip the tests.
+   * @param {function()} describeBody The body of the describe() block.  This
+   *   function will call before/after/it functions to define tests.
+   */
+  window.filterDescribe = (describeName, cond, describeBody) => {
+    describe(describeName, () => {
+      const old = {};
+      for (const methodName of ['fit', 'it']) {
+        old[methodName] = window[methodName];
+        window[methodName] = (testName, testBody, ...rest) => {
+          const shim = filterShim(
+              testBody, cond, 'Skipping test due to platform support');
+          return old[methodName](testName, shim, ...rest);
+        };
+      }
+      const otherNames = ['afterAll', 'afterEach', 'beforeAll', 'beforeEach'];
+      for (const methodName of otherNames) {
+        old[methodName] = window[methodName];
+        window[methodName] = (body, ...rest) => {
+          const shim = filterShim(body, cond, null);
+          return old[methodName](shim, ...rest);
+        };
+      }
+
+      describeBody();
+
+      for (const methodName in old) {
+        window[methodName] = old[methodName];
+      }
+    });
+  };
+
+  beforeAll((done) => {  // eslint-disable-line no-restricted-syntax
     // Configure AMD modules and their dependencies.
     require.config({
       baseUrl: '/base/node_modules',
       packages: [
         {
-          name: 'promise-mock',
-          main: 'lib/index',
-        },
-        {
-          name: 'promise-polyfill',  // Used by promise-mock.
-          main: 'lib/index',
-        },
-        {
           name: 'sprintf-js',
           main: 'src/sprintf',
+        },
+        {
+          name: 'less',
+          main: 'dist/less',
         },
       ],
     });
 
     // Load required AMD modules, then proceed with tests.
-    require(['promise-mock', 'sprintf-js'], (PromiseMock, sprintfJs) => {
-      window.PromiseMock = PromiseMock;
-      window.sprintf = sprintfJs.sprintf;
+    require(['sprintf-js', 'less'],
+        (sprintfJs, less) => {
+          // These external interfaces are declared as "const" in the externs.
+          // Avoid "const"-ness complaints from the compiler by assigning these
+          // using bracket notation.
+          window['sprintf'] = sprintfJs.sprintf;
+          window['less'] = less;
 
-      // Patch a new convenience method into PromiseMock.
-      // See https://github.com/taylorhakes/promise-mock/issues/7
-      PromiseMock.flush = () => {
-        // PromiseMock.runAll() throws is waiting is empty.
-        if (PromiseMock.waiting.length) {
-          PromiseMock.runAll();
-        }
-      };
-
-      done();
-    });
+          done();
+        });
   });
+
+  const originalSetTimeout = window.setTimeout;
+  const delayTests = getClientArg('delayTests');
+  if (delayTests) {
+    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
+      console.log('Delaying test by ' + delayTests + ' seconds...');
+      originalSetTimeout(done, delayTests * 1000);
+    });
+  }
+
+  // Work-around: allow the Tizen media pipeline to cool down.
+  // Without this, Tizen's pipeline seems to hang in subsequent tests.
+  // TODO: file a bug on Tizen
+  if (shaka.util.Platform.isTizen()) {
+    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
+      originalSetTimeout(done, 100 /* ms */);
+    });
+  }
+
+  // Code in karma-jasmine's adapter will malform test failures when the
+  // expectation message contains a stack trace, losing the failure message and
+  // mixing up the stack trace of the failure.  To avoid this, we modify
+  // shaka.util.Error not to create a stack trace.  This trace is not available
+  // in production, and there is never any need for it in the tests.
+  // Shimming shaka.util.Error proved too complicated because of a combination
+  // of compiler restrictions and ES6 language features, so this is by far the
+  // simpler answer.
+  shaka.util.Error.createStack = false;
 })();

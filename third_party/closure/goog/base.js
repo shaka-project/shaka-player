@@ -108,14 +108,14 @@ goog.isDef = function(val) {
  * "a.b.c" -> a = {};a.b={};a.b.c={};
  * Used by goog.provide and goog.exportSymbol.
  * @param {string} name name of the object that this file defines.
- * @param {*=} opt_object the object to expose at the end of the path.
- * @param {Object=} opt_objectToExportTo The object to add the path to; default
+ * @param {*=} object the object to expose at the end of the path.
+ * @param {Object=} objectToExportTo The object to add the path to; default
  *     is |goog.global|.
  * @private
  */
-goog.exportPath_ = function(name, opt_object, opt_objectToExportTo) {
+goog.exportPath_ = function(name, object, objectToExportTo) {
   var parts = name.split('.');
-  var cur = opt_objectToExportTo || goog.global;
+  var cur = objectToExportTo || goog.global;
 
   // Internet Explorer exhibits strange behavior when throwing errors from
   // methods externed in this manner.  See the testExportSymbolExceptions in
@@ -131,9 +131,9 @@ goog.exportPath_ = function(name, opt_object, opt_objectToExportTo) {
 
   // Parentheses added to eliminate strict JS warning in Firefox.
   for (var part; parts.length && (part = parts.shift());) {
-    if (!parts.length && goog.isDef(opt_object)) {
+    if (!parts.length && goog.isDef(object)) {
       // last part and we have an object; use it
-      cur[part] = opt_object;
+      cur[part] = object;
     } else if (cur[part]) {
       cur = cur[part];
     } else {
@@ -311,13 +311,13 @@ if (!COMPILED) {
  * properties.
  *
  * @param {string} name The fully qualified name.
- * @param {Object=} opt_obj The object within which to look; default is
+ * @param {Object=} obj The object within which to look; default is
  *     |goog.global|.
  * @return {?} The value (object or primitive) or, if not found, null.
  */
-goog.getObjectByName = function(name, opt_obj) {
+goog.getObjectByName = function(name, obj) {
   var parts = name.split('.');
-  var cur = opt_obj || goog.global;
+  var cur = obj || goog.global;
   for (var part; part = parts.shift(); ) {
     if (goog.isDefAndNotNull(cur[part])) {
       cur = cur[part];
@@ -333,12 +333,12 @@ goog.getObjectByName = function(name, opt_obj) {
  * Globalizes a whole namespace, such as goog or goog.lang.
  *
  * @param {Object} obj The namespace to globalize.
- * @param {Object=} opt_global The object to add the properties to.
+ * @param {Object=} global The object to add the properties to.
  * @deprecated Properties may be explicitly exported to the global scope, but
  *     this should no longer be done in bulk.
  */
-goog.globalize = function(obj, opt_global) {
-  var global = opt_global || goog.global;
+goog.globalize = function(obj, global) {
+  global = global || goog.global;
   for (var x in obj) {
     global[x] = obj[x];
   }
@@ -562,13 +562,13 @@ if (goog.DEPENDENCIES_ENABLED) {
    * Imports a script if, and only if, that script hasn't already been imported.
    * (Must be called at execution time)
    * @param {string} src Script source.
-   * @param {string=} opt_sourceText The optionally source text to evaluate
+   * @param {string=} sourceText The optionally source text to evaluate
    * @private
    */
-  goog.importScript_ = function(src, opt_sourceText) {
+  goog.importScript_ = function(src, sourceText) {
     var importScript = goog.global.CLOSURE_IMPORT_SCRIPT ||
         goog.writeScriptTag_;
-    if (importScript(src, opt_sourceText)) {
+    if (importScript(src, sourceText)) {
       goog.dependencies_.written[src] = true;
     }
   };
@@ -579,11 +579,11 @@ if (goog.DEPENDENCIES_ENABLED) {
    * import the script.
    *
    * @param {string} src The script url.
-   * @param {string=} opt_sourceText The optionally source text to evaluate
+   * @param {string=} sourceText The optionally source text to evaluate
    * @return {boolean} True if the script was imported, false otherwise.
    * @private
    */
-  goog.writeScriptTag_ = function(src, opt_sourceText) {
+  goog.writeScriptTag_ = function(src, sourceText) {
     if (goog.inHtmlDocument_()) {
       var doc = goog.global.document;
 
@@ -603,14 +603,14 @@ if (goog.DEPENDENCIES_ENABLED) {
         }
       }
 
-      if (opt_sourceText === undefined) {
+      if (sourceText === undefined) {
         doc.write(
             '<script type="text/javascript" src="' +
                 src + '"></' + 'script>');
       } else {
         doc.write(
             '<script type="text/javascript">' +
-              opt_sourceText + '</' + 'script>');
+              sourceText + '</' + 'script>');
       }
       return true;
     } else {
@@ -757,11 +757,11 @@ goog.isString = function(val) {
  *
  * @param {string} publicPath Unobfuscated name to export.
  * @param {*} object Object the name should point to.
- * @param {Object=} opt_objectToExportTo The object to add the path to; default
+ * @param {Object=} objectToExportTo The object to add the path to; default
  *     is goog.global.
  */
-goog.exportSymbol = function(publicPath, object, opt_objectToExportTo) {
-  goog.exportPath_(publicPath, object, opt_objectToExportTo);
+goog.exportSymbol = function(publicPath, object, objectToExportTo) {
+  goog.exportPath_(publicPath, object, objectToExportTo);
 };
 
 

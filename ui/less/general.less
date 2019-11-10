@@ -1,0 +1,128 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* General utility mixins and classes with broad applicability. */
+
+/* Make a thing unselectable.  There are currently no cases where we make it
+ * selectable again. */
+.unselectable() {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.hidden() {
+  display: none;
+}
+
+.fill-container() {
+  width: 100%;
+  height: 100%;
+}
+
+.bottom-align-children() {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+
+.bottom-panels-elements-margin() {
+  margin: 1px 6px;
+}
+
+/* For containers which host elements overlaying other things. */
+.overlay-parent() {
+  /* For a detailed explanation of how this achieves an overlay, please refer
+   * to https://developer.mozilla.org/en-US/docs/Web/CSS/position .
+   *
+   * But you don't have to, because we've encapsulated these high level
+   * concepts into classes.
+   *
+   * This makes it possible for some children of this container to overlay the
+   * others using .overlay-child(). */
+  position: relative;
+
+  /* Make sure any top or left styles applied from outside don't move this from
+   * it's original position, now that it's relative to that original position.
+   * This is a defensive move that came out of intensive debugging on IE 11. */
+  top: 0;
+  left: 0;
+}
+
+/* For things which overlay other things. */
+.overlay-child() {
+  /* For a detailed explanation of how this achieves an overlay, please refer
+   * to https://developer.mozilla.org/en-US/docs/Web/CSS/position .
+   *
+   * But you don't have to, because we've encapsulated these high level
+   * concepts into classes.
+   *
+   * This makes it possible for this child to overlay the other children of a
+   * .overlay-parent() object. */
+  position: absolute;
+
+  /* Fill the container by default. */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+
+  .fill-container();
+}
+
+.absolute-position() {
+  /* When setting "position: absolute" it uses the left,right,top,bottom
+   * properties to determine the positioning.  We should set all these
+   * properties to ensure it is positioned properly on all platforms. */
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+/* For things that should not shrink inside a flex container.
+ * This will be used for all controls by default. */
+.unshrinkable() {
+  flex-shrink: 0;
+}
+
+/* Use this to override .unshrinkable() in particular cases that *should* shrink
+ * inside a flex container. */
+.shrinkable() {
+  flex-shrink: 1;
+}
+
+.opacity-transition() {
+  /* Transparent unless explicitly made opaque through
+   "shown=true" attribute */
+  opacity: 0;
+
+  /* When we show/hide this, do it gradually using cubic-bezier timing. */
+  transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 600ms;
+
+  &[shown="true"] {
+    opacity: 1;
+  }
+}
+
+/* The width of the bottom-section controls: seek bar, ad controls, and
+the control buttons panel. */
+@bottom-controls-width: 96%;

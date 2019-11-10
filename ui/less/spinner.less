@@ -1,0 +1,84 @@
+/**
+ * @license
+ * The SVG/CSS buffering spinner is based on http://codepen.io/jczimm/pen/vEBpoL
+ * Some local modifications have been made.
+ *
+ * Copyright (c) 2016 by jczimm
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/* This is the spinner SVG itself, which contains a circular path element.
+ * It sits inside the play button and fills it. */
+.shaka-spinner-svg {
+  /* Because of some sizing hacks in the play button (see comments there), this
+   * spinner needs to be an overlay child to be properly sized and positioned
+   * within the button. */
+  .overlay-child();
+
+  /* Keep it spinning! */
+  animation: rotate 2s linear infinite;
+  transform-origin: center center;
+
+  /* The SVG should fill its container. */
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* This is the path element, which draws a circle. */
+.shaka-spinner-path {
+  /* Fall back for IE 11, where the stroke properties cannot be animated,
+   * but the spinner still rotates. */
+  stroke: #202124;
+  stroke-dasharray: 20, 200;
+  stroke-dashoffset: 0;
+
+  /* Animate the stroke of this circular path. */
+  animation: dash 1.5s ease-in-out infinite;
+
+  /* Round the line on the ends. */
+  stroke-linecap: round;
+}
+
+/* Spin the whole SVG. */
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pulse the circle's outline forward and backward while it spins. */
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124px;
+  }
+}

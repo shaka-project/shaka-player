@@ -1,0 +1,35 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* UI elements that did not fit into the buttons/range elements category. */
+
+/* This is a spacer element used to separate elements within the control
+ * buttons panel. It's just an empty div of certain width. */
+.shaka-spacer {
+  /* This should not have a pointer-style cursor like the other controls. */
+  cursor: default;
+
+  /* Make the element shrink to accommodate things to the right. */
+  .shrinkable();
+
+  /* Make the element grow to take up the remaining space. */
+  flex-grow: 1;
+
+  /* Margins don't shrink. Remove margins in order to be more flexible when
+   * shrinking. */
+  margin: 0;
+}

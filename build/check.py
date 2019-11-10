@@ -22,68 +22,91 @@ This checks:
  * Run the linter to check for style violations.
 """
 
+import argparse
+import ast
 import logging
 import os
 import re
-import sys
 
 import build
+import compiler
 import shakaBuildHelpers
+
+
+_CHECKS = []
+
+def _Check(name):
+  """A decorator for checks."""
+  def decorator(func):
+    _CHECKS.append((name, func))
+    return func
+  return decorator
 
 
 def get_lint_files():
   """Returns the absolute paths to all the files to run the linter over."""
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(arg):
-    return shakaBuildHelpers.get_all_files(os.path.join(base, arg), match)
-  return get('test') + get('lib') + get('externs') + get('demo')
+  def get(*path_components):
+    return shakaBuildHelpers.get_all_files(
+        os.path.join(base, *path_components), match)
+  main_sources = (get('test') + get('lib') + get('externs') + get('demo') +
+      get('ui') + get('build'))
+  main_sources.remove(os.path.join(base, 'build', 'wrapper.template.js'))
+  tool_sources = [
+      os.path.join(base, '.eslintrc.js'),
+      os.path.join(base, 'docs', 'jsdoc-plugin.js'),
+      os.path.join(base, 'karma.conf.js'),
+  ]
+  return main_sources + tool_sources
 
 
-def check_closure_compiler_linter():
-  """Runs the Closure Compiler linter."""
-  logging.info('Running Closure Compiler linter...')
-
-  base = shakaBuildHelpers.get_source_base()
-  closure_linter_path = os.path.join(base, 'third_party', 'closure', 'linter.jar')
-  cmd_line = ['java', '-jar', closure_linter_path] + get_lint_files()
-
-  # The compiler's linter tool doesn't return a status code (as of v20171203)
-  # and has no options.  Instead of checking status, success is no output.
-  output = shakaBuildHelpers.execute_get_output(cmd_line)
-  if output != '':
-    print output
-    return False
-  return True
-
-
-def check_js_lint():
+@_Check('js_lint')
+def check_js_lint(args):
   """Runs the JavaScript linter."""
   # TODO: things not enforced: property doc requirements
-  logging.info('Running eslint...')
+  logging.info('Linting JavaScript...')
 
-  eslint = shakaBuildHelpers.get_node_binary('eslint')
-  cmd_line = eslint + get_lint_files()
-  return shakaBuildHelpers.execute_get_code(cmd_line) == 0
-
-
-def check_html_lint():
-  """Runs the HTML linter over the HTML files.
-
-  Returns:
-    True on success, False on failure.
-  """
-  logging.info('Running htmlhint...')
-  htmlhint = shakaBuildHelpers.get_node_binary('htmlhint')
   base = shakaBuildHelpers.get_source_base()
-  files = ['index.html', 'demo/index.html', 'support.html']
+  config_path = os.path.join(base, '.eslintrc.js')
+
+  linter = compiler.Linter(get_lint_files(), config_path)
+  return linter.lint(fix=args.fix, force=args.force)
+
+
+@_Check('css_lint')
+def check_css_lint(args):
+  """Runs the CSS linter."""
+  logging.info('Linting CSS...')
+
+  match = re.compile(r'.*\.(less|css)$')
+  base = shakaBuildHelpers.get_source_base()
+  def get(*path_components):
+    return shakaBuildHelpers.get_all_files(
+        os.path.join(base, *path_components), match)
+  files = (get('ui') + get('demo'));
+  config_path = os.path.join(base, '.csslintrc')
+
+  linter = compiler.CssLinter(files, config_path)
+  return linter.lint(fix=args.fix, force=args.force)
+
+
+@_Check('html_lint')
+def check_html_lint(args):
+  """Runs the HTML linter."""
+  logging.info('Linting HTML...')
+
+  base = shakaBuildHelpers.get_source_base()
+  files = ['index.html', os.path.join('demo', 'index.html'), 'support.html']
   file_paths = [os.path.join(base, x) for x in files]
   config_path = os.path.join(base, '.htmlhintrc')
-  cmd_line = htmlhint + ['--config=' + config_path] + file_paths
-  return shakaBuildHelpers.execute_get_code(cmd_line) == 0
+
+  htmllinter = compiler.HtmlLinter(file_paths, config_path)
+  return htmllinter.lint(force=args.force)
 
 
-def check_complete():
+@_Check('complete')
+def check_complete(_):
   """Checks whether the 'complete' build references every file.
 
   This is used by the build script to ensure that every file is included in at
@@ -104,8 +127,12 @@ def check_complete():
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  all_files = shakaBuildHelpers.get_all_files(os.path.join(base, 'lib'), match)
-  missing_files = set(all_files) - complete.include
+  all_files = set()
+  all_files.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'lib'), match))
+  all_files.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'ui'), match))
+  missing_files = all_files - complete.include
 
   if missing_files:
     logging.error('There are files missing from the complete build:')
@@ -116,7 +143,125 @@ def check_complete():
   return True
 
 
-def check_tests():
+@_Check('spelling')
+def check_spelling(_):
+  """Checks that source files don't have any common misspellings."""
+  logging.info('Checking for common misspellings...')
+
+  complete = build.Build()
+  # Normally we don't need to include @core, but because we look at the build
+  # object directly, we need to include it here.  When using main(), it will
+  # call addCore which will ensure core is included.
+  if not complete.parse_build(['+@complete', '+@core'], os.getcwd()):
+    logging.error('Error parsing complete build')
+    return False
+  base = shakaBuildHelpers.get_source_base()
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'test'), re.compile(r'.*\.js$')))
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'demo'), re.compile(r'.*\.js$')))
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'build'), re.compile(r'.*\.(js|py)$')))
+
+  with shakaBuildHelpers.open_file(
+      os.path.join(base, 'build', 'misspellings.txt')) as f:
+    misspellings = ast.literal_eval(f.read())
+  has_error = False
+  for path in complete.include:
+    with shakaBuildHelpers.open_file(path) as f:
+      for i, line in enumerate(f):
+        for regex, replace_pattern in misspellings.items():
+          for match in re.finditer(regex, line):
+            repl = match.expand(replace_pattern)
+            if match.group(0).lower() == repl:
+              continue  # No-op suggestion
+
+            if not has_error:
+              logging.error('The following file(s) have misspellings:')
+            logging.error(
+                '  %s:%d:%d: Did you mean %r?' %
+                (os.path.relpath(path, base), i + 1, match.start() + 1, repl))
+            has_error = True
+
+  return not has_error
+
+
+@_Check('eslint_disable')
+def check_eslint_disable(_):
+  """Checks that source files correctly use "eslint-disable".
+
+  - Rules are disabled/enabled in nested blocks.
+  - Rules are not disabled multiple times.
+  - Rules are enabled again by the end of the file.
+
+  Returns:
+    True on success, False on failure.
+  """
+  logging.info('Checking correct usage of eslint-disable...')
+
+  complete = build.Build()
+  # Normally we don't need to include @core, but because we look at the build
+  # object directly, we need to include it here.  When using main(), it will
+  # call addCore which will ensure core is included.
+  if not complete.parse_build(['+@complete', '+@core'], os.getcwd()):
+    logging.error('Error parsing complete build')
+    return False
+  base = shakaBuildHelpers.get_source_base()
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'test'), re.compile(r'.*\.js$')))
+  complete.include.update(shakaBuildHelpers.get_all_files(
+      os.path.join(base, 'demo'), re.compile(r'.*\.js$')))
+
+  has_error = False
+  for path in complete.include:
+    # The stack of rules that are disabled.
+    disabled = []
+
+    with shakaBuildHelpers.open_file(path, 'r') as f:
+      rel_path = os.path.relpath(path, base)
+      for i, line in enumerate(f):
+        match = re.match(r'^\s*/\* eslint-(disable|enable) ([\w-]*) \*/$', line)
+        if match:
+          if match.group(1) == 'disable':
+            # |line| disables a rule; validate it isn't already disabled.
+            if match.group(2) in disabled:
+              logging.error('%s:%d Rule %r already disabled',
+                            rel_path, i + 1, match.group(2))
+              has_error = True
+            else:
+              disabled.append(match.group(2))
+          else:
+            # |line| enabled a rule; validate it's already disabled and it's
+            # enabled in the correct order.
+            if not disabled or match.group(2) not in disabled:
+              logging.error("%s:%d Rule %r isn't disabled",
+                            rel_path, i + 1, match.group(2))
+              has_error = True
+            elif disabled[-1] != match.group(2):
+              logging.error('%s:%d Rule %r enabled out of order',
+                            rel_path, i + 1, match.group(2))
+              has_error = True
+              disabled = [x for x in disabled if x != match.group(2)]
+            else:
+              disabled = disabled[:-1]
+        else:
+          # |line| is not a normal eslint-disable or eslint-enable line.  Verify
+          # we don't have this text elsewhere where eslint will ignore it.
+          if re.search(r'eslint-(disable|enable)(?!-(next-)?line)', line):
+            logging.error('%s:%d Invalid eslint-disable',
+                          rel_path, i + 1)
+            has_error = True
+
+      for rule in disabled:
+        logging.error('%s:%d Rule %r still disabled at end of file',
+                      rel_path, i + 1, rule)
+        has_error = True
+
+  return not has_error
+
+
+@_Check('test_type')
+def check_tests(args):
   """Runs an extra compile pass over the test code to check for type errors.
 
   Returns:
@@ -126,12 +271,18 @@ def check_tests():
 
   match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(*args):
-    return shakaBuildHelpers.get_all_files(os.path.join(base, *args), match)
-  files = set(get('lib') + get('externs') + get('test') +
-              get('third_party', 'closure'))
+  def get(*path_components):
+    return shakaBuildHelpers.get_all_files(
+        os.path.join(base, *path_components), match)
+  files = set(get('lib') + get('externs') + get('test') + get('ui') +
+              get('third_party', 'closure') +
+              get('third_party', 'language-mapping-list'))
+  files.add(os.path.join(base, 'demo', 'common', 'asset.js'))
   files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
-  test_build = build.Build(files)
+
+  localizations = compiler.GenerateLocalizations(None)
+  localizations.generate(args.force)
+  files.add(localizations.output)
 
   closure_opts = build.common_closure_opts + build.common_closure_defines
   closure_opts += build.debug_closure_opts + build.debug_closure_defines
@@ -142,87 +293,48 @@ def check_tests():
       '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
       '--checks-only', '-O', 'SIMPLE'
   ]
-  return test_build.build_raw(closure_opts)
 
-
-def check_externs():
-  """Runs an extra compile pass over the generated externs to ensure that they
-  are usable.
-
-  Returns:
-    True on success, False on failure.
-  """
-  logging.info('Checking the usability of generated externs...')
-
-  # Create a complete "build" object.
-  externs_build = build.Build()
-  if not externs_build.parse_build(['+@complete'], os.getcwd()):
-    return False
-  externs_build.add_core()
-
-  # Use it to generate externs for the next check.
-  if not externs_build.generate_externs('check'):
-    return False
-
-  # Create a custom "build" object, add all manually-written externs, then add
-  # the generated externs we just generated.
-  source_base = shakaBuildHelpers.get_source_base()
-  manual_externs = shakaBuildHelpers.get_all_files(
-      os.path.join(source_base, 'externs'), re.compile(r'.*\.js$'))
-  generated_externs = os.path.join(
-      source_base, 'dist', 'shaka-player.check.externs.js')
-
-  check_build = build.Build()
-  check_build.include = set(manual_externs)
-  check_build.include.add(generated_externs)
-
-  # Build with the complete set of externs, but without any application code.
-  # This will help find issues in the generated externs, independent of the app.
-  # Since we have no app, don't use the defines.  Unused defines cause a
-  # compilation error.
-  closure_opts = build.common_closure_opts + build.debug_closure_opts + [
-      '--checks-only', '-O', 'SIMPLE'
-  ]
-  ok = check_build.build_raw(closure_opts)
-
-  # Clean up the temporary externs we just generated.
-  os.unlink(generated_externs)
-
-  # Return the success/failure of the build above.
-  return ok
-
-
-def usage():
-  print 'Usage:', sys.argv[0]
-  print
-  print __doc__
+  # Set up a build with the build name of "dummy".  With output_compiled_bundle
+  # set to False, the build name is irrelevant, since we won't generate any
+  # compiled output.
+  closure = compiler.ClosureCompiler(files, 'dummy')
+  closure.output_compiled_bundle = False
+  # Instead of creating a compiled bundle, we will touch a timestamp file to
+  # keep track of how recently we've run this check.
+  closure.timestamp_file = os.path.join(base, 'dist', '.testcheckstamp')
+  return closure.compile(closure_opts, args.force)
 
 
 def main(args):
-  for arg in args:
-    if arg == '--help':
-      usage()
-      return 0
-    else:
-      logging.error('Unknown option: %s', arg)
-      usage()
-      return 1
+  parser = argparse.ArgumentParser(
+      description=__doc__,
+      formatter_class=argparse.RawDescriptionHelpFormatter)
+  parser.add_argument(
+      '--fix',
+      help='Automatically fix style violations.',
+      action='store_true')
+  parser.add_argument(
+      '--force',
+      '-f',
+      help='Force checks even if no files have changed.',
+      action='store_true')
+  parser.add_argument(
+      '--filter',
+      metavar='CHECK',
+      nargs='+',
+      choices=[i[0] for i in _CHECKS],
+      help='Run only the given checks (choices: %(choices)s).')
+
+  parsed_args = parser.parse_args(args)
 
   # Update node modules if needed.
   if not shakaBuildHelpers.update_node_modules():
     return 1
 
-  steps = [
-    check_closure_compiler_linter,
-    check_js_lint,
-    check_html_lint,
-    check_complete,
-    check_tests,
-    check_externs,
-  ]
-  for step in steps:
-    if not step():
-      return 1
+  for name, step in _CHECKS:
+    if not parsed_args.filter or name in parsed_args.filter:
+      if not step(parsed_args):
+        return 1
   return 0
 
 

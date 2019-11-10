@@ -116,8 +116,8 @@ simple channel count][cast_labs_dash_2012].
 ### urn:dolby:dash:audio\_channel\_configuration:2011
 
 The DASH encoder from Cast Labs also supports
-"urn:dolby:dash:audio\_channel\_configuration:2011" for AC3 and EC3, which [seems
-to be identical to the hex string][cast_labs_dolby] used in the
+"urn:dolby:dash:audio\_channel\_configuration:2011" for AC3 and EC3, which
+[seems to be identical to the hex string][cast_labs_dolby] used in the
 "tag:dolby.com,2014:dash:audio\_channel\_configuration:2011" scheme above.
 
 [cast_labs_dolby]: https://github.com/castlabs/dashencrypt/blob/1d604896/dash.fragmencrypter/src/main/java/com/castlabs/dash/helpers/DashHelper.java#L100

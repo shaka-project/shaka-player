@@ -1,0 +1,67 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Ad controls. */
+.shaka-ad-container {
+  .absolute-position();
+  .fill-container();
+}
+
+.shaka-ad-controls {
+  display: flex;
+  flex-direction: row;
+  z-index: 1;
+
+  /* Add some room between the ad controls and the controls
+  button panel. */
+  padding-bottom: 1%;
+
+  button, div {
+    color: white;
+    font-size: initial;
+  }
+
+  div {
+    .bottom-panels-elements-margin();
+  }
+}
+
+.shaka-ad-counter {
+  .bottom-align-children();
+
+  /* Give white text a black shadow, so it's visible against
+  white background. */
+  text-shadow: 1px 1px 4px black;
+}
+
+.shaka-skip-ad-button {
+  /* Skip button is positioned at the very right edge of the
+  video container unlike the rest of the bottom controls. */
+  position: relative;
+
+  /* This math is determining how far the button is
+  from the right edge. Ad panel's parent is centered and
+  @bottom-controls-width wide, so
+  100 - @bottom-controls-width = margins from both sides of the container.
+  That divided by 2 is margin on one side, so we take that, and
+  move the button from its normal position to the right by that percentage.
+  */
+  right: (100 - @bottom-controls-width) / 2 * -1;
+  padding: 5px 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+}

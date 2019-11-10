@@ -18,67 +18,65 @@
 goog.provide('shaka.test.ManifestParser');
 
 
-/**
- * Verifies the segment references of a stream.
- *
- * @param {?shakaExtern.Stream} stream
- * @param {!Array.<shaka.media.SegmentReference>} references
- */
-shaka.test.ManifestParser.verifySegmentIndex = function(stream, references) {
-  expect(stream).toBeTruthy();
-  expect(stream.findSegmentPosition).toBeTruthy();
-  expect(stream.getSegmentReference).toBeTruthy();
+shaka.test.ManifestParser = class {
+  /**
+   * Verifies the segment references of a stream.
+   *
+   * @param {?shaka.extern.Stream} stream
+   * @param {!Array.<shaka.media.SegmentReference>} references
+   */
+  static verifySegmentIndex(stream, references) {
+    expect(stream).toBeTruthy();
+    expect(stream.segmentIndex).toBeTruthy();
 
-  if (references.length == 0) {
-    expect(stream.findSegmentPosition(0)).toBe(null);
-    return;
+    if (references.length == 0) {
+      expect(stream.segmentIndex.find(0)).toBe(null);
+      return;
+    }
+
+    // Even if the first segment doesn't start at 0, this should return the
+    // first segment.
+    expect(stream.segmentIndex.find(0)).toBe(references[0].position);
+
+    for (const expectedRef of references) {
+      // Don't query negative times.  Query 0 instead.
+      const startTime = Math.max(0, expectedRef.startTime);
+      const position = stream.segmentIndex.find(startTime);
+      expect(position).not.toBe(null);
+      const actualRef =
+          stream.segmentIndex.get(/** @type {number} */ (position));
+      // NOTE: A custom matcher for SegmentReferences is installed, so this
+      // checks the URIs as well.
+      expect(actualRef).toEqual(expectedRef);
+    }
+
+    // Make sure that the references stop at the end.
+    const lastExpectedReference = references[references.length - 1];
+    const positionAfterEnd =
+        stream.segmentIndex.find(lastExpectedReference.endTime);
+    expect(positionAfterEnd).toBe(null);
+    const referencePastEnd =
+        stream.segmentIndex.get(lastExpectedReference.position + 1);
+    expect(referencePastEnd).toBe(null);
   }
 
-  // Even if the first segment doesn't start at 0, this should return the first
-  // segment.
-  expect(stream.findSegmentPosition(0)).toBe(references[0].position);
-
-  for (var i = 0; i < references.length; i++) {
-    var expectedRef = references[i];
-    // Don't query negative times.  Query 0 instead.
-    var startTime = Math.max(0, expectedRef.startTime);
-    var position = stream.findSegmentPosition(startTime);
-    expect(position).not.toBe(null);
-    var actualRef =
-        stream.getSegmentReference(/** @type {number} */ (position));
-    expect(actualRef).toEqual(expectedRef);
+  /**
+   * Creates a segment reference using a relative URI.
+   *
+   * @param {string} uri A relative URI to http://example.com
+   * @param {number} position
+   * @param {number} start
+   * @param {number} end
+   * @param {string=} baseUri
+   * @param {number=} startByte
+   * @param {?number=} endByte
+   * @return {!shaka.media.SegmentReference}
+   */
+  static makeReference(uri, position, start, end, baseUri = '',
+      startByte = 0, endByte = null) {
+    const getUris = () => [baseUri + uri];
+    return new shaka.media.SegmentReference(
+        position, start, end, getUris, startByte, endByte,
+        /* initSegmentReference */ null, /* presentationTimeOffset */ 0);
   }
-
-  // Make sure that the references stop at the end.
-  var lastExpectedReference = references[references.length - 1];
-  var positionAfterEnd =
-      stream.findSegmentPosition(lastExpectedReference.endTime);
-  expect(positionAfterEnd).toBe(null);
-  var referencePastEnd =
-      stream.getSegmentReference(lastExpectedReference.position + 1);
-  expect(referencePastEnd).toBe(null);
-};
-
-
-/**
- * Creates a segment reference using a relative URI.
- *
- * @param {string} uri A relative URI to http://example.com
- * @param {number} position
- * @param {number} start
- * @param {number} end
- * @param {string=} opt_baseUri
- * @param {number=} opt_startByte
- * @param {?number=} opt_endByte
- * @return {!shaka.media.SegmentReference}
- */
-shaka.test.ManifestParser.makeReference =
-    function(uri, position, start, end, opt_baseUri,
-             opt_startByte, opt_endByte) {
-  var base = opt_baseUri || '';
-  var startByte = opt_startByte || 0;
-  var endByte = opt_endByte || null;
-  var getUris = function() { return [base + uri]; };
-  return new shaka.media.SegmentReference(
-      position, start, end, getUris, startByte, endByte);
 };

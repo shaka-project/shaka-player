@@ -15,54 +15,51 @@
  * limitations under the License.
  */
 
-describe('ManifestParserUtils', function() {
-  var ManifestParserUtils;
+describe('ManifestParserUtils', () => {
+  const ManifestParserUtils = shaka.util.ManifestParserUtils;
 
-  beforeAll(function() {
-    ManifestParserUtils = shaka.util.ManifestParserUtils;
-  });
-  describe('resolveUris', function() {
-    it('resolves relative URIs', function() {
-      var base = ['http://example.com/'];
-      var relative = ['page.html'];
-      var expected = ['http://example.com/page.html'];
-      var actual = ManifestParserUtils.resolveUris(base, relative);
+  describe('resolveUris', () => {
+    it('resolves relative URIs', () => {
+      const base = ['http://example.com/'];
+      const relative = ['page.html'];
+      const expected = ['http://example.com/page.html'];
+      const actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(expected);
     });
 
-    it('resolves URIs multiplicatively', function() {
-      var base = ['http://example.com/', 'http://example.org'];
-      var relative = ['page.html', 'site.css'];
-      var expected = [
+    it('resolves URIs multiplicatively', () => {
+      const base = ['http://example.com/', 'http://example.org'];
+      const relative = ['page.html', 'site.css'];
+      const expected = [
         'http://example.com/page.html',
         'http://example.com/site.css',
         'http://example.org/page.html',
-        'http://example.org/site.css'
+        'http://example.org/site.css',
       ];
-      var actual = ManifestParserUtils.resolveUris(base, relative);
+      const actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(expected);
     });
 
-    it('returns base if no relative URIs', function() {
-      var base = ['http://example.com'];
-      var relative = [];
-      var actual = ManifestParserUtils.resolveUris(base, relative);
+    it('returns base if no relative URIs', () => {
+      const base = ['http://example.com'];
+      const relative = [];
+      const actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(base);
     });
 
-    it('handles manifest file as base URI', function() {
-      var base = [
+    it('handles manifest file as base URI', () => {
+      const base = [
         'http://example.com/manifest.mpd',
-        'http://example.org/path/to/manifest.mpd'
+        'http://example.org/path/to/manifest.mpd',
       ];
-      var relative = ['segment.mp4', 'other/location/segment.webm'];
-      var expected = [
+      const relative = ['segment.mp4', 'other/location/segment.webm'];
+      const expected = [
         'http://example.com/segment.mp4',
         'http://example.com/other/location/segment.webm',
         'http://example.org/path/to/segment.mp4',
-        'http://example.org/path/to/other/location/segment.webm'
+        'http://example.org/path/to/other/location/segment.webm',
       ];
-      var actual = ManifestParserUtils.resolveUris(base, relative);
+      const actual = ManifestParserUtils.resolveUris(base, relative);
       expect(actual).toEqual(expected);
     });
   });

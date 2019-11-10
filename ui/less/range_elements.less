@@ -1,0 +1,185 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Special styles for input elements with type "range".
+ *
+ * These elements are composed of two main parts: a "track", which is the
+ * horizontal bar, and the "thumb", which is the knob which slides along that
+ * bar.
+ *
+ * In order to style the track across browsers (cough, IE 11), we need to do
+ * something a bit tricky.  Styling the track is a nightmare, especially if you
+ * want the thumb to be larger.  On IE 11, this gets clipped at the track size.
+ * So a tiny track with a large thumb is not easily achieved.  It can be done,
+ * but the techniques for it are incompatible with the gradient background we
+ * want to apply to it.
+ *
+ * The solution is to put the input inside a div container, and apply the
+ * background gradient styles to the container.  The container will act as a
+ * visible, virtual track, inside which is contained a larger, invisible track,
+ * in which is contained a visible thumb.  This way, the thumb is not larger
+ * than the actual track (for IE 11's sake), but can be larger than the virtual
+ * track.  And since we are still using a semantically correct input element,
+ * the element is inherently accessible. */
+
+/* These control the color and size of the various pieces. */
+@thumb-color: white;
+@track-default-color: white;
+@thumb-size: 12px;
+@track-height: 4px;
+
+/* The range container is the div that contains a range element.
+ * This div will act as a virtual track to allow us to style the track space.
+ * An actual track still exists inside the range element, but is transparent. */
+.range-container() {
+  /* This contains an input element which overlays it. */
+  .overlay-parent();
+
+  /* Vertical margins to occupy the same space as the thumb. */
+  margin: (@thumb-size - @track-height)/2 6px;
+
+  /* Smaller height to contain the background for the virtual track. */
+  height: @track-height;
+
+  /* Rounded ends on the virtual track. */
+  border-radius: @track-height;
+
+  /* Until we set a gradient background in JS, this will be the track color. */
+  background: @track-default-color;
+}
+
+/* The "track" is the pseudo-element inside the range element which represents
+ * the horizontal bar on which the "thumb" (knob) moves. */
+.track() {
+  /* The track should fill the range element. */
+  width: 100%;
+
+  /* The track should be tall enough to contain the thumb without clipping it.
+   * It is very tricky to make the thumb show outside the track on IE 11, and
+   * it is incompatible with our background gradients. */
+  height: @thumb-size;
+
+  /* Some browsers have default backgrounds, colors, or borders for this.
+   * Hide them all. */
+  background: transparent;
+  color: transparent;
+  border: none;
+}
+
+/* The "thumb" is the pseudo-element inside the range element which represents
+ * the knob which moves along the "track" (bar). */
+.thumb() {
+  /* Remove default styles on WebKit-based and Blink-based browsers. */
+  -webkit-appearance: none;
+
+  /* On some browsers (IE 11), the thumb has a border, which affects the size.
+   * Disable it. */
+  border: none;
+
+  /* Make the thumb a circle and set its diameter. */
+  border-radius: @thumb-size;
+  height: @thumb-size;
+  width: @thumb-size;
+
+  /* Give it the desired color. */
+  background: @thumb-color;
+}
+
+/* This is the actual range input element. */
+.range-element() {
+  /* Remove any browser styling of the range element. */
+  -webkit-appearance: none;
+  background: transparent;
+
+  /* Overlay and fill the container div. */
+  .overlay-child();
+
+  /* The range element should be big enough to contain the thumb without
+   * clipping it.  It is very tricky to make the thumb show outside the track
+   * on IE 11. */
+  height: @thumb-size;
+
+  /* Position the top of the range element so that it is centered on the
+   * container. Note that the container is actually smaller than the thumb. */
+  top: (@track-height - @thumb-size) / 2;
+
+  /* Make sure clicking at the very top of the bar still takes effect and is not
+   * confused with clicking the video to play/pause it. */
+  z-index: 1;
+
+  /* Pseudo-elements for Blink-based or WebKit-based browsers. */
+  &::-webkit-slider-runnable-track {
+    .track();
+  }
+
+  &::-webkit-slider-thumb {
+    .thumb();
+  }
+
+  /* Pseudo-elements for Gecko-based browsers. */
+  &::-moz-range-track {
+    .track();
+  }
+
+  &::-moz-range-thumb {
+    .thumb();
+  }
+
+  /* Pseudo-elements for IE 11. */
+  &::-ms-track {
+    .track();
+  }
+
+  &::-ms-thumb {
+    .thumb();
+  }
+
+  /* Turn off tooltips for range element values, unique to IE. */
+  &::-ms-tooltip {
+    .hidden();
+  }
+
+  /* Hide the "lower" and "upper" regions of the track, unique to IE. */
+  &::-ms-fill-lower {
+    .hidden();
+  }
+
+  &::-ms-fill-upper {
+    .hidden();
+  }
+}
+
+.shaka-range-container {
+  .range-container();
+}
+
+.shaka-volume-bar-container {
+  width: 100px;
+
+  /* Hide volume slider on mobile-sized screens. */
+  @media screen and (max-width: 550px) {
+    .hidden();
+  }
+}
+
+.shaka-range-element {
+  .range-element();
+}
+
+.shaka-seek-bar-container {
+  .opacity-transition();
+}

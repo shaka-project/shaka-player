@@ -132,12 +132,16 @@ function onError(error) {
 }
 
 function selectTracks(tracks) {
-  // Store the highest bandwidth variant.
+  // This example stores the highest bandwidth variant.
+  //
+  // Note that this is just an example of an arbitrary algorithm, and not a best
+  // practice for storing content offline.  Decide what your app needs, or keep
+  // the default (user-pref-matching audio, best SD video, all text).
   var found = tracks
       .filter(function(track) { return track.type == 'variant'; })
-      .sort(function(a, b) { return a.bandwidth > b.bandwidth; })
+      .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
       .pop();
-  console.log('Offline Track: ' + found);
+  console.log('Offline Track bandwidth: ' + found.bandwidth);
   return [ found ];
 }
 
@@ -328,7 +332,7 @@ contain anything you want. The metadata is optional, so you can ignore it if
 you want.
 
 `storage.store` returns a Promise that resolves to a
-`shakaExterns.StoredContent` instance (a summary of the stored content).
+`shaka.externs.StoredContent` instance (a summary of the stored content).
 
 At this point, the content is now stored offline and it's ready to be played.
 Next we will add functionality to play offline content.
@@ -361,7 +365,7 @@ return window.storage.list();
 
 Once again Shaka Player makes it easy for you. All you need is to call
 `storage.list` and you will get a Promise that resolves to a
-`shakaExtern.StoredContent` Array reflecting all content you have stored
+`shaka.extern.StoredContent` Array reflecting all content you have stored
 offline.
 
 Now you should be able to download content and play content.
@@ -484,12 +488,16 @@ function onError(error) {
 }
 
 function selectTracks(tracks) {
-  // Store the highest bandwidth variant.
+  // This example stores the highest bandwidth variant.
+  //
+  // Note that this is just an example of an arbitrary algorithm, and not a best
+  // practice for storing content offline.  Decide what your app needs, or keep
+  // the default (user-pref-matching audio, best SD video, all text).
   var found = tracks
       .filter(function(track) { return track.type == 'variant'; })
-      .sort(function(a, b) { return a.bandwidth > b.bandwidth; })
+      .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
       .pop();
-  console.log('Offline Track: ' + found);
+  console.log('Offline Track bandwidth: ' + found.bandwidth);
   return [ found ];
 }
 

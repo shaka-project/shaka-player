@@ -29,15 +29,20 @@ This script can output four different stats in two different formats:
 - All tokens in the source map.
 
 The dependencies can be outputted in DOT format which can be used with graph
-programs to display a visual layout of the dependencies.
+programs to display a visual layout of the dependencies.  For example, using
+graphviz:
+
+  ./stats.py -c -d | fdb -Goverlap=prism | neato -n2 -Tsvg > out.svg
 """
 
+from __future__ import print_function
+
+import argparse
 import json
 import logging
 import math
 import os
 import string
-import sys
 
 import shakaBuildHelpers
 
@@ -352,8 +357,8 @@ def print_tokens(tokens, lines, funcs):
         if next_.dst_line == token.dst_line:
           partial_line = lines[token.dst_line][token.dst_col:next_.dst_col]
       token_text = partial_line[:10].replace('\n', '').rjust(12)
-      print '%s %4d %4d %12s %s' % (prefix, token.dst_line, token.dst_col,
-                                    token_text, token.name)
+      print('%s %4d %4d %12s %s' % (prefix, token.dst_line, token.dst_col,
+                                    token_text, token.name))
 
     def add(self, token, index):
       """Parses the given token.
@@ -385,7 +390,7 @@ def print_tokens(tokens, lines, funcs):
       this_func = [t for t in funcs if t.name == self.name]
       if this_func:
         size = this_func[0].size
-      print 'X', self.name, size
+      print('X %s %d' % (self.name, size))
 
   traverse_tokens(tokens, lines, State)
 
@@ -437,7 +442,7 @@ def process_deps(tokens, lines, is_class):
 
       # Strip function names if class graph; also remove it from the name.
       if is_class:
-        if parts[-1][0] in string.lowercase:
+        if parts[-1][0] in string.ascii_lowercase:
           del parts[-1]
           name = '.'.join(parts)
 
@@ -641,13 +646,13 @@ def print_sizes(sizes):
     def callback(title, indent, results):
       if title:
         size = sum([k.size for k in results])
-        print '%s %*d %s' % (indent * '  ', padding, size, title)
+        print('%s %*d %s' % (indent * '  ', padding, size, title))
     return callback
 
   total = sum([k.size for k in sizes])
   padding = int(math.ceil(math.log10(total)))
 
-  print '%*d %s' % (padding, total, 'TOTAL')
+  print('%*d %s' % (padding, total, 'TOTAL'))
   print_tree(sizes, 0, callback_factory(padding), None)
 
 
@@ -664,10 +669,10 @@ def print_deps(results, in_dot):
 
       # Ignore items with no dependencies.
       if deps:
-        print name
+        print(name)
 
       for dep in deps:
-        print '  ', dep
+        print('   ' + dep)
 
     return
 
@@ -675,24 +680,24 @@ def print_deps(results, in_dot):
 
   # Use the printTree to produce clusters for each namespace and type.  This
   # will print boxes around each class and show dependencies between types.
-  print 'digraph {'
+  print('digraph {')
   def callback_factory(dep_map, temp):
     """Creates a callback function."""
     def callback(title, indent, results):
       if title:
         if len(results) > 1:
-          print '\t' * indent, 'subgraph', 'cluster' + str(len(temp)), '{'
+          print('%s subgraph cluster%d {' % ('\t' * indent, len(temp)))
           temp.append(1)
         else:
-          print('\t' * indent, len(dep_map), '[',
-                'label="' + results[0].name + '"', ']', ';')
+          print('%s %d [label="%s"];' % ('\t' * indent, len(dep_map),
+                                         results[0].name))
           dep_map[results[0].name] = len(dep_map)
 
     return callback
 
   def end_callback(indent):
     if indent > 1:
-      print '\t' * (indent - 1), '}'
+      print('\t' * (indent - 1), '}')
 
   print_tree(results, 1, callback_factory(dep_map, []), end_callback)
 
@@ -703,27 +708,16 @@ def print_deps(results, in_dot):
     if deps:
       if name not in dep_map:
         dep_map[name] = len(dep_map)
-        print '\t', dep_map[name], '[', 'label="' + name + '"', ']', ';'
+        print('\t%s [label="%s"];' % (dep_map[name], name))
 
     for dep in deps:
       if dep not in dep_map:
         dep_map[dep] = len(dep_map)
-        print '\t', dep_map[dep], '[', 'label="' + dep + '"', ']', ';'
+        print('\t%s [label="%s"];' % (dep_map[dep], dep))
 
-      print '\t', dep_map[name], '->', dep_map[dep], ';'
+      print('\t%s -> %s;' % (dep_map[name], dep_map[dep]))
 
-  print '}'
-
-
-class Options(object):
-  """Defines options to the script."""
-
-  def __init__(self):
-    self.print_deps = False
-    self.print_sizes = False
-    self.print_tokens = False
-    self.in_dot = False
-    self.is_class = False
+  print('}')
 
 
 def process(text, options):
@@ -743,91 +737,56 @@ def process(text, options):
   data = json.loads(text)
   # Paths are relative to the output directory.
   base = os.path.join(shakaBuildHelpers.get_source_base(), 'dist')
-  file_lines = open(os.path.join(base, data['file'])).readlines()
+  with shakaBuildHelpers.open_file(os.path.join(base, data['file']), 'r') as f:
+    file_lines = f.readlines()
   names = data['names']
   mappings = data['mappings']
   tokens = decode_mappings(mappings, names)
   sizes = process_sizes(tokens, file_lines)
 
   # Print out one of the results.
-  if options.print_tokens:
+  if options.all_tokens:
     print_tokens(tokens, file_lines, sizes)
-  elif options.print_sizes:
+  elif options.function_sizes:
     print_sizes(sizes)
-  elif options.print_deps or options.is_class:
-    temp = process_deps(tokens, file_lines, options.is_class)
-    print_deps(temp, options.in_dot)
-
-
-def print_help():
-  """Prints the help docs.
-  """
-
-  print 'Usage:', sys.argv[0], """[options] [--] [source_map]
-
-source_map must be either the path to the source map, or the name of the build
-type.  You must build Shaka first.
-
-Types(must include exactly one):
- -c --class-deps         : Prints the class dependencies
- -f --function-deps      : Prints the function dependencies
- -s --function-sizes     : Prints the function sizes (in number of characters)
- -t --all-tokens         : Prints all tokens in the source map
-
-Options:
- -d --dot-format         : Prints in DOT format; only valid with \
---function-deps or --class-dep
- -h --help               : Prints this help page
-
-Token Format:
- prefix line col token name => Token
- X functionName size        => end function
-
-Prefixes:
- > - start a function
- ! - not in a function
- - - end curly brace
- + - start curly brace
-   - other token
-
-DOT Format:
-  This can print the dependency graph in DOT format.  This can be used with
-  graph programs to display a visual graph of dependencies.  For example
-  using graphviz:
-
- """, sys.argv[0], """-c -d | fdp -Goverlap=prism | neato -n2 -Tsvg > out.svg"""
+  elif options.function_deps or options.class_deps:
+    temp = process_deps(tokens, file_lines, options.class_deps)
+    print_deps(temp, options.dot_format)
 
 
 def main(args):
-  options = Options()
-  done_args = False
-  name = 'shaka-player.compiled.debug.map'
+  parser = argparse.ArgumentParser(
+      description=__doc__,
+      formatter_class=argparse.RawDescriptionHelpFormatter)
 
-  # Process the command-line arguments.
-  for arg in args:
-    if done_args or arg[0] != '-':
-      name = arg
-    elif arg == '-f' or arg == '--function-deps':
-      options.print_deps = True
-    elif arg == '-t' or arg == '--all-tokens':
-      options.print_tokens = True
-    elif arg == '-s' or arg == '--function-sizes':
-      options.print_sizes = True
-    elif arg == '-c' or arg == '--class-deps':
-      options.is_class = True
-    elif arg == '-d' or arg == '--dot-format':
-      options.in_dot = True
-    elif arg == '--':
-      done_args = True
-    elif arg == '-h' or arg == '--help':
-      print_help()
-      return 0
-    else:
-      logging.error('Unrecognized argument: %s', arg)
-      print_help()
-      return 1
+  parser.add_argument('-d', '--dot-format', action='store_true',
+                      help='Prints in DOT format.')
+  parser.add_argument('source_map', nargs='?',
+                      default='shaka-player.compiled.map',
+                      help='The source map or the name of the build to use.')
+
+  print_types = parser.add_mutually_exclusive_group(required=True)
+  print_types.add_argument('-c', '--class-deps', action='store_true',
+                           help='Prints the class dependencies.')
+  print_types.add_argument('-f', '--function-deps', action='store_true',
+                           help='Prints the function dependencies.')
+  print_types.add_argument(
+      '-s', '--function-sizes', action='store_true',
+      help='Prints the function sizes (in number of characters).')
+  print_types.add_argument(
+      '-t', '--all-tokens', action='store_true',
+      help='Prints all tokens in the source map.')
+
+  options = parser.parse_args(args)
+
+  # Verify arguments are correct.
+  if (options.dot_format and not options.function_deps
+      and not options.class_deps):
+    parser.error('--dot-format only valid with --function-deps or '
+                 '--class-deps.')
 
   # Try to find the file
+  name = options.source_map
   if not os.path.isfile(name):
     # Get the source code base directory
     base = shakaBuildHelpers.get_source_base()
@@ -848,19 +807,9 @@ def main(args):
       logging.error('"%s" not found; build Shaka first.', name)
       return 1
 
-  # Verify arguments are correct.
-  if (options.print_sizes + options.print_deps + options.print_tokens +
-      options.is_class) != 1:
-    logging.error('Must include exactly one output type.')
-    print_help()
-    return 1
-  elif options.in_dot and not options.print_deps and not options.is_class:
-    logging.error('--dot-format only valid with --function-deps or '
-                  '--class-deps.')
-    return 1
-  else:
-    process(open(name).read(), options)
-    return 0
+  with shakaBuildHelpers.open_file(name, 'r') as f:
+    process(f.read(), options)
+  return 0
 
 
 if __name__ == '__main__':

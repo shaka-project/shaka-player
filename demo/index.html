@@ -22,54 +22,66 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ffffff">
 
-    <base target="_blank">
-
     <title>Shaka Player Demo</title>
+
+    <link rel="preconnect" href="https://shaka-player-demo.appspot.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://storage.googleapis.com">
 
     <link rel="manifest" href="app_manifest.json">
     <link rel="icon" href="favicon.ico">
-    <link rel="stylesheet" href="demo.css">
-    <link rel="stylesheet" href="common/controls.css">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Condensed">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="../dist/demo.css">
+    <link rel="stylesheet" href="../dist/controls.css">
 
-    <script defer src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
+    <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
     <!-- transmuxing support is enabled by including this: -->
-    <script defer src="../node_modules/mux.js/dist/mux.js"></script>
-    <!-- IE11 support is enabled by including this: -->
-    <script defer src="../node_modules/es6-promise-polyfill/promise.min.js"></script>
+    <script defer src="../node_modules/mux.js/dist/mux.min.js"></script>
+    <!-- MDL is enabled by including this: -->
+    <script defer src="../node_modules/material-design-lite/dist/material.min.js"></script>
+    <!-- MDL modal dialogs are enabled by including these: -->
+    <script defer src="../node_modules/dialog-polyfill/dist/dialog-polyfill.js"></script>
+    <!-- Datalist-like fields are enabled by including these: -->
+    <script defer src="../node_modules/awesomplete/awesomplete.min.js"></script>
+    <!-- tippy.js requires popper.js to work properly: -->
+    <script defer src="../node_modules/popper.js/dist/umd/popper.min.js"></script>
+    <!-- Tooltips are made using tippy.js: -->
+    <script defer src="../node_modules/tippy.js/umd/index.min.js"></script>
+    <!-- Improved PWA capability on mobile Safari is enabled by loading pwacompat: -->
+    <script defer src="https://cdn.jsdelivr.net/npm/pwacompat@2.0.9/pwacompat.min.js"
+        integrity="sha384-VcI6S+HIsE80FVM1jgbd6WDFhzKYA0PecD/LcIyMQpT4fMJdijBh0I7Iblaacawc"
+        crossorigin="anonymous"></script>
+    <!-- Include IMA SDK to enable client-side ad insertion: -->
+    <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
 
     <script>
 COMPILED_JS = [
-  // The compiled library.
-  '../dist/shaka-player.compiled.js',
+  // The compiled library, with UI.
+  '../dist/shaka-player.ui.js',
   // The compiled demo.
-  '../dist/demo.compiled.js'
+  '../dist/demo.compiled.js',
 ];
 COMPILED_DEBUG_JS = [
-  // The compiled library, debug mode.
-  '../dist/shaka-player.compiled.debug.js',
+  // The compiled library, with UI, debug mode.
+  '../dist/shaka-player.ui.debug.js',
   // The compiled demo.
-  '../dist/demo.compiled.debug.js'
+  '../dist/demo.compiled.debug.js',
 ];
 UNCOMPILED_JS = [
   // Bootstrap the Shaka Player library through the Closure library.
   '../third_party/closure/goog/base.js',
   '../dist/deps.js',
+  // This is required for goog.asserts.
+  '../lib/debug/asserts.js',
   // This file contains goog.require calls for all exported library classes.
   '../shaka-player.uncompiled.js',
+  // Enable less, the CSS pre-processor.
+  '../node_modules/less/dist/less.js',
   // These are the individual parts of the demo app.
+  'common/asset.js',
   'common/assets.js',
-  'common/controls.js',
-  'common/demo_utils.js',
-  'main.js',
-  'asset_section.js',
-  'configuration_section.js',
-  'info_section.js',
-  'log_section.js',
-  'offline_section.js'
+  'demo_uncompiled.js',
 ];
     </script>
 
@@ -77,196 +89,75 @@ UNCOMPILED_JS = [
     <script defer src="load.js"></script>
   </head>
   <body>
-    <div id="container">
-      <h1>Shaka Player <span id="version"></span></h1>
-
-      <div class="input">
-        <p id="compiled_links">
-          <a href="#" id="uncompiled_link">uncompiled</a> |
-          <a href="#" id="debug_compiled_link">compiled (debug)</a> |
-          <a href="#" id="compiled_link">compiled (release)</a>
-        </p>
-        <p>This is a demo of Google's Shaka Player, a JavaScript library for
-           adaptive video streaming.</p>
-
-        <p>Choose an asset and tap <strong>Load</strong>.
-           (On Android, you may also need to press the play button on the
-            video.)</p>
-
-        <p class="links">
-          <a href="../docs/api/index.html">Documentation</a> |
-          <a href="https://github.com/google/shaka-player">Repo</a> |
-          <a href="https://www.npmjs.com/package/shaka-player">NPM</a> |
-          <a href="https://cdnjs.com/libraries/shaka-player">CDNJS</a>
-        </p>
-
-        <div class="flex">
-          <label for="assetList">Asset:</label>
-          <select id="assetList" class="flex-grow"></select>
+    <div id="main-layout" class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="app-header mdl-layout__header should-hide-in-no-input-mode">
+        <header class="mdl-layout__header-row" id="nav-button-container">
+          <img alt="Shaka Player Logo" src="shaka_logo_trans.png" class="logo" />
+          <button id="nav-button-front" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" defaultselected>HOME</button>
+          <button id="nav-button-search" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">SEARCH</button>
+          <button id="nav-button-custom" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">CUSTOM CONTENT</button>
+          <div class="mdl-layout-spacer"></div>
+          <button id="bug-button" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail">REPORT BUG</button>
+          <div class="version-block">
+            <span class="version-string"></span>
+          </div>
+        </header>
+      </header>
+      <div class="version-block hidden should-show-in-no-input-mode">
+        <span class="version-string"></span>
+      </div>
+      <div class="mdl-layout__drawer hamburger-menu">
+        <div id="hamburger-menu-title" class="mdl-layout-title">
+          Shaka Player Demo Config
+          <div class="mdl-layout-spacer"></div>
+          <button id="drawer-close-button" class="mdl-button mdl-js-button mdl-button--icon should-disable-on-fail"><i class="material-icons">close</i></button>
         </div>
-        <div id="customAsset">
-          <div class="flex">
-            <label for="manifestInput">Custom manifest:</label>
-            <input id="manifestInput" type="text" class="flex-grow">
-          </div>
-          <div class="flex">
-            <label for="licenseServerInput">Custom license server:</label>
-            <input id="licenseServerInput" type="text" class="flex-grow">
-          </div>
-          <div class="flex">
-            <label for="certificateInput">Custom license certificate URL:</label>
-            <input id="certificateInput" type="text" class="flex-grow">
+        <nav class="mdl-navigation" id="hamburger-menu-contents">
+        </nav>
+      </div>
+      <div id="error-display" class="hidden">
+        <div id="error-display-close-button">x</div>
+        <a id="error-display-link" href="#"></a>
+      </div>
+      <main class="mdl-layout__content" id="main-div">
+        <div id="video-bar" class="hidden">
+          <div data-shaka-player-container data-shaka-player-cast-receiver-id="07AEE832" class="video-container">
+            <video data-shaka-player autoplay playsinline id="video"></video>
           </div>
         </div>
+        <div id="contents" class="should-hide-in-no-input-mode"></div>
+        <footer class="mdl-mega-footer should-hide-in-no-input-mode">
+          <div class="mdl-mega-footer__middle-section">
 
-        <div>
-          <button id="loadButton">Load</button>
-        </div>
-      </div>
-
-      <div id="errorDisplay">
-        <div id="errorDisplayCloseButton">x</div>
-        <a id="errorDisplayLink" href="#"></a>
-      </div>
-      <div id="videoContainer" class="overlay-parent">
-        <video id="video" autoplay></video>
-        <div id="giantPlayButtonContainer" class="overlay">
-          <button id="giantPlayButton" class="material-icons">play_arrow</button>
-        </div>
-        <div id="bufferingSpinner" class="overlay">
-          <svg class="spinnerSvg" viewBox="25 25 50 50">
-            <circle class="spinnerPath" cx="50" cy="50" r="20"
-                    fill="none" stroke-width="2" stroke-miterlimit="10" />
-          </svg>
-        </div>
-        <div id="castReceiverName" class="overlay"></div>
-        <div id="controlsContainer" class="overlay"><div id="controls">
-          <button id="playPauseButton" class="material-icons">play_arrow</button>
-          <label for="seekBar" class="for-screen-readers">seek</label>
-          <input id="seekBar" type="range" step="any" min="0" max="1" value="0">
-          <button id="rewindButton" class="material-icons">fast_rewind</button>
-          <div id="currentTime">0:00</div>
-          <button id="fastForwardButton" class="material-icons">fast_forward</button>
-          <button id="muteButton" class="material-icons">volume_up</button>
-          <label for="volumeBar" class="for-screen-readers">volume</label>
-          <input id="volumeBar" type="range" step="any" min="0" max="1" value="0">
-          <button id="castButton" class="material-icons">cast</button>
-          <button id="captionButton" class="material-icons">closed_caption</button>
-          <button id="fullscreenButton" class="material-icons">fullscreen</button>
-        </div></div>
-      </div>
-
-      <details id="logSection">
-        <summary>Logs</summary>
-        <div id="log"></div>
-      </details>
-
-      <details class="input">
-        <summary>Configuration</summary>
-        <div class="flex">
-          <label for="preferredAudioLanguage">Preferred audio language:</label>
-          <input id="preferredAudioLanguage" class="flex-grow" type="text">
-        </div>
-        <div class="flex">
-          <label for="preferredTextLanguage">Preferred text language:</label>
-          <input id="preferredTextLanguage" class="flex-grow" type="text">
-        </div>
-        <div>
-          <label for="showNative">Show native browser controls:</label>
-          <input id="showNative" type="checkbox">
-        </div>
-        <div>
-          <label for="showTrickPlay">Show trick play controls:</label>
-          <input id="showTrickPlay" type="checkbox">
-        </div>
-        <div>
-          <label for="enableAdaptation">Enable adaptation:</label>
-          <input id="enableAdaptation" type="checkbox" checked>
-        </div>
-        <div>
-          <label for="enableLoadOnRefresh">Auto-load on page refresh:</label>
-          <input id="enableLoadOnRefresh" type="checkbox">
-        </div>
-        <div>
-          <label for="logToScreen">Log to the screen:</label>
-          <input id="logToScreen" type="checkbox">
-        </div>
-        <div>
-          <label for="smallGapLimit">Maximum small gap size:</label>
-          <input id="smallGapLimit" class="flex-grow" type="text">
-        </div>
-        <div>
-          <label for="jumpLargeGaps">Jump large gaps:</label>
-          <input id="jumpLargeGaps" type="checkbox">
-        </div>
-        <div id="logLevelListDiv" hidden>
-          <label for="logLevelList">Log Level:</label>
-          <select id="logLevelList" class="flex-grow">
-            <option value="info">Info</option>
-            <option value="debug">Debug</option>
-            <option value="v">Verbose</option>
-            <option value="vv">Very Verbose</option>
-          </select>
-        </div>
-        <div>
-          <label for="drmSettingsVideoRobustness">Video Robustness:</label>
-          <input id="drmSettingsVideoRobustness" type="text" class="flex-grow" list="robustnessSuggestions">
-        </div>
-        <div>
-          <label for="drmSettingsAudioRobustness">Audio Robustness:</label>
-          <input id="drmSettingsAudioRobustness" type="text" class="flex-grow" list="robustnessSuggestions">
-        </div>
-	<datalist id="robustnessSuggestions"></datalist>
-      </details>
-
-      <details class="input">
-        <summary>Info</summary>
-        <div class="flex">
-          <label for="audioLanguages">Audio languages:</label>
-          <select id="audioLanguages" class="flex-grow"></select>
-        </div>
-
-        <div class="flex">
-          <label for="variantTracks">Video+audio track combinations:</label>
-          <select id="variantTracks" class="flex-grow"></select>
-        </div>
-
-        <div class="flex">
-          <label for="textLanguages">Text languages:</label>
-          <select id="textLanguages" class="flex-grow"></select>
-        </div>
-
-        <div class="flex">
-          <label for="textTracks">Text tracks:</label>
-          <select id="textTracks" class="flex-grow"></select>
-        </div>
-
-        <div>
-          <span class="label">Active resolution:</span>
-          <span id="videoResDebug"></span>
-        </div>
-
-        <div>
-          <span class="label">Buffered:</span>
-          <span id="bufferedDebug"></span>
-        </div>
-      </details>
-
-      <details id="offlineSection" class="input">
-        <summary>Offline</summary>
-        <div>
-          <button id="storeDeleteButton">Store</button>
-          <span id="storeDeleteHelpText"></span>
-        </div>
-        <div id="progressDiv">
-          <span class="label">Progress:</span>
-          <span id="progress">0</span>%
-        </div>
-        <div id="offlineNameDiv">
-          <label for="offlineName">Name:</label>
-          <input id="offlineName" class="flex-grow" type="text">
-        </div>
-      </details>
+            <div class="mdl-mega-footer__drop-down-section">
+              <h1 class="mdl-mega-footer__heading">PROJECT LINKS</h1>
+              <ul class="mdl-mega-footer__link-list">
+                <li><a rel="noopener" target="_blank" href="../docs/api/index.html">Documentation</a></li>
+                <li><a rel="noopener" target="_blank" href="https://www.apache.org/licenses/LICENSE-2.0">Apache License</a></li>
+                <li><a rel="noopener" target="_blank" href="https://github.com/google/shaka-player">Source on GitHub</a></li>
+                <li><a rel="noopener" target="_blank" href="https://www.npmjs.com/package/shaka-player">Package on NPM</a></li>
+                <li><a rel="noopener" target="_blank" href="../support.html">Browser Support Test</a></li>
+              </ul>
+            </div>
+            <div class="mdl-mega-footer__drop-down-section">
+              <h1 class="mdl-mega-footer__heading">CDN</h1>
+              <ul class="mdl-mega-footer__link-list">
+                <li><a rel="noopener" target="_blank" href="https://developers.google.com/speed/libraries/#shaka-player">Google Hosted Libraries</a></li>
+                <li><a rel="noopener" target="_blank" href="https://www.jsdelivr.com/package/npm/shaka-player">jsDelivr</a></li>
+                <li><a rel="noopener" target="_blank" href="https://cdnjs.com/libraries/shaka-player">CDNJS</a></li>
+              </ul>
+            </div>
+            <div class="mdl-mega-footer__drop-down-section">
+              <h1 class="mdl-mega-footer__heading">DEMO MODE</h1>
+              <ul class="mdl-mega-footer__link-list" id="compiled-links">
+                <li><a href="#build=compiled" id="compiled-link">Compiled (Release)</a></li>
+                <li><a href="#build=debug_compiled" id="debug-compiled-link">Compiled (Debug)</a></li>
+                <li><a href="#build=uncompiled" id="uncompiled-link">Uncompiled</a></li>
+              </ul>
+            </div>
+          </div>
+        </footer>
+      </main>
     </div>
   </body>
 </html>

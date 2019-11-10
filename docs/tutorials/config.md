@@ -10,10 +10,28 @@ streaming, and DRM.
 To see the current config, you can use `player.getConfiguration()`.  If you run
 this without setting anything first, you get the default configuration.
 
-Player also has a `configure()` method that takes a plain, anonymous object as
-an argument.  Any fields you leave out of the config object will retain their
-existing values, and any fields you explicitly set as `undefined` will be
-reverted to their default value.
+Player also has a `configure()` method that takes it's argument(s) in one of two
+forms:
+
+1. A plain, anonymous object.  Any fields you leave out of the config object
+will retain their existing values, and any fields you explicitly set as
+`undefined` will be reverted to their default value.  For example:
+
+```js
+player.configure({
+  streaming: {
+    bufferingGoal: 120
+  }
+});
+```
+
+2. For setting a single field, a name (full path) of the field can be provided
+as the first argument (a string) and value of the field as the second. For
+example:
+
+```js
+player.configure('streaming.bufferingGoal', 120);
+```
 
 You can use the code from {@tutorial basic-usage} and try these examples in
 the JS console:
@@ -54,18 +72,20 @@ player.getConfiguration();
        durationBackoff: 1
        failureCallback: Function
        ignoreTextStreamFailures: false
+       alwaysStreamText: false
        jumpLargeGaps: false
        rebufferingGoal: 2
        retryParameters: Object
        smallGapLimit: 0.5
        startAtSegmentBoundary: false
+       safeSeekOffset: 5
      textDisplayFactory: Function
 
 
 // Example configurations, all of which are arbitrary:
 
 // set audio language preference to Canadian French:
-player.configure({ preferredAudioLanguage: 'fr-CA' });
+player.configure('preferredAudioLanguage', 'fr-CA');
 // NOTE: language preferences affect the next call to load()
 
 // set text language preference to Greek and buffering goal to 2 minutes:
@@ -102,7 +122,7 @@ buffering settings) while some will not have any effect until the next call to
 #### Detailed API Docs
 
 For more detail on individual configuration options, please see the API docs for
-{@link shakaExtern.PlayerConfiguration} and {@link shaka.Player#configure}.
+{@link shaka.extern.PlayerConfiguration} and {@link shaka.Player#configure}.
 
 
 #### Continue the Tutorials

@@ -37,7 +37,8 @@ This can also happen with mixed-content restrictions.  If the site is using
 
 <hr>
 
-**Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code 6001.
+**Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code
+6001.
 
 **A:** The most common cause is that you are not using a secure origin.  The
 EME API in the browser requires a secure origin, which means `https` or
@@ -93,7 +94,7 @@ The only browsers capable of playing TS natively are Edge and Chromecast.  You
 will get a `CONTENT_UNSUPPORTED_BY_BROWSER` error on other browsers due to
 their lack of TS support.
 
-You can enable transmuxing by [including mux.js][] v4.4+ in your application.
+You can enable transmuxing by [including mux.js][] v5.1.3+ in your application.
 If Shaka Player detects that mux.js has been loaded, we will use it to transmux
 TS content into MP4 on-the-fly, so that the content can be played by the
 browser.
@@ -133,20 +134,58 @@ In other environments, for example Electron, it is appropriate.
 In those cases, before Shaka Player loads a manifest, you can register the
 existing http plugin for `file://` requests:
 ```js
-shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpPlugin);
+shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
 ```
 
 <hr>
 
-**Q:** Why doesn't my app work in IE 11?
+**Q:** Why are my CEA-708 captions not showing on Edge or Chromecast?
 
-**A:** IE 11 doesn't have native Promise support.  Starting with v2.4,
-applications are required to load their own Promise polyfill for IE support.
-We no longer maintain and ship our own polyfill for this.  We recommend
-es6-promise-polyfill.
+**A:** Our support for CEA-708 captions requires transmuxing the TS files that
+contain said captions.  Edge and Chromecast, however, have native TS support and
+thus are not required to transmux.
+In order to force those platforms to transmux, set the
+[`.streaming.forceTransmuxTS`][StreamingConfiguration] configuration to true.
 
-Polyfill source: https://github.com/lahmatiy/es6-promise-polyfill
-Polyfill on NPM: https://www.npmjs.com/package/es6-promise-polyfill
+<hr>
+
+**Q:** Why do I get 404 errors with very large timescales?
+
+**A:** We can't handle content that creates timestamps too large to be
+represented as Numbers in JavaScript (2^53).  Very large timescales require very
+large timestamps (in timescale units), which means we are unable to substitute
+the correct values for `$Time$` in a `<SegmentTemplate>`.  [BigInteger.js][] is
+too large to become a required dependency for Shaka Player.
+
+We recommend reducing your timescale or avoiding `$Time` in `<SegmentTemplate>`.
+See discussion in [#1667][1667] for details.
+
+<hr>
+
+**Q:** I get logs like: `It is recommended that a robustness level be
+specified...`.
+
+**A:** This is a warning from Chrome about setting the robustness level for EME.
+For most content, this warning can be safely ignored (see
+<https://crbug.com/720013>).  If your content requires a specific robustness
+level, it is suggested to set it in the player configuration to ensure playback
+works: `.drm.advanced.<key_system>.audioRobustness` and
+`.drm.advanced.<key_system>.videoRobustness` (see
+[docs][AdvancedDrmConfiguration]).
+
+<hr>
+
+**Q:** Does Shaka Player support iOS?
+
+**A:** Starting in v2.5, we support it through Apple's native HLS player.  So
+you can use the same top-level APIs; but we are dependent on the browser
+handling the streaming.  So we won't support DASH on iOS since the browser
+doesn't support it.
+
+We have another project called [Shaka Player Embedded][] that offers the same
+features and similar APIs for native apps on iOS.  This project uses its own
+media stack, which allows it to play content that would otherwise not be
+supported.  This supports both DASH and HLS manifests.
 
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
@@ -154,10 +193,14 @@ Polyfill on NPM: https://www.npmjs.com/package/es6-promise-polyfill
 [743]: https://github.com/google/shaka-player/issues/743
 [887]: https://github.com/google/shaka-player/issues/887
 [999]: https://github.com/google/shaka-player/issues/999
-[AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#AbrConfiguration
+[1667]: https://github.com/google/shaka-player/issues/1667
+[AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AbrConfiguration
+[AdvancedDrmConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#.AdvancedDrmConfiguration
+[BigInteger.js]: https://github.com/peterolson/BigInteger.js
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-[DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#DashManifestConfiguration
-[StreamingConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shakaExtern.html#StreamingConfiguration
+[DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration
+[Shaka Player Embedded]: https://github.com/google/shaka-player-embedded
+[StreamingConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration
 [auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
 [buffering]: https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html
 [drm_tutorial]: https://shaka-player-demo.appspot.com/docs/api/tutorial-drm-config.html

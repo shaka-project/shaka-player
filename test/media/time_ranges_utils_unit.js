@@ -15,26 +15,27 @@
  * limitations under the License.
  */
 
-describe('TimeRangesUtils', function() {
-  describe('isBuffered', function() {
-    var isBuffered;
+describe('TimeRangesUtils', () => {
+  const TimeRangesUtils = shaka.media.TimeRangesUtils;
 
-    beforeAll(function() {
-      isBuffered = shaka.media.TimeRangesUtils.isBuffered;
+  describe('isBuffered', () => {
+    it('still works when passed null', () => {
+      expect(TimeRangesUtils.isBuffered(null, 10)).toBe(false);
     });
 
-    it('still works when passed null', function() {
-      expect(isBuffered(null, 10)).toBe(false);
+    it('still works with nothing buffered', () => {
+      const b = createFakeBuffered([]);
+      expect(TimeRangesUtils.isBuffered(b, 10)).toBe(false);
     });
 
-    it('still works with nothing buffered', function() {
-      var b = createFakeBuffered([]);
-      expect(isBuffered(b, 10)).toBe(false);
+    it('returns buffered when inside a single range', () => {
+      const b = createFakeBuffered([{start: 10, end: 20}]);
+      expect(TimeRangesUtils.isBuffered(b, 13)).toBe(true);
     });
 
-    it('returns buffered when inside a single range', function() {
-      var b = createFakeBuffered([{start: 10, end: 20}]);
-      expect(isBuffered(b, 13)).toBe(true);
+    it('returns buffered when having a small gap', () => {
+      const b = createFakeBuffered([{start: 10, end: 20}]);
+      expect(TimeRangesUtils.isBuffered(b, 9, 1)).toBe(true);
     });
 
     // Ranges: [10-20], [30-40], [50-60]
@@ -51,28 +52,22 @@ describe('TimeRangesUtils', function() {
      * @param {{time: number, expected: boolean}} data
      */
     function defineTest(name, data) {
-      it(name, function() {
-        var b = createFakeBuffered(
+      it(name, () => {
+        const b = createFakeBuffered(
             [{start: 10, end: 20}, {start: 30, end: 40}, {start: 50, end: 60}]);
-        expect(isBuffered(b, data.time)).toBe(data.expected);
+        expect(TimeRangesUtils.isBuffered(b, data.time)).toBe(data.expected);
       });
     }
   });
 
-  describe('bufferedAheadOf', function() {
-    var bufferedAheadOf;
-
-    beforeAll(function() {
-      bufferedAheadOf = shaka.media.TimeRangesUtils.bufferedAheadOf;
+  describe('bufferedAheadOf', () => {
+    it('still works when passed null', () => {
+      expect(TimeRangesUtils.bufferedAheadOf(null, 10)).toBe(0);
     });
 
-    it('still works when passed null', function() {
-      expect(bufferedAheadOf(null, 10)).toBe(0);
-    });
-
-    it('still works when nothing is buffered', function() {
-      var b = createFakeBuffered([]);
-      expect(bufferedAheadOf(b, 10)).toBe(0);
+    it('still works when nothing is buffered', () => {
+      const b = createFakeBuffered([]);
+      expect(TimeRangesUtils.bufferedAheadOf(b, 10)).toBe(0);
     });
 
 
@@ -93,28 +88,23 @@ describe('TimeRangesUtils', function() {
      * @param {{time: number, expected: number}} data
      */
     function defineTest(name, data) {
-      it(name, function() {
-        var b = createFakeBuffered(
+      it(name, () => {
+        const b = createFakeBuffered(
             [{start: 10, end: 20}, {start: 30, end: 40}, {start: 50, end: 60}]);
-        expect(bufferedAheadOf(b, data.time)).toBe(data.expected);
+        expect(TimeRangesUtils.bufferedAheadOf(
+            b, data.time)).toBe(data.expected);
       });
     }
   });
 
-  describe('getGapIndex', function() {
-    var getGapIndex;
-
-    beforeAll(function() {
-      getGapIndex = shaka.media.TimeRangesUtils.getGapIndex;
+  describe('getGapIndex', () => {
+    it('still works when passed null', () => {
+      expect(TimeRangesUtils.getGapIndex(null, 10)).toBe(null);
     });
 
-    it('still works when passed null', function() {
-      expect(getGapIndex(null, 10)).toBe(null);
-    });
-
-    it('still works whith nothing buffered', function() {
-      var b = createFakeBuffered([]);
-      expect(getGapIndex(b, 10)).toBe(null);
+    it('still works whith nothing buffered', () => {
+      const b = createFakeBuffered([]);
+      expect(TimeRangesUtils.getGapIndex(b, 10)).toBe(null);
     });
 
 
@@ -138,10 +128,10 @@ describe('TimeRangesUtils', function() {
      * @param {{time: number, expected: ?number}} data
      */
     function defineTest(name, data) {
-      it(name, function() {
-        var b = createFakeBuffered(
+      it(name, () => {
+        const b = createFakeBuffered(
             [{start: 10, end: 20}, {start: 30, end: 40}, {start: 50, end: 60}]);
-        expect(getGapIndex(b, data.time)).toBe(data.expected);
+        expect(TimeRangesUtils.getGapIndex(b, data.time)).toBe(data.expected);
       });
     }
   });

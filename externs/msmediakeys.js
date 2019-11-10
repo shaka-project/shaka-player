@@ -22,7 +22,6 @@
  */
 
 
-
 /**
  * @constructor
  * @param {string} keySystem
@@ -41,46 +40,37 @@ MSMediaKeys.isTypeSupported = function(keySystem, contentType) {};
 /**
  * @param {string} contentType
  * @param {Uint8Array} initData
- * @param {Uint8Array=} opt_cdmData
+ * @param {Uint8Array=} cdmData
  * @return {!MSMediaKeySession}
  */
 MSMediaKeys.prototype.createSession =
-    function(contentType, initData, opt_cdmData) {};
-
+    function(contentType, initData, cdmData) {};
 
 
 /**
  * @interface
  * @extends {EventTarget}
  */
-function MSMediaKeySession() {}
+class MSMediaKeySession {
+  constructor() {
+    /** @type {MSMediaKeyError} */
+    this.error;
+  }
 
+  /** @param {Uint8Array} message */
+  update(message) {}
 
-/**
- * @param {Uint8Array} message
- */
-MSMediaKeySession.prototype.update = function(message) {};
+  close() {}
 
+  /** @override */
+  addEventListener(type, listener, useCapture) {}
 
-MSMediaKeySession.prototype.close = function() {};
+  /** @override */
+  removeEventListener(type, listener, useCapture) {}
 
-
-/** @type {MSMediaKeyError} */
-MSMediaKeySession.prototype.error;
-
-
-/** @override */
-MSMediaKeySession.prototype.addEventListener =
-    function(type, listener, useCapture) {};
-
-
-/** @override */
-MSMediaKeySession.prototype.removeEventListener =
-    function(type, listener, useCapture) {};
-
-
-/** @override */
-MSMediaKeySession.prototype.dispatchEvent = function(evt) {};
+  /** @override */
+  dispatchEvent(evt) {}
+}
 
 
 /**
@@ -89,17 +79,15 @@ MSMediaKeySession.prototype.dispatchEvent = function(evt) {};
 HTMLMediaElement.prototype.msSetMediaKeys = function(mediaKeys) {};
 
 
+class MSMediaKeyError {
+  constructor() {
+    /** @type {number} */
+    this.code;
 
-/** @constructor */
-function MSMediaKeyError() {}
-
-
-/** @type {number} */
-MSMediaKeyError.prototype.code;
-
-
-/** @type {number} */
-MSMediaKeyError.prototype.systemCode;
+    /** @type {number} */
+    this.systemCode;
+  }
+}
 
 
 /** @type {number} */

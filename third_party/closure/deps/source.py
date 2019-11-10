@@ -22,6 +22,7 @@ __author__ = 'nnaze@google.com'
 
 
 import re
+import sys
 
 _BASE_REGEX_STRING = '^\s*goog\.%s\(\s*[\'"](.+)[\'"]\s*\)'
 _PROVIDE_REGEX = re.compile(_BASE_REGEX_STRING % 'provide')
@@ -111,7 +112,10 @@ def GetFileContents(path):
     IOError: An error occurred opening or reading the file.
 
   """
-  fileobj = open(path)
+  if sys.version_info[0] == 2:
+    fileobj = open(path)
+  else:
+    fileobj = open(path, encoding='utf8')
   try:
     return fileobj.read()
   finally:

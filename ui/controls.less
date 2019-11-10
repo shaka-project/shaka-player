@@ -1,0 +1,63 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import "less/general.less";
+@import "less/containers.less";
+@import "less/buttons.less";
+@import "less/range_elements.less";
+@import "less/spinner.less";
+@import "less/other_elements.less";
+@import "less/overflow_menu.less";
+@import "less/ad_controls.less";
+@import (css, inline) "https://fonts.googleapis.com/css?family=Roboto";
+@import (css, inline) "https://fonts.googleapis.com/icon?family=Material+Icons";
+
+/* FIXME: These appear to be unused: */
+
+.shaka-cast-receiver-name {
+  display: none;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 150%;
+  padding: 5px;
+
+  /* dimensions */
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: max-content;
+}
+
+.shaka-cast-connected-button {
+  .hidden();
+}
+
+/* FIXME: Why are these here?  Why must they appear at the end? */
+
+/* Add 'button' to hidden and displayed classes
+to make them override display setting previously set in
+.overflowMenu button.
+See https://goo.gl/egXAJY for explanation of
+how CSS cascade rules work. */
+button.shaka-hidden, .shaka-hidden {
+  .hidden();
+}
+
+button.shaka-displayed, .shaka-displayed {
+  display: flex;
+}

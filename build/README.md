@@ -1,8 +1,8 @@
 This directory contains the scripts used to build and test Shaka Player.  These
 scripts can run on any platform that supports python v2.7 and JRE 8+.
 
-* `all.py` simply runs `gendeps.py`, `check.py`, and `build.py`.  Will forward
-  `--force` to `build.py`.
+* `all.py` simply runs `gendeps.py`, `check.py`, `docs.py`, and `build.py`.
+  It will forward `--force` to `build.py`.
 * `build.py` builds the compiled library.  This will fail if there are syntax
   or type errors.
 * `check.py` will check all the files for style violations and will check the
@@ -32,10 +32,10 @@ java -jar /path/to/shaka/third_party/closure/compiler.jar --language_in ...
 
 `build.py` is used to compile the library and can also be used to produce
 customized builds that contain only the features that your app requires.
-`build.py` accepts an optional argument `--name` which will set the name of
-the build, defaulting to `compiled`.  All other arguments are treated as
-commands describing what to include in the build.  If nothing is given, it
-will use `+@complete`.
+`build.py` accepts an optional argument `--name` which will set the name of the
+build, defaulting to `ui`.  All other arguments are treated as commands
+describing what to include in the build.  If nothing is given, it will use
+`+@complete`.
 
 A command is either an addition or a subtraction.  An addition is prefixed with
 a `+`; a subtraction with a `-`.  An addition will add the JavaScript file (or
@@ -108,7 +108,7 @@ used internally to determine dependencies and to determine the size of the
 compiled library.
 
 Before running the script, you have to compile it first.  Then you need to pass
-either the name of the build (e.g. `compiled`) or the path to the `.map` file.
+either the name of the build (e.g. `ui`) or the path to the `.map` file.
 You will also need to pass some arguments to determine the output you want.
 You must pass exactly one of the following:
 

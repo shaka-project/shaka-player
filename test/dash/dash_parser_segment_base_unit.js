@@ -15,50 +15,54 @@
  * limitations under the License.
  */
 
-describe('DashParser SegmentBase', function() {
-  /** @const */
-  var Dash = shaka.test.Dash;
+describe('DashParser SegmentBase', () => {
+  const Dash = shaka.test.Dash;
+
+  const indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
-  var fakeNetEngine;
+  let fakeNetEngine;
   /** @type {!shaka.dash.DashParser} */
-  var parser;
-  /** @type {shakaExtern.ManifestParser.PlayerInterface} */
-  var playerInterface;
-  /** @const {string} */
-  var indexSegmentUri = '/base/test/test/assets/index-segment.mp4';
-  /** @type {ArrayBuffer} */
-  var indexSegment;
+  let parser;
+  /** @type {shaka.extern.ManifestParser.PlayerInterface} */
+  let playerInterface;
+  /** @type {!ArrayBuffer} */
+  let indexSegment;
 
-  beforeAll(function(done) {
-    shaka.test.Util.fetch(indexSegmentUri).then(function(data) {
-      indexSegment = data;
-    }).catch(fail).then(done);
+  beforeAll(async () => {
+    indexSegment = await shaka.test.Util.fetch(indexSegmentUri);
   });
 
-  beforeEach(function() {
+  beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = shaka.test.Dash.makeDashParser();
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterNewPeriod: function() {},
-      filterAllPeriods: function() {},
+      filterNewPeriod: () => {},
+      filterAllPeriods: () => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
-      onError: fail
+      onError: fail,
     };
   });
 
-  it('requests init data for WebM', function(done) {
-    var source = [
+  it('requests init data for WebM', async () => {
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
+      '  <BaseURL>http://example.com</BaseURL>',
       '  <Period>',
       '    <AdaptationSet mimeType="video/webm">',
-      '      <Representation bandwidth="1">',
-      '        <BaseURL>http://example.com</BaseURL>',
+      '      <Representation id="1" bandwidth="1">',
+      '        <BaseURL>media-1.webm</BaseURL>',
       '        <SegmentBase indexRange="100-200" timescale="9000">',
-      '          <Initialization sourceURL="init.webm" range="201-300" />',
+      '          <Initialization sourceURL="init-1.webm" range="201-300" />',
+      '        </SegmentBase>',
+      '      </Representation>',
+      '      <Representation id="2" bandwidth="1">',
+      '        <BaseURL>media-2.webm</BaseURL>',
+      '        <SegmentBase indexRange="1100-1200" timescale="9000">',
+      '          <Initialization sourceURL="init-2.webm" range="1201-1300" />',
       '        </SegmentBase>',
       '      </Representation>',
       '    </AdaptationSet>',
@@ -66,29 +70,37 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com': '',
-      'http://example.com/init.webm': ''
-    });
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toEqual(
-              Dash.makeManifestFromInit('init.webm', 201, 300));
-          return Dash.callCreateSegmentIndex(manifest);
-        })
-        .then(function() {
-          expect(fakeNetEngine.request.calls.count()).toBe(3);
-          fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
-          fakeNetEngine.expectRangeRequest(
-              'http://example.com/init.webm', 201, 300);
-        })
-        .catch(fail)
-        .then(done);
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseText('http://example.com/media-1.webm', '')
+        .setResponseText('http://example.com/media-2.webm', '')
+        .setResponseText('http://example.com/init-1.webm', '')
+        .setResponseText('http://example.com/init-2.webm', '');
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    // Call createSegmentIndex() on each stream to make the requests, but expect
+    // failure from the actual parsing, since the data is bogus.
+    const stream1 = manifest.periods[0].variants[0].video;
+    await expectAsync(stream1.createSegmentIndex()).toBeRejected();
+    const stream2 = manifest.periods[0].variants[1].video;
+    await expectAsync(stream2.createSegmentIndex()).toBeRejected();
+
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(5);
+
+    // Expect calls to fetch part of the media and init segments of each stream.
+    fakeNetEngine.expectRangeRequest(
+        'http://example.com/media-1.webm', 100, 200);
+    fakeNetEngine.expectRangeRequest(
+        'http://example.com/init-1.webm', 201, 300);
+    fakeNetEngine.expectRangeRequest(
+        'http://example.com/media-2.webm', 1100, 1200);
+    fakeNetEngine.expectRangeRequest(
+        'http://example.com/init-2.webm', 1201, 1300);
   });
 
-  it('inherits from Period', function(done) {
-    var source = [
+  it('inherits from Period', async () => {
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
@@ -102,26 +114,24 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com': ''
-    });
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toEqual(
-              Dash.makeManifestFromInit('init.mp4', 201, 300));
-          return Dash.callCreateSegmentIndex(manifest);
-        })
-        .then(function() {
-          expect(fakeNetEngine.request.calls.count()).toBe(2);
-          fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
-        })
-        .catch(fail)
-        .then(done);
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseValue('http://example.com', indexSegment);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/init.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(201);
+    expect(initSegmentReference.getEndByte()).toBe(300);
+
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
+    fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
   });
 
-  it('inherits from AdaptationSet', function(done) {
-    var source = [
+  it('inherits from AdaptationSet', async () => {
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -135,26 +145,24 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com': ''
-    });
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toEqual(
-              Dash.makeManifestFromInit('init.mp4', 201, 300));
-          return Dash.callCreateSegmentIndex(manifest);
-        })
-        .then(function() {
-          expect(fakeNetEngine.request.calls.count()).toBe(2);
-          fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
-        })
-        .catch(fail)
-        .then(done);
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseValue('http://example.com', indexSegment);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/init.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(201);
+    expect(initSegmentReference.getEndByte()).toBe(300);
+
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
+    fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
   });
 
-  it('does not require sourceURL in Initialization', function(done) {
-    var source = [
+  it('does not require sourceURL in Initialization', async () => {
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -169,27 +177,24 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com/stream.mp4': ''
-    });
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toEqual(
-              Dash.makeManifestFromInit('stream.mp4', 201, 300));
-          return Dash.callCreateSegmentIndex(manifest);
-        })
-        .then(function() {
-          expect(fakeNetEngine.request.calls.count()).toBe(2);
-          fakeNetEngine.expectRangeRequest(
-              'http://example.com/stream.mp4', 100, 200);
-        })
-        .catch(fail)
-        .then(done);
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseValue('http://example.com/stream.mp4', indexSegment);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/stream.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(201);
+    expect(initSegmentReference.getEndByte()).toBe(300);
+
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
+    fakeNetEngine.expectRangeRequest('http://example.com/stream.mp4', 100, 200);
   });
 
-  it('merges across levels', function(done) {
-    var source = [
+  it('merges across levels', async () => {
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
@@ -210,27 +215,25 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com/index.mp4': ''
-    });
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toEqual(
-              Dash.makeManifestFromInit('init.mp4', 201, 300, 10));
-          return Dash.callCreateSegmentIndex(manifest);
-        })
-        .then(function() {
-          expect(fakeNetEngine.request.calls.count()).toBe(2);
-          fakeNetEngine.expectRangeRequest(
-              'http://example.com/index.mp4', 5, 2000);
-        })
-        .catch(fail)
-        .then(done);
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseValue('http://example.com/index.mp4', indexSegment);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/init.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(201);
+    expect(initSegmentReference.getEndByte()).toBe(300);
+    expect(segmentReference.presentationTimeOffset).toBe(10);
+
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
+    fakeNetEngine.expectRangeRequest('http://example.com/index.mp4', 5, 2000);
   });
 
-  it('merges and overrides across levels', function(done) {
-    var source = [
+  it('merges and overrides across levels', async () => {
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <BaseURL>http://example.com</BaseURL>',
@@ -250,26 +253,25 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMapAsText({
-      'dummy://foo': source,
-      'http://example.com': ''
-    });
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toEqual(
-              Dash.makeManifestFromInit('special.mp4', 0, null, 20));
-          return Dash.callCreateSegmentIndex(manifest);
-        })
-        .then(function() {
-          expect(fakeNetEngine.request.calls.count()).toBe(2);
-          fakeNetEngine.expectRangeRequest('http://example.com', 30, 900);
-        })
-        .catch(fail)
-        .then(done);
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseValue('http://example.com', indexSegment);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
+    const initSegmentReference = segmentReference.initSegmentReference;
+    expect(initSegmentReference.getUris()).toEqual(
+        ['http://example.com/special.mp4']);
+    expect(initSegmentReference.getStartByte()).toBe(0);
+    expect(initSegmentReference.getEndByte()).toBe(null);
+    expect(segmentReference.presentationTimeOffset).toBe(20);
+
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
+    fakeNetEngine.expectRangeRequest('http://example.com', 30, 900);
   });
 
-  it('does not assume the same timescale as media', function(done) {
-    var source = [
+  it('does not assume the same timescale as media', async () => {
+    const source = [
       '<MPD mediaPresentationDuration="PT75S">',
       '  <Period>',
       '    <AdaptationSet mimeType="video/mp4">',
@@ -284,29 +286,22 @@ describe('DashParser SegmentBase', function() {
       '</MPD>',
     ].join('\n');
 
-    fakeNetEngine.setResponseMap({
-      'dummy://foo': shaka.util.StringUtils.toUTF8(source),
-      'http://example.com/index.mp4': indexSegment
-    });
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseValue('http://example.com/index.mp4', indexSegment);
 
-    var video;
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          video = manifest.periods[0].variants[0].video;
-          return video.createSegmentIndex();  // real data, should succeed
-        })
-        .then(function() {
-          var reference = video.getSegmentReference(0);
-          expect(reference.startTime).toEqual(0);  // clamped to 0 by fit()
-          expect(reference.endTime).toEqual(10);  // would be 12 without PTO
-        })
-        .catch(fail)
-        .then(done);
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const video = manifest.periods[0].variants[0].video;
+    await video.createSegmentIndex();  // real data, should succeed
+
+    const reference = video.segmentIndex.get(0);
+    expect(reference.startTime).toBe(-2);
+    expect(reference.endTime).toBe(10);  // would be 12 without PTO
   });
 
-  describe('fails for', function() {
-    it('unsupported container', function(done) {
-      var source = [
+  describe('fails for', () => {
+    it('unsupported container', async () => {
+      const source = [
         '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
@@ -318,15 +313,15 @@ describe('DashParser SegmentBase', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      var error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_UNSUPPORTED_CONTAINER);
-      Dash.testFails(done, source, error);
+      await Dash.testFails(source, error);
     });
 
-    it('missing init segment for WebM', function(done) {
-      var source = [
+    it('missing init segment for WebM', async () => {
+      const source = [
         '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
@@ -338,15 +333,15 @@ describe('DashParser SegmentBase', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      var error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_WEBM_MISSING_INIT);
-      Dash.testFails(done, source, error);
+      await Dash.testFails(source, error);
     });
 
-    it('no @indexRange nor RepresentationIndex', function(done) {
-      var source = [
+    it('no @indexRange nor RepresentationIndex', async () => {
+      const source = [
         '<MPD mediaPresentationDuration="PT75S">',
         '  <Period>',
         '    <BaseURL>http://example.com</BaseURL>',
@@ -360,11 +355,11 @@ describe('DashParser SegmentBase', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      var error = new shaka.util.Error(
+      const error = new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.DASH_NO_SEGMENT_INFO);
-      Dash.testFails(done, source, error);
+      await Dash.testFails(source, error);
     });
   });
 });

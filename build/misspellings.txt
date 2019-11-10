@@ -1,0 +1,31 @@
+# A map of a regex to the suggested replacement.  The replacement can include
+# capture groups from the regex and will be ignored if the replacement is the
+# same as the match.
+{
+    r'(?i)arti?fi?ci?ai?l': 'artificial',
+    r'(?i)cur+ent': 'current',
+    r'(?i)ful+screen': 'fullscreen',
+    r'(?i)gene?ra?tor': 'generator',
+    r'(?i)in?ter[ai]ble': 'iterable',
+    r'(?i)int(er|re)p(er|re)tation': 'interpretation',
+    r'(?i)langauge': 'language',
+    r'(?i)mananger': 'manager',
+    r'(?i)mani?fe?st': 'manifest',
+    r'(?i)mil+isecond': 'millisecond',
+    r'(?i)oc+ur+(?!ed|ing|ence)': 'occur',
+    r'(?i)oc+ur+(ed|ing|ence)': r'occurr\1',
+    r'(?i)oc+ur+ance': 'occurrence',
+    r'(?i)parrent': 'parent',
+    r'(?i)pol+yfil+': 'polyfill',
+    r'(?i)propogate': 'propagate',
+    r'(?i)refrence': 'reference',
+    r'(?i)substract': 'subtract',
+    # Only match an "s" if it is not part of "spy".
+    r'(?i)suc+e(?:(?!spy)s)+': 'success',
+    r'(?i)suc+es+ful+(?!y)': 'successful',
+    r'(?i)suc+es+ful+y': 'successfully',
+    r'(?i)uncomplied': 'uncompiled',
+    r'(?i)wether': 'whether',
+    r'(?i)@returns': '@return',
+    r'(?i)varint': 'variant',
+}

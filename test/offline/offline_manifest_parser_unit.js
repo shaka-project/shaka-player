@@ -15,223 +15,224 @@
  * limitations under the License.
  */
 
-describe('OfflineManifestParser', function() {
-  /** @const */
-  var OfflineUri = shaka.offline.OfflineUri;
+/** @return {boolean} */
+const offlineManifestParserSupport = () => shaka.offline.StorageMuxer.support();
+filterDescribe('OfflineManifestParser', offlineManifestParserSupport, () => {
+  const Util = shaka.test.Util;
+  // The offline manifest parser does not need the player interface, so
+  // this is a work around to avoid creating one.
+  const playerInterface =
+  /** @type {shaka.extern.ManifestParser.PlayerInterface} */({});
 
-  /** @const */
-  var mockSEFactory = new shaka.test.MockStorageEngineFactory();
+  // A session id that will be found in the manifest created by |makeManifest|.
+  const sessionId = 'session-id';
 
-  /** @const */
-  var playerInterface =
-      /** @type {shakaExtern.ManifestParser.PlayerInterface} */ (null);
-
-  /** @type {!shaka.offline.IStorageEngine} */
-  var fakeStorageEngine;
   /** @type {!shaka.offline.OfflineManifestParser} */
-  var parser;
+  let parser;
 
-  beforeEach(function() {
-    fakeStorageEngine = new shaka.test.MemoryStorageEngine();
-    var getStorageEngine = function() {
-      return Promise.resolve(fakeStorageEngine);
-    };
-
-    mockSEFactory.overrideIsSupported(true);
-    mockSEFactory.overrideCreate(getStorageEngine);
-
+  beforeEach(async () => {
+    // Make sure we start with a clean slate.
+    await clearStorage();
     parser = new shaka.offline.OfflineManifestParser();
   });
 
-  afterEach(function() {
+  afterEach(async () => {
     parser.stop();
-    mockSEFactory.resetAll();
+    // Make sure that we don't waste storage by leaving stuff in storage.
+    await clearStorage();
   });
 
-  it('will query storage engine for the manifest', function(done) {
-    new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-        .build().then(function(id) {
-          /** @const {string} */
-          var uri = OfflineUri.manifestIdToUri(id);
-          return parser.start(uri, playerInterface);
-        }).catch(fail).then(done);
+  it('returns manifest from storage', async () => {
+    const inputManifest = makeManifest();
+
+    /** @type {!shaka.offline.OfflineUri} */
+    let uri;
+
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
+      await muxer.init();
+      const handle = await muxer.getActive();
+      const keys = await handle.cell.addManifests([inputManifest]);
+
+      uri = shaka.offline.OfflineUri.manifest(
+          handle.path.mechanism, handle.path.cell, keys[0]);
+    } finally {
+      await muxer.destroy();
+    }
+
+    const outputManifest = await parser.start(uri.toString(), playerInterface);
+    expect(outputManifest).toBeTruthy();
   });
 
-  it('will fail if manifest not found', function(done) {
-    /** @type {number} */
-    var id = 101;
-    /** @type {string} */
-    var uri = OfflineUri.manifestIdToUri(id);
+  it('updates expiration', async () => {
+    const newExpiration = 1000;
 
-    parser.start(uri, playerInterface)
-        .then(fail)
-        .catch(function(err) {
-          shaka.test.Util.expectToEqualError(
-              err,
-              new shaka.util.Error(
-                  shaka.util.Error.Severity.CRITICAL,
-                  shaka.util.Error.Category.STORAGE,
-                  shaka.util.Error.Code.REQUESTED_ITEM_NOT_FOUND,
-                  id));
-        })
-        .then(done);
+    const inputManifest = makeManifest();
+    // Make sure that the expiration is different from the new expiration
+    // so that when we check that they are the same later, it actually
+    // means that it changed.
+    expect(inputManifest.expiration).not.toBe(newExpiration);
+
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
+      await muxer.init();
+      const handle = await muxer.getActive();
+      const keys = await handle.cell.addManifests([inputManifest]);
+
+      /** @type {!shaka.offline.OfflineUri} */
+      const uri = shaka.offline.OfflineUri.manifest(
+          handle.path.mechanism, handle.path.cell, keys[0]);
+
+      await parser.start(uri.toString(), playerInterface);
+      await parser.onExpirationUpdated(sessionId, newExpiration);
+
+      const found = await handle.cell.getManifests(keys);
+      expect(found[0].expiration).toBe(newExpiration);
+    } finally {
+      await muxer.destroy();
+    }
   });
 
-  it('will fail for invalid URI', function(done) {
-    var uri = 'offline:this-is-invalid';
-    parser.start(uri, playerInterface)
-        .then(fail)
-        .catch(function(err) {
-          shaka.test.Util.expectToEqualError(
-              err,
-              new shaka.util.Error(
-                  shaka.util.Error.Severity.CRITICAL,
-                  shaka.util.Error.Category.NETWORK,
-                  shaka.util.Error.Code.MALFORMED_OFFLINE_URI, uri));
-        })
-        .then(done);
+  it('fails if manifest was not found', async () => {
+    const inputManifest = makeManifest();
+
+    /** @type {!shaka.offline.OfflineUri} */
+    let uri;
+
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
+      await muxer.init();
+      const handle = await muxer.getActive();
+      const keys = await handle.cell.addManifests([inputManifest]);
+
+      uri = shaka.offline.OfflineUri.manifest(
+          handle.path.mechanism, handle.path.cell, keys[0]);
+
+      // Remove the manifest so that the uri will point to nothing.
+      const noop = () => {};
+      await handle.cell.removeManifests(keys, noop);
+    } finally {
+      await muxer.destroy();
+    }
+
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.STORAGE,
+        shaka.util.Error.Code.KEY_NOT_FOUND,
+        jasmine.any(String)));
+    await expectAsync(parser.start(uri.toString(), playerInterface))
+        .toBeRejectedWith(expected);
   });
 
-  describe('update expiration', function() {
-    /** @const {string} */
-    var sessionId = 'abc';
+  it('fails for invalid URI', async () => {
+    const uri = 'this-is-an-invalid-uri';
 
-    /** @type {number} */
-    var id;
-
-    /** @type {number} */
-    var expiration = 256;
-
-    beforeEach(function(done) {
-      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-          .onManifest(function(manifest) {
-            manifest.sessionIds = [sessionId];
-          })
-          .build().then(function(newId) {
-            //  Save the id so that we can use it later to fetch the manifest.
-            id = newId;
-
-            /** @const {string} */
-            var uri = OfflineUri.manifestIdToUri(id);
-            return parser.start(uri, playerInterface);
-          }).catch(fail).then(done);
-    });
-
-    it('will ignore when data is deleted', function(done) {
-      fakeStorageEngine.removeManifests([0], null)
-          .then(function() {
-            parser.onExpirationUpdated(sessionId, expiration);
-          })
-          .catch(fail)
-          .then(done);
-    });
-
-    it('will ignore when updating unknown session', function() {
-      parser.onExpirationUpdated('other', expiration);
-    });
-
-    it('will update expiration', function(done) {
-      parser.onExpirationUpdated(sessionId, expiration);
-
-      shaka.test.Util.delay(0.1).then(function() {
-        return fakeStorageEngine.getManifest(id);
-      }).then(function(manifest) {
-        expect(manifest.expiration).toBe(expiration);
-      }).catch(fail).then(done);
-    });
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
+        uri));
+    await expectAsync(parser.start(uri, playerInterface))
+        .toBeRejectedWith(expected);
   });
 
-  describe('reconstructing manifest', function() {
-    /** @const */
-    var originalReconstructPeriod =
-        shaka.offline.OfflineUtils.reconstructPeriod;
+  it('ignores update expiration when data is deleted', async () => {
+    const newExpiration = 1000;
 
-    afterAll(function() {
-      shaka.offline.OfflineUtils.reconstructPeriod = originalReconstructPeriod;
-    });
+    const inputManifest = makeManifest();
 
-    it('converts non-Period members correctly', function(done) {
-      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-          .onManifest(function(manifest) {
-            manifest.sessionIds = ['abc', '123'];
-            manifest.duration = 60;
-          })
-          .build().then(function(id) {
-            /** @const {string} */
-            var uri = OfflineUri.manifestIdToUri(id);
-            return parser.start(uri, playerInterface);
-          }).then(function(manifest) {
-            expect(manifest).toBeTruthy();
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+    try {
+      await muxer.init();
+      const handle = await muxer.getActive();
+      const keys = await handle.cell.addManifests([inputManifest]);
 
-            expect(manifest.offlineSessionIds.length).toBe(2);
-            expect(manifest.offlineSessionIds).toContain('abc');
-            expect(manifest.offlineSessionIds).toContain('123');
+      const uri = shaka.offline.OfflineUri.manifest(
+          handle.path.mechanism, handle.path.cell, keys[0]);
 
-            var timeline = manifest.presentationTimeline;
-            expect(timeline).toBeTruthy();
-            expect(timeline.isLive()).toBe(false);
-            expect(timeline.getPresentationStartTime()).toBe(null);
-            expect(timeline.getDuration()).toBe(60);
-          }).catch(fail).then(done);
-    });
+      await parser.start(uri.toString(), playerInterface);
 
-    it('will accept DrmInfo', function(done) {
-      var drmInfo = {
-        keySystem: 'com.example.drm',
-        licenseServerUri: 'https://example.com/drm',
-        distinctiveIdentifierRequired: false,
-        persistentStateRequired: true,
-        audioRobustness: 'weak',
-        videoRobustness: 'awesome',
-        serverCertificate: null,
-        initData: [{initData: new Uint8Array([1]), initDataType: 'foo'}],
-        keyIds: ['key1', 'key2']
-      };
-
-      var spy = jasmine.createSpy('reconstructPeriod');
-      shaka.offline.OfflineUtils.reconstructPeriod =
-          shaka.test.Util.spyFunc(spy);
-
-      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-          .onManifest(function(manifest) {
-            manifest.drmInfo = drmInfo;
-          })
-          .period()
-          .build().then(function(id) {
-            /** @const {string} */
-            var uri = OfflineUri.manifestIdToUri(id);
-            return parser.start(uri, playerInterface);
-          }).then(function(manifest) {
-            expect(manifest).toBeTruthy();
-
-            expect(spy).toHaveBeenCalled();
-            expect(spy.calls.argsFor(0)[1]).toEqual([drmInfo]);
-          }).catch(fail).then(done);
-    });
-
-    it('will call reconstructPeriod for each Period', function(done) {
-      var spy = jasmine.createSpy('reconstructPeriod');
-      shaka.offline.OfflineUtils.reconstructPeriod =
-          shaka.test.Util.spyFunc(spy);
-
-      new shaka.test.ManifestDBBuilder(fakeStorageEngine)
-          .onManifest(function(manifest) {
-            manifest.sessionId = ['abc', '123'];
-          })
-          .period()
-          .period()
-          .period()
-          .build().then(function(id) {
-            /** @const {string} */
-            var uri = OfflineUri.manifestIdToUri(id);
-            return parser.start(uri, playerInterface);
-          })
-          .then(function(manifest) {
-            expect(manifest).toBeTruthy();
-            expect(manifest.periods.length).toBe(3);
-          })
-          .catch(fail)
-          .then(done);
-    });
+      // Remove the manifest after we have parsed it so that the
+      // update won't find it. Oh, we are sneaky.
+      const noop = () => {};
+      await handle.cell.removeManifests(keys, noop);
+      await parser.onExpirationUpdated(sessionId, newExpiration);
+    } finally {
+      await muxer.destroy();
+    }
   });
+
+  it('ignores update expiration with unknown session', async () => {
+    const wrongSession = 'this-session-wont-be-found';
+    const newExpiration = 1000;
+
+    const inputManifest = makeManifest();
+    const oldExpiration = inputManifest.expiration;
+
+    // Make sure that the expirations are not the same.
+    expect(oldExpiration).not.toBe(newExpiration);
+
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+
+    try {
+      await muxer.init();
+      const handle = await muxer.getActive();
+      const keys = await handle.cell.addManifests([inputManifest]);
+
+      const uri = shaka.offline.OfflineUri.manifest(
+          handle.path.mechanism, handle.path.cell, keys[0]);
+
+      await parser.start(uri.toString(), playerInterface);
+      await parser.onExpirationUpdated(wrongSession, newExpiration);
+
+      // Make sure that the expiration was not updated.
+      const found = await handle.cell.getManifests(keys);
+      expect(found[0].expiration).toBe(oldExpiration);
+    } finally {
+      await muxer.destroy();
+    }
+  });
+
+  /**
+   * @return {!shaka.extern.ManifestDB}
+   */
+  function makeManifest() {
+    const mb = 1024 * 1024;
+    const seconds = 1.0;
+
+    /** @type {shaka.extern.ManifestDB} */
+    const manifest = {
+      originalManifestUri: '',
+      duration: 600 * seconds,
+      size: 100 * mb,
+      expiration: Infinity,
+      periods: [],
+      sessionIds: [sessionId],
+      drmInfo: null,
+      appMetadata: {},
+    };
+
+    return manifest;
+  }
+
+  /**
+   * @return {!Promise}
+   */
+  async function clearStorage() {
+    /** @type {!shaka.offline.StorageMuxer} */
+    const muxer = new shaka.offline.StorageMuxer();
+    try {
+      await muxer.erase();
+    } finally {
+      await muxer.destroy();
+    }
+  }
 });

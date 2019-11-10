@@ -37,8 +37,8 @@ manifest and license server:
 
 ```js
 var manifestUri =
-    '//storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd';
-var licenseServer = '//cwip-shaka-proxy.appspot.com/wrapped_request';
+    'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd';
+var licenseServer = 'https://cwip-shaka-proxy.appspot.com/wrapped_request';
 ```
 
 We'll also need to configure the player to use this license server before it
@@ -124,7 +124,7 @@ Change the license server to:
 
 ```js
 var licenseServer =
-    '//cwip-shaka-proxy.appspot.com/wrapped_request_and_response';
+    'https://cwip-shaka-proxy.appspot.com/wrapped_request_and_response';
 ```
 
 This license server is sending a wrapped response, so if we try to play now, we
@@ -167,4 +167,4 @@ CDM.  Open the JavaScript console to see what the server sent back.
 
 #### Continue the Tutorials
 
-Next, check out {@tutorial plugins}.
+Next, check out {@tutorial ui}.

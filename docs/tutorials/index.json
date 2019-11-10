@@ -7,19 +7,21 @@
   { "drm-config": { "title": "DRM Configuration" } },
   { "license-server-auth": { "title": "License Server Authentication" } },
   { "license-wrapping": { "title": "License Wrapping" } },
+  { "ui": { "title": "UI Library" } },
+  { "ui-customization": { "title": "Configuring the UI" } },
+  { "a11y": { "title": "Creating accessible buttons" } },
   { "plugins": { "title": "Plugins and Customizing the Build" } },
   { "manifest-parser": { "title": "Manifest Parser Plugins" } },
   { "architecture": { "title": "Architecture Diagrams" } },
   { "service-worker": { "title": "Service Worker Caching" } },
   { "offline": { "title": "Offline Storage and Playback" } },
+  { "fairplay": { "title": "FairPlay support" } },
   { "faq": { "title": "Frequently Asked Questions" } },
   { "upgrade": {
       "title": "Upgrade Guide",
       "children": {
-        "upgrade-v1": { "title": "Upgrade Guide, v1 => v2" },
-        "upgrade-v2-0": { "title": "Upgrade Guide, v2.0 => v2.3" },
-        "upgrade-v2-1": { "title": "Upgrade Guide, v2.1 => v2.3" },
-        "upgrade-v2-2": { "title": "Upgrade Guide, v2.2 => v2.3" }
+        "upgrade-v2-3": { "title": "Upgrade Guide, v2.3 => v2.5" },
+        "upgrade-v2-4": { "title": "Upgrade Guide, v2.4 => v2.5" }
       }
   } }
 ]

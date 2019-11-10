@@ -1,0 +1,279 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* All of the top-level containers into which various visible features go. */
+
+@transparent: rgba(0, 0, 0, 0);
+
+/* A container for the entire video + controls combo.  This is the auto-setup
+ * div which we populate. */
+.shaka-video-container {
+  .overlay-parent();
+
+  /* Without this, the container somehow winds up being a tad taller than it
+   * should be (484px vs 480px). */
+  display: flex;
+
+  /* Set the fonts for all contents, with a special exception for material
+   * design icons. */
+  .material-icons {
+    font-family: 'Material Icons';
+  }
+
+  * {
+    font-family: Roboto-Regular, Roboto, sans-serif;
+  }
+}
+
+/* Each browser has a different prefixed pseudo-class for fullscreened elements.
+ * Define the properties of a fullscreened element in a mixin, then apply to
+ * each of the browser-specific pseudo-classes.
+ * NOTE: These fullscreen pseudo-classes can't be combined with commas into a
+ * single delcaration.  Browsers ignore the rest of the list once they hit one
+ * pseudo-class they don't support. */
+.fullscreen-container() {
+  .fill-container();
+
+  background-color: black;
+
+  .shaka-text-container {
+    /* In fullscreen mode, the text displayer's font size should be relative to
+     * the either window height or width (whichever is smaller), instead of a
+     * fixed size. */
+    font-size: 4.4vmin;
+  }
+}
+.shaka-video-container:fullscreen { .fullscreen-container(); }
+.shaka-video-container:-webkit-full-screen { .fullscreen-container(); }
+.shaka-video-container:-moz-full-screen { .fullscreen-container(); }
+.shaka-video-container:-ms-fullscreen { .fullscreen-container(); }
+
+/* The actual video element.  Sits inside .shaka-video-container and gives it a
+ * size in non-fullscreen mode.  In fullscreen mode, the sizing relationship
+ * flips.  CSS is just great like that.  :-( */
+.shaka-video {
+  /* At the moment, nothing special is required here.
+   * Note that this should NOT be an overlay-child, as its size could dictate
+   * the size of the container for some applications. */
+}
+
+/* A container for all controls, including the giant play button, seek bar, etc.
+ * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
+ * below (Y axis) .shaka-play-button-container. */
+.shaka-controls-container {
+  .overlay-child();
+
+  /* Without this, the controls container overflows the video container. */
+  box-sizing: border-box;
+
+  /* A flex container, to make layout of children easier to reason about. */
+  display: flex;
+
+  /* Defines in which direction the children should flow. */
+  flex-direction: column;
+
+  /* Pushes the children toward the bottom of the container. */
+  justify-content: flex-end;
+
+  /* Centers children horizontally. */
+  align-items: center;
+
+  /* By default, do not allow any of our controls to shrink.
+   * Specific controls can use .shrinkable() to override. */
+  * { .unshrinkable(); }
+
+  /* Position the controls container in front of the text container, so that
+   * the text container doesn't interfere with the control buttons. */
+  z-index: 1;
+
+  /* Opacity transition for controls. */
+  & > .shaka-fade-out-on-mouse-out {
+    .opacity-transition();
+  }
+
+  /* Always show controls while casting. */
+  &[casting="true"] {
+    opacity: 1;
+
+    /* Hide fullscreen button while casting. */
+    .shaka-fullscreen-button {
+      .hidden();
+    }
+  }
+}
+
+/* Container for controls positioned at the bottom of the video container:
+ * controls button panel and the seek bar. */
+.shaka-bottom-controls {
+  width: @bottom-controls-width;
+  padding: 0;
+  padding-bottom: 2.5%;
+
+  /* Position the bottom panel in front of other controls (play button and
+   * spinner containers).
+   * TODO: A different layout arrangement might be a better solution for this.
+   * Need to experiment.
+   */
+  z-index: 1;
+}
+
+/* This is the container for the horizontal row of controls above the seek bar.
+ * It sits above (Y axis) the seek bar, and below (Y axis) the giant play button
+ * in the middle. */
+.shaka-controls-button-panel {
+  /* Fill the space horizontally, with no extra padding or margin. */
+  padding: 0;
+  margin: 0;
+
+  /* This is itself a flex container, with children layed out horizontally. */
+  display: flex;
+  flex-direction: row;
+
+  /* Push children to the right. */
+  justify-content: flex-end;
+
+  /* Center children vertically. */
+  align-items: center;
+
+  /* TODO: Document why. */
+  overflow: hidden;
+  min-width: 48px;
+
+  /* Make sure we don't inherit odd font sizes and styles from the environment.
+   * TODO: When did this happen?  What forced us to do this? */
+  font-size: 12px;
+  font-weight: normal;
+  font-style: normal;
+
+  /* Make sure contents cannot be selected. */
+  .unselectable();
+
+  .opacity-transition();
+
+  /* All buttons, divs, and other controls directly inside this panel should
+   * have these characteristics by default. */
+  & > * {
+    /* White text or button icons. */
+    color: white;
+
+    /* 32px tall controls. */
+    height: 32px;
+
+    /* Consistent margins (external) and padding (internal) between controls. */
+    .bottom-panels-elements-margin();
+
+    padding: 0;
+
+    /* Transparent backgrounds, no borders, and a pointer when you mouse over
+     * them. */
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+  }
+}
+
+/* The container for the giant play button.  Sits above (Y axis) the
+ * other video controls and seek bar, in the middle of the video frame, on top
+ * of (Z axis) the video. */
+.shaka-play-button-container {
+  /* Take up as much space as possible, but shrink (vertically) to accomodate
+   * the controls at the bottom. */
+  margin: 0;
+  .fill-container();
+  .shrinkable();
+  .absolute-position();
+
+  /* Keep the play button in the middle of this container. */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.shaka-skim-container {
+  margin: 0;
+  .fill-container();
+  .shrinkable();
+  .absolute-position();
+
+  /* A black gradient at the bottom, behind the controls, but only so high. */
+  background: linear-gradient(to top, rgba(0, 0, 0, 1) 0, @transparent 92px);
+}
+
+.shaka-text-container {
+  .absolute-position();
+
+  bottom: 15%;
+  width: 100%;
+  min-width: 48px;
+  text-align: center;
+
+  /* Set the captions in the middle horizontally by default. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* Set the captions at the bottom by default. */
+  justify-content: flex-end;
+
+  /* If the captions are too long to fit in the video container, hide the
+   * overflow content. */
+  overflow: hidden;
+
+  /* These are defaults which are overridden by JS or cue styles. */
+  font-size: 20px;
+  line-height: 1.4;  // relative to font size.
+
+  span {
+    /* These are defaults which are overridden by JS or cue styles. */
+    background-color: rgba(0, 0, 0, 0.8);
+    color: rgb(255, 255, 255);
+    display: inline-block;
+  }
+}
+
+/* The buffering spinner. */
+.shaka-spinner-container {
+  .absolute-position();
+  .fill-container();
+
+  flex-shrink: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@spinner-size-percentage: 15.6%;
+
+.shaka-spinner {
+  /* This uses the same trickery as the big play button define
+  the spinner's width and height. See .shaka-play-button
+  for the detailed explanation. */
+
+  /* For the padding thing to work, spinner div needs to be an
+  overlay-parent and spinner svg - an overlay child. */
+  .overlay-parent();
+
+  margin: 0;
+  box-sizing: border-box;
+  padding: @spinner-size-percentage / 2;
+  width: 0;
+  height: 0;
+
+  /* Add a bit of a white shadow to keep our black spinner visible
+  on a black background. */
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}

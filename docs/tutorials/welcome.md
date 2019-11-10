@@ -27,31 +27,25 @@ externs have been generated.
 
 You can build Shaka on Linux, Windows, or Mac.
 To get the sources and compile the library, you will need:
-  * Git 1.7.10+  {@link https://git-scm.com/downloads}
-  * Python 2.7.x  {@link https://www.python.org/downloads/}
-  * Java Runtime Environment 8+  {@link https://java.com/en/download/}
-  * A local web server
+  * {@link https://git-scm.com/downloads Git v1.9+}
+  * {@link https://www.python.org/downloads/ Python v2.7 or v3.5+}
+  * {@link https://java.com/en/download/ Java Runtime Environment v8+}
+  * {@link https://nodejs.org/en/download/ NodeJS v8+}
+  * A local web server, such as {@link https://httpd.apache.org/ Apache}
     * _NOTE: A local web server is required because browsers place restrictions
       on applications from file:/// URLs._
 
-Additionally, to build the documentation and run the tests, you will need:
-  * npm v1.3.12+  {@link https://nodejs.org/en/download/}
-
-To quickly install these prerequisites on Ubuntu or Debian, run:
+To quickly install these prerequisites on Ubuntu or Debian, you can run this
+script:
 
 ```sh
-sudo apt-get update
-sudo apt-get install git python2.7 default-jre-headless npm
-
-# Upgrade npm and node to the latest versions
-sudo npm install -g n
-sudo n stable
-sudo npm install -g npm
+curl https://raw.githubusercontent.com/google/shaka-player/master/build/install-linux-prereqs.sh | bash
 ```
 
-Installation instructions for other operating systems are not provided here.
-(We can't possibly document them all.)  You can follow the links above to
-download and install the prerequisites.
+We do not provide detailed instructions or scripts for installing these
+prerequisites on other operating systems or on non-Debian-based Linux
+distributions.  (We couldn't possibly document them all.)  You can follow the
+links above to download and install the prerequisites manually on any OS.
 
 
 #### Get the source
@@ -62,7 +56,7 @@ cd shaka-player
 ```
 
 
-#### Compile the library
+#### Compile the library and generate the docs
 
 ```sh
 python build/all.py
@@ -73,15 +67,7 @@ The output is:
  * dist/shaka-player.compiled.debug.js (debug bundle)
  * dist/shaka-player.compiled.externs.js
    (generated externs, for Closure-based projects)
-
-
-#### Generate the documentation
-
-```sh
-python build/docs.py
-```
-
-The output will be in `docs/api/`.
+ * docs/api/index.html (generated documentation)
 
 
 #### Run the tests

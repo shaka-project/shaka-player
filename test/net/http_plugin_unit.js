@@ -15,233 +15,416 @@
  * limitations under the License.
  */
 
-describe('HttpPlugin', function() {
-  /** @type {shakaExtern.RetryParameters} */
-  var retryParameters;
 
-  beforeAll(function() {
-    // Install the mock only briefly in the global namespace, to get a handle to
-    // the mocked XHR implementation.
-    jasmine.Ajax.install();
-    var MockXHR = window.XMLHttpRequest;
-    jasmine.Ajax.uninstall();
-    // Now plug this mock into HttpRequest directly, so it does not interfere
-    // with other requests, such as those made by karma frameworks like
-    // source-map-support.
-    shaka.net.HttpPlugin['xhr_'] = MockXHR;
+/**
+ * Add a set of http plugin tests, for the given scheme plugin.
+ *
+ * @param {boolean} usingFetch True if this should use fetch, false otherwise.
+ */
+function httpPluginTests(usingFetch) {
+  // Neither plugin uses the request type, so this is arbitrary.
+  const requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+  const Util = shaka.test.Util;
 
-    jasmine.clock().install();
+  // A dummy progress callback.
+  const progressUpdated = (elapsedMs, bytes, bytesRemaining) => {};
 
-    jasmine.Ajax.stubRequest('https://foo.bar/').andReturn({
+  /** @type {shaka.extern.RetryParameters} */
+  let retryParameters;
+
+  /** @type {shaka.extern.SchemePlugin} */
+  let plugin;
+
+  beforeAll(() => {
+    plugin = usingFetch ? shaka.net.HttpFetchPlugin.parse :
+                          shaka.net.HttpXHRPlugin.parse;
+
+    if (usingFetch) {
+      // Install the mock only briefly in the global namespace, to get a handle
+      // to the mocked fetch implementation.
+      jasmine.Fetch.install();
+      const MockFetch = window.fetch;
+      const MockAbortController = window.AbortController;
+      const MockReadableStream = window.ReadableStream;
+      const MockHeaders = window.Headers;
+      jasmine.Fetch.uninstall();
+      // Now plug this mock into HttpRequest directly, so it does not interfere
+      // with other requests, such as those made by karma frameworks like
+      // source-map-support.
+      shaka.net.HttpFetchPlugin['fetch_'] = MockFetch;
+      shaka.net.HttpFetchPlugin['AbortController_'] = MockAbortController;
+      shaka.net.HttpFetchPlugin['ReadableStream_'] = MockReadableStream;
+      shaka.net.HttpFetchPlugin['Headers_'] = MockHeaders;
+    } else {
+      // Install the mock only briefly in the global namespace, to get a handle
+      // to the mocked XHR implementation.
+      jasmine.Ajax.install();
+      const JasmineXHRMock = window.XMLHttpRequest;
+      jasmine.Ajax.uninstall();
+
+      // Wrap event handlers to catch errors
+      // eslint-disable-next-line no-restricted-syntax
+      const MockXHR = function() {
+        const instance = new JasmineXHRMock();
+
+        const events = ['abort', 'load', 'error', 'timeout', 'progress'];
+        for (const eventName of events) {
+          const eventHandlerName = 'on' + eventName;
+          let eventHandler = null;
+
+          Object.defineProperty(instance, eventHandlerName, {
+            set: (callback) => {
+              eventHandler = (event) => {
+                // If an event handler throws, the test should fail, since
+                // errors should be passed as reasons to `reject()`. Otherwise
+                // we would leave the Promise in a pending state.
+                try {
+                  callback(event);
+                } catch (error) {  // eslint-disable-line no-restricted-syntax
+                  fail(
+                      'Uncaught error in XMLHttpRequest#' + eventHandlerName +
+                      ', ' + error.message);
+                }
+              };
+            },
+            get: () => eventHandler,
+          });
+        }
+
+        return instance;
+      };
+
+
+      // Now plug this mock into HttpRequest directly, so it does not interfere
+      // with other requests, such as those made by karma frameworks like
+      // source-map-support.
+      shaka.net.HttpXHRPlugin['Xhr_'] = MockXHR;
+    }
+
+    stubRequest('https://foo.bar/').andReturn({
       'response': new ArrayBuffer(10),
       'status': 200,
-      'responseHeaders': { 'FOO': 'BAR' }
+      'responseHeaders': {'FOO': 'BAR'},
     });
-    jasmine.Ajax.stubRequest('https://foo.bar/202').andReturn({
+    stubRequest('https://foo.bar/202').andReturn({
       'response': new ArrayBuffer(0),
-      'status': 202
+      'status': 202,
     });
-    jasmine.Ajax.stubRequest('https://foo.bar/204').andReturn({
+    stubRequest('https://foo.bar/204').andReturn({
       'response': new ArrayBuffer(10),
       'status': 204,
-      'responseHeaders': { 'FOO': 'BAR' }
+      'responseHeaders': {'FOO': 'BAR'},
     });
-    jasmine.Ajax.stubRequest('https://foo.bar/withemptyline').andReturn({
-      'response': new ArrayBuffer(0),
-      'status': 200,
-      'responseHeaders': { '\nFOO': 'BAR' }
-    });
-    jasmine.Ajax.stubRequest('https://foo.bar/302').andReturn({
+    stubRequest('https://foo.bar/withemptyline').andReturn({
       'response': new ArrayBuffer(10),
       'status': 200,
-      'responseHeaders': { 'FOO': 'BAR' },
-      'responseURL': 'https://foo.bar/after/302'
+      'responseHeaders': {'\nFOO': 'BAR'},
     });
-    jasmine.Ajax.stubRequest('https://foo.bar/401').andReturn({
+    stubRequest('https://foo.bar/302').andReturn({
+      'response': new ArrayBuffer(10),
+      'status': 200,
+      'responseHeaders': {'FOO': 'BAR'},
+      'responseURL': 'https://foo.bar/after/302',
+    });
+    stubRequest('https://foo.bar/401').andReturn({
       'response': new ArrayBuffer(0),
-      'status': 401
+      'status': 401,
     });
-    jasmine.Ajax.stubRequest('https://foo.bar/403').andReturn({
+    stubRequest('https://foo.bar/403').andReturn({
       'response': new ArrayBuffer(0),
-      'status': 403
+      'status': 403,
     });
-    jasmine.Ajax.stubRequest('https://foo.bar/404').andReturn({
-      'response': new ArrayBuffer(0),
-      'status': 404
+    stubRequest('https://foo.bar/404').andReturn({
+      'response': shaka.util.BufferUtils.toArrayBuffer(
+          new Uint8Array([65, 66, 67])),  // "ABC"
+      'status': 404,
+      'responseHeaders': {'FOO': 'BAR'},
     });
-    jasmine.Ajax.stubRequest('https://foo.bar/cache').andReturn({
+    stubRequest('https://foo.bar/cache').andReturn({
       'response': new ArrayBuffer(0),
       'status': 200,
-      'responseHeaders': { 'X-Shaka-From-Cache': 'true' }
+      'responseHeaders': {'X-Shaka-From-Cache': 'true'},
     });
 
-    jasmine.Ajax.stubRequest('https://foo.bar/timeout').andTimeout();
-    jasmine.Ajax.stubRequest('https://foo.bar/error').andError();
+    stubRequest('https://foo.bar/timeout').andTimeout();
+    stubRequest('https://foo.bar/error').andError();
 
     retryParameters = shaka.net.NetworkingEngine.defaultRetryParameters();
+    retryParameters.timeout = 4000;
   });
 
-  afterAll(function() {
-    shaka.net.HttpPlugin['xhr_'] = window.XMLHttpRequest;
-    jasmine.clock().uninstall();
+  afterAll(() => {
+    if (usingFetch) {
+      shaka.net.HttpFetchPlugin['fetch_'] = window.fetch;
+      shaka.net.HttpFetchPlugin['AbortController_'] = window.AbortController;
+      shaka.net.HttpFetchPlugin['ReadableStream_'] = window.ReadableStream;
+      shaka.net.HttpFetchPlugin['Headers_'] = window.Headers;
+    } else {
+      shaka.net.HttpXHRPlugin['Xhr_'] = window.XMLHttpRequest;
+    }
   });
 
-  it('sets the correct fields', function(done) {
-    var request = shaka.net.NetworkingEngine.makeRequest(
+  it('sets the correct fields', async () => {
+    const request = shaka.net.NetworkingEngine.makeRequest(
         ['https://foo.bar/'], retryParameters);
     request.allowCrossSiteCredentials = true;
     request.method = 'POST';
     request.headers['BAZ'] = '123';
 
-    shaka.net.HttpPlugin(request.uris[0], request).promise
-        .then(function() {
-          /** @type {!jasmine.Ajax.RequestStub} */
-          var actual = jasmine.Ajax.requests.mostRecent();
-          expect(actual).toBeTruthy();
-          expect(actual.url).toBe(request.uris[0]);
-          expect(actual.method).toBe(request.method);
-          expect(actual.withCredentials).toBe(true);
-          expect(actual.requestHeaders['BAZ']).toBe('123');
-        })
-        .catch(fail)
-        .then(done);
+    await plugin(request.uris[0], request, requestType, progressUpdated)
+        .promise;
+
+    const actual = mostRecentRequest();
+    expect(actual).toBeTruthy();
+    expect(actual.url).toBe(request.uris[0]);
+    expect(actual.method).toBe(request.method);
+    expect(actual.withCredentials).toBe(true);
+    // Headers are normalized into lowercase, so 'BAZ' becomes 'baz'.
+    expect(actual.requestHeaders['baz']).toBe('123');
   });
 
-  it('fails with 202 status', function(done) {
-    testFails('https://foo.bar/202', done);
+  if (usingFetch) {
+    // Regression test for an issue with Edge, where Fetch fails if the body
+    // is set to null but succeeds on undefined.
+    it('sets a request\'s null body to undefined', async () => {
+      const request = shaka.net.NetworkingEngine.makeRequest(
+          ['https://foo.bar/'], retryParameters);
+      request.body = null;
+      request.method = 'GET';
+
+      await plugin(request.uris[0], request, requestType, progressUpdated)
+          .promise;
+
+      const actual = jasmine.Fetch.requests.mostRecent();
+      expect(actual).toBeTruthy();
+      expect(actual.body).toBeUndefined();
+    });
+  }
+
+  it('succeeds with 204 status', async () => {
+    await testSucceeds('https://foo.bar/204');
   });
 
-  it('succeeds with 204 status', function(done) {
-    testSucceeds('https://foo.bar/204', done);
+  it('succeeds with empty line in response', async () => {
+    await testSucceeds('https://foo.bar/withemptyline');
   });
 
-  it('succeeds with empty line in response', function(done) {
-    testSucceedsWithEmptyLine('https://foo.bar/withemptyline', done);
+  it('gets redirect URLs with 302 status', async () => {
+    await testSucceeds('https://foo.bar/302', 'https://foo.bar/after/302');
   });
 
-  it('gets redirect URLs with 302 status', function(done) {
-    testSucceeds('https://foo.bar/302', done,
-                 'https://foo.bar/after/302');
+  it('fails with 202 status', async () => {
+    const uri = 'https://foo.bar/202';
+    const expected = new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.BAD_HTTP_STATUS,
+        uri, 202, '', jasmine.any(Object), requestType);
+    await testFails(uri, expected);
   });
 
-  it('fails with CRITICAL for 401 status', function(done) {
-    testFails('https://foo.bar/401', done, shaka.util.Error.Severity.CRITICAL);
+  it('fails with CRITICAL for 401 status', async () => {
+    const uri = 'https://foo.bar/401';
+    const expected = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.BAD_HTTP_STATUS,
+        uri, 401, '', jasmine.any(Object), requestType);
+    await testFails(uri, expected);
   });
 
-  it('fails with CRITICAL for 403 status', function(done) {
-    testFails('https://foo.bar/403', done, shaka.util.Error.Severity.CRITICAL);
+  it('fails with CRITICAL for 403 status', async () => {
+    const uri = 'https://foo.bar/403';
+    const expected = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.BAD_HTTP_STATUS,
+        uri, 403, '', jasmine.any(Object), requestType);
+    await testFails(uri, expected);
   });
 
-  it('fails if non-2xx status', function(done) {
-    testFails('https://foo.bar/404', done);
+  it('fails if non-2xx status', async () => {
+    const uri = 'https://foo.bar/404';
+    const expected = new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.BAD_HTTP_STATUS,
+        uri, 404, 'ABC', {'foo': 'BAR'}, requestType);
+    await testFails(uri, expected);
   });
 
-  it('fails on timeout', function(done) {
-    testFails('https://foo.bar/timeout', done);
+  it('fails on timeout', async () => {
+    const uri = 'https://foo.bar/timeout';
+    const expected = new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.TIMEOUT,
+        uri, requestType);
+
+    // The timeout handler for Jasmine requires the mock clock to be installed.
+    jasmine.clock().install();
+    try {
+      await testFails(uri, expected);
+    } finally {
+      jasmine.clock().uninstall();
+    }
   });
 
-  it('fails on error', function(done) {
-    testFails('https://foo.bar/error', done);
+  it('fails on error', async () => {
+    const uri = 'https://foo.bar/error';
+    const expected = new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.HTTP_ERROR,
+        uri, jasmine.any(Object), requestType);
+    await testFails(uri, expected);
   });
 
-  it('detects cache headers', function(done) {
-    var request = shaka.net.NetworkingEngine.makeRequest(
+  it('detects cache headers', async () => {
+    const request = shaka.net.NetworkingEngine.makeRequest(
         ['https://foo.bar/cache'], retryParameters);
-    shaka.net.HttpPlugin(request.uris[0], request).promise
-        .catch(fail)
-        .then(function(response) {
-          expect(response).toBeTruthy();
-          expect(response.fromCache).toBe(true);
-        })
-        .then(done);
+
+    const response =
+        await plugin(request.uris[0], request, requestType, progressUpdated)
+            .promise;
+    expect(response).toBeTruthy();
+    expect(response.fromCache).toBe(true);
   });
 
-  it('aborts the request when the operation is aborted', function(done) {
-    var request = shaka.net.NetworkingEngine.makeRequest(
-        ['https://foo.bar/'], retryParameters);
-    var operation = shaka.net.HttpPlugin(request.uris[0], request);
+  it('aborts the request when the operation is aborted', async () => {
+    let requestPromise;
+    let uri;
+    const oldXHRMock = shaka.net.HttpXHRPlugin['Xhr_'];
+    if (usingFetch) {
+      uri = 'https://foo.bar/timeout';
+      const request = shaka.net.NetworkingEngine.makeRequest(
+          [uri], retryParameters);
+      const operation = plugin(
+          request.uris[0], request, requestType, progressUpdated);
 
-    /** @type {!jasmine.Ajax.RequestStub} */
-    var actual = jasmine.Ajax.requests.mostRecent();
-    actual.abort = shaka.test.Util.spyFunc(jasmine.createSpy('abort'));
+      /** @type {jasmine.Fetch.RequestStub} */
+      const actual = jasmine.Fetch.requests.mostRecent();
 
-    var requestPromise = operation.promise.catch(() => {});
+      requestPromise = operation.promise;
 
-    expect(actual.abort).not.toHaveBeenCalled();
-    var abortPromise = operation.abort();
-    expect(actual.abort).toHaveBeenCalled();
+      expect(actual.aborted).toBe(false);
+      await operation.abort();
+      await Util.shortDelay();  // Delay for jasmine-fetch to detect the abort.
+      expect(actual.aborted).toBe(true);
+    } else {
+      /** @type {shaka.extern.IAbortableOperation.<shaka.extern.Response>} */
+      let operation;
 
-    Promise.all([abortPromise, requestPromise]).catch(fail).then(done);
+      // Jasmine-ajax stubbed requests are purely synchronous, so we can't
+      // actually insert a call to abort in the middle.
+      // Instead, install a very elementary mock.
+      /** @constructor */
+      function NewXHRMock() {  // eslint-disable-line no-inner-declarations
+        this.abort = Util.spyFunc(jasmine.createSpy('abort'));
+
+        this.open = Util.spyFunc(jasmine.createSpy('open'));
+
+        /** @type {function()} */
+        this.onabort;
+
+        this.send = async () => {
+          // Delay the effects of send until after operation is defined.
+          await Promise.resolve();
+          expect(this.abort).not.toHaveBeenCalled();
+          operation.abort();
+          expect(this.abort).toHaveBeenCalled();
+          this.onabort();
+        };
+      }
+      shaka.net.HttpXHRPlugin['Xhr_'] = NewXHRMock;
+
+      uri = 'https://foo.bar/';
+      const request = shaka.net.NetworkingEngine.makeRequest(
+          [uri], retryParameters);
+      operation = plugin(
+          request.uris[0], request, requestType, progressUpdated);
+      requestPromise = operation.promise;
+    }
+
+    const expected = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.RECOVERABLE,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.OPERATION_ABORTED,
+        uri, requestType));
+    await expectAsync(requestPromise).toBeRejectedWith(expected);
+
+    shaka.net.HttpXHRPlugin['Xhr_'] = oldXHRMock;
   });
 
   /**
    * @param {string} uri
-   * @param {function()} done
-   * @param {string=} opt_overrideUri
+   * @return {jasmine.Ajax.Stub|jasmine.Fetch.RequestStub}
    */
-  function testSucceeds(uri, done, opt_overrideUri) {
-    var request = shaka.net.NetworkingEngine.makeRequest(
-        [uri], retryParameters);
-    shaka.net.HttpPlugin(uri, request).promise
-        .catch(fail)
-        .then(function(response) {
-          expect(jasmine.Ajax.requests.mostRecent().url).toBe(uri);
-          expect(response).toBeTruthy();
-          expect(response.uri).toBe(opt_overrideUri || uri);
-          expect(response.data).toBeTruthy();
-          expect(response.data.byteLength).toBe(10);
-          expect(response.fromCache).toBe(false);
-          expect(response.headers).toBeTruthy();
-          // Returned header names are in lowercase.
-          expect(response.headers['foo']).toBe('BAR');
-        })
-        .then(done);
+  function stubRequest(uri) {
+    if (usingFetch) {
+      return jasmine.Fetch.stubRequest(uri);
+    } else {
+      return jasmine.Ajax.stubRequest(uri);
+    }
   }
 
   /**
    * @param {string} uri
-   * @param {function()} done
-   * @param {shaka.util.Error.Severity=} opt_severity
+   * @param {string=} overrideUri
    */
-  function testFails(uri, done, opt_severity) {
-    var request = shaka.net.NetworkingEngine.makeRequest(
+  async function testSucceeds(uri, overrideUri) {
+    const request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
-    shaka.net.HttpPlugin(uri, request).promise
-        .then(fail)
-        .catch(function(error) {
-          expect(error).toBeTruthy();
-          expect(error.severity)
-              .toBe(opt_severity || shaka.util.Error.Severity.RECOVERABLE);
-          expect(error.category).toBe(shaka.util.Error.Category.NETWORK);
+    const response =
+        await plugin(uri, request, requestType, progressUpdated).promise;
 
-          expect(jasmine.Ajax.requests.mostRecent().url).toBe(uri);
-        })
-        .then(done);
+    expect(mostRecentRequest().url).toBe(uri);
+    expect(response).toBeTruthy();
+    expect(response.uri).toBe(overrideUri || uri);
+    expect(response.data).toBeTruthy();
+    expect(response.data.byteLength).toBe(10);
+    expect(response.fromCache).toBe(false);
+    expect(response.headers).toBeTruthy();
+    // Returned header names are in lowercase and should not contain empty lines
+    expect(response.headers['foo']).toBe('BAR');
   }
 
   /**
-   * Since IE/Edge incorrectly return the header with a leading new line
-   * character ('\n'), we need to trim the response header.
    * @param {string} uri
-   * @param {function()} done
-   * @param {string=} opt_overrideUri
+   * @param {shaka.util.Error} expected
    */
-  function testSucceedsWithEmptyLine(uri, done, opt_overrideUri) {
-    var request = shaka.net.NetworkingEngine.makeRequest(
+  async function testFails(uri, expected) {
+    const request = shaka.net.NetworkingEngine.makeRequest(
         [uri], retryParameters);
-    shaka.net.HttpPlugin(uri, request).promise
-        .catch(fail)
-        .then(function(response) {
-          expect(jasmine.Ajax.requests.mostRecent().url).toBe(uri);
-          expect(response).toBeTruthy();
-          expect(response.uri).toBe(opt_overrideUri || uri);
-          expect(response.data).toBeTruthy();
-          expect(response.fromCache).toBe(false);
-          expect(response.headers).toBeTruthy();
-          // Returned header names do not contain empty lines.
-          expect(response.headers['foo']).toBe('BAR');
-        })
-        .then(done);
-  }
-});
 
+    const p = plugin(uri, request, requestType, progressUpdated).promise;
+    if (expected.code == shaka.util.Error.Code.TIMEOUT) {
+      jasmine.clock().tick(5000);
+    }
+    await expectAsync(p).toBeRejectedWith(expected);
+  }
+
+  /**
+   * @return {jasmine.Ajax.RequestStub}
+   */
+  function mostRecentRequest() {
+    if (usingFetch) {
+      const mostRecent = jasmine.Fetch.requests.mostRecent();
+      if (mostRecent) {
+        // Convert from jasmine.Fetch.RequestStub to jasmine.Ajax.RequestStub
+        return /** @type {jasmine.Ajax.RequestStub} */({
+          url: mostRecent.url,
+          query: mostRecent.query,
+          data: mostRecent.data,
+          method: mostRecent.method,
+          requestHeaders: mostRecent.requestHeaders,
+          withCredentials: mostRecent.withCredentials,
+        });
+      }
+    }
+    return jasmine.Ajax.requests.mostRecent();
+  }
+}
+
+describe('HttpXHRPlugin', () => httpPluginTests(false));
+describe('HttpFetchPlugin', () => httpPluginTests(true));

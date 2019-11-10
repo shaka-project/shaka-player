@@ -15,61 +15,56 @@
  * limitations under the License.
  */
 
-describe('OfflineUri', function() {
-  /** @const */
-  var OfflineUri = shaka.offline.OfflineUri;
+describe('OfflineUri', () => {
+  const OfflineUri = shaka.offline.OfflineUri;
 
-  it('creates uri from manifest id', function() {
+  it('creates uri from manifest id', () => {
     /** @type {number} */
-    var id = 123;
+    const id = 123;
     /** @type {string} */
-    var uri = OfflineUri.manifestIdToUri(id);
+    const uri = OfflineUri.manifest('mech', 'cell', id).toString();
 
-    expect(uri).toBe('offline:manifest/123');
+    expect(uri).toBe('offline:manifest/mech/cell/123');
   });
 
-  it('creates uri from segment id', function() {
+  it('creates uri from segment id', () => {
     /** @type {number} */
-    var id = 123;
+    const id = 123;
     /** @type {string} */
-    var uri = OfflineUri.segmentIdToUri(id);
+    const uri = OfflineUri.segment('mech', 'cell', id).toString();
 
-    expect(uri).toBe('offline:segment/123');
+    expect(uri).toBe('offline:segment/mech/cell/123');
   });
 
-  it('creates null id from non-manifest uri', function() {
+  it('creates null from invalid uri', () => {
     /** @type {string} */
-    var uri = 'invalid-uri';
-    /** @type {?number} */
-    var id = OfflineUri.uriToManifestId(uri);
+    const uri = 'invalid-uri';
+    const parsed = OfflineUri.parse(uri);
 
-    expect(id).toBeNull();
+    expect(parsed).toBeNull();
   });
 
-  it('creates id from manifest uri', function() {
+  it('parse manifest uri', () => {
     /** @type {string} */
-    var uri = 'offline:manifest/123';
-    /** @type {?number} */
-    var id = OfflineUri.uriToManifestId(uri);
+    const uri = 'offline:manifest/mech/cell/123';
+    const parsed = OfflineUri.parse(uri);
 
-    expect(id).toBe(123);
+    expect(parsed).toBeTruthy();
+    expect(parsed.isManifest()).toBeTruthy();
+    expect(parsed.mechanism()).toBe('mech');
+    expect(parsed.cell()).toBe('cell');
+    expect(parsed.key()).toBe(123);
   });
 
-  it('creates null id from non-segment uri', function() {
+  it('parse segment uri', () => {
     /** @type {string} */
-    var uri = 'invalid-uri';
-    /** @type {?number} */
-    var id = OfflineUri.uriToSegmentId(uri);
+    const uri = 'offline:segment/mech/cell/123';
+    const parsed = OfflineUri.parse(uri);
 
-    expect(id).toBeNull();
-  });
-
-  it('creates id from segment uri', function() {
-    /** @type {string} */
-    var uri = 'offline:segment/123';
-    /** @type {?number} */
-    var id = OfflineUri.uriToSegmentId(uri);
-
-    expect(id).toBe(123);
+    expect(parsed).toBeTruthy();
+    expect(parsed.isSegment()).toBeTruthy();
+    expect(parsed.mechanism()).toBe('mech');
+    expect(parsed.cell()).toBe('cell');
+    expect(parsed.key()).toBe(123);
   });
 });

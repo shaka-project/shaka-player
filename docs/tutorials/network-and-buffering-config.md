@@ -14,7 +14,7 @@ identical:
 
 ```js
 retryParameters: {
-  timeout: 0,       // timeout in ms, after which we abort a request; 0 means never
+  timeout: 0,       // timeout in ms, after which we abort; 0 means never
   maxAttempts: 2,   // the maximum number of requests before we fail
   baseDelay: 1000,  // the base delay in ms between retries
   backoffFactor: 2, // the multiplicative backoff factor between retries
@@ -72,6 +72,8 @@ This is a minimum; if the stream's max segment size is longer than the
 *NOTES:*
  - *`rebufferingGoal` should always be less than `bufferingGoal`.*
  - *A DASH manifest's `minBufferTime`, if greater, overrides `rebufferingGoal`.*
+ - *You can ignore `minBufferTime` by setting the
+   `manifest.dash.ignoreMinBufferTime` configuration to true.*
 
 All of these settings should be customized for your application.  The default
 values are very conservative.
