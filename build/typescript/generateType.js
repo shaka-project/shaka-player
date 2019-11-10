@@ -1,4 +1,4 @@
-const { getNodeAtPath } = require('./treeUtils');
+const {getNodeAtPath} = require('./treeUtils');
 
 // Primitive types are not nullable in Closure unless marked as such.
 // Keep a list of primitives to properly set the nullable flag.
@@ -51,18 +51,18 @@ function processType(root, rawType, inferNullability) {
     }
     case 'NullableType':
       return Object.assign(
-        processType(root, rawType.expression, false),
-        { isNullabe: true }
+          processType(root, rawType.expression, false),
+          {isNullabe: true}
       );
     case 'NonNullableType':
       return Object.assign(
-        processType(root, rawType.expression, false),
-        { isNullabe: false }
+          processType(root, rawType.expression, false),
+          {isNullabe: false}
       );
     case 'OptionalType':
       return Object.assign(
-        processType(root, rawType.expression, inferNullability),
-        { isOptional: true }
+          processType(root, rawType.expression, inferNullability),
+          {isOptional: true}
       );
     case 'RestType':
       return {
@@ -72,16 +72,16 @@ function processType(root, rawType, inferNullability) {
       };
     case 'TypeApplication':
       return Object.assign(
-        processType(root, rawType.expression, inferNullability),
-        {
-          applications: rawType.applications.map(
-            (t) => processType(root, t, false)
-          ),
-        }
+          processType(root, rawType.expression, inferNullability),
+          {
+            applications: rawType.applications.map(
+                (t) => processType(root, t, false)
+            ),
+          }
       );
     case 'UnionType': {
       const elements = rawType.elements.map(
-        (t) => processType(root, t, true)
+          (t) => processType(root, t, true)
       );
       let isNullabe = false;
       for (const element of elements) {
@@ -93,7 +93,7 @@ function processType(root, rawType, inferNullability) {
       return {
         isUnion: true,
         isNullabe: inferNullability ? isNullabe : false,
-        elements: elements
+        elements: elements,
       };
     }
     case 'FunctionType':
@@ -103,7 +103,7 @@ function processType(root, rawType, inferNullability) {
         params: rawType.params.map((t) => processType(root, t, true)),
         returnType: rawType.result
           ? processType(root, rawType.result, true)
-          : { isNullabe: false, name: 'void' },
+          : {isNullabe: false, name: 'void'},
       };
     case 'RecordType':
       return {
@@ -150,9 +150,9 @@ function stringifyType(type) {
     if (type.name === 'Object') {
       if (type.applications) {
         console.assert(
-          type.applications.length === 2,
-          'Expected Object to have either 0 or 2 type applications, got',
-          type.applications.length
+            type.applications.length === 2,
+            'Expected Object to have either 0 or 2 type applications, got',
+            type.applications.length
         );
         const key = stringifyType(type.applications[0]);
         const value = stringifyType(type.applications[1]);
@@ -164,22 +164,22 @@ function stringifyType(type) {
     } else if (type.name === 'Promise') {
       if (type.applications) {
         console.assert(
-          type.applications.length === 1,
-          'Expected Promise to have at most one type application, got',
-          type.applications.length
+            type.applications.length === 1,
+            'Expected Promise to have at most one type application, got',
+            type.applications.length
         );
       } else {
-        type.applications = [{ isNullabe: false, name: 'void' }];
+        type.applications = [{isNullabe: false, name: 'void'}];
       }
     } else if (type.name === 'Array') {
       if (type.applications) {
         console.assert(
-          type.applications.length === 1,
-          'Expected Array to have at most one type application, got',
-          type.applications.length
+            type.applications.length === 1,
+            'Expected Array to have at most one type application, got',
+            type.applications.length
         );
       } else {
-        type.applications = [{ isNullabe: false, name: 'any' }];
+        type.applications = [{isNullabe: false, name: 'any'}];
       }
 
       if (type.applications[0].name) {
@@ -207,5 +207,5 @@ function generateType(root, rawType, inferNullability = true) {
 module.exports = {
   processType,
   stringifyType,
-  generateType
+  generateType,
 };

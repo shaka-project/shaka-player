@@ -37,7 +37,7 @@ function getPropTypeFromInterface(interface, propName) {
   const attributes = interface.definition.attributes;
   if (attributes.type === 'interface') {
     const base = getNodeAtPath(
-      interface.children, ['prototype', propName]
+        interface.children, ['prototype', propName]
     );
     if (base) {
       const baseAttributes = base.definition.attributes;
@@ -67,7 +67,7 @@ function getMethodTypesFromInterface(interface, methodName) {
   const attributes = interface.definition.attributes;
   if (attributes.type === 'interface') {
     const base = getNodeAtPath(
-      interface.children, ['prototype', methodName]
+        interface.children, ['prototype', methodName]
     );
     if (base) {
       const baseAttributes = base.definition.attributes;

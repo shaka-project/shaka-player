@@ -1,12 +1,12 @@
 class InterfaceNode {
   constructor(
-    name,
-    comments,
-    templateTypes,
-    extendsInterfaces,
-    properties,
-    methods,
-    namespace
+      name,
+      comments,
+      templateTypes,
+      extendsInterfaces,
+      properties,
+      methods,
+      namespace
   ) {
     this.name = name;
     this.comments = comments;

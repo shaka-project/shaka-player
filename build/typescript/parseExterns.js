@@ -3,11 +3,11 @@ const doctrine = require('doctrine');
 
 function staticMemberExpressionToPath(expression) {
   console.assert(
-    expression.type === 'MemberExpression',
-    'Expected MemberExpression, got',
-    expression.type
+      expression.type === 'MemberExpression',
+      'Expected MemberExpression, got',
+      expression.type
   );
-  const { object, property } = expression;
+  const {object, property} = expression;
   const objectPath = object.type === 'MemberExpression'
     ? staticMemberExpressionToPath(object)
     : [object.name];
@@ -40,10 +40,11 @@ function parseAssignmentExpression(expression) {
       };
     default:
       console.log(
-        'Unknown expression type',
-        expression.right.type,
-        'for assignment value'
+          'Unknown expression type',
+          expression.right.type,
+          'for assignment value'
       );
+      return undefined;
   }
 }
 
@@ -81,12 +82,12 @@ function normalizeDescription(description) {
 
 function parseBlockComment(comment) {
   console.assert(
-    comment.type === 'Block',
-    'Expected comment of type Block, got',
-    comment.type
+      comment.type === 'Block',
+      'Expected comment of type Block, got',
+      comment.type
   );
 
-  const ast = doctrine.parse(comment.value, { unwrap: true });
+  const ast = doctrine.parse(comment.value, {unwrap: true});
 
   // Possible types:
   // null, const, enum, class, interface, function, property, typedef
@@ -159,17 +160,17 @@ function parseBlockComment(comment) {
         break;
       case 'implements':
         console.assert(
-          tag.type.type === 'NameExpression',
-          'Expected name expression after implements keyword, got',
-          tag.type
+            tag.type.type === 'NameExpression',
+            'Expected name expression after implements keyword, got',
+            tag.type
         );
         attributes.implements = tag.type.name;
         break;
       case 'extends':
         console.assert(
-          tag.type.type === 'NameExpression',
-          'Expected name expression after extends keyword, got',
-          tag.type
+            tag.type.type === 'NameExpression',
+            'Expected name expression after extends keyword, got',
+            tag.type
         );
         attributes.extends = tag.type.name;
         break;
@@ -198,8 +199,8 @@ function parseLeadingComments(statement) {
     };
   }
   console.assert(
-    comments,
-    'Expected at least one leading comment, found none'
+      comments,
+      'Expected at least one leading comment, found none'
   );
   // Only parse the comment closest to the statement
   const comment = comments[comments.length - 1];
@@ -207,22 +208,22 @@ function parseLeadingComments(statement) {
 }
 
 function parseExterns(code) {
-  const program = esprima.parse(code, { attachComment: true });
+  const program = esprima.parse(code, {attachComment: true});
   const definitions = program.body
-    // Only take expressions into consideration.
-    // Variable declarations are discarded because they are only used for
-    // declaring namespaces.
-    .filter((statement) => statement.type === 'ExpressionStatement')
-    // Prepare for further inspection
-    .map((statement) => Object.assign(
-      parseExpressionStatement(statement),
-      { attributes: parseLeadingComments(statement) }
-    ))
-    // @const without type is only used to define namespaces, discard.
-    .filter((definition) =>
-      definition.attributes.type !== 'const' ||
+  // Only take expressions into consideration.
+  // Variable declarations are discarded because they are only used for
+  // declaring namespaces.
+      .filter((statement) => statement.type === 'ExpressionStatement')
+  // Prepare for further inspection
+      .map((statement) => Object.assign(
+          parseExpressionStatement(statement),
+          {attributes: parseLeadingComments(statement)}
+      ))
+  // @const without type is only used to define namespaces, discard.
+      .filter((definition) =>
+        definition.attributes.type !== 'const' ||
       definition.attributes.constType !== undefined
-    );
+      );
 
   return definitions;
 }

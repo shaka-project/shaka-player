@@ -14,16 +14,16 @@ function generateTypeDefinitions(outputPath, inputPaths) {
   }));
   const root = buildDefinitionTree(definitions);
 
-  const stream = fs.createWriteStream(outputPath, { encoding: 'utf-8' });
+  const stream = fs.createWriteStream(outputPath, {encoding: 'utf-8'});
   writeTypeDefinitions(stream, root);
   stream.end();
 }
 
 function main(args) {
-  var inputPaths = [];
-  var outputPath;
+  const inputPaths = [];
+  let outputPath;
 
-  for (var i = 0; i < args.length; ++i) {
+  for (let i = 0; i < args.length; ++i) {
     if (args[i] == '--output') {
       outputPath = args[i + 1];
       ++i;
@@ -32,9 +32,9 @@ function main(args) {
     }
   }
   console.assert(outputPath,
-                 'You must specify output file with --output <EXTERNS>');
+      'You must specify output file with --output <EXTERNS>');
   console.assert(inputPaths.length,
-                 'You must specify at least one input file.');
+      'You must specify at least one input file.');
 
   generateTypeDefinitions(outputPath, inputPaths);
 }

@@ -1,4 +1,4 @@
-const { stringifyType } = require('../generateType');
+const {stringifyType} = require('../generateType');
 
 class FunctionNode {
   constructor(name, comments, templateTypes, params, returnType) {

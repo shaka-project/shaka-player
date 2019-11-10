@@ -1,16 +1,16 @@
 class ClassNode {
   constructor(
-    name,
-    comments,
-    templateTypes,
-    extendsClass,
-    implementsInterfaces,
-    staticProperties,
-    staticMethods,
-    constructor,
-    properties,
-    methods,
-    namespace
+      name,
+      comments,
+      templateTypes,
+      extendsClass,
+      implementsInterfaces,
+      staticProperties,
+      staticMethods,
+      constructor,
+      properties,
+      methods,
+      namespace
   ) {
     this.name = name;
     this.comments = comments;

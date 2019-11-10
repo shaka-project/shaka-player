@@ -1,4 +1,4 @@
-const { stringifyType } = require('../generateType');
+const {stringifyType} = require('../generateType');
 
 class PropertyNode {
   constructor(name, comments, type, isConst) {

@@ -1,4 +1,4 @@
-const { getNodeAtPath } = require('./treeUtils');
+const {getNodeAtPath} = require('./treeUtils');
 const generateType = require('./generateType');
 
 class Writer {

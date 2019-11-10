@@ -5,5 +5,5 @@ module.exports = {
   InterfaceNode: require('./InterfaceNode'),
   NamespaceNode: require('./NamespaceNode'),
   PropertyNode: require('./PropertyNode'),
-  TypeNode: require('./TypeNode')
+  TypeNode: require('./TypeNode'),
 };
