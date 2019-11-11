@@ -127,6 +127,9 @@ function parseBlockComment(comment) {
         attributes.type = 'const';
         attributes.constType = tag.type;
         break;
+      case 'namespace':
+        attributes.type = 'namespace';
+        break;
       case 'define':
         attributes.type = 'const';
         attributes.constType = tag.type;
@@ -165,9 +168,17 @@ function parseBlockComment(comment) {
         }
         break;
       case 'implements':
-        assert.equal(tag.type.type, 'NameExpression',
-            'Expected name expression after implements keyword');
-        attributes.implements = tag.type.name;
+        if (tag.type.type === 'NameExpression') {
+          attributes.implements = tag.type.name;
+        } else if (tag.type.type === 'TypeApplication') {
+          assert.equal(tag.type.expression.type, 'NameExpression');
+          attributes.implements = tag.type.expression.name;
+        } else {
+          assert.fail(
+              'Expected name or type application expression after implements ' +
+              'keyword'
+          );
+        }
         break;
       case 'extends':
         assert.equal(
@@ -201,7 +212,7 @@ function parseLeadingComments(statement) {
     };
   }
   assert(
-      comments,
+      comments.length > 0,
       'Expected at least one leading comment, found none'
   );
   // Only parse the comment closest to the statement
@@ -223,8 +234,9 @@ function parseExterns(code) {
       ))
       // @const without type is only used to define namespaces, discard.
       .filter((definition) =>
-        definition.attributes.type !== 'const' ||
-        definition.attributes.constType !== undefined
+        definition.attributes.type !== 'namespace' &&
+        (definition.attributes.type !== 'const' ||
+        definition.attributes.constType !== undefined)
       );
 
   return definitions;
