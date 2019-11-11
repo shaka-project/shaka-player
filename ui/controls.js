@@ -79,7 +79,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.videoContainer_ = videoContainer;
 
-    /** @private {shaka.ads.AdManager} */
+    /** @private {shaka.extern.IAdManager} */
     this.adManager_ = this.player_.getAdManager();
 
     /** @private {shaka.extern.IAd} */

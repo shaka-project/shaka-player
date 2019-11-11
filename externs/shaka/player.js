@@ -857,8 +857,8 @@ shaka.extern.OfflineConfiguration;
  *   Optional playback and seek end time in seconds. Defaults to the end of
  *   the presentation if not provided.
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
- *   A factory to construct text displayer. Note that, if this is changed during
- *   playback, it will cause the text tracks to be reloaded.
+ *   A factory to construct a text displayer. Note that, if this is changed
+ *   during playback, it will cause the text tracks to be reloaded.
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;

@@ -69,7 +69,7 @@ shaka.ui.Element = class {
     this.video = this.controls.getVideo();
 
     /**
-     * @protected {shaka.ads.AdManager}
+     * @protected {shaka.extern.IAdManager}
      * @exportInterface
      */
     this.adManager = this.player.getAdManager();

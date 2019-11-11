@@ -20,6 +20,24 @@
  * @externs
  */
 
+/**
+ * An object that's responsible for all the ad-related logic
+ * in the player.
+ *
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IAdManager = class extends EventTarget {};
+
+
+/**
+ * A factory for creating the ad manager.  This will be called with 'new'.
+ *
+ * @typedef {function(new:shaka.extern.IAdManager)}
+ * @exportDoc
+ */
+shaka.extern.IAdManager.Factory;
+
 
 /**
  * Interface for Ad objects.

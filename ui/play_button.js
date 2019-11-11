@@ -91,6 +91,10 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
    * @protected
    */
   isPaused() {
+    if (this.ad) {
+      return this.ad.isPaused();
+    }
+
     return this.controls.presentationIsPaused();
   }
 
