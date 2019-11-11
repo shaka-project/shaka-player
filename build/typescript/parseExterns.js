@@ -3,6 +3,9 @@ const esprima = require('esprima');
 const doctrine = require('doctrine');
 
 function staticMemberExpressionToPath(expression) {
+  if (!expression) {
+    return null;
+  }
   assert(
       expression.type === 'MemberExpression',
       'Expected MemberExpression, got ' +
@@ -39,11 +42,17 @@ function parseAssignmentExpression(expression) {
           throw new Error('Unrecognited key type ' + p.key.type);
         }),
       };
-    case 'ClassExpression':
+    case 'ClassExpression': {
+      const {body} = expression.right.body;
       return {
         type: 'class',
         identifier: identifier,
+        superClass: staticMemberExpressionToPath(expression.right.superClass),
+        constructor: body.find((d) => d.kind === 'constructor'),
+        methods: body.filter((d) => d.kind === 'method' && !d.static),
+        staticMethods: body.filter((d) => d.kind === 'method' && d.static),
       };
+    }
     default:
       console.dir(expression.right);
       throw new Error(

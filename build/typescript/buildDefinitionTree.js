@@ -46,7 +46,7 @@ function parseClassNode(root, node) {
   // We assume the interface is a native interface in that case,
   // defined by one of TypeScript's base libs.
 
-  // Gather all static members
+  // Gather all static members (static properties)
   for (const child of node.children.values()) {
     if (child.name === 'prototype') {
       continue;
@@ -79,7 +79,7 @@ function parseClassNode(root, node) {
     }
   }
 
-  // Gather all prototype members
+  // Gather all prototype members (instance properties)
   for (const child of prototype.children.values()) {
     assert.notEqual(
         child.definition, null,
@@ -129,11 +129,13 @@ function parseClassNode(root, node) {
   const comments = [attributes.description];
 
   // Constructor
-  const constructor = parseFunctionNode(root, node);
+  const constructor = parseFunctionNode(
+      root, node.definition.constructor.value
+  );
 
   return new ClassNode(
       node.name,
-      [node.definition.attributes.description],
+      comments,
       attributes.template,
       attributes.extends,
       interfaceName ? [interfaceName] : null,
