@@ -150,10 +150,9 @@ function stringifyType(type) {
 
     if (type.name === 'Object') {
       if (type.applications) {
-        assert(
-            type.applications.length === 2,
-            'Expected Object to have either 0 or 2 type applications, got ' +
-            type.applications.length
+        assert.equal(
+            type.applications.length, 2,
+            'Expected Object to have either 0 or 2 type applications'
         );
         const key = stringifyType(type.applications[0]);
         const value = stringifyType(type.applications[1]);
@@ -164,20 +163,18 @@ function stringifyType(type) {
       }
     } else if (type.name === 'Promise') {
       if (type.applications) {
-        assert(
-            type.applications.length === 1,
-            'Expected Promise to have at most one type application, got ' +
-            type.applications.length
+        assert.equal(
+            type.applications.length, 1,
+            'Expected Promise to have at most one type application'
         );
       } else {
         type.applications = [{isNullabe: false, name: 'void'}];
       }
     } else if (type.name === 'Array') {
       if (type.applications) {
-        assert(
-            type.applications.length === 1,
-            'Expected Array to have at most one type application, got ' +
-            type.applications.length
+        assert.equal(
+            type.applications.length, 1,
+            'Expected Array to have at most one type application'
         );
       } else {
         type.applications = [{isNullabe: false, name: 'any'}];

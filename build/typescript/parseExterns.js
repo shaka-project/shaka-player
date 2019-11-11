@@ -165,18 +165,14 @@ function parseBlockComment(comment) {
         }
         break;
       case 'implements':
-        assert(
-            tag.type.type === 'NameExpression',
-            'Expected name expression after implements keyword, got ' +
-            JSON.stringify(tag.type, undefined, 2)
-        );
+        assert.equal(tag.type.type, 'NameExpression',
+            'Expected name expression after implements keyword');
         attributes.implements = tag.type.name;
         break;
       case 'extends':
-        assert(
-            tag.type.type === 'NameExpression',
-            'Expected name expression after extends keyword, got ' +
-            JSON.stringify(tag.type, undefined, 2)
+        assert.equal(
+            tag.type.type, 'NameExpression',
+            'Expected name expression after extends keyword'
         );
         attributes.extends = tag.type.name;
         break;

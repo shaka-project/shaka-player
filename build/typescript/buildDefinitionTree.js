@@ -51,8 +51,8 @@ function parseClassNode(root, node) {
     if (child.name === 'prototype') {
       continue;
     }
-    assert(
-        child.definition !== null,
+    assert.notEqual(
+        child.definition, null,
         'Unexpected child without definition in class statics: ' +
         JSON.stringify(child, undefined, 2),
     );
@@ -81,8 +81,8 @@ function parseClassNode(root, node) {
 
   // Gather all prototype members
   for (const child of prototype.children.values()) {
-    assert(
-        child.definition !== null,
+    assert.notEqual(
+        child.definition, null,
         'Unexpected child without definition in class prototype: ' +
         JSON.stringify(child, undefined, 2)
     );
@@ -176,8 +176,8 @@ function parseInterfaceNode(root, node) {
     if (child.name === 'prototype') {
       continue;
     }
-    assert(
-        child.definition !== null,
+    assert.notEqual(
+        child.definition, null,
         'Unexpected child without definition in interface statics: ' +
         JSON.stringify(child, undefined, 2)
     );
@@ -186,8 +186,8 @@ function parseInterfaceNode(root, node) {
 
   // Gather all prototype members
   for (const child of prototype.children.values()) {
-    assert(
-        child.definition !== null,
+    assert.notEqual(
+        child.definition, null,
         'Unexpected child without definition in interface prototype: ' +
         JSON.stringify(child, undefined, 2)
     );
@@ -316,11 +316,11 @@ function parseTypedefNode(root, node) {
 
 function parseEnumNode(node) {
   const definition = node.definition;
-  assert(
-      definition.type === 'object',
+  assert.equal(
+      definition.type, 'object',
       'Expected enum ' +
       node.name +
-      'to be defined with an object, got ' +
+      ' to be defined with an object, got ' +
       definition.type
   );
 
