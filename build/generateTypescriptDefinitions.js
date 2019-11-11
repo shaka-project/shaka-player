@@ -2,7 +2,7 @@
 
 // Load required modules.
 const fs = require('fs');
-const path = require('path');
+const assert = require('assert').strict;
 const parseExterns = require('./typescript/parseExterns');
 const buildDefinitionTree = require('./typescript/buildDefinitionTree');
 const writeTypeDefinitions = require('./typescript/writeTypeDefinitions');
@@ -31,9 +31,8 @@ function main(args) {
       inputPaths.push(args[i]);
     }
   }
-  console.assert(outputPath,
-      'You must specify output file with --output <EXTERNS>');
-  console.assert(inputPaths.length,
+  assert(outputPath, 'You must specify output file with --output <EXTERNS>');
+  assert(inputPaths.length,
       'You must specify at least one input file.');
 
   generateTypeDefinitions(outputPath, inputPaths);

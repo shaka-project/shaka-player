@@ -1,3 +1,4 @@
+const assert = require('assert').strict;
 const {
   getOrCreateNode,
   getOrCreateNodeAtPath,
@@ -33,10 +34,10 @@ function parseClassNode(root, node) {
   if (interface != null) {
     const attributes = interface.definition.attributes;
     // Only allow names of interfaces or typedefs for @implements
-    console.assert(
+    assert(
         attributes.type === 'interface' ||
-      attributes.type === 'typedef',
-        'Expected name of interface or typedef after implements keyword, got',
+        attributes.type === 'typedef',
+        'Expected name of interface or typedef after implements keyword, got ' +
         attributes.type
     );
   }
@@ -50,10 +51,10 @@ function parseClassNode(root, node) {
     if (child.name === 'prototype') {
       continue;
     }
-    console.assert(
+    assert(
         child.definition !== null,
-        'Unexpected child without definition in class statics:',
-        child
+        'Unexpected child without definition in class statics: ' +
+        JSON.stringify(child, undefined, 2),
     );
 
     const type = child.definition.attributes.type || child.definition.type;
@@ -80,10 +81,10 @@ function parseClassNode(root, node) {
 
   // Gather all prototype members
   for (const child of prototype.children.values()) {
-    console.assert(
+    assert(
         child.definition !== null,
-        'Unexpected child without definition in class prototype:',
-        child
+        'Unexpected child without definition in class prototype: ' +
+        JSON.stringify(child, undefined, 2)
     );
 
     const type = child.definition.attributes.type || child.definition.type;
@@ -135,13 +136,13 @@ function parseClassNode(root, node) {
       [node.definition.attributes.description],
       attributes.template,
       attributes.extends,
-    interfaceName ? [interfaceName] : null,
-    staticProperties,
-    staticMethods,
-    constructor,
-    properties,
-    methods,
-    others.length > 0 ? new NamespaceNode(node.name, others) : null
+      interfaceName ? [interfaceName] : null,
+      staticProperties,
+      staticMethods,
+      constructor,
+      properties,
+      methods,
+      others.length > 0 ? new NamespaceNode(node.name, others) : null
   );
 }
 
@@ -159,10 +160,10 @@ function parseInterfaceNode(root, node) {
   if (baseInterface != null) {
     const attributes = baseInterface.definition.attributes;
     // Only allow names of interfaces or typedefs for @implements
-    console.assert(
+    assert(
         attributes.type === 'interface' ||
-      attributes.type === 'typedef',
-        'Expected name of interface or typedef after extends keyword, got',
+        attributes.type === 'typedef',
+        'Expected name of interface or typedef after extends keyword, got ' +
         attributes.type
     );
   }
@@ -175,20 +176,20 @@ function parseInterfaceNode(root, node) {
     if (child.name === 'prototype') {
       continue;
     }
-    console.assert(
+    assert(
         child.definition !== null,
-        'Unexpected child without definition in interface statics:',
-        child
+        'Unexpected child without definition in interface statics: ' +
+        JSON.stringify(child, undefined, 2)
     );
     others.push(parseNode(root, child));
   }
 
   // Gather all prototype members
   for (const child of prototype.children.values()) {
-    console.assert(
+    assert(
         child.definition !== null,
-        'Unexpected child without definition in interface prototype:',
-        child
+        'Unexpected child without definition in interface prototype: ' +
+        JSON.stringify(child, undefined, 2)
     );
 
     const type = child.definition.attributes.type || child.definition.type;
@@ -315,11 +316,11 @@ function parseTypedefNode(root, node) {
 
 function parseEnumNode(node) {
   const definition = node.definition;
-  console.assert(
+  assert(
       definition.type === 'object',
-      'Expected enum',
-      node.name,
-      'to be defined with an object, got',
+      'Expected enum ' +
+      node.name +
+      'to be defined with an object, got ' +
       definition.type
   );
 
@@ -418,6 +419,7 @@ function parseNode(root, node) {
     case 'function':
       return parseFunctionNode(root, node);
     default:
+      console.dir(node);
       throw new Error('Unexpected definition type ' + type);
   }
 }
@@ -427,9 +429,9 @@ function buildDefinitionTree(definitions) {
   // Insert all definitions into the unparsed tree
   for (const definition of definitions) {
     const id = definition.identifier;
-    console.assert(
+    assert(
         id.length > 1,
-        'Illegal top-level definition found:',
+        'Illegal top-level definition found: ' +
         id
     );
     const node = getOrCreateNodeAtPath(root, id);

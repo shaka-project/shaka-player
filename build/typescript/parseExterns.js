@@ -1,10 +1,11 @@
+const assert = require('assert').strict;
 const esprima = require('esprima');
 const doctrine = require('doctrine');
 
 function staticMemberExpressionToPath(expression) {
-  console.assert(
+  assert(
       expression.type === 'MemberExpression',
-      'Expected MemberExpression, got',
+      'Expected MemberExpression, got ' +
       expression.type
   );
   const {object, property} = expression;
@@ -38,13 +39,18 @@ function parseAssignmentExpression(expression) {
           throw new Error('Unrecognited key type ' + p.key.type);
         }),
       };
+    case 'ClassExpression':
+      return {
+        type: 'class',
+        identifier: identifier,
+      };
     default:
-      console.log(
-          'Unknown expression type',
-          expression.right.type,
-          'for assignment value'
+      console.dir(expression.right);
+      throw new Error(
+          'Unknown expression type ' +
+          expression.right.type +
+          ' for assignment value'
       );
-      return undefined;
   }
 }
 
@@ -81,9 +87,9 @@ function normalizeDescription(description) {
  */
 
 function parseBlockComment(comment) {
-  console.assert(
+  assert(
       comment.type === 'Block',
-      'Expected comment of type Block, got',
+      'Expected comment of type Block, got ' +
       comment.type
   );
 
@@ -159,18 +165,18 @@ function parseBlockComment(comment) {
         }
         break;
       case 'implements':
-        console.assert(
+        assert(
             tag.type.type === 'NameExpression',
-            'Expected name expression after implements keyword, got',
-            tag.type
+            'Expected name expression after implements keyword, got ' +
+            JSON.stringify(tag.type, undefined, 2)
         );
         attributes.implements = tag.type.name;
         break;
       case 'extends':
-        console.assert(
+        assert(
             tag.type.type === 'NameExpression',
-            'Expected name expression after extends keyword, got',
-            tag.type
+            'Expected name expression after extends keyword, got ' +
+            JSON.stringify(tag.type, undefined, 2)
         );
         attributes.extends = tag.type.name;
         break;
@@ -198,7 +204,7 @@ function parseLeadingComments(statement) {
       description: '',
     };
   }
-  console.assert(
+  assert(
       comments,
       'Expected at least one leading comment, found none'
   );
@@ -210,19 +216,19 @@ function parseLeadingComments(statement) {
 function parseExterns(code) {
   const program = esprima.parse(code, {attachComment: true});
   const definitions = program.body
-  // Only take expressions into consideration.
-  // Variable declarations are discarded because they are only used for
-  // declaring namespaces.
+      // Only take expressions into consideration.
+      // Variable declarations are discarded because they are only used for
+      // declaring namespaces.
       .filter((statement) => statement.type === 'ExpressionStatement')
-  // Prepare for further inspection
+      // Prepare for further inspection
       .map((statement) => Object.assign(
           parseExpressionStatement(statement),
           {attributes: parseLeadingComments(statement)}
       ))
-  // @const without type is only used to define namespaces, discard.
+      // @const without type is only used to define namespaces, discard.
       .filter((definition) =>
         definition.attributes.type !== 'const' ||
-      definition.attributes.constType !== undefined
+        definition.attributes.constType !== undefined
       );
 
   return definitions;
