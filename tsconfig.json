@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2015",
     "lib": [
       "dom",
       "es5",
       "es2015.promise"
     ],
+    "allowJs": false,
     "strict": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -13,7 +14,9 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "noEmit": true
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true
   },
   "files": [
     "../../dist/shaka-player.compiled.d.ts"

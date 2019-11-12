@@ -1,12 +1,12 @@
-class InterfaceNode {
+export default class InterfaceNode {
   constructor(
-      name,
-      comments,
-      templateTypes,
-      extendsInterfaces,
-      properties,
-      methods,
-      namespace
+    name,
+    comments,
+    templateTypes,
+    extendsInterfaces,
+    properties,
+    methods,
+    namespace
   ) {
     this.name = name;
     this.comments = comments;
@@ -20,19 +20,19 @@ class InterfaceNode {
   write(writer) {
     let declaration = this.name;
     if (this.templateTypes) {
-      declaration += '<' + this.templateTypes.join(', ') + '>';
+      declaration += "<" + this.templateTypes.join(", ") + ">";
     }
     if (this.extendsInterfaces) {
-      declaration += ' extends ' + this.extendsInterfaces.join(', ');
+      declaration += " extends " + this.extendsInterfaces.join(", ");
     }
 
     writer.writeComments(this.comments);
-    writer.writeLine('interface ' + declaration + ' {');
+    writer.writeLine("interface " + declaration + " {");
     writer.increaseLevel();
 
     // Properties
     for (const propNode of this.properties) {
-      propNode.write(writer, 'readonly');
+      propNode.write(writer, "readonly");
     }
 
     // Methods
@@ -41,12 +41,10 @@ class InterfaceNode {
     }
 
     writer.decreaseLevel();
-    writer.writeLine('}');
+    writer.writeLine("}");
 
     if (this.namespace) {
       this.namespace.write(writer);
     }
   }
 }
-
-module.exports = InterfaceNode;

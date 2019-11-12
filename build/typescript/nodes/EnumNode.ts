@@ -1,4 +1,4 @@
-class EnumNode {
+export default class EnumNode {
   constructor(name, comments, values) {
     this.name = name;
     this.comments = comments;
@@ -7,16 +7,14 @@ class EnumNode {
 
   write(writer) {
     writer.writeComments(this.comments);
-    writer.writeLine('enum ' + this.name + ' {');
+    writer.writeLine("enum " + this.name + " {");
     writer.increaseLevel();
 
     for (const value of this.values) {
-      writer.writeLine(value + ',');
+      writer.writeLine(value + ",");
     }
 
     writer.decreaseLevel();
-    writer.writeLine('}');
+    writer.writeLine("}");
   }
 }
-
-module.exports = EnumNode;

@@ -1,6 +1,6 @@
-const {stringifyType} = require('../generateType');
+import { stringifyType } from "../generateType";
 
-class PropertyNode {
+export default class PropertyNode {
   constructor(name, comments, type, isConst) {
     this.name = name;
     this.comments = comments;
@@ -8,19 +8,17 @@ class PropertyNode {
     this.isConst = isConst;
   }
 
-  write(writer, constKeyword = 'const', keyword = null) {
+  write(writer, constKeyword = "const", keyword = null) {
     const type = stringifyType(this.type);
-    let declaration = this.name + ': ' + type + ';';
+    let declaration = this.name + ": " + type + ";";
     if (this.isConst) {
-      declaration = constKeyword + ' ' + declaration;
+      declaration = constKeyword + " " + declaration;
     }
     if (keyword) {
-      declaration = keyword + ' ' + declaration;
+      declaration = keyword + " " + declaration;
     }
 
     writer.writeComments(this.comments);
     writer.writeLine(declaration);
   }
 }
-
-module.exports = PropertyNode;
