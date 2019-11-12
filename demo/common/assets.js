@@ -562,7 +562,6 @@ shakaAssets.testAssets = [
     .addFeature(shakaAssets.Feature.MP4)
     .addFeature(shakaAssets.Feature.DASH)
     .addFeature(shakaAssets.Feature.MULTIPERIOD)
-    .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
     .addFeature(shakaAssets.Feature.WEBVTT),
   new ShakaDemoAssetInfo(
       /* name= */ 'Clear, Live HLS',
@@ -571,8 +570,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.AXINOM)
     .addFeature(shakaAssets.Feature.HLS)
     .addFeature(shakaAssets.Feature.LIVE)
-    .addFeature(shakaAssets.Feature.MP4)
-    .addFeature(shakaAssets.Feature.HIGH_DEFINITION),
+    .addFeature(shakaAssets.Feature.MP4),
   // }}}
 
   // Unified Streaming {{{
@@ -1011,6 +1009,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.IRT)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.LIVE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Bayerischer Rundfunk Recorded Loop (HLS)',
@@ -1019,6 +1018,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.IRT)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.LIVE),
   // }}}
 ];
