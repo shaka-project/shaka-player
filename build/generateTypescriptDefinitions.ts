@@ -6,12 +6,13 @@ import { strict as assert } from "assert";
 import parseExterns from "./typescript/parseExterns";
 import buildDefinitionTree from "./typescript/buildDefinitionTree";
 import writeTypeDefinitions from "./typescript/writeTypeDefinitions";
+import { Definition } from "./typescript/base";
 
 function generateTypeDefinitions(
   outputPath: string,
   inputPaths: string[]
 ): void {
-  const definitions = [].concat(
+  const definitions: Definition[] = [].concat(
     ...inputPaths.map(inputPath => {
       const code = fs.readFileSync(inputPath, "utf-8");
       return parseExterns(code);

@@ -1,10 +1,13 @@
-interface Node {
+import * as doctrine from "@teppeis/doctrine";
+import { Definition, ParamTypes } from "./base";
+
+export interface Node {
   name: string;
-  definition: null;
+  definition: Definition | null;
   children: Map<string, Node>;
 }
 
-type NodeMap = Map<string, Node>;
+export type NodeMap = Map<string, Node>;
 
 export function getOrCreateNode(nodes: NodeMap, name: string): Node {
   if (nodes.has(name)) {
@@ -42,11 +45,19 @@ export function getNodeAtPath(root: NodeMap, path: string[]): Node {
   return node;
 }
 
-export function getPropTypeFromInterface(iface, propName: string) {
+export interface PropType {
+  rawType: doctrine.Type | null;
+  isConst: boolean;
+}
+
+export function getPropTypeFromInterface(
+  iface: Node,
+  propName: string
+): PropType {
   const attributes = iface.definition.attributes;
   if (attributes.type === "interface") {
     const base = getNodeAtPath(iface.children, ["prototype", propName]);
-    if (base) {
+    if (base && base.definition) {
       const baseAttributes = base.definition.attributes;
       const isConst = baseAttributes.type === "const";
       return {
@@ -68,7 +79,15 @@ export function getPropTypeFromInterface(iface, propName: string) {
   };
 }
 
-export function getMethodTypesFromInterface(iface, methodName: string) {
+interface MethodTypes {
+  paramTypes: ParamTypes | doctrine.Type[] | null;
+  returnType: doctrine.Type | null;
+}
+
+export function getMethodTypesFromInterface(
+  iface: Node,
+  methodName: string
+): MethodTypes {
   const attributes = iface.definition.attributes;
   if (attributes.type === "interface") {
     const base = getNodeAtPath(iface.children, ["prototype", methodName]);
@@ -81,10 +100,10 @@ export function getMethodTypesFromInterface(iface, methodName: string) {
     }
   } else if (attributes.type === "typedef" && attributes.props) {
     const base = attributes.props.find(p => p.name === methodName);
-    if (base.type === "FunctionType") {
+    if (base.type.type === doctrine.Syntax.FunctionType) {
       return {
-        paramTypes: base.params,
-        returnType: base.result
+        paramTypes: base.type.params,
+        returnType: base.type.result
       };
     }
   }

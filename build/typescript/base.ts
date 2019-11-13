@@ -46,28 +46,29 @@ export enum DefinitionType {
   Property = "property"
 }
 
-export interface FunctionDefinition {
-  type: DefinitionType.Function;
+export interface BaseDefinition {
   identifier: string[];
+  attributes?: Attributes;
+}
+
+export interface FunctionDefinition extends BaseDefinition {
+  type: DefinitionType.Function;
   params: string[];
 }
 
-export interface ObjectDefinition {
+export interface ObjectDefinition extends BaseDefinition {
   type: DefinitionType.Object;
-  identifier: string[];
   props: Array<string | number | boolean | RegExp | undefined>;
 }
 
-export interface ClassDefinition {
+export interface ClassDefinition extends BaseDefinition {
   type: DefinitionType.Class;
-  identifier: string[];
   superClass: string[] | null;
   methods: estree.MethodDefinition[];
 }
 
-export interface PropertyDefinition {
+export interface PropertyDefinition extends BaseDefinition {
   type: DefinitionType.Property;
-  identifier: string[];
 }
 
 export type Definition =

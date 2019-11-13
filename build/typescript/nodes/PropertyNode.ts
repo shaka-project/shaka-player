@@ -1,7 +1,7 @@
 import { stringifyType } from "../generateType";
 
 export default class PropertyNode {
-  constructor(name, comments, type, isConst) {
+  constructor(name, comments, type, isConst: boolean = false) {
     this.name = name;
     this.comments = comments;
     this.type = type;

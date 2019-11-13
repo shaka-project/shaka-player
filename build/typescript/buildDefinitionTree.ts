@@ -4,7 +4,9 @@ import {
   getOrCreateNodeAtPath,
   getNodeAtPath,
   getPropTypeFromInterface,
-  getMethodTypesFromInterface
+  getMethodTypesFromInterface,
+  NodeMap,
+  Node
 } from "./treeUtils";
 import { processType } from "./generateType";
 import {
@@ -14,10 +16,13 @@ import {
   InterfaceNode,
   NamespaceNode,
   PropertyNode,
-  TypeNode
+  TypeNode,
+  DefinitionNode
 } from "./nodes";
+import { Definition, DefinitionType, FunctionDefinition } from "./base";
 
-function parseClassNode(root, node) {
+function parseClassNode(root: NodeMap, node: Node): ClassNode {
+  assert(node.definition.type === DefinitionType.Class);
   const staticProperties = [];
   const staticMethods = [];
   const properties = [];
@@ -127,7 +132,7 @@ function parseClassNode(root, node) {
   // Constructor
   const constructor = parseFunctionNode(
     root,
-    node.definition.constructor.value
+    node.definition.methods.find(m => m.kind === "constructor").value
   );
 
   return new ClassNode(
@@ -145,7 +150,7 @@ function parseClassNode(root, node) {
   );
 }
 
-function parseInterfaceNode(root, node) {
+function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
   const properties = [];
   const methods = [];
   const others = [];
@@ -191,7 +196,7 @@ function parseInterfaceNode(root, node) {
     );
 
     const type = child.definition.attributes.type || child.definition.type;
-    switch (child.definition.type) {
+    switch (type) {
       case "const":
       case "property": {
         const attributes = child.definition.attributes;
@@ -236,7 +241,7 @@ function parseInterfaceNode(root, node) {
   );
 }
 
-function parseTypedefNode(root, node) {
+function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
   const attributes = node.definition.attributes;
   const typedefType = attributes.typedefType;
 
@@ -275,7 +280,7 @@ function parseTypedefNode(root, node) {
       return acc;
     }, {});
 
-    const functionNode = {
+    const functionNode: Node = {
       name: "new",
       children: new Map(),
       definition: {
@@ -289,7 +294,7 @@ function parseTypedefNode(root, node) {
           paramTypes: paramTypes,
           returnType: typedefType.this
         }
-      }
+      } as FunctionDefinition
     };
 
     const methods = [parseFunctionNode(root, functionNode)];
@@ -313,7 +318,7 @@ function parseTypedefNode(root, node) {
   );
 }
 
-function parseEnumNode(node) {
+function parseEnumNode(node: Node) {
   const definition = node.definition;
   assert(
     definition.type === "object",
@@ -327,7 +332,7 @@ function parseEnumNode(node) {
   );
 }
 
-function parseConstNode(root, node) {
+function parseConstNode(root: NodeMap, node: Node) {
   const definition = node.definition;
   const attributes = definition.attributes;
   const constType = processType(root, attributes.constType);
@@ -335,7 +340,8 @@ function parseConstNode(root, node) {
   return new PropertyNode(node.name, attributes.comments, constType, true);
 }
 
-function parseFunctionNode(root, node) {
+function parseFunctionNode(root: NodeMap, node: Node) {
+  assert(node.definition.type === DefinitionType.Function);
   const attributes = node.definition.attributes;
   const paramTypes = attributes.paramTypes || {};
 
@@ -380,7 +386,7 @@ function parseFunctionNode(root, node) {
   );
 }
 
-function parseNode(root, node) {
+function parseNode(root: NodeMap, node: Node): DefinitionNode {
   if (node.definition === null) {
     const nodes = [];
     for (const child of node.children.values()) {
@@ -415,8 +421,10 @@ function parseNode(root, node) {
   }
 }
 
-export default function buildDefinitionTree(definitions) {
-  const root = new Map();
+export default function buildDefinitionTree(
+  definitions: Definition[]
+): DefinitionNode[] {
+  const root: NodeMap = new Map();
   // Insert all definitions into the unparsed tree
   for (const definition of definitions) {
     const id = definition.identifier;
@@ -425,7 +433,7 @@ export default function buildDefinitionTree(definitions) {
     node.definition = definition;
   }
 
-  const definitionTreeRoot = [];
+  const definitionTreeRoot: DefinitionNode[] = [];
   for (const node of root.values()) {
     definitionTreeRoot.push(parseNode(root, node));
   }
