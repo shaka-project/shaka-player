@@ -57,6 +57,9 @@ shakaDemo.Custom = class {
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
     });
+    document.addEventListener('shaka-main-locale-changed', () => {
+      this.remakeSavedList_();
+    });
     document.addEventListener('shaka-main-page-changed', () => {
       if (!this.savedList_.childNodes.length &&
           !container.classList.contains('hidden')) {

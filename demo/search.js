@@ -34,19 +34,24 @@ shakaDemo.Search = class {
     /** @private {?shakaAssets.KeySystem} */
     this.desiredDRM_;
 
-    this.makeSearchDiv_(container);
+    /** @private {!Element} */
+    this.resultsDiv_ = document.createElement('div');
+    this.remakeSearchDiv_(container);
 
     /** @private {!Array.<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
-
-    this.resultsDiv_ = document.createElement('div');
-    container.appendChild(this.resultsDiv_);
 
     document.addEventListener('shaka-main-selected-asset-changed', () => {
       this.updateSelected_();
     });
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
+    });
+    document.addEventListener('shaka-main-locale-changed', () => {
+      this.remakeSearchDiv_(container);
+      this.remakeResultsDiv_();
+      // Update the componentHandler, to account for any new MDL elements added.
+      componentHandler.upgradeDom();
     });
     document.addEventListener('shaka-main-page-changed', () => {
       if (!this.resultsDiv_.childNodes.length &&
@@ -234,7 +239,9 @@ shakaDemo.Search = class {
    * @param {!Element} container
    * @private
    */
-  makeSearchDiv_(container) {
+  remakeSearchDiv_(container) {
+    shaka.util.Dom.removeAllChildren(container);
+
     const Feature = shakaAssets.Feature;
     const FEATURE = shakaDemo.Search.TermType.FEATURE;
     const DRM = shakaDemo.Search.TermType.DRM;
@@ -282,6 +289,8 @@ shakaDemo.Search = class {
         shakaDemo.MessageIds.STORED_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.AUDIO_ONLY, FEATURE,
         shakaDemo.MessageIds.AUDIO_ONLY_SEARCH);
+
+    container.appendChild(this.resultsDiv_);
   }
 
   /**

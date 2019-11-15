@@ -313,6 +313,10 @@ shakaDemo.Main = class {
     });
 
     // Set up localization lazy-loading.
+    const applyNewLocaleIfPossible = () => {
+      this.localizeHTMLElements_();
+      this.dispatchEventWithName_('shaka-main-locale-changed');
+    };
     const localization = this.controls_.getLocalization();
     const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
     localization.addEventListener(UNKNOWN_LOCALES, (event) => {
@@ -321,8 +325,16 @@ shakaDemo.Main = class {
         // this function is actually expected to fail fairly often, and has
         // built-in fallback behavior (from localization events) without needing
         // to catch the promise rejection.
-        this.loadUILocale_(locale);
+        this.loadUILocale_(locale).then(() => {
+          if (locale == this.uiLocale_) {
+            applyNewLocaleIfPossible();
+          }
+        });
       }
+    });
+    const LOCALE_CHANGED = shaka.ui.Localization.LOCALE_CHANGED;
+    localization.addEventListener(LOCALE_CHANGED, (event) => {
+      applyNewLocaleIfPossible();
     });
     const initialLocaleLoads = [];
     initialLocaleLoads.push(this.loadUILocale_(this.uiLocale_));

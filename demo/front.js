@@ -45,6 +45,9 @@ shakaDemo.Front = class {
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
     });
+    document.addEventListener('shaka-main-locale-changed', () => {
+      this.remakeAssetCards_();
+    });
     document.addEventListener('shaka-main-page-changed', () => {
       if (!this.assetCardDiv_.childNodes.length &&
           !container.classList.contains('hidden')) {

@@ -48,6 +48,11 @@ shakaDemo.Config = class {
       // changes based on the config changes.
       this.reloadAndSaveState_();
     });
+    document.addEventListener('shaka-main-locale-changed', () => {
+      // Respond to them by remaking. This is to avoid triggering any config
+      // changes based on the config changes.
+      this.reloadAndSaveState_();
+    });
     document.addEventListener('shaka-main-drawer-state-change', () => {
       this.setContentAvailability_(shakaDemoMain.getIsDrawerOpen());
     });
@@ -329,6 +334,7 @@ shakaDemo.Config = class {
         .addTextInput_(MessageIds.TEXT_LANGUAGE, 'preferredTextLanguage');
     const onChange = (input) => {
       shakaDemoMain.setUILocale(input.value);
+      shakaDemoMain.remakeHash();
     };
     this.addCustomTextInput_(MessageIds.UI_LOCALE, onChange);
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
