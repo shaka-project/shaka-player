@@ -1,5 +1,10 @@
 import * as doctrine from "@teppeis/doctrine";
-import { Definition, ParamTypes, DefinitionType } from "./base";
+import {
+  Definition,
+  ParamTypes,
+  DefinitionType,
+  PropertyDefinition
+} from "./base";
 import assert from "./assert";
 
 export interface Node {
@@ -52,11 +57,32 @@ export interface PropType {
 }
 
 export function getPropTypeFromInterface(
+  root: NodeMap,
   iface: Node,
   propName: string
 ): PropType {
   assert(iface.definition);
-  const attributes = iface.definition.attributes;
+  if (iface.definition.type === DefinitionType.Class) {
+    const md = iface.definition.methods.find(md => md.isConstructor);
+    if (md && md.definitions) {
+      const pd = md.definitions.find(
+        (pd: Definition): pd is PropertyDefinition =>
+          pd.type === DefinitionType.Property &&
+          pd.identifier[0] === "this" &&
+          pd.identifier[1] === propName
+      );
+      if (pd) {
+        assert(pd.attributes);
+        const isConst = pd.attributes.type === "const";
+        return {
+          rawType: isConst ? pd.attributes.constType : pd.attributes.propType,
+          isConst
+        };
+      }
+    }
+  }
+
+  const { attributes } = iface.definition;
   assert(attributes);
   if (attributes.type === "interface") {
     const base = getNodeAtPath(iface.children, ["prototype", propName]);
@@ -79,11 +105,16 @@ export function getPropTypeFromInterface(
     };
   }
 
+  if (attributes.extends) {
+    const base = getNodeAtPath(root, attributes.extends.split("."));
+    if (base) {
+      return getPropTypeFromInterface(root, base, propName);
+    }
+  }
+
   console.log("Not found:", iface.definition.identifier, propName);
 
-  return {
-    isConst: false
-  };
+  return { isConst: false };
 }
 
 interface MethodTypes {

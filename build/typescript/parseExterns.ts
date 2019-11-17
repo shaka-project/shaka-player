@@ -25,6 +25,9 @@ function staticMemberExpressionToPath(expression: estree.Expression): string[] {
   if (object.type === "Identifier") {
     return [object.name, property.name];
   }
+  if (object.type === "ThisExpression") {
+    return ["this", property.name];
+  }
   return fail(
     "Expected either member expression or identifier as object in path"
   );
@@ -48,6 +51,7 @@ function parseMethodDefinition(
     isMethod: md.kind === "method",
     isStatic: md.static,
     isConstructor: md.kind === "constructor",
+    definitions: parseBody(md.value.body.body),
     attributes: parseLeadingComments(md.leadingComments)
   };
 }
@@ -182,6 +186,7 @@ function parseBlockComment(comment: estree.Comment): Attributes {
           attributes.description = normalizeDescription(tag.description);
         }
         break;
+      case "protected":
       case "type":
         attributes.type = AnnotationType.Property;
         attributes.propType = tag.type || undefined;
@@ -264,27 +269,33 @@ function parseLeadingComments(comments?: estree.Comment[]): Attributes {
   return parseBlockComment(comment);
 }
 
-export default function parseExterns(code: string) {
-  const program = esprima.parseScript(code, { attachComment: true } as any);
-  const definitions = program.body
-    // Only take expressions into consideration.
-    // Variable declarations are discarded because they are only used for
-    // declaring namespaces.
-    .filter(
-      (statement): statement is estree.ExpressionStatement =>
-        statement.type === "ExpressionStatement"
-    )
-    // Prepare for further inspection
-    .map(statement => ({
-      ...parseExpressionStatement(statement),
-      attributes: parseLeadingComments(statement.leadingComments)
-    }))
-    // @const without type is only used to define namespaces, discard.
-    .filter(
-      definition =>
-        definition.attributes.type !== AnnotationType.Const ||
-        definition.attributes.constType !== undefined
-    );
+function parseBody(
+  statements: Array<estree.Statement | estree.ModuleDeclaration>
+): Definition[] {
+  return (
+    statements
+      // Only take expressions into consideration.
+      // Variable declarations are discarded because they are only used for
+      // declaring namespaces.
+      .filter(
+        (statement): statement is estree.ExpressionStatement =>
+          statement.type === "ExpressionStatement"
+      )
+      // Prepare for further inspection
+      .map(statement => ({
+        ...parseExpressionStatement(statement),
+        attributes: parseLeadingComments(statement.leadingComments)
+      }))
+      // @const without type is only used to define namespaces, discard.
+      .filter(
+        definition =>
+          definition.attributes.type !== AnnotationType.Const ||
+          definition.attributes.constType !== undefined
+      )
+  );
+}
 
-  return definitions;
+export default function parseExterns(code: string): Definition[] {
+  const program = esprima.parseScript(code, { attachComment: true } as any);
+  return parseBody(program.body);
 }

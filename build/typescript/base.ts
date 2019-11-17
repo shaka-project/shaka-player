@@ -1,5 +1,4 @@
 import * as doctrine from "@teppeis/doctrine";
-import * as estree from "estree";
 
 export enum AnnotationType {
   Const = "const",
@@ -58,6 +57,7 @@ export interface FunctionDefinition extends BaseDefinition {
   isMethod?: boolean;
   isStatic?: boolean;
   isConstructor?: boolean;
+  definitions?: Definition[];
 }
 
 export interface ObjectDefinition extends BaseDefinition {

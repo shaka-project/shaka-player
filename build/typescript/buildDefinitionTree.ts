@@ -117,7 +117,7 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
         if (!rawType && iface) {
           // Check if this property has been defined in the implemented
           // interface.
-          const propType = getPropTypeFromInterface(iface, child.name);
+          const propType = getPropTypeFromInterface(root, iface, child.name);
           rawType = propType.rawType;
           isConst = propType.isConst;
         }
@@ -251,7 +251,11 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
         let isConst = attributes.type === "const";
         let rawType = isConst ? attributes.constType : attributes.propType;
         if (!rawType && baseInterface) {
-          const type = getPropTypeFromInterface(baseInterface, child.name);
+          const type = getPropTypeFromInterface(
+            root,
+            baseInterface,
+            child.name
+          );
           rawType = type.rawType;
           isConst = type.isConst;
         }
@@ -285,6 +289,24 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
   if (node.definition.type === DefinitionType.Class) {
     // Gather all methods
     for (const md of node.definition.methods) {
+      if (md.isConstructor && md.definitions) {
+        for (const pd of md.definitions) {
+          if (
+            pd.type === DefinitionType.Property &&
+            pd.identifier[0] === "this"
+          ) {
+            assert(pd.attributes);
+            const name = pd.identifier[1];
+            const isConst = pd.attributes.type === "const";
+            const rawType = isConst
+              ? pd.attributes.constType
+              : pd.attributes.propType;
+            const type = processType(root, rawType);
+            properties.push(new PropertyNode(name, [], type, isConst));
+          }
+        }
+      }
+
       const { attributes } = md;
       assert(attributes);
       if ((!attributes.paramTypes || !attributes.returnType) && baseInterface) {
