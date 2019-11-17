@@ -1,12 +1,25 @@
-export default class InterfaceNode {
+import { Writable, Writer } from "../base";
+import PropertyNode from "./PropertyNode";
+import FunctionNode from "./FunctionNode";
+import NamespaceNode from "./NamespaceNode";
+
+export default class InterfaceNode implements Writable {
+  name: string;
+  comments: string[];
+  templateTypes?: string[];
+  extendsInterfaces?: string[];
+  properties: PropertyNode[];
+  methods: FunctionNode[];
+  namespace?: NamespaceNode;
+
   constructor(
-    name,
-    comments,
-    templateTypes,
-    extendsInterfaces,
-    properties,
-    methods,
-    namespace
+    name: string,
+    comments: string[],
+    templateTypes: string[] | undefined,
+    extendsInterfaces: string[] | undefined,
+    properties: PropertyNode[],
+    methods: FunctionNode[],
+    namespace: NamespaceNode | undefined
   ) {
     this.name = name;
     this.comments = comments;
@@ -17,7 +30,7 @@ export default class InterfaceNode {
     this.namespace = namespace;
   }
 
-  write(writer) {
+  write(writer: Writer): void {
     let declaration = this.name;
     if (this.templateTypes) {
       declaration += "<" + this.templateTypes.join(", ") + ">";
@@ -37,7 +50,7 @@ export default class InterfaceNode {
 
     // Methods
     for (const methodNode of this.methods) {
-      methodNode.write(writer, null);
+      methodNode.write(writer, undefined);
     }
 
     writer.decreaseLevel();

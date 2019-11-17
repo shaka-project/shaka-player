@@ -14,7 +14,7 @@ export enum AnnotationType {
 export interface Props {
   name: string;
   type: doctrine.Type;
-  description: string;
+  description?: string;
 }
 
 export interface ParamTypes {
@@ -22,8 +22,8 @@ export interface ParamTypes {
 }
 
 export interface Attributes {
-  type: AnnotationType | null;
-  description: string;
+  type?: AnnotationType;
+  description?: string;
   comments: string[];
 
   props?: Props[];
@@ -58,12 +58,12 @@ export interface FunctionDefinition extends BaseDefinition {
 
 export interface ObjectDefinition extends BaseDefinition {
   type: DefinitionType.Object;
-  props: Array<string | number | boolean | RegExp | undefined>;
+  props: string[];
 }
 
 export interface ClassDefinition extends BaseDefinition {
   type: DefinitionType.Class;
-  superClass: string[] | null;
+  superClass?: string[];
   methods: estree.MethodDefinition[];
 }
 
@@ -78,6 +78,8 @@ export type Definition =
   | PropertyDefinition;
 
 export interface Writer {
+  readonly level: number;
+
   increaseLevel(): void;
   decreaseLevel(): void;
   getIndentation(): string;

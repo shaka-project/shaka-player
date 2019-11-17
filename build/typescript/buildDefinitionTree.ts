@@ -1,6 +1,5 @@
 import assert from "./assert";
 import {
-  getOrCreateNode,
   getOrCreateNodeAtPath,
   getNodeAtPath,
   getPropTypeFromInterface,
@@ -8,21 +7,31 @@ import {
   NodeMap,
   Node
 } from "./treeUtils";
-import { processType } from "./generateType";
+import { processType, TypeInformation } from "./generateType";
 import {
   ClassNode,
   EnumNode,
   FunctionNode,
+  Param,
   InterfaceNode,
   NamespaceNode,
   PropertyNode,
   TypeNode,
   DefinitionNode
 } from "./nodes";
-import { Definition, DefinitionType, FunctionDefinition } from "./base";
+import {
+  Definition,
+  DefinitionType,
+  FunctionDefinition,
+  AnnotationType,
+  ParamTypes
+} from "./base";
 
 function parseClassNode(root: NodeMap, node: Node): ClassNode {
+  assert(node.definition);
   assert(node.definition.type === DefinitionType.Class);
+  assert(node.definition.attributes);
+
   const staticProperties = [];
   const staticMethods = [];
   const properties = [];
@@ -30,13 +39,18 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
   const others = [];
   // Class might consist of only a constructor
   // Prototype defaults to empty in that case
-  const prototype = node.children.get("prototype") || { children: new Map() };
+  const prototype: Node = node.children.get("prototype") || {
+    name: "prototype",
+    children: new Map()
+  };
 
   // Find interfaces for classes with implements keyword
   const interfaceName = node.definition.attributes.implements;
   const iface = interfaceName && getNodeAtPath(root, interfaceName.split("."));
-  if (iface != null) {
+  if (iface) {
+    assert(iface.definition);
     const attributes = iface.definition.attributes;
+    assert(attributes);
     // Only allow names of interfaces or typedefs for @implements
     assert(
       attributes.type === "interface" || attributes.type === "typedef",
@@ -55,16 +69,17 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
       continue;
     }
     assert(
-      child.definition !== null,
+      child.definition,
       "Unexpected child without definition in class statics: " +
         JSON.stringify(child, undefined, 2)
     );
+    const { attributes } = child.definition;
+    assert(attributes);
 
-    const type = child.definition.attributes.type || child.definition.type;
+    const type = attributes.type || child.definition.type;
     switch (type) {
       case "const":
       case "property": {
-        const attributes = child.definition.attributes;
         const isConst = attributes.type === "const";
         const rawType = isConst ? attributes.constType : attributes.propType;
         const type = processType(root, rawType);
@@ -83,17 +98,18 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
   // Gather all prototype members (instance properties)
   for (const child of prototype.children.values()) {
     assert(
-      child.definition !== null,
+      child.definition,
       "Unexpected child without definition in class prototype: " +
         JSON.stringify(child, undefined, 2)
     );
+    const { attributes } = child.definition;
+    assert(attributes);
 
-    const type = child.definition.attributes.type || child.definition.type;
-    switch (child.definition.type) {
-      case "const":
+    const type = attributes.type || child.definition.type;
+    switch (type) {
+      case AnnotationType.Const:
       case "property": {
-        const attributes = child.definition.attributes;
-        let isConst = attributes.type === "const";
+        let isConst = attributes.type === AnnotationType.Const;
         let rawType = isConst ? attributes.constType : attributes.propType;
         if (!rawType && iface) {
           // Check if this property has been defined in the implemented
@@ -108,6 +124,7 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
       }
       case "function": {
         const attributes = child.definition.attributes;
+        assert(attributes);
         if ((!attributes.paramTypes || !attributes.returnType) && iface) {
           const types = getMethodTypesFromInterface(iface, child.name);
           attributes.paramTypes = attributes.paramTypes || types.paramTypes;
@@ -127,12 +144,19 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
 
   // Include constructor description before class declaration as well,
   // as they can describe the constructor, the class, or both.
-  const comments = [attributes.description];
+  const comments = attributes.description ? [attributes.description] : [];
 
   // Constructor
-  const constructor = parseFunctionNode(
+  /*const constructor = parseFunctionNode(
     root,
     node.definition.methods.find(m => m.kind === "constructor").value
+  );*/
+  const constructor = new FunctionNode(
+    "constructor",
+    [],
+    undefined,
+    [],
+    undefined
   );
 
   return new ClassNode(
@@ -140,29 +164,34 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
     comments,
     attributes.template,
     attributes.extends,
-    interfaceName ? [interfaceName] : null,
+    interfaceName ? [interfaceName] : undefined,
     staticProperties,
     staticMethods,
     constructor,
     properties,
     methods,
-    others.length > 0 ? new NamespaceNode(node.name, others) : null
+    others.length > 0 ? new NamespaceNode(node.name, others) : undefined
   );
 }
 
 function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
+  assert(node.definition);
+  const { attributes } = node.definition;
+  assert(attributes);
   const properties = [];
   const methods = [];
   const others = [];
   const prototype = node.children.get("prototype");
-  const attributes = node.definition.attributes;
+  assert(prototype, JSON.stringify(node));
 
   // Find interfaces for classes with implements keyword
-  const baseInterfaceName = node.definition.attributes.extends;
+  const baseInterfaceName = attributes.extends;
   const baseInterface =
     baseInterfaceName && getNodeAtPath(root, baseInterfaceName.split("."));
-  if (baseInterface != null) {
+  if (baseInterface) {
+    assert(baseInterface.definition);
     const attributes = baseInterface.definition.attributes;
+    assert(attributes);
     // Only allow names of interfaces or typedefs for @implements
     assert(
       attributes.type === "interface" || attributes.type === "typedef",
@@ -180,7 +209,7 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
       continue;
     }
     assert(
-      child.definition !== null,
+      child.definition,
       "Unexpected child without definition in interface statics: " +
         JSON.stringify(child, undefined, 2)
     );
@@ -190,16 +219,17 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
   // Gather all prototype members
   for (const child of prototype.children.values()) {
     assert(
-      child.definition !== null,
+      child.definition,
       "Unexpected child without definition in interface prototype: " +
         JSON.stringify(child, undefined, 2)
     );
+    const { attributes } = child.definition;
+    assert(attributes);
 
-    const type = child.definition.attributes.type || child.definition.type;
+    const type = attributes.type || child.definition.type;
     switch (type) {
       case "const":
       case "property": {
-        const attributes = child.definition.attributes;
         let isConst = attributes.type === "const";
         let rawType = isConst ? attributes.constType : attributes.propType;
         if (!rawType && baseInterface) {
@@ -234,16 +264,17 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
     node.name,
     attributes.comments,
     attributes.template,
-    baseInterfaceName ? [baseInterfaceName] : null,
+    baseInterfaceName ? [baseInterfaceName] : undefined,
     properties,
     methods,
-    others.length > 0 ? new NamespaceNode(node.name, others) : null
+    others.length > 0 ? new NamespaceNode(node.name, others) : undefined
   );
 }
 
 function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
-  const attributes = node.definition.attributes;
-  const typedefType = attributes.typedefType;
+  assert(node.definition);
+  const { attributes } = node.definition;
+  assert(attributes);
 
   if (attributes.props) {
     // Typedef defines an object structure, declare as interface
@@ -259,13 +290,16 @@ function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
     return new InterfaceNode(
       node.name,
       attributes.comments,
-      null,
-      null,
+      undefined,
+      undefined,
       props,
       [],
-      null
+      undefined
     );
   }
+
+  const typedefType = attributes.typedefType;
+  assert(typedefType);
 
   if (typedefType.type === "FunctionType" && typedefType.new) {
     // Type definition describes a class factory.
@@ -275,7 +309,7 @@ function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
     // TypeScript doesn't allow nameless parameter declarations,
     // so we are just going to follow a p0, p1, ... schema.
     const params = typedefType.params.map((_, i) => "p" + i);
-    const paramTypes = typedefType.params.reduce((acc, type, i) => {
+    const paramTypes = typedefType.params.reduce((acc: ParamTypes, type, i) => {
       acc["p" + i] = type;
       return acc;
     }, {});
@@ -302,11 +336,11 @@ function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
     return new InterfaceNode(
       node.name,
       attributes.comments,
-      null,
-      null,
+      undefined,
+      undefined,
       [],
       methods,
-      null
+      undefined
     );
   }
 
@@ -319,11 +353,13 @@ function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
 }
 
 function parseEnumNode(node: Node) {
-  const definition = node.definition;
+  const { definition } = node;
+  assert(definition);
   assert(
-    definition.type === "object",
+    definition.type === DefinitionType.Object,
     `Expected enum ${node.name} to be defined with an object, got ${definition.type}`
   );
+  assert(definition.attributes);
 
   return new EnumNode(
     node.name,
@@ -333,20 +369,25 @@ function parseEnumNode(node: Node) {
 }
 
 function parseConstNode(root: NodeMap, node: Node) {
-  const definition = node.definition;
-  const attributes = definition.attributes;
+  const { definition } = node;
+  assert(definition);
+  const { attributes } = definition;
+  assert(attributes);
   const constType = processType(root, attributes.constType);
 
   return new PropertyNode(node.name, attributes.comments, constType, true);
 }
 
 function parseFunctionNode(root: NodeMap, node: Node) {
-  assert(node.definition.type === DefinitionType.Function);
-  const attributes = node.definition.attributes;
+  const { definition } = node;
+  assert(definition);
+  assert(definition.type === DefinitionType.Function);
+  const { attributes } = definition;
+  assert(attributes);
   const paramTypes = attributes.paramTypes || {};
 
-  const params = node.definition.params.map(name => {
-    let type = {
+  const params: Param[] = definition.params.map(name => {
+    let type: TypeInformation = {
       name: "any",
       isNullable: false
     };
@@ -361,7 +402,7 @@ function parseFunctionNode(root: NodeMap, node: Node) {
         "Missing type information for parameter",
         name,
         "in function",
-        node.definition.identifier.join(".")
+        definition.identifier.join(".")
       );
     }
 
@@ -375,7 +416,7 @@ function parseFunctionNode(root: NodeMap, node: Node) {
 
   const returnType = attributes.returnType
     ? processType(root, attributes.returnType)
-    : null;
+    : undefined;
 
   return new FunctionNode(
     node.name,
@@ -387,7 +428,8 @@ function parseFunctionNode(root: NodeMap, node: Node) {
 }
 
 function parseNode(root: NodeMap, node: Node): DefinitionNode {
-  if (node.definition === null) {
+  const { definition } = node;
+  if (!definition) {
     const nodes = [];
     for (const child of node.children.values()) {
       nodes.push(parseNode(root, child));
@@ -395,8 +437,8 @@ function parseNode(root: NodeMap, node: Node): DefinitionNode {
     return new NamespaceNode(node.name, nodes);
   }
 
-  const definition = node.definition;
-  const attributes = definition.attributes;
+  const { attributes } = definition;
+  assert(attributes);
 
   // If the doc comment didn't lead to a type, fall back to the type we got
   // from the declaration itself.

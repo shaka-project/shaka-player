@@ -16,9 +16,10 @@
     "noImplicitReturns": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true
+    "downlevelIteration": true
   },
+  "include": ["build/"]/*,
   "files": [
     "../../dist/shaka-player.compiled.d.ts"
-  ]
+  ]*/
 }

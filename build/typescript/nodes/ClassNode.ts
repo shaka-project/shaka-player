@@ -1,30 +1,33 @@
 import { Writable, Writer } from "../base";
+import PropertyNode from "./PropertyNode";
+import FunctionNode from "./FunctionNode";
+import NamespaceNode from "./NamespaceNode";
 
 export default class ClassNode implements Writable {
   name: string;
   comments: string[];
-  templateTypes: any;
-  extendsClass: any;
-  implementsInterfaces: any;
-  staticProperties: any;
-  staticMethods: any;
-  constructorMethod: any;
-  properties: any;
-  methods: any;
-  namespace: any;
+  templateTypes?: string[];
+  extendsClass?: string;
+  implementsInterfaces?: string[];
+  staticProperties: PropertyNode[];
+  staticMethods: FunctionNode[];
+  constructorMethod: FunctionNode;
+  properties: PropertyNode[];
+  methods: FunctionNode[];
+  namespace?: NamespaceNode;
 
   constructor(
     name: string,
     comments: string[],
-    templateTypes,
-    extendsClass,
-    implementsInterfaces,
-    staticProperties,
-    staticMethods,
-    constructor,
-    properties,
-    methods,
-    namespace
+    templateTypes: string[] | undefined,
+    extendsClass: string | undefined,
+    implementsInterfaces: string[] | undefined,
+    staticProperties: PropertyNode[],
+    staticMethods: FunctionNode[],
+    constructor: FunctionNode,
+    properties: PropertyNode[],
+    methods: FunctionNode[],
+    namespace: NamespaceNode | undefined
   ) {
     this.name = name;
     this.comments = comments;
@@ -66,7 +69,7 @@ export default class ClassNode implements Writable {
     }
 
     // Constructor
-    this.constructorMethod.write(writer, null, true);
+    this.constructorMethod.write(writer, undefined, true);
 
     // Properties
     for (const propNode of this.properties) {
@@ -75,7 +78,7 @@ export default class ClassNode implements Writable {
 
     // Methods
     for (const methodNode of this.methods) {
-      methodNode.write(writer, null);
+      methodNode.write(writer, undefined);
     }
 
     writer.decreaseLevel();

@@ -2,6 +2,8 @@ import * as doctrine from "@teppeis/doctrine";
 import assert from "./assert";
 import { getNodeAtPath, NodeMap } from "./treeUtils";
 
+const ds = doctrine.Syntax;
+
 // Primitive types are not nullable in Closure unless marked as such.
 // Keep a list of primitives to properly set the nullable flag.
 // Aside of that, type names are the same in Closure and TypeScript so a
@@ -10,6 +12,7 @@ import { getNodeAtPath, NodeMap } from "./treeUtils";
 const primitiveTypes = ["null", "undefined", "boolean", "number", "string"];
 
 function checkNullability(root: NodeMap, rawType: doctrine.Type): boolean {
+  assert(rawType.type === ds.NameExpression);
   if (primitiveTypes.includes(rawType.name)) {
     return false;
   }
@@ -19,10 +22,15 @@ function checkNullability(root: NodeMap, rawType: doctrine.Type): boolean {
     return true;
   }
 
+  assert(node.definition);
   const attributes = node.definition.attributes;
+  assert(attributes);
   switch (attributes.type) {
     case "enum":
-      return !primitiveTypes.includes(attributes.enumType);
+      assert(
+        attributes.enumType && attributes.enumType.type === ds.NameExpression
+      );
+      return !primitiveTypes.includes(attributes.enumType.name);
     case "typedef":
       return processType(root, attributes.typedefType, true).isNullable;
     default:
@@ -48,7 +56,7 @@ export interface TypeInformation {
 
 export function processType(
   root: NodeMap,
-  rawType: doctrine.Type | null,
+  rawType?: doctrine.Type | null,
   inferNullability?: boolean
 ): TypeInformation {
   if (!rawType) {
@@ -59,32 +67,32 @@ export function processType(
   }
 
   switch (rawType.type) {
-    case "NameExpression": {
+    case ds.NameExpression: {
       return {
         isNullable: inferNullability ? checkNullability(root, rawType) : false,
         name: rawType.name
       };
     }
-    case "NullableType":
+    case ds.NullableType:
       return Object.assign(processType(root, rawType.expression, false), {
         isNullabe: true
       });
-    case "NonNullableType":
+    case ds.NonNullableType:
       return Object.assign(processType(root, rawType.expression, false), {
         isNullabe: false
       });
-    case "OptionalType":
+    case ds.OptionalType:
       return Object.assign(
         processType(root, rawType.expression, inferNullability),
         { isOptional: true }
       );
-    case "RestType":
+    case ds.RestType:
       return {
         name: "Array",
         isNullable: false,
         applications: [processType(root, rawType.expression, false)]
       };
-    case "TypeApplication":
+    case ds.TypeApplication:
       return Object.assign(
         processType(root, rawType.expression, inferNullability),
         {
@@ -93,7 +101,7 @@ export function processType(
           )
         }
       );
-    case "UnionType": {
+    case ds.UnionType: {
       const elements = rawType.elements.map(t => processType(root, t, true));
       let isNullable = false;
       for (const element of elements) {
@@ -108,7 +116,7 @@ export function processType(
         elements: elements
       };
     }
-    case "FunctionType":
+    case ds.FunctionType:
       return {
         isFunction: true,
         isNullable: false,
@@ -117,21 +125,24 @@ export function processType(
           ? processType(root, rawType.result, true)
           : { isNullable: false, name: "void" }
       };
-    case "RecordType":
+    case ds.RecordType:
       return {
         isRecord: true,
         isNullable: false,
-        fields: rawType.fields.map(field => ({
-          key: field.key,
-          value: processType(root, field.value, true)
-        }))
+        fields: rawType.fields.map(field => {
+          assert(field.type === ds.FieldType);
+          return {
+            key: field.key,
+            value: processType(root, field.value, true)
+          };
+        })
       };
-    case "UndefinedLiteral":
+    case ds.UndefinedLiteral:
       return {
         isNullable: false,
         name: "undefined"
       };
-    case "AllLiteral":
+    case ds.AllLiteral:
       return {
         isNullable: false,
         name: "any"
@@ -144,19 +155,24 @@ export function processType(
 export function stringifyType(type: TypeInformation): string {
   let str = "";
   if (type.isFunction) {
+    assert(type.params);
+    assert(type.returnType);
     const params = type.params
       .map((paramType, i) => `p${i}: ${stringifyType(paramType)}`)
       .join(", ");
     const returnType = stringifyType(type.returnType);
     str = `((${params}) => ${returnType})`;
   } else if (type.isRecord) {
+    assert(type.fields);
     const fields = type.fields
       .map(field => `${field.key}: ${stringifyType(field.value)}`)
       .join(", ");
     str = "{" + fields + "}";
   } else if (type.isUnion) {
+    assert(type.elements);
     str = type.elements.map(stringifyType).join(" | ");
   } else {
+    assert(type.name);
     str = type.name;
 
     if (type.name === "Object") {
@@ -168,7 +184,7 @@ export function stringifyType(type: TypeInformation): string {
         const key = stringifyType(type.applications[0]);
         const value = stringifyType(type.applications[1]);
         str = `{ [key: ${key}]: ${value} }`;
-        type.applications = null;
+        type.applications = undefined;
       } else {
         str = "object";
       }
@@ -193,7 +209,7 @@ export function stringifyType(type: TypeInformation): string {
 
       if (type.applications[0].name) {
         str = stringifyType(type.applications[0]) + "[]";
-        type.applications = null;
+        type.applications = undefined;
       }
     }
   }

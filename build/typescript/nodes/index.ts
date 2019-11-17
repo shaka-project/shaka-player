@@ -1,6 +1,6 @@
 import ClassNode from "./ClassNode";
 import EnumNode from "./EnumNode";
-import FunctionNode from "./FunctionNode";
+import FunctionNode, { Param } from "./FunctionNode";
 import InterfaceNode from "./InterfaceNode";
 import NamespaceNode from "./NamespaceNode";
 import PropertyNode from "./PropertyNode";
@@ -19,6 +19,7 @@ export {
   ClassNode,
   EnumNode,
   FunctionNode,
+  Param,
   InterfaceNode,
   NamespaceNode,
   PropertyNode,

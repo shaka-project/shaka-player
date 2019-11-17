@@ -10,12 +10,7 @@ import {
   PropertyDefinition
 } from "./base";
 
-function staticMemberExpressionToPath(
-  expression: estree.Expression
-): string[] | null {
-  if (!expression) {
-    return null;
-  }
+function staticMemberExpressionToPath(expression: estree.Expression): string[] {
   assert(
     expression.type === "MemberExpression",
     "Expected MemberExpression, got " + expression.type
@@ -29,7 +24,9 @@ function staticMemberExpressionToPath(
   if (object.type === "Identifier") {
     return [object.name, property.name];
   }
-  fail("Expected either member expression or identifier as object in path");
+  return fail(
+    "Expected either member expression or identifier as object in path"
+  );
 }
 
 function parseAssignmentExpression(
@@ -56,7 +53,7 @@ function parseAssignmentExpression(
             return p.key.name;
           }
           if (p.key.type === "Literal") {
-            return p.key.value;
+            return p.key.value as string;
           }
           throw new Error("Unrecognited key type " + p.key.type);
         })
@@ -65,7 +62,9 @@ function parseAssignmentExpression(
       return {
         type: DefinitionType.Class,
         identifier: identifier,
-        superClass: staticMemberExpressionToPath(expression.right.superClass),
+        superClass: expression.right.superClass
+          ? staticMemberExpressionToPath(expression.right.superClass)
+          : undefined,
         methods: expression.right.body.body
       };
     default:
@@ -114,7 +113,6 @@ function parseBlockComment(comment: estree.Comment): Attributes {
   const ast = doctrine.parse(comment.value, { unwrap: true });
 
   const attributes: Attributes = {
-    type: null,
     description: normalizeDescription(ast.description),
     comments: []
   };
@@ -122,52 +120,62 @@ function parseBlockComment(comment: estree.Comment): Attributes {
   for (const tag of ast.tags) {
     switch (tag.title) {
       case "summary":
+        assert(tag.description);
         attributes.description = normalizeDescription(tag.description);
         break;
       case "description":
+        assert(tag.description);
         attributes.description = normalizeDescription(tag.description);
         break;
       case "typedef":
+        assert(tag.type);
         attributes.type = AnnotationType.Typedef;
         attributes.typedefType = tag.type;
         break;
       case "property":
+        assert(tag.name);
+        assert(tag.type);
         attributes.props = attributes.props || [];
         attributes.props.push({
           name: tag.name,
           type: tag.type,
-          description: tag.description && normalizeDescription(tag.description)
+          description: tag.description
+            ? normalizeDescription(tag.description)
+            : undefined
         });
         break;
       case "const":
         attributes.type = AnnotationType.Const;
-        attributes.constType = tag.type;
+        attributes.constType = tag.type || undefined;
         break;
       case "namespace":
         attributes.type = AnnotationType.Const;
+        attributes.constType = undefined;
         break;
       case "define":
         attributes.type = AnnotationType.Const;
-        attributes.constType = tag.type;
+        attributes.constType = tag.type || undefined;
         if (tag.description) {
           attributes.description = normalizeDescription(tag.description);
         }
         break;
       case "type":
         attributes.type = AnnotationType.Property;
-        attributes.propType = tag.type;
+        attributes.propType = tag.type || undefined;
         break;
       case "constructor":
         attributes.type = AnnotationType.Class;
         break;
       case "enum":
         attributes.type = AnnotationType.Enum;
-        attributes.enumType = tag.type;
+        attributes.enumType = tag.type || undefined;
         break;
       case "interface":
         attributes.type = AnnotationType.Interface;
         break;
       case "param":
+        assert(tag.name);
+        assert(tag.type);
         attributes.paramTypes = attributes.paramTypes || {};
         attributes.paramTypes[tag.name] = tag.type;
         if (tag.description) {
@@ -177,13 +185,14 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         break;
       case "return":
         attributes.type = AnnotationType.Function;
-        attributes.returnType = tag.type;
+        attributes.returnType = tag.type || undefined;
         if (tag.description) {
           const description = normalizeDescription(tag.description);
           attributes.comments.push(`@returnType ${description}`);
         }
         break;
       case "implements":
+        assert(tag.type);
         if (tag.type.type === doctrine.Syntax.NameExpression) {
           attributes.implements = tag.type.name;
         } else if (tag.type.type === doctrine.Syntax.TypeApplication) {
@@ -196,10 +205,12 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         }
         break;
       case "extends":
+        assert(tag.type);
         assert(tag.type.type === doctrine.Syntax.NameExpression);
         attributes.extends = tag.type.name;
         break;
       case "template":
+        assert(tag.description);
         attributes.template = tag.description.split(",");
         break;
       default:
@@ -207,7 +218,7 @@ function parseBlockComment(comment: estree.Comment): Attributes {
     }
   }
 
-  if (attributes.description.length > 0) {
+  if (attributes.description) {
     attributes.comments.unshift(attributes.description);
   }
 
@@ -220,7 +231,6 @@ function parseLeadingComments(
   const comments = statement.leadingComments;
   if (!comments) {
     return {
-      type: null,
       comments: [],
       description: ""
     };
@@ -235,7 +245,7 @@ function parseLeadingComments(
 }
 
 export default function parseExterns(code: string) {
-  const program = esprima.parseScript(code, { comment: true });
+  const program = esprima.parseScript(code, { attachComment: true } as any);
   const definitions = program.body
     // Only take expressions into consideration.
     // Variable declarations are discarded because they are only used for
@@ -252,7 +262,7 @@ export default function parseExterns(code: string) {
     // @const without type is only used to define namespaces, discard.
     .filter(
       definition =>
-        definition.attributes.type !== "const" ||
+        definition.attributes.type !== AnnotationType.Const ||
         definition.attributes.constType !== undefined
     );
 

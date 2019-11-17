@@ -274,13 +274,13 @@ class Build(object):
 
     tsd_generator = shakaBuildHelpers.cygwin_safe_path(os.path.join(
         shakaBuildHelpers.get_source_base(), 'build',
-        'generateTypescriptDefinitions.js'))
+        'generateTypescriptDefinitions.ts'))
 
     output = shakaBuildHelpers.cygwin_safe_path(os.path.join(
         shakaBuildHelpers.get_source_base(), 'dist',
         'shaka-player.' + name + '.d.ts'))
 
-    cmd_line = ['node', tsd_generator, '--output', output] + files
+    cmd_line = ['node_modules/.bin/ts-node', tsd_generator, '--output', output] + files
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('TypeScript type definition generation failed')
       return False

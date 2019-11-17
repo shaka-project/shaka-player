@@ -1,14 +1,39 @@
-import { stringifyType } from "../generateType";
+import { stringifyType, TypeInformation } from "../generateType";
+import { Writable, Writer } from "../base";
 
-export default class FunctionNode {
-  constructor(name, comments, templateTypes, params, returnType) {
+export interface Param {
+  name: string;
+  type: TypeInformation;
+  isOptional: boolean;
+  isRest: boolean;
+}
+
+export default class FunctionNode implements Writable {
+  name: string;
+  comments: string[];
+  params: Param[];
+  returnType?: TypeInformation;
+  templateTypes?: string[];
+
+  constructor(
+    name: string,
+    comments: string[],
+    templateTypes: string[] | undefined,
+    params: Param[],
+    returnType: TypeInformation | undefined
+  ) {
     this.name = name;
     this.comments = comments;
+    this.templateTypes = templateTypes;
     this.params = params;
     this.returnType = returnType;
   }
 
-  write(writer, keyword = "function", isConstructor = false) {
+  write(
+    writer: Writer,
+    keyword: string = "function",
+    isConstructor: boolean = false
+  ): void {
     writer.writeComments(this.comments);
 
     const params = this.params.map(param => {

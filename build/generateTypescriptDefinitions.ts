@@ -1,8 +1,8 @@
 #!/usr/bin/env ts-node
 
 // Load required modules.
-import fs from "fs";
-import { strict as assert } from "assert";
+import * as fs from "fs";
+import assert from "./typescript/assert";
 import parseExterns from "./typescript/parseExterns";
 import buildDefinitionTree from "./typescript/buildDefinitionTree";
 import writeTypeDefinitions from "./typescript/writeTypeDefinitions";
@@ -12,7 +12,7 @@ function generateTypeDefinitions(
   outputPath: string,
   inputPaths: string[]
 ): void {
-  const definitions: Definition[] = [].concat(
+  const definitions: Definition[] = Array.prototype.concat(
     ...inputPaths.map(inputPath => {
       const code = fs.readFileSync(inputPath, "utf-8");
       return parseExterns(code);
