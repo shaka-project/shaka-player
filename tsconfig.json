@@ -18,8 +18,8 @@
     "moduleResolution": "node",
     "downlevelIteration": true
   },
-  "include": ["build/"]/*,
-  "files": [
-    "../../dist/shaka-player.compiled.d.ts"
-  ]*/
+  "include": [
+    "build/",
+    "dist/"
+  ]
 }

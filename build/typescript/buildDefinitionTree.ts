@@ -306,24 +306,29 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
           }
         }
       }
-
-      const { attributes } = md;
-      assert(attributes);
-      if ((!attributes.paramTypes || !attributes.returnType) && baseInterface) {
-        const types = getMethodTypesFromInterface(
-          root,
-          baseInterface,
-          md.identifier[0]
-        );
-        attributes.paramTypes = attributes.paramTypes || types.paramTypes;
-        attributes.returnType = attributes.returnType || types.returnType;
+      // TypeScript does not allow constructors in interface definitions
+      if (!md.isConstructor) {
+        const { attributes } = md;
+        assert(attributes);
+        if (
+          (!attributes.paramTypes || !attributes.returnType) &&
+          baseInterface
+        ) {
+          const types = getMethodTypesFromInterface(
+            root,
+            baseInterface,
+            md.identifier[0]
+          );
+          attributes.paramTypes = attributes.paramTypes || types.paramTypes;
+          attributes.returnType = attributes.returnType || types.returnType;
+        }
+        const functionNode = parseFunctionNode(root, {
+          name: md.identifier[0],
+          definition: md,
+          children: new Map()
+        });
+        methods.push(functionNode);
       }
-      const functionNode = parseFunctionNode(root, {
-        name: md.identifier[0],
-        definition: md,
-        children: new Map()
-      });
-      methods.push(functionNode);
     }
   }
 
