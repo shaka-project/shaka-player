@@ -29,7 +29,7 @@ import {
 
 function parseClassNode(root: NodeMap, node: Node): ClassNode {
   assert(node.definition);
-  assert(node.definition.type === DefinitionType.Class);
+  assert(node.definition.type === DefinitionType.Class, "Expected class node");
   assert(node.definition.attributes);
 
   const staticProperties = [];
@@ -37,7 +37,7 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
   const properties = [];
   const methods = [];
   const others = [];
-  // Class might consist of only a constructor
+  // Class might not have any properteis
   // Prototype defaults to empty in that case
   const prototype: Node = node.children.get("prototype") || {
     name: "prototype",
@@ -140,24 +140,25 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
     }
   }
 
+  // Gather all methods
+  let constructor: FunctionNode | undefined;
+  for (const md of node.definition.methods) {
+    const functionNode = parseFunctionNode(root, {
+      name: md.identifier[0],
+      definition: md,
+      children: new Map()
+    });
+    if (md.isConstructor) {
+      constructor = functionNode;
+    } else if (md.isStatic) {
+      staticMethods.push(functionNode);
+    } else {
+      methods.push(functionNode);
+    }
+  }
+
   const attributes = node.definition.attributes;
-
-  // Include constructor description before class declaration as well,
-  // as they can describe the constructor, the class, or both.
   const comments = attributes.description ? [attributes.description] : [];
-
-  // Constructor
-  /*const constructor = parseFunctionNode(
-    root,
-    node.definition.methods.find(m => m.kind === "constructor").value
-  );*/
-  const constructor = new FunctionNode(
-    "constructor",
-    [],
-    undefined,
-    [],
-    undefined
-  );
 
   return new ClassNode(
     node.name,
@@ -181,8 +182,12 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
   const properties = [];
   const methods = [];
   const others = [];
-  const prototype = node.children.get("prototype");
-  assert(prototype, JSON.stringify(node));
+  // Interface might not have any properteis
+  // Prototype defaults to empty in that case
+  const prototype: Node = node.children.get("prototype") || {
+    name: "prototype",
+    children: new Map()
+  };
 
   // Find interfaces for classes with implements keyword
   const baseInterfaceName = attributes.extends;
@@ -257,6 +262,18 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
         throw new Error(
           `Found unexpected node type ${type} in interface prototype`
         );
+    }
+  }
+
+  if (node.definition.type === DefinitionType.Class) {
+    // Gather all methods
+    for (const md of node.definition.methods) {
+      const functionNode = parseFunctionNode(root, {
+        name: md.identifier[0],
+        definition: md,
+        children: new Map()
+      });
+      methods.push(functionNode);
     }
   }
 

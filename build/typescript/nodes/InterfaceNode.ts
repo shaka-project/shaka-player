@@ -50,7 +50,7 @@ export default class InterfaceNode implements Writable {
 
     // Methods
     for (const methodNode of this.methods) {
-      methodNode.write(writer, undefined);
+      methodNode.write(writer, "");
     }
 
     writer.decreaseLevel();

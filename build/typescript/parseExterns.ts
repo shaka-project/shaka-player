@@ -7,7 +7,8 @@ import {
   AnnotationType,
   DefinitionType,
   Definition,
-  PropertyDefinition
+  PropertyDefinition,
+  FunctionDefinition
 } from "./base";
 
 function staticMemberExpressionToPath(expression: estree.Expression): string[] {
@@ -27,6 +28,28 @@ function staticMemberExpressionToPath(expression: estree.Expression): string[] {
   return fail(
     "Expected either member expression or identifier as object in path"
   );
+}
+
+function parseMethodDefinition(
+  md: estree.MethodDefinition
+): FunctionDefinition {
+  assert(md.key.type === "Identifier");
+  return {
+    type: DefinitionType.Function,
+    identifier: [md.key.name],
+    params: md.value.params.map(p => {
+      if (p.type === "RestElement") {
+        assert(p.argument.type === "Identifier", p.argument.type);
+        return "..." + p.argument.name;
+      }
+      assert(p.type === "Identifier", p.type);
+      return p.name;
+    }),
+    isMethod: md.kind === "method",
+    isStatic: md.static,
+    isConstructor: md.kind === "constructor",
+    attributes: parseLeadingComments(md.leadingComments)
+  };
 }
 
 function parseAssignmentExpression(
@@ -65,7 +88,7 @@ function parseAssignmentExpression(
         superClass: expression.right.superClass
           ? staticMemberExpressionToPath(expression.right.superClass)
           : undefined,
-        methods: expression.right.body.body
+        methods: expression.right.body.body.map(parseMethodDefinition)
       };
     default:
       console.dir(expression.right);
@@ -225,10 +248,7 @@ function parseBlockComment(comment: estree.Comment): Attributes {
   return attributes;
 }
 
-function parseLeadingComments(
-  statement: estree.ExpressionStatement
-): Attributes {
-  const comments = statement.leadingComments;
+function parseLeadingComments(comments?: estree.Comment[]): Attributes {
   if (!comments) {
     return {
       comments: [],
@@ -257,7 +277,7 @@ export default function parseExterns(code: string) {
     // Prepare for further inspection
     .map(statement => ({
       ...parseExpressionStatement(statement),
-      attributes: parseLeadingComments(statement)
+      attributes: parseLeadingComments(statement.leadingComments)
     }))
     // @const without type is only used to define namespaces, discard.
     .filter(

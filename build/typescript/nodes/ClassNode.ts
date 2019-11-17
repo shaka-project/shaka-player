@@ -11,7 +11,7 @@ export default class ClassNode implements Writable {
   implementsInterfaces?: string[];
   staticProperties: PropertyNode[];
   staticMethods: FunctionNode[];
-  constructorMethod: FunctionNode;
+  constructorMethod?: FunctionNode;
   properties: PropertyNode[];
   methods: FunctionNode[];
   namespace?: NamespaceNode;
@@ -24,7 +24,7 @@ export default class ClassNode implements Writable {
     implementsInterfaces: string[] | undefined,
     staticProperties: PropertyNode[],
     staticMethods: FunctionNode[],
-    constructor: FunctionNode,
+    constructor: FunctionNode | undefined,
     properties: PropertyNode[],
     methods: FunctionNode[],
     namespace: NamespaceNode | undefined
@@ -69,7 +69,9 @@ export default class ClassNode implements Writable {
     }
 
     // Constructor
-    this.constructorMethod.write(writer, undefined, true);
+    if (this.constructorMethod) {
+      this.constructorMethod.write(writer, "", true);
+    }
 
     // Properties
     for (const propNode of this.properties) {
@@ -78,7 +80,7 @@ export default class ClassNode implements Writable {
 
     // Methods
     for (const methodNode of this.methods) {
-      methodNode.write(writer, undefined);
+      methodNode.write(writer, "");
     }
 
     writer.decreaseLevel();

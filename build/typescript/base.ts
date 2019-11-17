@@ -54,6 +54,10 @@ export interface BaseDefinition {
 export interface FunctionDefinition extends BaseDefinition {
   type: DefinitionType.Function;
   params: string[];
+
+  isMethod?: boolean;
+  isStatic?: boolean;
+  isConstructor?: boolean;
 }
 
 export interface ObjectDefinition extends BaseDefinition {
@@ -64,7 +68,7 @@ export interface ObjectDefinition extends BaseDefinition {
 export interface ClassDefinition extends BaseDefinition {
   type: DefinitionType.Class;
   superClass?: string[];
-  methods: estree.MethodDefinition[];
+  methods: FunctionDefinition[];
 }
 
 export interface PropertyDefinition extends BaseDefinition {

@@ -12,7 +12,10 @@ const ds = doctrine.Syntax;
 const primitiveTypes = ["null", "undefined", "boolean", "number", "string"];
 
 function checkNullability(root: NodeMap, rawType: doctrine.Type): boolean {
-  assert(rawType.type === ds.NameExpression);
+  assert(
+    rawType.type === ds.NameExpression,
+    "Expected a NameExpression as rawType"
+  );
   if (primitiveTypes.includes(rawType.name)) {
     return false;
   }
@@ -28,7 +31,8 @@ function checkNullability(root: NodeMap, rawType: doctrine.Type): boolean {
   switch (attributes.type) {
     case "enum":
       assert(
-        attributes.enumType && attributes.enumType.type === ds.NameExpression
+        attributes.enumType && attributes.enumType.type === ds.NameExpression,
+        "Expected a NameExpression as enumType"
       );
       return !primitiveTypes.includes(attributes.enumType.name);
     case "typedef":
@@ -130,7 +134,10 @@ export function processType(
         isRecord: true,
         isNullable: false,
         fields: rawType.fields.map(field => {
-          assert(field.type === ds.FieldType);
+          assert(
+            field.type === ds.FieldType,
+            "Expected field to be of type FieldType"
+          );
           return {
             key: field.key,
             value: processType(root, field.value, true)

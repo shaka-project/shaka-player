@@ -2,11 +2,10 @@ import { strict } from "assert";
 
 export const fail = strict.fail;
 
-export default function assert(
+// Workaround for node.js "assert" module missing the new TypeScript "asserts" syntax
+const assert: (
   condition: unknown,
   message?: string | Error
-): asserts condition {
-  if (!condition) {
-    strict.fail(message);
-  }
-}
+) => asserts condition = strict.ok;
+
+export default assert;
