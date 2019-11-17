@@ -1,5 +1,5 @@
 import * as doctrine from "@teppeis/doctrine";
-import { Definition, ParamTypes } from "./base";
+import { Definition, ParamTypes, DefinitionType } from "./base";
 import assert from "./assert";
 
 export interface Node {
@@ -79,6 +79,8 @@ export function getPropTypeFromInterface(
     };
   }
 
+  console.log("Not found:", iface.definition.identifier, propName);
+
   return {
     isConst: false
   };
@@ -90,11 +92,27 @@ interface MethodTypes {
 }
 
 export function getMethodTypesFromInterface(
+  root: NodeMap,
   iface: Node,
   methodName: string
 ): MethodTypes {
+  let types: MethodTypes = {};
+
   assert(iface.definition);
-  const attributes = iface.definition.attributes;
+  if (iface.definition.type === DefinitionType.Class) {
+    const md = iface.definition.methods.find(
+      md => md.identifier[0] === methodName
+    );
+    if (md) {
+      assert(md.attributes);
+      types = {
+        paramTypes: md.attributes.paramTypes,
+        returnType: md.attributes.returnType
+      };
+    }
+  }
+
+  const { attributes } = iface.definition;
   assert(attributes);
   if (attributes.type === "interface") {
     const base = getNodeAtPath(iface.children, ["prototype", methodName]);
@@ -102,7 +120,7 @@ export function getMethodTypesFromInterface(
       assert(base.definition);
       const baseAttributes = base.definition.attributes;
       assert(baseAttributes);
-      return {
+      types = {
         paramTypes: baseAttributes.paramTypes,
         returnType: baseAttributes.returnType
       };
@@ -111,7 +129,7 @@ export function getMethodTypesFromInterface(
     const base = attributes.props.find(p => p.name === methodName);
     assert(base);
     if (base.type.type === doctrine.Syntax.FunctionType) {
-      return {
+      types = {
         paramTypes: base.type.params.reduce((acc: ParamTypes, type, i) => {
           acc["p" + i] = type;
           return acc;
@@ -121,5 +139,14 @@ export function getMethodTypesFromInterface(
     }
   }
 
-  return {};
+  if ((!types.paramTypes || !types.returnType) && attributes.extends) {
+    const base = getNodeAtPath(root, attributes.extends.split("."));
+    if (base) {
+      const baseTypes = getMethodTypesFromInterface(root, base, methodName);
+      types.paramTypes = types.paramTypes || baseTypes.paramTypes;
+      types.returnType = types.returnType || baseTypes.returnType;
+    }
+  }
+
+  return types;
 }

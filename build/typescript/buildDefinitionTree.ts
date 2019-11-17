@@ -126,10 +126,10 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
         break;
       }
       case "function": {
-        const attributes = child.definition.attributes;
+        const { attributes } = child.definition;
         assert(attributes);
         if ((!attributes.paramTypes || !attributes.returnType) && iface) {
-          const types = getMethodTypesFromInterface(iface, child.name);
+          const types = getMethodTypesFromInterface(root, iface, child.name);
           attributes.paramTypes = attributes.paramTypes || types.paramTypes;
           attributes.returnType = attributes.returnType || types.returnType;
         }
@@ -146,6 +146,13 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
   // Gather all methods
   let constructor: FunctionNode | undefined;
   for (const md of node.definition.methods) {
+    const { attributes } = md;
+    assert(attributes);
+    if ((!attributes.paramTypes || !attributes.returnType) && iface) {
+      const types = getMethodTypesFromInterface(root, iface, md.identifier[0]);
+      attributes.paramTypes = attributes.paramTypes || types.paramTypes;
+      attributes.returnType = attributes.returnType || types.returnType;
+    }
     const functionNode = parseFunctionNode(root, {
       name: md.identifier[0],
       definition: md,
@@ -257,7 +264,11 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
           (!attributes.paramTypes || !attributes.returnType) &&
           baseInterface
         ) {
-          const types = getMethodTypesFromInterface(baseInterface, child.name);
+          const types = getMethodTypesFromInterface(
+            root,
+            baseInterface,
+            child.name
+          );
           attributes.paramTypes = attributes.paramTypes || types.paramTypes;
           attributes.returnType = attributes.returnType || types.returnType;
         }
@@ -274,6 +285,17 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
   if (node.definition.type === DefinitionType.Class) {
     // Gather all methods
     for (const md of node.definition.methods) {
+      const { attributes } = md;
+      assert(attributes);
+      if ((!attributes.paramTypes || !attributes.returnType) && baseInterface) {
+        const types = getMethodTypesFromInterface(
+          root,
+          baseInterface,
+          md.identifier[0]
+        );
+        attributes.paramTypes = attributes.paramTypes || types.paramTypes;
+        attributes.returnType = attributes.returnType || types.returnType;
+      }
       const functionNode = parseFunctionNode(root, {
         name: md.identifier[0],
         definition: md,
