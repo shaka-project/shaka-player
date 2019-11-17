@@ -45,12 +45,15 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
   };
 
   // Find interfaces for classes with implements keyword
-  const interfaceName = node.definition.attributes.implements;
+  let interfaceName = node.definition.attributes.implements;
   const iface = interfaceName && getNodeAtPath(root, interfaceName.split("."));
   if (iface) {
     assert(iface.definition);
     const attributes = iface.definition.attributes;
     assert(attributes);
+    if (attributes.template) {
+      interfaceName += "<" + attributes.template.join(", ") + ">";
+    }
     // Only allow names of interfaces or typedefs for @implements
     assert(
       attributes.type === "interface" || attributes.type === "typedef",
@@ -190,13 +193,16 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
   };
 
   // Find interfaces for classes with implements keyword
-  const baseInterfaceName = attributes.extends;
+  let baseInterfaceName = attributes.extends;
   const baseInterface =
     baseInterfaceName && getNodeAtPath(root, baseInterfaceName.split("."));
   if (baseInterface) {
     assert(baseInterface.definition);
     const attributes = baseInterface.definition.attributes;
     assert(attributes);
+    if (attributes.template) {
+      baseInterfaceName += "<" + attributes.template.join(", ") + ">";
+    }
     // Only allow names of interfaces or typedefs for @implements
     assert(
       attributes.type === "interface" || attributes.type === "typedef",
