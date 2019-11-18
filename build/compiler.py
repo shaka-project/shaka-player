@@ -240,10 +240,10 @@ class TypescriptGenerator(object):
       return True
 
     ts_generator = _get_source_path('build/typescript/main.ts')
-    ts_node = _get_source_path('node_modules/.bin/ts-node')
+    ts_node = _get_source_path('node_modules/ts-node/dist/bin')
     tsconfig = _get_source_path('tsconfig.json')
 
-    cmd_line = [ts_node, '-P', tsconfig, ts_generator, '--output', self.output]
+    cmd_line = ['node', ts_node, '-P', tsconfig, ts_generator, '--output', self.output]
     cmd_line += self.source_files
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
