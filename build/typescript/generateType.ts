@@ -21,11 +21,10 @@ function checkNullability(root: NodeMap, rawType: doctrine.Type): boolean {
   }
 
   const node = getNodeAtPath(root, rawType.name.split("."));
-  if (!node) {
+  if (!node || !node.definition) {
     return true;
   }
 
-  assert(node.definition);
   const attributes = node.definition.attributes;
   assert(attributes);
   switch (attributes.type) {
@@ -154,8 +153,13 @@ export function processType(
         isNullable: false,
         name: "any"
       };
+    case ds.NullableLiteral:
+      return {
+        isNullable: false,
+        name: "null"
+      };
     default:
-      throw new Error(`Unhandled raw type: ${rawType}`);
+      throw new Error(`Unhandled raw type: ${rawType.type}`);
   }
 }
 

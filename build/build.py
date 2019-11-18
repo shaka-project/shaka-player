@@ -253,40 +253,6 @@ class Build(object):
 
     return True
 
-  def generate_typescript_definitions(self, name):
-    """Generates TypeScript type definitions.
-
-    Args:
-      name: The name of the build.
-
-    Returns:
-      True on success; False on failure.
-    """
-
-    match = re.compile(r'.*\.js$')
-    base = shakaBuildHelpers.get_source_base()
-    files = shakaBuildHelpers.get_all_files(
-        os.path.join(base, 'externs', 'shaka'), match)
-    externs = shakaBuildHelpers.cygwin_safe_path(os.path.join(
-        shakaBuildHelpers.get_source_base(), 'dist',
-        'shaka-player.' + name + '.externs.js'))
-    files.append(externs)
-
-    tsd_generator = shakaBuildHelpers.cygwin_safe_path(os.path.join(
-        shakaBuildHelpers.get_source_base(), 'build',
-        'generateTypescriptDefinitions.ts'))
-
-    output = shakaBuildHelpers.cygwin_safe_path(os.path.join(
-        shakaBuildHelpers.get_source_base(), 'dist',
-        'shaka-player.' + name + '.d.ts'))
-
-    cmd_line = ['node_modules/.bin/ts-node', "-P", "tsconfig.json", tsd_generator, '--output', output] + files
-    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
-      logging.error('TypeScript type definition generation failed')
-      return False
-
-    return True
-
   def build_library(self, name, locales, force, is_debug):
     """Builds Shaka Player using the files in |self.include|.
 
@@ -312,6 +278,16 @@ class Build(object):
     closure = compiler.ClosureCompiler(self.include, build_name)
     generator = compiler.ExternGenerator(self.include, build_name)
 
+    ts_input = [generator.output]
+    match = re.compile(r'.*\.js$')
+    base = shakaBuildHelpers.get_source_base()
+    ts_input += shakaBuildHelpers.get_all_files(
+        os.path.join(base, 'externs'), match)
+    if self.has_ui():
+      ts_input += shakaBuildHelpers.get_all_files(
+          os.path.join(base, 'ui', 'externs'), match)
+    ts_generator = compiler.TypescriptGenerator(ts_input, build_name)
+
     closure_opts = common_closure_opts + common_closure_defines
     if is_debug:
       closure_opts += debug_closure_opts + debug_closure_defines
@@ -326,7 +302,7 @@ class Build(object):
     if not generator.generate(force):
       return False
     
-    if not self.generate_typescript_definitions(name):
+    if not ts_generator.generate(force):
       return False
 
     return True

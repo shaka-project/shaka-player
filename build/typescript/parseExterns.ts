@@ -11,7 +11,13 @@ import {
   FunctionDefinition
 } from "./base";
 
+const ds = doctrine.Syntax;
+
 function staticMemberExpressionToPath(expression: estree.Expression): string[] {
+  if (expression.type === "Identifier") {
+    return [expression.name];
+  }
+
   assert(
     expression.type === "MemberExpression",
     "Expected MemberExpression, got " + expression.type
@@ -29,7 +35,7 @@ function staticMemberExpressionToPath(expression: estree.Expression): string[] {
     return ["this", property.name];
   }
   return fail(
-    "Expected either member expression or identifier as object in path"
+    "Expected either member expression, identifier, or `this` as object in path"
   );
 }
 
@@ -53,6 +59,20 @@ function parseMethodDefinition(
     isConstructor: md.kind === "constructor",
     definitions: parseBody(md.value.body.body),
     attributes: parseLeadingComments(md.leadingComments)
+  };
+}
+
+function parseFunctionDeclaration(
+  decl: estree.FunctionDeclaration
+): FunctionDefinition {
+  assert(decl.id);
+  return {
+    type: DefinitionType.Function,
+    identifier: staticMemberExpressionToPath(decl.id),
+    params: decl.params.map(p => {
+      assert(p.type === "Identifier");
+      return p.name;
+    })
   };
 }
 
@@ -111,9 +131,12 @@ function parseMemberExpression(
   };
 }
 
-function parseExpressionStatement(
-  statement: estree.ExpressionStatement
-): Definition {
+function parseStatement(statement: estree.Statement): Definition {
+  if (statement.type === "FunctionDeclaration") {
+    return parseFunctionDeclaration(statement);
+  }
+
+  assert(statement.type === "ExpressionStatement");
   switch (statement.expression.type) {
     case "AssignmentExpression":
       return parseAssignmentExpression(statement.expression);
@@ -221,10 +244,10 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         break;
       case "implements":
         assert(tag.type);
-        if (tag.type.type === doctrine.Syntax.NameExpression) {
+        if (tag.type.type === ds.NameExpression) {
           attributes.implements = tag.type.name;
-        } else if (tag.type.type === doctrine.Syntax.TypeApplication) {
-          assert(tag.type.expression.type === doctrine.Syntax.NameExpression);
+        } else if (tag.type.type === ds.TypeApplication) {
+          assert(tag.type.expression.type === ds.NameExpression);
           attributes.implements = tag.type.expression.name;
         } else {
           fail(
@@ -234,8 +257,16 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         break;
       case "extends":
         assert(tag.type);
-        assert(tag.type.type === doctrine.Syntax.NameExpression);
-        attributes.extends = tag.type.name;
+        if (tag.type.type === ds.NameExpression) {
+          attributes.extends = tag.type.name;
+        } else if (tag.type.type === ds.TypeApplication) {
+          assert(tag.type.expression.type === ds.NameExpression);
+          attributes.extends = tag.type.expression.name;
+        } else {
+          fail(
+            "Expected name or type application expression after extends keyword"
+          );
+        }
         break;
       case "template":
         assert(tag.description);
@@ -278,17 +309,20 @@ function parseBody(
       // Variable declarations are discarded because they are only used for
       // declaring namespaces.
       .filter(
-        (statement): statement is estree.ExpressionStatement =>
-          statement.type === "ExpressionStatement"
+        (statement): statement is estree.Statement =>
+          statement.type === "ExpressionStatement" ||
+          statement.type === "FunctionDeclaration"
       )
       // Prepare for further inspection
       .map(statement => ({
-        ...parseExpressionStatement(statement),
+        ...parseStatement(statement),
         attributes: parseLeadingComments(statement.leadingComments)
       }))
       // @const without type is only used to define namespaces, discard.
+      // Except in the chromecast externs, because it might be a class and contain "static methods"
       .filter(
         definition =>
+          definition.type === DefinitionType.Class ||
           definition.attributes.type !== AnnotationType.Const ||
           definition.attributes.constType !== undefined
       )

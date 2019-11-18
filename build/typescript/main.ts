@@ -2,11 +2,11 @@
 
 // Load required modules.
 import * as fs from "fs";
-import assert from "./typescript/assert";
-import parseExterns from "./typescript/parseExterns";
-import buildDefinitionTree from "./typescript/buildDefinitionTree";
-import writeTypeDefinitions from "./typescript/writeTypeDefinitions";
-import { Definition } from "./typescript/base";
+import assert from "./assert";
+import parseExterns from "./parseExterns";
+import buildDefinitionTree from "./buildDefinitionTree";
+import writeTypeDefinitions from "./writeTypeDefinitions";
+import { Definition } from "./base";
 
 function generateTypeDefinitions(
   outputPath: string,

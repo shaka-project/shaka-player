@@ -29,15 +29,15 @@ import {
 
 function parseClassNode(root: NodeMap, node: Node): ClassNode {
   assert(node.definition);
-  assert(node.definition.type === DefinitionType.Class, "Expected class node");
-  assert(node.definition.attributes);
+  const { attributes } = node.definition;
+  assert(attributes);
 
   const staticProperties = [];
   const staticMethods = [];
   const properties = [];
   const methods = [];
   const others = [];
-  // Class might not have any properteis
+  // Class might not have any properties
   // Prototype defaults to empty in that case
   const prototype: Node = node.children.get("prototype") || {
     name: "prototype",
@@ -45,7 +45,7 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
   };
 
   // Find interfaces for classes with implements keyword
-  let interfaceName = node.definition.attributes.implements;
+  let interfaceName = attributes.implements;
   const iface = interfaceName && getNodeAtPath(root, interfaceName.split("."));
   if (iface) {
     assert(iface.definition);
@@ -145,29 +145,36 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
 
   // Gather all methods
   let constructor: FunctionNode | undefined;
-  for (const md of node.definition.methods) {
-    const { attributes } = md;
-    assert(attributes);
-    if ((!attributes.paramTypes || !attributes.returnType) && iface) {
-      const types = getMethodTypesFromInterface(root, iface, md.identifier[0]);
-      attributes.paramTypes = attributes.paramTypes || types.paramTypes;
-      attributes.returnType = attributes.returnType || types.returnType;
+  if (node.definition.type === DefinitionType.Class) {
+    for (const md of node.definition.methods) {
+      const { attributes } = md;
+      assert(attributes);
+      if ((!attributes.paramTypes || !attributes.returnType) && iface) {
+        const types = getMethodTypesFromInterface(
+          root,
+          iface,
+          md.identifier[0]
+        );
+        attributes.paramTypes = attributes.paramTypes || types.paramTypes;
+        attributes.returnType = attributes.returnType || types.returnType;
+      }
+      const functionNode = parseFunctionNode(root, {
+        name: md.identifier[0],
+        definition: md,
+        children: new Map()
+      });
+      if (md.isConstructor) {
+        constructor = functionNode;
+      } else if (md.isStatic) {
+        staticMethods.push(functionNode);
+      } else {
+        methods.push(functionNode);
+      }
     }
-    const functionNode = parseFunctionNode(root, {
-      name: md.identifier[0],
-      definition: md,
-      children: new Map()
-    });
-    if (md.isConstructor) {
-      constructor = functionNode;
-    } else if (md.isStatic) {
-      staticMethods.push(functionNode);
-    } else {
-      methods.push(functionNode);
-    }
+  } else {
+    constructor = parseFunctionNode(root, node);
   }
 
-  const attributes = node.definition.attributes;
   const comments = attributes.description ? [attributes.description] : [];
 
   return new ClassNode(
@@ -440,7 +447,7 @@ function parseEnumNode(node: Node) {
   );
 }
 
-function parseConstNode(root: NodeMap, node: Node) {
+function parseConstNode(root: NodeMap, node: Node): PropertyNode {
   const { definition } = node;
   assert(definition);
   const { attributes } = definition;
@@ -450,7 +457,7 @@ function parseConstNode(root: NodeMap, node: Node) {
   return new PropertyNode(node.name, attributes.comments, constType, true);
 }
 
-function parseFunctionNode(root: NodeMap, node: Node) {
+function parseFunctionNode(root: NodeMap, node: Node): FunctionNode {
   const { definition } = node;
   assert(definition);
   assert(definition.type === DefinitionType.Function);
@@ -499,6 +506,30 @@ function parseFunctionNode(root: NodeMap, node: Node) {
   );
 }
 
+function parsePropertyNode(root: NodeMap, node: Node): InterfaceNode {
+  // "Global" property nodes are handled as extensions of existing global interfaces
+  // by using TypeScript's declaration merging
+  assert(node.definition);
+  assert(node.definition.type === DefinitionType.Property);
+  const { attributes, identifier } = node.definition;
+  assert(attributes);
+  assert(identifier.length === 3);
+  assert(identifier[1] === "prototype", identifier.join("."));
+
+  const type = processType(root, attributes.propType);
+  const prop = new PropertyNode(node.name, attributes.comments, type, false);
+
+  return new InterfaceNode(
+    identifier[0],
+    ["Global interface extension (generated)"],
+    undefined,
+    undefined,
+    [prop],
+    [],
+    undefined
+  );
+}
+
 function parseNode(root: NodeMap, node: Node): DefinitionNode {
   const { definition } = node;
   if (!definition) {
@@ -514,8 +545,11 @@ function parseNode(root: NodeMap, node: Node): DefinitionNode {
 
   // If the doc comment didn't lead to a type, fall back to the type we got
   // from the declaration itself.
+  // Except if it is a class, because somehow the externs contain classes
+  // marked as constants... *flips table*
   // Types: const, enum, class, interface, function, property, object
-  const type = attributes.type || definition.type;
+  const type =
+    definition.type === "class" ? "class" : attributes.type || definition.type;
   switch (type) {
     case "class":
       return parseClassNode(root, node);
@@ -529,6 +563,8 @@ function parseNode(root: NodeMap, node: Node): DefinitionNode {
       return parseConstNode(root, node);
     case "function":
       return parseFunctionNode(root, node);
+    case "property":
+      return parsePropertyNode(root, node);
     default:
       console.dir(node);
       throw new Error("Unexpected definition type " + type);
@@ -542,7 +578,8 @@ export default function buildDefinitionTree(
   // Insert all definitions into the unparsed tree
   for (const definition of definitions) {
     const id = definition.identifier;
-    assert(id.length > 1, "Illegal top-level definition found: " + id);
+    // Uncomment to disallow globals:
+    // assert(id.length > 1, "Illegal top-level definition found: " + id);
     const node = getOrCreateNodeAtPath(root, id);
     node.definition = definition;
   }
