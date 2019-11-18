@@ -155,6 +155,11 @@ export function processType(
       };
     case ds.NullableLiteral:
       return {
+        isNullable: true,
+        name: "any"
+      };
+    case ds.NullLiteral:
+      return {
         isNullable: false,
         name: "null"
       };
