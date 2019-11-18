@@ -49,7 +49,7 @@ function parseMethodDefinition(
     params: md.value.params.map(p => {
       if (p.type === "RestElement") {
         assert(p.argument.type === "Identifier", p.argument.type);
-        return "..." + p.argument.name;
+        return p.argument.name;
       }
       assert(p.type === "Identifier", p.type);
       return p.name;
