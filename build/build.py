@@ -282,7 +282,8 @@ class Build(object):
     match = re.compile(r'.*\.js$')
     base = shakaBuildHelpers.get_source_base()
     ts_input += shakaBuildHelpers.get_all_files(
-        os.path.join(base, 'externs'), match)
+        os.path.join(base, 'externs', 'shaka'), match)
+    ts_input += [os.path.join(base, 'externs', 'ima.js')]
     if self.has_ui():
       ts_input += shakaBuildHelpers.get_all_files(
           os.path.join(base, 'ui', 'externs'), match)
