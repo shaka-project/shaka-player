@@ -1,5 +1,7 @@
 # Polyfills used to emulate missing browsers features.
 
++../../node_modules/eme-encryption-scheme-polyfill/index.js
++../../lib/polyfill/encryption_scheme.js
 +../../lib/polyfill/fullscreen.js
 +../../lib/polyfill/indexed_db.js
 +../../lib/polyfill/input_event.js
