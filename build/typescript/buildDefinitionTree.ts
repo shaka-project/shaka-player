@@ -71,11 +71,14 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
     if (child.name === "prototype") {
       continue;
     }
-    assert(
-      child.definition,
-      "Unexpected child without definition in class statics: " +
-        JSON.stringify(child, undefined, 2)
-    );
+    if (!child.definition) {
+      console.warn(
+        "Unexpected child without definition in class statics: ",
+        child
+      );
+      continue;
+    }
+
     const { attributes } = child.definition;
     assert(attributes);
 
@@ -506,28 +509,34 @@ function parseFunctionNode(root: NodeMap, node: Node): FunctionNode {
   );
 }
 
-function parsePropertyNode(root: NodeMap, node: Node): InterfaceNode {
-  // "Global" property nodes are handled as extensions of existing global interfaces
-  // by using TypeScript's declaration merging
+function parsePropertyNode(
+  root: NodeMap,
+  node: Node
+): InterfaceNode | PropertyNode {
   assert(node.definition);
   assert(node.definition.type === DefinitionType.Property);
   const { attributes, identifier } = node.definition;
   assert(attributes);
-  assert(identifier.length === 3);
-  assert(identifier[1] === "prototype", identifier.join("."));
 
   const type = processType(root, attributes.propType);
   const prop = new PropertyNode(node.name, attributes.comments, type, false);
 
-  return new InterfaceNode(
-    identifier[0],
-    ["Global interface extension (generated)"],
-    undefined,
-    undefined,
-    [prop],
-    [],
-    undefined
-  );
+  if (identifier.length === 3 && identifier[1] === "prototype") {
+    // "Global" property nodes in prototypes are handled as extensions of existing global interfaces
+    // by using TypeScript's declaration merging
+    return new InterfaceNode(
+      identifier[0],
+      ["Global interface extension (generated)"],
+      undefined,
+      undefined,
+      [prop],
+      [],
+      undefined
+    );
+  }
+
+  prop.isConst = true;
+  return prop;
 }
 
 function parseNode(root: NodeMap, node: Node): DefinitionNode {
