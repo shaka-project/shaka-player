@@ -2,13 +2,14 @@ import { Writable, Writer } from "../base";
 import PropertyNode from "./PropertyNode";
 import FunctionNode from "./FunctionNode";
 import NamespaceNode from "./NamespaceNode";
+import { TypeInformation, stringifyType } from "../generateType";
 
 export default class ClassNode implements Writable {
   name: string;
   comments: string[];
   templateTypes?: string[];
-  extendsClass?: string;
-  implementsInterfaces?: string[];
+  extendsClass?: TypeInformation;
+  implementsInterfaces?: TypeInformation[];
   staticProperties: PropertyNode[];
   staticMethods: FunctionNode[];
   constructorMethod?: FunctionNode;
@@ -20,8 +21,8 @@ export default class ClassNode implements Writable {
     name: string,
     comments: string[],
     templateTypes: string[] | undefined,
-    extendsClass: string | undefined,
-    implementsInterfaces: string[] | undefined,
+    extendsClass: TypeInformation | undefined,
+    implementsInterfaces: TypeInformation[] | undefined,
     staticProperties: PropertyNode[],
     staticMethods: FunctionNode[],
     constructor: FunctionNode | undefined,
@@ -48,10 +49,12 @@ export default class ClassNode implements Writable {
       declaration += "<" + this.templateTypes.join(", ") + ">";
     }
     if (this.extendsClass) {
-      declaration += " extends " + this.extendsClass;
+      declaration += " extends " + stringifyType(this.extendsClass);
     }
     if (this.implementsInterfaces) {
-      declaration += " implements " + this.implementsInterfaces.join(", ");
+      declaration +=
+        " implements " +
+        this.implementsInterfaces.map(stringifyType).join(", ");
     }
 
     writer.writeComments(this.comments);

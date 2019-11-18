@@ -244,29 +244,11 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         break;
       case "implements":
         assert(tag.type);
-        if (tag.type.type === ds.NameExpression) {
-          attributes.implements = tag.type.name;
-        } else if (tag.type.type === ds.TypeApplication) {
-          assert(tag.type.expression.type === ds.NameExpression);
-          attributes.implements = tag.type.expression.name;
-        } else {
-          fail(
-            "Expected name or type application expression after implements keyword"
-          );
-        }
+        attributes.implements = tag.type;
         break;
       case "extends":
         assert(tag.type);
-        if (tag.type.type === ds.NameExpression) {
-          attributes.extends = tag.type.name;
-        } else if (tag.type.type === ds.TypeApplication) {
-          assert(tag.type.expression.type === ds.NameExpression);
-          attributes.extends = tag.type.expression.name;
-        } else {
-          fail(
-            "Expected name or type application expression after extends keyword"
-          );
-        }
+        attributes.extends = tag.type;
         break;
       case "template":
         assert(tag.description);

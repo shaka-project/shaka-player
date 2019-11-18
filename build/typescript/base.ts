@@ -33,8 +33,8 @@ export interface Attributes {
   paramTypes?: ParamTypes;
   returnType?: doctrine.Type;
 
-  implements?: string;
-  extends?: string;
+  implements?: doctrine.Type;
+  extends?: doctrine.Type;
   template?: string[];
 }
 

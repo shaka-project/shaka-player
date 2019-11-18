@@ -2,12 +2,13 @@ import { Writable, Writer } from "../base";
 import PropertyNode from "./PropertyNode";
 import FunctionNode from "./FunctionNode";
 import NamespaceNode from "./NamespaceNode";
+import { TypeInformation, stringifyType } from "../generateType";
 
 export default class InterfaceNode implements Writable {
   name: string;
   comments: string[];
   templateTypes?: string[];
-  extendsInterfaces?: string[];
+  extendsInterfaces?: TypeInformation[];
   properties: PropertyNode[];
   methods: FunctionNode[];
   namespace?: NamespaceNode;
@@ -16,7 +17,7 @@ export default class InterfaceNode implements Writable {
     name: string,
     comments: string[],
     templateTypes: string[] | undefined,
-    extendsInterfaces: string[] | undefined,
+    extendsInterfaces: TypeInformation[] | undefined,
     properties: PropertyNode[],
     methods: FunctionNode[],
     namespace: NamespaceNode | undefined
@@ -36,7 +37,8 @@ export default class InterfaceNode implements Writable {
       declaration += "<" + this.templateTypes.join(", ") + ">";
     }
     if (this.extendsInterfaces) {
-      declaration += " extends " + this.extendsInterfaces.join(", ");
+      declaration +=
+        " extends " + this.extendsInterfaces.map(stringifyType).join(", ");
     }
 
     writer.writeComments(this.comments);

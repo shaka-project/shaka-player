@@ -6,6 +6,7 @@ import {
   PropertyDefinition
 } from "./base";
 import assert from "./assert";
+import { processType } from "./generateType";
 
 export interface Node {
   name: string;
@@ -58,12 +59,12 @@ export interface PropType {
 
 export function getPropTypeFromInterface(
   root: NodeMap,
-  iface: Node,
+  interfaceNode: Node,
   propName: string
 ): PropType {
-  assert(iface.definition);
-  if (iface.definition.type === DefinitionType.Class) {
-    const md = iface.definition.methods.find(md => md.isConstructor);
+  assert(interfaceNode.definition);
+  if (interfaceNode.definition.type === DefinitionType.Class) {
+    const md = interfaceNode.definition.methods.find(md => md.isConstructor);
     if (md && md.definitions) {
       const pd = md.definitions.find(
         (pd: Definition): pd is PropertyDefinition =>
@@ -82,10 +83,10 @@ export function getPropTypeFromInterface(
     }
   }
 
-  const { attributes } = iface.definition;
+  const { attributes } = interfaceNode.definition;
   assert(attributes);
   if (attributes.type === "interface") {
-    const base = getNodeAtPath(iface.children, ["prototype", propName]);
+    const base = getNodeAtPath(interfaceNode.children, ["prototype", propName]);
     if (base) {
       assert(base.definition);
       const baseAttributes = base.definition.attributes;
@@ -106,13 +107,19 @@ export function getPropTypeFromInterface(
   }
 
   if (attributes.extends) {
-    const base = getNodeAtPath(root, attributes.extends.split("."));
+    const extendsType = processType(root, attributes.extends);
+    const base =
+      extendsType.name && getNodeAtPath(root, extendsType.name.split("."));
     if (base) {
       return getPropTypeFromInterface(root, base, propName);
     }
   }
 
-  console.log("Not found:", iface.definition.identifier, propName);
+  console.log(
+    "Property could not be inferred from interface:",
+    interfaceNode.definition.identifier,
+    propName
+  );
 
   return { isConst: false };
 }
@@ -124,14 +131,14 @@ interface MethodTypes {
 
 export function getMethodTypesFromInterface(
   root: NodeMap,
-  iface: Node,
+  interfaceNode: Node,
   methodName: string
 ): MethodTypes {
   let types: MethodTypes = {};
 
-  assert(iface.definition);
-  if (iface.definition.type === DefinitionType.Class) {
-    const md = iface.definition.methods.find(
+  assert(interfaceNode.definition);
+  if (interfaceNode.definition.type === DefinitionType.Class) {
+    const md = interfaceNode.definition.methods.find(
       md => md.identifier[0] === methodName
     );
     if (md) {
@@ -143,10 +150,13 @@ export function getMethodTypesFromInterface(
     }
   }
 
-  const { attributes } = iface.definition;
+  const { attributes } = interfaceNode.definition;
   assert(attributes);
   if (attributes.type === "interface") {
-    const base = getNodeAtPath(iface.children, ["prototype", methodName]);
+    const base = getNodeAtPath(interfaceNode.children, [
+      "prototype",
+      methodName
+    ]);
     if (base) {
       assert(base.definition);
       const baseAttributes = base.definition.attributes;
@@ -171,13 +181,21 @@ export function getMethodTypesFromInterface(
   }
 
   if ((!types.paramTypes || !types.returnType) && attributes.extends) {
-    const base = getNodeAtPath(root, attributes.extends.split("."));
+    const extendsType = processType(root, attributes.extends);
+    const base =
+      extendsType.name && getNodeAtPath(root, extendsType.name.split("."));
     if (base) {
       const baseTypes = getMethodTypesFromInterface(root, base, methodName);
       types.paramTypes = types.paramTypes || baseTypes.paramTypes;
       types.returnType = types.returnType || baseTypes.returnType;
     }
   }
+
+  // console.log(
+  //   "Method could not be inferred from interface:",
+  //   interfaceNode.definition.identifier,
+  //   methodName
+  // );
 
   return types;
 }

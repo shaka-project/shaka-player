@@ -32,11 +32,11 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
   const { attributes } = node.definition;
   assert(attributes);
 
-  const staticProperties = [];
-  const staticMethods = [];
-  const properties = [];
-  const methods = [];
-  const others = [];
+  const staticProperties: PropertyNode[] = [];
+  const staticMethods: FunctionNode[] = [];
+  const properties: PropertyNode[] = [];
+  const methods: FunctionNode[] = [];
+  const others: DefinitionNode[] = [];
   // Class might not have any properties
   // Prototype defaults to empty in that case
   const prototype: Node = node.children.get("prototype") || {
@@ -45,15 +45,14 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
   };
 
   // Find interfaces for classes with implements keyword
-  let interfaceName = attributes.implements;
-  const iface = interfaceName && getNodeAtPath(root, interfaceName.split("."));
-  if (iface) {
-    assert(iface.definition);
-    const attributes = iface.definition.attributes;
+  const interfaceType =
+    attributes.implements && processType(root, attributes.implements);
+  const interfaceNode =
+    interfaceType?.name && getNodeAtPath(root, interfaceType.name.split("."));
+  if (interfaceNode) {
+    assert(interfaceNode.definition);
+    const { attributes } = interfaceNode.definition;
     assert(attributes);
-    if (attributes.template) {
-      interfaceName += "<" + attributes.template.join(", ") + ">";
-    }
     // Only allow names of interfaces or typedefs for @implements
     assert(
       attributes.type === "interface" || attributes.type === "typedef",
@@ -72,10 +71,12 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
       continue;
     }
     if (!child.definition) {
-      console.warn(
-        "Unexpected child without definition in class statics: ",
-        child
-      );
+      // Treat static members without definitions as namespaces
+      const nestedNodes: DefinitionNode[] = [];
+      for (const nestedChild of child.children.values()) {
+        nestedNodes.push(parseNode(root, nestedChild));
+      }
+      others.push(new NamespaceNode(child.name, nestedNodes));
       continue;
     }
 
@@ -117,10 +118,14 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
       case "property": {
         let isConst = attributes.type === AnnotationType.Const;
         let rawType = isConst ? attributes.constType : attributes.propType;
-        if (!rawType && iface) {
+        if (!rawType && interfaceNode) {
           // Check if this property has been defined in the implemented
           // interface.
-          const propType = getPropTypeFromInterface(root, iface, child.name);
+          const propType = getPropTypeFromInterface(
+            root,
+            interfaceNode,
+            child.name
+          );
           rawType = propType.rawType;
           isConst = propType.isConst;
         }
@@ -131,8 +136,15 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
       case "function": {
         const { attributes } = child.definition;
         assert(attributes);
-        if ((!attributes.paramTypes || !attributes.returnType) && iface) {
-          const types = getMethodTypesFromInterface(root, iface, child.name);
+        if (
+          (!attributes.paramTypes || !attributes.returnType) &&
+          interfaceNode
+        ) {
+          const types = getMethodTypesFromInterface(
+            root,
+            interfaceNode,
+            child.name
+          );
           attributes.paramTypes = attributes.paramTypes || types.paramTypes;
           attributes.returnType = attributes.returnType || types.returnType;
         }
@@ -152,10 +164,10 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
     for (const md of node.definition.methods) {
       const { attributes } = md;
       assert(attributes);
-      if ((!attributes.paramTypes || !attributes.returnType) && iface) {
+      if ((!attributes.paramTypes || !attributes.returnType) && interfaceNode) {
         const types = getMethodTypesFromInterface(
           root,
-          iface,
+          interfaceNode,
           md.identifier[0]
         );
         attributes.paramTypes = attributes.paramTypes || types.paramTypes;
@@ -184,8 +196,8 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
     node.name,
     comments,
     attributes.template,
-    attributes.extends,
-    interfaceName ? [interfaceName] : undefined,
+    attributes.extends && processType(root, attributes.extends),
+    interfaceType ? [interfaceType] : undefined,
     staticProperties,
     staticMethods,
     constructor,
@@ -199,9 +211,9 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
   assert(node.definition);
   const { attributes } = node.definition;
   assert(attributes);
-  const properties = [];
-  const methods = [];
-  const others = [];
+  const properties: PropertyNode[] = [];
+  const methods: FunctionNode[] = [];
+  const others: DefinitionNode[] = [];
   // Interface might not have any properteis
   // Prototype defaults to empty in that case
   const prototype: Node = node.children.get("prototype") || {
@@ -210,16 +222,15 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
   };
 
   // Find interfaces for classes with implements keyword
-  let baseInterfaceName = attributes.extends;
+  const baseInterfaceType =
+    attributes.extends && processType(root, attributes.extends);
   const baseInterface =
-    baseInterfaceName && getNodeAtPath(root, baseInterfaceName.split("."));
+    baseInterfaceType?.name &&
+    getNodeAtPath(root, baseInterfaceType.name.split("."));
   if (baseInterface) {
     assert(baseInterface.definition);
-    const attributes = baseInterface.definition.attributes;
+    const { attributes } = baseInterface.definition;
     assert(attributes);
-    if (attributes.template) {
-      baseInterfaceName += "<" + attributes.template.join(", ") + ">";
-    }
     // Only allow names of interfaces or typedefs for @implements
     assert(
       attributes.type === "interface" || attributes.type === "typedef",
@@ -346,7 +357,7 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
     node.name,
     attributes.comments,
     attributes.template,
-    baseInterfaceName ? [baseInterfaceName] : undefined,
+    baseInterfaceType ? [baseInterfaceType] : undefined,
     properties,
     methods,
     others.length > 0 ? new NamespaceNode(node.name, others) : undefined
