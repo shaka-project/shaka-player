@@ -1,6 +1,6 @@
 import * as doctrine from "@teppeis/doctrine";
 import assert from "./assert";
-import { getNodeAtPath, NodeMap } from "./treeUtils";
+import { getNodeAtPath, NodeMap, Node } from "./treeUtils";
 
 const ds = doctrine.Syntax;
 
@@ -11,16 +11,15 @@ const ds = doctrine.Syntax;
 // Enum nullability works the same with regards to the enum's base type.
 const primitiveTypes = ["null", "undefined", "boolean", "number", "string"];
 
-function checkNullability(root: NodeMap, rawType: doctrine.Type): boolean {
-  assert(
-    rawType.type === ds.NameExpression,
-    "Expected a NameExpression as rawType"
-  );
+function checkNullability(
+  root: NodeMap,
+  rawType: doctrine.type.NameExpression,
+  node: Node | null
+): boolean {
   if (primitiveTypes.includes(rawType.name)) {
     return false;
   }
 
-  const node = getNodeAtPath(root, rawType.name.split("."));
   if (!node || !node.definition) {
     return true;
   }
@@ -71,8 +70,15 @@ export function processType(
 
   switch (rawType.type) {
     case ds.NameExpression: {
+      const node = getNodeAtPath(root, rawType.name.split("."));
       return {
-        isNullable: inferNullability ? checkNullability(root, rawType) : false,
+        isNullable: inferNullability
+          ? checkNullability(root, rawType, node)
+          : false,
+        applications: node?.definition?.attributes?.template?.map(() => ({
+          isNullable: false,
+          name: "any"
+        })),
         name: rawType.name
       };
     }
@@ -96,14 +102,10 @@ export function processType(
         applications: [processType(root, rawType.expression, false)]
       };
     case ds.TypeApplication:
-      return Object.assign(
-        processType(root, rawType.expression, inferNullability),
-        {
-          applications: rawType.applications.map(t =>
-            processType(root, t, false)
-          )
-        }
-      );
+      return {
+        ...processType(root, rawType.expression, inferNullability),
+        applications: rawType.applications.map(t => processType(root, t, false))
+      };
     case ds.UnionType: {
       const elements = rawType.elements.map(t => processType(root, t, true));
       let isNullable = false;
