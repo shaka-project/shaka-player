@@ -74,6 +74,8 @@ UNCOMPILED_JS = [
   '../dist/deps.js',
   // This is required for goog.asserts.
   '../lib/debug/asserts.js',
+  // Compiled into Shaka Player, but outside of the Closure deps system.
+  '../node_modules/eme-encryption-scheme-polyfill/index.js',
   // This file contains goog.require calls for all exported library classes.
   '../shaka-player.uncompiled.js',
   // Enable less, the CSS pre-processor.

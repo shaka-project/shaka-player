@@ -81,6 +81,7 @@ requirement {
   whitelist_regexp: 'demo/'
   whitelist_regexp: 'third_party/closure/'
   whitelist_regexp: 'test/'
+  whitelist_regexp: 'node_modules/'
 }
 
 
@@ -144,6 +145,7 @@ requirement: {
   whitelist_regexp: 'lib/debug/log.js'
   whitelist_regexp: 'third_party/closure/'
   whitelist_regexp: 'test/test/boot.js'
+  whitelist_regexp: 'node_modules/'
 }
 
 
