@@ -598,6 +598,24 @@ export default function buildDefinitionTree(
   // Insert all definitions into the unparsed tree
   for (const definition of definitions) {
     const id = definition.identifier;
+    const prototypeIndex = id.indexOf("prototype");
+    if (prototypeIndex >= 0) {
+      const identifier = id.slice(0, prototypeIndex);
+      const node = getOrCreateNodeAtPath(root, identifier);
+      // If this is an extension of an existing interface not defined in these externs,
+      // we have to generate an according node first
+      if (!node.definition) {
+        node.definition = {
+          identifier,
+          type: DefinitionType.Function,
+          params: [],
+          attributes: {
+            type: AnnotationType.Interface,
+            comments: []
+          }
+        } as FunctionDefinition;
+      }
+    }
     // Uncomment to disallow globals:
     // assert(id.length > 1, "Illegal top-level definition found: " + id);
     const node = getOrCreateNodeAtPath(root, id);
