@@ -58,6 +58,8 @@ class StreamWriter extends BaseWriter {
 
 function writeNodes(writer: Writer, nodes: Writable[]) {
   for (const node of nodes) {
+    // Mark top-level declarations as ambient
+    writer.write("declare ");
     node.write(writer);
   }
 }

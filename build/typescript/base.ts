@@ -82,8 +82,6 @@ export type Definition =
   | PropertyDefinition;
 
 export interface Writer {
-  readonly level: number;
-
   increaseLevel(): void;
   decreaseLevel(): void;
   getIndentation(): string;

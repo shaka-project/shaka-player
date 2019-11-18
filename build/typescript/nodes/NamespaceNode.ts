@@ -10,13 +10,7 @@ export default class NamespaceNode implements Writable {
   }
 
   write(writer: Writer): void {
-    let declaration = "namespace " + this.name + " {";
-    if (writer.level === 0) {
-      // Mark top-level namespaces as ambient
-      declaration = "declare " + declaration;
-    }
-
-    writer.writeLine(declaration);
+    writer.writeLine(`namespace ${this.name} {`);
     writer.increaseLevel();
 
     for (const node of this.nodes) {
