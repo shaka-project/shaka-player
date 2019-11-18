@@ -68,14 +68,14 @@ export default class ClassNode implements Writable {
       methodNode.write(writer, "static");
     }
 
-    // Constructor
-    if (this.constructorMethod) {
-      this.constructorMethod.write(writer, "", true);
-    }
-
     // Properties
     for (const propNode of this.properties) {
       propNode.write(writer, "readonly");
+    }
+
+    // Constructor
+    if (this.constructorMethod) {
+      this.constructorMethod.write(writer, "", true);
     }
 
     // Methods
