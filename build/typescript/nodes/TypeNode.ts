@@ -14,6 +14,7 @@ export default class TypeNode implements Writable {
 
   write(writer: Writer): void {
     const type = stringifyType(this.type);
+    writer.writeComments(this.comments);
     writer.writePrefix();
     writer.writeLine("type " + this.name + " = " + type + ";");
   }
