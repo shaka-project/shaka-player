@@ -34,6 +34,7 @@ export default class PropertyNode implements Writable {
     }
 
     writer.writeComments(this.comments);
+    writer.writePrefix();
     writer.writeLine(declaration);
   }
 }

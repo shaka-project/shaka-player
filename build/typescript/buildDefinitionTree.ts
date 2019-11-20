@@ -3,9 +3,7 @@ import {
   getOrCreateNodeAtPath,
   getNodeAtPath,
   getPropTypeFromInterface,
-  getMethodTypesFromInterface,
-  NodeMap,
-  Node
+  getMethodTypesFromInterface
 } from "./treeUtils";
 import { processType, TypeInformation } from "./generateType";
 import {
@@ -24,7 +22,9 @@ import {
   DefinitionType,
   FunctionDefinition,
   AnnotationType,
-  ParamTypes
+  ParamTypes,
+  NodeMap,
+  Node
 } from "./base";
 
 function parseClassNode(root: NodeMap, node: Node): ClassNode {

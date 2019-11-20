@@ -13,6 +13,7 @@ export default class EnumNode implements Writable {
 
   write(writer: Writer): void {
     writer.writeComments(this.comments);
+    writer.writePrefix();
     writer.writeLine("enum " + this.name + " {");
     writer.increaseLevel();
 

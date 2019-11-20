@@ -42,6 +42,7 @@ export default class InterfaceNode implements Writable {
     }
 
     writer.writeComments(this.comments);
+    writer.writePrefix();
     writer.writeLine("interface " + declaration + " {");
     writer.increaseLevel();
 

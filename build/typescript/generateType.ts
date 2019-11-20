@@ -1,6 +1,7 @@
 import * as doctrine from "@teppeis/doctrine";
 import assert from "./assert";
-import { getNodeAtPath, NodeMap, Node } from "./treeUtils";
+import { getNodeAtPath } from "./treeUtils";
+import { NodeMap, Node } from "./base";
 
 const ds = doctrine.Syntax;
 

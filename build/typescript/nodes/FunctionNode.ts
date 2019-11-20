@@ -65,6 +65,7 @@ export default class FunctionNode implements Writable {
     }
     declaration += ";";
 
+    writer.writePrefix();
     writer.writeLine(declaration);
   }
 }

@@ -81,15 +81,23 @@ export type Definition =
   | ClassDefinition
   | PropertyDefinition;
 
+export interface Node {
+  name: string;
+  definition?: Definition;
+  children: Map<string, Node>;
+}
+
+export type NodeMap = Map<string, Node>;
+
 export interface Writer {
   increaseLevel(): void;
   decreaseLevel(): void;
   getIndentation(): string;
+
   write(str: string): void;
-
   writeLine(str: string): void;
-
   writeComments(comments: string[]): void;
+  writePrefix(): void;
 }
 
 export interface Writable {

@@ -2,6 +2,7 @@ import { Writer, Writable } from "./base";
 
 class BaseWriter implements Writer {
   level = 0;
+  prefix = "";
 
   increaseLevel(): void {
     this.level++;
@@ -33,6 +34,13 @@ class BaseWriter implements Writer {
       this.writeLine(" */");
     }
   }
+
+  writePrefix(): void {
+    if (this.prefix) {
+      this.write(this.prefix);
+      this.prefix = "";
+    }
+  }
 }
 
 class StringWriter extends BaseWriter {
@@ -56,10 +64,10 @@ class StreamWriter extends BaseWriter {
   }
 }
 
-function writeNodes(writer: Writer, nodes: Writable[]) {
+function writeNodes(writer: BaseWriter, nodes: Writable[]) {
   for (const node of nodes) {
     // Mark top-level declarations as ambient
-    writer.write("declare ");
+    writer.prefix = "declare ";
     node.write(writer);
   }
 }

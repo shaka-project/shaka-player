@@ -58,6 +58,7 @@ export default class ClassNode implements Writable {
     }
 
     writer.writeComments(this.comments);
+    writer.writePrefix();
     writer.writeLine("class " + declaration + " {");
     writer.increaseLevel();
 

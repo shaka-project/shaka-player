@@ -3,18 +3,13 @@ import {
   Definition,
   ParamTypes,
   DefinitionType,
-  PropertyDefinition
+  PropertyDefinition,
+  NodeMap,
+  Node
 } from "./base";
 import assert from "./assert";
 import { processType } from "./generateType";
-
-export interface Node {
-  name: string;
-  definition?: Definition;
-  children: Map<string, Node>;
-}
-
-export type NodeMap = Map<string, Node>;
+import { predefinedInterfaces } from "./predefined";
 
 export function getOrCreateNode(nodes: NodeMap, name: string): Node {
   if (nodes.has(name)) {
@@ -39,7 +34,19 @@ export function getOrCreateNodeAtPath(root: NodeMap, path: string[]): Node {
   return node!;
 }
 
-export function getNodeAtPath(root: NodeMap, path: string[]): Node | null {
+export function getNodeAtPath(
+  root: NodeMap,
+  path: string[],
+  considerPredefinedNodes: boolean = true
+): Node | null {
+  if (
+    considerPredefinedNodes &&
+    path.length === 1 &&
+    predefinedInterfaces.has(path[0])
+  ) {
+    return predefinedInterfaces.get(path[0])!;
+  }
+
   let nodes = root;
   let node = null;
   for (const part of path) {
@@ -86,7 +93,11 @@ export function getPropTypeFromInterface(
   const { attributes } = interfaceNode.definition;
   assert(attributes);
   if (attributes.type === "interface") {
-    const base = getNodeAtPath(interfaceNode.children, ["prototype", propName]);
+    const base = getNodeAtPath(
+      interfaceNode.children,
+      ["prototype", propName],
+      false
+    );
     if (base) {
       assert(base.definition);
       const baseAttributes = base.definition.attributes;
@@ -153,10 +164,11 @@ export function getMethodTypesFromInterface(
   const { attributes } = interfaceNode.definition;
   assert(attributes);
   if (attributes.type === "interface") {
-    const base = getNodeAtPath(interfaceNode.children, [
-      "prototype",
-      methodName
-    ]);
+    const base = getNodeAtPath(
+      interfaceNode.children,
+      ["prototype", methodName],
+      false
+    );
     if (base) {
       assert(base.definition);
       const baseAttributes = base.definition.attributes;

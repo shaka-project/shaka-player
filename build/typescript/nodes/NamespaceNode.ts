@@ -10,6 +10,7 @@ export default class NamespaceNode implements Writable {
   }
 
   write(writer: Writer): void {
+    writer.writePrefix();
     writer.writeLine(`namespace ${this.name} {`);
     writer.increaseLevel();
 

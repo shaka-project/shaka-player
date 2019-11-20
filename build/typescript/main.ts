@@ -7,6 +7,7 @@ import parseExterns from "./parseExterns";
 import buildDefinitionTree from "./buildDefinitionTree";
 import writeTypeDefinitions from "./writeTypeDefinitions";
 import { Definition } from "./base";
+import { predefinedDefinitions } from "./predefined";
 
 function generateTypeDefinitions(
   outputPath: string,
@@ -19,6 +20,7 @@ function generateTypeDefinitions(
     })
   );
   const root = buildDefinitionTree(definitions);
+  root.push(...predefinedDefinitions);
 
   const stream = fs.createWriteStream(outputPath, { encoding: "utf-8" });
   writeTypeDefinitions(stream, root);
