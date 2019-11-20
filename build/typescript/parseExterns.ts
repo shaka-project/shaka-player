@@ -248,7 +248,15 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         break;
       case "extends":
         assert(tag.type);
-        attributes.extends = tag.type;
+        if (tag.type.type === ds.NameExpression && tag.type.name === "Error") {
+          // Refer to built-in Error typeas "window.Error"
+          attributes.extends = {
+            type: ds.NameExpression,
+            name: "window.Error"
+          } as doctrine.type.NameExpression;
+        } else {
+          attributes.extends = tag.type;
+        }
         break;
       case "template":
         assert(tag.description);
