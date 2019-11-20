@@ -461,9 +461,13 @@ function parseEnumNode(node: Node) {
   );
 }
 
-function parseConstNode(root: NodeMap, node: Node): PropertyNode {
+function parseConstNode(root: NodeMap, node: Node): PropertyNode | ClassNode {
   const { definition } = node;
   assert(definition);
+  if (definition.type === DefinitionType.Class) {
+    return parseClassNode(root, node);
+  }
+
   const { attributes } = definition;
   assert(attributes);
   const constType = processType(root, attributes.constType);
@@ -565,11 +569,8 @@ function parseNode(root: NodeMap, node: Node): DefinitionNode {
 
   // If the doc comment didn't lead to a type, fall back to the type we got
   // from the declaration itself.
-  // Except if it is a class, because somehow the externs contain classes
-  // marked as constants... *flips table*
   // Types: const, enum, class, interface, function, property, object
-  const type =
-    definition.type === "class" ? "class" : attributes.type || definition.type;
+  const type = attributes.type || definition.type;
   switch (type) {
     case "class":
       return parseClassNode(root, node);
