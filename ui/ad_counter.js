@@ -105,10 +105,9 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
       if (adsInAdPod > 1) {
         this.span_.textContent = timeString;
       } else {
-        // TODO: This should be formatted and localized according to the
-        // loc team's guidelines on the localization of expressions.
-        // e.g. the string should be something like 'Ad: %remainingAdTime%.'
-        this.span_.textContent = 'Ad: ' + timeString;
+        const LocIds = shaka.ui.Locales.Ids;
+        const raw = this.localization.resolve(LocIds.AD_TIME);
+        this.span_.textContent = raw.replace('[AD_TIME]', timeString);
       }
     } else {
       this.reset_();

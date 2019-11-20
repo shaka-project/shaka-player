@@ -1,10 +1,10 @@
 {
   "DEMO_TRICK_MODE": {
-    "message": "Special trick mode track",
-    "description": "A tag that marks an asset as having a trick mode track."
+    "message": "Special [JARGON:trick mode] track",
+    "description": "A tag that marks an asset as having a trick mode track, which allows a VCR-like effect when fast forwarding or rewinding."
   },
   "DEMO_XLINK": {
-    "message": "XLink",
+    "message": "[JARGON:XLink]",
     "description": "A tag that marks an asset as containing one or more XLink."
   },
   "DEMO_SUBTITLES": {
@@ -40,7 +40,7 @@
     "description": "A header on a search field that filters by container type."
   },
   "DEMO_DRM_SEARCH": {
-    "message": "DRM",
+    "message": "[JARGON:DRM]",
     "description": "A header on a search field that filters by whether or not the asset is protected by a Digital Rights Management system."
   },
   "DEMO_SOURCE_SEARCH": {
@@ -49,18 +49,18 @@
   },
   "DEMO_LIVE": {
     "message": "Live",
-    "description": "Text that describes an asset that is live."
+    "description": "Text that describes an asset that is being broadcast live."
   },
   "DEMO_WEBM": {
-    "message": "WebM",
+    "message": "[JARGON:WebM]",
     "description": "Text that describes an asset that uses the WebM container."
   },
   "DEMO_MP4": {
-    "message": "MP4",
+    "message": "[JARGON:MP4]",
     "description": "Text that describes an asset that uses the MP4 container."
   },
   "DEMO_MP2TS": {
-    "message": "MPEG-2 TS",
+    "message": "[JARGON:MPEG-2 TS]",
     "description": "Text that describes an asset that uses the MPEG-2 TS container."
   },
   "DEMO_HIGH_DEFINITION": {
@@ -76,31 +76,31 @@
     "description": "Text that describes an asset that has an a surround sound audio stream."
   },
   "DEMO_DASH": {
-    "message": "DASH",
+    "message": "[PROPER_NAME:DASH]",
     "description": "Text that describes an asset that is packaged in a DASH manifest."
   },
   "DEMO_HLS": {
-    "message": "HLS",
+    "message": "[PROPER_NAME:HLS]",
     "description": "Text that describes an asset that is packaged in an HLS manifest."
   },
   "DEMO_WIDEVINE": {
-    "message": "Widevine DRM",
+    "message": "[PROPER_NAME:Widevine] [JARGON:DRM]",
     "description": "Text that describes an asset that is protected with the Widevine Digital Rights Management system."
   },
   "DEMO_FAIRPLAY": {
-    "message": "Fairplay",
+    "message": "[PROPER_NAME:Fairplay] [JARGON:DRM]",
     "description": "Text that describes an asset that is protected with the Fairplay Digital Rights Management system."
   },
   "DEMO_CLEAR": {
-    "message": "no DRM protection",
+    "message": "No [JARGON:DRM] protection",
     "description": "Text that describes an asset that is not protected with any Digital Rights Management system."
   },
   "DEMO_CLEAR_KEY": {
-    "message": "Clear Key DRM",
+    "message": "Clear Key [JARGON:DRM]",
     "description": "Text that describes an asset that is protected with the Clear Key Digital Rights Management system."
   },
   "DEMO_PLAYREADY": {
-    "message": "PlayReady DRM",
+    "message": "[PROPER_NAME:PlayReady] [JARGON:DRM]",
     "description": "Text that describes an asset that is protected with the Playready Digital Rights Management system."
   },
   "DEMO_UNKNOWN": {
@@ -112,55 +112,55 @@
     "description": "Text that describes an asset that was defined by the user."
   },
   "DEMO_SHAKA": {
-    "message": "Shaka",
+    "message": "[PROPER_NAME:Shaka]",
     "description": "Text that describes an asset that comes from the Shaka Player asset library."
   },
   "DEMO_AXINOM": {
-    "message": "Axinom",
+    "message": "[PROPER_NAME:Axinom]",
     "description": "Text that describes an asset that comes from the Axinom asset library."
   },
   "DEMO_UNIFIED_STREAMING": {
-    "message": "Unified Streaming",
+    "message": "[PROPER_NAME:Unified Streaming]",
     "description": "Text that describes an asset that comes from the Unified Streaming asset library."
   },
   "DEMO_DASH_IF": {
-    "message": "DASH-IF",
+    "message": "[PROPER_NAME:DASH-IF]",
     "description": "Text that describes an asset that comes from the Dash Industry Forum asset library."
   },
   "DEMO_WOWZA": {
-    "message": "Wowza",
+    "message": "[PROPER_NAME:Wowza]",
     "description": "Text that describes an asset that comes from the Wowza asset library."
   },
   "DEMO_BITCODIN": {
-    "message": "Bitcodin",
+    "message": "[PROPER_NAME:Bitcodin]",
     "description": "Text that describes an asset that comes from the Bitcodin asset library."
   },
   "DEMO_NIMBLE_STREAMER": {
-    "message": "Nimble Streamer",
+    "message": "[PROPER_NAME:Nimble Streamer]",
     "description": "Text that describes an asset that comes from the Nimble Streamer asset library."
   },
   "DEMO_AZURE_MEDIA_SERVICES": {
-    "message": "Azure Media Services",
+    "message": "[PROPER_NAME:Azure Media Services]",
     "description": "Text that describes an asset that comes from the Azure Media Services asset library."
   },
   "DEMO_GPAC": {
-    "message": "GPAC",
+    "message": "[PROPER_NAME:GPAC]",
     "description": "Text that describes an asset that comes from the GPAC project asset library."
   },
   "DEMO_UPLYNK": {
-    "message": "Verizon Digital Media Services",
+    "message": "[PROPER_NAME:Verizon Digital Media Services]",
     "description": "Text that describes an asset that comes from the Verizon Digital Media Services asset library."
   },
   "DEMO_APPLE": {
-    "message": "Apple",
+    "message": "[PROPER_NAME:Apple]",
     "description": "Text that describes an asset that comes from the Apple asset library."
   },
   "DEMO_IRT": {
-    "message": "IRT",
+    "message": "[PROPER_NAME:IRT]",
     "description": "Text that describes an asset that comes from the Institut für Rundfunktechnik asset library."
   },
   "DEMO_CONFIG": {
-    "message": "Shaka Player Demo Config",
+    "message": "[PROPER_NAME:Shaka Player] Demo Config",
     "description": "A title on the configuration panel, labeling it as configuration."
   },
   "DEMO_HOME": {
@@ -188,15 +188,15 @@
     "description": "A link in the footer, to the Shaka Player documentation."
   },
   "DEMO_LICENSE": {
-    "message": "Apache License",
+    "message": "[PROPER_NAME:Apache] License",
     "description": "A link in the footer, to the Apache open-source license."
   },
   "DEMO_SOURCE": {
-    "message": "Source on GitHub",
+    "message": "Source on [PROPER_NAME:GitHub]",
     "description": "A link in the footer, to the Shaka Player source on GitHub."
   },
   "DEMO_NPM": {
-    "message": "Package on NPM",
+    "message": "Package on [PROPER_NAME:NPM]",
     "description": "A link in the footer, to the Nexus Package Manager page for Shaka Player."
   },
   "DEMO_SUPPORT": {
@@ -204,19 +204,19 @@
     "description": "A link in the footer, to a browser support test."
   },
   "DEMO_CDN_HEADER": {
-    "message": "CDN",
+    "message": "[JARGON:CDN]",
     "description": "A header for a section of the footer, that contains links to various CDN (Content Delivery Network)-related things."
   },
   "DEMO_LIBRARIES": {
-    "message": "Google Hosted Libraries",
+    "message": "[PROPER_NAME:Google Hosted Libraries]",
     "description": "A link in the footer, to Shaka Player in the Google Hosted Libraries CDN."
   },
   "DEMO_JSDELIVR": {
-    "message": "jsDelivr",
+    "message": "[PROPER_NAME:jsDelivr]",
     "description": "A link in the footer, to Shaka Player in the jsDelivr CDN."
   },
   "DEMO_CDNJS": {
-    "message": "CDNJS",
+    "message": "[PROPER_NAME:CDNJS]",
     "description": "A link in the footer, to Shaka Player in the CDNJS CDN."
   },
   "DEMO_DEMO_MODE_HEADER": {
@@ -268,11 +268,11 @@
     "description": "An error message that shows why an asset cannot be stored offline: the browser cannot store protected content offline."
   },
   "DEMO_UNSUPPORTED_NO_DASH_SUPPORT": {
-    "message": "Your browser does not support MPEG-DASH manifests.",
+    "message": "Your browser does not support [PROPER_NAME:MPEG-DASH] manifests.",
     "description": "An error message that shows why an asset cannot be stored offline: the browser cannot play MPEG-DASH (https://en.wikipedia.org/wiki/Dynamic_Adaptive_Streaming_over_HTTP) content."
   },
   "DEMO_UNSUPPORTED_NO_HLS_SUPPORT": {
-    "message": "Your browser does not support HLS manifests.",
+    "message": "Your browser does not support [PROPER_NAME:HLS] manifests.",
     "description": "An error message that shows why an asset cannot be stored offline: the browser cannot play HLS (https://en.wikipedia.org/wiki/HTTP_Live_Streaming) content."
   },
   "DEMO_UNSUPPORTED_NO_FORMAT_SUPPORT": {
@@ -288,7 +288,7 @@
     "description": "A prompt asking the user if they want to delete the offline copy of an asset."
   },
   "DEMO_FRONT_INTRO_ONE": {
-    "message": "This is a demo of Google's Shaka Player, a JavaScript library for adaptive video streaming.",
+    "message": "This is a demo of Google's [PROPER_NAME:Shaka Player], a JavaScript library for adaptive video streaming.",
     "description": "The first part of a message introducing the demo to new users."
   },
   "DEMO_FRONT_INTRO_TWO": {
@@ -316,7 +316,7 @@
     "description": "The label on a field that allows users to provide a license certificate for a custom asset."
   },
   "DEMO_DRM_SYSTEM": {
-    "message": "Custom DRM System",
+    "message": "Custom [JARGON:DRM] System",
     "description": "The label on a field that allows users to provide a Digital Rights Management (DRM) system identifier for a custom asset."
   },
   "DEMO_NAME": {
@@ -344,7 +344,7 @@
     "description": "A button allowing users to delete a custom asset."
   },
   "DEMO_CUSTOM_INTRO_ONE": {
-    "message": "Try Shaka Player with your own content!",
+    "message": "Try [PROPER_NAME:Shaka Player] with your own content!",
     "description": "The first part of a message instructing users on how to add custom content."
   },
   "DEMO_CUSTOM_INTRO_TWO": {
@@ -368,7 +368,7 @@
     "description": "A tooltip for an optional search term."
   },
   "DEMO_XLINK_SEARCH": {
-    "message": "Filters for assets that have XLINK tags in their manifests, so that they can be broken into multiple files.",
+    "message": "Filters for assets that have [JARGON:XLINK] tags in their manifests, so that they can be broken into multiple files.",
     "description": "A tooltip for an optional search term."
   },
   "DEMO_SUBTITLES_SEARCH": {
@@ -376,7 +376,7 @@
     "description": "A tooltip for an optional search term."
   },
   "DEMO_TRICK_MODE_SEARCH": {
-    "message": "Filters for assets that have special video tracks to be used in trick mode playback (aka fast-forward).",
+    "message": "Filters for assets that have special video tracks to be used in [JARGON:trick mode] playback (aka fast-forward).",
     "description": "A tooltip for an optional search term."
   },
   "DEMO_SURROUND_SEARCH": {
@@ -408,19 +408,19 @@
     "description": "The name of a configuration value."
   },
   "DEMO_IGNORE_DASH_DRM": {
-    "message": "Ignore DASH DRM Info",
+    "message": "Ignore [PROPER_NAME:DASH] [JARGON:DRM] Info",
     "description": "The name of a configuration value."
   },
   "DEMO_AUTO_CORRECT_DASH_DRIFT": {
-    "message": "Auto-Correct DASH Drift",
+    "message": "Auto-Correct [PROPER_NAME:DASH] Drift",
     "description": "The name of a configuration value."
   },
   "DEMO_XLINK_FAIL_GRACEFULLY": {
-    "message": "Xlink Should Fail Gracefully",
+    "message": "[JARGON:Xlink] Should Fail Gracefully",
     "description": "The name of a configuration value."
   },
   "DEMO_IGNORE_HLS_TEXT_FAILURES": {
-    "message": "Ignore HLS Text Stream Failures",
+    "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures",
     "description": "The name of a configuration value."
   },
   "DEMO_AVAILABILITY_WINDOW_OVERRIDE": {
@@ -432,7 +432,7 @@
     "description": "The name of a configuration value."
   },
   "DEMO_IGNORE_DRM": {
-    "message": "Ignore DRM Info",
+    "message": "Ignore [JARGON:DRM] Info",
     "description": "The name of a configuration value."
   },
   "DEMO_DEFAULT_PRESENTATION_DELAY": {
@@ -572,7 +572,7 @@
     "description": "The name of a configuration value."
   },
   "DEMO_FORCE_TRANSMUX_TS": {
-    "message": "Force Transmux TS",
+    "message": "Force Transmux [JARGON:MPEG-2 TS]",
     "description": "The name of a configuration value."
   },
   "DEMO_START_AT_SEGMENT_BOUNDARY": {
@@ -588,7 +588,7 @@
     "description": "The name of a configuration value."
   },
   "DEMO_USE_NATIVE_HLS_SAFARI": {
-    "message": "Use native HLS on Safari",
+    "message": "Use native [PROPER_NAME:HLS] on Safari",
     "description": "The name of a configuration value."
   },
   "DEMO_AUDIO_LANGUAGE": {
@@ -608,7 +608,7 @@
     "description": "The name of a configuration value."
   },
   "DEMO_SHAKA_CONTROLS": {
-    "message": "Shaka Controls",
+    "message": "[PROPER_NAME:Shaka] Controls",
     "description": "The name of a configuration value."
   },
   "DEMO_LOG_LEVEL": {
@@ -632,7 +632,7 @@
     "description": "The name of a log level, describing how detailed logging should be."
   },
   "DEMO_DRM_SECTION_HEADER": {
-    "message": "DRM",
+    "message": "[JARGON:DRM]",
     "description": "The header for a section of configuration values."
   },
   "DEMO_MANIFEST_SECTION_HEADER": {
@@ -664,7 +664,7 @@
     "description": "The header for a section of configuration values."
   },
   "DEMO_DRM_RETRY_SECTION_HEADER": {
-    "message": "DRM Retry Parameters",
+    "message": "[JARGON:DRM] Retry Parameters",
     "description": "The header for a section of configuration values."
   },
   "DEMO_MANIFEST_RETRY_SECTION_HEADER": {

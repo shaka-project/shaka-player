@@ -41,9 +41,9 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     this.button_.disabled = true;
     shaka.ui.Utils.setDisplay(this.button_, false);
     this.button_.classList.add('shaka-no-propagation');
-    this.button_.textContent = 'Skip Ad'; // TODO: localize
-    this.container_.appendChild(this.button_);
+    this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
+    this.updateLocalizedStrings_();
 
     /**
      * The timer that tracks down the ad progress until it can be skipped.
@@ -62,6 +62,7 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
           this.updateAriaLabel_();
+          this.updateLocalizedStrings_();
         });
 
     this.eventManager.listen(
@@ -83,6 +84,14 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
         this.button_, 'click', () => {
           this.ad.skip();
         });
+  }
+
+  /**
+   * @private
+   */
+  updateLocalizedStrings_() {
+    const LocIds = shaka.ui.Locales.Ids;
+    this.button_.textContent = this.localization.resolve(LocIds.SKIP_AD);
   }
 
   /**
