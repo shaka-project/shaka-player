@@ -61,12 +61,7 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
     );
   }
 
-  const baseClassType =
-    attributes.implements && processType(root, attributes.extends);
-  const baseClassNode =
-    baseClassType?.name && getNodeAtPath(root, baseClassType.name.split("."));
-
-  // If interface / base class could not be found, still proceed.
+  // If interface could not be found, still proceed.
   // We assume the interface is a native interface in that case,
   // defined by one of TypeScript's base libs.
 
@@ -153,18 +148,6 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
           attributes.paramTypes = attributes.paramTypes || types.paramTypes;
           attributes.returnType = attributes.returnType || types.returnType;
         }
-        if (
-          (!attributes.paramTypes || !attributes.returnType) &&
-          baseClassNode
-        ) {
-          const types = getMethodTypesFromInterface(
-            root,
-            baseClassNode,
-            child.name
-          );
-          attributes.paramTypes = attributes.paramTypes || types.paramTypes;
-          attributes.returnType = attributes.returnType || types.returnType;
-        }
         methods.push(parseFunctionNode(root, child));
         break;
       }
@@ -185,15 +168,6 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
         const types = getMethodTypesFromInterface(
           root,
           interfaceNode,
-          md.identifier[0]
-        );
-        attributes.paramTypes = attributes.paramTypes || types.paramTypes;
-        attributes.returnType = attributes.returnType || types.returnType;
-      }
-      if ((!attributes.paramTypes || !attributes.returnType) && baseClassNode) {
-        const types = getMethodTypesFromInterface(
-          root,
-          baseClassNode,
           md.identifier[0]
         );
         attributes.paramTypes = attributes.paramTypes || types.paramTypes;
