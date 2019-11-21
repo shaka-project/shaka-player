@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2015",
-    "lib": [
-      "dom",
-      "es5",
-      "es2015.promise"
-    ],
+    "lib": ["dom", "es5", "es2015"],
     "allowJs": false,
     "strict": true,
     "strictNullChecks": true,
@@ -18,8 +14,6 @@
     "moduleResolution": "node",
     "downlevelIteration": true
   },
-  "include": [
-    "build/",
-    "dist/"
-  ]
+  "include": ["."],
+  "files": ["../../dist/shaka-player.ui.d.ts"]
 }

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "lib": ["es5", "es2015.promise"],
+    "allowJs": false,
+    "strict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "downlevelIteration": true
+  },
+  "include": ["."]
+}

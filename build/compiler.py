@@ -241,7 +241,7 @@ class TypescriptGenerator(object):
 
     ts_generator = _get_source_path('build/typescript/main.ts')
     ts_node = _get_source_path('node_modules/ts-node/dist/bin')
-    tsconfig = _get_source_path('tsconfig.json')
+    tsconfig = _get_source_path('build/typescript/tsconfig.json')
 
     cmd_line = ['node', ts_node, '-P', tsconfig, ts_generator, '--output', self.output]
     cmd_line += self.source_files
