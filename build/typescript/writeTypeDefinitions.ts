@@ -65,6 +65,8 @@ class StreamWriter extends BaseWriter {
 }
 
 function writeNodes(writer: BaseWriter, nodes: Writable[]) {
+  writer.writeLine("export = shaka;");
+  writer.writeLine("export as namespace shaka;");
   for (const node of nodes) {
     // Mark top-level declarations as ambient
     writer.prefix = "declare ";
