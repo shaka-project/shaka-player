@@ -192,11 +192,24 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
 
   const comments = attributes.description ? [attributes.description] : [];
 
+  let superClass: TypeInformation | undefined = undefined;
+  if (attributes.extends) {
+    superClass = processType(root, attributes.extends);
+  } else if (
+    node.definition.type === DefinitionType.Class &&
+    node.definition.superClass
+  ) {
+    superClass = {
+      isNullable: false,
+      name: node.definition.superClass.join(".")
+    };
+  }
+
   return new ClassNode(
     node.name,
     comments,
     attributes.template,
-    attributes.extends && processType(root, attributes.extends),
+    superClass,
     interfaceType ? [interfaceType] : undefined,
     staticProperties,
     staticMethods,
