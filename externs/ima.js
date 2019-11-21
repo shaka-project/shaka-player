@@ -137,6 +137,22 @@ google.ima.Ad = class {
 
   /** @return {number} */
   getSkipTimeOffset() {}
+
+  /** @return {google.ima.AdPodInfo} */
+  getAdPodInfo() {}
+
+  /** @return {string} */
+  getAdvertiserName() {}
+};
+
+
+/** @const */
+google.ima.AdPodInfo = class {
+  /** @return {number} */
+  getAdPosition() {}
+
+  /** @return {number} */
+  getTotalAds() {}
 };
 
 
@@ -152,6 +168,8 @@ google.ima.AdEvent.Type = {
   VOLUME_CHANGED: 'VOLUME_CHANGED',
   VOLUME_MUTED: 'VOLUME_MUTED',
   SKIPPABLE_STATE_CHANGED: 'SKIPPABLE_STATE_CHANGED',
+  STARTED: 'STARTED',
+  ALL_ADS_COMPLETED: 'ALL_ADS_COMPLETED',
 };
 
 

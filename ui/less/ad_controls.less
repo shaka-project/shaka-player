@@ -16,6 +16,12 @@
  */
 
 /* Ad controls. */
+.ad-text-shadow() {
+  /* Give white text a black shadow, so it's visible against a
+  white background. */
+  text-shadow: 1px 1px 4px black;
+}
+
 .shaka-ad-container {
   .absolute-position();
   .fill-container();
@@ -46,12 +52,9 @@
   }
 }
 
-.shaka-ad-counter {
+.shaka-ad-counter, .shaka-ad-position {
   .bottom-align-children();
-
-  /* Give white text a black shadow, so it's visible against
-  white background. */
-  text-shadow: 1px 1px 4px black;
+  .ad-text-shadow();
 }
 
 .shaka-skip-ad-container {

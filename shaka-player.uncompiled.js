@@ -59,6 +59,7 @@ goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.AudioLanguageSelection');
 goog.require('shaka.ui.AdCounter');
+goog.require('shaka.ui.AdPosition');
 goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.CastButton');
 goog.require('shaka.ui.Element');

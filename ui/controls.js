@@ -763,6 +763,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
     this.bottomControls_.appendChild(this.adPanel_);
 
+    const adPosition = new shaka.ui.AdPosition(this.adPanel_, this);
+    this.elements_.push(adPosition);
+
     const adCounter = new shaka.ui.AdCounter(this.adPanel_, this);
     this.elements_.push(adCounter);
 

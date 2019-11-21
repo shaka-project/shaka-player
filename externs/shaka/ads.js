@@ -96,4 +96,14 @@ shaka.extern.IAd = class {
    * @param {number} height
    */
   resize(width, height) {}
+
+  /**
+   * @return {number}
+   */
+  getSequenceLength() {}
+
+  /**
+   * @return {number}
+   */
+  getPositionInSequence() {}
 };

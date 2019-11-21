@@ -9,6 +9,7 @@ goog.provide('shaka.ui.AdCounter');
 goog.require('goog.asserts');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 
 
@@ -90,10 +91,25 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
 
     const secondsLeft = Math.round(this.ad.getRemainingTime());
     if (secondsLeft > 0) {
-      // TODO: This should be formatted and localized according to the
-      // loc team's guidelines on the localization of expressions.
-      // e.g. the string should be something like 'Ad: %remainingAdTime%.'
-      this.span_.textContent = 'Ad: ' + secondsLeft;
+      const timePassed = this.ad.getDuration() - secondsLeft;
+      const timePassedStr =
+          shaka.ui.Utils.buildTimeString(timePassed, /* showHour */ false);
+      const adLength = shaka.ui.Utils.buildTimeString(
+          this.ad.getDuration(), /* showHour */ false);
+      const timeString = timePassedStr + ' / ' + adLength;
+
+      const adsInAdPod = this.ad.getSequenceLength();
+      // If there's more than one ad in the sequence, show the time
+      // without the word 'Ad' (it will be shown by another element).
+      // Otherwise, the format is "Ad: 0:05 / 0:10."
+      if (adsInAdPod > 1) {
+        this.span_.textContent = timeString;
+      } else {
+        // TODO: This should be formatted and localized according to the
+        // loc team's guidelines on the localization of expressions.
+        // e.g. the string should be something like 'Ad: %remainingAdTime%.'
+        this.span_.textContent = 'Ad: ' + timeString;
+      }
     } else {
       this.reset_();
     }
