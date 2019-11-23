@@ -100,9 +100,7 @@ function configure(player: shaka.Player) {
           // Encode the raw license request in base64.
           // The server we are using in this tutorial expects this field and this
           // encoding for the raw request.
-          rawLicenseRequestBase64: Uint8ArrayUtils.toBase64(
-            new Uint8Array(request.body)
-          ),
+          rawLicenseRequestBase64: Uint8ArrayUtils.toBase64(request.body),
           // Add whatever else we want to communicate to the server.
           // None of these values are read by the server we are using in this
           // tutorial.
