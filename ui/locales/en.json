@@ -27,8 +27,8 @@
   "PICTURE_IN_PICTURE": "Picture-in-Picture",
   "ON": "On",
   "OFF": "Off",
-  "AD": "Ad",
-  "OF": "of",
+  "AD_PROGRESS": "[AD_ON] of [NUM_ADS]",
   "SKIP_AD": "Skip Ad",
-  "AD_DURATION": "Ad duration"
+  "AD_DURATION": "Ad duration",
+  "AD_TIME": "Ad: [AD_TIME]"
 }

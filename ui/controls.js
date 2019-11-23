@@ -1,18 +1,6 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 
@@ -79,7 +67,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.videoContainer_ = videoContainer;
 
-    /** @private {shaka.ads.AdManager} */
+    /** @private {shaka.extern.IAdManager} */
     this.adManager_ = this.player_.getAdManager();
 
     /** @private {shaka.extern.IAd} */
@@ -774,6 +762,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.adPanel_.classList.add('shaka-ad-controls');
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
     this.bottomControls_.appendChild(this.adPanel_);
+
+    const adPosition = new shaka.ui.AdPosition(this.adPanel_, this);
+    this.elements_.push(adPosition);
 
     const adCounter = new shaka.ui.AdCounter(this.adPanel_, this);
     this.elements_.push(adCounter);

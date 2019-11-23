@@ -1,18 +1,6 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 // Karma configuration
@@ -87,6 +75,10 @@ module.exports = (config) => {
       // muxjs module next
       'node_modules/mux.js/dist/mux.min.js',
 
+      // EME encryption scheme polyfill, compiled into Shaka Player, but outside
+      // of the Closure deps system.
+      'node_modules/eme-encryption-scheme-polyfill/index.js',
+
       // load closure base, the deps tree, and the uncompiled library
       'third_party/closure/goog/base.js',
       'dist/deps.js',
@@ -102,6 +94,7 @@ module.exports = (config) => {
       'test/test/util/*.js',
 
       // list of test assets next
+      'demo/common/message_ids.js',
       'demo/common/asset.js',
       'demo/common/assets.js',
 

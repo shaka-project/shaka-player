@@ -1,18 +1,6 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 
@@ -57,6 +45,9 @@ shakaDemo.Front = class {
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
     });
+    document.addEventListener('shaka-main-locale-changed', () => {
+      this.remakeAssetCards_();
+    });
     document.addEventListener('shaka-main-page-changed', () => {
       if (!this.assetCardDiv_.childNodes.length &&
           !container.classList.contains('hidden')) {
@@ -78,23 +69,19 @@ shakaDemo.Front = class {
     const makeMessage = (textClass, text) => {
       const textElement = document.createElement('h2');
       textElement.classList.add('mdl-typography--' + textClass);
-      // TODO: Localize these messages.
-      textElement.textContent = text;
+      textElement.textContent = shakaDemoMain.getLocalizedString(text);
       this.messageDiv_.appendChild(textElement);
     };
-    makeMessage('body-2',
-        'This is a demo of Google\'s Shaka Player, a JavaScript ' +
-                'library for adaptive video streaming.');
-    makeMessage('body-1',
-        'Choose a video to playback; more assets are available via ' +
-                'the search tab.');
+    makeMessage('body-2', shakaDemo.MessageIds.FRONT_INTRO_ONE);
+    makeMessage('body-1', shakaDemo.MessageIds.FRONT_INTRO_TWO);
 
     const hideButton = document.createElement('button');
     hideButton.classList.add('mdl-button');
     hideButton.classList.add('mdl-button--colored');
     hideButton.classList.add('mdl-js-button');
     hideButton.classList.add('mdl-js-ripple-effect');
-    hideButton.textContent = 'Dismiss'; // TODO: localize
+    hideButton.textContent = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.FRONT_INTRO_DISMISS);
     hideButton.addEventListener('click', () => {
       shaka.util.Dom.removeAllChildren(this.messageDiv_);
       window.localStorage.setItem(hideName, 'true');
@@ -130,7 +117,7 @@ shakaDemo.Front = class {
       if (unsupportedReason) {
         c.markAsUnsupported(unsupportedReason);
       } else {
-        c.addButton('Play', () => {
+        c.addButton(shakaDemo.MessageIds.PLAY, () => {
           shakaDemoMain.loadAsset(asset);
           this.updateSelected_();
         });

@@ -1,18 +1,6 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 
@@ -46,19 +34,24 @@ shakaDemo.Search = class {
     /** @private {?shakaAssets.KeySystem} */
     this.desiredDRM_;
 
-    this.makeSearchDiv_(container);
+    /** @private {!Element} */
+    this.resultsDiv_ = document.createElement('div');
+    this.remakeSearchDiv_(container);
 
     /** @private {!Array.<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
-
-    this.resultsDiv_ = document.createElement('div');
-    container.appendChild(this.resultsDiv_);
 
     document.addEventListener('shaka-main-selected-asset-changed', () => {
       this.updateSelected_();
     });
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
+    });
+    document.addEventListener('shaka-main-locale-changed', () => {
+      this.remakeSearchDiv_(container);
+      this.remakeResultsDiv_();
+      // Update the componentHandler, to account for any new MDL elements added.
+      componentHandler.upgradeDom();
     });
     document.addEventListener('shaka-main-page-changed', () => {
       if (!this.resultsDiv_.childNodes.length &&
@@ -84,7 +77,7 @@ shakaDemo.Search = class {
       if (unsupportedReason) {
         c.markAsUnsupported(unsupportedReason);
       } else {
-        c.addButton('Play', () => {
+        c.addButton(shakaDemo.MessageIds.PLAY, () => {
           shakaDemoMain.loadAsset(asset);
           this.updateSelected_();
         });
@@ -181,7 +174,7 @@ shakaDemo.Search = class {
    * The term this represents.
    * @param {shakaDemo.Search.TermType} type
    * The type of term that this term is.
-   * @param {string} tooltip
+   * @param {?shakaDemo.MessageIds} tooltip
    * @private
    */
   makeBooleanInput_(searchContainer, choice, type, tooltip) {
@@ -207,7 +200,7 @@ shakaDemo.Search = class {
    * Creates an input for a group of related but mutually-exclusive search
    * terms.
    * @param {!shakaDemo.InputContainer} searchContainer
-   * @param {string} name
+   * @param {!shakaDemo.MessageIds} name
    * @param {!Array.<!shakaDemo.Search.SearchTerm>} choices
    * An array of the terms in this term group.
    * @param {shakaDemo.Search.TermType} type
@@ -217,29 +210,11 @@ shakaDemo.Search = class {
    */
   makeSelectInput_(searchContainer, name, choices, type) {
     searchContainer.addRow(null, null);
-    const nullOption = 'Unspecified';
+    const nullOption = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.UNDEFINED);
     const valuesObject = {};
     for (const term of choices) {
-      if (type == 'DRM') {
-        // The internal names of the keysystems aren't very readable, so use a
-        // common name instead.
-        // However, as we are basing this off of the key name, we have to remove
-        // any underscores, so that the user isn't presented with a button
-        // labeled CLEAR_KEY.
-        for (const key in shakaAssets.KeySystem) {
-          if (shakaAssets.KeySystem[key] == term) {
-            // TODO: It'd be better to have some table of "translations",
-            // instead of making a readable name here with string operations.
-            valuesObject[term] = key.split('_').map((name) => {
-              // Return everything but first character to lower-case.
-              return name[0] + name.substr(1).toLowerCase();
-            }).join(' ');
-            break;
-          }
-        }
-      } else {
-        valuesObject[term] = term;
-      }
+      valuesObject[term] = shakaDemoMain.getLocalizedString(term);
     }
     valuesObject[nullOption] = nullOption;
     let lastValue = nullOption;
@@ -257,7 +232,6 @@ shakaDemo.Search = class {
     };
     const input = new shakaDemo.SelectInput(
         searchContainer, name, onChange, valuesObject);
-    input.extra().textContent = name;
     input.input().value = nullOption;
   }
 
@@ -265,7 +239,9 @@ shakaDemo.Search = class {
    * @param {!Element} container
    * @private
    */
-  makeSearchDiv_(container) {
+  remakeSearchDiv_(container) {
+    shaka.util.Dom.removeAllChildren(container);
+
     const Feature = shakaAssets.Feature;
     const FEATURE = shakaDemo.Search.TermType.FEATURE;
     const DRM = shakaDemo.Search.TermType.DRM;
@@ -275,15 +251,20 @@ shakaDemo.Search = class {
     const coreContainer = new shakaDemo.InputContainer(
         container, /* headerText= */ null, shakaDemo.InputContainer.Style.FLEX,
         /* docLink= */ null);
-    this.makeSelectInput_(coreContainer, 'Manifest',
+    this.makeSelectInput_(coreContainer,
+        shakaDemo.MessageIds.MANIFEST_SEARCH,
         [Feature.DASH, Feature.HLS], FEATURE);
-    this.makeSelectInput_(coreContainer, 'Container',
+    this.makeSelectInput_(coreContainer,
+        shakaDemo.MessageIds.CONTAINER_SEARCH,
         [Feature.MP4, Feature.MP2TS, Feature.WEBM], FEATURE);
-    this.makeSelectInput_(coreContainer, 'DRM',
+    this.makeSelectInput_(coreContainer,
+        shakaDemo.MessageIds.DRM_SEARCH,
         Object.values(shakaAssets.KeySystem), DRM);
-    this.makeSelectInput_(coreContainer, 'Source',
-        Object.values(shakaAssets.Source).filter((term) => term != 'Custom'),
-        SOURCE);
+    this.makeSelectInput_(coreContainer,
+        shakaDemo.MessageIds.SOURCE_SEARCH,
+        Object.values(shakaAssets.Source).filter((term) => {
+          return term != shakaAssets.Source.CUSTOM;
+        }), SOURCE);
 
     // Special terms.
     const containerStyle = shakaDemo.InputContainer.Style.FLEX;
@@ -291,25 +272,25 @@ shakaDemo.Search = class {
         container, /* headerText= */ null, containerStyle,
         /* docLink= */ null);
     this.makeBooleanInput_(specialContainer, Feature.LIVE, FEATURE,
-        'Filters for assets that are live.');
+        shakaDemo.MessageIds.LIVE_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.HIGH_DEFINITION, FEATURE,
-        'Filters for assets with at least one high-definition video stream.');
+        shakaDemo.MessageIds.HIGH_DEFINITION_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.XLINK, FEATURE,
-        'Filters for assets that have XLINK tags in their manifests, ' +
-        'so that they can be broken into multiple files.');
+        shakaDemo.MessageIds.XLINK_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.SUBTITLES, FEATURE,
-        'Filters for assets with caption tracks, or embedded captions.');
+        shakaDemo.MessageIds.SUBTITLES_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.TRICK_MODE, FEATURE,
-        'Filters for assets that have special video tracks to be used in ' +
-        'trick mode playback (aka fast-forward).');
+        shakaDemo.MessageIds.TRICK_MODE_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.SURROUND, FEATURE,
-        'Filters for assets with at least one surround sound audio track.');
+        shakaDemo.MessageIds.SURROUND_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.OFFLINE, FEATURE,
-        'Filters for assets that can be stored offline.');
+        shakaDemo.MessageIds.OFFLINE_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.STORED, FEATURE,
-        'Filters for assets that have been stored offline.');
+        shakaDemo.MessageIds.STORED_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.AUDIO_ONLY, FEATURE,
-        'Filters for assets that do not have video streams.');
+        shakaDemo.MessageIds.AUDIO_ONLY_SEARCH);
+
+    container.appendChild(this.resultsDiv_);
   }
 
   /**

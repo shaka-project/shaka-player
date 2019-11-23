@@ -1,18 +1,6 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 
@@ -140,7 +128,7 @@ shakaDemo.AssetCard = class {
 
   /**
    * @param {string} icon
-   * @param {string} title
+   * @param {!shakaDemo.MessageIds} title
    * @private
    */
   addFeatureIcon_(icon, title) {
@@ -181,13 +169,13 @@ shakaDemo.AssetCard = class {
     for (const drm of asset.drm) {
       switch (drm) {
         case KeySystem.WIDEVINE:
-          this.addFeatureIcon_('widevine', 'Widevine DRM');
+          this.addFeatureIcon_('widevine', drm);
           break;
         case KeySystem.CLEAR_KEY:
-          this.addFeatureIcon_('clear_key', 'Clear Key DRM');
+          this.addFeatureIcon_('clear_key', drm);
           break;
         case KeySystem.PLAYREADY:
-          this.addFeatureIcon_('playready', 'PlayReady DRM');
+          this.addFeatureIcon_('playready', drm);
           break;
       }
     }
@@ -195,17 +183,18 @@ shakaDemo.AssetCard = class {
 
   /**
    * Modify an asset to make it clear that it is unsupported.
-   * @param {string} unsupportedReason
+   * @param {!shakaDemo.MessageIds} unsupportedReason
    */
   markAsUnsupported(unsupportedReason) {
     this.card_.classList.add('asset-card-unsupported');
-    this.makeUnsupportedButton_('Not Available', unsupportedReason);
+    this.makeUnsupportedButton_(
+        shakaDemo.MessageIds.UNSUPPORTED, unsupportedReason);
   }
 
   /**
    * Make a button that represents the lack of a working button.
-   * @param {string} buttonName
-   * @param {string} unsupportedReason
+   * @param {?shakaDemo.MessageIds} buttonName
+   * @param {!shakaDemo.MessageIds} unsupportedReason
    * @return {!Element}
    * @private
    */
@@ -277,7 +266,7 @@ shakaDemo.AssetCard = class {
     }
     if (unsupportedReason) {
       // This can't be stored.
-      const button = this.makeUnsupportedButton_('', unsupportedReason);
+      const button = this.makeUnsupportedButton_(null, unsupportedReason);
       // As this is a unsupported button, it is wrapped in an "attach point";
       // that is the element this has to move with CSS, otherwise the tooltip
       // will end up coming out of the wrong place.
@@ -286,12 +275,12 @@ shakaDemo.AssetCard = class {
       return;
     }
     if (this.asset_.isStored()) {
-      const deleteButton = this.addButton('', () => {
+      const deleteButton = this.addButton(null, () => {
         this.attachDeleteDialog_(deleteButton);
       });
       styleAsDownloadButton(deleteButton, deleteButton, 'offline_pin');
     } else {
-      const downloadButton = this.addButton('', async () => {
+      const downloadButton = this.addButton(null, async () => {
         downloadButton.disabled = true;
         await this.asset_.storeCallback();
         this.remakeButtons();
@@ -310,17 +299,16 @@ shakaDemo.AssetCard = class {
       return;
     }
 
-    // TODO: Localize these messages.
-    const deleteMessage = 'Delete the offline copy?';
-    this.makeYesNoDialogue_(parentDiv, deleteMessage, async () => {
-      deleteButton.disabled = true;
-      await this.asset_.unstoreCallback();
-    });
+    this.makeYesNoDialogue_(parentDiv,
+        shakaDemo.MessageIds.DELETE_STORED_PROMPT, async () => {
+          deleteButton.disabled = true;
+          await this.asset_.unstoreCallback();
+        });
   }
 
   /**
    * @param {!Element} parentDiv
-   * @param {string} text
+   * @param {!shakaDemo.MessageIds} text
    * @param {function():Promise} callback
    * @private
    */
@@ -334,14 +322,14 @@ shakaDemo.AssetCard = class {
 
     const textElement = document.createElement('h2');
     textElement.classList.add('mdl-typography--title');
-    textElement.textContent = text;
+    textElement.textContent = shakaDemoMain.getLocalizedString(text);
     dialog.appendChild(textElement);
 
     const buttonsDiv = document.createElement('div');
     dialog.appendChild(buttonsDiv);
-    const makeButton = (text, fn) => {
+    const makeButton = (textId, fn) => {
       const button = document.createElement('button');
-      button.textContent = text;
+      button.textContent = shakaDemoMain.getLocalizedString(textId);
       button.classList.add('mdl-button');
       button.classList.add('mdl-button--colored');
       button.classList.add('mdl-js-button');
@@ -352,13 +340,12 @@ shakaDemo.AssetCard = class {
       buttonsDiv.appendChild(button);
       button.blur();
     };
-    // TODO: Localize these messages.
-    makeButton('Yes', async () => {
+    makeButton(shakaDemo.MessageIds.PROMPT_YES, async () => {
       dialog.close();
       await callback();
       this.remakeButtons();
     });
-    makeButton('No', () => {
+    makeButton(shakaDemo.MessageIds.PROMPT_NO, () => {
       dialog.close();
     });
 
@@ -386,9 +373,9 @@ shakaDemo.AssetCard = class {
   /**
    * Adds a button to the bottom of the card that will call |onClick| when
    * clicked. For example, a play or delete button.
-   * @param {string} name
+   * @param {?shakaDemo.MessageIds} name
    * @param {function()} onclick
-   * @param {string=} yesNoDialogText
+   * @param {shakaDemo.MessageIds=} yesNoDialogText
    * @return {!Element}
    */
   addButton(name, onclick, yesNoDialogText) {
@@ -397,7 +384,7 @@ shakaDemo.AssetCard = class {
     button.classList.add('mdl-button--colored');
     button.classList.add('mdl-js-button');
     button.classList.add('mdl-js-ripple-effect');
-    button.textContent = name;
+    button.textContent = name ? shakaDemoMain.getLocalizedString(name) : '';
     button.addEventListener('click', () => {
       if (!button.hasAttribute('disabled')) {
         if (yesNoDialogText) {

@@ -1,19 +1,7 @@
 // vim: foldmethod=marker:foldmarker={{{,}}}
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 
@@ -28,86 +16,90 @@ goog.require('ShakaDemoAssetInfo');
 const shakaAssets = {};
 
 
-/** @enum {string} */
+/** @enum {shakaDemo.MessageIds} */
 shakaAssets.Source = {
-  UNKNOWN: 'Unknown',
-  CUSTOM: 'Custom',
-  SHAKA: 'Shaka',
-  AXINOM: 'Axinom',
-  UNIFIED_STREAMING: 'Unified Streaming',
-  DASH_IF: 'DASH-IF',
-  WOWZA: 'Wowza',
-  BITCODIN: 'Bitcodin',
-  NIMBLE_STREAMER: 'Nimble Streamer',
-  AZURE_MEDIA_SERVICES: 'Azure Media Services',
-  GPAC: 'GPAC',
-  UPLYNK: 'Verizon Digital Media Services',
-  APPLE: 'Apple',
-  IRT: 'IRT',
+  UNKNOWN: shakaDemo.MessageIds.UNKNOWN,
+  CUSTOM: shakaDemo.MessageIds.CUSTOM,
+  SHAKA: shakaDemo.MessageIds.SHAKA,
+  AXINOM: shakaDemo.MessageIds.AXINOM,
+  UNIFIED_STREAMING: shakaDemo.MessageIds.UNIFIED_STREAMING,
+  DASH_IF: shakaDemo.MessageIds.DASH_IF,
+  WOWZA: shakaDemo.MessageIds.WOWZA,
+  BITCODIN: shakaDemo.MessageIds.BITCODIN,
+  NIMBLE_STREAMER: shakaDemo.MessageIds.NIMBLE_STREAMER,
+  AZURE_MEDIA_SERVICES: shakaDemo.MessageIds.AZURE_MEDIA_SERVICES,
+  GPAC: shakaDemo.MessageIds.GPAC,
+  UPLYNK: shakaDemo.MessageIds.UPLYNK,
+  APPLE: shakaDemo.MessageIds.APPLE,
+  IRT: shakaDemo.MessageIds.IRT,
 };
 
 
-/** @enum {string} */
+/** @enum {shakaDemo.MessageIds} */
 shakaAssets.KeySystem = {
-  CLEAR_KEY: 'org.w3.clearkey',
-  FAIRPLAY: 'com.apple.fps.1_0',
-  PLAYREADY: 'com.microsoft.playready',
-  WIDEVINE: 'com.widevine.alpha',
-  CLEAR: 'no drm protection',
+  CLEAR_KEY: shakaDemo.MessageIds.CLEAR_KEY,
+  FAIRPLAY: shakaDemo.MessageIds.FAIRPLAY,
+  PLAYREADY: shakaDemo.MessageIds.PLAYREADY,
+  WIDEVINE: shakaDemo.MessageIds.WIDEVINE,
+  CLEAR: shakaDemo.MessageIds.CLEAR,
 };
 
 
-/** @enum {string} */
+/**
+ * @param {!shakaAssets.KeySystem} keySystem
+ * @return {string}
+ */
+shakaAssets.identifierForKeySystem = (keySystem) => {
+  const KeySystem = shakaAssets.KeySystem;
+  switch (keySystem) {
+    case KeySystem.CLEAR_KEY: return 'org.w3.clearkey';
+    case KeySystem.FAIRPLAY: return 'com.apple.fps.1_0';
+    case KeySystem.PLAYREADY: return 'com.microsoft.playready';
+    case KeySystem.WIDEVINE: return 'com.widevine.alpha';
+    default: return 'no drm protection';
+  }
+};
+
+
+/** @enum {shakaDemo.MessageIds} */
 shakaAssets.Feature = {
-  // Set if the asset has more than one drm key defined.
-  MULTIKEY: 'multiple keys',
-  // Set if the asset has multiple periods.
-  MULTIPERIOD: 'multiple Periods',
-  ENCRYPTED_WITH_CLEAR: 'mixing encrypted and unencrypted periods',
-  AESCTR_16_BYTE_IV: 'encrypted with AES CTR Mode using a 16 byte IV',
-  AESCTR_8_BYTE_IV: 'encrypted with AES CTR Mode using a 8 byte IV',
   // Set if the asset has a special trick mode track, for rewinding effects.
-  TRICK_MODE: 'Special trick mode track',
-  XLINK: 'XLink',
+  TRICK_MODE: shakaDemo.MessageIds.TRICK_MODE,
+  XLINK: shakaDemo.MessageIds.XLINK,
 
   // Set if the asset has any subtitle tracks.
-  SUBTITLES: 'Subtitles',
+  SUBTITLES: shakaDemo.MessageIds.SUBTITLES,
   // Set if the asset has any closed caption tracks.
-  CAPTIONS: 'Captions',
-  EMBEDDED_TEXT: 'embedded text',
+  CAPTIONS: shakaDemo.MessageIds.CAPTIONS,
   // Set if the asset has multiple audio languages.
-  MULTIPLE_LANGUAGES: 'multiple languages',
+  MULTIPLE_LANGUAGES: shakaDemo.MessageIds.MULTIPLE_LANGUAGES,
   // Set if the asset is audio-only.
-  AUDIO_ONLY: 'Audio only',
-  OFFLINE: 'Downloadable',
+  AUDIO_ONLY: shakaDemo.MessageIds.AUDIO_ONLY,
+  OFFLINE: shakaDemo.MessageIds.OFFLINE,
   // A synthetic property used in the search tab. Should not be given to assets.
-  STORED: 'Downloaded',
+  STORED: shakaDemo.MessageIds.STORED,
 
   // Set if the asset is a livestream.
-  LIVE: 'Live',
+  LIVE: shakaDemo.MessageIds.LIVE,
   // Set if the asset has at least one WebM stream.
-  WEBM: 'WebM',
+  WEBM: shakaDemo.MessageIds.WEBM,
   // Set if the asset has at least one mp4 stream.
-  MP4: 'MP4',
+  MP4: shakaDemo.MessageIds.MP4,
   // Set if the asset has at least one MPEG-2 TS stream.
-  MP2TS: 'MPEG-2 TS',
-  // Set if the asset has at least one TTML text track.
-  TTML: 'TTML',
-  // Set if the asset has at least one WEBVTT text track.
-  WEBVTT: 'WebVTT',
+  MP2TS: shakaDemo.MessageIds.MP2TS,
 
   // Set if the asset has at least one stream that is at least 720p.
-  HIGH_DEFINITION: 'High definition',
+  HIGH_DEFINITION: shakaDemo.MessageIds.HIGH_DEFINITION,
   // Set if the asset has at least one stream that is at least 4k.
-  ULTRA_HIGH_DEFINITION: 'Ultra-high definition',
+  ULTRA_HIGH_DEFINITION: shakaDemo.MessageIds.ULTRA_HIGH_DEFINITION,
 
   // Set if the asset has at least one stream that is surround sound.
-  SURROUND: 'Surround sound',
+  SURROUND: shakaDemo.MessageIds.SURROUND,
 
   // Set if the asset is a MPEG-DASH manifest.
-  DASH: 'DASH',
+  DASH: shakaDemo.MessageIds.DASH,
   // Set if the asset is an HLS manifest.
-  HLS: 'HLS',
+  HLS: shakaDemo.MessageIds.HLS,
 };
 
 
@@ -223,7 +215,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (multicodec, multilingual, Widevine)',
@@ -235,9 +226,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.MULTIKEY)
       .addFeature(shakaAssets.Feature.WEBM)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
   new ShakaDemoAssetInfo(
@@ -251,7 +240,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addLicenseServer('org.w3.clearkey', 'https://cwip-shaka-proxy.appspot.com/clearkey?_u3wDe7erb7v8Lqt8A3QDQ=ABEiM0RVZneImaq7zN3u_w'),
   new ShakaDemoAssetInfo(
@@ -264,7 +252,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (HLS, MP4, multilingual, Widevine)',
@@ -277,8 +264,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
-      .addFeature(shakaAssets.Feature.MULTIKEY)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
   new ShakaDemoAssetInfo(
@@ -290,9 +275,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.WEBM)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel w/ trick mode (MP4 only, 720p)',
@@ -303,7 +286,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.TRICK_MODE)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   // NOTE: hanging in Firefox
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1291451
@@ -315,9 +297,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.WEBM)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (MP4 only)',
@@ -328,8 +308,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec, Widevine)',
@@ -342,11 +320,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.MULTIKEY)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.WEBM)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
   new ShakaDemoAssetInfo(
@@ -358,8 +333,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel w/ 44 subtitle languages',
@@ -370,7 +343,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Heliocentrism (multicodec, multiperiod)',
@@ -379,7 +351,6 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.MULTIPERIOD)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
@@ -389,7 +360,6 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.MULTIPERIOD)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.XLINK)
       .addFeature(shakaAssets.Feature.OFFLINE),
@@ -434,7 +404,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.TTML)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
@@ -484,9 +453,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.TTML)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addLicenseServer('com.widevine.alpha', 'https://drm-widevine-licensing.axtest.net/AcquireLicense')
       .addLicenseServer('com.microsoft.playready', 'https://drm-playready-licensing.axtest.net/AcquireLicense')
       .addLicenseRequestHeader('X-AxDRM-Message', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiOWViNDA1MGQtZTQ0Yi00ODAyLTkzMmUtMjdkNzUwODNlMjY2IiwiZW5jcnlwdGVkX2tleSI6ImxLM09qSExZVzI0Y3Iya3RSNzRmbnc9PSJ9XX19.4lWwW46k-oWcah8oN18LPj5OLS5ZU-_AQv7fe0JhNjA'),
@@ -501,11 +467,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
-      .addFeature(shakaAssets.Feature.MULTIKEY)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.TTML)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addLicenseServer('com.widevine.alpha', 'https://drm-widevine-licensing.axtest.net/AcquireLicense')
       .addLicenseServer('com.microsoft.playready', 'https://drm-playready-licensing.axtest.net/AcquireLicense')
       .addLicenseRequestHeader('X-AxDRM-Message', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiODAzOTliZjUtOGEyMS00MDE0LTgwNTMtZTI3ZTc0OGU5OGMwIiwiZW5jcnlwdGVkX2tleSI6ImxpTkpxVmFZa05oK01LY3hKRms3SWc9PSJ9LHsiaWQiOiI5MDk1M2UwOS02Y2IyLTQ5YTMtYTI2MC03YTVmZWZlYWQ0OTkiLCJlbmNyeXB0ZWRfa2V5Ijoia1l0SEh2cnJmQ01lVmRKNkxrYmtuZz09In0seyJpZCI6IjBlNGRhOTJiLWQwZTgtNGE2Ni04YzNmLWMyNWE5N2ViNjUzMiIsImVuY3J5cHRlZF9rZXkiOiI3dzdOWkhITE1nSjRtUUtFSzVMVE1RPT0ifSx7ImlkIjoiNTg1ZjIzM2YtMzA3Mi00NmYxLTlmYTQtNmRjMjJjNjZhMDE0IiwiZW5jcnlwdGVkX2tleSI6IkFjNFVVbVl0Qko1blBROU4xNXJjM2c9PSJ9LHsiaWQiOiI0MjIyYmQ3OC1iYzQ1LTQxYmYtYjYzZS02ZjgxNGRjMzkxZGYiLCJlbmNyeXB0ZWRfa2V5IjoiTzZGTzBmcVNXb3BwN2JqYy9ENGxNQT09In1dfX0.uF6YlKAREOmbniAeYiH070HSJhV0YS7zSKjlCtiDR5Y'),
@@ -521,11 +483,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.MULTIKEY)
-      .addFeature(shakaAssets.Feature.MULTIPERIOD)
-      .addFeature(shakaAssets.Feature.TTML)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addLicenseServer('com.widevine.alpha', 'https://drm-widevine-licensing.axtest.net/AcquireLicense')
       .addLicenseServer('com.microsoft.playready', 'https://drm-playready-licensing.axtest.net/AcquireLicense')
       .addLicenseRequestHeader('X-AxDRM-Message', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiYjMzNjRlYjUtNTFmNi00YWUzLThjOTgtMzNjZWQ1ZTMxYzc4IiwibWVzc2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIjoiMDg3Mjc4NmUtZjllNy00NjVmLWEzYTItNGU1YjBlZjhmYTQ1IiwiZW5jcnlwdGVkX2tleSI6IlB3NitlRVlOY3ZqWWJmc2gzWDNmbWc9PSJ9LHsiaWQiOiJjMTRmMDcwOS1mMmI5LTQ0MjctOTE2Yi02MWI1MjU4NjUwNmEiLCJlbmNyeXB0ZWRfa2V5IjoiLzErZk5paDM4bXFSdjR5Y1l6bnQvdz09In0seyJpZCI6IjhiMDI5ZTUxLWQ1NmEtNDRiZC05MTBmLWQ0YjVmZDkwZmJhMiIsImVuY3J5cHRlZF9rZXkiOiJrcTBKdVpFanBGTjhzYVRtdDU2ME9nPT0ifSx7ImlkIjoiMmQ2ZTkzODctNjBjYS00MTQ1LWFlYzItYzQwODM3YjRiMDI2IiwiZW5jcnlwdGVkX2tleSI6IlRjUlFlQld4RW9IT0tIcmFkNFNlVlE9PSJ9LHsiaWQiOiJkZTAyZjA3Zi1hMDk4LTRlZTAtYjU1Ni05MDdjMGQxN2ZiYmMiLCJlbmNyeXB0ZWRfa2V5IjoicG9lbmNTN0dnbWVHRmVvSjZQRUFUUT09In0seyJpZCI6IjkxNGU2OWY0LTBhYjMtNDUzNC05ZTlmLTk4NTM2MTVlMjZmNiIsImVuY3J5cHRlZF9rZXkiOiJlaUkvTXNsbHJRNHdDbFJUL0xObUNBPT0ifSx7ImlkIjoiZGE0NDQ1YzItZGI1ZS00OGVmLWIwOTYtM2VmMzQ3YjE2YzdmIiwiZW5jcnlwdGVkX2tleSI6IjJ3K3pkdnFycERWM3hSMGJKeTR1Z3c9PSJ9LHsiaWQiOiIyOWYwNWU4Zi1hMWFlLTQ2ZTQtODBlOS0yMmRjZDQ0Y2Q3YTEiLCJlbmNyeXB0ZWRfa2V5IjoiL3hsU0hweHdxdTNnby9nbHBtU2dhUT09In0seyJpZCI6IjY5ZmU3MDc3LWRhZGQtNGI1NS05NmNkLWMzZWRiMzk5MTg1MyIsImVuY3J5cHRlZF9rZXkiOiJ6dTZpdXpOMnBzaTBaU3hRaUFUa1JRPT0ifV19fQ.BXr93Et1krYMVs-CUnf7F3ywJWFRtxYdkR7Qn4w3-to'),
@@ -538,10 +495,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
-      .addFeature(shakaAssets.Feature.TTML)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Clear, multi-Period',
@@ -552,11 +506,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
-      .addFeature(shakaAssets.Feature.MULTIPERIOD)
-      .addFeature(shakaAssets.Feature.TTML)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Clear, Live DASH',
@@ -565,10 +515,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.AXINOM)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.MULTIPERIOD)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.WEBVTT),
+      .addFeature(shakaAssets.Feature.DASH),
   new ShakaDemoAssetInfo(
       /* name= */ 'Clear, Live HLS',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/axinom_test.png',
@@ -576,8 +523,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.AXINOM)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION),
+      .addFeature(shakaAssets.Feature.MP4),
   // End Axinom assets }}}
 
   // Unified Streaming assets {{{
@@ -600,7 +546,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Tears of Steel (Widevine)',
@@ -612,7 +557,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.TTML)
       .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Tears of Steel (PlayReady)',
@@ -624,7 +568,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.TTML)
       .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?PlayRight=1&UseSimpleNonPersistentLicense=1'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Tears of Steel (subtitles)',
@@ -635,7 +578,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.TTML)
       .addFeature(shakaAssets.Feature.OFFLINE),
   // End Unified Streaming assets }}}
 
@@ -695,8 +637,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.MULTIPERIOD),
+      .addFeature(shakaAssets.Feature.MP4),
   new ShakaDemoAssetInfo(
       /* name= */ 'Live sim TTML Image Subtitles embedded (VoD)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
@@ -704,8 +645,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.TTML),
+      .addFeature(shakaAssets.Feature.MP4),
   // End DASH-IF Assets }}}
 
   // Wowza assets {{{
@@ -801,7 +741,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addExtraText({
         uri: 'https://ams-samplescdn.streaming.mediaservices.windows.net/11196e3d-2f40-4835-9a4d-fc52751b0323/TOS-en.vtt',
@@ -846,7 +785,6 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.GPAC)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.MULTIPERIOD)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
@@ -915,8 +853,6 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.MULTIKEY)
-      .addFeature(shakaAssets.Feature.AESCTR_8_BYTE_IV)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addLicenseServer('com.microsoft.playready', 'https://content.uplynk.com/pr')
       .addLicenseServer('com.widevine.alpha', 'https://content.uplynk.com/wv')
@@ -934,10 +870,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
-      .addFeature(shakaAssets.Feature.MULTIKEY)
-      .addFeature(shakaAssets.Feature.MULTIPERIOD)
-      .addFeature(shakaAssets.Feature.WEBVTT)
-      .addFeature(shakaAssets.Feature.AESCTR_8_BYTE_IV)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addLicenseServer('com.microsoft.playready', 'https://content.uplynk.com/pr')
       .addLicenseServer('com.widevine.alpha', 'https://content.uplynk.com/wv')
@@ -953,8 +885,6 @@ shakaAssets.testAssets = [
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.MULTIKEY)
-      .addFeature(shakaAssets.Feature.AESCTR_16_BYTE_IV)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addLicenseServer('com.widevine.alpha', 'https://content.uplynk.com/wv')
       .setRequestFilter(shakaAssets.UplynkRequestFilter)
@@ -972,11 +902,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
-      .addFeature(shakaAssets.Feature.MULTIPERIOD)
-      .addFeature(shakaAssets.Feature.MULTIKEY)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.AESCTR_16_BYTE_IV)
-      .addFeature(shakaAssets.Feature.ENCRYPTED_WITH_CLEAR)
       .addLicenseServer('com.widevine.alpha', 'https://content.uplynk.com/wv')
       .setRequestFilter(shakaAssets.UplynkRequestFilter)
       .setResponseFilter(shakaAssets.UplynkResponseFilter),
@@ -992,7 +918,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.CAPTIONS)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Apple Advanced HLS Stream (TS)',
@@ -1002,7 +927,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.CAPTIONS)
-      .addFeature(shakaAssets.Feature.WEBVTT)
       .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 
@@ -1016,6 +940,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.IRT)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.LIVE),
   new ShakaDemoAssetInfo(
       /* name= */ 'Bayerischer Rundfunk Recorded Loop (HLS)',
@@ -1024,6 +949,7 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.IRT)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.LIVE),
   // }}}
 ];

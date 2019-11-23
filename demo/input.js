@@ -1,18 +1,6 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 goog.provide('shakaDemo.BoolInput');
@@ -111,7 +99,7 @@ shakaDemo.Input.lastId_ = 0;
 shakaDemo.SelectInput = class extends shakaDemo.Input {
   /**
    * @param {!shakaDemo.InputContainer} parentContainer
-   * @param {string} name
+   * @param {?shakaDemo.MessageIds} name
    * @param {function(!Element)} onChange
    * @param {!Object.<string, string>} values
    */
@@ -123,6 +111,9 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
     this.input_.classList.add('mdl-textfield__input');
     this.extra_.classList.add('mdl-textfield__label');
     this.extra_.setAttribute('for', this.input_.id);
+    if (name) {
+      this.extra_.textContent = shakaDemoMain.getLocalizedString(name);
+    }
     for (const value of Object.keys(values)) {
       const option = document.createElement('option');
       option.textContent = values[value];
@@ -227,20 +218,29 @@ shakaDemo.NumberInput = class extends shakaDemo.TextInput {
     error.classList.add('mdl-textfield__error');
     this.container_.appendChild(error);
 
-    error.textContent = 'Must be a positive';
+    const MessageIds = shakaDemo.MessageIds;
+    const localize = (name) => shakaDemoMain.getLocalizedString(name);
+    if (canBeZero && canBeDecimal) {
+      error.textContent = localize(MessageIds.NUMBER_DECIMAL_WARNING);
+    } else if (canBeZero) {
+      error.textContent = localize(MessageIds.NUMBER_INTEGER_WARNING);
+    } else if (canBeDecimal) {
+      error.textContent =
+          localize(MessageIds.NUMBER_NONZERO_DECIMAL_WARNING);
+    } else {
+      error.textContent =
+          localize(MessageIds.NUMBER_NONZERO_INTEGER_WARNING);
+    }
+
     this.input_.pattern = '(Infinity|';
     if (canBeZero) {
       this.input_.pattern += '[0-9]*';
     } else {
       this.input_.pattern += '[0-9]*[1-9][0-9]*';
-      error.textContent += ', nonzero';
     }
     if (canBeDecimal) {
       // TODO: Handle commas as decimal delimeters, for appropriate regions?
       this.input_.pattern += '(.[0-9]+)?';
-      error.textContent += ' number.';
-    } else {
-      error.textContent += ' integer.';
     }
     this.input_.pattern += ')';
     if (canBeUnset) {

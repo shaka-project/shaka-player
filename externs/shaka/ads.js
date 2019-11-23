@@ -1,24 +1,30 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 
 /**
  * @externs
  */
+
+/**
+ * An object that's responsible for all the ad-related logic
+ * in the player.
+ *
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IAdManager = class extends EventTarget {};
+
+
+/**
+ * A factory for creating the ad manager.  This will be called with 'new'.
+ *
+ * @typedef {function(new:shaka.extern.IAdManager)}
+ * @exportDoc
+ */
+shaka.extern.IAdManager.Factory;
 
 
 /**
@@ -40,9 +46,26 @@ shaka.extern.IAd = class {
   getRemainingTime() {}
 
   /**
+   * @return {number}
+   */
+  getTimeUntilSkippable() {}
+
+  /**
    * @return {boolean}
    */
   isPaused() {}
+
+  /**
+   * @return {boolean}
+   */
+  isSkippable() {}
+
+  /**
+   * @return {boolean}
+   */
+  canSkipNow() {}
+
+  skip() {}
 
   play() {}
 
@@ -73,4 +96,14 @@ shaka.extern.IAd = class {
    * @param {number} height
    */
   resize(width, height) {}
+
+  /**
+   * @return {number}
+   */
+  getSequenceLength() {}
+
+  /**
+   * @return {number}
+   */
+  getPositionInSequence() {}
 };

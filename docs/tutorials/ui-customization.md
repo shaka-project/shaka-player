@@ -28,15 +28,22 @@ fast-forwarding. You could add the following line to init(), right before
 creating the UI overlay. This will configure UI to ONLY provide these two buttons:
 
 ```js
-uiConfig['controlPanelElements'] = ['rewind', 'fast_forward'];
+const config = {
+  'controlPanelElements': ['rewind', 'fast_forward']
+}
+ui.configure(config);
 ```
 This call will result in the controls panel having only two elements: rewind
 button and fast forward button, in that order. If the reversed order is desired,
 the call should be:
 
 ```js
-uiConfig['controlPanelElements'] = ['fast_forward', 'rewind'];
+const config = {
+ 'controlPanelElements': ['fast_forward', 'rewind']
+}
+ui.configure(config);
 ```
+
 The following elements can be added to the UI bar using this configuration value:
 * time_and_duration: adds an element tracking and displaying current progress of
   the presentation and the full presentation duration in the "0:10 / 1:00"
@@ -67,6 +74,18 @@ The following buttons can be added to the overflow menu:
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
+
+Example:
+```js
+// Add only the cast button to the overflow menu, nothing else
+const config = {
+  'overflowMenuButtons' : ['cast']
+}
+ui.configure(config);
+```
+
+An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
+layout for the overflow menu to be available to the user.
 
 The presense of the seek bar and the big play button in the center of the video element can be
 customized with `addSeekBar` and `addBigPlayButton` booleans in the config.

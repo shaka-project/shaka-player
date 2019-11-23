@@ -1,18 +1,6 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
@@ -74,6 +62,13 @@ google.ima.AdsManager = class {
   resume() {}
 
   getVolume() {}
+
+  /**
+   * @return {boolean}
+   */
+  getAdSkippableState() {}
+
+  skip() {}
 
   /**
    * @param {number} volume
@@ -139,6 +134,25 @@ google.ima.AdEvent = class extends Event {
 google.ima.Ad = class {
   /** @return {number} */
   getDuration() {}
+
+  /** @return {number} */
+  getSkipTimeOffset() {}
+
+  /** @return {google.ima.AdPodInfo} */
+  getAdPodInfo() {}
+
+  /** @return {string} */
+  getAdvertiserName() {}
+};
+
+
+/** @const */
+google.ima.AdPodInfo = class {
+  /** @return {number} */
+  getAdPosition() {}
+
+  /** @return {number} */
+  getTotalAds() {}
 };
 
 
@@ -153,6 +167,9 @@ google.ima.AdEvent.Type = {
   RESUMED: 'RESUMED',
   VOLUME_CHANGED: 'VOLUME_CHANGED',
   VOLUME_MUTED: 'VOLUME_MUTED',
+  SKIPPABLE_STATE_CHANGED: 'SKIPPABLE_STATE_CHANGED',
+  STARTED: 'STARTED',
+  ALL_ADS_COMPLETED: 'ALL_ADS_COMPLETED',
 };
 
 

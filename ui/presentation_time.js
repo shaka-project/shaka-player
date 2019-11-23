@@ -1,24 +1,13 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 
 goog.provide('shaka.ui.PresentationTimeTracker');
 
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 
 
@@ -74,6 +63,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     const duration = this.video.duration;
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
+    const Utils = shaka.ui.Utils;
 
     if (this.player.isLive()) {
       // The amount of time we are behind the live edge.
@@ -88,7 +78,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
       // The button should only be clickable when it's live stream content, and
       // the current play time is behind live edge.
       if ((displayTime >= 1) || isSeeking) {
-        this.setValue_('- ' + this.buildTimeString_(displayTime, showHour));
+        this.setValue_('- ' + Utils.buildTimeString(displayTime, showHour));
         this.currentTime_.disabled = false;
       } else {
         this.setValue_(this.localization.resolve(shaka.ui.Locales.Ids.LIVE));
@@ -97,40 +87,13 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
     } else {
       const showHour = duration >= 3600;
 
-      let value = this.buildTimeString_(displayTime, showHour);
+      let value = Utils.buildTimeString(displayTime, showHour);
       if (duration) {
-        value += ' / ' +
-            this.buildTimeString_(duration, showHour);
+        value += ' / ' + Utils.buildTimeString(duration, showHour);
       }
       this.setValue_(value);
       this.currentTime_.disabled = true;
     }
-  }
-
-
-  /**
-   * Builds a time string, e.g., 01:04:23, from |displayTime|.
-   *
-   * @param {number} displayTime
-   * @param {boolean} showHour
-   * @return {string}
-   * @private
-   */
-  buildTimeString_(displayTime, showHour) {
-    const h = Math.floor(displayTime / 3600);
-    const m = Math.floor((displayTime / 60) % 60);
-    let s = Math.floor(displayTime % 60);
-    if (s < 10) {
-      s = '0' + s;
-    }
-    let text = m + ':' + s;
-    if (showHour) {
-      if (m < 10) {
-        text = '0' + text;
-      }
-      text = h + ':' + text;
-    }
-    return text;
   }
 
   /**

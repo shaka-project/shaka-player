@@ -276,7 +276,10 @@ class Build(object):
 
     build_name = 'shaka-player.' + name
     closure = compiler.ClosureCompiler(self.include, build_name)
-    generator = compiler.ExternGenerator(self.include, build_name)
+
+    # Don't pass node modules to the extern generator.
+    local_include = set([f for f in self.include if 'node_modules' not in f])
+    generator = compiler.ExternGenerator(local_include, build_name)
 
     ts_input = [generator.output]
     match = re.compile(r'.*\.js$')
