@@ -38,7 +38,7 @@ function onCastStatusChanged(event) {
 
 function onPlayerErrorEvent(errorEvent) {
   // Extract the shaka.util.Error object from the event.
-  onPlayerError(event.detail);
+  onPlayerError(errorEvent.detail);
 }
 
 function onPlayerError(error: shaka.extern.Error) {
@@ -48,7 +48,7 @@ function onPlayerError(error: shaka.extern.Error) {
 
 function onUIErrorEvent(errorEvent) {
   // Extract the shaka.util.Error object from the event.
-  onPlayerError(event.detail);
+  onPlayerError(errorEvent.detail);
 }
 
 function initFailed() {

@@ -11,6 +11,8 @@ import {
   FunctionDefinition
 } from "./base";
 
+type Statement = estree.Statement | estree.ModuleDeclaration;
+
 const ds = doctrine.Syntax;
 
 function staticMemberExpressionToPath(expression: estree.Expression): string[] {
@@ -41,8 +43,12 @@ function staticMemberExpressionToPath(expression: estree.Expression): string[] {
 
 function parseMethodDefinition(
   md: estree.MethodDefinition
-): FunctionDefinition {
+): FunctionDefinition | null {
   assert(md.key.type === "Identifier");
+  const attributes = parseLeadingComments(md.leadingComments);
+  if (!attributes.export && md.kind !== "constructor") {
+    return null;
+  }
   return {
     type: DefinitionType.Function,
     identifier: [md.key.name],
@@ -51,6 +57,10 @@ function parseMethodDefinition(
         assert(p.argument.type === "Identifier", p.argument.type);
         return p.argument.name;
       }
+      if (p.type === "AssignmentPattern") {
+        assert(p.left.type === "Identifier", p.left.type);
+        return p.left.name;
+      }
       assert(p.type === "Identifier", p.type);
       return p.name;
     }),
@@ -58,7 +68,7 @@ function parseMethodDefinition(
     isStatic: md.static,
     isConstructor: md.kind === "constructor",
     definitions: parseBody(md.value.body.body),
-    attributes: parseLeadingComments(md.leadingComments)
+    attributes
   };
 }
 
@@ -85,7 +95,7 @@ function parseAssignmentExpression(
     case "FunctionExpression":
       return {
         type: DefinitionType.Function,
-        identifier: identifier,
+        identifier,
         params: expression.right.params.map(p => {
           assert(p.type === "Identifier");
           return p.name;
@@ -94,7 +104,7 @@ function parseAssignmentExpression(
     case "ObjectExpression":
       return {
         type: DefinitionType.Object,
-        identifier: identifier,
+        identifier,
         props: expression.right.properties.map(p => {
           if (p.key.type === "Identifier") {
             return p.key.name;
@@ -102,23 +112,26 @@ function parseAssignmentExpression(
           if (p.key.type === "Literal") {
             return p.key.value as string;
           }
-          throw new Error("Unrecognited key type " + p.key.type);
+          throw new Error("Unrecognized key type " + p.key.type);
         })
       };
     case "ClassExpression":
       return {
         type: DefinitionType.Class,
-        identifier: identifier,
+        identifier,
         superClass: expression.right.superClass
           ? staticMemberExpressionToPath(expression.right.superClass)
           : undefined,
-        methods: expression.right.body.body.map(parseMethodDefinition)
+        methods: expression.right.body.body
+          .map(parseMethodDefinition)
+          .filter((m): m is FunctionDefinition => m != null)
       };
     default:
-      console.dir(expression.right);
-      throw new Error(
-        `Unknown expression type ${expression.right.type} for assignment value`
-      );
+      // console.dir(expression.right);
+      return {
+        type: DefinitionType.Property,
+        identifier
+      };
   }
 }
 
@@ -131,20 +144,21 @@ function parseMemberExpression(
   };
 }
 
-function parseStatement(statement: estree.Statement): Definition {
+function parseStatement(statement: Statement): Definition {
   if (statement.type === "FunctionDeclaration") {
     return parseFunctionDeclaration(statement);
   }
-
-  assert(statement.type === "ExpressionStatement");
-  switch (statement.expression.type) {
-    case "AssignmentExpression":
-      return parseAssignmentExpression(statement.expression);
-    case "MemberExpression":
-      return parseMemberExpression(statement.expression);
-    default:
-      throw new Error(`Unknown expression type ${statement.expression.type}`);
+  if (statement.type === "ExpressionStatement") {
+    switch (statement.expression.type) {
+      case "AssignmentExpression":
+        return parseAssignmentExpression(statement.expression);
+      case "MemberExpression":
+        return parseMemberExpression(statement.expression);
+      default:
+        throw new Error(`Unknown expression type ${statement.expression.type}`);
+    }
   }
+  throw new Error(`Unknown statement type ${statement.type}`);
 }
 
 function normalizeDescription(description: string): string {
@@ -164,7 +178,8 @@ function parseBlockComment(comment: estree.Comment): Attributes {
 
   const attributes: Attributes = {
     description: normalizeDescription(ast.description),
-    comments: []
+    comments: [],
+    export: false
   };
 
   for (const tag of ast.tags) {
@@ -199,8 +214,7 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         attributes.constType = tag.type || undefined;
         break;
       case "namespace":
-        attributes.type = AnnotationType.Const;
-        attributes.constType = undefined;
+        attributes.type = AnnotationType.Namespace;
         break;
       case "define":
         attributes.type = AnnotationType.Const;
@@ -262,6 +276,13 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         assert(tag.description);
         attributes.template = tag.description.split(",");
         break;
+      case "export":
+      case "exportInterface":
+        attributes.export = true;
+        break;
+      case "exportDoc":
+        attributes.export = attributes.type !== AnnotationType.Namespace;
+        break;
       default:
         break;
     }
@@ -275,48 +296,32 @@ function parseBlockComment(comment: estree.Comment): Attributes {
 }
 
 function parseLeadingComments(comments?: estree.Comment[]): Attributes {
-  if (!comments) {
+  const blockComments = comments && comments.filter(c => c.type === "Block");
+  if (!blockComments || !blockComments.length) {
     return {
       comments: [],
-      description: ""
+      description: "",
+      export: false
     };
   }
-  assert(
-    comments.length > 0,
-    "Expected at least one leading comment, found none"
-  );
   // Only parse the comment closest to the statement
-  const comment = comments[comments.length - 1];
+  const comment = blockComments[blockComments.length - 1];
   return parseBlockComment(comment);
 }
 
-function parseBody(
-  statements: Array<estree.Statement | estree.ModuleDeclaration>
-): Definition[] {
-  return (
-    statements
-      // Only take expressions into consideration.
-      // Variable declarations are discarded because they are only used for
-      // declaring namespaces.
-      .filter(
-        (statement): statement is estree.Statement =>
-          statement.type === "ExpressionStatement" ||
-          statement.type === "FunctionDeclaration"
-      )
-      // Prepare for further inspection
-      .map(statement => ({
+function parseBody(statements: Statement[]): Definition[] {
+  return statements
+    .map<Definition | null>(statement => {
+      const attributes = parseLeadingComments(statement.leadingComments);
+      if (!attributes.export) {
+        return null;
+      }
+      return {
         ...parseStatement(statement),
-        attributes: parseLeadingComments(statement.leadingComments)
-      }))
-      // @const without type is only used to define namespaces, discard.
-      // Except in the chromecast externs, because it might be a class and contain "static methods"
-      .filter(
-        definition =>
-          definition.type === DefinitionType.Class ||
-          definition.attributes.type !== AnnotationType.Const ||
-          definition.attributes.constType !== undefined
-      )
-  );
+        attributes
+      };
+    })
+    .filter((definition): definition is Definition => definition != null);
 }
 
 export default function parseExterns(code: string): Definition[] {

@@ -178,6 +178,12 @@ module.exports = {
     'prefer-arrow-callback': 'error',
     'prefer-const': ['error', {'ignoreReadBeforeAssign': true}],
     // }}}
+
+    'max-len': ['error', {
+      // Wrapped type annotations break the TypeScript generator
+      // Maybe there is a better solution though
+      'ignoreComments': true,
+    }],
   },
   'overrides': [
     {

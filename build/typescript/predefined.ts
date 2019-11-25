@@ -48,7 +48,8 @@ function makeInterface(name: string, methods: Method[]): Node {
       identifier: [name],
       attributes: {
         type: AnnotationType.Interface,
-        comments: []
+        comments: [],
+        export: true
       },
       methods: methods.map(m => ({
         type: DefinitionType.Function,
@@ -57,6 +58,7 @@ function makeInterface(name: string, methods: Method[]): Node {
         attributes: {
           type: AnnotationType.Function,
           comments: [],
+          export: true,
           paramTypes: m.params.reduce((acc: ParamTypes, p: Parameter) => {
             acc[p.name] = p.type;
             return acc;

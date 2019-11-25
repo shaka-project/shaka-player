@@ -7,7 +7,8 @@ export enum AnnotationType {
   Interface = "interface",
   Function = "function",
   Property = "property",
-  Typedef = "typedef"
+  Typedef = "typedef",
+  Namespace = "namespace"
 }
 
 export interface Props {
@@ -24,6 +25,7 @@ export interface Attributes {
   type?: AnnotationType;
   description?: string;
   comments: string[];
+  export: boolean;
 
   props?: Props[];
   constType?: doctrine.Type;

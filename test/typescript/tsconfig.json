@@ -4,6 +4,8 @@
     "noEmit": true,
     "allowJs": false,
     "strict": true,
-    "noImplicitReturns": true
-  }
+    "noImplicitReturns": true,
+    "allowSyntheticDefaultImports": false
+  },
+  "include": ["."]
 }

@@ -180,6 +180,23 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
       });
       if (md.isConstructor) {
         constructor = functionNode;
+        if (md.definitions) {
+          for (const pd of md.definitions) {
+            if (
+              pd.type === DefinitionType.Property &&
+              pd.identifier[0] === "this"
+            ) {
+              assert(pd.attributes);
+              const name = pd.identifier[1];
+              const isConst = pd.attributes.type === "const";
+              const rawType = isConst
+                ? pd.attributes.constType
+                : pd.attributes.propType;
+              const type = processType(root, rawType);
+              properties.push(new PropertyNode(name, [], type, isConst));
+            }
+          }
+        }
       } else if (md.isStatic) {
         staticMethods.push(functionNode);
       } else {
@@ -432,7 +449,8 @@ function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
           description: "",
           comments: [],
           paramTypes: paramTypes,
-          returnType: typedefType.this
+          returnType: typedefType.this,
+          export: true
         }
       } as FunctionDefinition
     };
@@ -593,6 +611,7 @@ function parseNode(root: NodeMap, node: Node): DefinitionNode {
       return parseTypedefNode(root, node);
     case "enum":
       return parseEnumNode(node);
+    case "namespace":
     case "const":
       return parseConstNode(root, node);
     case "function":
@@ -625,7 +644,8 @@ export default function buildDefinitionTree(
           params: [],
           attributes: {
             type: AnnotationType.Interface,
-            comments: []
+            comments: [],
+            export: true
           }
         } as FunctionDefinition;
       }

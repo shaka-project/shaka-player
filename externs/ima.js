@@ -41,6 +41,7 @@ google.ima.AdsLoader = class {
 
 /**
  * @implements {EventTarget}
+ * @exportDoc
  */
 google.ima.AdsManager = class {
   start() {}
@@ -82,13 +83,22 @@ google.ima.AdsManager = class {
    */
   resize(width, height, viewMode) {}
 
-  /** @override */
+  /**
+   * @override
+   * @exportDoc
+   */
   addEventListener() {}
 
-  /** @override */
+  /**
+   * @override
+   * @exportDoc
+   */
   removeEventListener() {}
 
-  /** @override */
+  /**
+   * @override
+   * @exportDoc
+   */
   dispatchEvent() {}
 };
 
@@ -130,7 +140,10 @@ google.ima.AdEvent = class extends Event {
 };
 
 
-/** @const */
+/**
+ * @const
+ * @exportDoc
+ */
 google.ima.Ad = class {
   /** @return {number} */
   getDuration() {}

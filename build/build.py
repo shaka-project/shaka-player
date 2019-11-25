@@ -280,17 +280,7 @@ class Build(object):
     # Don't pass node modules to the extern generator.
     local_include = set([f for f in self.include if 'node_modules' not in f])
     generator = compiler.ExternGenerator(local_include, build_name)
-
-    ts_input = [generator.output]
-    match = re.compile(r'.*\.js$')
-    base = shakaBuildHelpers.get_source_base()
-    ts_input += shakaBuildHelpers.get_all_files(
-        os.path.join(base, 'externs', 'shaka'), match)
-    ts_input += [os.path.join(base, 'externs', 'ima.js')]
-    if self.has_ui():
-      ts_input += shakaBuildHelpers.get_all_files(
-          os.path.join(base, 'ui', 'externs'), match)
-    ts_generator = compiler.TypescriptGenerator(ts_input, build_name)
+    ts_generator = compiler.TypescriptGenerator(local_include, build_name)
 
     closure_opts = common_closure_opts + common_closure_defines
     if is_debug:
