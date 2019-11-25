@@ -157,3 +157,5 @@ function onErrorEvent(event) {
 function onError(error: shaka.extern.Error) {
   console.error("Error code", error.code, "object", error);
 }
+
+document.addEventListener("DOMContentLoaded", initApp);
