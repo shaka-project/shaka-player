@@ -1,16 +1,15 @@
+import * as shaka from "../../dist/shaka-player.ui";
+
+interface ShakaVideoElement extends HTMLVideoElement {
+  ui: shaka.ui.Overlay;
+}
+
 const manifestUri =
   "https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd";
 
-interface HTMLVideoElement {
-  ui?: shaka.ui.Overlay;
-}
-
 async function init() {
   // When using the UI, the player is made automatically by the UI object.
-  const video = document.getElementById("video");
-  if (!(video instanceof HTMLVideoElement) || !video.ui) {
-    return;
-  }
+  const video = document.getElementById("video") as ShakaVideoElement;
   const ui = video.ui;
   const controls = ui.getControls();
   const player = controls.getPlayer();

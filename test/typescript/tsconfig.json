@@ -1,19 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es2015",
-    "lib": ["dom", "es5", "es2015"],
+    "target": "esnext",
+    "noEmit": true,
     "allowJs": false,
     "strict": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "alwaysStrict": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "noImplicitReturns": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "downlevelIteration": true
-  },
-  "include": ["."],
-  "files": ["../../dist/shaka-player.ui.d.ts"]
+    "noImplicitReturns": true
+  }
 }

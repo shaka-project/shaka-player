@@ -1,3 +1,5 @@
+import * as shaka from "../../dist/shaka-player.compiled";
+
 const manifestUri =
   "https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd";
 const licenseServer = "https://cwip-shaka-proxy.appspot.com/header_auth";
