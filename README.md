@@ -184,6 +184,19 @@ Please read CONTRIBUTING.md for more information on the process we would like
 contributors to follow.
 
 
+## Framework Integrations ##
+
+The Shaka team doesn't have the bandwidth and experience to provide guidance and support
+for integrating Shaka Player with specific frameworks, but some of our users have
+sucessfully done so and created tutorials to help other beginners.
+Shaka + ReactJS integrations:
+- https://github.com/matvp91/shaka-player-react
+- https://github.com/amit08255/shaka-player-react-with-ui-config
+
+If you have published Shaka Integration code/tutorials, please let us know, we'd
+love to add it top the list!
+
+
 ## FAQ ##
 
 For general help and before filing any bugs, please read the
