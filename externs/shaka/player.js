@@ -529,7 +529,8 @@ shaka.extern.DrmConfiguration;
  *   defaultPresentationDelay: number,
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
- *   initialSegmentLimit: number
+ *   initialSegmentLimit: number,
+ *   ignoreSuggestedPresentationDelay: boolean
  * }}
  *
  * @property {shaka.extern.DashContentProtectionCallback} customScheme
@@ -569,6 +570,10 @@ shaka.extern.DrmConfiguration;
  *   <code>SegmentTemplate</code> with fixed-duration segments.  This is limited
  *   to avoid excessive memory consumption with very large
  *   <code>timeShiftBufferDepth</code> values.
+ * @property {boolean} ignoreSuggestedPresentationDelay
+ *   If true will cause DASH parser to ignore
+ *   <code>suggestedPresentationDelay</code> from manifest. Defaults to
+ *   <code>false</code> if not provided.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
