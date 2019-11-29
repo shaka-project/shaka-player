@@ -14,6 +14,7 @@ class SkipButton extends shaka.ui.Element {
     super(parent, controls);
 
     this.button.textContent = "Skip current video";
+    this.button.setAttribute("aria-label", "Skip");
     this.parent.appendChild(this.button);
     this.eventManager.listen(this.button, "click", this.onClick);
   }
