@@ -1,18 +1,41 @@
 import * as shaka from "../../dist/shaka-player.ui";
 
-interface ShakaVideoElement extends HTMLVideoElement {
-  ui: shaka.ui.Overlay;
-}
-
 const manifestUri =
   "https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd";
 
+class SkipButton extends shaka.ui.Element {
+  static create(rootElement: HTMLElement, controls: shaka.ui.Controls) {
+    return new SkipButton(rootElement, controls);
+  }
+
+  button = document.createElement("button");
+
+  constructor(parent: HTMLElement, controls: shaka.ui.Controls) {
+    super(parent, controls);
+
+    this.button.textContent = "Skip current video";
+    this.parent.appendChild(this.button);
+    this.eventManager.listen(this.button, "click", this.onClick);
+  }
+
+  onClick = () => {
+    this.player.load(manifestUri);
+  };
+}
+
+shaka.ui.Controls.registerElement("skip", SkipButton);
+
 async function init() {
   // When using the UI, the player is made automatically by the UI object.
-  const video = document.getElementById("video") as ShakaVideoElement;
+  const video = document.getElementById("video") as shaka.ui.VideoElement;
   const ui = video.ui;
   const controls = ui.getControls();
   const player = controls.getPlayer();
+
+  ui.configure({
+    addSeekBar: false,
+    controlPanelElements: ["rewind", "fast_forward", "skip"]
+  });
 
   // Listen for error events.
   player.addEventListener("error", onPlayerErrorEvent);

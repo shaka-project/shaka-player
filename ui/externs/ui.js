@@ -167,6 +167,8 @@ shaka.extern.IUIElement.Factory = class {
    * @param {!HTMLElement} rootElement
    * @param {!shaka.ui.Controls} controls
    * @return {!shaka.extern.IUIElement}
+   *
+   * @exportDoc
    */
   create(rootElement, controls) {}
 };

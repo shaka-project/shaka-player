@@ -6,7 +6,9 @@ import {
   NamespaceNode,
   ClassNode,
   FunctionNode,
-  LiteralNode
+  LiteralNode,
+  InterfaceNode,
+  PropertyNode
 } from "./nodes";
 import {
   ClassDefinition,
@@ -296,11 +298,40 @@ export function patchDefinitions(definitions: DefinitionNode[]) {
     };
   }
 
-  const Controls = ui?.nodes.find(
-    (n): n is ClassNode => n instanceof ClassNode && n.name === "Controls"
+  const Overlay = ui?.nodes.find(
+    (n): n is ClassNode => n instanceof ClassNode && n.name === "Overlay"
   );
-  const configureUIMethod = Controls?.methods.find(n => n.name === "configure");
+  const configureUIMethod = Overlay?.methods.find(n => n.name === "configure");
   if (configureUIMethod) {
+    const configureUIObjectMethod = new FunctionNode(
+      configureUIMethod.name,
+      configureUIMethod.comments,
+      configureUIMethod.templateTypes,
+      [
+        {
+          name: "config",
+          isOptional: false,
+          isRest: false,
+          type: {
+            isNullable: false,
+            name: "RecursivePartial",
+            applications: [
+              {
+                isNullable: false,
+                name: "shaka.extern.UIConfiguration"
+              }
+            ]
+          }
+        }
+      ],
+      configureUIMethod.returnType
+    );
+    Overlay?.methods.splice(
+      Overlay.methods.indexOf(configureUIMethod),
+      0,
+      configureUIObjectMethod
+    );
+
     configureUIMethod.params = [
       {
         name: "config",
@@ -308,13 +339,16 @@ export function patchDefinitions(definitions: DefinitionNode[]) {
         isRest: false,
         type: {
           isNullable: false,
-          name: "RecursivePartial",
-          applications: [
-            {
-              isNullable: false,
-              name: "shaka.extern.UIConfiguration"
-            }
-          ]
+          name: "string"
+        }
+      },
+      {
+        name: "value",
+        isOptional: false,
+        isRest: false,
+        type: {
+          isNullable: false,
+          name: "any"
         }
       }
     ];
@@ -323,6 +357,25 @@ export function patchDefinitions(definitions: DefinitionNode[]) {
   /**
    * Predefined definitions
    */
+
+  if (ui) {
+    ui.nodes.push(
+      new InterfaceNode(
+        "VideoElement",
+        comments,
+        undefined,
+        [{ isNullable: false, name: "HTMLVideoElement" }],
+        [
+          new PropertyNode("ui", [], {
+            isNullable: false,
+            name: "shaka.ui.Overlay"
+          })
+        ],
+        [],
+        undefined
+      )
+    );
+  }
 
   definitions.push(...predefinedDefinitions);
 }
