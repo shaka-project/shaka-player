@@ -216,6 +216,9 @@ export function patchDefinitions(definitions: DefinitionNode[]) {
   const net = shaka?.nodes.find(
     (n): n is NamespaceNode => n instanceof NamespaceNode && n.name === "net"
   );
+  const ui = shaka?.nodes.find(
+    (n): n is NamespaceNode => n instanceof NamespaceNode && n.name === "ui"
+  );
 
   /**
    * Classes
@@ -291,6 +294,30 @@ export function patchDefinitions(definitions: DefinitionNode[]) {
       name: "Partial",
       applications: [requestParam.type]
     };
+  }
+
+  const Controls = ui?.nodes.find(
+    (n): n is ClassNode => n instanceof ClassNode && n.name === "Controls"
+  );
+  const configureUIMethod = Controls?.methods.find(n => n.name === "configure");
+  if (configureUIMethod) {
+    configureUIMethod.params = [
+      {
+        name: "config",
+        isOptional: false,
+        isRest: false,
+        type: {
+          isNullable: false,
+          name: "RecursivePartial",
+          applications: [
+            {
+              isNullable: false,
+              name: "shaka.extern.UIConfiguration"
+            }
+          ]
+        }
+      }
+    ];
   }
 
   /**

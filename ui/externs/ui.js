@@ -32,6 +32,8 @@ shaka.extern = {};
  * @property {string} played
  *   The CSS background color applied to the portion of the seek bar showing
  *   what has been played already.
+ *
+ * @exportDoc
  */
 shaka.extern.UISeekBarColors;
 
@@ -47,6 +49,8 @@ shaka.extern.UISeekBarColors;
  * @property {string} level
  *   The CSS background color applied to the portion of the volume bar showing
  *   the volume level.
+ *
+ * @exportDoc
  */
 shaka.extern.UIVolumeBarColors;
 
@@ -89,6 +93,8 @@ shaka.extern.UIVolumeBarColors;
  *   The CSS colors applied to the volume bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you
  *   cannot do this in pure CSS.
+ *
+ * @exportDoc
  */
 shaka.extern.UIConfiguration;
 
