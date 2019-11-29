@@ -1,13 +1,11 @@
 #!/usr/bin/env ts-node
-
-// Load required modules.
 import * as fs from "fs";
 import assert from "./assert";
 import parseExterns from "./parseExterns";
 import buildDefinitionTree from "./buildDefinitionTree";
 import writeTypeDefinitions from "./writeTypeDefinitions";
 import { Definition } from "./base";
-import { predefinedDefinitions } from "./predefined";
+import { patchDefinitions } from "./predefined";
 
 function generateTypeDefinitions(
   outputPath: string,
@@ -20,7 +18,7 @@ function generateTypeDefinitions(
     })
   );
   const root = buildDefinitionTree(definitions);
-  root.push(...predefinedDefinitions);
+  patchDefinitions(root);
 
   const stream = fs.createWriteStream(outputPath, { encoding: "utf-8" });
   writeTypeDefinitions(stream, root);

@@ -1,14 +1,22 @@
-import { TypeNode } from "./nodes";
+import * as doctrine from "@teppeis/doctrine";
+import assert from "./assert";
+import {
+  TypeNode,
+  DefinitionNode,
+  NamespaceNode,
+  ClassNode,
+  FunctionNode,
+  LiteralNode
+} from "./nodes";
 import {
   ClassDefinition,
   AnnotationType,
   DefinitionType,
   Node,
-  FunctionDefinition,
   ParamTypes,
   NodeMap
 } from "./base";
-import * as doctrine from "@teppeis/doctrine";
+import { getNodeAtPath } from "./treeUtils";
 
 const ds = doctrine.Syntax;
 
@@ -16,13 +24,23 @@ const ds = doctrine.Syntax;
  * Predefined definitions required to make the generated ones work
  */
 
+const comments = ["Defined by generator"];
+
+const RecursivePartial = new LiteralNode(
+  "type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };",
+  comments
+);
+
 const MediaKeySystemMediacapability = new TypeNode(
   "MediaKeySystemMediacapability",
-  ["Predefined by generator"],
+  comments,
   { name: "MediaKeySystemMediaCapability", isNullable: false }
 );
 
-export const predefinedDefinitions = [MediaKeySystemMediacapability];
+export const predefinedDefinitions = [
+  RecursivePartial,
+  MediaKeySystemMediacapability
+];
 
 /**
  * Predefined interfaces for type inference
@@ -182,3 +200,102 @@ const EventTarget = makeInterface("EventTarget", [
 export const predefinedInterfaces: NodeMap = new Map([
   ["EventTarget", EventTarget]
 ]);
+
+/**
+ * Predefined patches for definitions
+ */
+
+export function patchDefinitions(definitions: DefinitionNode[]) {
+  /**
+   * Namespaces
+   */
+
+  const shaka = definitions.find(
+    (n): n is NamespaceNode => n instanceof NamespaceNode && n.name === "shaka"
+  );
+  const net = shaka?.nodes.find(
+    (n): n is NamespaceNode => n instanceof NamespaceNode && n.name === "net"
+  );
+
+  /**
+   * Classes
+   */
+
+  const Player = shaka?.nodes.find(
+    (n): n is ClassNode => n instanceof ClassNode && n.name === "Player"
+  );
+  const configureMethod = Player?.methods.find(n => n.name === "configure");
+  if (configureMethod) {
+    const configureObjectMethod = new FunctionNode(
+      configureMethod.name,
+      configureMethod.comments,
+      configureMethod.templateTypes,
+      [
+        {
+          name: "config",
+          isOptional: false,
+          isRest: false,
+          type: {
+            isNullable: false,
+            name: "RecursivePartial",
+            applications: [
+              {
+                isNullable: false,
+                name: "shaka.extern.PlayerConfiguration"
+              }
+            ]
+          }
+        }
+      ],
+      configureMethod.returnType
+    );
+    Player?.methods.splice(
+      Player.methods.indexOf(configureMethod),
+      0,
+      configureObjectMethod
+    );
+
+    configureMethod.params = [
+      {
+        name: "config",
+        isOptional: false,
+        isRest: false,
+        type: {
+          isNullable: false,
+          name: "string"
+        }
+      },
+      {
+        name: "value",
+        isOptional: false,
+        isRest: false,
+        type: {
+          isNullable: false,
+          name: "any"
+        }
+      }
+    ];
+  }
+
+  const NetworkingEngine = net?.nodes.find(
+    (n): n is ClassNode =>
+      n instanceof ClassNode && n.name === "NetworkingEngine"
+  );
+  const requestMethod = NetworkingEngine?.methods.find(
+    n => n.name === "request"
+  );
+  const requestParam = requestMethod?.params.find(p => p.name === "request");
+  if (requestParam) {
+    requestParam.type = {
+      isNullable: false,
+      name: "Partial",
+      applications: [requestParam.type]
+    };
+  }
+
+  /**
+   * Predefined definitions
+   */
+
+  definitions.push(...predefinedDefinitions);
+}

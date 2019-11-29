@@ -180,6 +180,7 @@ module.exports = {
     // }}}
 
     'max-len': ['error', {
+      'code': 120,
       // Wrapped type annotations break the TypeScript generator
       // Maybe there is a better solution though
       'ignoreComments': true,
