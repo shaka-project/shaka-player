@@ -65,7 +65,7 @@ export function processType(
   if (!rawType) {
     return {
       isNullable: false,
-      name: "any"
+      name: "unknown"
     };
   }
 
@@ -78,7 +78,7 @@ export function processType(
           : false,
         applications: node?.definition?.attributes?.template?.map(() => ({
           isNullable: false,
-          name: "any"
+          name: "unknown"
         })),
         name: rawType.name
       };
