@@ -6,17 +6,20 @@ export default class PropertyNode implements Writable {
   comments: string[];
   type: TypeInformation;
   isConst: boolean;
+  isOptional: boolean;
 
   constructor(
     name: string,
     comments: string[],
     type: TypeInformation,
-    isConst: boolean = false
+    isConst: boolean = false,
+    isOptional: boolean = false
   ) {
     this.name = name;
     this.comments = comments;
     this.type = type;
     this.isConst = isConst;
+    this.isOptional = isOptional;
   }
 
   write(
@@ -25,7 +28,11 @@ export default class PropertyNode implements Writable {
     keyword: string | null = null
   ): void {
     const type = stringifyType(this.type);
-    let declaration = this.name + ": " + type + ";";
+    let declaration = this.name;
+    if (this.isOptional) {
+      declaration += "?";
+    }
+    declaration += ": " + type + ";";
     if (this.isConst) {
       declaration = constKeyword + " " + declaration;
     }

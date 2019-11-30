@@ -218,6 +218,9 @@ export function patchDefinitions(definitions: DefinitionNode[]) {
   const net = shaka?.nodes.find(
     (n): n is NamespaceNode => n instanceof NamespaceNode && n.name === "net"
   );
+  const util = shaka?.nodes.find(
+    (n): n is NamespaceNode => n instanceof NamespaceNode && n.name === "util"
+  );
   const ui = shaka?.nodes.find(
     (n): n is NamespaceNode => n instanceof NamespaceNode && n.name === "ui"
   );
@@ -296,6 +299,27 @@ export function patchDefinitions(definitions: DefinitionNode[]) {
       name: "Partial",
       applications: [requestParam.type]
     };
+  }
+
+  const Error = util?.nodes.find(
+    (n): n is ClassNode => n instanceof ClassNode && n.name === "Error"
+  );
+  if (Error) {
+    Error.extendsClass = undefined;
+    Error.properties.push(
+      new PropertyNode("name", comments, { isNullable: false, name: "string" }),
+      new PropertyNode("message", comments, {
+        isNullable: false,
+        name: "string"
+      }),
+      new PropertyNode(
+        "stack",
+        comments,
+        { isNullable: false, name: "string" },
+        false,
+        true
+      )
+    );
   }
 
   const Overlay = ui?.nodes.find(
