@@ -465,7 +465,9 @@ function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
       node.name,
       attributes.comments,
       undefined,
-      undefined,
+      attributes.type === AnnotationType.Event
+        ? [{ isNullable: false, name: "Event" }]
+        : undefined,
       props,
       [],
       undefined
@@ -567,7 +569,7 @@ function parseFunctionNode(root: NodeMap, node: Node): FunctionNode {
 
   const params: Param[] = definition.params.map(name => {
     let type: TypeInformation = {
-      name: "any",
+      name: "unknown",
       isNullable: false
     };
     let isOptional = false;
