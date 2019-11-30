@@ -25,6 +25,7 @@ import compiler
 import docs
 import gendeps
 import generateLocalizations
+import logging
 import shakaBuildHelpers
 
 import os
@@ -142,6 +143,13 @@ def main(args):
 
     is_debug = mode == 'debug'
     if not apps.build_all(parsed_args.force, is_debug):
+      return 1
+  
+  if 'release' in modes:
+    # Check if the generated Typescript typings are correct
+    logging.info('Checking generated Typescript typings...')
+    tsc = compiler.TypescriptCompiler("test/typescript/tsconfig.json")
+    if not tsc.compile():
       return 1
 
   return 0

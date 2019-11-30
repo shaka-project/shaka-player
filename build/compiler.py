@@ -251,6 +251,28 @@ class TypescriptGenerator(object):
       return False
 
     return True
+  
+
+class TypescriptCompiler(object):
+  def __init__(self, project):
+    self.project = _get_source_path(project)
+
+  def compile(self):
+    """Compiles the TypeScript project defined by the tsconfig in |self.project|.
+
+    Returns:
+      True on success; False on failure.
+    """
+
+    tsc = _get_source_path('node_modules/typescript/lib/tsc')
+    cmd_line = ['node', tsc, '-p', self.project]
+
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+      logging.error('TypeScript compiler failed')
+      return False
+
+    return True
+
 
 
 class Less(object):
