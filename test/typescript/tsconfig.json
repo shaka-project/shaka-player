@@ -5,7 +5,12 @@
     "allowJs": false,
     "strict": true,
     "noImplicitReturns": true,
-    "allowSyntheticDefaultImports": false
+    "allowSyntheticDefaultImports": false,
+    "baseUrl": "../../dist",
+    "typeRoots": []
   },
-  "include": ["."]
+  "files": [
+    "basic.ts",
+    "ui.ts"
+  ]
 }

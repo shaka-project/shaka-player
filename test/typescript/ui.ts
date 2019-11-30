@@ -1,4 +1,4 @@
-import * as shaka from "../../dist/shaka-player.ui";
+import * as shaka from "shaka-player.ui";
 
 const manifestUri =
   "https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd";
