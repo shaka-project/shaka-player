@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2015",
-    "lib": ["es5", "es2015.promise"],
+    "target": "es2019",
     "allowJs": false,
     "strict": true,
     "strictNullChecks": true,

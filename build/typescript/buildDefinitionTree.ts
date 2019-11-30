@@ -97,6 +97,57 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
         staticMethods.push(parseFunctionNode(root, child));
         break;
       }
+      case "event": {
+        assert(attributes.eventType);
+        const params = [
+          {
+            name: "type",
+            isOptional: false,
+            isRest: false,
+            type: {
+              isNullable: false,
+              name: attributes.eventType
+            }
+          },
+          {
+            name: "listener",
+            isOptional: false,
+            isRest: false,
+            type: {
+              isNullable: false,
+              isFunction: true,
+              params: [
+                {
+                  isNullable: false,
+                  name: child.definition.identifier.join(".")
+                }
+              ],
+              returnType: {
+                isNullable: false,
+                name: "void"
+              }
+            }
+          }
+        ];
+        methods.push(
+          new FunctionNode(
+            "addEventListener",
+            ["Defined by generator"],
+            undefined,
+            params,
+            undefined
+          ),
+          new FunctionNode(
+            "removeEventListener",
+            ["Defined by generator"],
+            undefined,
+            params,
+            undefined
+          )
+        );
+        others.push(parseNode(root, child));
+        break;
+      }
       default:
         others.push(parseNode(root, child));
     }
@@ -607,6 +658,7 @@ function parseNode(root: NodeMap, node: Node): DefinitionNode {
       return parseClassNode(root, node);
     case "interface":
       return parseInterfaceNode(root, node);
+    case "event":
     case "typedef":
       return parseTypedefNode(root, node);
     case "enum":

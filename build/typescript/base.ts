@@ -8,7 +8,8 @@ export enum AnnotationType {
   Function = "function",
   Property = "property",
   Typedef = "typedef",
-  Namespace = "namespace"
+  Namespace = "namespace",
+  Event = "event"
 }
 
 export interface Props {
@@ -24,6 +25,7 @@ export interface ParamTypes {
 export interface Attributes {
   type?: AnnotationType;
   description?: string;
+  identifier?: string[];
   comments: string[];
   export: boolean;
 
@@ -34,6 +36,7 @@ export interface Attributes {
   propType?: doctrine.Type;
   paramTypes?: ParamTypes;
   returnType?: doctrine.Type;
+  eventType?: string; // Not a real type, but a string identifier
 
   implements?: doctrine.Type;
   extends?: doctrine.Type;
@@ -44,7 +47,8 @@ export enum DefinitionType {
   Function = "function",
   Object = "object",
   Class = "class",
-  Property = "property"
+  Property = "property",
+  Comment = "comment"
 }
 
 export interface BaseDefinition {
@@ -77,11 +81,16 @@ export interface PropertyDefinition extends BaseDefinition {
   type: DefinitionType.Property;
 }
 
+export interface CommentDefinition extends BaseDefinition {
+  type: DefinitionType.Comment;
+}
+
 export type Definition =
   | FunctionDefinition
   | ObjectDefinition
   | ClassDefinition
-  | PropertyDefinition;
+  | PropertyDefinition
+  | CommentDefinition;
 
 export interface Node {
   name: string;

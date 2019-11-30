@@ -150,8 +150,8 @@ function configure(player: shaka.Player) {
     });
 }
 
-function onErrorEvent(event) {
-  onErrorEvent(event.detail);
+function onErrorEvent(event: shaka.Player.ErrorEvent) {
+  onError(event.detail);
 }
 
 function onError(error: shaka.extern.Error) {

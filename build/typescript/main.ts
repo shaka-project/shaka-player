@@ -4,19 +4,17 @@ import assert from "./assert";
 import parseExterns from "./parseExterns";
 import buildDefinitionTree from "./buildDefinitionTree";
 import writeTypeDefinitions from "./writeTypeDefinitions";
-import { Definition } from "./base";
 import { patchDefinitions } from "./predefined";
 
 function generateTypeDefinitions(
   outputPath: string,
   inputPaths: string[]
 ): void {
-  const definitions: Definition[] = Array.prototype.concat(
-    ...inputPaths.map(inputPath => {
-      const code = fs.readFileSync(inputPath, "utf-8");
-      return parseExterns(code);
-    })
-  );
+  const definitions = inputPaths.flatMap(inputPath => {
+    const code = fs.readFileSync(inputPath, "utf-8");
+    return parseExterns(code);
+  });
+
   const root = buildDefinitionTree(definitions);
   patchDefinitions(root);
 

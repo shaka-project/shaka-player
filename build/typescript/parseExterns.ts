@@ -8,7 +8,8 @@ import {
   DefinitionType,
   Definition,
   PropertyDefinition,
-  FunctionDefinition
+  FunctionDefinition,
+  CommentDefinition
 } from "./base";
 
 type Statement = estree.Statement | estree.ModuleDeclaration;
@@ -45,7 +46,7 @@ function parseMethodDefinition(
   md: estree.MethodDefinition
 ): FunctionDefinition | null {
   assert(md.key.type === "Identifier");
-  const attributes = parseLeadingComments(md.leadingComments);
+  const [_, attributes] = parseLeadingComment(md.leadingComments);
   if (!attributes.export && md.kind !== "constructor") {
     return null;
   }
@@ -208,6 +209,13 @@ function parseBlockComment(comment: estree.Comment): Attributes {
             ? normalizeDescription(tag.description)
             : undefined
         });
+        if (
+          tag.name === "type" &&
+          tag.description &&
+          attributes.type === AnnotationType.Event
+        ) {
+          attributes.eventType = normalizeDescription(tag.description);
+        }
         break;
       case "const":
         attributes.type = AnnotationType.Const;
@@ -222,6 +230,11 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         if (tag.description) {
           attributes.description = normalizeDescription(tag.description);
         }
+        break;
+      case "event":
+        assert(tag.description);
+        attributes.type = AnnotationType.Event;
+        attributes.identifier = tag.description.split(".");
         break;
       case "protected":
       case "type":
@@ -295,33 +308,51 @@ function parseBlockComment(comment: estree.Comment): Attributes {
   return attributes;
 }
 
-function parseLeadingComments(comments?: estree.Comment[]): Attributes {
-  const blockComments = comments && comments.filter(c => c.type === "Block");
+function parseLeadingComment(
+  comments: estree.Comment[] | undefined
+): [estree.Comment[], Attributes] {
+  const blockComments = comments?.filter(c => c.type === "Block");
   if (!blockComments || !blockComments.length) {
-    return {
-      comments: [],
-      description: "",
-      export: false
-    };
+    return [
+      [],
+      {
+        comments: [],
+        description: "",
+        export: false
+      }
+    ];
   }
-  // Only parse the comment closest to the statement
-  const comment = blockComments[blockComments.length - 1];
-  return parseBlockComment(comment);
+  return [blockComments, parseBlockComment(blockComments.pop()!)];
 }
 
 function parseBody(statements: Statement[]): Definition[] {
-  return statements
-    .map<Definition | null>(statement => {
-      const attributes = parseLeadingComments(statement.leadingComments);
+  return statements.flatMap(statement => {
+    const [comments, attributes] = parseLeadingComment(
+      statement.leadingComments
+    );
+    const commentDefinitions = comments.flatMap<CommentDefinition>(comment => {
+      const attributes = parseBlockComment(comment);
       if (!attributes.export) {
-        return null;
+        return [];
       }
+      assert(attributes.identifier);
       return {
-        ...parseStatement(statement),
+        type: DefinitionType.Comment,
+        identifier: attributes.identifier,
         attributes
       };
-    })
-    .filter((definition): definition is Definition => definition != null);
+    });
+    if (!attributes.export) {
+      return commentDefinitions;
+    }
+    return [
+      ...commentDefinitions,
+      {
+        ...parseStatement(statement),
+        attributes
+      }
+    ];
+  });
 }
 
 export default function parseExterns(code: string): Definition[] {

@@ -54,13 +54,12 @@ async function init() {
   }
 }
 
-function onCastStatusChanged(event) {
-  const newCastStatus = event["newStatus"];
+function onCastStatusChanged(event: shaka.ui.Controls.CastStatusChangedEvent) {
   // Handle cast status change
-  console.log("The new cast status is: " + newCastStatus);
+  console.log("The new cast status is:", event.newStatus);
 }
 
-function onPlayerErrorEvent(errorEvent) {
+function onPlayerErrorEvent(errorEvent: shaka.Player.ErrorEvent) {
   // Extract the shaka.util.Error object from the event.
   onPlayerError(errorEvent.detail);
 }
@@ -70,7 +69,7 @@ function onPlayerError(error: shaka.extern.Error) {
   console.error("Error code", error.code, "object", error);
 }
 
-function onUIErrorEvent(errorEvent) {
+function onUIErrorEvent(errorEvent: shaka.ui.Controls.ErrorEvent) {
   // Extract the shaka.util.Error object from the event.
   onPlayerError(errorEvent.detail);
 }
