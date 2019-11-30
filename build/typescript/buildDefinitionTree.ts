@@ -239,10 +239,21 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
             ) {
               assert(pd.attributes);
               const name = pd.identifier[1];
-              const isConst = pd.attributes.type === "const";
-              const rawType = isConst
+              let isConst = pd.attributes.type === AnnotationType.Const;
+              let rawType = isConst
                 ? pd.attributes.constType
                 : pd.attributes.propType;
+              if (!rawType && interfaceNode) {
+                // Check if this property has been defined in the implemented
+                // interface.
+                const propType = getPropTypeFromInterface(
+                  root,
+                  interfaceNode,
+                  name
+                );
+                rawType = propType.rawType;
+                isConst = propType.isConst;
+              }
               const type = processType(root, rawType);
               properties.push(new PropertyNode(name, [], type, isConst));
             }
