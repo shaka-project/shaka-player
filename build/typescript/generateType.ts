@@ -171,7 +171,10 @@ export function processType(
   }
 }
 
-export function stringifyType(type: TypeInformation): string {
+export function stringifyType(
+  type: TypeInformation,
+  isReturnType: boolean = false
+): string {
   let str = "";
   if (type.isFunction) {
     assert(type.params);
@@ -179,7 +182,7 @@ export function stringifyType(type: TypeInformation): string {
     const params = type.params
       .map((paramType, i) => `p${i}: ${stringifyType(paramType)}`)
       .join(", ");
-    const returnType = stringifyType(type.returnType);
+    const returnType = stringifyType(type.returnType, true);
     str = `((${params}) => ${returnType})`;
   } else if (type.isRecord) {
     assert(type.fields);
@@ -189,7 +192,10 @@ export function stringifyType(type: TypeInformation): string {
     str = "{" + fields + "}";
   } else if (type.isUnion) {
     assert(type.elements);
-    str = type.elements.map(stringifyType).join(" | ");
+    str = type.elements.map(e => stringifyType(e)).join(" | ");
+    if (isReturnType && type.elements.find(e => e.name === "undefined")) {
+      str += " | void";
+    }
   } else {
     assert(type.name);
     str = type.name;
@@ -234,7 +240,9 @@ export function stringifyType(type: TypeInformation): string {
   }
 
   if (type.applications) {
-    const applications = type.applications.map(stringifyType).join(", ");
+    const applications = type.applications
+      .map(a => stringifyType(a))
+      .join(", ");
     str += "<" + applications + ">";
   }
   if (type.isNullable) {

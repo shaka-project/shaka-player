@@ -57,6 +57,10 @@ function configure(player: shaka.Player) {
     }
   });
 
+  player.getNetworkingEngine().registerResponseFilter((type, request) => {
+    console.log("Response:", type, request);
+  });
+
   player
     .getNetworkingEngine()
     .registerRequestFilter(async function(type, request) {

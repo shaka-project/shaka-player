@@ -38,7 +38,8 @@ export default class InterfaceNode implements Writable {
     }
     if (this.extendsInterfaces) {
       declaration +=
-        " extends " + this.extendsInterfaces.map(stringifyType).join(", ");
+        " extends " +
+        this.extendsInterfaces.map(i => stringifyType(i)).join(", ");
     }
 
     writer.writeComments(this.comments);

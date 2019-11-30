@@ -54,7 +54,7 @@ export default class ClassNode implements Writable {
     if (this.implementsInterfaces) {
       declaration +=
         " implements " +
-        this.implementsInterfaces.map(stringifyType).join(", ");
+        this.implementsInterfaces.map(i => stringifyType(i)).join(", ");
     }
 
     writer.writeComments(this.comments);
