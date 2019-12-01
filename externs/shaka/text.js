@@ -97,7 +97,7 @@ shaka.extern.CueRegion = class {
      * @type {shaka.text.CueRegion.scrollMode}
      * @exportDoc
      */
-    shaka.extern.CueRegion.prototype.scroll;
+    this.scroll;
   }
 };
 
