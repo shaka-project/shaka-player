@@ -163,7 +163,7 @@ const EventTarget = makeInterface("EventTarget", [
         } as doctrine.type.NameExpression
       },
       {
-        name: "callback",
+        name: "listener",
         type: {
           type: ds.NullableType,
           expression: {
