@@ -187,6 +187,18 @@ features and similar APIs for native apps on iOS.  This project uses its own
 media stack, which allows it to play content that would otherwise not be
 supported.  This supports both DASH and HLS manifests.
 
+<hr>
+
+**Q:** The Nightly Demo isn't loading for me!
+
+**A:** Are you looking at the uncompiled build with an AdBlocker enabled?
+We're rolling out ad support which is triggering some ad blockers to block
+requests for some of our source files. This only affects the uncompiled build.
+Switch to the compiled build (add "build=compiled" to the url) or temporarily
+disable your ad blocker to see the nightly uncompiled mode.
+Please note that if you want to test our ad logic, you might have to disable
+the ad blocker in compiled mode as well.
+
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
