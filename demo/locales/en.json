@@ -112,6 +112,7 @@
   "DEMO_IGNORE_MIN_BUFFER_TIME": "Ignore Min Buffer Time",
   "DEMO_INITIAL_SEGMENT_LIMIT": "Initial Segment Limit",
   "DEMO_DISABLE_AUDIO": "Disable Audio",
+  "DEMO_DISABLE_VIDEO": "Disable Video",
   "DEMO_ENABLED": "Enabled",
   "DEMO_BANDWIDTH_ESTIMATE": "Default Bandwidth Estimate",
   "DEMO_BANDWIDTH_DOWNGRADE": "Bandwidth Downgrade Target",
