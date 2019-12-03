@@ -1307,6 +1307,31 @@ describe('DashParser Manifest', function() {
     expect(presentationDelay).toBe(config.dash.defaultPresentationDelay);
   });
 
+  it('Honors the ignoreSuggestedPresentationDelay config', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT2S" suggestedPresentationDelay="PT25S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreSuggestedPresentationDelay = true;
+    parser.configure(config);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const presentationTimeline = manifest.presentationTimeline;
+    const presentationDelay = presentationTimeline.getDelay();
+    expect(presentationDelay).toBe(config.dash.defaultPresentationDelay);
+  });
+
   it('converts Accessibility element to "kind"', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',

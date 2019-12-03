@@ -187,6 +187,8 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore DRM Info', 'manifest.dash.ignoreDrmInfo')
         .addNumberInput_('Default Presentation Delay',
                          'manifest.dash.defaultPresentationDelay')
+        .addNumberInput_('Ignore DASH suggestedPresentationDelay',
+                         'manifest.dash.ignoreSuggestedPresentationDelay')
         .addBoolInput_('Ignore Min Buffer Time',
             'manifest.dash.ignoreMinBufferTime')
         .addBoolInput_('Disable audio',

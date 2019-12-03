@@ -548,7 +548,8 @@ shaka.extern.DrmConfiguration;
  *   xlinkFailGracefully: boolean,
  *   defaultPresentationDelay: number,
  *   ignoreMinBufferTime: boolean,
- *   autoCorrectDrift: boolean
+ *   autoCorrectDrift: boolean,
+ *   ignoreSuggestedPresentationDelay: boolean
  * }}
  *
  * @property {shaka.extern.DashContentProtectionCallback} customScheme
@@ -583,6 +584,10 @@ shaka.extern.DrmConfiguration;
  *   allows us to play streams that have a lot of drift.  If <code>false</code>,
  *   we can't play content where the manifest specifies segments in the future.
  *   Defaults to <code>true</code>.
+ * @property {boolean} ignoreSuggestedPresentationDelay
+ *   If true will cause DASH parser to ignore
+ *   <code>suggestedPresentationDelay</code> from manifest. Defaults to
+ *   <code>false</code> if not provided.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
