@@ -1284,7 +1284,7 @@ describe('DashParser Manifest', () => {
     expect(presentationDelay).toBe(config.dash.defaultPresentationDelay);
   });
 
-  it('Config with ignoreSuggestedPresentationDelay = true', async () => {
+  it('Honors the ignoreSuggestedPresentationDelay config', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT2S" suggestedPresentationDelay="PT25S">',
       '  <Period id="1" duration="PT30S">',
