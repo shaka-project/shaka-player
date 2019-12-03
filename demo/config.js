@@ -190,7 +190,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Ignore Min Buffer Time',
             'manifest.dash.ignoreMinBufferTime')
         .addBoolInput_('Disable audio',
-            'manifest.disableAudio');
+            'manifest.disableAudio')
+        .addBoolInput_('Disable video',
+            'manifest.disableVideo');
 
     this.addRetrySection_('manifest', 'Manifest');
   }
