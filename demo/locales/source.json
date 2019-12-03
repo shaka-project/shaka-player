@@ -451,6 +451,10 @@
     "message": "Disable Audio",
     "description": "The name of a configuration value."
   },
+  "DEMO_DISABLE_VIDEO": {
+    "message": "Disable Video",
+    "description": "The name of a configuration value."
+  },
   "DEMO_ENABLED": {
     "message": "Enabled",
     "description": "The name of a configuration value."
