@@ -72,6 +72,12 @@ describe('Player Src Equals', () => {
     expect(player.isAudioOnly()).toBeFalsy();
   });
 
+  it('allow load with startTime', async () => {
+    const startTime = parseFloat(5);
+    await loadWithSrcEqualsAndStartTime(SMALL_MP4_CONTENT_URI, startTime);
+    expect(video.currentTime).toBe(startTime);
+  });
+
   // Since we don't have any manifest data, we must assume that we can seek
   // anywhere in the presentation; end-time will come from the media element.
   it('allows seeking throughout the presentation', async () => {
@@ -346,6 +352,24 @@ describe('Player Src Equals', () => {
 
     await player.attach(video, /* initMediaSource= */ false);
     await player.load(contentUri);
+
+    // Wait until the media element is ready with content. Waiting until this
+    // point ensures it is safe to interact with the media element.
+    await ready;
+  }
+
+  /**
+   * @param {string} contentUri
+   * @param {number} startTime
+   * @return {!Promise}
+   */
+  async function loadWithSrcEqualsAndStartTime(contentUri, startTime) {
+    const ready = new Promise((resolve) => {
+      eventManager.listenOnce(video, 'loadedmetadata', resolve);
+    });
+
+    await player.attach(video, /* initMediaSource= */ false);
+    await player.load(contentUri, startTime);
 
     // Wait until the media element is ready with content. Waiting until this
     // point ensures it is safe to interact with the media element.
