@@ -419,6 +419,10 @@
     "message": "[JARGON:Xlink] Should Fail Gracefully",
     "description": "The name of a configuration value."
   },
+  "DEMO_IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY": {
+    "message": "Ignore [PROPER_NAME:DASH] [JARGON:suggestedPresentationDelay]",
+    "description": "The name of a configuration value."
+  },
   "DEMO_IGNORE_HLS_TEXT_FAILURES": {
     "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures",
     "description": "The name of a configuration value."
