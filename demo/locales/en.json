@@ -114,6 +114,7 @@
   "DEMO_INITIAL_SEGMENT_LIMIT": "Initial Segment Limit",
   "DEMO_DISABLE_AUDIO": "Disable Audio",
   "DEMO_DISABLE_VIDEO": "Disable Video",
+  "DEMO_DISABLE_TEXT": "Disable Text",
   "DEMO_ENABLED": "Enabled",
   "DEMO_BANDWIDTH_ESTIMATE": "Default Bandwidth Estimate",
   "DEMO_BANDWIDTH_DOWNGRADE": "Bandwidth Downgrade Target",

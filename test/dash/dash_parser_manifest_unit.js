@@ -1238,6 +1238,41 @@ describe('DashParser Manifest', () => {
     expect(variant.video).toBe(null);
   });
 
+  it('Disable text does not create text streams', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="3" mimeType="audio/mp4">',
+      '      <Representation id="audio-en">',
+      '        <BaseURL>a-en.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="text/vtt" lang="de">',
+      '      <Representation>',
+      '        <BaseURL>http://example.com/de.vtt</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.disableText = true;
+    parser.configure(config);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const stream = manifest.periods[0].textStreams[0];
+    expect(stream).toBeUndefined();
+  });
+
   it('override manifest value if ignoreMinBufferTime is true', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
