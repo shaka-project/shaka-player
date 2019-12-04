@@ -598,6 +598,7 @@ shaka.extern.HlsManifestConfiguration;
  *   availabilityWindowOverride: number,
  *   disableAudio: boolean,
  *   disableVideo: boolean,
+ *   disableText: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
  * }}
@@ -614,6 +615,9 @@ shaka.extern.HlsManifestConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} disableVideo
  *   If <code>true</code>, the video tracks are ignored.
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableText
+ *   If <code>true</code>, the text tracks are ignored.
  *   Defaults to <code>false</code>.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
