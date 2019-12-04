@@ -194,7 +194,9 @@ shakaDemo.Config = class {
         .addBoolInput_('Disable audio',
             'manifest.disableAudio')
         .addBoolInput_('Disable video',
-            'manifest.disableVideo');
+            'manifest.disableVideo')
+        .addBoolInput_('Disable text',
+            'manifest.disableText');
 
     this.addRetrySection_('manifest', 'Manifest');
   }
