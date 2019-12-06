@@ -1397,4 +1397,34 @@ describe('DashParser Manifest', function() {
     expect(textStream.roles).toEqual(['captions', 'foo']);
     expect(textStream.kind).toBe('caption');
   });
+
+  it('Does not error when image adaptation sets are present', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="3" mimeType="audio/mp4">',
+      '      <Representation id="audio-en">',
+      '        <BaseURL>a-en.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet contentType="image" id="3">',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.periods[0].variants[0];
+    expect(variant.audio).toBeTruthy();
+    expect(variant.video).toBeTruthy();
+  });
 });
