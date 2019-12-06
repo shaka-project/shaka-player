@@ -1371,9 +1371,7 @@ describe('DashParser Manifest', () => {
     expect(textStream.kind).toBe('caption');
   });
 
-  // Filter image adaptation sets, until we add thumbnail track support.
-  // See: https://github.com/google/shaka-player/issues/559
-  it('Filter image adaptation sets', async () => {
+  it('Does not error when image adaptation sets are present', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
