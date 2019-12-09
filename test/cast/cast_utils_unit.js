@@ -245,7 +245,7 @@ describe('CastUtils', () => {
         document.body.removeChild(video);
       });
 
-      quarantinedIt('deserialize into equivalent objects', () => {
+      it('deserialize into equivalent objects', () => {
         const buffered = video.buffered;
 
         // The test is less interesting if the ranges are empty.
