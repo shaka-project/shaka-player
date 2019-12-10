@@ -405,6 +405,7 @@ describe('ManifestConverter', () => {
       emsgSchemeIdUris: null,
       roles: [],
       channelsCount: null,
+      audioSamplingRate: null,
       closedCaptions: null,
     };
 
