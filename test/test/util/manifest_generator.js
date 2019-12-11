@@ -559,6 +559,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     emsgSchemeIdUris: null,
     roles: [],
     channelsCount: null,
+    audioSamplingRate: null,
     closedCaptions: null,
   };
   return stream;
@@ -822,6 +823,17 @@ shaka.test.ManifestGenerator.prototype.roles = function(roles) {
 shaka.test.ManifestGenerator.prototype.channelsCount = function(count) {
   let stream = this.currentStream_();
   stream.channelsCount = count;
+  return this;
+};
+
+
+/**
+ * @param {number} rate
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.audioSamplingRate = function(rate) {
+  let stream = this.currentStream_();
+  stream.audioSamplingRate = rate;
   return this;
 };
 

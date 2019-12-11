@@ -198,6 +198,7 @@ shaka.extern.BufferedInfo;
  *   videoId: ?number,
  *   audioId: ?number,
  *   channelsCount: ?number,
+ *   audioSamplingRate: ?number,
  *   audioBandwidth: ?number,
  *   videoBandwidth: ?number,
  *   originalVideoId: ?string,
@@ -263,6 +264,8 @@ shaka.extern.BufferedInfo;
  *   (only for variant tracks) The audio stream id.
  * @property {?number} channelsCount
  *   The count of the audio track channels.
+ * @property {?number} audioSamplingRate
+ *   Specifies the maximum sampling rate of the content.
  * @property {?number} audioBandwidth
  *   (only for variant tracks) The audio stream's bandwidth if known.
  * @property {?number} videoBandwidth

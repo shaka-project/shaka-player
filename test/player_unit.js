@@ -924,7 +924,7 @@ describe('Player', function() {
             .addVideo(1).originalId('video-1kbps').bandwidth(1000)
               .size(100, 200).frameRate(1000000 / 42000)
             .addAudio(3).originalId('audio-en-6c').bandwidth(300)
-              .channelsCount(6).roles(['main'])
+              .channelsCount(6).roles(['main']).audioSamplingRate(48000)
 
           .addVariant(101)  // main surround, high res
             .bandwidth(2300)
@@ -938,7 +938,7 @@ describe('Player', function() {
             .language('en')
             .addExistingStream(1)  // video
             .addAudio(4).originalId('audio-en-2c').bandwidth(100)
-              .channelsCount(2).roles(['main'])
+              .channelsCount(2).roles(['main']).audioSamplingRate(48000)
 
           .addVariant(103)  // main stereo, high res
             .bandwidth(2100)
@@ -951,7 +951,7 @@ describe('Player', function() {
             .language('en')
             .addExistingStream(1)  // video
             .addAudio(5).originalId('audio-commentary').bandwidth(100)
-              .channelsCount(2).roles(['commentary'])
+              .channelsCount(2).roles(['commentary']).audioSamplingRate(48000)
 
           .addVariant(105)  // commentary stereo, low res
             .bandwidth(2100)
@@ -964,7 +964,7 @@ describe('Player', function() {
             .bandwidth(1100)
             .addExistingStream(1)  // video
             .addAudio(6).originalId('audio-es').bandwidth(100)
-              .channelsCount(2)
+              .channelsCount(2).audioSamplingRate(48000)
 
           .addVariant(107)  // spanish stereo, high res
             .language('es')
@@ -990,12 +990,16 @@ describe('Player', function() {
             .bandwidth(1100)
             .language('en')
             .addVideo(10).bandwidth(1000).size(100, 200)
-            .addAudio(11).bandwidth(100).channelsCount(2)
+            .addAudio(11)
+              .bandwidth(100).channelsCount(2)
+              .audioSamplingRate(48000)
           .addVariant(201)
             .bandwidth(1300)
             .language('en')
             .addExistingStream(10)  // video
-            .addAudio(12).bandwidth(300).channelsCount(6)
+            .addAudio(12)
+              .bandwidth(300).channelsCount(6)
+              .audioSamplingRate(48000)
         .build();
 
       variantTracks = [
@@ -1020,6 +1024,7 @@ describe('Player', function() {
           videoId: 1,
           audioId: 3,
           channelsCount: 6,
+          audioSamplingRate: 48000,
           audioBandwidth: 300,
           videoBandwidth: 1000,
           originalAudioId: 'audio-en-6c',
@@ -1047,6 +1052,7 @@ describe('Player', function() {
           videoId: 2,
           audioId: 3,
           channelsCount: 6,
+          audioSamplingRate: 48000,
           audioBandwidth: 300,
           videoBandwidth: 2000,
           originalAudioId: 'audio-en-6c',
@@ -1074,6 +1080,7 @@ describe('Player', function() {
           videoId: 1,
           audioId: 4,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-en-2c',
@@ -1101,6 +1108,7 @@ describe('Player', function() {
           videoId: 2,
           audioId: 4,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-en-2c',
@@ -1128,6 +1136,7 @@ describe('Player', function() {
           videoId: 1,
           audioId: 5,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-commentary',
@@ -1155,6 +1164,7 @@ describe('Player', function() {
           videoId: 2,
           audioId: 5,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-commentary',
@@ -1182,6 +1192,7 @@ describe('Player', function() {
           videoId: 1,
           audioId: 6,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-es',
@@ -1209,6 +1220,7 @@ describe('Player', function() {
           videoId: 2,
           audioId: 6,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-es',
@@ -1233,6 +1245,7 @@ describe('Player', function() {
           roles: [],
           audioRoles: null,
           channelsCount: null,
+          audioSamplingRate: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1260,6 +1273,7 @@ describe('Player', function() {
           roles: ['main'],
           audioRoles: null,
           channelsCount: null,
+          audioSamplingRate: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1287,6 +1301,7 @@ describe('Player', function() {
           roles: ['commentary'],
           audioRoles: null,
           channelsCount: null,
+          audioSamplingRate: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -2745,10 +2760,14 @@ describe('Player', function() {
           .addPeriod(0)
             // Surround sound AC-3, preferred by config
             .addVariant(0).bandwidth(300)
-              .addAudio(0).channelsCount(6).mime('audio/mp4', 'ac-3')
+              .addAudio(0)
+                .channelsCount(6).mime('audio/mp4', 'ac-3')
+                .audioSamplingRate(48000)
             // Stereo AAC, would win out based on bandwidth alone
             .addVariant(1).bandwidth(100)
-              .addAudio(1).channelsCount(2).mime('audio/mp4', 'mp4a.40.2')
+              .addAudio(1)
+                .channelsCount(2).mime('audio/mp4', 'mp4a.40.2')
+                .audioSamplingRate(48000)
           .build();
 
       // Configure for 6 channels.

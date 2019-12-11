@@ -413,6 +413,7 @@ describe('ManifestConverter', function() {
       emsgSchemeIdUris: null,
       roles: [],
       channelsCount: null,
+      audioSamplingRate: null,
       closedCaptions: null,
     };
 
