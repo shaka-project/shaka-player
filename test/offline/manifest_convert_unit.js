@@ -392,6 +392,7 @@ describe('ManifestConverter', () => {
       mimeType: streamDb.mimeType,
       codecs: streamDb.codecs,
       frameRate: streamDb.frameRate,
+      pixelAspectRatio: streamDb.pixelAspectRatio || null,
       width: streamDb.width || undefined,
       height: streamDb.height || undefined,
       kind: streamDb.kind,

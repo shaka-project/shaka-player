@@ -160,6 +160,7 @@ describe('AdaptationSet', () => {
   function makeStream(id, mimeType, codecs, roles) {
     return {
       audioSamplingRate: null,
+      pixelAspectRatio: null,
       channelsCount: null,
       closedCaptions: null,
       codecs: codecs.join(','),
