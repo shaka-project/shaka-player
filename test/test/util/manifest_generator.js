@@ -574,6 +574,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.roles = [];
       /** @type {?number} */
       this.channelsCount = null;
+      /** @type {?number} */
+      this.audioSamplingRate = null;
       /** @type {Map.<string, string>} */
       this.closedCaptions = null;
     }
