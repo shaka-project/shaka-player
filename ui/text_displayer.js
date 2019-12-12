@@ -87,7 +87,7 @@ shaka.ui.TextDisplayer = class {
    * @override
    * @export
    */
-  remove(startTime, endTime) {
+  remove(start, end) {
     // Return false if destroy() has been called.
     if (!this.textContainer_) {
       return false;
@@ -95,7 +95,7 @@ shaka.ui.TextDisplayer = class {
 
     // Remove the cues out of the time range.
     this.cues_ = this.cues_.filter(
-        (cue) => cue.startTime < startTime || cue.endTime >= endTime);
+        (cue) => cue.startTime < start || cue.endTime >= end);
     this.updateCaptions_();
 
     return true;

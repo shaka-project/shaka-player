@@ -252,8 +252,8 @@ function parseBlockComment(comment: estree.Comment): Attributes {
       case "param":
         assert(tag.name);
         assert(tag.type);
-        attributes.paramTypes = attributes.paramTypes || {};
-        attributes.paramTypes[tag.name] = tag.type;
+        attributes.paramTypes = attributes.paramTypes || [];
+        attributes.paramTypes.push(tag.type);
         if (tag.description) {
           const description = normalizeDescription(tag.description);
           attributes.comments.push(`@param ${tag.name} ${description}`);

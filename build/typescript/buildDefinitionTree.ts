@@ -22,7 +22,6 @@ import {
   DefinitionType,
   FunctionDefinition,
   AnnotationType,
-  ParamTypes,
   NodeMap,
   Node
 } from "./base";
@@ -496,10 +495,7 @@ function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
     // TypeScript doesn't allow nameless parameter declarations,
     // so we are just going to follow a p0, p1, ... schema.
     const params = typedefType.params.map((_, i) => "p" + i);
-    const paramTypes = typedefType.params.reduce((acc: ParamTypes, type, i) => {
-      acc["p" + i] = type;
-      return acc;
-    }, {});
+    const paramTypes = typedefType.params;
 
     const functionNode: Node = {
       name: "new",
@@ -507,12 +503,12 @@ function parseTypedefNode(root: NodeMap, node: Node): InterfaceNode | TypeNode {
       definition: {
         type: "function",
         identifier: node.definition.identifier.concat(["new"]),
-        params: params,
+        params,
         attributes: {
           type: "function",
           description: "",
           comments: [],
-          paramTypes: paramTypes,
+          paramTypes,
           returnType: typedefType.this,
           export: true
         }
@@ -576,19 +572,20 @@ function parseFunctionNode(root: NodeMap, node: Node): FunctionNode {
   assert(definition.type === DefinitionType.Function);
   const { attributes } = definition;
   assert(attributes);
-  const paramTypes = attributes.paramTypes || {};
+  const paramTypes = attributes.paramTypes || [];
 
-  const params: Param[] = definition.params.map(name => {
+  const params: Param[] = definition.params.map((name, i) => {
     let type: TypeInformation = {
       name: "unknown",
       isNullable: false
     };
     let isOptional = false;
     let isRest = false;
-    if (paramTypes[name]) {
-      type = processType(root, paramTypes[name]);
-      isOptional = paramTypes[name].type === "OptionalType";
-      isRest = paramTypes[name].type === "RestType";
+    const paramType = paramTypes[i];
+    if (paramType) {
+      type = processType(root, paramType);
+      isOptional = paramType.type === "OptionalType";
+      isRest = paramType.type === "RestType";
     } else {
       console.warn(
         "Missing type information for parameter",

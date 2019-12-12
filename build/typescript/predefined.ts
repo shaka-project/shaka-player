@@ -15,7 +15,6 @@ import {
   AnnotationType,
   DefinitionType,
   Node,
-  ParamTypes,
   NodeMap
 } from "./base";
 import { getNodeAtPath } from "./treeUtils";
@@ -79,10 +78,7 @@ function makeInterface(name: string, methods: Method[]): Node {
           type: AnnotationType.Function,
           comments: [],
           export: true,
-          paramTypes: m.params.reduce((acc: ParamTypes, p: Parameter) => {
-            acc[p.name] = p.type;
-            return acc;
-          }, {}),
+          paramTypes: m.params.map(p => p.type),
           returnType: m.returnType
         }
       }))

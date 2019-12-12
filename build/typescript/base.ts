@@ -25,13 +25,6 @@ export interface Props {
 }
 
 /**
- * Mapping of parameter names to types
- */
-export interface ParamTypes {
-  [key: string]: doctrine.Type;
-}
-
-/**
  * Metadata defined by annotations in closure block comment
  */
 export interface Attributes {
@@ -46,7 +39,7 @@ export interface Attributes {
   enumType?: doctrine.Type;
   typedefType?: doctrine.Type;
   propType?: doctrine.Type;
-  paramTypes?: ParamTypes;
+  paramTypes?: doctrine.Type[];
   returnType?: doctrine.Type;
   eventType?: string; // Not a real type, but a string identifier
 

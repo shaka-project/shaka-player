@@ -1,7 +1,6 @@
 import * as doctrine from "@teppeis/doctrine";
 import {
   Definition,
-  ParamTypes,
   DefinitionType,
   PropertyDefinition,
   NodeMap,
@@ -136,7 +135,7 @@ export function getPropTypeFromInterface(
 }
 
 interface MethodTypes {
-  paramTypes?: ParamTypes;
+  paramTypes?: doctrine.Type[];
   returnType?: doctrine.Type;
 }
 
@@ -183,10 +182,7 @@ export function getMethodTypesFromInterface(
     assert(base);
     if (base.type.type === doctrine.Syntax.FunctionType) {
       types = {
-        paramTypes: base.type.params.reduce((acc: ParamTypes, type, i) => {
-          acc["p" + i] = type;
-          return acc;
-        }, {}),
+        paramTypes: base.type.params,
         returnType: base.type.result || undefined
       };
     }
