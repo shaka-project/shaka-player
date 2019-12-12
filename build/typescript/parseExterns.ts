@@ -14,8 +14,6 @@ import {
 
 type Statement = estree.Statement | estree.ModuleDeclaration;
 
-const ds = doctrine.Syntax;
-
 function staticMemberExpressionToPath(expression: estree.Expression): string[] {
   if (expression.type === "Identifier") {
     return [expression.name];
