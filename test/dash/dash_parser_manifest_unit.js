@@ -366,6 +366,29 @@ describe('DashParser Manifest', () => {
         expect(stream3.closedCaptions).toEqual(expectedClosedCaptions);
       });
 
+  it('Detects E-AC3 JOC content by SupplementalProperty', async () => {
+    const idUri = 'tag:dolby.com,2018:dash:EC3_ExtensionType:2018';
+    const source = [
+      '<MPD>',
+      '  <Period duration="PT30M">',
+      '    <AdaptationSet mimeType="audio/mp4" lang="\u2603">',
+      '      <Representation bandwidth="500">',
+      '        <SupplementalProperty schemeIdUri="' + idUri + '" value="JOC"/>',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', source);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const stream = manifest.periods[0].variants[0].audio;
+    expect(stream.mimeType).toBe('audio/eac3-joc');
+  });
+
   it('correctly parses closed captions without channel numbers', async () => {
     const source = [
       '<MPD minBufferTime="PT75S">',
