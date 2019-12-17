@@ -1,3 +1,34 @@
+## 2.5.7 (2019-12-18)
+
+New Features:
+  - Add audioSamplingRate property
+    - https://github.com/google/shaka-player/pull/2290
+  - Ignore DASH image tracks
+    - https://github.com/google/shaka-player/pull/2276
+  - Add AV1 check and more file extensions for src mode
+    - https://github.com/google/shaka-player/pull/2280
+  - Allow removing text from manifests
+    - https://github.com/google/shaka-player/pull/2278
+  - Allow ignoreSuggestedPresentationDelay in DASH
+    - https://github.com/google/shaka-player/pull/2260
+  - Allow removing video from manifests
+    - https://github.com/google/shaka-player/pull/2259
+  - Add a polyfill for EME encryption scheme queries
+  - Add support for ttml regions
+    - https://github.com/google/shaka-player/issues/2191
+  - Add a method to select variants by label
+    - https://github.com/google/shaka-player/issues/924
+
+Bugfixes:
+  - Fix shaka.polyfill missing in externs
+  - Fix width of overflow menu with wide content
+    - https://github.com/google/shaka-player/issues/2249
+  - Disable indexedDB support if an error is thrown
+    - https://github.com/google/shaka-player/pull/2236
+  - Fix setting robustness settings in DRM config
+    - https://github.com/google/shaka-player/issues/2211
+
+
 ## 2.5.6 (2019-11-06)
 
 Bugfixes:
