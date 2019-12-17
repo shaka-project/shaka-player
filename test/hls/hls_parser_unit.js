@@ -536,7 +536,7 @@ describe('HlsParser', () => {
 
     expect(ref.startTime).toBe(0);
     // baseMediaDecodeTime (655360) / timescale (1000)
-    expect(ref.presentationTimeOffset).toBe(655.36);
+    expect(ref.timestampOffset).toBe(-655.36);
     expect(presentationTimeline.getSeekRangeStart()).toBe(0);
     expect(presentationTimeline.getSeekRangeEnd()).toBe(5);
   });
@@ -2037,9 +2037,9 @@ describe('HlsParser', () => {
           '' /* baseUri */,
           expectedStartByte,
           expectedEndByte);
-      // In VOD content, we set the presentationTimeOffset to align the
+      // In VOD content, we set the timestampOffset to align the
       // content to presentation time 0.
-      expectedRef.presentationTimeOffset = segmentDataStartTime;
+      expectedRef.timestampOffset = -segmentDataStartTime;
 
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.periods[0].variants[0].video;
@@ -2070,9 +2070,9 @@ describe('HlsParser', () => {
           '' /* baseUri */,
           expectedStartByte,
           expectedEndByte);
-      // In VOD content, we set the presentationTimeOffset to align the
+      // In VOD content, we set the timestampOffset to align the
       // content to presentation time 0.
-      expectedRef.presentationTimeOffset = segmentDataStartTime;
+      expectedRef.timestampOffset = -segmentDataStartTime;
 
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.periods[0].variants[0].video;
@@ -2142,7 +2142,7 @@ describe('HlsParser', () => {
       const ref = video.segmentIndex.get(0);
       expect(video.segmentIndex.get(1)).toBe(null);  // No more references.
 
-      expect(ref.presentationTimeOffset).toBe(segmentDataStartTime);
+      expect(ref.timestampOffset).toBe(-segmentDataStartTime);
       // The duration should be set to the sum of the segment durations (5),
       // even though the endTime of the segment is larger.
       expect(ref.endTime - ref.startTime).toBe(5);

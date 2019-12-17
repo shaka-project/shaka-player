@@ -24,7 +24,8 @@ describe('ManifestConverter', () => {
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
-          audios, videos, timeline, /* periodStart */ 0);
+          audios, videos, timeline, /* periodStart */ 0,
+          /* periodDuration */ 10);
       expect(variants.size).toBe(2);
 
       expect(variants.has(0)).toBeTruthy();
@@ -49,7 +50,8 @@ describe('ManifestConverter', () => {
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
-          audios, videos, timeline, /* periodStart */ 0);
+          audios, videos, timeline, /* periodStart */ 0,
+          /* periodDuration */ 10);
       expect(variants.size).toBe(2);
     });
 
@@ -66,12 +68,15 @@ describe('ManifestConverter', () => {
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
-          audios, videos, timeline, /* periodStart */ 0);
+          audios, videos, timeline, /* periodStart */ 0,
+          /* periodDuration */ 10);
       expect(variants.size).toBe(2);
     });
   }); // describe('createVariants')
 
   describe('fromPeriodDB', () => {
+    const arbitraryPeriodDuration = 180;
+
     it('will reconstruct Periods correctly', () => {
       /** @type {shaka.extern.PeriodDB} */
       const periodDb = {
@@ -81,7 +86,8 @@ describe('ManifestConverter', () => {
 
       const timeline = createTimeline();
 
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
       expect(period).toBeTruthy();
       expect(period.startTime).toBe(periodDb.startTime);
       expect(period.textStreams).toEqual([]);
@@ -95,8 +101,8 @@ describe('ManifestConverter', () => {
       expect(variant.allowedByApplication).toBe(true);
       expect(variant.allowedByKeySystem).toBe(true);
 
-      verifyStream(variant.video, periodDb.streams[0]);
-      verifyStream(variant.audio, periodDb.streams[1]);
+      verifyStream(periodDb, variant.video, periodDb.streams[0]);
+      verifyStream(periodDb, variant.audio, periodDb.streams[1]);
     });
 
     it('supports video-only content', () => {
@@ -108,7 +114,8 @@ describe('ManifestConverter', () => {
 
       const timeline = createTimeline();
 
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(2);
       expect(period.variants[0].audio).toBe(null);
@@ -124,7 +131,8 @@ describe('ManifestConverter', () => {
 
       const timeline = createTimeline();
 
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(2);
       expect(period.variants[0].audio).toBeTruthy();
@@ -143,12 +151,13 @@ describe('ManifestConverter', () => {
 
       const timeline = createTimeline();
 
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(1);
       expect(period.textStreams.length).toBe(1);
 
-      verifyStream(period.textStreams[0], periodDb.streams[1]);
+      verifyStream(periodDb, period.textStreams[0], periodDb.streams[1]);
     });
 
     it('combines Variants according to variantIds field', () => {
@@ -178,7 +187,8 @@ describe('ManifestConverter', () => {
       const timeline = createTimeline();
 
       /** @type {shaka.extern.Period} */
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
 
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(3);
@@ -375,10 +385,11 @@ describe('ManifestConverter', () => {
   }
 
   /**
+   * @param {?shaka.extern.PeriodDB} periodDb
    * @param {?shaka.extern.Stream} stream
    * @param {?shaka.extern.StreamDB} streamDb
    */
-  function verifyStream(stream, streamDb) {
+  function verifyStream(periodDb, stream, streamDb) {
     if (!streamDb) {
       expect(stream).toBeFalsy();
       return;
@@ -435,7 +446,8 @@ describe('ManifestConverter', () => {
       expect(segment.endByte).toBe(null);
       expect(segment.getUris()).toEqual([uri.toString()]);
       expect(segment.initSegmentReference).toEqual(initSegmentReference);
-      expect(segment.presentationTimeOffset).toBe(presentationTimeOffset);
+      expect(segment.timestampOffset).toBe(
+          periodDb.startTime - presentationTimeOffset);
     });
   }
 

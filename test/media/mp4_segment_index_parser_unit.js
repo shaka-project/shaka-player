@@ -32,7 +32,10 @@ describe('Mp4SegmentIndexParser', () => {
         /* sidxOffset */ 0,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0)).toThrow(error);
+        /* scaledPresentationTimeOffset */ 0,
+        /* timestampOffset */ 0,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ Infinity)).toThrow(error);
   });
 
   it('parses index segment ', () => {
@@ -41,7 +44,10 @@ describe('Mp4SegmentIndexParser', () => {
         /* sidxOffset */ 0,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0);
+        /* scaledPresentationTimeOffset */ 0,
+        /* timestampOffset */ 0,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ Infinity);
     const references = [
       {startTime: 0, endTime: 12, startByte: 92, endByte: 194960},
       {startTime: 12, endTime: 24, startByte: 194961, endByte: 294059},
@@ -59,7 +65,10 @@ describe('Mp4SegmentIndexParser', () => {
         /* sidxOffset */ 0,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 2);
+        /* scaledPresentationTimeOffset */ 2,
+        /* timestampOffset */ -2,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ Infinity);
     const references = [
       {startTime: -2, endTime: 10},
       {startTime: 10, endTime: 22},

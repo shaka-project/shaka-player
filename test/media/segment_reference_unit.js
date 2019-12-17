@@ -18,7 +18,9 @@ describe('SegmentReference', () => {
         /* startByte */ 4,
         /* endByte */ 5,
         initSegmentReference,
-        /* presentationTimeOffset */ 6);
+        /* timestampOffset */ 6,
+        /* appendWindowStart */ 7,
+        /* appendWindowEnd */ 8);
 
     expect(reference.getPosition()).toBe(1);
     expect(reference.getStartTime()).toBe(2);
@@ -27,7 +29,9 @@ describe('SegmentReference', () => {
     expect(reference.getStartByte()).toBe(4);
     expect(reference.getEndByte()).toBe(5);
     expect(reference.initSegmentReference).toBe(initSegmentReference);
-    expect(reference.presentationTimeOffset).toBe(6);
+    expect(reference.timestampOffset).toBe(6);
+    expect(reference.appendWindowStart).toBe(7);
+    expect(reference.appendWindowEnd).toBe(8);
   });
 });
 

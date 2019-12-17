@@ -81,7 +81,7 @@ describe('DashParser SegmentTemplate', () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="10"',
         ' presentationTimeOffset="50" />',
-      ], 30 /* duration */);
+      ], 30 /* duration */, 40 /* startTime */ );
 
       fakeNetEngine.setResponseText('dummy://foo', source);
       const manifest = await parser.start('dummy://foo', playerInterface);
@@ -95,11 +95,11 @@ describe('DashParser SegmentTemplate', () => {
 
       const expectedRef1 = ManifestParser.makeReference(
           's1.mp4', 0, 0, 10, baseUri);
-      expectedRef1.presentationTimeOffset = 50;
+      expectedRef1.timestampOffset = -10;
 
       const expectedRef2 = ManifestParser.makeReference(
           's2.mp4', 1, 10, 20, baseUri);
-      expectedRef2.presentationTimeOffset = 50;
+      expectedRef2.timestampOffset = -10;
 
       expect(stream.segmentIndex.get(0)).toEqual(expectedRef1);
       expect(stream.segmentIndex.get(1)).toEqual(expectedRef2);

@@ -562,8 +562,8 @@ describe('HlsParser live', () => {
         const expectedRef = ManifestParser.makeReference(
             'test:/main.mp4', 0, segmentDataStartTime,
             segmentDataStartTime + 2);
-        // In live content, we do not set presentationTimeOffset.
-        expectedRef.presentationTimeOffset = 0;
+        // In live content, we do not set timestampOffset.
+        expectedRef.timestampOffset = 0;
 
         const manifest = await parser.start('test:/master', playerInterface);
         const video = manifest.periods[0].variants[0].video;
@@ -623,8 +623,8 @@ describe('HlsParser live', () => {
         const expectedRef = ManifestParser.makeReference(
             'test:/main2.ts', 1, segmentDataStartTime,
             segmentDataStartTime + 2);
-        // In live content, we do not set presentationTimeOffset.
-        expectedRef.presentationTimeOffset = 0;
+        // In live content, we do not set timestampOffset.
+        expectedRef.timestampOffset = 0;
 
         const manifest = await parser.start('test:/master', playerInterface);
         const video = manifest.periods[0].variants[0].video;

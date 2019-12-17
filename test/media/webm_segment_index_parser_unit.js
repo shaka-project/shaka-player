@@ -29,7 +29,10 @@ describe('WebmSegmentIndexParser', () => {
         /* initSegment */ initSegment,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0)).toThrow(error);
+        /* scaledPresentationTimeOffset */ 0,
+        /* timestampOffset */ 0,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ Infinity)).toThrow(error);
   });
 
   it('rejects an invalid init segment ', () => {
@@ -42,7 +45,10 @@ describe('WebmSegmentIndexParser', () => {
         /* initSegment */ indexSegment,  // deliberate wrong data
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0)).toThrow(error);
+        /* scaledPresentationTimeOffset */ 0,
+        /* timestampOffset */ 0,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ Infinity)).toThrow(error);
   });
 
   it('parses index segment ', () => {
@@ -50,7 +56,10 @@ describe('WebmSegmentIndexParser', () => {
         indexSegment, initSegment,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0);
+        /* scaledPresentationTimeOffset */ 0,
+        /* timestampOffset */ 0,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ Infinity);
     const references = [
       {startTime: 0, endTime: 12, startByte: 281, endByte: 95911},
       {startTime: 12, endTime: 24, startByte: 95912, endByte: 209663},
@@ -67,7 +76,10 @@ describe('WebmSegmentIndexParser', () => {
         indexSegment, initSegment,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 2);
+        /* scaledPresentationTimeOffset */ 2,
+        /* timestampOffset */ -2,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ Infinity);
     const references = [
       {startTime: -2, endTime: 10},
       {startTime: 10, endTime: 22},

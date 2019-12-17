@@ -73,11 +73,15 @@ shaka.test.ManifestParser = class {
       },
     });
 
-    const presentationTimeOffset = /** @type {?} */(jasmine.any(Number));
+    const timestampOffset = /** @type {?} */(jasmine.any(Number));
+    const appendWindowStart = /** @type {?} */(jasmine.any(Number));
+    const appendWindowEnd = /** @type {?} */(jasmine.any(Number));
 
     return new shaka.media.SegmentReference(
         position, start, end, getUris, startByte, endByte,
         initSegmentReference,
-        presentationTimeOffset);
+        timestampOffset,
+        appendWindowStart,
+        appendWindowEnd);
   }
 };

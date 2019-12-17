@@ -609,9 +609,9 @@ describe('StreamingEngine', () => {
               /* startByte */ 0,
               /* endByte */ null,
               initSegmentReference,
-              // Normally PTO adjusts the segment time backwards; so to make the
-              // segment appear in the future, use a negative.
-              /* presentationTimeOffset */ -gapAtStart));
+              /* timestampOffset */ gapAtStart,
+              /* appendWindowStart */ 0,
+              /* appendWindowEnd */ Infinity));
 
           i++;
           time = end;

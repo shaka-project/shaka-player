@@ -184,7 +184,9 @@ var references = refs.map(function(r, position) {
       /* startByte */ 0,
       /* endByte */ null,
       initSegmentReference,
-      /* presentationTimeOffset */ 0);
+      /* timestampOffset */ 0,
+      /* appendWindowStart */ 0,
+      /* appendWindowEnd */ Infinity);
 });
 
 var index = new shaka.media.SegmentIndex(references);
@@ -327,7 +329,9 @@ MyManifestParser.prototype.loadReference_ =
       /* startByte */ 0,
       /* endByte */ null,
       initSegmentReference,
-      /* presentationTimeOffset */ 0);
+      /* timestampOffset */ 0,
+      /* appendWindowStart */ 0,
+      /* appendWindowEnd */ Infinity);
 };
 ```
 

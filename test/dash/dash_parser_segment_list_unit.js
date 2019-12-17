@@ -285,12 +285,16 @@ describe('DashParser SegmentList', () => {
         '  </Period>',
         '</MPD>',
       ].join('\n');
+
       const references = [
         ManifestParser.makeReference('s1.mp4', 1, 40, 50, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 50, 55, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 55, 63, baseUri),
         ManifestParser.makeReference('s4.mp4', 4, 63, 70, baseUri),
       ];
+      for (const ref of references) {
+        ref.timestampOffset = -10;
+      }
 
       await Dash.testSegmentIndex(source, references);
     });

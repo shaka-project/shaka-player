@@ -1230,7 +1230,9 @@ describe('Storage', () => {
         /* startByte */ 0,
         /* endByte */ null,
         /* initSegmentReference */ null,
-        /* presentationTimeOffset */ 0);
+        /* timestampOffset */ 0,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ Infinity);
   }
 
   /**

@@ -232,10 +232,15 @@ shaka.test.StreamingEngineUtil = class {
 
       const d = segmentDurations[type];
       const getUris = () => [periodNumber + '_' + type + '_' + position];
+      const timestampOffset = periodStartTimes[periodNumber - 1];
+      const appendWindowStart = periodStartTimes[periodNumber - 1];
+      const appendWindowEnd = periodNumber == periodStartTimes.length ?
+          presentationDuration : periodStartTimes[periodNumber];
       return new shaka.media.SegmentReference(
           position, (position - 1) * d, position * d, getUris,
           /* startByte */ 0, /* endByte */ null,
-          initSegmentReference, /* presentationTimeOffset */ 0);
+          initSegmentReference, timestampOffset, appendWindowStart,
+          appendWindowEnd);
     };
 
     const manifest = {

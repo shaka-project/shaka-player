@@ -202,6 +202,7 @@ describe('DashParser Manifest', () => {
     const source = sprintf(template, {periodContents: periodContents});
 
     fakeNetEngine.setResponseText('dummy://foo', source);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
   });
@@ -232,6 +233,7 @@ describe('DashParser Manifest', () => {
     const source = sprintf(template, {periodContents: periodContents});
 
     fakeNetEngine.setResponseText('dummy://foo', source);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(3);
     expect(manifest.periods[0].startTime).toBe(10);
@@ -252,11 +254,12 @@ describe('DashParser Manifest', () => {
 
     fakeNetEngine.setResponseText('dummy://foo', source);
     fakeNetEngine.setResponseValue('http://example.com', mp4Index);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
     const ref = stream.segmentIndex.get(0);
-    expect(ref.presentationTimeOffset).toBe(1);
+    expect(ref.timestampOffset).toBe(-1);
   });
 
   it('defaults to SegmentList with SegmentTemplate', async () => {
@@ -275,12 +278,13 @@ describe('DashParser Manifest', () => {
     ]);
 
     fakeNetEngine.setResponseText('dummy://foo', source);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
     const position = stream.segmentIndex.find(0);
     const ref = stream.segmentIndex.get(position);
-    expect(ref.presentationTimeOffset).toBe(2);
+    expect(ref.timestampOffset).toBe(-2);
   });
 
   it('generates a correct index for non-segmented text', async () => {
@@ -303,6 +307,7 @@ describe('DashParser Manifest', () => {
 
     fakeNetEngine.setResponseText('dummy://foo', source);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].textStreams[0];
     await stream.createSegmentIndex();
@@ -315,7 +320,9 @@ describe('DashParser Manifest', () => {
         /* startByte */ 0,
         /* endBytes */ null,
         /* initSegmentReference */ null,
-        /* presentationTimeOffset */ 0));
+        /* timestampOffset */ 0,
+        /* appendWindowStart */ 0,
+        /* appendWindowEnd */ 30));
   });
 
   it('correctly parses closed captions with channels and languages',
@@ -350,6 +357,7 @@ describe('DashParser Manifest', () => {
 
         fakeNetEngine.setResponseText('dummy://foo', source);
 
+        /** @type {shaka.extern.Manifest} */
         const manifest = await parser.start('dummy://foo', playerInterface);
         // First Representation should be dropped.
         const period = manifest.periods[0];
@@ -384,6 +392,7 @@ describe('DashParser Manifest', () => {
 
     fakeNetEngine.setResponseText('dummy://foo', source);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].audio;
     expect(stream.mimeType).toBe('audio/eac3-joc');
@@ -406,6 +415,7 @@ describe('DashParser Manifest', () => {
 
     fakeNetEngine.setResponseText('dummy://foo', source);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
     const expectedClosedCaptions = new Map(
@@ -432,6 +442,7 @@ describe('DashParser Manifest', () => {
 
         fakeNetEngine.setResponseText('dummy://foo', source);
 
+        /** @type {shaka.extern.Manifest} */
         const manifest = await parser.start('dummy://foo', playerInterface);
         const stream = manifest.periods[0].variants[0].video;
         const expectedClosedCaptions = new Map([['CC1', 'und']]);
@@ -455,6 +466,7 @@ describe('DashParser Manifest', () => {
 
     fakeNetEngine.setResponseText('dummy://foo', source);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const variant = manifest.periods[0].variants[0];
     const stream = manifest.periods[0].variants[0].audio;
@@ -507,6 +519,7 @@ describe('DashParser Manifest', () => {
      * @return {!Promise}
      */
     async function runTest(expectedTime) {
+      /** @type {shaka.extern.Manifest} */
       const manifest = await parser.start(
           'http://foo.bar/manifest', playerInterface);
       expect(manifest.presentationTimeline).toBeTruthy();
@@ -624,6 +637,7 @@ describe('DashParser Manifest', () => {
 
     fakeNetEngine.setResponseText('dummy://foo', source);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     // First Representation should be dropped.
     const period = manifest.periods[0];
@@ -650,6 +664,7 @@ describe('DashParser Manifest', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', source);
 
+      /** @type {shaka.extern.Manifest} */
       const manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.periods[0].textStreams.length).toBe(1);
     });
@@ -672,6 +687,7 @@ describe('DashParser Manifest', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', source);
 
+      /** @type {shaka.extern.Manifest} */
       const manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.periods[0].textStreams.length).toBe(1);
     });
@@ -694,6 +710,7 @@ describe('DashParser Manifest', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', source);
 
+      /** @type {shaka.extern.Manifest} */
       const manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.periods[0].textStreams.length).toBe(1);
     });
@@ -847,6 +864,7 @@ describe('DashParser Manifest', () => {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
     expect(manifest.periods[0].variants.length).toBe(1);
@@ -881,6 +899,7 @@ describe('DashParser Manifest', () => {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
 
@@ -921,6 +940,7 @@ describe('DashParser Manifest', () => {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
     expect(manifest.periods[0].textStreams.length).toBe(2);
@@ -950,6 +970,7 @@ describe('DashParser Manifest', () => {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
 
@@ -993,6 +1014,7 @@ describe('DashParser Manifest', () => {
     // This test proves that duplicate Representation IDs are allowed for VOD
     // and that error doesn't occur.
     fakeNetEngine.setResponseText('dummy://foo', source);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
     expect(manifest.periods[0].variants.length).toBe(2);
@@ -1032,6 +1054,7 @@ describe('DashParser Manifest', () => {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', source);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.periods.length).toBe(1);
     expect(manifest.periods[0].variants.length).toBe(2);
@@ -1084,6 +1107,7 @@ describe('DashParser Manifest', () => {
       parser = shaka.test.Dash.makeDashParser();
 
       fakeNetEngine.setResponseText('dummy://foo', source);
+      /** @type {shaka.extern.Manifest} */
       const manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.periods.length).toBe(1);
       expect(manifest.periods[0].variants.length).toBe(1);
@@ -1191,6 +1215,7 @@ describe('DashParser Manifest', () => {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const variant = manifest.periods[0].variants[0];
     const textStream = manifest.periods[0].textStreams[0];
@@ -1224,6 +1249,7 @@ describe('DashParser Manifest', () => {
     config.disableAudio = true;
     parser.configure(config);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const variant = manifest.periods[0].variants[0];
     expect(variant.audio).toBe(null);
@@ -1255,6 +1281,7 @@ describe('DashParser Manifest', () => {
     config.disableVideo = true;
     parser.configure(config);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const variant = manifest.periods[0].variants[0];
     expect(variant.audio).toBeTruthy();
@@ -1291,6 +1318,7 @@ describe('DashParser Manifest', () => {
     config.disableText = true;
     parser.configure(config);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].textStreams[0];
     expect(stream).toBeUndefined();
@@ -1315,6 +1343,7 @@ describe('DashParser Manifest', () => {
     config.dash.ignoreMinBufferTime = true;
     parser.configure(config);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const minBufferTime = manifest.minBufferTime;
     expect(minBufferTime).toBe(0);
@@ -1339,6 +1368,7 @@ describe('DashParser Manifest', () => {
     config.dash.ignoreMinBufferTime = false;
     parser.configure(config);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const minBufferTime = manifest.minBufferTime;
     expect(minBufferTime).toBe(75);
@@ -1366,6 +1396,7 @@ describe('DashParser Manifest', () => {
     config.dash.ignoreMinBufferTime = true;
     parser.configure(config);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
@@ -1392,6 +1423,7 @@ describe('DashParser Manifest', () => {
     config.dash.ignoreSuggestedPresentationDelay = true;
     parser.configure(config);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
@@ -1423,6 +1455,7 @@ describe('DashParser Manifest', () => {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const textStream = manifest.periods[0].textStreams[0];
     expect(textStream.roles).toEqual(['captions', 'foo']);
@@ -1453,6 +1486,7 @@ describe('DashParser Manifest', () => {
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const variant = manifest.periods[0].variants[0];
     expect(variant.audio).toBeTruthy();

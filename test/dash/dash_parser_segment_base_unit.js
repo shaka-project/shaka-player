@@ -65,6 +65,7 @@ describe('DashParser SegmentBase', () => {
         .setResponseText('http://example.com/init-1.webm', '')
         .setResponseText('http://example.com/init-2.webm', '');
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
 
     // Call createSegmentIndex() on each stream to make the requests, but expect
@@ -106,6 +107,7 @@ describe('DashParser SegmentBase', () => {
         .setResponseText('dummy://foo', source)
         .setResponseValue('http://example.com', indexSegment);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
     const initSegmentReference = segmentReference.initSegmentReference;
@@ -137,6 +139,7 @@ describe('DashParser SegmentBase', () => {
         .setResponseText('dummy://foo', source)
         .setResponseValue('http://example.com', indexSegment);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
     const initSegmentReference = segmentReference.initSegmentReference;
@@ -169,6 +172,7 @@ describe('DashParser SegmentBase', () => {
         .setResponseText('dummy://foo', source)
         .setResponseValue('http://example.com/stream.mp4', indexSegment);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
     const initSegmentReference = segmentReference.initSegmentReference;
@@ -207,6 +211,7 @@ describe('DashParser SegmentBase', () => {
         .setResponseText('dummy://foo', source)
         .setResponseValue('http://example.com/index.mp4', indexSegment);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
     const initSegmentReference = segmentReference.initSegmentReference;
@@ -214,7 +219,7 @@ describe('DashParser SegmentBase', () => {
         ['http://example.com/init.mp4']);
     expect(initSegmentReference.getStartByte()).toBe(201);
     expect(initSegmentReference.getEndByte()).toBe(300);
-    expect(segmentReference.presentationTimeOffset).toBe(10);
+    expect(segmentReference.timestampOffset).toBe(-10);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com/index.mp4', 5, 2000);
@@ -245,6 +250,7 @@ describe('DashParser SegmentBase', () => {
         .setResponseText('dummy://foo', source)
         .setResponseValue('http://example.com', indexSegment);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const segmentReference = await Dash.getFirstVideoSegmentReference(manifest);
     const initSegmentReference = segmentReference.initSegmentReference;
@@ -252,7 +258,7 @@ describe('DashParser SegmentBase', () => {
         ['http://example.com/special.mp4']);
     expect(initSegmentReference.getStartByte()).toBe(0);
     expect(initSegmentReference.getEndByte()).toBe(null);
-    expect(segmentReference.presentationTimeOffset).toBe(20);
+    expect(segmentReference.timestampOffset).toBe(-20);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com', 30, 900);
@@ -278,6 +284,7 @@ describe('DashParser SegmentBase', () => {
         .setResponseText('dummy://foo', source)
         .setResponseValue('http://example.com/index.mp4', indexSegment);
 
+    /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const video = manifest.periods[0].variants[0].video;
     await video.createSegmentIndex();  // real data, should succeed

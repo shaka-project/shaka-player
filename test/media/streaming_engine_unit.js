@@ -951,7 +951,7 @@ describe('StreamingEngine', () => {
     expect(timeline.setDuration).not.toHaveBeenCalled();
   });
 
-  it('applies fudge factor for appendWindowStart', async () => {
+  it('applies fudge factors for append window', async () => {
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
     createStreamingEngine();
@@ -968,8 +968,11 @@ describe('StreamingEngine', () => {
     const lt20 = {
       asymmetricMatch: (val) => val >= 19.9 && val < 20,
     };
+    const gt40 = {
+      asymmetricMatch: (val) => val > 40 && val <= 40.1,
+    };
     expect(mediaSourceEngine.setStreamProperties)
-        .toHaveBeenCalledWith('video', 20, lt20, 40);
+        .toHaveBeenCalledWith('video', 20, lt20, gt40);
   });
 
   it('does not buffer one media type ahead of another', async () => {
@@ -2949,7 +2952,8 @@ describe('StreamingEngine', () => {
           return new shaka.media.SegmentReference(
               seg.position, seg.startTime, seg.endTime, seg.getUris,
               /* startByte= */ 0, /* endByte= */ null,
-              /* initSegmentReference */ null, /* presentationTimeOffset */ 0);
+              /* initSegmentReference */ null, /* timestampOffset */ 0,
+              /* appendWindowStart */ 0, /* appendWindowEnd */ Infinity);
         } else {
           return seg;
         }

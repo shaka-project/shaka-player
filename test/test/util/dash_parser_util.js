@@ -44,6 +44,17 @@ shaka.test.Dash = class {
     const manifest = await dashParser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
+
+    // Set expected values for append window.
+    const appendWindowStart = manifest.periods[0].startTime;
+    const appendWindowEnd = manifest.periods[1] ?
+        manifest.periods[1].startTime :
+        manifest.presentationTimeline.getDuration();
+    for (const ref of references) {
+      ref.appendWindowStart = appendWindowStart;
+      ref.appendWindowEnd = appendWindowEnd;
+    }
+
     shaka.test.ManifestParser.verifySegmentIndex(stream, references);
   }
 
@@ -278,6 +289,9 @@ shaka.test.Dash = class {
           ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
           ManifestParser.makeReference('s5.mp4', 5, 40, 50, baseUri),
         ];
+        for (const ref of references) {
+          ref.timestampOffset = 30;
+        }
         await Dash.testSegmentIndex(source, references);
       });
 
