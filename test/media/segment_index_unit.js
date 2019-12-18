@@ -151,7 +151,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const index = new shaka.media.SegmentIndex(references);
       expect(index.references_).toEqual(references);
 
-      index.fit(/* periodDuration */ 15);
+      index.fit(/* periodStart */ 0, /* periodEnd */ 15);
       const newReferences = [
         /* ref 0 dropped because it ends before the period starts */
         makeReference(1, -3, 4, uri(1)),
@@ -172,7 +172,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const index = new shaka.media.SegmentIndex(references);
       expect(index.references_).toEqual(references);
 
-      index.fit(/* periodDuration */ 10);
+      index.fit(/* periodStart */ 0, /* periodEnd */ 10);
       const newReferences = [
         /* ref 0 dropped because it ends before the period starts (at 0) */
         makeReference(1, 0, 10, uri(1)),

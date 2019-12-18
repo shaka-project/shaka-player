@@ -29,7 +29,6 @@ describe('WebmSegmentIndexParser', () => {
         /* initSegment */ initSegment,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0,
         /* timestampOffset */ 0,
         /* appendWindowStart */ 0,
         /* appendWindowEnd */ Infinity)).toThrow(error);
@@ -45,7 +44,6 @@ describe('WebmSegmentIndexParser', () => {
         /* initSegment */ indexSegment,  // deliberate wrong data
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0,
         /* timestampOffset */ 0,
         /* appendWindowStart */ 0,
         /* appendWindowEnd */ Infinity)).toThrow(error);
@@ -56,7 +54,6 @@ describe('WebmSegmentIndexParser', () => {
         indexSegment, initSegment,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0,
         /* timestampOffset */ 0,
         /* appendWindowStart */ 0,
         /* appendWindowEnd */ Infinity);
@@ -71,12 +68,11 @@ describe('WebmSegmentIndexParser', () => {
     expect(result).toEqual(references.map((o) => jasmine.objectContaining(o)));
   });
 
-  it('takes a scaled presentationTimeOffset in seconds', () => {
+  it('takes a timestamp offset in seconds', () => {
     const result = shaka.media.WebmSegmentIndexParser.parse(
         indexSegment, initSegment,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 2,
         /* timestampOffset */ -2,
         /* appendWindowStart */ 0,
         /* appendWindowEnd */ Infinity);

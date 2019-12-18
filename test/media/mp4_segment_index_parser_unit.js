@@ -32,7 +32,6 @@ describe('Mp4SegmentIndexParser', () => {
         /* sidxOffset */ 0,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0,
         /* timestampOffset */ 0,
         /* appendWindowStart */ 0,
         /* appendWindowEnd */ Infinity)).toThrow(error);
@@ -44,7 +43,6 @@ describe('Mp4SegmentIndexParser', () => {
         /* sidxOffset */ 0,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0,
         /* timestampOffset */ 0,
         /* appendWindowStart */ 0,
         /* appendWindowEnd */ Infinity);
@@ -59,13 +57,12 @@ describe('Mp4SegmentIndexParser', () => {
     expect(result).toEqual(references.map((o) => jasmine.objectContaining(o)));
   });
 
-  it('takes a scaled presentationTimeOffset in seconds', () => {
+  it('takes a timestamp offset in seconds', () => {
     const result = shaka.media.Mp4SegmentIndexParser.parse(
         indexSegment,
         /* sidxOffset */ 0,
         /* uris */ [],
         /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 2,
         /* timestampOffset */ -2,
         /* appendWindowStart */ 0,
         /* appendWindowEnd */ Infinity);

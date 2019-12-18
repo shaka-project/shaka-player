@@ -95,6 +95,29 @@ describe('DashParser Live', () => {
   }
 
   /**
+   * Make clones of a list of references so that they can be modified without
+   * affecting the originals.
+   *
+   * @param {!Array.<!shaka.media.SegmentReference>} references
+   * @return {!Array.<!shaka.media.SegmentReference>}
+   */
+  function cloneRefs(references) {
+    return references.map((ref) => {
+      return new shaka.media.SegmentReference(
+          ref.position,
+          ref.startTime,
+          ref.endTime,
+          ref.getUris,
+          ref.startByte,
+          ref.endByte,
+          ref.initSegmentReference,
+          ref.timestampOffset,
+          ref.appendWindowStart,
+          ref.appendWindowEnd);
+    });
+  }
+
+  /**
    * Creates tests that test the behavior common between SegmentList and
    * SegmentTemplate.
    *
@@ -234,12 +257,21 @@ describe('DashParser Live', () => {
       Date.now = () => 0;
       const manifest = await parser.start('dummy://foo', playerInterface);
 
+      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      const period1Refs = cloneRefs(basicRefs);
+      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      const period2Refs = cloneRefs(basicRefs);
+      for (const ref of period2Refs) {
+        ref.startTime += pStart;
+        ref.endTime += pStart;
+      }
+
       const stream1 = manifest.periods[0].variants[0].video;
       const stream2 = manifest.periods[1].variants[0].video;
       await stream1.createSegmentIndex();
       await stream2.createSegmentIndex();
-      ManifestParser.verifySegmentIndex(stream1, basicRefs);
-      ManifestParser.verifySegmentIndex(stream2, basicRefs);
+      ManifestParser.verifySegmentIndex(stream1, period1Refs);
+      ManifestParser.verifySegmentIndex(stream2, period2Refs);
 
       // The 60 second availability window is initially full in all cases
       // (SegmentTemplate+Timeline, etc.)  The first segment is always 10
@@ -249,14 +281,14 @@ describe('DashParser Live', () => {
       Date.now = () => 11 * 1000;
       await updateManifest();
       // The first reference should have been evicted.
-      ManifestParser.verifySegmentIndex(stream1, basicRefs.slice(1));
-      ManifestParser.verifySegmentIndex(stream2, basicRefs);
+      ManifestParser.verifySegmentIndex(stream1, period1Refs.slice(1));
+      ManifestParser.verifySegmentIndex(stream2, period2Refs);
 
       // Same as above, but 1 period length later
       Date.now = () => (11 + pStart) * 1000;
       await updateManifest();
       ManifestParser.verifySegmentIndex(stream1, []);
-      ManifestParser.verifySegmentIndex(stream2, basicRefs.slice(1));
+      ManifestParser.verifySegmentIndex(stream2, period2Refs.slice(1));
     });
 
     it('sets infinite duration for single-period live streams', async () => {

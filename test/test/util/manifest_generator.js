@@ -612,7 +612,11 @@ shaka.test.ManifestGenerator.Stream = class {
 
     this.createSegmentIndex = () => Promise.resolve();
 
-    this.segmentIndex.find = (time) => Math.floor(time / segmentDuration);
+    this.segmentIndex.find = (time) => {
+      // Note: |time| is relative to the presentation.
+      const periodTime = time - periodStart;
+      return Math.floor(periodTime / segmentDuration);
+    };
 
     this.segmentIndex.get = (index) => {
       goog.asserts.assert(!isNaN(index), 'Invalid index requested!');
@@ -623,7 +627,12 @@ shaka.test.ManifestGenerator.Stream = class {
       const start = index * segmentDuration;
       const end = Math.min(totalDuration, (index + 1) * segmentDuration);
       return new this.manifest_.shaka_.media.SegmentReference(
-          index, start, end, getUris, 0, segmentSize,
+          index,
+          /* startTime */ periodStart + start,
+          /* endTime */ periodStart + end,
+          getUris,
+          /* startByte */ 0,
+          /* endByte */ segmentSize,
           this.initSegmentReference_,
           /* timestampOffset */ periodStart,
           /* appendWindowStart */ periodStart,

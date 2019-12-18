@@ -274,7 +274,7 @@ shaka.test.Dash = class {
         await Dash.testSegmentIndex(source, references);
       });
 
-      it('gives times relative to period', async () => {
+      it('gives segment times relative to the presentation', async () => {
         const timeline = [
           '<SegmentTimeline>',
           '  <S t="0" d="10" r="-1" />',
@@ -283,11 +283,11 @@ shaka.test.Dash = class {
         const source =
             makeManifestText(timeline, '', 50 /* duration */, 30 /* start */);
         const references = [
-          ManifestParser.makeReference('s1.mp4', 1, 0, 10, baseUri),
-          ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
-          ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
-          ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
-          ManifestParser.makeReference('s5.mp4', 5, 40, 50, baseUri),
+          ManifestParser.makeReference('s1.mp4', 1, 30, 40, baseUri),
+          ManifestParser.makeReference('s2.mp4', 2, 40, 50, baseUri),
+          ManifestParser.makeReference('s3.mp4', 3, 50, 60, baseUri),
+          ManifestParser.makeReference('s4.mp4', 4, 60, 70, baseUri),
+          ManifestParser.makeReference('s5.mp4', 5, 70, 80, baseUri),
         ];
         for (const ref of references) {
           ref.timestampOffset = 30;

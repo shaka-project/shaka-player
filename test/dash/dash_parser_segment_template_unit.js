@@ -94,11 +94,11 @@ describe('DashParser SegmentTemplate', () => {
       await stream.createSegmentIndex();
 
       const expectedRef1 = ManifestParser.makeReference(
-          's1.mp4', 0, 0, 10, baseUri);
+          's1.mp4', 0, 40, 50, baseUri);
       expectedRef1.timestampOffset = -10;
 
       const expectedRef2 = ManifestParser.makeReference(
-          's2.mp4', 1, 10, 20, baseUri);
+          's2.mp4', 1, 50, 60, baseUri);
       expectedRef2.timestampOffset = -10;
 
       expect(stream.segmentIndex.get(0)).toEqual(expectedRef1);

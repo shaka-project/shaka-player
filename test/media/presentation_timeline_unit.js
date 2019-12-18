@@ -199,8 +199,7 @@ describe('PresentationTimeline', () => {
       // the availability window.
       // See https://github.com/google/shaka-player/issues/999
       setElapsed(1000);
-      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5],
-          /* periodStart */ 0);
+      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
 
       // last segment time (50) - availability (20)
       expect(timeline.getSegmentAvailabilityStart()).toBe(30);
@@ -217,8 +216,7 @@ describe('PresentationTimeline', () => {
       const ref5 = makeSegmentReference(40, 50);
 
       setElapsed(100);
-      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5],
-          /* periodStart */ 0);
+      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
 
       // now (100) - max segment duration (10) - availability start time (0)
       expect(timeline.getSegmentAvailabilityEnd()).toBe(90);
@@ -300,8 +298,7 @@ describe('PresentationTimeline', () => {
       // the availability window.
       // See https://github.com/google/shaka-player/issues/999
       setElapsed(1000);
-      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5],
-          /* periodStart */ 0);
+      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
 
       // last segment time (50)
       expect(timeline.getSegmentAvailabilityEnd()).toBe(50);
@@ -391,22 +388,6 @@ describe('PresentationTimeline', () => {
       expect(timeline.getSeekRangeStart()).toBe(0);
       expect(timeline.getSafeSeekRangeStart(0)).toBe(0);
       expect(timeline.getSafeSeekRangeStart(25)).toBe(5);
-    });
-
-    it('adjusts segment times to the presentation timeline', () => {
-      // All of these segments fit in the availability window.
-      const timeline = makeLiveTimeline(/* availability */ 100);
-
-      // A reference from 30-40, + period start 0
-      timeline.notifySegments([makeSegmentReference(30, 40)],
-          /* periodStart */ 0);
-
-      // A reference from 0-10, + period start 40
-      timeline.notifySegments([makeSegmentReference(0, 10)],
-          /* periodStart */ 40);
-
-      // If we hadn't adjusted for period start, this would be 0.
-      expect(timeline.getSeekRangeStart()).toBe(30);
     });
   });
 
