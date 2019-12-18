@@ -130,20 +130,15 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
   updateTextLanguages_() {
     const tracks = this.player.getTextTracks();
 
-    const languagesAndRoles = this.player.getTextLanguagesAndRoles();
-    const languages = languagesAndRoles.map((langAndRole) => {
-      return langAndRole.language;
-    });
-
-    shaka.ui.LanguageUtils.updateLanguages(tracks, this.menu,
-        languages,
-        (lang) => this.onTextLanguageSelected_(lang),
+    shaka.ui.LanguageUtils.updateTracks(tracks, this.menu,
+        (track) => this.onTextTrackSelected_(track),
 
         // Don't mark current text language as chosen unless captions are
         // enabled
         this.player.isTextTrackVisible(),
         this.currentSelection,
-        this.localization);
+        this.localization,
+        this.controls.getConfig().trackLabelFormat);
 
     // Add the Off button
     const offButton = shaka.util.Dom.createHTMLElement('button');
@@ -174,14 +169,14 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
 
   /**
-   * @param {string} language
+   * @param {!shaka.extern.Track} track
    * @return {!Promise}
    * @private
    */
-  async onTextLanguageSelected_(language) {
+  async onTextTrackSelected_(track) {
     await this.player.setTextTrackVisibility(true);
     if (this.player) {  // May have become null while awaiting
-      this.player.selectTextLanguage(language);
+      this.player.selectTextLanguage(track.language, track.roles[0]);
     }
   }
 

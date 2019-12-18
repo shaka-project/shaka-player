@@ -72,6 +72,7 @@ shaka.extern.UIVolumeBarColors;
  *   clearBufferOnQualityChange: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
+ *   trackLabelFormat: shaka.ui.TrackLabelFormat,
  *   fadeDelay: number
  * }}
  *
@@ -102,6 +103,13 @@ shaka.extern.UIVolumeBarColors;
  *   The CSS colors applied to the volume bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you
  *   cannot do this in pure CSS.
+ * @property {shaka.ui.TrackLabelFormat} trackLabelFormat
+ *   An enum that determines what is shown in the labels for text track and
+ *   audio variant selection.
+ *   LANGUAGE means that only the language of the item is shown.
+ *   ROLE means that only the role of the item is shown.
+ *   LANGUAGE_ROLE means both are shown, or just language if there is no role.
+ *   Defaults to LANGUAGE.
  * @property {number} fadeDelay
  *   The delay (in seconds) before fading out the controls once the user stops
  *   interacting with them.  We recommend setting this to 3 on your cast

@@ -219,6 +219,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
       base: 'rgba(255, 255, 255, 0.54)',
       level: 'rgb(255, 255, 255)',
     },
+    trackLabelFormat: shaka.ui.TrackLabelFormat.LANGUAGE,
     fadeDelay: 0,
   };
 };
@@ -390,6 +391,18 @@ shaka.ui.Overlay.setupUIandAutoLoad_ = async function(container, video) {
   }
 };
 
+/**
+ * Describes what information should show up in labels for selecting audio
+ * variants and text tracks.
+ *
+ * @enum {number}
+ * @export
+ */
+shaka.ui.TrackLabelFormat = {
+  'LANGUAGE': 0,
+  'ROLE': 1,
+  'LANGUAGE_ROLE': 2,
+};
 
 if (document.readyState == 'complete') {
   // Don't fire this event synchronously.  In a compiled bundle, the "shaka"
