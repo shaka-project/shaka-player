@@ -63,8 +63,21 @@ shaka.test.ManifestParser = class {
   static makeReference(uri, position, start, end, baseUri = '',
       startByte = 0, endByte = null) {
     const getUris = () => [baseUri + uri];
+
+    // If a test wants to verify these, they can be set explicitly after
+    // makeReference is called.
+    const initSegmentReference = /** @type {?} */({
+      asymmetricMatch: (value) => {
+        return value == null ||
+            value instanceof shaka.media.InitSegmentReference;
+      },
+    });
+
+    const presentationTimeOffset = /** @type {?} */(jasmine.any(Number));
+
     return new shaka.media.SegmentReference(
         position, start, end, getUris, startByte, endByte,
-        /* initSegmentReference */ null, /* presentationTimeOffset */ 0);
+        initSegmentReference,
+        presentationTimeOffset);
   }
 };

@@ -222,18 +222,18 @@ shaka.test.Util = class {
           !a.every((x, i) => { return x == b[i]; })) {
         return false;
       }
+
+      // Make shallow copies of each, without their getUris fields.
+      const trimmedFirst = Object.assign({}, /** @type {Object} */(first));
+      delete trimmedFirst.getUris;
+      const trimmedSecond = Object.assign({}, /** @type {Object} */(second));
+      delete trimmedSecond.getUris;
+
+      // Compare those using Jasmine's utility, which will compare the fields of
+      // an object and the items of an array.
+      return jasmine.matchersUtil.equals(trimmedFirst, trimmedSecond);
     }
-    if (isSegment) {
-      return first.position == second.position &&
-          first.startTime == second.startTime &&
-          first.endTime == second.endTime &&
-          first.startByte == second.startByte &&
-          first.endByte == second.endByte;
-    }
-    if (isInit) {
-      return first.startByte == second.startByte &&
-          first.endByte == second.endByte;
-    }
+
     return undefined;
   }
 
