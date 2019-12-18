@@ -58,13 +58,11 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   updateAudioLanguages_() {
     const tracks = this.player.getVariantTracks();
-    const languages = this.player.getAudioLanguages();
 
-    shaka.ui.LanguageUtils.updateLanguages(tracks, this.menu,
-        languages,
-        (lang) => this.onAudioLanguageSelected_(lang), /* updateChosen */ true,
-        this.currentSelection,
-        this.localization);
+    shaka.ui.LanguageUtils.updateTracks(tracks, this.menu,
+        (track) => this.onAudioTrackSelected_(track),
+        /* updateChosen */ true, this.currentSelection, this.localization,
+        this.controls.getConfig().trackLabelFormat);
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 
     this.controls.dispatchEvent(
@@ -79,11 +77,11 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
   }
 
   /**
-   * @param {string} language
+   * @param {!shaka.extern.Track} track
    * @private
    */
-  onAudioLanguageSelected_(language) {
-    this.player.selectAudioLanguage(language);
+  onAudioTrackSelected_(track) {
+    this.player.selectAudioLanguage(track.language, track.roles[0]);
   }
 
 

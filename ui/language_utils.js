@@ -14,16 +14,16 @@ shaka.ui.LanguageUtils = class {
   /**
    * @param {!Array.<shaka.extern.Track>} tracks
    * @param {!HTMLElement} langMenu
-   * @param {!Array.<string>} languages
-   * @param {function(string)} onLanguageSelected
+   * @param {function(!shaka.extern.Track)} onTrackSelected
    * @param {boolean} updateChosen
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
+   * @param {shaka.ui.TrackLabelFormat} trackLabelFormat
    */
   // TODO: Do the benefits of having this common code in a method still
   // outweigh the complexity of the parameter list?
-  static updateLanguages(tracks, langMenu, languages, onLanguageSelected,
-      updateChosen, currentSelectionElement, localization) {
+  static updateTracks(tracks, langMenu, onTrackSelected, updateChosen,
+      currentSelectionElement, localization, trackLabelFormat) {
     // Using array.filter(f)[0] as an alternative to array.find(f) which is
     // not supported in IE11.
     const activeTracks = tracks.filter((track) => {
@@ -31,7 +31,7 @@ shaka.ui.LanguageUtils = class {
     });
     const selectedTrack = activeTracks[0];
 
-    // Remove old languages
+    // Remove old tracks
     // 1. Save the back to menu button
     const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
         langMenu, 'shaka-back-to-overflow-button');
@@ -42,19 +42,64 @@ shaka.ui.LanguageUtils = class {
     // 3. Add the backTo Menu button back
     langMenu.appendChild(backButton);
 
-    // 4. Add new buttons
-    for (const language of languages) {
+    // 4. Figure out which languages have multiple roles.
+    const getRolesString = (track) => {
+      if (track.type == 'variant') {
+        return track.audioRoles ? track.audioRoles.join(', ') : undefined;
+      } else {
+        return track.roles.join(', ');
+      }
+    };
+    /** @type {!Map.<string, !Set.<string>>} */
+    const rolesByLanguage = new Map();
+    for (const track of tracks) {
+      if (!rolesByLanguage.has(track.language)) {
+        rolesByLanguage.set(track.language, new Set());
+      }
+      rolesByLanguage.get(track.language).add(getRolesString(track));
+    }
+
+    // 5. Add new buttons
+    /** @type {!Set.<string>} */
+    const combinationsMade = new Set();
+    for (const track of tracks) {
+      const language = track.language;
+      const rolesString = getRolesString(track);
+      const combinationName = language + ': ' + rolesString;
+      if (combinationsMade.has(combinationName)) {
+        continue;
+      }
+      combinationsMade.add(combinationName);
+
       const button = shaka.util.Dom.createHTMLElement('button');
       button.addEventListener('click', () => {
-        onLanguageSelected(language);
+        onTrackSelected(track);
       });
 
       const span = shaka.util.Dom.createHTMLElement('span');
-      span.textContent =
-        shaka.ui.LanguageUtils.getLanguageName(language, localization);
       button.appendChild(span);
 
-      if (updateChosen && (language == selectedTrack.language)) {
+      span.textContent =
+          shaka.ui.LanguageUtils.getLanguageName(language, localization);
+      switch (trackLabelFormat) {
+        case shaka.ui.TrackLabelFormat.ROLE:
+          if (!rolesString) {
+            // Fallback behavior. This probably shouldn't happen.
+            shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
+                'role, but the UI is configured to only show role.');
+            span.textContent = '?';
+          } else {
+            span.textContent = rolesString;
+          }
+          break;
+        case shaka.ui.TrackLabelFormat.LANGUAGE_ROLE:
+          if (rolesString) {
+            span.textContent += ': ' + rolesString;
+          }
+          break;
+      }
+
+      if (updateChosen && (track == selectedTrack)) {
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
         button.setAttribute('aria-selected', 'true');

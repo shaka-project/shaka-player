@@ -209,6 +209,7 @@ shaka.ui.Overlay = class {
         base: 'rgba(255, 255, 255, 0.54)',
         level: 'rgb(255, 255, 255)',
       },
+      trackLabelFormat: shaka.ui.TrackLabelFormat.LANGUAGE,
     };
   }
 
@@ -375,6 +376,19 @@ shaka.ui.Overlay = class {
       }
     }
   }
+};
+
+/**
+ * Describes what information should show up in labels for selecting audio
+ * variants and text tracks.
+ *
+ * @enum {number}
+ * @export
+ */
+shaka.ui.TrackLabelFormat = {
+  'LANGUAGE': 0,
+  'ROLE': 1,
+  'LANGUAGE_ROLE': 2,
 };
 
 if (document.readyState == 'complete') {
