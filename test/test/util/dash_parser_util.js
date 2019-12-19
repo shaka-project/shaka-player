@@ -263,7 +263,7 @@ shaka.test.Dash = class {
           '  <S d="10" r="-1" />',
           '</SegmentTimeline>',
         ];
-        const source = makeManifestText(timeline, '', 50 /* duration */);
+        const source = makeManifestText(timeline, '', /* duration= */ 50);
         const references = [
           ManifestParser.makeReference('s1.mp4', 1, 5, 10, baseUri),
           ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
@@ -281,7 +281,7 @@ shaka.test.Dash = class {
           '</SegmentTimeline>',
         ];
         const source =
-            makeManifestText(timeline, '', 50 /* duration */, 30 /* start */);
+            makeManifestText(timeline, '', /* duration= */ 50, /* start= */ 30);
         const references = [
           ManifestParser.makeReference('s1.mp4', 1, 30, 40, baseUri),
           ManifestParser.makeReference('s2.mp4', 2, 40, 50, baseUri),

@@ -242,11 +242,11 @@ shaka.test.StreamingEngineUtil = class {
 
       return new shaka.media.SegmentReference(
           position,
-          /* startTime */ timestampOffset + (position - 1) * d,
-          /* endTime */ timestampOffset + position * d,
+          /* startTime= */ timestampOffset + (position - 1) * d,
+          /* endTime= */ timestampOffset + position * d,
           getUris,
-          /* startByte */ 0,
-          /* endByte */ null,
+          /* startByte= */ 0,
+          /* endByte= */ null,
           initSegmentReference,
           timestampOffset,
           appendWindowStart,

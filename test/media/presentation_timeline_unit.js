@@ -64,9 +64,9 @@ describe('PresentationTimeline', () => {
    */
   function makeVodTimeline(duration) {
     const timeline = makePresentationTimeline(
-        /* static */ true, duration, /* start time */ null,
-        /* availability */ Infinity, /* max seg dur */ 10,
-        /* clock offset */ 0, /* presentation delay */ 0);
+        /* static= */ true, duration, /* start= */ null,
+        /* availability= */ Infinity, /* max= */ 10,
+        /* clock= */ 0, /* presentation= */ 0);
     expect(timeline.isLive()).toBe(false);
     expect(timeline.isInProgress()).toBe(false);
     return timeline;
@@ -82,9 +82,9 @@ describe('PresentationTimeline', () => {
   function makeIprTimeline(duration, delay) {
     const now = Date.now() / 1000;
     const timeline = makePresentationTimeline(
-        /* static */ false, duration, /* start time */ now,
-        /* availability */ Infinity, /* max seg dur */ 10,
-        /* clock offset */ 0, delay || 0);
+        /* static= */ false, duration, /* start= */ now,
+        /* availability= */ Infinity, /* max= */ 10,
+        /* clock= */ 0, delay || 0);
     expect(timeline.isLive()).toBe(false);
     expect(timeline.isInProgress()).toBe(true);
     return timeline;
@@ -101,9 +101,9 @@ describe('PresentationTimeline', () => {
   function makeLiveTimeline(availability, delay, autoCorrectDrift = true) {
     const now = Date.now() / 1000;
     const timeline = makePresentationTimeline(
-        /* static */ false, /* duration */ Infinity, /* start time */ now,
-        availability, /* max seg dur */ 10,
-        /* clock offset */ 0, delay || 0, autoCorrectDrift);
+        /* static= */ false, /* duration= */ Infinity, /* start= */ now,
+        availability, /* max= */ 10,
+        /* clock= */ 0, delay || 0, autoCorrectDrift);
     expect(timeline.isLive()).toBe(true);
     expect(timeline.isInProgress()).toBe(false);
     return timeline;
@@ -119,22 +119,22 @@ describe('PresentationTimeline', () => {
     // start and end times are the only fields that matter to
     // PresentationTimeline.
     return new shaka.media.SegmentReference(
-        /* position */ 0,
+        /* position= */ 0,
         startTime,
         endTime,
-        /* uris */ () => [],
-        /* startByte */ 0,
-        /* endByte */ null,
-        /* initSegmentReference */ null,
-        /* timestampOffset */ 0,
-        /* appendWindowStart */ 0,
-        /* appendWindowEnd */ Infinity);
+        /* uris= */ () => [],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
   }
 
   describe('getSegmentAvailabilityStart', () => {
     it('returns 0 for VOD and IPR', () => {
-      const timeline1 = makeVodTimeline(/* duration */ 60);
-      const timeline2 = makeIprTimeline(/* duration */ 60);
+      const timeline1 = makeVodTimeline(/* duration= */ 60);
+      const timeline2 = makeIprTimeline(/* duration= */ 60);
 
       setElapsed(0);
       expect(timeline1.getSegmentAvailabilityStart()).toBe(0);
@@ -146,7 +146,7 @@ describe('PresentationTimeline', () => {
     });
 
     it('calculates time for live with finite availability', () => {
-      const timeline = makeLiveTimeline(/* availability */ 20);
+      const timeline = makeLiveTimeline(/* availability= */ 20);
 
       setElapsed(0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
@@ -171,7 +171,7 @@ describe('PresentationTimeline', () => {
     });
 
     it('calculates time for live with infinite availability', () => {
-      const timeline = makeLiveTimeline(/* availability */ Infinity);
+      const timeline = makeLiveTimeline(/* availability= */ Infinity);
 
       setElapsed(0);
       expect(timeline.getSegmentAvailabilityStart()).toBe(0);
@@ -187,7 +187,7 @@ describe('PresentationTimeline', () => {
     });
 
     it('calculates time based on segment times when available', () => {
-      const timeline = makeLiveTimeline(/* availability */ 20);
+      const timeline = makeLiveTimeline(/* availability= */ 20);
 
       const ref1 = makeSegmentReference(0, 10);
       const ref2 = makeSegmentReference(10, 20);
@@ -207,7 +207,8 @@ describe('PresentationTimeline', () => {
 
     it('ignores segment times when configured to', () => {
       const timeline = makeLiveTimeline(
-          /* availability */ 20, /* drift */ 0, /* autoCorrectDrift */ false);
+          /* availability= */ 20, /* drift= */ 0,
+          /* autoCorrectDrift= */ false);
 
       const ref1 = makeSegmentReference(0, 10);
       const ref2 = makeSegmentReference(10, 20);
@@ -225,7 +226,7 @@ describe('PresentationTimeline', () => {
 
   describe('getSegmentAvailabilityEnd', () => {
     it('returns duration for VOD', () => {
-      const timeline = makeVodTimeline(/* duration */ 60);
+      const timeline = makeVodTimeline(/* duration= */ 60);
 
       setElapsed(0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
@@ -235,7 +236,7 @@ describe('PresentationTimeline', () => {
     });
 
     it('calculates time for IPR', () => {
-      const timeline = makeIprTimeline(/* duration */ 60);
+      const timeline = makeIprTimeline(/* duration= */ 60);
 
       setElapsed(0);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(0);
@@ -257,8 +258,8 @@ describe('PresentationTimeline', () => {
     });
 
     it('calculates time for live', () => {
-      const timeline1 = makeLiveTimeline(/* availability */ 20);
-      const timeline2 = makeLiveTimeline(/* availability */ Infinity);
+      const timeline1 = makeLiveTimeline(/* availability= */ 20);
+      const timeline2 = makeLiveTimeline(/* availability= */ Infinity);
 
       setElapsed(0);
       expect(timeline1.getSegmentAvailabilityEnd()).toBe(0);
@@ -286,7 +287,7 @@ describe('PresentationTimeline', () => {
     });
 
     it('calculates time based on segment times when available', () => {
-      const timeline = makeLiveTimeline(/* availability */ 20);
+      const timeline = makeLiveTimeline(/* availability= */ 20);
 
       const ref1 = makeSegmentReference(0, 10);
       const ref2 = makeSegmentReference(10, 20);
@@ -308,10 +309,10 @@ describe('PresentationTimeline', () => {
   describe('getDuration', () => {
     it('returns the timeline duration', () => {
       setElapsed(0);
-      const timeline1 = makeVodTimeline(/* duration */ 60);
-      const timeline2 = makeIprTimeline(/* duration */ 60);
-      const timeline3 = makeLiveTimeline(/* availability */ 20);
-      const timeline4 = makeLiveTimeline(/* availability */ Infinity);
+      const timeline1 = makeVodTimeline(/* duration= */ 60);
+      const timeline2 = makeIprTimeline(/* duration= */ 60);
+      const timeline3 = makeLiveTimeline(/* availability= */ 20);
+      const timeline4 = makeLiveTimeline(/* availability= */ Infinity);
       expect(timeline1.getDuration()).toBe(60);
       expect(timeline2.getDuration()).toBe(60);
       expect(timeline3.getDuration()).toBe(Infinity);
@@ -322,7 +323,7 @@ describe('PresentationTimeline', () => {
   describe('setDuration', () => {
     it('affects availability end for VOD', () => {
       setElapsed(0);
-      const timeline = makeVodTimeline(/* duration */ 60);
+      const timeline = makeVodTimeline(/* duration= */ 60);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
 
       timeline.setDuration(90);
@@ -330,7 +331,7 @@ describe('PresentationTimeline', () => {
     });
 
     it('affects availability end for IPR', () => {
-      const timeline = makeIprTimeline(/* duration */ 60);
+      const timeline = makeIprTimeline(/* duration= */ 60);
 
       setElapsed(85);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(60);
@@ -342,25 +343,25 @@ describe('PresentationTimeline', () => {
 
   describe('clockOffset', () => {
     it('offsets availability calculations', () => {
-      const timeline = makeLiveTimeline(/* availability */ 10);
+      const timeline = makeLiveTimeline(/* availability= */ 10);
       setElapsed(11);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(1);
 
-      timeline.setClockOffset(5000 /* ms */);
+      timeline.setClockOffset(/* ms= */ 5000);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(6);
     });
   });
 
   describe('getSafeSeekRangeStart', () => {
     it('ignores offset for VOD', () => {
-      const timeline = makeVodTimeline(/* duration */ 60);
+      const timeline = makeVodTimeline(/* duration= */ 60);
       expect(timeline.getSafeSeekRangeStart(0)).toBe(0);
       expect(timeline.getSafeSeekRangeStart(10)).toBe(0);
       expect(timeline.getSafeSeekRangeStart(25)).toBe(0);
     });
 
     it('offsets from live edge', () => {
-      const timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+      const timeline = makeLiveTimeline(/* availability= */ 60, /* delay= */ 0);
 
       setElapsed(120);
       // now (120) - availability (60) - segment size (10) = 50
@@ -371,7 +372,7 @@ describe('PresentationTimeline', () => {
     });
 
     it('clamps to end', () => {
-      const timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+      const timeline = makeLiveTimeline(/* availability= */ 60, /* delay= */ 0);
 
       setElapsed(120);
       expect(timeline.getSegmentAvailabilityEnd()).toBe(110);
@@ -381,7 +382,7 @@ describe('PresentationTimeline', () => {
     });
 
     it('will return 0 if safe', () => {
-      const timeline = makeLiveTimeline(/* availability */ 60, /* delay */ 0);
+      const timeline = makeLiveTimeline(/* availability= */ 60, /* delay= */ 0);
 
       setElapsed(50);
       // now (50) - availability (60) - segment size (10) = -20
@@ -393,8 +394,8 @@ describe('PresentationTimeline', () => {
 
   describe('getSeekRangeEnd', () => {
     it('accounts for delay for live and IPR', () => {
-      const timeline1 = makeIprTimeline(/* duration */ 60, /* delay */ 7);
-      const timeline2 = makeLiveTimeline(/* duration */ 60, /* delay */ 7);
+      const timeline1 = makeIprTimeline(/* duration= */ 60, /* delay= */ 7);
+      const timeline2 = makeLiveTimeline(/* duration= */ 60, /* delay= */ 7);
 
       setElapsed(11);
       expect(timeline1.getSeekRangeEnd()).toBe(0);

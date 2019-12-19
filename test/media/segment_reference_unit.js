@@ -6,21 +6,21 @@
 describe('SegmentReference', () => {
   it('returns in getters values from constructor parameters', () => {
     const initSegmentReference = new shaka.media.InitSegmentReference(
-        /* getUris */ () => ['a', 'b'],
-        /* startByte */ 0,
-        /* endBytes */ null);
+        /* getUris= */ () => ['a', 'b'],
+        /* startByte= */ 0,
+        /* endBytes= */ null);
 
     const reference = new shaka.media.SegmentReference(
-        /* position */ 1,
-        /* startTime */ 2,
-        /* endTime */ 3,
-        /* getUris */ () => ['x', 'y'],
-        /* startByte */ 4,
-        /* endByte */ 5,
+        /* position= */ 1,
+        /* startTime= */ 2,
+        /* endTime= */ 3,
+        /* getUris= */ () => ['x', 'y'],
+        /* startByte= */ 4,
+        /* endByte= */ 5,
         initSegmentReference,
-        /* timestampOffset */ 6,
-        /* appendWindowStart */ 7,
-        /* appendWindowEnd */ 8);
+        /* timestampOffset= */ 6,
+        /* appendWindowStart= */ 7,
+        /* appendWindowEnd= */ 8);
 
     expect(reference.getPosition()).toBe(1);
     expect(reference.getStartTime()).toBe(2);
@@ -38,9 +38,9 @@ describe('SegmentReference', () => {
 describe('InitSegmentReference', () => {
   it('returns in getters values from constructor parameters', () => {
     const reference = new shaka.media.InitSegmentReference(
-        /* getUris */ () => ['x', 'y'],
-        /* startByte */ 4,
-        /* endByte */ 5);
+        /* getUris= */ () => ['x', 'y'],
+        /* startByte= */ 4,
+        /* endByte= */ 5);
 
     expect(reference.getUris()).toEqual(['x', 'y']);
     expect(reference.getStartByte()).toBe(4);

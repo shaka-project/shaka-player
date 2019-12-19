@@ -246,7 +246,7 @@ shaka.test.Util = class {
   static fetch(uri) {
     return new Promise(((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', uri, true /* asynchronous */);
+      xhr.open('GET', uri, /* asynchronous= */ true);
       xhr.responseType = 'arraybuffer';
 
       xhr.onload = (event) => {
@@ -263,7 +263,7 @@ shaka.test.Util = class {
         reject('shaka.test.Util.fetch failed: ' + uri);
       };
 
-      xhr.send(null /* body */);
+      xhr.send(/* body= */ null);
     }));
   }
 

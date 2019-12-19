@@ -417,7 +417,7 @@ describe('DrmEngine', () => {
 
       const variants = Periods.getAllVariantsFrom(manifest.periods);
       await expectAsync(
-          drmEngine.initForStorage(variants, /* usePersistentLicense */ true))
+          drmEngine.initForStorage(variants, /* usePersistentLicense= */ true))
           .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);

@@ -91,7 +91,7 @@ describe('StringUtils', () => {
   it('converts toUTF16-LE', () => {
     const str = 'Xe\u4524\u1952';
     const arr = [0x58, 0, 0x65, 0, 0x24, 0x45, 0x52, 0x19];
-    const buffer = StringUtils.toUTF16(str, /* littleEndian */ true);
+    const buffer = StringUtils.toUTF16(str, /* littleEndian= */ true);
     expect(shaka.util.BufferUtils.toUint8(buffer))
         .toEqual(new Uint8Array(arr));
   });
@@ -99,7 +99,7 @@ describe('StringUtils', () => {
   it('converts toUTF16-BE', () => {
     const str = 'Xe\u4524\u1952';
     const arr = [0, 0x58, 0, 0x65, 0x45, 0x24, 0x19, 0x52];
-    const buffer = StringUtils.toUTF16(str, /* littleEndian */ false);
+    const buffer = StringUtils.toUTF16(str, /* littleEndian= */ false);
     expect(shaka.util.BufferUtils.toUint8(buffer))
         .toEqual(new Uint8Array(arr));
   });

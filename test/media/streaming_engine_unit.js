@@ -176,20 +176,20 @@ describe('StreamingEngine', () => {
     playing = false;
 
     setupNetworkingEngine(
-        2 /* segmentsInFirstPeriod */,
-        2 /* segmentsInSecondPeriod */);
+        /* segmentsInFirstPeriod= */ 2,
+        /* segmentsInSecondPeriod= */ 2);
 
     timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-        0 /* segmentAvailabilityStart */,
-        40 /* segmentAvailabilityEnd */,
-        40 /* presentationDuration */,
-        10 /* maxSegmentDuration */,
-        false /* isLive */);
+        /* segmentAvailabilityStart= */ 0,
+        /* segmentAvailabilityEnd= */ 40,
+        /* presentationDuration= */ 40,
+        /* maxSegmentDuration= */ 10,
+        /* isLive= */ false);
 
     setupManifest(
-        0 /* firstPeriodStartTime */,
-        20 /* secondPeriodStartTime */,
-        40 /* presentationDuration */);
+        /* firstPeriodStartTime= */ 0,
+        /* secondPeriodStartTime= */ 20,
+        /* presentationDuration= */ 40);
   }
 
   function setupLive() {
@@ -285,8 +285,8 @@ describe('StreamingEngine', () => {
     playing = false;
 
     setupNetworkingEngine(
-        12 /* segmentsInFirstPeriod */,
-        2 /* segmentsInSecondPeriod */);
+        /* segmentsInFirstPeriod= */ 12,
+        /* segmentsInSecondPeriod= */ 2);
 
     // NOTE: Many tests here start playback at 100, so the availability start is
     // 90.  This allows the async index creation processes to complete before
@@ -296,16 +296,16 @@ describe('StreamingEngine', () => {
     // time to complete.  To test actual boundary conditions, you can change
     // timeline.segmentAvailabilityStart in the test setup.
     timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-        90 /* segmentAvailabilityStart */,
-        140 /* segmentAvailabilityEnd */,
-        140 /* presentationDuration */,
-        10 /* maxSegmentDuration */,
-        true /* isLive */);
+        /* segmentAvailabilityStart= */ 90,
+        /* segmentAvailabilityEnd= */ 140,
+        /* presentationDuration= */ 140,
+        /* maxSegmentDuration= */ 10,
+        /* isLive= */ true);
 
     setupManifest(
-        0 /* firstPeriodStartTime */,
-        120 /* secondPeriodStartTime */,
-        140 /* presentationDuration */);
+        /* firstPeriodStartTime= */ 0,
+        /* secondPeriodStartTime= */ 120,
+        /* presentationDuration= */ 140);
   }
 
   function setupNetworkingEngine(
@@ -1112,7 +1112,7 @@ describe('StreamingEngine', () => {
       onCanSwitch.and.callFake(async () => {
         mediaSourceEngine.clear.calls.reset();
         streamingEngine.switchVariant(
-            sameAudioVariant, /* clearBuffer */ true, /* safeMargin */ 0);
+            sameAudioVariant, /* clearBuffer= */ true, /* safeMargin= */ 0);
         await Util.fakeEventLoop(1);
         expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('audio');
         expect(mediaSourceEngine.clear).toHaveBeenCalledWith('video');
@@ -1120,7 +1120,7 @@ describe('StreamingEngine', () => {
 
         mediaSourceEngine.clear.calls.reset();
         streamingEngine.switchVariant(
-            sameVideoVariant, /* clearBuffer */ true, /* safeMargin */ 0);
+            sameVideoVariant, /* clearBuffer= */ true, /* safeMargin= */ 0);
         await Util.fakeEventLoop(1);
         expect(mediaSourceEngine.clear).toHaveBeenCalledWith('audio');
         expect(mediaSourceEngine.clear).not.toHaveBeenCalledWith('video');
@@ -2604,7 +2604,7 @@ describe('StreamingEngine', () => {
 
   describe('setTrickPlay', () => {
     it('uses trick mode track when requested', async () => {
-      setupVod(/* trickMode */ true);
+      setupVod(/* trickMode= */ true);
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
@@ -2952,8 +2952,8 @@ describe('StreamingEngine', () => {
           return new shaka.media.SegmentReference(
               seg.position, seg.startTime, seg.endTime, seg.getUris,
               /* startByte= */ 0, /* endByte= */ null,
-              /* initSegmentReference */ null, /* timestampOffset */ 0,
-              /* appendWindowStart */ 0, /* appendWindowEnd */ Infinity);
+              /* initSegmentReference= */ null, /* timestampOffset= */ 0,
+              /* appendWindowStart= */ 0, /* appendWindowEnd= */ Infinity);
         } else {
           return seg;
         }

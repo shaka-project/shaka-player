@@ -61,7 +61,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
 
     shaka.ui.LanguageUtils.updateTracks(tracks, this.menu,
         (track) => this.onAudioTrackSelected_(track),
-        /* updateChosen */ true, this.currentSelection, this.localization,
+        /* updateChosen= */ true, this.currentSelection, this.localization,
         this.controls.getConfig().trackLabelFormat);
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 

@@ -2030,11 +2030,11 @@ describe('HlsParser', () => {
           .setResponseValue('test:/main.mp4', segmentData);
 
       const expectedRef = ManifestParser.makeReference(
-          'test:/main.mp4' /* uri */,
-          0 /* position */,
-          0 /* startTime */,
-          5 /* endTime */,
-          '' /* baseUri */,
+          /* uri= */ 'test:/main.mp4',
+          /* position= */ 0,
+          /* startTime= */ 0,
+          /* endTime= */ 5,
+          /* baseUri= */ '',
           expectedStartByte,
           expectedEndByte);
       // In VOD content, we set the timestampOffset to align the
@@ -2063,11 +2063,11 @@ describe('HlsParser', () => {
           .setResponseValue('test:/main.ts', tsSegmentData);
 
       const expectedRef = ManifestParser.makeReference(
-          'test:/main.ts' /* uri */,
-          0 /* position */,
-          0 /* startTime */,
-          5 /* endTime */,
-          '' /* baseUri */,
+          /* uri= */ 'test:/main.ts',
+          /* position= */ 0,
+          /* startTime= */ 0,
+          /* endTime= */ 5,
+          /* baseUri= */ '',
           expectedStartByte,
           expectedEndByte);
       // In VOD content, we set the timestampOffset to align the

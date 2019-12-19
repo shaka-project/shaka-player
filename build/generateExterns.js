@@ -679,7 +679,7 @@ function main(args) {
   const results = inputPaths.map((path) => generateExterns(names, path));
 
   // Sort them in dependency order.
-  const sorted = topologicalSort(results, /* getDeps */ (object) => {
+  const sorted = topologicalSort(results, /* getDeps= */ (object) => {
     return object.requires.map((id) => {
       const dep = results.find((x) => x.provides.includes(id));
       assert(dep, 'Cannot find dependency: ' + id);

@@ -98,7 +98,7 @@ shaka.ui.Overlay = class {
     const ret = this.defaultConfig_();
     shaka.util.ConfigUtils.mergeConfigObjects(
         ret, this.config_, this.defaultConfig_(),
-        /* overrides (only used for player config)*/ {}, /* path */ '');
+        /* overrides= */ {}, /* path= */ '');
     return ret;
   }
 
@@ -124,7 +124,7 @@ shaka.ui.Overlay = class {
 
     shaka.util.ConfigUtils.mergeConfigObjects(
         this.config_, config, this.defaultConfig_(),
-        /* overrides (only used for player config)*/ {}, /* path */ '');
+        /* overrides= */ {}, /* path= */ '');
 
     // If a cast receiver app id has been given, add a cast button to the UI
     if (this.config_.castReceiverAppId &&

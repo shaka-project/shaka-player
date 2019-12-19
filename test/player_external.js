@@ -239,7 +239,7 @@ describe('Player', () => {
       // On some platforms, currentTime is less than duration, but it should be
       // close.
       expect(video.currentTime).toBeCloseTo(
-          video.duration, 1 /* decimal place */);
+          video.duration, /* decimal= */ 1);
     }
   }
 

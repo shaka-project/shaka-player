@@ -29,23 +29,23 @@ describe('Mp4SegmentIndexParser', () => {
 
     expect(() => shaka.media.Mp4SegmentIndexParser.parse(
         mediaSegment,
-        /* sidxOffset */ 0,
-        /* uris */ [],
-        /* initSegmentReference */ null,
-        /* timestampOffset */ 0,
-        /* appendWindowStart */ 0,
-        /* appendWindowEnd */ Infinity)).toThrow(error);
+        /* sidxOffset= */ 0,
+        /* uris= */ [],
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity)).toThrow(error);
   });
 
   it('parses index segment ', () => {
     const result = shaka.media.Mp4SegmentIndexParser.parse(
         indexSegment,
-        /* sidxOffset */ 0,
-        /* uris */ [],
-        /* initSegmentReference */ null,
-        /* timestampOffset */ 0,
-        /* appendWindowStart */ 0,
-        /* appendWindowEnd */ Infinity);
+        /* sidxOffset= */ 0,
+        /* uris= */ [],
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
     const references = [
       {startTime: 0, endTime: 12, startByte: 92, endByte: 194960},
       {startTime: 12, endTime: 24, startByte: 194961, endByte: 294059},
@@ -60,12 +60,12 @@ describe('Mp4SegmentIndexParser', () => {
   it('takes a timestamp offset in seconds', () => {
     const result = shaka.media.Mp4SegmentIndexParser.parse(
         indexSegment,
-        /* sidxOffset */ 0,
-        /* uris */ [],
-        /* initSegmentReference */ null,
-        /* timestampOffset */ -2,
-        /* appendWindowStart */ 0,
-        /* appendWindowEnd */ Infinity);
+        /* sidxOffset= */ 0,
+        /* uris= */ [],
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ -2,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
     const references = [
       {startTime: -2, endTime: 10},
       {startTime: 10, endTime: 22},

@@ -3250,7 +3250,7 @@ describe('Player', () => {
       };
 
       await player.load(
-          fakeManifestUri, /* startTime */ 0, returnManifest(manifest));
+          fakeManifestUri, /* startTime= */ 0, returnManifest(manifest));
 
       // Ensure this is seen as a live stream, or else the test is invalid.
       expect(player.isLive()).toBe(true);

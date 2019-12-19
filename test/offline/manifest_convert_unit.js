@@ -24,8 +24,8 @@ describe('ManifestConverter', () => {
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
-          audios, videos, timeline, /* periodStart */ 0,
-          /* periodDuration */ 10);
+          audios, videos, timeline, /* periodStart= */ 0,
+          /* periodDuration= */ 10);
       expect(variants.size).toBe(2);
 
       expect(variants.has(0)).toBeTruthy();
@@ -50,8 +50,8 @@ describe('ManifestConverter', () => {
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
-          audios, videos, timeline, /* periodStart */ 0,
-          /* periodDuration */ 10);
+          audios, videos, timeline, /* periodStart= */ 0,
+          /* periodDuration= */ 10);
       expect(variants.size).toBe(2);
     });
 
@@ -68,8 +68,8 @@ describe('ManifestConverter', () => {
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
-          audios, videos, timeline, /* periodStart */ 0,
-          /* periodDuration */ 10);
+          audios, videos, timeline, /* periodStart= */ 0,
+          /* periodDuration= */ 10);
       expect(variants.size).toBe(2);
     });
   }); // describe('createVariants')
@@ -297,17 +297,17 @@ describe('ManifestConverter', () => {
       keyId: 'key1',
       segments: [
         createSegmentDB(
-            /* start time */ periodStart,
-            /* end time */ periodStart + 10,
-            /* data key */ 1),
+            /* startTime= */ periodStart,
+            /* endTime= */ periodStart + 10,
+            /* dataKey= */ 1),
         createSegmentDB(
-            /* start time */ periodStart + 10,
-            /* end time */ periodStart + 20,
-            /* data key */ 2),
+            /* startTime= */ periodStart + 10,
+            /* endTime= */ periodStart + 20,
+            /* dataKey= */ 2),
         createSegmentDB(
-            /* start time */ periodStart + 20,
-            /* end time */ periodStart + 25,
-            /* data key */ 3),
+            /* startTime= */ periodStart + 20,
+            /* endTime= */ periodStart + 25,
+            /* dataKey= */ 3),
       ],
       variantIds: variantIds,
     };
@@ -341,17 +341,17 @@ describe('ManifestConverter', () => {
       keyId: null,
       segments: [
         createSegmentDB(
-            /* start time */ periodStart,
-            /* end time */ periodStart + 10,
-            /* data key */ 1),
+            /* startTime= */ periodStart,
+            /* endTime= */ periodStart + 10,
+            /* dataKey= */ 1),
         createSegmentDB(
-            /* start time */ periodStart + 10,
-            /* end time */ periodStart + 20,
-            /* data key */ 2),
+            /* startTime= */ periodStart + 10,
+            /* endTime= */ periodStart + 20,
+            /* dataKey= */ 2),
         createSegmentDB(
-            /* start time */ periodStart + 20,
-            /* end time */ periodStart + 25,
-            /* data key */ 3),
+            /* startTime= */ periodStart + 20,
+            /* endTime= */ periodStart + 25,
+            /* dataKey= */ 3),
       ],
       variantIds: variantIds,
     };
@@ -384,17 +384,17 @@ describe('ManifestConverter', () => {
       keyId: null,
       segments: [
         createSegmentDB(
-            /* start time */ periodStart,
-            /* end time */ periodStart + 10,
-            /* data key */ 1),
+            /* startTime= */ periodStart,
+            /* endTime= */ periodStart + 10,
+            /* dataKey= */ 1),
         createSegmentDB(
-            /* start time */ periodStart + 10,
-            /* end time */ periodStart + 20,
-            /* data key */ 2),
+            /* startTime= */ periodStart + 10,
+            /* endTime= */ periodStart + 20,
+            /* dataKey= */ 2),
         createSegmentDB(
-            /* start time */ periodStart + 20,
-            /* end time */ periodStart + 25,
-            /* data key */ 3),
+            /* startTime= */ periodStart + 20,
+            /* endTime= */ periodStart + 25,
+            /* dataKey= */ 3),
       ],
       variantIds: [5],
     };

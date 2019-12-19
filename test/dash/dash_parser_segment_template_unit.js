@@ -52,7 +52,7 @@ describe('DashParser SegmentTemplate', () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" media="s$Number$.mp4"',
         '  duration="10" />',
-      ], 60 /* duration */);
+      ], /* duration= */ 60);
       const references = [
         ManifestParser.makeReference('s1.mp4', 0, 0, 10, baseUri),
         ManifestParser.makeReference('s2.mp4', 1, 10, 20, baseUri),
@@ -68,7 +68,7 @@ describe('DashParser SegmentTemplate', () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="10" media="s$Number$.mp4"',
         '   duration="10" />',
-      ], 30 /* duration */);
+      ], /* duration= */ 30);
       const references = [
         ManifestParser.makeReference('s10.mp4', 0, 0, 10, baseUri),
         ManifestParser.makeReference('s11.mp4', 1, 10, 20, baseUri),
@@ -81,7 +81,7 @@ describe('DashParser SegmentTemplate', () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="10"',
         ' presentationTimeOffset="50" />',
-      ], 30 /* duration */, 40 /* startTime */ );
+      ], /* duration= */ 30, /* startTime= */ 40);
 
       fakeNetEngine.setResponseText('dummy://foo', source);
       const manifest = await parser.start('dummy://foo', playerInterface);
@@ -108,7 +108,7 @@ describe('DashParser SegmentTemplate', () => {
     it('handles segments larger than the period', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="60" />',
-      ], 30 /* duration */);
+      ], /* duration= */ 30);
       // The first segment is number 1 and position 0.
       // Although the segment is 60 seconds long, it is clipped to the period
       // duration of 30 seconds.
@@ -121,7 +121,7 @@ describe('DashParser SegmentTemplate', () => {
     it('presentation start is parsed correctly', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate media="s$Number$.mp4" duration="60" />',
-      ], 30 /* duration */, /* startTime */ 30);
+      ], /* duration= */ 30, /* startTime= */ 30);
 
       fakeNetEngine.setResponseText('dummy://foo', source);
       const manifest = await parser.start('dummy://foo', playerInterface);
@@ -293,7 +293,7 @@ describe('DashParser SegmentTemplate', () => {
         '    <S t="0" d="15" r="2" />',
         '  </SegmentTimeline>',
         '</SegmentTemplate>',
-      ], 45 /* duration */);
+      ], /* duration= */ 45);
       const references = [
         ManifestParser.makeReference('0-0-500.mp4', 0, 0, 15, baseUri),
         ManifestParser.makeReference('1-15-500.mp4', 1, 15, 30, baseUri),
@@ -306,7 +306,7 @@ describe('DashParser SegmentTemplate', () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="0" duration="10"',
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
-      ], 30 /* duration */);
+      ], /* duration= */ 30);
       const references = [
         ManifestParser.makeReference('0-0-500.mp4', 0, 0, 10, baseUri),
         ManifestParser.makeReference('1-10-500.mp4', 1, 10, 20, baseUri),
@@ -319,7 +319,7 @@ describe('DashParser SegmentTemplate', () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" duration="10"',
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
-      ], 30 /* duration */);
+      ], /* duration= */ 30);
       const references = [
         ManifestParser.makeReference('1-0-500.mp4', 0, 0, 10, baseUri),
         ManifestParser.makeReference('2-10-500.mp4', 1, 10, 20, baseUri),
@@ -332,7 +332,7 @@ describe('DashParser SegmentTemplate', () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="10" duration="10"',
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
-      ], 30 /* duration */);
+      ], /* duration= */ 30);
       const references = [
         ManifestParser.makeReference('10-0-500.mp4', 0, 0, 10, baseUri),
         ManifestParser.makeReference('11-10-500.mp4', 1, 10, 20, baseUri),
@@ -345,7 +345,7 @@ describe('DashParser SegmentTemplate', () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" timescale="9000" duration="9000"',
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
-      ], 3 /* duration */);
+      ], /* duration= */ 3);
       const references = [
         ManifestParser.makeReference('1-0-500.mp4', 0, 0, 1, baseUri),
         ManifestParser.makeReference('2-9000-500.mp4', 1, 1, 2, baseUri),

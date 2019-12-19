@@ -114,8 +114,8 @@ shaka.test.UiUtils = class {
     // (in test/test/boot.js). This tells it that we've added a new
     // stylesheet, so LESS can process it.
     less.registerStylesheetsImmediately();
-    await less.refresh(/* reload */ true,
-        /* modifyVars*/ false, /* clearFileCache */ false);
+    await less.refresh(/* reload= */ true,
+        /* modifyVars= */ false, /* clearFileCache= */ false);
   }
 
   /**

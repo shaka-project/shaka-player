@@ -458,14 +458,14 @@ filterDescribe('Storage', storageSupport, () => {
           return new ArrayBuffer(16);
         });
       };
-      setResponseFor(audioSegment1Uri, /* depending on */ null);
-      setResponseFor(audioSegment2Uri, /* depending on */ videoSegment1Uri);
-      setResponseFor(audioSegment3Uri, /* depending on */ videoSegment2Uri);
-      setResponseFor(audioSegment4Uri, /* depending on */ videoSegment3Uri);
-      setResponseFor(videoSegment1Uri, /* depending on */ audioSegment1Uri);
-      setResponseFor(videoSegment2Uri, /* depending on */ audioSegment2Uri);
-      setResponseFor(videoSegment3Uri, /* depending on */ audioSegment3Uri);
-      setResponseFor(videoSegment4Uri, /* depending on */ audioSegment4Uri);
+      setResponseFor(audioSegment1Uri, null);
+      setResponseFor(audioSegment2Uri, videoSegment1Uri);
+      setResponseFor(audioSegment3Uri, videoSegment2Uri);
+      setResponseFor(audioSegment4Uri, videoSegment3Uri);
+      setResponseFor(videoSegment1Uri, audioSegment1Uri);
+      setResponseFor(videoSegment2Uri, audioSegment2Uri);
+      setResponseFor(videoSegment3Uri, audioSegment3Uri);
+      setResponseFor(videoSegment4Uri, audioSegment4Uri);
 
       // Use a real Player as Storage will use it to get a networking
       // engine.
@@ -1321,12 +1321,12 @@ filterDescribe('Storage', storageSupport, () => {
         startTime,
         endTime,
         () => [uri],
-        /* startByte */ 0,
-        /* endByte */ null,
-        /* initSegmentReference */ null,
-        /* timestampOffset */ 0,
-        /* appendWindowStart */ 0,
-        /* appendWindowEnd */ Infinity);
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
   }
 
   /**
@@ -1537,7 +1537,7 @@ filterDescribe('Storage', storageSupport, () => {
     try {
       drm.configure(player.getConfiguration().drm);
       const variants = shaka.util.Periods.getAllVariantsFrom(manifest.periods);
-      await drm.initForStorage(variants, /* usePersistentLicenses */ true);
+      await drm.initForStorage(variants, /* usePersistentLicenses= */ true);
       await action(drm);
     } finally {
       await drm.destroy();

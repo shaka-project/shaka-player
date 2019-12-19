@@ -643,11 +643,11 @@ describe('HlsParser live', () => {
             .setResponseValue('test:/main.mp4', segmentData);
 
         const expectedRef = ManifestParser.makeReference(
-            'test:/main.mp4' /* uri */,
-            0 /* position */,
-            segmentDataStartTime /* start */,
-            segmentDataStartTime + 2 /* end */,
-            '' /* baseUri */,
+            /* uri= */ 'test:/main.mp4',
+            /* position= */ 0,
+            /* start= */ segmentDataStartTime,
+            /* end= */ segmentDataStartTime + 2,
+            /* baseUri= */ '',
             expectedStartByte,
             expectedEndByte);  // Complete segment reference
 

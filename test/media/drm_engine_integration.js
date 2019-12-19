@@ -198,10 +198,10 @@ describe('DrmEngine', () => {
       await drmEngine.attach(video);
       await mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, videoInitSegment, null, null,
-          /* hasClosedCaptions */ false);
+          /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
           ContentType.AUDIO, audioInitSegment, null, null,
-          /* hasClosedCaptions */ false);
+          /* hasClosedCaptions= */ false);
       await encryptedEventSeen;
       // With PlayReady, a persistent license policy can cause a different
       // chain of events.  In particular, the request is bypassed and we
@@ -235,10 +235,10 @@ describe('DrmEngine', () => {
 
       await mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, videoSegment, null, null,
-          /* hasClosedCaptions */ false);
+          /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
           ContentType.AUDIO, audioSegment, null, null,
-          /* hasClosedCaptions */ false);
+          /* hasClosedCaptions= */ false);
 
       expect(video.buffered.end(0)).toBeGreaterThan(0);
       video.play();

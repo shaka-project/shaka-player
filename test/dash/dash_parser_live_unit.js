@@ -501,7 +501,7 @@ describe('DashParser Live', () => {
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
     // updateTime parameter sets @minimumUpdatePeriod in the manifest.
-    const manifestText = makeSimpleLiveManifestText(lines, /* updateTime */ 0);
+    const manifestText = makeSimpleLiveManifestText(lines, /* updateTime= */ 0);
 
     /** @type {!jasmine.Spy} */
     const tickAfter = updateTickSpy();
@@ -522,7 +522,7 @@ describe('DashParser Live', () => {
     ];
     // updateTime parameter sets @minimumUpdatePeriod in the manifest.
     const manifestText =
-        makeSimpleLiveManifestText(lines, /* updateTime */ null);
+        makeSimpleLiveManifestText(lines, /* updateTime= */ null);
 
     /** @type {!jasmine.Spy} */
     const tickAfter = updateTickSpy();

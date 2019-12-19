@@ -299,8 +299,8 @@ describe('UI', () => {
 
       languagesToButtons = mapChoicesToButtons(
           /* allButtons= */ languageButtons,
-          /* choices */ langsFromContent,
-          /* modifier */ getNativeName
+          /* choices= */ langsFromContent,
+          /* modifier= */ getNativeName
       );
 
       const button = languagesToButtons.get(newLanguage);

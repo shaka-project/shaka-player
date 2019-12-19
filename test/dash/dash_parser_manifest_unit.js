@@ -313,16 +313,16 @@ describe('DashParser Manifest', () => {
     await stream.createSegmentIndex();
     expect(stream.segmentIndex.find(0)).toBe(1);
     expect(stream.segmentIndex.get(1)).toEqual(new shaka.media.SegmentReference(
-        /* position */ 1,
-        /* startTime */ 0,
-        /* endTime */ 30,
-        /* getUris */ () => ['http://example.com/de.vtt'],
-        /* startByte */ 0,
-        /* endBytes */ null,
-        /* initSegmentReference */ null,
-        /* timestampOffset */ 0,
-        /* appendWindowStart */ 0,
-        /* appendWindowEnd */ 30));
+        /* position= */ 1,
+        /* startTime= */ 0,
+        /* endTime= */ 30,
+        /* getUris= */ () => ['http://example.com/de.vtt'],
+        /* startByte= */ 0,
+        /* endBytes= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ 30));
   });
 
   it('correctly parses closed captions with channels and languages',

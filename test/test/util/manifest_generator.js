@@ -630,15 +630,15 @@ shaka.test.ManifestGenerator.Stream = class {
       const end = Math.min(totalDuration, (index + 1) * segmentDuration);
       return new this.manifest_.shaka_.media.SegmentReference(
           index,
-          /* startTime */ periodStart + start,
-          /* endTime */ periodStart + end,
+          /* startTime= */ periodStart + start,
+          /* endTime= */ periodStart + end,
           getUris,
-          /* startByte */ 0,
-          /* endByte */ segmentSize,
+          /* startByte= */ 0,
+          /* endByte= */ segmentSize,
           this.initSegmentReference_,
-          /* timestampOffset */ periodStart,
-          /* appendWindowStart */ periodStart,
-          /* appendWindowEnd */ Infinity);
+          /* timestampOffset= */ periodStart,
+          /* appendWindowStart= */ periodStart,
+          /* appendWindowEnd= */ Infinity);
     };
   }
 
@@ -656,7 +656,7 @@ shaka.test.ManifestGenerator.Stream = class {
     };
     this.segmentIndex =
         this.manifest_.shaka_.media.SegmentIndex.forSingleSegment(
-            /* startTime */ 0, duration, [uri]);
+            /* startTime= */ 0, duration, [uri]);
   }
 
   /**
