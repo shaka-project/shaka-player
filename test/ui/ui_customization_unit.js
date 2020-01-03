@@ -31,7 +31,7 @@ describe('UI Customization', () => {
       /** @type {!HTMLElement} */ (document.createElement('div'));
     document.body.appendChild(container);
 
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     container.appendChild(video);
   });
 

@@ -49,7 +49,7 @@ describe('DrmEngine', () => {
   let audioSegment;
 
   beforeAll(async () => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
 
     const responses = await Promise.all([

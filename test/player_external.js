@@ -24,7 +24,7 @@ describe('Player', () => {
   let compiledShaka;
 
   beforeAll(async () => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
 
     /** @type {!shaka.util.PublicPromise} */

@@ -136,4 +136,20 @@ shaka.test.UiUtils = class {
     event.initEvent(name, true, true);
     target.dispatchEvent(event);
   }
+
+  /**
+   * Creates a muted, fixed size video element for testing.
+   *
+   * @return {!HTMLVideoElement}
+   */
+  static createVideoElement() {
+    const video = /** @type {!HTMLVideoElement} */(document.createElement(
+        'video'));
+
+    video.muted = true;
+    video.width = 600;
+    video.height = 400;
+
+    return video;
+  }
 };

@@ -21,7 +21,7 @@ describe('TextTrackIntegration', () => {
   let trackCues;
 
   beforeEach(() => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
 
     expect(video.textTracks).toBeTruthy();

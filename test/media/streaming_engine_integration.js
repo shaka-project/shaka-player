@@ -50,7 +50,7 @@ describe('StreamingEngine', () => {
   let onStartupComplete;
 
   beforeAll(() => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
 
     metadata = shaka.test.TestScheme.DATA['sintel'];

@@ -39,7 +39,7 @@ describe('UI', () => {
         /** @type {!HTMLElement} */ (document.createElement('div'));
       document.body.appendChild(videoContainer);
 
-      video = shaka.util.Dom.createVideoElement();
+      video = shaka.test.UiUtils.createVideoElement();
       videoContainer.appendChild(video);
       UiUtils.createUIThroughAPI(videoContainer, video);
     });
@@ -98,7 +98,7 @@ describe('UI', () => {
       let video;
 
       beforeEach(async () => {
-        video = shaka.util.Dom.createVideoElement();
+        video = shaka.test.UiUtils.createVideoElement();
         document.body.appendChild(video);
 
         await UiUtils.createUIThroughDOMAutoSetup(/* containers */ [], [video]);
@@ -149,7 +149,7 @@ describe('UI', () => {
           /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
 
-        video = shaka.util.Dom.createVideoElement();
+        video = shaka.test.UiUtils.createVideoElement();
         container.appendChild(video);
 
         await UiUtils.createUIThroughDOMAutoSetup([container], [video]);
@@ -172,7 +172,7 @@ describe('UI', () => {
         /** @type {!HTMLElement} */ (document.createElement('div'));
       document.body.appendChild(videoContainer);
 
-      video = shaka.util.Dom.createVideoElement();
+      video = shaka.test.UiUtils.createVideoElement();
       videoContainer.appendChild(video);
     });
 

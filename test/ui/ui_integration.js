@@ -36,7 +36,7 @@ describe('UI', () => {
   });
 
   beforeEach(async () => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
 
     videoContainer = shaka.util.Dom.createHTMLElement('div');
     videoContainer.appendChild(video);
