@@ -602,7 +602,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (document.pictureInPictureElement) {
           await document.exitPictureInPicture();
         }
-        await this.videoContainer_.requestFullscreen();
+        await this.videoContainer_.requestFullscreen({ "navigationUI": "hide" });
       } catch (error) {
         this.dispatchEvent(new shaka.util.FakeEvent('error', {
           detail: error,
@@ -949,7 +949,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (screen.orientation.type.includes('landscape') &&
         !document.fullscreenElement) {
-      await this.videoContainer_.requestFullscreen();
+      await this.videoContainer_.requestFullscreen({ "navigationUI": "hide" });
     } else if (screen.orientation.type.includes('portrait') &&
         document.fullscreenElement) {
       await document.exitFullscreen();
