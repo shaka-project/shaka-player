@@ -509,7 +509,7 @@ shaka.ui.Controls.prototype.toggleFullScreen = async function() {
         detail: error,
       }));
     }
-    await this.videoContainer_.requestFullscreen();
+    await this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
   }
 };
 
@@ -797,7 +797,7 @@ shaka.ui.Controls.prototype.onScreenRotation_ = function() {
 
   if (screen.orientation.type.includes('landscape') &&
       !document.fullscreenElement) {
-    this.videoContainer_.requestFullscreen();
+    this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
   } else if (screen.orientation.type.includes('portrait') &&
       document.fullscreenElement) {
     document.exitFullscreen();
