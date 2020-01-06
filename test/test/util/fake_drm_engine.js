@@ -46,6 +46,10 @@ shaka.test.FakeDrmEngine = class {
     this.getExpiration.and.returnValue(Infinity);
 
     /** @type {!jasmine.Spy} */
+    this.getLicenseTime = jasmine.createSpy('getLicenseTime');
+    this.getLicenseTime.and.returnValue(NaN);
+
+    /** @type {!jasmine.Spy} */
     this.getKeyStatuses = jasmine.createSpy('getKeyStatuses');
     this.getKeyStatuses.and.returnValue({});
 
