@@ -114,6 +114,7 @@ shaka.extern.PeriodDB;
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
+ *   pixelAspectRatio: ?string,
  *   kind: (string|undefined),
  *   language: string,
  *   label: ?string,
@@ -144,6 +145,8 @@ shaka.extern.PeriodDB;
  *   The codecs of the stream.
  * @property {(number|undefined)} frameRate
  *   The Stream's framerate in frames per second.
+ * @property {?string} pixelAspectRatio
+ *   The Stream's pixel aspect ratio
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
