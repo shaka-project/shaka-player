@@ -26,23 +26,7 @@ describe('Player', () => {
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
-
-    /** @type {!shaka.util.PublicPromise} */
-    const loaded = new shaka.util.PublicPromise();
-    if (getClientArg('uncompiled')) {
-      // For debugging purposes, use the uncompiled library.
-      compiledShaka = shaka;
-      loaded.resolve();
-    } else {
-      // Load the compiled library as a module.
-      // All tests in this suite will use the compiled library.
-      require(['/base/dist/shaka-player.ui.js'], (shakaModule) => {
-        compiledShaka = shakaModule;
-        loaded.resolve();
-      });
-    }
-
-    await loaded;
+    compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
     support = await compiledShaka.Player.probeSupport();
   });
 
