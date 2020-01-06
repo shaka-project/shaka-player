@@ -132,6 +132,7 @@ shakaAssets.Feature = {
  *   (optional) The codecs string, if needed to refine the MIME type.
  */
 shakaAssets.ExtraText;
+// }}}
 
 
 // Custom callbacks {{{
