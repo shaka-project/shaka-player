@@ -545,6 +545,7 @@ shaka.test.ManifestGenerator.prototype.createStream_ =
     mimeType: defaultMimeType,
     codecs: defaultCodecs,
     frameRate: undefined,
+    pixelAspectRatio: null,
     bandwidth: undefined,
     width: undefined,
     height: undefined,
@@ -733,6 +734,20 @@ shaka.test.ManifestGenerator.prototype.closedCaptions =
 shaka.test.ManifestGenerator.prototype.frameRate = function(frameRate) {
   let stream = this.currentStream_();
   stream.frameRate = frameRate;
+  return this;
+};
+
+
+/**
+ * Sets the pixel aspect ratio of the current stream.
+ *
+ * @param {string} pixelAspectRatio
+ * @return {!shaka.test.ManifestGenerator}
+ */
+shaka.test.ManifestGenerator.prototype.pixelAspectRatio =
+    function(pixelAspectRatio) {
+  let stream = this.currentStream_();
+  stream.pixelAspectRatio = pixelAspectRatio;
   return this;
 };
 

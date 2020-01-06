@@ -293,6 +293,7 @@ shaka.extern.GetSegmentReferenceFunction;
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
+ *   pixelAspectRatio: ?string,
  *   bandwidth: (number|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
@@ -359,6 +360,9 @@ shaka.extern.GetSegmentReferenceFunction;
  * @property {(number|undefined)} frameRate
  *   <i>Video streams only.</i> <br>
  *   The Stream's framerate in frames per second
+ * @property {?string} pixelAspectRatio
+ *   <i>Video streams only.</i> <br>
+ *   The Stream's pixel aspect ratio
  * @property {(number|undefined)} bandwidth
  *   <i>Audio and video streams only.</i> <br>
  *   The stream's required bandwidth in bits per second.

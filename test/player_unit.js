@@ -923,6 +923,7 @@ describe('Player', function() {
             .language('en')
             .addVideo(1).originalId('video-1kbps').bandwidth(1000)
               .size(100, 200).frameRate(1000000 / 42000)
+              .pixelAspectRatio('59:54')
             .addAudio(3).originalId('audio-en-6c').bandwidth(300)
               .channelsCount(6).roles(['main']).audioSamplingRate(48000)
 
@@ -931,6 +932,7 @@ describe('Player', function() {
             .language('en')
             .addVideo(2).originalId('video-2kbps').bandwidth(2000)
               .size(200, 400).frameRate(24)
+              .pixelAspectRatio('59:54')
             .addExistingStream(3)  // audio
 
           .addVariant(102)  // main stereo, low res
@@ -1014,6 +1016,7 @@ describe('Player', function() {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1042,6 +1045,7 @@ describe('Player', function() {
           width: 200,
           height: 400,
           frameRate: 24,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1070,6 +1074,7 @@ describe('Player', function() {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1098,6 +1103,7 @@ describe('Player', function() {
           width: 200,
           height: 400,
           frameRate: 24,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1126,6 +1132,7 @@ describe('Player', function() {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1154,6 +1161,7 @@ describe('Player', function() {
           width: 200,
           height: 400,
           frameRate: 24,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1182,6 +1190,7 @@ describe('Player', function() {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1210,6 +1219,7 @@ describe('Player', function() {
           width: 200,
           height: 400,
           frameRate: 24,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1252,6 +1262,7 @@ describe('Player', function() {
           width: null,
           height: null,
           frameRate: null,
+          pixelAspectRatio: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1280,6 +1291,7 @@ describe('Player', function() {
           width: null,
           height: null,
           frameRate: null,
+          pixelAspectRatio: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1308,6 +1320,7 @@ describe('Player', function() {
           width: null,
           height: null,
           frameRate: null,
+          pixelAspectRatio: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
