@@ -16,18 +16,33 @@
  */
 
 /**
- * @fileoverview Externs for prefixed fullscreen methods.
+ * @fileoverview Externs for fullscreen methods ahead of new compiler release.
  * @externs
+ *
+ * The old compiler we're using already has an incompatible definition for
+ * requestFullscreen on Element.  Since we can't replace it on Element, we add
+ * ours on HTMLElement, one subclass down.  This is still low-level enough to
+ * apply to all reasonable usage of the fullscreen API.
+ *
+ * The latest compiler version has the updated definition on Element.
+ *
+ * TODO: Remove once the compiler is upgraded.
  */
-
-
-Document.prototype.msExitFullscreen = function() {};
-
-
-Document.prototype.webkitExitFullscreen = function() {};
 
 /**
- * @return {!boolean}
+ * @record
+ * @see https://fullscreen.spec.whatwg.org/#dictdef-fullscreenoptions
  */
-Document.prototype.webkitSupportsFullscreen = function() {};
+function FullscreenOptions() {}
 
+/** @type {string} */
+FullscreenOptions.prototype.navigationUI;
+
+/**
+ * @see https://fullscreen.spec.whatwg.org/#dom-element-requestfullscreen
+ * @param {!FullscreenOptions=} options
+ * @return {!Promise}
+ * @override
+ * @suppress {checkTypes}
+ */
+HTMLElement.prototype.requestFullscreen = function(options) {};
