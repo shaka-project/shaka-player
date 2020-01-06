@@ -266,7 +266,7 @@ describe('ManifestConverter', () => {
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
       frameRate: 22,
-      pixelAspectRatio: '16:9',
+      pixelAspectRatio: '59:54',
       kind: undefined,
       language: '',
       label: null,

@@ -1095,7 +1095,7 @@ describe('Storage', () => {
       width: height * (16 / 9),
       height: height,
       frameRate: 30,
-      pixelAspectRatio: '16:9',
+      pixelAspectRatio: '59:54',
       mimeType: 'video/mp4,audio/mp4',
       codecs: 'mp4,mp4',
       audioCodec: 'mp4',
