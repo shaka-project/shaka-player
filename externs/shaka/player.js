@@ -111,7 +111,7 @@ shaka.extern.StateChange;
  * @property {number} bufferingTime
  *   The total time spent in a buffering state in seconds.
  * @property {number} licenseTime
- *   This is the number of seconds it took in the license requests.
+ *   The time spent on license requests during this session in seconds, or NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
