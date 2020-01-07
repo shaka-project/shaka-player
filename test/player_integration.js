@@ -368,6 +368,23 @@ describe('Player', () => {
       expect(video.playbackRate).toBe(1);
     });
 
+    // Regression test for #2326.
+    //
+    // 1. Construct an instance with a video element.
+    // 2. Don't call or await attach().
+    // 3. Call load() with a MIME type, which triggers a check for native
+    //    playback support.
+    //
+    // Note that a real playback may use a HEAD request to fetch a MIME type,
+    // even if one is not specified in load().
+    it('immediately after construction with MIME type', async () => {
+      const testSchemeMimeType = 'application/x-test-manifest';
+      player = new compiledShaka.Player(video);
+      await player.load('test:sintel_compiled', 0, testSchemeMimeType);
+      video.play();
+      await waitUntilPlayheadReaches(eventManager, video, 1, 10);
+    });
+
     /**
      * Gets the language of the active Variant.
      * @return {string}
