@@ -95,6 +95,22 @@ shaka.extern.AbrManager = class {
   getBandwidthEstimate() {}
 
   /**
+   * Updates manager playback rate.
+   *
+   * @param {number} rate
+   * @exportDoc
+   */
+  setPlaybackRate(rate) {}
+
+  /**
+   * Return the current playback rate.
+   *
+   * @return {number}
+   * @exportDoc
+   */
+  getPlaybackRate() {}
+
+  /**
    * Sets the ABR configuration.
    *
    * It is the responsibility of the AbrManager implementation to implement the

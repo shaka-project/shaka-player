@@ -1925,6 +1925,7 @@ describe('Player', () => {
     });
 
     it('tracks info about current stream', () => {
+      abrManager.getPlaybackRate.and.returnValue(1);
       const stats = player.getStats();
       // Should have chosen the first of each type of stream.
       expect(stats.width).toBe(100);
