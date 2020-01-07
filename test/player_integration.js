@@ -117,7 +117,7 @@ describe('Player', () => {
 
       // We are opting not to initialize the player with a video element so that
       // it is in the least loaded state possible.
-      player = new shaka.Player();
+      player = new compiledShaka.Player();
 
       const stats = player.getStats();
       expect(stats).toBeTruthy();
@@ -460,7 +460,7 @@ describe('Player', () => {
       // uncompiled version.  Then we will get assertions.
       eventManager.unlisten(player, 'error');
       await player.destroy();
-      player = new shaka.Player(video);
+      player = new shaka.Player(video);  // NOTE: MUST BE UNCOMPILED
       player.configure({abr: {enabled: false}});
       eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
 
@@ -495,7 +495,7 @@ describe('Player', () => {
       // uncompiled version.  Then we will get assertions.
       eventManager.unlisten(player, 'error');
       await player.destroy();
-      player = new shaka.Player(video);
+      player = new shaka.Player(video);  // NOTE: MUST BE UNCOMPILED
       player.configure({abr: {enabled: false}});
       eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
 
