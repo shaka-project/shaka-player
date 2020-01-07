@@ -129,36 +129,12 @@ describe('Player', () => {
         // Is this necessary because of a bug in Shaka Player?
         player.configure('streaming.jumpLargeGaps', true);
 
-        // Configure DRM for this asset.
-        if (asset.licenseServers) {
-          player.configure('drm.servers', asset.licenseServers);
-        }
-        if (asset.drmCallback) {
-          player.configure('manifest.dash.customScheme', asset.drmCallback);
-        }
-        if (asset.clearKeys) {
-          player.configure('drm.clearKeys', asset.clearKeys);
-        }
+        // Add asset-specific configuration.
+        player.configure(asset.getConfiguration());
 
         // Configure networking for this asset.
         const networkingEngine = player.getNetworkingEngine();
-        if (asset.licenseRequestHeaders) {
-          const headers = asset.licenseRequestHeaders;
-          networkingEngine.registerRequestFilter((requestType, request) => {
-            addLicenseRequestHeaders(headers, requestType, request);
-          });
-        }
-        if (asset.requestFilter) {
-          networkingEngine.registerRequestFilter(asset.requestFilter);
-        }
-        if (asset.responseFilter) {
-          networkingEngine.registerResponseFilter(asset.responseFilter);
-        }
-
-        // Add any extra configuration for this asset.
-        if (asset.extraConfig) {
-          player.configure(asset.extraConfig);
-        }
+        asset.applyFilters(networkingEngine);
 
         await player.load(asset.manifestUri);
         if (asset.features) {
