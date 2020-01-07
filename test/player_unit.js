@@ -1937,10 +1937,11 @@ describe('Player', () => {
       let stats = player.getStats();
       expect(stats.decodedFrames).toBeNaN();
       expect(stats.droppedFrames).toBeNaN();
+      expect(stats.corruptedFrames).toBeNaN();
 
       video.getVideoPlaybackQuality = () => {
         return {
-          corruptedVideoFrames: 0,
+          corruptedVideoFrames: 10,
           creationTime: 0,
           totalFrameDelay: 0,
           totalVideoFrames: 75,
@@ -1952,6 +1953,7 @@ describe('Player', () => {
       stats = player.getStats();
       expect(stats.decodedFrames).toBe(75);
       expect(stats.droppedFrames).toBe(125);
+      expect(stats.corruptedFrames).toBe(10);
     });
 
     describe('buffer/play times', () => {
