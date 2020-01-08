@@ -299,6 +299,9 @@ shaka.extern.Track;
  *   minPixels: number,
  *   maxPixels: number,
  *
+ *   minFrameRate: number,
+ *   maxFrameRate: number,
+ *
  *   minBandwidth: number,
  *   maxBandwidth: number
  * }}
@@ -327,6 +330,11 @@ shaka.extern.Track;
  * @property {number} maxPixels
  *   The maximum number of total pixels in a video track (i.e.
  *   <code>width * height</code>).
+ *
+ * @property {number} minFrameRate
+ *   The minimum framerate of a variant track.
+ * @property {number} maxFrameRate
+ *   The maximum framerate of a variant track.
  *
  * @property {number} minBandwidth
  *   The minimum bandwidth of a variant track, in bit/sec.
