@@ -176,6 +176,10 @@ shakaDemo.Config = class {
                        'manifest.dash.autoCorrectDrift')
         .addBoolInput_('Xlink Should Fail Gracefully',
                        'manifest.dash.xlinkFailGracefully')
+        .addBoolInput_('Ignore DASH Suggested Presentation Delay',
+            'manifest.dash.ignoreSuggestedPresentationDelay')
+        .addBoolInput_('Ignore DASH Empty Adaptation Set',
+            'manifest.dash.ignoreEmptyAdaptationSet')
         .addBoolInput_('Ignore HLS Text Stream Failures',
             'manifest.hls.ignoreTextStreamFailures')
         .addNumberInput_('Availability Window Override',
