@@ -539,7 +539,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
  *   initialSegmentLimit: number,
- *   ignoreSuggestedPresentationDelay: boolean
+ *   ignoreSuggestedPresentationDelay: boolean,
+ *   ignoreEmptyAdaptationSet: boolean
  * }}
  *
  * @property {shaka.extern.DashContentProtectionCallback} customScheme
@@ -582,6 +583,10 @@ shaka.extern.DrmConfiguration;
  * @property {boolean} ignoreSuggestedPresentationDelay
  *   If true will cause DASH parser to ignore
  *   <code>suggestedPresentationDelay</code> from manifest. Defaults to
+ *   <code>false</code> if not provided.
+ * @property {boolean} ignoreEmptyAdaptationSet
+ *   If true will cause DASH parser to ignore
+ *   empty <code>AdaptationSet</code> from manifest. Defaults to
  *   <code>false</code> if not provided.
  * @exportDoc
  */
