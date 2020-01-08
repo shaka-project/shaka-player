@@ -32,6 +32,18 @@ describe('Demo', () => {
     await shakaDemoMain.cleanup();
   });
 
+  it('has all messages defined', async () => {
+    const englishResponse = await fetch('/base/demo/locales/en.json');
+    const englishMessages = await englishResponse.json();
+    const sourceResponse = await fetch('/base/demo/locales/source.json');
+    const sourceMessages = await sourceResponse.json();
+
+    for (const id of Object.values(shakaDemo.MessageIds)) {
+      expect(englishMessages[id]).withContext(`id=${id}, English`).toBeTruthy();
+      expect(sourceMessages[id]).withContext(`id=${id}, source`).toBeTruthy();
+    }
+  });
+
   describe('config', () => {
     it('does not have entries for invalid config options', () => {
       // We determine whether a config option has been made or not by looking at
