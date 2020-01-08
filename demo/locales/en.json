@@ -105,6 +105,7 @@
   "DEMO_AUTO_CORRECT_DASH_DRIFT": "Auto-Correct DASH Drift",
   "DEMO_XLINK_FAIL_GRACEFULLY": "Xlink Should Fail Gracefully",
   "DEMO_IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY": "Ignore DASH suggestedPresentationDelay",
+  "DEMO_IGNORE_DASH_EMPTY_ADAPTATION_SET": "Ignore empty DASH AdaptationSets",
   "DEMO_IGNORE_HLS_TEXT_FAILURES": "Ignore HLS Text Stream Failures",
   "DEMO_AVAILABILITY_WINDOW_OVERRIDE": "Availability Window Override",
   "DEMO_CLOCK_SYNC_URI": "Clock Sync URI",
