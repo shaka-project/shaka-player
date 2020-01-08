@@ -507,6 +507,14 @@
     "message": "Max Pixels",
     "description": "The name of a configuration value."
   },
+  "DEMO_MIN_FRAMERATE": {
+    "message": "Min Framerate",
+    "description": "The name of a configuration value."
+  },
+  "DEMO_MAX_FRAMERATE": {
+    "message": "Max Framerate",
+    "description": "The name of a configuration value."
+  },
   "DEMO_MIN_BANDWIDTH": {
     "message": "Min Bandwidth",
     "description": "The name of a configuration value."

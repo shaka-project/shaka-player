@@ -126,6 +126,8 @@
   "DEMO_MAX_HEIGHT": "Max Height",
   "DEMO_MIN_PIXELS": "Min Pixels",
   "DEMO_MAX_PIXELS": "Max Pixels",
+  "DEMO_MIN_FRAMERATE": "Min Framerate",
+  "DEMO_MAX_FRAMERATE": "Max Framerate",
   "DEMO_MIN_BANDWIDTH": "Min Bandwidth",
   "DEMO_MAX_BANDWIDTH": "Max Bandwidth",
   "DEMO_MAX_ATTEMPTS": "Max Attempts",
