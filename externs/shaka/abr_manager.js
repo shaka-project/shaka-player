@@ -100,15 +100,7 @@ shaka.extern.AbrManager = class {
    * @param {number} rate
    * @exportDoc
    */
-  setPlaybackRate(rate) {}
-
-  /**
-   * Return the current playback rate.
-   *
-   * @return {number}
-   * @exportDoc
-   */
-  getPlaybackRate() {}
+  playbackRateChanged(rate) {}
 
   /**
    * Sets the ABR configuration.

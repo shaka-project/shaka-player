@@ -69,10 +69,7 @@ shaka.test.FakeAbrManager = class {
     });
 
     /** @type {!jasmine.Spy} */
-    this.setPlaybackRate = jasmine.createSpy('setPlaybackRate');
-
-    /** @type {!jasmine.Spy} */
-    this.getPlaybackRate = jasmine.createSpy('getPlaybackRate');
+    this.playbackRateChanged = jasmine.createSpy('playbackRateChanged');
 
     /** @type {!jasmine.Spy} */
     this.configure = jasmine.createSpy('configure');
