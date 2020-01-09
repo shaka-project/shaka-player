@@ -155,14 +155,17 @@ class ShakaReceiverApp {
       this.controlsTimerId_ = null;
     }
 
+    // Control if the controls are visible. Use a custom version of the UI's
+    // opacity transition with a special name for "show", to over-write the UI's
+    // control of the element.
     if (this.video_.paused && this.video_.readyState > 0) {
       // Show controls.
-      this.controlsElement_.style.opacity = 1;
+      this.controlsElement_.setAttribute('receiverShown', 'true');
     } else {
       // Show controls for 3 seconds.
-      this.controlsElement_.style.opacity = 1;
+      this.controlsElement_.setAttribute('receiverShown', 'true');
       this.controlsTimerId_ = window.setTimeout(() => {
-        this.controlsElement_.style.opacity = 0;
+        this.controlsElement_.removeAttribute('receiverShown');
       }, ShakaReceiverApp.CONTROLS_TIMEOUT_SECONDS_ * 1000);
     }
   }
