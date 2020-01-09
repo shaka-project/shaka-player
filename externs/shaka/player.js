@@ -99,7 +99,7 @@ shaka.extern.StateChange;
  *   The total number of frames dropped by the Player.  This may be
  *   <code>NaN</code> if this is not supported by the browser.
  * @property {number} corruptedFrames
- *   The total number of frames corrupted by the browser.  This may be
+ *   The total number of corrupted frames dropped by the browser.  This may be
  *   <code>NaN</code> if this is not supported by the browser.
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
