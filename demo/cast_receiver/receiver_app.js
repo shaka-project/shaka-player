@@ -50,6 +50,7 @@ class ShakaReceiverApp {
 
     // Make sure we don't show extra UI elements we don't need on the TV.
     ui.configure({
+      noFade: true,
       controlPanelElements: [
         'play_pause',
         'time_and_duration',

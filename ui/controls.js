@@ -363,6 +363,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Create the new layout
     this.createDOM_();
 
+    // If the controls are supposed to not fade, then they should be shown here.
+    if (config.noFade) {
+      this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
+    }
+
     // Init the play state
     this.onPlayStateChange_();
 
@@ -1046,7 +1051,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Keep showing the controls if ad or video is paused or one of
     // the control menus is hovered.
-    if (adIsPaused ||
+    if (adIsPaused || this.config_.noFade ||
        (!this.ad_ && videoIsPaused) || this.overrideCssShowControls_) {
       this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
     } else {
