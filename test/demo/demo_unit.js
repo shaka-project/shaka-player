@@ -33,10 +33,14 @@ describe('Demo', () => {
   });
 
   it('has all messages defined', async () => {
-    const englishResponse = await fetch('/base/demo/locales/en.json');
-    const englishMessages = await englishResponse.json();
-    const sourceResponse = await fetch('/base/demo/locales/source.json');
-    const sourceMessages = await sourceResponse.json();
+    const englishBuffer =
+        await shaka.test.Util.fetch('/base/demo/locales/en.json');
+    const englishMessages = JSON.parse(shaka.util.StringUtils.fromUTF8(
+        englishBuffer));
+    const sourceBuffer =
+        await shaka.test.Util.fetch('/base/demo/locales/source.json');
+    const sourceMessages = JSON.parse(shaka.util.StringUtils.fromUTF8(
+        sourceBuffer));
 
     for (const id of Object.values(shakaDemo.MessageIds)) {
       expect(englishMessages[id]).withContext(`id=${id}, English`).toBeTruthy();
