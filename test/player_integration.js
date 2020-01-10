@@ -92,6 +92,7 @@ describe('Player', function() {
 
         decodedFrames: jasmine.any(Number),
         droppedFrames: jasmine.any(Number),
+        corruptedFrames: jasmine.any(Number),
         estimatedBandwidth: jasmine.any(Number),
 
         loadLatency: jasmine.any(Number),
