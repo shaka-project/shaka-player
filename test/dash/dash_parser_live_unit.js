@@ -1245,4 +1245,57 @@ describe('DashParser Live', () => {
     const timingRequest = shaka.net.NetworkingEngine.RequestType.TIMING;
     fakeNetEngine.expectRequest('dummy://time', timingRequest);
   });
+
+  it('adds segments to in-progress recordings', async () => {
+    const manifestText = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '      mediaPresentationDuration="PT10S">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    // The presentation started just over 4 seconds ago.  There should be 2
+    // segments so far.
+    Date.now = () => 4.1 * 1000;
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    // Make sure we're testing what we think we're testing.
+    // This should be seen as in-progress.
+    expect(manifest.presentationTimeline.isInProgress()).toBe(true);
+
+    const stream = manifest.periods[0].variants[0].video;
+    expect(stream).toBeTruthy();
+
+    await stream.createSegmentIndex();
+    expect(stream.segmentIndex).toBeTruthy();
+
+    // Check for the 2 initial segments we're expecting.
+    ManifestParser.verifySegmentIndex(stream, [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 1, 2, 4, originalUri),
+    ]);
+
+    // Just over 10 seconds after the presentation started, we should now have
+    // all 5 segments.  In order to trick the system into updating, we must both
+    // fake the current time and wait long enough for the timer to fire and
+    // update the references.
+    Date.now = () => 10.1 * 1000;
+    await shaka.test.Util.delay(2.1);  // A little longer than the segments are.
+
+    ManifestParser.verifySegmentIndex(stream, [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 1, 2, 4, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 2, 4, 6, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 3, 6, 8, originalUri),
+      shaka.test.ManifestParser.makeReference('s5.mp4', 4, 8, 10, originalUri),
+    ]);
+  });
 });
