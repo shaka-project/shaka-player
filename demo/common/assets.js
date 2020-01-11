@@ -745,6 +745,8 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
       /* manifestUri= */ 'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8',
       /* source= */ shakaAssets.Source.BITCODIN)
+    // Disabled because the audio playlist ends about 9 seconds early somehow.
+    .markAsDisabled()
     .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
     .addFeature(shakaAssets.Feature.HLS)
     .addFeature(shakaAssets.Feature.MP2TS)
