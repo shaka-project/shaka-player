@@ -77,7 +77,7 @@ goog.require('shaka.util.Dom');
         }
 
         // Make sure controls are displayed
-        this.controls.overrideCssShowControls();
+        this.controls.computeOpacity();
       });
     }
 
@@ -197,7 +197,8 @@ goog.require('shaka.util.Dom');
       this.controls.hideSettingsMenus();
     } else {
       shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
-      this.controls.overrideCssShowControls();
+      this.controls.computeOpacity();
+
       // If overflow menu has currently visible buttons, focus on the
       // first one, when the menu opens.
       const isDisplayed = function(element) {
