@@ -101,14 +101,11 @@
   z-index: 1;
 
   /* Opacity transition for controls. */
-  & > .shaka-fade-out-on-mouse-out {
+  & .shaka-fade-out-on-mouse-out {
     .opacity-transition();
   }
 
-  /* Always show controls while casting. */
   &[casting="true"] {
-    opacity: 1;
-
     /* Hide fullscreen button while casting. */
     .shaka-fullscreen-button {
       .hidden();

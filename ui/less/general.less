@@ -121,6 +121,11 @@
   &[shown="true"] {
     opacity: 1;
   }
+
+  /* Always show controls while casting. */
+  .shaka-controls-container[casting="true"] & {
+    opacity: 1;
+  }
 }
 
 /* The width of the bottom-section controls: seek bar, ad controls, and
