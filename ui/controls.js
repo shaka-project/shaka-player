@@ -79,12 +79,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.settingsMenus_ = [];
 
     /**
-     * Individual controls which will be shown/hidden when we fade in/out.
-     * @private {!Array.<!Element>}
-     */
-    this.fadeOutControls_ = [];
-
-    /**
      * Individual controls which, when hovered or tab-focused, will force the
      * controls to be shown.
      * @private {!Array.<!Element>}
@@ -685,10 +679,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     }
 
-    this.fadeOutControls_ = Array.from(
-        this.videoContainer_.getElementsByClassName(
-            'shaka-fade-out-on-mouse-out'));
-
     this.showOnHoverControls_ = Array.from(
         this.videoContainer_.getElementsByClassName(
             'shaka-show-controls-on-mouse-over'));
@@ -728,7 +718,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // black gradient skim at the end of the controls.
     const skimContainer = shaka.util.Dom.createHTMLElement('div');
     skimContainer.classList.add('shaka-skim-container');
-    skimContainer.classList.add('shaka-fade-out-on-mouse-out');
     this.controlsContainer_.appendChild(skimContainer);
   }
 
@@ -819,7 +808,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.controlsButtonPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
-    this.controlsButtonPanel_.classList.add('shaka-fade-out-on-mouse-out');
     this.controlsButtonPanel_.classList.add(
         'shaka-show-controls-on-mouse-over');
     this.bottomControls_.appendChild(this.controlsButtonPanel_);
@@ -1063,13 +1051,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Make sure the state is up-to-date before showing it.
       this.updateTimeAndSeekRange_();
 
-      for (const el of this.fadeOutControls_) {
-        el.setAttribute('shown', 'true');
-      }
+      this.controlsContainer_.setAttribute('shown', 'true');
     } else {
-      for (const el of this.fadeOutControls_) {
-        el.removeAttribute('shown');
-      }
+      this.controlsContainer_.removeAttribute('shown');
 
       // If there's an overflow menu open, keep it this way for a couple of
       // seconds in case a user immediately initiates another mouse move to
@@ -1226,7 +1210,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return false;
     }
 
-    return this.fadeOutControls_.some((c) => c.getAttribute('shown') != null) ||
+    return this.controlsContainer_.getAttribute('shown') != null ||
         this.controlsContainer_.getAttribute('casting') != null;
   }
 

@@ -24,7 +24,6 @@ shaka.ui.BigPlayButton = class extends shaka.ui.PlayButton {
 
     this.button.classList.add('shaka-play-button');
     this.button.classList.add('shaka-no-propagation');
-    this.button.classList.add('shaka-fade-out-on-mouse-out');
 
     this.updateIcon();
     this.updateAriaLabel();
