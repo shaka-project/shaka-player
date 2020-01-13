@@ -363,11 +363,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Create the new layout
     this.createDOM_();
 
-    // If the controls are supposed to not fade, then they should be shown here.
-    if (config.noFade || this.isCasting_()) {
-      this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
-    }
-
     // Init the play state
     this.onPlayStateChange_();
 
@@ -1046,30 +1041,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Hide the cursor.  (NOTE: not supported on IE)
     this.videoContainer_.style.cursor = 'none';
 
-    this.chooseControlsOpacity_();
-  }
-
-  /** @private */
-  chooseControlsOpacity_() {
     const adIsPaused = this.ad_ ? this.ad_.isPaused() : false;
     const videoIsPaused = this.video_.paused && !this.isSeeking_;
 
     // Keep showing the controls if ad or video is paused or one of
     // the control menus is hovered.
-    if (adIsPaused || this.config_.noFade || this.isCasting_() ||
+    if (adIsPaused ||
        (!this.ad_ && videoIsPaused) || this.overrideCssShowControls_) {
       this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
     } else {
       this.setControlsOpacity_(shaka.ui.Enums.Opacity.TRANSPARENT);
     }
-  }
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isCasting_() {
-    return this.castProxy_ != null && this.castProxy_.isCasting();
   }
 
   /**
@@ -1127,17 +1109,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.controlsContainer_.setAttribute('casting', 'true');
     } else {
       this.controlsContainer_.removeAttribute('casting');
-
-      // Transition from having the controls forced open to not.
-      // However, after casting ends, there is typically a brief period of
-      // buffering, so wait for that to end first; if we called this immediately
-      // then it would just set the controls to be visible again, as we also
-      // forcibly-show the controls while the video is paused (or buffering),
-      // and the user would have to mouse over the video again to make the
-      // controls fade.
-      this.eventManager_.listenOnce(this.video_, 'playing', () => {
-        this.chooseControlsOpacity_();
-      });
     }
   }
 
@@ -1226,6 +1197,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   isOpaque_() {
     if (!this.enabled_) {
       return false;
+    }
+
+    // TODO: refactor into a single property
+    // While you are casting, the UI is always opaque.
+    if (this.castProxy_ && this.castProxy_.isCasting()) {
+      return true;
     }
 
     return this.fadeOutControls_.some((c) => c.getAttribute('shown') != null);

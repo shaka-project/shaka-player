@@ -36,19 +36,6 @@ body {
   color: white;
 }
 
-.shaka-controls-container {
-  /* Transparent unless explicitly made opaque through
-   "shown=true" attribute */
-  opacity: 0;
-
-  /* When we show/hide this, do it gradually using cubic-bezier timing. */
-  transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 600ms;
-}
-
-.shaka-controls-container[receiverShown="true"] {
-  opacity: 1;
-}
-
 #videoContainer {
   width: 100%;
   height: 100%;

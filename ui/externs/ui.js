@@ -60,8 +60,7 @@ shaka.extern.UIVolumeBarColors;
  *   clearBufferOnQualityChange: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
- *   trackLabelFormat: shaka.ui.TrackLabelFormat,
- *   noFade: boolean
+ *   trackLabelFormat: shaka.ui.TrackLabelFormat
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -98,8 +97,6 @@ shaka.extern.UIVolumeBarColors;
  *   ROLE means that only the role of the item is shown.
  *   LANGUAGE_ROLE means both are shown, or just language if there is no role.
  *   Defaults to LANGUAGE.
- * @property {boolean} noFade
- *   If set to true, the UI will not fade, even if the user is not mousing over.
  */
 shaka.extern.UIConfiguration;
 

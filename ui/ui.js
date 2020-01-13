@@ -210,7 +210,6 @@ shaka.ui.Overlay = class {
         level: 'rgb(255, 255, 255)',
       },
       trackLabelFormat: shaka.ui.TrackLabelFormat.LANGUAGE,
-      noFade: false,
     };
   }
 
