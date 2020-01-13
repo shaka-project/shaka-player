@@ -9,7 +9,6 @@ goog.provide('shaka.ui.ControlsPanel');
 
 goog.require('shaka.log');
 goog.require('shaka.ui.Constants');
-goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
@@ -38,9 +37,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {boolean} */
     this.enabled_ = true;
-
-    /** @private {boolean} */
-    this.overrideCssShowControls_ = false;
 
     /** @private {shaka.extern.UIConfiguration} */
     this.config_ = config;
@@ -82,8 +78,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!Array.<!Element>} */
     this.settingsMenus_ = [];
 
-    /** @private {!Array.<!Element>} */
+    /**
+     * Individual controls which will be shown/hidden when we fade in/out.
+     * @private {!Array.<!Element>}
+     */
     this.fadeOutControls_ = [];
+
+    /**
+     * Individual controls which, when hovered or tab-focused, will force the
+     * controls to be shown.
+     * @private {!Array.<!Element>}
+     */
+    this.showOnHoverControls_ = [];
+
+    /** @private {boolean} */
+    this.recentMouseMovement_ = false;
 
     /**
      * This timer is used to detect when the user has stopped moving the mouse
@@ -374,19 +383,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.eventManager_.listen(element, 'click', cb);
       this.eventManager_.listen(element, 'dblclick', cb);
     }
-
-    // Keep showing controls if one of those elements is hovered
-    const showControlsElements = this.videoContainer_.getElementsByClassName(
-        'shaka-show-controls-on-mouse-over');
-    for (const element of showControlsElements) {
-      this.eventManager_.listen(element, 'mouseover', () => {
-        this.overrideCssShowControls_ = true;
-      });
-
-      this.eventManager_.listen(element, 'mouseleave', () => {
-        this.overrideCssShowControls_ = false;
-      });
-    }
   }
 
   /**
@@ -564,20 +560,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Display controls even if css says overwise.
-   * Normally, controls opacity is controled by CSS, but there are
-   * a few special cases where we want controls to be displayed no
-   * matter what. For example, if the focus is on one of the settings
-   * menus. This method is called when we want to signal an exception
-   * to normal CSS opacity rules and keep the controls visible.
-   *
-   * @export
-   */
-  overrideCssShowControls() {
-    this.overrideCssShowControls_ = true;
-  }
-
-  /**
    * @return {boolean}
    * @export
    */
@@ -706,6 +688,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.fadeOutControls_ = Array.from(
         this.videoContainer_.getElementsByClassName(
             'shaka-fade-out-on-mouse-out'));
+
+    this.showOnHoverControls_ = Array.from(
+        this.videoContainer_.getElementsByClassName(
+            'shaka-show-controls-on-mouse-over'));
   }
 
   /** @private */
@@ -970,6 +956,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Disable blue outline for focused elements for mouse navigation.
     if (event.type == 'mousemove') {
       this.controlsContainer_.classList.remove('shaka-keyboard-navigation');
+      this.computeOpacity();
     }
     if (event.type == 'touchstart' || event.type == 'touchmove' ||
         event.type == 'touchend' || event.type == 'keyup') {
@@ -990,6 +977,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Use the cursor specified in the CSS file.
     this.videoContainer_.style.cursor = '';
 
+    this.recentMouseMovement_ = true;
+
     // Make sure we are not about to hide the settings menus and then force them
     // open.
     this.hideSettingsMenusTimer_.stop();
@@ -1000,7 +989,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // seek bar will be updated much more rapidly during mouse movement.  Do
       // this right before making it visible.
       this.updateTimeAndSeekRange_();
-      this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
+      this.computeOpacity();
     }
 
     // Hide the cursor when the mouse stops moving.
@@ -1040,17 +1029,53 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   onMouseStill_() {
     // Hide the cursor.  (NOTE: not supported on IE)
     this.videoContainer_.style.cursor = 'none';
+    this.recentMouseMovement_ = false;
+    this.computeOpacity();
+  }
 
+  /**
+   * @return {boolean} true if any relevant elements are hovered.
+   * @private
+   */
+  isHovered_() {
+    return this.showOnHoverControls_.some((element) => {
+      return element.matches(':hover');
+    });
+  }
+
+  /**
+   * Recompute whether the controls should be shown or hidden.
+   */
+  computeOpacity() {
     const adIsPaused = this.ad_ ? this.ad_.isPaused() : false;
     const videoIsPaused = this.video_.paused && !this.isSeeking_;
+    const keyboardNavigationMode = this.controlsContainer_.classList.contains(
+        'shaka-keyboard-navigation');
 
-    // Keep showing the controls if ad or video is paused or one of
-    // the control menus is hovered.
+    // Keep showing the controls if the ad or video is paused, there has been
+    // recent mouse movement, we're in keyboard navigation, or one of a special
+    // class of elements is hovered.
     if (adIsPaused ||
-       (!this.ad_ && videoIsPaused) || this.overrideCssShowControls_) {
-      this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
+        (!this.ad_ && videoIsPaused) ||
+        this.recentMouseMovement_ ||
+        keyboardNavigationMode ||
+        this.isHovered_()) {
+      // Make sure the state is up-to-date before showing it.
+      this.updateTimeAndSeekRange_();
+
+      for (const el of this.fadeOutControls_) {
+        el.setAttribute('shown', 'true');
+      }
     } else {
-      this.setControlsOpacity_(shaka.ui.Enums.Opacity.TRANSPARENT);
+      for (const el of this.fadeOutControls_) {
+        el.removeAttribute('shown');
+      }
+
+      // If there's an overflow menu open, keep it this way for a couple of
+      // seconds in case a user immediately initiates another mouse move to
+      // interact with the menus. If that didn't happen, go ahead and hide
+      // the menus.
+      this.hideSettingsMenusTimer_.tickAfter(/* seconds= */ 2);
     }
   }
 
@@ -1120,6 +1145,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.video_.ended && !this.video_.paused) {
       this.video_.pause();
     }
+
+    this.computeOpacity();
   }
 
   /**
@@ -1199,13 +1226,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return false;
     }
 
-    // TODO: refactor into a single property
-    // While you are casting, the UI is always opaque.
-    if (this.castProxy_ && this.castProxy_.isCasting()) {
-      return true;
-    }
-
-    return this.fadeOutControls_.some((c) => c.getAttribute('shown') != null);
+    return this.fadeOutControls_.some((c) => c.getAttribute('shown') != null) ||
+        this.controlsContainer_.getAttribute('casting') != null;
   }
 
   /**
@@ -1265,6 +1287,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // Enable blue outline for focused elements for keyboard
       // navigation.
       this.controlsContainer_.classList.add('shaka-keyboard-navigation');
+      this.computeOpacity();
       this.eventManager_.listen(window, 'mousedown', () => this.onMouseDown_());
     }
 
@@ -1343,28 +1366,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   onMouseDown_() {
     this.eventManager_.unlisten(window, 'mousedown');
     this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
-  }
-
-  /**
-   * @param {!shaka.ui.Enums.Opacity} opacity
-   * @private
-   */
-  setControlsOpacity_(opacity) {
-    for (const el of this.fadeOutControls_) {
-      if (opacity == shaka.ui.Enums.Opacity.OPAQUE) {
-        el.setAttribute('shown', 'true');
-      } else {
-        el.removeAttribute('shown');
-      }
-    }
-
-    if (opacity == shaka.ui.Enums.Opacity.TRANSPARENT) {
-      // If there's an overflow menu open, keep it this way for a couple of
-      // seconds in case a user immediately initiates another mouse move to
-      // interact with the menus. If that didn't happen, go ahead and hide
-      // the menus.
-      this.hideSettingsMenusTimer_.tickAfter(/* seconds= */ 2);
-    }
   }
 
   /**
