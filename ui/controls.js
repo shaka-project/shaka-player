@@ -99,6 +99,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     /**
+     * This timer is used to delay the fading of the UI.
+     *
+     * @private {shaka.util.Timer}
+     */
+    this.fadeControlsTimer_ = new shaka.util.Timer(() => {
+      this.controlsContainer_.removeAttribute('shown');
+
+      // If there's an overflow menu open, keep it this way for a couple of
+      // seconds in case a user immediately initiates another mouse move to
+      // interact with the menus. If that didn't happen, go ahead and hide
+      // the menus.
+      this.hideSettingsMenusTimer_.tickAfter(/* seconds= */ 2);
+    });
+
+    /**
      * This timer will be used to hide all settings menus. When the timer ticks
      * it will force all controls to invisible.
      *
@@ -180,6 +195,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (this.mouseStillTimer_) {
       this.mouseStillTimer_.stop();
       this.mouseStillTimer_ = null;
+    }
+
+    if (this.fadeControlsTimer_) {
+      this.fadeControlsTimer_.stop();
+      this.fadeControlsTimer_ = null;
     }
 
     if (this.hideSettingsMenusTimer_) {
@@ -566,7 +586,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   hideSettingsMenus() {
     this.hideSettingsMenusTimer_.tickNow();
   }
-
 
   /** @export */
   async toggleFullScreen() {
@@ -1052,14 +1071,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.updateTimeAndSeekRange_();
 
       this.controlsContainer_.setAttribute('shown', 'true');
+      this.fadeControlsTimer_.stop();
     } else {
-      this.controlsContainer_.removeAttribute('shown');
-
-      // If there's an overflow menu open, keep it this way for a couple of
-      // seconds in case a user immediately initiates another mouse move to
-      // interact with the menus. If that didn't happen, go ahead and hide
-      // the menus.
-      this.hideSettingsMenusTimer_.tickAfter(/* seconds= */ 2);
+      this.fadeControlsTimer_.tickAfter(/* seconds= */ this.config_.fadeDelay);
     }
   }
 

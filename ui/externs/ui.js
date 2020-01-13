@@ -60,7 +60,8 @@ shaka.extern.UIVolumeBarColors;
  *   clearBufferOnQualityChange: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
- *   trackLabelFormat: shaka.ui.TrackLabelFormat
+ *   trackLabelFormat: shaka.ui.TrackLabelFormat,
+ *   fadeDelay: number
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -97,6 +98,10 @@ shaka.extern.UIVolumeBarColors;
  *   ROLE means that only the role of the item is shown.
  *   LANGUAGE_ROLE means both are shown, or just language if there is no role.
  *   Defaults to LANGUAGE.
+ * @property {number} fadeDelay
+ *   The delay (in seconds) before fading out the controls.  We recommend
+ *   settings this to 3 on your cast receiver UI.
+ *   Defaults to 0.
  */
 shaka.extern.UIConfiguration;
 

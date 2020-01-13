@@ -22,12 +22,6 @@ class ShakaReceiverApp {
     this.receiver_ = null;
 
     /** @private {Element} */
-    this.controlsElement_ = null;
-
-    /** @private {?number} */
-    this.controlsTimerId_ = null;
-
-    /** @private {Element} */
     this.idleCard_ = null;
 
     /** @private {?number} */
@@ -50,6 +44,7 @@ class ShakaReceiverApp {
 
     // Make sure we don't show extra UI elements we don't need on the TV.
     ui.configure({
+      fadeDelay: 3,
       controlPanelElements: [
         'play_pause',
         'time_and_duration',
@@ -67,18 +62,7 @@ class ShakaReceiverApp {
     this.player_ = ui.getControls().getLocalPlayer();
     goog.asserts.assert(this.player_, 'Player should be available!');
 
-    this.controlsElement_ = document.querySelector('.shaka-controls-container');
-
     this.idleCard_ = document.getElementById('idle');
-
-    this.video_.addEventListener(
-        'play', () => this.onPlayStateChange_());
-    this.video_.addEventListener(
-        'pause', () => this.onPlayStateChange_());
-    this.video_.addEventListener(
-        'seeking', () => this.onPlayStateChange_());
-    this.video_.addEventListener(
-        'emptied', () => this.onPlayStateChange_());
 
     this.receiver_ = new shaka.cast.CastReceiver(
         this.video_, this.player_,
@@ -146,25 +130,6 @@ class ShakaReceiverApp {
       this.idleTimerId_ = null;
     }
   }
-
-  /** @private */
-  onPlayStateChange_() {
-    if (this.controlsTimerId_ != null) {
-      window.clearTimeout(this.controlsTimerId_);
-      this.controlsTimerId_ = null;
-    }
-
-    if (this.video_.paused && this.video_.readyState > 0) {
-      // Show controls.
-      this.controlsElement_.style.opacity = 1;
-    } else {
-      // Show controls for 3 seconds.
-      this.controlsElement_.style.opacity = 1;
-      this.controlsTimerId_ = window.setTimeout(() => {
-        this.controlsElement_.style.opacity = 0;
-      }, ShakaReceiverApp.CONTROLS_TIMEOUT_SECONDS_ * 1000);
-    }
-  }
 }  // class ShakaRecevierApp
 
 /**
@@ -172,12 +137,6 @@ class ShakaReceiverApp {
  * @private
  */
 ShakaReceiverApp.IDLE_TIMEOUT_MINUTES_ = 5;
-
-/**
- * @const {number}
- * @private
- */
-ShakaReceiverApp.CONTROLS_TIMEOUT_SECONDS_ = 3;
 
 document.addEventListener('shaka-ui-loaded', () => {
   // Initialize the receiver app by instantiating ShakaReceiverApp.
