@@ -35,12 +35,6 @@ function ShakaReceiver() {
   this.receiver_ = null;
 
   /** @private {Element} */
-  this.controlsElement_ = null;
-
-  /** @private {?number} */
-  this.controlsTimerId_ = null;
-
-  /** @private {Element} */
   this.idle_ = null;
 
   /** @private {?number} */
@@ -74,6 +68,7 @@ ShakaReceiver.prototype.init = function() {
 
   // Make sure we don't show extra UI elements we don't need on the TV.
   ui.configure({
+    fadeDelay: 3,
     controlPanelElements: [
       'play_pause',
       'time_and_duration',
@@ -91,18 +86,7 @@ ShakaReceiver.prototype.init = function() {
   this.player_ = ui.getControls().getLocalPlayer();
   goog.asserts.assert(this.player_, 'Player should be available!');
 
-  this.controlsElement_ = document.querySelector('.shaka-controls-container');
-
   this.idle_ = document.getElementById('idle');
-
-  this.video_.addEventListener(
-      'play', this.onPlayStateChange_.bind(this));
-  this.video_.addEventListener(
-      'pause', this.onPlayStateChange_.bind(this));
-  this.video_.addEventListener(
-      'seeking', this.onPlayStateChange_.bind(this));
-  this.video_.addEventListener(
-      'emptied', this.onPlayStateChange_.bind(this));
 
   this.receiver_ = new shaka.cast.CastReceiver(
       this.video_, /** @type {!shaka.Player} */ (this.player_),
@@ -169,25 +153,6 @@ ShakaReceiver.prototype.cancelIdleTimer_ = function() {
   if (this.idleTimerId_ != null) {
     window.clearTimeout(this.idleTimerId_);
     this.idleTimerId_ = null;
-  }
-};
-
-
-/** @private */
-ShakaReceiver.prototype.onPlayStateChange_ = function() {
-  if (this.controlsTimerId_ != null) {
-    window.clearTimeout(this.controlsTimerId_);
-  }
-
-  if (this.video_.paused && this.video_.readyState > 0) {
-    // Show controls.
-    this.controlsElement_.style.opacity = 1;
-  } else {
-    // Show controls for 3 seconds.
-    this.controlsElement_.style.opacity = 1;
-    this.controlsTimerId_ = window.setTimeout(function() {
-      this.controlsElement_.style.opacity = 0;
-    }.bind(this), 3000);
   }
 };
 

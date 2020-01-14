@@ -71,7 +71,8 @@ shaka.extern.UIVolumeBarColors;
  *   castReceiverAppId: string,
  *   clearBufferOnQualityChange: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
- *   volumeBarColors: shaka.extern.UIVolumeBarColors
+ *   volumeBarColors: shaka.extern.UIVolumeBarColors,
+ *   fadeDelay: number
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -101,6 +102,11 @@ shaka.extern.UIVolumeBarColors;
  *   The CSS colors applied to the volume bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you
  *   cannot do this in pure CSS.
+ * @property {number} fadeDelay
+ *   The delay (in seconds) before fading out the controls once the user stops
+ *   interacting with them.  We recommend setting this to 3 on your cast
+ *   receiver UI.
+ *   Defaults to 0.
  */
 shaka.extern.UIConfiguration;
 
