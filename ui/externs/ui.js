@@ -99,8 +99,9 @@ shaka.extern.UIVolumeBarColors;
  *   LANGUAGE_ROLE means both are shown, or just language if there is no role.
  *   Defaults to LANGUAGE.
  * @property {number} fadeDelay
- *   The delay (in seconds) before fading out the controls.  We recommend
- *   settings this to 3 on your cast receiver UI.
+ *   The delay (in seconds) before fading out the controls once the user stops
+ *   interacting with them.  We recommend setting this to 3 on your cast
+ *   receiver UI.
  *   Defaults to 0.
  */
 shaka.extern.UIConfiguration;
