@@ -255,7 +255,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
- *   pixelAspectRatio: ?string,
+ *   pixelAspectRatio: (string|undefined),
  *   bandwidth: (number|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
@@ -302,7 +302,7 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {(number|undefined)} frameRate
  *   <i>Video streams only.</i> <br>
  *   The Stream's framerate in frames per second
- * @property {?string} pixelAspectRatio
+ * @property {(string|undefined)} pixelAspectRatio
  *   <i>Video streams only.</i> <br>
  *   The Stream's pixel aspect ratio
  * @property {(number|undefined)} bandwidth
