@@ -51,7 +51,7 @@ shaka.test.OfflineUtils.createStream = function(id, type) {
     mimeType: '',
     codecs: '',
     frameRate: undefined,
-    pixelAspectRatio: null,
+    pixelAspectRatio: undefined,
     kind: undefined,
     language: '',
     label: null,
