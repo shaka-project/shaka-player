@@ -31,6 +31,10 @@
     "message": "Downloaded",
     "description": "A tag that marks an asset as being downloaded by the user."
   },
+  "DEMO_AD": {
+    "message": "Ad",
+    "description": "A tag that marks an asset as having an advertisement."
+  },
   "DEMO_MANIFEST_SEARCH": {
     "message": "Manifest",
     "description": "A header on a search field that filters by manifest type."
@@ -389,6 +393,10 @@
   },
   "DEMO_STORED_SEARCH": {
     "message": "Filters for assets that have been stored offline.",
+    "description": "A tooltip for an optional search term."
+  },
+  "DEMO_AD_SEARCH": {
+    "message": "Filters for assets that have advertisements.",
     "description": "A tooltip for an optional search term."
   },
   "DEMO_AUDIO_ONLY_SEARCH": {

@@ -79,6 +79,8 @@ shakaAssets.Feature = {
   OFFLINE: shakaDemo.MessageIds.OFFLINE,
   // A synthetic property used in the search tab. Should not be given to assets.
   STORED: shakaDemo.MessageIds.STORED,
+  // Set if the asset has an ad.
+  AD: shakaDemo.MessageIds.AD,
 
   // Set if the asset is a livestream.
   LIVE: shakaDemo.MessageIds.LIVE,
