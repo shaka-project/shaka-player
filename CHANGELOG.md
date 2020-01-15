@@ -1,3 +1,44 @@
+## 2.5.8 (2020-01-16)
+
+Bugfixes:
+  - Recognize and reject raw AAC in HLS
+    - https://github.com/google/shaka-player/issues/1083
+    - https://github.com/google/shaka-player/issues/2337
+  - Fix fullscreen on Android
+    - https://github.com/google/shaka-player/issues/2324
+    - https://github.com/google/shaka-player/pull/2325
+  - Fix start time support in src= mode
+    - https://github.com/google/shaka-player/issues/2267
+    - https://github.com/google/shaka-player/pull/2271
+  - Add missing events to CastProxy Player
+    - https://github.com/google/shaka-player/issues/2318
+  - Fix cast receiver UI update
+    - https://github.com/google/shaka-player/issues/2314
+
+New Features:
+  - Add corruptedFrames to stats
+    - https://github.com/google/shaka-player/pull/2328
+  - Add framerate restriction to the config
+    - https://github.com/google/shaka-player/issues/2068
+    - https://github.com/google/shaka-player/pull/2332
+  - Add option to ignore empty AdaptationSets in DASH
+    - https://github.com/google/shaka-player/issues/2023
+    - https://github.com/google/shaka-player/pull/2330
+  - Add licenseTime to stats
+    - https://github.com/google/shaka-player/pull/2297
+  - Add pixelAspectRatio property from DASH
+    - https://github.com/google/shaka-player/pull/2294
+  - Add AirPlay support with native HLS and FairPlay
+    - https://github.com/google/shaka-player/issues/2177
+    - https://github.com/google/shaka-player/pull/2257
+  - Add option to show text/audio roles in UI
+    - https://github.com/google/shaka-player/issues/2307
+  - Add "fadeDelay" option to delay fading UI controls
+
+Demo App:
+  - Update asset list and metadata
+
+
 ## 2.5.7 (2019-12-18)
 
 New Features:
