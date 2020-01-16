@@ -17,6 +17,17 @@
  */
 shaka.extern.IAdManager = class extends EventTarget {
   onAssetUnload() {}
+
+  /**
+   * @param {!HTMLElement} adContainer
+   * @param {!HTMLMediaElement} video
+   */
+  initClientSide(adContainer, video) {}
+
+  /**
+   * @param {!google.ima.AdsRequest} imaRequest
+   */
+  requestClientSideAds(imaRequest) {}
 };
 
 

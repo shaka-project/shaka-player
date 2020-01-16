@@ -1121,6 +1121,25 @@ shakaDemo.Main = class {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
 
+      // If the asset has an ad tag attached to it, load the ads
+      const adManager = this.player_.getAdManager();
+      if (adManager && asset.adTagUri) {
+        try {
+          // If IMA is blocked by an AdBlocker, init() will throw.
+          // If that happens, just proceed to load.
+          goog.asserts.assert(this.video_ != null, 'this.video should exist!');
+          adManager.initClientSide(
+              this.controls_.getAdContainer(), this.video_);
+          const adRequest = new google.ima.AdsRequest();
+          adRequest.adTagUrl = asset.adTagUri;
+          adManager.requestClientSideAds(adRequest);
+        } catch (error) {
+          console.log(error);
+          console.warn('Ads code has been prevented from running. ' +
+            'Proceeding with the load without ads.');
+        }
+      }
+
       // Set media session title, but only if the browser supports that API.
       if (navigator.mediaSession) {
         const metadata = {

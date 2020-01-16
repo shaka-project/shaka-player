@@ -287,7 +287,7 @@ shakaDemo.Search = class {
         shakaDemo.MessageIds.OFFLINE_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.STORED, FEATURE,
         shakaDemo.MessageIds.STORED_SEARCH);
-    this.makeBooleanInput_(specialContainer, Feature.AD, FEATURE,
+    this.makeBooleanInput_(specialContainer, Feature.ADS, FEATURE,
         shakaDemo.MessageIds.AD_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.AUDIO_ONLY, FEATURE,
         shakaDemo.MessageIds.AUDIO_ONLY_SEARCH);

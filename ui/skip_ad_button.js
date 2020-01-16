@@ -33,6 +33,7 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     /** @private {!HTMLElement} */
     this.counter_ = shaka.util.Dom.createHTMLElement('div');
     this.counter_.classList.add('shaka-skip-ad-counter');
+    shaka.ui.Utils.setDisplay(this.counter_, false);
     this.container_.appendChild(this.counter_);
 
     /** @private {!HTMLElement} */
@@ -41,7 +42,7 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     this.button_.disabled = true;
     shaka.ui.Utils.setDisplay(this.button_, false);
     this.button_.classList.add('shaka-no-propagation');
-    this.parent.appendChild(this.button_);
+    this.container_.appendChild(this.button_);
     this.updateAriaLabel_();
     this.updateLocalizedStrings_();
 

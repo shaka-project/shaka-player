@@ -45,6 +45,25 @@ shakaAssets.KeySystem = {
 };
 
 
+/** @enum {string} */
+shakaAssets.AdTag = {
+  SINGLE_LINEAR_AD: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480' +
+    '&iu=/124319096/external/' +
+    'single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
+    'unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%' +
+    '3Dlinear&correlator=',
+  SINGLE_SKIPPABLE_AD: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/' +
+    '124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&' +
+    'gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=' +
+    'deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=',
+  AD_POD_PREROLL_MIDROLL_POSTROLL: 'https://pubads.g.doubleclick.net/gampad/ads?' +
+    'sz=640x480&iu=/124319096/external/ad_rule_samples&' +
+    'ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=' +
+    'vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite' +
+    '%26sample_ar%3Dpremidpostpod&cmsid=496&vid=short_onecue&correlator=',
+};
+
+
 /**
  * @param {!shakaAssets.KeySystem} keySystem
  * @return {string}
@@ -79,8 +98,9 @@ shakaAssets.Feature = {
   OFFLINE: shakaDemo.MessageIds.OFFLINE,
   // A synthetic property used in the search tab. Should not be given to assets.
   STORED: shakaDemo.MessageIds.STORED,
-  // Set if the asset has an ad.
-  AD: shakaDemo.MessageIds.AD,
+  // Set if the asset has ads. Autoset by calling setAdTagUri() on an asset.
+  // Does not need to be set manually.
+  ADS: shakaDemo.MessageIds.ADS,
 
   // Set if the asset is a livestream.
   LIVE: shakaDemo.MessageIds.LIVE,
@@ -270,6 +290,20 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Angel One (HLS, MP4, multilingual, Widevine, single linear ad)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .setAdTagUri(shakaAssets.AdTag.SINGLE_LINEAR_AD)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel/dash.mpd',
@@ -317,8 +351,23 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
-      .addDescription('A Blender Foundation short film, protected by Widevine encryption.')
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Sintel 4k (multicodec, Widevine, ads)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addDescription('A Blender Foundation short film, protected by Widevine encryption ' +
+          ' with pre-roll, mid-roll, and post-roll ads.')
       .markAsFeatured('Sintel')
+      .setAdTagUri(shakaAssets.AdTag.AD_POD_PREROLL_MIDROLL_POSTROLL)
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
@@ -414,6 +463,17 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/tos-surround/dash.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel (multicodec, surround + stereo, single skippable ad)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/tos-surround/dash.mpd',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .setAdTagUri(shakaAssets.AdTag.SINGLE_SKIPPABLE_AD)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SURROUND)

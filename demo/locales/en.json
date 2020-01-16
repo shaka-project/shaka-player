@@ -7,7 +7,7 @@
   "DEMO_AUDIO_ONLY": "Audio only",
   "DEMO_OFFLINE": "Downloadable",
   "DEMO_STORED": "Downloaded",
-  "DEMO_AD": "Ad",
+  "DEMO_ADS": "Ads",
   "DEMO_MANIFEST_SEARCH": "Manifest",
   "DEMO_CONTAINER_SEARCH": "Container",
   "DEMO_DRM_SEARCH": "DRM",

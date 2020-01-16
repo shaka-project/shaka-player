@@ -31,9 +31,9 @@
     "message": "Downloaded",
     "description": "A tag that marks an asset as being downloaded by the user."
   },
-  "DEMO_AD": {
-    "message": "Ad",
-    "description": "A tag that marks an asset as having an advertisement."
+  "DEMO_ADS": {
+    "message": "Ads",
+    "description": "A tag that marks an asset as having one or more advertisements."
   },
   "DEMO_MANIFEST_SEARCH": {
     "message": "Manifest",
