@@ -20,6 +20,7 @@ describe('HlsParser', function() {
   const ManifestParser = shaka.test.ManifestParser;
   const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
   const Util = shaka.test.Util;
+  const originalAlwaysWarn = shaka.log.alwaysWarn;
 
   const vttText = [
     'WEBVTT\n',
@@ -42,6 +43,10 @@ describe('HlsParser', function() {
   let segmentData;
   /** @type {!ArrayBuffer} */
   let selfInitializingSegmentData;
+
+  afterEach(() => {
+    shaka.log.alwaysWarn = originalAlwaysWarn;
+  });
 
   beforeEach(function() {
     // TODO: use StreamGenerator?
@@ -2228,5 +2233,74 @@ describe('HlsParser', function() {
           .build();
 
     await testHlsParser(master, media, manifest);
+  });
+
+  it('skips raw audio formats', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",URI="audio1"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",URI="audio2"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",URI="audio3"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",URI="audio4"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=400,CODECS="avc1,mp4a",',
+      'RESOLUTION=1280x720,AUDIO="audio"\n',
+      'video\n',
+    ].join('');
+
+    const videoMedia = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="v-init.mp4"\n',
+      '#EXTINF:5,\n',
+      'v1.mp4',
+    ].join('');
+
+    const audioMedia1 = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'a1.mp3',
+    ].join('');
+
+    const audioMedia2 = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'a1.aac',
+    ].join('');
+
+    const audioMedia3 = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'a1.ac3',
+    ].join('');
+
+    const audioMedia4 = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'a1.ec3',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', videoMedia)
+        .setResponseText('test:/audio1', audioMedia1)
+        .setResponseText('test:/audio2', audioMedia2)
+        .setResponseText('test:/audio3', audioMedia3)
+        .setResponseText('test:/audio4', audioMedia4)
+        .setResponseValue('test:/v-init.mp4', initSegmentData)
+        .setResponseValue('test:/v1.mp4', segmentData);
+
+    const alwaysWarnSpy = jasmine.createSpy('shaka.log.alwaysWarn');
+    shaka.log.alwaysWarn = shaka.test.Util.spyFunc(alwaysWarnSpy);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    expect(manifest.periods[0].variants.length).toBe(1);
+    expect(manifest.periods[0].variants[0].audio).toBe(null);
+
+    // We should log a warning when this happens.
+    expect(alwaysWarnSpy).toHaveBeenCalled();
   });
 });
