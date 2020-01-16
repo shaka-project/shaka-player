@@ -306,7 +306,6 @@ describe('UI', () => {
       });
     });
 
-
     describe('controls-button-panel', () => {
       /** @type {!HTMLElement} */
       let controlsButtonPanel;
@@ -323,11 +322,26 @@ describe('UI', () => {
 
         UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-current-time');
         UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-mute-button');
-        UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-volume-bar');
         UiUtils.confirmElementFound(controlsButtonPanel,
             'shaka-fullscreen-button');
         UiUtils.confirmElementFound(controlsButtonPanel,
             'shaka-overflow-menu-button');
+
+        UiUtils.confirmElementFound(videoContainer, 'shaka-seek-bar');
+
+        // The default settings vary in mobile/desktop context.
+        if (shaka.util.Platform.isMobile()) {
+          UiUtils.confirmElementFound(videoContainer,
+              'shaka-play-button-container');
+          UiUtils.confirmElementFound(videoContainer, 'shaka-play-button');
+          UiUtils.confirmElementMissing(controlsButtonPanel,
+              'shaka-volume-bar');
+        } else {
+          UiUtils.confirmElementMissing(videoContainer,
+              'shaka-play-button-container');
+          UiUtils.confirmElementMissing(videoContainer, 'shaka-play-button');
+          UiUtils.confirmElementFound(controlsButtonPanel, 'shaka-volume-bar');
+        }
       });
 
       it('is accessible', () => {
@@ -578,11 +592,9 @@ describe('UI', () => {
   function checkBasicUIElements(container) {
     const videos = container.getElementsByTagName('video');
     expect(videos.length).not.toBe(0);
-    UiUtils.confirmElementFound(container, 'shaka-play-button-container');
-    UiUtils.confirmElementFound(container, 'shaka-play-button');
+
     UiUtils.confirmElementFound(container, 'shaka-spinner-svg');
     UiUtils.confirmElementFound(container, 'shaka-overflow-menu');
     UiUtils.confirmElementFound(container, 'shaka-controls-button-panel');
-    UiUtils.confirmElementFound(container, 'shaka-seek-bar');
   }
 });

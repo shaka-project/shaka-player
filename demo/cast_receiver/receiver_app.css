@@ -47,12 +47,6 @@ body {
   margin: auto;
 }
 
-/* Until the UI gives us a way to disable the giant play/pause button, do it in
- * CSS instead. */
-.shaka-play-button {
-  display: none;
-}
-
 /* The UI default style for fullscreen is to make the font size relative to the
  * window height.  That is also appropriate for the cast receiver experience.
  * Since playback here is not technically in fullscreen mode, we just duplicate
