@@ -219,10 +219,6 @@
     "message": "[PROPER_NAME:jsDelivr]",
     "description": "A link in the footer, to Shaka Player in the jsDelivr CDN."
   },
-  "DEMO_CDNJS": {
-    "message": "[PROPER_NAME:CDNJS]",
-    "description": "A link in the footer, to Shaka Player in the CDNJS CDN."
-  },
   "DEMO_DEMO_MODE_HEADER": {
     "message": "DEMO MODE",
     "description": "A header for a section of the footer, that allows the user to switch between different modes."

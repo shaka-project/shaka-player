@@ -54,7 +54,6 @@
   "DEMO_CDN_HEADER": "CDN",
   "DEMO_LIBRARIES": "Google Hosted Libraries",
   "DEMO_JSDELIVR": "jsDelivr",
-  "DEMO_CDNJS": "CDNJS",
   "DEMO_DEMO_MODE_HEADER": "DEMO MODE",
   "DEMO_COMPILED_RELEASE": "Compiled (Release)",
   "DEMO_COMPILED_DEBUG": "Compiled (Debug)",
