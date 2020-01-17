@@ -409,20 +409,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   setEnabledShakaControls(enabled) {
     this.enabled_ = enabled;
     if (enabled) {
-      shaka.ui.Utils.setDisplay(this.controlsContainer_, true);
-
-      // Spinner lives outside of the main controls div
-      shaka.ui.Utils.setDisplay(
-          this.spinnerContainer_, this.player_.isBuffering());
+      this.videoContainer_.setAttribute('shaka-controls', 'true');
 
       // If we're hiding native controls, make sure the video element itself is
       // not tab-navigable.  Our custom controls will still be tab-navigable.
       this.video_.tabIndex = -1;
       this.video_.controls = false;
     } else {
-      shaka.ui.Utils.setDisplay(this.controlsContainer_, false);
-      // Spinner lives outside of the main controls div
-      shaka.ui.Utils.setDisplay(this.spinnerContainer_, false);
+      this.videoContainer_.removeAttribute('shaka-controls');
     }
 
     // The effects of play state changes are inhibited while showing native

@@ -125,6 +125,12 @@
   }
 }
 
+.hide-when-shaka-controls-disabled() {
+  .shaka-video-container:not([shaka-controls="true"]) & {
+    .hidden();
+  }
+}
+
 /* The width of the bottom-section controls: seek bar, ad controls, and
 the control buttons panel. */
 @bottom-controls-width: 96%;

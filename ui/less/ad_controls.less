@@ -26,14 +26,24 @@
   .absolute-position();
   .fill-container();
 
-  /* IMA SDK ads their own ad UI into an iframe element.
-  Hide it, so only our UI is visible. */
+  &:not([ad-active="true"]) {
+    pointer-events: none;
+  }
+
+  /* IMA SDK adds their own ad UI into an iframe element.
+  Hide it when shaka controls are enabled, so we can show
+  our own UI. Show it when shaka controls are disabled
+  (and native controls are enabled). */
   iframe {
-    display: none;
+    .shaka-video-container[shaka-controls="true"] & {
+      .hidden();
+    }
   }
 }
 
 .shaka-ad-controls {
+  .hide-when-shaka-controls-disabled();
+
   display: flex;
   flex-direction: row;
   z-index: 1;

@@ -77,6 +77,8 @@
 .shaka-controls-container {
   .overlay-child();
 
+  .hide-when-shaka-controls-disabled();
+
   /* Without this, the controls container overflows the video container. */
   box-sizing: border-box;
 
@@ -242,6 +244,7 @@
 .shaka-spinner-container {
   .absolute-position();
   .fill-container();
+  .hide-when-shaka-controls-disabled();
 
   flex-shrink: 1;
   display: flex;
