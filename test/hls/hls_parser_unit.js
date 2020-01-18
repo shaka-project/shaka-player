@@ -536,7 +536,7 @@ describe('HlsParser', () => {
 
     expect(ref.startTime).toBe(0);
     // baseMediaDecodeTime (655360) / timescale (1000)
-    expect(ref.presentationTimeOffset).toBe(655.36);
+    expect(ref.timestampOffset).toBe(-655.36);
     expect(presentationTimeline.getSeekRangeStart()).toBe(0);
     expect(presentationTimeline.getSeekRangeEnd()).toBe(5);
   });
@@ -1178,6 +1178,127 @@ describe('HlsParser', () => {
     const variant = actual.periods[0].variants[0];
     expect(variant.audio).toBe(null);
     expect(variant.video).toBeTruthy();
+  });
+
+  it('Disable video does not create video streams', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const text = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.vtt',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseText('test:/text', text)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.disableVideo = true;
+    parser.configure(config);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    const variant = actual.periods[0].variants[0];
+    expect(variant.audio).toBeTruthy();
+    expect(variant.video).toBe(null);
+  });
+
+  it('Disable text does not create text streams', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const text = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.vtt',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseText('test:/text', text)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.disableText = true;
+    parser.configure(config);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    const stream = actual.periods[0].textStreams[0];
+    expect(stream).toBeUndefined();
   });
 
   it('parses manifest with MP4+TTML streams', async () => {
@@ -1909,13 +2030,16 @@ describe('HlsParser', () => {
           .setResponseValue('test:/main.mp4', segmentData);
 
       const expectedRef = ManifestParser.makeReference(
-          'test:/main.mp4' /* uri */,
-          0 /* position */,
-          0 /* startTime */,
-          5 /* endTime */,
-          '' /* baseUri */,
+          /* uri= */ 'test:/main.mp4',
+          /* position= */ 0,
+          /* startTime= */ 0,
+          /* endTime= */ 5,
+          /* baseUri= */ '',
           expectedStartByte,
           expectedEndByte);
+      // In VOD content, we set the timestampOffset to align the
+      // content to presentation time 0.
+      expectedRef.timestampOffset = -segmentDataStartTime;
 
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.periods[0].variants[0].video;
@@ -1928,12 +2052,6 @@ describe('HlsParser', () => {
           'test:/main.mp4',
           expectedStartByte,
           partialEndByte);
-
-      // In VOD content, we set the presentationTimeOffset to align the
-      // content to presentation time 0.
-      const position = video.segmentIndex.find(0);
-      const ref = video.segmentIndex.get(position);
-      expect(ref.presentationTimeOffset).toBe(segmentDataStartTime);
     });
 
     it('parses start time from ts segments', async () => {
@@ -1945,13 +2063,16 @@ describe('HlsParser', () => {
           .setResponseValue('test:/main.ts', tsSegmentData);
 
       const expectedRef = ManifestParser.makeReference(
-          'test:/main.ts' /* uri */,
-          0 /* position */,
-          0 /* startTime */,
-          5 /* endTime */,
-          '' /* baseUri */,
+          /* uri= */ 'test:/main.ts',
+          /* position= */ 0,
+          /* startTime= */ 0,
+          /* endTime= */ 5,
+          /* baseUri= */ '',
           expectedStartByte,
           expectedEndByte);
+      // In VOD content, we set the timestampOffset to align the
+      // content to presentation time 0.
+      expectedRef.timestampOffset = -segmentDataStartTime;
 
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.periods[0].variants[0].video;
@@ -1964,12 +2085,6 @@ describe('HlsParser', () => {
           'test:/main.ts',
           expectedStartByte,
           partialEndByte);
-
-      // In VOD content, we set the presentationTimeOffset to align the
-      // content to presentation time 0.
-      const position = video.segmentIndex.find(0);
-      const ref = video.segmentIndex.get(position);
-      expect(ref.presentationTimeOffset).toBe(segmentDataStartTime);
     });
 
     // We want to make sure that we can interrupt the parser while it is getting
@@ -2027,7 +2142,7 @@ describe('HlsParser', () => {
       const ref = video.segmentIndex.get(0);
       expect(video.segmentIndex.get(1)).toBe(null);  // No more references.
 
-      expect(ref.presentationTimeOffset).toBe(segmentDataStartTime);
+      expect(ref.timestampOffset).toBe(-segmentDataStartTime);
       // The duration should be set to the sum of the segment durations (5),
       // even though the endTime of the segment is larger.
       expect(ref.endTime - ref.startTime).toBe(5);

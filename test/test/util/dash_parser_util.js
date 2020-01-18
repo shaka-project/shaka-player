@@ -44,6 +44,17 @@ shaka.test.Dash = class {
     const manifest = await dashParser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
+
+    // Set expected values for append window.
+    const appendWindowStart = manifest.periods[0].startTime;
+    const appendWindowEnd = manifest.periods[1] ?
+        manifest.periods[1].startTime :
+        manifest.presentationTimeline.getDuration();
+    for (const ref of references) {
+      ref.appendWindowStart = appendWindowStart;
+      ref.appendWindowEnd = appendWindowEnd;
+    }
+
     shaka.test.ManifestParser.verifySegmentIndex(stream, references);
   }
 
@@ -252,7 +263,7 @@ shaka.test.Dash = class {
           '  <S d="10" r="-1" />',
           '</SegmentTimeline>',
         ];
-        const source = makeManifestText(timeline, '', 50 /* duration */);
+        const source = makeManifestText(timeline, '', /* duration= */ 50);
         const references = [
           ManifestParser.makeReference('s1.mp4', 1, 5, 10, baseUri),
           ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
@@ -263,21 +274,24 @@ shaka.test.Dash = class {
         await Dash.testSegmentIndex(source, references);
       });
 
-      it('gives times relative to period', async () => {
+      it('gives segment times relative to the presentation', async () => {
         const timeline = [
           '<SegmentTimeline>',
           '  <S t="0" d="10" r="-1" />',
           '</SegmentTimeline>',
         ];
         const source =
-            makeManifestText(timeline, '', 50 /* duration */, 30 /* start */);
+            makeManifestText(timeline, '', /* duration= */ 50, /* start= */ 30);
         const references = [
-          ManifestParser.makeReference('s1.mp4', 1, 0, 10, baseUri),
-          ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
-          ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
-          ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
-          ManifestParser.makeReference('s5.mp4', 5, 40, 50, baseUri),
+          ManifestParser.makeReference('s1.mp4', 1, 30, 40, baseUri),
+          ManifestParser.makeReference('s2.mp4', 2, 40, 50, baseUri),
+          ManifestParser.makeReference('s3.mp4', 3, 50, 60, baseUri),
+          ManifestParser.makeReference('s4.mp4', 4, 60, 70, baseUri),
+          ManifestParser.makeReference('s5.mp4', 5, 70, 80, baseUri),
         ];
+        for (const ref of references) {
+          ref.timestampOffset = 30;
+        }
         await Dash.testSegmentIndex(source, references);
       });
 

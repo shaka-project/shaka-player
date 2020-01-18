@@ -24,25 +24,9 @@ describe('Player', () => {
   let compiledShaka;
 
   beforeAll(async () => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
-
-    /** @type {!shaka.util.PublicPromise} */
-    const loaded = new shaka.util.PublicPromise();
-    if (getClientArg('uncompiled')) {
-      // For debugging purposes, use the uncompiled library.
-      compiledShaka = shaka;
-      loaded.resolve();
-    } else {
-      // Load the compiled library as a module.
-      // All tests in this suite will use the compiled library.
-      require(['/base/dist/shaka-player.ui.js'], (shakaModule) => {
-        compiledShaka = shakaModule;
-        loaded.resolve();
-      });
-    }
-
-    await loaded;
+    compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
     support = await compiledShaka.Player.probeSupport();
   });
 
@@ -120,36 +104,12 @@ describe('Player', () => {
         // Is this necessary because of a bug in Shaka Player?
         player.configure('streaming.jumpLargeGaps', true);
 
-        // Configure DRM for this asset.
-        if (asset.licenseServers) {
-          player.configure('drm.servers', asset.licenseServers);
-        }
-        if (asset.drmCallback) {
-          player.configure('manifest.dash.customScheme', asset.drmCallback);
-        }
-        if (asset.clearKeys) {
-          player.configure('drm.clearKeys', asset.clearKeys);
-        }
+        // Add asset-specific configuration.
+        player.configure(asset.getConfiguration());
 
         // Configure networking for this asset.
         const networkingEngine = player.getNetworkingEngine();
-        if (asset.licenseRequestHeaders) {
-          const headers = asset.licenseRequestHeaders;
-          networkingEngine.registerRequestFilter((requestType, request) => {
-            addLicenseRequestHeaders(headers, requestType, request);
-          });
-        }
-        if (asset.requestFilter) {
-          networkingEngine.registerRequestFilter(asset.requestFilter);
-        }
-        if (asset.responseFilter) {
-          networkingEngine.registerResponseFilter(asset.responseFilter);
-        }
-
-        // Add any extra configuration for this asset.
-        if (asset.extraConfig) {
-          player.configure(asset.extraConfig);
-        }
+        asset.applyFilters(networkingEngine);
 
         await player.load(asset.manifestUri);
         if (asset.features) {
@@ -239,7 +199,7 @@ describe('Player', () => {
       // On some platforms, currentTime is less than duration, but it should be
       // close.
       expect(video.currentTime).toBeCloseTo(
-          video.duration, 1 /* decimal place */);
+          video.duration, /* decimal= */ 1);
     }
   }
 

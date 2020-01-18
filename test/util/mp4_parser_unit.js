@@ -353,7 +353,7 @@ describe('Mp4Parser', () => {
         new shaka.util.Mp4Parser()
             .box('b003', Util.spyFunc(parentBox))
             .box('b032', Util.spyFunc(childBox1))
-            .parse(partialBoxWithSampleDescription, false /* partialOkay */);
+            .parse(partialBoxWithSampleDescription, /* partialOkay= */ false);
       }).toThrow(expected);
 
       parentBox.calls.reset();
@@ -363,7 +363,7 @@ describe('Mp4Parser', () => {
       new shaka.util.Mp4Parser()
           .box('b003', Util.spyFunc(parentBox))
           .box('b032', Util.spyFunc(childBox1))
-          .parse(partialBoxWithSampleDescription, true /* partialOkay */);
+          .parse(partialBoxWithSampleDescription, /* partialOkay= */ true);
 
       expect(parentBox).toHaveBeenCalledTimes(1);
       expect(childBox1).toHaveBeenCalledTimes(1);

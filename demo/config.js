@@ -172,6 +172,10 @@ shakaDemo.Config = class {
             'manifest.dash.autoCorrectDrift')
         .addBoolInput_(MessageIds.XLINK_FAIL_GRACEFULLY,
             'manifest.dash.xlinkFailGracefully')
+        .addBoolInput_(MessageIds.IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY,
+            'manifest.dash.ignoreSuggestedPresentationDelay')
+        .addBoolInput_(MessageIds.IGNORE_DASH_EMPTY_ADAPTATION_SET,
+            'manifest.dash.ignoreEmptyAdaptationSet')
         .addBoolInput_(MessageIds.IGNORE_HLS_TEXT_FAILURES,
             'manifest.hls.ignoreTextStreamFailures')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
@@ -191,7 +195,11 @@ shakaDemo.Config = class {
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
         .addBoolInput_(MessageIds.DISABLE_AUDIO,
-            'manifest.disableAudio');
+            'manifest.disableAudio')
+        .addBoolInput_(MessageIds.DISABLE_VIDEO,
+            'manifest.disableVideo')
+        .addBoolInput_(MessageIds.DISABLE_TEXT,
+            'manifest.disableText');
 
     this.addRetrySection_('manifest', MessageIds.MANIFEST_RETRY_SECTION_HEADER);
   }
@@ -233,6 +241,8 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.MAX_HEIGHT, prefix + 'maxHeight')
         .addNumberInput_(MessageIds.MIN_PIXELS, prefix + 'minPixels')
         .addNumberInput_(MessageIds.MAX_PIXELS, prefix + 'maxPixels')
+        .addNumberInput_(MessageIds.MIN_FRAMERATE, prefix + 'minFrameRate')
+        .addNumberInput_(MessageIds.MAX_FRAMERATE, prefix + 'maxFrameRate')
         .addNumberInput_(MessageIds.MIN_BANDWIDTH, prefix + 'minBandwidth')
         .addNumberInput_(MessageIds.MAX_BANDWIDTH, prefix + 'maxBandwidth');
   }

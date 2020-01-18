@@ -39,7 +39,7 @@ describe('UI', () => {
         /** @type {!HTMLElement} */ (document.createElement('div'));
       document.body.appendChild(videoContainer);
 
-      video = shaka.util.Dom.createVideoElement();
+      video = shaka.test.UiUtils.createVideoElement();
       videoContainer.appendChild(video);
       UiUtils.createUIThroughAPI(videoContainer, video);
     });
@@ -59,7 +59,8 @@ describe('UI', () => {
           /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
 
-        await UiUtils.createUIThroughDOMAutoSetup([container], /* videos */ []);
+        await UiUtils.createUIThroughDOMAutoSetup(
+            [container], /* videos= */ []);
       });
 
       it('has all the basic elements', () => {
@@ -84,7 +85,7 @@ describe('UI', () => {
         document.body.appendChild(container2);
 
         await UiUtils.createUIThroughDOMAutoSetup([container1, container2],
-            /* videos */ []);
+            /* videos= */ []);
       });
 
       it('has all the basic elements', () => {
@@ -98,10 +99,11 @@ describe('UI', () => {
       let video;
 
       beforeEach(async () => {
-        video = shaka.util.Dom.createVideoElement();
+        video = shaka.test.UiUtils.createVideoElement();
         document.body.appendChild(video);
 
-        await UiUtils.createUIThroughDOMAutoSetup(/* containers */ [], [video]);
+        await UiUtils.createUIThroughDOMAutoSetup(
+            /* containers= */ [], [video]);
       });
 
       it('has all the basic elements', () => {
@@ -127,7 +129,7 @@ describe('UI', () => {
           videos.push(video);
         }
 
-        await UiUtils.createUIThroughDOMAutoSetup(/* containers */ [], videos);
+        await UiUtils.createUIThroughDOMAutoSetup(/* containers= */ [], videos);
       });
 
       it('has all the basic elements', () => {
@@ -149,7 +151,7 @@ describe('UI', () => {
           /** @type {!HTMLElement} */ (document.createElement('div'));
         document.body.appendChild(container);
 
-        video = shaka.util.Dom.createVideoElement();
+        video = shaka.test.UiUtils.createVideoElement();
         container.appendChild(video);
 
         await UiUtils.createUIThroughDOMAutoSetup([container], [video]);
@@ -172,7 +174,7 @@ describe('UI', () => {
         /** @type {!HTMLElement} */ (document.createElement('div'));
       document.body.appendChild(videoContainer);
 
-      video = shaka.util.Dom.createVideoElement();
+      video = shaka.test.UiUtils.createVideoElement();
       videoContainer.appendChild(video);
     });
 

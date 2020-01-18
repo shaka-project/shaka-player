@@ -100,15 +100,7 @@
    * the text container doesn't interfere with the control buttons. */
   z-index: 1;
 
-  /* Opacity transition for controls. */
-  & > .shaka-fade-out-on-mouse-out {
-    .opacity-transition();
-  }
-
-  /* Always show controls while casting. */
   &[casting="true"] {
-    opacity: 1;
-
     /* Hide fullscreen button while casting. */
     .shaka-fullscreen-button {
       .hidden();
@@ -162,7 +154,7 @@
   /* Make sure contents cannot be selected. */
   .unselectable();
 
-  .opacity-transition();
+  .show-when-controls-shown();
 
   /* All buttons, divs, and other controls directly inside this panel should
    * have these characteristics by default. */
@@ -208,6 +200,7 @@
   .fill-container();
   .shrinkable();
   .absolute-position();
+  .show-when-controls-shown();
 
   /* A black gradient at the bottom, behind the controls, but only so high. */
   background: linear-gradient(to top, rgba(0, 0, 0, 1) 0, @transparent 92px);

@@ -114,6 +114,7 @@ shaka.extern.PeriodDB;
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
+ *   pixelAspectRatio: (string|undefined),
  *   kind: (string|undefined),
  *   language: string,
  *   label: ?string,
@@ -134,7 +135,8 @@ shaka.extern.PeriodDB;
  * @property {boolean} primary
  *   Whether the stream set was primary.
  * @property {number} presentationTimeOffset
- *   The presentation time offset of the stream, in seconds.
+ *   The presentation time offset of the stream, in seconds.  Note that this is
+ *   the inverse of the timestampOffset as defined in the manifest types.
  * @property {string} contentType
  *   The type of the stream, 'audio', 'text', or 'video'.
  * @property {string} mimeType
@@ -143,6 +145,8 @@ shaka.extern.PeriodDB;
  *   The codecs of the stream.
  * @property {(number|undefined)} frameRate
  *   The Stream's framerate in frames per second.
+ * @property {(string|undefined)} pixelAspectRatio
+ *   The Stream's pixel aspect ratio
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language

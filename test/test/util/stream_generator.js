@@ -366,7 +366,7 @@ shaka.test.StreamGenerator = class {
     const size = reader.readUint32();
     const type = reader.readUint32();
     goog.asserts.assert(
-        type == 0x6d646864 /* mdhd */,
+        type == 0x6d646864,  // mdhd
         'initSegment does not contain an mdhd box at the specified offset.');
 
     const largesizePresent = size == 1;
@@ -420,7 +420,7 @@ shaka.test.StreamGenerator = class {
     const size = reader.readUint32();
     const type = reader.readUint32();
     goog.asserts.assert(
-        type == 0x74666474 /* tfdt */,
+        type == 0x74666474,  // tfdt
         'segment does not contain a tfdt box at the specified offset.');
 
     const largesizePresent = size == 1;

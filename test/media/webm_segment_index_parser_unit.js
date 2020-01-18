@@ -25,11 +25,13 @@ describe('WebmSegmentIndexParser', () => {
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_CUES_ELEMENT_MISSING));
     expect(() => shaka.media.WebmSegmentIndexParser.parse(
-        /* indexSegment */ initSegment,  // deliberate wrong data
-        /* initSegment */ initSegment,
-        /* uris */ [],
-        /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0)).toThrow(error);
+        /* indexSegment= */ initSegment,  // deliberate wrong data
+        /* initSegment= */ initSegment,
+        /* uris= */ [],
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity)).toThrow(error);
   });
 
   it('rejects an invalid init segment ', () => {
@@ -38,19 +40,23 @@ describe('WebmSegmentIndexParser', () => {
         shaka.util.Error.Category.MEDIA,
         shaka.util.Error.Code.WEBM_EBML_HEADER_ELEMENT_MISSING));
     expect(() => shaka.media.WebmSegmentIndexParser.parse(
-        /* indexSegment */ indexSegment,
-        /* initSegment */ indexSegment,  // deliberate wrong data
-        /* uris */ [],
-        /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0)).toThrow(error);
+        /* indexSegment= */ indexSegment,
+        /* initSegment= */ indexSegment,  // deliberate wrong data
+        /* uris= */ [],
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity)).toThrow(error);
   });
 
   it('parses index segment ', () => {
     const result = shaka.media.WebmSegmentIndexParser.parse(
         indexSegment, initSegment,
-        /* uris */ [],
-        /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 0);
+        /* uris= */ [],
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
     const references = [
       {startTime: 0, endTime: 12, startByte: 281, endByte: 95911},
       {startTime: 12, endTime: 24, startByte: 95912, endByte: 209663},
@@ -62,12 +68,14 @@ describe('WebmSegmentIndexParser', () => {
     expect(result).toEqual(references.map((o) => jasmine.objectContaining(o)));
   });
 
-  it('takes a scaled presentationTimeOffset in seconds', () => {
+  it('takes a timestamp offset in seconds', () => {
     const result = shaka.media.WebmSegmentIndexParser.parse(
         indexSegment, initSegment,
-        /* uris */ [],
-        /* initSegmentReference */ null,
-        /* scaledPresentationTimeOffset */ 2);
+        /* uris= */ [],
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ -2,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
     const references = [
       {startTime: -2, endTime: 10},
       {startTime: 10, endTime: 22},

@@ -31,6 +31,10 @@
     "message": "Downloaded",
     "description": "A tag that marks an asset as being downloaded by the user."
   },
+  "DEMO_AD": {
+    "message": "Ad",
+    "description": "A tag that marks an asset as having an advertisement."
+  },
   "DEMO_MANIFEST_SEARCH": {
     "message": "Manifest",
     "description": "A header on a search field that filters by manifest type."
@@ -215,10 +219,6 @@
     "message": "[PROPER_NAME:jsDelivr]",
     "description": "A link in the footer, to Shaka Player in the jsDelivr CDN."
   },
-  "DEMO_CDNJS": {
-    "message": "[PROPER_NAME:CDNJS]",
-    "description": "A link in the footer, to Shaka Player in the CDNJS CDN."
-  },
   "DEMO_DEMO_MODE_HEADER": {
     "message": "DEMO MODE",
     "description": "A header for a section of the footer, that allows the user to switch between different modes."
@@ -391,6 +391,10 @@
     "message": "Filters for assets that have been stored offline.",
     "description": "A tooltip for an optional search term."
   },
+  "DEMO_AD_SEARCH": {
+    "message": "Filters for assets that have advertisements.",
+    "description": "A tooltip for an optional search term."
+  },
   "DEMO_AUDIO_ONLY_SEARCH": {
     "message": "Filters for assets that do not have video streams.",
     "description": "A tooltip for an optional search term."
@@ -417,6 +421,14 @@
   },
   "DEMO_XLINK_FAIL_GRACEFULLY": {
     "message": "[JARGON:Xlink] Should Fail Gracefully",
+    "description": "The name of a configuration value."
+  },
+  "DEMO_IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY": {
+    "message": "Ignore [PROPER_NAME:DASH] [JARGON:suggestedPresentationDelay]",
+    "description": "The name of a configuration value."
+  },
+  "DEMO_IGNORE_DASH_EMPTY_ADAPTATION_SET": {
+    "message": "Ignore empty [PROPER_NAME:DASH] [JARGON:AdaptationSets]",
     "description": "The name of a configuration value."
   },
   "DEMO_IGNORE_HLS_TEXT_FAILURES": {
@@ -449,6 +461,14 @@
   },
   "DEMO_DISABLE_AUDIO": {
     "message": "Disable Audio",
+    "description": "The name of a configuration value."
+  },
+  "DEMO_DISABLE_VIDEO": {
+    "message": "Disable Video",
+    "description": "The name of a configuration value."
+  },
+  "DEMO_DISABLE_TEXT": {
+    "message": "Disable Text",
     "description": "The name of a configuration value."
   },
   "DEMO_ENABLED": {
@@ -493,6 +513,14 @@
   },
   "DEMO_MAX_PIXELS": {
     "message": "Max Pixels",
+    "description": "The name of a configuration value."
+  },
+  "DEMO_MIN_FRAMERATE": {
+    "message": "Min Framerate",
+    "description": "The name of a configuration value."
+  },
+  "DEMO_MAX_FRAMERATE": {
+    "message": "Max Framerate",
     "description": "The name of a configuration value."
   },
   "DEMO_MIN_BANDWIDTH": {

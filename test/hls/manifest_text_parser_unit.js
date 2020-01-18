@@ -30,7 +30,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-TARGETDURATION', [], '6'),
             ],
           },
 
@@ -47,8 +47,8 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
-              new shaka.hls.Tag(/* id */ 1, 'EXT-X-STREAM-INF',
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+              new shaka.hls.Tag(/* id= */ 1, 'EXT-X-STREAM-INF',
                   [
                     new shaka.hls.Attribute('BANDWIDTH', '2165224'),
                     new shaka.hls.Attribute('URI', 'prog_index.m3u8'),
@@ -71,7 +71,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-TARGETDURATION', [], '6'),
             ],
           },
 
@@ -94,7 +94,7 @@ describe('ManifestTextParser', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           code));
-      expect(() => parser.parsePlaylist(data, /* uri */ '')).toThrow(error);
+      expect(() => parser.parsePlaylist(data, /* uri= */ '')).toThrow(error);
     }
   });
 
@@ -104,7 +104,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-INDEPENDENT-SEGMENTS', []),
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-INDEPENDENT-SEGMENTS', []),
             ],
           },
 
@@ -119,7 +119,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 1, 'EXT-X-PLAYLIST-TYPE', [], 'VOD'),
+              new shaka.hls.Tag(/* id= */ 1, 'EXT-X-PLAYLIST-TYPE', [], 'VOD'),
             ],
           },
 
@@ -134,7 +134,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 2, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
+              new shaka.hls.Tag(/* id= */ 2, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
           },
 
@@ -151,7 +151,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA',
                   [new shaka.hls.Attribute('TYPE', 'CLOSED-CAPTIONS')]),
             ],
           },
@@ -167,7 +167,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag(/* id */ 1, 'EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id= */ 1, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('URI', 'main.mp4'),
                     new shaka.hls.Attribute('BYTERANGE', '720@0'),
@@ -188,7 +188,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('CODECS', 'avc1.64002a,mp4a.40.2'),
                   ]),
@@ -206,7 +206,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag(/* id */ 1, 'EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id= */ 1, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('CODECS',
                         'avc1.64002a,mp4a.40.2,avc2.64000'),
@@ -225,7 +225,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MASTER,
             tags: [
-              new shaka.hls.Tag(/* id */ 2, 'EXT-X-MEDIA',
+              new shaka.hls.Tag(/* id= */ 2, 'EXT-X-MEDIA',
                   [
                     new shaka.hls.Attribute('CODECS',
                         'avc1.64002a,mp4a.40.2'),
@@ -249,7 +249,7 @@ describe('ManifestTextParser', () => {
           shaka.util.Error.Code.INVALID_HLS_TAG,
           'invalid tag'));
       const text = shaka.util.StringUtils.toUTF8('#EXTM3U\ninvalid tag');
-      expect(() => parser.parsePlaylist(text, /* uri */ '')).toThrow(error);
+      expect(() => parser.parsePlaylist(text, /* uri= */ '')).toThrow(error);
     });
   });
 
@@ -285,12 +285,12 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
               new shaka.hls.Segment('https://test/test.mp4',
                   [
-                    new shaka.hls.Tag(/* id */ 2, 'EXTINF', [], '5.99467'),
+                    new shaka.hls.Tag(/* id= */ 2, 'EXTINF', [], '5.99467'),
                   ]),
             ],
           },
@@ -310,13 +310,13 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
               new shaka.hls.Segment('https://test/test.mp4',
                   [
                     new shaka.hls.Tag(
-                        /* id */ 2,
+                        /* id= */ 2,
                         'EXTINF',
                         [new shaka.hls.Attribute('pid', '180')],
                         '5.99467'
@@ -340,18 +340,18 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 2, 'EXT-X-TARGETDURATION', [], '6'),
+              new shaka.hls.Tag(/* id= */ 2, 'EXT-X-TARGETDURATION', [], '6'),
             ],
             segments: [
               new shaka.hls.Segment('https://test/test.mp4',
                   [
-                    new shaka.hls.Tag(/* id */ 1, 'EXT-X-KEY',
+                    new shaka.hls.Tag(/* id= */ 1, 'EXT-X-KEY',
                         [
                           new shaka.hls.Attribute('METHOD', 'AES-128'),
                           new shaka.hls.Attribute('URI', 'http://key.com'),
                           new shaka.hls.Attribute('IV', '123'),
                         ]),
-                    new shaka.hls.Tag(/* id */ 3, 'EXTINF', [], '5.99467'),
+                    new shaka.hls.Tag(/* id= */ 3, 'EXTINF', [], '5.99467'),
                   ]),
             ],
           },
@@ -373,12 +373,12 @@ describe('ManifestTextParser', () => {
             absoluteUri: 'https://test/manifest.m3u8',
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
               new shaka.hls.Segment('https://test/test.mp4',
                   [
-                    new shaka.hls.Tag(/* id */ 2, 'EXTINF', [], '5.99467'),
+                    new shaka.hls.Tag(/* id= */ 2, 'EXTINF', [], '5.99467'),
                   ]),
             ],
           },
@@ -407,7 +407,7 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-TARGETDURATION', [], '6'),
             ],
             segments: [
               new shaka.hls.Segment('https://test/uri',
@@ -428,8 +428,8 @@ describe('ManifestTextParser', () => {
           {
             type: shaka.hls.PlaylistType.MEDIA,
             tags: [
-              new shaka.hls.Tag(/* id */ 0, 'EXT-X-TARGETDURATION', [], '6'),
-              new shaka.hls.Tag(/* id */ 4, 'EXT-X-ENDLIST', []),
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+              new shaka.hls.Tag(/* id= */ 4, 'EXT-X-ENDLIST', []),
             ],
             segments: [
               new shaka.hls.Segment('https://test/uri',

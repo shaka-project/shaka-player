@@ -199,8 +199,11 @@ shaka.test.StreamingEngineUtil = class {
      * @return {?number} A segment position.
      */
     const find = (type, periodNumber, time) => {
-      // Note: |time| is relative to a Period's start time.
-      const position = Math.floor(time / segmentDurations[type]) + 1;
+      // Note: |time| is relative to the presentation, and |periodNumber| is
+      // 1-based.
+      const periodTime = time - periodStartTimes[periodNumber - 1];
+
+      const position = Math.floor(periodTime / segmentDurations[type]) + 1;
       return boundsCheckPosition(type, periodNumber, position);
     };
 
@@ -232,10 +235,22 @@ shaka.test.StreamingEngineUtil = class {
 
       const d = segmentDurations[type];
       const getUris = () => [periodNumber + '_' + type + '_' + position];
+      const timestampOffset = periodStartTimes[periodNumber - 1];
+      const appendWindowStart = periodStartTimes[periodNumber - 1];
+      const appendWindowEnd = periodNumber == periodStartTimes.length ?
+          presentationDuration : periodStartTimes[periodNumber];
+
       return new shaka.media.SegmentReference(
-          position, (position - 1) * d, position * d, getUris,
-          /* startByte */ 0, /* endByte */ null,
-          initSegmentReference, /* presentationTimeOffset */ 0);
+          position,
+          /* startTime= */ timestampOffset + (position - 1) * d,
+          /* endTime= */ timestampOffset + position * d,
+          getUris,
+          /* startByte= */ 0,
+          /* endByte= */ null,
+          initSegmentReference,
+          timestampOffset,
+          appendWindowStart,
+          appendWindowEnd);
     };
 
     const manifest = {

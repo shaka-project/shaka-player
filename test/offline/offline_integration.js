@@ -14,7 +14,7 @@ describe('Offline', () => {
   let eventManager;
 
   beforeAll(() => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
   });
 

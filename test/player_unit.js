@@ -909,11 +909,13 @@ describe('Player', () => {
               stream.width = 100;
               stream.height = 200;
               stream.frameRate = 1000000 / 42000;
+              stream.pixelAspectRatio = '59:54';
             });
             variant.addAudio(3, (stream) => {
               stream.originalId = 'audio-en-6c';
               stream.bandwidth = 300;
               stream.channelsCount = 6;
+              stream.audioSamplingRate = 48000;
               stream.roles = ['main'];
             });
           });
@@ -924,6 +926,7 @@ describe('Player', () => {
               stream.originalId = 'video-2kbps';
               stream.bandwidth = 2000;
               stream.frameRate = 24;
+              stream.pixelAspectRatio = '59:54';
               stream.size(200, 400);
             });
             variant.addExistingStream(3);  // audio
@@ -936,6 +939,7 @@ describe('Player', () => {
               stream.originalId = 'audio-en-2c';
               stream.bandwidth = 100;
               stream.channelsCount = 2;
+              stream.audioSamplingRate = 48000;
               stream.roles = ['main'];
             });
           });
@@ -953,6 +957,7 @@ describe('Player', () => {
               stream.originalId = 'audio-commentary';
               stream.bandwidth = 100;
               stream.channelsCount = 2;
+              stream.audioSamplingRate = 48000;
               stream.roles = ['commentary'];
             });
           });
@@ -970,6 +975,7 @@ describe('Player', () => {
               stream.originalId = 'audio-es';
               stream.bandwidth = 100;
               stream.channelsCount = 2;
+              stream.audioSamplingRate = 48000;
             });
           });
           period.addVariant(107, (variant) => {  // spanish stereo, high res
@@ -1018,6 +1024,7 @@ describe('Player', () => {
             variant.addAudio(11, (stream) => {
               stream.bandwidth = 100;
               stream.channelsCount = 2;
+              stream.audioSamplingRate = 48000;
             });
           });
           period.addVariant(201, (variant) => {
@@ -1027,6 +1034,7 @@ describe('Player', () => {
             variant.addAudio(12, (stream) => {
               stream.bandwidth = 300;
               stream.channelsCount = 6;
+              stream.audioSamplingRate = 48000;
             });
           });
         });
@@ -1044,6 +1052,7 @@ describe('Player', () => {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1054,6 +1063,7 @@ describe('Player', () => {
           videoId: 1,
           audioId: 3,
           channelsCount: 6,
+          audioSamplingRate: 48000,
           audioBandwidth: 300,
           videoBandwidth: 1000,
           originalAudioId: 'audio-en-6c',
@@ -1071,6 +1081,7 @@ describe('Player', () => {
           width: 200,
           height: 400,
           frameRate: 24,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1081,6 +1092,7 @@ describe('Player', () => {
           videoId: 2,
           audioId: 3,
           channelsCount: 6,
+          audioSamplingRate: 48000,
           audioBandwidth: 300,
           videoBandwidth: 2000,
           originalAudioId: 'audio-en-6c',
@@ -1098,6 +1110,7 @@ describe('Player', () => {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1108,6 +1121,7 @@ describe('Player', () => {
           videoId: 1,
           audioId: 4,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-en-2c',
@@ -1125,6 +1139,7 @@ describe('Player', () => {
           width: 200,
           height: 400,
           frameRate: 24,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1135,6 +1150,7 @@ describe('Player', () => {
           videoId: 2,
           audioId: 4,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-en-2c',
@@ -1152,6 +1168,7 @@ describe('Player', () => {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1162,6 +1179,7 @@ describe('Player', () => {
           videoId: 1,
           audioId: 5,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-commentary',
@@ -1179,6 +1197,7 @@ describe('Player', () => {
           width: 200,
           height: 400,
           frameRate: 24,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1189,6 +1208,7 @@ describe('Player', () => {
           videoId: 2,
           audioId: 5,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-commentary',
@@ -1206,6 +1226,7 @@ describe('Player', () => {
           width: 100,
           height: 200,
           frameRate: 1000000 / 42000,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1216,6 +1237,7 @@ describe('Player', () => {
           videoId: 1,
           audioId: 6,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-es',
@@ -1233,6 +1255,7 @@ describe('Player', () => {
           width: 200,
           height: 400,
           frameRate: 24,
+          pixelAspectRatio: '59:54',
           mimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
@@ -1243,6 +1266,7 @@ describe('Player', () => {
           videoId: 2,
           audioId: 6,
           channelsCount: 2,
+          audioSamplingRate: 48000,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-es',
@@ -1267,12 +1291,14 @@ describe('Player', () => {
           roles: [],
           audioRoles: null,
           channelsCount: null,
+          audioSamplingRate: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
           width: null,
           height: null,
           frameRate: null,
+          pixelAspectRatio: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1294,12 +1320,14 @@ describe('Player', () => {
           roles: ['main'],
           audioRoles: null,
           channelsCount: null,
+          audioSamplingRate: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
           width: null,
           height: null,
           frameRate: null,
+          pixelAspectRatio: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1321,12 +1349,14 @@ describe('Player', () => {
           roles: ['commentary'],
           audioRoles: null,
           channelsCount: null,
+          audioSamplingRate: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
           width: null,
           height: null,
           frameRate: null,
+          pixelAspectRatio: null,
           videoId: null,
           audioId: null,
           originalAudioId: null,
@@ -1907,10 +1937,11 @@ describe('Player', () => {
       let stats = player.getStats();
       expect(stats.decodedFrames).toBeNaN();
       expect(stats.droppedFrames).toBeNaN();
+      expect(stats.corruptedFrames).toBeNaN();
 
       video.getVideoPlaybackQuality = () => {
         return {
-          corruptedVideoFrames: 0,
+          corruptedVideoFrames: 10,
           creationTime: 0,
           totalFrameDelay: 0,
           totalVideoFrames: 75,
@@ -1922,6 +1953,7 @@ describe('Player', () => {
       stats = player.getStats();
       expect(stats.decodedFrames).toBe(75);
       expect(stats.droppedFrames).toBe(125);
+      expect(stats.corruptedFrames).toBe(10);
     });
 
     describe('buffer/play times', () => {
@@ -2993,6 +3025,7 @@ describe('Player', () => {
             variant.bandwidth = 300;
             variant.addAudio(0, (stream) => {
               stream.channelsCount = 6;
+              stream.audioSamplingRate = 48000;
               stream.codecs = 'ac-3';
             });
           });
@@ -3001,6 +3034,7 @@ describe('Player', () => {
             variant.bandwidth = 100;
             variant.addAudio(1, (stream) => {
               stream.channelsCount = 2;
+              stream.audioSamplingRate = 48000;
               stream.codecs = 'mp4a.40.2';
             });
           });
@@ -3218,7 +3252,7 @@ describe('Player', () => {
       };
 
       await player.load(
-          fakeManifestUri, /* startTime */ 0, returnManifest(manifest));
+          fakeManifestUri, /* startTime= */ 0, returnManifest(manifest));
 
       // Ensure this is seen as a live stream, or else the test is invalid.
       expect(player.isLive()).toBe(true);

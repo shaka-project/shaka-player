@@ -76,8 +76,10 @@ module.exports = (config) => {
       'node_modules/mux.js/dist/mux.min.js',
 
       // EME encryption scheme polyfill, compiled into Shaka Player, but outside
-      // of the Closure deps system.
-      'node_modules/eme-encryption-scheme-polyfill/index.js',
+      // of the Closure deps system, so not in shaka-player.uncompiled.js.  This
+      // is specifically the compiled, minified, cross-browser build of it.
+      // eslint-disable-next-line max-len
+      'node_modules/eme-encryption-scheme-polyfill/dist/eme-encryption-scheme-polyfill.js',
 
       // load closure base, the deps tree, and the uncompiled library
       'third_party/closure/goog/base.js',
@@ -117,6 +119,8 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
+      {pattern: 'demo/locales/en.json', included: false},
+      {pattern: 'demo/locales/source.json', included: false},
       {pattern: 'node_modules/**/*.js', included: false},
     ],
 

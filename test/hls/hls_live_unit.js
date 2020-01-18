@@ -562,15 +562,13 @@ describe('HlsParser live', () => {
         const expectedRef = ManifestParser.makeReference(
             'test:/main.mp4', 0, segmentDataStartTime,
             segmentDataStartTime + 2);
+        // In live content, we do not set timestampOffset.
+        expectedRef.timestampOffset = 0;
 
         const manifest = await parser.start('test:/master', playerInterface);
         const video = manifest.periods[0].variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [expectedRef]);
-
-        // In live content, we do not set presentationTimeOffset.
-        const ref = video.segmentIndex.get(0);
-        expect(ref.presentationTimeOffset).toBe(0);
       });
 
       it('gets start time on update without segment request', async () => {
@@ -625,15 +623,13 @@ describe('HlsParser live', () => {
         const expectedRef = ManifestParser.makeReference(
             'test:/main2.ts', 1, segmentDataStartTime,
             segmentDataStartTime + 2);
+        // In live content, we do not set timestampOffset.
+        expectedRef.timestampOffset = 0;
 
         const manifest = await parser.start('test:/master', playerInterface);
         const video = manifest.periods[0].variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [expectedRef]);
-
-        // In live content, we do not set presentationTimeOffset.
-        const ref = video.segmentIndex.get(1);
-        expect(ref.presentationTimeOffset).toBe(0);
       });
 
       it('gets start time of segments with byte range', async () => {
@@ -647,11 +643,11 @@ describe('HlsParser live', () => {
             .setResponseValue('test:/main.mp4', segmentData);
 
         const expectedRef = ManifestParser.makeReference(
-            'test:/main.mp4' /* uri */,
-            0 /* position */,
-            segmentDataStartTime /* start */,
-            segmentDataStartTime + 2 /* end */,
-            '' /* baseUri */,
+            /* uri= */ 'test:/main.mp4',
+            /* position= */ 0,
+            /* start= */ segmentDataStartTime,
+            /* end= */ segmentDataStartTime + 2,
+            /* baseUri= */ '',
             expectedStartByte,
             expectedEndByte);  // Complete segment reference
 

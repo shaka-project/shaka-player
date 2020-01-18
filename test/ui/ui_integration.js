@@ -36,7 +36,7 @@ describe('UI', () => {
   });
 
   beforeEach(async () => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
 
     videoContainer = shaka.util.Dom.createHTMLElement('div');
     videoContainer.appendChild(video);
@@ -299,8 +299,8 @@ describe('UI', () => {
 
       languagesToButtons = mapChoicesToButtons(
           /* allButtons= */ languageButtons,
-          /* choices */ langsFromContent,
-          /* modifier */ getNativeName
+          /* choices= */ langsFromContent,
+          /* modifier= */ getNativeName
       );
 
       const button = languagesToButtons.get(newLanguage);

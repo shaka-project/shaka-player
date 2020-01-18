@@ -39,6 +39,7 @@ shaka.test.OfflineUtils = class {
       mimeType: '',
       codecs: '',
       frameRate: undefined,
+      pixelAspectRatio: undefined,
       kind: undefined,
       language: '',
       label: null,

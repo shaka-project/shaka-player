@@ -21,9 +21,34 @@ module.exports = {
     return {
       ':matches(CallExpression, NewExpression)': (node) => {
         for (const arg of node.arguments) {
-          const comment = source.getCommentsBefore(arg).pop();
-          if (!comment || comment.type != 'Block' ||
-              !comment.value.includes('=')) {
+          const filter = (c) => c.type == 'Block' && !c.value.includes('@');
+          const beforeComments = source.getCommentsBefore(arg).filter(filter);
+          if (beforeComments.length > 1) {
+            ctx.report({
+              node: beforeComments[0],
+              message: 'Multiple comments around arguments',
+            });
+            continue;
+          }
+
+          const afterComments = source.getCommentsAfter(arg).filter(filter);
+          if (afterComments.length > 0) {
+            ctx.report({
+              node: afterComments[0],
+              message: 'Argument comment should appear before argument',
+              fix: (fixer) => {
+                return [
+                  fixer.remove(afterComments[0]),
+                  fixer.insertTextBefore(
+                      arg, '/*' + afterComments[0].value + '*/ '),
+                ];
+              },
+            });
+            continue;
+          }
+
+          const comment = beforeComments.pop();
+          if (!comment) {
             continue;
           }
 

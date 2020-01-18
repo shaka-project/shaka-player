@@ -89,9 +89,9 @@ A Period represents a distinct set of streams that are played over a set time.
 Each Period is considered independent.  This allows you to combine multiple
 assets together seamlessly with little effort.
 
-All media times in the manifest are relative to the Period start time.  This
-means that you can insert the same content (unmodified) multiple times and we
-will adjust the times for you.
+All media times in the manifest are relative to the presentation, *not* the
+Period.  This means that you must account for period start times in your segment
+references.  (This changed in Shaka Player v2.6.)
 
 **Note**: Because of browser requirements regarding MSE, we don't support
 changing MIME types or codecs after starting.  This means that all Periods must
@@ -139,15 +139,19 @@ starts at 0 and ends at the duration of the media.
 
 ## Media Segments
 
-A Stream contains a number of segment references.  This is usually referred to
-as a segment index.  A segment reference contains important metadata about the
-segment: the start and end times, the URL, and optionally a byte range into
-that URL.  A segment reference is created using the
-{@link shaka.media.SegmentReference} constructor.
+A Stream contains a number of segment references contained in a segment index.
+A segment reference contains important metadata about the segment: the start
+and end times, the URL, and optionally a byte range into that URL.  A segment
+reference is created using the {@link shaka.media.SegmentReference}
+constructor.
 
 Rather than storing the references in an array, the manifest parser provides
 callbacks to get them.  This allows a manifest parser to turn abstract segment
 descriptions (such as DASH's `SegmentTemplate`) into concrete ones on demand.
+
+Media segment times are all in terms of the presentation timeline.  So if the
+content is multi-period, the period start time must be accounted for in the
+reference's `timestampOffset` field.
 
 First we ask for the index that corresponds with a start time.  Then on update,
 we increment the index and ask for segments in order. The value of the index
@@ -184,7 +188,9 @@ var references = refs.map(function(r, position) {
       /* startByte */ 0,
       /* endByte */ null,
       initSegmentReference,
-      /* presentationTimeOffset */ 0);
+      /* timestampOffset */ 0,
+      /* appendWindowStart */ 0,
+      /* appendWindowEnd */ Infinity);
 });
 
 var index = new shaka.media.SegmentIndex(references);
@@ -288,7 +294,7 @@ MyManifestParser.prototype.loadStream_ = function(type) {
       new shaka.media.InitSegmentReference(getUris, 0, null);
 
   var index = new shaka.media.SegmentIndex([
-    // Times are in seconds, relative to the Period
+    // Times are in seconds, relative to the presentation
     this.loadReference_(0, 0, 10),
     this.loadReference_(1, 10, 20),
     this.loadReference_(2, 20, 30),
@@ -327,7 +333,9 @@ MyManifestParser.prototype.loadReference_ =
       /* startByte */ 0,
       /* endByte */ null,
       initSegmentReference,
-      /* presentationTimeOffset */ 0);
+      /* timestampOffset */ 0,
+      /* appendWindowStart */ 0,
+      /* appendWindowEnd */ Infinity);
 };
 ```
 

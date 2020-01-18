@@ -114,8 +114,8 @@ shaka.test.UiUtils = class {
     // (in test/test/boot.js). This tells it that we've added a new
     // stylesheet, so LESS can process it.
     less.registerStylesheetsImmediately();
-    await less.refresh(/* reload */ true,
-        /* modifyVars*/ false, /* clearFileCache */ false);
+    await less.refresh(/* reload= */ true,
+        /* modifyVars= */ false, /* clearFileCache= */ false);
   }
 
   /**
@@ -135,5 +135,21 @@ shaka.test.UiUtils = class {
     const event = document.createEvent(type);
     event.initEvent(name, true, true);
     target.dispatchEvent(event);
+  }
+
+  /**
+   * Creates a muted, fixed size video element for testing.
+   *
+   * @return {!HTMLVideoElement}
+   */
+  static createVideoElement() {
+    const video = /** @type {!HTMLVideoElement} */(document.createElement(
+        'video'));
+
+    video.muted = true;
+    video.width = 600;
+    video.height = 400;
+
+    return video;
   }
 };

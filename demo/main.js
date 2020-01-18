@@ -689,20 +689,15 @@ shakaDemo.Main = class {
     const localization = this.controls_.getLocalization();
     const load = async (urlBase) => {
       const url = urlBase + '/locales/' + locale + '.json';
-      const response = await fetch(url);
-      if (!response.ok) {
+
+      try {
+        const text = await this.loadText_(url);
+        const obj = /** @type {!Object.<string, string>} */(JSON.parse(text));
+        const map = new Map(Object.entries(obj));
+        localization.insert(locale, map);
+      } catch (error) {
         console.warn('Unable to load locale', locale, 'for url', url);
-        return;
       }
-
-      // eslint-disable-next-line no-await-in-loop
-      const obj = await response.json();
-      const map = new Map();
-      for (const key in obj) {
-        map.set(key, obj[key]);
-      }
-
-      localization.insert(locale, map);
     };
     await Promise.all([load('../ui'), load('../demo')]);
   }

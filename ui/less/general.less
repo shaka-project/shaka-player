@@ -110,15 +110,17 @@
   flex-shrink: 1;
 }
 
-.opacity-transition() {
-  /* Transparent unless explicitly made opaque through
-   "shown=true" attribute */
+.show-when-controls-shown() {
+  /* Transparent unless explicitly made opaque through container attributes. */
   opacity: 0;
 
   /* When we show/hide this, do it gradually using cubic-bezier timing. */
   transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 600ms;
 
-  &[shown="true"] {
+  /* Show controls when the container's "shown" or "casting" attributes are
+   * set. */
+  .shaka-controls-container[shown="true"] &,
+  .shaka-controls-container[casting="true"] & {
     opacity: 1;
   }
 }

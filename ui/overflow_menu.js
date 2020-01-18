@@ -65,7 +65,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
         }
 
         // Make sure controls are displayed
-        this.controls.overrideCssShowControls();
+        this.controls.computeOpacity();
       });
     }
 
@@ -143,7 +143,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.overflowMenu_.classList.add('shaka-no-propagation');
     this.overflowMenu_.classList.add('shaka-show-controls-on-mouse-over');
     this.overflowMenu_.classList.add('shaka-settings-menu');
-    this.overflowMenu_.classList.add('shaka-fade-out-on-mouse-out');
     this.controlsContainer_.appendChild(this.overflowMenu_);
   }
 
@@ -187,7 +186,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
       this.controls.hideSettingsMenus();
     } else {
       shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
-      this.controls.overrideCssShowControls();
+      this.controls.computeOpacity();
+
       // If overflow menu has currently visible buttons, focus on the
       // first one, when the menu opens.
       const isDisplayed =

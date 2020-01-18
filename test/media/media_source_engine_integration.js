@@ -26,7 +26,7 @@ describe('MediaSourceEngine', () => {
   let textDisplayer;
 
   beforeAll(() => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
   });
 
@@ -61,22 +61,22 @@ describe('MediaSourceEngine', () => {
   function appendInit(type) {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(
-        type, segment, null, null, /* hasClosedCaptions */ false);
+        type, segment, null, null, /* hasClosedCaptions= */ false);
   }
 
   function append(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, 0, Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(
-        type, segment, null, null, /* hasClosedCaptions */ false);
+        type, segment, null, null, /* hasClosedCaptions= */ false);
   }
 
   // The start time and end time should be null for init segment with closed
   // captions.
   function appendInitWithClosedCaptions(type) {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, /* startTime */ null,
-        /* endTime */ null, /* hasClosedCaptions */ true);
+    return mediaSourceEngine.appendBuffer(type, segment, /* startTime= */ null,
+        /* endTime= */ null, /* hasClosedCaptions= */ true);
   }
 
   // The start time and end time should be valid for the segments with closed
@@ -84,8 +84,8 @@ describe('MediaSourceEngine', () => {
   function appendWithClosedCaptions(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, 0, Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, /* startTime */ 0,
-        /* endTime */ 2, /* hasClosedCaptions */ true);
+    return mediaSourceEngine.appendBuffer(type, segment, /* startTime= */ 0,
+        /* endTime= */ 2, /* hasClosedCaptions= */ true);
   }
 
   function buffered(type, time) {
@@ -289,9 +289,9 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
-        /* timestampOffset */ 0,
-        /* appendWindowStart */ 5,
-        /* appendWindowEnd */ 18);
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 5,
+        /* appendWindowEnd= */ 18);
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
@@ -308,9 +308,9 @@ describe('MediaSourceEngine', () => {
     await appendInit(ContentType.VIDEO);
     // Simulate period 1, with 20 seconds of content, no timestamp offset
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
-        /* timestampOffset */ 0,
-        /* appendWindowStart */ 0,
-        /* appendWindowEnd */ 20);
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ 20);
     await append(ContentType.VIDEO, 1);
     await append(ContentType.VIDEO, 2);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
@@ -320,9 +320,9 @@ describe('MediaSourceEngine', () => {
     // The 5 seconds of overlap should be trimmed off, and we should still
     // have a continuous stream with 35 seconds of content.
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
-        /* timestampOffset */ 15,
-        /* appendWindowStart */ 20,
-        /* appendWindowEnd */ 35);
+        /* timestampOffset= */ 15,
+        /* appendWindowStart= */ 20,
+        /* appendWindowEnd= */ 35);
     await append(ContentType.VIDEO, 1);
     await append(ContentType.VIDEO, 2);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
@@ -339,7 +339,7 @@ describe('MediaSourceEngine', () => {
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
     // Call with forceTransmuxTS = true, so that it will transmux even on
     // platforms with native TS support.
-    await mediaSourceEngine.init(initObject, /** forceTransmuxTS */ true);
+    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ true);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await append(ContentType.VIDEO, 0);
 
@@ -354,7 +354,7 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(initObject, /** forceTransmuxTS */ false);
+    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInitWithClosedCaptions(ContentType.VIDEO);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');

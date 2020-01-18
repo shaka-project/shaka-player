@@ -29,7 +29,7 @@ describe('DashParser SegmentList', () => {
       '    <S d="5" />',
       '  </SegmentTimeline>',
       '</SegmentList>',
-    ], 65 /* duration */);
+    ], /* duration= */ 65);
     const references = [
       ManifestParser.makeReference('s1.mp4', 1, 50, 60, baseUri),
       ManifestParser.makeReference('s2.mp4', 2, 60, 65, baseUri),
@@ -42,7 +42,7 @@ describe('DashParser SegmentList', () => {
       '<SegmentList>',
       '  <SegmentURL media="s1.mp4" />',
       '</SegmentList>',
-    ], 30 /* duration */);
+    ], /* duration= */ 30);
     const references = [ManifestParser.makeReference('s1.mp4', 1,
         0, 30, baseUri)];
     await Dash.testSegmentIndex(source, references);
@@ -285,12 +285,16 @@ describe('DashParser SegmentList', () => {
         '  </Period>',
         '</MPD>',
       ].join('\n');
+
       const references = [
         ManifestParser.makeReference('s1.mp4', 1, 40, 50, baseUri),
         ManifestParser.makeReference('s2.mp4', 2, 50, 55, baseUri),
         ManifestParser.makeReference('s3.mp4', 3, 55, 63, baseUri),
         ManifestParser.makeReference('s4.mp4', 4, 63, 70, baseUri),
       ];
+      for (const ref of references) {
+        ref.timestampOffset = -10;
+      }
 
       await Dash.testSegmentIndex(source, references);
     });

@@ -247,7 +247,7 @@ function getClientArg(name) {
   // TODO: file a bug on Tizen
   if (shaka.util.Platform.isTizen()) {
     afterEach((done) => {  // eslint-disable-line no-restricted-syntax
-      originalSetTimeout(done, 100 /* ms */);
+      originalSetTimeout(done, /* ms= */ 100);
     });
   }
 

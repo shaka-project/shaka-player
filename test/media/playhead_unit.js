@@ -162,7 +162,7 @@ describe('Playhead', () => {
           video,
           manifest,
           config,
-          5 /* startTime */,
+          /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -183,7 +183,7 @@ describe('Playhead', () => {
           video,
           manifest,
           config,
-          5 /* startTime */,
+          /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -224,7 +224,7 @@ describe('Playhead', () => {
           video,
           manifest,
           config,
-          5 /* startTime */,
+          /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -244,7 +244,7 @@ describe('Playhead', () => {
       timeline.getSeekRangeEnd.and.returnValue(60);
 
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, 0 /* startTime */, Util.spyFunc(onSeek),
+          video, manifest, config, /* startTime= */ 0, Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(0);
@@ -258,7 +258,7 @@ describe('Playhead', () => {
       timeline.getDuration.and.returnValue(60);
 
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, 60 /* startTime */, Util.spyFunc(onSeek),
+          video, manifest, config, /* startTime= */ 60, Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(59);  // duration - durationBackoff
@@ -273,7 +273,7 @@ describe('Playhead', () => {
       timeline.getSeekRangeEnd.and.returnValue(60);
 
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, -15 /* startTime */, Util.spyFunc(onSeek),
+          video, manifest, config, /* startTime= */ -15, Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(45);
@@ -288,7 +288,7 @@ describe('Playhead', () => {
       // If the live stream's playback offset time is not available, start
       // playing from the seek range start time.
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, -40 /* startTime */, Util.spyFunc(onSeek),
+          video, manifest, config, /* startTime= */ -40, Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(30);
@@ -299,7 +299,7 @@ describe('Playhead', () => {
           video,
           manifest,
           config,
-          5 /* startTime */,
+          /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -332,7 +332,7 @@ describe('Playhead', () => {
           video,
           manifest,
           config,
-          null /* startTime */,
+          /* startTime= */ null,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -365,7 +365,7 @@ describe('Playhead', () => {
         video,
         manifest,
         config,
-        5 /* startTime */,
+        /* startTime= */ 5,
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
 
@@ -525,7 +525,7 @@ describe('Playhead', () => {
         video,
         manifest,
         config,
-        5 /* startTime */,
+        /* startTime= */ 5,
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
 
@@ -574,7 +574,7 @@ describe('Playhead', () => {
         video,
         manifest,
         config,
-        5 /* startTime */,
+        /* startTime= */ 5,
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
 
@@ -635,7 +635,7 @@ describe('Playhead', () => {
         video,
         manifest,
         config,
-        5 /* startTime */,
+        /* startTime= */ 5,
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
     expect(currentTime).toBe(1000);
@@ -681,7 +681,7 @@ describe('Playhead', () => {
           video,
           manifest,
           config,
-          5 /* startTime */,
+          /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -713,7 +713,7 @@ describe('Playhead', () => {
           video,
           manifest,
           config,
-          5 /* startTime */,
+          /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -748,7 +748,7 @@ describe('Playhead', () => {
         video,
         manifest,
         config,
-        30 /* startTime, middle of the seek range */,
+        /* startTime= */ 30,
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
 
@@ -893,7 +893,7 @@ describe('Playhead', () => {
               video,
               manifest,
               config,
-              data.start /* startTime */,
+              /* startTime= */ data.start,
               Util.spyFunc(onSeek),
               Util.spyFunc(onEvent));
 
@@ -1146,7 +1146,7 @@ describe('Playhead', () => {
           video,
           manifest,
           config,
-          12 /* startTime */,
+          /* startTime= */ 12,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -1195,7 +1195,7 @@ describe('Playhead', () => {
           video,
           manifest,
           config,
-          0 /* startTime */,
+          /* startTime= */ 0,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
@@ -1227,7 +1227,7 @@ describe('Playhead', () => {
             video,
             manifest,
             config,
-            data.start /* startTime */,
+            /* startTime= */ data.start,
             Util.spyFunc(onSeek),
             Util.spyFunc(onEvent));
 
