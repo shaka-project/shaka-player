@@ -70,6 +70,8 @@ google.ima.AdsManager = class {
 
   skip() {}
 
+  stop() {}
+
   /**
    * @param {number} volume
    */

@@ -15,7 +15,9 @@
  * @interface
  * @exportDoc
  */
-shaka.extern.IAdManager = class extends EventTarget {};
+shaka.extern.IAdManager = class extends EventTarget {
+  onAssetUnload() {}
+};
 
 
 /**
