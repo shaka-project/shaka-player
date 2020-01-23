@@ -563,7 +563,6 @@ describe('MediaSourceEngine', () => {
         await mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null, null,
             /* hasClosedCaptions= */ false);
-        expect(mockTextEngine.appendCues).not.toHaveBeenCalled();
         expect(mockTextEngine.storeAndAppendClosedCaptions)
             .not.toHaveBeenCalled();
         expect(videoSourceBuffer.appendBuffer)
@@ -1188,7 +1187,7 @@ describe('MediaSourceEngine', () => {
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
         'setAppendWindow', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
-        'appendCues', 'storeAndAppendClosedCaptions',
+        'storeAndAppendClosedCaptions',
       ]);
 
       const resolve = () => Promise.resolve();
