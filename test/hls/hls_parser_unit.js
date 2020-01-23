@@ -2486,4 +2486,57 @@ describe('HlsParser', () => {
     // We should log a warning when this happens.
     expect(alwaysWarnSpy).toHaveBeenCalled();
   });
+
+  // Issue #1875
+  it('ignores audio groups on audio-only content', async () => {
+    // NOTE: To reproduce the original issue accurately, the two audio playlist
+    // URIs must differ.  When the issue occurred, the audio-only variant would
+    // be detected as a video stream and combined with the audio group, leading
+    // the player to buffer "video" that was really audio, resulting in
+    // audio-only playback to the exclusion of any other streams.  Since the
+    // root cause of that was the mis-detection, this repro case does not need
+    // to include any audio+video variants.
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANG="en",URI="audio1"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANG="eo",URI="audio2"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a",AUDIO="aud"\n',
+      'audio3\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPeriod(0, (period) => {
+        const anyVariantId = /** @type {?} */(jasmine.any(Number));
+        period.addVariant(anyVariantId, (variant) => {
+          variant.bandwidth = 200;
+          variant.language = 'und';
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio1', media)
+        .setResponseText('test:/audio2', media)
+        .setResponseText('test:/audio3', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual.periods[0].variants.length).toBe(1);
+    expect(actual).toEqual(manifest);
+  });
 });
