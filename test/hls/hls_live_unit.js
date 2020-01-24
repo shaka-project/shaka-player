@@ -339,6 +339,33 @@ describe('HlsParser live', () => {
         const manifest = await parser.start('test:/master', playerInterface);
         expect(manifest.presentationTimeline.isLive()).toBe(false);
       });
+
+      it('does not throw when interrupted by stop', async () => {
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+
+        expect(manifest.presentationTimeline.isLive()).toBe(true);
+
+        // Block the next request so that update() is still happening when we
+        // call stop().
+        /** @type {!shaka.util.PublicPromise} */
+        const delay = fakeNetEngine.delayNextRequest();
+        // Trigger an update.
+        await delayForUpdatePeriod();
+        // Stop the parser mid-update, but don't wait for stop to complete.
+        const stopPromise = parser.stop();
+        // Unblock the request.
+        delay.resolve();
+        // Allow update to finish.
+        await shaka.test.Util.shortDelay();
+        // Wait for stop to complete.
+        await stopPromise;
+      });
     });  // describe('update')
   });  // describe('playlist type EVENT')
 
