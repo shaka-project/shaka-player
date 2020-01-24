@@ -50,6 +50,11 @@ shaka.ui.LanguageUtils = class {
         return track.roles.join(', ');
       }
     };
+
+    const getCombination = (language, rolesString) => {
+      return language + ': ' + rolesString;
+    };
+
     /** @type {!Map.<string, !Set.<string>>} */
     const rolesByLanguage = new Map();
     for (const track of tracks) {
@@ -62,10 +67,13 @@ shaka.ui.LanguageUtils = class {
     // 5. Add new buttons
     /** @type {!Set.<string>} */
     const combinationsMade = new Set();
+    const selectedCombination = selectedTrack ? getCombination(
+        selectedTrack.language, getRolesString(selectedTrack)) : '';
+
     for (const track of tracks) {
       const language = track.language;
       const rolesString = getRolesString(track);
-      const combinationName = language + ': ' + rolesString;
+      const combinationName = getCombination(language, rolesString);
       if (combinationsMade.has(combinationName)) {
         continue;
       }
@@ -99,7 +107,7 @@ shaka.ui.LanguageUtils = class {
           break;
       }
 
-      if (updateChosen && (track == selectedTrack)) {
+      if (updateChosen && (combinationName == selectedCombination)) {
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
         button.setAttribute('aria-selected', 'true');
