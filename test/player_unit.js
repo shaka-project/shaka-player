@@ -924,6 +924,7 @@ describe('Player', function() {
             .addVideo(1).originalId('video-1kbps').bandwidth(1000)
               .size(100, 200).frameRate(1000000 / 42000)
               .pixelAspectRatio('59:54')
+              .roles(['main'])
             .addAudio(3).originalId('audio-en-6c').bandwidth(300)
               .channelsCount(6).roles(['main']).audioSamplingRate(48000)
 
@@ -1138,7 +1139,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: ['commentary'],
+          roles: ['commentary', 'main'],
           audioRoles: ['commentary'],
           videoId: 1,
           audioId: 5,
@@ -1196,7 +1197,7 @@ describe('Player', function() {
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
           primary: false,
-          roles: [],
+          roles: ['main'],
           audioRoles: [],
           videoId: 1,
           audioId: 6,
@@ -1511,6 +1512,23 @@ describe('Player', function() {
       expect(args[0].audio.roles).toContain('commentary');
       expect(args[1]).toBe(true);
       expect(getActiveVariantTrack().roles).toContain('commentary');
+    });
+
+    it('selectAudioLanguage() applies role only to audio', () => {
+      streamingEngine.onCanSwitch();
+      expect(getActiveVariantTrack().roles).not.toContain('commentary');
+      player.selectAudioLanguage('en', 'commentary');
+      let args = streamingEngine.switchVariant.calls.argsFor(0);
+      expect(args[0].audio.roles).toContain('commentary');
+      expect(args[0].video.roles).toContain('main');
+
+      // Switch audio role from 'commentary' to 'main'.
+      streamingEngine.switchVariant.calls.reset();
+      player.selectAudioLanguage('en', 'main');
+      expect(streamingEngine.switchVariant).toHaveBeenCalled();
+      args = streamingEngine.switchVariant.calls.argsFor(0);
+      expect(args[0].audio.roles).toContain('main');
+      expect(args[0].video.roles).toContain('main');
     });
 
     it('selectAudioLanguage() does not change selected text track', function() {
