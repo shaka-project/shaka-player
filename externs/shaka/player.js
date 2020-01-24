@@ -70,6 +70,8 @@ shaka.extern.StateChange;
  *   estimatedBandwidth: number,
  *
  *   loadLatency: number,
+ *   manifestTimeSeconds: number,
+ *   drmTimeSeconds: number,
  *   playTime: number,
  *   pauseTime: number,
  *   bufferingTime: number,
@@ -108,6 +110,10 @@ shaka.extern.StateChange;
  *   This is the number of seconds it took for the video element to have enough
  *   data to begin playback.  This is measured from the time load() is called to
  *   the time the <code>'loadeddata'</code> event is fired by the media element.
+ * @property {number} manifestTimeSeconds
+ *   The amount of time it took to download and parse the manifest.
+ * @property {number} drmTimeSeconds
+ *   The amount of time it took to download the first drm key.
  * @property {number} playTime
  *   The total time spent in a playing state in seconds.
  * @property {number} pauseTime

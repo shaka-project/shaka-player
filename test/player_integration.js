@@ -86,6 +86,8 @@ describe('Player', () => {
         estimatedBandwidth: jasmine.any(Number),
 
         loadLatency: jasmine.any(Number),
+        manifestTimeSeconds: jasmine.any(Number),
+        drmTimeSeconds: jasmine.any(Number),
         playTime: jasmine.any(Number),
         pauseTime: jasmine.any(Number),
         bufferingTime: jasmine.any(Number),
