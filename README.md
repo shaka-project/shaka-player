@@ -42,7 +42,7 @@ NOTES:
  - ¹: Only the latest stable version is tested and supported. Older releases may still be usable, and we will accept pull requests for them, but they will not be officially tested or supported.
  - ²: The latest stable Chromecast firmware is tested. Both sender and receiver can be implemented with Shaka Player.
  - ³: Tizen 2017 model is actively tested and supported by the Shaka Player team. Tizen 2016 model is community-supported and untested by us.
- - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11 can play clear content on Windows 8.0. IE 11 does not support adaptive playback on Windows 7 and under.
+ - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11 can play clear content on Windows 8.0. IE 11 does not support adaptive playback on Windows 7 and under.  (IE support will stop in v2.7: https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka Player team.
 
 We support iOS through Apple's native HLS player.  We provide the same top-level
@@ -131,7 +131,7 @@ NOTES:
  - ¹: Only official Chrome builds contain the Widevine CDM.  Chromium built from source does not support DRM.
  - ²: DRM must be enabled by the user.  The first time a Firefox user visits a site with encrypted media, the user will be prompted to enable DRM.
  - ³: PlayReady in Edge does not seem to work on a VM or over Remote Desktop.
- - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only.
+ - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only.  (IE support will stop in v2.7: https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka Player team.
  - ⁶: ClearKey is a useful tool for debugging, and does not provide actual content security.
 
