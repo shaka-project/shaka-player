@@ -169,130 +169,128 @@ shaka.ui.TextDisplayer = class {
   }
 
   /**
-   * Returns a safe collection of html elements for display as a single cue.
-   * @param {string} cueBody
-   * @return {Array<HTMLElement>}
+   * Returns tokens describing start/end tags and string content from a cue.
+   *
+   * @param {string} str
+   * @return {!Array<{type: string, value: string}>}
    * @private
    */
-  buildCueElements_(cueBody) {
-    const tokenize = (str) => {
-      if (!str) {
-        return [];
-      }
-
-      const tokens = [];
-
-      let currentValue = '';
-      for (let i = 0; i < str.length; i++) {
-        if (str[i] === '<' && str[i+1] !== ' ') {
-          if (currentValue) {
-            // Flush the current value as we enter tag detection.
-            tokens.push({type: 'text', value: currentValue});
-          }
-          currentValue = '<';
-
-          // Seek to end of tag.
-          i++;
-          let wellTerminated = false;
-          for (;i < str.length; i++) {
-            currentValue += str[i];
-            if (str[i] === '>') {
-              wellTerminated = true;
-              break;
-            }
-          }
-
-          if (!wellTerminated || currentValue.length < 3) {
-            // No termination found, append literal string.
-            tokens.push({type: 'text', value: currentValue});
-          } else {
-            let tagType = 'startTag';
-            currentValue = currentValue.substr(1, currentValue.length - 2);
-            if (currentValue[0] == '/') {
-              currentValue = currentValue.substr(1); // Removes /
-              tagType = 'endTag';
-            }
-            if (currentValue) {
-              tokens.push({type: tagType, value: currentValue});
-            }
-          }
-          currentValue = '';
-        } else {
-          currentValue += str[i];
-        }
-      }
-
-      // Final flush.
-      if (currentValue) {
-        tokens.push({type: 'text', value: currentValue});
-      }
-
-      return tokens;
-    };
-
-    const tokens = tokenize(cueBody);
-    if (!tokens) {
+  tokenizeCueString_(str) {
+    if (!str) {
       return [];
     }
 
-    const buildElement = (tokens) => {
-      const supportedTags = [
-        'i',
-        'b',
-        'u',
-      ];
+    const tokens = [];
 
-      const elements = [];
+    let currentValue = '';
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] === '<' && str[i+1] !== ' ') {
+        if (currentValue) {
+          // Flush the current value as we enter tag detection.
+          tokens.push({type: 'text', value: currentValue});
+        }
+        currentValue = '<';
 
-      // Build a set of root elements from the token collection.
-      const stack = [];
-      for (let i = 0; i < tokens.length; i++) {
-        const currentToken = tokens[i];
-        const supportedTag = supportedTags.includes(currentToken.value);
-        if (currentToken.type === 'text' || !supportedTag) {
-          // Element is a text field or an unsupported tag.
-          const textElement = document.createElement('span');
-          textElement.textContent = currentToken.value;
-          if (stack.length > 0) {
-            // Add to bottom stack element.
-            stack[stack.length - 1].appendChild(textElement);
-          } else {
-            // Add as standalone.
-            elements.push(textElement);
+        // Seek to end of tag.
+        i++;
+        let wellTerminated = false;
+        for (;i < str.length; i++) {
+          currentValue += str[i];
+          if (str[i] === '>') {
+            wellTerminated = true;
+            break;
           }
+        }
+
+        if (!wellTerminated || currentValue.length < 3) {
+          // No termination found, append literal string.
+          tokens.push({type: 'text', value: currentValue});
         } else {
-          if (currentToken.type === 'startTag') {
-            // Add this new element to the stack.
-            stack.push(document.createElement(currentToken.value));
-            if (stack.length > 1) {
-              // Add this item as a child of the element one up the stack.
-              stack[stack.length - 2].appendChild(stack[stack.length - 1]);
+          let tagType = 'startTag';
+          currentValue = currentValue.substr(1, currentValue.length - 2);
+          if (currentValue[0] == '/') {
+            currentValue = currentValue.substr(1); // Removes /
+            tagType = 'endTag';
+          }
+          if (currentValue) {
+            tokens.push({type: tagType, value: currentValue});
+          }
+        }
+        currentValue = '';
+      } else {
+        currentValue += str[i];
+      }
+    }
+
+    // Final flush.
+    if (currentValue) {
+      tokens.push({type: 'text', value: currentValue});
+    }
+
+    return tokens;
+  }
+
+  /**
+   * Returns a safe collection of html elements for display as a single cue.
+   *
+   * @param {!Array<{type: string, value: string}>} tokens
+   * @return {!Array<HTMLElement>}
+   * @private
+   */
+  buildCueElements_(tokens) {
+    const supportedTags = [
+      'i',
+      'b',
+      'u',
+    ];
+
+    const elements = [];
+
+    // Build a set of root elements from the token collection.
+    const stack = [];
+    for (const currentToken of tokens) {
+      const supportedTag = supportedTags.includes(currentToken.value);
+      if (currentToken.type === 'text' || !supportedTag) {
+        // Element is a text field or an unsupported tag.
+        const textElement = document.createElement('span');
+        textElement.textContent = currentToken.value;
+        if (stack.length > 0) {
+          // Add to bottom stack element.
+          stack[stack.length - 1].appendChild(textElement);
+        } else {
+          // Add as standalone.
+          elements.push(textElement);
+        }
+      } else {
+        if (currentToken.type === 'startTag') {
+          // Add this new element to the stack.
+          stack.push(document.createElement(currentToken.value));
+          if (stack.length > 1) {
+            // Add this item as a child of the element one up the stack.
+            stack[stack.length - 2].appendChild(stack[stack.length - 1]);
+          }
+        } else if (currentToken.type === 'endTag') {
+          // Check to see if this closes the last opened tag.
+          const bottomName = stack[stack.length - 1].tagName.toLowerCase();
+          if (bottomName === currentToken.value.toLowerCase()) {
+            // Close this tag off the stack.
+            const v = stack.pop();
+            if (stack.length === 0) {
+              // Stack is empty, push root of this tree into elements.
+              elements.push(v);
             }
-          } else if (currentToken.type === 'endTag') {
-            // Check to see if this closes the last opened tag.
-            const bottomName = stack[stack.length - 1].tagName.toLowerCase();
-            if (bottomName === currentToken.value.toLowerCase()) {
-              // Close this tag off the stack.
-              const v = stack.pop();
-              if (stack.length === 0) {
-                // Stack is empty, push root of this tree into elements.
-                elements.push(v);
-              }
-            } else {
-              // Input syntax error.
-            }
+          } else {
+            // Input syntax error.
           }
         }
       }
-      // If we have unclosed tags, add the unclosed elements.
-      if (stack.length > 0) {
-        elements.push(stack[0]);
-      }
+    }
+    // If we have unclosed tags, add the unclosed elements.
+    if (stack.length > 0) {
+      elements.push(stack[0]);
+    }
 
-      return elements;
-    };
-
-    return buildElement(tokens);
+    return elements;
   }
 
   /**
@@ -359,11 +357,9 @@ shaka.ui.TextDisplayer = class {
     captionsStyle.direction = cue.direction;
 
     // Add cue content
-    const content = this.buildCueElements_(cue.payload);
-    if (content) {
-      for (let i = 0; i < content.length; i++) {
-        captions.appendChild(content[i]);
-      }
+    const tokens = this.tokenizeCueString_(cue.payload);
+    for (const element of this.buildCueElements_(tokens)) {
+      captions.appendChild(element);
     }
 
     if (cue.backgroundImage) {
