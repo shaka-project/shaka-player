@@ -174,7 +174,7 @@ shaka.ui.TextDisplayer = class {
    * @return {Array<HTMLElement>}
    * @private
    */
-  buildCueElements(cueBody) {
+  buildCueElements_(cueBody) {
     const tokenize = (str) => {
       if (!str) {
         return [];
@@ -242,16 +242,16 @@ shaka.ui.TextDisplayer = class {
         'u',
       ];
 
-      let elements = [];
+      const elements = [];
 
       // Build a set of root elements from the token collection.
-      let stack = [];
+      const stack = [];
       for (let i = 0; i < tokens.length; i++) {
         const currentToken = tokens[i];
         const supportedTag = supportedTags.includes(currentToken.value);
         if (currentToken.type === 'text' || !supportedTag) {
           // Element is a text field or an unsupported tag.
-          let textElement = document.createElement('span');
+          const textElement = document.createElement('span');
           textElement.textContent = currentToken.value;
           if (stack.length > 0) {
             // Add to bottom stack element.
@@ -270,11 +270,11 @@ shaka.ui.TextDisplayer = class {
             }
           } else if (currentToken.type === 'endTag') {
             // Check to see if this closes the last opened tag.
-            let bottomName = stack[stack.length - 1].tagName.toLowerCase();
+            const bottomName = stack[stack.length - 1].tagName.toLowerCase();
             if (bottomName === currentToken.value.toLowerCase()) {
               // Close this tag off the stack.
-              let v = stack.pop();
-              if(stack.length === 0) {
+              const v = stack.pop();
+              if (stack.length === 0) {
                 // Stack is empty, push root of this tree into elements.
                 elements.push(v);
               }
@@ -359,7 +359,7 @@ shaka.ui.TextDisplayer = class {
     captionsStyle.direction = cue.direction;
 
     // Add cue content
-    const content = this.buildCueElements(cue.payload);
+    const content = this.buildCueElements_(cue.payload);
     if (content) {
       for (let i = 0; i < content.length; i++) {
         captions.appendChild(content[i]);
