@@ -137,13 +137,10 @@ shakaDemo.Main = class {
 
     if (navigator.serviceWorker) {
       console.debug('Registering service worker.');
-      try {
-        const registration =
-            await navigator.serviceWorker.register('service_worker.js');
-        console.debug('Service worker registered!', registration.scope);
-      } catch (error) {
-        console.error('Service worker registration failed!', error);
-      }
+      // NOTE: This can sometimes hang on iOS 12, so let's not wait for it to
+      // complete before setting up the app.  We don't even use the Promise
+      // result or react to the registration failure except to log it.
+      navigator.serviceWorker.register('service_worker.js');
     }
 
     // Optionally enter noinput mode. This has to happen before setting up the
