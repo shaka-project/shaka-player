@@ -26,7 +26,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 
 ## Platform and browser support matrix
 
-|Browser    |Windows   |Mac      |Linux    |Android  |iOS       |ChromeOS|Other|
+|Browser    |Windows   |Mac      |Linux    |Android  |iOS >= 12 |ChromeOS|Other|
 |:---------:|:--------:|:-------:|:-------:|:-------:|:--------:|:------:|:---:|
 |Chrome¹    |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Y**   | -   |
 |Firefox¹   |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -      | -   |
@@ -39,9 +39,8 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Tizen TV³  | -        | -       | -       | -       | -        | -      |**Y**|
 
 NOTES:
- - ¹: Only the latest stable version is tested and supported. Older releases may
-   still be usable, and we will accept pull requests for them, but they will not
-   be officially tested or supported.
+ - ¹: On macOS, only Safari 11+ is supported.  On iOS, only iOS 12+ is
+   supported.  Older versions will be rejected.
  - ²: The latest stable Chromecast firmware is tested. Both sender and receiver
    can be implemented with Shaka Player.
  - ³: Tizen 2017 model is actively tested and supported by the Shaka Player
@@ -53,9 +52,9 @@ NOTES:
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.
 
-We support iOS through Apple's native HLS player.  We provide the same top-level
-API, but we just set the video's `src` element to the manifest/media.  So we are
-dependent on the browser supporting the manifests.
+We support iOS 12+ through Apple's native HLS player.  We provide the same
+top-level API, but we just set the video's `src` element to the manifest/media.
+So we are dependent on the browser supporting the manifests.
 
 ### Shaka Player Embedded (for native iOS)
 
@@ -117,7 +116,7 @@ HLS features supported:
    separately included)
  - WebVTT and TTML
  - CEA-608/708 captions
- - Encrypted content with FairPlay (Safari on macOS and iOS only)
+ - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
 
 HLS features **not** supported:
  - Encrypted content with PlayReady:

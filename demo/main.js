@@ -113,6 +113,10 @@ shakaDemo.Main = class {
                  'platform-and-browser-support-matrix';
     this.handleError_(severity, message, href);
 
+    const errorCloseButton =
+        document.getElementById('error-display-close-button');
+    errorCloseButton.style.display = 'none';
+
     // Update the componentHandler, to account for any new MDL elements added.
     componentHandler.upgradeDom();
 
