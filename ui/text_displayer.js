@@ -260,6 +260,7 @@ shaka.ui.TextDisplayer = class {
       captionsStyle.justifyContent = 'flex-end';
     }
     if (cue.nestedCues.length) {
+      captionsStyle.alignItems = 'center';
       captionsStyle.display = 'flex';
       captionsStyle.flexDirection = 'column';
       captionsStyle.margin = '0';
