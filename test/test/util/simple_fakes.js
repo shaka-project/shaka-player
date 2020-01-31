@@ -69,6 +69,9 @@ shaka.test.FakeAbrManager = class {
     });
 
     /** @type {!jasmine.Spy} */
+    this.playbackRateChanged = jasmine.createSpy('playbackRateChanged');
+
+    /** @type {!jasmine.Spy} */
     this.configure = jasmine.createSpy('configure');
   }
 };

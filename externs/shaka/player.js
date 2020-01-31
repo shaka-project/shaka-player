@@ -93,6 +93,7 @@ shaka.extern.StateChange;
  *   The height of the current video track.
  * @property {number} streamBandwidth
  *   The bandwidth required for the current streams (total, in bit/sec).
+ *   It takes into account the playbackrate.
  *
  * @property {number} decodedFrames
  *   The total number of frames decoded by the Player.  This may be
