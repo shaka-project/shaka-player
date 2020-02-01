@@ -249,9 +249,8 @@ shaka.ui.TextDisplayer = class {
     // Build a set of root elements from the token collection.
     const stack = [];
     for (const currentToken of tokens) {
-      const supportedTag = supportedTags.includes(currentToken.value);
-      if (currentToken.type === 'text' || !supportedTag) {
-        // Element is a text field or an unsupported tag.
+      if (currentToken.type === 'text') {
+        // Element is a text field.
         const textElement = document.createElement('span');
         textElement.textContent = currentToken.value;
         if (stack.length > 0) {
@@ -261,7 +260,8 @@ shaka.ui.TextDisplayer = class {
           // Add as standalone.
           elements.push(textElement);
         }
-      } else {
+      } else if (supportedTags.includes(currentToken.value)) {
+        // Element is a supported tag.
         if (currentToken.type === 'startTag') {
           // Add this new element to the stack.
           stack.push(document.createElement(currentToken.value));
