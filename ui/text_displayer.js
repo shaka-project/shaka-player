@@ -287,6 +287,8 @@ shaka.ui.TextDisplayer = class {
     }
     // If we have unclosed tags, add the unclosed elements.
     if (stack.length > 0) {
+      // Since the elements in the stack are already nested inside each other,
+      // we only need to push stack[0].
       elements.push(stack[0]);
     }
 
