@@ -16,6 +16,7 @@
 +../../ui/fullscreen_button.js
 +../../ui/language_utils.js
 +../../ui/localization.js
++../../ui/loop_button.js
 +../../ui/mute_button.js
 +../../ui/overflow_menu.js
 +../../ui/pip_button.js

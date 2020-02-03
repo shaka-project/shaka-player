@@ -30,5 +30,8 @@
   "AD_PROGRESS": "[AD_ON] of [NUM_ADS]",
   "SKIP_AD": "Skip Ad",
   "AD_DURATION": "Ad duration",
-  "AD_TIME": "Ad: [AD_TIME]"
+  "AD_TIME": "Ad: [AD_TIME]",
+  "LOOP": "Loop",
+  "ENTER_LOOP_MODE": "Enter loop mode",
+  "EXIT_LOOP_MODE": "Exit loop mode"
 }

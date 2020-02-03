@@ -136,5 +136,17 @@
   "AD_TIME": {
     "message": "Ad: [AD_TIME:0:05/0:10]",
     "description": "The text content of a label that shows how much time is left in the current ad."
-  }
+  },
+  "LOOP": {
+    "message": "Loop",
+    "description": "The text content of a name label for the loop button."
+  },
+  "ENTER_LOOP_MODE": {
+    "message": "Loop the current video",
+    "description": "Label for a button that controls the loop mode of a video player. This mode will loop (play over and over) currently selected video."
+  },
+  "EXIT_LOOP_MODE": {
+    "message": "Stop looping the current video",
+    "description": "Label for a button that exits the loop mode of a video player."
+  },
 }
