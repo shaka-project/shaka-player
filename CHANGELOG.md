@@ -1,3 +1,29 @@
+## 2.5.9 (2020-02-04)
+
+Bugfixes:
+  - Fix PiP polyfill for iOS
+    - https://github.com/google/shaka-player/issues/2199
+  - Ban iOS < 12
+    - https://github.com/google/shaka-player/issues/1920
+  - Work around service worker registration hang on iOS
+  - Fix display of selected language in UI
+    - https://github.com/google/shaka-player/issues/2353
+  - Fix race condition on HLS parser shutdown
+    - https://github.com/google/shaka-player/issues/2138
+  - Fix StringUtils on Xbox One
+    - https://github.com/google/shaka-player/issues/2186
+  - Fix selecting audio track by role when video tracks contain the same role
+    - https://github.com/google/shaka-player/issues/2346
+  - Fix skipping of raw format streams in HLS
+  - Fix iPad 13+ detection
+    - https://github.com/google/shaka-player/issues/2360
+  - Fix exception thrown for Chrome & Firefox on iOS
+
+Docs:
+  - Fix typo in fairplay tutorial
+    - https://github.com/google/shaka-player/issues/2344
+
+
 ## 2.5.8 (2020-01-16)
 
 Bugfixes:
