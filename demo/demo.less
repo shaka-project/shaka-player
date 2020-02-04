@@ -64,6 +64,12 @@ html, body {
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
 }
 
+/* Change the default opacity of the ripple container, to get around an iOS bug.
+ * See: https://github.com/google/material-design-lite/issues/5281 */
+.mdl-ripple {
+  opacity: 0.001;
+}
+
 /* Give the FAB a drop shadow, that expands a little bit when moused over. */
 .mdl-button--fab {
   filter: drop-shadow(0 2px 5px #333);
