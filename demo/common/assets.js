@@ -576,6 +576,7 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://akamai-axtest.akamaized.net/routes/lapd-v1-acceptance/www_c4/Manifest.mpd',
       /* source= */ shakaAssets.Source.AXINOM)
       // Disabled pending resolution of https://github.com/Axinom/public-test-vectors/issues/16
+      // Disabled pending resolution of https://github.com/Axinom/public-test-vectors/issues/17
       .markAsDisabled()
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
@@ -585,6 +586,8 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/axinom_test.png',
       /* manifestUri= */ 'https://akamai-axtest.akamaized.net/routes/lapd-v1-acceptance/www_c4/Manifest.m3u8',
       /* source= */ shakaAssets.Source.AXINOM)
+      // Disabled pending resolution of https://github.com/Axinom/public-test-vectors/issues/17
+      .markAsDisabled()
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),
