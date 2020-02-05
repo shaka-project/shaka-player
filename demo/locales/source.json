@@ -131,10 +131,6 @@
     "message": "[PROPER_NAME:DASH-IF]",
     "description": "Text that describes an asset that comes from the Dash Industry Forum asset library."
   },
-  "DEMO_WOWZA": {
-    "message": "[PROPER_NAME:Wowza]",
-    "description": "Text that describes an asset that comes from the Wowza asset library."
-  },
   "DEMO_BITCODIN": {
     "message": "[PROPER_NAME:Bitcodin]",
     "description": "Text that describes an asset that comes from the Bitcodin asset library."
