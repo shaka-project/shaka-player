@@ -36,7 +36,6 @@ shakaAssets.Source = {
   AXINOM: 'Axinom',
   UNIFIED_STREAMING: 'Unified Streaming',
   DASH_IF: 'DASH-IF',
-  WOWZA: 'Wowza',
   BITCODIN: 'Bitcodin',
   NIMBLE_STREAMER: 'Nimble Streamer',
   AZURE_MEDIA_SERVICES: 'Azure Media Services',
@@ -705,18 +704,6 @@ shakaAssets.testAssets = [
     .addFeature(shakaAssets.Feature.SUBTITLES)
     .addFeature(shakaAssets.Feature.MP4)
     .addFeature(shakaAssets.Feature.TTML),
-  // }}}
-
-  // Wowza assets {{{
-  // Src: http://www.dash-player.com/demo/streaming-server-and-encoder-support/
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Big Buck Bunny (Live)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
-      /* manifestUri= */ 'https://wowzaec2demo.streamlock.net/live/bigbuckbunny/manifest_mpm4sav_mvtime.mpd',
-      /* source= */ shakaAssets.Source.WOWZA)
-    .addFeature(shakaAssets.Feature.DASH)
-    .addFeature(shakaAssets.Feature.LIVE)
-    .addFeature(shakaAssets.Feature.MP4),
   // }}}
 
   // bitcodin assets {{{
