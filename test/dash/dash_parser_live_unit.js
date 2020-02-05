@@ -1279,8 +1279,8 @@ describe('DashParser Live', () => {
 
     // Check for the 2 initial segments we're expecting.
     ManifestParser.verifySegmentIndex(stream, [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 0, 2, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 1, 2, 4, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 2, 4, originalUri),
     ]);
 
     // Just over 10 seconds after the presentation started, we should now have
@@ -1291,11 +1291,11 @@ describe('DashParser Live', () => {
     await shaka.test.Util.delay(2.1);  // A little longer than the segments are.
 
     ManifestParser.verifySegmentIndex(stream, [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 0, 2, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 1, 2, 4, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 2, 4, 6, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 3, 6, 8, originalUri),
-      shaka.test.ManifestParser.makeReference('s5.mp4', 4, 8, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 2, 4, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 4, 6, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 6, 8, originalUri),
+      shaka.test.ManifestParser.makeReference('s5.mp4', 5, 8, 10, originalUri),
     ]);
   });
 });

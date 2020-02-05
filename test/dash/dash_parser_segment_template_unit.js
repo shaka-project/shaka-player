@@ -54,12 +54,12 @@ describe('DashParser SegmentTemplate', () => {
         '  duration="10" />',
       ], /* duration= */ 60);
       const references = [
-        ManifestParser.makeReference('s1.mp4', 0, 0, 10, baseUri),
-        ManifestParser.makeReference('s2.mp4', 1, 10, 20, baseUri),
-        ManifestParser.makeReference('s3.mp4', 2, 20, 30, baseUri),
-        ManifestParser.makeReference('s4.mp4', 3, 30, 40, baseUri),
-        ManifestParser.makeReference('s5.mp4', 4, 40, 50, baseUri),
-        ManifestParser.makeReference('s6.mp4', 5, 50, 60, baseUri),
+        ManifestParser.makeReference('s1.mp4', 1, 0, 10, baseUri),
+        ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
+        ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
+        ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
+        ManifestParser.makeReference('s5.mp4', 5, 40, 50, baseUri),
+        ManifestParser.makeReference('s6.mp4', 6, 50, 60, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -70,9 +70,9 @@ describe('DashParser SegmentTemplate', () => {
         '   duration="10" />',
       ], /* duration= */ 30);
       const references = [
-        ManifestParser.makeReference('s10.mp4', 0, 0, 10, baseUri),
-        ManifestParser.makeReference('s11.mp4', 1, 10, 20, baseUri),
-        ManifestParser.makeReference('s12.mp4', 2, 20, 30, baseUri),
+        ManifestParser.makeReference('s10.mp4', 10, 0, 10, baseUri),
+        ManifestParser.makeReference('s11.mp4', 11, 10, 20, baseUri),
+        ManifestParser.makeReference('s12.mp4', 12, 20, 30, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -94,15 +94,15 @@ describe('DashParser SegmentTemplate', () => {
       await stream.createSegmentIndex();
 
       const expectedRef1 = ManifestParser.makeReference(
-          's1.mp4', 0, 40, 50, baseUri);
+          's1.mp4', 1, 40, 50, baseUri);
       expectedRef1.timestampOffset = -10;
 
       const expectedRef2 = ManifestParser.makeReference(
-          's2.mp4', 1, 50, 60, baseUri);
+          's2.mp4', 2, 50, 60, baseUri);
       expectedRef2.timestampOffset = -10;
 
-      expect(stream.segmentIndex.get(0)).toEqual(expectedRef1);
-      expect(stream.segmentIndex.get(1)).toEqual(expectedRef2);
+      expect(stream.segmentIndex.get(1)).toEqual(expectedRef1);
+      expect(stream.segmentIndex.get(2)).toEqual(expectedRef2);
     });
 
     it('handles segments larger than the period', async () => {
@@ -113,7 +113,7 @@ describe('DashParser SegmentTemplate', () => {
       // Although the segment is 60 seconds long, it is clipped to the period
       // duration of 30 seconds.
       const references = [
-        ManifestParser.makeReference('s1.mp4', 0, 0, 30, baseUri),
+        ManifestParser.makeReference('s1.mp4', 1, 0, 30, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -321,9 +321,9 @@ describe('DashParser SegmentTemplate', () => {
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
       ], /* duration= */ 30);
       const references = [
-        ManifestParser.makeReference('1-0-500.mp4', 0, 0, 10, baseUri),
-        ManifestParser.makeReference('2-10-500.mp4', 1, 10, 20, baseUri),
-        ManifestParser.makeReference('3-20-500.mp4', 2, 20, 30, baseUri),
+        ManifestParser.makeReference('1-0-500.mp4', 1, 0, 10, baseUri),
+        ManifestParser.makeReference('2-10-500.mp4', 2, 10, 20, baseUri),
+        ManifestParser.makeReference('3-20-500.mp4', 3, 20, 30, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -334,9 +334,9 @@ describe('DashParser SegmentTemplate', () => {
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
       ], /* duration= */ 30);
       const references = [
-        ManifestParser.makeReference('10-0-500.mp4', 0, 0, 10, baseUri),
-        ManifestParser.makeReference('11-10-500.mp4', 1, 10, 20, baseUri),
-        ManifestParser.makeReference('12-20-500.mp4', 2, 20, 30, baseUri),
+        ManifestParser.makeReference('10-0-500.mp4', 10, 0, 10, baseUri),
+        ManifestParser.makeReference('11-10-500.mp4', 11, 10, 20, baseUri),
+        ManifestParser.makeReference('12-20-500.mp4', 12, 20, 30, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -347,9 +347,9 @@ describe('DashParser SegmentTemplate', () => {
         '    media="$Number$-$Time$-$Bandwidth$.mp4" />',
       ], /* duration= */ 3);
       const references = [
-        ManifestParser.makeReference('1-0-500.mp4', 0, 0, 1, baseUri),
-        ManifestParser.makeReference('2-9000-500.mp4', 1, 1, 2, baseUri),
-        ManifestParser.makeReference('3-18000-500.mp4', 2, 2, 3, baseUri),
+        ManifestParser.makeReference('1-0-500.mp4', 1, 0, 1, baseUri),
+        ManifestParser.makeReference('2-9000-500.mp4', 2, 1, 2, baseUri),
+        ManifestParser.makeReference('3-18000-500.mp4', 3, 2, 3, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -381,24 +381,24 @@ describe('DashParser SegmentTemplate', () => {
       await variants[1].video.createSegmentIndex();
       await variants[2].video.createSegmentIndex();
 
-      expect(variants[0].video.segmentIndex.find(0)).toBe(0);
-      expect(variants[0].video.segmentIndex.get(0)).toEqual(
-          ManifestParser.makeReference('1-0-100.mp4', 0, 0, 10, baseUri));
-      expect(variants[0].video.segmentIndex.find(12)).toBe(1);
+      expect(variants[0].video.segmentIndex.find(0)).toBe(1);
       expect(variants[0].video.segmentIndex.get(1)).toEqual(
-          ManifestParser.makeReference('2-10-100.mp4', 1, 10, 20, baseUri));
-      expect(variants[1].video.segmentIndex.find(0)).toBe(0);
-      expect(variants[1].video.segmentIndex.get(0)).toEqual(
-          ManifestParser.makeReference('1-0-200.mp4', 0, 0, 10, baseUri));
-      expect(variants[1].video.segmentIndex.find(12)).toBe(1);
+          ManifestParser.makeReference('1-0-100.mp4', 1, 0, 10, baseUri));
+      expect(variants[0].video.segmentIndex.find(12)).toBe(2);
+      expect(variants[0].video.segmentIndex.get(2)).toEqual(
+          ManifestParser.makeReference('2-10-100.mp4', 2, 10, 20, baseUri));
+      expect(variants[1].video.segmentIndex.find(0)).toBe(1);
       expect(variants[1].video.segmentIndex.get(1)).toEqual(
-          ManifestParser.makeReference('2-10-200.mp4', 1, 10, 20, baseUri));
-      expect(variants[2].video.segmentIndex.find(0)).toBe(0);
-      expect(variants[2].video.segmentIndex.get(0)).toEqual(
-          ManifestParser.makeReference('1-0-300.mp4', 0, 0, 10, baseUri));
-      expect(variants[2].video.segmentIndex.find(12)).toBe(1);
+          ManifestParser.makeReference('1-0-200.mp4', 1, 0, 10, baseUri));
+      expect(variants[1].video.segmentIndex.find(12)).toBe(2);
+      expect(variants[1].video.segmentIndex.get(2)).toEqual(
+          ManifestParser.makeReference('2-10-200.mp4', 2, 10, 20, baseUri));
+      expect(variants[2].video.segmentIndex.find(0)).toBe(1);
       expect(variants[2].video.segmentIndex.get(1)).toEqual(
-          ManifestParser.makeReference('2-10-300.mp4', 1, 10, 20, baseUri));
+          ManifestParser.makeReference('1-0-300.mp4', 1, 0, 10, baseUri));
+      expect(variants[2].video.segmentIndex.find(12)).toBe(2);
+      expect(variants[2].video.segmentIndex.get(2)).toEqual(
+          ManifestParser.makeReference('2-10-300.mp4', 2, 10, 20, baseUri));
     });
 
     it('create correct Uris when multiple representations', async () => {
