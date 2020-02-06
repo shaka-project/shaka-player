@@ -1167,7 +1167,7 @@ describe('HlsParser', function() {
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
       'URI="text"\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,stpp.TTML.im1t",',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,stpp.ttml.im1t",',
       'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
       'video\n',
     ].join('');
@@ -1188,7 +1188,7 @@ describe('HlsParser', function() {
                 .addPartialStream(ContentType.VIDEO)
               .addPartialStream(ContentType.TEXT)
                 .language('en')
-                .mime('application/mp4', 'stpp.TTML.im1t')
+                .mime('application/mp4', 'stpp.ttml.im1t')
           .build();
 
     fakeNetEngine
