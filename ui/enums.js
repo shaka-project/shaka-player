@@ -33,6 +33,7 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'REWIND': 'fast_rewind',
   'FAST_FORWARD': 'fast_forward',
   'PLAY': 'play_arrow',
+  'PLAYBACK_RATE': 'slow_motion_video',
   'PAUSE': 'pause',
   'LOOP': 'loop',
 };

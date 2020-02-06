@@ -93,6 +93,7 @@ describe('UI Customization', () => {
     confirmLowPosition('shaka-resolutions');
     confirmLowPosition('shaka-audio-languages');
     confirmLowPosition('shaka-text-languages');
+    confirmLowPosition('shaka-playback-rates');
   });
 
   it('controls are created in specified order', () => {

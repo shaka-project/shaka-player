@@ -196,6 +196,7 @@ shaka.ui.Overlay = class {
         'language',
         'picture_in_picture',
         'cast',
+        'playback_rate',
       ],
       addSeekBar: true,
       addBigPlayButton: false,

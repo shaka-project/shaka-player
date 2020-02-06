@@ -149,4 +149,8 @@
     "message": "Stop looping the current video",
     "description": "Label for a button that exits the loop mode of a video player."
   },
+  "PLAYBACK_RATE": {
+    "message": "Playback speed",
+    "description": "Label for a button used to navigate to a submenu to choose the playback speed in the video player."
+  }
 }

@@ -25,6 +25,7 @@
   "ENTER_PICTURE_IN_PICTURE": "Enter Picture-in-Picture",
   "EXIT_PICTURE_IN_PICTURE": "Exit Picture-in-Picture",
   "PICTURE_IN_PICTURE": "Picture-in-Picture",
+  "PLAYBACK_RATE": "Playback Speed",
   "ON": "On",
   "OFF": "Off",
   "AD_PROGRESS": "[AD_ON] of [NUM_ADS]",
