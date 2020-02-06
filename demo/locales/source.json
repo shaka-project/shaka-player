@@ -311,6 +311,10 @@
     "message": "Custom License Certificate URL",
     "description": "The label on a field that allows users to provide a license certificate for a custom asset."
   },
+  "DEMO_LOG_LICENSE_EXCHANGE": {
+    "message": "Log license exchange data",
+    "description": "The label on a field that allows users to select whether to log data about the license exchange"
+  },
   "DEMO_DRM_SYSTEM": {
     "message": "Custom [JARGON:DRM] System",
     "description": "The label on a field that allows users to provide a Digital Rights Management (DRM) system identifier for a custom asset."

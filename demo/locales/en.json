@@ -77,6 +77,7 @@
   "DEMO_MANIFEST_URL_ERROR": "Must have a manifest URL.",
   "DEMO_LICENSE_SERVER_URL": "Custom License Server URL",
   "DEMO_LICENSE_CERTIFICATE_URL": "Custom License Certificate URL",
+  "DEMO_LOG_LICENSE_EXCHANGE": "Log license exchange data",
   "DEMO_DRM_SYSTEM": "Custom DRM System",
   "DEMO_NAME": "Name",
   "DEMO_NAME_ERROR": "Must be a unique name.",
