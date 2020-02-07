@@ -28,6 +28,38 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {!google.ima.AdsRequest} imaRequest
    */
   requestClientSideAds(imaRequest) {}
+
+  /**
+   * @param {!HTMLElement} adContainer
+   * @param {!HTMLMediaElement} video
+   * @param {!shaka.Player} player
+   */
+  initServerSide(adContainer, video, player) {}
+
+  /**
+   * @param {Object} adTagParameters
+   * @param {string} apiKey
+   * @param {string} authToken
+   * @param {string} contentSourceId
+   * @param {string} streamActivityMonitorId
+   * @param {string} videoId
+   * @param {string} backupUrl
+   */
+  loadServerSideVodStream(
+      adTagParameters, apiKey, authToken, contentSourceId,
+      streamActivityMonitorId, videoId, backupUrl) {}
+
+  /**
+   * @param {Object} adTagParameters
+   * @param {string} apiKey
+   * @param {string} assetKey
+   * @param {string} authToken
+   * @param {string} streamActivityMonitorId
+   * @param {string} backupUrl
+   */
+  loadServerSideLiveStream(
+      adTagParameters, apiKey, assetKey, authToken, streamActivityMonitorId,
+      backupUrl) {}
 };
 
 
