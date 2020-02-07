@@ -90,12 +90,19 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
         'this.ad should exist at this point');
 
     const secondsLeft = Math.round(this.ad.getRemainingTime());
+    const adDuration = this.ad.getDuration();
+    if (secondsLeft == -1 || adDuration == -1) {
+      // Not enough information about the ad. Don't show the
+      // counter just yet.
+      return;
+    }
+
     if (secondsLeft > 0) {
-      const timePassed = this.ad.getDuration() - secondsLeft;
+      const timePassed = adDuration - secondsLeft;
       const timePassedStr =
           shaka.ui.Utils.buildTimeString(timePassed, /* showHour= */ false);
       const adLength = shaka.ui.Utils.buildTimeString(
-          this.ad.getDuration(), /* showHour= */ false);
+          adDuration, /* showHour= */ false);
       const timeString = timePassedStr + ' / ' + adLength;
 
       const adsInAdPod = this.ad.getSequenceLength();

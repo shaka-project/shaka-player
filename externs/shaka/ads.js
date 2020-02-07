@@ -59,8 +59,8 @@ shaka.extern.IAdManager = class extends EventTarget {
 
   /**
    * @param {!google.ima.dai.api.StreamRequest} imaRequest
-   * @param {string} backupUrl
-   * @param {number} startTime
+   * @param {string=} backupUrl
+   * @param {?number=} startTime
    */
   requestServerSideStream(imaRequest, backupUrl, startTime) {}
 
