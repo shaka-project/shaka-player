@@ -25,7 +25,7 @@ goog.provide('shaka.test.CannedIDB');
  * @example
  *   shaka.test = shaka.test || {};
  *   s = document.createElement('script');
- *   s.src = '/shaka/test/test/util/canned_idb.js';
+ *   s.src = '../test/test/util/canned_idb.js';
  *   document.head.appendChild(s);
  *   dump = await shaka.test.CannedIDB.dumpJSON('shaka_offline_db', true);
  */
