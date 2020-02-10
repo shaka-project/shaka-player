@@ -60,6 +60,11 @@ shaka.extern.IAdManager = class extends EventTarget {
   loadServerSideLiveStream(
       adTagParameters, apiKey, assetKey, authToken, streamActivityMonitorId,
       backupUrl) {}
+
+  /**
+   * @param {Object} adTagParameters
+   */
+  replaceServerSideAdTagParameters(adTagParameters) {}
 };
 
 
