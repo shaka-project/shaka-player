@@ -240,6 +240,9 @@ google.ima.dai.api.StreamManager = class {
   /** @param {Object} metadata */
   onTimedMetadata(metadata) {}
 
+  /** @param {number} streamTime */
+  previousCuePointForStreamTime(streamTime) {}
+
   /**
    * @param {string} type
    * @param {Uint8Array|string} data
@@ -257,6 +260,9 @@ google.ima.dai.api.StreamManager = class {
 
   /** @param {HTMLElement} clickElement */
   setClickElement(clickElement) {}
+
+  /** @param {number} contentTime */
+  streamTimeForContentTime(contentTime) {}
 
   /** @override */
   addEventListener() {}
