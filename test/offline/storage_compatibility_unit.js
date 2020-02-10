@@ -76,6 +76,7 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
 
   function makeTests(metadata) {
     const CannedIDB = shaka.test.CannedIDB;
+    const ContentType = shaka.util.ManifestParserUtils.ContentType;
     const Util = shaka.test.Util;
 
     /** @type {?shaka.extern.StorageCell} */
@@ -244,7 +245,80 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
       await checkMissingManifests(manifestKeys);
     });
 
-    // TODO: Add tests for converted manifest output.
+    it('correctly converts to the current manifest format', async () => {
+      // There should be one manifest.
+      const manifestDb = (await cell.getManifests([metadata.manifestKey]))[0];
+      const converter = new shaka.offline.ManifestConverter(
+          'mechanism', 'cell');
+      const actual = converter.fromManifestDB(manifestDb);
+
+      const expected = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.anyTimeline();
+        manifest.minBufferTime = 2;
+
+        manifest.addPeriod(0, (period) => {
+          period.addPartialVariant((variant) => {
+            variant.addPartialStream(ContentType.VIDEO, (stream) => {
+              stream.frameRate = 29.97;
+              stream.mime('video/webm', 'vp9');
+              stream.size(640, 480);
+            });
+          });
+        });
+
+        manifest.addPeriod(Util.closeTo(2.06874), (period) => {
+          period.addPartialVariant((variant) => {
+            variant.addPartialStream(ContentType.VIDEO, (stream) => {
+              stream.frameRate = 29.97;
+              stream.mime('video/webm', 'vp9');
+              stream.size(640, 480);
+            });
+          });
+        });
+
+        manifest.addPeriod(Util.closeTo(4.20413), (period) => {
+          period.addPartialVariant((variant) => {
+            variant.addPartialStream(ContentType.VIDEO, (stream) => {
+              stream.frameRate = 3000 / 99;
+              stream.mime('video/webm', 'vp9');
+              stream.size(320, 240);
+            });
+          });
+        });
+      });
+
+      expect(actual).toEqual(expected);
+
+      const segmentIndex0 = actual.periods[0].variants[0].video.segmentIndex;
+      const segmentIndex1 = actual.periods[1].variants[0].video.segmentIndex;
+      const segmentIndex2 = actual.periods[2].variants[0].video.segmentIndex;
+
+      const segment0 = segmentIndex0.get(0);
+      const segment1 = segmentIndex1.get(0);
+      const segment2 = segmentIndex2.get(0);
+
+      expect(segment0).toEqual(jasmine.objectContaining({
+        startTime: 0,
+        endTime: Util.closeTo(2.06874),
+        timestampOffset: 0,
+        appendWindowStart: 0,
+        appendWindowEnd: Util.closeTo(2.06874),
+      }));
+      expect(segment1).toEqual(jasmine.objectContaining({
+        startTime: Util.closeTo(2.06874),
+        endTime: Util.closeTo(4.20413),
+        timestampOffset: Util.closeTo(2.06874),
+        appendWindowStart: Util.closeTo(2.06874),
+        appendWindowEnd: Util.closeTo(4.20413),
+      }));
+      expect(segment2).toEqual(jasmine.objectContaining({
+        startTime: Util.closeTo(4.20413),
+        endTime: Util.closeTo(4.904831),
+        timestampOffset: Util.closeTo(4.20413),
+        appendWindowStart: Util.closeTo(4.20413),
+        appendWindowEnd: Util.closeTo(4.904831),
+      }));
+    });
 
     /**
      * Get the keys for each segment. This will include the init segments.

@@ -90,15 +90,16 @@ shaka.test.Util = class {
   /**
    * Creates a custom matcher object that matches a number that is close to the
    * given value.
+   *
    * @param {number} val
-   * @return {!Object}
+   * @return {number}
    */
   static closeTo(val) {
     const E = 0.000001;
-    return {
+    return /** @type {number} */(/** @type {?} */({
       asymmetricMatch: (other) => other >= val - E && other <= val + E,
       jasmineToString: () => '<closeTo: ' + val + '>',
-    };
+    }));
   }
 
   /**
