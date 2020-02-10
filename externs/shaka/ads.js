@@ -11,7 +11,8 @@
 /**
  * @typedef {{
  *   started: number,
- *   playedCompletely: number
+ *   playedCompletely: number,
+ *   skipped: number
  * }}
  *
  * @description
@@ -21,6 +22,8 @@
  *   The number of ads started.
  * @property {number} playedCompletely
  *   The number of ads played completely.
+ * @property {number} skipped
+ *   The number of ads skipped.
  * @exportDoc
  */
 shaka.extern.AdsStats;
