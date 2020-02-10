@@ -171,28 +171,28 @@ describe('VttTextParser', () => {
   });
 
   it('rejects invalid time values', () => {
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+    verifyHelper([],
         'WEBVTT\n\n00.020    --> 0:00.040\nTest',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+    verifyHelper([],
         'WEBVTT\n\n0:00.020  --> 0:00.040\nTest',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+    verifyHelper([],
         'WEBVTT\n\n00:00.20  --> 0:00.040\nTest',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+    verifyHelper([],
         'WEBVTT\n\n00:100.20 --> 0:00.040\nTest',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+    verifyHelper([],
         'WEBVTT\n\n00:00.020 --> 0:00.040\nTest',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+    verifyHelper([],
         'WEBVTT\n\n00:00:00:00.020 --> 0:00.040\nTest',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+    verifyHelper([],
         'WEBVTT\n\n00:61.020 --> 0:00.040\nTest',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+    verifyHelper([],
         'WEBVTT\n\n61:00.020 --> 0:00.040\nTest',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
@@ -585,6 +585,19 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports extra newlines in cue body', () => {
+    verifyHelper(
+        [
+          {startTime: 20, endTime: 40, payload: ''},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '\nTest\n\nExtra line\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        'Test2',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
 
   /**
    * @param {!Array} cues
