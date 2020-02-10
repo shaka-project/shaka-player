@@ -31,6 +31,14 @@
 @progress-circle-size: 45px;
 @progress-circle-thickness: 5px;
 
+/* This class name is used in the Google Fonts CSS to point to the non-rounded
+ * variant we originally used.  We switched to a rounded variant and didn't want
+ * to rename the classes we use everywhere, so we must explicitly set the
+ * font-family for material icons application-wide. */
+.material-icons {
+  font-family: 'Material Icons Round';
+}
+
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
  * class with the same name, which can be used in the application directly. */
 .hidden() {
