@@ -595,6 +595,14 @@
     "message": "Text must always be streamed while native controls are enabled, for captions to work.",
     "description": "A tooltip that warns the user that a certain combination of config values cannot be picked."
   },
+  "DEMO_TRICK_PLAY_CONTROLS": {
+    "message": "Enabled [JARGON:Trick Play] Controls",
+    "description": "The name of a configuration value."
+  },
+  "DEMO_TRICK_PLAY_CONTROLS_WARNING": {
+    "message": "[JARGON:Trick Play] controls require the Shaka UI.",
+    "description": "A tooltip that warns the user that a certain combination of config values cannot be picked."
+  },
   "DEMO_JUMP_LARGE_GAPS": {
     "message": "Jump Large Gaps",
     "description": "The name of a configuration value."

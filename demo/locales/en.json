@@ -148,6 +148,8 @@
   "DEMO_SAFE_SKIP_DISTANCE": "Safe Skip Distance",
   "DEMO_ALWAYS_STREAM_TEXT": "Always Stream Text",
   "DEMO_ALWAYS_STREAM_TEXT_WARNING": "Text must always be streamed while native controls are enabled, for captions to work.",
+  "DEMO_TRICK_PLAY_CONTROLS": "Enabled Trick Play Controls",
+  "DEMO_TRICK_PLAY_CONTROLS_WARNING": "Trick Play controls require the Shaka UI.",
   "DEMO_JUMP_LARGE_GAPS": "Jump Large Gaps",
   "DEMO_FORCE_TRANSMUX_TS": "Force Transmux TS",
   "DEMO_START_AT_SEGMENT_BOUNDARY": "Start At Segment Boundary",

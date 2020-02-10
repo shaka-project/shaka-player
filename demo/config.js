@@ -316,7 +316,7 @@ shakaDemo.Config = class {
       // Add a fake custom fixed "input" that warns the users not to change it.
       const noop = (input) => {};
       this.addCustomBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
-          noop, MessageIds.ALWAYS_STREAM_TEXT);
+          noop, MessageIds.ALWAYS_STREAM_TEXT_WARNING);
       this.latestInput_.input().disabled = true;
       this.latestInput_.input().checked = true;
     }
@@ -374,6 +374,22 @@ shakaDemo.Config = class {
     // are ready to add ALL of the tooltip messages.
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.latestInput_.input().checked = true;
+    }
+
+    if (!shakaDemoMain.getNativeControlsEnabled()) {
+      this.addCustomBoolInput_(MessageIds.TRICK_PLAY_CONTROLS, (input) => {
+        shakaDemoMain.setTrickPlayControlsEnabled(input.checked);
+      });
+      if (shakaDemoMain.getTrickPlayControlsEnabled()) {
+        this.latestInput_.input().checked = true;
+      }
+    } else {
+      // Add a fake custom fixed "input" that warns the users not to change it.
+      const noop = (input) => {};
+      this.addCustomBoolInput_(MessageIds.TRICK_PLAY_CONTROLS,
+          noop, MessageIds.TRICK_PLAY_CONTROLS_WARNING);
+      this.latestInput_.input().disabled = true;
+      this.latestInput_.input().checked = false;
     }
 
     // shaka.log is not set if logging isn't enabled.
