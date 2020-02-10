@@ -9,6 +9,24 @@
  */
 
 /**
+ * @typedef {{
+ *   started: number,
+ *   playedCompletely: number
+ * }}
+ *
+ * @description
+ * Contains statistics and information about the current state of the player.
+ *
+ * @property {number} started
+ *   The number of ads started.
+ * @property {number} playedCompletely
+ *   The number of ads played completely.
+ * @exportDoc
+ */
+shaka.extern.AdsStats;
+
+
+/**
  * An object that's responsible for all the ad-related logic
  * in the player.
  *
@@ -65,6 +83,12 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {Object} adTagParameters
    */
   replaceServerSideAdTagParameters(adTagParameters) {}
+
+  /**
+   * Get statistics for the current playback session. If the player is not
+   * playing content, this will return an empty stats object.
+   */
+  getStats() {}
 };
 
 
