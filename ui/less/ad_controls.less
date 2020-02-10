@@ -31,9 +31,9 @@
   }
 
   /* IMA SDK adds their own ad UI into an iframe element.
-  Hide it when shaka controls are enabled, so we can show
-  our own UI. Show it when shaka controls are disabled
-  (and native controls are enabled). */
+   * Hide it when shaka controls are enabled, so we can show
+   * our own UI. Show it when shaka controls are disabled
+   * (and native controls are enabled). */
   iframe {
     .shaka-video-container[shaka-controls="true"] & {
       .hidden();
