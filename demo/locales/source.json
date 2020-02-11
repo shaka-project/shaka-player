@@ -319,6 +319,10 @@
     "message": "Custom [JARGON:DRM] System",
     "description": "The label on a field that allows users to provide a Digital Rights Management (DRM) system identifier for a custom asset."
   },
+  "DEMO_AD_TAG_URL": {
+    "message": "Ad Tag URL",
+    "description": "The label on a field that allows users to provide a Ad Tag URL for a custom asset."
+  },
   "DEMO_NAME": {
     "message": "Name",
     "description": "The label on a field that allows users to provide a name for a custom asset."

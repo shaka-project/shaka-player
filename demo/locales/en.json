@@ -79,6 +79,7 @@
   "DEMO_LICENSE_CERTIFICATE_URL": "Custom License Certificate URL",
   "DEMO_LOG_LICENSE_EXCHANGE": "Log license exchange data",
   "DEMO_DRM_SYSTEM": "Custom DRM System",
+  "DEMO_AD_TAG_URL": "Ad Tag URL",
   "DEMO_NAME": "Name",
   "DEMO_NAME_ERROR": "Must be a unique name.",
   "DEMO_ICON_URL": "Icon URL",
