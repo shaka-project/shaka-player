@@ -65,6 +65,21 @@ const compatibilityTestsMetadata = [
         /* manifestStore= */ 'manifest-v3',
         /* isFixedKey= */ false),  // TODO: Drop isFixedKey when v4 is out.
   },
+  {
+    // This is the v3 version of the database as written by v2.5.0 - v2.5.9.  A
+    // bug in v2.5 caused the stream metadata from all periods to be written to
+    // each period.  This was corrected in v2.5.10.
+    // See https://github.com/google/shaka-player/issues/2389
+    name: 'v3-broken',
+    dbImagePath: '/base/test/test/assets/db-dump-v3-broken.json',
+    manifestKey: 1,
+    readOnly: false,
+    makeCell: (connection) => new shaka.offline.indexeddb.V2StorageCell(
+        connection,
+        /* segmentStore= */ 'segment-v3',
+        /* manifestStore= */ 'manifest-v3',
+        /* isFixedKey= */ false),  // TODO: Drop isFixedKey when v4 is out.
+  },
 ];
 
 filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
@@ -172,8 +187,8 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
 
       // Check that each segment was successfully retrieved.
       const segmentData = await cell.getSegments(dataKeys);
-      expect(segmentData).toBeTruthy();
-      expect(segmentData.length).toBe(6);
+      expect(segmentData.length).not.toBe(0);
+
       for (const segment of segmentData) {
         expect(segment).toBeTruthy();
       }
@@ -212,7 +227,7 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
       });
 
       expect(manifestKeys.length).toBe(1);
-      expect(segmentKeys.length).toBe(6);
+      expect(segmentKeys.length).not.toBe(0);
 
       // Remove all the segments.
       const noop = () => {};
@@ -279,7 +294,7 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
         manifest.addPeriod(Util.closeTo(4.20413), (period) => {
           period.addPartialVariant((variant) => {
             variant.addPartialStream(ContentType.VIDEO, (stream) => {
-              stream.frameRate = 3000 / 99;
+              stream.frameRate = 29.97;
               stream.mime('video/webm', 'vp9');
               stream.size(320, 240);
             });
