@@ -92,6 +92,22 @@ shaka.test.Util.delay = function(seconds, realSetTimeout) {
 
 
 /**
+ * Creates a custom matcher object that matches a number that is close to the
+ * given value.
+ *
+ * @param {number} val
+ * @return {number}
+ */
+shaka.test.Util.closeTo = function(val) {
+  const E = 0.000001;
+  return /** @type {number} */(/** @type {?} */({
+    asymmetricMatch: (other) => other >= val - E && other <= val + E,
+    jasmineToString: () => '<closeTo: ' + val + '>',
+  }));
+};
+
+
+/**
  * @param {!shaka.util.Error} error
  * @return {*}
  */

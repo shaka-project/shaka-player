@@ -65,6 +65,21 @@ const compatibilityTestsMetadata = [
         /* manifestStore= */ 'manifest-v3',
         /* isFixedKey= */ false),  // TODO: Drop isFixedKey when v4 is out.
   },
+  {
+    // This is the v3 version of the database as written by v2.5.0 - v2.5.9.  A
+    // bug in v2.5 caused the stream metadata from all periods to be written to
+    // each period.  This was corrected in v2.5.10.
+    // See https://github.com/google/shaka-player/issues/2389
+    name: 'v3-broken',
+    dbImagePath: '/base/test/test/assets/db-dump-v3-broken.json',
+    manifestKey: 1,
+    readOnly: false,
+    makeCell: (connection) => new shaka.offline.indexeddb.V2StorageCell(
+        connection,
+        /* segmentStore= */ 'segment-v3',
+        /* manifestStore= */ 'manifest-v3',
+        /* isFixedKey= */ false),  // TODO: Drop isFixedKey when v4 is out.
+  },
 ];
 
 
@@ -182,8 +197,8 @@ describe('Storage Compatibility', () => {
 
       // Check that each segment was successfully retrieved.
       const segmentData = await cell.getSegments(dataKeys);
-      expect(segmentData).toBeTruthy();
-      expect(segmentData.length).toBe(6);
+      expect(segmentData.length).not.toBe(0);
+
       for (const segment of segmentData) {
         expect(segment).toBeTruthy();
       }
@@ -226,7 +241,7 @@ describe('Storage Compatibility', () => {
       });
 
       expect(manifestKeys.length).toBe(1);
-      expect(segmentKeys.length).toBe(6);
+      expect(segmentKeys.length).not.toBe(0);
 
       // Remove all the segments.
       const noop = () => {};
@@ -259,7 +274,69 @@ describe('Storage Compatibility', () => {
       await checkMissingManifests(manifestKeys);
     });
 
-    // TODO: Add tests for converted manifest output.
+    it('correctly converts to the current manifest format', async () => {
+      const ContentType = shaka.util.ManifestParserUtils.ContentType;
+
+      // There should be one manifest.
+      const manifestDb = (await cell.getManifests([metadata.manifestKey]))[0];
+      const converter = new shaka.offline.ManifestConverter(
+          'mechanism', 'cell');
+      const actual = converter.fromManifestDB(manifestDb);
+
+      const expected = new shaka.test.ManifestGenerator()
+          .anyTimeline()
+          .minBufferTime(2)
+          .addPeriod(0)
+            .addPartialVariant()
+              .addPartialStream(ContentType.VIDEO)
+                .frameRate(29.97)
+                .mime('video/webm', 'vp9')
+                .size(640, 480)
+          .addPeriod(Util.closeTo(2.06874))
+            .addPartialVariant()
+              .addPartialStream(ContentType.VIDEO)
+                .frameRate(29.97)
+                .mime('video/webm', 'vp9')
+                .size(640, 480)
+          .addPeriod(Util.closeTo(4.20413))
+            .addPartialVariant()
+              .addPartialStream(ContentType.VIDEO)
+                .frameRate(29.97)
+                .mime('video/webm', 'vp9')
+                .size(320, 240)
+          .build();
+
+      expect(actual).toEqual(expected);
+
+      const period0 = actual.periods[0];
+      const period1 = actual.periods[1];
+      const period2 = actual.periods[2];
+
+      expect(period0.startTime).toEqual(0);
+      expect(period1.startTime).toEqual(Util.closeTo(2.06874));
+      expect(period2.startTime).toEqual(Util.closeTo(4.20413));
+
+      const video0 = period0.variants[0].video;
+      const video1 = period1.variants[0].video;
+      const video2 = period2.variants[0].video;
+
+      const segment0 = video0.getSegmentReference(0);
+      const segment1 = video1.getSegmentReference(0);
+      const segment2 = video2.getSegmentReference(0);
+
+      expect(segment0).toEqual(jasmine.objectContaining({
+        startTime: 0,
+        endTime: Util.closeTo(2.06874),
+      }));
+      expect(segment1).toEqual(jasmine.objectContaining({
+        startTime: 0,
+        endTime: Util.closeTo(2.13539),
+      }));
+      expect(segment2).toEqual(jasmine.objectContaining({
+        startTime: 0,
+        endTime: Util.closeTo(0.70070),
+      }));
+    });
 
     /**
      * Get the keys for each segment. This will include the init segments.
