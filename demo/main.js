@@ -775,10 +775,11 @@ shakaDemo.Main = class {
     const params = this.getParams_();
 
     const manifest = params['asset'];
+    const adTagUri = params['adTagUri'];
     if (manifest) {
       // See if it's a default asset.
       for (const asset of shakaAssets.testAssets) {
-        if (asset.manifestUri == manifest) {
+        if (asset.manifestUri == manifest && asset.adTagUri == adTagUri) {
           return asset;
         }
       }
@@ -1272,6 +1273,9 @@ shakaDemo.Main = class {
     if (this.selectedAsset) {
       const isDefault = shakaAssets.testAssets.includes(this.selectedAsset);
       params.push('asset=' + this.selectedAsset.manifestUri);
+      if (this.selectedAsset.adTagUri) {
+        params.push('adTagUri=' + this.selectedAsset.adTagUri);
+      }
       if (!isDefault && this.selectedAsset.licenseServers.size) {
         const uri = this.selectedAsset.licenseServers.values().next().value;
         params.push('license=' + uri);
