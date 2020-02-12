@@ -240,11 +240,12 @@ class TypescriptGenerator(object):
       return True
 
     ts_generator = _get_source_path('build/typescript/main.ts')
-    ts_node = _get_source_path('node_modules/ts-node/dist/bin')
     tsconfig = _get_source_path('build/typescript/tsconfig.json')
 
-    cmd_line = ['node', ts_node, '-P', tsconfig, ts_generator, '--output', self.output]
-    cmd_line += self.source_files
+    ts_node = shakaBuildHelpers.get_node_binary('ts-node')
+    ts_options = ['-P', tsconfig, ts_generator, '--output', self.output]
+
+    cmd_line = ts_node + ts_options + self.source_files
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('TypeScript generation failed')
@@ -264,8 +265,9 @@ class TypescriptCompiler(object):
       True on success; False on failure.
     """
 
-    tsc = _get_source_path('node_modules/typescript/lib/tsc')
-    cmd_line = ['node', tsc, '-p', self.project]
+    tsc = shakaBuildHelpers.get_node_binary('typescript', 'tsc')
+    tsc_options = ['-p', self.project]
+    cmd_line = tsc + tsc_options
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('TypeScript compiler failed')
