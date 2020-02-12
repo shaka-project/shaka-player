@@ -28,6 +28,9 @@ google.ima.AdsLoader = class {
   /** @param {google.ima.AdsRequest} request */
   requestAds(request) {}
 
+  /** @return {google.ima.ImaSdkSettings} */
+  getSettings() {}
+
   /** @override */
   addEventListener() {}
 
@@ -155,6 +158,19 @@ google.ima.AdPodInfo = class {
 
   /** @return {number} */
   getTotalAds() {}
+};
+
+/** @const */
+google.ima.ImaSdkSettings = class {
+  /**
+   * @param {string} player
+   */
+  setPlayerType(player) {}
+
+  /**
+   * @param {string} version
+   */
+  setPlayerVersion(version) {}
 };
 
 

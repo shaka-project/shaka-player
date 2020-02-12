@@ -72,6 +72,7 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.menu.classList.add('shaka-no-propagation');
     this.menu.classList.add('shaka-show-controls-on-mouse-over');
     this.menu.classList.add('shaka-settings-menu');
+    this.menu.classList.add('shaka-hidden');
 
     /** @protected {!HTMLElement}*/
     this.backButton = shaka.util.Dom.createHTMLElement('button');

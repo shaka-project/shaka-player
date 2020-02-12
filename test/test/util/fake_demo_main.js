@@ -43,6 +43,15 @@ shaka.test.FakeDemoMain = class {
         jasmine.createSpy('setNativeControlsEnabled');
 
     /** @type {!jasmine.Spy} */
+    this.getTrickPlayControlsEnabled =
+        jasmine.createSpy('getTrickPlayControlsEnabled');
+    this.getTrickPlayControlsEnabled.and.returnValue(false);
+
+    /** @type {!jasmine.Spy} */
+    this.setTrickPlayControlsEnabled =
+        jasmine.createSpy('setTrickPlayControlsEnabled');
+
+    /** @type {!jasmine.Spy} */
     this.getConfiguration = jasmine.createSpy('getConfiguration');
     this.getConfiguration.and.returnValue(this.config_);
 

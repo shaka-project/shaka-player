@@ -514,7 +514,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
- *       ((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined)
+ *       ((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined),
+ *   logLicenseExchange: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -542,6 +543,12 @@ shaka.extern.AdvancedDrmConfiguration;
  *   If given, this function is called with the init data from the
  *   manifest/media and should return the (possibly transformed) init data to
  *   pass to the browser.
+ * @property {boolean} logLicenseExchange
+ *   <i>Optional.</i><br>
+ *   If set to <code>true</code>, prints logs containing the license exchange.
+ *   This includes the init data, request, and response data, printed as base64
+ *   strings.  Don't use in production, for debugging only; has no affect in
+ *   release builds as logging is removed.
  *
  * @exportDoc
  */
