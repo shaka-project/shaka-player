@@ -65,10 +65,11 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {string} streamActivityMonitorId
    * @param {string} videoId
    * @param {string} backupUrl
+   * @param {number} startTime
    */
   loadServerSideVodStream(
       adTagParameters, apiKey, authToken, contentSourceId,
-      streamActivityMonitorId, videoId, backupUrl) {}
+      streamActivityMonitorId, videoId, backupUrl, startTime) {}
 
   /**
    * @param {Object} adTagParameters
@@ -77,10 +78,11 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {string} authToken
    * @param {string} streamActivityMonitorId
    * @param {string} backupUrl
+   * @param {number} startTime
    */
   loadServerSideLiveStream(
       adTagParameters, apiKey, assetKey, authToken, streamActivityMonitorId,
-      backupUrl) {}
+      backupUrl, startTime) {}
 
   /**
    * @param {Object} adTagParameters
