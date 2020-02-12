@@ -687,7 +687,8 @@ shaka.extern.ManifestConfiguration;
  *   stallEnabled: boolean,
  *   stallThreshold: number,
  *   stallSkip: number,
- *   useNativeHlsOnSafari: boolean
+ *   useNativeHlsOnSafari: boolean,
+ *   inaccurateManifestTolerance: number
  * }}
  *
  * @description
@@ -768,6 +769,11 @@ shaka.extern.ManifestConfiguration;
  *   Depending on the application's needs, it may prefer one over the other.
  *   Examples: FairPlay is only supported via Safari's native HLS, but it
  *   doesn't have an API for selecting specific tracks.
+ * @property {number} inaccurateManifestTolerance
+ *   The maximum difference, in seconds, between the times in the manifest and
+ *   the times in the segments.  Larger values allow us to compensate for more
+ *   drift (up to one segment duration).  Smaller values reduce the incidence of
+ *   extra segment requests necessary to compensate for drift
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

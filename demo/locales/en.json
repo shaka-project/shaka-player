@@ -75,6 +75,7 @@
   "DEMO_IGNORE_HLS_TEXT_FAILURES": "Ignore HLS Text Stream Failures",
   "DEMO_IGNORE_MIN_BUFFER_TIME": "Ignore Min Buffer Time",
   "DEMO_IGNORE_TEXT_FAILURES": "Ignore Text Stream Failures",
+  "DEMO_INACCURATE_MANIFEST_TOLERANCE": "Inaccurate Manifest Tolerance",
   "DEMO_INITIAL_SEGMENT_LIMIT": "Initial Segment Limit",
   "DEMO_IRT": "IRT",
   "DEMO_JSDELIVR": "jsDelivr",

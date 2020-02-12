@@ -303,6 +303,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore Text Stream Failures"
   },
+  "DEMO_INACCURATE_MANIFEST_TOLERANCE": {
+    "message": "Inaccurate Manifest Tolerance",
+    "description": "The name of a configuration value."
+  },
   "DEMO_INITIAL_SEGMENT_LIMIT": {
     "description": "The name of a configuration value.",
     "message": "Initial Segment Limit"

@@ -307,6 +307,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.SAFE_SKIP_DISTANCE,
             'streaming.stallSkip',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.INACCURATE_MANIFEST_TOLERANCE,
+            'streaming.inaccurateManifestTolerance',
             /* canBeDecimal= */ true);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
