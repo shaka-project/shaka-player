@@ -186,24 +186,25 @@ function parseBlockComment(comment: estree.Comment): Attributes {
   };
 
   for (const tag of ast.tags) {
-    assert(!tag.errors, util.inspect(tag));
+    const tagStr = util.inspect(tag);
+    assert(!tag.errors, tagStr);
     switch (tag.title) {
       case "summary":
-        assert(tag.description);
+        assert(tag.description, tagStr);
         attributes.description = normalizeDescription(tag.description);
         break;
       case "description":
-        assert(tag.description);
+        assert(tag.description, tagStr);
         attributes.description = normalizeDescription(tag.description);
         break;
       case "typedef":
-        assert(tag.type);
+        assert(tag.type, tagStr);
         attributes.type = AnnotationType.Typedef;
         attributes.typedefType = tag.type;
         break;
       case "property":
-        assert(tag.name);
-        assert(tag.type);
+        assert(tag.name, tagStr);
+        assert(tag.type, tagStr);
         attributes.props = attributes.props || [];
         attributes.props.push({
           name: tag.name,
@@ -235,7 +236,7 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         }
         break;
       case "event":
-        assert(tag.description);
+        assert(tag.description, tagStr);
         attributes.type = AnnotationType.Event;
         attributes.identifier = tag.description.split(".");
         break;
@@ -255,8 +256,8 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         attributes.type = AnnotationType.Interface;
         break;
       case "param":
-        assert(tag.name);
-        assert(tag.type);
+        assert(tag.name, tagStr);
+        assert(tag.type, tagStr);
         attributes.paramTypes = attributes.paramTypes || [];
         attributes.paramTypes.push(tag.type);
         if (tag.description) {
@@ -273,15 +274,15 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         }
         break;
       case "implements":
-        assert(tag.type);
+        assert(tag.type, tagStr);
         attributes.implements = tag.type;
         break;
       case "extends":
-        assert(tag.type);
+        assert(tag.type, tagStr);
         attributes.extends = tag.type;
         break;
       case "template":
-        assert(tag.description);
+        assert(tag.description, tagStr);
         attributes.template = tag.description.split(",");
         break;
       case "export":
