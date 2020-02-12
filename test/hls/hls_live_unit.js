@@ -453,6 +453,30 @@ describe('HlsParser live', () => {
       await parser.start('test:/master', playerInterface);
     });
 
+    it('sets presentation delay as configured', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
+      config.defaultPresentationDelay = 10;
+      parser.configure(config);
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.presentationTimeline.getDelay()).toBe(
+          config.defaultPresentationDelay);
+    });
+
+    it('sets 3 times target duration as presentation delay if not configured',
+        async () => {
+          fakeNetEngine
+              .setResponseText('test:/master', master)
+              .setResponseText('test:/video', media)
+              .setResponseValue('test:/init.mp4', initSegmentData)
+              .setResponseValue('test:/main.mp4', segmentData);
+          const manifest = await parser.start('test:/master', playerInterface);
+          expect(manifest.presentationTimeline.getDelay()).toBe(15);
+        });
+
     describe('availabilityWindowOverride', () => {
       async function testWindowOverride(expectedWindow) {
         fakeNetEngine

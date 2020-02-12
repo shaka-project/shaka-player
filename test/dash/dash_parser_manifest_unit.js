@@ -1399,10 +1399,40 @@ describe('DashParser Manifest', () => {
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
     expect(presentationDelay).not.toBeNaN();
-    expect(presentationDelay).toBe(config.dash.defaultPresentationDelay);
+    expect(presentationDelay).toBe(config.defaultPresentationDelay);
   });
 
   it('Honors the ignoreSuggestedPresentationDelay config', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT2S" suggestedPresentationDelay="PT25S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreSuggestedPresentationDelay = true;
+    config.defaultPresentationDelay = 10;
+    parser.configure(config);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const presentationTimeline = manifest.presentationTimeline;
+    const presentationDelay = presentationTimeline.getDelay();
+    expect(presentationDelay).toBe(config.defaultPresentationDelay);
+  });
+
+  it('Uses 1.5 times minBufferTime as default presentation delay', async () => {
+    // When sugguestedPresentDelay should be ignored, and
+    // config.defaultpresentdelay is not set other than 0, use 1.5*minBufferTime
+    // as the presentationDelay.
     const manifestText = [
       '<MPD minBufferTime="PT2S" suggestedPresentationDelay="PT25S">',
       '  <Period id="1" duration="PT30S">',
@@ -1425,7 +1455,7 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
-    expect(presentationDelay).toBe(config.dash.defaultPresentationDelay);
+    expect(presentationDelay).toBe(1.5*manifest.minBufferTime);
   });
 
   it('Honors the ignoreEmptyAdaptationSet config', async () => {

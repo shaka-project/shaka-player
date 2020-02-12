@@ -188,7 +188,7 @@ shakaDemo.Config = class {
         .addTextInput_(MessageIds.CLOCK_SYNC_URI, 'manifest.dash.clockSyncUri')
         .addBoolInput_(MessageIds.IGNORE_DRM, 'manifest.dash.ignoreDrmInfo')
         .addNumberInput_(MessageIds.DEFAULT_PRESENTATION_DELAY,
-            'manifest.dash.defaultPresentationDelay')
+            'manifest.defaultPresentationDelay')
         .addBoolInput_(MessageIds.IGNORE_MIN_BUFFER_TIME,
             'manifest.dash.ignoreMinBufferTime')
         .addNumberInput_(MessageIds.INITIAL_SEGMENT_LIMIT,

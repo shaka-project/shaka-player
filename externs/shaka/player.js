@@ -561,7 +561,6 @@ shaka.extern.DrmConfiguration;
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
  *   xlinkFailGracefully: boolean,
- *   defaultPresentationDelay: number,
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
  *   initialSegmentLimit: number,
@@ -586,10 +585,6 @@ shaka.extern.DrmConfiguration;
  *   existing contents. If false, xlink-related errors will be propagated
  *   to the application and will result in a playback failure. Defaults to
  *   false if not provided.
- * @property {number} defaultPresentationDelay
- *   A default <code>presentationDelay</code> if
- *   <code>suggestedPresentationDelay</code> is missing in the MPEG DASH
- *   manifest. This has to be bigger than <code>minBufferTime * 1.5</code>.
  * @property {boolean} ignoreMinBufferTime
  *   If true will cause DASH parser to ignore <code>minBufferTime</code> from
  *   manifest. It allows player config to take precedence over manifest for
@@ -639,6 +634,7 @@ shaka.extern.HlsManifestConfiguration;
  *   disableAudio: boolean,
  *   disableVideo: boolean,
  *   disableText: boolean,
+ *   defaultPresentationDelay: number,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
  * }}
@@ -659,6 +655,14 @@ shaka.extern.HlsManifestConfiguration;
  * @property {boolean} disableText
  *   If <code>true</code>, the text tracks are ignored.
  *   Defaults to <code>false</code>.
+ * @property {number} defaultPresentationDelay
+ *   A default <code>presentationDelay</code> value.
+ *   For DASH, it's a default <code>presentationDelay</code> value if
+ *   <code>suggestedPresentationDelay</code> is missing in the MPEG DASH
+ *   manifest. The default value is <code>1.5 * minBufferTime</code> if not
+ *   configured or set as 0.
+ *   For HLS, the default value is 3 segments duration if not configured or
+ *   set as 0.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
