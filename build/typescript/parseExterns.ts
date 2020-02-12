@@ -1,3 +1,4 @@
+import * as util from "util";
 import * as esprima from "esprima";
 import * as estree from "estree";
 import * as doctrine from "@teppeis/doctrine";
@@ -173,7 +174,10 @@ function parseBlockComment(comment: estree.Comment): Attributes {
     "Expected comment of type Block, got " + comment.type
   );
 
-  const ast = doctrine.parse(comment.value, { unwrap: true });
+  const ast = doctrine.parse(comment.value, {
+    unwrap: true,
+    recoverable: true
+  });
 
   const attributes: Attributes = {
     description: normalizeDescription(ast.description),
@@ -182,6 +186,7 @@ function parseBlockComment(comment: estree.Comment): Attributes {
   };
 
   for (const tag of ast.tags) {
+    assert(!tag.errors, util.inspect(tag));
     switch (tag.title) {
       case "summary":
         assert(tag.description);
@@ -285,7 +290,8 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         attributes.export = true;
         break;
       case "exportDoc":
-        attributes.export = attributes.type !== AnnotationType.Namespace;
+        attributes.export =
+          attributes.export || attributes.type !== AnnotationType.Namespace;
         break;
       default:
         break;
