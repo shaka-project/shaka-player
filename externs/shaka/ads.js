@@ -37,95 +37,95 @@ shaka.extern.IAdManager.Factory;
 shaka.extern.IAd = class {
   /**
    * @return {number}
-   * @export
+   * @exportTypescript
    */
   getDuration() {}
 
   /**
    * @return {number}
-   * @export
+   * @exportTypescript
    */
   getRemainingTime() {}
 
   /**
    * @return {number}
-   * @export
+   * @exportTypescript
    */
   getTimeUntilSkippable() {}
 
   /**
    * @return {boolean}
-   * @export
+   * @exportTypescript
    */
   isPaused() {}
 
   /**
    * @return {boolean}
-   * @export
+   * @exportTypescript
    */
   isSkippable() {}
 
   /**
    * @return {boolean}
-   * @export
+   * @exportTypescript
    */
   canSkipNow() {}
 
   /**
-   * @export
+   * @exportTypescript
    */
   skip() {}
 
   /**
-   * @export
+   * @exportTypescript
    */
   play() {}
 
   /**
-   * @export
+   * @exportTypescript
    */
   pause() {}
 
   /**
    * @return {number}
-   * @export
+   * @exportTypescript
    */
   getVolume() {}
 
   /**
    * @param {number} volume
-   * @export
+   * @exportTypescript
    */
   setVolume(volume) {}
 
   /**
    * @return {boolean}
-   * @export
+   * @exportTypescript
    */
   isMuted() {}
 
   /**
    * @param {boolean} muted
-   * @export
+   * @exportTypescript
    */
   setMuted(muted) {}
 
   /**
    * @param {number} width
    * @param {number} height
-   * @export
+   * @exportTypescript
    */
   resize(width, height) {}
 
   /**
    * @return {number}
-   * @export
+   * @exportTypescript
    */
   getSequenceLength() {}
 
   /**
    * @return {number}
-   * @export
+   * @exportTypescript
    */
   getPositionInSequence() {}
 };

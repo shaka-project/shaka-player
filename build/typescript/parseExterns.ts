@@ -281,6 +281,7 @@ function parseBlockComment(comment: estree.Comment): Attributes {
         break;
       case "export":
       case "exportInterface":
+      case "exportTypescript":
         attributes.export = true;
         break;
       case "exportDoc":

@@ -65,6 +65,7 @@ common_closure_opts = [
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
     '--extra_annotation_name=exportInterface',
+    '--extra_annotation_name=exportTypescript',
 
     '--conformance_configs',
     ('%s/build/conformance.textproto' %

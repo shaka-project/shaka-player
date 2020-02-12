@@ -33,7 +33,7 @@ shaka.extern = {};
  *   The CSS background color applied to the portion of the seek bar showing
  *   what has been played already.
  *
- * @exportDoc
+ * @exportTypescript
  */
 shaka.extern.UISeekBarColors;
 
@@ -50,7 +50,7 @@ shaka.extern.UISeekBarColors;
  *   The CSS background color applied to the portion of the volume bar showing
  *   the volume level.
  *
- * @exportDoc
+ * @exportTypescript
  */
 shaka.extern.UIVolumeBarColors;
 
@@ -108,7 +108,7 @@ shaka.extern.UIVolumeBarColors;
  *   receiver UI.
  *   Defaults to 0.
  *
- * @exportDoc
+ * @exportTypescript
  */
 shaka.extern.UIConfiguration;
 
@@ -182,7 +182,7 @@ shaka.extern.IUIElement.Factory = class {
    * @param {!shaka.ui.Controls} controls
    * @return {!shaka.extern.IUIElement}
    *
-   * @exportDoc
+   * @exportTypescript
    */
   create(rootElement, controls) {}
 };

@@ -41,7 +41,7 @@ google.ima.AdsLoader = class {
 
 /**
  * @implements {EventTarget}
- * @exportDoc
+ * @exportTypescript
  */
 google.ima.AdsManager = class {
   start() {}
@@ -85,19 +85,19 @@ google.ima.AdsManager = class {
 
   /**
    * @override
-   * @exportDoc
+   * @exportTypescript
    */
   addEventListener() {}
 
   /**
    * @override
-   * @exportDoc
+   * @exportTypescript
    */
   removeEventListener() {}
 
   /**
    * @override
-   * @exportDoc
+   * @exportTypescript
    */
   dispatchEvent() {}
 };
@@ -142,7 +142,7 @@ google.ima.AdEvent = class extends Event {
 
 /**
  * @const
- * @exportDoc
+ * @exportTypescript
  */
 google.ima.Ad = class {
   /** @return {number} */
