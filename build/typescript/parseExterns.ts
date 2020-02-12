@@ -186,8 +186,8 @@ function parseBlockComment(comment: estree.Comment): Attributes {
   };
 
   for (const tag of ast.tags) {
+    assert(!tag.errors, util.inspect({ comment: comment.value, tag }));
     const tagStr = util.inspect(tag);
-    assert(!tag.errors, tagStr);
     switch (tag.title) {
       case "summary":
         assert(tag.description, tagStr);
