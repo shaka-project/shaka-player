@@ -1,3 +1,4 @@
+import * as util from "util";
 import assert from "./assert";
 import {
   getOrCreateNodeAtPath,
@@ -157,7 +158,7 @@ function parseClassNode(root: NodeMap, node: Node): ClassNode {
     assert(
       child.definition,
       "Unexpected child without definition in class prototype: " +
-        JSON.stringify(child, undefined, 2)
+        util.inspect(child)
     );
     const { attributes } = child.definition;
     assert(attributes);
@@ -341,7 +342,7 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
     assert(
       child.definition,
       "Unexpected child without definition in interface statics: " +
-        JSON.stringify(child, undefined, 2)
+        util.inspect(child)
     );
     others.push(parseNode(root, child));
   }
@@ -351,7 +352,7 @@ function parseInterfaceNode(root: NodeMap, node: Node): InterfaceNode {
     assert(
       child.definition,
       "Unexpected child without definition in interface prototype: " +
-        JSON.stringify(child, undefined, 2)
+        util.inspect(child)
     );
     const { attributes } = child.definition;
     assert(attributes);
