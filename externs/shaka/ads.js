@@ -58,31 +58,11 @@ shaka.extern.IAdManager = class extends EventTarget {
   initServerSide(adContainer, video, player) {}
 
   /**
-   * @param {Object} adTagParameters
-   * @param {string} apiKey
-   * @param {string} authToken
-   * @param {string} contentSourceId
-   * @param {string} streamActivityMonitorId
-   * @param {string} videoId
+   * @param {!google.ima.dai.api.StreamRequest} imaRequest
    * @param {string} backupUrl
    * @param {number} startTime
    */
-  loadServerSideVodStream(
-      adTagParameters, apiKey, authToken, contentSourceId,
-      streamActivityMonitorId, videoId, backupUrl, startTime) {}
-
-  /**
-   * @param {Object} adTagParameters
-   * @param {string} apiKey
-   * @param {string} assetKey
-   * @param {string} authToken
-   * @param {string} streamActivityMonitorId
-   * @param {string} backupUrl
-   * @param {number} startTime
-   */
-  loadServerSideLiveStream(
-      adTagParameters, apiKey, assetKey, authToken, streamActivityMonitorId,
-      backupUrl, startTime) {}
+  requestServerSideStream(imaRequest, backupUrl, startTime) {}
 
   /**
    * @param {Object} adTagParameters
