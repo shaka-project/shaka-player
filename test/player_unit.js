@@ -407,6 +407,19 @@ describe('Player', () => {
           stringContaining('.streaming'));
     });
 
+    it('accepts synchronous function values for async function fields', () => {
+      const defaultConfig = player.getConfiguration();
+
+      // Make sure the default is async, or the test is invalid.
+      const AsyncFunction = (async () => {}).constructor;
+      expect(defaultConfig.offline.trackSelectionCallback.constructor)
+          .toBe(AsyncFunction);
+
+      // Try a synchronous callback.
+      player.configure('offline.trackSelectionCallback', () => {});
+      // If this fails, an error log will trigger test failure.
+    });
+
     it('expands dictionaries that allow arbitrary keys', () => {
       player.configure({
         drm: {servers: {'com.widevine.alpha': 'http://foo/widevine'}},
