@@ -349,11 +349,14 @@ describe('UI', () => {
       preferredLanguage = 'en';
 
       // Disable abr for the resolution tests
-      const config = {abr: {enabled: false}};
-      player.configure(config);
+      player.configure('abr.enabled', false);
 
-      player.selectAudioLanguage(preferredLanguage);
-      await waiter.waitForEvent(player, 'variantchanged');
+      const selectedLanguage =
+          getSelectedTrack(player.getVariantTracks()).language;
+      if (selectedLanguage != preferredLanguage) {
+        player.selectAudioLanguage(preferredLanguage);
+        await waiter.waitForEvent(player, 'variantchanged');
+      }
 
       resolutionsMenu = shaka.util.Dom.getElementByClassName(
           'shaka-resolutions', videoContainer);
