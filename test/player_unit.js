@@ -52,6 +52,7 @@ describe('Player', () => {
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     logErrorSpy.calls.reset();
     shaka.log.error = shaka.test.Util.spyFunc(logErrorSpy);
+    shaka.log.alwaysError = shaka.test.Util.spyFunc(logErrorSpy);
 
     logWarnSpy = jasmine.createSpy('shaka.log.warning');
     logErrorSpy.and.callFake(fail);
@@ -135,6 +136,7 @@ describe('Player', () => {
       await player.destroy();
     } finally {
       shaka.log.error = originalLogError;
+      shaka.log.alwaysError = originalLogError;
       shaka.log.warning = originalLogWarn;
       shaka.log.alwaysWarn = originalLogAlwaysWarn;
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
