@@ -6,8 +6,8 @@
 describe('Player', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Util = shaka.test.Util;
-  const returnManifest = (manifest) =>
-    Util.factoryReturns(new shaka.test.FakeManifestParser(manifest));
+  const returnManifest =
+      (manifest) => () => new shaka.test.FakeManifestParser(manifest);
 
   const originalLogError = shaka.log.error;
   const originalLogWarn = shaka.log.warning;
@@ -120,8 +120,8 @@ describe('Player', () => {
     player.configure({
       // Ensures we don't get a warning about missing preference.
       preferredAudioLanguage: 'en',
-      abrFactory: Util.factoryReturns(abrManager),
-      textDisplayFactory: Util.factoryReturns(textDisplayer),
+      abrFactory: () => abrManager,
+      textDisplayFactory: () => textDisplayer,
     });
 
     onError = jasmine.createSpy('error event');
@@ -186,7 +186,7 @@ describe('Player', () => {
         expect(networkingEngine.destroy).not.toHaveBeenCalled();
       });
 
-      const load = player.load(fakeManifestUri, 0, Util.factoryReturns(parser));
+      const load = player.load(fakeManifestUri, 0, () => parser);
       await shaka.test.Util.shortDelay();
       await player.destroy();
       expect(abrManager.stop).toHaveBeenCalled();
@@ -1419,7 +1419,7 @@ describe('Player', () => {
         return Promise.resolve();
       });
 
-      await player.load(fakeManifestUri, 0, Util.factoryReturns(parser));
+      await player.load(fakeManifestUri, 0, () => parser);
 
       // Make sure the interruptions didn't mess up the tracks.
       streamingEngine.onCanSwitch();
@@ -2359,7 +2359,7 @@ describe('Player', () => {
 
       /** @type {!shaka.test.FakeManifestParser} */
       const parser = new shaka.test.FakeManifestParser(manifest);
-      await player.load(fakeManifestUri, 0, Util.factoryReturns(parser));
+      await player.load(fakeManifestUri, 0, () => parser);
 
       const manifest2 = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addPeriod(10, (period) => {
@@ -3036,7 +3036,7 @@ describe('Player', () => {
 
       /** @type {!shaka.test.FakeAbrManager} */
       const abrManager = new shaka.test.FakeAbrManager();
-      player.configure({abrFactory: Util.factoryReturns(abrManager)});
+      player.configure('abrFactory', () => abrManager);
       await setupPlayer();
       expect(player.getVariantTracks().length).toBe(2);
 

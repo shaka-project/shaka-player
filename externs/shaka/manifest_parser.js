@@ -130,11 +130,10 @@ shaka.extern.ManifestParser.PlayerInterface;
 
 
 /**
- * A factory for creating the manifest parser.  This will be called with 'new'.
- * This function is registered with shaka.media.ManifestParser to create parser
- * instances.
+ * A factory for creating the manifest parser.  This function is registered with
+ * shaka.media.ManifestParser to create parser instances.
  *
- * @typedef {function(new:shaka.extern.ManifestParser)}
+ * @typedef {function():!shaka.extern.ManifestParser}
  * @exportDoc
  */
 shaka.extern.ManifestParser.Factory;

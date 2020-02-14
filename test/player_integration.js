@@ -248,7 +248,7 @@ describe('Player', () => {
         cues = cues.concat(added);
       });
 
-      player.configure('textDisplayFactory', Util.factoryReturns(displayer));
+      player.configure('textDisplayFactory', () => displayer);
 
       const preferredTextLanguage = 'fa';  // The same as in the content itself
       player.configure({preferredTextLanguage: preferredTextLanguage});
@@ -269,7 +269,7 @@ describe('Player', () => {
         cues = cues.concat(added);
       });
 
-      player.configure('textDisplayFactory', Util.factoryReturns(displayer));
+      player.configure('textDisplayFactory', () => displayer);
 
       const eventManager = new shaka.util.EventManager();
       /** @type {shaka.test.Waiter} */
@@ -412,13 +412,11 @@ describe('Player', () => {
         return false;
       });
       textDisplayer.destroySpy.and.returnValue(Promise.resolve());
-      player.configure({
-        textDisplayFactory: Util.factoryReturns(textDisplayer),
-      });
+      player.configure('textDisplayFactory', () => textDisplayer);
 
       // Make sure the configuration was taken.
-      const ConfiguredFactory = player.getConfiguration().textDisplayFactory;
-      const configuredTextDisplayer = new ConfiguredFactory();
+      const configuredFactory = player.getConfiguration().textDisplayFactory;
+      const configuredTextDisplayer = configuredFactory();
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 
@@ -786,7 +784,7 @@ describe('Player', () => {
 
     beforeEach(() => {
       abrManager = new shaka.test.FakeAbrManager();
-      player.configure('abrFactory', Util.factoryReturns(abrManager));
+      player.configure('abrFactory', () => abrManager);
     });
 
     it('fires "adaptation" event', async () => {

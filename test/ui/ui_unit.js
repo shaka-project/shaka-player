@@ -6,8 +6,8 @@
 describe('UI', () => {
   const UiUtils = shaka.test.UiUtils;
   const Util = shaka.test.Util;
-  const returnManifest = (manifest) =>
-    Util.factoryReturns(new shaka.test.FakeManifestParser(manifest));
+  const returnManifest =
+      (manifest) => () => new shaka.test.FakeManifestParser(manifest);
 
   /** @type {shaka.Player} */
   let player;

@@ -667,6 +667,11 @@ shaka.test.TestScheme.ManifestParser = class {
   /** @override */
   configure(config) {}
 
+  /** @return {!shaka.test.TestScheme.ManifestParser} */
+  static factory() {
+    return new shaka.test.TestScheme.ManifestParser();
+  }
+
   /** @override */
   start(uri, playerInterface) {
     const re = /^test:([^/]+)$/;
@@ -710,4 +715,5 @@ shaka.test.TestScheme.ManifestParser = class {
 
 shaka.net.NetworkingEngine.registerScheme('test', shaka.test.TestScheme.plugin);
 shaka.media.ManifestParser.registerParserByMime(
-    'application/x-test-manifest', shaka.test.TestScheme.ManifestParser);
+    'application/x-test-manifest',
+    shaka.test.TestScheme.ManifestParser.factory);

@@ -21,8 +21,8 @@ async function drmStorageSupport() {
 
 filterDescribe('Storage', storageSupport, () => {
   const Util = shaka.test.Util;
-  const returnManifest = (manifest) =>
-    Util.factoryReturns(new shaka.test.FakeManifestParser(manifest));
+  const returnManifest =
+      (manifest) => () => new shaka.test.FakeManifestParser(manifest);
 
   const englishUS = 'en-us';
   const frenchCanadian= 'fr-ca';
@@ -75,7 +75,8 @@ filterDescribe('Storage', storageSupport, () => {
 
       // Store a piece of content.
       await withStorage((storage) => {
-        return storage.store(manifestUri, noMetadata, TestManifestParser);
+        return storage.store(
+            manifestUri, noMetadata, TestManifestParser.factory);
       });
 
       // Make sure that the content can be found.
@@ -146,7 +147,7 @@ filterDescribe('Storage', storageSupport, () => {
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
       const stored = await storage.store(
-          'test:sintel-enc', noMetadata, TestManifestParser);
+          'test:sintel-enc', noMetadata, TestManifestParser.factory);
       expect(stored.offlineUri).toBeTruthy();
 
       /** @type {shaka.offline.OfflineUri} */
@@ -189,7 +190,7 @@ filterDescribe('Storage', storageSupport, () => {
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
       const stored = await storage.store(
-          'test:sintel-enc', noMetadata, TestManifestParser);
+          'test:sintel-enc', noMetadata, TestManifestParser.factory);
       expect(stored.offlineUri).toBeTruthy();
 
       /** @type {shaka.offline.OfflineUri} */
@@ -707,7 +708,7 @@ filterDescribe('Storage', storageSupport, () => {
       for (let i = 0; i < manifestUris.length; ++i) {
         const uri = manifestUris[i];
         // eslint-disable-next-line no-await-in-loop
-        await storage.store(uri, noMetadata, FakeManifestParser);
+        await storage.store(uri, noMetadata, fakeManifestParser);
       }
 
       const content = await storage.list();
@@ -739,7 +740,7 @@ filterDescribe('Storage', storageSupport, () => {
       // Stored content should reflect the tracks in the first period, so we
       // should only find track there.
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeManifestParser);
       expect(stored.tracks.length).toBe(1);
       expect(stored.tracks[0].language).toBe(frenchCanadian);
 
@@ -784,7 +785,7 @@ filterDescribe('Storage', storageSupport, () => {
       });
 
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeManifestParser);
       expect(stored.tracks.length).toBe(1);
       expect(stored.tracks[0].language).toBe(frenchCanadian);
     });
@@ -893,9 +894,7 @@ filterDescribe('Storage', storageSupport, () => {
       const hangingPromise = netEngine.delayNextRequest();
       /** @type {!Promise} */
       const storePromise = storage.store(
-          manifestWithPerStreamBandwidthUri,
-          noMetadata,
-          FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeManifestParser);
 
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -904,7 +903,7 @@ filterDescribe('Storage', storageSupport, () => {
       await expectAsync(
           storage.store(
               manifestWithoutPerStreamBandwidthUri,
-              noMetadata, FakeManifestParser))
+              noMetadata, fakeManifestParser))
           .toBeRejectedWith(expected);
 
       // Unblock the original store and wait for it to complete.
@@ -920,7 +919,7 @@ filterDescribe('Storage', storageSupport, () => {
           manifestWithLiveTimelineUri));
       await expectAsync(
           storage.store(
-              manifestWithLiveTimelineUri, noMetadata, FakeManifestParser))
+              manifestWithLiveTimelineUri, noMetadata, fakeManifestParser))
           .toBeRejectedWith(expected);
     });
 
@@ -967,7 +966,7 @@ filterDescribe('Storage', storageSupport, () => {
       await expectAsync(
           storage.store(
               manifestWithPerStreamBandwidthUri, noMetadata,
-              FakeManifestParser))
+              fakeManifestParser))
           .toBeRejectedWith(Util.jasmineError(error));
     });
 
@@ -985,9 +984,7 @@ filterDescribe('Storage', storageSupport, () => {
       // Store a piece of content, but then change the uri slightly so that
       // it won't be found when we try to remove it (with the wrong uri).
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri,
-          noMetadata,
-          FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeManifestParser);
       const storedUri = shaka.offline.OfflineUri.parse(stored.offlineUri);
       const missingManifestUri = shaka.offline.OfflineUri.manifest(
           storedUri.mechanism(), storedUri.cell(), storedUri.key() + 1);
@@ -1003,14 +1000,14 @@ filterDescribe('Storage', storageSupport, () => {
 
     it('removes manifest', async () => {
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeManifestParser);
 
       await storage.remove(stored.offlineUri);
     });
 
     it('removes manifest with missing segments', async () => {
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeManifestParser);
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -1070,9 +1067,7 @@ filterDescribe('Storage', storageSupport, () => {
         },
       });
       const content = await storage.store(
-          manifestWithPerStreamBandwidthUri,
-          noMetadata,
-          FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeManifestParser);
 
       /**
        * @type {!Array.<number>}
@@ -1098,7 +1093,7 @@ filterDescribe('Storage', storageSupport, () => {
 
     it('stores multi-period content', async () => {
       const storedContent = await storage.store(
-          manifestWithThreePeriodsUri, noMetadata, FakeManifestParser);
+          manifestWithThreePeriodsUri, noMetadata, fakeManifestParser);
 
       let parsed = false;
 
@@ -1154,7 +1149,8 @@ filterDescribe('Storage', storageSupport, () => {
       /** @type {shaka.offline.Storage} */
       const storage = new shaka.offline.Storage();
       try {
-        await storage.store(manifestUri, noMetadata, TestManifestParser);
+        await storage.store(
+            manifestUri, noMetadata, TestManifestParser.factory);
       } finally {
         await storage.destroy();
       }
@@ -1485,6 +1481,9 @@ filterDescribe('Storage', storageSupport, () => {
     /** @override */
     onExpirationUpdated(session, number) {}
   };
+
+  /** @const {shaka.extern.ManifestParser.Factory} */
+  const fakeManifestParser = () => new FakeManifestParser();
 
   /**
    * @param {!shaka.media.DrmEngine} drmEngine

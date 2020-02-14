@@ -50,13 +50,9 @@ shaka.ui.Overlay = class {
     this.configure({});
 
     // If the browser's native controls are disabled, use UI TextDisplayer.
-    // Arrow functions cannot be used with "new", so the factory must use
-    // a "function" function.
     if (!video.controls) {
-      // eslint-disable-next-line no-restricted-syntax
-      const textDisplayer = function() {
-        return new shaka.ui.TextDisplayer(video, videoContainer);
-      };
+      const textDisplayer =
+          () => new shaka.ui.TextDisplayer(video, videoContainer);
       player.configure('textDisplayFactory', textDisplayer);
     }
 

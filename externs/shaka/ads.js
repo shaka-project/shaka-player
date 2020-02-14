@@ -78,9 +78,9 @@ shaka.extern.IAdManager = class extends EventTarget {
 
 
 /**
- * A factory for creating the ad manager.  This will be called with 'new'.
+ * A factory for creating the ad manager.
  *
- * @typedef {function(new:shaka.extern.IAdManager)}
+ * @typedef {function():!shaka.extern.IAdManager}
  * @exportDoc
  */
 shaka.extern.IAdManager.Factory;

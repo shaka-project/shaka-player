@@ -378,7 +378,7 @@ shaka.extern.TextParser.TimeContext;
 
 
 /**
- * @typedef {function(new:shaka.extern.TextParser)}
+ * @typedef {function():!shaka.extern.TextParser}
  * @exportDoc
  */
 shaka.extern.TextParserPlugin;
@@ -461,7 +461,7 @@ shaka.extern.TextDisplayer = class {
 /**
  * A factory for creating a TextDisplayer.
  *
- * @typedef {function(new:shaka.extern.TextDisplayer)}
+ * @typedef {function():!shaka.extern.TextDisplayer}
  * @exportDoc
  */
 shaka.extern.TextDisplayer.Factory;
