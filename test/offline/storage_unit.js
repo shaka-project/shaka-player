@@ -702,34 +702,31 @@ describe('Storage', function() {
       });
     }));
 
-    it('only stores chosen tracks', checkAndRun(async function() {
+    it('only stores chosen tracks', checkAndRun(async () => {
       // Change storage to only store one track so that it will be easy
-      // for use to ensure that only the one track was stored.
-      let selectTrack = (tracks) => {
+      // for us to ensure that only the one track was stored.
+      const selectTracks = (tracks) => {
         let selected = tracks.filter((t) => t.language == frenchCanadian);
         expect(selected.length).toBe(1);
         return selected;
       };
       storage.configure({
         offline: {
-          trackSelectionCallback: selectTrack,
+          trackSelectionCallback: selectTracks,
         },
       });
 
       // Stored content should reflect the tracks in the first period, so we
       // should only find track there.
-      let stored = await storage.store(
+      const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
-      expect(stored).toBeTruthy();
-      expect(stored.tracks).toBeTruthy();
       expect(stored.tracks.length).toBe(1);
       expect(stored.tracks[0].language).toBe(frenchCanadian);
 
       // Pull the manifest out of storage so that we can ensure that it only
       // has one variant.
       /** @type {shaka.offline.OfflineUri} */
-      let uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
-      expect(uri).toBeTruthy();
+      const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
 
       /** @type {!shaka.offline.StorageMuxer} */
       const muxer = new shaka.offline.StorageMuxer();
@@ -738,26 +735,38 @@ describe('Storage', function() {
         await muxer.init();
         let cell = await muxer.getCell(uri.mechanism(), uri.cell());
         let manifests = await cell.getManifests([uri.key()]);
-        expect(manifests).toBeTruthy();
         expect(manifests.length).toBe(1);
 
         let manifest = manifests[0];
-        expect(manifest).toBeTruthy();
-        expect(manifest.periods).toBeTruthy();
         expect(manifest.periods.length).toBe(1);
 
         let period = manifest.periods[0];
-        expect(period).toBeTruthy();
-        expect(period.streams).toBeTruthy();
         // There should be 2 streams, an audio and a video stream.
         expect(period.streams.length).toBe(2);
 
         let audio = period.streams.filter((s) => s.contentType == 'audio')[0];
-        expect(audio).toBeTruthy();
         expect(audio.language).toBe(frenchCanadian);
       } finally {
         await muxer.destroy();
       }
+    }));
+
+    it('can choose tracks asynchronously', checkAndRun(async () => {
+      storage.configure({
+        offline: {
+          trackSelectionCallback: async (tracks) => {
+            await shaka.test.Util.delay(0.1);
+            const selected = tracks.filter((t) => t.language == frenchCanadian);
+            expect(selected.length).toBe(1);
+            return selected;
+          },
+        },
+      });
+
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
+      expect(stored.tracks.length).toBe(1);
+      expect(stored.tracks[0].language).toBe(frenchCanadian);
     }));
 
     it('stores drm info without license', checkAndRun(async function() {
