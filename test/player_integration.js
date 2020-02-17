@@ -690,6 +690,48 @@ describe('Player', function() {
       throw new Error('Timeout waiting to buffer');
     }
   });
+
+  describe('configuration', () => {
+    it('has the correct number of arguments in compiled callbacks', () => {
+      // Get the default configuration for both the compiled & uncompiled
+      // versions for comparison.
+      const compiledConfig = (new compiledShaka.Player()).getConfiguration();
+      const uncompiledConfig = (new shaka.Player()).getConfiguration();
+
+      compareConfigFunctions(compiledConfig, uncompiledConfig);
+
+      /**
+       * Find all the callbacks in the configuration recursively and compare
+       * their lengths (number of arguments).  We warn the app developer when a
+       * configured callback has the wrong number of arguments, so our own
+       * compiled versions must be correct.
+       *
+       * @param {Object} compiled
+       * @param {Object} uncompiled
+       * @param {string=} basePath The path to this point in the config, for
+       *   logging purposes.
+       */
+      function compareConfigFunctions(compiled, uncompiled, basePath = '') {
+        for (const key in uncompiled) {
+          const uncompiledValue = uncompiled[key];
+          const compiledValue = compiled[key];
+          const path = basePath + '.' + key;
+
+          if (uncompiledValue && uncompiledValue.constructor == Object) {
+            // This is an anonymous Object, so recurse on it.
+            compareConfigFunctions(compiledValue, uncompiledValue, path);
+          } else if (typeof uncompiledValue == 'function') {
+            // This is a function, so check its length.  The uncompiled version
+            // is considered canonically correct, so we use the uncompiled
+            // length as the expectation.
+            shaka.log.debug('[' + path + ']',
+                compiledValue.length, 'should be', uncompiledValue.length);
+            expect(compiledValue.length).toBe(uncompiledValue.length);
+          }
+        }
+      }
+    });
+  });  // describe('configuration')
 });
 
 // TODO(vaage): Try to group the stat tests together.
