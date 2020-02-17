@@ -104,7 +104,9 @@ describe('HlsParser', () => {
         .setResponseText('test:/video2', media)
         .setResponseText('test:/main.vtt', vttText)
         .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/init2.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseValue('test:/main2.mp4', segmentData)
         .setResponseValue('test:/main.test', segmentData)
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
@@ -1609,6 +1611,51 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('allows multiple init segments', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
+      'audio\n',
+      '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video"',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXT-X-MAP:URI="init2.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main2.mp4',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/init2.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseValue('test:/main2.mp4', segmentData);
+
+    const actualManifest = await parser.start('test:/master', playerInterface);
+    const actualVideo = actualManifest.periods[0].variants[0].video;
+    await actualVideo.createSegmentIndex();
+
+    // Verify that the stream contains two segment references, each of the
+    // SegmentReference object contains the InitSegmentReference with expected
+    // uri.
+    const segment = actualVideo.segmentIndex.get(0);
+    expect(segment.initSegmentReference.getUris()[0])
+        .toBe('test:/init.mp4');
+    const segment2 = actualVideo.segmentIndex.get(1);
+    expect(segment2.initSegmentReference.getUris()[0])
+        .toBe('test:/init2.mp4');
+  });
+
   it('drops variants encrypted with AES-128', async () => {
     const master = [
       '#EXTM3U\n',
@@ -1738,33 +1785,6 @@ describe('HlsParser', () => {
       await expectAsync(parser.start('test:/master', playerInterface))
           .toBeRejectedWith(Util.jasmineError(error));
     }
-
-    it('if multiple init sections were provided', async () => {
-      const master = [
-        '#EXTM3U\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
-        'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
-        'audio\n',
-        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video"',
-      ].join('');
-
-      const media = [
-        '#EXTM3U\n',
-        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
-        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
-        '#EXT-X-PLAYLIST-TYPE:VOD\n',
-        '#EXTINF:5,\n',
-        '#EXT-X-BYTERANGE:121090@616\n',
-        'main.mp4',
-      ].join('');
-
-      const error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          Code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
-
-      await verifyError(master, media, error);
-    });
 
     it('if unable to guess mime type', async () => {
       const master = [
