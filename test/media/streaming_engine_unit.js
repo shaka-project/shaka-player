@@ -3097,7 +3097,8 @@ describe('StreamingEngine', () => {
           return new shaka.media.SegmentReference(
               seg.position, seg.startTime, seg.endTime, seg.getUris,
               /* startByte= */ 0, /* endByte= */ null,
-              /* initSegmentReference */ null, /* presentationTimeOffset */ 0);
+              /* initSegmentReference= */ null, /* timestampOffset= */ 0,
+              /* appendWindowStart= */ 0, /* appendWindowEnd= */ Infinity);
         } else {
           return seg;
         }
