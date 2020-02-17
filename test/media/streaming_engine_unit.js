@@ -3024,6 +3024,32 @@ describe('StreamingEngine', function() {
       bufferAndCheck(/* didAbort= */ true, /* hasInit= */ true);
     });
 
+    it('still aborts if new segment size unknown', () => {
+      const videoStream = manifest.periods[0].variants[1].video;
+      videoStream.bandwidth = 10;
+      const oldGet = videoStream.getSegmentReference;
+      videoStream.getSegmentReference = (idx) => {
+        // eslint-disable-next-line no-restricted-syntax
+        const seg = oldGet.call(videoStream, idx);
+        if (seg) {
+          // With endByte being null, we won't know the segment size.
+          // Segment size has to be calculated with times and bandwidth.
+          return new shaka.media.SegmentReference(
+              seg.position, seg.startTime, seg.endTime, seg.getUris,
+              /* startByte= */ 0, /* endByte= */ null);
+        } else {
+          return seg;
+        }
+      };
+
+      prepareForAbort();
+
+      streamingEngine.switchVariant(
+          newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+
+      bufferAndCheck(/* didAbort= */ true);
+    });
+
     /**
      * Creates and starts the StreamingEngine instance.  After this returns,
      * it should be waiting for the second segment request to complete.
