@@ -3083,8 +3083,9 @@ describe('StreamingEngine', () => {
       expect(secondRequest.abort).toHaveBeenCalled();
     });
 
-    it('aborts segment without size', async () => {
-      const videoStream = manifest.periods[0].variants[0].video;
+    it('still aborts if new segment size unknown', async () => {
+      const videoStream = manifest.periods[0].variants[1].video;
+      videoStream.bandwidth = 10;
       await videoStream.createSegmentIndex();
       const segmentIndex = videoStream.segmentIndex;
       const oldGet = segmentIndex.get;
