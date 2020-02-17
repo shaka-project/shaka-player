@@ -63,6 +63,8 @@ const ShakaDemoAssetInfo = class {
     this.clearKeys = new Map(); // TODO: Setter method?
     /** @type {?Object} */
     this.extraConfig = null;
+    /** @type {?string} */
+    this.adTagUri = null;
 
     // Offline storage values.
     /** @type {?function()} */
@@ -175,6 +177,16 @@ const ShakaDemoAssetInfo = class {
    */
   addLicenseServer(keySystem, licenseServer) {
     this.licenseServers.set(keySystem, licenseServer);
+    return this;
+  }
+
+  /**
+   * @param {string} uri
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setAdTagUri(uri) {
+    this.adTagUri = uri;
+    this.addFeature(shakaAssets.Feature.ADS);
     return this;
   }
 

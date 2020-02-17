@@ -6,7 +6,7 @@
       "max-line-length": [ 80, {
         ignorePattern: "/^@import\\s+/",
       }],
-      "selector-list-comma-newline-after": "never-multi-line",
+      "selector-list-comma-newline-after": "always-multi-line",
       "selector-pseudo-element-colon-notation": "single",
       "unit-whitelist": ["em", "%", "px", "s", "deg", "vmin", "ms", "vh"]
     }

@@ -182,7 +182,7 @@ filterDescribe('IndexeddbStorageCell', () => window.indexedDB, () => {
         connection,
         segmentStore,
         manifestStore,
-        false /* allow add operations */);
+        /* allow= */ false);
 
     // Track the cell so that we can destroy it when the test is over.
     cells.push(cell);

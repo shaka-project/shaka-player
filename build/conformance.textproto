@@ -329,3 +329,15 @@ requirement: {
   error_message: 'ES6 TypedArray methods are not allowed '
                  'because they are not supported in IE11'
 }
+
+# Disallow the general use of fetch, which is not available on all supported
+# platforms.
+requirement: {
+  type: BANNED_NAME_CALL
+  value: 'fetch'
+  value: 'window.fetch'
+  error_message: 'Using "fetch" directly is not allowed; '
+                 'use shaka.test.Util.fetch or NetworkingEngine.request '
+                 'instead.'
+  whitelist_regexp: 'lib/net/http_fetch_plugin.js'
+}

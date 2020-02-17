@@ -95,6 +95,29 @@ describe('DashParser Live', () => {
   }
 
   /**
+   * Make clones of a list of references so that they can be modified without
+   * affecting the originals.
+   *
+   * @param {!Array.<!shaka.media.SegmentReference>} references
+   * @return {!Array.<!shaka.media.SegmentReference>}
+   */
+  function cloneRefs(references) {
+    return references.map((ref) => {
+      return new shaka.media.SegmentReference(
+          ref.position,
+          ref.startTime,
+          ref.endTime,
+          ref.getUris,
+          ref.startByte,
+          ref.endByte,
+          ref.initSegmentReference,
+          ref.timestampOffset,
+          ref.appendWindowStart,
+          ref.appendWindowEnd);
+    });
+  }
+
+  /**
    * Creates tests that test the behavior common between SegmentList and
    * SegmentTemplate.
    *
@@ -234,12 +257,21 @@ describe('DashParser Live', () => {
       Date.now = () => 0;
       const manifest = await parser.start('dummy://foo', playerInterface);
 
+      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      const period1Refs = cloneRefs(basicRefs);
+      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      const period2Refs = cloneRefs(basicRefs);
+      for (const ref of period2Refs) {
+        ref.startTime += pStart;
+        ref.endTime += pStart;
+      }
+
       const stream1 = manifest.periods[0].variants[0].video;
       const stream2 = manifest.periods[1].variants[0].video;
       await stream1.createSegmentIndex();
       await stream2.createSegmentIndex();
-      ManifestParser.verifySegmentIndex(stream1, basicRefs);
-      ManifestParser.verifySegmentIndex(stream2, basicRefs);
+      ManifestParser.verifySegmentIndex(stream1, period1Refs);
+      ManifestParser.verifySegmentIndex(stream2, period2Refs);
 
       // The 60 second availability window is initially full in all cases
       // (SegmentTemplate+Timeline, etc.)  The first segment is always 10
@@ -249,14 +281,14 @@ describe('DashParser Live', () => {
       Date.now = () => 11 * 1000;
       await updateManifest();
       // The first reference should have been evicted.
-      ManifestParser.verifySegmentIndex(stream1, basicRefs.slice(1));
-      ManifestParser.verifySegmentIndex(stream2, basicRefs);
+      ManifestParser.verifySegmentIndex(stream1, period1Refs.slice(1));
+      ManifestParser.verifySegmentIndex(stream2, period2Refs);
 
       // Same as above, but 1 period length later
       Date.now = () => (11 + pStart) * 1000;
       await updateManifest();
       ManifestParser.verifySegmentIndex(stream1, []);
-      ManifestParser.verifySegmentIndex(stream2, basicRefs.slice(1));
+      ManifestParser.verifySegmentIndex(stream2, period2Refs.slice(1));
     });
 
     it('sets infinite duration for single-period live streams', async () => {
@@ -469,7 +501,7 @@ describe('DashParser Live', () => {
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
     // updateTime parameter sets @minimumUpdatePeriod in the manifest.
-    const manifestText = makeSimpleLiveManifestText(lines, /* updateTime */ 0);
+    const manifestText = makeSimpleLiveManifestText(lines, /* updateTime= */ 0);
 
     /** @type {!jasmine.Spy} */
     const tickAfter = updateTickSpy();
@@ -490,7 +522,7 @@ describe('DashParser Live', () => {
     ];
     // updateTime parameter sets @minimumUpdatePeriod in the manifest.
     const manifestText =
-        makeSimpleLiveManifestText(lines, /* updateTime */ null);
+        makeSimpleLiveManifestText(lines, /* updateTime= */ null);
 
     /** @type {!jasmine.Spy} */
     const tickAfter = updateTickSpy();
@@ -1212,5 +1244,58 @@ describe('DashParser Live', () => {
     // Now make sure we made the time sync request.
     const timingRequest = shaka.net.NetworkingEngine.RequestType.TIMING;
     fakeNetEngine.expectRequest('dummy://time', timingRequest);
+  });
+
+  it('adds segments to in-progress recordings', async () => {
+    const manifestText = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '      mediaPresentationDuration="PT10S">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    // The presentation started just over 4 seconds ago.  There should be 2
+    // segments so far.
+    Date.now = () => 4.1 * 1000;
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    // Make sure we're testing what we think we're testing.
+    // This should be seen as in-progress.
+    expect(manifest.presentationTimeline.isInProgress()).toBe(true);
+
+    const stream = manifest.periods[0].variants[0].video;
+    expect(stream).toBeTruthy();
+
+    await stream.createSegmentIndex();
+    expect(stream.segmentIndex).toBeTruthy();
+
+    // Check for the 2 initial segments we're expecting.
+    ManifestParser.verifySegmentIndex(stream, [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 2, 4, originalUri),
+    ]);
+
+    // Just over 10 seconds after the presentation started, we should now have
+    // all 5 segments.  In order to trick the system into updating, we must both
+    // fake the current time and wait long enough for the timer to fire and
+    // update the references.
+    Date.now = () => 10.1 * 1000;
+    await shaka.test.Util.delay(2.1);  // A little longer than the segments are.
+
+    ManifestParser.verifySegmentIndex(stream, [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 2, 4, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 4, 6, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 6, 8, originalUri),
+      shaka.test.ManifestParser.makeReference('s5.mp4', 5, 8, 10, originalUri),
+    ]);
   });
 });

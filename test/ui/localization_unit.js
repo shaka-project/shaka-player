@@ -187,7 +187,7 @@ describe('Localization', () => {
     it('fires when we change to a locale we have not loaded', () => {
       const events = [];
 
-      const localization = new Localization(/* fallback */ HALFLING_COMMON);
+      const localization = new Localization(/* fallback= */ HALFLING_COMMON);
       collectEvents(localization, Localization.UNKNOWN_LOCALES, events);
 
       localization.insert(HALFLING_COMMON, new Map());
@@ -201,7 +201,7 @@ describe('Localization', () => {
     it('will not fire after we add the locale', () => {
       const events = [];
 
-      const localization = new Localization(/* fallback */ HALFLING_COMMON);
+      const localization = new Localization(/* fallback= */ HALFLING_COMMON);
       collectEvents(localization, Localization.UNKNOWN_LOCALES, events);
 
       // We should see an event telling us that both elvish and dwarfish are

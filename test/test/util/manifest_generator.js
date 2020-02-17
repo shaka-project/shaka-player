@@ -75,6 +75,9 @@ shaka.test.ManifestGenerator = class {
 };
 
 shaka.test.ManifestGenerator.Manifest = class {
+  // TODO(joeyparrish): Upgrade these question marks to "typeof shaka" after
+  // compiler update to 20190910 or later.  We currently get NO TYPE CHECKS for
+  // any Shaka library calls made by the manifest generator through shaka_.
   /** @param {?=} shaka */
   constructor(shaka) {
     /** @private {?} */
@@ -548,6 +551,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.codecs = defaultCodecs;
       /** @type {(number|undefined)} */
       this.frameRate = undefined;
+      /** @type {(string|undefined)} */
+      this.pixelAspectRatio = undefined;
       /** @type {(number|undefined)} */
       this.bandwidth = undefined;
       /** @type {(number|undefined)} */
@@ -574,6 +579,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.roles = [];
       /** @type {?number} */
       this.channelsCount = null;
+      /** @type {?number} */
+      this.audioSamplingRate = null;
       /** @type {Map.<string, string>} */
       this.closedCaptions = null;
     }
@@ -602,8 +609,17 @@ shaka.test.ManifestGenerator.Stream = class {
   useSegmentTemplate(template, segmentDuration, segmentSize = null) {
     const totalDuration = this.manifest_.presentationTimeline.getDuration();
     const segmentCount = totalDuration / segmentDuration;
+    const currentPeriod = this.manifest_.currentPeriod_;
+    const periodStart = currentPeriod.startTime;
+
     this.createSegmentIndex = () => Promise.resolve();
-    this.segmentIndex.find = (time) => Math.floor(time / segmentDuration);
+
+    this.segmentIndex.find = (time) => {
+      // Note: |time| is relative to the presentation.
+      const periodTime = time - periodStart;
+      return Math.floor(periodTime / segmentDuration);
+    };
+
     this.segmentIndex.get = (index) => {
       goog.asserts.assert(!isNaN(index), 'Invalid index requested!');
       if (index < 0 || index >= segmentCount || isNaN(index)) {
@@ -613,8 +629,16 @@ shaka.test.ManifestGenerator.Stream = class {
       const start = index * segmentDuration;
       const end = Math.min(totalDuration, (index + 1) * segmentDuration);
       return new this.manifest_.shaka_.media.SegmentReference(
-          index, start, end, getUris, 0, segmentSize,
-          this.initSegmentReference_, 0);
+          index,
+          /* startTime= */ periodStart + start,
+          /* endTime= */ periodStart + end,
+          getUris,
+          /* startByte= */ 0,
+          /* endByte= */ segmentSize,
+          this.initSegmentReference_,
+          /* timestampOffset= */ periodStart,
+          /* appendWindowStart= */ periodStart,
+          /* appendWindowEnd= */ Infinity);
     };
   }
 
@@ -632,7 +656,7 @@ shaka.test.ManifestGenerator.Stream = class {
     };
     this.segmentIndex =
         this.manifest_.shaka_.media.SegmentIndex.forSingleSegment(
-            duration, [uri]);
+            /* startTime= */ 0, duration, [uri]);
   }
 
   /**

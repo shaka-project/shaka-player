@@ -58,7 +58,7 @@ describe('RegionObserver', () => {
     // Make sure we call |onEnter| when we enter the region.
     poll(observer,
         /* timeInSeconds= */ 7,
-        /* seeking */ false);
+        /* seeking= */ false);
     expect(onEnterRegion).toHaveBeenCalledOnceMoreWith([region, false]);
   });
 
@@ -69,7 +69,7 @@ describe('RegionObserver', () => {
     // Make sure we call |onEnter| when we enter the region.
     poll(observer,
         /* timeInSeconds= */ 7,
-        /* seeking */ false);
+        /* seeking= */ false);
     expect(onEnterRegion).toHaveBeenCalledOnceMoreWith([region, false]);
 
     poll(observer,
@@ -90,12 +90,12 @@ describe('RegionObserver', () => {
     // Move into the region (we must be in the region to leave it).
     poll(observer,
         /* timeInSeconds= */ 7,
-        /* seeking */ false);
+        /* seeking= */ false);
 
     // Make sure we call |onExit| when we exit the region.
     poll(observer,
         /* timeInSeconds= */ 15,
-        /* seeking */ false);
+        /* seeking= */ false);
     expect(onExitRegion).toHaveBeenCalledOnceMoreWith([region, false]);
   });
 
@@ -106,14 +106,14 @@ describe('RegionObserver', () => {
     // Make sure we are before the region starts.
     poll(observer,
         /* timeInSeconds= */ 4,
-        /* seeking */ false);
+        /* seeking= */ false);
     expect(onSkipRegion).not.toHaveBeenCalled();
 
     // Make sure we call |onSkip| when we move so far that we skip over the
     // region.
     poll(observer,
         /* timeInSeconds= */ 15,
-        /* seeking */ false);
+        /* seeking= */ false);
     expect(onSkipRegion).toHaveBeenCalledOnceMoreWith([region, false]);
   });
 
@@ -125,14 +125,14 @@ describe('RegionObserver', () => {
     // Make sure we are before the region starts.
     poll(observer,
         /* timeInSeconds= */ 4,
-        /* seeking */ false);
+        /* seeking= */ false);
     expect(onSkipRegion).not.toHaveBeenCalled();
 
     // Make sure we call |onSkip| when we move so far that we skip over the
     // region.
     poll(observer,
         /* timeInSeconds= */ 10,
-        /* seeking */ false);
+        /* seeking= */ false);
     expect(onSkipRegion).toHaveBeenCalledOnceMoreWith([region, false]);
   });
 

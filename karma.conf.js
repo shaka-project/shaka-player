@@ -119,6 +119,8 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
+      {pattern: 'demo/locales/en.json', included: false},
+      {pattern: 'demo/locales/source.json', included: false},
       {pattern: 'node_modules/**/*.js', included: false},
     ],
 

@@ -286,8 +286,8 @@ describe('Walker', () => {
     // be non-interruptible and the second route interruptible so that we can
     // see both types be cancelled by |destroy|. The non-interruptible route
     // must before first or else it would interrupt the other route.
-    const goToC = startNewRoute(nodeC, /* interruptible */ false);
-    const goToB = startNewRoute(nodeB, /* interruptible */ true);
+    const goToC = startNewRoute(nodeC, /* interruptible= */ false);
+    const goToB = startNewRoute(nodeB, /* interruptible= */ true);
 
     /** @type {jasmine.Spy} */
     const canceledCSpy = jasmine.createSpy('cancel c');
@@ -325,7 +325,7 @@ describe('Walker', () => {
     // Go to D (passing through C). This should throw an error, so wait for the
     // error to be seen. The route must be abortable because we are going to
     // throw an abortable error.
-    await failsRoute(startNewRoute(nodeD, /* interruptible */ true));
+    await failsRoute(startNewRoute(nodeD, /* interruptible= */ true));
 
     expect(handleErrorSpy).toHaveBeenCalled();
   });
@@ -347,11 +347,11 @@ describe('Walker', () => {
 
     // Wait for us to enter node d before continuing. We introduce a small delay
     // to ensure that we are "stuck" on the abortable operation.
-    const goingToD = startNewRoute(nodeD, /* interruptible */ true);
+    const goingToD = startNewRoute(nodeD, /* interruptible= */ true);
     await waitUntilEntering(goingToD, nodeC);
     await shaka.test.Util.shortDelay();
 
-    await completesRoute(startNewRoute(nodeE, /* interruptible */ true));
+    await completesRoute(startNewRoute(nodeE, /* interruptible= */ true));
     expect(handleErrorSpy).toHaveBeenCalled();
   });
 
@@ -369,7 +369,7 @@ describe('Walker', () => {
 
     // Wait for us to enter node d before continuing. We introduce a small delay
     // to ensure that we are "stuck" on the abortable operation.
-    const goingToD = startNewRoute(nodeD, /* interruptible */ true);
+    const goingToD = startNewRoute(nodeD, /* interruptible= */ true);
     await waitUntilEntering(goingToD, nodeC);
     await shaka.test.Util.shortDelay();
 

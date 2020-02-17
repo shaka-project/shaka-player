@@ -1,18 +1,6 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 /* Ad controls. */
@@ -26,14 +14,24 @@
   .absolute-position();
   .fill-container();
 
-  /* IMA SDK ads their own ad UI into an iframe element.
-  Hide it, so only our UI is visible. */
+  &:not([ad-active="true"]) {
+    pointer-events: none;
+  }
+
+  /* IMA SDK adds their own ad UI into an iframe element.
+   * Hide it when shaka controls are enabled, so we can show
+   * our own UI. Show it when shaka controls are disabled
+   * (and native controls are enabled). */
   iframe {
-    display: none;
+    .shaka-video-container[shaka-controls="true"] & {
+      .hidden();
+    }
   }
 }
 
 .shaka-ad-controls {
+  .hide-when-shaka-controls-disabled();
+
   display: flex;
   flex-direction: row;
   z-index: 1;

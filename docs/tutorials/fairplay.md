@@ -52,7 +52,7 @@ player.getNetworkingEngine().registerRequestFilter((type, request) => {
   request.body = shaka.util.StringUtils.toUTF8(encodeURIComponent(params));
 });
 
-player.getNetworkingEngine().registerResponseFilter((type, request) => {
+player.getNetworkingEngine().registerResponseFilter((type, response) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }

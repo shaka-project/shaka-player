@@ -31,7 +31,7 @@ describe('UI Customization', () => {
       /** @type {!HTMLElement} */ (document.createElement('div'));
     document.body.appendChild(container);
 
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     container.appendChild(video);
   });
 
@@ -57,40 +57,48 @@ describe('UI Customization', () => {
     UiUtils.confirmElementMissing(container, 'shaka-caption-button');
   });
 
-  it('seek bar is not created unless configured', () => {
-    const config = {addSeekBar: false};
-    UiUtils.createUIThroughAPI(container, video, config);
-
+  it('seek bar only created when configured', async () => {
+    const ui =
+        UiUtils.createUIThroughAPI(container, video, {addSeekBar: false});
     UiUtils.confirmElementMissing(container, 'shaka-seek-bar');
-  });
+    await ui.destroy();
 
-  it('seek bar is created when configured', () => {
-    const config = {addSeekBar: true};
-    UiUtils.createUIThroughAPI(container, video, config);
-
+    UiUtils.createUIThroughAPI(container, video, {addSeekBar: true});
     UiUtils.confirmElementFound(container, 'shaka-seek-bar');
   });
 
-  it('settings menus are positioned lower when seek bar is absent',
-      () => {
-        const config = {addSeekBar: false};
-        UiUtils.createUIThroughAPI(container, video, config);
+  it('big play button only created when configured', async () => {
+    const ui =
+        UiUtils.createUIThroughAPI(container, video, {addBigPlayButton: false});
+    UiUtils.confirmElementMissing(container, 'shaka-play-button-container');
+    UiUtils.confirmElementMissing(container, 'shaka-play-button');
+    await ui.destroy();
 
-        function confirmLowPosition(className) {
-          const elements =
-            container.getElementsByClassName(className);
-          expect(elements.length).toBe(1);
-          expect(
-              elements[0].classList.contains('shaka-low-position')).toBe(true);
-        }
+    UiUtils.createUIThroughAPI(container, video, {addBigPlayButton: true});
+    UiUtils.confirmElementFound(container, 'shaka-play-button-container');
+    UiUtils.confirmElementFound(container, 'shaka-play-button');
+  });
 
-        UiUtils.confirmElementMissing(container, 'shaka-seek-bar');
+  it('settings menus are positioned lower when seek bar is absent', () => {
+    const config = {addSeekBar: false};
+    UiUtils.createUIThroughAPI(container, video, config);
 
-        confirmLowPosition('shaka-overflow-menu');
-        confirmLowPosition('shaka-resolutions');
-        confirmLowPosition('shaka-audio-languages');
-        confirmLowPosition('shaka-text-languages');
-      });
+    function confirmLowPosition(className) {
+      const elements =
+        container.getElementsByClassName(className);
+      expect(elements.length).toBe(1);
+      expect(
+          elements[0].classList.contains('shaka-low-position')).toBe(true);
+    }
+
+    UiUtils.confirmElementMissing(container, 'shaka-seek-bar');
+
+    confirmLowPosition('shaka-overflow-menu');
+    confirmLowPosition('shaka-resolutions');
+    confirmLowPosition('shaka-audio-languages');
+    confirmLowPosition('shaka-text-languages');
+    confirmLowPosition('shaka-playback-rates');
+  });
 
   it('controls are created in specified order', () => {
     const config = {

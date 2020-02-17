@@ -66,12 +66,16 @@ shaka.extern.StateChange;
  *
  *   decodedFrames: number,
  *   droppedFrames: number,
+ *   corruptedFrames: number,
  *   estimatedBandwidth: number,
  *
  *   loadLatency: number,
+ *   manifestTimeSeconds: number,
+ *   drmTimeSeconds: number,
  *   playTime: number,
  *   pauseTime: number,
  *   bufferingTime: number,
+ *   licenseTime: number,
  *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
@@ -89,12 +93,16 @@ shaka.extern.StateChange;
  *   The height of the current video track.
  * @property {number} streamBandwidth
  *   The bandwidth required for the current streams (total, in bit/sec).
+ *   It takes into account the playbackrate.
  *
  * @property {number} decodedFrames
  *   The total number of frames decoded by the Player.  This may be
  *   <code>NaN</code> if this is not supported by the browser.
  * @property {number} droppedFrames
  *   The total number of frames dropped by the Player.  This may be
+ *   <code>NaN</code> if this is not supported by the browser.
+ * @property {number} corruptedFrames
+ *   The total number of corrupted frames dropped by the browser.  This may be
  *   <code>NaN</code> if this is not supported by the browser.
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
@@ -103,12 +111,18 @@ shaka.extern.StateChange;
  *   This is the number of seconds it took for the video element to have enough
  *   data to begin playback.  This is measured from the time load() is called to
  *   the time the <code>'loadeddata'</code> event is fired by the media element.
+ * @property {number} manifestTimeSeconds
+ *   The amount of time it took to download and parse the manifest.
+ * @property {number} drmTimeSeconds
+ *   The amount of time it took to download the first drm key.
  * @property {number} playTime
  *   The total time spent in a playing state in seconds.
  * @property {number} pauseTime
  *   The total time spent in a paused state in seconds.
  * @property {number} bufferingTime
  *   The total time spent in a buffering state in seconds.
+ * @property {number} licenseTime
+ *   The time spent on license requests during this session in seconds, or NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
@@ -176,6 +190,7 @@ shaka.extern.BufferedInfo;
  *   width: ?number,
  *   height: ?number,
  *   frameRate: ?number,
+ *   pixelAspectRatio: ?string,
  *   mimeType: ?string,
  *   codecs: ?string,
  *   audioCodec: ?string,
@@ -186,6 +201,7 @@ shaka.extern.BufferedInfo;
  *   videoId: ?number,
  *   audioId: ?number,
  *   channelsCount: ?number,
+ *   audioSamplingRate: ?number,
  *   audioBandwidth: ?number,
  *   videoBandwidth: ?number,
  *   originalVideoId: ?string,
@@ -224,6 +240,8 @@ shaka.extern.BufferedInfo;
  *   The video height provided in the manifest, if present.
  * @property {?number} frameRate
  *   The video framerate provided in the manifest, if present.
+ * @property {?string} pixelAspectRatio
+ *   The video pixel aspect ratio provided in the manifest, if present.
  * @property {?string} mimeType
  *   The MIME type of the content provided in the manifest.
  * @property {?string} codecs
@@ -251,6 +269,8 @@ shaka.extern.BufferedInfo;
  *   (only for variant tracks) The audio stream id.
  * @property {?number} channelsCount
  *   The count of the audio track channels.
+ * @property {?number} audioSamplingRate
+ *   Specifies the maximum sampling rate of the content.
  * @property {?number} audioBandwidth
  *   (only for variant tracks) The audio stream's bandwidth if known.
  * @property {?number} videoBandwidth
@@ -277,6 +297,9 @@ shaka.extern.Track;
  *   maxHeight: number,
  *   minPixels: number,
  *   maxPixels: number,
+ *
+ *   minFrameRate: number,
+ *   maxFrameRate: number,
  *
  *   minBandwidth: number,
  *   maxBandwidth: number
@@ -306,6 +329,11 @@ shaka.extern.Track;
  * @property {number} maxPixels
  *   The maximum number of total pixels in a video track (i.e.
  *   <code>width * height</code>).
+ *
+ * @property {number} minFrameRate
+ *   The minimum framerate of a variant track.
+ * @property {number} maxFrameRate
+ *   The maximum framerate of a variant track.
  *
  * @property {number} minBandwidth
  *   The minimum bandwidth of a variant track, in bit/sec.
@@ -486,7 +514,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
- *       ((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined)
+ *       ((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined),
+ *   logLicenseExchange: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -514,6 +543,12 @@ shaka.extern.AdvancedDrmConfiguration;
  *   If given, this function is called with the init data from the
  *   manifest/media and should return the (possibly transformed) init data to
  *   pass to the browser.
+ * @property {boolean} logLicenseExchange
+ *   <i>Optional.</i><br>
+ *   If set to <code>true</code>, prints logs containing the license exchange.
+ *   This includes the init data, request, and response data, printed as base64
+ *   strings.  Don't use in production, for debugging only; has no affect in
+ *   release builds as logging is removed.
  *
  * @exportDoc
  */
@@ -530,7 +565,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
  *   initialSegmentLimit: number,
- *   ignoreSuggestedPresentationDelay: boolean
+ *   ignoreSuggestedPresentationDelay: boolean,
+ *   ignoreEmptyAdaptationSet: boolean
  * }}
  *
  * @property {shaka.extern.DashContentProtectionCallback} customScheme
@@ -574,6 +610,10 @@ shaka.extern.DrmConfiguration;
  *   If true will cause DASH parser to ignore
  *   <code>suggestedPresentationDelay</code> from manifest. Defaults to
  *   <code>false</code> if not provided.
+ * @property {boolean} ignoreEmptyAdaptationSet
+ *   If true will cause DASH parser to ignore
+ *   empty <code>AdaptationSet</code> from manifest. Defaults to
+ *   <code>false</code> if not provided.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -598,6 +638,7 @@ shaka.extern.HlsManifestConfiguration;
  *   availabilityWindowOverride: number,
  *   disableAudio: boolean,
  *   disableVideo: boolean,
+ *   disableText: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
  * }}
@@ -614,6 +655,9 @@ shaka.extern.HlsManifestConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} disableVideo
  *   If <code>true</code>, the video tracks are ignored.
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableText
+ *   If <code>true</code>, the text tracks are ignored.
  *   Defaults to <code>false</code>.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
@@ -643,7 +687,8 @@ shaka.extern.ManifestConfiguration;
  *   stallEnabled: boolean,
  *   stallThreshold: number,
  *   stallSkip: number,
- *   useNativeHlsOnSafari: boolean
+ *   useNativeHlsOnSafari: boolean,
+ *   inaccurateManifestTolerance: number
  * }}
  *
  * @description
@@ -724,6 +769,11 @@ shaka.extern.ManifestConfiguration;
  *   Depending on the application's needs, it may prefer one over the other.
  *   Examples: FairPlay is only supported via Safari's native HLS, but it
  *   doesn't have an API for selecting specific tracks.
+ * @property {number} inaccurateManifestTolerance
+ *   The maximum difference, in seconds, between the times in the manifest and
+ *   the times in the segments.  Larger values allow us to compensate for more
+ *   drift (up to one segment duration).  Smaller values reduce the incidence of
+ *   extra segment requests necessary to compensate for drift
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

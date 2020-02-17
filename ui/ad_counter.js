@@ -93,9 +93,9 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
     if (secondsLeft > 0) {
       const timePassed = this.ad.getDuration() - secondsLeft;
       const timePassedStr =
-          shaka.ui.Utils.buildTimeString(timePassed, /* showHour */ false);
+          shaka.ui.Utils.buildTimeString(timePassed, /* showHour= */ false);
       const adLength = shaka.ui.Utils.buildTimeString(
-          this.ad.getDuration(), /* showHour */ false);
+          this.ad.getDuration(), /* showHour= */ false);
       const timeString = timePassedStr + ' / ' + adLength;
 
       const adsInAdPod = this.ad.getSequenceLength();

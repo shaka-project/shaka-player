@@ -364,8 +364,8 @@ describe('DashParser ContentProtection', () => {
           buildDrmInfo('com.microsoft.playready'),
           buildDrmInfo('com.adobe.primetime'),
         ])));
-    await testDashParser(source, expected, /* callback */ undefined,
-        /* ignoreDrmInfo */ true);
+    await testDashParser(source, expected, /* callback= */ undefined,
+        /* ignoreDrmInfo= */ true);
   });
 
   it('parses key IDs when ignoreDrmInfo flag is set', async () => {
@@ -391,8 +391,8 @@ describe('DashParser ContentProtection', () => {
           buildDrmInfo('com.microsoft.playready', keyIds),
           buildDrmInfo('com.adobe.primetime', keyIds),
         ]);
-    await testDashParser(source, expected, /* callback */ undefined,
-        /* ignoreDrmInfo */ true);
+    await testDashParser(source, expected, /* callback= */ undefined,
+        /* ignoreDrmInfo= */ true);
   });
 
   it('inherits PSSH from generic CENC into all key systems', async () => {

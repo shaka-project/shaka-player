@@ -157,6 +157,7 @@ shakaDemo.AssetCard = class {
         .set(Feature.ULTRA_HIGH_DEFINITION, 'ultra_high_definition')
         .set(Feature.SURROUND, 'surround_sound')
         .set(Feature.MULTIPLE_LANGUAGES, 'multiple_languages')
+        .set(Feature.ADS, 'ad')
         .set(Feature.AUDIO_ONLY, 'audio_only');
 
     for (const feature of asset.features) {

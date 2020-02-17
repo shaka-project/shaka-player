@@ -24,7 +24,8 @@ describe('ManifestConverter', () => {
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
-          audios, videos, timeline, /* periodStart */ 0);
+          audios, videos, timeline, /* periodStart= */ 0,
+          /* periodDuration= */ 10);
       expect(variants.size).toBe(2);
 
       expect(variants.has(0)).toBeTruthy();
@@ -49,7 +50,8 @@ describe('ManifestConverter', () => {
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
-          audios, videos, timeline, /* periodStart */ 0);
+          audios, videos, timeline, /* periodStart= */ 0,
+          /* periodDuration= */ 10);
       expect(variants.size).toBe(2);
     });
 
@@ -66,22 +68,29 @@ describe('ManifestConverter', () => {
 
       /** @type {!Map.<number, shaka.extern.Variant>} */
       const variants = createConverter().createVariants(
-          audios, videos, timeline, /* periodStart */ 0);
+          audios, videos, timeline, /* periodStart= */ 0,
+          /* periodDuration= */ 10);
       expect(variants.size).toBe(2);
     });
   }); // describe('createVariants')
 
   describe('fromPeriodDB', () => {
+    const arbitraryPeriodDuration = 180;
+
     it('will reconstruct Periods correctly', () => {
       /** @type {shaka.extern.PeriodDB} */
       const periodDb = {
         startTime: 60,
-        streams: [createVideoStreamDB(1, [0]), createAudioStreamDB(2, [0])],
+        streams: [
+          createVideoStreamDB(1, 60, [0]),
+          createAudioStreamDB(2, 60, [0]),
+        ],
       };
 
       const timeline = createTimeline();
 
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
       expect(period).toBeTruthy();
       expect(period.startTime).toBe(periodDb.startTime);
       expect(period.textStreams).toEqual([]);
@@ -95,20 +104,24 @@ describe('ManifestConverter', () => {
       expect(variant.allowedByApplication).toBe(true);
       expect(variant.allowedByKeySystem).toBe(true);
 
-      verifyStream(variant.video, periodDb.streams[0]);
-      verifyStream(variant.audio, periodDb.streams[1]);
+      verifyStream(periodDb, variant.video, periodDb.streams[0]);
+      verifyStream(periodDb, variant.audio, periodDb.streams[1]);
     });
 
     it('supports video-only content', () => {
       /** @type {shaka.extern.PeriodDB} */
       const periodDb = {
         startTime: 60,
-        streams: [createVideoStreamDB(1, [0]), createVideoStreamDB(2, [1])],
+        streams: [
+          createVideoStreamDB(1, 60, [0]),
+          createVideoStreamDB(2, 60, [1]),
+        ],
       };
 
       const timeline = createTimeline();
 
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(2);
       expect(period.variants[0].audio).toBe(null);
@@ -119,12 +132,16 @@ describe('ManifestConverter', () => {
       /** @type {shaka.extern.PeriodDB} */
       const periodDb = {
         startTime: 60,
-        streams: [createAudioStreamDB(1, [0]), createAudioStreamDB(2, [1])],
+        streams: [
+          createAudioStreamDB(1, 60, [0]),
+          createAudioStreamDB(2, 60, [1]),
+        ],
       };
 
       const timeline = createTimeline();
 
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(2);
       expect(period.variants[0].audio).toBeTruthy();
@@ -136,19 +153,20 @@ describe('ManifestConverter', () => {
       const periodDb = {
         startTime: 60,
         streams: [
-          createVideoStreamDB(1, [0]),
-          createTextStreamDB(2),
+          createVideoStreamDB(1, 60, [0]),
+          createTextStreamDB(2, 60),
         ],
       };
 
       const timeline = createTimeline();
 
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(1);
       expect(period.textStreams.length).toBe(1);
 
-      verifyStream(period.textStreams[0], periodDb.streams[1]);
+      verifyStream(periodDb, period.textStreams[0], periodDb.streams[1]);
     });
 
     it('combines Variants according to variantIds field', () => {
@@ -166,19 +184,20 @@ describe('ManifestConverter', () => {
         startTime: 60,
         streams: [
           // Audio
-          createAudioStreamDB(audio1, [variant2]),
-          createAudioStreamDB(audio2, [variant1, variant3]),
+          createAudioStreamDB(audio1, 60, [variant2]),
+          createAudioStreamDB(audio2, 60, [variant1, variant3]),
 
           // Video
-          createVideoStreamDB(video1, [variant1]),
-          createVideoStreamDB(video2, [variant2, variant3]),
+          createVideoStreamDB(video1, 60, [variant1]),
+          createVideoStreamDB(video2, 60, [variant2, variant3]),
         ],
       };
 
       const timeline = createTimeline();
 
       /** @type {shaka.extern.Period} */
-      const period = createConverter().fromPeriodDB(periodDb, timeline);
+      const period = createConverter().fromPeriodDB(
+          periodDb, arbitraryPeriodDuration, timeline);
 
       expect(period).toBeTruthy();
       expect(period.variants.length).toBe(3);
@@ -251,10 +270,11 @@ describe('ManifestConverter', () => {
 
   /**
    * @param {number} id
+   * @param {number} periodStart
    * @param {!Array.<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
-  function createVideoStreamDB(id, variantIds) {
+  function createVideoStreamDB(id, periodStart, variantIds) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
       id: id,
@@ -265,6 +285,7 @@ describe('ManifestConverter', () => {
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
       frameRate: 22,
+      pixelAspectRatio: '59:54',
       kind: undefined,
       language: '',
       label: null,
@@ -275,17 +296,17 @@ describe('ManifestConverter', () => {
       keyId: 'key1',
       segments: [
         createSegmentDB(
-            /* start time */ 0,
-            /* end time */ 10,
-            /* data key */ 1),
+            /* startTime= */ periodStart,
+            /* endTime= */ periodStart + 10,
+            /* dataKey= */ 1),
         createSegmentDB(
-            /* start time */ 10,
-            /* end time */ 20,
-            /* data key */ 2),
+            /* startTime= */ periodStart + 10,
+            /* endTime= */ periodStart + 20,
+            /* dataKey= */ 2),
         createSegmentDB(
-            /* start time */ 20,
-            /* end time */ 25,
-            /* data key */ 3),
+            /* startTime= */ periodStart + 20,
+            /* endTime= */ periodStart + 25,
+            /* dataKey= */ 3),
       ],
       variantIds: variantIds,
     };
@@ -293,10 +314,11 @@ describe('ManifestConverter', () => {
 
   /**
    * @param {number} id
+   * @param {number} periodStart
    * @param {!Array.<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
-  function createAudioStreamDB(id, variantIds) {
+  function createAudioStreamDB(id, periodStart, variantIds) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
       id: id,
@@ -307,6 +329,7 @@ describe('ManifestConverter', () => {
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
       frameRate: undefined,
+      pixelAspectRatio: undefined,
       kind: undefined,
       language: 'en',
       label: null,
@@ -317,17 +340,17 @@ describe('ManifestConverter', () => {
       keyId: null,
       segments: [
         createSegmentDB(
-            /* start time */ 0,
-            /* end time */ 10,
-            /* data key */ 1),
+            /* startTime= */ periodStart,
+            /* endTime= */ periodStart + 10,
+            /* dataKey= */ 1),
         createSegmentDB(
-            /* start time */ 10,
-            /* end time */ 20,
-            /* data key */ 2),
+            /* startTime= */ periodStart + 10,
+            /* endTime= */ periodStart + 20,
+            /* dataKey= */ 2),
         createSegmentDB(
-            /* start time */ 20,
-            /* end time */ 25,
-            /* data key */ 3),
+            /* startTime= */ periodStart + 20,
+            /* endTime= */ periodStart + 25,
+            /* dataKey= */ 3),
       ],
       variantIds: variantIds,
     };
@@ -335,9 +358,10 @@ describe('ManifestConverter', () => {
 
   /**
    * @param {number} id
+   * @param {number} periodStart
    * @return {shaka.extern.StreamDB}
    */
-  function createTextStreamDB(id) {
+  function createTextStreamDB(id, periodStart) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
       id: id,
@@ -348,6 +372,7 @@ describe('ManifestConverter', () => {
       mimeType: 'text/vtt',
       codecs: '',
       frameRate: undefined,
+      pixelAspectRatio: undefined,
       kind: undefined,
       language: 'en',
       label: null,
@@ -358,27 +383,28 @@ describe('ManifestConverter', () => {
       keyId: null,
       segments: [
         createSegmentDB(
-            /* start time */ 0,
-            /* end time */ 10,
-            /* data key */ 1),
+            /* startTime= */ periodStart,
+            /* endTime= */ periodStart + 10,
+            /* dataKey= */ 1),
         createSegmentDB(
-            /* start time */ 10,
-            /* end time */ 20,
-            /* data key */ 2),
+            /* startTime= */ periodStart + 10,
+            /* endTime= */ periodStart + 20,
+            /* dataKey= */ 2),
         createSegmentDB(
-            /* start time */ 20,
-            /* end time */ 25,
-            /* data key */ 3),
+            /* startTime= */ periodStart + 20,
+            /* endTime= */ periodStart + 25,
+            /* dataKey= */ 3),
       ],
       variantIds: [5],
     };
   }
 
   /**
+   * @param {?shaka.extern.PeriodDB} periodDb
    * @param {?shaka.extern.Stream} stream
    * @param {?shaka.extern.StreamDB} streamDb
    */
-  function verifyStream(stream, streamDb) {
+  function verifyStream(periodDb, stream, streamDb) {
     if (!streamDb) {
       expect(stream).toBeFalsy();
       return;
@@ -392,6 +418,7 @@ describe('ManifestConverter', () => {
       mimeType: streamDb.mimeType,
       codecs: streamDb.codecs,
       frameRate: streamDb.frameRate,
+      pixelAspectRatio: streamDb.pixelAspectRatio || undefined,
       width: streamDb.width || undefined,
       height: streamDb.height || undefined,
       kind: streamDb.kind,
@@ -405,6 +432,7 @@ describe('ManifestConverter', () => {
       emsgSchemeIdUris: null,
       roles: [],
       channelsCount: null,
+      audioSamplingRate: null,
       closedCaptions: null,
     };
 
@@ -421,20 +449,23 @@ describe('ManifestConverter', () => {
       const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
 
-      expect(stream.segmentIndex.find(segmentDb.startTime)).toBe(i);
-      expect(stream.segmentIndex.find(segmentDb.endTime - 0.1)).toBe(i);
+      expect(stream.segmentIndex.find(
+          periodDb.startTime + segmentDb.startTime)).toBe(i);
+      expect(stream.segmentIndex.find(
+          periodDb.startTime + segmentDb.endTime - 0.1)).toBe(i);
 
       /** @type {shaka.media.SegmentReference} */
       const segment = stream.segmentIndex.get(i);
       expect(segment).toBeTruthy();
       expect(segment.position).toBe(i);
-      expect(segment.startTime).toBe(segmentDb.startTime);
-      expect(segment.endTime).toBe(segmentDb.endTime);
+      expect(segment.startTime).toBe(periodDb.startTime + segmentDb.startTime);
+      expect(segment.endTime).toBe(periodDb.startTime + segmentDb.endTime);
       expect(segment.startByte).toBe(0);
       expect(segment.endByte).toBe(null);
       expect(segment.getUris()).toEqual([uri.toString()]);
       expect(segment.initSegmentReference).toEqual(initSegmentReference);
-      expect(segment.presentationTimeOffset).toBe(presentationTimeOffset);
+      expect(segment.timestampOffset).toBe(
+          periodDb.startTime - presentationTimeOffset);
     });
   }
 

@@ -90,15 +90,16 @@ shaka.test.Util = class {
   /**
    * Creates a custom matcher object that matches a number that is close to the
    * given value.
+   *
    * @param {number} val
-   * @return {!Object}
+   * @return {number}
    */
   static closeTo(val) {
     const E = 0.000001;
-    return {
+    return /** @type {number} */(/** @type {?} */({
       asymmetricMatch: (other) => other >= val - E && other <= val + E,
       jasmineToString: () => '<closeTo: ' + val + '>',
-    };
+    }));
   }
 
   /**
@@ -222,18 +223,18 @@ shaka.test.Util = class {
           !a.every((x, i) => { return x == b[i]; })) {
         return false;
       }
+
+      // Make shallow copies of each, without their getUris fields.
+      const trimmedFirst = Object.assign({}, /** @type {Object} */(first));
+      delete trimmedFirst.getUris;
+      const trimmedSecond = Object.assign({}, /** @type {Object} */(second));
+      delete trimmedSecond.getUris;
+
+      // Compare those using Jasmine's utility, which will compare the fields of
+      // an object and the items of an array.
+      return jasmine.matchersUtil.equals(trimmedFirst, trimmedSecond);
     }
-    if (isSegment) {
-      return first.position == second.position &&
-          first.startTime == second.startTime &&
-          first.endTime == second.endTime &&
-          first.startByte == second.startByte &&
-          first.endByte == second.endByte;
-    }
-    if (isInit) {
-      return first.startByte == second.startByte &&
-          first.endByte == second.endByte;
-    }
+
     return undefined;
   }
 
@@ -246,7 +247,7 @@ shaka.test.Util = class {
   static fetch(uri) {
     return new Promise(((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', uri, true /* asynchronous */);
+      xhr.open('GET', uri, /* asynchronous= */ true);
       xhr.responseType = 'arraybuffer';
 
       xhr.onload = (event) => {
@@ -263,7 +264,7 @@ shaka.test.Util = class {
         reject('shaka.test.Util.fetch failed: ' + uri);
       };
 
-      xhr.send(null /* body */);
+      xhr.send(/* body= */ null);
     }));
   }
 

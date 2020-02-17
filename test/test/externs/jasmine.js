@@ -646,3 +646,13 @@ jasmine.Ajax.RequestTracker.prototype.at = function(index) {};
 
 /** @const {!jasmine.Ajax.RequestTracker} */
 jasmine.Ajax.requests;
+
+/** @const */
+jasmine.matchersUtil = {};
+
+/**
+ * @param {*} first
+ * @param {*} second
+ * @return {boolean}
+ */
+jasmine.matchersUtil.equals = function(first, second) {};

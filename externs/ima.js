@@ -28,6 +28,9 @@ google.ima.AdsLoader = class {
   /** @param {google.ima.AdsRequest} request */
   requestAds(request) {}
 
+  /** @return {google.ima.ImaSdkSettings} */
+  getSettings() {}
+
   /** @override */
   addEventListener() {}
 
@@ -69,6 +72,8 @@ google.ima.AdsManager = class {
   getAdSkippableState() {}
 
   skip() {}
+
+  stop() {}
 
   /**
    * @param {number} volume
@@ -155,6 +160,19 @@ google.ima.AdPodInfo = class {
   getTotalAds() {}
 };
 
+/** @const */
+google.ima.ImaSdkSettings = class {
+  /**
+   * @param {string} player
+   */
+  setPlayerType(player) {}
+
+  /**
+   * @param {string} version
+   */
+  setPlayerVersion(version) {}
+};
+
 
 /**
  * @enum {string}
@@ -169,6 +187,10 @@ google.ima.AdEvent.Type = {
   VOLUME_MUTED: 'VOLUME_MUTED',
   SKIPPABLE_STATE_CHANGED: 'SKIPPABLE_STATE_CHANGED',
   STARTED: 'STARTED',
+  FIRST_QUARTILE: 'FIRST_QUARTILE',
+  MIDPOINT: 'MIDPOINT',
+  THIRD_QUARTILE: 'THIRD_QUARTILE',
+  COMPLETE: 'COMPLETE',
   ALL_ADS_COMPLETED: 'ALL_ADS_COMPLETED',
 };
 

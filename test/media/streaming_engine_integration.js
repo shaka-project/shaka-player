@@ -50,7 +50,7 @@ describe('StreamingEngine', () => {
   let onStartupComplete;
 
   beforeAll(() => {
-    video = shaka.util.Dom.createVideoElement();
+    video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
 
     metadata = shaka.test.TestScheme.DATA['sintel'];
@@ -93,23 +93,23 @@ describe('StreamingEngine', () => {
     await createVodStreamGenerator(metadata.video, ContentType.VIDEO);
 
     timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-        0 /* segmentAvailabilityStart */,
-        60 /* segmentAvailabilityEnd */,
-        60 /* presentationDuration */,
-        metadata.video.segmentDuration /* maxSegmentDuration */,
-        false /* isLive */);
+        /* segmentAvailabilityStart= */ 0,
+        /* segmentAvailabilityEnd= */ 60,
+        /* presentationDuration= */ 60,
+        /* maxSegmentDuration= */ metadata.video.segmentDuration,
+        /* isLive= */ false);
 
     setupNetworkingEngine(
-        0 /* firstPeriodStartTime */,
-        30 /* secondPeriodStartTime */,
-        60 /* presentationDuration */,
+        /* firstPeriodStartTime= */ 0,
+        /* secondPeriodStartTime= */ 30,
+        /* presentationDuration= */ 60,
         {audio: metadata.audio.segmentDuration,
           video: metadata.video.segmentDuration});
 
     setupManifest(
-        0 /* firstPeriodStartTime */,
-        30 /* secondPeriodStartTime */,
-        60 /* presentationDuration */);
+        /* firstPeriodStartTime= */ 0,
+        /* secondPeriodStartTime= */ 30,
+        /* presentationDuration= */ 60);
 
     setupPlayhead();
 
@@ -120,34 +120,34 @@ describe('StreamingEngine', () => {
     await createLiveStreamGenerator(
         metadata.audio,
         ContentType.AUDIO,
-        20 /* timeShiftBufferDepth */);
+        /* timeShiftBufferDepth= */ 20);
 
     await createLiveStreamGenerator(
         metadata.video,
         ContentType.VIDEO,
-        20 /* timeShiftBufferDepth */);
+        /* timeShiftBufferDepth= */ 20);
 
     // The generator's AST is set to 295 seconds in the past, so the live-edge
     // is at 295 - 10 seconds.
     // -10 to account for maxSegmentDuration.
     timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-        275 - 10 /* segmentAvailabilityStart */,
-        295 - 10 /* segmentAvailabilityEnd */,
-        Infinity /* presentationDuration */,
-        metadata.video.segmentDuration /* maxSegmentDuration */,
-        true /* isLive */);
+        /* segmentAvailabilityStart= */ 275 - 10,
+        /* segmentAvailabilityEnd= */ 295 - 10,
+        /* presentationDuration= */ Infinity,
+        /* maxSegmentDuration= */ metadata.video.segmentDuration,
+        /* isLive= */ true);
 
     setupNetworkingEngine(
-        0 /* firstPeriodStartTime */,
-        300 /* secondPeriodStartTime */,
-        Infinity /* presentationDuration */,
+        /* firstPeriodStartTime= */ 0,
+        /* secondPeriodStartTime= */ 300,
+        /* presentationDuration= */ Infinity,
         {audio: metadata.audio.segmentDuration,
           video: metadata.video.segmentDuration});
 
     setupManifest(
-        0 /* firstPeriodStartTime */,
-        300 /* secondPeriodStartTime */,
-        Infinity /* presentationDuration */);
+        /* firstPeriodStartTime= */ 0,
+        /* secondPeriodStartTime= */ 300,
+        /* presentationDuration= */ Infinity);
     setupPlayhead();
 
     createStreamingEngine();
@@ -174,8 +174,8 @@ describe('StreamingEngine', () => {
         metadata.segmentUri,
         metadata.tfdtOffset,
         metadata.segmentDuration,
-        now - 295 /* broadcastStartTime */,
-        now - 295 /* availabilityStartTime */,
+        /* broadcastStartTime= */ now - 295,
+        /* availabilityStartTime= */ now - 295,
         timeShiftBufferDepth);
     generators[type] = generator;
     return generator.init();
@@ -237,7 +237,7 @@ describe('StreamingEngine', () => {
         /** @type {!HTMLVideoElement} */(video),
         manifest,
         config,
-        null /* startTime */,
+        /* startTime= */ null,
         onSeek,
         shaka.test.Util.spyFunc(onEvent));
   }
@@ -246,11 +246,11 @@ describe('StreamingEngine', () => {
       firstPeriodStartTime, secondPeriodStartTime, presentationDuration) {
     manifest = shaka.test.StreamingEngineUtil.createManifest(
         [firstPeriodStartTime, secondPeriodStartTime], presentationDuration,
-        /* segmentDurations */ {
+        /* segmentDurations= */ {
           audio: metadata.audio.segmentDuration,
           video: metadata.video.segmentDuration,
         },
-        /* initSegmentRanges */ {
+        /* initSegmentRanges= */ {
           audio: [0, null],
           video: [0, null],
         });
@@ -363,10 +363,9 @@ describe('StreamingEngine', () => {
       onStartupComplete.and.callFake(() => {
         // firstSegmentNumber =
         //   [(segmentAvailabilityEnd - rebufferingGoal) / segmentDuration] + 1
-        // Then -1 to account for drift safe buffering.
         const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-        netEngine.expectRequest('1_video_28', segmentType);
-        netEngine.expectRequest('1_audio_28', segmentType);
+        netEngine.expectRequest('1_video_29', segmentType);
+        netEngine.expectRequest('1_audio_29', segmentType);
         video.play();
       });
 
@@ -443,7 +442,7 @@ describe('StreamingEngine', () => {
   describe('gap jumping', () => {
     it('jumps small gaps at the beginning', async () => {
       config.smallGapLimit = 5;
-      await setupGappyContent(/* gapAtStart */ 1, /* dropSegment */ false);
+      await setupGappyContent(/* gapAtStart= */ 1, /* dropSegment= */ false);
       onStartupComplete.and.callFake(() => {
         expect(video.buffered.length).toBeGreaterThan(0);
         expect(video.buffered.start(0)).toBeCloseTo(1);
@@ -460,7 +459,7 @@ describe('StreamingEngine', () => {
     it('jumps large gaps at the beginning', async () => {
       config.smallGapLimit = 1;
       config.jumpLargeGaps = true;
-      await setupGappyContent(/* gapAtStart */ 5, /* dropSegment */ false);
+      await setupGappyContent(/* gapAtStart= */ 5, /* dropSegment= */ false);
       onStartupComplete.and.callFake(() => {
         expect(video.buffered.length).toBeGreaterThan(0);
         expect(video.buffered.start(0)).toBeCloseTo(5);
@@ -476,7 +475,7 @@ describe('StreamingEngine', () => {
 
     it('jumps small gaps in the middle', async () => {
       config.smallGapLimit = 20;
-      await setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true);
+      await setupGappyContent(/* gapAtStart= */ 0, /* dropSegment= */ true);
       onStartupComplete.and.callFake(() => {
         video.currentTime = 8;
         video.play();
@@ -493,7 +492,7 @@ describe('StreamingEngine', () => {
 
     it('jumps large gaps in the middle', async () => {
       config.jumpLargeGaps = true;
-      await setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true);
+      await setupGappyContent(/* gapAtStart= */ 0, /* dropSegment= */ true);
       onStartupComplete.and.callFake(() => {
         video.currentTime = 8;
         video.play();
@@ -510,7 +509,7 @@ describe('StreamingEngine', () => {
 
     it('won\'t jump large gaps with preventDefault()', async () => {
       config.jumpLargeGaps = true;
-      await setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true);
+      await setupGappyContent(/* gapAtStart= */ 0, /* dropSegment= */ true);
       onStartupComplete.and.callFake(() => {
         video.currentTime = 8;
         video.play();
@@ -545,16 +544,16 @@ describe('StreamingEngine', () => {
 
       timeline =
           shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-              0 /* segmentAvailabilityStart */,
-              30 /* segmentAvailabilityEnd */,
-              30 /* presentationDuration */,
-              metadata.video.segmentDuration /* maxSegmentDuration */,
-              false /* isLive */);
+              /* segmentAvailabilityStart= */ 0,
+              /* segmentAvailabilityEnd= */ 30,
+              /* presentationDuration= */ 30,
+              /* maxSegmentDuration= */ metadata.video.segmentDuration,
+              /* isLive= */ false);
 
       setupNetworkingEngine(
-          0 /* firstPeriodStartTime */,
-          30 /* secondPeriodStartTime */,
-          30 /* presentationDuration */,
+          /* firstPeriodStartTime= */ 0,
+          /* secondPeriodStartTime= */ 30,
+          /* presentationDuration= */ 30,
           {
             audio: metadata.audio.segmentDuration,
             video: metadata.video.segmentDuration,
@@ -602,16 +601,16 @@ describe('StreamingEngine', () => {
             return ['1_' + type + '_' + cur];
           };
           refs.push(new shaka.media.SegmentReference(
-              /* position */ i,
-              /* startTime */ time,
-              /* endTime */ end,
+              /* position= */ i,
+              /* startTime= */ time,
+              /* endTime= */ end,
               getUris,
-              /* startByte */ 0,
-              /* endByte */ null,
+              /* startByte= */ 0,
+              /* endByte= */ null,
               initSegmentReference,
-              // Normally PTO adjusts the segment time backwards; so to make the
-              // segment appear in the future, use a negative.
-              /* presentationTimeOffset */ -gapAtStart));
+              /* timestampOffset= */ gapAtStart,
+              /* appendWindowStart= */ 0,
+              /* appendWindowEnd= */ Infinity));
 
           i++;
           time = end;
