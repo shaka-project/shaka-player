@@ -653,8 +653,7 @@ document.addEventListener('DOMContentLoaded', initApp);
 ## Protected Content
 
 When storing protected content offline, there are some limitations based on
-browsers. Right now Chrome only supports persistent licenses on Android (M62+)
-and Chromebooks.
+browsers. Before Chrome v64, persistent licenses were only supported on Android (M62+) and Chromebooks. In Chrome v64 support was added for Windows and Mac as well.
 
 For other platforms, we offer the ability to disable the use of persistent
 licenses. If you choose to disable persistent licenses, you will get offline
