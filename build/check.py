@@ -175,7 +175,7 @@ def check_spelling(_):
       for i, line in enumerate(f):
         for regex, replace_pattern in misspellings.items():
           for match in re.finditer(regex, line):
-            repl = match.expand(replace_pattern)
+            repl = match.expand(replace_pattern).lower()
             if match.group(0).lower() == repl:
               continue  # No-op suggestion
 

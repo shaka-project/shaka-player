@@ -1352,9 +1352,9 @@ describe('StreamingEngine', () => {
             text: [],
           });
           expect(mediaSourceEngine.segments).toEqual({
-            audio: [true, true, false, false],
-            video: [true, true, false, false],
-            text: [true, true, false, false],
+            audio: [false, true, false, false],
+            video: [false, true, false, false],
+            text: [false, true, false, false],
           });
 
           onChooseStreams.and.throwError(new Error());
@@ -1375,9 +1375,9 @@ describe('StreamingEngine', () => {
         text: [],
       });
       expect(mediaSourceEngine.segments).toEqual({
-        audio: [true, true, true, true],
-        video: [true, true, true, true],
-        text: [true, true, true, true],
+        audio: [false, true, true, true],
+        video: [false, true, true, true],
+        text: [false, true, true, true],
       });
     });
 
@@ -1509,9 +1509,9 @@ describe('StreamingEngine', () => {
             text: [],
           });
           expect(mediaSourceEngine.segments).toEqual({
-            audio: [true, true, false, false],
-            video: [true, true, false, false],
-            text: [true, true, false, false],
+            audio: [false, true, false, false],
+            video: [false, true, false, false],
+            text: [false, true, false, false],
           });
 
           onChooseStreams.and.throwError(new Error());
@@ -1535,6 +1535,44 @@ describe('StreamingEngine', () => {
         video: [false, true],
         text: [],
       });
+      expect(mediaSourceEngine.segments).toEqual({
+        audio: [false, true, true, true],
+        video: [false, true, true, true],
+        text: [false, true, true, true],
+      });
+    });
+
+    it('into unbuffered regions near segment start', async () => {
+      onChooseStreams.and.callFake(defaultOnChooseStreams);
+
+      onInitialStreamsSetup.and.callFake(() => {
+        // Seek forward to an unbuffered region in the first Period.
+        expect(presentationTimeInSeconds).toBe(0);
+        presentationTimeInSeconds = 11;
+        streamingEngine.seeked();
+
+        onTick.and.callFake(() => {
+          // Nothing should have been cleared.
+          expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
+          onTick.and.stub();
+        });
+      });
+
+      // This happens after onInitialStreamsSetup(), so pass 11 so the playhead
+      // resumes from 11.
+      onStartupComplete.and.callFake(() => setupFakeGetTime(11));
+
+      // Here we go!
+      streamingEngine.start();
+
+      await runTest(Util.spyFunc(onTick));
+      // Verify buffers.
+      expect(mediaSourceEngine.initSegments).toEqual({
+        audio: [false, true],
+        video: [false, true],
+        text: [],
+      });
+      // Should buffer previous segment despite being inside segment 2.
       expect(mediaSourceEngine.segments).toEqual({
         audio: [true, true, true, true],
         video: [true, true, true, true],
@@ -2692,7 +2730,7 @@ describe('StreamingEngine', () => {
           });
           expect(mediaSourceEngine.segments).toEqual({
             audio: [true, true, true, true],
-            video: [false, false, true, true],  // starts buffering one seg back
+            video: [false, false, false, true],
             trickvideo: [false, false, false, false],  // cleared
             text: [true, true, true, true],
           });
@@ -3043,6 +3081,35 @@ describe('StreamingEngine', () => {
       await bufferAndCheck(/* didAbort= */ true);
 
       expect(secondRequest.abort).toHaveBeenCalled();
+    });
+
+    it('still aborts if new segment size unknown', async () => {
+      const videoStream = manifest.periods[0].variants[1].video;
+      videoStream.bandwidth = 10;
+      await videoStream.createSegmentIndex();
+      const segmentIndex = videoStream.segmentIndex;
+      const oldGet = segmentIndex.get;
+      videoStream.segmentIndex.get = (idx) => {
+        // eslint-disable-next-line no-restricted-syntax
+        const seg = oldGet.call(segmentIndex, idx);
+        if (seg) {
+          // With endByte being null, we won't know the segment size.
+          // Segment size has to be calculated with times and bandwidth.
+          return new shaka.media.SegmentReference(
+              seg.position, seg.startTime, seg.endTime, seg.getUris,
+              /* startByte= */ 0, /* endByte= */ null,
+              /* initSegmentReference= */ null, /* timestampOffset= */ 0,
+              /* appendWindowStart= */ 0, /* appendWindowEnd= */ Infinity);
+        } else {
+          return seg;
+        }
+      };
+
+      await prepareForAbort();
+      streamingEngine.switchVariant(
+          newVariant, /* clear_buffer= */ false, /* safe_margin= */ 0);
+
+      await bufferAndCheck(/* didAbort= */ true);
     });
 
     function flushDelayedRequests() {

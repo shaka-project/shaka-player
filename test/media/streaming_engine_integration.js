@@ -363,10 +363,9 @@ describe('StreamingEngine', () => {
       onStartupComplete.and.callFake(() => {
         // firstSegmentNumber =
         //   [(segmentAvailabilityEnd - rebufferingGoal) / segmentDuration] + 1
-        // Then -1 to account for drift safe buffering.
         const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-        netEngine.expectRequest('1_video_28', segmentType);
-        netEngine.expectRequest('1_audio_28', segmentType);
+        netEngine.expectRequest('1_video_29', segmentType);
+        netEngine.expectRequest('1_audio_29', segmentType);
         video.play();
       });
 

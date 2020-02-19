@@ -52,6 +52,7 @@ describe('Player', () => {
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     logErrorSpy.calls.reset();
     shaka.log.error = shaka.test.Util.spyFunc(logErrorSpy);
+    shaka.log.alwaysError = shaka.test.Util.spyFunc(logErrorSpy);
 
     logWarnSpy = jasmine.createSpy('shaka.log.warning');
     logErrorSpy.and.callFake(fail);
@@ -135,6 +136,7 @@ describe('Player', () => {
       await player.destroy();
     } finally {
       shaka.log.error = originalLogError;
+      shaka.log.alwaysError = originalLogError;
       shaka.log.warning = originalLogWarn;
       shaka.log.alwaysWarn = originalLogAlwaysWarn;
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
@@ -405,6 +407,19 @@ describe('Player', () => {
       expect(newConfig).toEqual(defaultConfig);
       expect(logErrorSpy).toHaveBeenCalledWith(
           stringContaining('.streaming'));
+    });
+
+    it('accepts synchronous function values for async function fields', () => {
+      const defaultConfig = player.getConfiguration();
+
+      // Make sure the default is async, or the test is invalid.
+      const AsyncFunction = (async () => {}).constructor;
+      expect(defaultConfig.offline.trackSelectionCallback.constructor)
+          .toBe(AsyncFunction);
+
+      // Try a synchronous callback.
+      player.configure('offline.trackSelectionCallback', () => {});
+      // If this fails, an error log will trigger test failure.
     });
 
     it('expands dictionaries that allow arbitrary keys', () => {

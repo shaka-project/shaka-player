@@ -573,7 +573,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   anySettingsMenusAreOpen() {
     return this.settingsMenus_.some(
-        (menu) => menu.classList.contains('shaka-displayed'));
+        (menu) => !menu.classList.contains('shaka-hidden'));
   }
 
   /** @export */
@@ -1309,7 +1309,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   keepFocusInMenu_(event) {
     const openSettingsMenus = this.settingsMenus_.filter(
-        (menu) => menu.classList.contains('shaka-displayed'));
+        (menu) => !menu.classList.contains('shaka-hidden'));
     const settingsMenu = openSettingsMenus[0];
     if (settingsMenu.childNodes.length) {
       // Get the first and the last displaying child element from the overflow

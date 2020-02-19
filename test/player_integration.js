@@ -64,7 +64,7 @@ describe('Player', () => {
       await player.attach(video);
       await player.load('test:sintel_compiled');
     });
-  });
+  });  // describe('attach')
 
   describe('getStats', () => {
     it('gives stats about current stream', async () => {
@@ -126,7 +126,7 @@ describe('Player', () => {
       expect(stats).toBeTruthy();
       await player.destroy();
     });
-  });
+  });  // describe('getStats')
 
   describe('setTextTrackVisibility', () => {
     // Using mode='disabled' on TextTrack causes cues to go null, which leads
@@ -297,7 +297,7 @@ describe('Player', () => {
       expect(displayer.isTextVisible()).toBe(true);
       expect(cues.length).toBeGreaterThan(0);
     });
-  });
+  });  // describe('setTextTrackVisibility')
 
   describe('plays', () => {
     it('with external text tracks', async () => {
@@ -399,7 +399,7 @@ describe('Player', () => {
       expect(tracks.length).toBeGreaterThan(0);
       return tracks[0].language;
     }
-  });
+  });  // describe('plays')
 
   describe('TextDisplayer plugin', () => {
     // Simulate the use of an external TextDisplayer plugin.
@@ -432,7 +432,7 @@ describe('Player', () => {
       // renamed in the compiled version and could not be called.
       expect(textDisplayer.destroySpy).toHaveBeenCalled();
     });
-  });
+  });  // describe('TextDisplayer plugin')
 
   describe('TextAndRoles', () => {
     // Regression Test. Makes sure that the language and role fields have been
@@ -446,7 +446,7 @@ describe('Player', () => {
         expect(languageAndRole.role).not.toBeUndefined();
       }
     });
-  });
+  });  // describe('TextAndRoles')
 
   describe('streaming event', () => {
     // Calling switch early during load() caused a failed assertion in Player
@@ -527,7 +527,7 @@ describe('Player', () => {
       // trigger the code path in this bug.
       expect(streamingListener).toHaveBeenCalled();
     });
-  });
+  });  // describe('streaming event')
 
   describe('tracks', () => {
     // This is a regression test for b/138941217, in which tracks briefly
@@ -602,7 +602,7 @@ describe('Player', () => {
       // bug, tracks would disappear _after_ load() on some platforms.
       await canPlayThrough;
     });
-  });
+  });  // describe('tracks')
 
   describe('buffering', () => {
     const startBuffering = jasmine.objectContaining({buffering: true});
@@ -735,5 +735,48 @@ describe('Player', () => {
       }
       throw new Error('Timeout waiting to buffer');
     }
-  });
+  });  // describe('buffering')
+
+  describe('configuration', () => {
+    it('has the correct number of arguments in compiled callbacks', () => {
+      // Get the default configuration for both the compiled & uncompiled
+      // versions for comparison.
+      const compiledConfig = (new compiledShaka.Player()).getConfiguration();
+      const uncompiledConfig = (new shaka.Player()).getConfiguration();
+
+      compareConfigFunctions(compiledConfig, uncompiledConfig);
+
+      /**
+       * Find all the callbacks in the configuration recursively and compare
+       * their lengths (number of arguments).  We warn the app developer when a
+       * configured callback has the wrong number of arguments, so our own
+       * compiled versions must be correct.
+       *
+       * @param {Object} compiled
+       * @param {Object} uncompiled
+       * @param {string=} basePath The path to this point in the config, for
+       *   logging purposes.
+       */
+      function compareConfigFunctions(compiled, uncompiled, basePath = '') {
+        for (const key in uncompiled) {
+          const uncompiledValue = uncompiled[key];
+          const compiledValue = compiled[key];
+          const path = basePath + '.' + key;
+
+          if (uncompiledValue && uncompiledValue.constructor == Object) {
+            // This is an anonymous Object, so recurse on it.
+            compareConfigFunctions(compiledValue, uncompiledValue, path);
+          } else if (typeof uncompiledValue == 'function') {
+            // This is a function, so check its length.  The uncompiled version
+            // is considered canonically correct, so we use the uncompiled
+            // length as the expectation.
+            shaka.log.debug('[' + path + ']',
+                compiledValue.length, 'should be', uncompiledValue.length);
+            expect(compiledValue.length).withContext(path)
+                .toBe(uncompiledValue.length);
+          }
+        }
+      }
+    });
+  });  // describe('configuration')
 });

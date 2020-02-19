@@ -221,9 +221,11 @@ Shaka + ReactJS integrations:
 - https://github.com/matvp91/shaka-player-react
 - https://github.com/amit08255/shaka-player-react-with-ui-config
 
-If you have published Shaka Integration code/tutorials, please let us know, we'd
-love to add it top the list!
+Shaka + Next.js integration:
+- https://github.com/amit08255/shaka-player-react-with-ui-config/tree/master/nextjs-shaka-player
 
+If you have published Shaka Integration code/tutorials, please feel free to submit PRs
+to add them to this list, we will gladly approve!
 
 ## FAQ ##
 

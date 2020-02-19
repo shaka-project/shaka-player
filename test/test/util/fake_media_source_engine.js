@@ -67,6 +67,10 @@ shaka.test.FakeMediaSourceEngine = class {
         jasmine.createSpy('endOfStream').and.returnValue(Promise.resolve());
 
     /** @type {!jasmine.Spy} */
+    this.getBufferedInfo =
+        jasmine.createSpy('getBufferedInfo').and.returnValue({});
+
+    /** @type {!jasmine.Spy} */
     this.setDuration = jasmine.createSpy('setDuration')
         .and.callFake((dur) => this.setDurationImpl_(dur));
 

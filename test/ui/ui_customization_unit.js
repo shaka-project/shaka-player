@@ -57,18 +57,22 @@ describe('UI Customization', () => {
     UiUtils.confirmElementMissing(container, 'shaka-caption-button');
   });
 
-  it('seek bar only created when configured', () => {
-    UiUtils.createUIThroughAPI(container, video, {addSeekBar: false});
+  it('seek bar only created when configured', async () => {
+    const ui =
+        UiUtils.createUIThroughAPI(container, video, {addSeekBar: false});
     UiUtils.confirmElementMissing(container, 'shaka-seek-bar');
+    await ui.destroy();
 
     UiUtils.createUIThroughAPI(container, video, {addSeekBar: true});
     UiUtils.confirmElementFound(container, 'shaka-seek-bar');
   });
 
-  it('big play button only created when configured', () => {
-    UiUtils.createUIThroughAPI(container, video, {addBigPlayButton: false});
+  it('big play button only created when configured', async () => {
+    const ui =
+        UiUtils.createUIThroughAPI(container, video, {addBigPlayButton: false});
     UiUtils.confirmElementMissing(container, 'shaka-play-button-container');
     UiUtils.confirmElementMissing(container, 'shaka-play-button');
+    await ui.destroy();
 
     UiUtils.createUIThroughAPI(container, video, {addBigPlayButton: true});
     UiUtils.confirmElementFound(container, 'shaka-play-button-container');
@@ -93,6 +97,7 @@ describe('UI Customization', () => {
     confirmLowPosition('shaka-resolutions');
     confirmLowPosition('shaka-audio-languages');
     confirmLowPosition('shaka-text-languages');
+    confirmLowPosition('shaka-playback-rates');
   });
 
   it('controls are created in specified order', () => {
