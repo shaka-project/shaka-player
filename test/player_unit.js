@@ -6,8 +6,6 @@
 describe('Player', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Util = shaka.test.Util;
-  const returnManifest =
-      (manifest) => () => new shaka.test.FakeManifestParser(manifest);
 
   const originalLogError = shaka.log.error;
   const originalLogWarn = shaka.log.warning;
@@ -15,6 +13,7 @@ describe('Player', () => {
   const originalIsTypeSupported = window.MediaSource.isTypeSupported;
 
   const fakeManifestUri = 'fake-manifest-uri';
+  const fakeMimeType = 'application/test';
 
   /** @type {!jasmine.Spy} */
   let logErrorSpy;
@@ -85,6 +84,9 @@ describe('Player', () => {
     });
     periodIndex = 0;
 
+    shaka.media.ManifestParser.registerParserByMime(
+        fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
     abrManager = new shaka.test.FakeAbrManager();
     textDisplayer = createTextDisplayer();
 
@@ -140,6 +142,7 @@ describe('Player', () => {
       shaka.log.warning = originalLogWarn;
       shaka.log.alwaysWarn = originalLogAlwaysWarn;
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
+      shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
     }
   });
 
@@ -147,7 +150,7 @@ describe('Player', () => {
     it('cleans up all dependencies', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       await player.destroy();
 
       expect(abrManager.stop).toHaveBeenCalled();
@@ -167,7 +170,7 @@ describe('Player', () => {
         expect(drmEngine.destroy).not.toHaveBeenCalled();
       });
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       await player.destroy();
 
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
@@ -185,8 +188,10 @@ describe('Player', () => {
         expect(abrManager.stop).not.toHaveBeenCalled();
         expect(networkingEngine.destroy).not.toHaveBeenCalled();
       });
+      shaka.media.ManifestParser.registerParserByMime(
+          fakeMimeType, () => parser);
 
-      const load = player.load(fakeManifestUri, 0, () => parser);
+      const load = player.load(fakeManifestUri, 0, fakeMimeType);
       await shaka.test.Util.shortDelay();
       await player.destroy();
       expect(abrManager.stop).toHaveBeenCalled();
@@ -241,7 +246,7 @@ describe('Player', () => {
 
       async function runTest() {
         expect(streamingListener).not.toHaveBeenCalled();
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(streamingListener).toHaveBeenCalled();
       }
 
@@ -296,14 +301,14 @@ describe('Player', () => {
       });
 
       it('load text stream if caption is visible', async () => {
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
         await player.setTextTrackVisibility(true);
         expect(streamingEngine.loadNewTextStream).toHaveBeenCalled();
         expect(streamingEngine.getBufferingText()).not.toBe(null);
       });
 
       it('does not load text stream if caption is invisible', async () => {
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
         await player.setTextTrackVisibility(false);
         expect(streamingEngine.loadNewTextStream).not.toHaveBeenCalled();
         expect(streamingEngine.getBufferingText()).toBe(null);
@@ -313,7 +318,7 @@ describe('Player', () => {
         await player.setTextTrackVisibility(false);
         player.configure({streaming: {alwaysStreamText: true}});
 
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(streamingEngine.getBufferingText()).not.toBe(null);
 
         await player.setTextTrackVisibility(true);
@@ -637,7 +642,7 @@ describe('Player', () => {
         });
       });
       goog.asserts.assert(manifest, 'manifest must be non-null');
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       const seekRange = player.seekRange();
       expect(seekRange.start).toBe(5);
       expect(seekRange.end).toBe(10);
@@ -646,7 +651,7 @@ describe('Player', () => {
     it('does not switch for plain configuration changes', async () => {
       const switchVariantSpy = spyOn(player, 'switchVariant_');
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
 
       player.configure({abr: {enabled: false}});
       player.configure({streaming: {bufferingGoal: 9001}});
@@ -766,17 +771,17 @@ describe('Player', () => {
     });
 
     it('sets through load', async () => {
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.init).toHaveBeenCalled();
     });
 
     it('calls chooseVariant', async () => {
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.chooseVariant).toHaveBeenCalled();
     });
 
     it('does not enable before stream startup', async () => {
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(abrManager.enable).not.toHaveBeenCalled();
       streamingEngine.onCanSwitch();
       expect(abrManager.enable).toHaveBeenCalled();
@@ -784,13 +789,13 @@ describe('Player', () => {
 
     it('does not enable if adaptation is disabled', async () => {
       player.configure({abr: {enabled: false}});
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       streamingEngine.onCanSwitch();
       expect(abrManager.enable).not.toHaveBeenCalled();
     });
 
     it('enables/disables though configure', async () => {
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       streamingEngine.onCanSwitch();
       abrManager.enable.calls.reset();
       abrManager.disable.calls.reset();
@@ -804,7 +809,7 @@ describe('Player', () => {
 
     it('waits to enable if in-between Periods', async () => {
       player.configure({abr: {enabled: false}});
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       player.configure({abr: {enabled: true}});
       expect(abrManager.enable).not.toHaveBeenCalled();
       // Until onCanSwitch is called, the first period hasn't been set up yet.
@@ -818,11 +823,11 @@ describe('Player', () => {
           jasmine.createSpy('AbrManagerFactory').and.returnValue(abrManager);
       player.configure({abrFactory: spy});
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(spy).toHaveBeenCalled();
       spy.calls.reset();
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(spy).not.toHaveBeenCalled();
     });
 
@@ -835,13 +840,13 @@ describe('Player', () => {
           jasmine.createSpy('AbrManagerFactory').and.returnValue(abrManager);
       player.configure({abrFactory: spy1});
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(spy1).toHaveBeenCalled();
       expect(spy2).not.toHaveBeenCalled();
       spy1.calls.reset();
 
       player.configure({abrFactory: spy2});
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(spy1).not.toHaveBeenCalled();
       expect(spy2).toHaveBeenCalled();
     });
@@ -891,7 +896,7 @@ describe('Player', () => {
         }),
       ];
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       // Check the first period's variant tracks.
       const actualVariantTracks1 = player.getVariantTracks();
       expect(actualVariantTracks1).toEqual(variantTracks1);
@@ -1391,7 +1396,7 @@ describe('Player', () => {
         preferredAudioChannelCount: 6,
       });
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
     });
 
     it('returns the correct tracks', () => {
@@ -1418,8 +1423,10 @@ describe('Player', () => {
 
         return Promise.resolve();
       });
+      shaka.media.ManifestParser.registerParserByMime(
+          fakeMimeType, () => parser);
 
-      await player.load(fakeManifestUri, 0, () => parser);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
 
       // Make sure the interruptions didn't mess up the tracks.
       streamingEngine.onCanSwitch();
@@ -1811,7 +1818,7 @@ describe('Player', () => {
 
       expect(player.isTextTrackVisible()).toBe(false);
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
 
       // Text was turned on during startup.
       expect(player.isTextTrackVisible()).toBe(true);
@@ -1847,7 +1854,7 @@ describe('Player', () => {
         preferredAudioLanguage: undefined,
       });
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
 
       expect(abrManager.setVariants).toHaveBeenCalled();
 
@@ -1890,7 +1897,7 @@ describe('Player', () => {
         preferredAudioLanguage: preference,
       });
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       expect(getActiveVariantTrack().id).toBe(expectedIndex);
     }
   });
@@ -1941,7 +1948,7 @@ describe('Player', () => {
         });
       });
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
 
       // Initialize the fake streams.
       streamingEngine.onCanSwitch();
@@ -2238,7 +2245,7 @@ describe('Player', () => {
         });
       });
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
     });
 
     it('success when all periods are playable', async () => {
@@ -2259,7 +2266,7 @@ describe('Player', () => {
         });
       });
 
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
     });
 
     it('throw UNPLAYABLE_PERIOD when some periods are unplayable', async () => {
@@ -2284,7 +2291,7 @@ describe('Player', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.UNPLAYABLE_PERIOD));
-      const load = player.load(fakeManifestUri, 0, returnManifest(manifest));
+      const load = player.load(fakeManifestUri, 0, fakeMimeType);
       await expectAsync(load).toBeRejectedWith(expected);
     });
 
@@ -2304,7 +2311,7 @@ describe('Player', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER));
-      const load = player.load(fakeManifestUri, 0, returnManifest(manifest));
+      const load = player.load(fakeManifestUri, 0, fakeMimeType);
       await expectAsync(load).toBeRejectedWith(expected);
     });
 
@@ -2336,8 +2343,7 @@ describe('Player', () => {
               shaka.util.Error.Severity.CRITICAL,
               shaka.util.Error.Category.MANIFEST,
               shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER));
-          const load = player.load(
-              fakeManifestUri, 0, returnManifest(manifest));
+          const load = player.load(fakeManifestUri, 0, fakeMimeType);
           await expectAsync(load).toBeRejectedWith(expected);
         });
 
@@ -2359,7 +2365,9 @@ describe('Player', () => {
 
       /** @type {!shaka.test.FakeManifestParser} */
       const parser = new shaka.test.FakeManifestParser(manifest);
-      await player.load(fakeManifestUri, 0, () => parser);
+      shaka.media.ManifestParser.registerParserByMime(
+          fakeMimeType, () => parser);
+      await player.load(fakeManifestUri, 0, fakeMimeType);
 
       const manifest2 = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addPeriod(10, (period) => {
@@ -3091,7 +3099,7 @@ describe('Player', () => {
      * @return {!Promise}
      */
     async function setupPlayer() {
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       // Initialize the fake streams.
       streamingEngine.onCanSwitch();
     }
@@ -3112,7 +3120,7 @@ describe('Player', () => {
       });
 
       goog.asserts.assert(manifest, 'manifest must be non-null');
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
     });
 
     it('gets current wall clock time in UTC', () => {
@@ -3127,7 +3135,7 @@ describe('Player', () => {
     const expected = Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.MANIFEST,
         shaka.util.Error.Code.NO_PERIODS));
-    await expectAsync(player.load(fakeManifestUri, 0, returnManifest(manifest)))
+    await expectAsync(player.load(fakeManifestUri, 0, fakeMimeType))
         .toBeRejectedWith(expected);
   });
 
@@ -3157,7 +3165,7 @@ describe('Player', () => {
       });
     });
 
-    await player.load(fakeManifestUri, 0, returnManifest(manifest));
+    await player.load(fakeManifestUri, 0, fakeMimeType);
     streamingEngine.onCanSwitch();
 
     // We've already loaded variants[0].  Switch to [1] and [2].
@@ -3190,7 +3198,7 @@ describe('Player', () => {
           });
         });
       });
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       // We have audio & video tracks, so this is not audio-only.
       expect(player.isAudioOnly()).toBe(false);
 
@@ -3201,7 +3209,7 @@ describe('Player', () => {
           });
         });
       });
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       // We have video-only tracks, so this is not audio-only.
       expect(player.isAudioOnly()).toBe(false);
 
@@ -3212,7 +3220,7 @@ describe('Player', () => {
           });
         });
       });
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       // We have audio-only tracks, so this is audio-only.
       expect(player.isAudioOnly()).toBe(true);
 
@@ -3243,7 +3251,7 @@ describe('Player', () => {
       });
 
       // Before the fix, load() would fail assertions and throw errors.
-      await player.load(fakeManifestUri, 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, 0, fakeMimeType);
     });
 
     it('respects startTime of 0', async () => {
@@ -3284,8 +3292,7 @@ describe('Player', () => {
         return realPlayhead;
       };
 
-      await player.load(
-          fakeManifestUri, /* startTime= */ 0, returnManifest(manifest));
+      await player.load(fakeManifestUri, /* startTime= */ 0, fakeMimeType);
 
       // Ensure this is seen as a live stream, or else the test is invalid.
       expect(player.isLive()).toBe(true);
@@ -3370,7 +3377,7 @@ describe('Player', () => {
 
     describe('get*Languages', () => {
       it('returns a list of languages', async () => {
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguages()).toEqual(['fr', 'en', 'de']);
         expect(player.getTextLanguages()).toEqual(['es', 'en']);
       });
@@ -3378,7 +3385,7 @@ describe('Player', () => {
       it('returns "und" for video-only tracks', async () => {
         manifest = videoOnlyManifest;
 
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguages()).toEqual(['und']);
         expect(player.getTextLanguages()).toEqual([]);
       });
@@ -3401,7 +3408,7 @@ describe('Player', () => {
           });
         });
 
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
 
         expect(player.getAudioLanguagesAndRoles()).toEqual([
           {language: 'en', role: 'audio-only-role'},
@@ -3409,7 +3416,7 @@ describe('Player', () => {
       });
 
       it('lists all language-role combinations', async () => {
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
           {language: 'fr', role: ''},
           {language: 'en', role: 'main'},
@@ -3430,7 +3437,7 @@ describe('Player', () => {
           });
         });
 
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
           {language: 'und', role: ''},
         ]);
@@ -3439,7 +3446,7 @@ describe('Player', () => {
 
     describe('getTextLanguageAndRoles', () => {
       it('lists all language-role combinations', async () => {
-        await player.load(fakeManifestUri, 0, returnManifest(manifest));
+        await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getTextLanguagesAndRoles()).toEqual([
           {language: 'es', role: 'baz'},
           {language: 'es', role: 'qwerty'},

@@ -6,8 +6,8 @@
 describe('UI', () => {
   const UiUtils = shaka.test.UiUtils;
   const Util = shaka.test.Util;
-  const returnManifest =
-      (manifest) => () => new shaka.test.FakeManifestParser(manifest);
+
+  const fakeMimeType = 'application/test';
 
   /** @type {shaka.Player} */
   let player;
@@ -21,6 +21,7 @@ describe('UI', () => {
   });
 
   afterEach(async () => {
+    shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
     await UiUtils.cleanupUI();
   });
 
@@ -280,10 +281,12 @@ describe('UI', () => {
                     });
                   });
                 });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
 
             await player.load(
-                /* uri= */ 'fake', /* startTime= */ 0,
-                returnManifest(manifest));
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
             const pipButtons =
             videoContainer.getElementsByClassName('shaka-pip-button');
             expect(pipButtons.length).toBe(1);
@@ -433,9 +436,11 @@ describe('UI', () => {
             });
           });
         });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
 
         await player.load(
-            /* uri= */ 'fake', /* startTime= */ 0, returnManifest(manifest));
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
 
         const selectVariantTrack = spyOn(player, 'selectVariantTrack');
 
@@ -523,9 +528,11 @@ describe('UI', () => {
               .map((btn) => btn.innerText)
               .sort();
         };
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
 
         await player.load(
-            /* uri= */ 'fake', /* startTime= */ 0, returnManifest(manifest));
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
         player.configure('abr.enabled', false);
 
         const tracks = player.getVariantTracks();
