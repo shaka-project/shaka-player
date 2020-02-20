@@ -198,6 +198,7 @@ filterDescribe('OfflineManifestParser', offlineManifestParserSupport, () => {
 
     /** @type {shaka.extern.ManifestDB} */
     const manifest = {
+      creationTime: Date.now(),
       originalManifestUri: '',
       duration: 600 * seconds,
       size: 100 * mb,

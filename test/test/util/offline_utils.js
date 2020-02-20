@@ -13,6 +13,7 @@ shaka.test.OfflineUtils = class {
    */
   static createManifest(originalUri) {
     return {
+      creationTime: Date.now(),
       appMetadata: null,
       drmInfo: null,
       duration: 90,

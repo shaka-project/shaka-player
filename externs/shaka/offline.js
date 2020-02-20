@@ -60,6 +60,7 @@ shaka.extern.StoredContent;
 
 /**
  * @typedef {{
+ *   creationTime: number,
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
@@ -70,6 +71,8 @@ shaka.extern.StoredContent;
  *   appMetadata: Object
  * }}
  *
+ * @property {number} creationTime
+ *   The date time when the asset was created.
  * @property {string} originalManifestUri
  *   The URI that the manifest was originally loaded from.
  * @property {number} duration
