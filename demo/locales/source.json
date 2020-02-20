@@ -15,6 +15,10 @@
     "description": "A tooltip for an optional search term.",
     "message": "Filters for assets that have advertisements."
   },
+  "DEMO_AD_TAG_URL": {
+    "message": "Ad Tag URL",
+    "description": "The label on a field that allows users to provide a Ad Tag URL for a custom asset."
+  },
   "DEMO_ALWAYS_STREAM_TEXT": {
     "description": "The name of a configuration value.",
     "message": "Always Stream Text"

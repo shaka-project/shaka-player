@@ -218,6 +218,19 @@ shakaDemo.Custom = class {
         shakaDemo.MessageIds.DRM_SYSTEM);
     makeField(DRMSystemName, drmSetup, drmOnChange);
 
+    // Make the ad tag URL field.
+    const adTagSetup = (input, container) => {
+      if (assetInProgress.adTagUri) {
+        input.value = assetInProgress.adTagUri;
+      }
+    };
+    const adTagOnChange = (input) => {
+      assetInProgress.adTagUri = input.value;
+    };
+    const adTagURLName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.AD_TAG_URL);
+    makeField(adTagURLName, adTagSetup, adTagOnChange);
+
     // Make the name field.
     const nameSetup = (input, container) => {
       input.value = assetInProgress.name;
