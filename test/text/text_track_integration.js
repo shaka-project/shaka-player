@@ -88,11 +88,18 @@ describe('TextTrackIntegration', function() {
   });
 
 
-  describe('addCue', function() {
-    let cues = [
-      new VTTCue(0, 1000, 'Cue 1 message'),
-      new VTTCue(2000, 3000, 'Cue 2 message'),
-    ];
+  describe('addCue', () => {
+    /** @type {!Array.<!VTTCue>} */
+    let cues;
+
+    // Wait to construct cue objects, so we know the polyfill for VTTCue is
+    // loaded.
+    beforeEach(() => {
+      cues = [
+        new VTTCue(0, 1000, 'Cue 1 message'),
+        new VTTCue(2000, 3000, 'Cue 2 message'),
+      ];
+    });
 
     it('adds cues when showing', function() {
       track.mode = 'showing';
@@ -128,11 +135,18 @@ describe('TextTrackIntegration', function() {
     });
   });
 
-  describe('removeCue', function() {
-    let cues = [
-      new VTTCue(0, 1000, 'Cue 1 message'),
-      new VTTCue(2000, 3000, 'Cue 2 message'),
-    ];
+  describe('removeCue', () => {
+    /** @type {!Array.<!VTTCue>} */
+    let cues;
+
+    // Wait to construct cue objects, so we know the polyfill for VTTCue is
+    // loaded.
+    beforeEach(() => {
+      cues = [
+        new VTTCue(0, 1000, 'Cue 1 message'),
+        new VTTCue(2000, 3000, 'Cue 2 message'),
+      ];
+    });
 
     it('removes cues when showing', function() {
       track.mode = 'showing';
