@@ -112,9 +112,10 @@ describe('Storage Compatibility', () => {
       if (!window.indexedDB) { pending('No storage support!'); }
 
       const dbName = 'shaka-storage-cell-test';
+
       // Load the canned database image.
       await CannedIDB.restoreJSON(
-          dbName, dbImageAsString, /* startFromScratch= */ true);
+          dbName, dbImageAsString, /* wipeDatabase= */ true);
 
       // Track the connection so that we can close it when the test is over.
       connection = await shaka.test.IndexedDBUtils.open(dbName);

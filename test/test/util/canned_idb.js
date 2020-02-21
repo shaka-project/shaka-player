@@ -282,8 +282,15 @@ shaka.test.CannedIDB = class {
           if (storeName in existingStoreMap) {
             shaka.log.debug('Ignoring existing store', storeName);
           } else {
-            shaka.log.debug('Creating store', storeName);
             const storeInfo = savedDatabase.stores[storeName];
+
+            // Legacy Edge can't handle a null keyPath, and throws errors if you
+            // specify that.  So delete it if it's null.
+            if (storeInfo.parameters.keyPath == null) {
+              delete storeInfo.parameters.keyPath;
+            }
+
+            shaka.log.debug('Creating store', storeName, storeInfo.parameters);
             db.createObjectStore(storeName, storeInfo.parameters);
           }
         }
