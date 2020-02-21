@@ -602,13 +602,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @export */
   showAdUI() {
-    // TODO: other ad states (seek bar display etc)
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
   }
 
   /** @export */
   hideAdUI() {
-    // TODO: other ad states (seek bar display etc)
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
   }
 

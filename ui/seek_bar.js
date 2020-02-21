@@ -56,6 +56,18 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         shaka.ui.Localization.LOCALE_CHANGED,
         () => this.updateAriaLabel_());
 
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+          shaka.ui.Utils.setDisplay(this.container, false);
+        });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+          if (this.shouldBeDisplayed_()) {
+            shaka.ui.Utils.setDisplay(this.container, true);
+          }
+        });
+
     // Initialize seek state and label.
     this.setValue(this.video.currentTime);
     this.update();
@@ -147,9 +159,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     this.setRange(seekRange.start, seekRange.end);
 
-    // Hide seekbar if the seek window is very small.
-    if (this.player.isLive() &&
-        seekRangeSize < shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
+    if (!this.shouldBeDisplayed_()) {
       shaka.ui.Utils.setDisplay(this.container, false);
     } else {
       shaka.ui.Utils.setDisplay(this.container, true);
@@ -186,6 +196,24 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
             'linear-gradient(' + gradient.join(',') + ')';
       }
     }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  shouldBeDisplayed_() {
+    // The seek bar should be hidden when the seek window's too small or
+    // there's an ad playing.
+    const seekRange = this.player.seekRange();
+    const seekRangeSize = seekRange.end - seekRange.start;
+
+    if (this.player.isLive() &&
+        seekRangeSize < shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
+      return false;
+    }
+
+    return this.ad == null;
   }
 
   /** @private */
