@@ -585,7 +585,21 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports extra newlines in cue body', () => {
+  it('supports an extra newline inside the cue body', () => {
+    verifyHelper(
+        [
+          {startTime: 20, endTime: 40, payload: 'Test'},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n\nExtra line\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        'Test2',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports an extra newline before the cue body', () => {
     verifyHelper(
         [
           {startTime: 20, endTime: 40, payload: ''},
@@ -593,7 +607,7 @@ describe('VttTextParser', () => {
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
-        '\nTest\n\nExtra line\n\n' +
+        '\nTest\n\n' +
         '00:00:40.000 --> 00:00:50.000\n' +
         'Test2',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
