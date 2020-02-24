@@ -7,7 +7,6 @@
 goog.provide('shaka.ui.Overlay');
 
 goog.require('goog.asserts');
-goog.require('shaka.Deprecate');
 goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.TextDisplayer');
@@ -133,21 +132,6 @@ shaka.ui.Overlay = class {
     this.controls_.configure(this.config_);
 
     this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
-  }
-
-
-  /**
-   * @return {shaka.Player}
-   * @export
-   * @deprecated Use getControls().getPlayer() instead.
-   */
-  getPlayer() {
-    shaka.Deprecate.deprecateFeature(
-        2, 6,
-        'ui.Overlay.getPlayer()',
-        'Please use getControls().getPlayer() instead.');
-
-    return this.controls_.getPlayer();
   }
 
 

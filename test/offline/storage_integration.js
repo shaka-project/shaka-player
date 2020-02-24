@@ -857,9 +857,7 @@ filterDescribe('Storage', storageSupport, () => {
           storage,
           drm,
           makeManifestWithPerStreamBandwidth(1));
-      storage.configure({
-        usePersistentLicense: false,
-      });
+      storage.configure('offline.usePersistentLicense', false);
 
       const stored = await storage.store(manifestWithPerStreamBandwidthUri);
 
