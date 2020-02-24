@@ -503,8 +503,6 @@ describe('StreamingEngine', () => {
         verifyNetworkingEngineRequestCalls(1);
 
         onCanSwitch.and.callFake(() => {
-          expect(mediaSourceEngine.reinitText).toHaveBeenCalled();
-          mediaSourceEngine.reinitText.calls.reset();
           onCanSwitch.and.throwError(new Error());
         });
 
@@ -535,6 +533,9 @@ describe('StreamingEngine', () => {
     streamingEngine.start();
 
     await runTest();
+    // Should be called only once before applying
+    // an init segment of the second period
+    expect(mediaSourceEngine.reinitText).toHaveBeenCalledTimes(1);
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
     // Verify buffers.
@@ -840,7 +841,6 @@ describe('StreamingEngine', () => {
       onCanSwitch.and.callFake(() => {
         expect(streamingEngine.getBufferingText()).toBe(textStream2);
 
-        mediaSourceEngine.reinitText.calls.reset();
         streamingEngine.switchTextStream(textStream2);
       });
     });
@@ -849,7 +849,10 @@ describe('StreamingEngine', () => {
     streamingEngine.start();
     await runTest();
 
-    expect(mediaSourceEngine.reinitText).not.toHaveBeenCalled();
+    // Should be called only once after it's switched from the first period
+    // but switching to the already playing text track when
+    // in the second period should be ignored
+    expect(mediaSourceEngine.reinitText).toHaveBeenCalledTimes(1);
   });
 
   it('plays when 2nd Period doesn\'t have text streams', async () => {
