@@ -130,5 +130,14 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
     // this is just a safeguard.
     this.span_.textContent = '';
   }
+
+  /**
+   * @override
+   */
+  release() {
+    this.timer_.stop();
+    this.timer_ = null;
+    super.release();
+  }
 };
 
