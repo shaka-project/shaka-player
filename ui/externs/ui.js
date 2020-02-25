@@ -58,6 +58,7 @@ shaka.extern.UIVolumeBarColors;
  *   addBigPlayButton: boolean,
  *   castReceiverAppId: string,
  *   clearBufferOnQualityChange: boolean,
+ *   showUnbufferedStart: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
  *   trackLabelFormat: shaka.ui.TrackLabelFormat,
@@ -83,6 +84,17 @@ shaka.extern.UIVolumeBarColors;
  *   resolution is being buffered. Not clearing the buffer will mean
  *   we play the content in the previously selected resolution that we
  *   already have buffered before switching to the new resolution.
+ * @property {boolean} showUnbufferedStart
+ *   If true, color any unbuffered region at the start of the seek bar as
+ *   unbuffered (using the "base" color).  If false, color any unbuffered region
+ *   at the start of the seek bar as played (using the "played" color).
+ *   <br>
+ *   A value of false matches the default behavior of Chrome's native controls
+ *   and Shaka Player v2.6+.
+ *   <br>
+ *   A value of true matches the default behavior of Shaka Player v2.5.
+ *   <br>
+ *   Defaults to false.
  * @property {shaka.extern.UISeekBarColors} seekBarColors
  *   The CSS colors applied to the seek bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you

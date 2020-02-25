@@ -182,6 +182,7 @@ shaka.ui.Overlay = class {
       addBigPlayButton: false,
       castReceiverAppId: '',
       clearBufferOnQualityChange: true,
+      showUnbufferedStart: false,
       seekBarColors: {
         base: 'rgba(255, 255, 255, 0.3)',
         buffered: 'rgba(255, 255, 255, 0.54)',

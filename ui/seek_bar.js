@@ -182,10 +182,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
         const playheadFraction = (playheadDistance / seekRangeSize) || 0;
 
+        const unbufferedColor =
+            this.config_.showUnbufferedStart ? colors.base : colors.played;
+
         const makeColor = (color, fract) => color + ' ' + (fract * 100) + '%';
         const gradient = [
           'to right',
-          makeColor(colors.base, bufferStartFraction),
+          makeColor(unbufferedColor, bufferStartFraction),
           makeColor(colors.played, bufferStartFraction),
           makeColor(colors.played, playheadFraction),
           makeColor(colors.buffered, playheadFraction),
