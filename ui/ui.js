@@ -210,6 +210,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
     addBigPlayButton: true,
     castReceiverAppId: '',
     clearBufferOnQualityChange: true,
+    showUnbufferedStart: true,
     seekBarColors: {
       base: 'rgba(255, 255, 255, 0.3)',
       buffered: 'rgba(255, 255, 255, 0.54)',
