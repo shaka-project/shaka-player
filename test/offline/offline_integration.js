@@ -92,7 +92,7 @@ describe('Offline', () => {
 
         shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
 
-        storage.configure({usePersistentLicense: true});
+        storage.configure('offline.usePersistentLicense', true);
         const content = await storage.store('test:sintel-enc');
 
         // Work around http://crbug.com/887535 in which load cannot happen right
@@ -136,7 +136,7 @@ describe('Offline', () => {
         // to throw an error inappropriately.
         shaka.test.TestScheme.setupPlayer(player, 'multidrm_no_init_data');
 
-        storage.configure({usePersistentLicense: false});
+        storage.configure('offline.usePersistentLicense', false);
         const content = await storage.store('test:multidrm_no_init_data');
 
         const contentUri = content.offlineUri;
