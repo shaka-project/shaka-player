@@ -46,6 +46,7 @@
     "mux.js": "^5.1.3",
     "promise-mock": "^2.1.0",
     "promise-polyfill": "<8.1.1",
+    "pwacompat": "^2.0.10",
     "rimraf": "^2.6.3",
     "sprintf-js": "^1.1.2",
     "stylelint": "github:theodab/stylelint",
