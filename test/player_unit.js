@@ -159,6 +159,26 @@ describe('Player', () => {
       expect(playhead.release).toHaveBeenCalled();
       expect(mediaSourceEngine.destroy).toHaveBeenCalled();
       expect(streamingEngine.destroy).toHaveBeenCalled();
+
+      const segmentIndexes = [];
+      for (const period of manifest.periods) {
+        for (const variant of period.variants) {
+          if (variant.audio) {
+            segmentIndexes.push(variant.audio.segmentIndex);
+          }
+          if (variant.video) {
+            segmentIndexes.push(variant.video.segmentIndex);
+          }
+        }
+        for (const textStream of period.textStreams) {
+          segmentIndexes.push(textStream.segmentIndex);
+        }
+      }
+      for (const segmentIndex of segmentIndexes) {
+        if (segmentIndex) {
+          expect(segmentIndex.release).toHaveBeenCalled();
+        }
+      }
     });
 
     it('destroys mediaSourceEngine before drmEngine', async () => {

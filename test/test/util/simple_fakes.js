@@ -427,8 +427,7 @@ shaka.test.FakeClosedCaptionParser = class {
 shaka.test.FakeSegmentIndex = class {
   constructor() {
     /** @type {!jasmine.Spy} */
-    this.destroy =
-        jasmine.createSpy('destroy').and.returnValue(Promise.resolve());
+    this.release = jasmine.createSpy('release');
 
     /** @type {!jasmine.Spy} */
     this.find = jasmine.createSpy('find').and.returnValue(null);
