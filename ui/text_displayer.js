@@ -229,8 +229,10 @@ shaka.ui.TextDisplayer = class {
     captionsStyle.whiteSpace = 'pre-line';
     captions.textContent = cue.payload;
     captionsStyle.backgroundColor = cue.backgroundColor;
+    captionsStyle.border = cue.border;
     captionsStyle.color = cue.color;
     captionsStyle.direction = cue.direction;
+    captionsStyle.opacity = cue.opacity;
 
     if (cue.backgroundImage) {
       captionsStyle.backgroundImage = 'url(\'' + cue.backgroundImage + '\')';
@@ -270,6 +272,7 @@ shaka.ui.TextDisplayer = class {
     captionsStyle.fontWeight = cue.fontWeight.toString();
     captionsStyle.fontSize = cue.fontSize;
     captionsStyle.fontStyle = cue.fontStyle;
+    captionsStyle.letterSpacing = cue.letterSpacing;
 
     // The line attribute defines the positioning of the text container inside
     // the video container.

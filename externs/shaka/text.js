@@ -256,6 +256,13 @@ shaka.extern.Cue = class {
     this.backgroundImage;
 
     /**
+     * Text border.
+     * @type {!string}
+     * @exportDoc
+     */
+    this.border;
+
+    /**
      * Text font size in px or em (e.g. '100px'/'100em').
      * @type {string}
      * @exportDoc
@@ -282,6 +289,20 @@ shaka.extern.Cue = class {
      * @exportDoc
      */
     this.fontFamily;
+
+    /**
+     * Text letter spacing.
+     * @type {!string}
+     * @exportDoc
+     */
+    this.letterSpacing;
+
+    /**
+     * Text opacity.
+     * @type {!number}
+     * @exportDoc
+     */
+    this.opacity;
 
     /**
      * Text decoration. A combination of underline, overline
