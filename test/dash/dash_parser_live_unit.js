@@ -785,6 +785,7 @@ describe('DashParser Live', () => {
     const manifestRequestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
     const dateRequestType = shaka.net.NetworkingEngine.RequestType.TIMING;
     const manifestUri = 'dummy://foo';
+    const manifestWithTimelineUri = 'dummy://foo2';
     const dateUri = 'http://foo.bar/date';
 
     beforeEach(() => {
@@ -806,9 +807,31 @@ describe('DashParser Live', () => {
         '  </Period>',
         '</MPD>',
       ].join('\n');
+      const manifestWithTimeline = [
+        '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+        '    minimumUpdatePeriod="PT' + updateTime + 'S">',
+        '  <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
+        '      value="http://foo.bar/date" />',
+        '  <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
+        '      value="http://foo.bar/date" />',
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation id="3" bandwidth="500">',
+        '        <BaseURL>http://example.com</BaseURL>',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4">',
+        '          <SegmentTimeline>',
+        '            <S d="2" t="0" />',
+        '          </SegmentTimeline>',
+        '        </SegmentTemplate>',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
       fakeNetEngine
           .setResponseText('http://foo.bar/date', '1970-01-01T00:00:30Z')
-          .setResponseText('dummy://foo', manifest);
+          .setResponseText('dummy://foo', manifest)
+          .setResponseText('dummy://foo2', manifestWithTimeline);
     });
 
     it('stops updates', async () => {
@@ -873,6 +896,64 @@ describe('DashParser Live', () => {
       // This is the initial manifest request.
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+      fakeNetEngine.request.calls.reset();
+      // Resolve the manifest request and wait on the UTCTiming request.
+      delay.resolve();
+      delay = fakeNetEngine.delayNextRequest();
+      await Util.shortDelay();
+
+      // This is the first UTCTiming request.
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest(dateUri, dateRequestType);
+      fakeNetEngine.request.calls.reset();
+      // Interrupt the parser, then fail the request.
+      parser.stop();
+      delay.reject();
+      await expectation;
+
+      // Wait for another update period.
+      await updateManifest();
+
+      // No more updates should occur.
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
+    });
+
+    it('does not call UTCTiming requests', async () => {
+      const manifest = await parser.start('dummy://foo2', playerInterface);
+
+      expect(manifest).toBeTruthy();
+      fakeNetEngine.expectRequest(manifestWithTimelineUri, manifestRequestType);
+      fakeNetEngine.request.calls.reset();
+
+      // Wait on the UTCTiming request.
+      await Util.shortDelay();
+
+      // No UTCTiming request should be called.
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
+
+      parser.stop();
+
+      // Wait for another update period.
+      await updateManifest();
+
+      // No more updates should occur.
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
+    });
+
+    it('not use autoCorrectDrift', async () => {
+      /** @type {!shaka.util.PublicPromise} */
+      let delay = fakeNetEngine.delayNextRequest();
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.dash.autoCorrectDrift = false;
+      parser.configure(config);
+      const expectation =
+          expectAsync(parser.start('dummy://foo2', playerInterface))
+              .toBeRejected();
+
+      await Util.shortDelay();
+      // This is the initial manifest request.
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest(manifestWithTimelineUri, manifestRequestType);
       fakeNetEngine.request.calls.reset();
       // Resolve the manifest request and wait on the UTCTiming request.
       delay.resolve();
