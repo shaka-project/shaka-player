@@ -210,8 +210,7 @@ shakaDemo.Search = class {
    */
   makeSelectInput_(searchContainer, name, choices, type) {
     searchContainer.addRow(null, null);
-    const nullOption = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.UNDEFINED);
+    const nullOption = '---';
     const valuesObject = {};
     for (const term of choices) {
       valuesObject[term] = shakaDemoMain.getLocalizedString(term);

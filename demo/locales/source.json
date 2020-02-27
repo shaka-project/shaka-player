@@ -651,10 +651,6 @@
     "description": "A link in the footer, to the uncompiled build of the demo.",
     "message": "Uncompiled"
   },
-  "DEMO_UNDEFINED": {
-    "description": "Text describing a search term that the user has not set any desired value for.",
-    "message": "Undefined"
-  },
   "DEMO_UNIFIED_STREAMING": {
     "description": "Text that describes an asset that comes from the Unified Streaming asset library.",
     "message": "[PROPER_NAME:Unified Streaming]"
