@@ -164,7 +164,6 @@
   "DEMO_UNCOMPILED": "Uncompiled",
   "DEMO_UNDEFINED": "Undefined",
   "DEMO_UNIFIED_STREAMING": "Unified Streaming",
-  "DEMO_UNKNOWN": "Unknown",
   "DEMO_UNSUPPORTED": "Not Available",
   "DEMO_UNSUPPORTED_DISABLED": "This asset is disabled.",
   "DEMO_UNSUPPORTED_NO_DASH_SUPPORT": "Your browser does not support MPEG-DASH manifests.",

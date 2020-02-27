@@ -659,10 +659,6 @@
     "description": "Text that describes an asset that comes from the Unified Streaming asset library.",
     "message": "[PROPER_NAME:Unified Streaming]"
   },
-  "DEMO_UNKNOWN": {
-    "description": "Text that describes an asset that comes from an unknown source.",
-    "message": "Unknown"
-  },
   "DEMO_UNSUPPORTED": {
     "description": "A label that marks an asset as being unavailable, for some reason.",
     "message": "Not Available"

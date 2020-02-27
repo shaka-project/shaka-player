@@ -18,7 +18,6 @@ const shakaAssets = {};
 
 /** @enum {shakaDemo.MessageIds} */
 shakaAssets.Source = {
-  UNKNOWN: shakaDemo.MessageIds.UNKNOWN,
   CUSTOM: shakaDemo.MessageIds.CUSTOM,
   SHAKA: shakaDemo.MessageIds.SHAKA,
   AXINOM: shakaDemo.MessageIds.AXINOM,
