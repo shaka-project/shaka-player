@@ -217,7 +217,7 @@ shakaDemo.Search = class {
    */
   makeSelectInput_(searchContainer, name, choices, type) {
     searchContainer.addRow(null, null);
-    const nullOption = 'Unspecified';
+    const nullOption = '---';
     const valuesObject = {};
     for (let term of choices) {
       if (type == 'DRM') {
