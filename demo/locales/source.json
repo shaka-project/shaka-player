@@ -545,7 +545,7 @@
   },
   "DEMO_SEARCH": {
     "description": "A link in the header, that switches to a page configuration for searching through the content library.",
-    "message": "SEARCH"
+    "message": "ALL CONTENT"
   },
   "DEMO_SHAKA": {
     "description": "Text that describes an asset that comes from the Shaka Player asset library.",
