@@ -20,7 +20,8 @@ shaka.extern = {};
  * @typedef {{
  *   base: string,
  *   buffered: string,
- *   played: string
+ *   played: string,
+ *   adBreaks: string
  * }}
  *
  * @property {string} base
@@ -32,6 +33,9 @@ shaka.extern = {};
  * @property {string} played
  *   The CSS background color applied to the portion of the seek bar showing
  *   what has been played already.
+ * @property {string} adBreaks
+ *   The CSS background color applied to the portion of the seek bar showing
+ *   when the ad breaks are scheduled to occur on the timeline.
  */
 shaka.extern.UISeekBarColors;
 
