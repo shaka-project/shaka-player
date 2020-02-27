@@ -102,6 +102,8 @@ shakaAssets.Feature = {
 
   // Set if the asset is a livestream.
   LIVE: shakaDemo.MessageIds.LIVE,
+  // A synthetic property used if the asset is VOD (not-livestream).
+  VOD: shakaDemo.MessageIds.VOD,
   // Set if the asset has at least one WebM stream.
   WEBM: shakaDemo.MessageIds.WEBM,
   // Set if the asset has at least one mp4 stream.

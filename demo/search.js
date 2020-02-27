@@ -264,14 +264,15 @@ shakaDemo.Search = class {
         Object.values(shakaAssets.Source).filter((term) => {
           return term != shakaAssets.Source.CUSTOM;
         }), SOURCE);
+    this.makeSelectInput_(coreContainer,
+        shakaDemo.MessageIds.LIVE_SEARCH,
+        [Feature.LIVE, Feature.VOD], FEATURE);
 
     // Special terms.
     const containerStyle = shakaDemo.InputContainer.Style.FLEX;
     const specialContainer = new shakaDemo.InputContainer(
         container, /* headerText= */ null, containerStyle,
         /* docLink= */ null);
-    this.makeBooleanInput_(specialContainer, Feature.LIVE, FEATURE,
-        shakaDemo.MessageIds.LIVE_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.HIGH_DEFINITION, FEATURE,
         shakaDemo.MessageIds.HIGH_DEFINITION_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.XLINK, FEATURE,

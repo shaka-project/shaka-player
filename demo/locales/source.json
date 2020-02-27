@@ -352,8 +352,8 @@
     "message": "Live"
   },
   "DEMO_LIVE_SEARCH": {
-    "description": "A tooltip for an optional search term.",
-    "message": "Filters for assets that are live."
+    "description": "A header on a search field that filters by whether the asset is live or not.",
+    "message": "Live"
   },
   "DEMO_LOG_LEVEL": {
     "description": "The name of a configuration value.",
@@ -706,6 +706,10 @@
   "DEMO_VIDEO_ROBUSTNESS": {
     "description": "The name of a configuration value.",
     "message": "Video Robustness"
+  },
+  "DEMO_VOD": {
+    "description": "Text that describes an asset that is a VOD (Video On Delivery).",
+    "message": "[JARGON:VOD]"
   },
   "DEMO_WEBM": {
     "description": "Text that describes an asset that uses the WebM container.",
