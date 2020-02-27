@@ -30,7 +30,6 @@ const shakaAssets = {};
 
 /** @enum {string} */
 shakaAssets.Source = {
-  UNKNOWN: 'Unknown',
   CUSTOM: 'Custom',
   SHAKA: 'Shaka',
   AXINOM: 'Axinom',

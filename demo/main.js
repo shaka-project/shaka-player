@@ -698,10 +698,10 @@ shakaDemo.Main = class {
 
       // Construct a new asset.
       const asset = new ShakaDemoAssetInfo(
-        /* name= */ 'loaded asset',
-        /* iconUri= */ '',
-        /* manifestUri= */ manifest,
-        /* source= */ shakaAssets.Source.UNKNOWN);
+          /* name= */ 'loaded asset',
+          /* iconUri= */ '',
+          /* manifestUri= */ manifest,
+          /* source= */ shakaAssets.Source.CUSTOM);
       if ('license' in params) {
         let drmSystems = shakaDemo.Main.commonDrmSystems;
         if ('drmSystem' in params) {
@@ -1080,9 +1080,7 @@ shakaDemo.Main = class {
           title: asset.name,
           artwork: [{src: asset.iconUri}],
         };
-        if (asset.source != shakaAssets.Source.UNKNOWN) {
-          metadata.artist = asset.source;
-        }
+        metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
     } catch (reason) {
