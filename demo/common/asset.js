@@ -58,7 +58,7 @@ const ShakaDemoAssetInfo = class {
     /** @type {!Array.<!shakaAssets.KeySystem>} */
     this.drm = [shakaAssets.KeySystem.CLEAR];
     /** @type {!Array.<!shakaAssets.Feature>} */
-    this.features = [];
+    this.features = [shakaAssets.Feature.VOD];
     /** @type {!Map.<string, string>} */
     this.licenseServers = new Map();
     /** @type {!Map.<string, string>} */
@@ -125,6 +125,11 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   addFeature(feature) {
+    const Feature = shakaAssets.Feature;
+    if (feature == Feature.LIVE) {
+      // Unmark this feature as being VOD.
+      this.features = this.features.filter((feature) => feature != Feature.VOD);
+    }
     this.features.push(feature);
     // Sort the features list, so that features are in a predictable order.
     this.features.sort(ShakaDemoAssetInfo.caseLessAlphaComparator_);

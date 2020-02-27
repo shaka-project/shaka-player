@@ -84,6 +84,8 @@ shakaAssets.Feature = {
 
   // Set if the asset is a livestream.
   LIVE: 'Live',
+  // A synthetic property used if the asset is VOD (not-livestream).
+  VOD: 'VOD',
   // Set if the asset has at least one WebM stream.
   WEBM: 'WebM',
   // Set if the asset has at least one mp4 stream.

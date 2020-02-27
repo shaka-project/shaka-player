@@ -282,16 +282,17 @@ shakaDemo.Search = class {
     this.makeSelectInput_(coreContainer, 'DRM',
         Object.values(shakaAssets.KeySystem), DRM);
     this.makeSelectInput_(coreContainer, 'Source',
-        Object.values(shakaAssets.Source).filter((term) => term != 'Custom'),
-        SOURCE);
+        Object.values(shakaAssets.Source).filter((term) => {
+          return term != shakaAssets.Source.CUSTOM;
+        }), SOURCE);
+    this.makeSelectInput_(coreContainer, 'Live',
+        [Feature.LIVE, Feature.VOD], FEATURE);
 
     // Special terms.
     const containerStyle = shakaDemo.InputContainer.Style.FLEX;
     const specialContainer = new shakaDemo.InputContainer(
         container, /* headerText = */ null, containerStyle,
         /* docLink = */ null);
-    this.makeBooleanInput_(specialContainer, Feature.LIVE, FEATURE,
-        'Filters for assets that are live.');
     this.makeBooleanInput_(specialContainer, Feature.HIGH_DEFINITION, FEATURE,
         'Filters for assets with at least one high-definition video stream.');
     this.makeBooleanInput_(specialContainer, Feature.XLINK, FEATURE,
