@@ -98,6 +98,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           this.onAdCuePointsChanged_();
         });
 
+    this.eventManager.listen(
+        this.player, 'unloading', () => {
+          this.adCuePoints_ = [];
+          this.onAdCuePointsChanged_();
+        });
+
     // Initialize seek state and label.
     this.setValue(this.video.currentTime);
     this.update();
@@ -236,6 +242,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @private
    */
   markAdBreaks_() {
+    if (!this.adCuePoints_.length) {
+      this.adMarkerContainer_.style.background = 'transparent';
+      return;
+    }
+
     const seekRange = this.player.seekRange();
     const seekRangeSize = seekRange.end - seekRange.start;
     const gradient = ['to right'];
