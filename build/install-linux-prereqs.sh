@@ -5,7 +5,7 @@
 #  - Python v2.7 (to run the build scripts)
 #  - Java Runtime Environment v8+ (to run the Closure compiler)
 #  - Apache (to serve the Shaka Player demo)
-#  - NodeJS v9.3 (to run some build deps, such as jsdoc, karma, etc)
+#  - NodeJS v8+ (to run some build deps, such as jsdoc, karma, etc)
 
 # Tested on:
 #  - Ubuntu 16.04 LTS (Xenial)
@@ -79,6 +79,8 @@ else
       sudo apt -y remove --purge nodejs || true
       sudo apt -y remove --purge nodejs-dev || true
       sudo apt -y remove --purge npm || true
+      sudo apt -y remove --purge libnode || true
+      sudo apt -y remove --purge libnode64 || true
       sudo apt -y autoremove || true
 
       # Remove any old symlinks or other copies.
@@ -109,18 +111,26 @@ else
     echo "*****" 1>&2
   fi
 
-  # NodeJS v9.3.0 has npm v5.5.1, which works.  Nodejs v9.4, v9.5, and v9.6 use
-  # npm v5.6.0, which seems to be buggy.  So we avoid those and use v9.3.
-  # See https://github.com/npm/npm/issues/19394 for details.
+  available_node_version=$(apt-cache show nodejs \
+      | grep '^Version:' | cut -f 2 -d ' ')
+  available_node_major_version=$(echo "$available_node_version" \
+      | cut -f 1 -d '.')
+  if [ "$available_node_major_version" -gt "8" ]; then
+    sudo apt -y install nodejs npm
+    echo "*****" 1>&2
+    echo "NodeJS v$available_node_version installed from your distro." 1>&2
+    echo "*****" 1>&2
+  else
+    # Fetch a known-good copy of NodeJS from nodesource.com and install it.
+    # NodeJS v10.19.0 has npm v6.13.4.
+    deb_file=$(mktemp --suffix .deb)
+    curl -o "$deb_file" \
+        https://deb.nodesource.com/node_10.x/pool/main/n/nodejs/nodejs_10.19.0-1nodesource1_amd64.deb
+    sudo dpkg -i "$deb_file"
+    rm -f "$deb_file"
 
-  # Fetch a known-good copy of NodeJS from nodesource.com and install it.
-  deb_file=$(mktemp --suffix .deb)
-  curl -o "$deb_file" \
-    http://deb.nodesource.com/node_9.x/pool/main/n/nodejs/nodejs_9.3.0-1nodesource1_amd64.deb
-  sudo dpkg -i "$deb_file"
-  rm -f "$deb_file"
-
-  echo "*****" 1>&2
-  echo "NodeJS v9.3 installed." 1>&2
-  echo "*****" 1>&2
+    echo "*****" 1>&2
+    echo "NodeJS v10.19 installed from nodesource." 1>&2
+    echo "*****" 1>&2
+  fi
 fi
