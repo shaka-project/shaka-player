@@ -144,10 +144,8 @@ shaka.test.Dash = class {
     }
 
     await video.createSegmentIndex();
-    const position = video.segmentIndex.find(0);
-    expect(position).not.toBe(null);
 
-    const reference = video.segmentIndex.get(position);
+    const reference = video.segmentIndex.seek(0);
     expect(reference).not.toBe(null);
     return reference;
   }

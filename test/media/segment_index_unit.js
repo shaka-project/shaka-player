@@ -8,36 +8,36 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
   const actual2 = makeReference(1, 10, 20, uri(20));
   const actual3 = makeReference(2, 20, 30, uri(20));
 
-  describe('find', () => {
+  describe('seek', () => {
     it('finds the correct references', () => {
       // One reference.
       let index = new shaka.media.SegmentIndex([actual1]);
-      let pos1 = index.find(5);
-      expect(pos1).toBe(actual1.position);
+      let ref1 = index.seek(5);
+      expect(ref1).toBe(actual1);
 
       // Two references.
       index = new shaka.media.SegmentIndex([actual1, actual2]);
-      pos1 = index.find(5);
-      let pos2 = index.find(15);
-      expect(pos1).toBe(actual1.position);
-      expect(pos2).toBe(actual2.position);
+      ref1 = index.seek(5);
+      let ref2 = index.seek(15);
+      expect(ref1).toBe(actual1);
+      expect(ref2).toBe(actual2);
 
       // Three references.
       index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
-      pos1 = index.find(5);
-      pos2 = index.find(15);
-      const pos3 = index.find(25);
-      expect(pos1).toBe(actual1.position);
-      expect(pos2).toBe(actual2.position);
-      expect(pos3).toBe(actual3.position);
+      ref1 = index.seek(5);
+      ref2 = index.seek(15);
+      const ref3 = index.seek(25);
+      expect(ref1).toBe(actual1);
+      expect(ref2).toBe(actual2);
+      expect(ref3).toBe(actual3);
     });
 
     it('works if time == first start time', () => {
       const actual = makeReference(1, 10, 20, uri(10));
       const index = new shaka.media.SegmentIndex([actual]);
 
-      const pos = index.find(10);
-      expect(pos).toBe(actual.position);
+      const ref = index.seek(10);
+      expect(ref).toBe(actual);
     });
 
     it('works with two references if time == second start time', () => {
@@ -45,32 +45,32 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const actual2 = makeReference(2, 20, 30, uri(20));
       const index = new shaka.media.SegmentIndex([actual1, actual2]);
 
-      const pos = index.find(20);
-      expect(pos).toBe(actual2.position);
+      const ref = index.seek(20);
+      expect(ref).toBe(actual2);
     });
 
     it('returns the first segment if time < first start time', () => {
       const actual = makeReference(1, 10, 20, uri(10));
       const index = new shaka.media.SegmentIndex([actual]);
 
-      const pos = index.find(5);
-      expect(pos).toBe(actual.position);
+      const ref = index.seek(5);
+      expect(ref).toBe(actual);
     });
 
     it('returns null if time == last end time', () => {
       const actual = makeReference(1, 10, 20, uri(10));
       const index = new shaka.media.SegmentIndex([actual]);
 
-      const pos = index.find(20);
-      expect(pos).toBeNull();
+      const ref = index.seek(20);
+      expect(ref).toBeNull();
     });
 
     it('returns null if time > last end time', () => {
       const actual = makeReference(1, 10, 20, uri(10));
       const index = new shaka.media.SegmentIndex([actual]);
 
-      const pos = index.find(21);
-      expect(pos).toBeNull();
+      const ref = index.seek(21);
+      expect(ref).toBeNull();
     });
 
     it('returns null if time is within a gap', () => {
@@ -78,63 +78,8 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const actual2 = makeReference(2, 25, 30, uri(25));
       const index = new shaka.media.SegmentIndex([actual1, actual2]);
 
-      const pos = index.find(23);
-      expect(pos).toBeNull();
-    });
-  });
-
-  describe('get', () => {
-    it('returns the correct references', () => {
-      // One reference.
-      let index = new shaka.media.SegmentIndex([actual1]);
-      let r1 = index.get(0);
-      expect(r1).toEqual(actual1);
-
-      // Two references.
-      index = new shaka.media.SegmentIndex([actual1, actual2]);
-      r1 = index.get(0);
-      let r2 = index.get(1);
-      expect(r1).toEqual(actual1);
-      expect(r2).toEqual(actual2);
-
-      // Three references.
-      index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
-      r1 = index.get(0);
-      r2 = index.get(1);
-      let r3 = index.get(2);
-      expect(r1).toEqual(actual1);
-      expect(r2).toEqual(actual2);
-      expect(r3).toEqual(actual3);
-
-      // Two references with offset.
-      index = new shaka.media.SegmentIndex([actual2, actual3]);
-      r2 = index.get(1);
-      r3 = index.get(2);
-      expect(r2).toEqual(actual2);
-      expect(r3).toEqual(actual3);
-
-      // One reference with offset.
-      index = new shaka.media.SegmentIndex([actual3]);
-      r3 = index.get(2);
-      expect(r3).toEqual(actual3);
-    });
-
-    it('returns null with zero references', () => {
-      const index = new shaka.media.SegmentIndex([]);
-      expect(index.get(0)).toBeNull();
-    });
-
-    it('returns null if position < 0', () => {
-      const index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
-      expect(index.get(-1)).toBeNull();
-    });
-
-    it('returns null for unknown positions', () => {
-      const index1 = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
-      expect(index1.get(3)).toBeNull();
-
-      const index2 = new shaka.media.SegmentIndex([actual2, actual3]);
-      expect(index2.get(0)).toBeNull();
+      const ref = index.seek(23);
+      expect(ref).toBeNull();
     });
   });
 

@@ -614,32 +614,33 @@ shaka.test.ManifestGenerator.Stream = class {
 
     this.createSegmentIndex = () => Promise.resolve();
 
-    this.segmentIndex.find = (time) => {
-      // Note: |time| is relative to the presentation.
-      const periodTime = time - periodStart;
-      return Math.floor(periodTime / segmentDuration);
-    };
-
-    this.segmentIndex.get = (index) => {
-      goog.asserts.assert(!isNaN(index), 'Invalid index requested!');
-      if (index < 0 || index >= segmentCount || isNaN(index)) {
-        return null;
-      }
-      const getUris = () => [sprintf(template, index)];
-      const start = index * segmentDuration;
-      const end = Math.min(totalDuration, (index + 1) * segmentDuration);
-      return new this.manifest_.shaka_.media.SegmentReference(
-          index,
-          /* startTime= */ periodStart + start,
-          /* endTime= */ periodStart + end,
-          getUris,
-          /* startByte= */ 0,
-          /* endByte= */ segmentSize,
-          this.initSegmentReference_,
-          /* timestampOffset= */ periodStart,
-          /* appendWindowStart= */ periodStart,
-          /* appendWindowEnd= */ Infinity);
-    };
+    this.segmentIndex = new shaka.test.FakeSegmentIndex(
+        /* byIndex= */ (index) => {
+          goog.asserts.assert(!isNaN(index), 'Invalid index requested!');
+          if (index < 0 || index >= segmentCount || isNaN(index)) {
+            return null;
+          }
+          const getUris = () => [sprintf(template, index)];
+          const start = index * segmentDuration;
+          const end = Math.min(totalDuration, (index + 1) * segmentDuration);
+          return new this.manifest_.shaka_.media.SegmentReference(
+              index,
+              /* startTime= */ periodStart + start,
+              /* endTime= */ periodStart + end,
+              getUris,
+              /* startByte= */ 0,
+              /* endByte= */ segmentSize,
+              this.initSegmentReference_,
+              /* timestampOffset= */ periodStart,
+              /* appendWindowStart= */ periodStart,
+              /* appendWindowEnd= */ Infinity);
+        },
+        /* findIndex= */ (time) => {
+          // Note: |time| is relative to the presentation.
+          const periodTime = time - periodStart;
+          const index = Math.floor(periodTime / segmentDuration);
+          return index;
+        });
   }
 
   /**

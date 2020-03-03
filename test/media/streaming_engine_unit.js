@@ -3487,14 +3487,32 @@ describe('StreamingEngine', () => {
       return;
     }
 
-    const originalGet = stream.segmentIndex.get;
-    stream.segmentIndex.get = (position) => {
-      // eslint-disable-next-line no-restricted-syntax
-      const segmentReference = originalGet.call(stream.segmentIndex, position);
+    const patch = (segmentReference) => {
       if (segmentReference) {
         segmentReference.initSegmentReference = initSegmentReference;
       }
       return segmentReference;
+    };
+
+    const originalSeek = stream.segmentIndex.seek;
+    stream.segmentIndex.seek = (time) => {
+      // eslint-disable-next-line no-restricted-syntax
+      const segmentReference = originalSeek.call(stream.segmentIndex, time);
+      return patch(segmentReference);
+    };
+
+    const originalCurrent = stream.segmentIndex.current;
+    stream.segmentIndex.current = () => {
+      // eslint-disable-next-line no-restricted-syntax
+      const segmentReference = originalCurrent.call(stream.segmentIndex);
+      return patch(segmentReference);
+    };
+
+    const originalNext = stream.segmentIndex.next;
+    stream.segmentIndex.next = () => {
+      // eslint-disable-next-line no-restricted-syntax
+      const segmentReference = originalNext.call(stream.segmentIndex);
+      return patch(segmentReference);
     };
   }
 });
