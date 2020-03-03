@@ -788,28 +788,42 @@ describe('Player', () => {
     });
 
     it('fires "adaptation" event', async () => {
+      const abrEnabled = new Promise((resolve) => {
+        abrManager.enable.and.callFake(resolve);
+      });
+
       await player.load('test:sintel_multi_lingual_multi_res_compiled');
 
       expect(abrManager.switchCallback).toBeTruthy();
       expect(abrManager.variants.length).toBeGreaterThan(1);
       expect(abrManager.chooseIndex).toBe(0);
 
+      /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager)
-          .timeoutAfter(1)
-          .failOnTimeout(true);
+          .timeoutAfter(1).failOnTimeout(true);
+
+      await waiter.waitForPromise(abrEnabled, 'AbrManager enabled');
+
       const p = waiter.waitForEvent(player, 'adaptation');
       abrManager.switchCallback(abrManager.variants[1]);
       await expectAsync(p).toBeResolved();
     });
 
     it('doesn\'t fire "adaptation" when not changing streams', async () => {
+      const abrEnabled = new Promise((resolve) => {
+        abrManager.enable.and.callFake(resolve);
+      });
+
       await player.load('test:sintel_multi_lingual_multi_res_compiled');
 
       expect(abrManager.switchCallback).toBeTruthy();
 
+      /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager)
-          .timeoutAfter(0.25)
-          .failOnTimeout(true);
+          .timeoutAfter(1).failOnTimeout(true);
+
+      await waiter.waitForPromise(abrEnabled, 'AbrManager enabled');
+
       const p = waiter.waitForEvent(player, 'adaptation');
       for (let i = 0; i < 3; i++) {
         abrManager.switchCallback(abrManager.variants[abrManager.chooseIndex]);
