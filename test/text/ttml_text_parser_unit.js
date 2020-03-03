@@ -913,6 +913,43 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  describe('getCellResolution_', () => {
+    const {cellResolution} = shaka.text.Cue;
+
+    const DEFAULT = {
+      columns: cellResolution.COLUMNS,
+      rows: cellResolution.ROWS,
+    };
+
+    const {getCellResolution_} = shaka.text.TtmlTextParser;
+
+    it('should return default values if cellResolution was not provided',
+        () => {
+          expect(getCellResolution_('')).toEqual(DEFAULT);
+          expect(getCellResolution_(null)).toEqual(DEFAULT);
+        });
+
+    it('should return default values if provided cellResolution is not valid',
+        () => {
+          expect(getCellResolution_('')).toEqual(DEFAULT);
+          expect(getCellResolution_('-50 14')).toEqual(DEFAULT);
+          expect(getCellResolution_('60 incorrect')).toEqual(DEFAULT);
+          expect(getCellResolution_('incorrect50 14')).toEqual(DEFAULT);
+          expect(getCellResolution_('50 14incorrect')).toEqual(DEFAULT);
+        });
+
+    it('should return columns and rows by provided cell resolution', () => {
+      expect(getCellResolution_('60 20')).toEqual({
+        columns: 60,
+        rows: 20,
+      });
+      expect(getCellResolution_('10 30')).toEqual({
+        columns: 10,
+        rows: 30,
+      });
+    });
+  });
+
 
   /**
    * @param {!Array} cues

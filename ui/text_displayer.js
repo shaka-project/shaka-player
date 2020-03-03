@@ -268,11 +268,15 @@ shaka.ui.TextDisplayer = class {
       captionsStyle.margin = '0';
     }
 
+    const {convertLengthValue_} = shaka.ui.TextDisplayer;
+
     captionsStyle.fontFamily = cue.fontFamily;
     captionsStyle.fontWeight = cue.fontWeight.toString();
-    captionsStyle.fontSize = cue.fontSize;
     captionsStyle.fontStyle = cue.fontStyle;
     captionsStyle.letterSpacing = cue.letterSpacing;
+    captionsStyle.fontSize = convertLengthValue_(
+        cue.fontSize, cue, this.videoContainer_
+    );
 
     // The line attribute defines the positioning of the text container inside
     // the video container.
@@ -360,5 +364,55 @@ shaka.ui.TextDisplayer = class {
     } else {
       panelStyle.height = cue.size + '%';
     }
+  }
+
+  /**
+   * Returns info about provided lengthValue
+   * @example 100px => { value: 100, unit: 'px' }
+   * @param {?string} lengthValue
+   *
+   * @return {?{ value: number, unit: string }}
+   * @private
+   */
+  static getLengthValueInfo_(lengthValue) {
+    const regexp = new RegExp(/(\d*\.?\d+)([a-z]+|%+)/).exec(lengthValue);
+
+    if (!regexp) {
+      return null;
+    }
+
+    return {
+      value: Number(regexp[1]),
+      unit: regexp[2],
+    };
+  }
+
+  /**
+   * Converts length value
+   *
+   * @param {string} lengthValue
+   * @param {!shaka.extern.Cue} cue
+   * @param {HTMLElement} videoContainer
+   * @return {string}
+   * @private
+  */
+  static convertLengthValue_(lengthValue, cue, videoContainer) {
+    const {getLengthValueInfo_} = shaka.ui.TextDisplayer;
+
+    const lengthValueInfo = getLengthValueInfo_(lengthValue);
+
+    if (!lengthValueInfo) {
+      return lengthValue;
+    }
+
+    const {unit, value} = getLengthValueInfo_(lengthValue);
+
+    if (unit === 'c') {
+      const containerHeight = videoContainer.clientHeight;
+
+      return (containerHeight * (1 /cue.cellResolutionRows) * value) + 'px';
+    }
+
+    return lengthValue;
   }
 };
