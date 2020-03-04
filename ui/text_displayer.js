@@ -268,13 +268,11 @@ shaka.ui.TextDisplayer = class {
       captionsStyle.margin = '0';
     }
 
-    const {convertLengthValue_} = shaka.ui.TextDisplayer;
-
     captionsStyle.fontFamily = cue.fontFamily;
     captionsStyle.fontWeight = cue.fontWeight.toString();
     captionsStyle.fontStyle = cue.fontStyle;
     captionsStyle.letterSpacing = cue.letterSpacing;
-    captionsStyle.fontSize = convertLengthValue_(
+    captionsStyle.fontSize = shaka.ui.TextDisplayer.convertLengthValue_(
         cue.fontSize, cue, this.videoContainer_
     );
 
@@ -377,7 +375,7 @@ shaka.ui.TextDisplayer = class {
   static getLengthValueInfo_(lengthValue) {
     const matches = new RegExp(/(\d*\.?\d+)([a-z]+|%+)/).exec(lengthValue);
 
-    if (!matches ) {
+    if (!matches) {
       return null;
     }
 
@@ -388,7 +386,10 @@ shaka.ui.TextDisplayer = class {
   }
 
   /**
-   * Converts length value
+   * Converts length value to an absolute value in pixels.
+   * If lengthValue is already an absolute value it will not
+   * be modified. Relative lengthValue will be converted to an
+   * absolute value in pixels based on Computed Cell Size
    *
    * @param {string} lengthValue
    * @param {!shaka.extern.Cue} cue
@@ -397,9 +398,12 @@ shaka.ui.TextDisplayer = class {
    * @private
   */
   static convertLengthValue_(lengthValue, cue, videoContainer) {
-    const {TextDisplayer} = shaka.ui;
+    const {
+      getLengthValueInfo_,
+      getAbsoluteLengthInPixels_,
+    } = shaka.ui.TextDisplayer;
 
-    const lengthValueInfo = TextDisplayer.getLengthValueInfo_(lengthValue);
+    const lengthValueInfo = getLengthValueInfo_(lengthValue);
 
     if (!lengthValueInfo) {
       return lengthValue;
@@ -409,20 +413,21 @@ shaka.ui.TextDisplayer = class {
 
     switch (unit) {
       case '%':
-        return TextDisplayer.getComputedValue_(
+        return getAbsoluteLengthInPixels_(
             value / 100,
             cue,
             videoContainer
         );
       case 'c':
-        return TextDisplayer.getComputedValue_(value, cue, videoContainer);
+        return getAbsoluteLengthInPixels_(value, cue, videoContainer);
       default:
         return lengthValue;
     }
   }
 
   /**
-   * Returns computed value
+   * Returns computed absolute length value in pixels based on cell
+   * and a video container size
    * @param {number} value
    * @param {!shaka.extern.Cue} cue
    * @param {HTMLElement} videoContainer
@@ -430,7 +435,7 @@ shaka.ui.TextDisplayer = class {
    *
    * @private
    * */
-  static getComputedValue_(value, cue, videoContainer) {
+  static getAbsoluteLengthInPixels_(value, cue, videoContainer) {
     const containerHeight = videoContainer.clientHeight;
     const cellResolutionRows = cue.cellResolution[1];
 

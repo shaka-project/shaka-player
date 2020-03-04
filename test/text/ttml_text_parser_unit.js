@@ -883,25 +883,28 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('parses cellResolution', () => {
+  it('cues should have default cellResolution', () => {
     verifyHelper(
         [
           {
             startTime: 1,
             endTime: 2,
-            cellResolution: [
-              Cue.cellResolution.COLUMNS,
-              Cue.cellResolution.ROWS,
-            ],
+            cellResolution: [32, 15],
+            fontSize: '0.45c',
           },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:fontSize="0.45c"/>' +
+        '</styling>' +
         '<body >' +
-        '<p begin="00:01.00" end="00:02.00">Test</p>' +
+        '<p begin="00:01.00" end="00:02.00" style="s1">Test</p>' +
         '</body>' +
         '</tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
 
+  it('parses cellResolution', () => {
     verifyHelper(
         [
           {
@@ -909,12 +912,18 @@ describe('TtmlTextParser', () => {
             endTime: 2,
             payload: 'Test',
             cellResolution: [60, 20],
+            fontSize: '67%',
           },
         ],
-        '<tt xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +
+        '<tt ' +
+        'xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +
+        'xmlns:tts="http://www.w3.org/ns/ttml#styling" ' +
         'ttp:cellResolution="60 20">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:fontSize="67%"/>' +
+        '</styling>' +
         '<body >' +
-        '<p begin="00:01.00" end="00:02.00">Test</p>' +
+        '<p begin="00:01.00" end="00:02.00" style="s1">Test</p>' +
         '</body>' +
         '</tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});

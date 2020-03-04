@@ -41,13 +41,16 @@ describe('UITextDisplayer', () => {
   }
 
 
-  beforeEach(() => {
+  beforeAll(() => {
     videoContainer =
       /** @type {!HTMLElement} */ (document.createElement('div'));
     videoContainer.style.height = `${videoContainerHeight}px`;
     document.body.appendChild(videoContainer);
     video = shaka.test.UiUtils.createVideoElement();
     videoContainer.appendChild(video);
+  });
+
+  beforeEach(() => {
     textDisplayer = new shaka.ui.TextDisplayer(video, videoContainer);
   });
 
