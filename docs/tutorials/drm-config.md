@@ -76,6 +76,7 @@ content keys (both in hex):
 player.configure({
   drm: {
     clearKeys: {
+      // 'key-id-in-hex': 'key-in-hex',
       'deadbeefdeadbeefdeadbeefdeadbeef': '18675309186753091867530918675309',
       '02030507011013017019023029031037': '03050701302303204201080425098033'
     }
