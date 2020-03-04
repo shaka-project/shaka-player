@@ -160,4 +160,28 @@ describe('UITextDisplayer', () => {
     expect(cssObj).toEqual(
         jasmine.objectContaining({'font-size': expectedFontSize}));
   });
+
+  it('correctly displays styles for percentages units', async () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+    cue.fontSize = '0.90c';
+    cue.cellResolutionRows = 15;
+    cue.cellResolutionColumns = 32;
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    // Wait until updateCaptions_() gets called.
+    await shaka.test.Util.delay(0.5);
+
+    // Expected value is calculated based on  ttp:cellResolution="32 15"
+    // videoContainerHeight=450px and tts:fontSize="90%" on the default style.
+    const expectedFontSize = '27px';
+
+    const textContainer =
+        videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('span');
+    const cssObj = parseCssText(captions.style.cssText);
+    expect(cssObj).toEqual(
+        jasmine.objectContaining({'font-size': expectedFontSize}));
+  });
 });

@@ -397,9 +397,9 @@ shaka.ui.TextDisplayer = class {
    * @private
   */
   static convertLengthValue_(lengthValue, cue, videoContainer) {
-    const {getLengthValueInfo_} = shaka.ui.TextDisplayer;
+    const {TextDisplayer} = shaka.ui;
 
-    const lengthValueInfo = getLengthValueInfo_(lengthValue);
+    const lengthValueInfo = TextDisplayer.getLengthValueInfo_(lengthValue);
 
     if (!lengthValueInfo) {
       return lengthValue;
@@ -407,12 +407,32 @@ shaka.ui.TextDisplayer = class {
 
     const {unit, value} = lengthValueInfo;
 
-    if (unit === 'c') {
-      const containerHeight = videoContainer.clientHeight;
-
-      return (containerHeight * (1 /cue.cellResolutionRows) * value) + 'px';
+    switch (unit) {
+      case '%':
+        return TextDisplayer.getComputedValue_(
+            value / 100,
+            cue,
+            videoContainer
+        );
+      case 'c':
+        return TextDisplayer.getComputedValue_(value, cue, videoContainer);
+      default:
+        return lengthValue;
     }
+  }
 
-    return lengthValue;
+  /**
+   * Returns computed value
+   * @param {number} value
+   * @param {!shaka.extern.Cue} cue
+   * @param {HTMLElement} videoContainer
+   * @return {string}
+   *
+   * @private
+   * */
+  static getComputedValue_(value, cue, videoContainer) {
+    const containerHeight = videoContainer.clientHeight;
+
+    return (containerHeight * value / cue.cellResolutionRows) + 'px';
   }
 };
