@@ -889,8 +889,10 @@ describe('TtmlTextParser', () => {
           {
             startTime: 1,
             endTime: 2,
-            cellResolutionRows: Cue.cellResolution.ROWS,
-            cellResolutionColumns: Cue.cellResolution.COLUMNS,
+            cellResolution: [
+              Cue.cellResolution.COLUMNS,
+              Cue.cellResolution.ROWS,
+            ],
           },
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
@@ -906,8 +908,7 @@ describe('TtmlTextParser', () => {
             startTime: 1,
             endTime: 2,
             payload: 'Test',
-            cellResolutionRows: 20,
-            cellResolutionColumns: 60,
+            cellResolution: [60, 20],
           },
         ],
         '<tt xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +

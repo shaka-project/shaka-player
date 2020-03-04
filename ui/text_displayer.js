@@ -432,7 +432,8 @@ shaka.ui.TextDisplayer = class {
    * */
   static getComputedValue_(value, cue, videoContainer) {
     const containerHeight = videoContainer.clientHeight;
+    const cellResolutionRows = cue.cellResolution[1];
 
-    return (containerHeight * value / cue.cellResolutionRows) + 'px';
+    return (containerHeight * value / cellResolutionRows) + 'px';
   }
 };
