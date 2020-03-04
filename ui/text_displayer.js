@@ -375,15 +375,15 @@ shaka.ui.TextDisplayer = class {
    * @private
    */
   static getLengthValueInfo_(lengthValue) {
-    const regexp = new RegExp(/(\d*\.?\d+)([a-z]+|%+)/).exec(lengthValue);
+    const matches = new RegExp(/(\d*\.?\d+)([a-z]+|%+)/).exec(lengthValue);
 
-    if (!regexp) {
+    if (!matches ) {
       return null;
     }
 
     return {
-      value: Number(regexp[1]),
-      unit: regexp[2],
+      value: Number(matches[1]),
+      unit: matches[2],
     };
   }
 
