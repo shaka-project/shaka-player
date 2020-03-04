@@ -405,7 +405,7 @@ shaka.ui.TextDisplayer = class {
       return lengthValue;
     }
 
-    const {unit, value} = getLengthValueInfo_(lengthValue);
+    const {unit, value} = lengthValueInfo;
 
     if (unit === 'c') {
       const containerHeight = videoContainer.clientHeight;

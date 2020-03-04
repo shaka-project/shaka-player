@@ -10,6 +10,8 @@ describe('UITextDisplayer', () => {
   let video;
   /** @type {shaka.ui.TextDisplayer} */
   let textDisplayer;
+  /** @type {number} */
+  const videoContainerHeight = 450;
 
   /**
    * Transform a cssText to an object.
@@ -39,13 +41,18 @@ describe('UITextDisplayer', () => {
   }
 
 
-  beforeAll(() => {
+  beforeEach(() => {
     videoContainer =
       /** @type {!HTMLElement} */ (document.createElement('div'));
+    videoContainer.style.height = `${videoContainerHeight}px`;
     document.body.appendChild(videoContainer);
     video = shaka.test.UiUtils.createVideoElement();
     videoContainer.appendChild(video);
     textDisplayer = new shaka.ui.TextDisplayer(video, videoContainer);
+  });
+
+  afterEach(() => {
+    textDisplayer.destroy();
   });
 
   it('correctly displays styles for cues', async () => {
@@ -128,5 +135,29 @@ describe('UITextDisplayer', () => {
           // https://github.com/google/shaka-player/issues/2339
           // 'writing-mode': 'horizontal-tb',
         }));
+  });
+
+  it('correctly displays styles for cellResolution units', async () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+    cue.fontSize = '0.80c';
+    cue.cellResolutionRows = 20;
+    cue.cellResolutionColumns = 60;
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    // Wait until updateCaptions_() gets called.
+    await shaka.test.Util.delay(0.5);
+
+    // Expected value is calculated based on  ttp:cellResolution="60 20"
+    // videoContainerHeight=450px and tts:fontSize="0.80c" on the default style.
+    const expectedFontSize = '18px';
+
+    const textContainer =
+        videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('span');
+    const cssObj = parseCssText(captions.style.cssText);
+    expect(cssObj).toEqual(
+        jasmine.objectContaining({'font-size': expectedFontSize}));
   });
 });
