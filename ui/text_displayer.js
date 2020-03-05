@@ -398,12 +398,8 @@ shaka.ui.TextDisplayer = class {
    * @private
   */
   static convertLengthValue_(lengthValue, cue, videoContainer) {
-    const {
-      getLengthValueInfo_,
-      getAbsoluteLengthInPixels_,
-    } = shaka.ui.TextDisplayer;
-
-    const lengthValueInfo = getLengthValueInfo_(lengthValue);
+    const lengthValueInfo =
+      shaka.ui.TextDisplayer.getLengthValueInfo_(lengthValue);
 
     if (!lengthValueInfo) {
       return lengthValue;
@@ -413,13 +409,13 @@ shaka.ui.TextDisplayer = class {
 
     switch (unit) {
       case '%':
-        return getAbsoluteLengthInPixels_(
-            value / 100,
-            cue,
-            videoContainer
+        return shaka.ui.TextDisplayer.getAbsoluteLengthInPixels_(
+            value / 100, cue, videoContainer
         );
       case 'c':
-        return getAbsoluteLengthInPixels_(value, cue, videoContainer);
+        return shaka.ui.TextDisplayer.getAbsoluteLengthInPixels_(
+            value, cue, videoContainer
+        );
       default:
         return lengthValue;
     }
