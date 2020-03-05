@@ -169,7 +169,7 @@ describe('UITextDisplayer', () => {
   it('correctly displays styles for percentages units', async () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
-    cue.fontSize = '0.90c';
+    cue.fontSize = '90%';
     cue.cellResolution = {
       columns: 32,
       rows: 15,
