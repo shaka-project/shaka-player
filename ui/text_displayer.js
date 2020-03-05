@@ -410,12 +410,10 @@ shaka.ui.TextDisplayer = class {
     switch (unit) {
       case '%':
         return shaka.ui.TextDisplayer.getAbsoluteLengthInPixels_(
-            value / 100, cue, videoContainer
-        );
+            value / 100, cue, videoContainer);
       case 'c':
         return shaka.ui.TextDisplayer.getAbsoluteLengthInPixels_(
-            value, cue, videoContainer
-        );
+            value, cue, videoContainer);
       default:
         return lengthValue;
     }
