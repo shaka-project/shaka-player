@@ -144,7 +144,10 @@ describe('UITextDisplayer', () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
     cue.fontSize = '0.80c';
-    cue.cellResolution = [60, 20];
+    cue.cellResolution = {
+      columns: 60,
+      rows: 20,
+    };
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue]);
@@ -167,7 +170,10 @@ describe('UITextDisplayer', () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
     cue.fontSize = '0.90c';
-    cue.cellResolution = [32, 15];
+    cue.cellResolution = {
+      columns: 32,
+      rows: 15,
+    };
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue]);

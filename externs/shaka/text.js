@@ -249,9 +249,14 @@ shaka.extern.Cue = class {
     /**
      * The number of horizontal and vertical cells into which
      * the Root Container Region area is divided
-     * cellResolution[0] - columns
-     * cellResolution[1] - rows
-     * @type {!Array.<number>}
+     *
+     * @typedef {{ columns: number, rows: number }}
+     *
+     * @property {number} columns
+     *     The number of vertical cells
+     * @property {number} rows
+     *     The number of horizontal cells
+     *
      * @exportDoc
      */
     this.cellResolution;

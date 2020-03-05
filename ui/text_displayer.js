@@ -437,8 +437,7 @@ shaka.ui.TextDisplayer = class {
    * */
   static getAbsoluteLengthInPixels_(value, cue, videoContainer) {
     const containerHeight = videoContainer.clientHeight;
-    const cellResolutionRows = cue.cellResolution[1];
 
-    return (containerHeight * value / cellResolutionRows) + 'px';
+    return (containerHeight * value / cue.cellResolution.rows) + 'px';
   }
 };

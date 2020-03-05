@@ -889,7 +889,10 @@ describe('TtmlTextParser', () => {
           {
             startTime: 1,
             endTime: 2,
-            cellResolution: [32, 15],
+            cellResolution: {
+              columns: 32,
+              rows: 15,
+            },
             fontSize: '0.45c',
           },
         ],
@@ -911,7 +914,10 @@ describe('TtmlTextParser', () => {
             startTime: 1,
             endTime: 2,
             payload: 'Test',
-            cellResolution: [60, 20],
+            cellResolution: {
+              columns: 60,
+              rows: 20,
+            },
             fontSize: '67%',
           },
         ],
