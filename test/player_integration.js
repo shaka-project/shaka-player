@@ -602,6 +602,32 @@ describe('Player', () => {
     });
   });  // describe('tracks')
 
+  describe('loading', () => {
+    // A regression test for Issue #2433.
+    it('can load very large files', async () => {
+      // Reset the lazy function, so that it does not remember any chunk size
+      // that was detected beforehand.
+      compiledShaka.util.StringUtils.resetFromCharCode();
+      const oldFromCharCode = String.fromCharCode;
+      try {
+        // Replace String.fromCharCode with a version that can only handle very
+        // small chunks.
+        // This has to be an old-style function, to use the "arguments" object.
+        // eslint-disable-next-line no-restricted-syntax
+        String.fromCharCode = function() {
+          if (arguments.length > 2000) {
+            throw new RangeError('Synthetic Range Error');
+          }
+          // eslint-disable-next-line no-restricted-syntax
+          return oldFromCharCode.apply(null, arguments);
+        };
+        await player.load('base/test/test/assets/large_file.mpd');
+      } finally {
+        String.fromCharCode = oldFromCharCode;
+      }
+    });
+  });
+
   describe('buffering', () => {
     const startBuffering = jasmine.objectContaining({buffering: true});
     const endBuffering = jasmine.objectContaining({buffering: false});
