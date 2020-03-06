@@ -69,6 +69,31 @@ shaka.test.UiUtils = class {
     expect(elements.length).toBe(0);
   }
 
+  /**
+   * @param {!HTMLElement} parent
+   * @param {string} className
+   * @return {!HTMLElement}
+   */
+  static getElementByClassName(parent, className) {
+    const elements = parent.getElementsByClassName(className);
+    expect(elements.length).toBe(1);
+    return /** @type {!HTMLElement} */ (elements[0]);
+  }
+
+  /**
+   * @param {!HTMLElement} element
+   */
+  static confirmElementHidden(element) {
+    expect(element.classList.contains('shaka-hidden')).toBe(true);
+  }
+
+
+  /**
+   * @param {!HTMLElement} element
+   */
+  static confirmElementDisplayed(element) {
+    expect(element.classList.contains('shaka-hidden')).toBe(false);
+  }
 
   /**
    * Thoroughly clean up after UI-related tests.

@@ -88,6 +88,15 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
   }
 
   /**
+   * @override
+   */
+  release() {
+    this.timer_.stop();
+    this.timer_ = null;
+    super.release();
+  }
+
+  /**
    * @private
    */
   updateLocalizedStrings_() {
