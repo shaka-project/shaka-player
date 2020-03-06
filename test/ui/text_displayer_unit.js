@@ -54,8 +54,8 @@ describe('UITextDisplayer', () => {
     textDisplayer = new shaka.ui.TextDisplayer(video, videoContainer);
   });
 
-  afterEach(() => {
-    textDisplayer.destroy();
+  afterEach(async () => {
+    await textDisplayer.destroy();
   });
 
   it('correctly displays styles for cues', async () => {

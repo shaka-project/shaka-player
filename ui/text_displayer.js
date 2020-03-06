@@ -399,7 +399,7 @@ shaka.ui.TextDisplayer = class {
   */
   static convertLengthValue_(lengthValue, cue, videoContainer) {
     const lengthValueInfo =
-      shaka.ui.TextDisplayer.getLengthValueInfo_(lengthValue);
+        shaka.ui.TextDisplayer.getLengthValueInfo_(lengthValue);
 
     if (!lengthValueInfo) {
       return lengthValue;
