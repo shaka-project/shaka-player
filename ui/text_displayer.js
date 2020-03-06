@@ -270,9 +270,11 @@ shaka.ui.TextDisplayer = class {
 
     captionsStyle.fontFamily = cue.fontFamily;
     captionsStyle.fontWeight = cue.fontWeight.toString();
-    captionsStyle.fontSize = cue.fontSize;
     captionsStyle.fontStyle = cue.fontStyle;
     captionsStyle.letterSpacing = cue.letterSpacing;
+    captionsStyle.fontSize = shaka.ui.TextDisplayer.convertLengthValue_(
+        cue.fontSize, cue, this.videoContainer_
+    );
 
     // The line attribute defines the positioning of the text container inside
     // the video container.
@@ -360,5 +362,76 @@ shaka.ui.TextDisplayer = class {
     } else {
       panelStyle.height = cue.size + '%';
     }
+  }
+
+  /**
+   * Returns info about provided lengthValue
+   * @example 100px => { value: 100, unit: 'px' }
+   * @param {?string} lengthValue
+   *
+   * @return {?{ value: number, unit: string }}
+   * @private
+   */
+  static getLengthValueInfo_(lengthValue) {
+    const matches = new RegExp(/(\d*\.?\d+)([a-z]+|%+)/).exec(lengthValue);
+
+    if (!matches) {
+      return null;
+    }
+
+    return {
+      value: Number(matches[1]),
+      unit: matches[2],
+    };
+  }
+
+  /**
+   * Converts length value to an absolute value in pixels.
+   * If lengthValue is already an absolute value it will not
+   * be modified. Relative lengthValue will be converted to an
+   * absolute value in pixels based on Computed Cell Size
+   *
+   * @param {string} lengthValue
+   * @param {!shaka.extern.Cue} cue
+   * @param {HTMLElement} videoContainer
+   * @return {string}
+   * @private
+  */
+  static convertLengthValue_(lengthValue, cue, videoContainer) {
+    const lengthValueInfo =
+        shaka.ui.TextDisplayer.getLengthValueInfo_(lengthValue);
+
+    if (!lengthValueInfo) {
+      return lengthValue;
+    }
+
+    const {unit, value} = lengthValueInfo;
+
+    switch (unit) {
+      case '%':
+        return shaka.ui.TextDisplayer.getAbsoluteLengthInPixels_(
+            value / 100, cue, videoContainer);
+      case 'c':
+        return shaka.ui.TextDisplayer.getAbsoluteLengthInPixels_(
+            value, cue, videoContainer);
+      default:
+        return lengthValue;
+    }
+  }
+
+  /**
+   * Returns computed absolute length value in pixels based on cell
+   * and a video container size
+   * @param {number} value
+   * @param {!shaka.extern.Cue} cue
+   * @param {HTMLElement} videoContainer
+   * @return {string}
+   *
+   * @private
+   * */
+  static getAbsoluteLengthInPixels_(value, cue, videoContainer) {
+    const containerHeight = videoContainer.clientHeight;
+
+    return (containerHeight * value / cue.cellResolution.rows) + 'px';
   }
 };
