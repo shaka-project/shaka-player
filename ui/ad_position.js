@@ -32,6 +32,7 @@ shaka.ui.AdPosition = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.span_ = shaka.util.Dom.createHTMLElement('span');
+    this.span_.classList.add('shaka-ad-position-span');
     this.container_.appendChild(this.span_);
 
     this.updateAriaLabel_();

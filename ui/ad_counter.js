@@ -33,6 +33,7 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.span_ = shaka.util.Dom.createHTMLElement('span');
+    this.span_.classList.add('shaka-ad-counter-span');
     this.container_.appendChild(this.span_);
 
     /**
