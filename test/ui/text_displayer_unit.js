@@ -144,6 +144,7 @@ describe('UITextDisplayer', () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
     cue.fontSize = '0.80c';
+    cue.linePadding = '0.50c';
     cue.cellResolution = {
       columns: 60,
       rows: 20,
@@ -158,12 +159,21 @@ describe('UITextDisplayer', () => {
     // videoContainerHeight=450px and tts:fontSize="0.80c" on the default style.
     const expectedFontSize = '18px';
 
+    // Expected value is calculated based on ttp:cellResolution="60 20"
+    // videoContainerHeight=450px and ebutts:linePadding="0.5c" on the default
+    // style.
+    const expectedLinePadding = '11.25px';
+
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
     const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
-        jasmine.objectContaining({'font-size': expectedFontSize}));
+        jasmine.objectContaining({
+          'font-size': expectedFontSize,
+          'padding-left': expectedLinePadding,
+          'padding-right': expectedLinePadding,
+        }));
   });
 
   it('correctly displays styles for percentages units', async () => {
