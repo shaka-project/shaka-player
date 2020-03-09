@@ -247,6 +247,15 @@ shaka.extern.Cue = class {
     this.backgroundColor;
 
     /**
+     * The number of horizontal and vertical cells into which
+     * the Root Container Region area is divided
+     *
+     * @type {{ columns: number, rows: number }}
+     * @exportDoc
+     */
+    this.cellResolution;
+
+    /**
      * Image background represented by any string that would be
      * accepted in image HTML element.
      * E. g. 'data:[mime type];base64,[data]'.
