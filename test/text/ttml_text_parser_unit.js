@@ -935,6 +935,35 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('parses line padding', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 1,
+            endTime: 2,
+            payload: 'Test',
+            cellResolution: {
+              columns: 60,
+              rows: 20,
+            },
+            linePadding: '0.5c',
+          },
+        ],
+        '<tt ' +
+        'xmlns:ttp="http://www.w3.org/ns/ttml#parameter" ' +
+        'xmlns:tts="http://www.w3.org/ns/ttml#styling" ' +
+        'xmlns:ebutts="urn:ebu:tt:style" ' +
+        'ttp:cellResolution="60 20">' +
+        '<styling>' +
+        '<style xml:id="s1" ebutts:linePadding="0.5c"/>' +
+        '</styling>' +
+        '<body >' +
+        '<p begin="00:01.00" end="00:02.00" style="s1">Test</p>' +
+        '</body>' +
+        '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('chooses style on element over style on region', () => {
     verifyHelper(
         [
