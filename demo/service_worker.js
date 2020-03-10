@@ -155,6 +155,9 @@ const LOCAL_BASE = resolveRelativeUrl('../');
  * @param {!InstallEvent} event
  */
 function onInstall(event) {
+  // Activate as soon as installation is complete.
+  self.skipWaiting();
+
   const preCacheApplication = async () => {
     const cache = await caches.open(CACHE_NAME);
     // Fetching these with addAll fails for CORS-restricted content, so we use
@@ -203,7 +206,12 @@ function onActivate(event) {
     await Promise.all(cleanUpPromises);
   };
 
-  event.waitUntil(dropOldCaches());
+  event.waitUntil(Promise.all([
+    dropOldCaches(),
+
+    // makes this the active service worker for all open tabs
+    clients.claim(),
+  ]));
 }
 
 /**
