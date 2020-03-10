@@ -241,7 +241,7 @@ async function fetchCacheableResource(request) {
     // We have it in cache.  Try to fetch a live version and update the cache,
     // but limit how long we will wait for the updated version.
     try {
-      return timeout(NETWORK_TIMEOUT, fetchAndCache(cache, request));
+      return await timeout(NETWORK_TIMEOUT, fetchAndCache(cache, request));
     } catch (error) {
       // We tried to fetch a live version, but it either failed or took too
       // long.  If it took too long, the fetch and cache operation will continue
