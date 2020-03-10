@@ -94,7 +94,8 @@ shakaAssets.Feature = {
   AUDIO_ONLY: shakaDemo.MessageIds.AUDIO_ONLY,
   // Set if the asset can be stored offline.
   OFFLINE: shakaDemo.MessageIds.OFFLINE,
-  // A synthetic property used in the search tab. Should not be given to assets.
+  // A synthetic property used in the "all content" tab. Should not be given to
+  // assets.
   STORED: shakaDemo.MessageIds.STORED,
   // Set if the asset has ads. Autoset by calling setAdTagUri() on an asset.
   // Does not need to be set manually.

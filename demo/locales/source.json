@@ -19,6 +19,10 @@
     "message": "Ad Tag URL",
     "description": "The label on a field that allows users to provide a Ad Tag URL for a custom asset."
   },
+  "DEMO_ALL_CONTENT": {
+    "description": "A link in the header, that switches to a page for browsing or searching through the entire content library.",
+    "message": "ALL CONTENT"
+  },
   "DEMO_ALWAYS_STREAM_TEXT": {
     "description": "The name of a configuration value.",
     "message": "Always Stream Text"
@@ -249,7 +253,7 @@
   },
   "DEMO_FRONT_INTRO_TWO": {
     "description": "The second part of a message introducing the demo to new users.",
-    "message": "Choose a video to playback; more assets are available via the search tab."
+    "message": "Choose a video to playback; more assets are available via the \"all content\" tab."
   },
   "DEMO_FUZZ_FACTOR": {
     "description": "The name of a configuration value.",
@@ -542,10 +546,6 @@
   "DEMO_SAFE_SKIP_DISTANCE": {
     "description": "The name of a configuration value.",
     "message": "Safe Skip Distance"
-  },
-  "DEMO_SEARCH": {
-    "description": "A link in the header, that switches to a page configuration for searching through the content library.",
-    "message": "ALL CONTENT"
   },
   "DEMO_SHAKA": {
     "description": "Text that describes an asset that comes from the Shaka Player asset library.",
