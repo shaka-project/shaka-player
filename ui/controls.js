@@ -413,8 +413,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
       // If we're hiding native controls, make sure the video element itself is
       // not tab-navigable.  Our custom controls will still be tab-navigable.
-      this.video_.tabIndex = -1;
-      this.video_.controls = false;
+      this.localVideo_.tabIndex = -1;
+      this.localVideo_.controls = false;
     } else {
       this.videoContainer_.removeAttribute('shaka-controls');
     }
@@ -436,8 +436,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // If we disable the native controls, we want to make sure that the video
     // element itself is not tab-navigable, so that the element is skipped over
     // when tabbing through the page.
-    this.video_.controls = enabled;
-    this.video_.tabIndex = enabled ? 0 : -1;
+    this.localVideo_.controls = enabled;
+    this.localVideo_.tabIndex = enabled ? 0 : -1;
 
     if (enabled) {
       this.setEnabledShakaControls(false);
@@ -659,7 +659,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   createDOM_() {
     this.videoContainer_.classList.add('shaka-video-container');
-    this.video_.classList.add('shaka-video');
+    this.localVideo_.classList.add('shaka-video');
 
     this.addSkimContainer_();
 
@@ -915,7 +915,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(document, 'fullscreenchange', () => {
       if (this.ad_) {
-        this.ad_.resize(this.video_.offsetWidth, this.video_.offsetHeight);
+        this.ad_.resize(
+            this.localVideo_.offsetWidth, this.localVideo_.offsetHeight);
       }
     });
   }
