@@ -433,8 +433,8 @@ shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
 
     // If we're hiding native controls, make sure the video element itself is
     // not tab-navigable.  Our custom controls will still be tab-navigable.
-    this.video_.tabIndex = -1;
-    this.video_.controls = false;
+    this.localVideo_.tabIndex = -1;
+    this.localVideo_.controls = false;
   } else {
     shaka.ui.Utils.setDisplay(this.controlsContainer_, false);
     // Spinner lives outside of the main controls div
@@ -468,8 +468,8 @@ shaka.ui.Controls.prototype.setEnabledNativeControls = function(enabled) {
   // If we disable the native controls, we want to make sure that the video
   // element itself is not tab-navigable, so that the element is skipped over
   // when tabbing through the page.
-  this.video_.controls = enabled;
-  this.video_.tabIndex = enabled ? 0 : -1;
+  this.localVideo_.controls = enabled;
+  this.localVideo_.tabIndex = enabled ? 0 : -1;
 
   if (enabled) {
     this.setEnabledShakaControls(false);
@@ -635,7 +635,7 @@ shaka.ui.Controls.prototype.hideSettingsMenus = function() {
  */
 shaka.ui.Controls.prototype.createDOM_ = function() {
   this.videoContainer_.classList.add('shaka-video-container');
-  this.video_.classList.add('shaka-video');
+  this.localVideo_.classList.add('shaka-video');
 
   this.addSkimContainer_();
 
