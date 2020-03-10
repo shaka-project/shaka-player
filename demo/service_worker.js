@@ -200,11 +200,15 @@ function onActivate(event) {
  * @param {!FetchEvent} event
  */
 function onFetch(event) {
+  // For some reason, on a page load, we get hash parameters in the URL for this
+  // event.  The hash should not be used when we do any of the lookups below.
+  const url = event.request.url.split('#')[0];
+
   // Make sure this is a request we should be handling in the first place.
   // If it's not, it's important to leave it alone and not call respondWith.
   let useCache = false;
   for (const prefix of CACHEABLE_URL_PREFIXES) {
-    if (event.request.url.startsWith(prefix)) {
+    if (url.startsWith(prefix)) {
       useCache = true;
       break;
     }
@@ -218,8 +222,8 @@ function onFetch(event) {
   // check here will only be able to match the absolute ones, but that's enough,
   // because the relative ones are covered by the loop above.
   if (!useCache) {
-    if (CRITICAL_RESOURCES.includes(event.request.url) ||
-        OPTIONAL_RESOURCES.includes(event.request.url)) {
+    if (CRITICAL_RESOURCES.includes(url) ||
+        OPTIONAL_RESOURCES.includes(url)) {
       useCache = true;
     }
   }
