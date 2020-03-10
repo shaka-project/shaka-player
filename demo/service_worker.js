@@ -78,6 +78,13 @@ const CRITICAL_RESOURCES = [
 
   // Datalist-like fields are enabled by including these:
   '../node_modules/awesomplete/awesomplete.min.js',
+
+  // Tooltips are enabled by including these:
+  '../node_modules/tippy.js/umd/index.min.js',
+  '../node_modules/popper.js/dist/umd/popper.min.js',
+
+  // PWA compatibility for iOS:
+  '../node_modules/pwacompat/pwacompat.min.js',
 ];
 
 
@@ -101,6 +108,10 @@ const OPTIONAL_RESOURCES = [
 
   // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
+
+  // The IMA ads SDK.
+  'http://imasdk.googleapis.com/js/sdkloader/ima3.js',
+  'http://imasdk.googleapis.com/js/sdkloader/ima3_dai.js',
 ];
 
 
