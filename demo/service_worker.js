@@ -129,6 +129,15 @@ const CACHEABLE_URL_PREFIXES = [
 
 
 /**
+ * This constant is used to catch local resources which may be missing from the
+ * set of cacheable URLs and prefixes above.
+ *
+ * @const {string}
+ */
+const LOCAL_BASE = resolveRelativeUrl('../');
+
+
+/**
  * This event fires when the service worker is installed.
  *
  * @param {!InstallEvent} event
@@ -215,6 +224,27 @@ function onFetch(event) {
         OPTIONAL_RESOURCES.includes(url)) {
       useCache = true;
     }
+  }
+
+  if (!useCache && url.startsWith(LOCAL_BASE)) {
+    // If we have the correct resource lists above, then all local resources
+    // should have useCache set to true by now.
+
+    // Check to see if this request is coming from a compiled build of the demo,
+    // and only log an error if this missing request is from a compiled build.
+
+    // The check is async, and that's fine because we aren't handling this fetch
+    // event anyway.
+    (async () => {
+      // This client represents the tab that made the request.
+      const client = await clients.get(event.clientId);
+      // This is the URL of that tab's main document.
+      const urlHash = client.url.split('#')[1] || '';
+      const hashParameters = urlHash.split(';');
+      if (hashParameters.includes('build=compiled')) {
+        console.error('Local resource missing!', url);
+      }
+    })();
   }
 
   if (useCache) {
