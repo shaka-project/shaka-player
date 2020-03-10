@@ -79,7 +79,8 @@ shakaAssets.Feature = {
   AUDIO_ONLY: 'audio only',
   // Set if the asset can be stored offline.
   OFFLINE: 'Downloadable',
-  // A synthetic property used in the search tab. Should not be given to assets.
+  // A synthetic property used in the "all content" tab. Should not be given to
+  // assets.
   STORED: 'Downloaded',
 
   // Set if the asset is a livestream.
