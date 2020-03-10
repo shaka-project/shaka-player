@@ -123,17 +123,21 @@ const OPTIONAL_RESOURCES = [
  * @const {!Array.<string>}
  */
 const CACHEABLE_URL_PREFIXES = [
-  // Anything associated with this application is fair game to cache.
-  // This would not be necessary if this demo were always served from the same
-  // location and always used absolute URLs in the resources lists above.
-  location.origin,
+  // Translations should be cached.  We don't know which ones the user will
+  // want, so use this prefix.
+  'locales/',
+  '../ui/locales/',
+
+  // The various app logos should be cached, too.  We don't know which ones the
+  // browser will load, so use this prefix.
+  'app_logo_',
 
   // Google Web Fonts should be cached when first seen, without being explicitly
   // listed, and should be preferred from cache for speed.
   'https://fonts.gstatic.com/',
   // Same goes for asset icons.
   'https://storage.googleapis.com/shaka-asset-icons/',
-];
+].map(resolveRelativeUrl);
 
 
 /**
