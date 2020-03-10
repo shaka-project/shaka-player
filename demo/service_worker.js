@@ -73,7 +73,7 @@ const CRITICAL_RESOURCES = [
 
   // PWA compatibility for iOS:
   '../node_modules/pwacompat/pwacompat.min.js',
-];
+].map(resolveRelativeUrl);
 
 
 /**
@@ -100,7 +100,7 @@ const OPTIONAL_RESOURCES = [
   // The IMA ads SDK.
   'http://imasdk.googleapis.com/js/sdkloader/ima3.js',
   'http://imasdk.googleapis.com/js/sdkloader/ima3_dai.js',
-];
+].map(resolveRelativeUrl);
 
 
 /**
@@ -206,9 +206,6 @@ function onFetch(event) {
   // cover everything that was installed initially, and those things still need
   // to be read from cache.  So we check if this request URL matches one of
   // those lists.
-  // The resource lists contain some relative URLs and some absolute URLs.  The
-  // check here will only be able to match the absolute ones, but that's enough,
-  // because the relative ones are covered by the loop above.
   if (!useCache) {
     if (CRITICAL_RESOURCES.includes(url) ||
         OPTIONAL_RESOURCES.includes(url)) {
@@ -296,6 +293,18 @@ function timeout(seconds, asyncProcess) {
       setTimeout(reject, seconds * 1000);
     })),
   ]);
+}
+
+
+/**
+ * @param {string} relativeUrl A URL which may be relative to this service
+ *   worker.
+ * @return {string} The same URL converted to an absolute URL.
+ */
+function resolveRelativeUrl(relativeUrl) {
+  // NOTE: This is the URL of the service worker, not the main HTML document.
+  const baseUrl = location.href;
+  return (new URL(relativeUrl, baseUrl)).href;
 }
 
 self.addEventListener('install', /** @type {function(!Event)} */(onInstall));
