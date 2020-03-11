@@ -282,10 +282,36 @@ describe('Ad UI', () => {
         });
   });
 
-  /*
-   TODO:
-   Timeline:
-   - dissappears when an ad is showing
-   - ad markers are placed correctly
-   */
+  describe('timeline', () => {
+    /** @type {!HTMLElement} */
+    let seekBar;
+    /** @type {!HTMLElement} */
+    let adMarkersBar;
+
+    beforeEach(() => {
+      seekBar = UiUtils.getElementByClassName(
+          container, 'shaka-seek-bar-container');
+
+      adMarkersBar = UiUtils.getElementByClassName(
+          container, 'shaka-ad-markers');
+    });
+
+    it('dissappears when an ad is playing', async () => {
+      const eventManager = new shaka.util.EventManager();
+      const waiter = new shaka.test.Waiter(eventManager);
+      const p = waiter.waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+
+      ad = new shaka.test.FakeAd(/* skipIn= */ null,
+          /* position= */ 1, /* totalAdsInPod= */ 1);
+      adManager.startAd(ad);
+
+      await p;
+
+      UiUtils.confirmElementHidden(seekBar);
+    });
+
+    it('ad markers aren\'t displayed if there are no ads', () => {
+      expect(adMarkersBar.style.background).toBe('');
+    });
+  });
 });
