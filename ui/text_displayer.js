@@ -185,7 +185,7 @@ shaka.ui.TextDisplayer = class {
    *
    * @param {Element} container
    * @param {!shaka.extern.Cue} cue
-   * @return {Element} the created captions container
+   * @return {!Element} the created captions container
    * @private
    */
   displayNestedCue_(container, cue) {
