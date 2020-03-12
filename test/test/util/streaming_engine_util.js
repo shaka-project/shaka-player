@@ -276,9 +276,10 @@ shaka.test.StreamingEngineUtil = class {
         const stream =
             shaka.test.StreamingEngineUtil.createMockStream(type, id++);
 
-        const segmentIndex = new shaka.test.FakeSegmentIndex(
-            /* byIndex= */ (pos) => get(type, i + 1, pos),
-            /* findIndex= */ (time) => find(type, i + 1, time));
+        const segmentIndex = new shaka.test.FakeSegmentIndex();
+        segmentIndex.find.and.callFake(
+            (time) => find(type, i + 1, time));
+        segmentIndex.get.and.callFake((pos) => get(type, i + 1, pos));
 
         stream.createSegmentIndex.and.callFake(() => {
           stream.segmentIndex = segmentIndex;

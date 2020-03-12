@@ -201,6 +201,7 @@ describe('DashParser Live', () => {
 
       await stream.createSegmentIndex();
       expect(stream.segmentIndex).toBeTruthy();
+      expect(stream.segmentIndex.find(0)).toBe(1);
       ManifestParser.verifySegmentIndex(stream, basicRefs);
 
       // The 30 second availability window is initially full in all cases
@@ -211,6 +212,7 @@ describe('DashParser Live', () => {
       Date.now = () => 11 * 1000;
       await updateManifest();
       // The first reference should have been evicted.
+      expect(stream.segmentIndex.find(0)).toBe(2);
       ManifestParser.verifySegmentIndex(stream, basicRefs.slice(1));
     });
 
@@ -446,8 +448,7 @@ describe('DashParser Live', () => {
     // the redirected base.
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
-    const ref = stream.segmentIndex.seek(0);
-    const segmentUri = ref.getUris()[0];
+    const segmentUri = stream.segmentIndex.get(1).getUris()[0];
     expect(segmentUri).toBe(redirectedUri + 's1.mp4');
   });
 
@@ -1054,10 +1055,11 @@ describe('DashParser Live', () => {
       // Find the last segment by looking just before the live edge.  Looking
       // right on the live edge creates test flake, and the segments are 2
       // seconds in duration.
-      // This should not throw an assertion.
-      const ref = stream.segmentIndex.seek(liveEdge - 0.5);
-      expect(ref).not.toBe(null);
+      const idx = stream.segmentIndex.find(liveEdge - 0.5);
+      expect(idx).not.toBe(null);
 
+      // This should not throw an assertion.
+      const ref = stream.segmentIndex.get(idx);
       // The segment's endTime should definitely not be 0.
       expect(ref.endTime).toBeGreaterThan(0);
     });

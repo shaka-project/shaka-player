@@ -543,13 +543,13 @@ describe('HlsParser live', () => {
       const manifest = await parser.start('test:/master', playerInterface);
       const textStream = manifest.periods[0].textStreams[0];
       await textStream.createSegmentIndex();
-      let ref = textStream.segmentIndex.seek(0);
+      let ref = textStream.segmentIndex.get(0);
       expect(ref).not.toBe(null);
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
 
       const videoStream = manifest.periods[0].variants[0].video;
       await videoStream.createSegmentIndex();
-      ref = videoStream.segmentIndex.seek(0);
+      ref = videoStream.segmentIndex.get(0);
       expect(ref).not.toBe(null);
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
     });

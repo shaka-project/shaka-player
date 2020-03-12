@@ -309,9 +309,9 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
       const segmentIndex1 = actual.periods[1].variants[0].video.segmentIndex;
       const segmentIndex2 = actual.periods[2].variants[0].video.segmentIndex;
 
-      const segment0 = segmentIndex0.seek(0);
-      const segment1 = segmentIndex1.seek(0);
-      const segment2 = segmentIndex2.seek(0);
+      const segment0 = segmentIndex0.get(0);
+      const segment1 = segmentIndex1.get(0);
+      const segment2 = segmentIndex2.get(0);
 
       expect(segment0).toEqual(jasmine.objectContaining({
         startTime: 0,

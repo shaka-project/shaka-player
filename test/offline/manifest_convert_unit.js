@@ -449,15 +449,13 @@ describe('ManifestConverter', () => {
       const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
 
-      /** @type {shaka.media.SegmentReference} */
-      const segment = stream.segmentIndex.seek(
-          periodDb.startTime + segmentDb.startTime);
+      expect(stream.segmentIndex.find(
+          periodDb.startTime + segmentDb.startTime)).toBe(i);
+      expect(stream.segmentIndex.find(
+          periodDb.startTime + segmentDb.endTime - 0.1)).toBe(i);
 
       /** @type {shaka.media.SegmentReference} */
-      const sameSegment = stream.segmentIndex.seek(
-          periodDb.startTime + segmentDb.endTime - 0.1);
-
-      expect(segment).toBe(sameSegment);
+      const segment = stream.segmentIndex.get(i);
       expect(segment).toBeTruthy();
       expect(segment.position).toBe(i);
       expect(segment.startTime).toBe(periodDb.startTime + segmentDb.startTime);

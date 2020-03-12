@@ -425,25 +425,16 @@ shaka.test.FakeClosedCaptionParser = class {
 
 /** @extends {shaka.media.SegmentIndex} */
 shaka.test.FakeSegmentIndex = class {
-  /**
-   * @param {(function(number):shaka.media.SegmentReference)=} byIndex Maps an
-   *   index to a SegmentReference or null
-   * @param {(function(number):?number)=} findIndex Maps a time to an index or
-   *   null
-   */
-  constructor(byIndex = undefined, findIndex = undefined) {
+  constructor() {
     /** @type {!jasmine.Spy} */
     this.destroy =
         jasmine.createSpy('destroy').and.returnValue(Promise.resolve());
 
     /** @type {!jasmine.Spy} */
-    this.seek = jasmine.createSpy('seek').and.returnValue(null);
+    this.find = jasmine.createSpy('find').and.returnValue(null);
 
     /** @type {!jasmine.Spy} */
-    this.current = jasmine.createSpy('current').and.returnValue(null);
-
-    /** @type {!jasmine.Spy} */
-    this.next = jasmine.createSpy('next').and.returnValue(null);
+    this.get = jasmine.createSpy('get').and.returnValue(null);
 
     /** @type {!jasmine.Spy} */
     this.offset = jasmine.createSpy('offset');
@@ -462,32 +453,6 @@ shaka.test.FakeSegmentIndex = class {
 
     /** @type {!jasmine.Spy} */
     this.updateEvery = jasmine.createSpy('updateEvery');
-
-    /** @protected {number} */
-    this.currentIndex_ = 0;
-
-    if (byIndex) {
-      this.next.and.callFake(() => {
-        this.currentIndex_++;
-        return this.current();
-      });
-
-      this.current.and.callFake(() => {
-        return byIndex(this.currentIndex_);
-      });
-    }
-
-    if (findIndex) {
-      this.seek.and.callFake((time) => {
-        const index = findIndex(time);
-        if (index == null) {
-          this.currentIndex_ = Infinity;
-        } else {
-          this.currentIndex_ = index;
-        }
-        return byIndex(this.currentIndex_);
-      });
-    }
   }
 };
 

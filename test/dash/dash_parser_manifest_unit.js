@@ -258,7 +258,7 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
-    const ref = stream.segmentIndex.seek(0);
+    const ref = stream.segmentIndex.get(0);
     expect(ref.timestampOffset).toBe(-1);
   });
 
@@ -282,7 +282,8 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
-    const ref = stream.segmentIndex.seek(0);
+    const position = stream.segmentIndex.find(0);
+    const ref = stream.segmentIndex.get(position);
     expect(ref.timestampOffset).toBe(-2);
   });
 
@@ -310,8 +311,8 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].textStreams[0];
     await stream.createSegmentIndex();
-    const ref = stream.segmentIndex.seek(0);
-    expect(ref).toEqual(new shaka.media.SegmentReference(
+    expect(stream.segmentIndex.find(0)).toBe(1);
+    expect(stream.segmentIndex.get(1)).toEqual(new shaka.media.SegmentReference(
         /* position= */ 1,
         /* startTime= */ 0,
         /* endTime= */ 30,
@@ -470,7 +471,8 @@ describe('DashParser Manifest', () => {
     const variant = manifest.periods[0].variants[0];
     const stream = manifest.periods[0].variants[0].audio;
     await stream.createSegmentIndex();
-    const segment = stream.segmentIndex.seek(0);
+    const position = stream.segmentIndex.find(0);
+    const segment = stream.segmentIndex.get(position);
     expect(segment.initSegmentReference.getUris()[0])
         .toBe('http://example.com/%C8%A7.mp4');
     expect(variant.language).toBe('\u2603');
@@ -1057,9 +1059,9 @@ describe('DashParser Manifest', () => {
     expect(variant2.video).toBeTruthy();
     await variant1.video.createSegmentIndex();
     await variant2.video.createSegmentIndex();
-    expect(variant1.video.segmentIndex.seek(0).getUris())
+    expect(variant1.video.segmentIndex.get(1).getUris())
         .toEqual(['dummy://foo/1.mp4']);
-    expect(variant2.video.segmentIndex.seek(0).getUris())
+    expect(variant2.video.segmentIndex.get(1).getUris())
         .toEqual(['dummy://foo/2.mp4']);
   });
 

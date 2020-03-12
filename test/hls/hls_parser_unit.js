@@ -537,8 +537,10 @@ describe('HlsParser', () => {
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
 
-    const ref = stream.segmentIndex.seek(0);
-    expect(ref).not.toBe(null);
+    const pos = stream.segmentIndex.find(0);
+    expect(pos).not.toBe(null);
+    const ref = stream.segmentIndex.get(pos);
+
     expect(ref.startTime).toBe(0);
     // baseMediaDecodeTime (655360) / timescale (1000)
     expect(ref.timestampOffset).toBe(-655.36);
@@ -1553,8 +1555,15 @@ describe('HlsParser', () => {
     await video.createSegmentIndex();
     await audio.createSegmentIndex();
 
-    const videoReference = video.segmentIndex.seek(0);
-    const audioReference = audio.segmentIndex.seek(0);
+    const videoPosition = video.segmentIndex.find(0);
+    const audioPosition = audio.segmentIndex.find(0);
+    goog.asserts.assert(
+        videoPosition != null, 'Cannot find first video segment');
+    goog.asserts.assert(
+        audioPosition != null, 'Cannot find first audio segment');
+
+    const videoReference = video.segmentIndex.get(videoPosition);
+    const audioReference = audio.segmentIndex.get(audioPosition);
     expect(videoReference).not.toBe(null);
     expect(audioReference).not.toBe(null);
     if (videoReference) {
@@ -1639,10 +1648,10 @@ describe('HlsParser', () => {
     // Verify that the stream contains two segment references, each of the
     // SegmentReference object contains the InitSegmentReference with expected
     // uri.
-    const segment = actualVideo.segmentIndex.seek(0);
+    const segment = actualVideo.segmentIndex.get(0);
     expect(segment.initSegmentReference.getUris()[0])
         .toBe('test:/init.mp4');
-    const segment2 = actualVideo.segmentIndex.seek(5);
+    const segment2 = actualVideo.segmentIndex.get(1);
     expect(segment2.initSegmentReference.getUris()[0])
         .toBe('test:/init2.mp4');
   });
@@ -2155,8 +2164,8 @@ describe('HlsParser', () => {
       const presentationTimeline = manifest.presentationTimeline;
       const video = manifest.periods[0].variants[0].video;
       await video.createSegmentIndex();
-      const ref = video.segmentIndex.seek(0);
-      expect(video.segmentIndex.seek(5)).toBe(null);  // No more references.
+      const ref = video.segmentIndex.get(0);
+      expect(video.segmentIndex.get(1)).toBe(null);  // No more references.
 
       expect(ref.timestampOffset).toBe(-segmentDataStartTime);
       // The duration should be set to the sum of the segment durations (5),

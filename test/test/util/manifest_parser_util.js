@@ -18,18 +18,21 @@ shaka.test.ManifestParser = class {
     expect(stream.segmentIndex).toBeTruthy();
 
     if (references.length == 0) {
-      expect(stream.segmentIndex.seek(0)).toBe(null);
+      expect(stream.segmentIndex.find(0)).toBe(null);
       return;
     }
 
     // Even if the first segment doesn't start at 0, this should return the
     // first segment.
-    expect(stream.segmentIndex.seek(0)).toEqual(references[0]);
+    expect(stream.segmentIndex.find(0)).toBe(references[0].position);
 
     for (const expectedRef of references) {
       // Don't query negative times.  Query 0 instead.
       const startTime = Math.max(0, expectedRef.startTime);
-      const actualRef = stream.segmentIndex.seek(startTime);
+      const position = stream.segmentIndex.find(startTime);
+      expect(position).not.toBe(null);
+      const actualRef =
+          stream.segmentIndex.get(/** @type {number} */ (position));
       // NOTE: A custom matcher for SegmentReferences is installed, so this
       // checks the URIs as well.
       expect(actualRef).toEqual(expectedRef);
@@ -37,9 +40,12 @@ shaka.test.ManifestParser = class {
 
     // Make sure that the references stop at the end.
     const lastExpectedReference = references[references.length - 1];
-    const referenceAfterEnd =
-        stream.segmentIndex.seek(lastExpectedReference.endTime);
-    expect(referenceAfterEnd).toBe(null);
+    const positionAfterEnd =
+        stream.segmentIndex.find(lastExpectedReference.endTime);
+    expect(positionAfterEnd).toBe(null);
+    const referencePastEnd =
+        stream.segmentIndex.get(lastExpectedReference.position + 1);
+    expect(referencePastEnd).toBe(null);
   }
 
   /**

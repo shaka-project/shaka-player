@@ -1111,9 +1111,17 @@ filterDescribe('Storage', storageSupport, () => {
         await stream1.createSegmentIndex();
         await stream2.createSegmentIndex();
 
-        const segment0 = stream0.segmentIndex.seek(start0);
-        const segment1 = stream1.segmentIndex.seek(start1);
-        const segment2 = stream2.segmentIndex.seek(start2);
+        const position0 = stream0.segmentIndex.find(start0);
+        const position1 = stream1.segmentIndex.find(start1);
+        const position2 = stream2.segmentIndex.find(start2);
+
+        expect(position0).not.toBe(null);
+        expect(position1).not.toBe(null);
+        expect(position2).not.toBe(null);
+
+        const segment0 = stream0.segmentIndex.get(position0);
+        const segment1 = stream1.segmentIndex.get(position1);
+        const segment2 = stream2.segmentIndex.get(position2);
 
         expect(segment0.startTime).toBe(start0);
         expect(segment1.startTime).toBe(start1);
