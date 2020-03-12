@@ -27,23 +27,16 @@ if (window.expectAsync === undefined) {
   const AsyncMatchers = class {
     /**
      * @param {!Promise} val
-     * @param {string=} context
      * @param {boolean=} negated
      */
-    constructor(val, context = '', negated = false) {
+    constructor(val, negated = false) {
       this.val_ = val;
       this.negated_ = negated;
-      this.context_ = context ? '"' + context + '" ' : '';
 
       // Don't use a normal property to avoid infinite recursion.
       Object.defineProperty(this, 'not', {
-        get: () => new AsyncMatchers(val, context, !negated),
+        get: () => new AsyncMatchers(val, !negated),
       });
-    }
-
-    /** @override */
-    withContext(ctx) {
-      return new AsyncMatchers(this.val_, ctx, this.negated_);
     }
 
     /** @override */
@@ -62,7 +55,7 @@ if (window.expectAsync === undefined) {
      * @return {!Promise}
      */
     async toBeResolvedShared(hasValue, expected = undefined) {
-      let msg = 'Expected ' + this.context_;
+      let msg = 'Expected ';
       if (this.negated_) {
         msg += ' not';
       }
@@ -105,7 +98,7 @@ if (window.expectAsync === undefined) {
      * @return {!Promise}
      */
     async toBeRejectedShared(hasValue, expected = undefined) {
-      let msg = 'Expected ' + this.context_;
+      let msg = 'Expected ';
       if (this.negated_) {
         msg += ' not';
       }
