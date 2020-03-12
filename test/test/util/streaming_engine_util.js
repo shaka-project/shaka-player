@@ -241,7 +241,6 @@ shaka.test.StreamingEngineUtil = class {
           presentationDuration : periodStartTimes[periodNumber];
 
       return new shaka.media.SegmentReference(
-          position,
           /* startTime= */ timestampOffset + (position - 1) * d,
           /* endTime= */ timestampOffset + position * d,
           getUris,

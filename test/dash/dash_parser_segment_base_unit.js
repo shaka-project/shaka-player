@@ -289,7 +289,8 @@ describe('DashParser SegmentBase', () => {
     const video = manifest.periods[0].variants[0].video;
     await video.createSegmentIndex();  // real data, should succeed
 
-    const reference = video.segmentIndex.get(0);
+    const pos = video.segmentIndex.find(0);
+    const reference = video.segmentIndex.get(pos);
     expect(reference.startTime).toBe(-2);
     expect(reference.endTime).toBe(10);  // would be 12 without PTO
   });

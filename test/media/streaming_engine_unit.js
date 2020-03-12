@@ -2988,7 +2988,7 @@ describe('StreamingEngine', () => {
         if (seg) {
           // With endByte being null, we won't know the segment size.
           return new shaka.media.SegmentReference(
-              seg.position, seg.startTime, seg.endTime, seg.getUris,
+              seg.startTime, seg.endTime, seg.getUris,
               /* startByte= */ 0, /* endByte= */ null,
               /* initSegmentReference= */ null, /* timestampOffset= */ 0,
               /* appendWindowStart= */ 0, /* appendWindowEnd= */ Infinity);
@@ -3096,7 +3096,7 @@ describe('StreamingEngine', () => {
           // With endByte being null, we won't know the segment size.
           // Segment size has to be calculated with times and bandwidth.
           return new shaka.media.SegmentReference(
-              seg.position, seg.startTime, seg.endTime, seg.getUris,
+              seg.startTime, seg.endTime, seg.getUris,
               /* startByte= */ 0, /* endByte= */ null,
               /* initSegmentReference= */ null, /* timestampOffset= */ 0,
               /* appendWindowStart= */ 0, /* appendWindowEnd= */ Infinity);

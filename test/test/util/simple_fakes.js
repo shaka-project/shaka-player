@@ -453,6 +453,31 @@ shaka.test.FakeSegmentIndex = class {
 
     /** @type {!jasmine.Spy} */
     this.updateEvery = jasmine.createSpy('updateEvery');
+
+    /** @type {!jasmine.Spy} */
+    this[Symbol.iterator] = jasmine.createSpy('Symbol.iterator')
+        .and.callFake(() => {
+          let nextPosition = 0;
+
+          return {
+            next: () => {
+              const value = this.get(nextPosition++);
+              return {
+                value,
+                done: !value,
+              };
+            },
+
+            current: () => {
+              return this.get(nextPosition - 1);
+            },
+
+            seek: (time) => {
+              nextPosition = this.find(time);
+              return this.get(nextPosition++);
+            },
+          };
+        });
   }
 };
 

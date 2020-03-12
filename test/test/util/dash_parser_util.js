@@ -208,11 +208,11 @@ shaka.test.Dash = class {
         ];
         const source = makeManifestText(timeline, '');
         const references = [
-          ManifestParser.makeReference('s1.mp4', 1, 34, 46, baseUri),
-          ManifestParser.makeReference('s2.mp4', 2, 46, 67, baseUri),
-          ManifestParser.makeReference('s3.mp4', 3, 67, 111, baseUri),
-          ManifestParser.makeReference('s4.mp4', 4, 111, 121, baseUri),
-          ManifestParser.makeReference('s5.mp4', 5, 121, 131, baseUri),
+          ManifestParser.makeReference('s1.mp4', 34, 46, baseUri),
+          ManifestParser.makeReference('s2.mp4', 46, 67, baseUri),
+          ManifestParser.makeReference('s3.mp4', 67, 111, baseUri),
+          ManifestParser.makeReference('s4.mp4', 111, 121, baseUri),
+          ManifestParser.makeReference('s5.mp4', 121, 131, baseUri),
         ];
         await Dash.testSegmentIndex(source, references);
       });
@@ -227,11 +227,11 @@ shaka.test.Dash = class {
         ];
         const source = makeManifestText(timeline, '');
         const references = [
-          ManifestParser.makeReference('s1.mp4', 1, 34, 46, baseUri),
-          ManifestParser.makeReference('s2.mp4', 2, 46, 56, baseUri),
-          ManifestParser.makeReference('s3.mp4', 3, 56, 66, baseUri),
-          ManifestParser.makeReference('s4.mp4', 4, 66, 76, baseUri),
-          ManifestParser.makeReference('s5.mp4', 5, 76, 120, baseUri),
+          ManifestParser.makeReference('s1.mp4', 34, 46, baseUri),
+          ManifestParser.makeReference('s2.mp4', 46, 56, baseUri),
+          ManifestParser.makeReference('s3.mp4', 56, 66, baseUri),
+          ManifestParser.makeReference('s4.mp4', 66, 76, baseUri),
+          ManifestParser.makeReference('s5.mp4', 76, 120, baseUri),
         ];
         await Dash.testSegmentIndex(source, references);
       });
@@ -247,11 +247,11 @@ shaka.test.Dash = class {
         ];
         const source = makeManifestText(timeline, '');
         const references = [
-          ManifestParser.makeReference('s1.mp4', 1, 22, 30, baseUri),
-          ManifestParser.makeReference('s2.mp4', 2, 30, 40, baseUri),
-          ManifestParser.makeReference('s3.mp4', 3, 40, 50, baseUri),
-          ManifestParser.makeReference('s4.mp4', 4, 50, 62, baseUri),
-          ManifestParser.makeReference('s5.mp4', 5, 62, 72, baseUri),
+          ManifestParser.makeReference('s1.mp4', 22, 30, baseUri),
+          ManifestParser.makeReference('s2.mp4', 30, 40, baseUri),
+          ManifestParser.makeReference('s3.mp4', 40, 50, baseUri),
+          ManifestParser.makeReference('s4.mp4', 50, 62, baseUri),
+          ManifestParser.makeReference('s5.mp4', 62, 72, baseUri),
         ];
         await Dash.testSegmentIndex(source, references);
       });
@@ -265,11 +265,11 @@ shaka.test.Dash = class {
         ];
         const source = makeManifestText(timeline, '', /* duration= */ 50);
         const references = [
-          ManifestParser.makeReference('s1.mp4', 1, 5, 10, baseUri),
-          ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
-          ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
-          ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
-          ManifestParser.makeReference('s5.mp4', 5, 40, 50, baseUri),
+          ManifestParser.makeReference('s1.mp4', 5, 10, baseUri),
+          ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+          ManifestParser.makeReference('s3.mp4', 20, 30, baseUri),
+          ManifestParser.makeReference('s4.mp4', 30, 40, baseUri),
+          ManifestParser.makeReference('s5.mp4', 40, 50, baseUri),
         ];
         await Dash.testSegmentIndex(source, references);
       });
@@ -283,11 +283,11 @@ shaka.test.Dash = class {
         const source =
             makeManifestText(timeline, '', /* duration= */ 50, /* start= */ 30);
         const references = [
-          ManifestParser.makeReference('s1.mp4', 1, 30, 40, baseUri),
-          ManifestParser.makeReference('s2.mp4', 2, 40, 50, baseUri),
-          ManifestParser.makeReference('s3.mp4', 3, 50, 60, baseUri),
-          ManifestParser.makeReference('s4.mp4', 4, 60, 70, baseUri),
-          ManifestParser.makeReference('s5.mp4', 5, 70, 80, baseUri),
+          ManifestParser.makeReference('s1.mp4', 30, 40, baseUri),
+          ManifestParser.makeReference('s2.mp4', 40, 50, baseUri),
+          ManifestParser.makeReference('s3.mp4', 50, 60, baseUri),
+          ManifestParser.makeReference('s4.mp4', 60, 70, baseUri),
+          ManifestParser.makeReference('s5.mp4', 70, 80, baseUri),
         ];
         for (const ref of references) {
           ref.timestampOffset = 30;
@@ -307,11 +307,11 @@ shaka.test.Dash = class {
         ];
         const source = makeManifestText(timeline, 'timescale="9000"');
         const references = [
-          ManifestParser.makeReference('s1.mp4', 1, 2, 2.5, baseUri),
-          ManifestParser.makeReference('s2.mp4', 2, 2.5, 3.5, baseUri),
-          ManifestParser.makeReference('s3.mp4', 3, 3.5, 7, baseUri),
-          ManifestParser.makeReference('s4.mp4', 4, 7, 8, baseUri),
-          ManifestParser.makeReference('s5.mp4', 5, 8, 9, baseUri),
+          ManifestParser.makeReference('s1.mp4', 2, 2.5, baseUri),
+          ManifestParser.makeReference('s2.mp4', 2.5, 3.5, baseUri),
+          ManifestParser.makeReference('s3.mp4', 3.5, 7, baseUri),
+          ManifestParser.makeReference('s4.mp4', 7, 8, baseUri),
+          ManifestParser.makeReference('s5.mp4', 8, 9, baseUri),
         ];
         await Dash.testSegmentIndex(source, references);
       });

@@ -104,7 +104,6 @@ describe('DashParser Live', () => {
   function cloneRefs(references) {
     return references.map((ref) => {
       return new shaka.media.SegmentReference(
-          ref.position,
           ref.startTime,
           ref.endTime,
           ref.getUris,
@@ -201,7 +200,7 @@ describe('DashParser Live', () => {
 
       await stream.createSegmentIndex();
       expect(stream.segmentIndex).toBeTruthy();
-      expect(stream.segmentIndex.find(0)).toBe(1);
+      const firstPosition = stream.segmentIndex.find(0);
       ManifestParser.verifySegmentIndex(stream, basicRefs);
 
       // The 30 second availability window is initially full in all cases
@@ -212,7 +211,7 @@ describe('DashParser Live', () => {
       Date.now = () => 11 * 1000;
       await updateManifest();
       // The first reference should have been evicted.
-      expect(stream.segmentIndex.find(0)).toBe(2);
+      expect(stream.segmentIndex.find(0)).toBe(firstPosition + 1);
       ManifestParser.verifySegmentIndex(stream, basicRefs.slice(1));
     });
 
@@ -448,7 +447,8 @@ describe('DashParser Live', () => {
     // the redirected base.
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
-    const segmentUri = stream.segmentIndex.get(1).getUris()[0];
+    const pos = stream.segmentIndex.find(0);
+    const segmentUri = stream.segmentIndex.get(pos).getUris()[0];
     expect(segmentUri).toBe(redirectedUri + 's1.mp4');
   });
 
@@ -907,9 +907,9 @@ describe('DashParser Live', () => {
       '</SegmentTemplate>',
     ];
     const basicRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
     ];
     const updateLines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4">',
@@ -922,10 +922,10 @@ describe('DashParser Live', () => {
       '</SegmentTemplate>',
     ];
     const updateRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 30, 40, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 30, 40, originalUri),
     ];
     const partialUpdateLines = [
       '<SegmentTemplate startNumber="3" media="s$Number$.mp4">',
@@ -954,9 +954,9 @@ describe('DashParser Live', () => {
       '</SegmentList>',
     ];
     const basicRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
     ];
     const updateLines = [
       '<SegmentList>',
@@ -973,10 +973,10 @@ describe('DashParser Live', () => {
       '</SegmentList>',
     ];
     const updateRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 30, 40, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 30, 40, originalUri),
     ];
     const partialUpdateLines = [
       '<SegmentList startNumber="3">',
@@ -1002,9 +1002,9 @@ describe('DashParser Live', () => {
       '</SegmentList>',
     ];
     const basicRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 20, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 20, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 20, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 20, 30, originalUri),
     ];
     const updateLines = [
       '<SegmentList duration="10">',
@@ -1015,10 +1015,10 @@ describe('DashParser Live', () => {
       '</SegmentList>',
     ];
     const updateRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 20, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 20, 30, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 30, 40, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 20, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 20, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 30, 40, originalUri),
     ];
     const partialUpdateLines = [
       '<SegmentList startNumber="3" duration="10">',
@@ -1279,8 +1279,8 @@ describe('DashParser Live', () => {
 
     // Check for the 2 initial segments we're expecting.
     ManifestParser.verifySegmentIndex(stream, [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 2, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 2, 4, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 4, originalUri),
     ]);
 
     // Just over 10 seconds after the presentation started, we should now have
@@ -1291,11 +1291,11 @@ describe('DashParser Live', () => {
     await shaka.test.Util.delay(2.1);  // A little longer than the segments are.
 
     ManifestParser.verifySegmentIndex(stream, [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 2, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 2, 4, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 4, 6, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 6, 8, originalUri),
-      shaka.test.ManifestParser.makeReference('s5.mp4', 5, 8, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 4, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 4, 6, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 6, 8, originalUri),
+      shaka.test.ManifestParser.makeReference('s5.mp4', 8, 10, originalUri),
     ]);
   });
 });

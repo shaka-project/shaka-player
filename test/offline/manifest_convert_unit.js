@@ -445,19 +445,14 @@ describe('ManifestConverter', () => {
         null;
     const presentationTimeOffset = streamDb.presentationTimeOffset;
 
+    const iterator = stream.segmentIndex[Symbol.iterator]();
+
     streamDb.segments.forEach((segmentDb, i) => {
       const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
 
-      expect(stream.segmentIndex.find(
-          periodDb.startTime + segmentDb.startTime)).toBe(i);
-      expect(stream.segmentIndex.find(
-          periodDb.startTime + segmentDb.endTime - 0.1)).toBe(i);
-
       /** @type {shaka.media.SegmentReference} */
-      const segment = stream.segmentIndex.get(i);
-      expect(segment).toBeTruthy();
-      expect(segment.position).toBe(i);
+      const segment = iterator.seek(periodDb.startTime + segmentDb.startTime);
       expect(segment.startTime).toBe(periodDb.startTime + segmentDb.startTime);
       expect(segment.endTime).toBe(periodDb.startTime + segmentDb.endTime);
       expect(segment.startByte).toBe(0);

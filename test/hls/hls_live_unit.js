@@ -213,10 +213,8 @@ describe('HlsParser live', () => {
 
     describe('update', () => {
       it('adds new segments when they appear', async () => {
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             master, media, [ref1], mediaWithAdditionalSegment, [ref1, ref2]);
@@ -230,10 +228,8 @@ describe('HlsParser live', () => {
         ].join('');
 
         const masterWithTwoVariants = master + secondVariant;
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             masterWithTwoVariants, media, [ref1], mediaWithAdditionalSegment,
@@ -253,10 +249,8 @@ describe('HlsParser live', () => {
         ].join('');
 
         const masterWithAudio = masterlist + audio;
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             masterWithAudio, media, [ref1], mediaWithAdditionalSegment,
@@ -276,12 +270,9 @@ describe('HlsParser live', () => {
 
         const updatedMedia1 = media + newSegment1;
         const updatedMedia2 = updatedMedia1 + newSegment2;
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
-        const ref3 = ManifestParser.makeReference('test:/main3.mp4',
-            2, 6, 8);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
+        const ref3 = ManifestParser.makeReference('test:/main3.mp4', 6, 8);
 
         fakeNetEngine
             .setResponseText('test:/master', master)
@@ -543,33 +534,29 @@ describe('HlsParser live', () => {
       const manifest = await parser.start('test:/master', playerInterface);
       const textStream = manifest.periods[0].textStreams[0];
       await textStream.createSegmentIndex();
-      let ref = textStream.segmentIndex.get(0);
+      let ref = Array.from(textStream.segmentIndex)[0];
       expect(ref).not.toBe(null);
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
 
       const videoStream = manifest.periods[0].variants[0].video;
       await videoStream.createSegmentIndex();
-      ref = videoStream.segmentIndex.get(0);
+      ref = Array.from(videoStream.segmentIndex)[0];
       expect(ref).not.toBe(null);
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
     });
 
     describe('update', () => {
       it('adds new segments when they appear', async () => {
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             master, media, [ref1], mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
       it('evicts removed segments', async () => {
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             master, mediaWithAdditionalSegment, [ref1, ref2],
@@ -577,13 +564,12 @@ describe('HlsParser live', () => {
       });
 
       it('handles updates with redirects', async () => {
-        const oldRef1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
+        const oldRef1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
 
         const newRef1 =
-            ManifestParser.makeReference('test:/redirected/main.mp4', 0, 2, 4);
+            ManifestParser.makeReference('test:/redirected/main.mp4', 2, 4);
         const newRef2 =
-            ManifestParser.makeReference('test:/redirected/main2.mp4', 1, 4, 6);
+            ManifestParser.makeReference('test:/redirected/main2.mp4', 4, 6);
 
         let playlistFetchCount = 0;
 
@@ -611,8 +597,7 @@ describe('HlsParser live', () => {
             .setResponseValue('test:/main.mp4', segmentData);
 
         const expectedRef = ManifestParser.makeReference(
-            'test:/main.mp4', 0, segmentDataStartTime,
-            segmentDataStartTime + 2);
+            'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2);
         // In live content, we do not set timestampOffset.
         expectedRef.timestampOffset = 0;
 
@@ -630,11 +615,10 @@ describe('HlsParser live', () => {
             .setResponseValue('test:/main.mp4', segmentData);
 
         const ref1 = ManifestParser.makeReference(
-            'test:/main.mp4', 0, segmentDataStartTime,
-            segmentDataStartTime + 2);
+            'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2);
 
         const ref2 = ManifestParser.makeReference(
-            'test:/main2.mp4', 1, segmentDataStartTime + 2,
+            'test:/main2.mp4', segmentDataStartTime + 2,
             segmentDataStartTime + 4);
 
         const manifest = await parser.start('test:/master', playerInterface);
@@ -672,8 +656,7 @@ describe('HlsParser live', () => {
             .setResponseValue('test:/main2.ts', tsSegmentData);
 
         const expectedRef = ManifestParser.makeReference(
-            'test:/main2.ts', 1, segmentDataStartTime,
-            segmentDataStartTime + 2);
+            'test:/main2.ts', segmentDataStartTime, segmentDataStartTime + 2);
         // In live content, we do not set timestampOffset.
         expectedRef.timestampOffset = 0;
 
@@ -695,7 +678,6 @@ describe('HlsParser live', () => {
 
         const expectedRef = ManifestParser.makeReference(
             /* uri= */ 'test:/main.mp4',
-            /* position= */ 0,
             /* start= */ segmentDataStartTime,
             /* end= */ segmentDataStartTime + 2,
             /* baseUri= */ '',

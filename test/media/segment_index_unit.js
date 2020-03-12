@@ -4,61 +4,67 @@
  */
 
 describe('SegmentIndex', /** @suppress {accessControls} */ () => {
-  const actual1 = makeReference(0, 0, 10, uri(0));
-  const actual2 = makeReference(1, 10, 20, uri(20));
-  const actual3 = makeReference(2, 20, 30, uri(20));
+  const actual1 = makeReference(uri(0), 0, 10);
+  const actual2 = makeReference(uri(20), 10, 20);
+  const actual3 = makeReference(uri(20), 20, 30);
 
   describe('find', () => {
     it('finds the correct references', () => {
       // One reference.
       let index = new shaka.media.SegmentIndex([actual1]);
       let pos1 = index.find(5);
-      expect(pos1).toBe(actual1.position);
+      expect(pos1).toBe(0);
 
       // Two references.
       index = new shaka.media.SegmentIndex([actual1, actual2]);
       pos1 = index.find(5);
       let pos2 = index.find(15);
-      expect(pos1).toBe(actual1.position);
-      expect(pos2).toBe(actual2.position);
+      expect(pos1).toBe(0);
+      expect(pos2).toBe(1);
 
       // Three references.
       index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
       pos1 = index.find(5);
       pos2 = index.find(15);
       const pos3 = index.find(25);
-      expect(pos1).toBe(actual1.position);
-      expect(pos2).toBe(actual2.position);
-      expect(pos3).toBe(actual3.position);
+      expect(pos1).toBe(0);
+      expect(pos2).toBe(1);
+      expect(pos3).toBe(2);
     });
 
     it('works if time == first start time', () => {
-      const actual = makeReference(1, 10, 20, uri(10));
+      const actual = makeReference(uri(10), 10, 20);
       const index = new shaka.media.SegmentIndex([actual]);
 
       const pos = index.find(10);
-      expect(pos).toBe(actual.position);
+      goog.asserts.assert(pos != null, 'Null position!');
+      const ref = index.get(pos);
+      expect(ref).toBe(actual);
     });
 
     it('works with two references if time == second start time', () => {
-      const actual1 = makeReference(1, 10, 20, uri(10));
-      const actual2 = makeReference(2, 20, 30, uri(20));
+      const actual1 = makeReference(uri(10), 10, 20);
+      const actual2 = makeReference(uri(20), 20, 30);
       const index = new shaka.media.SegmentIndex([actual1, actual2]);
 
       const pos = index.find(20);
-      expect(pos).toBe(actual2.position);
+      goog.asserts.assert(pos != null, 'Null position!');
+      const ref = index.get(pos);
+      expect(ref).toBe(actual2);
     });
 
     it('returns the first segment if time < first start time', () => {
-      const actual = makeReference(1, 10, 20, uri(10));
+      const actual = makeReference(uri(10), 10, 20);
       const index = new shaka.media.SegmentIndex([actual]);
 
       const pos = index.find(5);
-      expect(pos).toBe(actual.position);
+      goog.asserts.assert(pos != null, 'Null position!');
+      const ref = index.get(pos);
+      expect(ref).toBe(actual);
     });
 
     it('returns null if time == last end time', () => {
-      const actual = makeReference(1, 10, 20, uri(10));
+      const actual = makeReference(uri(10), 10, 20);
       const index = new shaka.media.SegmentIndex([actual]);
 
       const pos = index.find(20);
@@ -66,7 +72,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     it('returns null if time > last end time', () => {
-      const actual = makeReference(1, 10, 20, uri(10));
+      const actual = makeReference(uri(10), 10, 20);
       const index = new shaka.media.SegmentIndex([actual]);
 
       const pos = index.find(21);
@@ -74,8 +80,8 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     it('returns null if time is within a gap', () => {
-      const actual1 = makeReference(1, 10, 20, uri(10));
-      const actual2 = makeReference(2, 25, 30, uri(25));
+      const actual1 = makeReference(uri(10), 10, 20);
+      const actual2 = makeReference(uri(25), 25, 30);
       const index = new shaka.media.SegmentIndex([actual1, actual2]);
 
       const pos = index.find(23);
@@ -108,14 +114,14 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
 
       // Two references with offset.
       index = new shaka.media.SegmentIndex([actual2, actual3]);
-      r2 = index.get(1);
-      r3 = index.get(2);
+      r2 = index.get(0);
+      r3 = index.get(1);
       expect(r2).toEqual(actual2);
       expect(r3).toEqual(actual3);
 
       // One reference with offset.
       index = new shaka.media.SegmentIndex([actual3]);
-      r3 = index.get(2);
+      r3 = index.get(0);
       expect(r3).toEqual(actual3);
     });
 
@@ -130,11 +136,9 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
 
     it('returns null for unknown positions', () => {
-      const index1 = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
-      expect(index1.get(3)).toBeNull();
-
-      const index2 = new shaka.media.SegmentIndex([actual2, actual3]);
-      expect(index2.get(0)).toBeNull();
+      const index = new shaka.media.SegmentIndex([actual1, actual2, actual3]);
+      expect(index.get(3)).toBeNull();
+      expect(index.get(-1)).toBeNull();
     });
   });
 
@@ -142,32 +146,41 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     it('drops references which are outside the period bounds', () => {
       // These negative numbers can occur due to presentationTimeOffset in DASH.
       const references = [
-        makeReference(0, -10, -3, uri(0)),
-        makeReference(1, -3, 4, uri(1)),
-        makeReference(2, 4, 11, uri(2)),
-        makeReference(3, 11, 18, uri(3)),
-        makeReference(4, 18, 25, uri(4)),
+        makeReference(uri(0), -10, -3),
+        makeReference(uri(1), -3, 4),
+        makeReference(uri(2), 4, 11),
+        makeReference(uri(3), 11, 18),
+        makeReference(uri(4), 18, 25),
       ];
       const index = new shaka.media.SegmentIndex(references);
       expect(index.references_).toEqual(references);
 
+      // Get the position and reference of the segment at time 5.
+      const positionAtTimeFive = index.find(5);
+      goog.asserts.assert(positionAtTimeFive != null, 'Null position!');
+      const referenceAtTimeFive = index.get(positionAtTimeFive);
+
       index.fit(/* periodStart= */ 0, /* periodEnd= */ 15);
       const newReferences = [
         /* ref 0 dropped because it ends before the period starts */
-        makeReference(1, -3, 4, uri(1)),
-        makeReference(2, 4, 11, uri(2)),
-        makeReference(3, 11, 15, uri(3)),  // end time clamped to period
+        makeReference(uri(1), -3, 4),
+        makeReference(uri(2), 4, 11),
+        makeReference(uri(3), 11, 15),  // end time clamped to period
         /* ref 4 dropped because it starts after the period ends */
       ];
       expect(index.references_).toEqual(newReferences);
+
+      // The position used to represent this segment should not have changed.
+      expect(index.find(5)).toBe(positionAtTimeFive);
+      expect(index.get(positionAtTimeFive)).toBe(referenceAtTimeFive);
     });
 
     it('drops references which end exactly at zero', () => {
       // The end time is meant to be exclusive, so segments ending at zero
       // (after PTO adjustments) should be dropped.
       const references = [
-        makeReference(0, -10, 0, uri(0)),
-        makeReference(1, 0, 10, uri(1)),
+        makeReference(uri(0), -10, 0),
+        makeReference(uri(1), 0, 10),
       ];
       const index = new shaka.media.SegmentIndex(references);
       expect(index.references_).toEqual(references);
@@ -175,7 +188,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       index.fit(/* periodStart= */ 0, /* periodEnd= */ 10);
       const newReferences = [
         /* ref 0 dropped because it ends before the period starts (at 0) */
-        makeReference(1, 0, 10, uri(1)),
+        makeReference(uri(1), 0, 10),
       ];
       expect(index.references_).toEqual(newReferences);
     });
@@ -205,11 +218,11 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
 
     it('one reference into one reference at end', () => {
       /** @type {!Array.<!shaka.media.SegmentReference>} */
-      const references1 = [makeReference(1, 10, 20, uri(10))];
+      const references1 = [makeReference(uri(10), 10, 20)];
       const index1 = new shaka.media.SegmentIndex(references1);
 
       /** @type {!Array.<!shaka.media.SegmentReference>} */
-      const references2 = [makeReference(2, 20, 30, uri(20))];
+      const references2 = [makeReference(uri(20), 20, 30)];
 
       index1.merge(references2);
       expect(index1.references_.length).toBe(2);
@@ -220,13 +233,13 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     it('one reference into two references at end', () => {
       /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references1 = [
-        makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20)),
+        makeReference(uri(10), 10, 20),
+        makeReference(uri(20), 20, 30),
       ];
       const index1 = new shaka.media.SegmentIndex(references1);
 
       /** @type {!Array.<!shaka.media.SegmentReference>} */
-      const references2 = [makeReference(3, 30, 40, uri(30))];
+      const references2 = [makeReference(uri(30), 30, 40)];
 
       index1.merge(references2);
       expect(index1.references_.length).toBe(3);
@@ -237,13 +250,13 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
 
     it('two references into one reference at end', () => {
       /** @type {!Array.<!shaka.media.SegmentReference>} */
-      const references1 = [makeReference(2, 20, 30, uri(20))];
+      const references1 = [makeReference(uri(20), 20, 30)];
       const index1 = new shaka.media.SegmentIndex(references1);
 
       /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references2 = [
-        makeReference(3, 30, 40, uri(30)),
-        makeReference(4, 40, 50, uri(40)),
+        makeReference(uri(30), 30, 40),
+        makeReference(uri(40), 40, 50),
       ];
 
       index1.merge(references2);
@@ -256,9 +269,9 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     it('last live stream reference when period change', () => {
       /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references1 = [
-        makeReference(1, 10, 20, uri(10)),
-        makeReference(2, 20, 30, uri(20)),
-        makeReference(3, 30, 49.887, uri(30)),
+        makeReference(uri(10), 10, 20),
+        makeReference(uri(20), 20, 30),
+        makeReference(uri(30), 30, 49.887),
       ];
       const index1 = new shaka.media.SegmentIndex(references1);
 
@@ -267,8 +280,8 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       // done that.
       /** @type {!Array.<!shaka.media.SegmentReference>} */
       const references2 = [
-        makeReference(2, 20, 30, uri(20)),
-        makeReference(3, 30, 50, uri(30)),
+        makeReference(uri(20), 20, 30),
+        makeReference(uri(30), 30, 50),
       ];
 
       index1.merge(references2);
@@ -331,28 +344,101 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       index1.evict(31);
       expect(index1.references_.length).toBe(0);
     });
+
+    it('does not change positions', () => {
+      // Get the position and reference of the segment at time 15.
+      const positionAtTimeFifteen = index1.find(15);
+      goog.asserts.assert(positionAtTimeFifteen != null, 'Null position!');
+      const referenceAtTimeFifteen = index1.get(positionAtTimeFifteen);
+
+      index1.evict(10);
+
+      // The position should not have changed.
+      expect(index1.find(15)).toBe(positionAtTimeFifteen);
+      expect(index1.get(positionAtTimeFifteen)).toBe(referenceAtTimeFifteen);
+    });
   });
 
-  /**
-   * Creates a new SegmentReference.
-   *
-   * @param {number} position
-   * @param {number} startTime
-   * @param {number} endTime
-   * @param {string} uri
-   * @return {!shaka.media.SegmentReference}
-   */
-  function makeReference(position, startTime, endTime, uri) {
-    return new shaka.media.SegmentReference(
-        position, startTime, endTime,
-        /* getUris= */ () => [uri],
-        /* startByte= */ 0,
-        /* endByte= */ null,
-        /* initSegmentReference= */ null,
-        /* timestampOffset= */ 0,
-        /* appendWindowStart= */ 0,
-        /* appendWindowEnd= */ Infinity);
-  }
+  describe('SegmentIterator', () => {
+    const makeReference = shaka.test.ManifestParser.makeReference;
+    const inputRefs = [
+      makeReference(uri(0), 0, 10),
+      makeReference(uri(1), 10, 20),
+      makeReference(uri(2), 20, 30),
+    ];
+
+    it('works with Array.from', () => {
+      const index = new shaka.media.SegmentIndex(inputRefs);
+      const refs = Array.from(index);
+      expect(refs).toEqual(inputRefs);
+    });
+
+    it('works with for-of', () => {
+      const index = new shaka.media.SegmentIndex(inputRefs);
+      const refs = [];
+      for (const ref of index) {
+        refs.push(ref);
+      }
+      expect(refs).toEqual(inputRefs);
+    });
+
+    describe('seek', () => {
+      it('returns the matching segment', () => {
+        const index = new shaka.media.SegmentIndex(inputRefs);
+        const iterator = index[Symbol.iterator]();
+        expect(iterator.seek(10)).toBe(inputRefs[1]);
+      });
+    });
+
+    describe('next', () => {
+      it('starts with the first segment', () => {
+        const index = new shaka.media.SegmentIndex(inputRefs);
+        const iterator = index[Symbol.iterator]();
+        expect(iterator.next().value).toBe(inputRefs[0]);
+      });
+
+      it('iterates through all segments', () => {
+        const index = new shaka.media.SegmentIndex(inputRefs);
+        const iterator = index[Symbol.iterator]();
+        expect(iterator.next().value).toBe(inputRefs[0]);
+        expect(iterator.next().value).toBe(inputRefs[1]);
+        expect(iterator.next().value).toBe(inputRefs[2]);
+        expect(iterator.next().value).toBe(null);
+      });
+
+      it('iterates forward after a seek', () => {
+        const index = new shaka.media.SegmentIndex(inputRefs);
+        const iterator = index[Symbol.iterator]();
+        expect(iterator.seek(10)).toBe(inputRefs[1]);
+        expect(iterator.next().value).toBe(inputRefs[2]);
+        expect(iterator.next().value).toBe(null);
+      });
+    });
+
+    describe('current', () => {
+      it('starts with null', () => {
+        const index = new shaka.media.SegmentIndex(inputRefs);
+        const iterator = index[Symbol.iterator]();
+        // Technically, next() starts iteration, so current() returns null
+        // before next() is called.
+        expect(iterator.current()).toBe(null);
+      });
+
+      it('returns the same thing returned by the previous next() call', () => {
+        const index = new shaka.media.SegmentIndex(inputRefs);
+        const iterator = index[Symbol.iterator]();
+
+        expect(iterator.next().value).toBe(inputRefs[0]);
+        expect(iterator.current()).toBe(inputRefs[0]);
+
+        expect(iterator.next().value).toBe(inputRefs[1]);
+        expect(iterator.current()).toBe(inputRefs[1]);
+
+        expect(iterator.next().value).toBe(inputRefs[2]);
+        expect(iterator.current()).toBe(inputRefs[2]);
+      });
+    });
+  });
 
   /**
    * Creates a URI string.
@@ -363,5 +449,28 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
   function uri(x) {
     return 'http://example.com/video_' + x + '.m4s';
   }
-});
 
+  /**
+   * Creates a real SegmentReference.  This is distinct from the fake ones used
+   * in ManifestParser tests because it can be on the left-hand side of an
+   * expect().  You can't expect jasmine.any(Number) to equal
+   * jasmine.any(Number).  :-(
+   *
+   * @param {string} uri
+   * @param {number} startTime
+   * @param {number} endTime
+   * @return {shaka.media.SegmentReference}
+   */
+  function makeReference(uri, startTime, endTime) {
+    return new shaka.media.SegmentReference(
+        startTime,
+        endTime,
+        /* getUris= */ () => [uri],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
+  }
+});

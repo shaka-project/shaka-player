@@ -308,10 +308,13 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
       const segmentIndex0 = actual.periods[0].variants[0].video.segmentIndex;
       const segmentIndex1 = actual.periods[1].variants[0].video.segmentIndex;
       const segmentIndex2 = actual.periods[2].variants[0].video.segmentIndex;
+      goog.asserts.assert(segmentIndex0, 'Null segment index!');
+      goog.asserts.assert(segmentIndex1, 'Null segment index!');
+      goog.asserts.assert(segmentIndex2, 'Null segment index!');
 
-      const segment0 = segmentIndex0.get(0);
-      const segment1 = segmentIndex1.get(0);
-      const segment2 = segmentIndex2.get(0);
+      const segment0 = Array.from(segmentIndex0)[0];
+      const segment1 = Array.from(segmentIndex1)[0];
+      const segment2 = Array.from(segmentIndex2)[0];
 
       expect(segment0).toEqual(jasmine.objectContaining({
         startTime: 0,

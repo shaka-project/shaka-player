@@ -1648,12 +1648,10 @@ describe('HlsParser', () => {
     // Verify that the stream contains two segment references, each of the
     // SegmentReference object contains the InitSegmentReference with expected
     // uri.
-    const segment = actualVideo.segmentIndex.get(0);
-    expect(segment.initSegmentReference.getUris()[0])
-        .toBe('test:/init.mp4');
-    const segment2 = actualVideo.segmentIndex.get(1);
-    expect(segment2.initSegmentReference.getUris()[0])
-        .toBe('test:/init2.mp4');
+    const initSegments = Array.from(actualVideo.segmentIndex).map(
+        (seg) => seg.initSegmentReference);
+    expect(initSegments[0].getUris()[0]).toBe('test:/init.mp4');
+    expect(initSegments[1].getUris()[0]).toBe('test:/init2.mp4');
   });
 
   it('drops variants encrypted with AES-128', async () => {
@@ -2056,7 +2054,6 @@ describe('HlsParser', () => {
 
       const expectedRef = ManifestParser.makeReference(
           /* uri= */ 'test:/main.mp4',
-          /* position= */ 0,
           /* startTime= */ 0,
           /* endTime= */ 5,
           /* baseUri= */ '',
@@ -2089,7 +2086,6 @@ describe('HlsParser', () => {
 
       const expectedRef = ManifestParser.makeReference(
           /* uri= */ 'test:/main.ts',
-          /* position= */ 0,
           /* startTime= */ 0,
           /* endTime= */ 5,
           /* baseUri= */ '',
@@ -2164,13 +2160,13 @@ describe('HlsParser', () => {
       const presentationTimeline = manifest.presentationTimeline;
       const video = manifest.periods[0].variants[0].video;
       await video.createSegmentIndex();
-      const ref = video.segmentIndex.get(0);
-      expect(video.segmentIndex.get(1)).toBe(null);  // No more references.
+      const refs = Array.from(video.segmentIndex);
+      expect(refs.length).toBe(1);
 
-      expect(ref.timestampOffset).toBe(-segmentDataStartTime);
+      expect(refs[0].timestampOffset).toBe(-segmentDataStartTime);
       // The duration should be set to the sum of the segment durations (5),
       // even though the endTime of the segment is larger.
-      expect(ref.endTime - ref.startTime).toBe(5);
+      expect(refs[0].endTime - refs[0].startTime).toBe(5);
       expect(presentationTimeline.getDuration()).toBe(5);
     });
   });

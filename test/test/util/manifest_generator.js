@@ -629,7 +629,6 @@ shaka.test.ManifestGenerator.Stream = class {
       const start = index * segmentDuration;
       const end = Math.min(totalDuration, (index + 1) * segmentDuration);
       return new this.manifest_.shaka_.media.SegmentReference(
-          index,
           /* startTime= */ periodStart + start,
           /* endTime= */ periodStart + end,
           getUris,

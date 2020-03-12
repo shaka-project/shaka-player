@@ -177,13 +177,12 @@ It handles merging new segments, and expanding the list of segments for live
 streams.
 
 ```js
-var references = refs.map(function(r, position) {
+var references = refs.map(function(r) {
   // Should return an array of possible URI choices; this is used for failover
   // in the event of network error.  This is a function to defer calculations.
   var getUris = function() { return [r.uri]; };
 
   return new shaka.media.SegmentReference(
-      position,
       r.start, r.end, getUris,
       /* startByte */ 0,
       /* endByte */ null,
@@ -329,7 +328,7 @@ MyManifestParser.prototype.loadReference_ =
     function(position, start, end, initSegmentReference) {
   var getUris = function() { return ['https://example.com/ref_' + position]; };
   return new shaka.media.SegmentReference(
-      position, start, end, getUris,
+      start, end, getUris,
       /* startByte */ 0,
       /* endByte */ null,
       initSegmentReference,

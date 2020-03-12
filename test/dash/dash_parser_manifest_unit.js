@@ -258,7 +258,8 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].variants[0].video;
     await stream.createSegmentIndex();
-    const ref = stream.segmentIndex.get(0);
+    const pos = stream.segmentIndex.find(0);
+    const ref = stream.segmentIndex.get(pos);
     expect(ref.timestampOffset).toBe(-1);
   });
 
@@ -311,9 +312,9 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.periods[0].textStreams[0];
     await stream.createSegmentIndex();
-    expect(stream.segmentIndex.find(0)).toBe(1);
-    expect(stream.segmentIndex.get(1)).toEqual(new shaka.media.SegmentReference(
-        /* position= */ 1,
+    const pos = stream.segmentIndex.find(0);
+    const ref = stream.segmentIndex.get(pos);
+    expect(ref).toEqual(new shaka.media.SegmentReference(
         /* startTime= */ 0,
         /* endTime= */ 30,
         /* getUris= */ () => ['http://example.com/de.vtt'],
@@ -1055,14 +1056,15 @@ describe('DashParser Manifest', () => {
 
     const variant1 = manifest.periods[0].variants[0];
     const variant2 = manifest.periods[0].variants[1];
-    expect(variant1.video).toBeTruthy();
-    expect(variant2.video).toBeTruthy();
+
     await variant1.video.createSegmentIndex();
     await variant2.video.createSegmentIndex();
-    expect(variant1.video.segmentIndex.get(1).getUris())
-        .toEqual(['dummy://foo/1.mp4']);
-    expect(variant2.video.segmentIndex.get(1).getUris())
-        .toEqual(['dummy://foo/2.mp4']);
+
+    const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
+    const variant2Ref = Array.from(variant2.video.segmentIndex)[0];
+
+    expect(variant1Ref.getUris()).toEqual(['dummy://foo/1.mp4']);
+    expect(variant2Ref.getUris()).toEqual(['dummy://foo/2.mp4']);
   });
 
   it('handles bandwidth of 0 or missing', async () => {

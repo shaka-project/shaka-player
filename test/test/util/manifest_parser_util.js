@@ -22,10 +22,6 @@ shaka.test.ManifestParser = class {
       return;
     }
 
-    // Even if the first segment doesn't start at 0, this should return the
-    // first segment.
-    expect(stream.segmentIndex.find(0)).toBe(references[0].position);
-
     for (const expectedRef of references) {
       // Don't query negative times.  Query 0 instead.
       const startTime = Math.max(0, expectedRef.startTime);
@@ -43,16 +39,12 @@ shaka.test.ManifestParser = class {
     const positionAfterEnd =
         stream.segmentIndex.find(lastExpectedReference.endTime);
     expect(positionAfterEnd).toBe(null);
-    const referencePastEnd =
-        stream.segmentIndex.get(lastExpectedReference.position + 1);
-    expect(referencePastEnd).toBe(null);
   }
 
   /**
    * Creates a segment reference using a relative URI.
    *
    * @param {string} uri A relative URI to http://example.com
-   * @param {number} position
    * @param {number} start
    * @param {number} end
    * @param {string=} baseUri
@@ -60,7 +52,7 @@ shaka.test.ManifestParser = class {
    * @param {?number=} endByte
    * @return {!shaka.media.SegmentReference}
    */
-  static makeReference(uri, position, start, end, baseUri = '',
+  static makeReference(uri, start, end, baseUri = '',
       startByte = 0, endByte = null) {
     const getUris = () => [baseUri + uri];
 
@@ -78,7 +70,7 @@ shaka.test.ManifestParser = class {
     const appendWindowEnd = /** @type {?} */(jasmine.any(Number));
 
     return new shaka.media.SegmentReference(
-        position, start, end, getUris, startByte, endByte,
+        start, end, getUris, startByte, endByte,
         initSegmentReference,
         timestampOffset,
         appendWindowStart,

@@ -602,19 +602,19 @@ filterDescribe('Storage', storageSupport, () => {
       const audio = manifest.periods[0].variants[0].audio;
       goog.asserts.assert(audio, 'Created manifest with audio, where is it?');
       overrideSegmentIndex(audio, [
-        makeSegmentReference(0, 0, 1, audioSegment1Uri),
-        makeSegmentReference(1, 1, 2, audioSegment2Uri),
-        makeSegmentReference(2, 2, 3, audioSegment3Uri),
-        makeSegmentReference(3, 3, 4, audioSegment4Uri),
+        makeReference(audioSegment1Uri, 0, 1),
+        makeReference(audioSegment2Uri, 1, 2),
+        makeReference(audioSegment3Uri, 2, 3),
+        makeReference(audioSegment4Uri, 3, 4),
       ]);
 
       const video = manifest.periods[0].variants[0].video;
       goog.asserts.assert(video, 'Created manifest with video, where is it?');
       overrideSegmentIndex(video, [
-        makeSegmentReference(0, 0, 1, videoSegment1Uri),
-        makeSegmentReference(1, 1, 2, videoSegment2Uri),
-        makeSegmentReference(2, 2, 3, videoSegment3Uri),
-        makeSegmentReference(3, 3, 4, videoSegment4Uri),
+        makeReference(videoSegment1Uri, 0, 1),
+        makeReference(videoSegment2Uri, 1, 2),
+        makeReference(videoSegment3Uri, 2, 3),
+        makeReference(videoSegment4Uri, 3, 4),
       ]);
 
       return manifest;
@@ -1283,10 +1283,10 @@ filterDescribe('Storage', storageSupport, () => {
         // Make a new copy each time, as the segment index can modify each
         // reference.
         const refs = [
-          makeSegmentReference(0, startTime + 0, startTime + 1, segment1Uri),
-          makeSegmentReference(1, startTime + 1, startTime + 2, segment2Uri),
-          makeSegmentReference(2, startTime + 2, startTime + 3, segment3Uri),
-          makeSegmentReference(3, startTime + 3, startTime + 4, segment4Uri),
+          makeReference(segment1Uri, startTime + 0, startTime + 1),
+          makeReference(segment2Uri, startTime + 1, startTime + 2),
+          makeReference(segment3Uri, startTime + 2, startTime + 3),
+          makeReference(segment4Uri, startTime + 3, startTime + 4),
         ];
 
         overrideSegmentIndex(stream, refs);
@@ -1311,27 +1311,6 @@ filterDescribe('Storage', storageSupport, () => {
   }
 
   /**
-   * @param {number} position
-   * @param {number} startTime
-   * @param {number} endTime
-   * @param {string} uri
-   * @return {!shaka.media.SegmentReference}
-   */
-  function makeSegmentReference(position, startTime, endTime, uri) {
-    return new shaka.media.SegmentReference(
-        position,
-        startTime,
-        endTime,
-        () => [uri],
-        /* startByte= */ 0,
-        /* endByte= */ null,
-        /* initSegmentReference= */ null,
-        /* timestampOffset= */ 0,
-        /* appendWindowStart= */ 0,
-        /* appendWindowEnd= */ Infinity);
-  }
-
-  /**
    * @return {shaka.extern.Manifest}
    */
   function makeManifestWithNonZeroStart() {
@@ -1339,10 +1318,10 @@ filterDescribe('Storage', storageSupport, () => {
 
     for (const stream of getAllStreams(manifest, 0)) {
       const refs = [
-        makeSegmentReference(0, 10, 11, segment1Uri),
-        makeSegmentReference(1, 11, 12, segment2Uri),
-        makeSegmentReference(2, 12, 13, segment3Uri),
-        makeSegmentReference(3, 13, 14, segment4Uri),
+        makeReference(segment1Uri, 10, 11),
+        makeReference(segment2Uri, 11, 12),
+        makeReference(segment3Uri, 12, 13),
+        makeReference(segment4Uri, 13, 14),
       ];
 
       overrideSegmentIndex(stream, refs);
@@ -1548,5 +1527,29 @@ filterDescribe('Storage', storageSupport, () => {
     if (error) {
       throw error;
     }
+  }
+
+  /**
+   * Creates a real SegmentReference.  This is distinct from the fake ones used
+   * in ManifestParser tests because it can be on the left-hand side of an
+   * expect().  You can't expect jasmine.any(Number) to equal
+   * jasmine.any(Number).  :-(
+   *
+   * @param {string} uri
+   * @param {number} startTime
+   * @param {number} endTime
+   * @return {shaka.media.SegmentReference}
+   */
+  function makeReference(uri, startTime, endTime) {
+    return new shaka.media.SegmentReference(
+        startTime,
+        endTime,
+        /* getUris= */ () => [uri],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
   }
 });
