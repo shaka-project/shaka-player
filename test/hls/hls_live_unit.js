@@ -492,7 +492,7 @@ describe('HlsParser live', () => {
 
         const start = timeline.getSegmentAvailabilityStart();
         const end = timeline.getSegmentAvailabilityEnd();
-        expect(end - start).toBeCloseTo(expectedWindow, 2);
+        expect(end - start).toBeCloseTo(expectedWindow, 1);
       }
 
       it('does not affect seek range if unset', async () => {
