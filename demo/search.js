@@ -19,12 +19,15 @@ shakaDemo.Search = class {
    * Register the page configuration.
    */
   static init() {
-    const container = shakaDemoMain.addNavButton('search');
-    shakaDemoSearch = new shakaDemo.Search(container);
+    const elements = shakaDemoMain.addNavButton('search');
+    shakaDemoSearch = new shakaDemo.Search(elements.container, elements.button);
   }
 
-  /** @param {!Element} container */
-  constructor(container) {
+  /**
+   * @param {!Element} container
+   * @param {!Element} button
+   */
+  constructor(container, button) {
     /** @private {!Array.<!shakaAssets.Feature>} */
     this.desiredFeatures_ = [];
 
@@ -35,8 +38,10 @@ shakaDemo.Search = class {
     this.desiredDRM_;
 
     /** @private {!Element} */
+    this.button_ = button;
+
+    /** @private {!Element} */
     this.resultsDiv_ = document.createElement('div');
-    this.remakeSearchDiv_(container);
 
     /** @private {!Array.<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
@@ -61,6 +66,49 @@ shakaDemo.Search = class {
         this.remakeResultsDiv_();
       }
     });
+
+    this.readHashParameters_();
+    this.updateHashParameters_();
+    this.remakeSearchDiv_(container);
+  }
+
+  /** @private */
+  readHashParameters_() {
+    const hashValues = this.button_.getAttribute('tab-hash');
+    if (hashValues) {
+      for (const valueRaw of hashValues.split(',')) {
+        if (valueRaw.startsWith('drm:')) {
+          this.desiredDRM_ =
+          /** @type {!shakaAssets.KeySystem} */ (valueRaw.split('drm:')[1]);
+        } else if (valueRaw.startsWith('source:')) {
+          this.desiredSource_ =
+          /** @type {!shakaAssets.Source} */ (valueRaw.split('source:')[1]);
+        } else {
+          this.desiredFeatures_.push(
+              /** @type {!shakaAssets.Feature} */ (valueRaw));
+        }
+      }
+    }
+  }
+
+  /** @private */
+  updateHashParameters_() {
+    const hashValues = [];
+    if (this.desiredSource_) {
+      hashValues.push('source:' + this.desiredSource_);
+    }
+    if (this.desiredDRM_) {
+      hashValues.push('drm:' + this.desiredDRM_);
+    }
+    for (const feature of this.desiredFeatures_) {
+      hashValues.push(feature);
+    }
+    if (hashValues.length > 0) {
+      this.button_.setAttribute('tab-hash', hashValues.join(','));
+    } else {
+      this.button_.removeAttribute('tab-hash');
+    }
+    shakaDemoMain.remakeHash();
   }
 
   /**
@@ -113,6 +161,26 @@ shakaDemo.Search = class {
     const assets = this.searchResults_();
     this.assetCards_ = assets.map((asset) => this.createAssetCardFor_(asset));
     this.updateSelected_();
+  }
+
+  /**
+   * @param {!shakaDemo.Search.SearchTerm} term
+   * @param {shakaDemo.Search.TermType} type
+   * @return {boolean}
+   * @private
+   */
+  checkDesiredTerm_(term, type) {
+    switch (type) {
+      case shakaDemo.Search.TermType.DRM:
+        return this.desiredDRM_ == term;
+      case shakaDemo.Search.TermType.SOURCE:
+        return this.desiredSource_ == term;
+      case shakaDemo.Search.TermType.FEATURE:
+        return this.desiredFeatures_.includes(
+            /** @type {!shakaAssets.Feature} */ (term));
+      default:
+        return false;
+    }
   }
 
   /**
@@ -191,9 +259,11 @@ shakaDemo.Search = class {
       // Update the componentHandler, to account for any new MDL elements
       // added. Notably, tooltips.
       componentHandler.upgradeDom();
+      // Update the hash.
+      this.updateHashParameters_();
     };
-    // eslint-disable-next-line no-new
-    new shakaDemo.BoolInput(searchContainer, choice, onChange);
+    const input = new shakaDemo.BoolInput(searchContainer, choice, onChange);
+    input.input().checked = this.checkDesiredTerm_(choice, type);
   }
 
   /**
@@ -228,10 +298,19 @@ shakaDemo.Search = class {
       // Update the componentHandler, to account for any new MDL elements added.
       // Notably, tooltips.
       componentHandler.upgradeDom();
+      // Update the hash.
+      this.updateHashParameters_();
     };
     const input = new shakaDemo.SelectInput(
         searchContainer, name, onChange, valuesObject);
     input.input().value = nullOption;
+    for (const choice of choices) {
+      if (this.checkDesiredTerm_(choice, type)) {
+        input.input().value = choice;
+        lastValue = choice;
+        break;
+      }
+    }
   }
 
   /**
