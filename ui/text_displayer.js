@@ -233,6 +233,12 @@ shaka.ui.TextDisplayer = class {
     captionsStyle.color = cue.color;
     captionsStyle.direction = cue.direction;
     captionsStyle.opacity = cue.opacity;
+    captionsStyle.paddingLeft = shaka.ui.TextDisplayer.convertLengthValue_(
+        cue.linePadding, cue, this.videoContainer_
+    );
+    captionsStyle.paddingRight = shaka.ui.TextDisplayer.convertLengthValue_(
+        cue.linePadding, cue, this.videoContainer_
+    );
 
     if (cue.backgroundImage) {
       captionsStyle.backgroundImage = 'url(\'' + cue.backgroundImage + '\')';

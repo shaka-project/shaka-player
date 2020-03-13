@@ -307,6 +307,13 @@ shaka.extern.Cue = class {
     this.letterSpacing;
 
     /**
+     * Text line padding.
+     * @type {!string}
+     * @exportDoc
+     */
+    this.linePadding;
+
+    /**
      * Text opacity.
      * @type {!number}
      * @exportDoc
