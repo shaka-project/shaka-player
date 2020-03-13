@@ -38,13 +38,14 @@ goog.require('shaka.util.Timer');
  * @param {!HTMLElement} videoContainer
  * @param {!HTMLMediaElement} video
  * @param {shaka.extern.UIConfiguration} config
+ * @param {shaka.extern.CastProxy=} castProxy
  * @constructor
  * @struct
  * @implements {shaka.util.IDestroyable}
  * @extends {shaka.util.FakeEventTarget}
  * @export
  */
-shaka.ui.Controls = function(player, videoContainer, video, config) {
+shaka.ui.Controls = function(player, videoContainer, video, config, castProxy) {
   shaka.util.FakeEventTarget.call(this);
 
   /** @private {boolean} */
@@ -53,21 +54,21 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   /** @private {shaka.extern.UIConfiguration} */
   this.config_ = config;
 
-  /** @private {shaka.cast.CastProxy} */
-  this.castProxy_ = new shaka.cast.CastProxy(
+  /** @private {shaka.extern.CastProxy} */
+  this.castProxy_ = castProxy || new shaka.cast.CastProxy(
     video, player, this.config_.castReceiverAppId);
 
   /** @private {boolean} */
   this.castAllowed_ = true;
 
   /** @private {HTMLMediaElement} */
-  this.video_ = this.castProxy_.getVideo();
+  this.video_ = this.castProxy_['getVideo']();
 
   /** @private {HTMLMediaElement} */
   this.localVideo_ = video;
 
   /** @private {shaka.Player} */
-  this.player_ = this.castProxy_.getPlayer();
+  this.player_ = this.castProxy_['getPlayer']();
 
   /** @private {shaka.Player} */
   this.localPlayer_ = player;
@@ -226,7 +227,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
   }
 
   if (this.castProxy_) {
-    await this.castProxy_.destroy();
+    await this.castProxy_['destroy']();
     this.castProxy_ = null;
   }
 
@@ -379,7 +380,7 @@ shaka.ui.Controls.prototype.loadComplete = function() {
 shaka.ui.Controls.prototype.configure = function(config) {
   this.config_ = config;
 
-  this.castProxy_.changeReceiverId(config.castReceiverAppId);
+  this.castProxy_['changeReceiverId'](config.castReceiverAppId);
 
   // Deconstruct the old layout if applicable
   if (this.seekBar_) {
@@ -479,7 +480,7 @@ shaka.ui.Controls.prototype.setEnabledNativeControls = function(enabled) {
 
 /**
  * @export
- * @return {shaka.cast.CastProxy}
+ * @return {shaka.extern.CastProxy}
  */
 shaka.ui.Controls.prototype.getCastProxy = function() {
   return this.castProxy_;
@@ -793,7 +794,7 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
 shaka.ui.Controls.prototype.onScreenRotation_ = function() {
   if (!this.video_ ||
       this.video_.readyState == 0 ||
-      this.castProxy_.isCasting()) { return; }
+      this.castProxy_['isCasting']()) { return; }
 
   if (screen.orientation.type.includes('landscape') &&
       !document.fullscreenElement) {
@@ -1050,7 +1051,7 @@ shaka.ui.Controls.prototype.onPlayPauseClick_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.onCastStatusChange_ = function(event) {
-  const isCasting = this.castProxy_.isCasting();
+  const isCasting = this.castProxy_['isCasting']();
   this.dispatchEvent(new shaka.util.FakeEvent('caststatuschanged', {
     newStatus: isCasting,
   }));

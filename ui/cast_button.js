@@ -39,7 +39,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {shaka.cast.CastProxy} */
+    /** @private {shaka.cast.CastProxy|shaka.extern.CastProxy} */
     this.castProxy_ = this.controls.getCastProxy();
 
     /** @private {!HTMLElement} */
@@ -94,12 +94,12 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 
     /** @private */
   async onCastClick_() {
-    if (this.castProxy_.isCasting()) {
-      this.castProxy_.suggestDisconnect();
+    if (this.castProxy_['isCasting']()) {
+      this.castProxy_['suggestDisconnect']();
     } else {
       try {
         this.castButton_.disabled = true;
-        await this.castProxy_.cast();
+        await this.castProxy_['cast']();
         this.castButton_.disabled = false;
       } catch (error) {
         this.castButton_.disabled = false;
@@ -117,8 +117,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
    * @private
    */
   onCastStatusChange_() {
-    const canCast = this.castProxy_.canCast() && this.controls.isCastAllowed();
-    const isCasting = this.castProxy_.isCasting();
+    const canCast = this.castProxy_['canCast']() &&
+                    this.controls.isCastAllowed();
+    const isCasting = this.castProxy_['isCasting']();
     const materialDesignIcons = shaka.ui.Enums.MaterialDesignIcons;
     shaka.ui.Utils.setDisplay(this.castButton_, canCast);
     this.castIcon_.textContent = isCasting ?
@@ -142,9 +143,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
    * @private
    */
   setCurrentCastSelection_() {
-    if (this.castProxy_.isCasting()) {
+    if (this.castProxy_['isCasting']()) {
       this.castCurrentSelectionSpan_.textContent =
-          this.castProxy_.receiverName();
+          this.castProxy_['receiverName']();
     } else {
       this.castCurrentSelectionSpan_.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);
