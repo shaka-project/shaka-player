@@ -66,7 +66,8 @@ shaka.extern.UIVolumeBarColors;
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
  *   trackLabelFormat: shaka.ui.TrackLabelFormat,
- *   fadeDelay: number
+ *   fadeDelay: number,
+ *   doubleClickForFullscreen: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -119,6 +120,10 @@ shaka.extern.UIVolumeBarColors;
  *   interacting with them.  We recommend setting this to 3 on your cast
  *   receiver UI.
  *   Defaults to 0.
+ * @property {boolean} doubleClickForFullscreen
+ *   Whether or not double-clicking on the UI should cause it to enter
+ *   fullscreen.
+ *   Defaults to true.
  */
 shaka.extern.UIConfiguration;
 
