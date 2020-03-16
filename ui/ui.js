@@ -222,6 +222,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
     },
     trackLabelFormat: shaka.ui.TrackLabelFormat.LANGUAGE,
     fadeDelay: 0,
+    doubleClickForFullscreen: true,
   };
 };
 
