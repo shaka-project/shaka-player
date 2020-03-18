@@ -25,13 +25,17 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   onAssetUnload() {}
 
   /** @override */
-  requestClientSideAds(imaRequest) {}
+  requestClientSideAds(imaRequest) {
+    return Promise.resolve('fake:url');
+  }
 
   /** @override */
-  initServerSide(adContainer, video, player) {}
+  initServerSide(adContainer, video) {}
 
   /** @override */
-  requestServerSideStream(imaRequest, backupUrl = '', startTime = null) {}
+  requestServerSideStream(imaRequest, backupUrl = '') {
+    return Promise.resolve('fake:url');
+  }
 
   /** @override */
   replaceServerSideAdTagParameters(adTagParameters) {}
@@ -40,6 +44,11 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   getStats() {
     return this.stats_;
   }
+
+  /**
+   * @override
+   */
+  onTimedMetadata(region) {}
 
   /**
    * @param {!shaka.test.FakeAd} ad

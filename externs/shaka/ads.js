@@ -53,16 +53,15 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {!HTMLElement} adContainer
    * @param {!HTMLMediaElement} video
-   * @param {!shaka.Player} player
    */
-  initServerSide(adContainer, video, player) {}
+  initServerSide(adContainer, video) {}
 
   /**
    * @param {!google.ima.dai.api.StreamRequest} imaRequest
    * @param {string=} backupUrl
-   * @param {?number=} startTime
+   * @return {!Promise.<!string>}
    */
-  requestServerSideStream(imaRequest, backupUrl, startTime) {}
+  requestServerSideStream(imaRequest, backupUrl) {}
 
   /**
    * @param {Object} adTagParameters
@@ -74,6 +73,11 @@ shaka.extern.IAdManager = class extends EventTarget {
    * playing content, this will return an empty stats object.
    */
   getStats() {}
+
+  /**
+   * @param {shaka.extern.TimelineRegionInfo} region
+   */
+  onTimedMetadata(region) {}
 };
 
 
