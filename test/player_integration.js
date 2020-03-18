@@ -621,7 +621,7 @@ describe('Player', () => {
           // eslint-disable-next-line no-restricted-syntax
           return oldFromCharCode.apply(null, arguments);
         };
-        await player.load('base/test/test/assets/large_file.mpd');
+        await player.load('/base/test/test/assets/large_file.mpd');
       } finally {
         String.fromCharCode = oldFromCharCode;
       }
