@@ -1,0 +1,21 @@
+{
+  "CAPTIONS": "Tekstitykset",
+  "CAST": "Suoratoista…",
+  "EXIT_FULL_SCREEN": "Poistu koko näytön tilasta",
+  "EXIT_PICTURE_IN_PICTURE": "Sulje kuva kuvassa ‑tila",
+  "FULL_SCREEN": "Koko näyttö",
+  "LANGUAGE": "Kieli",
+  "LIVE": "Live",
+  "MORE_SETTINGS": "Lisää asetuksia",
+  "MUTE": "Mykistä",
+  "OFF": "Pois käytöstä",
+  "ON": "Käytössä",
+  "PAUSE": "Keskeytä",
+  "PICTURE_IN_PICTURE": "Kuva kuvassa",
+  "PLAY": "Toista",
+  "REWIND": "Kelaa taaksepäin",
+  "SEEK": "Kelaa",
+  "UNMUTE": "Poista mykistys",
+  "UNRECOGNIZED_LANGUAGE": "Tunnistamaton",
+  "VOLUME": "Äänenvoimakkuus"
+}

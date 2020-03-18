@@ -53,7 +53,6 @@ DEFAULT_LOCALES = [
     'nl',
     'pl',
     'pt-BR',
-    'pt-PT',
     'ru',
     'th',
     'tr',
