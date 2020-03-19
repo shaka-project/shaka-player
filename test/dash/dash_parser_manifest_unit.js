@@ -476,11 +476,18 @@ describe('DashParser Manifest', () => {
     expect(variant.language).toBe('\u2603');
   });
 
-  describe('supports UTCTiming', () => {
+  describe('UTCTiming', () => {
     const originalNow = Date.now;
+    const dateRequestType = shaka.net.NetworkingEngine.RequestType.TIMING;
 
     beforeAll(() => {
       Date.now = () => 10 * 1000;
+    });
+
+    beforeEach(() => {
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.dash.autoCorrectDrift = false;
+      parser.configure(config);
     });
 
     afterAll(() => {
@@ -503,7 +510,12 @@ describe('DashParser Manifest', () => {
         '    <AdaptationSet mimeType="video/mp4">',
         '      <Representation bandwidth="500">',
         '        <BaseURL>http://example.com</BaseURL>',
-        '        <SegmentTemplate media="2.mp4" duration="1" />',
+        '        <SegmentList>',
+        '          <SegmentURL media="s1.mp4" />',
+        '          <SegmentTimeline>',
+        '            <S d="5" t="0" />',
+        '          </SegmentTimeline>',
+        '        </SegmentList>',
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
@@ -579,6 +591,7 @@ describe('DashParser Manifest', () => {
         }
       });
       await runTest(35);
+      fakeNetEngine.expectRequest('http://foo.bar/date', dateRequestType);
     });
 
     it('with xsdate', async () => {
@@ -591,6 +604,7 @@ describe('DashParser Manifest', () => {
           .setResponseText('http://foo.bar/manifest', source)
           .setResponseText('http://foo.bar/date', '1970-01-01T00:00:50Z');
       await runTest(45);
+      fakeNetEngine.expectRequest('http://foo.bar/date', dateRequestType);
     });
 
     it('with relative paths', async () => {
@@ -603,6 +617,7 @@ describe('DashParser Manifest', () => {
           .setResponseText('http://foo.bar/manifest', source)
           .setResponseText('http://foo.bar/date', '1970-01-01T00:00:50Z');
       await runTest(45);
+      fakeNetEngine.expectRequest('http://foo.bar/date', dateRequestType);
     });
 
     it('with paths relative to BaseURLs', async () => {
@@ -616,6 +631,25 @@ describe('DashParser Manifest', () => {
           .setResponseText('http://foo.bar/manifest', source)
           .setResponseText('http://example.com/date', '1970-01-01T00:00:50Z');
       await runTest(45);
+      fakeNetEngine.expectRequest('http://example.com/date', dateRequestType);
+    });
+
+    it('ignored with autoCorrectDrift', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.dash.autoCorrectDrift = true;
+      parser.configure(config);
+
+      const source = makeManifest([
+        '<UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
+        '    value="http://foo.bar/date" />',
+      ]);
+
+      fakeNetEngine
+          .setResponseText('http://foo.bar/manifest', source)
+          .setResponseText('http://foo.bar/date', '1970-01-01T00:00:50Z');
+      // Expect the presentation timeline to end at 5 based on the segments
+      // instead of 45 based on the UTCTiming element.
+      await runTest(5);
     });
   });
 
