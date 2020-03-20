@@ -36,10 +36,10 @@ describe('Player', function() {
     document.body.appendChild(video);
 
     compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
-    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
   });
 
-  beforeEach(function() {
+  beforeEach(async () => {
+    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
     player = new compiledShaka.Player(video);
 
     // Grab event manager from the uncompiled library:
@@ -239,7 +239,7 @@ describe('Player', function() {
       displayer.appendSpy.and.callFake((added) => {
         cues = cues.concat(added);
       });
-      displayer.removeSpy.and.callFake(() => { cues = []; });
+
       player.configure({textDisplayFactory: () => displayer});
 
       const preferredTextLanguage = 'fa';  // The same as in the content itself
