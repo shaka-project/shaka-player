@@ -420,6 +420,29 @@ describe('HlsParser live', () => {
       mediaWithManySegments += 'main.mp4\n';
     }
 
+    const mediaWithDiscontinuity = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-DISCONTINUITY-SEQUENCE:30\n',
+      '#EXTINF:2,\n',
+      'main.mp4\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+    ].join('');
+
+    const mediaWithUpdatedDiscontinuitySegment = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:1\n',
+      '#EXT-X-DISCONTINUITY-SEQUENCE:31\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+    ].join('');
+
     it('starts presentation as VOD when ENDLIST is present', async () => {
       fakeNetEngine
           .setResponseText('test:/master', master)
@@ -493,6 +516,32 @@ describe('HlsParser live', () => {
         parser.configure(config);
         await testWindowOverride(240);
       });
+    });
+
+    it('sets timestamp offset for segments with discontinuity', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithDiscontinuity)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData)
+          .setResponseValue('test:/main2.mp4', segmentData);
+
+      const ref1 = ManifestParser.makeReference(
+          'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* timestampOffset= */ 0);
+
+      // Expect the timestamp offset to be set for the segment after the
+      // EXT-X-DISCONTINUITY tag.
+      const ref2 = ManifestParser.makeReference(
+          'test:/main2.mp4', segmentDataStartTime + 2, segmentDataStartTime + 4,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* timestampOffset= */ 2);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      const video = manifest.variants[0].video;
+      await video.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
     });
 
     it('offsets VTT text with rolled over TS timestamps', async () => {
@@ -642,6 +691,52 @@ describe('HlsParser live', () => {
             'test:/video',
             shaka.net.NetworkingEngine.RequestType.MANIFEST);
       });
+
+      it('reuses cached timestamp offset for segments with discontinuity',
+          async () => {
+            fakeNetEngine
+                .setResponseText('test:/master', master)
+                .setResponseText('test:/video', mediaWithDiscontinuity)
+                .setResponseValue('test:/init.mp4', initSegmentData)
+                .setResponseValue('test:/main.mp4', segmentData)
+                .setResponseValue('test:/main2.mp4', segmentData);
+
+            const ref1 = ManifestParser.makeReference('test:/main.mp4',
+                segmentDataStartTime, segmentDataStartTime + 2);
+
+            const ref2 = ManifestParser.makeReference('test:/main2.mp4',
+                segmentDataStartTime + 2, segmentDataStartTime + 4);
+
+            const manifest =
+                await parser.start('test:/master', playerInterface);
+
+            const video = manifest.variants[0].video;
+            await video.createSegmentIndex();
+            ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
+
+            fakeNetEngine
+                .setResponseText('test:/master', master)
+                .setResponseText('test:/video',
+                    mediaWithUpdatedDiscontinuitySegment)
+                .setResponseValue('test:/init.mp4', initSegmentData)
+                .setResponseValue('test:/main2.mp4', segmentData);
+
+            fakeNetEngine.request.calls.reset();
+            await delayForUpdatePeriod();
+
+            ManifestParser.verifySegmentIndex(video, [ref2]);
+
+            // Only one request should be made, and it's for the playlist.
+            // Expect to use the cached timestamp offset for the main2.mp4
+            // segment, without fetching the start time again.
+            expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+            fakeNetEngine.expectRequest(
+                'test:/video',
+                shaka.net.NetworkingEngine.RequestType.MANIFEST);
+            fakeNetEngine.expectNoRequest(
+                'test:/main.mp4',
+                shaka.net.NetworkingEngine.RequestType.SEGMENT);
+          });
 
       it('parses start time from ts segments', async () => {
         const tsMediaPlaylist =

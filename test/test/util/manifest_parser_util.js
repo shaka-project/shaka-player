@@ -50,10 +50,11 @@ shaka.test.ManifestParser = class {
    * @param {string=} baseUri
    * @param {number=} startByte
    * @param {?number=} endByte
+   * @param {number=} timestampOffset
    * @return {!shaka.media.SegmentReference}
    */
   static makeReference(uri, start, end, baseUri = '',
-      startByte = 0, endByte = null) {
+      startByte = 0, endByte = null, timestampOffset) {
     const getUris = () => [baseUri + uri];
 
     // If a test wants to verify these, they can be set explicitly after
@@ -65,7 +66,8 @@ shaka.test.ManifestParser = class {
       },
     });
 
-    const timestampOffset = /** @type {?} */(jasmine.any(Number));
+    timestampOffset =
+        timestampOffset || /** @type {?} */(jasmine.any(Number));
     const appendWindowStart = /** @type {?} */(jasmine.any(Number));
     const appendWindowEnd = /** @type {?} */(jasmine.any(Number));
 
