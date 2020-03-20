@@ -676,11 +676,15 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
   this.videoContainer_.appendChild(this.controlsContainer_);
 
   this.eventManager_.listen(this.controlsContainer_, 'touchstart', (e) => {
-    this.onContainerTouch_(e);
+    if (!e.defaultPrevented) {
+      this.onContainerTouch_(e);
+    }
   }, {passive: false});
 
   this.eventManager_.listen(this.controlsContainer_, 'click', (e) => {
-    this.onContainerClick_(e);
+    if (!e.defaultPrevented) {
+      this.onContainerClick_(e);
+    }
   });
 };
 
