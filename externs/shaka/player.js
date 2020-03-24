@@ -290,6 +290,12 @@ shaka.extern.Track;
 
 
 /**
+ * @typedef {!Array.<!shaka.extern.Track>}
+ */
+shaka.extern.TrackList;
+
+
+/**
  * @typedef {{
  *   minWidth: number,
  *   maxWidth: number,
@@ -823,12 +829,12 @@ shaka.extern.AbrConfiguration;
 /**
  * @typedef {{
  *   trackSelectionCallback:
- *       function(!Array.<shaka.extern.Track>):!Array.<shaka.extern.Track>,
+ *       function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>,
  *   progressCallback: function(shaka.extern.StoredContent,number),
  *   usePersistentLicense: boolean
  * }}
  *
- * @property {function(!Array.<shaka.extern.Track>):!Array.<shaka.extern.Track>}
+ * @property {function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>}
  *     trackSelectionCallback
  *   Called inside <code>store()</code> to determine which tracks to save from a
  *   manifest. It is passed an array of Tracks from the manifest and it should
