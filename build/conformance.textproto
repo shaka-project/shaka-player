@@ -148,6 +148,20 @@ requirement: {
   whitelist_regexp: 'node_modules/'
 }
 
+# Disallow querySelector and querySelectorAll since they aren't supported on
+# Shaka Player Embedded.
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: 'Element.prototype.querySelector'
+  value: 'Document.prototype.querySelector'
+  value: 'Element.prototype.querySelectorAll'
+  value: 'Document.prototype.querySelectorAll'
+  error_message: 'Use getElementsByTagName'
+  whitelist_regexp: 'demo/'
+  whitelist_regexp: 'ui/'
+  whitelist_regexp: 'test/'
+}
+
 
 # Disallow Element.children.
 requirement: {
