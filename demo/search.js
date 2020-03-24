@@ -31,12 +31,15 @@ shakaDemo.Search = class {
    * Register the page configuration.
    */
   static init() {
-    const container = shakaDemoMain.addNavButton('search');
-    shakaDemoSearch = new shakaDemo.Search(container);
+    const elements = shakaDemoMain.addNavButton('search');
+    shakaDemoSearch = new shakaDemo.Search(elements.container, elements.button);
   }
 
-  /** @param {!Element} container */
-  constructor(container) {
+  /**
+   * @param {!Element} container
+   * @param {!Element} button
+   */
+  constructor(container, button) {
     /** @private {!Array.<!shakaAssets.Feature>} */
     this.desiredFeatures_ = [];
 
@@ -46,13 +49,14 @@ shakaDemo.Search = class {
     /** @private {?shakaAssets.KeySystem} */
     this.desiredDRM_;
 
-    this.makeSearchDiv_(container);
+    /** @private {!Element} */
+    this.button_ = button;
+
+    /** @private {!Element} */
+    this.resultsDiv_ = document.createElement('div');
 
     /** @private {!Array.<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
-
-    this.resultsDiv_ = document.createElement('div');
-    container.appendChild(this.resultsDiv_);
 
     document.addEventListener('shaka-main-selected-asset-changed', () => {
       this.updateSelected_();
@@ -68,6 +72,69 @@ shakaDemo.Search = class {
         this.remakeResultsDiv_();
       }
     });
+
+    this.readHashParameters_();
+    this.updateHashParameters_();
+    this.remakeSearchDiv_(container);
+  }
+
+  /** @private */
+  readHashParameters_() {
+    const hashValues = this.button_.getAttribute('tab-hash');
+    if (hashValues) {
+      for (const valueRaw of hashValues.split(',')) {
+        if (valueRaw.startsWith('drm:')) {
+          const key = valueRaw.split('drm:')[1];
+          const value = shakaAssets.KeySystem[key];
+          if (value) {
+            this.desiredDRM_ = value;
+          }
+        } else if (valueRaw.startsWith('source:')) {
+          const key = valueRaw.split('source:')[1];
+          const value = shakaAssets.Source[key];
+          if (value) {
+            this.desiredSource_ = value;
+          }
+        } else {
+          const value = shakaAssets.Feature[valueRaw];
+          if (value) {
+            this.desiredFeatures_.push(value);
+          }
+        }
+      }
+    }
+  }
+
+  /** @private */
+  updateHashParameters_() {
+    const hashValues = [];
+    if (this.desiredSource_) {
+      for (const key in shakaAssets.Source) {
+        if (shakaAssets.Source[key] == this.desiredSource_) {
+          hashValues.push('source:' + key);
+        }
+      }
+    }
+    if (this.desiredDRM_) {
+      for (const key in shakaAssets.KeySystem) {
+        if (shakaAssets.KeySystem[key] == this.desiredDRM_) {
+          hashValues.push('drm:' + key);
+        }
+      }
+    }
+    for (const feature of this.desiredFeatures_) {
+      for (const key in shakaAssets.Feature) {
+        if (shakaAssets.Feature[key] == feature) {
+          hashValues.push(key);
+        }
+      }
+    }
+    if (hashValues.length > 0) {
+      this.button_.setAttribute('tab-hash', hashValues.join(','));
+    } else {
+      this.button_.removeAttribute('tab-hash');
+    }
+    shakaDemoMain.remakeHash();
   }
 
   /**
@@ -120,6 +187,26 @@ shakaDemo.Search = class {
     const assets = this.searchResults_();
     this.assetCards_ = assets.map((asset) => this.createAssetCardFor_(asset));
     this.updateSelected_();
+  }
+
+  /**
+   * @param {!shakaDemo.Search.SearchTerm} term
+   * @param {shakaDemo.Search.TermType} type
+   * @return {boolean}
+   * @private
+   */
+  checkDesiredTerm_(term, type) {
+    switch (type) {
+      case shakaDemo.Search.TermType.DRM:
+        return this.desiredDRM_ == term;
+      case shakaDemo.Search.TermType.SOURCE:
+        return this.desiredSource_ == term;
+      case shakaDemo.Search.TermType.FEATURE:
+        return this.desiredFeatures_.includes(
+            /** @type {!shakaAssets.Feature} */ (term));
+      default:
+        return false;
+    }
   }
 
   /**
@@ -198,9 +285,11 @@ shakaDemo.Search = class {
       // Update the componentHandler, to account for any new MDL elements
       // added. Notably, tooltips.
       componentHandler.upgradeDom();
+      // Update the hash.
+      this.updateHashParameters_();
     };
-    // eslint-disable-next-line no-new
-    new shakaDemo.BoolInput(searchContainer, choice, onChange);
+    const input = new shakaDemo.BoolInput(searchContainer, choice, onChange);
+    input.input().checked = this.checkDesiredTerm_(choice, type);
   }
 
   /**
@@ -254,18 +343,29 @@ shakaDemo.Search = class {
       // Update the componentHandler, to account for any new MDL elements added.
       // Notably, tooltips.
       componentHandler.upgradeDom();
+      // Update the hash.
+      this.updateHashParameters_();
     };
     const input = new shakaDemo.SelectInput(
         searchContainer, name, onChange, valuesObject);
     input.extra().textContent = name;
     input.input().value = nullOption;
+    for (const choice of choices) {
+      if (this.checkDesiredTerm_(choice, type)) {
+        input.input().value = choice;
+        lastValue = choice;
+        break;
+      }
+    }
   }
 
   /**
    * @param {!Element} container
    * @private
    */
-  makeSearchDiv_(container) {
+  remakeSearchDiv_(container) {
+    shaka.ui.Utils.removeAllChildren(container);
+
     const Feature = shakaAssets.Feature;
     const FEATURE = shakaDemo.Search.TermType.FEATURE;
     const DRM = shakaDemo.Search.TermType.DRM;
@@ -309,6 +409,8 @@ shakaDemo.Search = class {
         'Filters for assets that can be stored offline.');
     this.makeBooleanInput_(specialContainer, Feature.STORED, FEATURE,
         'Filters for assets that have been stored offline.');
+
+    container.appendChild(this.resultsDiv_);
   }
 
   /**

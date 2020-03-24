@@ -31,8 +31,8 @@ shakaDemo.Custom = class {
    * Register the page configuration.
    */
   static init() {
-    const container = shakaDemoMain.addNavButton('custom');
-    shakaDemoCustom = new shakaDemo.Custom(container);
+    const elements = shakaDemoMain.addNavButton('custom');
+    shakaDemoCustom = new shakaDemo.Custom(elements.container);
   }
 
   /** @param {!Element} container */

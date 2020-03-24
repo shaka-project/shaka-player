@@ -1169,6 +1169,10 @@ shakaDemo.Main = class {
       if (button.nodeType == Node.ELEMENT_NODE &&
           button.classList.contains('mdl-button--accent')) {
         params.push('panel=' + button.textContent);
+        const hashValues = button.getAttribute('tab-hash');
+        if (hashValues) {
+          params.push('panelData=' + hashValues);
+        }
         break;
       }
     }
@@ -1251,7 +1255,10 @@ shakaDemo.Main = class {
    * setup process.
    * @param {string} containerName Used to determine the id of the button this
    *   is looking for.  Also used as the className of the container, for CSS.
-   * @return {!HTMLDivElement} The container for the tab.
+   * @return {{
+   *   container: !HTMLDivElement,
+   *   button: !HTMLButtonElement,
+   * }} The container for the tab, and the button element that activates it.
    */
   addNavButton(containerName) {
     const navButtons = document.getElementById('nav-button-container');
@@ -1263,7 +1270,13 @@ shakaDemo.Main = class {
     // Determine if the element is selected.
     const params = this.getParams_();
     let selected = params['panel'] == encodeURI(button.textContent);
-    if (!selected && !params['panel']) {
+    if (selected) {
+      // Re-apply any saved data from hash.
+      const hashValues = params['panelData'];
+      if (hashValues) {
+        button.setAttribute('tab-hash', hashValues);
+      }
+    } else if (!params['panel']) {
       // Check if it's selected by default.
       selected = button.getAttribute('defaultselected') != null;
     }
@@ -1303,7 +1316,10 @@ shakaDemo.Main = class {
       Promise.resolve().then(switchPage);
     }
 
-    return /** @type {!HTMLDivElement} */ (container);
+    return {
+      container: /** @type {!HTMLDivElement} */ (container),
+      button: /** @type {!HTMLButtonElement} */ (button),
+    };
   }
 
   /**
