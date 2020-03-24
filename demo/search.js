@@ -78,14 +78,22 @@ shakaDemo.Search = class {
     if (hashValues) {
       for (const valueRaw of hashValues.split(',')) {
         if (valueRaw.startsWith('drm:')) {
-          this.desiredDRM_ =
-          /** @type {!shakaAssets.KeySystem} */ (valueRaw.split('drm:')[1]);
+          const key = valueRaw.split('drm:')[1];
+          const value = shakaAssets.KeySystem[key];
+          if (value) {
+            this.desiredDRM_ = value;
+          }
         } else if (valueRaw.startsWith('source:')) {
-          this.desiredSource_ =
-          /** @type {!shakaAssets.Source} */ (valueRaw.split('source:')[1]);
+          const key = valueRaw.split('source:')[1];
+          const value = shakaAssets.Source[key];
+          if (value) {
+            this.desiredSource_ = value;
+          }
         } else {
-          this.desiredFeatures_.push(
-              /** @type {!shakaAssets.Feature} */ (valueRaw));
+          const value = shakaAssets.Feature[valueRaw];
+          if (value) {
+            this.desiredFeatures_.push(value);
+          }
         }
       }
     }
@@ -95,13 +103,25 @@ shakaDemo.Search = class {
   updateHashParameters_() {
     const hashValues = [];
     if (this.desiredSource_) {
-      hashValues.push('source:' + this.desiredSource_);
+      for (const key in shakaAssets.Source) {
+        if (shakaAssets.Source[key] == this.desiredSource_) {
+          hashValues.push('source:' + key);
+        }
+      }
     }
     if (this.desiredDRM_) {
-      hashValues.push('drm:' + this.desiredDRM_);
+      for (const key in shakaAssets.KeySystem) {
+        if (shakaAssets.KeySystem[key] == this.desiredDRM_) {
+          hashValues.push('drm:' + key);
+        }
+      }
     }
     for (const feature of this.desiredFeatures_) {
-      hashValues.push(feature);
+      for (const key in shakaAssets.Feature) {
+        if (shakaAssets.Feature[key] == feature) {
+          hashValues.push(key);
+        }
+      }
     }
     if (hashValues.length > 0) {
       this.button_.setAttribute('tab-hash', hashValues.join(','));
