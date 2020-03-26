@@ -243,8 +243,8 @@ describe('DrmEngine', function() {
           }).then(function() {
             expect(video.buffered.end(0)).toBeGreaterThan(0);
             video.play();
-            // Try to play for 5 seconds.
-            return shaka.test.Util.delay(5);
+            const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(15);
+            return waiter.waitForMovement(video);
           }).then(function() {
             // Something should have played by now.
             expect(video.readyState).toBeGreaterThan(1);
