@@ -10,6 +10,7 @@
 
 /**
  * @typedef {{
+ *   loadTimeSeconds: number,
  *   started: number,
  *   playedCompletely: number,
  *   skipped: number
@@ -18,6 +19,8 @@
  * @description
  * Contains statistics and information about the current state of the player.
  *
+ * @property {number} loadTimeSeconds
+ *   The amount of time it took to get the final manifest.
  * @property {number} started
  *   The number of ads started.
  * @property {number} playedCompletely
