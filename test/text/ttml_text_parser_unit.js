@@ -1002,6 +1002,24 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  // Regression test for https://github.com/google/shaka-player/issues/2478
+  it('supports nested cues with only non-ASCII characters', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: '',
+            nestedCues: [
+              {payload: 'äöü'},
+            ],
+          },
+        ],
+        '<tt><body><p begin="01:02.05" end="01:02:03.200">' +
+        '<span>äöü</span></p></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   /**
    * @param {!Array} cues
    * @param {string} text
