@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Tagal ng ad",
-  "AD_PROGRESS": "[AD_ON:1] ng [NUM_ADS:6]",
+  "AD_PROGRESS": "Ad [AD_ON:1] ng [NUM_ADS:6]",
   "AD_TIME": "Ad: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Auto",
   "BACK": "Bumalik",

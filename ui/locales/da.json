@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Annoncevarighed",
-  "AD_PROGRESS": "[AD_ON:1] af [NUM_ADS:6]",
+  "AD_PROGRESS": "Annonce [AD_ON:1] af [NUM_ADS:6]",
   "AD_TIME": "Annonce: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Auto",
   "BACK": "Tilbage",

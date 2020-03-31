@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Διάρκεια διαφήμισης",
-  "AD_PROGRESS": "[AD_ON:1] από [NUM_ADS:6]",
+  "AD_PROGRESS": "Διαφήμιση [AD_ON:1] από [NUM_ADS:6]",
   "AD_TIME": "Διαφήμιση: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Αυτόματα",
   "BACK": "Πίσω",

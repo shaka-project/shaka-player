@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "広告再生時間",
-  "AD_PROGRESS": "[AD_ON:1] 番目 / 全 [NUM_ADS:6] 個",
+  "AD_PROGRESS": "[AD_ON:1] 番目の広告（全 [NUM_ADS:6] 個）",
   "AD_TIME": "広告: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "自動",
   "BACK": "戻る",

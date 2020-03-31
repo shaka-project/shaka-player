@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Продолжительность объявления",
-  "AD_PROGRESS": "[AD_ON:1] из [NUM_ADS:6]",
+  "AD_PROGRESS": "Объявление [AD_ON:1] из [NUM_ADS:6]",
   "AD_TIME": "Объявление: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Авто",
   "BACK": "Назад",

@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Durata dell'annuncio",
-  "AD_PROGRESS": "[AD_ON:1] di [NUM_ADS:6]",
+  "AD_PROGRESS": "Annuncio [AD_ON:1] di [NUM_ADS:6]",
   "AD_TIME": "Annuncio: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Automatica",
   "BACK": "Indietro",

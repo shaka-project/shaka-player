@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Advertentieduur",
-  "AD_PROGRESS": "[AD_ON:1] van [NUM_ADS:6]",
+  "AD_PROGRESS": "Advertentie [AD_ON:1] van [NUM_ADS:6]",
   "AD_TIME": "Advertentie: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Automatisch",
   "BACK": "Terug",

@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Тривалість оголошення",
-  "AD_PROGRESS": "[AD_ON:1] з [NUM_ADS:6]",
+  "AD_PROGRESS": "Оголошення [AD_ON:1] з [NUM_ADS:6]",
   "AD_TIME": "Оголошення: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Автоматично",
   "BACK": "Назад",

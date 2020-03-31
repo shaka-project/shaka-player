@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Reklāmas ilgums",
-  "AD_PROGRESS": "[AD_ON:1]. no [NUM_ADS:6]",
+  "AD_PROGRESS": "[AD_ON:1]. reklāma no [NUM_ADS:6]",
   "AD_TIME": "Reklāma: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Automātiski",
   "BACK": "Atpakaļ",

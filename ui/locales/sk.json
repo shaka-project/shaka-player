@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Trvanie reklamy",
-  "AD_PROGRESS": "[AD_ON:1] z [NUM_ADS:6]",
+  "AD_PROGRESS": "[AD_ON:1]. reklama z [NUM_ADS:6]",
   "AD_TIME": "Reklama: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Automaticky",
   "BACK": "Späť",

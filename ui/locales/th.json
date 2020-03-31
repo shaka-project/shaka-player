@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "ระยะเวลาโฆษณา",
-  "AD_PROGRESS": "[AD_ON:1] จาก [NUM_ADS:6]",
+  "AD_PROGRESS": "โฆษณา [AD_ON:1] จาก [NUM_ADS:6] รายการ",
   "AD_TIME": "โฆษณา: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "อัตโนมัติ",
   "BACK": "กลับ",

@@ -1,6 +1,6 @@
 {
   "AD_DURATION": "Thời lượng quảng cáo",
-  "AD_PROGRESS": "[AD_ON:1]/[NUM_ADS:6]",
+  "AD_PROGRESS": "Quảng cáo [AD_ON:1]/[NUM_ADS:6]",
   "AD_TIME": "Quảng cáo: [AD_TIME:0:05/0:10]",
   "AUTO_QUALITY": "Tự động",
   "BACK": "Quay lại",
