@@ -174,6 +174,8 @@ describe('DashParser ContentProtection', () => {
         ['edef8ba9-79d6-4ace-a3c8-27dcd51d21ed'], ['com.widevine.alpha']);
     testKeySystemMappings('for PlayReady',
         ['9a04f079-9840-4286-ab92-e65be0885f95'], ['com.microsoft.playready']);
+    testKeySystemMappings('for old PlayReady',
+        ['79f0049a-4098-8642-ab92-e65be0885f95'], ['com.microsoft.playready']);
     testKeySystemMappings('for Adobe Primetime',
         ['f239e769-efa3-4850-9c16-a903c6932efb'], ['com.adobe.primetime']);
 
@@ -388,6 +390,7 @@ describe('DashParser ContentProtection', () => {
     const expected = buildExpectedManifest(
         [
           buildDrmInfo('com.widevine.alpha', keyIds),
+          buildDrmInfo('com.microsoft.playready', keyIds),
           buildDrmInfo('com.microsoft.playready', keyIds),
           buildDrmInfo('com.adobe.primetime', keyIds),
         ]);
