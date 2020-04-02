@@ -212,6 +212,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.timeAndSeekRangeTimer_ = null;
     }
 
+    // Important!  Release all child elements before destroying the cast proxy
+    // or player.  This makes sure those destructions will not trigger event
+    // listeners in the UI which would then invoke the cast proxy or player.
+    this.releaseChildElements_();
+
     if (this.castProxy_) {
       await this.castProxy_.destroy();
       this.castProxy_ = null;
@@ -225,8 +230,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.localVideo_ = null;
     this.video_ = null;
-
-    this.releaseChildElements_();
 
     this.localization_ = null;
     this.pressedKeys_.clear();
