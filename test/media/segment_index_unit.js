@@ -382,6 +382,12 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(refs).toEqual(inputRefs);
     });
 
+    it('works after eviction', () => {
+      const index = new shaka.media.SegmentIndex(inputRefs);
+      index.evict(15);  // Drop the first ref.
+      expect(Array.from(index)).toEqual(inputRefs.slice(1));
+    });
+
     describe('seek', () => {
       it('returns the matching segment', () => {
         const index = new shaka.media.SegmentIndex(inputRefs);
