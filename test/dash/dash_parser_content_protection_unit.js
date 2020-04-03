@@ -30,16 +30,16 @@ describe('DashParser ContentProtection', () => {
     config.dash.ignoreDrmInfo = ignoreDrmInfo || false;
     dashParser.configure(config);
 
-    const playerEvents = {
+    const playerInterface = {
       networkingEngine: netEngine,
-      filterNewPeriod: () => {},
-      filterAllPeriods: () => {},
+      filter: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
     };
 
-    const actual = await dashParser.start('http://example.com', playerEvents);
+    const actual = await dashParser.start(
+        'http://example.com', playerInterface);
     expect(actual).toEqual(expected);
   }
 
@@ -97,19 +97,15 @@ describe('DashParser ContentProtection', () => {
       const variant = jasmine.objectContaining({
         drmInfos: drmInfos,
         video: jasmine.objectContaining({
-          keyId: keyIds[i] || null,
+          keyIds: keyIds[i] ? [keyIds[i]] : [],
         }),
       });
       variants.push(variant);
     }
 
     return jasmine.objectContaining({
-      periods: [
-        jasmine.objectContaining({
-          variants: variants,
-          textStreams: [],
-        }),
-      ],  // periods
+      variants: variants,
+      textStreams: [],
     });
   }
 

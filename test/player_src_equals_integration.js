@@ -335,13 +335,13 @@ describe('Player Src Equals', () => {
   it('cannot add text tracks', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
 
-    const pendingAdd = player.addTextTrack(
-        'test:need-a-uri-for-text',
-        'en-US',
-        'main',
-        'text/mp4');
-
-    await expectAsync(pendingAdd).toBeRejected();
+    expect(() => {
+      player.addTextTrack(
+          'test:need-a-uri-for-text',
+          'en-US',
+          'main',
+          'text/mp4');
+    }).toThrow();
   });
 
   // Since we are not in-charge of streaming, calling |retryStreaming| should

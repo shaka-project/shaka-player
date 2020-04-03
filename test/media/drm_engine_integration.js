@@ -104,22 +104,20 @@ describe('DrmEngine', () => {
     drmEngine.configure(config);
 
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.addPeriod(0, (period) => {
-        period.addVariant(0, (variant) => {
-          variant.addDrmInfo('com.widevine.alpha');
-          variant.addDrmInfo('com.microsoft.playready');
-          variant.addVideo(1, (stream) => {
-            stream.encrypted = true;
-          });
-          variant.addAudio(2, (stream) => {
-            stream.encrypted = true;
-          });
+      manifest.addVariant(0, (variant) => {
+        variant.addDrmInfo('com.widevine.alpha');
+        variant.addDrmInfo('com.microsoft.playready');
+        variant.addVideo(1, (stream) => {
+          stream.encrypted = true;
+        });
+        variant.addAudio(2, (stream) => {
+          stream.encrypted = true;
         });
       });
     });
 
-    const videoStream = manifest.periods[0].variants[0].video;
-    const audioStream = manifest.periods[0].variants[0].audio;
+    const videoStream = manifest.variants[0].video;
+    const audioStream = manifest.variants[0].audio;
 
     eventManager = new shaka.util.EventManager();
 
@@ -191,8 +189,7 @@ describe('DrmEngine', () => {
         keyStatusEventSeen.resolve();
       });
 
-      const periods = manifest.periods;
-      const variants = shaka.util.Periods.getAllVariantsFrom(periods);
+      const variants = manifest.variants;
 
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       await drmEngine.attach(video);

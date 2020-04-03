@@ -827,8 +827,7 @@ shaka.extern.AbrConfiguration;
  *     trackSelectionCallback
  *   Called inside <code>store()</code> to determine which tracks to save from a
  *   manifest. It is passed an array of Tracks from the manifest and it should
- *   return an array of the tracks to store.  This is called for each Period in
- *   the manifest (in order).
+ *   return an array of the tracks to store.
  * @property {function(shaka.extern.StoredContent,number)} progressCallback
  *   Called inside <code>store()</code> to give progress info back to the app.
  *   It is given the current manifest being stored and the progress of it being

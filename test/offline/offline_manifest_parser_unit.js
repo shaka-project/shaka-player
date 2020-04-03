@@ -202,7 +202,7 @@ filterDescribe('OfflineManifestParser', offlineManifestParserSupport, () => {
       duration: 600 * seconds,
       size: 100 * mb,
       expiration: Infinity,
-      periods: [],
+      streams: [],
       sessionIds: [sessionId],
       drmInfo: null,
       appMetadata: {},

@@ -12,7 +12,8 @@
 /**
  * @typedef {{
  *   presentationTimeline: !shaka.media.PresentationTimeline,
- *   periods: !Array.<!shaka.extern.Period>,
+ *   variants: !Array.<shaka.extern.Variant>,
+ *   textStreams: !Array.<shaka.extern.Stream>,
  *   offlineSessionIds: !Array.<string>,
  *   minBufferTime: number
  * }}
@@ -36,8 +37,6 @@
  * </p>
  *
  * <p>
- * The presentation timeline is divided into one or more Periods, and each of
- * these Periods contains its own collection of Variants and text streams.
  * A variant is a combination of an audio and a video streams that can be played
  * together.
  * </p>
@@ -54,9 +53,12 @@
  * @property {!shaka.media.PresentationTimeline} presentationTimeline
  *   <i>Required.</i> <br>
  *   The presentation timeline.
- * @property {!Array.<!shaka.extern.Period>} periods
+ * @property {!Array.<shaka.extern.Variant>} variants
  *   <i>Required.</i> <br>
- *   The presentation's Periods. There must be at least one Period.
+ *   The presentation's Variants. There must be at least one Variant.
+ * @property {!Array.<shaka.extern.Stream>} textStreams
+ *   <i>Required.</i> <br>
+ *   The presentation's text streams.
  * @property {!Array.<string>} offlineSessionIds
  *   <i>Defaults to [].</i> <br>
  *   An array of EME sessions to load for offline playback.
@@ -69,35 +71,6 @@
  * @exportDoc
  */
 shaka.extern.Manifest;
-
-
-/**
- * @typedef {{
- *   startTime: number,
- *   variants: !Array.<shaka.extern.Variant>,
- *   textStreams: !Array.<shaka.extern.Stream>
- * }}
- *
- * @description
- * A Period object contains the Streams for part of the presentation.
- *
- * @property {number} startTime
- *   <i>Required.</i> <br>
- *   The Period's start time, in seconds, relative to the start of the
- *   presentation. The first Period must begin at the start of the
- *   presentation. The Period ends immediately before the next Period's start
- *   time or exactly at the end of the presentation timeline. Periods which
- *   begin after the end of the presentation timeline are ignored.
- * @property {!Array.<shaka.extern.Variant>} variants
- *   <i>Required.</i> <br>
- *   The Period's Variants. There must be at least one Variant.
- * @property {!Array.<shaka.extern.Stream>} textStreams
- *   <i>Required.</i> <br>
- *   The Period's text streams.
- *
- * @exportDoc
- */
-shaka.extern.Period;
 
 
 /**
@@ -209,9 +182,9 @@ shaka.extern.DrmInfo;
  *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm}
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
- *   True indicates that the player should use this Variant over others in the
- *   same Period. The player may still use another Variant to meet application
- *   preferences.
+ *   True indicates that the player should use this Variant over others if user
+ *   preferences cannot be met.  The player may still use another Variant to
+ *   meet user preferences.
  * @property {?shaka.extern.Stream} audio
  *   The audio stream of the variant.
  * @property {?shaka.extern.Stream} video
@@ -261,7 +234,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   height: (number|undefined),
  *   kind: (string|undefined),
  *   encrypted: boolean,
- *   keyId: ?string,
+ *   keyIds: !Array.<string>,
  *   language: string,
  *   label: ?string,
  *   type: string,
@@ -321,10 +294,11 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {boolean} encrypted
  *   <i>Defaults to false.</i><br>
  *   True if the stream is encrypted.
- * @property {?string} keyId
- *   <i>Defaults to null (i.e., unencrypted or key ID unknown).</i> <br>
- *   The stream's key ID as a lowercase hex string. This key ID identifies the
- *   encryption key that the browser (key system) can use to decrypt the stream.
+ * @property {!Array.<string>} keyIds
+ *   <i>Defaults to empty (i.e., unencrypted or key ID unknown).</i> <br>
+ *   The stream's key IDs as lowercase hex strings. These key IDs identify the
+ *   encryption keys that the browser (key system) can use to decrypt the
+ *   stream.
  * @property {string} language
  *   The Stream's language, specified as a language code. <br>
  *   Audio stream's language must be identical to the language of the containing
@@ -336,9 +310,9 @@ shaka.extern.CreateSegmentIndexFunction;
  *   Content type (e.g. 'video', 'audio' or 'text')
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
- *   True indicates that the player should prefer this Stream over others
- *   in the same Period. The player may still use another Stream to meet
- *   application preferences.
+ *   True indicates that the player should use this Stream over others if user
+ *   preferences cannot be met.  The player may still use another Variant to
+ *   meet user preferences.
  * @property {?shaka.extern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.

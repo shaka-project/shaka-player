@@ -178,11 +178,10 @@ filterDescribe('IndexeddbStorageCell', () => window.indexedDB, () => {
    * @return {shaka.extern.StorageCell}
    */
   function makeCell(connection) {
-    const cell = new shaka.offline.indexeddb.V2StorageCell(
+    const cell = new shaka.offline.indexeddb.V5StorageCell(
         connection,
         segmentStore,
-        manifestStore,
-        /* allow= */ false);
+        manifestStore);
 
     // Track the cell so that we can destroy it when the test is over.
     cells.push(cell);

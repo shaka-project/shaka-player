@@ -18,7 +18,7 @@ shaka.test.OfflineUtils = class {
       duration: 90,
       expiration: Infinity,
       originalManifestUri: originalUri,
-      periods: [],
+      streams: [],
       sessionIds: [],
       size: 1024,
     };
@@ -47,9 +47,13 @@ shaka.test.OfflineUtils = class {
       height: null,
       initSegmentKey: null,
       encrypted: false,
-      keyId: null,
+      keyIds: [],
       segments: [],
       variantIds: [],
+      roles: [],
+      channelsCount: null,
+      audioSamplingRate: null,
+      closedCaptions: null,
     };
   }
 

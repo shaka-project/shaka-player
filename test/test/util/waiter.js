@@ -203,6 +203,7 @@ shaka.test.Waiter = class {
         shaka.media.TimeRangesUtils.getBufferedInfo(mediaElement.buffered);
     shaka.log.error(message,
         'current time', mediaElement.currentTime,
+        'duration', mediaElement.duration,
         'ready state', mediaElement.readyState,
         'playback rate', mediaElement.playbackRate,
         'paused', mediaElement.paused,

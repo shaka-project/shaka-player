@@ -78,23 +78,11 @@ shaka.test.FakeAbrManager = class {
 
 /** @extends {shaka.media.StreamingEngine} */
 shaka.test.FakeStreamingEngine = class {
-  /**
-   * @param {function():shaka.media.StreamingEngine.ChosenStreams}
-   *     onChooseStreams
-   * @param {function()} onCanSwitch
-   */
-  constructor(onChooseStreams, onCanSwitch) {
+  constructor() {
     const resolve = () => Promise.resolve();
 
-    let activeAudio = null;
-    let activeVideo = null;
+    let activeVariant = null;
     let activeText = null;
-
-    /** @type {function()} */
-    this.onChooseStreams = onChooseStreams;
-
-    /** @type {function()} */
-    this.onCanSwitch = onCanSwitch;
 
     /** @type {!jasmine.Spy} */
     this.destroy = jasmine.createSpy('destroy').and.callFake(resolve);
@@ -106,26 +94,14 @@ shaka.test.FakeStreamingEngine = class {
     this.seeked = jasmine.createSpy('seeked');
 
     /** @type {!jasmine.Spy} */
-    this.getBufferingPeriod =
-        jasmine.createSpy('getBufferingPeriod').and.returnValue(null);
+    this.getCurrentVariant =
+        jasmine.createSpy('getCurrentVariant').and.callFake(
+            () => activeVariant);
 
     /** @type {!jasmine.Spy} */
-    this.getBufferingAudio =
-        jasmine.createSpy('getBufferingAudio').and.callFake(() => activeAudio);
-
-    /** @type {!jasmine.Spy} */
-    this.getBufferingVideo =
-        jasmine.createSpy('getBufferingVideo').and.callFake(() => activeVideo);
-
-    this.getBufferingText =
-        jasmine.createSpy('getBufferingText').and.callFake(() => activeText);
-
-    /** @type {!jasmine.Spy} */
-    this.loadNewTextStream =
-        jasmine.createSpy('loadNewTextStream').and.callFake((stream) => {
-          activeText = stream;
-          return Promise.resolve();
-        });
+    this.getCurrentTextStream =
+        jasmine.createSpy('getCurrentTextStream').and.callFake(
+            () => activeText);
 
     /** @type {!jasmine.Spy} */
     this.unloadTextStream =
@@ -134,25 +110,12 @@ shaka.test.FakeStreamingEngine = class {
         });
 
     /** @type {!jasmine.Spy} */
-    this.start = jasmine.createSpy('start').and.callFake(async () => {
-      const chosen = onChooseStreams();
-      await Promise.resolve();
-      if (chosen.variant && chosen.variant.audio) {
-        activeAudio = chosen.variant.audio;
-      }
-      if (chosen.variant && chosen.variant.video) {
-        activeVideo = chosen.variant.video;
-      }
-      if (chosen.text) {
-        activeText = chosen.text;
-      }
-    });
+    this.start = jasmine.createSpy('start');
 
     /** @type {!jasmine.Spy} */
     this.switchVariant =
         jasmine.createSpy('switchVariant').and.callFake((variant) => {
-          activeAudio = variant.audio || activeAudio;
-          activeVideo = variant.video || activeVideo;
+          activeVariant = variant;
         });
 
     /** @type {!jasmine.Spy} */

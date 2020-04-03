@@ -143,7 +143,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
   });
 
   describe('fit', () => {
-    it('drops references which are outside the period bounds', () => {
+    it('clamps references to the window bounds', () => {
       // These negative numbers can occur due to presentationTimeOffset in DASH.
       const references = [
         makeReference(uri(0), -10, -3),
@@ -160,7 +160,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       goog.asserts.assert(positionAtTimeFive != null, 'Null position!');
       const referenceAtTimeFive = index.get(positionAtTimeFive);
 
-      index.fit(/* periodStart= */ 0, /* periodEnd= */ 15);
+      index.fit(/* windowStart= */ 0, /* windowEnd= */ 15);
       const newReferences = [
         /* ref 0 dropped because it ends before the period starts */
         makeReference(uri(1), -3, 4),
@@ -175,19 +175,20 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(index.get(positionAtTimeFive)).toBe(referenceAtTimeFive);
     });
 
-    it('drops references which end exactly at zero', () => {
-      // The end time is meant to be exclusive, so segments ending at zero
-      // (after PTO adjustments) should be dropped.
+    it('drops references which end exactly at window start', () => {
+      // The end time is meant to be exclusive, so segments ending at window
+      // start should be dropped.
       const references = [
         makeReference(uri(0), -10, 0),
         makeReference(uri(1), 0, 10),
       ];
+
       const index = new shaka.media.SegmentIndex(references);
       expect(index.references_).toEqual(references);
 
-      index.fit(/* periodStart= */ 0, /* periodEnd= */ 10);
+      index.fit(/* windowStart= */ 0, /* windowEnd= */ 10);
       const newReferences = [
-        /* ref 0 dropped because it ends before the period starts (at 0) */
+        /* ref 0 dropped because it ends when the window start (at 0) */
         makeReference(uri(1), 0, 10),
       ];
       expect(index.references_).toEqual(newReferences);

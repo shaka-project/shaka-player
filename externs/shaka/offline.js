@@ -49,8 +49,7 @@ shaka.extern.OfflineSupport;
  *   The time that the encrypted license expires, in milliseconds.  If the media
  *   is clear or the license never expires, this will equal Infinity.
  * @property {!Array.<shaka.extern.Track>} tracks
- *   The tracks that are stored.  This only lists those found in the first
- *   Period.
+ *   The tracks that are stored.
  * @property {Object} appMetadata
  *   The metadata passed to store().
  * @exportDoc
@@ -64,7 +63,7 @@ shaka.extern.StoredContent;
  *   duration: number,
  *   size: number,
  *   expiration: number,
- *   periods: !Array.<shaka.extern.PeriodDB>,
+ *   streams: !Array.<shaka.extern.StreamDB>,
  *   sessionIds: !Array.<string>,
  *   drmInfo: ?shaka.extern.DrmInfo,
  *   appMetadata: Object
@@ -80,8 +79,8 @@ shaka.extern.StoredContent;
  *   The license expiration, in milliseconds; or Infinity if not applicable.
  *   Note that upon JSON serialization, Infinity becomes null, and must be
  *   converted back upon loading from storage.
- * @property {!Array.<shaka.extern.PeriodDB>} periods
- *   The Periods that are stored.
+ * @property {!Array.<shaka.extern.StreamDB>} streams
+ *   The Streams that are stored.
  * @property {!Array.<string>} sessionIds
  *   The DRM offline session IDs for the media.
  * @property {?shaka.extern.DrmInfo} drmInfo
@@ -94,24 +93,9 @@ shaka.extern.ManifestDB;
 
 /**
  * @typedef {{
- *   startTime: number,
- *   streams: !Array.<shaka.extern.StreamDB>
- * }}
- *
- * @property {number} startTime
- *   The start time of the period, in seconds.
- * @property {!Array.<shaka.extern.StreamDB>} streams
- *   The streams that define the Period.
- */
-shaka.extern.PeriodDB;
-
-
-/**
- * @typedef {{
  *   id: number,
  *   originalId: ?string,
  *   primary: boolean,
- *   presentationTimeOffset: number,
  *   contentType: string,
  *   mimeType: string,
  *   codecs: string,
@@ -122,11 +106,14 @@ shaka.extern.PeriodDB;
  *   label: ?string,
  *   width: ?number,
  *   height: ?number,
- *   initSegmentKey: ?number,
  *   encrypted: boolean,
- *   keyId: ?string,
+ *   keyIds: !Array.<string>,
  *   segments: !Array.<shaka.extern.SegmentDB>,
- *   variantIds: !Array.<number>
+ *   variantIds: !Array.<number>,
+ *   roles: !Array.<string>,
+ *   channelsCount: ?number,
+ *   audioSamplingRate: ?number,
+ *   closedCaptions: Map.<string, string>
  * }}
  *
  * @property {number} id
@@ -136,9 +123,6 @@ shaka.extern.PeriodDB;
  *   DASH, this is the "id" attribute of the Representation element.
  * @property {boolean} primary
  *   Whether the stream set was primary.
- * @property {number} presentationTimeOffset
- *   The presentation time offset of the stream, in seconds.  Note that this is
- *   the inverse of the timestampOffset as defined in the manifest types.
  * @property {string} contentType
  *   The type of the stream, 'audio', 'text', or 'video'.
  * @property {string} mimeType
@@ -159,31 +143,55 @@ shaka.extern.PeriodDB;
  *   The width of the stream; null for audio/text.
  * @property {?number} height
  *   The height of the stream; null for audio/text.
- * @property  {?number} initSegmentKey
- *   The storage key where the init segment is found; null if no init segment.
  * @property {boolean} encrypted
  *   Whether this stream is encrypted.
- * @property {?string} keyId
- *   The key ID this stream is encrypted with.
+ * @property {!Array.<string>} keyIds
+ *   The key IDs this stream is encrypted with.
  * @property {!Array.<shaka.extern.SegmentDB>} segments
  *   An array of segments that make up the stream.
  * @property {!Array.<number>} variantIds
  *   An array of ids of variants the stream is a part of.
+ * @property {!Array.<string>} roles
+ *   The roles of the stream as they appear on the manifest,
+ *   e.g. 'main', 'caption', or 'commentary'.
+ * @property {?number} channelsCount
+ *   The channel count information for the audio stream.
+ * @property {?number} audioSamplingRate
+ *   Specifies the maximum sampling rate of the content.
+ * @property {Map.<string, string>} closedCaptions
+ *   A map containing the description of closed captions, with the caption
+ *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
+ *   as the value. If the channel number is not provided by the description,
+ *   we'll set an 0-based index as the key.
+ *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
  */
 shaka.extern.StreamDB;
 
 
 /**
  * @typedef {{
+ *   initSegmentKey: ?number,
  *   startTime: number,
  *   endTime: number,
+ *   appendWindowStart: number,
+ *   appendWindowEnd: number,
+ *   timestampOffset: number,
  *   dataKey: number
  * }}
  *
+ * @property {?number} initSegmentKey
+ *   The storage key where the init segment is found; null if no init segment.
  * @property {number} startTime
- *   The start time of the segment, in seconds from the start of the Period.
+ *   The start time of the segment in the presentation timeline.
  * @property {number} endTime
- *   The end time of the segment, in seconds from the start of the Period.
+ *   The end time of the segment in the presentation timeline.
+ * @property {number} appendWindowStart
+ *   A start timestamp before which media samples will be truncated.
+ * @property {number} appendWindowEnd
+ *   An end timestamp beyond which media samples will be truncated.
+ * @property {number} timestampOffset
+ *   An offset which MediaSource will add to the segment's media timestamps
+ *   during ingestion, to align to the presentation timeline.
  * @property {number} dataKey
  *   The key to the data in storage.
  */

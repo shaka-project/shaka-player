@@ -103,8 +103,7 @@ describe('HlsParser live', () => {
 
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     playerInterface = {
-      filterNewPeriod: () => {},
-      filterAllPeriods: () => {},
+      filter: () => {},
       networkingEngine: fakeNetEngine,
       onError: fail,
       onEvent: fail,
@@ -151,9 +150,7 @@ describe('HlsParser live', () => {
 
     const manifest = await parser.start('test:/master', playerInterface);
 
-    /** @type {!Array.<shaka.extern.Variant>} */
-    const variants = manifest.periods[0].variants;
-    await Promise.all(variants.map(async (variant) => {
+    await Promise.all(manifest.variants.map(async (variant) => {
       await variant.video.createSegmentIndex();
       ManifestParser.verifySegmentIndex(variant.video, initialReferences);
       if (variant.audio) {
@@ -170,7 +167,7 @@ describe('HlsParser live', () => {
         .setResponseText('test:/audio', updatedMedia);
 
     await delayForUpdatePeriod();
-    for (const variant of variants) {
+    for (const variant of manifest.variants) {
       ManifestParser.verifySegmentIndex(variant.video, updatedReferences);
       if (variant.audio) {
         ManifestParser.verifySegmentIndex(variant.audio, updatedReferences);
@@ -282,7 +279,7 @@ describe('HlsParser live', () => {
 
         const manifest = await parser.start('test:/master', playerInterface);
 
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [ref1]);
 
@@ -532,13 +529,13 @@ describe('HlsParser live', () => {
           .setResponseText('test:/main.vtt', vtt);
 
       const manifest = await parser.start('test:/master', playerInterface);
-      const textStream = manifest.periods[0].textStreams[0];
+      const textStream = manifest.textStreams[0];
       await textStream.createSegmentIndex();
       let ref = Array.from(textStream.segmentIndex)[0];
       expect(ref).not.toBe(null);
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
 
-      const videoStream = manifest.periods[0].variants[0].video;
+      const videoStream = manifest.variants[0].video;
       await videoStream.createSegmentIndex();
       ref = Array.from(videoStream.segmentIndex)[0];
       expect(ref).not.toBe(null);
@@ -602,7 +599,7 @@ describe('HlsParser live', () => {
         expectedRef.timestampOffset = 0;
 
         const manifest = await parser.start('test:/master', playerInterface);
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [expectedRef]);
       });
@@ -622,7 +619,7 @@ describe('HlsParser live', () => {
             segmentDataStartTime + 4);
 
         const manifest = await parser.start('test:/master', playerInterface);
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
 
@@ -661,7 +658,7 @@ describe('HlsParser live', () => {
         expectedRef.timestampOffset = 0;
 
         const manifest = await parser.start('test:/master', playerInterface);
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [expectedRef]);
       });
@@ -685,7 +682,7 @@ describe('HlsParser live', () => {
             expectedEndByte);  // Complete segment reference
 
         const manifest = await parser.start('test:/master', playerInterface);
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [expectedRef]);
 

@@ -12,7 +12,6 @@
 +../../lib/deprecate/enforcer.js
 +../../lib/deprecate/version.js
 
-+../../lib/media/active_stream_map.js
 +../../lib/media/adaptation_set.js
 +../../lib/media/adaptation_set_criteria.js
 +../../lib/media/buffering_observer.js
@@ -22,7 +21,6 @@
 +../../lib/media/manifest_parser.js
 +../../lib/media/media_source_engine.js
 +../../lib/media/mp4_segment_index_parser.js
-+../../lib/media/period_observer.js
 +../../lib/media/play_rate_controller.js
 +../../lib/media/playhead.js
 +../../lib/media/playhead_observer.js

@@ -168,7 +168,7 @@ describe('AdaptationSet', () => {
       encrypted: false,
       segmentIndex: null,
       id: id,
-      keyId: null,
+      keyIds: [],
       label: null,
       language: '',
       mimeType: mimeType,

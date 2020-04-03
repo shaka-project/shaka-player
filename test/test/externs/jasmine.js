@@ -154,12 +154,8 @@ jasmine.Matchers.prototype.toHaveBeenCalledTimes = function(times) {};
 jasmine.Matchers.prototype.toMatch = function(value) {};
 
 
-/** @param {*} value */
+/** @param {*=} value */
 jasmine.Matchers.prototype.toThrow = function(value) {};
-
-
-/** @param {*} value */
-jasmine.Matchers.prototype.toThrowError = function(value) {};
 
 
 /**

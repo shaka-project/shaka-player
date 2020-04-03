@@ -204,6 +204,17 @@ function getClientArg(name) {
     });
   };
 
+  /**
+   * Unconditionally skip contained tests that would normally be run
+   * conditionally.  Used to temporarily disable tests that use filterDescribe.
+   * See filterDescribe above.
+   *
+   * @param {string} describeName
+   * @param {function():*} cond
+   * @param {function()} describeBody
+   */
+  window.xfilterDescribe = (describeName, cond, describeBody) => {};
+
   beforeAll((done) => {  // eslint-disable-line no-restricted-syntax
     // Configure AMD modules and their dependencies.
     require.config({
