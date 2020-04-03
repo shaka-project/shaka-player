@@ -119,10 +119,9 @@ describe('ManifestConverter', () => {
       expect(variant.bandwidth).toEqual(jasmine.any(Number));
       expect(variant.allowedByApplication).toBe(true);
       expect(variant.allowedByKeySystem).toBe(true);
-      expect(variant.drmInfos).toEqual([manifestDb.drmInfo]);
 
-      verifyStream(variant.video, manifestDb.streams[0]);
-      verifyStream(variant.audio, manifestDb.streams[1]);
+      verifyStream(variant.video, manifestDb.streams[0], manifestDb.drmInfo);
+      verifyStream(variant.audio, manifestDb.streams[1], manifestDb.drmInfo);
     });
 
     it('supports video-only content', () => {
@@ -442,12 +441,15 @@ describe('ManifestConverter', () => {
   /**
    * @param {?shaka.extern.Stream} stream
    * @param {?shaka.extern.StreamDB} streamDb
+   * @param {(?shaka.extern.DrmInfo)=} drmInfo
    */
-  function verifyStream(stream, streamDb) {
+  function verifyStream(stream, streamDb, drmInfo = null) {
     if (!streamDb) {
       expect(stream).toBeFalsy();
       return;
     }
+
+    const expectedDrmInfos = streamDb.encrypted ? [drmInfo] : [];
 
     const expectedStream = {
       id: jasmine.any(Number),
@@ -461,6 +463,7 @@ describe('ManifestConverter', () => {
       width: streamDb.width || undefined,
       height: streamDb.height || undefined,
       kind: streamDb.kind,
+      drmInfos: expectedDrmInfos,
       encrypted: streamDb.encrypted,
       keyIds: streamDb.keyIds,
       language: streamDb.language,

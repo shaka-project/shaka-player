@@ -160,7 +160,8 @@ shaka.test.TestScheme = class {
 
       if (data.licenseServers) {
         for (const keySystem in data.licenseServers) {
-          variant.addDrmInfo(keySystem, (drmInfo) => {
+          stream.encrypted = true;
+          stream.addDrmInfo(keySystem, (drmInfo) => {
             drmInfo.licenseServerUri = data.licenseServers[keySystem];
             if (data[contentType].initData) {
               drmInfo.addCencInitData(data[contentType].initData);

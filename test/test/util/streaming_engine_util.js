@@ -310,7 +310,6 @@ shaka.test.StreamingEngineUtil = class {
       allowedByApplication: true,
       allowedByKeySystem: true,
       bandwidth: 0,
-      drmInfos: [],
       id: 0,
       language: 'und',
       primary: false,
@@ -413,6 +412,7 @@ shaka.test.StreamingEngineUtil = class {
       codecs: 'mp4a.40.2',
       bandwidth: 192000,
       type: ContentType.AUDIO,
+      drmInfos: [],
     };
   }
 
@@ -434,6 +434,7 @@ shaka.test.StreamingEngineUtil = class {
       width: 600,
       height: 400,
       type: ContentType.VIDEO,
+      drmInfos: [],
     };
   }
 
@@ -452,6 +453,7 @@ shaka.test.StreamingEngineUtil = class {
       mimeType: 'text/vtt',
       kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
       type: ManifestParserUtils.ContentType.TEXT,
+      drmInfos: [],
     };
   }
 };

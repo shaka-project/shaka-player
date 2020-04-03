@@ -105,13 +105,15 @@ describe('DrmEngine', () => {
 
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.addVariant(0, (variant) => {
-        variant.addDrmInfo('com.widevine.alpha');
-        variant.addDrmInfo('com.microsoft.playready');
         variant.addVideo(1, (stream) => {
           stream.encrypted = true;
+          stream.addDrmInfo('com.widevine.alpha');
+          stream.addDrmInfo('com.microsoft.playready');
         });
         variant.addAudio(2, (stream) => {
           stream.encrypted = true;
+          stream.addDrmInfo('com.widevine.alpha');
+          stream.addDrmInfo('com.microsoft.playready');
         });
       });
     });

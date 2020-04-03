@@ -95,9 +95,9 @@ describe('DashParser ContentProtection', () => {
     const variants = [];
     for (const i of shaka.util.Iterables.range(numVariants)) {
       const variant = jasmine.objectContaining({
-        drmInfos: drmInfos,
         video: jasmine.objectContaining({
           keyIds: keyIds[i] ? [keyIds[i]] : [],
+          drmInfos,
         }),
       });
       variants.push(variant);
@@ -481,25 +481,6 @@ describe('DashParser ContentProtection', () => {
       // AdaptationSet lines
     ], [
       // Representation 1 lines
-      '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
-    ], [
-      // Representation 2 lines
-      '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
-    ]);
-    const expected = buildExpectedManifest(
-        [buildDrmInfo('com.widevine.alpha')]);
-    await testDashParser(source, expected);
-  });
-
-  it('only keeps key systems common to all Representations', async () => {
-    const source = buildManifestText([
-      // AdaptationSet lines
-    ], [
-      // Representation 1 lines
-      '<ContentProtection',
-      '  schemeIdUri="urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95" />',
       '<ContentProtection',
       '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
     ], [

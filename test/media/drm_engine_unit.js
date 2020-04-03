@@ -66,14 +66,16 @@ describe('DrmEngine', () => {
 
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.addVariant(0, (variant) => {
-        variant.addDrmInfo('drm.abc');
-        variant.addDrmInfo('drm.def');
         variant.addVideo(1, (stream) => {
           stream.encrypted = true;
+          stream.addDrmInfo('drm.abc');
+          stream.addDrmInfo('drm.def');
           stream.mime('video/foo', 'vbar');
         });
         variant.addAudio(2, (stream) => {
           stream.encrypted = true;
+          stream.addDrmInfo('drm.abc');
+          stream.addDrmInfo('drm.def');
           stream.mime('audio/foo', 'abar');
         });
       });
@@ -135,10 +137,10 @@ describe('DrmEngine', () => {
     it('supports all clear variants', async () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
-          variant.addDrmInfo('drm.abc');
-          variant.addDrmInfo('drm.def');
           variant.addVideo(1, (stream) => {
             stream.encrypted = false;
+            stream.addDrmInfo('drm.abc');
+            stream.addDrmInfo('drm.def');
             stream.mime('video/foo', 'vbar');
           });
         });
@@ -213,18 +215,20 @@ describe('DrmEngine', () => {
       setRequestMediaKeySystemAccessSpy(['drm.abc', 'drm.def']);
 
       // Add manifest-supplied license servers for both.
-      for (const drmInfo of manifest.variants[0].drmInfos) {
-        if (drmInfo.keySystem == 'drm.abc') {
-          drmInfo.licenseServerUri = 'http://foo.bar/abc';
-        } else if (drmInfo.keySystem == 'drm.def') {
-          drmInfo.licenseServerUri = 'http://foo.bar/def';
-        }
+      tweakDrmInfos((drmInfos) => {
+        for (const drmInfo of drmInfos) {
+          if (drmInfo.keySystem == 'drm.abc') {
+            drmInfo.licenseServerUri = 'http://foo.bar/abc';
+          } else if (drmInfo.keySystem == 'drm.def') {
+            drmInfo.licenseServerUri = 'http://foo.bar/def';
+          }
 
-        // Make sure we didn't somehow choose manifest-supplied values that
-        // match the config.  This would invalidate parts of the test.
-        const configServer = config.servers[drmInfo.keySystem];
-        expect(drmInfo.licenseServerUri).not.toBe(configServer);
-      }
+          // Make sure we didn't somehow choose manifest-supplied values that
+          // match the config.  This would invalidate parts of the test.
+          const configServer = config.servers[drmInfo.keySystem];
+          expect(drmInfo.licenseServerUri).not.toBe(configServer);
+        }
+      });
 
       // Remove the server URI for drm.abc from the config, so that only drm.def
       // could be used, in spite of the manifest-supplied license server URI.
@@ -305,7 +309,7 @@ describe('DrmEngine', () => {
           .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
     });
 
-    it('silences errors for unencrypted assets', async () => {
+    it('does not error for unencrypted assets with no EME', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
@@ -317,25 +321,23 @@ describe('DrmEngine', () => {
         });
       });
 
-      // Accept no key systems.
+      // Accept no key systems, simulating a lack of EME.
       setRequestMediaKeySystemAccessSpy([]);
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
-
-      // Both key systems were tried, since the first one failed.
-      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
-      expect(requestMediaKeySystemAccessSpy)
-          .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
-      expect(requestMediaKeySystemAccessSpy)
-          .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
+      // All that matters here is that we don't throw.
+      await expectAsync(
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .not.toBeRejected();
     });
 
     it('fails to initialize if no key systems are recognized', async () => {
       // Simulate the DASH parser inserting a blank placeholder when only
       // unrecognized custom schemes are found.
-      manifest.variants[0].drmInfos[0].keySystem = '';
-      manifest.variants[0].drmInfos[1].keySystem = '';
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].keySystem = '';
+        drmInfos[1].keySystem = '';
+      });
 
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -433,8 +435,10 @@ describe('DrmEngine', () => {
 
     it('honors distinctive identifier and persistent state', async () => {
       setRequestMediaKeySystemAccessSpy([]);
-      manifest.variants[0].drmInfos[0].distinctiveIdentifierRequired = true;
-      manifest.variants[0].drmInfos[1].persistentStateRequired = true;
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].distinctiveIdentifierRequired = true;
+        drmInfos[1].persistentStateRequired = true;
+      });
 
       const variants = manifest.variants;
       await expectAsync(
@@ -459,7 +463,8 @@ describe('DrmEngine', () => {
 
     it('makes no queries for clear content if no key config', async () => {
       setRequestMediaKeySystemAccessSpy([]);
-      manifest.variants[0].drmInfos = [];
+      manifest.variants[0].video.drmInfos = [];
+      manifest.variants[0].audio.drmInfos = [];
       config.servers = {};
       config.advanced = {};
 
@@ -473,7 +478,8 @@ describe('DrmEngine', () => {
 
     it('makes queries for clear content if key is configured', async () => {
       setRequestMediaKeySystemAccessSpy(['drm.abc']);
-      manifest.variants[0].drmInfos = [];
+      manifest.variants[0].video.drmInfos = [];
+      manifest.variants[0].audio.drmInfos = [];
       config.servers = {
         'drm.abc': 'http://abc.drm/license',
       };
@@ -491,11 +497,14 @@ describe('DrmEngine', () => {
       // Leave only one drmInfo
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
-          variant.addDrmInfo('drm.abc');
           variant.addVideo(1, (stream) => {
             stream.encrypted = true;
+            stream.addDrmInfo('drm.abc');
           });
-          variant.addAudio(2);
+          variant.addAudio(2, (stream) => {
+            stream.encrypted = true;
+            stream.addDrmInfo('drm.abc');
+          });
         });
       });
 
@@ -535,22 +544,26 @@ describe('DrmEngine', () => {
       // Leave only one drmInfo
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
-          variant.addDrmInfo('drm.abc');
           variant.addVideo(1, (stream) => {
             stream.encrypted = true;
+            stream.addDrmInfo('drm.abc');
           });
-          variant.addAudio(2);
+          variant.addAudio(2, (stream) => {
+            stream.encrypted = true;
+            stream.addDrmInfo('drm.abc');
+          });
         });
       });
 
       setRequestMediaKeySystemAccessSpy([]);
 
       // DrmInfo directly sets advanced settings.
-      manifest.variants[0].drmInfos[0].distinctiveIdentifierRequired = true;
-      manifest.variants[0].drmInfos[0].persistentStateRequired = true;
-      manifest.variants[0].drmInfos[0].audioRobustness = 'good';
-      manifest.variants[0].drmInfos[0]
-          .videoRobustness = 'really_really_ridiculously_good';
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].distinctiveIdentifierRequired = true;
+        drmInfos[0].persistentStateRequired = true;
+        drmInfos[0].audioRobustness = 'good';
+        drmInfos[0].videoRobustness = 'really_really_ridiculously_good';
+      });
 
       config.advanced['drm.abc'] = {
         audioRobustness: 'bad',
@@ -605,12 +618,13 @@ describe('DrmEngine', () => {
       // Both audio and video with the same key system:
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
-          variant.addDrmInfo('drm.abc');
           variant.addVideo(1, (stream) => {
             stream.encrypted = true;
+            stream.addDrmInfo('drm.abc');
           });
           variant.addAudio(2, (stream) => {
             stream.encrypted = true;
+            stream.addDrmInfo('drm.abc');
           });
         });
       });
@@ -618,7 +632,8 @@ describe('DrmEngine', () => {
 
     it('does nothing for unencrypted content', async () => {
       setRequestMediaKeySystemAccessSpy([]);
-      manifest.variants[0].drmInfos = [];
+      manifest.variants[0].video.drmInfos = [];
+      manifest.variants[0].audio.drmInfos = [];
       config.servers = {};
       config.advanced = {};
 
@@ -643,7 +658,9 @@ describe('DrmEngine', () => {
     it('prefers server certificate from DrmInfo', async () => {
       const cert1 = new Uint8Array(5);
       const cert2 = new Uint8Array(1);
-      manifest.variants[0].drmInfos[0].serverCertificate = cert1;
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].serverCertificate = cert1;
+      });
 
       config.advanced['drm.abc'] = createAdvancedConfig(cert2);
       drmEngine.configure(config);
@@ -665,11 +682,14 @@ describe('DrmEngine', () => {
       const initData2 = new Uint8Array(0);
       /** @type {!Uint8Array} */
       const initData3 = new Uint8Array(10);
-      manifest.variants[0].drmInfos[0].initData = [
-        {initData: initData1, initDataType: 'cenc', keyId: null},
-        {initData: initData2, initDataType: 'webm', keyId: null},
-        {initData: initData3, initDataType: 'cenc', keyId: null},
-      ];
+
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initData: initData1, initDataType: 'cenc', keyId: null},
+          {initData: initData2, initDataType: 'webm', keyId: null},
+          {initData: initData3, initDataType: 'cenc', keyId: null},
+        ];
+      });
 
       await initAndAttach();
       expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(3);
@@ -692,11 +712,14 @@ describe('DrmEngine', () => {
       const initData1 = new Uint8Array(1);
       const initData2 = new Uint8Array(1);
       const initData3 = new Uint8Array(10);
-      manifest.variants[0].drmInfos[0].initData = [
-        {initData: initData1, initDataType: 'cenc', keyId: 'abc'},
-        {initData: initData2, initDataType: 'cenc', keyId: 'def'},
-        {initData: initData3, initDataType: 'cenc', keyId: 'abc'},
-      ];
+
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initData: initData1, initDataType: 'cenc', keyId: 'abc'},
+          {initData: initData2, initDataType: 'cenc', keyId: 'def'},
+          {initData: initData3, initDataType: 'cenc', keyId: 'abc'},
+        ];
+      });
 
       await initAndAttach();
       expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
@@ -705,8 +728,9 @@ describe('DrmEngine', () => {
     });
 
     it('uses clearKeys config to override DrmInfo', async () => {
-      manifest.variants[0].drmInfos[0].keySystem =
-          'com.fake.NOT.clearkey';
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].keySystem = 'com.fake.NOT.clearkey';
+      });
 
       setRequestMediaKeySystemAccessSpy(['org.w3.clearkey']);
 
@@ -726,9 +750,10 @@ describe('DrmEngine', () => {
       await initAndAttach();
       const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
-      expect(manifest.variants[0].drmInfos.length).toBe(1);
-      expect(manifest.variants[0].drmInfos[0].keySystem)
-          .toBe('org.w3.clearkey');
+      tweakDrmInfos((drmInfos) => {
+        expect(drmInfos.length).toBe(1);
+        expect(drmInfos[0].keySystem).toBe('org.w3.clearkey');
+      });
 
       expect(session.generateRequest)
           .toHaveBeenCalledWith('keyids', jasmine.any(Uint8Array));
@@ -746,7 +771,8 @@ describe('DrmEngine', () => {
     // Regression test for #2139, in which we suppressed errors if drmInfos was
     // empty and clearKeys config was given
     it('fails if clearKeys config fails', async () => {
-      manifest.variants[0].drmInfos = [];
+      manifest.variants[0].video.drmInfos = [];
+      manifest.variants[0].audio.drmInfos = [];
 
       // Make it so that clear key setup fails by pretending we don't have it.
       // In reality, it was failing because of missing codec info, but any
@@ -806,9 +832,12 @@ describe('DrmEngine', () => {
       // Set up an init data override in the manifest to get an immediate call
       // to generateRequest:
       const initData1 = new Uint8Array(5);
-      manifest.variants[0].drmInfos[0].initData = [
-        {initData: initData1, initDataType: 'cenc', keyId: null},
-      ];
+
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initData: initData1, initDataType: 'cenc', keyId: null},
+        ];
+      });
 
       // Fail generateRequest.
       const session1 = createMockSession();
@@ -870,9 +899,11 @@ describe('DrmEngine', () => {
 
       it('is ignored when init data is in DrmInfo', async () => {
         // Set up an init data override in the manifest:
-        manifest.variants[0].drmInfos[0].initData = [
-          {initData: new Uint8Array(0), initDataType: 'cenc', keyId: null},
-        ];
+        tweakDrmInfos((drmInfos) => {
+          drmInfos[0].initData = [
+            {initData: new Uint8Array(0), initDataType: 'cenc', keyId: null},
+          ];
+        });
 
         await initAndAttach();
         // We already created a session for the init data override.
@@ -900,7 +931,8 @@ describe('DrmEngine', () => {
       });
 
       it('dispatches an error if manifest says unencrypted', async () => {
-        manifest.variants[0].drmInfos = [];
+        manifest.variants[0].video.drmInfos = [];
+        manifest.variants[0].audio.drmInfos = [];
         config.servers = {};
         config.advanced = {};
 
@@ -936,8 +968,9 @@ describe('DrmEngine', () => {
       });
 
       it('prefers a license server URI from configuration', async () => {
-        manifest.variants[0].drmInfos[0].licenseServerUri =
-            'http://foo.bar/drm';
+        tweakDrmInfos((drmInfos) => {
+          drmInfos[0].licenseServerUri = 'http://foo.bar/drm';
+        });
         await sendMessageTest('http://abc.drm/license');
       });
 
@@ -1105,10 +1138,13 @@ describe('DrmEngine', () => {
         // sessions.
         const initData1 = new Uint8Array(10);
         const initData2 = new Uint8Array(11);
-        manifest.variants[0].drmInfos[0].initData = [
-          {initData: initData1, initDataType: 'cenc', keyId: null},
-          {initData: initData2, initDataType: 'cenc', keyId: null},
-        ];
+
+        tweakDrmInfos((drmInfos) => {
+          drmInfos[0].initData = [
+            {initData: initData1, initDataType: 'cenc', keyId: null},
+            {initData: initData2, initDataType: 'cenc', keyId: null},
+          ];
+        });
 
         const keyId1 = makeKeyId(1);
         const keyId2 = makeKeyId(2);
@@ -1250,7 +1286,9 @@ describe('DrmEngine', () => {
     });
 
     it('uses clearKeys config to override DrmInfo', async () => {
-      manifest.variants[0].drmInfos[0].keySystem = 'com.fake.NOT.clearkey';
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].keySystem = 'com.fake.NOT.clearkey';
+      });
       setRequestMediaKeySystemAccessSpy(['org.w3.clearkey']);
 
       // Configure clear keys (map of hex key IDs to keys)
@@ -1719,20 +1757,22 @@ describe('DrmEngine', () => {
       // Leave only one drmInfo
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
-          variant.addDrmInfo('drm.abc');
           variant.addVideo(1, (stream) => {
             stream.encrypted = true;
+            stream.addDrmInfo('drm.abc');
           });
           variant.addAudio(2, (stream) => {
             stream.encrypted = true;
+            stream.addDrmInfo('drm.abc');
           });
         });
       });
       setRequestMediaKeySystemAccessSpy(['drm.abc']);
 
       // Key IDs in manifest
-      manifest.variants[0].drmInfos[0].keyIds[0] =
-          'deadbeefdeadbeefdeadbeefdeadbeef';
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].keyIds[0] = 'deadbeefdeadbeefdeadbeefdeadbeef';
+      });
 
       config.advanced['drm.abc'] = {
         audioRobustness: 'good',
@@ -2093,5 +2133,17 @@ describe('DrmEngine', () => {
    */
   function makeKeyId(id) {
     return shaka.util.BufferUtils.toArrayBuffer(new Uint8Array([id]));
+  }
+
+  /**
+   * @param {function(!Array.<shaka.extern.DrmInfo>)} callback
+   */
+  function tweakDrmInfos(callback) {
+    if (manifest.variants[0].video.encrypted) {
+      callback(manifest.variants[0].video.drmInfos);
+    }
+    if (manifest.variants[0].audio.encrypted) {
+      callback(manifest.variants[0].audio.drmInfos);
+    }
   }
 });

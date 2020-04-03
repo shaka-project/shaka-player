@@ -162,7 +162,6 @@ shaka.extern.DrmInfo;
  *   audio: ?shaka.extern.Stream,
  *   video: ?shaka.extern.Stream,
  *   bandwidth: number,
- *   drmInfos: !Array.<shaka.extern.DrmInfo>,
  *   allowedByApplication: boolean,
  *   allowedByKeySystem: boolean
  * }}
@@ -191,10 +190,6 @@ shaka.extern.DrmInfo;
  *   The video stream of the variant.
  * @property {number} bandwidth
  *   The variant's required bandwidth in bits per second.
- * @property {!Array.<!shaka.extern.DrmInfo>} drmInfos
- *   <i>Defaults to [] (i.e., no DRM).</i> <br>
- *   An array of DrmInfo objects which describe DRM schemes are compatible with
- *   the content.
  * @property {boolean} allowedByApplication
  *   <i>Defaults to true.</i><br>
  *   Set by the Player to indicate whether the variant is allowed to be played
@@ -234,6 +229,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   height: (number|undefined),
  *   kind: (string|undefined),
  *   encrypted: boolean,
+ *   drmInfos: !Array.<shaka.extern.DrmInfo>,
  *   keyIds: !Array.<string>,
  *   language: string,
  *   label: ?string,
@@ -294,6 +290,10 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {boolean} encrypted
  *   <i>Defaults to false.</i><br>
  *   True if the stream is encrypted.
+ * @property {!Array.<!shaka.extern.DrmInfo>} drmInfos
+ *   <i>Defaults to [] (i.e., no DRM).</i> <br>
+ *   An array of DrmInfo objects which describe DRM schemes are compatible with
+ *   the content.
  * @property {!Array.<string>} keyIds
  *   <i>Defaults to empty (i.e., unencrypted or key ID unknown).</i> <br>
  *   The stream's key IDs as lowercase hex strings. These key IDs identify the

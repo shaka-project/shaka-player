@@ -2516,16 +2516,16 @@ describe('Player', () => {
     it('removes if key system does not support codec', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
-          variant.addDrmInfo('foo.bar');
           variant.addVideo(1, (stream) => {
             stream.encrypted = true;
             stream.mimeType = 'video/unsupported';
+            stream.addDrmInfo('foo.bar');
           });
         });
         manifest.addVariant(1, (variant) => {
-          variant.addDrmInfo('foo.bar');
           variant.addVideo(2, (stream) => {
             stream.encrypted = true;
+            stream.addDrmInfo('foo.bar');
           });
         });
       });

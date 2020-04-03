@@ -1693,11 +1693,11 @@ describe('HlsParser', () => {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
-        variant.addDrmInfo('com.widevine.alpha', (drmInfo) => {
-          drmInfo.addCencInitData(initDataBase64);
-        });
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
           stream.encrypted = true;
+          stream.addDrmInfo('com.widevine.alpha', (drmInfo) => {
+            drmInfo.addCencInitData(initDataBase64);
+          });
         });
       });
     });

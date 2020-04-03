@@ -333,7 +333,6 @@ describe('StreamingEngine', () => {
       language: 'und',
       primary: false,
       bandwidth: 0,
-      drmInfos: [],
       allowedByApplication: true,
       allowedByKeySystem: true,
     };

@@ -252,8 +252,6 @@ shaka.test.ManifestGenerator.Variant = class {
       this.bandwidth = 0;
       /** @type {boolean} */
       this.primary = false;
-      /** @type {!Array.<shaka.extern.DrmInfo>} */
-      this.drmInfos = [];
       /** @type {boolean} */
       this.allowedByApplication = true;
       /** @type {boolean} */
@@ -271,24 +269,6 @@ shaka.test.ManifestGenerator.Variant = class {
    */
   build_() {
     return shaka.test.ManifestGenerator.buildCommon_(this);
-  }
-
-  /**
-   * Adds a new DrmInfo to the current variant.
-   *
-   * @param {string} keySystem
-   * @param {function(!shaka.test.ManifestGenerator.DrmInfo)=} func
-   */
-  addDrmInfo(keySystem, func) {
-    const drmInfo =
-        new shaka.test.ManifestGenerator.DrmInfo(this.manifest_, keySystem);
-    if (func) {
-      func(drmInfo);
-    }
-    if (!this.drmInfos) {
-      this.drmInfos = [];
-    }
-    this.drmInfos.push(drmInfo.build_());
   }
 
   /**
@@ -509,6 +489,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.kind = undefined;
       /** @type {boolean} */
       this.encrypted = false;
+      /** @type {!Array.<shaka.extern.DrmInfo>} */
+      this.drmInfos = [];
       /** @type {!Array.<string>} */
       this.keyIds = [];
       /** @type {string} */
@@ -542,6 +524,25 @@ shaka.test.ManifestGenerator.Stream = class {
    */
   build_() {
     return shaka.test.ManifestGenerator.buildCommon_(this);
+  }
+
+  /**
+   * Adds a new DrmInfo to the current Stream.
+   *
+   * @param {string} keySystem
+   * @param {function(!shaka.test.ManifestGenerator.DrmInfo)=} func
+   */
+  addDrmInfo(keySystem, func) {
+    const drmInfo =
+        new shaka.test.ManifestGenerator.DrmInfo(this.manifest_, keySystem);
+    if (func) {
+      func(drmInfo);
+    }
+    if (!this.drmInfos) {
+      // This may be the case if this was created through addPartialStream.
+      this.drmInfos = [];
+    }
+    this.drmInfos.push(drmInfo.build_());
   }
 
   /**
