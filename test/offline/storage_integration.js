@@ -723,6 +723,31 @@ filterDescribe('Storage', storageSupport, () => {
       }
     });
 
+    it('snapshots config when store is called', async () => {
+      /** @type {!jasmine.Spy} */
+      const selectTracksOne =
+          jasmine.createSpy('selectTracksOne').and.callFake((tracks) => tracks);
+      /** @type {!jasmine.Spy} */
+      const selectTracksTwo =
+          jasmine.createSpy('selectTracksTwo').and.callFake((tracks) => tracks);
+      /** @type {!jasmine.Spy} */
+      const selectTracksBad =
+          jasmine.createSpy('selectTracksBad').and.callFake((tracks) => []);
+
+      storage.configure('offline.trackSelectionCallback', selectTracksOne);
+      const storeOne = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      storage.configure('offline.trackSelectionCallback', selectTracksTwo);
+      const storeTwo = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      storage.configure('offline.trackSelectionCallback', selectTracksBad);
+      await Promise.all([storeOne, storeTwo]);
+
+      expect(selectTracksOne).toHaveBeenCalled();
+      expect(selectTracksTwo).toHaveBeenCalled();
+      expect(selectTracksBad).not.toHaveBeenCalled();
+    });
+
     it('only stores chosen tracks', async () => {
       // Change storage to only store one track so that it will be easy
       // for us to ensure that only the one track was stored.
@@ -833,6 +858,23 @@ filterDescribe('Storage', storageSupport, () => {
       }
     });
 
+    it('can store multiple assets at once', async () => {
+      // Block the network so that we won't finish the first store command.
+      /** @type {!shaka.util.PublicPromise} */
+      const hangingPromise = netEngine.delayNextRequest();
+      /** @type {!Promise} */
+      const storePromise = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+
+      const secondStorePromise = storage.store(
+          manifestWithoutPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await secondStorePromise;
+
+      // Unblock the original store and wait for it to complete.
+      hangingPromise.resolve();
+      await storePromise;
+    });
+
     // Make sure that when we configure storage to NOT store persistent
     // licenses that we don't store the sessions.
     it('stores drm info with no license', async () => {
@@ -878,30 +920,6 @@ filterDescribe('Storage', storageSupport, () => {
       } finally {
         await muxer.destroy();
       }
-    });
-
-    // TODO(vaage): Remove the need to limit the number of store commands. With
-    //              all the changes, it should be very easy to do now.
-    it('throws an error if another store is in progress', async () => {
-      // Block the network so that we won't finish the first store command.
-      /** @type {!shaka.util.PublicPromise} */
-      const hangingPromise = netEngine.delayNextRequest();
-      /** @type {!Promise} */
-      const storePromise = storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
-
-      const expected = Util.jasmineError(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.STORE_ALREADY_IN_PROGRESS));
-      await expectAsync(
-          storage.store(
-              manifestWithoutPerStreamBandwidthUri, noMetadata, fakeMimeType))
-          .toBeRejectedWith(expected);
-
-      // Unblock the original store and wait for it to complete.
-      hangingPromise.resolve();
-      await storePromise;
     });
 
     it('throws an error if the content is a live stream', async () => {
