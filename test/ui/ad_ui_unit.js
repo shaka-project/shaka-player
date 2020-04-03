@@ -30,6 +30,7 @@ describe('Ad UI', () => {
 
   afterAll(() => {
     document.head.removeChild(cssLink);
+    shaka.Player.setAdManagerFactory(() => new shaka.ads.AdManager());
   });
 
   beforeEach(() => {
