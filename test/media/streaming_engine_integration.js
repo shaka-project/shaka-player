@@ -256,8 +256,20 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
       video.play();
+
+      // Wait for playback to begin before increasing the playback rate.  This
+      // improves test reliability on slow platforms like Chromecast.
+      await waiter.timeoutAfter(10).waitForMovement(video);
       video.playbackRate = 10;
-      await waiter.timeoutAfter(30).waitForEnd(video);
+
+      // Something weird happens on some platforms (variously Chromecast, IE,
+      // legacy Edge, and Safari) where the playhead can go past duration.
+      // To cope with this, don't fail on timeout.  If the video never got
+      // flagged as "ended", check for the playhead to be near or past the end.
+      await waiter.timeoutAfter(30).failOnTimeout(false).waitForEnd(video);
+      if (!video.ended) {
+        expect(video.currentTime).toBeGreaterThan(video.duration - 0.1);
+      }
     });
 
     it('can handle buffered seeks', async () => {
