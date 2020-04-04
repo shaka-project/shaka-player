@@ -181,9 +181,11 @@ describe('DashParser Manifest', () => {
     const periodContents = [
       '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
       '      <Representation bandwidth="100">',
-      '        <SegmentBase presentationTimeOffset="1" indexRange="100-200">',
-      '          <Initialization sourceURL="init.mp4" range="201-300" />',
-      '        </SegmentBase>',
+      '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="10" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
       '      </Representation>',
       '    </AdaptationSet>',
     ].join('\n');
@@ -209,9 +211,7 @@ describe('DashParser Manifest', () => {
     const periodContents = [
       '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
       '      <Representation bandwidth="100">',
-      '        <SegmentBase presentationTimeOffset="1" indexRange="100-200">',
-      '          <Initialization sourceURL="init.mp4" range="201-300" />',
-      '        </SegmentBase>',
+      '        <SegmentTemplate duration="2" media="s$Number$.mp4" />',
       '      </Representation>',
       '    </AdaptationSet>',
     ].join('\n');
