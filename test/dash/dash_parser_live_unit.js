@@ -209,8 +209,7 @@ describe('DashParser Live', () => {
       ManifestParser.verifySegmentIndex(stream, basicRefs.slice(1));
     });
 
-    // FIXME(#1339): re-enable this test!
-    xit('evicts old references for multi-period live stream', async () => {
+    it('evicts old references for multi-period live stream', async () => {
       const template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT60S"',
@@ -346,8 +345,7 @@ describe('DashParser Live', () => {
     });
   }
 
-  // FIXME(#1339): re-enable this test!
-  xit('can add Periods', async () => {
+  it('can add Periods', async () => {
     const template1 = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
       '    suggestedPresentationDelay="PT5S"',
@@ -356,7 +354,11 @@ describe('DashParser Live', () => {
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation id="1" bandwidth="500">',
       '        <BaseURL>http://example.com</BaseURL>',
-      '        <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" r="1" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -370,7 +372,11 @@ describe('DashParser Live', () => {
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation id="1" bandwidth="500">',
       '        <BaseURL>http://example.com</BaseURL>',
-      '        <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" r="4" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -378,7 +384,11 @@ describe('DashParser Live', () => {
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation id="2" bandwidth="500">',
       '        <BaseURL>http://example.com</BaseURL>',
-      '        <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" r="1" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -407,8 +417,8 @@ describe('DashParser Live', () => {
     await updateManifest();
 
     // The update should have affected the same variant object we captured
-    // before.  Now the entire first period should exist (10s), plus the next
-    // two segments.
+    // before.  Now the entire first period should exist (0-10s), plus the next
+    // two segments (10-14s).
     expect(stream.segmentIndex.find(9)).not.toBe(null);
     expect(stream.segmentIndex.find(13)).not.toBe(null);
   });

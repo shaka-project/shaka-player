@@ -176,8 +176,7 @@ describe('DashParser Manifest', () => {
         }));
   });
 
-  // TODO(#1339): Update this test not to rely on manifest.periods
-  xit('skips any periods after one without duration', async () => {
+  it('rejects periods after one without duration', async () => {
     const periodContents = [
       '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
       '      <Representation bandwidth="100">',
@@ -204,7 +203,13 @@ describe('DashParser Manifest', () => {
     fakeNetEngine.setResponseText('dummy://foo', source);
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
-    expect(manifest.periods.length).toBe(1);
+    const video = manifest.variants[0].video;
+    await video.createSegmentIndex();
+
+    // The first period has a segment from 0-10.
+    // With the second period skipping, we should fail to find a segment at 10.
+    expect(video.segmentIndex.find(0)).not.toBe(null);
+    expect(video.segmentIndex.find(10)).toBe(null);
   });
 
   it('calculates Period times when missing', async () => {

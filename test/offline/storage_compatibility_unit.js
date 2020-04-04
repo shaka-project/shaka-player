@@ -77,7 +77,6 @@ const compatibilityTestsMetadata = [
         /* segmentStore= */ 'segment-v3',
         /* manifestStore= */ 'manifest-v3'),
   },
-  /* FIXME(#1339): Dump V5 database and enable this test case
   {
     // This is the v5 version of the database, introduced in v2.6.
     name: 'v5',
@@ -86,10 +85,9 @@ const compatibilityTestsMetadata = [
     readOnly: false,
     makeCell: (connection) => new shaka.offline.indexeddb.V5StorageCell(
         connection,
-        /* segmentStore= * 'segment-v5',
-        /* manifestStore= * 'manifest-v5'),
+        /* segmentStore= */ 'segment-v5',
+        /* manifestStore= */ 'manifest-v5'),
   },
-  */
 ];
 
 filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
@@ -271,8 +269,7 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
       await checkMissingManifests(manifestKeys);
     });
 
-    // FIXME(#1339): Re-enable this test!
-    xit('correctly converts to the current manifest format', async () => {
+    it('correctly converts to the current manifest format', async () => {
       // There should be one manifest.
       const manifestDb = (await cell.getManifests([metadata.manifestKey]))[0];
       const converter = new shaka.offline.ManifestConverter(

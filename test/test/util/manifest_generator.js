@@ -422,7 +422,7 @@ shaka.test.ManifestGenerator.DrmInfo = class {
 
 shaka.test.ManifestGenerator.Stream = class {
   /**
-   * @param {!shaka.test.ManifestGenerator.Manifest} manifest
+   * @param {shaka.test.ManifestGenerator.Manifest} manifest
    * @param {boolean} isPartial
    * @param {?number} id
    * @param {shaka.util.ManifestParserUtils.ContentType} type
@@ -430,10 +430,11 @@ shaka.test.ManifestGenerator.Stream = class {
    */
   constructor(manifest, isPartial, id, type, lang) {
     goog.asserts.assert(
-        !manifest.isIdUsed_(id), 'Streams should have unique ids!');
+        !manifest || !manifest.isIdUsed_(id),
+        'Streams should have unique ids!');
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
-    /** @const {!shaka.test.ManifestGenerator.Manifest} */
+    /** @const {shaka.test.ManifestGenerator.Manifest} */
     this.manifest_ = manifest;
 
     /** @type {shaka.media.InitSegmentReference} */
@@ -533,11 +534,16 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {function(!shaka.test.ManifestGenerator.DrmInfo)=} func
    */
   addDrmInfo(keySystem, func) {
+    goog.asserts.assert(this.manifest_,
+        'A top-level generated Manifest is required to use this method!');
+
     const drmInfo =
         new shaka.test.ManifestGenerator.DrmInfo(this.manifest_, keySystem);
+
     if (func) {
       func(drmInfo);
     }
+
     if (!this.drmInfos) {
       // This may be the case if this was created through addPartialStream.
       this.drmInfos = [];
@@ -554,6 +560,9 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {?number=} segmentSize
    */
   useSegmentTemplate(template, segmentDuration, segmentSize = null) {
+    goog.asserts.assert(this.manifest_,
+        'A top-level generated Manifest is required to use this method!');
+
     const totalDuration = this.manifest_.presentationTimeline.getDuration();
     const segmentCount = totalDuration / segmentDuration;
     const duration = this.manifest_.presentationTimeline.getDuration();
@@ -570,6 +579,8 @@ shaka.test.ManifestGenerator.Stream = class {
       const getUris = () => [sprintf(template, index)];
       const start = index * segmentDuration;
       const end = Math.min(totalDuration, (index + 1) * segmentDuration);
+      goog.asserts.assert(this.manifest_,
+          'A top-level generated Manifest is required to use this method!');
       return new this.manifest_.shaka_.media.SegmentReference(
           /* startTime= */ start,
           /* endTime= */ end,
@@ -590,6 +601,9 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {string} uri
    */
   textStream(uri) {
+    goog.asserts.assert(this.manifest_,
+        'A top-level generated Manifest is required to use this method!');
+
     const duration = this.manifest_.presentationTimeline.getDuration();
 
     this.createSegmentIndex = () => {
@@ -608,6 +622,9 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {?number} endByte
    */
   setInitSegmentReference(uris, startByte, endByte) {
+    goog.asserts.assert(this.manifest_,
+        'A top-level generated Manifest is required to use this method!');
+
     const getUris = () => uris;
     this.initSegmentReference_ =
         new this.manifest_.shaka_.media.InitSegmentReference(
