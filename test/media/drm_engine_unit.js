@@ -1771,7 +1771,7 @@ describe('DrmEngine', () => {
 
       // Key IDs in manifest
       tweakDrmInfos((drmInfos) => {
-        drmInfos[0].keyIds[0] = 'deadbeefdeadbeefdeadbeefdeadbeef';
+        drmInfos[0].keyIds = new Set(['deadbeefdeadbeefdeadbeefdeadbeef']);
       });
 
       config.advanced['drm.abc'] = {
@@ -1797,7 +1797,7 @@ describe('DrmEngine', () => {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
         initData: [],
-        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef'],
+        keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       });
     });
   });  // describe('getDrmInfo')
@@ -1813,7 +1813,7 @@ describe('DrmEngine', () => {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
         initData: [],
-        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef'],
+        keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       };
       const returnedOne =
           shaka.media.DrmEngine.getCommonDrmInfos([drmInfo], []);
@@ -1833,7 +1833,7 @@ describe('DrmEngine', () => {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: serverCert,
         initData: ['blah'],
-        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef'],
+        keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       };
       const drmInfoAudio = {
         keySystem: 'drm.abc',
@@ -1843,7 +1843,7 @@ describe('DrmEngine', () => {
         audioRobustness: 'good',
         serverCertificate: undefined,
         initData: ['init data'],
-        keyIds: ['eadbeefdeadbeefdeadbeefdeadbeefd'],
+        keyIds: new Set(['eadbeefdeadbeefdeadbeefdeadbeefd']),
       };
       const drmInfoDesired = {
         keySystem: 'drm.abc',
@@ -1854,8 +1854,10 @@ describe('DrmEngine', () => {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: serverCert,
         initData: ['blah', 'init data'],
-        keyIds: ['deadbeefdeadbeefdeadbeefdeadbeef',
-          'eadbeefdeadbeefdeadbeefdeadbeefd'],
+        keyIds: new Set([
+          'deadbeefdeadbeefdeadbeefdeadbeef',
+          'eadbeefdeadbeefdeadbeefdeadbeefd',
+        ]),
       };
       const returned = shaka.media.DrmEngine.getCommonDrmInfos([drmInfoVideo],
           [drmInfoAudio]);

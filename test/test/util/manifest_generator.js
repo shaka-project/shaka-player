@@ -376,8 +376,8 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     this.serverCertificate = null;
     /** @type {Array.<shaka.extern.InitDataOverride>} */
     this.initData = null;
-    /** @type {Array.<string>} */
-    this.keyIds = [];
+    /** @type {Set.<string>} */
+    this.keyIds = new Set();
 
     /** @type {shaka.extern.DrmInfo} */
     const foo = this;
@@ -491,8 +491,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.encrypted = false;
       /** @type {!Array.<shaka.extern.DrmInfo>} */
       this.drmInfos = [];
-      /** @type {!Array.<string>} */
-      this.keyIds = [];
+      /** @type {!Set.<string>} */
+      this.keyIds = new Set();
       /** @type {string} */
       this.language = lang || 'und';
       /** @type {?string} */

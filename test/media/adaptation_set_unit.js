@@ -168,7 +168,7 @@ describe('AdaptationSet', () => {
       drmInfos: [],
       segmentIndex: null,
       id: id,
-      keyIds: [],
+      keyIds: new Set(),
       label: null,
       language: '',
       mimeType: mimeType,

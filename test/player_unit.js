@@ -2264,7 +2264,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(1, (variant) => {
@@ -2296,7 +2296,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(1, (variant) => {
@@ -2325,7 +2325,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(1, (variant) => {
@@ -2350,7 +2350,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(1, (variant) => {
@@ -2372,7 +2372,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(1, (variant) => {
@@ -2394,7 +2394,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(2, (variant) => {
@@ -2417,17 +2417,17 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(2, (variant) => {
           variant.addVideo(3, (stream) => {
-            stream.keyIds = ['def'];
+            stream.keyIds = new Set(['def']);
           });
         });
         manifest.addVariant(4, (variant) => {
           variant.addVideo(5, (stream) => {
-            stream.keyIds = ['abc', 'def'];
+            stream.keyIds = new Set(['abc', 'def']);
           });
         });
       });
@@ -2444,7 +2444,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(2, (variant) => {
@@ -2467,7 +2467,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(2, (variant) => {
@@ -2489,12 +2489,12 @@ describe('Player', () => {
           manifest = shaka.test.ManifestGenerator.generate((manifest) => {
             manifest.addVariant(0, (variant) => {
               variant.addVideo(1, (stream) => {
-                stream.keyIds = ['abc'];
+                stream.keyIds = new Set(['abc']);
               });
             });
             manifest.addVariant(2, (variant) => {
               variant.addVideo(3, (stream) => {
-                stream.keyIds = ['xyz'];
+                stream.keyIds = new Set(['xyz']);
               });
             });
             manifest.addVariant(4, (variant) => {
@@ -2789,7 +2789,7 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
-            stream.keyIds = ['abc'];
+            stream.keyIds = new Set(['abc']);
           });
         });
         manifest.addVariant(2, (variant) => {

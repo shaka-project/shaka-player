@@ -107,7 +107,7 @@ shaka.extern.ManifestDB;
  *   width: ?number,
  *   height: ?number,
  *   encrypted: boolean,
- *   keyIds: !Array.<string>,
+ *   keyIds: !Set.<string>,
  *   segments: !Array.<shaka.extern.SegmentDB>,
  *   variantIds: !Array.<number>,
  *   roles: !Array.<string>,
@@ -145,7 +145,7 @@ shaka.extern.ManifestDB;
  *   The height of the stream; null for audio/text.
  * @property {boolean} encrypted
  *   Whether this stream is encrypted.
- * @property {!Array.<string>} keyIds
+ * @property {!Set.<string>} keyIds
  *   The key IDs this stream is encrypted with.
  * @property {!Array.<shaka.extern.SegmentDB>} segments
  *   An array of segments that make up the stream.

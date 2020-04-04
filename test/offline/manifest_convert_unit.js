@@ -97,10 +97,10 @@ describe('ManifestConverter', () => {
             initDataType: 'cenc',
             keyId: 'abc',
           }],
-          keyIds: [
+          keyIds: new Set([
             'abc',
             'def',
-          ],
+          ]),
         },
         appMetadata: null,
       };
@@ -271,7 +271,7 @@ describe('ManifestConverter', () => {
       width: null,
       height: null,
       encrypted: false,
-      keyIds: [],
+      keyIds: new Set(),
       segments: [],
       variantIds,
       roles: [],
@@ -326,7 +326,7 @@ describe('ManifestConverter', () => {
       width: 250,
       height: 100,
       encrypted: true,
-      keyIds: ['key1'],
+      keyIds: new Set(['key1']),
       segments: [
         createSegmentDB(
             /* startTime= */ 0,
@@ -371,7 +371,7 @@ describe('ManifestConverter', () => {
       width: null,
       height: null,
       encrypted: false,
-      keyIds: [],
+      keyIds: new Set(),
       segments: [
         createSegmentDB(
             /* startTime= */ 0,
@@ -415,7 +415,7 @@ describe('ManifestConverter', () => {
       width: null,
       height: null,
       encrypted: false,
-      keyIds: [],
+      keyIds: new Set(),
       segments: [
         createSegmentDB(
             /* startTime= */ 0,

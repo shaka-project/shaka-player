@@ -107,7 +107,7 @@ shaka.extern.InitDataOverride;
  *   videoRobustness: string,
  *   serverCertificate: Uint8Array,
  *   initData: Array.<!shaka.extern.InitDataOverride>,
- *   keyIds: Array.<string>
+ *   keyIds: Set.<string>
  * }}
  *
  * @description
@@ -145,8 +145,8 @@ shaka.extern.InitDataOverride;
  *   <i>Defaults to [], e.g., no override.</i> <br>
  *   A list of initialization data which override any initialization data found
  *   in the content.  See also shaka.extern.InitDataOverride.
- * @property {Array.<string>} keyIds
- *   <i>Defaults to []</i> <br>
+ * @property {Set.<string>} keyIds
+ *   <i>Defaults to the empty Set</i> <br>
  *   If not empty, contains the default key IDs for this key system, as
  *   lowercase hex strings.
  * @exportDoc
@@ -230,7 +230,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   kind: (string|undefined),
  *   encrypted: boolean,
  *   drmInfos: !Array.<shaka.extern.DrmInfo>,
- *   keyIds: !Array.<string>,
+ *   keyIds: !Set.<string>,
  *   language: string,
  *   label: ?string,
  *   type: string,
@@ -294,7 +294,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   <i>Defaults to [] (i.e., no DRM).</i> <br>
  *   An array of DrmInfo objects which describe DRM schemes are compatible with
  *   the content.
- * @property {!Array.<string>} keyIds
+ * @property {!Set.<string>} keyIds
  *   <i>Defaults to empty (i.e., unencrypted or key ID unknown).</i> <br>
  *   The stream's key IDs as lowercase hex strings. These key IDs identify the
  *   encryption keys that the browser (key system) can use to decrypt the

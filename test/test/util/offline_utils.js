@@ -47,7 +47,7 @@ shaka.test.OfflineUtils = class {
       height: null,
       initSegmentKey: null,
       encrypted: false,
-      keyIds: [],
+      keyIds: new Set(),
       segments: [],
       variantIds: [],
       roles: [],
