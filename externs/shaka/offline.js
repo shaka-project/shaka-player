@@ -96,7 +96,7 @@ shaka.extern.ManifestDB;
  *   id: number,
  *   originalId: ?string,
  *   primary: boolean,
- *   contentType: string,
+ *   type: string,
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
@@ -123,7 +123,7 @@ shaka.extern.ManifestDB;
  *   DASH, this is the "id" attribute of the Representation element.
  * @property {boolean} primary
  *   Whether the stream set was primary.
- * @property {string} contentType
+ * @property {string} type
  *   The type of the stream, 'audio', 'text', or 'video'.
  * @property {string} mimeType
  *   The MIME type of the stream.

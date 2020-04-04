@@ -254,16 +254,16 @@ describe('ManifestConverter', () => {
   /**
    * @param {number} id
    * @param {string} type
-   * @param {!Array.<number>} variants
+   * @param {!Array.<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
-  function createStreamDB(id, type, variants) {
+  function createStreamDB(id, type, variantIds) {
     /** @type {shaka.extern.StreamDB} */
     const streamDB = {
-      id: id,
+      id,
       originalId: id.toString(),
       primary: false,
-      contentType: type,
+      type,
       mimeType: '',
       codecs: '',
       language: '',
@@ -273,7 +273,7 @@ describe('ManifestConverter', () => {
       encrypted: false,
       keyIds: [],
       segments: [],
-      variantIds: variants,
+      variantIds,
       roles: [],
       channelsCount: null,
       audioSamplingRate: null,
@@ -312,10 +312,10 @@ describe('ManifestConverter', () => {
   function createVideoStreamDB(id, variantIds) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
-      id: id,
+      id,
       originalId: id.toString(),
       primary: false,
-      contentType: ContentType.VIDEO,
+      type: ContentType.VIDEO,
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
       frameRate: 22,
@@ -341,7 +341,7 @@ describe('ManifestConverter', () => {
             /* endTime= */ 25,
             /* dataKey= */ 3),
       ],
-      variantIds: variantIds,
+      variantIds,
       roles: [],
       channelsCount: null,
       audioSamplingRate: null,
@@ -357,10 +357,10 @@ describe('ManifestConverter', () => {
   function createAudioStreamDB(id, variantIds) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
-      id: id,
+      id,
       originalId: id.toString(),
       primary: false,
-      contentType: ContentType.AUDIO,
+      type: ContentType.AUDIO,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
       frameRate: undefined,
@@ -386,7 +386,7 @@ describe('ManifestConverter', () => {
             /* endTime= */ 25,
             /* dataKey= */ 3),
       ],
-      variantIds: variantIds,
+      variantIds,
       roles: [],
       channelsCount: null,
       audioSamplingRate: null,
@@ -401,10 +401,10 @@ describe('ManifestConverter', () => {
   function createTextStreamDB(id) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
-      id: id,
+      id,
       originalId: id.toString(),
       primary: false,
-      contentType: ContentType.TEXT,
+      type: ContentType.TEXT,
       mimeType: 'text/vtt',
       codecs: '',
       frameRate: undefined,
@@ -430,7 +430,7 @@ describe('ManifestConverter', () => {
             /* endTime= */ 25,
             /* dataKey= */ 3),
       ],
-      variantIds: [5],
+      variantIds: [],
       roles: [],
       channelsCount: null,
       audioSamplingRate: null,
@@ -468,7 +468,7 @@ describe('ManifestConverter', () => {
       keyIds: streamDb.keyIds,
       language: streamDb.language,
       label: streamDb.label,
-      type: streamDb.contentType,
+      type: streamDb.type,
       primary: streamDb.primary,
       trickModeVideo: null,
       emsgSchemeIdUris: null,

@@ -757,7 +757,7 @@ filterDescribe('Storage', storageSupport, () => {
         expect(manifest.streams.length).toBe(2);
 
         const audio = manifest.streams.filter(
-            (s) => s.contentType == 'audio')[0];
+            (s) => s.type == 'audio')[0];
         expect(audio.language).toBe(frenchCanadian);
       } finally {
         await muxer.destroy();

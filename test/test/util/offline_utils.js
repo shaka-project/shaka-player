@@ -31,11 +31,11 @@ shaka.test.OfflineUtils = class {
    */
   static createStream(id, type) {
     return {
-      id: id,
+      id,
       originalId: id.toString(),
       primary: false,
       presentationTimeOffset: 0,
-      contentType: type,
+      type,
       mimeType: '',
       codecs: '',
       frameRate: undefined,
