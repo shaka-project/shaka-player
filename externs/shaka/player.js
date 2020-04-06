@@ -520,7 +520,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
- *       ((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined),
+ *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
+ *         undefined),
  *   logLicenseExchange: boolean
  * }}
  *
@@ -543,7 +544,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   A dictionary which maps key system IDs to advanced DRM configuration for
  *   those key systems.
  * @property
- *     {((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined)}
+ *     {((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
+ *        undefined)}
  *   initDataTransform
  *   <i>Optional.</i><br>
  *   If given, this function is called with the init data from the

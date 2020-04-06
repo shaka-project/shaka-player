@@ -25,8 +25,13 @@ is used by the browser to generate the license request.  If you don't use the
 default content ID derivation, you need to specify a custom init data transform:
 
 ```js
-player.configure('drm.initDataTransform', (initData) => {
-  const contentId = getMyContentId(initData);
+player.configure('drm.initDataTransform', (initData, initDataType) => {
+  if (initDataType != 'skd')
+    return initData;
+
+  // 'initData' is a buffer containing an 'skd://' URL as a UTF-8 string.
+  const skdUri = shaka.util.StringUtils.fromBytesAutoDetect(initData);
+  const contentId = getMyContentId(sdkUri);
   const cert = player.drmInfo().serverCertificate;
   return shaka.util.FairPlayUtils.initDataTransform(initData, contentId, cert);
 });
