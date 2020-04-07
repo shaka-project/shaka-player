@@ -72,6 +72,11 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.eventManager.listen(this.player, 'texttrackvisibility', () => {
       this.onCaptionStateChange_();
+      if (this.player.isTextTrackVisible()) {
+        // If the track is becoming visible, it's possible that the text track
+        // has changed "invisibly", so handle that just in case.
+        this.onTracksChanged_();
+      }
     });
 
     this.eventManager.listen(this.player, 'textchanged', () => {
