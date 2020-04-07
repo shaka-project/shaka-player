@@ -17,8 +17,8 @@ const config = {
 ui.configure(config);
 ```
 
-Controls will fire a {@link shaka.Controls.UIUpdatedEvent} event once the config
-takes effect.
+Controls will fire a {@link shaka.ui.Controls.UIUpdatedEvent} event once the
+config takes effect.
 See the docs for {@link shaka.extern.UIConfiguration} for more information.
 
 #### Customizing the number and order of controls
