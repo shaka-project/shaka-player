@@ -172,9 +172,19 @@ describe('Player Src Equals', () => {
     video.play();
     await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
 
+    let videoRateChange = false;
+    eventManager.listen(video, 'ratechange', () => {
+      videoRateChange = true;
+    });
+
     // Enabling trick play should change our playback rate to the same rate.
     player.trickPlay(2);
     expect(video.playbackRate).toBe(2);
+
+    // It should also have fired a 'ratechange' event on the video.
+    // We may have to delay a short time to see the event, though.
+    await shaka.test.Util.delay(0.1);
+    expect(videoRateChange).toBe(true);
 
     // Let playback continue playing for a bit longer.
     await shaka.test.Util.delay(2);
