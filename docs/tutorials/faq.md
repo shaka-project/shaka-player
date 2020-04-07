@@ -199,6 +199,18 @@ disable your ad blocker to see the nightly uncompiled mode.
 Please note that if you want to test our ad logic, you might have to disable
 the ad blocker in compiled mode as well.
 
+<hr>
+
+**Q:** Why does some DASH content take a long time to start playback?
+
+**A:** Shaka Player honors the `minBufferTime` field in DASH.  If this field is
+set to a large value, Shaka Player will buffer that much content before
+beginning playback.  To override this behavior and ignore the `minBufferTime`
+field, we offer the following configuration:
+
+```js
+player.configure('manifest.dash.ignoreMinBufferTime', true);
+```
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
