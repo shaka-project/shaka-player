@@ -79,8 +79,6 @@ common_closure_defines = [
 ]
 
 debug_closure_opts = [
-    # Don't use a wrapper script in debug mode so all the internals are visible
-    # on the global object.
     '-O', 'SIMPLE',
 ]
 debug_closure_defines = [
@@ -284,8 +282,6 @@ class Build(object):
     closure_opts = common_closure_opts + common_closure_defines
     if is_debug:
       closure_opts += debug_closure_opts + debug_closure_defines
-      # The output wrapper is only used in the release build.
-      closure.add_wrapper = False
     else:
       closure_opts += release_closure_opts + release_closure_defines
 
