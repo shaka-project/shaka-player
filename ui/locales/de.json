@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "Dauer der Werbeanzeige",
-  "AD_PROGRESS": "Werbung [AD_ON:1] von [NUM_ADS:6]",
-  "AD_TIME": "Werbeanzeige: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "Werbung [AD_ON] von [NUM_ADS]",
+  "AD_TIME": "Werbeanzeige: [AD_TIME]",
   "AUTO_QUALITY": "Automatisch",
   "BACK": "Zurück",
   "CAPTIONS": "Untertitel",

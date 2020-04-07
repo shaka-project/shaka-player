@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "विज्ञापन का कुल समय",
-  "AD_PROGRESS": "[NUM_ADS:6] में से विज्ञापन [AD_ON:1]",
-  "AD_TIME": "विज्ञापन: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "[NUM_ADS] में से विज्ञापन [AD_ON]",
+  "AD_TIME": "विज्ञापन: [AD_TIME]",
   "AUTO_QUALITY": "अपने-आप",
   "BACK": "वापस जाएं",
   "CAPTIONS": "कैप्शन",

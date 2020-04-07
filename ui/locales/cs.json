@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "Délka reklamy",
-  "AD_PROGRESS": "Reklama [AD_ON:1] z [NUM_ADS:6]",
-  "AD_TIME": "Reklama: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "Reklama [AD_ON] z [NUM_ADS]",
+  "AD_TIME": "Reklama: [AD_TIME]",
   "AUTO_QUALITY": "Automaticky",
   "BACK": "Zpět",
   "CAPTIONS": "Titulky",

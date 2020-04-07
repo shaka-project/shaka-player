@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "مدت‌زمان آگهی",
-  "AD_PROGRESS": "آگهی [AD_ON:1] از [NUM_ADS:6]",
-  "AD_TIME": "آگهی: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "آگهی [AD_ON] از [NUM_ADS]",
+  "AD_TIME": "آگهی: [AD_TIME]",
   "AUTO_QUALITY": "خودکار",
   "BACK": "بازگشت",
   "CAPTIONS": "زیرنویس‌ها",

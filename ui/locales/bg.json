@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "Времетраене на рекламата",
-  "AD_PROGRESS": "Реклама [AD_ON:1] от [NUM_ADS:6]",
-  "AD_TIME": "Реклама: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "Реклама [AD_ON] от [NUM_ADS]",
+  "AD_TIME": "Реклама: [AD_TIME]",
   "AUTO_QUALITY": "Автоматично",
   "BACK": "Назад",
   "CAPTIONS": "Надписи",

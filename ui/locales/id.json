@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "Durasi iklan",
-  "AD_PROGRESS": "Iklan [AD_ON:1] dari [NUM_ADS:6]",
-  "AD_TIME": "Iklan: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "Iklan [AD_ON] dari [NUM_ADS]",
+  "AD_TIME": "Iklan: [AD_TIME]",
   "AUTO_QUALITY": "Otomatis",
   "BACK": "Kembali",
   "CAPTIONS": "Teks",

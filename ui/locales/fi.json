@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "Mainoksen kesto",
-  "AD_PROGRESS": "Mainos [AD_ON:1]/[NUM_ADS:6]",
-  "AD_TIME": "Mainos: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "Mainos [AD_ON]/[NUM_ADS]",
+  "AD_TIME": "Mainos: [AD_TIME]",
   "AUTO_QUALITY": "Automaattinen",
   "BACK": "Takaisin",
   "CAPTIONS": "Tekstitykset",

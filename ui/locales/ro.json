@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "Durata anunțului",
-  "AD_PROGRESS": "Anunțul [AD_ON:1] din [NUM_ADS:6]",
-  "AD_TIME": "Anunț: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "Anunțul [AD_ON] din [NUM_ADS]",
+  "AD_TIME": "Anunț: [AD_TIME]",
   "AUTO_QUALITY": "Automat",
   "BACK": "Înapoi",
   "CAPTIONS": "Subtitrări",

@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "משך המודעה",
-  "AD_PROGRESS": "מודעה [AD_ON:1] מתוך [NUM_ADS:6]",
-  "AD_TIME": "מודעה: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "מודעה [AD_ON] מתוך [NUM_ADS]",
+  "AD_TIME": "מודעה: [AD_TIME]",
   "AUTO_QUALITY": "אוטומטי",
   "BACK": "חזרה",
   "CAPTIONS": "כתוביות",
