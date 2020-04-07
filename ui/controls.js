@@ -763,7 +763,7 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
   this.bottomControls_.appendChild(this.controlsButtonPanel_);
 
   // Overflow menus are supposed to hide once you click elsewhere
-  // on the video element. The code in onContainerClick_ ensures that.
+  // on the page. The click event listener on window ensures that.
   // However, clicks on controls panel don't propagate to the container,
   // so we have to explicitly hide the menus onclick here.
   this.eventManager_.listen(this.controlsButtonPanel_, 'click', () => {
@@ -823,6 +823,9 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // Listen for key down events to detect tab and enable outline
   // for focused elements.
   this.eventManager_.listen(window, 'keydown', this.onKeyDown_.bind(this));
+
+  // Listen for click events to dismiss the settings menus.
+  this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
 
   this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
     if (this.config_.doubleClickForFullscreen) {
