@@ -315,4 +315,52 @@ describe('Ad UI', () => {
       expect(adMarkersBar.style.background).toBe('');
     });
   });
+
+  describe('overflow menu', () => {
+    /** @type {!HTMLElement} */
+    let overflowMenuButton;
+
+    beforeEach(() => {
+      overflowMenuButton = UiUtils.getElementByClassName(
+          container, 'shaka-overflow-menu-button');
+    });
+
+    it('is hidden when an ad is playing', async () => {
+      const eventManager = new shaka.util.EventManager();
+      const waiter = new shaka.test.Waiter(eventManager);
+      const p = waiter.waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+
+      ad = new shaka.test.FakeAd(/* skipIn= */ null,
+          /* position= */ 1, /* totalAdsInPod= */ 1);
+      adManager.startAd(ad);
+
+      await p;
+
+      UiUtils.confirmElementHidden(overflowMenuButton);
+    });
+
+    it('is displayed when an ad stops playing', async () => {
+      const eventManager = new shaka.util.EventManager();
+      const waiter = new shaka.test.Waiter(eventManager);
+      const pStart =
+          waiter.waitForEvent(adManager, shaka.ads.AdManager.AD_STARTED);
+
+      const pStop =
+          waiter.waitForEvent(adManager, shaka.ads.AdManager.AD_STOPPED);
+
+      ad = new shaka.test.FakeAd(/* skipIn= */ null,
+          /* position= */ 1, /* totalAdsInPod= */ 1);
+      adManager.startAd(ad);
+
+      await pStart;
+
+      UiUtils.confirmElementHidden(overflowMenuButton);
+
+      adManager.finishAd();
+
+      await pStop;
+
+      UiUtils.confirmElementDisplayed(overflowMenuButton);
+    });
+  });
 });
