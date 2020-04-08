@@ -57,8 +57,6 @@ const ShakaDemoAssetInfo = class {
     this.requestFilter = null;
     /** @type {?shaka.extern.ResponseFilter} */
     this.responseFilter = null;
-    /** @type {?shaka.extern.DashContentProtectionCallback} */
-    this.drmCallback = null; // TODO: Setter method?
     /** @type {!Map.<string, string>} */
     this.clearKeys = new Map(); // TODO: Setter method?
     /** @type {?Object} */
@@ -313,9 +311,6 @@ const ShakaDemoAssetInfo = class {
       this.licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
       });
-    }
-    if (this.drmCallback) {
-      config.manifest.dash.customScheme = this.drmCallback;
     }
     if (this.clearKeys.size) {
       config.drm.clearKeys = {};

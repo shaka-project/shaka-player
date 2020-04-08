@@ -18,21 +18,16 @@ describe('DashParser ContentProtection', () => {
    * @param {string} manifestText
    * @param {Object} expected A Manifest-like object.  The parser output is
    *   expected to match this.
-   * @param {shaka.extern.DashContentProtectionCallback=} callback
    * @param {boolean=} ignoreDrmInfo
    * @return {!Promise}
    */
-  async function testDashParser(manifestText, expected, callback,
-      ignoreDrmInfo = false) {
+  async function testDashParser(manifestText, expected, ignoreDrmInfo = false) {
     const netEngine = new shaka.test.FakeNetworkingEngine();
     netEngine.setDefaultText(manifestText);
     const dashParser = new shaka.dash.DashParser();
 
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreDrmInfo = ignoreDrmInfo || false;
-    if (callback) {
-      config.dash.customScheme = callback;
-    }
     dashParser.configure(config);
 
     const playerEvents = {
@@ -366,8 +361,7 @@ describe('DashParser ContentProtection', () => {
           buildDrmInfo('com.microsoft.playready'),
           buildDrmInfo('com.adobe.primetime'),
         ])));
-    await testDashParser(source, expected, /* callback= */ undefined,
-        /* ignoreDrmInfo= */ true);
+    await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });
 
   it('parses key IDs when ignoreDrmInfo flag is set', async () => {
@@ -394,8 +388,7 @@ describe('DashParser ContentProtection', () => {
           buildDrmInfo('com.microsoft.playready', keyIds),
           buildDrmInfo('com.adobe.primetime', keyIds),
         ]);
-    await testDashParser(source, expected, /* callback= */ undefined,
-        /* ignoreDrmInfo= */ true);
+    await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });
 
   it('inherits PSSH from generic CENC into all key systems', async () => {
@@ -462,61 +455,6 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.widevine.alpha'),
     ]);
     await testDashParser(source, expected);
-  });
-
-  it('invokes a callback for unknown schemes', async () => {
-    const source = buildManifestText([
-      // AdaptationSet lines
-      '<ContentProtection',
-      '  schemeIdUri="urn:uuid:feedbaad-f00d-2bee-baad-d00d00000000" />',
-      '<ContentProtection',
-      '  schemeIdUri="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed" />',
-      '<ContentProtection',
-      '  schemeIdUri="http://example.com/drm" />',
-    ], [], []);
-
-    /**
-     * @param {!Element} contentProtection
-     * @return {Array.<shaka.extern.DrmInfo>}
-     */
-    const callback = (contentProtection) => {
-      const schemeIdUri = contentProtection.getAttribute('schemeIdUri');
-      if (schemeIdUri == 'urn:uuid:feedbaad-f00d-2bee-baad-d00d00000000') {
-        return [{
-          keySystem: 'com.custom.baadd00d',
-          licenseServerUri: '',
-          distinctiveIdentifierRequired: false,
-          persistentStateRequired: false,
-          videoRobustness: '',
-          audioRobustness: '',
-          serverCertificate: null,
-          initData: [],
-          keyIds: [],
-        }];
-      } else if (schemeIdUri == 'http://example.com/drm') {
-        return [{
-          keySystem: 'com.example.drm',
-          licenseServerUri: '',
-          distinctiveIdentifierRequired: false,
-          persistentStateRequired: false,
-          videoRobustness: '',
-          audioRobustness: '',
-          serverCertificate: null,
-          initData: [],
-          keyIds: [],
-        }];
-      } else {
-        return null;
-      }
-    };
-
-    const expected = buildExpectedManifest([
-      buildDrmInfo('com.custom.baadd00d'),
-      buildDrmInfo('com.widevine.alpha'),
-      buildDrmInfo('com.example.drm'),
-    ]);
-
-    await testDashParser(source, expected, callback);
   });
 
   it('inserts a placeholder for unrecognized schemes', async () => {

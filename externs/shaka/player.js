@@ -461,14 +461,6 @@ shaka.extern.EmsgInfo;
 
 
 /**
- * @typedef {function(!Element):Array.<shaka.extern.DrmInfo>}
- * @see shaka.extern.DashManifestConfiguration
- * @exportDoc
- */
-shaka.extern.DashContentProtectionCallback;
-
-
-/**
  * @typedef {{
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
@@ -565,7 +557,6 @@ shaka.extern.DrmConfiguration;
 
 /**
  * @typedef {{
- *   customScheme: shaka.extern.DashContentProtectionCallback,
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
  *   xlinkFailGracefully: boolean,
@@ -576,10 +567,6 @@ shaka.extern.DrmConfiguration;
  *   ignoreEmptyAdaptationSet: boolean
  * }}
  *
- * @property {shaka.extern.DashContentProtectionCallback} customScheme
- *   If given, invoked by a DASH manifest parser to interpret custom or
- *   non-standard DRM schemes found in the manifest.  The argument is a
- *   ContentProtection node.  Return null if not recognized.
  * @property {string} clockSyncUri
  *   A default clock sync URI to be used with live streams which do not
  *   contain any clock sync information.  The <code>Date</code> header from this

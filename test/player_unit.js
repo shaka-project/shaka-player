@@ -538,49 +538,49 @@ describe('Player', () => {
     });
 
     it('checks the number of arguments to functions', () => {
-      const goodCustomScheme = (node) => {};
-      const badCustomScheme1 = () => {};  // too few args
-      const badCustomScheme2 = (x, y) => {};  // too many args
+      const goodFailureCallback = (error) => {};
+      const badFailureCallback1 = () => {};  // too few args
+      const badFailureCallback2 = (x, y) => {};  // too many args
 
       // Takes good callback.
       player.configure({
-        manifest: {dash: {customScheme: goodCustomScheme}},
+        streaming: {failureCallback: goodFailureCallback},
       });
 
       let newConfig = player.getConfiguration();
-      expect(newConfig.manifest.dash.customScheme).toBe(goodCustomScheme);
+      expect(newConfig.streaming.failureCallback).toBe(goodFailureCallback);
       expect(logWarnSpy).not.toHaveBeenCalled();
 
       // Warns about bad callback #1, still takes it.
       logWarnSpy.calls.reset();
       player.configure({
-        manifest: {dash: {customScheme: badCustomScheme1}},
+        streaming: {failureCallback: badFailureCallback1},
       });
 
       newConfig = player.getConfiguration();
-      expect(newConfig.manifest.dash.customScheme).toBe(badCustomScheme1);
+      expect(newConfig.streaming.failureCallback).toBe(badFailureCallback1);
       expect(logWarnSpy).toHaveBeenCalledWith(
-          stringContaining('.manifest.dash.customScheme'));
+          stringContaining('.streaming.failureCallback'));
 
       // Warns about bad callback #2, still takes it.
       logWarnSpy.calls.reset();
       player.configure({
-        manifest: {dash: {customScheme: badCustomScheme2}},
+        streaming: {failureCallback: badFailureCallback2},
       });
 
       newConfig = player.getConfiguration();
-      expect(newConfig.manifest.dash.customScheme).toBe(badCustomScheme2);
+      expect(newConfig.streaming.failureCallback).toBe(badFailureCallback2);
       expect(logWarnSpy).toHaveBeenCalledWith(
-          stringContaining('.manifest.dash.customScheme'));
+          stringContaining('.streaming.failureCallback'));
 
       // Resets to default if undefined.
       logWarnSpy.calls.reset();
       player.configure({
-        manifest: {dash: {customScheme: undefined}},
+        streaming: {failureCallback: undefined},
       });
 
       newConfig = player.getConfiguration();
-      expect(newConfig.manifest.dash.customScheme).not.toBe(badCustomScheme2);
+      expect(newConfig.streaming.failureCallback).not.toBe(badFailureCallback2);
       expect(logWarnSpy).not.toHaveBeenCalled();
     });
 
