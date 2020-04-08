@@ -261,7 +261,7 @@ shaka.test.FakeVideo = function(currentTime) {
     loop: false,
     autoplay: false,
     paused: false,
-    buffered: null,
+    buffered: createFakeBuffered([]),
     src: '',
     textTracks: [],
     offsetWidth: 1000,
