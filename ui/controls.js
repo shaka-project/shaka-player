@@ -1170,6 +1170,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // When the key is released, remove it from the pressed keys set.
     this.pressedKeys_.delete(event.keyCode);
 
+    if (!this.config_.enableKeyboardPlaybackControls) {
+      return;
+    }
 
     switch (key) {
       case 'ArrowLeft':

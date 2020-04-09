@@ -196,6 +196,7 @@ shaka.ui.Overlay = class {
       trackLabelFormat: shaka.ui.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
       doubleClickForFullscreen: true,
+      enableKeyboardPlaybackControls: true,
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause
