@@ -87,7 +87,11 @@ describe('Player Src Equals', () => {
   it('allow load with startTime', async () => {
     const startTime = 5;
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, startTime);
-    expect(video.currentTime).toBe(startTime);
+
+    // For some reason, the delta on IE & Edge can be 0.1 for this content and
+    // this start time.  It may be rounded to a key frame or something.
+    const delta = Math.abs(video.currentTime - startTime);
+    expect(delta).toBeLessThan(0.2);
   });
 
   // Since we don't have any manifest data, we must assume that we can seek
