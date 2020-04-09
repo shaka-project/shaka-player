@@ -1365,7 +1365,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onMouseDown_() {
     this.eventManager_.unlisten(window, 'mousedown');
-    this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
   }
 
   /**
