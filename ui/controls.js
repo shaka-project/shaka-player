@@ -1303,7 +1303,6 @@ shaka.ui.Controls.prototype.keepFocusInMenu_ = function(event) {
  */
 shaka.ui.Controls.prototype.onMouseDown_ = function() {
   this.eventManager_.unlisten(window, 'mousedown');
-  this.eventManager_.listen(window, 'keydown', this.onKeyDown_.bind(this));
 };
 
 
