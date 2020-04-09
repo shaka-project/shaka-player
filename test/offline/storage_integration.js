@@ -390,12 +390,16 @@ filterDescribe('Storage', storageSupport, () => {
     });
 
     it('throws error using store', async () => {
-      await expectAsync(storage.store('the-uri-wont-matter'))
+      // The URI still needs to map to a specific manifest parser, so we use an
+      // extension that maps to DASH.
+      await expectAsync(storage.store('the-uri-wont-matter.mpd'))
           .toBeRejectedWith(expectedError);
     });
 
     it('throws error using remove', async () => {
-      await expectAsync(storage.remove('the-uri-wont-matter'))
+      // The URI still needs to map to a specific manifest parser, so we use an
+      // extension that maps to DASH.
+      await expectAsync(storage.remove('the-uri-wont-matter.mpd'))
           .toBeRejectedWith(expectedError);
     });
   });
@@ -925,8 +929,10 @@ filterDescribe('Storage', storageSupport, () => {
         return manifest;
       };
 
-      // The uri won't matter as we have override |parseManifest|.
-      const waitOnStore = storage.store('uri-does-not-matter');
+      // The uri won't matter much, as we have overriden |parseManifest|.
+      // But there will still be a mapping from URI to parser to instantiate the
+      // parser, even though it won't be used.  So make the URI look like DASH.
+      const waitOnStore = storage.store('uri-does-not-matter-much.mpd');
 
       // Request for storage to be destroyed. Before waiting for it to resolve,
       // resolve the promise that we are using to stall the store operation.
