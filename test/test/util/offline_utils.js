@@ -19,7 +19,7 @@ shaka.test.OfflineUtils = class {
       duration: 90,
       expiration: Infinity,
       originalManifestUri: originalUri,
-      periods: [],
+      streams: [],
       sessionIds: [],
       size: 1024,
     };
@@ -32,11 +32,11 @@ shaka.test.OfflineUtils = class {
    */
   static createStream(id, type) {
     return {
-      id: id,
+      id,
       originalId: id.toString(),
       primary: false,
       presentationTimeOffset: 0,
-      contentType: type,
+      type,
       mimeType: '',
       codecs: '',
       frameRate: undefined,
@@ -48,9 +48,13 @@ shaka.test.OfflineUtils = class {
       height: null,
       initSegmentKey: null,
       encrypted: false,
-      keyId: null,
+      keyIds: new Set(),
       segments: [],
       variantIds: [],
+      roles: [],
+      channelsCount: null,
+      audioSamplingRate: null,
+      closedCaptions: null,
     };
   }
 

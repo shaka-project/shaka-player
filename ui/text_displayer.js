@@ -173,7 +173,7 @@ shaka.ui.TextDisplayer = class {
    *
    * @param {Element} container
    * @param {!shaka.extern.Cue} cue
-   * @return {Element} the created captions container
+   * @return {!Element} the created captions container
    * @private
    */
   displayNestedCue_(container, cue) {
@@ -229,8 +229,16 @@ shaka.ui.TextDisplayer = class {
     captionsStyle.whiteSpace = 'pre-line';
     captions.textContent = cue.payload;
     captionsStyle.backgroundColor = cue.backgroundColor;
+    captionsStyle.border = cue.border;
     captionsStyle.color = cue.color;
     captionsStyle.direction = cue.direction;
+    captionsStyle.opacity = cue.opacity;
+    captionsStyle.paddingLeft = shaka.ui.TextDisplayer.convertLengthValue_(
+        cue.linePadding, cue, this.videoContainer_
+    );
+    captionsStyle.paddingRight = shaka.ui.TextDisplayer.convertLengthValue_(
+        cue.linePadding, cue, this.videoContainer_
+    );
 
     if (cue.backgroundImage) {
       captionsStyle.backgroundImage = 'url(\'' + cue.backgroundImage + '\')';
@@ -268,8 +276,11 @@ shaka.ui.TextDisplayer = class {
 
     captionsStyle.fontFamily = cue.fontFamily;
     captionsStyle.fontWeight = cue.fontWeight.toString();
-    captionsStyle.fontSize = cue.fontSize;
     captionsStyle.fontStyle = cue.fontStyle;
+    captionsStyle.letterSpacing = cue.letterSpacing;
+    captionsStyle.fontSize = shaka.ui.TextDisplayer.convertLengthValue_(
+        cue.fontSize, cue, this.videoContainer_
+    );
 
     // The line attribute defines the positioning of the text container inside
     // the video container.
@@ -357,5 +368,76 @@ shaka.ui.TextDisplayer = class {
     } else {
       panelStyle.height = cue.size + '%';
     }
+  }
+
+  /**
+   * Returns info about provided lengthValue
+   * @example 100px => { value: 100, unit: 'px' }
+   * @param {?string} lengthValue
+   *
+   * @return {?{ value: number, unit: string }}
+   * @private
+   */
+  static getLengthValueInfo_(lengthValue) {
+    const matches = new RegExp(/(\d*\.?\d+)([a-z]+|%+)/).exec(lengthValue);
+
+    if (!matches) {
+      return null;
+    }
+
+    return {
+      value: Number(matches[1]),
+      unit: matches[2],
+    };
+  }
+
+  /**
+   * Converts length value to an absolute value in pixels.
+   * If lengthValue is already an absolute value it will not
+   * be modified. Relative lengthValue will be converted to an
+   * absolute value in pixels based on Computed Cell Size
+   *
+   * @param {string} lengthValue
+   * @param {!shaka.extern.Cue} cue
+   * @param {HTMLElement} videoContainer
+   * @return {string}
+   * @private
+  */
+  static convertLengthValue_(lengthValue, cue, videoContainer) {
+    const lengthValueInfo =
+        shaka.ui.TextDisplayer.getLengthValueInfo_(lengthValue);
+
+    if (!lengthValueInfo) {
+      return lengthValue;
+    }
+
+    const {unit, value} = lengthValueInfo;
+
+    switch (unit) {
+      case '%':
+        return shaka.ui.TextDisplayer.getAbsoluteLengthInPixels_(
+            value / 100, cue, videoContainer);
+      case 'c':
+        return shaka.ui.TextDisplayer.getAbsoluteLengthInPixels_(
+            value, cue, videoContainer);
+      default:
+        return lengthValue;
+    }
+  }
+
+  /**
+   * Returns computed absolute length value in pixels based on cell
+   * and a video container size
+   * @param {number} value
+   * @param {!shaka.extern.Cue} cue
+   * @param {HTMLElement} videoContainer
+   * @return {string}
+   *
+   * @private
+   * */
+  static getAbsoluteLengthInPixels_(value, cue, videoContainer) {
+    const containerHeight = videoContainer.clientHeight;
+
+    return (containerHeight * value / cue.cellResolution.rows) + 'px';
   }
 };

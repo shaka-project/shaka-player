@@ -67,7 +67,11 @@ shaka.test.FakeDemoMain = class {
 
     /** @type {!jasmine.Spy} */
     this.addNavButton = jasmine.createSpy('addNavButton').and.callFake(() => {
-      return /** @type {!HTMLDivElement} */ (document.createElement('div'));
+      const container =
+      /** @type {!HTMLDivElement} */ (document.createElement('div'));
+      const button =
+      /** @type {!HTMLButtonElement} */ (document.createElement('button'));
+      return {container: container, button: button};
     });
 
     /** @type {!jasmine.Spy} */

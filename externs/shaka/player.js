@@ -290,6 +290,12 @@ shaka.extern.Track;
 
 
 /**
+ * @typedef {!Array.<!shaka.extern.Track>}
+ */
+shaka.extern.TrackList;
+
+
+/**
  * @typedef {{
  *   minWidth: number,
  *   maxWidth: number,
@@ -455,14 +461,6 @@ shaka.extern.EmsgInfo;
 
 
 /**
- * @typedef {function(!Element):Array.<shaka.extern.DrmInfo>}
- * @see shaka.extern.DashManifestConfiguration
- * @exportDoc
- */
-shaka.extern.DashContentProtectionCallback;
-
-
-/**
  * @typedef {{
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
@@ -514,7 +512,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
- *       ((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined),
+ *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
+ *         undefined),
  *   logLicenseExchange: boolean
  * }}
  *
@@ -537,7 +536,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   A dictionary which maps key system IDs to advanced DRM configuration for
  *   those key systems.
  * @property
- *     {((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined)}
+ *     {((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
+ *        undefined)}
  *   initDataTransform
  *   <i>Optional.</i><br>
  *   If given, this function is called with the init data from the
@@ -557,11 +557,9 @@ shaka.extern.DrmConfiguration;
 
 /**
  * @typedef {{
- *   customScheme: shaka.extern.DashContentProtectionCallback,
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
  *   xlinkFailGracefully: boolean,
- *   defaultPresentationDelay: number,
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
  *   initialSegmentLimit: number,
@@ -569,10 +567,6 @@ shaka.extern.DrmConfiguration;
  *   ignoreEmptyAdaptationSet: boolean
  * }}
  *
- * @property {shaka.extern.DashContentProtectionCallback} customScheme
- *   If given, invoked by a DASH manifest parser to interpret custom or
- *   non-standard DRM schemes found in the manifest.  The argument is a
- *   ContentProtection node.  Return null if not recognized.
  * @property {string} clockSyncUri
  *   A default clock sync URI to be used with live streams which do not
  *   contain any clock sync information.  The <code>Date</code> header from this
@@ -586,10 +580,6 @@ shaka.extern.DrmConfiguration;
  *   existing contents. If false, xlink-related errors will be propagated
  *   to the application and will result in a playback failure. Defaults to
  *   false if not provided.
- * @property {number} defaultPresentationDelay
- *   A default <code>presentationDelay</code> if
- *   <code>suggestedPresentationDelay</code> is missing in the MPEG DASH
- *   manifest. This has to be bigger than <code>minBufferTime * 1.5</code>.
  * @property {boolean} ignoreMinBufferTime
  *   If true will cause DASH parser to ignore <code>minBufferTime</code> from
  *   manifest. It allows player config to take precedence over manifest for
@@ -639,6 +629,7 @@ shaka.extern.HlsManifestConfiguration;
  *   disableAudio: boolean,
  *   disableVideo: boolean,
  *   disableText: boolean,
+ *   defaultPresentationDelay: number,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
  * }}
@@ -659,6 +650,14 @@ shaka.extern.HlsManifestConfiguration;
  * @property {boolean} disableText
  *   If <code>true</code>, the text tracks are ignored.
  *   Defaults to <code>false</code>.
+ * @property {number} defaultPresentationDelay
+ *   A default <code>presentationDelay</code> value.
+ *   For DASH, it's a default <code>presentationDelay</code> value if
+ *   <code>suggestedPresentationDelay</code> is missing in the MPEG DASH
+ *   manifest. The default value is <code>1.5 * minBufferTime</code> if not
+ *   configured or set as 0.
+ *   For HLS, the default value is 3 segments duration if not configured or
+ *   set as 0.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
@@ -819,17 +818,16 @@ shaka.extern.AbrConfiguration;
 /**
  * @typedef {{
  *   trackSelectionCallback:
- *       function(!Array.<shaka.extern.Track>):!Array.<shaka.extern.Track>,
+ *       function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>,
  *   progressCallback: function(shaka.extern.StoredContent,number),
  *   usePersistentLicense: boolean
  * }}
  *
- * @property {function(!Array.<shaka.extern.Track>):!Array.<shaka.extern.Track>}
+ * @property {function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>}
  *     trackSelectionCallback
  *   Called inside <code>store()</code> to determine which tracks to save from a
  *   manifest. It is passed an array of Tracks from the manifest and it should
- *   return an array of the tracks to store.  This is called for each Period in
- *   the manifest (in order).
+ *   return an array of the tracks to store.
  * @property {function(shaka.extern.StoredContent,number)} progressCallback
  *   Called inside <code>store()</code> to give progress info back to the app.
  *   It is given the current manifest being stored and the progress of it being

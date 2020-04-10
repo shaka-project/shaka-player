@@ -127,13 +127,26 @@ shaka.test.Waiter = class {
   }
 
   /**
-   * Wait for a certain Promise to be resolved, or reject it on timeout.
+   * Wait for a certain Promise to be resolved, or throw on timeout.
+   *
+   * @param {!Promise} p
+   * @param {string} label A name to give the Promise in error messages.
+   * @return {!Promise}
+   */
+  waitForPromise(p, label) {
+    const cleanup = () => {};
+    const target = null;
+    return this.waitUntilGeneric_(label, p, cleanup, target);
+  }
+
+  /**
+   * Wait for a certain Promise to be resolved, or throw on timeout.
    * Handles all debug logging and timeouts generically.
    *
    * @param {string} goalName
    * @param {!Promise} p
    * @param {function()} cleanupOnTimeout
-   * @param {!EventTarget} target
+   * @param {EventTarget} target
    * @return {!Promise}
    * @private
    */
@@ -190,6 +203,7 @@ shaka.test.Waiter = class {
         shaka.media.TimeRangesUtils.getBufferedInfo(mediaElement.buffered);
     shaka.log.error(message,
         'current time', mediaElement.currentTime,
+        'duration', mediaElement.duration,
         'ready state', mediaElement.readyState,
         'playback rate', mediaElement.playbackRate,
         'paused', mediaElement.paused,

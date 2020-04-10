@@ -135,7 +135,8 @@ describe('Playhead', () => {
     timeline.setDuration.and.throwError(new Error());
 
     manifest = {
-      periods: [],
+      variants: [],
+      textStreams: [],
       presentationTimeline: timeline,
       minBufferTime: 10,
       offlineSessionIds: [],

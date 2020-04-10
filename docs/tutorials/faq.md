@@ -94,7 +94,7 @@ The only browsers capable of playing TS natively are Edge and Chromecast.  You
 will get a `CONTENT_UNSUPPORTED_BY_BROWSER` error on other browsers due to
 their lack of TS support.
 
-You can enable transmuxing by [including mux.js][] v5.1.3+ in your application.
+You can enable transmuxing by [including mux.js][] v5.5.3+ in your application.
 If Shaka Player detects that mux.js has been loaded, we will use it to transmux
 TS content into MP4 on-the-fly, so that the content can be played by the
 browser.
@@ -199,6 +199,18 @@ disable your ad blocker to see the nightly uncompiled mode.
 Please note that if you want to test our ad logic, you might have to disable
 the ad blocker in compiled mode as well.
 
+<hr>
+
+**Q:** Why does some DASH content take a long time to start playback?
+
+**A:** Shaka Player honors the `minBufferTime` field in DASH.  If this field is
+set to a large value, Shaka Player will buffer that much content before
+beginning playback.  To override this behavior and ignore the `minBufferTime`
+field, we offer the following configuration:
+
+```js
+player.configure('manifest.dash.ignoreMinBufferTime', true);
+```
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224

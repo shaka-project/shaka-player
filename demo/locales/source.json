@@ -15,6 +15,14 @@
     "description": "A tooltip for an optional search term.",
     "message": "Filters for assets that have advertisements."
   },
+  "DEMO_AD_TAG_URL": {
+    "message": "Ad Tag URL",
+    "description": "The label on a field that allows users to provide a Ad Tag URL for a custom asset."
+  },
+  "DEMO_ALL_CONTENT": {
+    "description": "A link in the header, that switches to a page for browsing or searching through the entire content library.",
+    "message": "ALL CONTENT"
+  },
   "DEMO_ALWAYS_STREAM_TEXT": {
     "description": "The name of a configuration value.",
     "message": "Always Stream Text"
@@ -245,7 +253,7 @@
   },
   "DEMO_FRONT_INTRO_TWO": {
     "description": "The second part of a message introducing the demo to new users.",
-    "message": "Choose a video to playback; more assets are available via the search tab."
+    "message": "Choose a video to playback; more assets are available via the \"all content\" tab."
   },
   "DEMO_FUZZ_FACTOR": {
     "description": "The name of a configuration value.",
@@ -348,8 +356,8 @@
     "message": "Live"
   },
   "DEMO_LIVE_SEARCH": {
-    "description": "A tooltip for an optional search term.",
-    "message": "Filters for assets that are live."
+    "description": "A header on a search field that filters by whether the asset is live or not.",
+    "message": "Live"
   },
   "DEMO_LOG_LEVEL": {
     "description": "The name of a configuration value.",
@@ -539,10 +547,6 @@
     "description": "The name of a configuration value.",
     "message": "Safe Skip Distance"
   },
-  "DEMO_SEARCH": {
-    "description": "A link in the header, that switches to a page configuration for searching through the content library.",
-    "message": "SEARCH"
-  },
   "DEMO_SHAKA": {
     "description": "Text that describes an asset that comes from the Shaka Player asset library.",
     "message": "[PROPER_NAME:Shaka]"
@@ -647,17 +651,9 @@
     "description": "A link in the footer, to the uncompiled build of the demo.",
     "message": "Uncompiled"
   },
-  "DEMO_UNDEFINED": {
-    "description": "Text describing a search term that the user has not set any desired value for.",
-    "message": "Undefined"
-  },
   "DEMO_UNIFIED_STREAMING": {
     "description": "Text that describes an asset that comes from the Unified Streaming asset library.",
     "message": "[PROPER_NAME:Unified Streaming]"
-  },
-  "DEMO_UNKNOWN": {
-    "description": "Text that describes an asset that comes from an unknown source.",
-    "message": "Unknown"
   },
   "DEMO_UNSUPPORTED": {
     "description": "A label that marks an asset as being unavailable, for some reason.",
@@ -710,6 +706,10 @@
   "DEMO_VIDEO_ROBUSTNESS": {
     "description": "The name of a configuration value.",
     "message": "Video Robustness"
+  },
+  "DEMO_VOD": {
+    "description": "Text that describes an asset that is a VOD (Video On Delivery).",
+    "message": "[JARGON:VOD]"
   },
   "DEMO_WEBM": {
     "description": "Text that describes an asset that uses the WebM container.",

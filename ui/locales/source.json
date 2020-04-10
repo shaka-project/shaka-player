@@ -5,7 +5,7 @@
   },
   "AD_PROGRESS": {
     "description": "The contents of the ad countdown element, describing what ad you are on in a sequence of ads.",
-    "message": "[AD_ON:1] of [NUM_ADS:6]"
+    "message": "Ad [AD_ON:1] of [NUM_ADS:6]"
   },
   "AD_TIME": {
     "description": "The text content of a label that shows how much time is left in the current ad.",

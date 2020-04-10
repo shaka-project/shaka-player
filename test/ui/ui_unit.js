@@ -6,8 +6,8 @@
 describe('UI', () => {
   const UiUtils = shaka.test.UiUtils;
   const Util = shaka.test.Util;
-  const returnManifest = (manifest) =>
-    Util.factoryReturns(new shaka.test.FakeManifestParser(manifest));
+
+  const fakeMimeType = 'application/test';
 
   /** @type {shaka.Player} */
   let player;
@@ -21,6 +21,7 @@ describe('UI', () => {
   });
 
   afterEach(async () => {
+    shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
     await UiUtils.cleanupUI();
   });
 
@@ -186,6 +187,7 @@ describe('UI', () => {
         overflowMenuButtons: [
           'quality',
         ],
+        doubleClickForFullscreen: false,
       };
       const ui = UiUtils.createUIThroughAPI(videoContainer, video, config);
       const controls = ui.getControls();
@@ -194,6 +196,13 @@ describe('UI', () => {
 
       const controlsContainer =
           videoContainer.querySelector('.shaka-controls-container');
+      // When double-click for fullscreen is disabled, it shouldn't happen.
+      UiUtils.simulateEvent(controlsContainer, 'dblclick');
+      await Util.shortDelay();
+      expect(spy).not.toHaveBeenCalled();
+      // Change the configuration and try again.
+      config.doubleClickForFullscreen = true;
+      (/** @type {!shaka.ui.Overlay} */ (ui)).configure(config);
       UiUtils.simulateEvent(controlsContainer, 'dblclick');
       await Util.shortDelay();
       expect(spy).toHaveBeenCalledTimes(1);
@@ -274,16 +283,16 @@ describe('UI', () => {
             // Load fake content that contains only audio.
             const manifest =
                 shaka.test.ManifestGenerator.generate((manifest) => {
-                  manifest.addPeriod(/* startTime= */ 0, (period) => {
-                    period.addVariant(/* id= */ 0, (variant) => {
-                      variant.addAudio(/* id= */ 1);
-                    });
+                  manifest.addVariant(/* id= */ 0, (variant) => {
+                    variant.addAudio(/* id= */ 1);
                   });
                 });
+            shaka.media.ManifestParser.registerParserByMime(
+                fakeMimeType,
+                () => new shaka.test.FakeManifestParser(manifest));
 
             await player.load(
-                /* uri= */ 'fake', /* startTime= */ 0,
-                returnManifest(manifest));
+                /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
             const pipButtons =
             videoContainer.getElementsByClassName('shaka-pip-button');
             expect(pipButtons.length).toBe(1);
@@ -422,20 +431,20 @@ describe('UI', () => {
       it('clears the buffer when changing resolutions', async () => {
         // Load fake content that has more than one quality level.
         const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.addPeriod(0, (period) => {
-            period.addVariant(0, (variant) => {
-              variant.addVideo(1, (stream) => {
-                stream.size(320, 240);
-              });
-              variant.addVideo(2, (stream) => {
-                stream.size(640, 480);
-              });
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(320, 240);
+            });
+            variant.addVideo(2, (stream) => {
+              stream.size(640, 480);
             });
           });
         });
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
 
         await player.load(
-            /* uri= */ 'fake', /* startTime= */ 0, returnManifest(manifest));
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
 
         const selectVariantTrack = spyOn(player, 'selectVariantTrack');
 
@@ -458,61 +467,59 @@ describe('UI', () => {
         // languages/channel-counts to test the current resolution list is
         // filtered.
         const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.addPeriod(0, (period) => {
-            period.addVariant(0, (variant) => {
-              variant.primary = true;
-              variant.language = 'en';
-              variant.addVideo(1, (stream) => {
-                stream.size(320, 240);
-              });
-              variant.addAudio(3, (stream) => {
-                stream.channelsCount = 2;
-              });
+          manifest.addVariant(0, (variant) => {
+            variant.primary = true;
+            variant.language = 'en';
+            variant.addVideo(1, (stream) => {
+              stream.size(320, 240);
             });
-            period.addVariant(4, (variant) => {
-              variant.language = 'en';
-              variant.addVideo(5, (stream) => {
-                stream.size(640, 480);
-              });
-              variant.addAudio(6, (stream) => {
-                stream.channelsCount = 2;
-              });
+            variant.addAudio(3, (stream) => {
+              stream.channelsCount = 2;
             });
-            period.addVariant(7, (variant) => {  // Duplicate with 4
-              variant.language = 'en';
-              variant.addVideo(8, (stream) => {
-                stream.size(640, 480);
-              });
-              variant.addAudio(9, (stream) => {
-                stream.channelsCount = 2;
-              });
+          });
+          manifest.addVariant(4, (variant) => {
+            variant.language = 'en';
+            variant.addVideo(5, (stream) => {
+              stream.size(640, 480);
             });
-            period.addVariant(10, (variant) => {
-              variant.language = 'en';
-              variant.addVideo(11, (stream) => {
-                stream.size(1280, 720);
-              });
-              variant.addAudio(12, (stream) => {
-                stream.channelsCount = 1;
-              });
+            variant.addAudio(6, (stream) => {
+              stream.channelsCount = 2;
             });
-            period.addVariant(13, (variant) => {
-              variant.language = 'es';
-              variant.addVideo(14, (stream) => {
-                stream.size(960, 540);
-              });
-              variant.addAudio(15, (stream) => {
-                stream.channelsCount = 2;
-              });
+          });
+          manifest.addVariant(7, (variant) => {  // Duplicate with 4
+            variant.language = 'en';
+            variant.addVideo(8, (stream) => {
+              stream.size(640, 480);
             });
-            period.addVariant(16, (variant) => {
-              variant.language = 'fr';
-              variant.addVideo(17, (stream) => {
-                stream.size(256, 144);
-              });
-              variant.addAudio(18, (stream) => {
-                stream.channelsCount = 2;
-              });
+            variant.addAudio(9, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(10, (variant) => {
+            variant.language = 'en';
+            variant.addVideo(11, (stream) => {
+              stream.size(1280, 720);
+            });
+            variant.addAudio(12, (stream) => {
+              stream.channelsCount = 1;
+            });
+          });
+          manifest.addVariant(13, (variant) => {
+            variant.language = 'es';
+            variant.addVideo(14, (stream) => {
+              stream.size(960, 540);
+            });
+            variant.addAudio(15, (stream) => {
+              stream.channelsCount = 2;
+            });
+          });
+          manifest.addVariant(16, (variant) => {
+            variant.language = 'fr';
+            variant.addVideo(17, (stream) => {
+              stream.size(256, 144);
+            });
+            variant.addAudio(18, (stream) => {
+              stream.channelsCount = 2;
             });
           });
         });
@@ -523,9 +530,11 @@ describe('UI', () => {
               .map((btn) => btn.innerText)
               .sort();
         };
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
 
         await player.load(
-            /* uri= */ 'fake', /* startTime= */ 0, returnManifest(manifest));
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
         player.configure('abr.enabled', false);
 
         const tracks = player.getVariantTracks();

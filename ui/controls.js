@@ -212,6 +212,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.timeAndSeekRangeTimer_ = null;
     }
 
+    // Important!  Release all child elements before destroying the cast proxy
+    // or player.  This makes sure those destructions will not trigger event
+    // listeners in the UI which would then invoke the cast proxy or player.
+    this.releaseChildElements_();
+
     if (this.castProxy_) {
       await this.castProxy_.destroy();
       this.castProxy_ = null;
@@ -225,8 +230,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.localVideo_ = null;
     this.video_ = null;
-
-    this.releaseChildElements_();
 
     this.localization_ = null;
     this.pressedKeys_.clear();
@@ -243,7 +246,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * @event shaka.Controls.CastStatusChangedEvent
+   * @event shaka.ui.Controls.CastStatusChangedEvent
    * @description Fired upon receiving a 'caststatuschanged' event from
    *    the cast proxy.
    * @property {string} type
@@ -256,7 +259,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * @event shaka.Controls.SubMenuOpenEvent
+   * @event shaka.ui.Controls.SubMenuOpenEvent
    * @description Fired when one of the overflow submenus is opened
    *    (e. g. language/resolution/subtitle selection).
    * @property {string} type
@@ -266,7 +269,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * @event shaka.Controls.CaptionSelectionUpdatedEvent
+   * @event shaka.ui.Controls.CaptionSelectionUpdatedEvent
    * @description Fired when the captions/subtitles menu has finished updating.
    * @property {string} type
    *   'captionselectionupdated'
@@ -275,7 +278,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * @event shaka.Controls.ResolutionSelectionUpdatedEvent
+   * @event shaka.ui.Controls.ResolutionSelectionUpdatedEvent
    * @description Fired when the resolution menu has finished updating.
    * @property {string} type
    *   'resolutionselectionupdated'
@@ -284,7 +287,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * @event shaka.Controls.LanguageSelectionUpdatedEvent
+   * @event shaka.ui.Controls.LanguageSelectionUpdatedEvent
    * @description Fired when the audio language menu has finished updating.
    * @property {string} type
    *   'languageselectionupdated'
@@ -293,7 +296,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * @event shaka.Controls.ErrorEvent
+   * @event shaka.ui.Controls.ErrorEvent
    * @description Fired when something went wrong with the controls.
    * @property {string} type
    *   'error'
@@ -307,7 +310,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * @event shaka.Controls.TimeAndSeekRangeUpdatedEvent
+   * @event shaka.ui.Controls.TimeAndSeekRangeUpdatedEvent
    * @description Fired when the time and seek range elements have finished
    *    updating.
    * @property {string} type
@@ -317,7 +320,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * @event shaka.Controls.UIUpdatedEvent
+   * @event shaka.ui.Controls.UIUpdatedEvent
    * @description Fired after a call to ui.configure() once the UI has finished
    *    updating.
    * @property {string} type
@@ -413,8 +416,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
       // If we're hiding native controls, make sure the video element itself is
       // not tab-navigable.  Our custom controls will still be tab-navigable.
-      this.video_.tabIndex = -1;
-      this.video_.controls = false;
+      this.localVideo_.tabIndex = -1;
+      this.localVideo_.controls = false;
     } else {
       this.videoContainer_.removeAttribute('shaka-controls');
     }
@@ -436,8 +439,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // If we disable the native controls, we want to make sure that the video
     // element itself is not tab-navigable, so that the element is skipped over
     // when tabbing through the page.
-    this.video_.controls = enabled;
-    this.video_.tabIndex = enabled ? 0 : -1;
+    this.localVideo_.controls = enabled;
+    this.localVideo_.tabIndex = enabled ? 0 : -1;
 
     if (enabled) {
       this.setEnabledShakaControls(false);
@@ -602,13 +605,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @export */
   showAdUI() {
-    // TODO: other ad states (seek bar display etc)
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
   }
 
   /** @export */
   hideAdUI() {
-    // TODO: other ad states (seek bar display etc)
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
   }
 
@@ -661,7 +662,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   createDOM_() {
     this.videoContainer_.classList.add('shaka-video-container');
-    this.video_.classList.add('shaka-video');
+    this.localVideo_.classList.add('shaka-video');
 
     this.addSkimContainer_();
 
@@ -809,7 +810,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.controlsContainer_.appendChild(this.bottomControls_);
 
     // Overflow menus are supposed to hide once you click elsewhere
-    // on the video element. The code in onContainerClick_ ensures that.
+    // on the page. The click event listener on window ensures that.
     // However, clicks on the bottom controls don't propagate to the container,
     // so we have to explicitly hide the menus onclick here.
     this.eventManager_.listen(this.bottomControls_, 'click', () => {
@@ -856,8 +857,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // for focused elements.
     this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
 
-    this.eventManager_.listen(
-        this.controlsContainer_, 'dblclick', () => this.toggleFullScreen());
+    // Listen for click events to dismiss the settings menus.
+    this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
+
+    this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
+      if (this.config_.doubleClickForFullscreen) {
+        this.toggleFullScreen();
+      }
+    });
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
@@ -917,7 +924,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(document, 'fullscreenchange', () => {
       if (this.ad_) {
-        this.ad_.resize(this.video_.offsetWidth, this.video_.offsetHeight);
+        this.ad_.resize(
+            this.localVideo_.offsetWidth, this.localVideo_.offsetHeight);
       }
     });
   }
@@ -1357,7 +1365,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onMouseDown_() {
     this.eventManager_.unlisten(window, 'mousedown');
-    this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
   }
 
   /**

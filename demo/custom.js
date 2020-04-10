@@ -19,8 +19,8 @@ shakaDemo.Custom = class {
    * Register the page configuration.
    */
   static init() {
-    const container = shakaDemoMain.addNavButton('custom');
-    shakaDemoCustom = new shakaDemo.Custom(container);
+    const elements = shakaDemoMain.addNavButton('custom');
+    shakaDemoCustom = new shakaDemo.Custom(elements.container);
   }
 
   /** @param {!Element} container */
@@ -217,6 +217,19 @@ shakaDemo.Custom = class {
     const DRMSystemName = shakaDemoMain.getLocalizedString(
         shakaDemo.MessageIds.DRM_SYSTEM);
     makeField(DRMSystemName, drmSetup, drmOnChange);
+
+    // Make the ad tag URL field.
+    const adTagSetup = (input, container) => {
+      if (assetInProgress.adTagUri) {
+        input.value = assetInProgress.adTagUri;
+      }
+    };
+    const adTagOnChange = (input) => {
+      assetInProgress.adTagUri = input.value;
+    };
+    const adTagURLName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.AD_TAG_URL);
+    makeField(adTagURLName, adTagSetup, adTagOnChange);
 
     // Make the name field.
     const nameSetup = (input, container) => {

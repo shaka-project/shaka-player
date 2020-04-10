@@ -103,8 +103,7 @@ describe('HlsParser live', () => {
 
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     playerInterface = {
-      filterNewPeriod: () => {},
-      filterAllPeriods: () => {},
+      filter: () => {},
       networkingEngine: fakeNetEngine,
       onError: fail,
       onEvent: fail,
@@ -151,9 +150,7 @@ describe('HlsParser live', () => {
 
     const manifest = await parser.start('test:/master', playerInterface);
 
-    /** @type {!Array.<shaka.extern.Variant>} */
-    const variants = manifest.periods[0].variants;
-    await Promise.all(variants.map(async (variant) => {
+    await Promise.all(manifest.variants.map(async (variant) => {
       await variant.video.createSegmentIndex();
       ManifestParser.verifySegmentIndex(variant.video, initialReferences);
       if (variant.audio) {
@@ -170,7 +167,7 @@ describe('HlsParser live', () => {
         .setResponseText('test:/audio', updatedMedia);
 
     await delayForUpdatePeriod();
-    for (const variant of variants) {
+    for (const variant of manifest.variants) {
       ManifestParser.verifySegmentIndex(variant.video, updatedReferences);
       if (variant.audio) {
         ManifestParser.verifySegmentIndex(variant.audio, updatedReferences);
@@ -213,10 +210,8 @@ describe('HlsParser live', () => {
 
     describe('update', () => {
       it('adds new segments when they appear', async () => {
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             master, media, [ref1], mediaWithAdditionalSegment, [ref1, ref2]);
@@ -230,10 +225,8 @@ describe('HlsParser live', () => {
         ].join('');
 
         const masterWithTwoVariants = master + secondVariant;
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             masterWithTwoVariants, media, [ref1], mediaWithAdditionalSegment,
@@ -253,10 +246,8 @@ describe('HlsParser live', () => {
         ].join('');
 
         const masterWithAudio = masterlist + audio;
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             masterWithAudio, media, [ref1], mediaWithAdditionalSegment,
@@ -276,12 +267,9 @@ describe('HlsParser live', () => {
 
         const updatedMedia1 = media + newSegment1;
         const updatedMedia2 = updatedMedia1 + newSegment2;
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
-        const ref3 = ManifestParser.makeReference('test:/main3.mp4',
-            2, 6, 8);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
+        const ref3 = ManifestParser.makeReference('test:/main3.mp4', 6, 8);
 
         fakeNetEngine
             .setResponseText('test:/master', master)
@@ -291,7 +279,7 @@ describe('HlsParser live', () => {
 
         const manifest = await parser.start('test:/master', playerInterface);
 
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [ref1]);
 
@@ -432,6 +420,29 @@ describe('HlsParser live', () => {
       mediaWithManySegments += 'main.mp4\n';
     }
 
+    const mediaWithDiscontinuity = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-DISCONTINUITY-SEQUENCE:30\n',
+      '#EXTINF:2,\n',
+      'main.mp4\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+    ].join('');
+
+    const mediaWithUpdatedDiscontinuitySegment = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:1\n',
+      '#EXT-X-DISCONTINUITY-SEQUENCE:31\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+    ].join('');
+
     it('starts presentation as VOD when ENDLIST is present', async () => {
       fakeNetEngine
           .setResponseText('test:/master', master)
@@ -453,6 +464,30 @@ describe('HlsParser live', () => {
       await parser.start('test:/master', playerInterface);
     });
 
+    it('sets presentation delay as configured', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
+      config.defaultPresentationDelay = 10;
+      parser.configure(config);
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.presentationTimeline.getDelay()).toBe(
+          config.defaultPresentationDelay);
+    });
+
+    it('sets 3 times target duration as presentation delay if not configured',
+        async () => {
+          fakeNetEngine
+              .setResponseText('test:/master', master)
+              .setResponseText('test:/video', media)
+              .setResponseValue('test:/init.mp4', initSegmentData)
+              .setResponseValue('test:/main.mp4', segmentData);
+          const manifest = await parser.start('test:/master', playerInterface);
+          expect(manifest.presentationTimeline.getDelay()).toBe(15);
+        });
+
     describe('availabilityWindowOverride', () => {
       async function testWindowOverride(expectedWindow) {
         fakeNetEngine
@@ -468,7 +503,7 @@ describe('HlsParser live', () => {
 
         const start = timeline.getSegmentAvailabilityStart();
         const end = timeline.getSegmentAvailabilityEnd();
-        expect(end - start).toBeCloseTo(expectedWindow, 2);
+        expect(end - start).toBeCloseTo(expectedWindow, 1);
       }
 
       it('does not affect seek range if unset', async () => {
@@ -481,6 +516,32 @@ describe('HlsParser live', () => {
         parser.configure(config);
         await testWindowOverride(240);
       });
+    });
+
+    it('sets timestamp offset for segments with discontinuity', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithDiscontinuity)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData)
+          .setResponseValue('test:/main2.mp4', segmentData);
+
+      const ref1 = ManifestParser.makeReference(
+          'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* timestampOffset= */ 0);
+
+      // Expect the timestamp offset to be set for the segment after the
+      // EXT-X-DISCONTINUITY tag.
+      const ref2 = ManifestParser.makeReference(
+          'test:/main2.mp4', segmentDataStartTime + 2, segmentDataStartTime + 4,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* timestampOffset= */ 2);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      const video = manifest.variants[0].video;
+      await video.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
     });
 
     it('offsets VTT text with rolled over TS timestamps', async () => {
@@ -517,35 +578,31 @@ describe('HlsParser live', () => {
           .setResponseText('test:/main.vtt', vtt);
 
       const manifest = await parser.start('test:/master', playerInterface);
-      const textStream = manifest.periods[0].textStreams[0];
+      const textStream = manifest.textStreams[0];
       await textStream.createSegmentIndex();
-      let ref = textStream.segmentIndex.get(0);
+      let ref = Array.from(textStream.segmentIndex)[0];
       expect(ref).not.toBe(null);
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
 
-      const videoStream = manifest.periods[0].variants[0].video;
+      const videoStream = manifest.variants[0].video;
       await videoStream.createSegmentIndex();
-      ref = videoStream.segmentIndex.get(0);
+      ref = Array.from(videoStream.segmentIndex)[0];
       expect(ref).not.toBe(null);
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
     });
 
     describe('update', () => {
       it('adds new segments when they appear', async () => {
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             master, media, [ref1], mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
       it('evicts removed segments', async () => {
-        const ref1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
-        const ref2 = ManifestParser.makeReference('test:/main2.mp4',
-            1, 4, 6);
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
         await testUpdate(
             master, mediaWithAdditionalSegment, [ref1, ref2],
@@ -553,13 +610,12 @@ describe('HlsParser live', () => {
       });
 
       it('handles updates with redirects', async () => {
-        const oldRef1 = ManifestParser.makeReference('test:/main.mp4',
-            0, 2, 4);
+        const oldRef1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
 
         const newRef1 =
-            ManifestParser.makeReference('test:/redirected/main.mp4', 0, 2, 4);
+            ManifestParser.makeReference('test:/redirected/main.mp4', 2, 4);
         const newRef2 =
-            ManifestParser.makeReference('test:/redirected/main2.mp4', 1, 4, 6);
+            ManifestParser.makeReference('test:/redirected/main2.mp4', 4, 6);
 
         let playlistFetchCount = 0;
 
@@ -587,13 +643,12 @@ describe('HlsParser live', () => {
             .setResponseValue('test:/main.mp4', segmentData);
 
         const expectedRef = ManifestParser.makeReference(
-            'test:/main.mp4', 0, segmentDataStartTime,
-            segmentDataStartTime + 2);
+            'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2);
         // In live content, we do not set timestampOffset.
         expectedRef.timestampOffset = 0;
 
         const manifest = await parser.start('test:/master', playerInterface);
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [expectedRef]);
       });
@@ -606,15 +661,14 @@ describe('HlsParser live', () => {
             .setResponseValue('test:/main.mp4', segmentData);
 
         const ref1 = ManifestParser.makeReference(
-            'test:/main.mp4', 0, segmentDataStartTime,
-            segmentDataStartTime + 2);
+            'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2);
 
         const ref2 = ManifestParser.makeReference(
-            'test:/main2.mp4', 1, segmentDataStartTime + 2,
+            'test:/main2.mp4', segmentDataStartTime + 2,
             segmentDataStartTime + 4);
 
         const manifest = await parser.start('test:/master', playerInterface);
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
 
@@ -638,6 +692,52 @@ describe('HlsParser live', () => {
             shaka.net.NetworkingEngine.RequestType.MANIFEST);
       });
 
+      it('reuses cached timestamp offset for segments with discontinuity',
+          async () => {
+            fakeNetEngine
+                .setResponseText('test:/master', master)
+                .setResponseText('test:/video', mediaWithDiscontinuity)
+                .setResponseValue('test:/init.mp4', initSegmentData)
+                .setResponseValue('test:/main.mp4', segmentData)
+                .setResponseValue('test:/main2.mp4', segmentData);
+
+            const ref1 = ManifestParser.makeReference('test:/main.mp4',
+                segmentDataStartTime, segmentDataStartTime + 2);
+
+            const ref2 = ManifestParser.makeReference('test:/main2.mp4',
+                segmentDataStartTime + 2, segmentDataStartTime + 4);
+
+            const manifest =
+                await parser.start('test:/master', playerInterface);
+
+            const video = manifest.variants[0].video;
+            await video.createSegmentIndex();
+            ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
+
+            fakeNetEngine
+                .setResponseText('test:/master', master)
+                .setResponseText('test:/video',
+                    mediaWithUpdatedDiscontinuitySegment)
+                .setResponseValue('test:/init.mp4', initSegmentData)
+                .setResponseValue('test:/main2.mp4', segmentData);
+
+            fakeNetEngine.request.calls.reset();
+            await delayForUpdatePeriod();
+
+            ManifestParser.verifySegmentIndex(video, [ref2]);
+
+            // Only one request should be made, and it's for the playlist.
+            // Expect to use the cached timestamp offset for the main2.mp4
+            // segment, without fetching the start time again.
+            expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+            fakeNetEngine.expectRequest(
+                'test:/video',
+                shaka.net.NetworkingEngine.RequestType.MANIFEST);
+            fakeNetEngine.expectNoRequest(
+                'test:/main.mp4',
+                shaka.net.NetworkingEngine.RequestType.SEGMENT);
+          });
+
       it('parses start time from ts segments', async () => {
         const tsMediaPlaylist =
             mediaWithRemovedSegment.replace(/\.mp4/g, '.ts');
@@ -648,13 +748,12 @@ describe('HlsParser live', () => {
             .setResponseValue('test:/main2.ts', tsSegmentData);
 
         const expectedRef = ManifestParser.makeReference(
-            'test:/main2.ts', 1, segmentDataStartTime,
-            segmentDataStartTime + 2);
+            'test:/main2.ts', segmentDataStartTime, segmentDataStartTime + 2);
         // In live content, we do not set timestampOffset.
         expectedRef.timestampOffset = 0;
 
         const manifest = await parser.start('test:/master', playerInterface);
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [expectedRef]);
       });
@@ -671,7 +770,6 @@ describe('HlsParser live', () => {
 
         const expectedRef = ManifestParser.makeReference(
             /* uri= */ 'test:/main.mp4',
-            /* position= */ 0,
             /* start= */ segmentDataStartTime,
             /* end= */ segmentDataStartTime + 2,
             /* baseUri= */ '',
@@ -679,7 +777,7 @@ describe('HlsParser live', () => {
             expectedEndByte);  // Complete segment reference
 
         const manifest = await parser.start('test:/master', playerInterface);
-        const video = manifest.periods[0].variants[0].video;
+        const video = manifest.variants[0].video;
         await video.createSegmentIndex();
         ManifestParser.verifySegmentIndex(video, [expectedRef]);
 

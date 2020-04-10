@@ -272,18 +272,15 @@ shaka.test.FakeMediaSourceEngine = class {
       throw new Error('unexpected data');
     }
 
+    // Verify that the segment is aligned.
     const segmentData = this.segmentData[type];
-    const expectedStartTime =
-        segmentData.segmentPeriodTimes[i] + segmentData.segmentStartTimes[i];
+    const appendedTime = segmentData.segmentStartTimes[i] +
+                         this.timestampOffsets_[originalType];
+    const expectedStartTime = i * segmentData.segmentDuration;
     const expectedEndTime = expectedStartTime + segmentData.segmentDuration;
+    expect(appendedTime).toBe(expectedStartTime);
     expect(startTime).toBe(expectedStartTime);
     expect(endTime).toBe(expectedEndTime);
-
-    // Verify that the segment is aligned.
-    const start = this.segmentData[type].segmentStartTimes[i] +
-                this.timestampOffsets_[originalType];
-    const expectedStart = i * this.segmentData[type].segmentDuration;
-    expect(start).toBe(expectedStart);
 
     this.segments[type][i] = true;
     return Promise.resolve();
@@ -410,7 +407,6 @@ shaka.test.FakeMediaSourceEngine = class {
  *   initSegments: !Array.<!BufferSource>,
  *   segments: !Array.<!BufferSource>,
  *   segmentStartTimes: !Array.<number>,
- *   segmentPeriodTimes: !Array.<number>,
  *   segmentDuration: number
  * }}
  *
@@ -422,9 +418,6 @@ shaka.test.FakeMediaSourceEngine = class {
  *   The start time of each media segment as they would appear within a
  *   segment index. These values plus drift simulate the segments'
  *   baseMediaDecodeTime (or equivalent) values.
- * @property {!Array.<number>} segmentPeriodTimes
- *   The start time of the period of the associated segment.  These are the same
- *   segments as in |segmentStartTimes|.
  * @property {number} segmentDuration
  *   The duration of each media segment.
  */

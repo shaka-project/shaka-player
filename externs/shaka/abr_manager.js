@@ -137,9 +137,9 @@ shaka.extern.AbrManager.SwitchCallback;
 
 
 /**
- * A factory for creating the abr manager.  This will be called with 'new'.
+ * A factory for creating the abr manager.
  *
- * @typedef {function(new:shaka.extern.AbrManager)}
+ * @typedef {function():!shaka.extern.AbrManager}
  * @exportDoc
  */
 shaka.extern.AbrManager.Factory;

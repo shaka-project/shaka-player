@@ -1,3 +1,85 @@
+## 2.5.10 (2020-03-24)
+
+New Features:
+  - Added 'doubleClickForFullscreen' config to UI
+    - https://github.com/google/shaka-player/issues/2459
+  - Add 'loaded' event
+    - https://github.com/google/shaka-player/pull/2441
+  - Update prerequisites script w/ new nodejs versions
+  - Export default text parser plugins
+    - https://github.com/google/shaka-player/issues/2428
+  - Add config to show/hide unbuffered range at seek bar start
+    - https://github.com/google/shaka-player/issues/2424
+  - Approximate segment size based on bandwidth when deciding to abort a request
+    - https://github.com/google/shaka-player/pull/2288
+  - Always log config errors
+  - Make 'offline.trackSelectionCallback' async to allow the app to prompt the
+    user or do other async checks
+    - https://github.com/google/shaka-player/pull/2387
+  - Disable video when the media element is AUDIO
+    - https://github.com/google/shaka-player/issues/2246
+    - https://github.com/google/shaka-player/pull/2371
+
+Bugfixes:
+  - Fix DRM-related issues on Tizen
+    - https://github.com/google/shaka-player/issues/813
+    - https://github.com/google/shaka-player/issues/2447
+    - https://github.com/google/shaka-player/issues/2448
+    - https://github.com/google/shaka-player/pull/2449
+  - Fix exceptions with very large manifests on XBox One and possibly other
+    consumer electronics platforms
+    - https://github.com/google/shaka-player/issues/2433
+  - Fix UI exception joining existing Cast session
+    - https://github.com/google/shaka-player/issues/2451
+  - Fix UTCTiming when autoCorrectDrift is off
+    - https://github.com/google/shaka-player/issues/2411
+    - https://github.com/google/shaka-player/pull/2412
+  - Fix EME polyfill exceptions on Edge
+    - https://github.com/google/shaka-player/issues/2413
+  - Fix offline storage with some Widevine and PlayReady content
+    - https://github.com/google/shaka-player/pull/2400
+  - Don't fire 'adaptation' event when not switching
+    - https://github.com/google/shaka-player/issues/2392
+  - Fix rare exception in isTextTrackVisible()
+    - https://github.com/google/shaka-player/issues/2399
+  - Fix bogus warnings about argument count in configs
+  - Fix duplicate DB objects when storing offline content
+    - https://github.com/google/shaka-player/issues/2389
+  - Fix MIME type case sensitivity in HLS parser
+  - Fix changing UI Cast app ID to empty string
+  - Fix case sensitivity in TTML MIME types
+    - https://github.com/google/shaka-player/issues/2378
+    - https://github.com/google/shaka-player/pull/2381
+  - Fix exceptions for Video Futur platform
+    - https://github.com/google/shaka-player/issues/2189
+    - https://github.com/google/shaka-player/pull/2368
+  - Fix captions display alignment
+    - https://github.com/google/shaka-player/issues/2334
+    - https://github.com/google/shaka-player/issues/2157
+  - Fix Cast errors in compiled mode
+    - https://github.com/google/shaka-player/issues/2130
+
+Docs:
+  - Improve ClearKey examples
+    - https://github.com/google/shaka-player/issues/2434
+    - https://github.com/google/shaka-player/pull/2439
+  - Fix truncated UI tutorial
+    - https://github.com/google/shaka-player/issues/2410
+  - Update offline.md
+    - https://github.com/google/shaka-player/pull/2404
+  - Add additional links in error code reference
+
+Demo App:
+  - Several service worker improvements and fixes
+  - Load pwacompat through npm
+  - Replace Live search boolean with a drop-down
+  - Renamed the "search" tab to "all content"
+  - Add search filters to the URL
+  - Work around Material Icons font bug
+  - Work around MDL button bug in iOS 13
+    - https://github.com/google/shaka-player/issues/2376
+
+
 ## 2.5.9 (2020-02-04)
 
 Bugfixes:

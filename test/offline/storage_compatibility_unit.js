@@ -33,8 +33,7 @@ const compatibilityTestsMetadata = [
     makeCell: (connection) => new shaka.offline.indexeddb.V2StorageCell(
         connection,
         /* segmentStore= */ 'segment-v2',
-        /* manifestStore= */ 'manifest-v2',
-        /* isFixedKey= */ true),  // TODO: Drop isFixedKey when v4 is out.
+        /* manifestStore= */ 'manifest-v2'),
   },
   {
     // This is the "clean" version of the v2 database format, as created from
@@ -47,38 +46,47 @@ const compatibilityTestsMetadata = [
     makeCell: (connection) => new shaka.offline.indexeddb.V2StorageCell(
         connection,
         /* segmentStore= */ 'segment-v2',
-        /* manifestStore= */ 'manifest-v2',
-        /* isFixedKey= */ true),  // TODO: Drop isFixedKey when v4 is out.
+        /* manifestStore= */ 'manifest-v2'),
   },
   {
     // This is the v3 version of the database, which is actually identical to
     // the "clean" version of the v2 database.  The version number was
     // incremented to overcome the "broken" v2 databases.  This format was
-    // introduced in v2.3.2.
+    // introduced in v2.3.2 and deprecated in v2.6.
     name: 'v3',
     dbImagePath: '/base/test/test/assets/db-dump-v3.json',
     manifestKey: 1,
-    readOnly: false,
+    readOnly: true,
     makeCell: (connection) => new shaka.offline.indexeddb.V2StorageCell(
         connection,
         /* segmentStore= */ 'segment-v3',
-        /* manifestStore= */ 'manifest-v3',
-        /* isFixedKey= */ false),  // TODO: Drop isFixedKey when v4 is out.
+        /* manifestStore= */ 'manifest-v3'),
   },
   {
-    // This is the v3 version of the database as written by v2.5.0 - v2.5.9.  A
+    // This is the v4 version of the database as written by v2.5.0 - v2.5.9.  A
     // bug in v2.5 caused the stream metadata from all periods to be written to
     // each period.  This was corrected in v2.5.10.
     // See https://github.com/google/shaka-player/issues/2389
-    name: 'v3-broken',
-    dbImagePath: '/base/test/test/assets/db-dump-v3-broken.json',
+    name: 'v4-broken',
+    dbImagePath: '/base/test/test/assets/db-dump-v4-broken.json',
     manifestKey: 1,
-    readOnly: false,
+    readOnly: true,
     makeCell: (connection) => new shaka.offline.indexeddb.V2StorageCell(
         connection,
+        // V4 of the database still used the V3 store names and structures.
         /* segmentStore= */ 'segment-v3',
-        /* manifestStore= */ 'manifest-v3',
-        /* isFixedKey= */ false),  // TODO: Drop isFixedKey when v4 is out.
+        /* manifestStore= */ 'manifest-v3'),
+  },
+  {
+    // This is the v5 version of the database, introduced in v2.6.
+    name: 'v5',
+    dbImagePath: '/base/test/test/assets/db-dump-v5.json',
+    manifestKey: 1,
+    readOnly: false,
+    makeCell: (connection) => new shaka.offline.indexeddb.V5StorageCell(
+        connection,
+        /* segmentStore= */ 'segment-v5',
+        /* manifestStore= */ 'manifest-v5'),
   },
 ];
 
@@ -110,9 +118,10 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
 
     beforeEach(async () => {
       const dbName = 'shaka-storage-cell-test';
+
       // Load the canned database image.
       await CannedIDB.restoreJSON(
-          dbName, dbImageAsString, /* startFromScratch= */ true);
+          dbName, dbImageAsString, /* wipeDatabase= */ true);
 
       // Track the connection so that we can close it when the test is over.
       connection = await shaka.test.IndexedDBUtils.open(dbName);
@@ -271,46 +280,20 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
         manifest.anyTimeline();
         manifest.minBufferTime = 2;
 
-        manifest.addPeriod(0, (period) => {
-          period.addPartialVariant((variant) => {
-            variant.addPartialStream(ContentType.VIDEO, (stream) => {
-              stream.frameRate = 29.97;
-              stream.mime('video/webm', 'vp9');
-              stream.size(640, 480);
-            });
-          });
-        });
-
-        manifest.addPeriod(Util.closeTo(2.06874), (period) => {
-          period.addPartialVariant((variant) => {
-            variant.addPartialStream(ContentType.VIDEO, (stream) => {
-              stream.frameRate = 29.97;
-              stream.mime('video/webm', 'vp9');
-              stream.size(640, 480);
-            });
-          });
-        });
-
-        manifest.addPeriod(Util.closeTo(4.20413), (period) => {
-          period.addPartialVariant((variant) => {
-            variant.addPartialStream(ContentType.VIDEO, (stream) => {
-              stream.frameRate = 29.97;
-              stream.mime('video/webm', 'vp9');
-              stream.size(320, 240);
-            });
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.frameRate = 29.97;
+            stream.mime('video/webm', 'vp9');
+            stream.size(640, 480);
           });
         });
       });
 
       expect(actual).toEqual(expected);
 
-      const segmentIndex0 = actual.periods[0].variants[0].video.segmentIndex;
-      const segmentIndex1 = actual.periods[1].variants[0].video.segmentIndex;
-      const segmentIndex2 = actual.periods[2].variants[0].video.segmentIndex;
-
-      const segment0 = segmentIndex0.get(0);
-      const segment1 = segmentIndex1.get(0);
-      const segment2 = segmentIndex2.get(0);
+      const segmentIndex = actual.variants[0].video.segmentIndex;
+      goog.asserts.assert(segmentIndex != null, 'Null segmentIndex!');
+      const [segment0, segment1, segment2] = Array.from(segmentIndex);
 
       expect(segment0).toEqual(jasmine.objectContaining({
         startTime: 0,
@@ -342,21 +325,19 @@ filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
      * @return {!Array.<number>}
      */
     function getAllSegmentKeys(manifest) {
-      const keys = [];
+      const keys = new Set();
 
-      for (const period of manifest.periods) {
-        for (const stream of period.streams) {
-          if (stream.initSegmentKey != null) {
-            keys.push(stream.initSegmentKey);
+      for (const stream of manifest.streams) {
+        for (const segment of stream.segments) {
+          if (segment.initSegmentKey != null) {
+            keys.add(segment.initSegmentKey);
           }
 
-          for (const segment of stream.segments) {
-            keys.push(segment.dataKey);
-          }
+          keys.add(segment.dataKey);
         }
       }
 
-      return keys;
+      return Array.from(keys);
     }
   }  // makeTests
 });

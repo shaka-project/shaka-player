@@ -7,7 +7,6 @@
 goog.provide('shaka.ui.Overlay');
 
 goog.require('goog.asserts');
-goog.require('shaka.Deprecate');
 goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.TextDisplayer');
@@ -50,13 +49,9 @@ shaka.ui.Overlay = class {
     this.configure({});
 
     // If the browser's native controls are disabled, use UI TextDisplayer.
-    // Arrow functions cannot be used with "new", so the factory must use
-    // a "function" function.
     if (!video.controls) {
-      // eslint-disable-next-line no-restricted-syntax
-      const textDisplayer = function() {
-        return new shaka.ui.TextDisplayer(video, videoContainer);
-      };
+      const textDisplayer =
+          () => new shaka.ui.TextDisplayer(video, videoContainer);
       player.configure('textDisplayFactory', textDisplayer);
     }
 
@@ -141,21 +136,6 @@ shaka.ui.Overlay = class {
 
 
   /**
-   * @return {shaka.Player}
-   * @export
-   * @deprecated Use getControls().getPlayer() instead.
-   */
-  getPlayer() {
-    shaka.Deprecate.deprecateFeature(
-        2, 6,
-        'ui.Overlay.getPlayer()',
-        'Please use getControls().getPlayer() instead.');
-
-    return this.controls_.getPlayer();
-  }
-
-
-  /**
    * @return {shaka.ui.Controls}
    * @export
    */
@@ -202,10 +182,12 @@ shaka.ui.Overlay = class {
       addBigPlayButton: false,
       castReceiverAppId: '',
       clearBufferOnQualityChange: true,
+      showUnbufferedStart: false,
       seekBarColors: {
         base: 'rgba(255, 255, 255, 0.3)',
         buffered: 'rgba(255, 255, 255, 0.54)',
         played: 'rgb(255, 255, 255)',
+        adBreaks: 'rgb(255, 204, 0)',
       },
       volumeBarColors: {
         base: 'rgba(255, 255, 255, 0.54)',
@@ -213,6 +195,7 @@ shaka.ui.Overlay = class {
       },
       trackLabelFormat: shaka.ui.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
+      doubleClickForFullscreen: true,
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause

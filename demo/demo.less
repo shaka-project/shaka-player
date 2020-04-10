@@ -37,7 +37,22 @@
   outline: none;
 }
 
+/* Use the class name, which is more specific than just "main".  Otherwise, the
+ * MDL styles will be used instead. */
+main.mdl-layout__content {
+  /* Make the main container a flex container oriented as a column. */
+  display: flex;
+  flex-direction: column;
+}
+
 #contents {
+  /* Expand the contents section to take up any extra space on the page.  This
+   * pushes the footer to the bottom when the window is large, while still
+   * allowing the contents to scroll when the window is small.
+   */
+  flex-grow: 1;
+
+  /* Pad the outside of the contents. */
   padding: 20px;
   text-align: center;
 }

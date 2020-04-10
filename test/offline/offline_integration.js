@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('Offline', () => {
+/** @return {boolean} */
+const supportsStorage = () => shaka.offline.Storage.support();
+
+// TODO: Merge with storage_integration.js.  No obvious difference in purpose.
+filterDescribe('Offline', supportsStorage, () => {
   /** @type {!shaka.Player} */
   let player;
   /** @type {!shaka.offline.Storage} */
@@ -28,11 +32,9 @@ describe('Offline', () => {
 
     eventManager = new shaka.util.EventManager();
 
-    if (supportsStorage()) {
-      // Make sure we are starting with a blank slate.
-      await shaka.offline.Storage.deleteAll();
-      storage = new shaka.offline.Storage(player);
-    }
+    // Make sure we are starting with a blank slate.
+    await shaka.offline.Storage.deleteAll();
+    storage = new shaka.offline.Storage(player);
   });
 
   afterEach(async () => {
@@ -43,9 +45,7 @@ describe('Offline', () => {
     }
 
     // Make sure we don't leave anything in storage after the test.
-    if (supportsStorage()) {
-      await shaka.offline.Storage.deleteAll();
-    }
+    await shaka.offline.Storage.deleteAll();
 
     if (player) {
       await player.destroy();
@@ -53,11 +53,6 @@ describe('Offline', () => {
   });
 
   it('stores, plays, and deletes clear content', async () => {
-    if (!supportsStorage()) {
-      pending('Storage is not supported.');
-      return;
-    }
-
     const content = await storage.store('test:sintel');
     expect(content).toBeTruthy();
 
@@ -77,11 +72,6 @@ describe('Offline', () => {
   drmIt(
       'stores, plays, and deletes protected content with a persistent license',
       async () => {
-        if (!supportsStorage()) {
-          pending('Storage is not supported on this platform.');
-          return;
-        }
-
         const support = await shaka.Player.probeSupport();
         const widevineSupport = support.drm['com.widevine.alpha'];
 
@@ -92,7 +82,7 @@ describe('Offline', () => {
 
         shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
 
-        storage.configure({usePersistentLicense: true});
+        storage.configure('offline.usePersistentLicense', true);
         const content = await storage.store('test:sintel-enc');
 
         // Work around http://crbug.com/887535 in which load cannot happen right
@@ -117,11 +107,6 @@ describe('Offline', () => {
   drmIt(
       'stores, plays, and deletes protected content with a temporary license',
       async () => {
-        if (!supportsStorage()) {
-          pending('Storage is not supported.');
-          return;
-        }
-
         const support = await shaka.Player.probeSupport();
         const widevineSupport = support.drm['com.widevine.alpha'];
         const playreadySupport = support.drm['com.microsoft.playready'];
@@ -136,7 +121,7 @@ describe('Offline', () => {
         // to throw an error inappropriately.
         shaka.test.TestScheme.setupPlayer(player, 'multidrm_no_init_data');
 
-        storage.configure({usePersistentLicense: false});
+        storage.configure('offline.usePersistentLicense', false);
         const content = await storage.store('test:multidrm_no_init_data');
 
         const contentUri = content.offlineUri;
@@ -159,10 +144,5 @@ describe('Offline', () => {
   async function playTo(endSeconds, timeoutSeconds) {
     await shaka.test.Util.waitUntilPlayheadReaches(
         eventManager, video, endSeconds, timeoutSeconds);
-  }
-
-  /** @return {boolean} */
-  function supportsStorage() {
-    return shaka.offline.Storage.support();
   }
 });

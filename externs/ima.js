@@ -87,6 +87,11 @@ google.ima.AdsManager = class {
    */
   resize(width, height, viewMode) {}
 
+  /**
+   * @return {!Array.<number>}
+   */
+  getCuePoints() {}
+
   /** @override */
   addEventListener() {}
 
@@ -322,6 +327,19 @@ google.ima.dai.api.AdPodInfo = class {
 
 
 /** @const */
+google.ima.dai.api.CuePoint = class {};
+
+/** @type {number} */
+google.ima.dai.api.CuePoint.prototype.start;
+
+/** @type {number} */
+google.ima.dai.api.CuePoint.prototype.end;
+
+/** @type {boolean} */
+google.ima.dai.api.CuePoint.prototype.played;
+
+
+/** @const */
 google.ima.dai.api.AdProgressData = class {};
 
 
@@ -351,6 +369,10 @@ google.ima.dai.api.StreamData.prototype.adProgressData;
 
 /** @type {string} */
 google.ima.dai.api.StreamData.prototype.url;
+
+
+/** @type {!Array.<!google.ima.dai.api.CuePoint>} */
+google.ima.dai.api.StreamData.prototype.cuepoints;
 
 
 /** @const */

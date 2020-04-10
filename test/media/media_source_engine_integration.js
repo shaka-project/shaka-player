@@ -66,7 +66,7 @@ describe('MediaSourceEngine', () => {
 
   function append(type, segmentNumber) {
     const segment = generators[type]
-        .getSegment(segmentNumber, 0, Date.now() / 1000);
+        .getSegment(segmentNumber, Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(
         type, segment, null, null, /* hasClosedCaptions= */ false);
   }
@@ -83,7 +83,7 @@ describe('MediaSourceEngine', () => {
   // captions.
   function appendWithClosedCaptions(type, segmentNumber) {
     const segment = generators[type]
-        .getSegment(segmentNumber, 0, Date.now() / 1000);
+        .getSegment(segmentNumber, Date.now() / 1000);
     return mediaSourceEngine.appendBuffer(type, segment, /* startTime= */ 0,
         /* endTime= */ 2, /* hasClosedCaptions= */ true);
   }
@@ -97,8 +97,8 @@ describe('MediaSourceEngine', () => {
   }
 
   function remove(type, segmentNumber) {
-    const start = (segmentNumber - 1) * metadata[type].segmentDuration;
-    const end = segmentNumber * metadata[type].segmentDuration;
+    const start = segmentNumber * metadata[type].segmentDuration;
+    const end = (segmentNumber + 1) * metadata[type].segmentDuration;
     return mediaSourceEngine.remove(type, start, end);
   }
 
@@ -116,11 +116,11 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
-    await append(ContentType.VIDEO, 1);
+    await append(ContentType.VIDEO, 0);
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(10);
-    await append(ContentType.VIDEO, 2);
+    await append(ContentType.VIDEO, 1);
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20);
-    await append(ContentType.VIDEO, 3);
+    await append(ContentType.VIDEO, 2);
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
   });
 
@@ -131,18 +131,18 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
     await Promise.all([
+      append(ContentType.VIDEO, 0),
       append(ContentType.VIDEO, 1),
       append(ContentType.VIDEO, 2),
-      append(ContentType.VIDEO, 3),
     ]);
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
-    await remove(ContentType.VIDEO, 1);
+    await remove(ContentType.VIDEO, 0);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(10);
     expect(buffered(ContentType.VIDEO, 10)).toBeCloseTo(20);
-    await remove(ContentType.VIDEO, 2);
+    await remove(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBe(20);
     expect(buffered(ContentType.VIDEO, 20)).toBeCloseTo(10);
-    await remove(ContentType.VIDEO, 3);
+    await remove(ContentType.VIDEO, 2);
     expect(bufferStart(ContentType.VIDEO)).toBe(null);
   });
 
@@ -154,14 +154,14 @@ describe('MediaSourceEngine', () => {
     await appendInit(ContentType.VIDEO);
     await mediaSourceEngine.setDuration(20);
     expect(mediaSource.duration).toBeCloseTo(20);
-    await append(ContentType.VIDEO, 1);
+    await append(ContentType.VIDEO, 0);
     expect(mediaSource.duration).toBeCloseTo(20);
     await mediaSourceEngine.setDuration(35);
     expect(mediaSource.duration).toBeCloseTo(35);
     await Promise.all([
+      append(ContentType.VIDEO, 1),
       append(ContentType.VIDEO, 2),
       append(ContentType.VIDEO, 3),
-      append(ContentType.VIDEO, 4),
     ]);
     expect(mediaSource.duration).toBeCloseTo(40);
     await mediaSourceEngine.setDuration(60);
@@ -174,9 +174,9 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.init(initObject, false);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
+    await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
     await append(ContentType.VIDEO, 2);
-    await append(ContentType.VIDEO, 3);
     await mediaSourceEngine.endOfStream();
     expect(mediaSource.duration).toBeCloseTo(30);
   });
@@ -187,7 +187,7 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.init(initObject, false);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInit(ContentType.VIDEO);
-    await append(ContentType.VIDEO, 1);
+    await append(ContentType.VIDEO, 0);
     // Call endOfStream twice. There should be no exception.
     await mediaSourceEngine.endOfStream();
     await mediaSourceEngine.endOfStream();
@@ -211,9 +211,9 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.init(initObject, false);
     checkOrder(mediaSourceEngine.setDuration(presentationDuration));
     checkOrder(appendInit(ContentType.VIDEO));
+    checkOrder(append(ContentType.VIDEO, 0));
     checkOrder(append(ContentType.VIDEO, 1));
     checkOrder(append(ContentType.VIDEO, 2));
-    checkOrder(append(ContentType.VIDEO, 3));
     checkOrder(mediaSourceEngine.endOfStream());
 
     await Promise.all(requests);
@@ -229,11 +229,11 @@ describe('MediaSourceEngine', () => {
     // The test operates correctly on real hardware.
     await appendInit(ContentType.AUDIO);
     expect(buffered(ContentType.AUDIO, 0)).toBe(0);
-    await append(ContentType.AUDIO, 1);
+    await append(ContentType.AUDIO, 0);
     expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(10, 1);
-    await append(ContentType.AUDIO, 2);
+    await append(ContentType.AUDIO, 1);
     expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(20, 1);
-    await append(ContentType.AUDIO, 3);
+    await append(ContentType.AUDIO, 2);
     expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(30, 1);
   });
 
@@ -247,33 +247,33 @@ describe('MediaSourceEngine', () => {
 
     const audioStreaming = async () => {
       await appendInit(ContentType.AUDIO);
-      await append(ContentType.AUDIO, 1);
+      await append(ContentType.AUDIO, 0);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(10, 1);
-      await append(ContentType.AUDIO, 2);
+      await append(ContentType.AUDIO, 1);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(20, 1);
-      await append(ContentType.AUDIO, 3);
+      await append(ContentType.AUDIO, 2);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(30, 1);
-      await append(ContentType.AUDIO, 4);
+      await append(ContentType.AUDIO, 3);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(40, 1);
-      await append(ContentType.AUDIO, 5);
+      await append(ContentType.AUDIO, 4);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(50, 1);
-      await append(ContentType.AUDIO, 6);
+      await append(ContentType.AUDIO, 5);
       expect(buffered(ContentType.AUDIO, 0)).toBeCloseTo(60, 1);
     };
 
     const videoStreaming = async () => {
       await appendInit(ContentType.VIDEO);
-      await append(ContentType.VIDEO, 1);
+      await append(ContentType.VIDEO, 0);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(10);
-      await append(ContentType.VIDEO, 2);
+      await append(ContentType.VIDEO, 1);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20);
-      await append(ContentType.VIDEO, 3);
+      await append(ContentType.VIDEO, 2);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(30);
-      await append(ContentType.VIDEO, 4);
+      await append(ContentType.VIDEO, 3);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(40);
-      await append(ContentType.VIDEO, 5);
+      await append(ContentType.VIDEO, 4);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(50);
-      await append(ContentType.VIDEO, 6);
+      await append(ContentType.VIDEO, 5);
       expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(60);
     };
 
@@ -293,10 +293,10 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 5,
         /* appendWindowEnd= */ 18);
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
-    await append(ContentType.VIDEO, 1);
+    await append(ContentType.VIDEO, 0);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
     expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(5, 1);
-    await append(ContentType.VIDEO, 2);
+    await append(ContentType.VIDEO, 1);
     expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(13, 1);
   });
 
@@ -311,8 +311,8 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ 20);
+    await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
-    await append(ContentType.VIDEO, 2);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(20, 1);
 
@@ -323,8 +323,8 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 15,
         /* appendWindowStart= */ 20,
         /* appendWindowEnd= */ 35);
+    await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
-    await append(ContentType.VIDEO, 2);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
     expect(buffered(ContentType.VIDEO, 0)).toBeCloseTo(35, 1);
   });
@@ -358,7 +358,7 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInitWithClosedCaptions(ContentType.VIDEO);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
-    await appendWithClosedCaptions(ContentType.VIDEO, 1);
+    await appendWithClosedCaptions(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalled();
   });

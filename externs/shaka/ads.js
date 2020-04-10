@@ -10,6 +10,7 @@
 
 /**
  * @typedef {{
+ *   loadTimes: !Array.<number>,
  *   started: number,
  *   playedCompletely: number,
  *   skipped: number
@@ -18,6 +19,8 @@
  * @description
  * Contains statistics and information about the current state of the player.
  *
+ * @property {number} loadTimes
+ *   The set of amounts of time it took to get the final manifest.
  * @property {number} started
  *   The number of ads started.
  * @property {number} playedCompletely
@@ -53,16 +56,15 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {!HTMLElement} adContainer
    * @param {!HTMLMediaElement} video
-   * @param {!shaka.Player} player
    */
-  initServerSide(adContainer, video, player) {}
+  initServerSide(adContainer, video) {}
 
   /**
    * @param {!google.ima.dai.api.StreamRequest} imaRequest
-   * @param {string} backupUrl
-   * @param {number} startTime
+   * @param {string=} backupUrl
+   * @return {!Promise.<!string>}
    */
-  requestServerSideStream(imaRequest, backupUrl, startTime) {}
+  requestServerSideStream(imaRequest, backupUrl) {}
 
   /**
    * @param {Object} adTagParameters
@@ -74,13 +76,18 @@ shaka.extern.IAdManager = class extends EventTarget {
    * playing content, this will return an empty stats object.
    */
   getStats() {}
+
+  /**
+   * @param {shaka.extern.TimelineRegionInfo} region
+   */
+  onTimedMetadata(region) {}
 };
 
 
 /**
- * A factory for creating the ad manager.  This will be called with 'new'.
+ * A factory for creating the ad manager.
  *
- * @typedef {function(new:shaka.extern.IAdManager)}
+ * @typedef {function():!shaka.extern.IAdManager}
  * @exportDoc
  */
 shaka.extern.IAdManager.Factory;

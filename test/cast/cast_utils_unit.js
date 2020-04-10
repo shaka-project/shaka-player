@@ -18,15 +18,12 @@ describe('CastUtils', () => {
       'destroy',  // Should use CastProxy.destroy instead
       'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
-      // TODO(vaage): Remove |getManifestUri| references in v2.6.
-      'getManifestUri',  // Handled specially by CastProxy
       'getManifestParserFactory',  // Would not serialize.
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
       'createNetworkingEngine',
       'createPlayhead',
-      'createMediaSource',
       'createMediaSourceEngine',
       'createStreamingEngine',
     ];
@@ -40,22 +37,21 @@ describe('CastUtils', () => {
       castMembers.push(name);
     }
     // eslint-disable-next-line no-restricted-syntax
-    const playerMembers = Object.getOwnPropertyNames(shaka.Player.prototype)
-        .filter((name) => {
-          // Private members end with _.
-          return !ignoredMembers.includes(name) && !name.endsWith('_');
-        });
+    const allPlayerMembers = Object.getOwnPropertyNames(shaka.Player.prototype);
+    expect(
+        ignoredMembers.filter((member) => !allPlayerMembers.includes(member)))
+        .toEqual([]);
+    const playerMembers = allPlayerMembers.filter((name) => {
+      // Private members end with _.
+      return !ignoredMembers.includes(name) && !name.endsWith('_');
+    });
 
     // To make debugging easier, don't check that they are equal; instead check
     // that neither has any extra entries.
-    const extraCastMembers = castMembers.filter((name) => {
-      return !playerMembers.includes(name);
-    });
-    const extraPlayerMembers = playerMembers.filter((name) => {
-      return !castMembers.includes(name);
-    });
-    expect(extraCastMembers).toEqual([]);
-    expect(extraPlayerMembers).toEqual([]);
+    expect(castMembers.filter((name) => !playerMembers.includes(name)))
+        .toEqual([]);
+    expect(playerMembers.filter((name) => !castMembers.includes(name)))
+        .toEqual([]);
   });
 
   describe('serialize/deserialize', () => {

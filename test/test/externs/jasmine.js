@@ -154,12 +154,8 @@ jasmine.Matchers.prototype.toHaveBeenCalledTimes = function(times) {};
 jasmine.Matchers.prototype.toMatch = function(value) {};
 
 
-/** @param {*} value */
+/** @param {*=} value */
 jasmine.Matchers.prototype.toThrow = function(value) {};
-
-
-/** @param {*} value */
-jasmine.Matchers.prototype.toThrowError = function(value) {};
 
 
 /**
@@ -394,11 +390,24 @@ jasmine.stringMatching = function(value) {};
 
 
 /**
- * @param {!Array.<T>} value
+ * Matches an Array containing all of the values specified, in any order.
+ *
+ * @param {!Array.<T>} values
  * @return {!Array.<T>}
  * @template T
  */
-jasmine.arrayContaining = function(value) {};
+jasmine.arrayContaining = function(values) {};
+
+
+/**
+ * Matches an Array with exactly the values specified, no more, no less, in any
+ * order.
+ *
+ * @param {!Array.<T>} values
+ * @return {!Array.<T>}
+ * @template T
+ */
+jasmine.arrayWithExactContents = function(values) {};
 
 
 /**

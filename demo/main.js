@@ -440,7 +440,11 @@ shakaDemo.Main = class {
 
     const storage = new shaka.offline.Storage();
 
-    // Set the progress callback;
+    // Configure the storage instance.
+    /**
+     * @param {string} identifier
+     * @return {?ShakaDemoAssetInfo}
+     */
     const getAssetWithIdentifier = (identifier) => {
       for (const asset of shakaAssets.testAssets) {
         if (this.getIdentifierFromAsset_(asset) == identifier) {
@@ -456,6 +460,10 @@ shakaDemo.Main = class {
       }
       return null;
     };
+    /**
+     * @param {shaka.extern.StoredContent} content
+     * @param {number} progress
+     */
     const progressCallback = (content, progress) => {
       const identifier = content.appMetadata['identifier'];
       const asset = getAssetWithIdentifier(identifier);
@@ -796,7 +804,7 @@ shakaDemo.Main = class {
           /* name= */ 'loaded asset',
           /* iconUri= */ '',
           /* manifestUri= */ manifest,
-          /* source= */ shakaAssets.Source.UNKNOWN);
+          /* source= */ shakaAssets.Source.CUSTOM);
       if ('license' in params) {
         let drmSystems = shakaDemo.Main.commonDrmSystems;
         if ('drmSystem' in params) {
@@ -1202,9 +1210,7 @@ shakaDemo.Main = class {
           title: asset.name,
           artwork: [{src: asset.iconUri}],
         };
-        if (asset.source != shakaAssets.Source.UNKNOWN) {
-          metadata.artist = asset.source;
-        }
+        metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
     } catch (reason) {
@@ -1296,6 +1302,10 @@ shakaDemo.Main = class {
       if (button.nodeType == Node.ELEMENT_NODE &&
           button.classList.contains('mdl-button--accent')) {
         params.push('panel=' + button.getAttribute('tab-identifier'));
+        const hashValues = button.getAttribute('tab-hash');
+        if (hashValues) {
+          params.push('panelData=' + hashValues);
+        }
         break;
       }
     }
@@ -1390,7 +1400,10 @@ shakaDemo.Main = class {
    * setup process.
    * @param {string} containerName Used to determine the id of the button this
    *   is looking for.  Also used as the className of the container, for CSS.
-   * @return {!HTMLDivElement} The container for the tab.
+   * @return {{
+   *   container: !HTMLDivElement,
+   *   button: !HTMLButtonElement,
+   * }} The container for the tab, and the button element that activates it.
    */
   addNavButton(containerName) {
     const navButtons = document.getElementById('nav-button-container');
@@ -1403,7 +1416,13 @@ shakaDemo.Main = class {
     const params = this.getParams_();
     let selected =
         params['panel'] == encodeURI(button.getAttribute('tab-identifier'));
-    if (!selected && !params['panel']) {
+    if (selected) {
+      // Re-apply any saved data from hash.
+      const hashValues = params['panelData'];
+      if (hashValues) {
+        button.setAttribute('tab-hash', hashValues);
+      }
+    } else if (!params['panel']) {
       // Check if it's selected by default.
       selected = button.getAttribute('defaultselected') != null;
     }
@@ -1443,7 +1462,10 @@ shakaDemo.Main = class {
       Promise.resolve().then(switchPage);
     }
 
-    return /** @type {!HTMLDivElement} */ (container);
+    return {
+      container: /** @type {!HTMLDivElement} */ (container),
+      button: /** @type {!HTMLButtonElement} */ (button),
+    };
   }
 
   /**

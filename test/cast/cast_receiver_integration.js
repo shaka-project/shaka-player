@@ -56,7 +56,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
         'test', shaka.test.TestScheme.plugin);
     shaka.media.ManifestParser.registerParserByMime(
         'application/x-test-manifest',
-        shaka.test.TestScheme.ManifestParser);
+        shaka.test.TestScheme.ManifestParser.factory);
 
     await shaka.test.TestScheme.createManifests(shaka, '');
     support = await shaka.media.DrmEngine.probeSupport();
@@ -186,7 +186,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     // at each stage, the cast receiver can form an update message without
     // causing an error.
     waitForUpdateMessageWrapper(
-        shaka.media.ManifestParser, 'ManifestParser', 'create');
+        shaka.media.ManifestParser, 'ManifestParser', 'getFactory');
     waitForUpdateMessageWrapper(
         // eslint-disable-next-line no-restricted-syntax
         shaka.test.TestScheme.ManifestParser.prototype, 'ManifestParser',

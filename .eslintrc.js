@@ -201,7 +201,7 @@ module.exports = {
           },
           {
             'selector': 'CatchClause',
-            'message': 'Use expect.toFail or expectAsync.toBeRejected',
+            'message': 'Use expect.toThrow or expectAsync.toBeRejected',
           },
           {
             'selector': 'CallExpression[callee.name=expect] >' +

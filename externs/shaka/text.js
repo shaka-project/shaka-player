@@ -247,6 +247,15 @@ shaka.extern.Cue = class {
     this.backgroundColor;
 
     /**
+     * The number of horizontal and vertical cells into which
+     * the Root Container Region area is divided
+     *
+     * @type {{ columns: number, rows: number }}
+     * @exportDoc
+     */
+    this.cellResolution;
+
+    /**
      * Image background represented by any string that would be
      * accepted in image HTML element.
      * E. g. 'data:[mime type];base64,[data]'.
@@ -254,6 +263,13 @@ shaka.extern.Cue = class {
      * @exportDoc
      */
     this.backgroundImage;
+
+    /**
+     * Text border.
+     * @type {!string}
+     * @exportDoc
+     */
+    this.border;
 
     /**
      * Text font size in px or em (e.g. '100px'/'100em').
@@ -282,6 +298,27 @@ shaka.extern.Cue = class {
      * @exportDoc
      */
     this.fontFamily;
+
+    /**
+     * Text letter spacing.
+     * @type {!string}
+     * @exportDoc
+     */
+    this.letterSpacing;
+
+    /**
+     * Text line padding.
+     * @type {!string}
+     * @exportDoc
+     */
+    this.linePadding;
+
+    /**
+     * Text opacity.
+     * @type {!number}
+     * @exportDoc
+     */
+    this.opacity;
 
     /**
      * Text decoration. A combination of underline, overline
@@ -378,7 +415,7 @@ shaka.extern.TextParser.TimeContext;
 
 
 /**
- * @typedef {function(new:shaka.extern.TextParser)}
+ * @typedef {function():!shaka.extern.TextParser}
  * @exportDoc
  */
 shaka.extern.TextParserPlugin;
@@ -461,7 +498,7 @@ shaka.extern.TextDisplayer = class {
 /**
  * A factory for creating a TextDisplayer.
  *
- * @typedef {function(new:shaka.extern.TextDisplayer)}
+ * @typedef {function():!shaka.extern.TextDisplayer}
  * @exportDoc
  */
 shaka.extern.TextDisplayer.Factory;
