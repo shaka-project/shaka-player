@@ -246,7 +246,10 @@ describe('Player', function() {
       player.configure({preferredTextLanguage: preferredTextLanguage});
 
       await player.load('test:sintel_realistic_compiled');
-      await Util.delay(1);  // Allow the first segments to be appended.
+
+      // Play until a time at which the external cues would be on screen.
+      video.play();
+      await waitUntilPlayheadReaches(eventManager, video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
       expect(displayer.isTextVisible()).toBe(true);
