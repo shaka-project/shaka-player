@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "Annonsens varaktighet",
-  "AD_PROGRESS": "[AD_ON:1] av [NUM_ADS:6]",
-  "AD_TIME": "Annons: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "Annons [AD_ON] av [NUM_ADS]",
+  "AD_TIME": "Annons: [AD_TIME]",
   "AUTO_QUALITY": "Automatisk",
   "BACK": "Tillbaka",
   "CAPTIONS": "Textning",

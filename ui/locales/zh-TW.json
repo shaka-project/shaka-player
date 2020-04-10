@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "廣告長度",
-  "AD_PROGRESS": "[AD_ON:1]/[NUM_ADS:6]",
-  "AD_TIME": "廣告：[AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "廣告 [AD_ON]/[NUM_ADS]",
+  "AD_TIME": "廣告：[AD_TIME]",
   "AUTO_QUALITY": "自動",
   "BACK": "返回",
   "CAPTIONS": "字幕",

@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "광고 기간",
-  "AD_PROGRESS": "[AD_ON:1]/[NUM_ADS:6]",
-  "AD_TIME": "광고: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "광고 [AD_ON]/[NUM_ADS]",
+  "AD_TIME": "광고: [AD_TIME]",
   "AUTO_QUALITY": "자동",
   "BACK": "뒤로",
   "CAPTIONS": "자막",

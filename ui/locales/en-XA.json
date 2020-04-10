@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "[Åð ðûŕåţîöñ one two]",
-  "AD_PROGRESS": "[ᐅ[AD_ON:1]ᐊ öƒ ᐅ[NUM_ADS:6]ᐊ one two three]",
-  "AD_TIME": "[Åð: ᐅ[AD_TIME:0:05/0:10]ᐊ one two]",
+  "AD_PROGRESS": "[Åð ᐅ[AD_ON]ᐊ öƒ ᐅ[NUM_ADS]ᐊ one two three]",
+  "AD_TIME": "[Åð: ᐅ[AD_TIME]ᐊ one two]",
   "AUTO_QUALITY": "[Åûţö one]",
   "BACK": "[Бåçķ one]",
   "CAPTIONS": "[Çåþţîöñš one]",

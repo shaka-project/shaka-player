@@ -27,8 +27,7 @@ describe('DashParser SegmentBase', () => {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterNewPeriod: () => {},
-      filterAllPeriods: () => {},
+      filter: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
@@ -70,9 +69,9 @@ describe('DashParser SegmentBase', () => {
 
     // Call createSegmentIndex() on each stream to make the requests, but expect
     // failure from the actual parsing, since the data is bogus.
-    const stream1 = manifest.periods[0].variants[0].video;
+    const stream1 = manifest.variants[0].video;
     await expectAsync(stream1.createSegmentIndex()).toBeRejected();
-    const stream2 = manifest.periods[0].variants[1].video;
+    const stream2 = manifest.variants[1].video;
     await expectAsync(stream2.createSegmentIndex()).toBeRejected();
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(5);
@@ -286,7 +285,7 @@ describe('DashParser SegmentBase', () => {
 
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
-    const video = manifest.periods[0].variants[0].video;
+    const video = manifest.variants[0].video;
     await video.createSegmentIndex();  // real data, should succeed
 
     const pos = video.segmentIndex.find(0);

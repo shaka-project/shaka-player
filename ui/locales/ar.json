@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "مدة الإعلان",
-  "AD_PROGRESS": "[AD_ON:1] من [NUM_ADS:6]",
-  "AD_TIME": "الإعلان: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "الإعلان [AD_ON] من [NUM_ADS]",
+  "AD_TIME": "الإعلان: [AD_TIME]",
   "AUTO_QUALITY": "تلقائي",
   "BACK": "رجوع",
   "CAPTIONS": "الترجمة والشرح",

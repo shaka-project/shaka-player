@@ -281,7 +281,6 @@ MyManifestParser.prototype.loadVariant_ = function(hasVideo, hasAudio) {
     audio:     hasAudio ? this.loadStream_('audio') : null,
     video:     hasVideo ? this.loadStream_('video') : null,
     bandwidth: 8000,  // bits/sec, audio+video combined
-    drmInfos:  [],
     allowedByApplication: true,  // always initially true
     allowedByKeySystem:   true   // always initially true
   };
@@ -313,6 +312,7 @@ MyManifestParser.prototype.loadStream_ = function(type) {
     kind:      type == 'text' ? 'subtitles' : undefined,
     channelsCount: type == 'audio' ? 2 : undefined,
     encrypted: false,
+    drmInfos:  [],
     keyId:     null,
     language:  'en',
     label:     'my_stream',
@@ -342,17 +342,16 @@ MyManifestParser.prototype.loadReference_ =
 ## Encrypted Content
 
 If your content is encrypted, there are a few changes to the manifest you need
-to do.  First, for each Variant that contains encrypted content, you need to set
-`variant.drmInfos` to an array of {@link shaka.extern.DrmInfo} objects.  All the
-fields (except the key-system name) can be set to the default and will be
-replaced by settings from the Player configuration.  If the `drmInfos` array
-is empty, the content is expected to be clear.
+to do.  First, for each Stream that contains encrypted content, you need to set
+`stream.encrypted` to true and set `stream.keyId` to the key ID that the stream
+is encrypted with.  The `keyId` field is technically optional, but it allows the
+player to choose streams more intelligently based on which keys are available.
+If `keyId` is omitted, missing keys may cause playback to stall.
 
-In each stream that is encrypted, set `stream.encrypted` to `true` and
-optionally set `stream.keyId` to the key ID that the stream is encrypted with.
-The `keyId` field is optional, but it allows the player to choose streams more
-intelligently based on which keys are available.  If `keyId` is omitted, missing
-keys may cause playback to stall.
+You must also set `stream.drmInfos` to an array of {@link shaka.extern.DrmInfo}
+objects.  All the fields (except the key-system name) can be set to the default
+and will be replaced by settings from the Player configuration.  If the
+`drmInfos` array is empty, the content is expected to be clear.
 
 If you set `drmInfo.initData` to a non-empty array, we will use that to
 initialize EME.  We will override any encryption info in the media (e.g.

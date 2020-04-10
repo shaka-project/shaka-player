@@ -1,7 +1,7 @@
 {
   "AD_DURATION": "Trajanje oglasa",
-  "AD_PROGRESS": "[AD_ON:1] od [NUM_ADS:6]",
-  "AD_TIME": "Oglas: [AD_TIME:0:05/0:10]",
+  "AD_PROGRESS": "Oglas [AD_ON] od [NUM_ADS]",
+  "AD_TIME": "Oglas: [AD_TIME]",
   "AUTO_QUALITY": "Automatski",
   "BACK": "Natrag",
   "CAPTIONS": "Titlovi",

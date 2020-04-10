@@ -440,7 +440,11 @@ shakaDemo.Main = class {
 
     const storage = new shaka.offline.Storage();
 
-    // Set the progress callback;
+    // Configure the storage instance.
+    /**
+     * @param {string} identifier
+     * @return {?ShakaDemoAssetInfo}
+     */
     const getAssetWithIdentifier = (identifier) => {
       for (const asset of shakaAssets.testAssets) {
         if (this.getIdentifierFromAsset_(asset) == identifier) {
@@ -456,6 +460,10 @@ shakaDemo.Main = class {
       }
       return null;
     };
+    /**
+     * @param {shaka.extern.StoredContent} content
+     * @param {number} progress
+     */
     const progressCallback = (content, progress) => {
       const identifier = content.appMetadata['identifier'];
       const asset = getAssetWithIdentifier(identifier);

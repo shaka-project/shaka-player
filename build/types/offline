@@ -9,6 +9,7 @@
 +../../lib/offline/indexeddb/storage_mechanism.js
 +../../lib/offline/indexeddb/v1_storage_cell.js
 +../../lib/offline/indexeddb/v2_storage_cell.js
++../../lib/offline/indexeddb/v5_storage_cell.js
 +../../lib/offline/manifest_converter.js
 +../../lib/offline/offline_manifest_parser.js
 +../../lib/offline/offline_scheme.js

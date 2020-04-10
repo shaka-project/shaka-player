@@ -240,7 +240,7 @@ describe('Player', () => {
     });
 
     // Repro for https://github.com/google/shaka-player/issues/1879.
-    it('actually appends cues when enabled initially', async () => {
+    it('appends cues when enabled initially', async () => {
       let cues = [];
       /** @const {!shaka.test.FakeTextDisplayer} */
       const displayer = new shaka.test.FakeTextDisplayer();
@@ -254,14 +254,17 @@ describe('Player', () => {
       player.configure({preferredTextLanguage: preferredTextLanguage});
 
       await player.load('test:sintel_realistic_compiled');
-      await Util.delay(1);  // Allow the first segments to be appended.
+
+      // Play until a time at which the external cues would be on screen.
+      video.play();
+      await waitUntilPlayheadReaches(eventManager, video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
       expect(displayer.isTextVisible()).toBe(true);
       expect(cues.length).toBeGreaterThan(0);
     });
 
-    it('actually appends cues for external text', async () => {
+    it('appends cues for external text', async () => {
       let cues = [];
       /** @const {!shaka.test.FakeTextDisplayer} */
       const displayer = new shaka.test.FakeTextDisplayer();
@@ -275,23 +278,22 @@ describe('Player', () => {
       /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager);
 
-
       await player.load('test:sintel_no_text_compiled');
       const locationUri = new goog.Uri(location.href);
       const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
       const absoluteUri = locationUri.resolve(partialUri);
-      await player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
-          'text/vtt');
+      const newTrack = player.addTextTrack(
+          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
 
-      const textTracks = player.getTextTracks();
-      expect(textTracks).toBeTruthy();
-      expect(textTracks.length).toBe(1);
+      expect(player.getTextTracks()).toEqual([newTrack]);
 
+      player.selectTextTrack(newTrack);
       player.setTextTrackVisibility(true);
       await waiter.waitForEvent(player, 'texttrackvisibility');
-      // Wait for the text cues to get appended.
-      // TODO: this should be based on an event instead.
-      await Util.delay(1);
+
+      // Play until a time at which the external cues would be on screen.
+      video.play();
+      await waitUntilPlayheadReaches(eventManager, video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
       expect(displayer.isTextVisible()).toBe(true);
@@ -308,15 +310,14 @@ describe('Player', () => {
       const locationUri = new goog.Uri(location.href);
       const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
       const absoluteUri = locationUri.resolve(partialUri);
-      await player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
-          'text/vtt');
+      const newTrack = player.addTextTrack(
+          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
 
-      const textTracks = player.getTextTracks();
-      expect(textTracks).toBeTruthy();
-      expect(textTracks.length).toBe(1);
+      expect(newTrack.language).toBe('en');
+      expect(player.getTextTracks()).toEqual([newTrack]);
 
-      expect(textTracks[0].active).toBe(true);
-      expect(textTracks[0].language).toBe('en');
+      player.selectTextTrack(newTrack);
+      expect(player.getTextTracks()[0].active).toBe(true);
     });
 
     it('with cea closed captions', async () => {
@@ -326,32 +327,6 @@ describe('Player', () => {
       expect(textTracks).toBeTruthy();
       expect(textTracks.length).toBe(1);
       expect(textTracks[0].language).toBe('en');
-    });
-
-    it('while changing languages with short Periods', async () => {
-      // See: https://github.com/google/shaka-player/issues/797
-      player.configure({preferredAudioLanguage: 'en'});
-      await player.load('test:sintel_short_periods_compiled');
-      video.play();
-      await waitUntilPlayheadReaches(eventManager, video, 8, 30);
-
-      // The Period changes at 10 seconds.  Assert that we are in the previous
-      // Period and have buffered into the next one.
-      expect(video.currentTime).toBeLessThan(9);
-      // The two periods might not be in a single contiguous buffer, so don't
-      // check end(0).  Gap-jumping will deal with any discontinuities.
-      const bufferEnd = video.buffered.end(video.buffered.length - 1);
-      expect(bufferEnd).toBeGreaterThan(11);
-
-      // Change to a different language; this should clear the buffers and
-      // cause a Period transition again.
-      expect(getActiveLanguage()).toBe('en');
-      player.selectAudioLanguage('es');
-      await waitUntilPlayheadReaches(eventManager, video, 21, 30);
-
-      // Should have gotten past the next Period transition and still be
-      // playing the new language.
-      expect(getActiveLanguage()).toBe('es');
     });
 
     it('at higher playback rates', async () => {
@@ -587,10 +562,7 @@ describe('Player', () => {
       const waiter = (new shaka.test.Waiter(eventManager)).timeoutAfter(10);
       const canPlayThrough = waiter.waitForEvent(video, 'canplaythrough');
 
-      // Important: use a stream that starts somewhere other than zero, so that
-      // the video element's time is initially different from the start time of
-      // playback, and there is no content at time zero.
-      await player.load('test:sintel_start_at_3_compiled', 5);
+      await player.load('test:sintel_compiled', 5);
       shaka.log.debug('load resolved');
 
       // When load is resolved(), tracks should definitely exist.

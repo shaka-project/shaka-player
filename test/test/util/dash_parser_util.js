@@ -35,25 +35,14 @@ shaka.test.Dash = class {
 
     const playerInterface = {
       networkingEngine: networkingEngine,
-      filterNewPeriod: () => {},
-      filterAllPeriods: () => {},
+      filter: () => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
     };
     const manifest = await dashParser.start('dummy://foo', playerInterface);
-    const stream = manifest.periods[0].variants[0].video;
+    const stream = manifest.variants[0].video;
     await stream.createSegmentIndex();
-
-    // Set expected values for append window.
-    const appendWindowStart = manifest.periods[0].startTime;
-    const appendWindowEnd = manifest.periods[1] ?
-        manifest.periods[1].startTime :
-        manifest.presentationTimeline.getDuration();
-    for (const ref of references) {
-      ref.appendWindowStart = appendWindowStart;
-      ref.appendWindowEnd = appendWindowEnd;
-    }
 
     shaka.test.ManifestParser.verifySegmentIndex(stream, references);
   }
@@ -74,8 +63,7 @@ shaka.test.Dash = class {
 
     const playerInterface = {
       networkingEngine: networkingEngine,
-      filterNewPeriod: () => {},
-      filterAllPeriods: () => {},
+      filter: () => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
@@ -125,13 +113,7 @@ shaka.test.Dash = class {
    * @return {!Promise.<shaka.media.SegmentReference>}
    */
   static async getFirstVideoSegmentReference(manifest) {
-    const period = manifest.periods[0];
-    expect(period).not.toBe(null);
-    if (!period) {
-      return null;
-    }
-
-    const variant = period.variants[0];
+    const variant = manifest.variants[0];
     expect(variant).not.toBe(null);
     if (!variant) {
       return null;
@@ -161,7 +143,7 @@ shaka.test.Dash = class {
    * @return {!Promise}
    */
   static async callCreateSegmentIndex(manifest) {
-    const stream = manifest.periods[0].variants[0].video;
+    const stream = manifest.variants[0].video;
     await expectAsync(stream.createSegmentIndex()).toBeRejected();
   }
 

@@ -143,7 +143,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
   });
 
   describe('fit', () => {
-    it('drops references which are outside the period bounds', () => {
+    it('clamps references to the window bounds', () => {
       // These negative numbers can occur due to presentationTimeOffset in DASH.
       const references = [
         makeReference(uri(0), -10, -3),
@@ -153,14 +153,14 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         makeReference(uri(4), 18, 25),
       ];
       const index = new shaka.media.SegmentIndex(references);
-      expect(index.references_).toEqual(references);
+      expect(index.references).toEqual(references);
 
       // Get the position and reference of the segment at time 5.
       const positionAtTimeFive = index.find(5);
       goog.asserts.assert(positionAtTimeFive != null, 'Null position!');
       const referenceAtTimeFive = index.get(positionAtTimeFive);
 
-      index.fit(/* periodStart= */ 0, /* periodEnd= */ 15);
+      index.fit(/* windowStart= */ 0, /* windowEnd= */ 15);
       const newReferences = [
         /* ref 0 dropped because it ends before the period starts */
         makeReference(uri(1), -3, 4),
@@ -168,29 +168,30 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         makeReference(uri(3), 11, 15),  // end time clamped to period
         /* ref 4 dropped because it starts after the period ends */
       ];
-      expect(index.references_).toEqual(newReferences);
+      expect(index.references).toEqual(newReferences);
 
       // The position used to represent this segment should not have changed.
       expect(index.find(5)).toBe(positionAtTimeFive);
       expect(index.get(positionAtTimeFive)).toBe(referenceAtTimeFive);
     });
 
-    it('drops references which end exactly at zero', () => {
-      // The end time is meant to be exclusive, so segments ending at zero
-      // (after PTO adjustments) should be dropped.
+    it('drops references which end exactly at window start', () => {
+      // The end time is meant to be exclusive, so segments ending at window
+      // start should be dropped.
       const references = [
         makeReference(uri(0), -10, 0),
         makeReference(uri(1), 0, 10),
       ];
-      const index = new shaka.media.SegmentIndex(references);
-      expect(index.references_).toEqual(references);
 
-      index.fit(/* periodStart= */ 0, /* periodEnd= */ 10);
+      const index = new shaka.media.SegmentIndex(references);
+      expect(index.references).toEqual(references);
+
+      index.fit(/* windowStart= */ 0, /* windowEnd= */ 10);
       const newReferences = [
-        /* ref 0 dropped because it ends before the period starts (at 0) */
+        /* ref 0 dropped because it ends when the window start (at 0) */
         makeReference(uri(1), 0, 10),
       ];
-      expect(index.references_).toEqual(newReferences);
+      expect(index.references).toEqual(newReferences);
     });
   });
 
@@ -202,8 +203,8 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const references2 = [actual1, actual2, actual3];
 
       index1.merge(references2);
-      expect(index1.references_.length).toBe(3);
-      expect(index1.references_).toEqual(references2);
+      expect(index1.references.length).toBe(3);
+      expect(index1.references).toEqual(references2);
     });
 
     it('zero references into three references', () => {
@@ -212,8 +213,8 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const index1 = new shaka.media.SegmentIndex(references1);
 
       index1.merge([]);
-      expect(index1.references_.length).toBe(3);
-      expect(index1.references_).toEqual(references1);
+      expect(index1.references.length).toBe(3);
+      expect(index1.references).toEqual(references1);
     });
 
     it('one reference into one reference at end', () => {
@@ -225,9 +226,9 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const references2 = [makeReference(uri(20), 20, 30)];
 
       index1.merge(references2);
-      expect(index1.references_.length).toBe(2);
-      expect(index1.references_[0]).toEqual(references1[0]);
-      expect(index1.references_[1]).toEqual(references2[0]);
+      expect(index1.references.length).toBe(2);
+      expect(index1.references[0]).toEqual(references1[0]);
+      expect(index1.references[1]).toEqual(references2[0]);
     });
 
     it('one reference into two references at end', () => {
@@ -242,10 +243,10 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const references2 = [makeReference(uri(30), 30, 40)];
 
       index1.merge(references2);
-      expect(index1.references_.length).toBe(3);
-      expect(index1.references_[0]).toEqual(references1[0]);
-      expect(index1.references_[1]).toEqual(references1[1]);
-      expect(index1.references_[2]).toEqual(references2[0]);
+      expect(index1.references.length).toBe(3);
+      expect(index1.references[0]).toEqual(references1[0]);
+      expect(index1.references[1]).toEqual(references1[1]);
+      expect(index1.references[2]).toEqual(references2[0]);
     });
 
     it('two references into one reference at end', () => {
@@ -260,10 +261,10 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       ];
 
       index1.merge(references2);
-      expect(index1.references_.length).toBe(3);
-      expect(index1.references_[0]).toEqual(references1[0]);
-      expect(index1.references_[1]).toEqual(references2[0]);
-      expect(index1.references_[2]).toEqual(references2[1]);
+      expect(index1.references.length).toBe(3);
+      expect(index1.references[0]).toEqual(references1[0]);
+      expect(index1.references[1]).toEqual(references2[0]);
+      expect(index1.references[2]).toEqual(references2[1]);
     });
 
     it('last live stream reference when period change', () => {
@@ -285,10 +286,10 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       ];
 
       index1.merge(references2);
-      expect(index1.references_.length).toBe(3);
-      expect(index1.references_[0]).toEqual(references1[0]);
-      expect(index1.references_[1]).toEqual(references2[0]);
-      expect(index1.references_[2]).toEqual(references2[1]);
+      expect(index1.references.length).toBe(3);
+      expect(index1.references[0]).toEqual(references1[0]);
+      expect(index1.references[1]).toEqual(references2[0]);
+      expect(index1.references[2]).toEqual(references2[1]);
     });
   });
 
@@ -302,47 +303,47 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
 
     it('no segments', () => {
       index1.evict(5);
-      expect(index1.references_.length).toBe(3);
+      expect(index1.references.length).toBe(3);
     });
 
     it('one segment (edge)', () => {
       index1.evict(10);
 
-      expect(index1.references_.length).toBe(2);
-      expect(index1.references_[0]).toEqual(actual2);
-      expect(index1.references_[1]).toEqual(actual3);
+      expect(index1.references.length).toBe(2);
+      expect(index1.references[0]).toEqual(actual2);
+      expect(index1.references[1]).toEqual(actual3);
     });
 
     it('one segment', () => {
       index1.evict(11);
 
-      expect(index1.references_.length).toBe(2);
-      expect(index1.references_[0]).toEqual(actual2);
-      expect(index1.references_[1]).toEqual(actual3);
+      expect(index1.references.length).toBe(2);
+      expect(index1.references[0]).toEqual(actual2);
+      expect(index1.references[1]).toEqual(actual3);
     });
 
     it('two segments (edge)', () => {
       index1.evict(20);
 
-      expect(index1.references_.length).toBe(1);
-      expect(index1.references_[0]).toEqual(actual3);
+      expect(index1.references.length).toBe(1);
+      expect(index1.references[0]).toEqual(actual3);
     });
 
     it('two segments', () => {
       index1.evict(21);
 
-      expect(index1.references_.length).toBe(1);
-      expect(index1.references_[0]).toEqual(actual3);
+      expect(index1.references.length).toBe(1);
+      expect(index1.references[0]).toEqual(actual3);
     });
 
     it('three segments (edge)', () => {
       index1.evict(30);
-      expect(index1.references_.length).toBe(0);
+      expect(index1.references.length).toBe(0);
     });
 
     it('three segments', () => {
       index1.evict(31);
-      expect(index1.references_.length).toBe(0);
+      expect(index1.references.length).toBe(0);
     });
 
     it('does not change positions', () => {
@@ -380,6 +381,12 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         refs.push(ref);
       }
       expect(refs).toEqual(inputRefs);
+    });
+
+    it('works after eviction', () => {
+      const index = new shaka.media.SegmentIndex(inputRefs);
+      index.evict(15);  // Drop the first ref.
+      expect(Array.from(index)).toEqual(inputRefs.slice(1));
     });
 
     describe('seek', () => {
@@ -437,6 +444,160 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         expect(iterator.next().value).toBe(inputRefs[2]);
         expect(iterator.current()).toBe(inputRefs[2]);
       });
+    });
+  });
+
+  describe('MetaSegmentIndex', () => {
+    const inputRefs0 = [
+      makeReference(uri(0), 0, 10),
+      makeReference(uri(1), 10, 20),
+      makeReference(uri(2), 20, 30),
+    ];
+    const inputRefs1 = [
+      makeReference(uri(3), 30, 40),
+      makeReference(uri(4), 40, 50),
+      makeReference(uri(5), 50, 60),
+    ];
+    const inputRefs2 = [
+      makeReference(uri(6), 60, 70),
+      makeReference(uri(7), 70, 80),
+      makeReference(uri(8), 80, 90),
+    ];
+
+    /** @type {!shaka.media.SegmentIndex} */
+    let index0;
+    /** @type {!shaka.media.SegmentIndex} */
+    let index1;
+    /** @type {!shaka.media.SegmentIndex} */
+    let index2;
+    /** @type {!shaka.media.MetaSegmentIndex} */
+    let metaIndex;
+
+    beforeEach(() => {
+      // Make sure each index has a _copy_ of the input refs, so that the
+      // original arrays are never modified.
+      index0 = new shaka.media.SegmentIndex(inputRefs0.slice());
+      index1 = new shaka.media.SegmentIndex(inputRefs1.slice());
+      index2 = new shaka.media.SegmentIndex(inputRefs2.slice());
+      metaIndex = new shaka.media.MetaSegmentIndex();
+    });
+
+    it('combines the contents of several SegmentIndexes', () => {
+      metaIndex.appendSegmentIndex(index0);
+      expect(metaIndex.find(0)).toBe(0);
+      expect(metaIndex.find(10)).toBe(1);
+      expect(metaIndex.find(20)).toBe(2);
+      expect(metaIndex.find(30)).toBe(null);
+      expect(Array.from(metaIndex)).toEqual(inputRefs0);
+
+      metaIndex.appendSegmentIndex(index1);
+      expect(metaIndex.find(0)).toBe(0);
+      expect(metaIndex.find(10)).toBe(1);
+      expect(metaIndex.find(20)).toBe(2);
+      expect(metaIndex.find(30)).toBe(3);
+      expect(metaIndex.find(40)).toBe(4);
+      expect(metaIndex.find(50)).toBe(5);
+      expect(metaIndex.find(60)).toBe(null);
+      expect(Array.from(metaIndex)).toEqual(inputRefs0.concat(inputRefs1));
+
+      metaIndex.appendSegmentIndex(index2);
+      expect(metaIndex.find(0)).toBe(0);
+      expect(metaIndex.find(10)).toBe(1);
+      expect(metaIndex.find(20)).toBe(2);
+      expect(metaIndex.find(30)).toBe(3);
+      expect(metaIndex.find(40)).toBe(4);
+      expect(metaIndex.find(50)).toBe(5);
+      expect(metaIndex.find(60)).toBe(6);
+      expect(metaIndex.find(70)).toBe(7);
+      expect(metaIndex.find(80)).toBe(8);
+      expect(metaIndex.find(90)).toBe(null);
+      expect(Array.from(metaIndex)).toEqual(
+          inputRefs0.concat(inputRefs1, inputRefs2));
+    });
+
+    it('updates through merge', () => {
+      metaIndex.appendSegmentIndex(index0);
+      metaIndex.appendSegmentIndex(index1);
+      expect(Array.from(metaIndex)).toEqual(inputRefs0.concat(inputRefs1));
+
+      index1.merge(inputRefs2);
+      expect(Array.from(metaIndex)).toEqual(
+          inputRefs0.concat(inputRefs1, inputRefs2));
+    });
+
+    it('updates through replace', () => {
+      metaIndex.appendSegmentIndex(index0);
+      metaIndex.appendSegmentIndex(index1);
+      expect(Array.from(metaIndex)).toEqual(inputRefs0.concat(inputRefs1));
+
+      index1.replace(inputRefs2);
+      expect(Array.from(metaIndex)).toEqual(inputRefs0.concat(inputRefs2));
+    });
+
+    it('tracks evictions with stable positions', () => {
+      metaIndex.appendSegmentIndex(index0);
+      metaIndex.appendSegmentIndex(index1);
+      metaIndex.appendSegmentIndex(index2);
+      const allRefs = inputRefs0.concat(inputRefs1, inputRefs2);
+
+      expect(metaIndex.find(0)).toBe(0);
+      expect(metaIndex.find(10)).toBe(1);
+      expect(metaIndex.find(20)).toBe(2);
+      expect(metaIndex.find(30)).toBe(3);
+      expect(metaIndex.find(40)).toBe(4);
+      expect(metaIndex.find(50)).toBe(5);
+      expect(metaIndex.find(60)).toBe(6);
+      expect(metaIndex.find(70)).toBe(7);
+      expect(metaIndex.find(80)).toBe(8);
+      expect(metaIndex.find(90)).toBe(null);
+      expect(Array.from(metaIndex)).toEqual(allRefs);
+
+      index0.evict(25);
+      index1.evict(25);
+      index2.evict(25);
+      expect(metaIndex.find(20)).toBe(2);
+      expect(metaIndex.find(30)).toBe(3);
+      expect(metaIndex.find(40)).toBe(4);
+      expect(metaIndex.find(50)).toBe(5);
+      expect(metaIndex.find(60)).toBe(6);
+      expect(metaIndex.find(70)).toBe(7);
+      expect(metaIndex.find(80)).toBe(8);
+      expect(metaIndex.find(90)).toBe(null);
+      expect(Array.from(metaIndex)).toEqual(allRefs.slice(2));
+
+      index0.evict(45);
+      index1.evict(45);
+      index2.evict(45);
+      expect(metaIndex.find(40)).toBe(4);
+      expect(metaIndex.find(50)).toBe(5);
+      expect(metaIndex.find(60)).toBe(6);
+      expect(metaIndex.find(70)).toBe(7);
+      expect(metaIndex.find(80)).toBe(8);
+      expect(metaIndex.find(90)).toBe(null);
+      expect(Array.from(metaIndex)).toEqual(allRefs.slice(4));
+    });
+
+    it('updates through updateEvery', async () => {
+      metaIndex.appendSegmentIndex(index0);
+      metaIndex.appendSegmentIndex(index1);
+
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const oldRefs = inputRefs0.concat(inputRefs1);
+
+      // Make a copy of inputRefs2 so we don't modify the original.
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const newRefs = inputRefs2.slice();
+
+      expect(Array.from(metaIndex)).toEqual(oldRefs);
+
+      // Every 0.1 seconds, return the next new ref.
+      index1.updateEvery(0.1, () => {
+        return [newRefs.shift()];
+      });
+      // Wait long enough for all three new refs to be appended.
+      await shaka.test.Util.delay(0.5);
+
+      expect(Array.from(metaIndex)).toEqual(oldRefs.concat(inputRefs2));
     });
   });
 

@@ -461,14 +461,6 @@ shaka.extern.EmsgInfo;
 
 
 /**
- * @typedef {function(!Element):Array.<shaka.extern.DrmInfo>}
- * @see shaka.extern.DashManifestConfiguration
- * @exportDoc
- */
-shaka.extern.DashContentProtectionCallback;
-
-
-/**
  * @typedef {{
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
@@ -520,7 +512,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
- *       ((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined),
+ *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
+ *         undefined),
  *   logLicenseExchange: boolean
  * }}
  *
@@ -543,7 +536,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   A dictionary which maps key system IDs to advanced DRM configuration for
  *   those key systems.
  * @property
- *     {((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined)}
+ *     {((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
+ *        undefined)}
  *   initDataTransform
  *   <i>Optional.</i><br>
  *   If given, this function is called with the init data from the
@@ -563,7 +557,6 @@ shaka.extern.DrmConfiguration;
 
 /**
  * @typedef {{
- *   customScheme: shaka.extern.DashContentProtectionCallback,
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
  *   xlinkFailGracefully: boolean,
@@ -574,10 +567,6 @@ shaka.extern.DrmConfiguration;
  *   ignoreEmptyAdaptationSet: boolean
  * }}
  *
- * @property {shaka.extern.DashContentProtectionCallback} customScheme
- *   If given, invoked by a DASH manifest parser to interpret custom or
- *   non-standard DRM schemes found in the manifest.  The argument is a
- *   ContentProtection node.  Return null if not recognized.
  * @property {string} clockSyncUri
  *   A default clock sync URI to be used with live streams which do not
  *   contain any clock sync information.  The <code>Date</code> header from this
@@ -838,8 +827,7 @@ shaka.extern.AbrConfiguration;
  *     trackSelectionCallback
  *   Called inside <code>store()</code> to determine which tracks to save from a
  *   manifest. It is passed an array of Tracks from the manifest and it should
- *   return an array of the tracks to store.  This is called for each Period in
- *   the manifest (in order).
+ *   return an array of the tracks to store.
  * @property {function(shaka.extern.StoredContent,number)} progressCallback
  *   Called inside <code>store()</code> to give progress info back to the app.
  *   It is given the current manifest being stored and the progress of it being

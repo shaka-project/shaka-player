@@ -36,8 +36,7 @@ describe('DashParser SegmentTemplate', () => {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterNewPeriod: () => {},
-      filterAllPeriods: () => {},
+      filter: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
@@ -86,10 +85,9 @@ describe('DashParser SegmentTemplate', () => {
       fakeNetEngine.setResponseText('dummy://foo', source);
       const manifest = await parser.start('dummy://foo', playerInterface);
 
-      expect(manifest.periods.length).toBe(1);
-      expect(manifest.periods[0].variants.length).toBe(1);
+      expect(manifest.variants.length).toBe(1);
 
-      const stream = manifest.periods[0].variants[0].video;
+      const stream = manifest.variants[0].video;
       expect(stream).toBeTruthy();
       await stream.createSegmentIndex();
 
@@ -376,7 +374,7 @@ describe('DashParser SegmentTemplate', () => {
       const actual = await parser.start('dummy://foo', playerInterface);
       expect(actual).toBeTruthy();
 
-      const variants = actual.periods[0].variants;
+      const variants = actual.variants;
       expect(variants.length).toBe(3);
 
       await variants[0].video.createSegmentIndex();
@@ -427,7 +425,7 @@ describe('DashParser SegmentTemplate', () => {
       const actual = await parser.start('dummy://foo', playerInterface);
       expect(actual).toBeTruthy();
 
-      const variants = actual.periods[0].variants;
+      const variants = actual.variants;
       expect(variants.length).toBe(3);
       await variants[0].video.createSegmentIndex();
       await variants[1].video.createSegmentIndex();

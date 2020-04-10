@@ -79,6 +79,16 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
           this.updateAriaLabel_();
         });
 
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+          shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
+        });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+          shaka.ui.Utils.setDisplay(this.overflowMenuButton_, true);
+        });
+
 
     this.eventManager.listen(
         this.controls, 'submenuopen', () => {
