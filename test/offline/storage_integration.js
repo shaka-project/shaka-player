@@ -390,17 +390,13 @@ filterDescribe('Storage', storageSupport, () => {
     });
 
     it('throws error using store', async () => {
-      // The URI still needs to map to a specific manifest parser, so we use an
-      // extension that maps to DASH.
-      await expectAsync(storage.store('the-uri-wont-matter.mpd'))
-          .toBeRejectedWith(expectedError);
+      const store = storage.store('any-uri', noMetadata, fakeMimeType);
+      await expectAsync(store).toBeRejectedWith(expectedError);
     });
 
     it('throws error using remove', async () => {
-      // The URI still needs to map to a specific manifest parser, so we use an
-      // extension that maps to DASH.
-      await expectAsync(storage.remove('the-uri-wont-matter.mpd'))
-          .toBeRejectedWith(expectedError);
+      const remove = storage.remove('any-uri');
+      await expectAsync(remove).toBeRejectedWith(expectedError);
     });
   });
 
@@ -829,7 +825,8 @@ filterDescribe('Storage', storageSupport, () => {
           drm,
           makeManifestWithPerStreamBandwidth());
 
-      const stored = await storage.store(manifestWithPerStreamBandwidthUri);
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -894,7 +891,8 @@ filterDescribe('Storage', storageSupport, () => {
           makeManifestWithPerStreamBandwidth());
       storage.configure('offline.usePersistentLicense', false);
 
-      const stored = await storage.store(manifestWithPerStreamBandwidthUri);
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -948,9 +946,7 @@ filterDescribe('Storage', storageSupport, () => {
       };
 
       // The uri won't matter much, as we have overriden |parseManifest|.
-      // But there will still be a mapping from URI to parser to instantiate the
-      // parser, even though it won't be used.  So make the URI look like DASH.
-      const waitOnStore = storage.store('uri-does-not-matter-much.mpd');
+      const waitOnStore = storage.store('any-uri', noMetadata, fakeMimeType);
 
       // Request for storage to be destroyed. Before waiting for it to resolve,
       // resolve the promise that we are using to stall the store operation.
