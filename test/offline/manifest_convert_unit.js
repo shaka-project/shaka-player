@@ -103,6 +103,7 @@ describe('ManifestConverter', () => {
           ]),
         },
         appMetadata: null,
+        creationTime: 0,
       };
 
       const manifest = createConverter().fromManifestDB(manifestDb);
@@ -134,6 +135,7 @@ describe('ManifestConverter', () => {
         sessionIds: [],
         drmInfo: null,
         appMetadata: null,
+        creationTime: 0,
         streams: [
           createVideoStreamDB(1, [0]),
           createVideoStreamDB(2, [1]),
@@ -160,6 +162,7 @@ describe('ManifestConverter', () => {
         sessionIds: [],
         drmInfo: null,
         appMetadata: null,
+        creationTime: 0,
         streams: [
           createAudioStreamDB(1, [0]),
           createAudioStreamDB(2, [1]),
@@ -186,6 +189,7 @@ describe('ManifestConverter', () => {
         sessionIds: [],
         drmInfo: null,
         appMetadata: null,
+        creationTime: 0,
         streams: [
           createVideoStreamDB(1, [0]),
           createTextStreamDB(2),
@@ -218,6 +222,7 @@ describe('ManifestConverter', () => {
         sessionIds: [],
         drmInfo: null,
         appMetadata: null,
+        creationTime: 0,
         streams: [
           // Audio
           createAudioStreamDB(audio1, [variant2]),
