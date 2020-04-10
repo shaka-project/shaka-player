@@ -38,4 +38,4 @@
     // Export directly to the global scope.
     innerGlobal.shaka = exportTo.shaka;
   }
-})();
+}());
