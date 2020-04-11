@@ -224,6 +224,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
     fadeDelay: 0,
     doubleClickForFullscreen: true,
     enableKeyboardPlaybackControls: true,
+    enableFullscreenOnRotation: true,
   };
 };
 

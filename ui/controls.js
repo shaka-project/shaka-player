@@ -793,7 +793,8 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
 shaka.ui.Controls.prototype.onScreenRotation_ = function() {
   if (!this.video_ ||
       this.video_.readyState == 0 ||
-      this.castProxy_.isCasting()) { return; }
+      this.castProxy_.isCasting() ||
+      !this.config_.enableFullscreenOnRotation) { return; }
 
   if (screen.orientation.type.includes('landscape') &&
       !document.fullscreenElement) {
