@@ -81,6 +81,11 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {shaka.extern.TimelineRegionInfo} region
    */
   onTimedMetadata(region) {}
+
+  /**
+   * @param {Object} value
+   */
+  onCueMetadataChange(value) {}
 };
 
 
