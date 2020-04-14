@@ -41,7 +41,11 @@ describe('TtmlTextParser', () => {
           {
             startTime: 62.03,
             endTime: 62.05,
-            nestedCues: [{payload: 'A B C'}],
+            nestedCues: [{
+              payload: 'A B C',
+              startTime: 62.03,
+              endTime: 62.05,
+            }],
             payload: '',
           },
         ],
@@ -53,8 +57,11 @@ describe('TtmlTextParser', () => {
           {
             startTime: 62.03,
             endTime: 62.05,
-            nestedCues: [{payload: ' A    B   C  '}],
-            payload: '',
+            nestedCues: [{
+              payload: ' A    B   C  ',
+              startTime: 62.03,
+              endTime: 62.05,
+            }],
           },
         ],
         '<tt xml:space="preserve">' + ttBody + '</tt>',
@@ -65,8 +72,11 @@ describe('TtmlTextParser', () => {
           {
             startTime: 62.03,
             endTime: 62.05,
-            nestedCues: [{payload: 'A B C'}],
-            payload: '',
+            nestedCues: [{
+              payload: 'A B C',
+              startTime: 62.03,
+              endTime: 62.05,
+            }],
           },
         ],
         '<tt>' + ttBody + '</tt>',
@@ -97,9 +107,22 @@ describe('TtmlTextParser', () => {
             endTime: 3723.2,
             payload: '',
             nestedCues: [
-              {payload: 'First cue'},
-              {payload: '', spacer: true},
-              {payload: 'Second cue'},
+              {
+                payload: 'First cue',
+                startTime: 62.05,
+                endTime: 3723.2,
+              },
+              {
+                payload: '',
+                spacer: true,
+                startTime: 62.05,
+                endTime: 3723.2,
+              },
+              {
+                payload: 'Second cue',
+                startTime: 62.05,
+                endTime: 3723.2,
+              },
             ],
           },
         ],
@@ -753,7 +776,11 @@ describe('TtmlTextParser', () => {
           {
             startTime: 62.05,
             endTime: 3723.2,
-            nestedCues: [{payload: 'Line1\nLine2'}],
+            nestedCues: [{
+              payload: 'Line1\nLine2',
+              startTime: 62.05,
+              endTime: 3723.2,
+            }],
             payload: '',
           },
         ],
@@ -1011,7 +1038,11 @@ describe('TtmlTextParser', () => {
             endTime: 3723.2,
             payload: '',
             nestedCues: [
-              {payload: 'äöü'},
+              {
+                payload: 'äöü',
+                startTime: 62.05,
+                endTime: 3723.2,
+              },
             ],
           },
         ],

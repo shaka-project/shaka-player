@@ -76,6 +76,20 @@ describe('SimpleTextDisplayer', () => {
             new shaka.text.Cue(20, 40, 'Test1'),
           ]);
     });
+
+    it('appends nested cues', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
+      const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
+
+      shakaCue.nestedCues = [nestedCue1, nestedCue2];
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, text: 'Test2'},
+            {startTime: 10, endTime: 20, text: 'Test1'},
+          ],
+          [shakaCue]);
+    });
   });
 
   describe('remove', () => {
