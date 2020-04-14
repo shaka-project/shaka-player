@@ -408,7 +408,7 @@ describe('TextEngine', () => {
       });
     });
 
-    it('limits appended cues', async () => {
+    it('limits not apply to appendBuffer', async () => {
       textEngine.setAppendWindow(0, 1.9);
       await textEngine.appendBuffer(dummyData, 0, 3);
 
@@ -416,6 +416,7 @@ describe('TextEngine', () => {
         [
           createFakeCue(0, 1),
           createFakeCue(1, 2),
+          createFakeCue(2, 3),
         ],
       ]);
 
@@ -424,6 +425,7 @@ describe('TextEngine', () => {
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
+          createFakeCue(0, 1),
           createFakeCue(1, 2),
           createFakeCue(2, 3),
         ],
