@@ -83,7 +83,8 @@ filterDescribe('Storage', storageSupport, () => {
 
       // Store a piece of content.
       await withStorage((storage) => {
-        return storage.store(manifestUri, noMetadata, testSchemeMimeType);
+        return storage.store(
+            manifestUri, noMetadata, testSchemeMimeType).promise;
       });
 
       // Make sure that the content can be found.
@@ -154,7 +155,7 @@ filterDescribe('Storage', storageSupport, () => {
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
       const stored = await storage.store(
-          'test:sintel-enc', noMetadata, testSchemeMimeType);
+          'test:sintel-enc', noMetadata, testSchemeMimeType).promise;
       expect(stored.offlineUri).toBeTruthy();
 
       /** @type {shaka.offline.OfflineUri} */
@@ -197,7 +198,7 @@ filterDescribe('Storage', storageSupport, () => {
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
       const stored = await storage.store(
-          'test:sintel-enc', noMetadata, testSchemeMimeType);
+          'test:sintel-enc', noMetadata, testSchemeMimeType).promise;
       expect(stored.offlineUri).toBeTruthy();
 
       /** @type {shaka.offline.OfflineUri} */
@@ -412,7 +413,7 @@ filterDescribe('Storage', storageSupport, () => {
         shaka.offline.StorageMuxer.overrideSupport(new Map());
 
         const store = storage.store('any-uri', noMetadata, fakeMimeType);
-        await expectAsync(store).toBeRejectedWith(expectedError);
+        await expectAsync(store.promise).toBeRejectedWith(expectedError);
       } finally {
         shaka.offline.StorageMuxer.clearOverride();
       }
@@ -593,7 +594,7 @@ filterDescribe('Storage', storageSupport, () => {
       // Store a manifest with bandwidth only for the variant (no per
       // stream bandwidth). This should result in a less accurate
       // progression of progress values as default values will be used.
-      await storage.store('uri-wont-matter', noMetadata, fakeMimeType);
+      await storage.store('uri-wont-matter', noMetadata, fakeMimeType).promise;
 
       // We should have hit all the progress steps.
       expect(remainingProgress.length).toBe(0);
@@ -734,7 +735,7 @@ filterDescribe('Storage', storageSupport, () => {
       for (let i = 0; i < manifestUris.length; ++i) {
         const uri = manifestUris[i];
         // eslint-disable-next-line no-await-in-loop
-        await storage.store(uri, noMetadata, fakeMimeType);
+        await storage.store(uri, noMetadata, fakeMimeType).promise;
       }
 
       const content = await storage.list();
@@ -767,7 +768,7 @@ filterDescribe('Storage', storageSupport, () => {
       const storeTwo = storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
       storage.configure('offline.trackSelectionCallback', selectTracksBad);
-      await Promise.all([storeOne, storeTwo]);
+      await Promise.all([storeOne.promise, storeTwo.promise]);
 
       expect(selectTracksOne).toHaveBeenCalled();
       expect(selectTracksTwo).toHaveBeenCalled();
@@ -789,7 +790,7 @@ filterDescribe('Storage', storageSupport, () => {
       });
 
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
       expect(stored.tracks.length).toBe(1);
       expect(stored.tracks[0].language).toBe(frenchCanadian);
 
@@ -832,7 +833,7 @@ filterDescribe('Storage', storageSupport, () => {
       });
 
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
       expect(stored.tracks.length).toBe(1);
       expect(stored.tracks[0].language).toBe(frenchCanadian);
     });
@@ -856,7 +857,7 @@ filterDescribe('Storage', storageSupport, () => {
           makeManifestWithPerStreamBandwidth());
 
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -889,8 +890,8 @@ filterDescribe('Storage', storageSupport, () => {
       // Block the network so that we won't finish the first store command.
       /** @type {!shaka.util.PublicPromise} */
       const hangingPromise = netEngine.delayNextRequest();
-      /** @type {!Promise} */
-      const storePromise = storage.store(
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
 
       // Critical: This manifest should have different segment URIs than the one
@@ -898,11 +899,11 @@ filterDescribe('Storage', storageSupport, () => {
       // two storage operations.
       const secondStorePromise = storage.store(
           manifestWithAlternateSegmentsUri, noMetadata, fakeMimeType);
-      await secondStorePromise;
+      await secondStorePromise.promise;
 
       // Unblock the original store and wait for it to complete.
       hangingPromise.resolve();
-      await storePromise;
+      await storeOperation.promise;
     });
 
     // Make sure that when we configure storage to NOT store persistent
@@ -925,7 +926,7 @@ filterDescribe('Storage', storageSupport, () => {
       storage.configure('offline.usePersistentLicense', false);
 
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -959,9 +960,9 @@ filterDescribe('Storage', storageSupport, () => {
           shaka.util.Error.Category.STORAGE,
           shaka.util.Error.Code.CANNOT_STORE_LIVE_OFFLINE,
           manifestWithLiveTimelineUri));
-      await expectAsync(
-          storage.store(manifestWithLiveTimelineUri, noMetadata, fakeMimeType))
-          .toBeRejectedWith(expected);
+      const storeOperation =
+          storage.store(manifestWithLiveTimelineUri, noMetadata, fakeMimeType);
+      await expectAsync(storeOperation.promise).toBeRejectedWith(expected);
     });
 
     it('throws an error if destroyed mid-store', async () => {
@@ -979,6 +980,7 @@ filterDescribe('Storage', storageSupport, () => {
       };
 
       // The uri won't matter much, as we have overriden |parseManifest|.
+      /** @type {!shaka.extern.IAbortableOperation} */
       const waitOnStore = storage.store('any-uri', noMetadata, fakeMimeType);
 
       // Request for storage to be destroyed. Before waiting for it to resolve,
@@ -992,8 +994,67 @@ filterDescribe('Storage', storageSupport, () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.STORAGE,
           shaka.util.Error.Code.OPERATION_ABORTED));
-      await expectAsync(waitOnStore).toBeRejectedWith(expected);
+      await expectAsync(waitOnStore.promise).toBeRejectedWith(expected);
     });
+
+    it('cancels downloads if destroyed mid-store', async () => {
+      await networkCancelTest((abortable) => {
+        return storage.destroy();
+      });
+    });
+
+    it('cancels downloads if canceled mid-store', async () => {
+      await networkCancelTest((abortable) => {
+        return abortable.abort();
+      });
+    });
+
+    /**
+     * @param {function(shaka.extern.IAbortableOperation):!Promise} interruption
+     */
+    async function networkCancelTest(interruption) {
+      const delays = [];
+      /** @type {!shaka.util.PublicPromise} */
+      const aRequestIsStarted = new shaka.util.PublicPromise();
+
+      // Set delays for the URIs of the manifest.
+      const uris = [segment1Uri, segment2Uri, segment3Uri, segment4Uri];
+      for (let i = 0; i < uris.length; i++) {
+        const promise = new shaka.util.PublicPromise();
+        delays.push(promise);
+
+        // The fake networking engine provides a "abortCheck" callback to the
+        // response, so that you can check whether or not the network operation
+        // has been aborted.
+        netEngine.setResponse(uris[i], async (abortCheck) => {
+          aRequestIsStarted.resolve();
+          await promise;
+
+          // All downloads for a given stream are in the same "download group",
+          // and will be downloaded sequentially. Thus, we expect only the first
+          // download to be aborted.
+          expect(abortCheck()).toBe(i == 0 ? true : false);
+
+          return new ArrayBuffer(16);
+        });
+      }
+
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await aRequestIsStarted;
+      const interruptionPromise = interruption(storeOperation);
+      for (const promise of delays) {
+        promise.resolve();
+      }
+      await interruptionPromise;
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.OPERATION_ABORTED));
+      await expectAsync(storeOperation.promise).toBeRejectedWith(expected);
+    }
 
     it('stops for networking errors', async () => {
       // Force all network requests to fail.
@@ -1004,9 +1065,9 @@ filterDescribe('Storage', storageSupport, () => {
         return shaka.util.AbortableOperation.failed(error);
       });
 
-      await expectAsync(
-          storage.store(
-              manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType))
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await expectAsync(storeOperation.promise)
           .toBeRejectedWith(Util.jasmineError(error));
     });
 
@@ -1024,7 +1085,7 @@ filterDescribe('Storage', storageSupport, () => {
       // Store a piece of content, but then change the uri slightly so that
       // it won't be found when we try to remove it (with the wrong uri).
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
       const storedUri = shaka.offline.OfflineUri.parse(stored.offlineUri);
       const missingManifestUri = shaka.offline.OfflineUri.manifest(
           storedUri.mechanism(), storedUri.cell(), storedUri.key() + 1);
@@ -1040,14 +1101,14 @@ filterDescribe('Storage', storageSupport, () => {
 
     it('removes manifest', async () => {
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       await storage.remove(stored.offlineUri);
     });
 
     it('removes manifest with missing segments', async () => {
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -1107,7 +1168,7 @@ filterDescribe('Storage', storageSupport, () => {
         },
       });
       const content = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       /**
        * @type {!Array.<number>}
@@ -1140,7 +1201,8 @@ filterDescribe('Storage', storageSupport, () => {
       /** @type {shaka.offline.Storage} */
       const storage = new shaka.offline.Storage();
       try {
-        await storage.store(manifestUri, noMetadata, testSchemeMimeType);
+        await storage.store(
+            manifestUri, noMetadata, testSchemeMimeType).promise;
       } finally {
         await storage.destroy();
       }
