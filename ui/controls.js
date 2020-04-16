@@ -296,6 +296,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.timeAndSeekRangeTimer_ = null;
     }
 
+    // Important!  Release all child elements before destroying the cast proxy
+    // or player.  This makes sure those destructions will not trigger event
+    // listeners in the UI which would then invoke the cast proxy or player.
+    this.releaseChildElements_();
+
     if (this.castProxy_) {
       await this.castProxy_.destroy();
       this.castProxy_ = null;
@@ -309,8 +314,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.localVideo_ = null;
     this.video_ = null;
-
-    this.releaseChildElements_();
 
     this.localization_ = null;
     this.pressedKeys_.clear();
@@ -410,20 +413,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   setEnabledShakaControls(enabled) {
     this.enabled_ = enabled;
     if (enabled) {
-      shaka.ui.Utils.setDisplay(this.controlsContainer_, true);
-
-      // Spinner lives outside of the main controls div
-      shaka.ui.Utils.setDisplay(
-          this.spinnerContainer_, this.player_.isBuffering());
+      this.videoContainer_.setAttribute('shaka-controls', 'true');
 
       // If we're hiding native controls, make sure the video element itself is
       // not tab-navigable.  Our custom controls will still be tab-navigable.
-      this.video_.tabIndex = -1;
-      this.video_.controls = false;
+      this.localVideo_.tabIndex = -1;
+      this.localVideo_.controls = false;
     } else {
-      shaka.ui.Utils.setDisplay(this.controlsContainer_, false);
-      // Spinner lives outside of the main controls div
-      shaka.ui.Utils.setDisplay(this.spinnerContainer_, false);
+      this.videoContainer_.removeAttribute('shaka-controls');
     }
 
     // The effects of play state changes are inhibited while showing native
@@ -443,8 +440,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // If we disable the native controls, we want to make sure that the video
     // element itself is not tab-navigable, so that the element is skipped over
     // when tabbing through the page.
-    this.video_.controls = enabled;
-    this.video_.tabIndex = enabled ? 0 : -1;
+    this.localVideo_.controls = enabled;
+    this.localVideo_.tabIndex = enabled ? 0 : -1;
 
     if (enabled) {
       this.setEnabledShakaControls(false);
@@ -580,7 +577,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   anySettingsMenusAreOpen() {
     return this.settingsMenus_.some(
-        (menu) => menu.classList.contains('shaka-displayed'));
+        (menu) => !menu.classList.contains('shaka-hidden'));
   }
 
   /** @export */
@@ -609,13 +606,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @export */
   showAdUI() {
-    // TODO: other ad states (seek bar display etc)
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
   }
 
   /** @export */
   hideAdUI() {
-    // TODO: other ad states (seek bar display etc)
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
   }
 
@@ -668,7 +663,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   createDOM_() {
     this.videoContainer_.classList.add('shaka-video-container');
-    this.video_.classList.add('shaka-video');
+    this.localVideo_.classList.add('shaka-video');
 
     this.addSkimContainer_();
 
@@ -816,7 +811,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.controlsContainer_.appendChild(this.bottomControls_);
 
     // Overflow menus are supposed to hide once you click elsewhere
-    // on the video element. The code in onContainerClick_ ensures that.
+    // on the page. The click event listener on window ensures that.
     // However, clicks on the bottom controls don't propagate to the container,
     // so we have to explicitly hide the menus onclick here.
     this.eventManager_.listen(this.bottomControls_, 'click', () => {
@@ -863,8 +858,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // for focused elements.
     this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
 
-    this.eventManager_.listen(
-        this.controlsContainer_, 'dblclick', () => this.toggleFullScreen());
+    // Listen for click events to dismiss the settings menus.
+    this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
+
+    this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
+      if (this.config_.doubleClickForFullscreen) {
+        this.toggleFullScreen();
+      }
+    });
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
@@ -924,7 +925,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(document, 'fullscreenchange', () => {
       if (this.ad_) {
-        this.ad_.resize(this.video_.offsetWidth, this.video_.offsetHeight);
+        this.ad_.resize(
+            this.localVideo_.offsetWidth, this.localVideo_.offsetHeight);
       }
     });
   }
@@ -939,7 +941,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   async onScreenRotation_() {
     if (!this.video_ ||
         this.video_.readyState == 0 ||
-        this.castProxy_.isCasting()) { return; }
+        this.castProxy_.isCasting() ||
+        !this.config_.enableFullscreenOnRotation) { return; }
 
     if (screen.orientation.type.includes('landscape') &&
         !document.fullscreenElement) {
@@ -1169,6 +1172,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // When the key is released, remove it from the pressed keys set.
     this.pressedKeys_.delete(event.keyCode);
 
+    if (!this.config_.enableKeyboardPlaybackControls) {
+      return;
+    }
 
     switch (key) {
       case 'ArrowLeft':
@@ -1316,7 +1322,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   keepFocusInMenu_(event) {
     const openSettingsMenus = this.settingsMenus_.filter(
-        (menu) => menu.classList.contains('shaka-displayed'));
+        (menu) => !menu.classList.contains('shaka-hidden'));
     const settingsMenu = openSettingsMenus[0];
     if (settingsMenu.childNodes.length) {
       // Get the first and the last displaying child element from the overflow
@@ -1364,7 +1370,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onMouseDown_() {
     this.eventManager_.unlisten(window, 'mousedown');
-    this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
   }
 
   /**

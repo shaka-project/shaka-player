@@ -25,46 +25,44 @@ describe('SimpleAbrManager', () => {
 
     // Keep unsorted.
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.addPeriod(0, (period) => {
-        period.addVariant(100, (variant) => {
-          variant.bandwidth = 4e5;  // 400 kbps
-          variant.addAudio(0);
-          variant.addVideo(1);
-        });
-        period.addVariant(101, (variant) => {
-          variant.bandwidth = 1e6;  // 1000 kbps
-          variant.addAudio(2);
-          variant.addVideo(3);
-        });
-        period.addVariant(102, (variant) => {
-          variant.bandwidth = 5e5;  // 500 kbps
-          variant.addAudio(4);
-          variant.addVideo(5);
-        });
-        period.addVariant(103, (variant) => {
-          variant.bandwidth = 2e6;
-          variant.addAudio(6);
-          variant.addVideo(7);
-        });
-        period.addVariant(104, (variant) => {
-          variant.bandwidth = 2e6;  // Identical on purpose.
-          variant.addAudio(8);
-          variant.addVideo(9);
-        });
-        period.addVariant(105, (variant) => {
-          variant.bandwidth = 6e5;
-          variant.addAudio(10);
-          variant.addVideo(11);
-        });
-        period.addTextStream(20);
-        period.addTextStream(21);
+      manifest.addVariant(100, (variant) => {
+        variant.bandwidth = 4e5;  // 400 kbps
+        variant.addAudio(0);
+        variant.addVideo(1);
       });
+      manifest.addVariant(101, (variant) => {
+        variant.bandwidth = 1e6;  // 1000 kbps
+        variant.addAudio(2);
+        variant.addVideo(3);
+      });
+      manifest.addVariant(102, (variant) => {
+        variant.bandwidth = 5e5;  // 500 kbps
+        variant.addAudio(4);
+        variant.addVideo(5);
+      });
+      manifest.addVariant(103, (variant) => {
+        variant.bandwidth = 2e6;
+        variant.addAudio(6);
+        variant.addVideo(7);
+      });
+      manifest.addVariant(104, (variant) => {
+        variant.bandwidth = 2e6;  // Identical on purpose.
+        variant.addAudio(8);
+        variant.addVideo(9);
+      });
+      manifest.addVariant(105, (variant) => {
+        variant.bandwidth = 6e5;
+        variant.addAudio(10);
+        variant.addVideo(11);
+      });
+      manifest.addTextStream(20);
+      manifest.addTextStream(21);
     });
 
     config = shaka.util.PlayerConfiguration.createDefault().abr;
     config.defaultBandwidthEstimate = defaultBandwidthEstimate;
 
-    variants = manifest.periods[0].variants;
+    variants = manifest.variants;
 
     abrManager = new shaka.abr.SimpleAbrManager();
     abrManager.init(shaka.test.Util.spyFunc(switchCallback));
@@ -97,19 +95,17 @@ describe('SimpleAbrManager', () => {
 
   it('can choose from audio only variants', () => {
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.addPeriod(0, (period) => {
-        period.addVariant(0, (variant) => {
-          variant.bandwidth = 4e5;
-          variant.addAudio(0);
-        });
-        period.addVariant(1, (variant) => {
-          variant.bandwidth = 1e6;
-          variant.addAudio(2);
-        });
+      manifest.addVariant(0, (variant) => {
+        variant.bandwidth = 4e5;
+        variant.addAudio(0);
+      });
+      manifest.addVariant(1, (variant) => {
+        variant.bandwidth = 1e6;
+        variant.addAudio(2);
       });
     });
 
-    abrManager.setVariants(manifest.periods[0].variants);
+    abrManager.setVariants(manifest.variants);
     const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
     expect(chosen.audio).not.toBe(null);
@@ -118,19 +114,17 @@ describe('SimpleAbrManager', () => {
 
   it('can choose from video only variants', () => {
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.addPeriod(0, (period) => {
-        period.addVariant(0, (variant) => {
-          variant.bandwidth = 4e5;
-          variant.addVideo(0);
-        });
-        period.addVariant(1, (variant) => {
-          variant.bandwidth = 1e6;
-          variant.addVideo(2);
-        });
+      manifest.addVariant(0, (variant) => {
+        variant.bandwidth = 4e5;
+        variant.addVideo(0);
+      });
+      manifest.addVariant(1, (variant) => {
+        variant.bandwidth = 1e6;
+        variant.addVideo(2);
       });
     });
 
-    abrManager.setVariants(manifest.periods[0].variants);
+    abrManager.setVariants(manifest.variants);
     const chosen = abrManager.chooseVariant();
     expect(chosen).not.toBe(null);
     expect(chosen.audio).toBe(null);
@@ -319,23 +313,21 @@ describe('SimpleAbrManager', () => {
 
   it('will respect restrictions', () => {
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.addPeriod(0, (period) => {
-        period.addVariant(10, (variant) => {
-          variant.bandwidth = 1e5;
-          variant.addVideo(0, (stream) => {
-            stream.size(50, 50);
-          });
+      manifest.addVariant(10, (variant) => {
+        variant.bandwidth = 1e5;
+        variant.addVideo(0, (stream) => {
+          stream.size(50, 50);
         });
-        period.addVariant(11, (variant) => {
-          variant.bandwidth = 2e5;
-          variant.addVideo(1, (stream) => {
-            stream.size(200, 200);
-          });
+      });
+      manifest.addVariant(11, (variant) => {
+        variant.bandwidth = 2e5;
+        variant.addVideo(1, (stream) => {
+          stream.size(200, 200);
         });
       });
     });
 
-    abrManager.setVariants(manifest.periods[0].variants);
+    abrManager.setVariants(manifest.variants);
     let chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(11);
 
@@ -348,23 +340,21 @@ describe('SimpleAbrManager', () => {
 
   it('uses lowest-bandwidth variant when restrictions cannot be met', () => {
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.addPeriod(0, (period) => {
-        period.addVariant(10, (variant) => {
-          variant.bandwidth = 1e5;
-          variant.addVideo(0, (stream) => {
-            stream.size(50, 50);
-          });
+      manifest.addVariant(10, (variant) => {
+        variant.bandwidth = 1e5;
+        variant.addVideo(0, (stream) => {
+          stream.size(50, 50);
         });
-        period.addVariant(11, (variant) => {
-          variant.bandwidth = 2e5;
-          variant.addVideo(1, (stream) => {
-            stream.size(200, 200);
-          });
+      });
+      manifest.addVariant(11, (variant) => {
+        variant.bandwidth = 2e5;
+        variant.addVideo(1, (stream) => {
+          stream.size(200, 200);
         });
       });
     });
 
-    abrManager.setVariants(manifest.periods[0].variants);
+    abrManager.setVariants(manifest.variants);
     let chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(11);
 

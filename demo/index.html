@@ -49,11 +49,12 @@
     <!-- Tooltips are made using tippy.js: -->
     <script defer src="../node_modules/tippy.js/umd/index.min.js"></script>
     <!-- Improved PWA capability on mobile Safari is enabled by loading pwacompat: -->
-    <script defer src="https://cdn.jsdelivr.net/npm/pwacompat@2.0.9/pwacompat.min.js"
-        integrity="sha384-VcI6S+HIsE80FVM1jgbd6WDFhzKYA0PecD/LcIyMQpT4fMJdijBh0I7Iblaacawc"
-        crossorigin="anonymous"></script>
+    <script defer src="../node_modules/pwacompat/pwacompat.min.js"></script>
     <!-- Include IMA SDK to enable client-side ad insertion: -->
     <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+    <!-- Include IMA DAI SDK to enable server-side ad insertion: -->
+    <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3_dai.js"></script>
+
 
     <script>
 COMPILED_JS = [
@@ -97,7 +98,7 @@ UNCOMPILED_JS = [
         <header class="mdl-layout__header-row" id="nav-button-container">
           <img alt="Shaka Player Logo" src="shaka_logo_trans.png" class="logo" />
           <button id="nav-button-front" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" defaultselected localized-string="HOME" tab-identifier="HOME"></button>
-          <button id="nav-button-search" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="SEARCH" tab-identifier="SEARCH"></button>
+          <button id="nav-button-search" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="ALL_CONTENT" tab-identifier="ALL_CONTENT"></button>
           <button id="nav-button-custom" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="CUSTOM_CONTENT" tab-identifier="CUSTOM CONTENT"></button>
           <div class="mdl-layout-spacer"></div>
           <button id="bug-button" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="REPORT_BUG"></button>

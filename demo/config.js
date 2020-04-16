@@ -125,7 +125,9 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.DrmConfiguration');
     this.addSection_(MessageIds.DRM_SECTION_HEADER, docLink)
         .addBoolInput_(MessageIds.DELAY_LICENSE,
-            'drm.delayLicenseRequestUntilPlayed');
+            'drm.delayLicenseRequestUntilPlayed')
+        .addBoolInput_(MessageIds.LOG_LICENSE_EXCHANGE,
+            'drm.logLicenseExchange');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const robustnessSuggestions = [
       'SW_SECURE_CRYPTO',
@@ -186,7 +188,7 @@ shakaDemo.Config = class {
         .addTextInput_(MessageIds.CLOCK_SYNC_URI, 'manifest.dash.clockSyncUri')
         .addBoolInput_(MessageIds.IGNORE_DRM, 'manifest.dash.ignoreDrmInfo')
         .addNumberInput_(MessageIds.DEFAULT_PRESENTATION_DELAY,
-            'manifest.dash.defaultPresentationDelay')
+            'manifest.defaultPresentationDelay')
         .addBoolInput_(MessageIds.IGNORE_MIN_BUFFER_TIME,
             'manifest.dash.ignoreMinBufferTime')
         .addNumberInput_(MessageIds.INITIAL_SEGMENT_LIMIT,
@@ -305,6 +307,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.SAFE_SKIP_DISTANCE,
             'streaming.stallSkip',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.INACCURATE_MANIFEST_TOLERANCE,
+            'streaming.inaccurateManifestTolerance',
             /* canBeDecimal= */ true);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
@@ -314,7 +319,7 @@ shakaDemo.Config = class {
       // Add a fake custom fixed "input" that warns the users not to change it.
       const noop = (input) => {};
       this.addCustomBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
-          noop, MessageIds.ALWAYS_STREAM_TEXT);
+          noop, MessageIds.ALWAYS_STREAM_TEXT_WARNING);
       this.latestInput_.input().disabled = true;
       this.latestInput_.input().checked = true;
     }
@@ -372,6 +377,22 @@ shakaDemo.Config = class {
     // are ready to add ALL of the tooltip messages.
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.latestInput_.input().checked = true;
+    }
+
+    if (!shakaDemoMain.getNativeControlsEnabled()) {
+      this.addCustomBoolInput_(MessageIds.TRICK_PLAY_CONTROLS, (input) => {
+        shakaDemoMain.setTrickPlayControlsEnabled(input.checked);
+      });
+      if (shakaDemoMain.getTrickPlayControlsEnabled()) {
+        this.latestInput_.input().checked = true;
+      }
+    } else {
+      // Add a fake custom fixed "input" that warns the users not to change it.
+      const noop = (input) => {};
+      this.addCustomBoolInput_(MessageIds.TRICK_PLAY_CONTROLS,
+          noop, MessageIds.TRICK_PLAY_CONTROLS_WARNING);
+      this.latestInput_.input().disabled = true;
+      this.latestInput_.input().checked = false;
     }
 
     // shaka.log is not set if logging isn't enabled.

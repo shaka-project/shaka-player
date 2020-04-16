@@ -31,8 +31,8 @@ describe('DashParser SegmentList', () => {
       '</SegmentList>',
     ], /* duration= */ 65);
     const references = [
-      ManifestParser.makeReference('s1.mp4', 1, 50, 60, baseUri),
-      ManifestParser.makeReference('s2.mp4', 2, 60, 65, baseUri),
+      ManifestParser.makeReference('s1.mp4', 50, 60, baseUri),
+      ManifestParser.makeReference('s2.mp4', 60, 65, baseUri),
     ];
     await Dash.testSegmentIndex(source, references);
   });
@@ -43,8 +43,9 @@ describe('DashParser SegmentList', () => {
       '  <SegmentURL media="s1.mp4" />',
       '</SegmentList>',
     ], /* duration= */ 30);
-    const references = [ManifestParser.makeReference('s1.mp4', 1,
-        0, 30, baseUri)];
+    const references = [
+      ManifestParser.makeReference('s1.mp4', 0, 30, baseUri),
+    ];
     await Dash.testSegmentIndex(source, references);
   });
 
@@ -59,10 +60,10 @@ describe('DashParser SegmentList', () => {
         '</SegmentList>',
       ]);
       const references = [
-        ManifestParser.makeReference('s1.mp4', 1, 0, 10, baseUri),
-        ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
-        ManifestParser.makeReference('s3.mp4', 3, 20, 30, baseUri),
-        ManifestParser.makeReference('s4.mp4', 4, 30, 40, baseUri),
+        ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+        ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+        ManifestParser.makeReference('s3.mp4', 20, 30, baseUri),
+        ManifestParser.makeReference('s4.mp4', 30, 40, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -77,10 +78,10 @@ describe('DashParser SegmentList', () => {
         '</SegmentList>',
       ]);
       const references = [
-        ManifestParser.makeReference('s1.mp4', 5, 40, 50, baseUri),
-        ManifestParser.makeReference('s2.mp4', 6, 50, 60, baseUri),
-        ManifestParser.makeReference('s3.mp4', 7, 60, 70, baseUri),
-        ManifestParser.makeReference('s4.mp4', 8, 70, 80, baseUri),
+        ManifestParser.makeReference('s1.mp4', 40, 50, baseUri),
+        ManifestParser.makeReference('s2.mp4', 50, 60, baseUri),
+        ManifestParser.makeReference('s3.mp4', 60, 70, baseUri),
+        ManifestParser.makeReference('s4.mp4', 70, 80, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -93,8 +94,8 @@ describe('DashParser SegmentList', () => {
         '</SegmentList>',
       ]);
       const references = [
-        ManifestParser.makeReference('s1.mp4', 1, 0, 10, baseUri),
-        ManifestParser.makeReference('s2.mp4', 2, 10, 20, baseUri),
+        ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+        ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -109,10 +110,10 @@ describe('DashParser SegmentList', () => {
         '</SegmentList>',
       ]);
       const references = [
-        ManifestParser.makeReference('s1.mp4', 1, 0, 2, baseUri),
-        ManifestParser.makeReference('s2.mp4', 2, 2, 4, baseUri),
-        ManifestParser.makeReference('s3.mp4', 3, 4, 6, baseUri),
-        ManifestParser.makeReference('s4.mp4', 4, 6, 8, baseUri),
+        ManifestParser.makeReference('s1.mp4', 0, 2, baseUri),
+        ManifestParser.makeReference('s2.mp4', 2, 4, baseUri),
+        ManifestParser.makeReference('s3.mp4', 4, 6, baseUri),
+        ManifestParser.makeReference('s4.mp4', 6, 8, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -185,10 +186,10 @@ describe('DashParser SegmentList', () => {
         '</MPD>',
       ].join('\n');
       const references = [
-        ManifestParser.makeReference('s1.mp4', 1, 0, 50, baseUri),
-        ManifestParser.makeReference('s2.mp4', 2, 50, 100, baseUri),
-        ManifestParser.makeReference('s3.mp4', 3, 100, 150, baseUri),
-        ManifestParser.makeReference('s4.mp4', 4, 150, 200, baseUri),
+        ManifestParser.makeReference('s1.mp4', 0, 50, baseUri),
+        ManifestParser.makeReference('s2.mp4', 50, 100, baseUri),
+        ManifestParser.makeReference('s3.mp4', 100, 150, baseUri),
+        ManifestParser.makeReference('s4.mp4', 150, 200, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -218,9 +219,9 @@ describe('DashParser SegmentList', () => {
         '</MPD>',
       ].join('\n');
       const references = [
-        ManifestParser.makeReference('s1.mp4', 1, 50, 60, baseUri),
-        ManifestParser.makeReference('s2.mp4', 2, 60, 65, baseUri),
-        ManifestParser.makeReference('s3.mp4', 3, 65, 73, baseUri),
+        ManifestParser.makeReference('s1.mp4', 50, 60, baseUri),
+        ManifestParser.makeReference('s2.mp4', 60, 65, baseUri),
+        ManifestParser.makeReference('s3.mp4', 65, 73, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -250,9 +251,9 @@ describe('DashParser SegmentList', () => {
         '</MPD>',
       ].join('\n');
       const references = [
-        ManifestParser.makeReference('s1.mp4', 1, 50, 60, baseUri),
-        ManifestParser.makeReference('s2.mp4', 2, 60, 65, baseUri),
-        ManifestParser.makeReference('s3.mp4', 3, 65, 73, baseUri),
+        ManifestParser.makeReference('s1.mp4', 50, 60, baseUri),
+        ManifestParser.makeReference('s2.mp4', 60, 65, baseUri),
+        ManifestParser.makeReference('s3.mp4', 65, 73, baseUri),
       ];
       await Dash.testSegmentIndex(source, references);
     });
@@ -287,10 +288,10 @@ describe('DashParser SegmentList', () => {
       ].join('\n');
 
       const references = [
-        ManifestParser.makeReference('s1.mp4', 1, 40, 50, baseUri),
-        ManifestParser.makeReference('s2.mp4', 2, 50, 55, baseUri),
-        ManifestParser.makeReference('s3.mp4', 3, 55, 63, baseUri),
-        ManifestParser.makeReference('s4.mp4', 4, 63, 70, baseUri),
+        ManifestParser.makeReference('s1.mp4', 40, 50, baseUri),
+        ManifestParser.makeReference('s2.mp4', 50, 55, baseUri),
+        ManifestParser.makeReference('s3.mp4', 55, 63, baseUri),
+        ManifestParser.makeReference('s4.mp4', 63, 70, baseUri),
       ];
       for (const ref of references) {
         ref.timestampOffset = -10;

@@ -736,6 +736,85 @@ describe('CastSender', () => {
           shaka.util.Error.Code.LOAD_INTERRUPTED));
       await expectAsync(p).toBeRejectedWith(expected);
     });
+
+    it('transfers playback to local device', async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const cast = sender.cast(fakeInitState);
+      fakeSessionConnection();
+      await cast;
+
+      expect(sender.isCasting()).toBe(true);
+      expect(onResumeLocal).not.toHaveBeenCalled();
+
+      sender.forceDisconnect();
+
+      expect(sender.isCasting()).toBe(false);
+      expect(onResumeLocal).toHaveBeenCalled();
+    });
+
+    it('succeeds even if session.stop() throws', async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const cast = sender.cast(fakeInitState);
+      fakeSessionConnection();
+      await cast;
+
+      mockSession.stop.and.throwError(new Error('DISCONNECTED!'));
+
+      expect(() => sender.forceDisconnect()).not.toThrow(jasmine.anything());
+    });
+  });
+
+  describe('sendMessage exception', () => {
+    /** @type {Error} */
+    let originalException;
+
+    /** @type {Object} */
+    let expectedError;
+
+    beforeEach(async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const cast = sender.cast(fakeInitState);
+      fakeSessionConnection();
+      await cast;
+
+      originalException = new Error('DISCONNECTED!');
+
+      expectedError = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.CAST,
+          shaka.util.Error.Code.CAST_CONNECTION_TIMED_OUT,
+          originalException));
+
+      mockSession.sendMessage.and.throwError(originalException);
+    });
+
+    it('propagates to the caller', () => {
+      expect(() => sender.set('video', 'muted', true)).toThrow(expectedError);
+    });
+
+    it('triggers an error event on Player', () => {
+      expect(() => sender.set('video', 'muted', true)).toThrow(expectedError);
+
+      const expectedEvent = jasmine.objectContaining({
+        type: 'error',
+        detail: expectedError,
+      });
+
+      expect(onRemoteEvent).toHaveBeenCalledWith('player', expectedEvent);
+    });
+
+    it('disconnects the sender', () => {
+      expect(sender.isCasting()).toBe(true);
+      expect(onResumeLocal).not.toHaveBeenCalled();
+
+      expect(() => sender.set('video', 'muted', true)).toThrow(expectedError);
+
+      expect(sender.isCasting()).toBe(false);
+      expect(onResumeLocal).toHaveBeenCalled();
+    });
   });
 
   describe('destroy', () => {

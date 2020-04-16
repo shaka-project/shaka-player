@@ -95,6 +95,14 @@ shaka.extern.AbrManager = class {
   getBandwidthEstimate() {}
 
   /**
+   * Updates manager playback rate.
+   *
+   * @param {number} rate
+   * @exportDoc
+   */
+  playbackRateChanged(rate) {}
+
+  /**
    * Sets the ABR configuration.
    *
    * It is the responsibility of the AbrManager implementation to implement the
@@ -129,9 +137,9 @@ shaka.extern.AbrManager.SwitchCallback;
 
 
 /**
- * A factory for creating the abr manager.  This will be called with 'new'.
+ * A factory for creating the abr manager.
  *
- * @typedef {function(new:shaka.extern.AbrManager)}
+ * @typedef {function():!shaka.extern.AbrManager}
  * @exportDoc
  */
 shaka.extern.AbrManager.Factory;

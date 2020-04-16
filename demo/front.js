@@ -19,8 +19,8 @@ shakaDemo.Front = class {
    * Register the page configuration.
    */
   static init() {
-    const container = shakaDemoMain.addNavButton('front');
-    shakaDemoFront = new shakaDemo.Front(container);
+    const elements = shakaDemoMain.addNavButton('front');
+    shakaDemoFront = new shakaDemo.Front(elements.container);
   }
 
   /** @param {!Element} container */

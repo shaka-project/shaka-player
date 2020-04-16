@@ -68,7 +68,7 @@ module.exports = {
     return {
       'ClassBody > MethodDefinition': (node) => {
         const comment = source.getCommentsBefore(node).pop();
-        const nameIsPrivate = node.key.name.endsWith('_');
+        const nameIsPrivate = node.key.name && node.key.name.endsWith('_');
         if (!comment) {
           if (nameIsPrivate) {
             ctx.report({

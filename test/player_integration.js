@@ -64,7 +64,7 @@ describe('Player', () => {
       await player.attach(video);
       await player.load('test:sintel_compiled');
     });
-  });
+  });  // describe('attach')
 
   describe('getStats', () => {
     it('gives stats about current stream', async () => {
@@ -86,6 +86,8 @@ describe('Player', () => {
         estimatedBandwidth: jasmine.any(Number),
 
         loadLatency: jasmine.any(Number),
+        manifestTimeSeconds: jasmine.any(Number),
+        drmTimeSeconds: jasmine.any(Number),
         playTime: jasmine.any(Number),
         pauseTime: jasmine.any(Number),
         bufferingTime: jasmine.any(Number),
@@ -124,7 +126,7 @@ describe('Player', () => {
       expect(stats).toBeTruthy();
       await player.destroy();
     });
-  });
+  });  // describe('getStats')
 
   describe('setTextTrackVisibility', () => {
     // Using mode='disabled' on TextTrack causes cues to go null, which leads
@@ -238,7 +240,7 @@ describe('Player', () => {
     });
 
     // Repro for https://github.com/google/shaka-player/issues/1879.
-    it('actually appends cues when enabled initially', async () => {
+    it('appends cues when enabled initially', async () => {
       let cues = [];
       /** @const {!shaka.test.FakeTextDisplayer} */
       const displayer = new shaka.test.FakeTextDisplayer();
@@ -246,20 +248,23 @@ describe('Player', () => {
         cues = cues.concat(added);
       });
 
-      player.configure('textDisplayFactory', Util.factoryReturns(displayer));
+      player.configure('textDisplayFactory', () => displayer);
 
       const preferredTextLanguage = 'fa';  // The same as in the content itself
       player.configure({preferredTextLanguage: preferredTextLanguage});
 
       await player.load('test:sintel_realistic_compiled');
-      await Util.delay(1);  // Allow the first segments to be appended.
+
+      // Play until a time at which the external cues would be on screen.
+      video.play();
+      await waitUntilPlayheadReaches(eventManager, video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
       expect(displayer.isTextVisible()).toBe(true);
       expect(cues.length).toBeGreaterThan(0);
     });
 
-    it('actually appends cues for external text', async () => {
+    it('appends cues for external text', async () => {
       let cues = [];
       /** @const {!shaka.test.FakeTextDisplayer} */
       const displayer = new shaka.test.FakeTextDisplayer();
@@ -267,35 +272,34 @@ describe('Player', () => {
         cues = cues.concat(added);
       });
 
-      player.configure('textDisplayFactory', Util.factoryReturns(displayer));
+      player.configure('textDisplayFactory', () => displayer);
 
       const eventManager = new shaka.util.EventManager();
       /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager);
 
-
       await player.load('test:sintel_no_text_compiled');
       const locationUri = new goog.Uri(location.href);
       const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
       const absoluteUri = locationUri.resolve(partialUri);
-      await player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
-          'text/vtt');
+      const newTrack = player.addTextTrack(
+          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
 
-      const textTracks = player.getTextTracks();
-      expect(textTracks).toBeTruthy();
-      expect(textTracks.length).toBe(1);
+      expect(player.getTextTracks()).toEqual([newTrack]);
 
+      player.selectTextTrack(newTrack);
       player.setTextTrackVisibility(true);
       await waiter.waitForEvent(player, 'texttrackvisibility');
-      // Wait for the text cues to get appended.
-      // TODO: this should be based on an event instead.
-      await Util.delay(1);
+
+      // Play until a time at which the external cues would be on screen.
+      video.play();
+      await waitUntilPlayheadReaches(eventManager, video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
       expect(displayer.isTextVisible()).toBe(true);
       expect(cues.length).toBeGreaterThan(0);
     });
-  });
+  });  // describe('setTextTrackVisibility')
 
   describe('plays', () => {
     it('with external text tracks', async () => {
@@ -306,15 +310,14 @@ describe('Player', () => {
       const locationUri = new goog.Uri(location.href);
       const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
       const absoluteUri = locationUri.resolve(partialUri);
-      await player.addTextTrack(absoluteUri.toString(), 'en', 'subtitles',
-          'text/vtt');
+      const newTrack = player.addTextTrack(
+          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
 
-      const textTracks = player.getTextTracks();
-      expect(textTracks).toBeTruthy();
-      expect(textTracks.length).toBe(1);
+      expect(newTrack.language).toBe('en');
+      expect(player.getTextTracks()).toEqual([newTrack]);
 
-      expect(textTracks[0].active).toBe(true);
-      expect(textTracks[0].language).toBe('en');
+      player.selectTextTrack(newTrack);
+      expect(player.getTextTracks()[0].active).toBe(true);
     });
 
     it('with cea closed captions', async () => {
@@ -324,32 +327,6 @@ describe('Player', () => {
       expect(textTracks).toBeTruthy();
       expect(textTracks.length).toBe(1);
       expect(textTracks[0].language).toBe('en');
-    });
-
-    it('while changing languages with short Periods', async () => {
-      // See: https://github.com/google/shaka-player/issues/797
-      player.configure({preferredAudioLanguage: 'en'});
-      await player.load('test:sintel_short_periods_compiled');
-      video.play();
-      await waitUntilPlayheadReaches(eventManager, video, 8, 30);
-
-      // The Period changes at 10 seconds.  Assert that we are in the previous
-      // Period and have buffered into the next one.
-      expect(video.currentTime).toBeLessThan(9);
-      // The two periods might not be in a single contiguous buffer, so don't
-      // check end(0).  Gap-jumping will deal with any discontinuities.
-      const bufferEnd = video.buffered.end(video.buffered.length - 1);
-      expect(bufferEnd).toBeGreaterThan(11);
-
-      // Change to a different language; this should clear the buffers and
-      // cause a Period transition again.
-      expect(getActiveLanguage()).toBe('en');
-      player.selectAudioLanguage('es');
-      await waitUntilPlayheadReaches(eventManager, video, 21, 30);
-
-      // Should have gotten past the next Period transition and still be
-      // playing the new language.
-      expect(getActiveLanguage()).toBe('es');
     });
 
     it('at higher playback rates', async () => {
@@ -397,7 +374,7 @@ describe('Player', () => {
       expect(tracks.length).toBeGreaterThan(0);
       return tracks[0].language;
     }
-  });
+  });  // describe('plays')
 
   describe('TextDisplayer plugin', () => {
     // Simulate the use of an external TextDisplayer plugin.
@@ -410,13 +387,11 @@ describe('Player', () => {
         return false;
       });
       textDisplayer.destroySpy.and.returnValue(Promise.resolve());
-      player.configure({
-        textDisplayFactory: Util.factoryReturns(textDisplayer),
-      });
+      player.configure('textDisplayFactory', () => textDisplayer);
 
       // Make sure the configuration was taken.
-      const ConfiguredFactory = player.getConfiguration().textDisplayFactory;
-      const configuredTextDisplayer = new ConfiguredFactory();
+      const configuredFactory = player.getConfiguration().textDisplayFactory;
+      const configuredTextDisplayer = configuredFactory();
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 
@@ -430,7 +405,7 @@ describe('Player', () => {
       // renamed in the compiled version and could not be called.
       expect(textDisplayer.destroySpy).toHaveBeenCalled();
     });
-  });
+  });  // describe('TextDisplayer plugin')
 
   describe('TextAndRoles', () => {
     // Regression Test. Makes sure that the language and role fields have been
@@ -444,7 +419,7 @@ describe('Player', () => {
         expect(languageAndRole.role).not.toBeUndefined();
       }
     });
-  });
+  });  // describe('TextAndRoles')
 
   describe('streaming event', () => {
     // Calling switch early during load() caused a failed assertion in Player
@@ -525,7 +500,7 @@ describe('Player', () => {
       // trigger the code path in this bug.
       expect(streamingListener).toHaveBeenCalled();
     });
-  });
+  });  // describe('streaming event')
 
   describe('tracks', () => {
     // This is a regression test for b/138941217, in which tracks briefly
@@ -587,10 +562,7 @@ describe('Player', () => {
       const waiter = (new shaka.test.Waiter(eventManager)).timeoutAfter(10);
       const canPlayThrough = waiter.waitForEvent(video, 'canplaythrough');
 
-      // Important: use a stream that starts somewhere other than zero, so that
-      // the video element's time is initially different from the start time of
-      // playback, and there is no content at time zero.
-      await player.load('test:sintel_start_at_3_compiled', 5);
+      await player.load('test:sintel_compiled', 5);
       shaka.log.debug('load resolved');
 
       // When load is resolved(), tracks should definitely exist.
@@ -599,6 +571,32 @@ describe('Player', () => {
       // Let the test keep running until we can play through.  In the original
       // bug, tracks would disappear _after_ load() on some platforms.
       await canPlayThrough;
+    });
+  });  // describe('tracks')
+
+  describe('loading', () => {
+    // A regression test for Issue #2433.
+    it('can load very large files', async () => {
+      // Reset the lazy function, so that it does not remember any chunk size
+      // that was detected beforehand.
+      compiledShaka.util.StringUtils.resetFromCharCode();
+      const oldFromCharCode = String.fromCharCode;
+      try {
+        // Replace String.fromCharCode with a version that can only handle very
+        // small chunks.
+        // This has to be an old-style function, to use the "arguments" object.
+        // eslint-disable-next-line no-restricted-syntax
+        String.fromCharCode = function() {
+          if (arguments.length > 2000) {
+            throw new RangeError('Synthetic Range Error');
+          }
+          // eslint-disable-next-line no-restricted-syntax
+          return oldFromCharCode.apply(null, arguments);
+        };
+        await player.load('/base/test/test/assets/large_file.mpd');
+      } finally {
+        String.fromCharCode = oldFromCharCode;
+      }
     });
   });
 
@@ -733,5 +731,102 @@ describe('Player', () => {
       }
       throw new Error('Timeout waiting to buffer');
     }
-  });
+  });  // describe('buffering')
+
+  describe('configuration', () => {
+    it('has the correct number of arguments in compiled callbacks', () => {
+      // Get the default configuration for both the compiled & uncompiled
+      // versions for comparison.
+      const compiledConfig = (new compiledShaka.Player()).getConfiguration();
+      const uncompiledConfig = (new shaka.Player()).getConfiguration();
+
+      compareConfigFunctions(compiledConfig, uncompiledConfig);
+
+      /**
+       * Find all the callbacks in the configuration recursively and compare
+       * their lengths (number of arguments).  We warn the app developer when a
+       * configured callback has the wrong number of arguments, so our own
+       * compiled versions must be correct.
+       *
+       * @param {Object} compiled
+       * @param {Object} uncompiled
+       * @param {string=} basePath The path to this point in the config, for
+       *   logging purposes.
+       */
+      function compareConfigFunctions(compiled, uncompiled, basePath = '') {
+        for (const key in uncompiled) {
+          const uncompiledValue = uncompiled[key];
+          const compiledValue = compiled[key];
+          const path = basePath + '.' + key;
+
+          if (uncompiledValue && uncompiledValue.constructor == Object) {
+            // This is an anonymous Object, so recurse on it.
+            compareConfigFunctions(compiledValue, uncompiledValue, path);
+          } else if (typeof uncompiledValue == 'function') {
+            // This is a function, so check its length.  The uncompiled version
+            // is considered canonically correct, so we use the uncompiled
+            // length as the expectation.
+            shaka.log.debug('[' + path + ']',
+                compiledValue.length, 'should be', uncompiledValue.length);
+            expect(compiledValue.length).withContext(path)
+                .toBe(uncompiledValue.length);
+          }
+        }
+      }
+    });
+  });  // describe('configuration')
+
+  describe('adaptation', () => {
+    /** @type {!shaka.test.FakeAbrManager} */
+    let abrManager;
+
+    beforeEach(() => {
+      abrManager = new shaka.test.FakeAbrManager();
+      player.configure('abrFactory', () => abrManager);
+    });
+
+    it('fires "adaptation" event', async () => {
+      const abrEnabled = new Promise((resolve) => {
+        abrManager.enable.and.callFake(resolve);
+      });
+
+      await player.load('test:sintel_multi_lingual_multi_res_compiled');
+
+      expect(abrManager.switchCallback).toBeTruthy();
+      expect(abrManager.variants.length).toBeGreaterThan(1);
+      expect(abrManager.chooseIndex).toBe(0);
+
+      /** @type {shaka.test.Waiter} */
+      const waiter = new shaka.test.Waiter(eventManager)
+          .timeoutAfter(1).failOnTimeout(true);
+
+      await waiter.waitForPromise(abrEnabled, 'AbrManager enabled');
+
+      const p = waiter.waitForEvent(player, 'adaptation');
+      abrManager.switchCallback(abrManager.variants[1]);
+      await expectAsync(p).toBeResolved();
+    });
+
+    it('doesn\'t fire "adaptation" when not changing streams', async () => {
+      const abrEnabled = new Promise((resolve) => {
+        abrManager.enable.and.callFake(resolve);
+      });
+
+      await player.load('test:sintel_multi_lingual_multi_res_compiled');
+
+      expect(abrManager.switchCallback).toBeTruthy();
+
+      /** @type {shaka.test.Waiter} */
+      const waiter = new shaka.test.Waiter(eventManager)
+          .timeoutAfter(1).failOnTimeout(true);
+
+      await waiter.waitForPromise(abrEnabled, 'AbrManager enabled');
+
+      const p = waiter.waitForEvent(player, 'adaptation');
+      for (let i = 0; i < 3; i++) {
+        abrManager.switchCallback(abrManager.variants[abrManager.chooseIndex]);
+      }
+      await expectAsync(p).toBeRejected();  // Timeout
+    });
+  });  // describe('adaptation')
 });

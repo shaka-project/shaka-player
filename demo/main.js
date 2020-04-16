@@ -46,6 +46,9 @@ shakaDemo.Main = class {
     this.initialStoredList_;
 
     /** @private {boolean} */
+    this.trickPlayControlsEnabled_ = false;
+
+    /** @private {boolean} */
     this.nativeControlsEnabled_ = false;
 
     /** @private {shaka.extern.SupportType} */
@@ -101,6 +104,10 @@ shakaDemo.Main = class {
                  'platform-and-browser-support-matrix';
     this.handleError_(severity, message, href);
 
+    const errorCloseButton =
+        document.getElementById('error-display-close-button');
+    errorCloseButton.style.display = 'none';
+
     // Update the componentHandler, to account for any new MDL elements added.
     componentHandler.upgradeDom();
 
@@ -137,13 +144,10 @@ shakaDemo.Main = class {
 
     if (navigator.serviceWorker) {
       console.debug('Registering service worker.');
-      try {
-        const registration =
-            await navigator.serviceWorker.register('service_worker.js');
-        console.debug('Service worker registered!', registration.scope);
-      } catch (error) {
-        console.error('Service worker registration failed!', error);
-      }
+      // NOTE: This can sometimes hang on iOS 12, so let's not wait for it to
+      // complete before setting up the app.  We don't even use the Promise
+      // result or react to the registration failure except to log it.
+      navigator.serviceWorker.register('service_worker.js');
     }
 
     // Optionally enter noinput mode. This has to happen before setting up the
@@ -262,6 +266,33 @@ shakaDemo.Main = class {
     });
   }
 
+  /** @private */
+  configureUI_() {
+    const video = /** @type {!HTMLVideoElement} */ (this.video_);
+    const ui = video['ui'];
+
+    const uiConfig = ui.getConfiguration();
+    // Remove any trick play configurations from a previous config.
+    uiConfig.addSeekBar = true;
+    uiConfig.controlPanelElements =
+        uiConfig.controlPanelElements.filter((element) => {
+          return element != 'rewind' && element != 'fast_forward';
+        });
+    if (this.trickPlayControlsEnabled_) {
+      // Trick mode controls don't have a seek bar.
+      uiConfig.addSeekBar = false;
+      // Replace the position the play_pause button was at with a full suite of
+      // trick play controls, including rewind and fast-forward.
+      const index = uiConfig.controlPanelElements.indexOf('play_pause');
+      uiConfig.controlPanelElements.splice(
+          index, 1, 'rewind', 'play_pause', 'fast_forward');
+    }
+    if (!uiConfig.controlPanelElements.includes('close')) {
+      uiConfig.controlPanelElements.push('close');
+    }
+    ui.configure(uiConfig);
+  }
+
   /**
    * @return {!Promise}
    * @private
@@ -280,9 +311,7 @@ shakaDemo.Main = class {
       shaka.ui.Controls.registerElement('close', closeFactory);
 
       // Configure UI.
-      const uiConfig = ui.getConfiguration();
-      uiConfig.controlPanelElements.push('close');
-      ui.configure(uiConfig);
+      this.configureUI_();
     }
 
     // Add application-level default configs here.  These are not the library
@@ -411,7 +440,11 @@ shakaDemo.Main = class {
 
     const storage = new shaka.offline.Storage();
 
-    // Set the progress callback;
+    // Configure the storage instance.
+    /**
+     * @param {string} identifier
+     * @return {?ShakaDemoAssetInfo}
+     */
     const getAssetWithIdentifier = (identifier) => {
       for (const asset of shakaAssets.testAssets) {
         if (this.getIdentifierFromAsset_(asset) == identifier) {
@@ -427,6 +460,10 @@ shakaDemo.Main = class {
       }
       return null;
     };
+    /**
+     * @param {shaka.extern.StoredContent} content
+     * @param {number} progress
+     */
     const progressCallback = (content, progress) => {
       const identifier = content.appMetadata['identifier'];
       const asset = getAssetWithIdentifier(identifier);
@@ -633,6 +670,27 @@ shakaDemo.Main = class {
   }
 
   /**
+   * Enable or disable the UI's trick play controls.
+   *
+   * @param {boolean} enabled
+   */
+  setTrickPlayControlsEnabled(enabled) {
+    this.trickPlayControlsEnabled_ = enabled;
+    // Configure the UI, to add or remove the controls.
+    this.configureUI_();
+    this.remakeHash();
+  }
+
+  /**
+   * Get if the trick play controls are enabled.
+   *
+   * @return {boolean} enabled
+   */
+  getTrickPlayControlsEnabled() {
+    return this.trickPlayControlsEnabled_;
+  }
+
+  /**
    * Enable or disable the native controls.
    * Goes into effect during the next load.
    *
@@ -725,10 +783,11 @@ shakaDemo.Main = class {
     const params = this.getParams_();
 
     const manifest = params['asset'];
+    const adTagUri = params['adTagUri'];
     if (manifest) {
       // See if it's a default asset.
       for (const asset of shakaAssets.testAssets) {
-        if (asset.manifestUri == manifest) {
+        if (asset.manifestUri == manifest && asset.adTagUri == adTagUri) {
           return asset;
         }
       }
@@ -745,7 +804,7 @@ shakaDemo.Main = class {
           /* name= */ 'loaded asset',
           /* iconUri= */ '',
           /* manifestUri= */ manifest,
-          /* source= */ shakaAssets.Source.UNKNOWN);
+          /* source= */ shakaAssets.Source.CUSTOM);
       if ('license' in params) {
         let drmSystems = shakaDemo.Main.commonDrmSystems;
         if ('drmSystem' in params) {
@@ -851,6 +910,12 @@ shakaDemo.Main = class {
 
     // Disable custom controls.
     this.nativeControlsEnabled_ = 'nativecontrols' in params;
+
+    // Enable trick play.
+    if ('trickplay' in params) {
+      this.trickPlayControlsEnabled_ = true;
+      this.configureUI_();
+    }
 
     // Check if uncompiled mode is supported.
     if (!shakaDemo.Utils.browserSupportsUncompiledMode()) {
@@ -1120,15 +1185,32 @@ shakaDemo.Main = class {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
 
+      // If the asset has an ad tag attached to it, load the ads
+      const adManager = this.player_.getAdManager();
+      if (adManager && asset.adTagUri) {
+        try {
+          // If IMA is blocked by an AdBlocker, init() will throw.
+          // If that happens, just proceed to load.
+          goog.asserts.assert(this.video_ != null, 'this.video should exist!');
+          adManager.initClientSide(
+              this.controls_.getAdContainer(), this.video_);
+          const adRequest = new google.ima.AdsRequest();
+          adRequest.adTagUrl = asset.adTagUri;
+          adManager.requestClientSideAds(adRequest);
+        } catch (error) {
+          console.log(error);
+          console.warn('Ads code has been prevented from running. ' +
+            'Proceeding with the load without ads.');
+        }
+      }
+
       // Set media session title, but only if the browser supports that API.
       if (navigator.mediaSession) {
         const metadata = {
           title: asset.name,
           artwork: [{src: asset.iconUri}],
         };
-        if (asset.source != shakaAssets.Source.UNKNOWN) {
-          metadata.artist = asset.source;
-        }
+        metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
       }
     } catch (reason) {
@@ -1197,6 +1279,9 @@ shakaDemo.Main = class {
     if (this.selectedAsset) {
       const isDefault = shakaAssets.testAssets.includes(this.selectedAsset);
       params.push('asset=' + this.selectedAsset.manifestUri);
+      if (this.selectedAsset.adTagUri) {
+        params.push('adTagUri=' + this.selectedAsset.adTagUri);
+      }
       if (!isDefault && this.selectedAsset.licenseServers.size) {
         const uri = this.selectedAsset.licenseServers.values().next().value;
         params.push('license=' + uri);
@@ -1217,6 +1302,10 @@ shakaDemo.Main = class {
       if (button.nodeType == Node.ELEMENT_NODE &&
           button.classList.contains('mdl-button--accent')) {
         params.push('panel=' + button.getAttribute('tab-identifier'));
+        const hashValues = button.getAttribute('tab-hash');
+        if (hashValues) {
+          params.push('panelData=' + hashValues);
+        }
         break;
       }
     }
@@ -1234,6 +1323,10 @@ shakaDemo.Main = class {
 
     if (this.nativeControlsEnabled_) {
       params.push('nativecontrols');
+    }
+
+    if (this.trickPlayControlsEnabled_) {
+      params.push('trickplay');
     }
 
     // MAX_LOG_LEVEL is the default starting log level. Only save the log level
@@ -1307,7 +1400,10 @@ shakaDemo.Main = class {
    * setup process.
    * @param {string} containerName Used to determine the id of the button this
    *   is looking for.  Also used as the className of the container, for CSS.
-   * @return {!HTMLDivElement} The container for the tab.
+   * @return {{
+   *   container: !HTMLDivElement,
+   *   button: !HTMLButtonElement,
+   * }} The container for the tab, and the button element that activates it.
    */
   addNavButton(containerName) {
     const navButtons = document.getElementById('nav-button-container');
@@ -1320,7 +1416,13 @@ shakaDemo.Main = class {
     const params = this.getParams_();
     let selected =
         params['panel'] == encodeURI(button.getAttribute('tab-identifier'));
-    if (!selected && !params['panel']) {
+    if (selected) {
+      // Re-apply any saved data from hash.
+      const hashValues = params['panelData'];
+      if (hashValues) {
+        button.setAttribute('tab-hash', hashValues);
+      }
+    } else if (!params['panel']) {
       // Check if it's selected by default.
       selected = button.getAttribute('defaultselected') != null;
     }
@@ -1360,7 +1462,10 @@ shakaDemo.Main = class {
       Promise.resolve().then(switchPage);
     }
 
-    return /** @type {!HTMLDivElement} */ (container);
+    return {
+      container: /** @type {!HTMLDivElement} */ (container),
+      button: /** @type {!HTMLButtonElement} */ (button),
+    };
   }
 
   /**

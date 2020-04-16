@@ -100,8 +100,10 @@ describe('MediaSourceEngine', () => {
     });
     mockTransmuxer = new shaka.test.FakeTransmuxer();
 
-    shaka.media.Transmuxer = /** @type {?} */ (
-      shaka.test.Util.factoryReturns(mockTransmuxer));
+    // eslint-disable-next-line no-restricted-syntax
+    shaka.media.Transmuxer = /** @type {?} */ (function() {
+      return /** @type {?} */ (mockTransmuxer);
+    });
     shaka.media.Transmuxer.convertTsCodecs = originalTransmuxer.convertTsCodecs;
     shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
       return mimeType == 'tsMimetype';
@@ -563,7 +565,6 @@ describe('MediaSourceEngine', () => {
         await mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null, null,
             /* hasClosedCaptions= */ false);
-        expect(mockTextEngine.appendCues).not.toHaveBeenCalled();
         expect(mockTextEngine.storeAndAppendClosedCaptions)
             .not.toHaveBeenCalled();
         expect(videoSourceBuffer.appendBuffer)
@@ -1188,7 +1189,7 @@ describe('MediaSourceEngine', () => {
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
         'setAppendWindow', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
-        'appendCues', 'storeAndAppendClosedCaptions',
+        'storeAndAppendClosedCaptions',
       ]);
 
       const resolve = () => Promise.resolve();

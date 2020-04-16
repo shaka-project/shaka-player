@@ -69,29 +69,20 @@ shaka.test.FakeAbrManager = class {
     });
 
     /** @type {!jasmine.Spy} */
+    this.playbackRateChanged = jasmine.createSpy('playbackRateChanged');
+
+    /** @type {!jasmine.Spy} */
     this.configure = jasmine.createSpy('configure');
   }
 };
 
 /** @extends {shaka.media.StreamingEngine} */
 shaka.test.FakeStreamingEngine = class {
-  /**
-   * @param {function():shaka.media.StreamingEngine.ChosenStreams}
-   *     onChooseStreams
-   * @param {function()} onCanSwitch
-   */
-  constructor(onChooseStreams, onCanSwitch) {
+  constructor() {
     const resolve = () => Promise.resolve();
 
-    let activeAudio = null;
-    let activeVideo = null;
+    let activeVariant = null;
     let activeText = null;
-
-    /** @type {function()} */
-    this.onChooseStreams = onChooseStreams;
-
-    /** @type {function()} */
-    this.onCanSwitch = onCanSwitch;
 
     /** @type {!jasmine.Spy} */
     this.destroy = jasmine.createSpy('destroy').and.callFake(resolve);
@@ -103,26 +94,14 @@ shaka.test.FakeStreamingEngine = class {
     this.seeked = jasmine.createSpy('seeked');
 
     /** @type {!jasmine.Spy} */
-    this.getBufferingPeriod =
-        jasmine.createSpy('getBufferingPeriod').and.returnValue(null);
+    this.getCurrentVariant =
+        jasmine.createSpy('getCurrentVariant').and.callFake(
+            () => activeVariant);
 
     /** @type {!jasmine.Spy} */
-    this.getBufferingAudio =
-        jasmine.createSpy('getBufferingAudio').and.callFake(() => activeAudio);
-
-    /** @type {!jasmine.Spy} */
-    this.getBufferingVideo =
-        jasmine.createSpy('getBufferingVideo').and.callFake(() => activeVideo);
-
-    this.getBufferingText =
-        jasmine.createSpy('getBufferingText').and.callFake(() => activeText);
-
-    /** @type {!jasmine.Spy} */
-    this.loadNewTextStream =
-        jasmine.createSpy('loadNewTextStream').and.callFake((stream) => {
-          activeText = stream;
-          return Promise.resolve();
-        });
+    this.getCurrentTextStream =
+        jasmine.createSpy('getCurrentTextStream').and.callFake(
+            () => activeText);
 
     /** @type {!jasmine.Spy} */
     this.unloadTextStream =
@@ -131,25 +110,12 @@ shaka.test.FakeStreamingEngine = class {
         });
 
     /** @type {!jasmine.Spy} */
-    this.start = jasmine.createSpy('start').and.callFake(async () => {
-      const chosen = onChooseStreams();
-      await Promise.resolve();
-      if (chosen.variant && chosen.variant.audio) {
-        activeAudio = chosen.variant.audio;
-      }
-      if (chosen.variant && chosen.variant.video) {
-        activeVideo = chosen.variant.video;
-      }
-      if (chosen.text) {
-        activeText = chosen.text;
-      }
-    });
+    this.start = jasmine.createSpy('start');
 
     /** @type {!jasmine.Spy} */
     this.switchVariant =
         jasmine.createSpy('switchVariant').and.callFake((variant) => {
-          activeAudio = variant.audio || activeAudio;
-          activeVideo = variant.video || activeVideo;
+          activeVariant = variant;
         });
 
     /** @type {!jasmine.Spy} */
@@ -206,7 +172,7 @@ shaka.test.FakeVideo = class {
     this.loop = false;
     this.autoplay = false;
     this.paused = false;
-    this.buffered = null;
+    this.buffered = createFakeBuffered([]);
     this.src = '';
     this.offsetWidth = 1000;
     this.offsetHeight = 1000;
@@ -424,8 +390,7 @@ shaka.test.FakeClosedCaptionParser = class {
 shaka.test.FakeSegmentIndex = class {
   constructor() {
     /** @type {!jasmine.Spy} */
-    this.destroy =
-        jasmine.createSpy('destroy').and.returnValue(Promise.resolve());
+    this.release = jasmine.createSpy('release');
 
     /** @type {!jasmine.Spy} */
     this.find = jasmine.createSpy('find').and.returnValue(null);
@@ -450,6 +415,31 @@ shaka.test.FakeSegmentIndex = class {
 
     /** @type {!jasmine.Spy} */
     this.updateEvery = jasmine.createSpy('updateEvery');
+
+    /** @type {!jasmine.Spy} */
+    this[Symbol.iterator] = jasmine.createSpy('Symbol.iterator')
+        .and.callFake(() => {
+          let nextPosition = 0;
+
+          return {
+            next: () => {
+              const value = this.get(nextPosition++);
+              return {
+                value,
+                done: !value,
+              };
+            },
+
+            current: () => {
+              return this.get(nextPosition - 1);
+            },
+
+            seek: (time) => {
+              nextPosition = this.find(time);
+              return this.get(nextPosition++);
+            },
+          };
+        });
   }
 };
 

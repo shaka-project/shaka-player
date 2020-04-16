@@ -1,18 +1,6 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 // Import the MDL styles with the desired color scheme.
@@ -31,6 +19,14 @@
 @progress-circle-size: 45px;
 @progress-circle-thickness: 5px;
 
+/* This class name is used in the Google Fonts CSS to point to the non-rounded
+ * variant we originally used.  We switched to a rounded variant and didn't want
+ * to rename the classes we use everywhere, so we must explicitly set the
+ * font-family for material icons application-wide. */
+.material-icons {
+  font-family: 'Material Icons Round';
+}
+
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
  * class with the same name, which can be used in the application directly. */
 .hidden() {
@@ -41,7 +37,22 @@
   outline: none;
 }
 
+/* Use the class name, which is more specific than just "main".  Otherwise, the
+ * MDL styles will be used instead. */
+main.mdl-layout__content {
+  /* Make the main container a flex container oriented as a column. */
+  display: flex;
+  flex-direction: column;
+}
+
 #contents {
+  /* Expand the contents section to take up any extra space on the page.  This
+   * pushes the footer to the bottom when the window is large, while still
+   * allowing the contents to scroll when the window is small.
+   */
+  flex-grow: 1;
+
+  /* Pad the outside of the contents. */
   padding: 20px;
   text-align: center;
 }
@@ -62,6 +73,12 @@
 html, body {
   /* Ensure everything has a consistent font. */
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+/* Change the default opacity of the ripple container, to get around an iOS bug.
+ * See: https://github.com/google/material-design-lite/issues/5281 */
+.mdl-ripple {
+  opacity: 0.001;
 }
 
 /* Give the FAB a drop shadow, that expands a little bit when moused over. */
@@ -332,7 +349,7 @@ html, body {
 }
 
 .significant-right-padding {
-  padding-right: 5.5em;
+  padding-right: 5em;
 }
 
 .mdl-dialog {

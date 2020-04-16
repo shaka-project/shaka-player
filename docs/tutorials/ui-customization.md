@@ -17,8 +17,8 @@ const config = {
 ui.configure(config);
 ```
 
-Controls will fire a {@link shaka.ui.Controls.UIUpdatedEvent} event once the config
-takes effect.
+Controls will fire a {@link shaka.ui.Controls.UIUpdatedEvent} event once the
+config takes effect.
 See the docs for {@link shaka.extern.UIConfiguration} for more information.
 
 #### Customizing the number and order of controls
@@ -73,6 +73,8 @@ The following buttons can be added to the overflow menu:
 * language: adds a button that controls audio language selection.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers.
+* loop: adds a button that controls if the currently selected video is played in a loop.
+* playback_rate: adds a button that controls the playback rate selection.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:

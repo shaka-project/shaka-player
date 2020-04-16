@@ -75,7 +75,11 @@ describe('Player Src Equals', () => {
   it('allow load with startTime', async () => {
     const startTime = 5;
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, startTime);
-    expect(video.currentTime).toBe(startTime);
+
+    // For some reason, the delta on IE & Edge can be 0.1 for this content and
+    // this start time.  It may be rounded to a key frame or something.
+    const delta = Math.abs(video.currentTime - startTime);
+    expect(delta).toBeLessThan(0.2);
   });
 
   // Since we don't have any manifest data, we must assume that we can seek
@@ -160,9 +164,24 @@ describe('Player Src Equals', () => {
     video.play();
     await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
 
+    let videoRateChange = false;
+    let playerRateChange = false;
+    eventManager.listen(video, 'ratechange', () => {
+      videoRateChange = true;
+    });
+    eventManager.listen(player, 'ratechange', () => {
+      playerRateChange = true;
+    });
+
     // Enabling trick play should change our playback rate to the same rate.
     player.trickPlay(2);
     expect(video.playbackRate).toBe(2);
+
+    // It should also have fired a 'ratechange' event on both video and player.
+    // We may have to delay a short time to see the events, though.
+    await shaka.test.Util.shortDelay();
+    expect(videoRateChange).toBe(true);
+    expect(playerRateChange).toBe(true);
 
     // Let playback continue playing for a bit longer.
     await shaka.test.Util.delay(2);
@@ -312,19 +331,21 @@ describe('Player Src Equals', () => {
     const stats = player.getStats();
     expect(stats).toBeTruthy();
     expect(stats.loadLatency).toBeGreaterThan(0);
+    expect(stats.manifestTimeSeconds).toBeNaN(); // There's no manifest.
+    expect(stats.drmTimeSeconds).toBeNaN(); // There's no DRM.
   });
 
   // Because we have no manifest, we can't add text tracks.
   it('cannot add text tracks', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
 
-    const pendingAdd = player.addTextTrack(
-        'test:need-a-uri-for-text',
-        'en-US',
-        'main',
-        'text/mp4');
-
-    await expectAsync(pendingAdd).toBeRejected();
+    expect(() => {
+      player.addTextTrack(
+          'test:need-a-uri-for-text',
+          'en-US',
+          'main',
+          'text/mp4');
+    }).toThrow();
   });
 
   // Since we are not in-charge of streaming, calling |retryStreaming| should

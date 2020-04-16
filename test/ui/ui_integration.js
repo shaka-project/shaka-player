@@ -81,6 +81,9 @@ describe('UI', () => {
     eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
     eventManager.listen(controls, 'error', Util.spyFunc(onErrorSpy));
 
+    // These tests expect text to be streaming upfront, so always stream text.
+    player.configure('streaming.alwaysStreamText', true);
+
     await player.load('test:sintel_multi_lingual_multi_res_compiled');
     // For this event, we ignore a timeout, since we sometimes miss this event
     // on Tizen.  But expect that the video is ready anyway.
@@ -340,11 +343,14 @@ describe('UI', () => {
       preferredLanguage = 'en';
 
       // Disable abr for the resolution tests
-      const config = {abr: {enabled: false}};
-      player.configure(config);
+      player.configure('abr.enabled', false);
 
-      player.selectAudioLanguage(preferredLanguage);
-      await waiter.waitForEvent(player, 'variantchanged');
+      const selectedLanguage =
+          getSelectedTrack(player.getVariantTracks()).language;
+      if (selectedLanguage != preferredLanguage) {
+        player.selectAudioLanguage(preferredLanguage);
+        await waiter.waitForEvent(player, 'variantchanged');
+      }
 
       resolutionsMenu = shaka.util.Dom.getElementByClassName(
           'shaka-resolutions', videoContainer);
@@ -352,6 +358,13 @@ describe('UI', () => {
       updateResolutionButtonsAndMap();
 
       oldResolutionTrack = findTrackWithHeight(tracks, oldResolution);
+
+      const selectedResolution =
+          getSelectedTrack(player.getVariantTracks()).height;
+      if (selectedResolution != oldResolution) {
+        player.selectVariantTrack(oldResolutionTrack);
+        await waiter.waitForEvent(player, 'variantchanged');
+      }
     });
 
 
@@ -364,10 +377,6 @@ describe('UI', () => {
 
 
     it('changing resolution via UI has effect on the player', async () => {
-      player.selectVariantTrack(oldResolutionTrack);
-
-      // Wait for the change to take effect
-      await waiter.waitForEvent(player, 'variantchanged');
       // Update the tracks
       tracks = player.getVariantTracks();
       expect(getSelectedTrack(tracks).height).toBe(oldResolution);
@@ -384,11 +393,6 @@ describe('UI', () => {
 
 
     it('changing resolution via API has effect on the UI', async () => {
-      // Start with the old resolution
-      player.selectVariantTrack(oldResolutionTrack);
-
-      // Wait for the change to take effect
-      await waiter.waitForEvent(player, 'variantchanged');
       updateResolutionButtonsAndMap();
       expect(getSelectedTrack(tracks).height).toBe(oldResolution);
 

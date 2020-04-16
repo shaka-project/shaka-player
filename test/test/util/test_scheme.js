@@ -66,7 +66,7 @@ shaka.test.TestScheme = class {
       responseData = generator.getInitSegment(0);
     } else {
       const index = Number(segmentParts[3]);
-      responseData = generator.getSegment(index + 1, 0, 0);
+      responseData = generator.getSegment(index, 0);
     }
     if (!responseData) {
       return shaka.util.AbortableOperation.failed(malformed);
@@ -160,7 +160,8 @@ shaka.test.TestScheme = class {
 
       if (data.licenseServers) {
         for (const keySystem in data.licenseServers) {
-          variant.addDrmInfo(keySystem, (drmInfo) => {
+          stream.encrypted = true;
+          stream.addDrmInfo(keySystem, (drmInfo) => {
             drmInfo.licenseServerUri = data.licenseServers[keySystem];
             if (data[contentType].initData) {
               drmInfo.addCencInitData(data[contentType].initData);
@@ -203,138 +204,97 @@ shaka.test.TestScheme = class {
       const manifest =
           windowShaka.test.ManifestGenerator.generate((manifest) => {
             manifest.presentationTimeline.setDuration(data.duration);
-            manifest.addPeriod(/* startTime= */ 0, (period) => {
-              period.addVariant(0, (variant) => {
-                if (data[ContentType.VIDEO]) {
-                  variant.addVideo(1, (stream) => {
-                    addStreamInfo(
-                        stream, variant, data, ContentType.VIDEO, name);
-                  });
-                }
-                if (data[ContentType.AUDIO]) {
-                  variant.addAudio(2, (stream) => {
-                    addStreamInfo(
-                        stream, variant, data, ContentType.AUDIO, name);
-                  });
-                }
-              });
 
-              if (data.text) {
-                period.addTextStream(3, (stream) => {
-                  stream.mime = data.text.mimeType;
-                  stream.codecs = data.text.codecs;
-                  stream.textStream(getAbsoluteUri(data));
-
-                  if (data.text.language) {
-                    stream.language = data.text.language;
-                  }
+            manifest.addVariant(0, (variant) => {
+              if (data[ContentType.VIDEO]) {
+                variant.addVideo(1, (stream) => {
+                  addStreamInfo(
+                      stream, variant, data, ContentType.VIDEO, name);
+                });
+              }
+              if (data[ContentType.AUDIO]) {
+                variant.addAudio(2, (stream) => {
+                  addStreamInfo(
+                      stream, variant, data, ContentType.AUDIO, name);
                 });
               }
             });
+
+            if (data.text) {
+              manifest.addTextStream(3, (stream) => {
+                stream.mime = data.text.mimeType;
+                stream.codecs = data.text.codecs;
+                stream.textStream(getAbsoluteUri(data));
+
+                if (data.text.language) {
+                  stream.language = data.text.language;
+                }
+              });
+            }
           }, shaka);
       MANIFESTS[name + suffix] = manifest;
     }
-    // Custom generators:
 
+    // Custom generator for multiple streams with different languages and
+    // resolutions.
+    // TODO: Can this be generalized from the DATA array instead?
     const data = DATA['sintel'];
     const periodDuration = 10;
-
-    // Multi-period
-    const numPeriods = 10;
-    let manifest = windowShaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.presentationTimeline.setDuration(periodDuration * numPeriods);
-
-      let idCount = 1;
-      for (const i of windowShaka.util.Iterables.range(numPeriods)) {
-        manifest.addPeriod(
-            /* startTime= */ periodDuration * i,
-            (period) => {
-              period.addVariant(idCount++, (variant) => {
-                variant.language = 'en';
-                variant.addVideo(idCount++, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.VIDEO, 'sintel');
-                });
-                variant.addAudio(idCount++, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.AUDIO, 'sintel');
-                });
-              });
-
-              period.addVariant(idCount++, (variant) => {
-                variant.language = 'es';
-                variant.addVideo(idCount++, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.VIDEO, 'sintel');
-                });
-                variant.addAudio(idCount++, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.AUDIO, 'sintel');
-                });
-              });
-            });
-      }
-    }, shaka);
-    MANIFESTS['sintel_short_periods' + suffix] = manifest;
-
-
-    // Multi-stream. Different languages and resolutions.
     let idCount = 1;
-    manifest = windowShaka.test.ManifestGenerator.generate((manifest) => {
+    const manifest = windowShaka.test.ManifestGenerator.generate((manifest) => {
       manifest.presentationTimeline.setDuration(periodDuration);
-      manifest.addPeriod(/* startTime= */ 0, (period) => {
-        // Variant in English, res 426x182
-        period.addVariant(idCount++, (variant) => {
-          variant.language = 'en';
-          variant.addVideo(idCount++, (stream) => {
-            stream.size(426, 182);
-            addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
-          });
-          variant.addAudio(idCount++, (stream) => {
-            stream.language = 'en';
-            addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
-          });
-        });
 
-        // Same language, different resolution
-        period.addVariant(idCount++, (variant) => {
-          variant.language = 'en';
-          variant.addVideo(idCount++, (stream) => {
-            stream.size(640, 272);
-            addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
-          });
-          variant.addAudio(idCount++, (stream) => {
-            stream.language = 'en';
-            addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
-          });
+      // Variant in English, res 426x182
+      manifest.addVariant(idCount++, (variant) => {
+        variant.language = 'en';
+        variant.addVideo(idCount++, (stream) => {
+          stream.size(426, 182);
+          addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
         });
+        variant.addAudio(idCount++, (stream) => {
+          stream.language = 'en';
+          addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
+        });
+      });
 
-        // Same resolution, different language
-        period.addVariant(idCount++, (variant) => {
-          variant.language = 'es';
-          variant.addVideo(idCount++, (stream) => {
-            stream.size(640, 272);
-            addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
-          });
-          variant.addAudio(idCount++, (stream) => {
-            stream.language = 'es';
-            addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
-          });
+      // Same language, different resolution
+      manifest.addVariant(idCount++, (variant) => {
+        variant.language = 'en';
+        variant.addVideo(idCount++, (stream) => {
+          stream.size(640, 272);
+          addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
         });
+        variant.addAudio(idCount++, (stream) => {
+          stream.language = 'en';
+          addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
+        });
+      });
 
-        period.addTextStream(idCount++, (stream) => {
-          stream.language = 'zh';
-          stream.mime = data.text.mimeType;
-          stream.codecs = data.text.codecs;
-          stream.textStream(getAbsoluteUri(data));
+      // Same resolution, different language
+      manifest.addVariant(idCount++, (variant) => {
+        variant.language = 'es';
+        variant.addVideo(idCount++, (stream) => {
+          stream.size(640, 272);
+          addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
         });
+        variant.addAudio(idCount++, (stream) => {
+          stream.language = 'es';
+          addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
+        });
+      });
 
-        period.addTextStream(idCount++, (stream) => {
-          stream.language = 'fr';
-          stream.mime = data.text.mimeType;
-          stream.codecs = data.text.codecs;
-          stream.textStream(getAbsoluteUri(data));
-        });
+      manifest.addTextStream(idCount++, (stream) => {
+        stream.language = 'zh';
+        stream.mime = data.text.mimeType;
+        stream.codecs = data.text.codecs;
+        stream.textStream(getAbsoluteUri(data));
+      });
+
+      manifest.addTextStream(idCount++, (stream) => {
+        stream.language = 'fr';
+        stream.mime = data.text.mimeType;
+        stream.codecs = data.text.codecs;
+        stream.textStream(getAbsoluteUri(data));
       });
     }, shaka);
     MANIFESTS['sintel_multi_lingual_multi_res' + suffix] = manifest;
@@ -407,35 +367,6 @@ shaka.test.TestScheme.DATA = {
       codecs: 'mp4a.40.2',
     },
     duration: 300,
-  },
-
-  // Like 'sintel' above, but with a non-zero period start time.
-  // This helps expose edge cases around startup and live streams.
-  'sintel_start_at_3': {
-    periodStart: 3,
-    video: {
-      initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
-      mdhdOffset: 0x1ba,
-      segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
-      tfdtOffset: 0x38,
-      segmentDuration: 10,
-      mimeType: 'video/mp4',
-      codecs: 'avc1.42c01e',
-    },
-    audio: {
-      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mdhdOffset: 0x1b6,
-      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
-      tfdtOffset: 0x3c,
-      segmentDuration: 10.005,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
-    },
-    text: {
-      uri: '/base/test/test/assets/text-clip.vtt',
-      mimeType: 'text/vtt',
-    },
-    duration: 30,
   },
 
   // Like 'sintel' above, but with languages and delayed setup.
@@ -667,6 +598,11 @@ shaka.test.TestScheme.ManifestParser = class {
   /** @override */
   configure(config) {}
 
+  /** @return {!shaka.test.TestScheme.ManifestParser} */
+  static factory() {
+    return new shaka.test.TestScheme.ManifestParser();
+  }
+
   /** @override */
   start(uri, playerInterface) {
     const re = /^test:([^/]+)$/;
@@ -687,10 +623,7 @@ shaka.test.TestScheme.ManifestParser = class {
     // This makes sure the filtering functions are covered implicitly by
     // tests. This covers regression
     // https://github.com/google/shaka-player/issues/988
-    playerInterface.filterAllPeriods(manifest.periods);
-    for (const period of manifest.periods) {
-      playerInterface.filterNewPeriod(period);
-    }
+    playerInterface.filter(manifest);
 
     return Promise.resolve(manifest);
   }
@@ -710,4 +643,5 @@ shaka.test.TestScheme.ManifestParser = class {
 
 shaka.net.NetworkingEngine.registerScheme('test', shaka.test.TestScheme.plugin);
 shaka.media.ManifestParser.registerParserByMime(
-    'application/x-test-manifest', shaka.test.TestScheme.ManifestParser);
+    'application/x-test-manifest',
+    shaka.test.TestScheme.ManifestParser.factory);

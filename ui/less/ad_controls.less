@@ -1,24 +1,12 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 /* Ad controls. */
 .ad-text-shadow() {
   /* Give white text a black shadow, so it's visible against a
-  white background. */
+   * white background. */
   text-shadow: 1px 1px 4px black;
 }
 
@@ -26,14 +14,24 @@
   .absolute-position();
   .fill-container();
 
-  /* IMA SDK ads their own ad UI into an iframe element.
-  Hide it, so only our UI is visible. */
+  &:not([ad-active="true"]) {
+    pointer-events: none;
+  }
+
+  /* IMA SDK adds their own ad UI into an iframe element.
+   * Hide it when shaka controls are enabled, so we can show
+   * our own UI. Show it when shaka controls are disabled
+   * (and native controls are enabled). */
   iframe {
-    display: none;
+    .shaka-video-container[shaka-controls="true"] & {
+      .hidden();
+    }
   }
 }
 
 .shaka-ad-controls {
+  .hide-when-shaka-controls-disabled();
+
   display: flex;
   flex-direction: row;
   z-index: 1;
@@ -59,16 +57,15 @@
 
 .shaka-skip-ad-container {
   /* Skip button is positioned at the very right edge of the
-  video container unlike the rest of the bottom controls. */
+   * video container unlike the rest of the bottom controls. */
   position: relative;
 
-  /* This math is determining how far the button is
-  from the right edge. Ad panel's parent is centered and
-  @bottom-controls-width wide, so
-  100 - @bottom-controls-width = margins from both sides of the container.
-  That divided by 2 is margin on one side, so we take that, and
-  move the button from its normal position to the right by that percentage.
-  */
+  /* This math is determining how far the button is from the right edge.
+   * Ad panel's parent is centered and @bottom-controls-width wide, so
+   * 100 - @bottom-controls-width = margins from both sides of the container.
+   * That divided by 2 is margin on one side, so we take that, and move the
+   * button from its normal position to the right by that percentage.
+   */
   right: (100 - @bottom-controls-width) / 2 * -1;
   display: flex;
   flex-direction: row;
@@ -83,6 +80,8 @@
   &:disabled {
     background: rgba(0, 0, 0, 0.3);
   }
+
+  cursor: pointer;
 }
 
 .shaka-skip-ad-counter {

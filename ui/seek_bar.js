@@ -35,6 +35,15 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           'shaka-show-controls-on-mouse-over',
         ]);
 
+    /** @private {!HTMLElement} */
+    this.adMarkerContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.adMarkerContainer_.classList.add('shaka-ad-markers');
+    // Insert the ad markers container as a first child for proper
+    // positioning.
+    this.container.insertBefore(
+        this.adMarkerContainer_, this.container.childNodes[0]);
+
+
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
 
@@ -48,6 +57,21 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.video.currentTime = this.getValue();
     });
 
+
+    /**
+     * The timer is activated for live content and checks if
+     * new ad breaks need to be marked in the current seek range.
+     *
+     * @private {shaka.util.Timer}
+     */
+    this.adBreaksTimer_ = new shaka.util.Timer(() => {
+      this.markAdBreaks_();
+    });
+
+
+    /** @private {!Array.<!shaka.ads.CuePoint>} */
+    this.adCuePoints_ = [];
+
     this.eventManager.listen(this.localization,
         shaka.ui.Localization.LOCALE_UPDATED,
         () => this.updateAriaLabel_());
@@ -55,6 +79,30 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.eventManager.listen(this.localization,
         shaka.ui.Localization.LOCALE_CHANGED,
         () => this.updateAriaLabel_());
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+          shaka.ui.Utils.setDisplay(this.container, false);
+        });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+          if (this.shouldBeDisplayed_()) {
+            shaka.ui.Utils.setDisplay(this.container, true);
+          }
+        });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.CUEPOINTS_CHANGED, (e) => {
+          this.adCuePoints_ = (e)['cuepoints'];
+          this.onAdCuePointsChanged_();
+        });
+
+    this.eventManager.listen(
+        this.player, 'unloading', () => {
+          this.adCuePoints_ = [];
+          this.onAdCuePointsChanged_();
+        });
 
     // Initialize seek state and label.
     this.setValue(this.video.currentTime);
@@ -67,6 +115,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     if (this.seekTimer_) {
       this.seekTimer_.stop();
       this.seekTimer_ = null;
+      this.adBreaksTimer_.stop();
+      this.adBreaksTimer_ = null;
     }
 
     super.release();
@@ -147,9 +197,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     this.setRange(seekRange.start, seekRange.end);
 
-    // Hide seekbar if the seek window is very small.
-    if (this.player.isLive() &&
-        seekRangeSize < shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
+    if (!this.shouldBeDisplayed_()) {
       shaka.ui.Utils.setDisplay(this.container, false);
     } else {
       shaka.ui.Utils.setDisplay(this.container, true);
@@ -172,20 +220,130 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         const bufferEndFraction = (bufferEndDistance / seekRangeSize) || 0;
         const playheadFraction = (playheadDistance / seekRangeSize) || 0;
 
-        const makeColor = (color, fract) => color + ' ' + (fract * 100) + '%';
+        const unbufferedColor =
+            this.config_.showUnbufferedStart ? colors.base : colors.played;
+
         const gradient = [
           'to right',
-          makeColor(colors.base, bufferStartFraction),
-          makeColor(colors.played, bufferStartFraction),
-          makeColor(colors.played, playheadFraction),
-          makeColor(colors.buffered, playheadFraction),
-          makeColor(colors.buffered, bufferEndFraction),
-          makeColor(colors.base, bufferEndFraction),
+          this.makeColor_(unbufferedColor, bufferStartFraction),
+          this.makeColor_(colors.played, bufferStartFraction),
+          this.makeColor_(colors.played, playheadFraction),
+          this.makeColor_(colors.buffered, playheadFraction),
+          this.makeColor_(colors.buffered, bufferEndFraction),
+          this.makeColor_(colors.base, bufferEndFraction),
         ];
         this.container.style.background =
             'linear-gradient(' + gradient.join(',') + ')';
       }
     }
+  }
+
+  /**
+   * @private
+   */
+  markAdBreaks_() {
+    if (!this.adCuePoints_.length) {
+      this.adMarkerContainer_.style.background = 'transparent';
+      return;
+    }
+
+    const seekRange = this.player.seekRange();
+    const seekRangeSize = seekRange.end - seekRange.start;
+    const gradient = ['to right'];
+    const pointsAsFractions = [];
+    const adBreakColor = this.config_.seekBarColors.adBreaks;
+    let postRollAd = false;
+    for (const point of this.adCuePoints_) {
+      // Post-roll ads are marked as starting at -1 in CS IMA ads.
+      if (point.start == -1 && !point.end) {
+        postRollAd = true;
+      }
+      // Filter point within the seek range. For points with no endpoint
+      // (client side ads) check that the start point is within range.
+      if (point.start >= seekRange.start && point.start < seekRange.end) {
+        if (point.end && point.end > seekRange.end) {
+          continue;
+        }
+
+        const startDist = point.start - seekRange.start;
+        const startFrac = (startDist / seekRangeSize) || 0;
+        // For points with no endpoint assume a 1% length: not too much,
+        // but enough to be visible on the timeline.
+        let endFrac = startFrac + 0.01;
+        if (point.end) {
+          const endDist = point.end - seekRange.start;
+          endFrac = (endDist / seekRangeSize) || 0;
+        }
+
+        pointsAsFractions.push({
+          start: startFrac,
+          end: endFrac,
+        });
+      }
+    }
+
+    for (const point of pointsAsFractions) {
+      gradient.push(this.makeColor_('transparent', point.start));
+      gradient.push(this.makeColor_(adBreakColor, point.start));
+      gradient.push(this.makeColor_(adBreakColor, point.end));
+      gradient.push(this.makeColor_('transparent', point.end));
+    }
+
+    if (postRollAd) {
+      gradient.push(this.makeColor_('transparent', 0.99));
+      gradient.push(this.makeColor_(adBreakColor, 0.99));
+    }
+    this.adMarkerContainer_.style.background =
+            'linear-gradient(' + gradient.join(',') + ')';
+  }
+
+
+  /**
+   * @param {string} color
+   * @param {number} fract
+   * @return {string}
+   * @private
+   */
+  makeColor_(color, fract) {
+    return color + ' ' + (fract * 100) + '%';
+  }
+
+
+  /**
+   * @private
+   */
+  onAdCuePointsChanged_() {
+    this.markAdBreaks_();
+    const seekRange = this.player.seekRange();
+    const seekRangeSize = seekRange.end - seekRange.start;
+    const minSeekBarWindow = shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR;
+    // Seek range keeps changing for live content and some of the known
+    // ad breaks might not be in the seek range now, but get into
+    // it later.
+    // If we have a LIVE seekable content, keep checking for ad breaks
+    // every second.
+    if (this.player.isLive() && seekRangeSize > minSeekBarWindow) {
+      this.adBreaksTimer_.tickEvery(1);
+    }
+  }
+
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  shouldBeDisplayed_() {
+    // The seek bar should be hidden when the seek window's too small or
+    // there's an ad playing.
+    const seekRange = this.player.seekRange();
+    const seekRangeSize = seekRange.end - seekRange.start;
+
+    if (this.player.isLive() &&
+        seekRangeSize < shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
+      return false;
+    }
+
+    return this.ad == null;
   }
 
   /** @private */

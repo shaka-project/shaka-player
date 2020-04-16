@@ -90,15 +90,16 @@ shaka.test.Util = class {
   /**
    * Creates a custom matcher object that matches a number that is close to the
    * given value.
+   *
    * @param {number} val
-   * @return {!Object}
+   * @return {number}
    */
   static closeTo(val) {
     const E = 0.000001;
-    return {
+    return /** @type {number} */(/** @type {?} */({
       asymmetricMatch: (other) => other >= val - E && other <= val + E,
       jasmineToString: () => '<closeTo: ' + val + '>',
-    };
+    }));
   }
 
   /**
@@ -317,7 +318,7 @@ shaka.test.Util = class {
             'test', shaka.test.TestScheme.plugin);
         compiledShaka.media.ManifestParser.registerParserByMime(
             'application/x-test-manifest',
-            shaka.test.TestScheme.ManifestParser);
+            shaka.test.TestScheme.ManifestParser.factory);
 
         loaded.resolve();
       }, (error) => {
@@ -375,21 +376,6 @@ shaka.test.Util = class {
     const waiter = new shaka.test.Waiter(eventManager)
         .failOnTimeout(false).timeoutAfter(timeout);
     return waiter.waitForEnd(target);
-  }
-
-  /**
-   * Returns a function that can be used as a factory.  This factory returns
-   * the given static value.
-   *
-   * @param {T} value
-   * @return {function():T}
-   * @template T
-   */
-  static factoryReturns(value) {
-    // eslint-disable-next-line no-restricted-syntax
-    return function() {
-      return value;
-    };
   }
 };
 
