@@ -47,6 +47,8 @@ UNCOMPILED_JS = [
   // Bootstrap the Shaka Player library through the Closure library.
   '../../third_party/closure/goog/base.js',
   '../../dist/deps.js',
+  // Compiled into Shaka Player, but outside of the Closure deps system.
+  '../../node_modules/eme-encryption-scheme-polyfill/index.js',
   // This file contains goog.require calls for all exported library classes.
   '../../shaka-player.uncompiled.js',
   // These are the individual parts of the receiver app.
