@@ -195,8 +195,48 @@ const EventTarget = makeInterface("EventTarget", [
   }
 ]);
 
+const Iterator = makeInterface("Iterator", [
+  {
+    name: "next",
+    params: [
+      {
+        name: "args",
+        type: {
+          type: ds.RestType,
+          expression: {
+            type: ds.TypeApplication,
+            expression: {
+              type: ds.NameExpression,
+              name: "Array"
+            } as doctrine.type.NameExpression,
+            applications: [{
+              type: ds.NameExpression,
+              name: "TNext",
+            } as doctrine.type.NameExpression],
+          } as doctrine.type.TypeApplication,
+        } as doctrine.type.RestType
+      },
+    ],
+    returnType: {
+      type: ds.TypeApplication,
+      expression: {
+        type: ds.NameExpression,
+        name: "IteratorResult",
+      } as doctrine.type.NameExpression,
+      applications: [{
+        type: ds.NameExpression,
+        name: "T"
+      } as doctrine.type.NameExpression, {
+        type: ds.NameExpression,
+        name: "TReturn"
+      } as doctrine.type.NameExpression]
+    } as doctrine.type.TypeApplication,
+  }
+])
+
 export const predefinedInterfaces: NodeMap = new Map([
-  ["EventTarget", EventTarget]
+  ["EventTarget", EventTarget],
+  ["Iterator", Iterator]
 ]);
 
 /**

@@ -44,14 +44,25 @@ function staticMemberExpressionToPath(expression: estree.Expression): string[] {
 function parseMethodDefinition(
   md: estree.MethodDefinition
 ): FunctionDefinition | null {
-  assert(md.key.type === "Identifier");
+  let identifier: string | undefined;
+  if (md.key.type === "Identifier") {
+    identifier = md.key.name;
+  } else if (md.key.type === "MemberExpression") {
+    // [Symbol]() syntax
+    assert(md.key.object.type === "Identifier");
+    assert(md.key.property.type === "Identifier");
+    identifier = `[${md.key.object.name}.${md.key.property.name}]`
+  }
+  if (!identifier) {
+    throw new Error(`Could not determine identifier from key type ${md.key.type}: ${util.inspect(md.key)}`);
+  }
   const [_, attributes] = parseLeadingComment(md.leadingComments);
   if (!attributes.export && md.kind !== "constructor") {
     return null;
   }
   return {
     type: DefinitionType.Function,
-    identifier: [md.key.name],
+    identifier: [identifier],
     params: md.value.params.map(p => {
       if (p.type === "RestElement") {
         assert(p.argument.type === "Identifier", p.argument.type);
@@ -106,6 +117,9 @@ function parseAssignmentExpression(
         type: DefinitionType.Object,
         identifier,
         props: expression.right.properties.map(p => {
+          if (p.type !== "Property") {
+            throw new Error("Unrecognized type in object expression: " + p.type);
+          }
           if (p.key.type === "Identifier") {
             return p.key.name;
           }

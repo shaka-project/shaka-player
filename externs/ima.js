@@ -264,6 +264,7 @@ google.ima.dai.api = {};
 
 /**
  * @implements {EventTarget}
+ * @exportTypescript
  */
 google.ima.dai.api.StreamManager = class {
   /** @param {HTMLMediaElement} videoElement */
@@ -310,7 +311,10 @@ google.ima.dai.api.StreamManager = class {
 };
 
 
-/** @const */
+/**
+ * @const
+ * @exportTypescript
+ */
 google.ima.dai.api.Ad = class {
   /** @return {number} */
   getDuration() {}
