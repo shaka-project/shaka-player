@@ -40,7 +40,6 @@ describe('UITextDisplayer', () => {
     return cssObj;
   }
 
-
   beforeAll(() => {
     videoContainer =
       /** @type {!HTMLElement} */ (document.createElement('div'));
@@ -56,6 +55,10 @@ describe('UITextDisplayer', () => {
 
   afterEach(async () => {
     await textDisplayer.destroy();
+  });
+
+  afterAll(() => {
+    document.body.removeChild(videoContainer);
   });
 
   it('correctly displays styles for cues', async () => {
