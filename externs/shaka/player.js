@@ -76,6 +76,7 @@ shaka.extern.StateChange;
  *   pauseTime: number,
  *   bufferingTime: number,
  *   licenseTime: number,
+ *   liveLatency: number,
  *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
@@ -123,6 +124,9 @@ shaka.extern.StateChange;
  *   The total time spent in a buffering state in seconds.
  * @property {number} licenseTime
  *   The time spent on license requests during this session in seconds, or NaN.
+ * @property {number} liveLatency
+ *   The time between the capturing of a frame and the end user having it
+ *   displayed on their screen.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.
