@@ -90,6 +90,17 @@ describe('SimpleTextDisplayer', () => {
           ],
           [shakaCue]);
     });
+
+    it('skips duplicate cues', () => {
+      const cue1 = new shaka.text.Cue(10, 20, 'Test');
+      displayer.append([cue1]);
+      expect(mockTrack.addCue).toHaveBeenCalledTimes(1);
+      mockTrack.addCue.calls.reset();
+
+      const cue2 = new shaka.text.Cue(10, 20, 'Test');
+      displayer.append([cue2]);
+      expect(mockTrack.addCue).not.toHaveBeenCalled();
+    });
   });
 
   describe('remove', () => {
@@ -132,13 +143,13 @@ describe('SimpleTextDisplayer', () => {
     it('converts shaka.text.Cues to VttCues', () => {
       verifyHelper(
           [
-            {startTime: 20, endTime: 40, text: 'Test'},
+            {startTime: 20, endTime: 40, text: 'Test4'},
           ],
           [
-            new shaka.text.Cue(20, 40, 'Test'),
+            new shaka.text.Cue(20, 40, 'Test4'),
           ]);
 
-      const cue1 = new shaka.text.Cue(20, 40, 'Test');
+      const cue1 = new shaka.text.Cue(20, 40, 'Test5');
       cue1.positionAlign = Cue.positionAlign.LEFT;
       cue1.lineAlign = Cue.lineAlign.START;
       cue1.size = 80;
@@ -153,7 +164,7 @@ describe('SimpleTextDisplayer', () => {
             {
               startTime: 20,
               endTime: 40,
-              text: 'Test',
+              text: 'Test5',
               lineAlign: 'start',
               positionAlign: 'line-left',
               size: 80,
@@ -188,7 +199,7 @@ describe('SimpleTextDisplayer', () => {
             },
           ], [cue2]);
 
-      const cue3 = new shaka.text.Cue(40, 60, 'Test');
+      const cue3 = new shaka.text.Cue(40, 60, 'Test1');
       cue3.positionAlign = Cue.positionAlign.CENTER;
       cue3.lineAlign = Cue.lineAlign.CENTER;
       cue3.textAlign = Cue.textAlign.START;
@@ -199,7 +210,7 @@ describe('SimpleTextDisplayer', () => {
             {
               startTime: 40,
               endTime: 60,
-              text: 'Test',
+              text: 'Test1',
               lineAlign: 'center',
               positionAlign: 'center',
               align: 'start',
@@ -207,7 +218,7 @@ describe('SimpleTextDisplayer', () => {
             },
           ], [cue3]);
 
-      const cue4 = new shaka.text.Cue(40, 60, 'Test');
+      const cue4 = new shaka.text.Cue(40, 60, 'Test2');
       cue4.line = null;
       cue4.position = null;
 
@@ -216,13 +227,13 @@ describe('SimpleTextDisplayer', () => {
             {
               startTime: 40,
               endTime: 60,
-              text: 'Test',
+              text: 'Test2',
               line: 'auto',
               position: 'auto',
             },
           ], [cue4]);
 
-      const cue5 = new shaka.text.Cue(40, 60, 'Test');
+      const cue5 = new shaka.text.Cue(40, 60, 'Test3');
       cue5.line = 0;
       cue5.position = 0;
 
@@ -231,7 +242,7 @@ describe('SimpleTextDisplayer', () => {
             {
               startTime: 40,
               endTime: 60,
-              text: 'Test',
+              text: 'Test3',
               line: 0,
               position: 0,
             },
@@ -277,6 +288,7 @@ describe('SimpleTextDisplayer', () => {
     });
 
     it('ignores cues with startTime >= endTime', () => {
+      mockTrack.addCue.calls.reset();
       const cue1 = new shaka.text.Cue(60, 40, 'Test');
       const cue2 = new shaka.text.Cue(40, 40, 'Test');
       displayer.append([cue1, cue2]);
@@ -289,6 +301,7 @@ describe('SimpleTextDisplayer', () => {
   }
 
   /**
+   * Verifies that vttCues are converted to shakaCues and appended.
    * @param {!Array} vttCues
    * @param {!Array.<!shaka.text.Cue>} shakaCues
    */
