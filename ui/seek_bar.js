@@ -55,7 +55,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
      * @private {shaka.util.Timer}
      */
     this.seekTimer_ = new shaka.util.Timer(() => {
-      this.video.currentTime = this.getValue();
+      this.video.currentTime = Math.min(this.getValue(),
+        this.video.duration - 0.01);
     });
 
     this.eventManager.listen(this.localization,
