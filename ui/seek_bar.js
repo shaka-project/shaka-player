@@ -170,7 +170,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     } else {
       shaka.ui.Utils.setDisplay(this.container, true);
 
-      if (bufferedLength == 0) {
+      if (bufferedLength == 0 && !this.video.seeking) {
         this.container.style.background = colors.base;
       } else {
         const clampedBufferStart = Math.max(bufferedStart, seekRange.start);
