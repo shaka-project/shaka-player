@@ -66,6 +66,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         shaka.ui.Localization.LOCALE_CHANGED,
         () => this.updateAriaLabel_());
 
+    this.paused = null;
+
     // Initialize seek state and label.
     this.setValue(this.video.currentTime);
     this.update();
@@ -89,6 +91,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @override
    */
   onChangeStart() {
+    this.paused = this.video.paused;
     this.controls.setSeeking(true);
     this.video.pause();
   }
@@ -131,7 +134,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // call the event so that we can respond immediately.
     this.seekTimer_.tickNow();
     this.controls.setSeeking(false);
-    this.video.play();
+    if (!this.paused) {
+      this.video.play();
+    }
   }
 
   /** @return {boolean} */
