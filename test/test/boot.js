@@ -107,6 +107,8 @@ function getClientArg(name) {
     if (seed) {
       jasmine.getEnv().seed(seed.toString());
     }
+  } else {
+    jasmine.getEnv().randomizeTests(false);
   }
 
   /**
