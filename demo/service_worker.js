@@ -78,7 +78,14 @@ const CRITICAL_RESOURCES = [
 
   // Datalist-like fields are enabled by including these:
   '../node_modules/awesomplete/awesomplete.min.js',
-];
+
+  // Tooltips are enabled by including these:
+  '../node_modules/tippy.js/umd/index.min.js',
+  '../node_modules/popper.js/dist/umd/popper.min.js',
+
+  // PWA compatibility for iOS:
+  '../node_modules/pwacompat/pwacompat.min.js',
+].map(resolveRelativeUrl);
 
 
 /**
@@ -101,7 +108,11 @@ const OPTIONAL_RESOURCES = [
 
   // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
-];
+
+  // The IMA ads SDK.
+  'http://imasdk.googleapis.com/js/sdkloader/ima3.js',
+  'http://imasdk.googleapis.com/js/sdkloader/ima3_dai.js',
+].map(resolveRelativeUrl);
 
 
 /**
@@ -112,17 +123,30 @@ const OPTIONAL_RESOURCES = [
  * @const {!Array.<string>}
  */
 const CACHEABLE_URL_PREFIXES = [
-  // Anything associated with this application is fair game to cache.
-  // This would not be necessary if this demo were always served from the same
-  // location and always used absolute URLs in the resources lists above.
-  location.origin,
+  // Translations should be cached.  We don't know which ones the user will
+  // want, so use this prefix.
+  'locales/',
+  '../ui/locales/',
+
+  // The various app logos should be cached, too.  We don't know which ones the
+  // browser will load, so use this prefix.
+  'app_logo_',
 
   // Google Web Fonts should be cached when first seen, without being explicitly
   // listed, and should be preferred from cache for speed.
   'https://fonts.gstatic.com/',
   // Same goes for asset icons.
   'https://storage.googleapis.com/shaka-asset-icons/',
-];
+].map(resolveRelativeUrl);
+
+
+/**
+ * This constant is used to catch local resources which may be missing from the
+ * set of cacheable URLs and prefixes above.
+ *
+ * @const {string}
+ */
+const LOCAL_BASE = resolveRelativeUrl('../');
 
 
 /**
@@ -131,6 +155,9 @@ const CACHEABLE_URL_PREFIXES = [
  * @param {!InstallEvent} event
  */
 function onInstall(event) {
+  // Activate as soon as installation is complete.
+  self.skipWaiting();
+
   const preCacheApplication = async () => {
     const cache = await caches.open(CACHE_NAME);
     // Fetching these with addAll fails for CORS-restricted content, so we use
@@ -179,7 +206,12 @@ function onActivate(event) {
     await Promise.all(cleanUpPromises);
   };
 
-  event.waitUntil(dropOldCaches());
+  event.waitUntil(Promise.all([
+    dropOldCaches(),
+
+    // makes this the active service worker for all open tabs
+    clients.claim(),
+  ]));
 }
 
 /**
@@ -189,11 +221,15 @@ function onActivate(event) {
  * @param {!FetchEvent} event
  */
 function onFetch(event) {
+  // For some reason, on a page load, we get hash parameters in the URL for this
+  // event.  The hash should not be used when we do any of the lookups below.
+  const url = event.request.url.split('#')[0];
+
   // Make sure this is a request we should be handling in the first place.
   // If it's not, it's important to leave it alone and not call respondWith.
   let useCache = false;
   for (const prefix of CACHEABLE_URL_PREFIXES) {
-    if (event.request.url.startsWith(prefix)) {
+    if (url.startsWith(prefix)) {
       useCache = true;
       break;
     }
@@ -203,14 +239,32 @@ function onFetch(event) {
   // cover everything that was installed initially, and those things still need
   // to be read from cache.  So we check if this request URL matches one of
   // those lists.
-  // The resource lists contain some relative URLs and some absolute URLs.  The
-  // check here will only be able to match the absolute ones, but that's enough,
-  // because the relative ones are covered by the loop above.
   if (!useCache) {
-    if (CRITICAL_RESOURCES.includes(event.request.url) ||
-        OPTIONAL_RESOURCES.includes(event.request.url)) {
+    if (CRITICAL_RESOURCES.includes(url) ||
+        OPTIONAL_RESOURCES.includes(url)) {
       useCache = true;
     }
+  }
+
+  if (!useCache && url.startsWith(LOCAL_BASE)) {
+    // If we have the correct resource lists above, then all local resources
+    // should have useCache set to true by now.
+
+    // Check to see if this request is coming from a compiled build of the demo,
+    // and only log an error if this missing request is from a compiled build.
+
+    // The check is async, and that's fine because we aren't handling this fetch
+    // event anyway.
+    (async () => {
+      // This client represents the tab that made the request.
+      const client = await clients.get(event.clientId);
+      // This is the URL of that tab's main document.
+      const urlHash = client.url.split('#')[1] || '';
+      const hashParameters = urlHash.split(';');
+      if (hashParameters.includes('build=compiled')) {
+        console.error('Local resource missing!', url);
+      }
+    })();
   }
 
   if (useCache) {
@@ -241,7 +295,7 @@ async function fetchCacheableResource(request) {
     // We have it in cache.  Try to fetch a live version and update the cache,
     // but limit how long we will wait for the updated version.
     try {
-      return timeout(NETWORK_TIMEOUT, fetchAndCache(cache, request));
+      return await timeout(NETWORK_TIMEOUT, fetchAndCache(cache, request));
     } catch (error) {
       // We tried to fetch a live version, but it either failed or took too
       // long.  If it took too long, the fetch and cache operation will continue
@@ -293,6 +347,18 @@ function timeout(seconds, asyncProcess) {
       setTimeout(reject, seconds * 1000);
     }),
   ]);
+}
+
+
+/**
+ * @param {string} relativeUrl A URL which may be relative to this service
+ *   worker.
+ * @return {string} The same URL converted to an absolute URL.
+ */
+function resolveRelativeUrl(relativeUrl) {
+  // NOTE: This is the URL of the service worker, not the main HTML document.
+  const baseUrl = location.href;
+  return (new URL(relativeUrl, baseUrl)).href;
 }
 
 self.addEventListener('install', /** @type {function(!Event)} */(onInstall));

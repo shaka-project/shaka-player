@@ -9,7 +9,6 @@ The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
 
 Candidate features for future release cycles
- - HLS discontinuity support
  - Low-latency live (LHLS, equivalent for DASH)
  - MediaCapabilities to make performance-based decisions
  - Codec-switching
@@ -18,15 +17,17 @@ Candidate features for future release cycles
  - Thumbnail tracks
  - Own CEA parser, use mux.js only for TS
  - Smaller, more modular binary
- - IMA SDK ad integration demo
- - Ad controls in the UI
-
-v2.6 - 2019 Q3 (estimated)
- - Code health release
- - Finish conversion to ES6
- - Isolate DASH periods to the DASH parser
 
 =====
+
+v2.6 - 2020 Q2
+ - Code health improvements
+ - Conversion to ES6
+ - Isolate DASH periods to the DASH parser
+ - HLS discontinuity support
+ - IMA ad SDK integration
+ - Ad controls in the UI
+ - Concurrent Storage operations
 
 v2.5 - 2019 Q2
  - Video controls UI API

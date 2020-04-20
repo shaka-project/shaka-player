@@ -87,7 +87,11 @@ describe('Player Src Equals', () => {
   it('allow load with startTime', async () => {
     const startTime = 5;
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, startTime);
-    expect(video.currentTime).toBe(startTime);
+
+    // For some reason, the delta on IE & Edge can be 0.1 for this content and
+    // this start time.  It may be rounded to a key frame or something.
+    const delta = Math.abs(video.currentTime - startTime);
+    expect(delta).toBeLessThan(0.2);
   });
 
   // Since we don't have any manifest data, we must assume that we can seek
@@ -172,9 +176,19 @@ describe('Player Src Equals', () => {
     video.play();
     await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
 
+    let videoRateChange = false;
+    eventManager.listen(video, 'ratechange', () => {
+      videoRateChange = true;
+    });
+
     // Enabling trick play should change our playback rate to the same rate.
     player.trickPlay(2);
     expect(video.playbackRate).toBe(2);
+
+    // It should also have fired a 'ratechange' event on the video.
+    // We may have to delay a short time to see the event, though.
+    await shaka.test.Util.delay(0.1);
+    expect(videoRateChange).toBe(true);
 
     // Let playback continue playing for a bit longer.
     await shaka.test.Util.delay(2);

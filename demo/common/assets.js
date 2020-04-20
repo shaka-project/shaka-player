@@ -30,7 +30,6 @@ const shakaAssets = {};
 
 /** @enum {string} */
 shakaAssets.Source = {
-  UNKNOWN: 'Unknown',
   CUSTOM: 'Custom',
   SHAKA: 'Shaka',
   AXINOM: 'Axinom',
@@ -80,11 +79,14 @@ shakaAssets.Feature = {
   AUDIO_ONLY: 'audio only',
   // Set if the asset can be stored offline.
   OFFLINE: 'Downloadable',
-  // A synthetic property used in the search tab. Should not be given to assets.
+  // A synthetic property used in the "all content" tab. Should not be given to
+  // assets.
   STORED: 'Downloaded',
 
   // Set if the asset is a livestream.
   LIVE: 'Live',
+  // A synthetic property used if the asset is VOD (not-livestream).
+  VOD: 'VOD',
   // Set if the asset has at least one WebM stream.
   WEBM: 'WebM',
   // Set if the asset has at least one mp4 stream.
@@ -653,22 +655,18 @@ shakaAssets.testAssets = [
     .addFeature(shakaAssets.Feature.MP4)
     .addFeature(shakaAssets.Feature.DASH),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Live sim SegmentTimeline w $Time$ (6s segments)',
+      /* name= */ 'Live sim SegmentTimeline w/ $Time$ (6s segments)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
       /* manifestUri= */ 'https://livesim.dashif.org/livesim/segtimeline_1/utc_head/testpic_6s/Manifest.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
-    // Disabled pending resolution of https://github.com/Dash-Industry-Forum/dash-live-source-simulator/issues/91
-    .markAsDisabled()
     .addFeature(shakaAssets.Feature.DASH)
     .addFeature(shakaAssets.Feature.LIVE)
     .addFeature(shakaAssets.Feature.MP4),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Live sim SegmentTimeline w $Number$ (6s segments)',
+      /* name= */ 'Live sim SegmentTimeline w/ $Number$ (6s segments)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
       /* manifestUri= */ 'https://livesim.dashif.org/livesim/segtimelinenr_1/utc_head/testpic_6s/Manifest.mpd',
       /* source= */ shakaAssets.Source.DASH_IF)
-    // Disabled pending resolution of https://github.com/Dash-Industry-Forum/dash-live-source-simulator/issues/91
-    .markAsDisabled()
     .addFeature(shakaAssets.Feature.DASH)
     .addFeature(shakaAssets.Feature.LIVE)
     .addFeature(shakaAssets.Feature.MP4),

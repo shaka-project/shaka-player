@@ -187,6 +187,18 @@ features and similar APIs for native apps on iOS.  This project uses its own
 media stack, which allows it to play content that would otherwise not be
 supported.  This supports both DASH and HLS manifests.
 
+<hr>
+
+**Q:** Why does some DASH content take a long time to start playback?
+
+**A:** Shaka Player honors the `minBufferTime` field in DASH.  If this field is
+set to a large value, Shaka Player will buffer that much content before
+beginning playback.  To override this behavior and ignore the `minBufferTime`
+field, we offer the following configuration:
+
+```js
+player.configure('manifest.dash.ignoreMinBufferTime', true);
+```
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224

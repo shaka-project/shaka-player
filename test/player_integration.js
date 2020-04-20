@@ -36,10 +36,10 @@ describe('Player', function() {
     document.body.appendChild(video);
 
     compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
-    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
   });
 
-  beforeEach(function() {
+  beforeEach(async () => {
+    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
     player = new compiledShaka.Player(video);
 
     // Grab event manager from the uncompiled library:
@@ -239,14 +239,17 @@ describe('Player', function() {
       displayer.appendSpy.and.callFake((added) => {
         cues = cues.concat(added);
       });
-      displayer.removeSpy.and.callFake(() => { cues = []; });
+
       player.configure({textDisplayFactory: () => displayer});
 
       const preferredTextLanguage = 'fa';  // The same as in the content itself
       player.configure({preferredTextLanguage: preferredTextLanguage});
 
       await player.load('test:sintel_realistic_compiled');
-      await Util.delay(1);  // Allow the first segments to be appended.
+
+      // Play until a time at which the external cues would be on screen.
+      video.play();
+      await waitUntilPlayheadReaches(eventManager, video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
       expect(displayer.isTextVisible()).toBe(true);
@@ -556,6 +559,32 @@ describe('Player', function() {
       // Let the test keep running until we can play through.  In the original
       // bug, tracks would disappear _after_ load() on some platforms.
       await canPlayThrough;
+    });
+  });
+
+  describe('loading', () => {
+    // A regression test for Issue #2433.
+    it('can load very large files', async () => {
+      // Reset the lazy function, so that it does not remember any chunk size
+      // that was detected beforehand.
+      compiledShaka.util.StringUtils.resetFromCharCode();
+      const oldFromCharCode = String.fromCharCode;
+      try {
+        // Replace String.fromCharCode with a version that can only handle very
+        // small chunks.
+        // This has to be an old-style function, to use the "arguments" object.
+        // eslint-disable-next-line no-restricted-syntax
+        String.fromCharCode = function() {
+          if (arguments.length > 2000) {
+            throw new RangeError('Synthetic Range Error');
+          }
+          // eslint-disable-next-line no-restricted-syntax
+          return oldFromCharCode.apply(null, arguments);
+        };
+        await player.load('/base/test/test/assets/large_file.mpd');
+      } finally {
+        String.fromCharCode = oldFromCharCode;
+      }
     });
   });
 

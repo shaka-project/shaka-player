@@ -255,7 +255,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
 
 
 /**
- * @event shaka.Controls.CastStatusChangedEvent
+ * @event shaka.ui.Controls.CastStatusChangedEvent
  * @description Fired upon receiving a 'caststatuschanged' event from
  *    the cast proxy.
  * @property {string} type
@@ -268,7 +268,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
 
 
 /**
- * @event shaka.Controls.SubMenuOpenEvent
+ * @event shaka.ui.Controls.SubMenuOpenEvent
  * @description Fired when one of the overflow submenus is opened
  *    (e. g. language/resolution/subtitle selection).
  * @property {string} type
@@ -278,7 +278,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
 
 
 /**
- * @event shaka.Controls.CaptionSelectionUpdatedEvent
+ * @event shaka.ui.Controls.CaptionSelectionUpdatedEvent
  * @description Fired when the captions/subtitles menu has finished updating.
  * @property {string} type
  *   'captionselectionupdated'
@@ -287,7 +287,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
 
 
  /**
- * @event shaka.Controls.ResolutionSelectionUpdatedEvent
+ * @event shaka.ui.Controls.ResolutionSelectionUpdatedEvent
  * @description Fired when the resolution menu has finished updating.
  * @property {string} type
  *   'resolutionselectionupdated'
@@ -296,7 +296,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
 
 
 /**
- * @event shaka.Controls.LanguageSelectionUpdatedEvent
+ * @event shaka.ui.Controls.LanguageSelectionUpdatedEvent
  * @description Fired when the audio language menu has finished updating.
  * @property {string} type
  *   'languageselectionupdated'
@@ -305,7 +305,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
 
 
 /**
- * @event shaka.Controls.ErrorEvent
+ * @event shaka.ui.Controls.ErrorEvent
  * @description Fired when something went wrong with the controls.
  * @property {string} type
  *   'error'
@@ -319,7 +319,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
 
 
 /**
- * @event shaka.Controls.TimeAndSeekRangeUpdatedEvent
+ * @event shaka.ui.Controls.TimeAndSeekRangeUpdatedEvent
  * @description Fired when the time and seek range elements have finished
  *    updating.
  * @property {string} type
@@ -329,7 +329,7 @@ shaka.ui.Controls.prototype.destroy = async function() {
 
 
  /**
- * @event shaka.Controls.UIUpdatedEvent
+ * @event shaka.ui.Controls.UIUpdatedEvent
  * @description Fired after a call to ui.configure() once the UI has finished
  *    updating.
  * @property {string} type
@@ -434,8 +434,8 @@ shaka.ui.Controls.prototype.setEnabledShakaControls = function(enabled) {
 
     // If we're hiding native controls, make sure the video element itself is
     // not tab-navigable.  Our custom controls will still be tab-navigable.
-    this.video_.tabIndex = -1;
-    this.video_.controls = false;
+    this.localVideo_.tabIndex = -1;
+    this.localVideo_.controls = false;
   } else {
     shaka.ui.Utils.setDisplay(this.controlsContainer_, false);
     // Spinner lives outside of the main controls div
@@ -469,8 +469,8 @@ shaka.ui.Controls.prototype.setEnabledNativeControls = function(enabled) {
   // If we disable the native controls, we want to make sure that the video
   // element itself is not tab-navigable, so that the element is skipped over
   // when tabbing through the page.
-  this.video_.controls = enabled;
-  this.video_.tabIndex = enabled ? 0 : -1;
+  this.localVideo_.controls = enabled;
+  this.localVideo_.tabIndex = enabled ? 0 : -1;
 
   if (enabled) {
     this.setEnabledShakaControls(false);
@@ -636,7 +636,7 @@ shaka.ui.Controls.prototype.hideSettingsMenus = function() {
  */
 shaka.ui.Controls.prototype.createDOM_ = function() {
   this.videoContainer_.classList.add('shaka-video-container');
-  this.video_.classList.add('shaka-video');
+  this.localVideo_.classList.add('shaka-video');
 
   this.addSkimContainer_();
 
@@ -768,7 +768,7 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
   this.bottomControls_.appendChild(this.controlsButtonPanel_);
 
   // Overflow menus are supposed to hide once you click elsewhere
-  // on the video element. The code in onContainerClick_ ensures that.
+  // on the page. The click event listener on window ensures that.
   // However, clicks on controls panel don't propagate to the container,
   // so we have to explicitly hide the menus onclick here.
   this.eventManager_.listen(this.controlsButtonPanel_, 'click', () => {
@@ -798,7 +798,8 @@ shaka.ui.Controls.prototype.addControlsButtonPanel_ = function() {
 shaka.ui.Controls.prototype.onScreenRotation_ = function() {
   if (!this.video_ ||
       this.video_.readyState == 0 ||
-      this.castProxy_['isCasting']()) { return; }
+      this.castProxy_['isCasting']() ||
+      !this.config_.enableFullscreenOnRotation) { return; }
 
   if (screen.orientation.type.includes('landscape') &&
       !document.fullscreenElement) {
@@ -829,8 +830,14 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // for focused elements.
   this.eventManager_.listen(window, 'keydown', this.onKeyDown_.bind(this));
 
-  this.eventManager_.listen(
-      this.controlsContainer_, 'dblclick', () => this.toggleFullScreen());
+  // Listen for click events to dismiss the settings menus.
+  this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
+
+  this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
+    if (this.config_.doubleClickForFullscreen) {
+      this.toggleFullScreen();
+    }
+  });
 
   this.eventManager_.listen(this.video_,
       'play', this.onPlayStateChange_.bind(this));
@@ -1102,6 +1109,9 @@ shaka.ui.Controls.prototype.onKeyUp_ = function(event) {
   // When the key is released, remove it from the pressed keys set.
   this.pressedKeys_.delete(event.keyCode);
 
+  if (!this.config_.enableKeyboardPlaybackControls) {
+    return;
+  }
 
   switch (key) {
     case 'ArrowLeft':
@@ -1302,7 +1312,6 @@ shaka.ui.Controls.prototype.keepFocusInMenu_ = function(event) {
  */
 shaka.ui.Controls.prototype.onMouseDown_ = function() {
   this.eventManager_.unlisten(window, 'mousedown');
-  this.eventManager_.listen(window, 'keydown', this.onKeyDown_.bind(this));
 };
 
 

@@ -190,6 +190,7 @@ describe('UI', function() {
         overflowMenuButtons: [
           'quality',
         ],
+        doubleClickForFullscreen: false,
       };
       const ui = createUIThroughAPI(videoContainer, video, config);
       const controls = ui.getControls();
@@ -198,6 +199,14 @@ describe('UI', function() {
 
       const controlsContainer =
           videoContainer.querySelector('.shaka-controls-container');
+      // When double-click for fullscreen is disabled, it shouldn't happen.
+      shaka.test.UiUtils.simulateEvent(controlsContainer, 'dblclick');
+      await shaka.test.Util.delay(0.1);
+      expect(spy).not.toHaveBeenCalled();
+
+      // Change the configuration and try again.
+      config.doubleClickForFullscreen = true;
+      (/** @type {!shaka.ui.Overlay} */ (ui)).configure(config);
       shaka.test.UiUtils.simulateEvent(controlsContainer, 'dblclick');
       await shaka.test.Util.delay(0.1);
       expect(spy).toHaveBeenCalledTimes(1);
