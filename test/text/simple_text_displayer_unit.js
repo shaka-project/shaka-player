@@ -50,7 +50,11 @@ describe('SimpleTextDisplayer', function() {
     window.VTTCue = /** @type {?} */(FakeVTTCue);
   });
 
-  afterAll(function() {
+  afterEach(async () => {
+    await displayer.destroy();
+  });
+
+  afterAll(() => {
     window.VTTCue = originalVTTCue;
   });
 
@@ -301,6 +305,24 @@ describe('SimpleTextDisplayer', function() {
       let cue2 = new shaka.text.Cue(40, 40, 'Test');
       displayer.append([cue1, cue2]);
       expect(mockTrack.addCue).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('destroy', () => {
+    it('disables the TextTrack it created', async () => {
+      // There should only be the one track created by this displayer.
+      expect(video.textTracks.length).toBe(1);
+
+      /** @type {!TextTrack} */
+      const textTrack = video.textTracks[0];
+
+      // It should not be disabled before we destroy it.
+      expect(textTrack.mode).not.toBe('disabled');
+
+      await displayer.destroy();
+
+      // It should be disabled after we destroy it.
+      expect(textTrack.mode).toBe('disabled');
     });
   });
 
