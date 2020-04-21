@@ -215,7 +215,12 @@ function getClientArg(name) {
    * @param {function():*} cond
    * @param {function()} describeBody
    */
-  window.xfilterDescribe = (describeName, cond, describeBody) => {};
+  window.xfilterDescribe = (describeName, cond, describeBody) => {
+    const oldDescribe = window['describe'];
+    window['describe'] = window['xdescribe'];
+    filterDescribe(describeName, cond, describeBody);
+    window['describe'] = oldDescribe;
+  };
 
   beforeAll((done) => {  // eslint-disable-line no-restricted-syntax
     // Configure AMD modules and their dependencies.
