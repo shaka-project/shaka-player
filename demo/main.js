@@ -1198,7 +1198,7 @@ shakaDemo.Main = class {
           // If that happens, just proceed to load.
           goog.asserts.assert(this.video_ != null, 'this.video should exist!');
           adManager.initClientSide(
-              this.controls_.getAdContainer(), this.video_);
+              this.controls_.getControlsContainer(), this.video_);
           const adRequest = new google.ima.AdsRequest();
           adRequest.adTagUrl = asset.adTagUri;
           adManager.requestClientSideAds(adRequest);
@@ -1409,12 +1409,12 @@ shakaDemo.Main = class {
         'Asset should have imaIds!');
 
     const adManager = this.player_.getAdManager();
-    const adContainer = this.controls_.getAdContainer();
+    const controlsContainer = this.controls_.getControlsContainer();
     try {
       // If IMA is blocked by an AdBlocker, init() will throw.
       // If that happens, return our backup uri.
       goog.asserts.assert(this.video_ != null, 'Video should not be null!');
-      adManager.initServerSide(adContainer, this.video_);
+      adManager.initServerSide(controlsContainer, this.video_);
       let request;
       if (asset.imaIds.assetKey.length) {
         // LIVE stream
