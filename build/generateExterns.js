@@ -150,6 +150,47 @@ function isExportNode(node) {
 
 /**
  * @param {ASTNode} node A node from the abstract syntax tree.
+ * @return {boolean} true if this is a class assignment.
+ */
+function isClassAssignmentNode(node) {
+  return node.type == 'ExpressionStatement' &&
+      node.expression.type == 'AssignmentExpression' &&
+      node.expression.right.type == 'ClassExpression';
+}
+
+
+/**
+ * @param {ASTNode} node A node from the abstract syntax tree.
+ * @return {boolean} true if this is a class assignment with exported members.
+ */
+function isPartiallyExportedClassAssignmentNode(node) {
+  if (!isClassAssignmentNode(node)) {
+    return false;
+  }
+
+  const rightSide = node.expression.right;
+  // Example code: foo.bar = class bar2 extends foo.baz { /* ... */ };
+  // Example right side: {
+  //   id: { name: 'bar' },   // or null
+  //   superClass: { type: 'MemberExpression', ... },  // or null
+  //   body: { body: [ ... ] },
+  // }
+
+  for (const member of rightSide.body.body) {
+    // Only look at exported members.  Constructors are exported implicitly
+    // when the class is exported.
+    const comment = getLeadingBlockComment(member);
+    if (EXPORT_REGEX.test(comment)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+
+/**
+ * @param {ASTNode} node A node from the abstract syntax tree.
  * @return {string} A reconstructed leading comment block for the node.
  *   If there are multiple comments before this node, we will take the most
  *   recent block comment, as that is the one that would contain any applicable
@@ -335,7 +376,8 @@ function createExternFromExportNode(names, node) {
       //   }
       // }
       name = getIdentifierString(node.expression.left);
-      assignment = createExternAssignment(name, node.expression.right);
+      assignment = createExternAssignment(name, node.expression.right,
+          /* alwaysIncludeConstructor= */ true);
       break;
 
     case 'MemberExpression':
@@ -372,6 +414,42 @@ function createExternFromExportNode(names, node) {
       }
     }
   }
+  return externString;
+}
+
+
+/**
+ * Some classes are not exported, but contain exported members.  These need to
+ * have externs generated, too.
+ *
+ * @param {!Set.<string>} names A set of the names of exported nodes.
+ * @param {ASTNode} node An exported node from the abstract syntax tree.
+ * @return {string} An extern string for this node.
+ */
+function createExternFromPartiallyExportedClassAssignmentNode(names, node) {
+  assert.equal(node.type, 'ExpressionStatement', 'Unknown node type');
+  assert.equal(node.expression.type, 'AssignmentExpression',
+      'Should be assignment node');
+  assert.equal(node.expression.right.type, 'ClassExpression',
+      'Should be class assignment');
+
+  const name = getIdentifierString(node.expression.left);
+  const assignment = createExternAssignment(name, node.expression.right,
+      /* alwaysIncludeConstructor= */ false);
+
+  let externString = name + assignment + ';\n';
+
+  // Find this.foo = bar in the constructor, and potentially generate externs
+  // for that, too.
+  const rightSide = node.expression.right;
+  const ctor = getClassConstructor(node.expression.right);
+  if (ctor) {
+    externString += createExternsFromConstructor(name, ctor);
+  }
+
+  // Keep track of the names we've externed.
+  names.add(name);
+
   return externString;
 }
 
@@ -453,9 +531,11 @@ function getClassConstructor(classNode) {
 /**
  * @param {string} name The name of the thing we are assigning.
  * @param {ASTNode} node An assignment node from the abstract syntax tree.
+ * @param {boolean} alwaysIncludeConstructor Include the constructor of a class
+ *   expression, even if there is no export annotation.
  * @return {string} The assignment part of the extern string for this node.
  */
-function createExternAssignment(name, node) {
+function createExternAssignment(name, node, alwaysIncludeConstructor) {
   switch (node.type) {
     case 'ClassExpression': {
       // Example code: foo.bar = class bar2 extends foo.baz { /* ... */ };
@@ -473,11 +553,20 @@ function createExternAssignment(name, node) {
       }
       classString += '{\n';
       for (const member of node.body.body) {
-        // Only look at exported members.  Constructors are exported implicitly
-        // when the class is exported.
         const comment = getLeadingBlockComment(member);
-        if (!EXPORT_REGEX.test(comment) && member.key.name != 'constructor') {
-          continue;
+
+        if (EXPORT_REGEX.test(comment)) {
+          // This has an export annotation, so fall through and generate
+          // externs.
+        } else {
+          // If there's no export annotation, we may make an exception for the
+          // constructor in some situations.
+          if (member.key.name == 'constructor' && alwaysIncludeConstructor) {
+            // Fall through and generate externs.
+          } else {
+            // Skip extern generation.
+            continue;
+          }
         }
 
         assert.equal(
@@ -639,8 +728,20 @@ function generateExterns(names, inputPath) {
   const requires = program.body.filter(isRequireNode)
       .map((node) => getArgumentFromCallNode(0, node));
 
-  const rawExterns = program.body.filter(isExportNode)
-      .map((node) => createExternFromExportNode(names, node));
+  // Get all exported nodes and all classes, in order.
+  const rawExterns = program.body.map((node) => {
+    if (isExportNode(node)) {
+      // Explicitly-exported nodes are handled here.
+      return createExternFromExportNode(names, node);
+    } else if (isPartiallyExportedClassAssignmentNode(node)) {
+      // Some classes are not exported, but contain exported members.  These
+      // need to have externs generated, too.
+      return createExternFromPartiallyExportedClassAssignmentNode(names, node);
+    } else {
+      // Ignore anything else, and don't generate any externs.
+      return '';
+    }
+  });
   const externs = rawExterns.join('');
 
   return {
