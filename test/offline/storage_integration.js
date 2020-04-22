@@ -32,11 +32,17 @@ filterDescribe('Storage', storageSupport, () => {
       'fake:manifest-without-per-stream-bandwidth';
   const manifestWithNonZeroStartUri = 'fake:manifest-with-non-zero-start';
   const manifestWithLiveTimelineUri = 'fake:manifest-with-live-timeline';
+  const manifestWithAlternateSegmentsUri = 'fake:manifest-with-alt-segments';
 
   const segment1Uri = 'fake:segment-1';
   const segment2Uri = 'fake:segment-2';
   const segment3Uri = 'fake:segment-3';
   const segment4Uri = 'fake:segment-4';
+
+  const alternateSegment1Uri = 'fake:alt-segment-1';
+  const alternateSegment2Uri = 'fake:alt-segment-2';
+  const alternateSegment3Uri = 'fake:alt-segment-3';
+  const alternateSegment4Uri = 'fake:alt-segment-4';
 
   const noMetadata = {};
 
@@ -863,8 +869,11 @@ filterDescribe('Storage', storageSupport, () => {
       const storePromise = storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
 
+      // Critical: This manifest should have different segment URIs than the one
+      // above, or else the blocked network request would be shared between the
+      // two storage operations.
       const secondStorePromise = storage.store(
-          manifestWithoutPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithAlternateSegmentsUri, noMetadata, fakeMimeType);
       await secondStorePromise;
 
       // Unblock the original store and wait for it to complete.
@@ -1284,6 +1293,26 @@ filterDescribe('Storage', storageSupport, () => {
   }
 
   /**
+   * @return {shaka.extern.Manifest}
+   */
+  function makeManifestWithAlternateSegments() {
+    const manifest = makeManifestWithPerStreamBandwidth();
+
+    for (const stream of getAllStreams(manifest)) {
+      const refs = [
+        makeReference(alternateSegment1Uri, 10, 11),
+        makeReference(alternateSegment2Uri, 11, 12),
+        makeReference(alternateSegment3Uri, 12, 13),
+        makeReference(alternateSegment4Uri, 13, 14),
+      ];
+
+      overrideSegmentIndex(stream, refs);
+    }
+
+    return manifest;
+  }
+
+  /**
    * @param {shaka.extern.Manifest} manifest
    * @return {!Array.<shaka.extern.Stream>}
    */
@@ -1320,7 +1349,11 @@ filterDescribe('Storage', storageSupport, () => {
         .setResponseValue(segment1Uri, new ArrayBuffer(16))
         .setResponseValue(segment2Uri, new ArrayBuffer(16))
         .setResponseValue(segment3Uri, new ArrayBuffer(16))
-        .setResponseValue(segment4Uri, new ArrayBuffer(16));
+        .setResponseValue(segment4Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment1Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment2Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment3Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment4Uri, new ArrayBuffer(16));
   }
 
   async function eraseStorage() {
@@ -1376,6 +1409,8 @@ filterDescribe('Storage', storageSupport, () => {
           makeManifestWithNonZeroStart();
       this.map_[manifestWithLiveTimelineUri] =
           makeManifestWithLiveTimeline();
+      this.map_[manifestWithAlternateSegmentsUri] =
+          makeManifestWithAlternateSegments();
     }
 
     /** @override */

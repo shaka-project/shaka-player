@@ -148,6 +148,26 @@ shakaAssets.Feature = {
  *   (optional) The codecs string, if needed to refine the MIME type.
  */
 shakaAssets.ExtraText;
+
+
+/**
+ * @typedef {{
+ *   contentSourceId: string,
+ *   videoId: string,
+ *   assetKey: string,
+ * }}
+ *
+ * @property {string} contentSourceId
+ *   Content source id of the asset in Google's Video Ad Manager system.
+ *   Only for VOD assets.
+ * @property {string} videoId
+ *   Video source id of the asset in Google's Video Ad Manager system.
+ *   Only for VOD assets.
+ * @property {string} assetKey
+ *   Asset key of the asset in Google's Video Ad Manager system.
+ *   Only for LIVE assets.
+ */
+shakaAssets.IMAIds;
 // End types and enums }}}
 
 
@@ -459,6 +479,20 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel (HLS, Server Side ads)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/tos/hls.m3u8',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .setIMAIds({
+        contentSourceId: '2528370',
+        videoId: 'tears-of-steel',
+        assetKey: '',
+      }),
   new ShakaDemoAssetInfo(
       /* name= */ 'Tears of Steel (multicodec, surround + stereo)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
