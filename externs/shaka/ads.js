@@ -83,7 +83,8 @@ shaka.extern.IAdManager = class extends EventTarget {
   onTimedMetadata(region) {}
 
   /**
-   * @param {Object} value
+   * @param {Object} value ID3 metadata, it's essentially a Map of <Any, Any>
+   * https://id3.org/id3v2.3.0#Declared_ID3v2_frames
    */
   onCueMetadataChange(value) {}
 };
