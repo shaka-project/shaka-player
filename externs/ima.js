@@ -253,8 +253,11 @@ google.ima.dai.api = {};
  * @implements {EventTarget}
  */
 google.ima.dai.api.StreamManager = class {
-  /** @param {HTMLMediaElement} videoElement */
-  constructor(videoElement) {}
+  /**
+   * @param {HTMLMediaElement} videoElement
+   * @param {HTMLElement=} adUiElement
+   */
+  constructor(videoElement, adUiElement = undefined) {}
 
   /** @param {number} streamTime */
   contentTimeForStreamTime(streamTime) {}
@@ -279,9 +282,6 @@ google.ima.dai.api.StreamManager = class {
   requestStream(streamRequest) {}
 
   reset() {}
-
-  /** @param {HTMLElement} clickElement */
-  setClickElement(clickElement) {}
 
   /** @param {number} contentTime */
   streamTimeForContentTime(contentTime) {}

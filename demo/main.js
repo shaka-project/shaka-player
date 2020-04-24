@@ -1177,9 +1177,14 @@ shakaDemo.Main = class {
       this.player_.configure('textDisplayFactory', textDisplayer);
 
       // Finally, the asset can be loaded.
-      const manifestUri = (asset.storedContent ?
-                           asset.storedContent.offlineUri :
-                           null) || asset.manifestUri;
+      let manifestUri = (asset.storedContent ?
+                         asset.storedContent.offlineUri :
+                         null) || asset.manifestUri;
+      // If it's a server side dai asset, request ad-containing manifest
+      // from the ad manager.
+      if (asset.imaIds) {
+        manifestUri = await this.getManifestUriFromAdManager_(asset);
+      }
       await this.player_.load(manifestUri);
       if (this.player_.isAudioOnly()) {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
@@ -1193,14 +1198,14 @@ shakaDemo.Main = class {
           // If that happens, just proceed to load.
           goog.asserts.assert(this.video_ != null, 'this.video should exist!');
           adManager.initClientSide(
-              this.controls_.getAdContainer(), this.video_);
+              this.controls_.getControlsContainer(), this.video_);
           const adRequest = new google.ima.AdsRequest();
           adRequest.adTagUrl = asset.adTagUri;
           adManager.requestClientSideAds(adRequest);
         } catch (error) {
           console.log(error);
           console.warn('Ads code has been prevented from running. ' +
-            'Proceeding with the load without ads.');
+            'Proceeding without ads.');
         }
       }
 
@@ -1392,6 +1397,46 @@ shakaDemo.Main = class {
    */
   showNode_(node) {
     node.classList.remove('hidden');
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
+   * @return {Promise.<string>}
+   * @private
+   */
+  async getManifestUriFromAdManager_(asset) {
+    goog.asserts.assert(asset.imaIds != null,
+        'Asset should have imaIds!');
+
+    const adManager = this.player_.getAdManager();
+    const controlsContainer = this.controls_.getControlsContainer();
+    try {
+      // If IMA is blocked by an AdBlocker, init() will throw.
+      // If that happens, return our backup uri.
+      goog.asserts.assert(this.video_ != null, 'Video should not be null!');
+      adManager.initServerSide(controlsContainer, this.video_);
+      let request;
+      if (asset.imaIds.assetKey.length) {
+        // LIVE stream
+        request = new google.ima.dai.api.LiveStreamRequest();
+        request.assetKey = asset.imaIds.assetKey;
+      } else {
+        // VOD
+        request = new google.ima.dai.api.VODStreamRequest();
+        request.contentSourceId = asset.imaIds.contentSourceId;
+        request.videoId = asset.imaIds.videoId;
+      }
+
+      const uri = await adManager.requestServerSideStream(
+          request, /* backupUri= */ asset.manifestUri);
+      return uri;
+    } catch (error) {
+      console.log(error);
+      console.warn('Ads code has been prevented from running ' +
+          'or returned an error. Proceeding without ads.');
+
+      return asset.manifestUri;
+    }
   }
 
   /**
