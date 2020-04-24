@@ -2517,8 +2517,6 @@ describe('HlsParser', () => {
           .setResponseText('test:/host/audio.m3u8?token=1', media)
           .setResponseText('test:/host/video.m3u8?token=1', media)
           .setResponseValue('test:/host/init.mp4', initSegmentData)
-          .setResponseValue('test:/host/segment.mp4', segmentData)
-          .setResponseValue('test:/host/init.mp4', initSegmentData)
           .setResponseValue('test:/host/segment.mp4', segmentData);
 
       const actual =
@@ -2574,8 +2572,6 @@ describe('HlsParser', () => {
           .setResponseText('test:/host/audio.m3u8', media)
           .setResponseText('test:/host/video.m3u8', media)
           .setResponseValue('test:/host/test/init.mp4', initSegmentData)
-          .setResponseValue('test:/host/test/segment.mp4?token=1', segmentData)
-          .setResponseValue('test:/host/test/init.mp4', initSegmentData)
           .setResponseValue('test:/host/test/segment.mp4?token=1', segmentData);
 
       const actual =
@@ -2630,8 +2626,6 @@ describe('HlsParser', () => {
           .setResponseText('test:/host/master.m3u8', master)
           .setResponseText('test:/host/audio.m3u8?token=1', media)
           .setResponseText('test:/host/video.m3u8?token=1', media)
-          .setResponseValue('test:/host/init.mp4?token=1', initSegmentData)
-          .setResponseValue('test:/host/segment.mp4?token=1', segmentData)
           .setResponseValue('test:/host/init.mp4?token=1', initSegmentData)
           .setResponseValue('test:/host/segment.mp4?token=1', segmentData);
 
