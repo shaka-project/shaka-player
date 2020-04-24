@@ -409,7 +409,7 @@ function createExternMethod(node) {
   if (node.static) {
     methodString += 'static ';
   }
-  methodString += id + '(' + params + ') {}';
+  methodString += id + '(' + params.join(', ') + ') {}';
   return methodString;
 }
 

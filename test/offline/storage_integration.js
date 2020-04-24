@@ -377,32 +377,56 @@ filterDescribe('Storage', storageSupport, () => {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(() => {
-      shaka.offline.StorageMuxer.overrideSupport(new Map());
+    // CAUTION: Do not put overrideSupport() or clearSupport() in
+    // beforEach/afterEach.  They change what is supported at a static level.
+    // When the test is run, a shim will call the support check and the test
+    // will be skipped if overrideSupport() has been called already.  A shim of
+    // afterEach will call the same check and skip afterEach's body, too, and
+    // the clean up will never happen.  So the calls to overrideSupport() and
+    // clearSupport() must be in each test using try/finally.
 
+    beforeEach(() => {
       player = new shaka.Player();
       storage = new shaka.offline.Storage(player);
+      // NOTE: See above "CAUTION" comment about overrideSupport/clearSupport.
     });
 
     afterEach(async () => {
       await storage.destroy();
       await player.destroy();
-
-      shaka.offline.StorageMuxer.clearOverride();
+      // NOTE: See above "CAUTION" comment about overrideSupport/clearSupport.
     });
 
     it('throws error using list', async () => {
-      await expectAsync(storage.list()).toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        await expectAsync(storage.list()).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
 
     it('throws error using store', async () => {
-      const store = storage.store('any-uri', noMetadata, fakeMimeType);
-      await expectAsync(store).toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        const store = storage.store('any-uri', noMetadata, fakeMimeType);
+        await expectAsync(store).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
 
     it('throws error using remove', async () => {
-      const remove = storage.remove('any-uri');
-      await expectAsync(remove).toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        const remove = storage.remove('any-uri');
+        await expectAsync(remove).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
   });
 
