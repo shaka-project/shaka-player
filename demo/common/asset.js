@@ -63,6 +63,8 @@ const ShakaDemoAssetInfo = class {
     this.extraConfig = null;
     /** @type {?string} */
     this.adTagUri = null;
+    /** @type {?shakaAssets.IMAIds} */
+    this.imaIds = null;
 
     // Offline storage values.
     /** @type {?function()} */
@@ -189,6 +191,16 @@ const ShakaDemoAssetInfo = class {
    */
   setAdTagUri(uri) {
     this.adTagUri = uri;
+    this.addFeature(shakaAssets.Feature.ADS);
+    return this;
+  }
+
+  /**
+   * @param {shakaAssets.IMAIds} imaIds
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setIMAIds(imaIds) {
+    this.imaIds = imaIds;
     this.addFeature(shakaAssets.Feature.ADS);
     return this;
   }

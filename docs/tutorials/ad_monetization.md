@@ -58,8 +58,8 @@ const video = document.getElementById('video');
 const ui = video['ui'];
 // If you're using a non-UI build, this is the div you'll need to create
 // for your layout.
-var adContainer = video.ui.getControls().getAdContainer();
-adManager.initClientSide(adContainer, video);
+var container = video.ui.getControls().getControlsContainer();
+adManager.initClientSide(container, video);
 ```
 
 With the client side logic initialized, you can request ads at any time during
@@ -100,8 +100,8 @@ const video = document.getElementById('video');
 const ui = video['ui'];
 // If you're using a non-UI build, this is the div you'll need to create
 // for your layout.
-var adContainer = video.ui.getControls().getAdContainer();
-adManager.initServerSide(adContainer, video);
+var container = video.ui.getControls().getControlsContainer();
+adManager.initServerSide(container, video);
 ```
 
 With server side logic initialized, you can request and load streams with
