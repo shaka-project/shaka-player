@@ -471,16 +471,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return this.videoContainer_;
   }
 
-
-  /**
-   * @return {!HTMLElement}
-   * @export
-   */
-  getAdContainer() {
-    return this.adContainer_;
-  }
-
-
   /**
    * @return {HTMLMediaElement}
    * @export
@@ -674,10 +664,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addBufferingSpinner_();
     }
 
-    if (!this.adContainer_) {
-      this.addAdContainer_();
-    }
-
     this.addControlsButtonPanel_();
 
     this.settingsMenus_ = Array.from(
@@ -740,15 +726,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /** @private */
-  addAdContainer_() {
-    // Ad container. IMA will use this div to display client-side ads.
-    /** @private {!HTMLElement} */
-    this.adContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.adContainer_.classList.add('shaka-ad-container');
-    this.videoContainer_.appendChild(this.adContainer_);
-  }
-
-  /** @private */
   addAdControls_() {
     /** @private {!HTMLElement} */
     this.adPanel_ = shaka.util.Dom.createHTMLElement('div');
@@ -761,12 +738,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     const adCounter = new shaka.ui.AdCounter(this.adPanel_, this);
     this.elements_.push(adCounter);
-
-    const spacer = new shaka.ui.Spacer(this.adPanel_, this);
-    this.elements_.push(spacer);
-
-    const skipButton = new shaka.ui.SkipAdButton(this.adPanel_, this);
-    this.elements_.push(skipButton);
   }
 
   /** @private */
