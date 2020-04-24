@@ -2527,25 +2527,15 @@ describe('HlsParser', () => {
       await video.createSegmentIndex();
       await audio.createSegmentIndex();
 
-      const videoPosition = video.segmentIndex.find(0);
-      const audioPosition = audio.segmentIndex.find(0);
-      goog.asserts.assert(
-          videoPosition != null, 'Cannot find first video segment');
-      goog.asserts.assert(
-          audioPosition != null, 'Cannot find first audio segment');
+      // We check that the references are correct to check that the entire
+      // flow has gone well.
+      const videoReference = Array.from(video.segmentIndex)[0];
+      expect(videoReference.getUris())
+          .toEqual(['test:/host/segment.mp4']);
 
-      const videoReference = video.segmentIndex.get(videoPosition);
-      const audioReference = audio.segmentIndex.get(audioPosition);
-      expect(videoReference).not.toBe(null);
-      expect(audioReference).not.toBe(null);
-      if (videoReference) {
-        expect(videoReference.getUris())
-            .toEqual(['test:/host/segment.mp4']);
-      }
-      if (audioReference) {
-        expect(audioReference.getUris())
-            .toEqual(['test:/host/segment.mp4']);
-      }
+      const audioReference = Array.from(audio.segmentIndex)[0];
+      expect(audioReference.getUris())
+          .toEqual(['test:/host/segment.mp4']);
     });
 
     it('parse variables in media playlist', async () => {
@@ -2582,25 +2572,15 @@ describe('HlsParser', () => {
       await video.createSegmentIndex();
       await audio.createSegmentIndex();
 
-      const videoPosition = video.segmentIndex.find(0);
-      const audioPosition = audio.segmentIndex.find(0);
-      goog.asserts.assert(
-          videoPosition != null, 'Cannot find first video segment');
-      goog.asserts.assert(
-          audioPosition != null, 'Cannot find first audio segment');
+      // We check that the references are correct to check that the entire
+      // flow has gone well.
+      const videoReference = Array.from(video.segmentIndex)[0];
+      expect(videoReference.getUris())
+          .toEqual(['test:/host/test/segment.mp4?token=1']);
 
-      const videoReference = video.segmentIndex.get(videoPosition);
-      const audioReference = audio.segmentIndex.get(audioPosition);
-      expect(videoReference).not.toBe(null);
-      expect(audioReference).not.toBe(null);
-      if (videoReference) {
-        expect(videoReference.getUris())
-            .toEqual(['test:/host/test/segment.mp4?token=1']);
-      }
-      if (audioReference) {
-        expect(audioReference.getUris())
-            .toEqual(['test:/host/test/segment.mp4?token=1']);
-      }
+      const audioReference = Array.from(audio.segmentIndex)[0];
+      expect(audioReference.getUris())
+          .toEqual(['test:/host/test/segment.mp4?token=1']);
     });
 
     it('import variables in media from master playlist', async () => {
@@ -2637,25 +2617,15 @@ describe('HlsParser', () => {
       await video.createSegmentIndex();
       await audio.createSegmentIndex();
 
-      const videoPosition = video.segmentIndex.find(0);
-      const audioPosition = audio.segmentIndex.find(0);
-      goog.asserts.assert(
-          videoPosition != null, 'Cannot find first video segment');
-      goog.asserts.assert(
-          audioPosition != null, 'Cannot find first audio segment');
+      // We check that the references are correct to check that the entire
+      // flow has gone well.
+      const videoReference = Array.from(video.segmentIndex)[0];
+      expect(videoReference.getUris())
+          .toEqual(['test:/host/segment.mp4?token=1']);
 
-      const videoReference = video.segmentIndex.get(videoPosition);
-      const audioReference = audio.segmentIndex.get(audioPosition);
-      expect(videoReference).not.toBe(null);
-      expect(audioReference).not.toBe(null);
-      if (videoReference) {
-        expect(videoReference.getUris())
-            .toEqual(['test:/host/segment.mp4?token=1']);
-      }
-      if (audioReference) {
-        expect(audioReference.getUris())
-            .toEqual(['test:/host/segment.mp4?token=1']);
-      }
+      const audioReference = Array.from(audio.segmentIndex)[0];
+      expect(audioReference.getUris())
+          .toEqual(['test:/host/segment.mp4?token=1']);
     });
   });
 });
