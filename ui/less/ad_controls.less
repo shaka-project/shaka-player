@@ -17,14 +17,18 @@
   &:not([ad-active="true"]) {
     pointer-events: none;
   }
+}
 
+.shaka-controls-container {
   /* IMA SDK adds their own ad UI into an iframe element.
-   * Hide it when shaka controls are enabled, so we can show
-   * our own UI. Show it when shaka controls are disabled
-   * (and native controls are enabled). */
+   * Adjust its position to fit in with our UI, when
+   * Shaka UI is enabled. */
   iframe {
     .shaka-video-container[shaka-controls="true"] & {
-      .hidden();
+      /* This moves the iframe up a little bit, so it
+       * doesn't operlap with our controls. */
+      height: 92%;
+      z-index: 1;
     }
   }
 }

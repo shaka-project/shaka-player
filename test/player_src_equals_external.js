@@ -6,12 +6,10 @@
 describe('Player Src Equals', () => {
   // This asset needs to be (1) long and (2) high bitrate so that we can
   // invoke unbuffered seeks.
-  const LARGE_MP4_CONTENT_URI = [
-    'https://storage.googleapis.com',
-    'shaka-demo-assets',
-    'sintel-mp4-only',
-    'v-2160p-17000k-libx264.mp4',
-  ].join('/');
+  const LARGE_MP4_CONTENT_URI = 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/v-2160p-17000k-libx264.mp4';
+
+  // This asset needs to have VTT subtitles.
+  const HLS_CONTENT_URI = 'https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8';
 
   /** @type {!HTMLVideoElement} */
   let video;
@@ -81,6 +79,20 @@ describe('Player Src Equals', () => {
     // are in a buffering state.
     await bufferingEvent;
     expect(player.isBuffering()).toBeTruthy();
+  });
+
+  // A regression test for https://github.com/google/shaka-player/issues/2523
+  it('detects subtitles in native HLS', async () => {
+    const supportsNativeHls =
+        video.canPlayType('application/vnd.apple.mpegurl') != '';
+    if (!supportsNativeHls) {
+      // Skip this test.
+      pending('No native HLS support!');
+    }
+
+    await loadWithSrcEquals(HLS_CONTENT_URI);
+
+    expect(player.getTextTracks()).not.toEqual([]);
   });
 
   /**

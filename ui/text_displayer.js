@@ -59,8 +59,23 @@ shaka.ui.TextDisplayer = class {
    * @export
    */
   append(cues) {
-    // Add the cues.
-    this.cues_ = this.cues_.concat(cues);
+    for (const cue of cues) {
+      // When a VTT cue spans a segment boundary, the cue will be duplicated
+      // into two segments.
+      // To avoid displaying duplicate cues, if the current cue list already
+      // contains the cue, skip it.
+      const containsCue = this.cues_.some((cueInList) => {
+        if (cueInList.payload == cue.payload &&
+            cueInList.startTime == cue.startTime &&
+            cueInList.endTime == cue.endTime) {
+          return true;
+        }
+        return false;
+      });
+      if (!containsCue) {
+        this.cues_.push(cue);
+      }
+    }
   }
 
 

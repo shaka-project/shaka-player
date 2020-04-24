@@ -51,6 +51,11 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   onTimedMetadata(region) {}
 
   /**
+   * @override
+   */
+  onCueMetadataChange(data) {}
+
+  /**
    * @param {!shaka.test.FakeAd} ad
    */
   startAd(ad) {

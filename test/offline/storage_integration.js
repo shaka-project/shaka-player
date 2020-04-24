@@ -32,11 +32,17 @@ filterDescribe('Storage', storageSupport, () => {
       'fake:manifest-without-per-stream-bandwidth';
   const manifestWithNonZeroStartUri = 'fake:manifest-with-non-zero-start';
   const manifestWithLiveTimelineUri = 'fake:manifest-with-live-timeline';
+  const manifestWithAlternateSegmentsUri = 'fake:manifest-with-alt-segments';
 
   const segment1Uri = 'fake:segment-1';
   const segment2Uri = 'fake:segment-2';
   const segment3Uri = 'fake:segment-3';
   const segment4Uri = 'fake:segment-4';
+
+  const alternateSegment1Uri = 'fake:alt-segment-1';
+  const alternateSegment2Uri = 'fake:alt-segment-2';
+  const alternateSegment3Uri = 'fake:alt-segment-3';
+  const alternateSegment4Uri = 'fake:alt-segment-4';
 
   const noMetadata = {};
 
@@ -371,32 +377,56 @@ filterDescribe('Storage', storageSupport, () => {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(() => {
-      shaka.offline.StorageMuxer.overrideSupport(new Map());
+    // CAUTION: Do not put overrideSupport() or clearSupport() in
+    // beforEach/afterEach.  They change what is supported at a static level.
+    // When the test is run, a shim will call the support check and the test
+    // will be skipped if overrideSupport() has been called already.  A shim of
+    // afterEach will call the same check and skip afterEach's body, too, and
+    // the clean up will never happen.  So the calls to overrideSupport() and
+    // clearSupport() must be in each test using try/finally.
 
+    beforeEach(() => {
       player = new shaka.Player();
       storage = new shaka.offline.Storage(player);
+      // NOTE: See above "CAUTION" comment about overrideSupport/clearSupport.
     });
 
     afterEach(async () => {
       await storage.destroy();
       await player.destroy();
-
-      shaka.offline.StorageMuxer.clearOverride();
+      // NOTE: See above "CAUTION" comment about overrideSupport/clearSupport.
     });
 
     it('throws error using list', async () => {
-      await expectAsync(storage.list()).toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        await expectAsync(storage.list()).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
 
     it('throws error using store', async () => {
-      const store = storage.store('any-uri', noMetadata, fakeMimeType);
-      await expectAsync(store).toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        const store = storage.store('any-uri', noMetadata, fakeMimeType);
+        await expectAsync(store).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
 
     it('throws error using remove', async () => {
-      const remove = storage.remove('any-uri');
-      await expectAsync(remove).toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        const remove = storage.remove('any-uri');
+        await expectAsync(remove).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
   });
 
@@ -863,8 +893,11 @@ filterDescribe('Storage', storageSupport, () => {
       const storePromise = storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
 
+      // Critical: This manifest should have different segment URIs than the one
+      // above, or else the blocked network request would be shared between the
+      // two storage operations.
       const secondStorePromise = storage.store(
-          manifestWithoutPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithAlternateSegmentsUri, noMetadata, fakeMimeType);
       await secondStorePromise;
 
       // Unblock the original store and wait for it to complete.
@@ -1284,6 +1317,26 @@ filterDescribe('Storage', storageSupport, () => {
   }
 
   /**
+   * @return {shaka.extern.Manifest}
+   */
+  function makeManifestWithAlternateSegments() {
+    const manifest = makeManifestWithPerStreamBandwidth();
+
+    for (const stream of getAllStreams(manifest)) {
+      const refs = [
+        makeReference(alternateSegment1Uri, 10, 11),
+        makeReference(alternateSegment2Uri, 11, 12),
+        makeReference(alternateSegment3Uri, 12, 13),
+        makeReference(alternateSegment4Uri, 13, 14),
+      ];
+
+      overrideSegmentIndex(stream, refs);
+    }
+
+    return manifest;
+  }
+
+  /**
    * @param {shaka.extern.Manifest} manifest
    * @return {!Array.<shaka.extern.Stream>}
    */
@@ -1320,7 +1373,11 @@ filterDescribe('Storage', storageSupport, () => {
         .setResponseValue(segment1Uri, new ArrayBuffer(16))
         .setResponseValue(segment2Uri, new ArrayBuffer(16))
         .setResponseValue(segment3Uri, new ArrayBuffer(16))
-        .setResponseValue(segment4Uri, new ArrayBuffer(16));
+        .setResponseValue(segment4Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment1Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment2Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment3Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment4Uri, new ArrayBuffer(16));
   }
 
   async function eraseStorage() {
@@ -1376,6 +1433,8 @@ filterDescribe('Storage', storageSupport, () => {
           makeManifestWithNonZeroStart();
       this.map_[manifestWithLiveTimelineUri] =
           makeManifestWithLiveTimeline();
+      this.map_[manifestWithAlternateSegmentsUri] =
+          makeManifestWithAlternateSegments();
     }
 
     /** @override */
