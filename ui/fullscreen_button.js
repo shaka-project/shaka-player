@@ -26,7 +26,8 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-fullscreen-button');
     this.button_.classList.add('material-icons');
 

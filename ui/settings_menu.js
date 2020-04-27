@@ -39,8 +39,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
    * @private
    */
   addButton_(iconText) {
-    /** @protected {!HTMLElement}*/
-    this.button = shaka.util.Dom.createHTMLElement('button');
+    /** @protected {!HTMLButtonElement} */
+    this.button = shaka.util.Dom.createButton();
 
     /** @protected {!HTMLElement}*/
     this.icon = shaka.util.Dom.createHTMLElement('i');
@@ -74,8 +74,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.menu.classList.add('shaka-settings-menu');
     this.menu.classList.add('shaka-hidden');
 
-    /** @protected {!HTMLElement}*/
-    this.backButton = shaka.util.Dom.createHTMLElement('button');
+    /** @protected {!HTMLButtonElement}*/
+    this.backButton = shaka.util.Dom.createButton();
     this.backButton.classList.add('shaka-back-to-overflow-button');
     this.menu.appendChild(this.backButton);
 

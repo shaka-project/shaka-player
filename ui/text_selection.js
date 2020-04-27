@@ -84,7 +84,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   addOffOption_() {
-    const off = shaka.util.Dom.createHTMLElement('button');
+    const off = shaka.util.Dom.createButton();
     off.setAttribute('aria-selected', 'true');
     this.menu.appendChild(off);
 
@@ -129,7 +129,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         this.controls.getConfig().trackLabelFormat);
 
     // Add the Off button
-    const offButton = shaka.util.Dom.createHTMLElement('button');
+    const offButton = shaka.util.Dom.createButton();
     offButton.classList.add('shaka-turn-captions-off-button');
     this.eventManager.listen(offButton, 'click', () => {
       this.player.setTextTrackVisibility(false);

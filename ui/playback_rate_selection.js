@@ -111,7 +111,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   addPlaybackRates_() {
     for (const rateStr of this.playbackRates_.keys()) {
-      const button = shaka.util.Dom.createHTMLElement('button');
+      const button = shaka.util.Dom.createButton();
       const span = shaka.util.Dom.createHTMLElement('span');
       span.textContent = rateStr;
       button.appendChild(span);

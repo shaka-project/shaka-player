@@ -162,8 +162,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    * @private
    */
   addOverflowMenuButton_() {
-    /** @private {!HTMLElement} */
-    this.overflowMenuButton_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.overflowMenuButton_ = shaka.util.Dom.createButton();
     this.overflowMenuButton_.classList.add('shaka-overflow-menu-button');
     this.overflowMenuButton_.classList.add('shaka-no-propagation');
     this.overflowMenuButton_.classList.add('material-icons');

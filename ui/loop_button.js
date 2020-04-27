@@ -28,8 +28,8 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     super(parent, controls);
 
     const LocIds = shaka.ui.Locales.Ids;
-    /** @private {!HTMLElement} */
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-loop-button');
 
     /** @private {!HTMLElement} */
