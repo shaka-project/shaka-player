@@ -586,7 +586,7 @@ shaka.test.ManifestGenerator.Stream = class {
           /* endTime= */ end,
           getUris,
           /* startByte= */ 0,
-          /* endByte= */ segmentSize,
+          /* endByte= */ /** @type {?number} */(segmentSize),
           this.initSegmentReference_,
           /* timestampOffset= */ 0,
           /* appendWindowStart= */ 0,

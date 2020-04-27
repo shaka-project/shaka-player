@@ -13,7 +13,7 @@ describe('Walker', () => {
     mediaElement: null,
     mimeType: null,
     startTime: null,
-    startTimeOfLoad: null,
+    startTimeOfLoad: NaN,
     uri: null,
   };
 

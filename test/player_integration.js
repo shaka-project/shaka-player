@@ -711,11 +711,17 @@ describe('Player', () => {
 
     function getBufferedAhead() {
       const end = shaka.media.TimeRangesUtils.bufferEnd(video.buffered);
+      if (end == null) {
+        return 0;
+      }
       return end - video.currentTime;
     }
 
     function getBufferedBehind() {
       const start = shaka.media.TimeRangesUtils.bufferStart(video.buffered);
+      if (start == null) {
+        return 0;
+      }
       return video.currentTime - start;
     }
 

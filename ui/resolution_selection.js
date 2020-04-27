@@ -6,6 +6,7 @@
 
 goog.provide('shaka.ui.ResolutionSelection');
 
+goog.require('goog.asserts');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -78,6 +79,11 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     shaka.ui.Utils.setDisplay(this.button, true);
 
     tracks.sort((t1, t2) => {
+      // We have already screened for audio-only content, but the compiler
+      // doesn't know that.
+      goog.asserts.assert(t1.height != null, 'Null height');
+      goog.asserts.assert(t2.height != null, 'Null height');
+
       return t2.height - t1.height;
     });
 

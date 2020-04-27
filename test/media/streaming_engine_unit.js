@@ -1660,8 +1660,8 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
       // Configure with a failure callback that records the callback time.
-      /** @type {?number} */
-      let callbackTime = null;
+      /** @type {number} */
+      let callbackTime = 0;
       const failureCallback = jasmine.createSpy('failureCallback');
       failureCallback.and.callFake(() => {
         callbackTime = Date.now();

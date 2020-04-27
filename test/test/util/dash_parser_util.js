@@ -127,10 +127,10 @@ shaka.test.Dash = class {
 
     await video.createSegmentIndex();
     const position = video.segmentIndex.find(0);
-    expect(position).not.toBe(null);
+    goog.asserts.assert(position != null, 'Position should not be null!');
 
     const reference = video.segmentIndex.get(position);
-    expect(reference).not.toBe(null);
+    goog.asserts.assert(reference != null, 'Reference should not be null!');
     return reference;
   }
 

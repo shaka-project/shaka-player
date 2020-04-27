@@ -31,6 +31,7 @@
 goog.provide('goog.Uri');
 goog.provide('goog.Uri.QueryData');
 
+goog.require('goog.asserts');
 goog.require('goog.uri.utils');
 goog.require('goog.uri.utils.ComponentIndex');
 
@@ -811,6 +812,7 @@ goog.Uri.QueryData.prototype.add = function(key, value) {
     this.keyMap_[key] = (values = []);
   }
   values.push(value);
+  goog.asserts.assert(this.count_ != null, 'Should not be null.');
   this.count_++;
   return this;
 };
