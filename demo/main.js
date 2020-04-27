@@ -1190,9 +1190,12 @@ shakaDemo.Main = class {
       this.player_.configure('textDisplayFactory', textDisplayer);
 
       // Finally, the asset can be loaded.
-      let manifestUri = (asset.storedContent ?
-                         asset.storedContent.offlineUri :
-                         null) || asset.manifestUri;
+      let manifestUri = asset.manifestUri;
+      // If we have an offline copy, use that.  If the offlineUri field is null,
+      // we are still downloading it.
+      if (asset.storedContent && asset.storedContent.offlineUri) {
+        manifestUri = asset.storedContent.offlineUri;
+      }
       // If it's a server side dai asset, request ad-containing manifest
       // from the ad manager.
       if (asset.imaIds) {

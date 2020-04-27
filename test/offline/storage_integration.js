@@ -156,7 +156,7 @@ filterDescribe('Storage', storageSupport, () => {
       //          associated with it.
       const stored = await storage.store(
           'test:sintel-enc', noMetadata, testSchemeMimeType).promise;
-      expect(stored.offlineUri).toBeTruthy();
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -199,7 +199,7 @@ filterDescribe('Storage', storageSupport, () => {
       //          associated with it.
       const stored = await storage.store(
           'test:sintel-enc', noMetadata, testSchemeMimeType).promise;
-      expect(stored.offlineUri).toBeTruthy();
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -791,6 +791,7 @@ filterDescribe('Storage', storageSupport, () => {
 
       const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
       expect(stored.tracks.length).toBe(1);
       expect(stored.tracks[0].language).toBe(frenchCanadian);
 
@@ -858,6 +859,7 @@ filterDescribe('Storage', storageSupport, () => {
 
       const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -927,6 +929,7 @@ filterDescribe('Storage', storageSupport, () => {
 
       const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -1086,6 +1089,7 @@ filterDescribe('Storage', storageSupport, () => {
       // it won't be found when we try to remove it (with the wrong uri).
       const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
       const storedUri = shaka.offline.OfflineUri.parse(stored.offlineUri);
       const missingManifestUri = shaka.offline.OfflineUri.manifest(
           storedUri.mechanism(), storedUri.cell(), storedUri.key() + 1);
@@ -1102,13 +1106,14 @@ filterDescribe('Storage', storageSupport, () => {
     it('removes manifest', async () => {
       const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
-
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
       await storage.remove(stored.offlineUri);
     });
 
     it('removes manifest with missing segments', async () => {
       const stored = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -1169,6 +1174,8 @@ filterDescribe('Storage', storageSupport, () => {
       });
       const content = await storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(
+          content.offlineUri != null, 'URI should not be null!');
 
       /**
        * @type {!Array.<number>}
