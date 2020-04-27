@@ -445,7 +445,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
     });
 
     it('turns errors into shaka errors', async () => {
-      const fakeError = 'fake error';
+      const fakeError = new Error('fake error');
       filter.and.callFake(() => {
         throw fakeError;
       });
@@ -531,7 +531,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
       });
-      filter.and.returnValue(Promise.reject());
+      filter.and.returnValue(Promise.reject(new Error('')));
 
       await expectAsync(networkingEngine.request(requestType, request).promise)
           .toBeRejected();

@@ -798,9 +798,8 @@ describe('DrmEngine', () => {
 
     it('fails with an error if setMediaKeys fails', async () => {
       // Fail setMediaKeys.
-      mockVideo.setMediaKeys.and.returnValue(Promise.reject({
-        message: 'whoops!',
-      }));
+      mockVideo.setMediaKeys.and.returnValue(Promise.reject(
+          new Error('whoops!')));
 
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -816,9 +815,8 @@ describe('DrmEngine', () => {
       drmEngine.configure(config);
 
       // Fail setServerCertificate.
-      mockMediaKeys.setServerCertificate.and.returnValue(Promise.reject({
-        message: 'whoops!',
-      }));
+      mockMediaKeys.setServerCertificate.and.returnValue(Promise.reject(
+          new Error('whoops!')));
 
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -841,7 +839,8 @@ describe('DrmEngine', () => {
 
       // Fail generateRequest.
       const session1 = createMockSession();
-      const nativeError = {message: 'whoops!'};
+      const message = 'whoops!';
+      const nativeError = new Error(message);
       session1.generateRequest.and.returnValue(Promise.reject(nativeError));
       mockMediaKeys.createSession.and.returnValue(session1);
 
@@ -853,7 +852,7 @@ describe('DrmEngine', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.DRM,
           shaka.util.Error.Code.FAILED_TO_GENERATE_LICENSE_REQUEST,
-          nativeError.message, nativeError, undefined));
+          message, nativeError, undefined));
     });
   });  // describe('attach')
 
@@ -1411,8 +1410,8 @@ describe('DrmEngine', () => {
       session2.update.and.returnValue(Promise.resolve());
 
       await shaka.test.Util.shortDelay();
-      session1.close.and.returnValue(Promise.reject());
-      session2.close.and.returnValue(Promise.reject());
+      session1.close.and.returnValue(Promise.reject(new Error('')));
+      session2.close.and.returnValue(Promise.reject(new Error('')));
       await drmEngine.destroy();
     });
 
@@ -1432,7 +1431,7 @@ describe('DrmEngine', () => {
       session2.update.and.returnValue(Promise.resolve());
 
       await shaka.test.Util.shortDelay();
-      mockVideo.setMediaKeys.and.returnValue(Promise.reject());
+      mockVideo.setMediaKeys.and.returnValue(Promise.reject(new Error('')));
       await drmEngine.destroy();
     });
 
@@ -1453,7 +1452,7 @@ describe('DrmEngine', () => {
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
           'drm.abc', jasmine.any(Array));
       await drmEngine.destroy();
-      p.reject();  // Fail drm.abc.
+      p.reject(new Error(''));  // Fail drm.abc.
       await expectAsync(init).toBeRejected();
       // A second query was not made.
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
@@ -1522,7 +1521,7 @@ describe('DrmEngine', () => {
       const destroy = drmEngine.destroy();
       const fail = async () => {
         await shaka.test.Util.shortDelay();
-        p1.reject();
+        p1.reject(new Error(''));
       };
       const success = async () => {
         await shaka.test.Util.shortDelay();
@@ -1579,7 +1578,7 @@ describe('DrmEngine', () => {
       expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledTimes(1);
       await drmEngine.destroy();
 
-      p.reject();  // Fail setServerCertificate.
+      p.reject(new Error(''));  // Fail setServerCertificate.
       await expectAsync(init).toBeRejected();
     });
 
@@ -1726,7 +1725,7 @@ describe('DrmEngine', () => {
 
       // Since this won't be attached to anything until much later, we must
       // silence unhandled rejection errors.
-      const rejected = Promise.reject();
+      const rejected = Promise.reject(new Error(''));
       rejected.catch(() => {});
 
       session1.close.and.returnValue(rejected);
@@ -1987,7 +1986,7 @@ describe('DrmEngine', () => {
     });
 
     it('is rejected when update() is rejected', async () => {
-      updatePromise.reject({message: 'Error'});
+      updatePromise.reject(new Error('Error'));
       onErrorSpy.and.stub();
 
       const expected = Util.jasmineError(new shaka.util.Error(
@@ -2056,7 +2055,7 @@ describe('DrmEngine', () => {
   function setRequestMediaKeySystemAccessSpy(acceptableKeySystems) {
     requestMediaKeySystemAccessSpy.and.callFake((keySystem) => {
       if (!acceptableKeySystems.includes(keySystem)) {
-        return Promise.reject();
+        return Promise.reject(new Error(''));
       }
       mockMediaKeySystemAccess.keySystem = keySystem;
       return Promise.resolve(mockMediaKeySystemAccess);
