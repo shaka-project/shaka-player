@@ -621,7 +621,7 @@ goog.Uri.decodeOrEmpty_ = function(val, preserveReserved) {
  * valid characters in a url and also escapes any special characters that
  * appear in extra.
  *
- * @param {*} unescapedPart The string to encode.
+ * @param {(?string|undefined)} unescapedPart The string to encode.
  * @param {RegExp} extra A character set of characters in [\01-\177].
  * @param {boolean=} removeDoubleEncoding If true, remove double percent
  *     encoding.
@@ -630,7 +630,7 @@ goog.Uri.decodeOrEmpty_ = function(val, preserveReserved) {
  */
 goog.Uri.encodeSpecialChars_ = function(unescapedPart, extra,
     removeDoubleEncoding) {
-  if (goog.isString(unescapedPart)) {
+  if (unescapedPart != null) {
     var encoded = encodeURI(unescapedPart).
         replace(extra, goog.Uri.encodeChar_);
     if (removeDoubleEncoding) {
@@ -798,7 +798,7 @@ goog.Uri.QueryData.prototype.getCount = function() {
 /**
  * Adds a key value pair.
  * @param {string} key Name.
- * @param {*} value Value.
+ * @param {string} value Value.
  * @return {!goog.Uri.QueryData} Instance of this object.
  */
 goog.Uri.QueryData.prototype.add = function(key, value) {

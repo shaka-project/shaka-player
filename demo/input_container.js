@@ -126,16 +126,18 @@ shakaDemo.InputContainer = class {
    * @private
    */
   addDocLink_(parentDiv, docLink) {
-    const link = document.createElement('a');
+    const link = /** @type {!HTMLAnchorElement} */(document.createElement('a'));
     link.href = docLink;
     link.target = '_blank';
     link.classList.add('mdl-button');
     link.classList.add('mdl-js-button');
     link.classList.add('mdl-js-ripple-effect');
     link.classList.add('mdl-button--colored');
+
     const icon = document.createElement('i');
     icon.classList.add('material-icons');
     icon.textContent = 'help';
+
     link.appendChild(icon);
     parentDiv.appendChild(link);
   }

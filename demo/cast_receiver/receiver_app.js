@@ -12,7 +12,7 @@ goog.require('goog.asserts');
  */
 class ShakaReceiverApp {
   constructor() {
-    /** @private {HTMLMediaElement} */
+    /** @private {HTMLVideoElement} */
     this.video_ = null;
 
     /** @private {shaka.Player} */
@@ -32,15 +32,14 @@ class ShakaReceiverApp {
    * Initialize the application.
    */
   init() {
-    /** @type {HTMLMediaElement} */
-    const video = /** @type {HTMLMediaElement} */
-        (document.getElementById('video'));
-    goog.asserts.assert(video, 'Video element should be available!');
+    const video = document.getElementById('video');
+    goog.asserts.assert(
+        video instanceof HTMLVideoElement, 'Wrong element type!');
     this.video_ = video;
 
-    /** @type {!shaka.ui.Overlay} */
     const ui = this.video_['ui'];
-    goog.asserts.assert(ui, 'UI should be available!');
+    goog.asserts.assert(
+        ui instanceof shaka.ui.Overlay, 'UI not present or wrong type!');
 
     // Make sure we don't show extra UI elements we don't need on the TV.
     ui.configure({
