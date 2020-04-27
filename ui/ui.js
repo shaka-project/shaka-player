@@ -392,7 +392,10 @@ shaka.ui.TrackLabelFormat = {
 if (document.readyState == 'complete') {
   // Don't fire this event synchronously.  In a compiled bundle, the "shaka"
   // namespace might not be exported to the window until after this point.
-  Promise.resolve().then(shaka.ui.Overlay.scanPageForShakaElements_);
+  (async () => {
+    await Promise.resolve();
+    shaka.ui.Overlay.scanPageForShakaElements_();
+  })();
 } else {
   window.addEventListener('load', shaka.ui.Overlay.scanPageForShakaElements_);
 }

@@ -4,10 +4,7 @@
  */
 
 describe('StreamUtils', () => {
-  const filterStreamsByLanguageAndRole =
-      shaka.util.StreamUtils.filterStreamsByLanguageAndRole;
-  const filterVariantsByAudioChannelCount =
-      shaka.util.StreamUtils.filterVariantsByAudioChannelCount;
+  const StreamUtils = shaka.util.StreamUtils;
 
   let manifest;
 
@@ -25,7 +22,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterStreamsByLanguageAndRole(
+      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
           manifest.textStreams,
           'en',
           '');
@@ -45,7 +42,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterStreamsByLanguageAndRole(
+      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
           manifest.textStreams,
           'en',
           '');
@@ -69,7 +66,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterStreamsByLanguageAndRole(
+      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
           manifest.textStreams,
           'en',
           'main');
@@ -92,7 +89,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterStreamsByLanguageAndRole(
+      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
           manifest.textStreams,
           'en',
           '');
@@ -115,7 +112,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterStreamsByLanguageAndRole(
+      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
           manifest.textStreams,
           'en',
           'main'); // A role that is not present.
@@ -152,7 +149,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterStreamsByLanguageAndRole(
+      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
           manifest.textStreams,
           'en',
           '');
@@ -197,7 +194,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterStreamsByLanguageAndRole(
+      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
           manifest.textStreams,
           'zh',
           '');
@@ -228,7 +225,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterStreamsByLanguageAndRole(
+      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
           manifest.textStreams,
           'zh',
           '');
@@ -271,7 +268,7 @@ describe('StreamUtils', () => {
             });
           });
 
-          const chosen = filterStreamsByLanguageAndRole(
+          const chosen = StreamUtils.filterStreamsByLanguageAndRole(
               manifest.textStreams,
               'zh',
               '');
@@ -319,7 +316,7 @@ describe('StreamUtils', () => {
             });
           });
 
-          const chosen = filterStreamsByLanguageAndRole(
+          const chosen = StreamUtils.filterStreamsByLanguageAndRole(
               manifest.textStreams,
               'zh',
               '');
@@ -351,7 +348,8 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterVariantsByAudioChannelCount(manifest.variants, 2);
+      const chosen = StreamUtils.filterVariantsByAudioChannelCount(
+          manifest.variants, 2);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.variants[0]);
       expect(chosen[1]).toBe(manifest.variants[2]);
@@ -377,7 +375,7 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterVariantsByAudioChannelCount(
+      const chosen = StreamUtils.filterVariantsByAudioChannelCount(
           manifest.variants, 6);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.variants[0]);
@@ -404,7 +402,8 @@ describe('StreamUtils', () => {
         });
       });
 
-      const chosen = filterVariantsByAudioChannelCount(manifest.variants, 2);
+      const chosen = StreamUtils.filterVariantsByAudioChannelCount(
+          manifest.variants, 2);
       expect(chosen.length).toBe(2);
       expect(chosen[0]).toBe(manifest.variants[0]);
       expect(chosen[1]).toBe(manifest.variants[2]);

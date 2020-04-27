@@ -7,69 +7,61 @@ describe('Iterables', () => {
   const Iterables = shaka.util.Iterables;
 
   describe('map', () => {
-    const map = Iterables.map;
-
     it('works with no items', () => {
       const input = new Set([]);
-      const output = Array.from(map(input, (x) => -x));
+      const output = Array.from(Iterables.map(input, (x) => -x));
 
       expect(output).toEqual([]);
     });
 
     it('works with items', () => {
       const input = new Set([1, 2, 3]);
-      const output = Array.from(map(input, (x) => -x));
+      const output = Array.from(Iterables.map(input, (x) => -x));
 
       expect(output).toEqual([-1, -2, -3]);
     });
   });
 
   describe('every', () => {
-    const every = Iterables.every;
-
     it('works with no items', () => {
       const input = new Set([]);
-      expect(every(input, (x) => x >= 0)).toBeTruthy();
+      expect(Iterables.every(input, (x) => x >= 0)).toBeTruthy();
     });
 
     it('works with items', () => {
       const input = new Set([0, 1, 2, 3]);
-      expect(every(input, (x) => x >= 0)).toBeTruthy();
-      expect(every(input, (x) => x > 0)).toBeFalsy();
+      expect(Iterables.every(input, (x) => x >= 0)).toBeTruthy();
+      expect(Iterables.every(input, (x) => x > 0)).toBeFalsy();
     });
   });
 
   describe('some', () => {
-    const some = Iterables.some;
-
     it('works with no items', () => {
       const input = new Set([]);
-      expect(some(input, (x) => x >= 2)).toBeFalsy();
+      expect(Iterables.some(input, (x) => x >= 2)).toBeFalsy();
     });
 
     it('works with items', () => {
       const input = new Set([0, 1, 2, 3]);
-      expect(some(input, (x) => x > 2)).toBeTruthy();
-      expect(some(input, (x) => x < 0)).toBeFalsy();
+      expect(Iterables.some(input, (x) => x > 2)).toBeTruthy();
+      expect(Iterables.some(input, (x) => x < 0)).toBeFalsy();
     });
   });
 
   describe('filter', () => {
-    const filter = Iterables.filter;
-
     it('works with no items', () => {
       const input = new Set([]);
-      expect(filter(input, (x) => x >= 2)).toEqual([]);
+      expect(Iterables.filter(input, (x) => x >= 2)).toEqual([]);
     });
 
     it('works with items', () => {
       const input = new Set([0, 1, 2, 3]);
       // Everything
-      expect(filter(input, (x) => x < 7)).toEqual([0, 1, 2, 3]);
+      expect(Iterables.filter(input, (x) => x < 7)).toEqual([0, 1, 2, 3]);
       // Some things
-      expect(filter(input, (x) => x < 2)).toEqual([0, 1]);
+      expect(Iterables.filter(input, (x) => x < 2)).toEqual([0, 1]);
       // Nothing
-      expect(filter(input, (x) => x < 0)).toEqual([]);
+      expect(Iterables.filter(input, (x) => x < 0)).toEqual([]);
     });
   });
 

@@ -41,22 +41,25 @@ describe('Transmuxer', () => {
   });
 
   describe('isSupported', () => {
-    const isSupported = shaka.media.Transmuxer.isSupported;
+    const Transmuxer = shaka.media.Transmuxer;
+
     it('returns whether the content type is supported', () => {
-      expect(isSupported(mp4MimeType, ContentType.VIDEO)).toBeFalsy();
-      expect(isSupported(transportStreamVideoMimeType, ContentType.VIDEO))
-          .toBe(true);
+      expect(Transmuxer.isSupported(
+          mp4MimeType, ContentType.VIDEO)).toBe(false);
+      expect(Transmuxer.isSupported(
+          transportStreamVideoMimeType, ContentType.VIDEO)).toBe(true);
     });
 
     // Issue #1991
     it('handles upper-case MIME types', () => {
       const mimeType = transportStreamVideoMimeType.replace('mp2t', 'MP2T');
-      expect(isSupported(mimeType, ContentType.VIDEO)).toBe(true);
+      expect(Transmuxer.isSupported(mimeType, ContentType.VIDEO)).toBe(true);
     });
   });
 
   describe('convertTsCodecs', () => {
-    const convertTsCodecs = shaka.media.Transmuxer.convertTsCodecs;
+    const convertTsCodecs =
+        (type, codecs) => shaka.media.Transmuxer.convertTsCodecs(type, codecs);
 
     it('returns converted codecs', () => {
       const convertedVideoCodecs =

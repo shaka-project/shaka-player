@@ -8,7 +8,6 @@
 // public methods behaviour correctly when playing content video |src=|.
 describe('Player Src Equals', () => {
   const Util = shaka.test.Util;
-  const waitForMovementOrFailOnTimeout = Util.waitForMovementOrFailOnTimeout;
 
   const SMALL_MP4_CONTENT_URI = '/base/test/test/assets/small.mp4';
 
@@ -101,7 +100,8 @@ describe('Player Src Equals', () => {
 
     // Start playback and wait for the playhead to move.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await Util.waitForMovementOrFailOnTimeout(
+        eventManager, video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be before
     // seeking.
@@ -111,7 +111,8 @@ describe('Player Src Equals', () => {
     // Trigger a seek and then wait for the seek to take effect.
     // This seek target is very close to the duration of the video.
     video.currentTime = 10;
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await Util.waitForMovementOrFailOnTimeout(
+        eventManager, video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be after
     // seeking.
@@ -138,7 +139,8 @@ describe('Player Src Equals', () => {
 
     // For playback to begin so that we have some content buffered.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await Util.waitForMovementOrFailOnTimeout(
+        eventManager, video, /* timeout= */10);
 
     const buffered = player.getBufferedInfo();
 
@@ -162,7 +164,8 @@ describe('Player Src Equals', () => {
 
     // Let playback run for a little.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await Util.waitForMovementOrFailOnTimeout(
+        eventManager, video, /* timeout= */10);
 
     let videoRateChange = false;
     let playerRateChange = false;
@@ -308,7 +311,8 @@ describe('Player Src Equals', () => {
 
     // Start playback and wait. We should see the playhead move.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await Util.waitForMovementOrFailOnTimeout(
+        eventManager, video, /* timeout= */10);
     await shaka.test.Util.delay(1.5);
 
     // When checking if the playhead moved, check for less progress than time we
@@ -325,7 +329,8 @@ describe('Player Src Equals', () => {
     // Wait some time for playback to start so that we will have a load latency
     // value.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await Util.waitForMovementOrFailOnTimeout(
+        eventManager, video, /* timeout= */10);
 
     // Get the stats and check that some stats have been filled in.
     const stats = player.getStats();

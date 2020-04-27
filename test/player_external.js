@@ -6,8 +6,6 @@
 describe('Player', () => {
   const Util = shaka.test.Util;
   const Feature = shakaAssets.Feature;
-  const waitForMovementOrFailOnTimeout = Util.waitForMovementOrFailOnTimeout;
-  const waitForEndOrTimeout = Util.waitForEndOrTimeout;
 
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
@@ -120,10 +118,10 @@ describe('Player', () => {
 
         // Wait for the video to start playback.  If it takes longer than 20
         // seconds, fail the test.
-        await waitForMovementOrFailOnTimeout(eventManager, video, 20);
+        await Util.waitForMovementOrFailOnTimeout(eventManager, video, 20);
 
         // Play for 30 seconds, but stop early if the video ends.
-        await waitForEndOrTimeout(eventManager, video, 30);
+        await Util.waitForEndOrTimeout(eventManager, video, 30);
 
         if (video.ended) {
           checkEndedTime();
@@ -143,10 +141,10 @@ describe('Player', () => {
 
             // Wait for the video to start playback again after seeking.  If it
             // takes longer than 20 seconds, fail the test.
-            await waitForMovementOrFailOnTimeout(eventManager, video, 20);
+            await Util.waitForMovementOrFailOnTimeout(eventManager, video, 20);
 
             // Play for 30 seconds, but stop early if the video ends.
-            await waitForEndOrTimeout(eventManager, video, 30);
+            await Util.waitForEndOrTimeout(eventManager, video, 30);
 
             // By now, ended should be true.
             expect(video.ended).toBe(true);

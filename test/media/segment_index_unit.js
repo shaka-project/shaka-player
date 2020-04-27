@@ -361,7 +361,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
   });
 
   describe('SegmentIterator', () => {
-    const makeReference = shaka.test.ManifestParser.makeReference;
     const inputRefs = [
       makeReference(uri(0), 0, 10),
       makeReference(uri(1), 10, 20),
