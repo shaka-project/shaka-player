@@ -40,7 +40,6 @@ describe('UITextDisplayer', () => {
     return cssObj;
   }
 
-
   beforeAll(() => {
     videoContainer =
       /** @type {!HTMLElement} */ (document.createElement('div'));
@@ -56,6 +55,10 @@ describe('UITextDisplayer', () => {
 
   afterEach(async () => {
     await textDisplayer.destroy();
+  });
+
+  afterAll(() => {
+    document.body.removeChild(videoContainer);
   });
 
   it('correctly displays styles for cues', async () => {
@@ -200,5 +203,26 @@ describe('UITextDisplayer', () => {
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({'font-size': expectedFontSize}));
+  });
+
+  it('does not display duplicate cues', async () => {
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    // Wait until updateCaptions_() gets called.
+    await shaka.test.Util.delay(0.5);
+    /** @type {Element} */
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    let captions = textContainer.querySelectorAll('span');
+    // Expect textContainer to display this cue.
+    expect(captions.length).toBe(1);
+
+    const cue2 = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+    textDisplayer.append([cue2]);
+    // Wait until updateCaptions_() gets called.
+    await shaka.test.Util.delay(0.5);
+    captions = textContainer.querySelectorAll('span');
+    // Expect textContainer to display one cue without duplication.
+    expect(captions.length).toBe(1);
   });
 });

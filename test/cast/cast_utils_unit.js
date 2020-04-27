@@ -262,6 +262,40 @@ describe('CastUtils', () => {
         expect(TimeRangesUtils.getBufferedInfo(deserialized))
             .toEqual(TimeRangesUtils.getBufferedInfo(buffered));
       });
+    });  // describe('TimeRanges')
+
+    it('transfers real Errors', () => {
+      let realError;
+      try {
+        // Cast undefined to "?" to convince the compiler to let us dereference
+        // it.
+        const foo = /** @type {?} */(undefined);
+
+        // Now this will generate a TypeError.
+        foo.bar = 'baz';
+
+        // We need to catch a real Error in this test, so we disable eslint on
+        // the next line.
+        // eslint-disable-next-line no-restricted-syntax
+      } catch (error) {
+        realError = error;
+      }
+
+      // The event is turned into a string.
+      const serialized = CastUtils.serialize(realError);
+      expect(typeof serialized).toBe('string');
+
+      // The string is turned back into an object.
+      const deserialized = CastUtils.deserialize(serialized);
+      expect(typeof deserialized).toBe('object');
+
+      // And that object should be an Error type.
+      expect(deserialized).toEqual(jasmine.any(Error));
+
+      // At least these basic properties should match.
+      expect(deserialized.type).toBe(realError.type);
+      expect(deserialized.message).toBe(realError.message);
+      expect(deserialized.stack).toBe(realError.stack);
     });
-  });
-});
+  });  // describe('serialize/deserialize')
+});  // describe('CastUtils')

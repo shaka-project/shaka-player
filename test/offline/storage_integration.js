@@ -32,11 +32,17 @@ filterDescribe('Storage', storageSupport, () => {
       'fake:manifest-without-per-stream-bandwidth';
   const manifestWithNonZeroStartUri = 'fake:manifest-with-non-zero-start';
   const manifestWithLiveTimelineUri = 'fake:manifest-with-live-timeline';
+  const manifestWithAlternateSegmentsUri = 'fake:manifest-with-alt-segments';
 
   const segment1Uri = 'fake:segment-1';
   const segment2Uri = 'fake:segment-2';
   const segment3Uri = 'fake:segment-3';
   const segment4Uri = 'fake:segment-4';
+
+  const alternateSegment1Uri = 'fake:alt-segment-1';
+  const alternateSegment2Uri = 'fake:alt-segment-2';
+  const alternateSegment3Uri = 'fake:alt-segment-3';
+  const alternateSegment4Uri = 'fake:alt-segment-4';
 
   const noMetadata = {};
 
@@ -77,7 +83,8 @@ filterDescribe('Storage', storageSupport, () => {
 
       // Store a piece of content.
       await withStorage((storage) => {
-        return storage.store(manifestUri, noMetadata, testSchemeMimeType);
+        return storage.store(
+            manifestUri, noMetadata, testSchemeMimeType).promise;
       });
 
       // Make sure that the content can be found.
@@ -148,7 +155,7 @@ filterDescribe('Storage', storageSupport, () => {
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
       const stored = await storage.store(
-          'test:sintel-enc', noMetadata, testSchemeMimeType);
+          'test:sintel-enc', noMetadata, testSchemeMimeType).promise;
       expect(stored.offlineUri).toBeTruthy();
 
       /** @type {shaka.offline.OfflineUri} */
@@ -191,7 +198,7 @@ filterDescribe('Storage', storageSupport, () => {
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
       const stored = await storage.store(
-          'test:sintel-enc', noMetadata, testSchemeMimeType);
+          'test:sintel-enc', noMetadata, testSchemeMimeType).promise;
       expect(stored.offlineUri).toBeTruthy();
 
       /** @type {shaka.offline.OfflineUri} */
@@ -371,36 +378,56 @@ filterDescribe('Storage', storageSupport, () => {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(() => {
-      shaka.offline.StorageMuxer.overrideSupport(new Map());
+    // CAUTION: Do not put overrideSupport() or clearSupport() in
+    // beforEach/afterEach.  They change what is supported at a static level.
+    // When the test is run, a shim will call the support check and the test
+    // will be skipped if overrideSupport() has been called already.  A shim of
+    // afterEach will call the same check and skip afterEach's body, too, and
+    // the clean up will never happen.  So the calls to overrideSupport() and
+    // clearSupport() must be in each test using try/finally.
 
+    beforeEach(() => {
       player = new shaka.Player();
       storage = new shaka.offline.Storage(player);
+      // NOTE: See above "CAUTION" comment about overrideSupport/clearSupport.
     });
 
     afterEach(async () => {
       await storage.destroy();
       await player.destroy();
-
-      shaka.offline.StorageMuxer.clearOverride();
+      // NOTE: See above "CAUTION" comment about overrideSupport/clearSupport.
     });
 
     it('throws error using list', async () => {
-      await expectAsync(storage.list()).toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        await expectAsync(storage.list()).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
 
     it('throws error using store', async () => {
-      // The URI still needs to map to a specific manifest parser, so we use an
-      // extension that maps to DASH.
-      await expectAsync(storage.store('the-uri-wont-matter.mpd'))
-          .toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        const store = storage.store('any-uri', noMetadata, fakeMimeType);
+        await expectAsync(store.promise).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
 
     it('throws error using remove', async () => {
-      // The URI still needs to map to a specific manifest parser, so we use an
-      // extension that maps to DASH.
-      await expectAsync(storage.remove('the-uri-wont-matter.mpd'))
-          .toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        const remove = storage.remove('any-uri');
+        await expectAsync(remove).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
   });
 
@@ -567,7 +594,7 @@ filterDescribe('Storage', storageSupport, () => {
       // Store a manifest with bandwidth only for the variant (no per
       // stream bandwidth). This should result in a less accurate
       // progression of progress values as default values will be used.
-      await storage.store('uri-wont-matter', noMetadata, fakeMimeType);
+      await storage.store('uri-wont-matter', noMetadata, fakeMimeType).promise;
 
       // We should have hit all the progress steps.
       expect(remainingProgress.length).toBe(0);
@@ -708,7 +735,7 @@ filterDescribe('Storage', storageSupport, () => {
       for (let i = 0; i < manifestUris.length; ++i) {
         const uri = manifestUris[i];
         // eslint-disable-next-line no-await-in-loop
-        await storage.store(uri, noMetadata, fakeMimeType);
+        await storage.store(uri, noMetadata, fakeMimeType).promise;
       }
 
       const content = await storage.list();
@@ -741,7 +768,7 @@ filterDescribe('Storage', storageSupport, () => {
       const storeTwo = storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
       storage.configure('offline.trackSelectionCallback', selectTracksBad);
-      await Promise.all([storeOne, storeTwo]);
+      await Promise.all([storeOne.promise, storeTwo.promise]);
 
       expect(selectTracksOne).toHaveBeenCalled();
       expect(selectTracksTwo).toHaveBeenCalled();
@@ -763,7 +790,7 @@ filterDescribe('Storage', storageSupport, () => {
       });
 
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
       expect(stored.tracks.length).toBe(1);
       expect(stored.tracks[0].language).toBe(frenchCanadian);
 
@@ -806,7 +833,7 @@ filterDescribe('Storage', storageSupport, () => {
       });
 
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
       expect(stored.tracks.length).toBe(1);
       expect(stored.tracks[0].language).toBe(frenchCanadian);
     });
@@ -829,7 +856,8 @@ filterDescribe('Storage', storageSupport, () => {
           drm,
           makeManifestWithPerStreamBandwidth());
 
-      const stored = await storage.store(manifestWithPerStreamBandwidthUri);
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -862,17 +890,20 @@ filterDescribe('Storage', storageSupport, () => {
       // Block the network so that we won't finish the first store command.
       /** @type {!shaka.util.PublicPromise} */
       const hangingPromise = netEngine.delayNextRequest();
-      /** @type {!Promise} */
-      const storePromise = storage.store(
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
           manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
 
+      // Critical: This manifest should have different segment URIs than the one
+      // above, or else the blocked network request would be shared between the
+      // two storage operations.
       const secondStorePromise = storage.store(
-          manifestWithoutPerStreamBandwidthUri, noMetadata, fakeMimeType);
-      await secondStorePromise;
+          manifestWithAlternateSegmentsUri, noMetadata, fakeMimeType);
+      await secondStorePromise.promise;
 
       // Unblock the original store and wait for it to complete.
       hangingPromise.resolve();
-      await storePromise;
+      await storeOperation.promise;
     });
 
     // Make sure that when we configure storage to NOT store persistent
@@ -894,7 +925,8 @@ filterDescribe('Storage', storageSupport, () => {
           makeManifestWithPerStreamBandwidth());
       storage.configure('offline.usePersistentLicense', false);
 
-      const stored = await storage.store(manifestWithPerStreamBandwidthUri);
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -928,9 +960,9 @@ filterDescribe('Storage', storageSupport, () => {
           shaka.util.Error.Category.STORAGE,
           shaka.util.Error.Code.CANNOT_STORE_LIVE_OFFLINE,
           manifestWithLiveTimelineUri));
-      await expectAsync(
-          storage.store(manifestWithLiveTimelineUri, noMetadata, fakeMimeType))
-          .toBeRejectedWith(expected);
+      const storeOperation =
+          storage.store(manifestWithLiveTimelineUri, noMetadata, fakeMimeType);
+      await expectAsync(storeOperation.promise).toBeRejectedWith(expected);
     });
 
     it('throws an error if destroyed mid-store', async () => {
@@ -948,9 +980,8 @@ filterDescribe('Storage', storageSupport, () => {
       };
 
       // The uri won't matter much, as we have overriden |parseManifest|.
-      // But there will still be a mapping from URI to parser to instantiate the
-      // parser, even though it won't be used.  So make the URI look like DASH.
-      const waitOnStore = storage.store('uri-does-not-matter-much.mpd');
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const waitOnStore = storage.store('any-uri', noMetadata, fakeMimeType);
 
       // Request for storage to be destroyed. Before waiting for it to resolve,
       // resolve the promise that we are using to stall the store operation.
@@ -963,8 +994,67 @@ filterDescribe('Storage', storageSupport, () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.STORAGE,
           shaka.util.Error.Code.OPERATION_ABORTED));
-      await expectAsync(waitOnStore).toBeRejectedWith(expected);
+      await expectAsync(waitOnStore.promise).toBeRejectedWith(expected);
     });
+
+    it('cancels downloads if destroyed mid-store', async () => {
+      await networkCancelTest((abortable) => {
+        return storage.destroy();
+      });
+    });
+
+    it('cancels downloads if canceled mid-store', async () => {
+      await networkCancelTest((abortable) => {
+        return abortable.abort();
+      });
+    });
+
+    /**
+     * @param {function(shaka.extern.IAbortableOperation):!Promise} interruption
+     */
+    async function networkCancelTest(interruption) {
+      const delays = [];
+      /** @type {!shaka.util.PublicPromise} */
+      const aRequestIsStarted = new shaka.util.PublicPromise();
+
+      // Set delays for the URIs of the manifest.
+      const uris = [segment1Uri, segment2Uri, segment3Uri, segment4Uri];
+      for (let i = 0; i < uris.length; i++) {
+        const promise = new shaka.util.PublicPromise();
+        delays.push(promise);
+
+        // The fake networking engine provides a "abortCheck" callback to the
+        // response, so that you can check whether or not the network operation
+        // has been aborted.
+        netEngine.setResponse(uris[i], async (abortCheck) => {
+          aRequestIsStarted.resolve();
+          await promise;
+
+          // All downloads for a given stream are in the same "download group",
+          // and will be downloaded sequentially. Thus, we expect only the first
+          // download to be aborted.
+          expect(abortCheck()).toBe(i == 0 ? true : false);
+
+          return new ArrayBuffer(16);
+        });
+      }
+
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await aRequestIsStarted;
+      const interruptionPromise = interruption(storeOperation);
+      for (const promise of delays) {
+        promise.resolve();
+      }
+      await interruptionPromise;
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.OPERATION_ABORTED));
+      await expectAsync(storeOperation.promise).toBeRejectedWith(expected);
+    }
 
     it('stops for networking errors', async () => {
       // Force all network requests to fail.
@@ -975,9 +1065,9 @@ filterDescribe('Storage', storageSupport, () => {
         return shaka.util.AbortableOperation.failed(error);
       });
 
-      await expectAsync(
-          storage.store(
-              manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType))
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await expectAsync(storeOperation.promise)
           .toBeRejectedWith(Util.jasmineError(error));
     });
 
@@ -995,7 +1085,7 @@ filterDescribe('Storage', storageSupport, () => {
       // Store a piece of content, but then change the uri slightly so that
       // it won't be found when we try to remove it (with the wrong uri).
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
       const storedUri = shaka.offline.OfflineUri.parse(stored.offlineUri);
       const missingManifestUri = shaka.offline.OfflineUri.manifest(
           storedUri.mechanism(), storedUri.cell(), storedUri.key() + 1);
@@ -1011,14 +1101,14 @@ filterDescribe('Storage', storageSupport, () => {
 
     it('removes manifest', async () => {
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       await storage.remove(stored.offlineUri);
     });
 
     it('removes manifest with missing segments', async () => {
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -1078,7 +1168,7 @@ filterDescribe('Storage', storageSupport, () => {
         },
       });
       const content = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
 
       /**
        * @type {!Array.<number>}
@@ -1111,7 +1201,8 @@ filterDescribe('Storage', storageSupport, () => {
       /** @type {shaka.offline.Storage} */
       const storage = new shaka.offline.Storage();
       try {
-        await storage.store(manifestUri, noMetadata, testSchemeMimeType);
+        await storage.store(
+            manifestUri, noMetadata, testSchemeMimeType).promise;
       } finally {
         await storage.destroy();
       }
@@ -1288,6 +1379,26 @@ filterDescribe('Storage', storageSupport, () => {
   }
 
   /**
+   * @return {shaka.extern.Manifest}
+   */
+  function makeManifestWithAlternateSegments() {
+    const manifest = makeManifestWithPerStreamBandwidth();
+
+    for (const stream of getAllStreams(manifest)) {
+      const refs = [
+        makeReference(alternateSegment1Uri, 10, 11),
+        makeReference(alternateSegment2Uri, 11, 12),
+        makeReference(alternateSegment3Uri, 12, 13),
+        makeReference(alternateSegment4Uri, 13, 14),
+      ];
+
+      overrideSegmentIndex(stream, refs);
+    }
+
+    return manifest;
+  }
+
+  /**
    * @param {shaka.extern.Manifest} manifest
    * @return {!Array.<shaka.extern.Stream>}
    */
@@ -1324,7 +1435,11 @@ filterDescribe('Storage', storageSupport, () => {
         .setResponseValue(segment1Uri, new ArrayBuffer(16))
         .setResponseValue(segment2Uri, new ArrayBuffer(16))
         .setResponseValue(segment3Uri, new ArrayBuffer(16))
-        .setResponseValue(segment4Uri, new ArrayBuffer(16));
+        .setResponseValue(segment4Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment1Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment2Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment3Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment4Uri, new ArrayBuffer(16));
   }
 
   async function eraseStorage() {
@@ -1380,6 +1495,8 @@ filterDescribe('Storage', storageSupport, () => {
           makeManifestWithNonZeroStart();
       this.map_[manifestWithLiveTimelineUri] =
           makeManifestWithLiveTimeline();
+      this.map_[manifestWithAlternateSegmentsUri] =
+          makeManifestWithAlternateSegments();
     }
 
     /** @override */

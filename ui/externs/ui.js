@@ -67,7 +67,9 @@ shaka.extern.UIVolumeBarColors;
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
  *   trackLabelFormat: shaka.ui.TrackLabelFormat,
  *   fadeDelay: number,
- *   doubleClickForFullscreen: boolean
+ *   doubleClickForFullscreen: boolean,
+ *   enableKeyboardPlaybackControls: boolean,
+ *   enableFullscreenOnRotation: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -123,6 +125,13 @@ shaka.extern.UIVolumeBarColors;
  * @property {boolean} doubleClickForFullscreen
  *   Whether or not double-clicking on the UI should cause it to enter
  *   fullscreen.
+ *   Defaults to true.
+ * @property {boolean} enableKeyboardPlaybackControls
+ *   Whether or not playback controls via keyboard is enabled, such as seek
+ *   forward, seek backward, jump to the beginning/end of the video.
+ *   Defaults to true.
+ * @property {boolean} enableFullscreenOnRotation
+ *   Whether or not to enter/exit fullscreen mode when the screen is rotated.
  *   Defaults to true.
  */
 shaka.extern.UIConfiguration;
