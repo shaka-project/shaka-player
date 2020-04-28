@@ -1584,7 +1584,9 @@ shakaDemo.Main = class {
    * @private
    */
   onErrorEvent_(event) {
-    this.onError_(event.detail);
+    // TODO: generate externs automatically from @event types
+    // This event should be shaka.Player.ErrorEvent
+    this.onError_(event['detail']);
   }
 
   /**
