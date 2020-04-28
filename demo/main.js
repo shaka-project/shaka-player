@@ -59,6 +59,13 @@ shakaDemo.Main = class {
 
     /** @private {boolean} */
     this.noInput_ = false;
+
+    /** @private {!HTMLAnchorElement} */
+    this.errorDisplayLink_ = /** @type {!HTMLAnchorElement} */(
+      document.getElementById('error-display-link'));
+
+    /** @private {?number} */
+    this.currentErrorSeverity_ = null;
   }
 
   /**
@@ -1573,10 +1580,9 @@ shakaDemo.Main = class {
    */
   closeError_() {
     document.getElementById('error-display').classList.add('hidden');
-    const link = document.getElementById('error-display-link');
-    link.href = '';
-    link.textContent = '';
-    link.severity = null;
+    this.errorDisplayLink_.href = '';
+    this.errorDisplayLink_.textContent = '';
+    this.currentErrorSeverity_ = null;
   }
 
   /**
@@ -1619,25 +1625,24 @@ shakaDemo.Main = class {
    * @private
    */
   handleError_(severity, message, href) {
-    const link = document.getElementById('error-display-link');
-
     // Always show the new error if:
     //   1. there is no error showing currently
     //   2. the new error is more severe than the old one
     // Sadly, we do not (yet?) have localizations for error messages.
-    if (link.severity == null || severity > link.severity) {
-      link.href = href;
+    if (this.currentErrorSeverity_ == null ||
+        severity > this.currentErrorSeverity_) {
+      this.errorDisplayLink_.href = href;
       // IE8 and other very old browsers don't have textContent.
-      if (link.textContent === undefined) {
-        link.innerText = message;
+      if (this.errorDisplayLink_.textContent === undefined) {
+        this.errorDisplayLink_.innerText = message;
       } else {
-        link.textContent = message;
+        this.errorDisplayLink_.textContent = message;
       }
-      link.severity = severity;
-      if (link.href) {
-        link.classList.remove('input-disabled');
+      this.currentErrorSeverity_ = severity;
+      if (this.errorDisplayLink_.href) {
+        this.errorDisplayLink_.classList.remove('input-disabled');
       } else {
-        link.classList.add('input-disabled');
+        this.errorDisplayLink_.classList.add('input-disabled');
       }
       document.getElementById('error-display').classList.remove('hidden');
     }
