@@ -517,7 +517,7 @@ shakaDemo.Main = class {
         };
         asset.storedProgress = 0;
         this.dispatchEventWithName_('shaka-main-offline-progress');
-        const stored = await storage.store(asset.manifestUri, metadata);
+        const stored = await storage.store(asset.manifestUri, metadata).promise;
         asset.storedContent = stored;
       } catch (error) {
         this.onError_(/** @type {!shaka.util.Error} */ (error));
