@@ -2867,8 +2867,11 @@ describe('Player', () => {
     });
 
     it('gets current wall clock time in UTC', () => {
+      playhead.getTime.and.returnValue(20);
+
       const liveTimeUtc = player.getPlayheadTimeAsDate();
-      expect(liveTimeUtc).toEqual(new Date(320000));
+      // (300 (presentation start time) + 20 (playhead time)) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(320 * 1000));
     });
   });
 
