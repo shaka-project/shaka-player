@@ -294,7 +294,13 @@ shaka.test.Util = class {
    * @return {*}
    */
   static invokeSpy(spy, ...varArgs) {
-    return spy(...varArgs);
+    // TODO: There should be a way to alter the externs for jasmine.Spy so that
+    // this utility is not needed.
+    // Why isn't there something like ICallable in Closure?
+    // https://github.com/google/closure-compiler/issues/946
+    // Why isn't it enough that jasmine.Spy extends Function?
+    // https://github.com/google/closure-compiler/issues/1422
+    return /** @type {Function} */(spy)(...varArgs);
   }
 
   /**
