@@ -21,15 +21,16 @@ shakaDemo.Input = class {
    *   the input object.
    * @param {string} extraType The element type for the "sibling element" to the
    *   input object. If null, it adds no such element.
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    */
   constructor(parentContainer, inputType, containerType, extraType, onChange) {
     /** @private {!Element} */
     this.container_ = document.createElement(containerType);
     parentContainer.latestElementContainer.appendChild(this.container_);
 
-    /** @private {!Element} */
-    this.input_ = document.createElement(inputType);
+    /** @private {!HTMLInputElement} */
+    this.input_ =
+      /** @type {!HTMLInputElement} */(document.createElement(inputType));
     this.input_.onchange = () => {
       onChange(this.input_);
     };
@@ -61,7 +62,7 @@ shakaDemo.Input = class {
     }
   }
 
-  /** @return {!Element} */
+  /** @return {!HTMLInputElement} */
   input() {
     return this.input_;
   }
@@ -100,7 +101,7 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
   /**
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {?shakaDemo.MessageIds} name
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    * @param {!Object.<string, string>} values
    */
   constructor(parentContainer, name, onChange, values) {
@@ -115,7 +116,8 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
       this.extra_.textContent = shakaDemoMain.getLocalizedString(name);
     }
     for (const value of Object.keys(values)) {
-      const option = document.createElement('option');
+      const option =
+        /** @type {!HTMLOptionElement} */(document.createElement('option'));
       option.textContent = values[value];
       option.value = value;
       this.input_.appendChild(option);
@@ -131,7 +133,7 @@ shakaDemo.BoolInput = class extends shakaDemo.Input {
   /**
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    */
   constructor(parentContainer, name, onChange) {
     super(parentContainer, 'input', 'label', 'span', onChange);
@@ -153,7 +155,7 @@ shakaDemo.TextInput = class extends shakaDemo.Input {
   /**
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    */
   constructor(parentContainer, name, onChange) {
     super(parentContainer, 'input', 'div', 'label', onChange);
@@ -174,7 +176,7 @@ shakaDemo.DatalistInput = class extends shakaDemo.TextInput {
   /**
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    * @param {!Array.<string>} values
    */
   constructor(parentContainer, name, onChange, values) {
@@ -206,7 +208,7 @@ shakaDemo.NumberInput = class extends shakaDemo.TextInput {
   /**
    * @param {!shakaDemo.InputContainer} parentContainer
    * @param {string} name
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    * @param {boolean} canBeDecimal
    * @param {boolean} canBeZero
    * @param {boolean} canBeUnset

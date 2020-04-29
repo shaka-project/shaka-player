@@ -26,8 +26,8 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {!HTMLElement} */
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('material-icons');
     this.button_.classList.add('shaka-rewind-button');
     this.button_.textContent =
