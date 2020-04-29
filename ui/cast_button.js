@@ -30,8 +30,8 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     /** @private {shaka.cast.CastProxy} */
     this.castProxy_ = this.controls.getCastProxy();
 
-    /** @private {!HTMLElement} */
-    this.castButton_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.castButton_ = shaka.util.Dom.createButton();
     this.castButton_.classList.add('shaka-cast-button');
     this.castButton_.setAttribute('aria-pressed', 'false');
 

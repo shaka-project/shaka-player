@@ -36,8 +36,8 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     shaka.ui.Utils.setDisplay(this.counter_, false);
     this.container_.appendChild(this.counter_);
 
-    /** @private {!HTMLElement} */
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-skip-ad-button');
     this.button_.disabled = true;
     shaka.ui.Utils.setDisplay(this.button_, false);

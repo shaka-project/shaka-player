@@ -24,7 +24,8 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.currentTime_ = shaka.util.Dom.createHTMLElement('button');
+    /** @type {!HTMLButtonElement} */
+    this.currentTime_ = shaka.util.Dom.createButton();
     this.currentTime_.classList.add('shaka-current-time');
     this.setValue_('0:00');
     this.parent.appendChild(this.currentTime_);

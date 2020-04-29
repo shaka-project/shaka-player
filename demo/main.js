@@ -15,7 +15,7 @@ goog.provide('shakaDemo.Main');
  */
 shakaDemo.Main = class {
   constructor() {
-    /** @private {HTMLMediaElement} */
+    /** @private {HTMLVideoElement} */
     this.video_ = null;
 
     /** @private {HTMLElement} */
@@ -59,6 +59,13 @@ shakaDemo.Main = class {
 
     /** @private {boolean} */
     this.noInput_ = false;
+
+    /** @private {!HTMLAnchorElement} */
+    this.errorDisplayLink_ = /** @type {!HTMLAnchorElement} */(
+      document.getElementById('error-display-link'));
+
+    /** @private {?number} */
+    this.currentErrorSeverity_ = null;
   }
 
   /**
@@ -71,14 +78,16 @@ shakaDemo.Main = class {
     // See shakaDemo.Main.initWrapper for a failsafe that works for init-time
     // errors on IE.
     window.addEventListener('error', (event) => {
+      const errorEvent = /** @type {!ErrorEvent} */(event);
+
       // Exception to the exceptions we catch: ChromeVox (screenreader) always
       // throws an error as of Chrome 73.  Screen these out since they are
       // unrelated to our application and we can't control them.
-      if (event.message.includes('cvox.Api')) {
+      if (errorEvent.message.includes('cvox.Api')) {
         return;
       }
 
-      this.onError_(/** @type {!shaka.util.Error} */ (event.error));
+      this.onError_(/** @type {!shaka.util.Error} */ (errorEvent.error));
     });
 
     // Set up event listeners.
@@ -165,11 +174,11 @@ shakaDemo.Main = class {
       // Set the page to noInput mode, disabling the header and footer.
       const hideClass = 'should-hide-in-no-input-mode';
       for (const element of document.getElementsByClassName(hideClass)) {
-        this.hideNode_(element);
+        this.hideElement_(element);
       }
       const showClass = 'should-show-in-no-input-mode';
       for (const element of document.getElementsByClassName(showClass)) {
-        this.showNode_(element);
+        this.showElement_(element);
       }
       // Also fullscreen the container.
       this.container_.classList.add('no-input-sized');
@@ -385,7 +394,7 @@ shakaDemo.Main = class {
       const layout = document.getElementById('main-layout');
       layout.MaterialLayout.toggleDrawer();
       this.dispatchEventWithName_('shaka-main-drawer-state-change');
-      this.hideNode_(drawerCloseButton);
+      this.hideElement_(drawerCloseButton);
     });
     // Dispatch drawer state change events when the drawer button or obfuscator
     // are pressed also.
@@ -393,15 +402,15 @@ shakaDemo.Main = class {
     goog.asserts.assert(drawerButton, 'There should be a drawer button.');
     drawerButton.addEventListener('click', () => {
       this.dispatchEventWithName_('shaka-main-drawer-state-change');
-      this.showNode_(drawerCloseButton);
+      this.showElement_(drawerCloseButton);
     });
     const obfuscator = document.querySelector('.mdl-layout__obfuscator');
     goog.asserts.assert(obfuscator, 'There should be an obfuscator.');
     obfuscator.addEventListener('click', () => {
       this.dispatchEventWithName_('shaka-main-drawer-state-change');
-      this.hideNode_(drawerCloseButton);
+      this.hideElement_(drawerCloseButton);
     });
-    this.hideNode_(drawerCloseButton);
+    this.hideElement_(drawerCloseButton);
   }
 
   /** @return {boolean} */
@@ -515,7 +524,7 @@ shakaDemo.Main = class {
         };
         asset.storedProgress = 0;
         this.dispatchEventWithName_('shaka-main-offline-progress');
-        const stored = await storage.store(asset.manifestUri, metadata);
+        const stored = await storage.store(asset.manifestUri, metadata).promise;
         asset.storedContent = stored;
       } catch (error) {
         this.onError_(/** @type {!shaka.util.Error} */ (error));
@@ -888,6 +897,8 @@ shakaDemo.Main = class {
     }
     for (const type of ['compiled', 'debug_compiled', 'uncompiled']) {
       const elem = document.getElementById(type.split('_').join('-') + '-link');
+      goog.asserts.assert(
+          elem instanceof HTMLAnchorElement, 'Wrong element type!');
       if (buildType == type) {
         elem.setAttribute('disabled', '');
         elem.removeAttribute('href');
@@ -920,6 +931,8 @@ shakaDemo.Main = class {
     // Check if uncompiled mode is supported.
     if (!shakaDemo.Utils.browserSupportsUncompiledMode()) {
       const uncompiledLink = document.getElementById('uncompiled-link');
+      goog.asserts.assert(
+          uncompiledLink instanceof HTMLAnchorElement, 'Wrong element type!');
       uncompiledLink.setAttribute('disabled', '');
       uncompiledLink.removeAttribute('href');
       uncompiledLink.title = 'requires a newer browser';
@@ -1028,7 +1041,7 @@ shakaDemo.Main = class {
   /**
    * @param {string} uri
    * @param {!shaka.net.NetworkingEngine} netEngine
-   * @return {!Promise.<ArrayBuffer>}
+   * @return {!Promise.<!ArrayBuffer>}
    * @private
    */
   async requestCertificate_(uri, netEngine) {
@@ -1042,7 +1055,7 @@ shakaDemo.Main = class {
   unload() {
     this.selectedAsset = null;
     const videoBar = document.getElementById('video-bar');
-    this.hideNode_(videoBar);
+    this.hideElement_(videoBar);
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
     if (document.fullscreenElement) {
@@ -1131,7 +1144,7 @@ shakaDemo.Main = class {
    */
   showPlayer_() {
     const videoBar = document.getElementById('video-bar');
-    this.showNode_(videoBar);
+    this.showElement_(videoBar);
     this.closeError_();
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
@@ -1304,6 +1317,8 @@ shakaDemo.Main = class {
 
     const navButtons = document.getElementById('nav-button-container');
     for (const button of navButtons.childNodes) {
+      goog.asserts.assert(
+          button instanceof HTMLButtonElement, 'Wrong element type!');
       if (button.nodeType == Node.ELEMENT_NODE &&
           button.classList.contains('mdl-button--accent')) {
         params.push('panel=' + button.getAttribute('tab-identifier'));
@@ -1384,24 +1399,24 @@ shakaDemo.Main = class {
   }
 
   /**
-   * @param {Node} node
+   * @param {Element} element
    * @private
    */
-  hideNode_(node) {
-    node.classList.add('hidden');
+  hideElement_(element) {
+    element.classList.add('hidden');
   }
 
   /**
-   * @param {Node} node
+   * @param {Element} element
    * @private
    */
-  showNode_(node) {
-    node.classList.remove('hidden');
+  showElement_(element) {
+    element.classList.remove('hidden');
   }
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @return {Promise.<string>}
+   * @return {!Promise.<string>}
    * @private
    */
   async getManifestUriFromAdManager_(asset) {
@@ -1474,7 +1489,7 @@ shakaDemo.Main = class {
 
     // Create the div for this nav button's container within the contents.
     const container = document.createElement('div');
-    this.hideNode_(container);
+    this.hideElement_(container);
     contents.appendChild(container);
 
     // Add a click listener to display this container, and hide the others.
@@ -1482,16 +1497,18 @@ shakaDemo.Main = class {
       // This element should be the selected one.
       for (const child of navButtons.childNodes) {
         if (child.nodeType == Node.ELEMENT_NODE) {
+          goog.asserts.assert(child instanceof Element, 'Wrong node type!');
           child.classList.remove('mdl-button--accent');
         }
       }
       for (const child of contents.childNodes) {
         if (child.nodeType == Node.ELEMENT_NODE) {
-          this.hideNode_(child);
+          goog.asserts.assert(child instanceof Element, 'Wrong node type!');
+          this.hideElement_(child);
         }
       }
       button.classList.add('mdl-button--accent');
-      this.showNode_(container);
+      this.showElement_(container);
       this.remakeHash();
 
       // Dispatch an event so that a page can load any deferred content.
@@ -1519,7 +1536,8 @@ shakaDemo.Main = class {
    * @private
    */
   dispatchEventWithName_(name) {
-    const event = document.createEvent('CustomEvent');
+    const event =
+      /** @type {!CustomEvent} */(document.createEvent('CustomEvent'));
     event.initCustomEvent(name,
         /* canBubble= */ false,
         /* cancelable= */ false,
@@ -1562,10 +1580,9 @@ shakaDemo.Main = class {
    */
   closeError_() {
     document.getElementById('error-display').classList.add('hidden');
-    const link = document.getElementById('error-display-link');
-    link.href = '';
-    link.textContent = '';
-    link.severity = null;
+    this.errorDisplayLink_.href = '';
+    this.errorDisplayLink_.textContent = '';
+    this.currentErrorSeverity_ = null;
   }
 
   /**
@@ -1573,7 +1590,9 @@ shakaDemo.Main = class {
    * @private
    */
   onErrorEvent_(event) {
-    this.onError_(event.detail);
+    // TODO: generate externs automatically from @event types
+    // This event should be shaka.Player.ErrorEvent
+    this.onError_(event['detail']);
   }
 
   /**
@@ -1606,25 +1625,24 @@ shakaDemo.Main = class {
    * @private
    */
   handleError_(severity, message, href) {
-    const link = document.getElementById('error-display-link');
-
     // Always show the new error if:
     //   1. there is no error showing currently
     //   2. the new error is more severe than the old one
     // Sadly, we do not (yet?) have localizations for error messages.
-    if (link.severity == null || severity > link.severity) {
-      link.href = href;
+    if (this.currentErrorSeverity_ == null ||
+        severity > this.currentErrorSeverity_) {
+      this.errorDisplayLink_.href = href;
       // IE8 and other very old browsers don't have textContent.
-      if (link.textContent === undefined) {
-        link.innerText = message;
+      if (this.errorDisplayLink_.textContent === undefined) {
+        this.errorDisplayLink_.innerText = message;
       } else {
-        link.textContent = message;
+        this.errorDisplayLink_.textContent = message;
       }
-      link.severity = severity;
-      if (link.href) {
-        link.classList.remove('input-disabled');
+      this.currentErrorSeverity_ = severity;
+      if (this.errorDisplayLink_.href) {
+        this.errorDisplayLink_.classList.remove('input-disabled');
       } else {
-        link.classList.add('input-disabled');
+        this.errorDisplayLink_.classList.add('input-disabled');
       }
       document.getElementById('error-display').classList.remove('hidden');
     }

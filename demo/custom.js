@@ -25,8 +25,10 @@ shakaDemo.Custom = class {
 
   /** @param {!Element} container */
   constructor(container) {
-    /** @private {!Element} */
-    this.dialog_ = document.createElement('dialog');
+    /** @private {!HTMLDialogElement} */
+    this.dialog_ =
+      /** @type {!HTMLDialogElement} */(document.createElement('dialog'));
+
     this.dialog_.classList.add('mdl-dialog');
     container.appendChild(this.dialog_);
     if (!this.dialog_.showModal) {
@@ -269,22 +271,28 @@ shakaDemo.Custom = class {
     const iconSetup = (input, container) => {
       if (assetInProgress.iconUri) {
         input.value = assetInProgress.iconUri;
-        const img = document.createElement('img');
+
+        const img =
+          /** @type {!HTMLImageElement} */(document.createElement('img'));
         img.src = input.value;
         img.alt = '';  // Not necessary to understand the page
         iconDiv.appendChild(img);
       }
     };
+
     const iconOnChange = (input) => {
       shaka.util.Dom.removeAllChildren(iconDiv);
       assetInProgress.iconUri = input.value;
+
       if (input.value) {
-        const img = document.createElement('img');
+        const img =
+          /** @type {!HTMLImageElement} */(document.createElement('img'));
         img.src = input.value;
         img.alt = '';  // Not necessary to understand the page
         iconDiv.appendChild(img);
       }
     };
+
     const iconURLName = shakaDemoMain.getLocalizedString(
         shakaDemo.MessageIds.ICON_URL);
     makeField(iconURLName, iconSetup, iconOnChange);
@@ -323,7 +331,8 @@ shakaDemo.Custom = class {
   loadAssetInfos_() {
     const savedString = window.localStorage.getItem(shakaDemo.Custom.saveId_);
     if (savedString) {
-      const assets = JSON.parse(savedString);
+      const assets =
+        /** @type {!Array.<!ShakaDemoAssetInfo>} */(JSON.parse(savedString));
       return new Set(assets.map((json) => {
         const asset = ShakaDemoAssetInfo.fromJSON(json);
         shakaDemoMain.setupOfflineSupport(asset);
