@@ -2860,9 +2860,12 @@ describe('Player', function() {
       await player.load(fakeManifestUri, 0, factory);
     });
 
-    it('gets current wall clock time in UTC', function() {
-      let liveTimeUtc = player.getPlayheadTimeAsDate();
-      expect(liveTimeUtc).toEqual(new Date(320000));
+    it('gets current wall clock time in UTC', () => {
+      playhead.getTime.and.returnValue(20);
+
+      const liveTimeUtc = player.getPlayheadTimeAsDate();
+      // (300 (presentation start time) + 20 (playhead time)) * 1000 (ms/sec)
+      expect(liveTimeUtc).toEqual(new Date(320 * 1000));
     });
   });
 
