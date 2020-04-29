@@ -6,6 +6,46 @@
 goog.provide('shaka.test.TestScheme');
 
 
+/**
+ * @typedef {{
+ *   initSegmentUri: string,
+ *   mdhdOffset: number,
+ *   segmentUri: string,
+ *   tfdtOffset: number,
+ *   segmentDuration: number,
+ *   mimeType: string,
+ *   codecs: string,
+ *   delaySetup: (boolean|undefined),
+ *   language: (string|undefined),
+ *   closedCaptions: (!Map.<string, string>|undefined),
+ *   initData: (string|undefined)
+ * }}
+ */
+let AVMetadataType;
+
+/**
+ * @typedef {{
+ *   uri: string,
+ *   mimeType: string,
+ *   codecs: string,
+ *   language: (string|undefined)
+ * }}
+ */
+let TextMetadataType;
+
+/**
+ * @typedef {{
+ *   video: AVMetadataType,
+ *   audio: AVMetadataType,
+ *   text: TextMetadataType,
+ *   duration: number,
+ *   licenseServers: !Object.<string, string>,
+ *   licenseRequestHeaders: !Object.<string, string>
+ * }}
+ */
+let MetadataType;
+
+
 shaka.test.TestScheme = class {
   /**
    * A plugin that handles fake network requests.  This will serve both segments
@@ -118,13 +158,12 @@ shaka.test.TestScheme = class {
     const windowShaka = window['shaka'];
 
     /**
-     * @param {Object} metadata
-     * @return {shaka.test.IStreamGenerator}
+     * @param {AVMetadataType} metadata
+     * @return {!shaka.test.IStreamGenerator}
      */
     function createStreamGenerator(metadata) {
       if (metadata.segmentUri.includes('.ts')) {
-        return new windowShaka.test.TSVodStreamGenerator(
-            metadata.segmentUri);
+        return new windowShaka.test.TSVodStreamGenerator(metadata.segmentUri);
       }
       return new windowShaka.test.Mp4VodStreamGenerator(
           metadata.initSegmentUri, metadata.mdhdOffset, metadata.segmentUri,
@@ -136,12 +175,12 @@ shaka.test.TestScheme = class {
      *
      * @param {!shaka.test.ManifestGenerator.Stream} stream
      * @param {!shaka.test.ManifestGenerator.Variant} variant
-     * @param {Object} data
+     * @param {MetadataType} data
      * @param {shaka.util.ManifestParserUtils.ContentType} contentType
      * @param {string} name
      */
     function addStreamInfo(stream, variant, data, contentType, name) {
-      stream.mime = data[contentType].mimeType;
+      stream.mimeType = data[contentType].mimeType;
       stream.codecs = data[contentType].codecs;
       stream.setInitSegmentReference(
           ['test:' + name + '/' + contentType + '/init'], 0, null);
@@ -172,7 +211,7 @@ shaka.test.TestScheme = class {
     }
 
     /**
-     * @param {!Object} data
+     * @param {MetadataType} data
      * @return {string}
      */
     function getAbsoluteUri(data) {
@@ -222,7 +261,7 @@ shaka.test.TestScheme = class {
 
             if (data.text) {
               manifest.addTextStream(3, (stream) => {
-                stream.mime = data.text.mimeType;
+                stream.mimeType = data.text.mimeType;
                 stream.codecs = data.text.codecs;
                 stream.textStream(getAbsoluteUri(data));
 
@@ -285,14 +324,14 @@ shaka.test.TestScheme = class {
 
       manifest.addTextStream(idCount++, (stream) => {
         stream.language = 'zh';
-        stream.mime = data.text.mimeType;
+        stream.mimeType = data.text.mimeType;
         stream.codecs = data.text.codecs;
         stream.textStream(getAbsoluteUri(data));
       });
 
       manifest.addTextStream(idCount++, (stream) => {
         stream.language = 'fr';
-        stream.mime = data.text.mimeType;
+        stream.mimeType = data.text.mimeType;
         stream.codecs = data.text.codecs;
         stream.textStream(getAbsoluteUri(data));
       });
@@ -318,7 +357,7 @@ shaka.test.TestScheme.GENERATORS = {};
 // general MP4 box parser.  We could eliminate these hard-coded offsets and use
 // our box parser to find the boxes at runtime after we load the segments.
 
-/** @const */
+/** @const {!Object.<string, MetadataType>} */
 shaka.test.TestScheme.DATA = {
   'sintel': {
     video: {
