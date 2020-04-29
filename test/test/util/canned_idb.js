@@ -27,7 +27,7 @@ shaka.test.CannedIDB = class {
    *   database later in a call to restoreJSON().
    */
   static async dumpJSON(name, dummyArrayBuffers) {
-    const savedDatabase = await this.dump(name, dummyArrayBuffers);
+    const savedDatabase = await this.dump(name);
     const replacer =
         (key, value) => this.replacer_(dummyArrayBuffers, key, value);
     return JSON.stringify(savedDatabase, replacer);
