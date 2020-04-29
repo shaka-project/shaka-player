@@ -1317,16 +1317,16 @@ shakaDemo.Main = class {
 
     const navButtons = document.getElementById('nav-button-container');
     for (const button of navButtons.childNodes) {
-      goog.asserts.assert(
-          button instanceof HTMLButtonElement, 'Wrong element type!');
-      if (button.nodeType == Node.ELEMENT_NODE &&
-          button.classList.contains('mdl-button--accent')) {
-        params.push('panel=' + button.getAttribute('tab-identifier'));
-        const hashValues = button.getAttribute('tab-hash');
-        if (hashValues) {
-          params.push('panelData=' + hashValues);
+      if (button.nodeType == Node.ELEMENT_NODE) {
+        goog.asserts.assert( button instanceof HTMLElement, 'Wrong node type!');
+        if (button.classList.contains('mdl-button--accent')) {
+          params.push('panel=' + button.getAttribute('tab-identifier'));
+          const hashValues = button.getAttribute('tab-hash');
+          if (hashValues) {
+            params.push('panelData=' + hashValues);
+          }
+          break;
         }
-        break;
       }
     }
 
