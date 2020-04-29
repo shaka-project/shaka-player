@@ -104,7 +104,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       // Simulate the canDisplayType reponse of Chromecast v1 or v2
       mockCanDisplayType.and.callFake((type) => {
         const matches = /height=(\d+)/.exec(type);
-        const height = matches[1];
+        const height = parseInt(matches[1], 10);
         if (height && height > 1080) {
           return false;
         }
@@ -121,7 +121,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       // Simulate the canDisplayType reponse of Chromecast Ultra
       mockCanDisplayType.and.callFake((type) => {
         const matches = /height=(\d+)/.exec(type);
-        const height = matches[1];
+        const height = parseInt(matches[1], 10);
         if (height && height > 2160) {
           return false;
         }
