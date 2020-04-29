@@ -8,7 +8,6 @@ goog.provide('shaka.ui.Controls');
 goog.provide('shaka.ui.ControlsPanel');
 
 goog.require('shaka.log');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
@@ -169,7 +168,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * The pressed keys set is used to record which keys are currently pressed
      * down, so we can know what keys are pressed at the same time.
      * Used by the focusInsideOverflowMenu_() function.
-     * @private {!Set.<number>}
+     * @private {!Set.<string>}
      */
     this.pressedKeys_ = new Set();
 
@@ -830,7 +829,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for key down events to detect tab and enable outline
     // for focused elements.
-    this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
+    this.eventManager_.listen(window, 'keydown', (e) => {
+      this.onKeyDown_(/** @type {!KeyboardEvent} */(e));
+    });
 
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
@@ -876,7 +877,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
-      this.onKeyUp_(e);
+      this.onKeyUp_(/** @type {!KeyboardEvent} */(e));
     });
 
     this.eventManager_.listen(
@@ -1127,12 +1128,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * Support controls with keyboard inputs.
-   * @param {!Event} event
+   * @param {!KeyboardEvent} event
    * @private
    */
   onKeyUp_(event) {
-    const key = event.key;
-
     const activeElement = document.activeElement;
     const isVolumeBar = activeElement && activeElement.classList ?
         activeElement.classList.contains('shaka-volume-bar') : false;
@@ -1144,13 +1143,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     // When the key is released, remove it from the pressed keys set.
-    this.pressedKeys_.delete(event.keyCode);
+    this.pressedKeys_.delete(event.key);
 
     if (!this.config_.enableKeyboardPlaybackControls) {
       return;
     }
 
-    switch (key) {
+    switch (event.key) {
       case 'ArrowLeft':
         // If it's not focused on the volume bar, move the seek time backward
         // for 5 sec. Otherwise, the volume will be adjusted automatically.
@@ -1253,16 +1252,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * 3. When navigating on overflow settings menu by pressing Tab
    *    key or Shift+Tab keys keep the focus inside overflow menu.
    *
-   * @param {!Event} event
+   * @param {!KeyboardEvent} event
    * @private
    */
   onKeyDown_(event) {
-    // Add the key code to the pressed keys set when it's pressed.
-    this.pressedKeys_.add(event.keyCode);
+    // Add the key to the pressed keys set when it's pressed.
+    this.pressedKeys_.add(event.key);
 
     const anySettingsMenusAreOpen = this.anySettingsMenusAreOpen();
 
-    if (event.keyCode == shaka.ui.Constants.KEYCODE_TAB) {
+    if (event.key == 'Tab') {
       // Enable blue outline for focused elements for keyboard
       // navigation.
       this.controlsContainer_.classList.add('shaka-keyboard-navigation');
@@ -1271,12 +1270,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     // If escape key was pressed, close any open settings menus.
-    if (event.keyCode == shaka.ui.Constants.KEYCODE_ESCAPE) {
+    if (event.key == 'Escape') {
       this.hideSettingsMenusTimer_.tickNow();
     }
 
-    if (anySettingsMenusAreOpen &&
-          this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_TAB)) {
+    if (anySettingsMenusAreOpen && this.pressedKeys_.has('Tab')) {
       // If Tab key or Shift+Tab keys are pressed when navigating through
       // an overflow settings menu, keep the focus to loop inside the
       // overflow menu.
@@ -1322,7 +1320,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // previous element. If it's currently focused on the first shown child
       // element of the overflow menu, let the focus move to the last child
       // element of the menu.
-      if (this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_SHIFT)) {
+      if (this.pressedKeys_.has('Shift')) {
         if (activeElement == firstShownChild) {
           event.preventDefault();
           lastShownChild.focus();

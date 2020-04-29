@@ -75,13 +75,15 @@ muxjs.mp4.Transmuxer = class {
  * @typedef {{
  *   initSegment: !Uint8Array,
  *   data: !Uint8Array,
- *   captions: !Array
+ *   captions: !Array,
+ *   metadata: !Array
  * }}
  *
  * @description Transmuxed data from mux.js.
  * @property {!Uint8Array} initSegment
  * @property {!Uint8Array} data
  * @property {!Array} captions
+ * @property {!Array} metadata
  * @exportDoc
  */
 muxjs.mp4.Transmuxer.Segment;
@@ -161,3 +163,43 @@ muxjs.mp4.ParsedClosedCaptions;
  * @property {string} text The content of the closed caption.
  */
 muxjs.mp4.ClosedCaption;
+
+
+/**
+ * @typedef {{
+ *   cueTime: number,
+ *   data: !Uint8Array,
+ *   dispatchType: string,
+ *   dts: number,
+ *   frames: !Array.<muxjs.mp4.MetadataFrame>,
+ *   pts: number
+ * }}
+ *
+ * @description metadata parsed from mux.js.
+ * @property {number} cueTime
+ * @property {number} data
+ * @property {number} dispatchType
+ * @property {number} dts
+ * @property {string} frames
+ * @property {string} pts
+ */
+muxjs.mp4.Metadata;
+
+
+/**
+ * @typedef {{
+ *   data: string,
+ *   description: string,
+ *   id: string,
+ *   key: string,
+ *   value: string
+ * }}
+ *
+ * @description metadata parsed from mux.js.
+ * @property {number} data
+ * @property {number} description
+ * @property {number} id
+ * @property {number} key
+ * @property {string} value
+ */
+muxjs.mp4.MetadataFrame;

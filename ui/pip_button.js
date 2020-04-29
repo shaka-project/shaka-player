@@ -31,8 +31,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.localVideo_ = this.controls.getLocalVideo();
 
     const LocIds = shaka.ui.Locales.Ids;
-    /** @private {!HTMLElement} */
-    this.pipButton_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.pipButton_ = shaka.util.Dom.createButton();
     this.pipButton_.classList.add('shaka-pip-button');
 
     /** @private {!HTMLElement} */

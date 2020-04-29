@@ -397,6 +397,44 @@ describe('PeriodCombiner', () => {
     expect(english.audio.originalId).toBe('es,en');
   });
 
+
+  it('Multiple representations of the same resolution', async () => {
+    /** @type {shaka.extern.Stream} */
+    const video1 = makeVideoStream(480);
+    video1.bandwidth = 1;
+    /** @type {shaka.extern.Stream} */
+    const video2 = makeVideoStream(480);
+    video2.bandwidth = 2;
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          video1,
+          video2,
+        ],
+        audioStreams: [
+          makeAudioStream('en'),
+        ],
+        textStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+    const variants = combiner.getVariants();
+    expect(variants).toEqual(jasmine.arrayWithExactContents([
+      makeAVVariant(480, 'en', /* channels= */ 2),
+      makeAVVariant(480, 'en', /* channels= */ 2),
+    ]));
+
+    const lowBandwidth = variants.find(
+        (v) => v.video.height == 480 && v.bandwidth == 1);
+    const highBandwidth = variants.find(
+        (v) => v.video.height == 480 && v.bandwidth == 2);
+    expect(lowBandwidth.video.originalId).toBe('480');
+    expect(highBandwidth.video.originalId).toBe('480');
+  });
+
   it('Text track gaps', async () => {
     /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
     const periods = [
