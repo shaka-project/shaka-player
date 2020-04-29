@@ -259,8 +259,9 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.variants[0].video;
     await stream.createSegmentIndex();
-    const pos = stream.segmentIndex.find(0);
-    const ref = stream.segmentIndex.get(pos);
+    goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+    const ref = Array.from(stream.segmentIndex)[0];
     expect(ref.timestampOffset).toBe(-1);
   });
 
@@ -284,8 +285,9 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.variants[0].video;
     await stream.createSegmentIndex();
-    const position = stream.segmentIndex.find(0);
-    const ref = stream.segmentIndex.get(position);
+    goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+    const ref = Array.from(stream.segmentIndex)[0];
     expect(ref.timestampOffset).toBe(-2);
   });
 
@@ -313,8 +315,9 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const stream = manifest.textStreams[0];
     await stream.createSegmentIndex();
-    const pos = stream.segmentIndex.find(0);
-    const ref = stream.segmentIndex.get(pos);
+    goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+    const ref = Array.from(stream.segmentIndex)[0];
     expect(ref).toEqual(new shaka.media.SegmentReference(
         /* startTime= */ 0,
         /* endTime= */ 30,
@@ -472,8 +475,9 @@ describe('DashParser Manifest', () => {
     const variant = manifest.variants[0];
     const stream = variant.audio;
     await stream.createSegmentIndex();
-    const position = stream.segmentIndex.find(0);
-    const segment = stream.segmentIndex.get(position);
+    goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+    const segment = Array.from(stream.segmentIndex)[0];
     expect(segment.initSegmentReference.getUris()[0])
         .toBe('http://example.com/%C8%A7.mp4');
     expect(variant.language).toBe('\u2603');
@@ -1053,6 +1057,8 @@ describe('DashParser Manifest', () => {
 
     await variant1.video.createSegmentIndex();
     await variant2.video.createSegmentIndex();
+    goog.asserts.assert(variant1.video.segmentIndex, 'Null segmentIndex!');
+    goog.asserts.assert(variant2.video.segmentIndex, 'Null segmentIndex!');
 
     const variant1Ref = Array.from(variant1.video.segmentIndex)[0];
     const variant2Ref = Array.from(variant2.video.segmentIndex)[0];

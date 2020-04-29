@@ -466,8 +466,10 @@ describe('DashParser Live', () => {
     // the redirected base.
     const stream = manifest.variants[0].video;
     await stream.createSegmentIndex();
-    const pos = stream.segmentIndex.find(0);
-    const segmentUri = stream.segmentIndex.get(pos).getUris()[0];
+    goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+    const ref = Array.from(stream.segmentIndex)[0];
+    const segmentUri = ref.getUris()[0];
     expect(segmentUri).toBe(redirectedUri + 's1.mp4');
   });
 
@@ -1074,7 +1076,7 @@ describe('DashParser Live', () => {
       // right on the live edge creates test flake, and the segments are 2
       // seconds in duration.
       const idx = stream.segmentIndex.find(liveEdge - 0.5);
-      expect(idx).not.toBe(null);
+      goog.asserts.assert(idx != null, 'Live edge not found!');
 
       // This should not throw an assertion.
       const ref = stream.segmentIndex.get(idx);

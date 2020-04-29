@@ -580,12 +580,16 @@ describe('HlsParser live', () => {
       const manifest = await parser.start('test:/master', playerInterface);
       const textStream = manifest.textStreams[0];
       await textStream.createSegmentIndex();
+      goog.asserts.assert(textStream.segmentIndex, 'Null segmentIndex!');
+
       let ref = Array.from(textStream.segmentIndex)[0];
       expect(ref).not.toBe(null);
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
 
       const videoStream = manifest.variants[0].video;
       await videoStream.createSegmentIndex();
+      goog.asserts.assert(videoStream.segmentIndex, 'Null segmentIndex!');
+
       ref = Array.from(videoStream.segmentIndex)[0];
       expect(ref).not.toBe(null);
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);

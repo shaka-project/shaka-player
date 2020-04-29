@@ -99,10 +99,11 @@ describe('DashParser SegmentTemplate', () => {
           's2.mp4', 50, 60, baseUri);
       expectedRef2.timestampOffset = -10;
 
-      const pos1 = stream.segmentIndex.find(45);
-      const pos2 = stream.segmentIndex.find(55);
-      expect(stream.segmentIndex.get(pos1)).toEqual(expectedRef1);
-      expect(stream.segmentIndex.get(pos2)).toEqual(expectedRef2);
+      const iterator = stream.segmentIndex[Symbol.iterator]();
+      const ref1 = iterator.seek(45);
+      const ref2 = iterator.seek(55);
+      expect(ref1).toEqual(expectedRef1);
+      expect(ref2).toEqual(expectedRef2);
     });
 
     it('handles segments larger than the period', async () => {

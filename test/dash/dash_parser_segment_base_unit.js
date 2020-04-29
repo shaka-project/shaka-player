@@ -287,9 +287,9 @@ describe('DashParser SegmentBase', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const video = manifest.variants[0].video;
     await video.createSegmentIndex();  // real data, should succeed
+    goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
 
-    const pos = video.segmentIndex.find(0);
-    const reference = video.segmentIndex.get(pos);
+    const reference = Array.from(video.segmentIndex)[0];
     expect(reference.startTime).toBe(-2);
     expect(reference.endTime).toBe(10);  // would be 12 without PTO
   });

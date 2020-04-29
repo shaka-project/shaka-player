@@ -515,14 +515,15 @@ describe('HlsParser', () => {
     const presentationTimeline = manifest.presentationTimeline;
     const stream = manifest.variants[0].video;
     await stream.createSegmentIndex();
+    goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
 
-    const pos = stream.segmentIndex.find(0);
-    expect(pos).not.toBe(null);
-    const ref = stream.segmentIndex.get(pos);
-
-    expect(ref.startTime).toBe(0);
-    // baseMediaDecodeTime (655360) / timescale (1000)
-    expect(ref.timestampOffset).toBe(-655.36);
+    const ref = Array.from(stream.segmentIndex)[0];
+    expect(ref).not.toBe(null);
+    if (ref) {
+      expect(ref.startTime).toBe(0);
+      // baseMediaDecodeTime (655360) / timescale (1000)
+      expect(ref.timestampOffset).toBe(-655.36);
+    }
     expect(presentationTimeline.getSeekRangeStart()).toBe(0);
     expect(presentationTimeline.getSeekRangeEnd()).toBe(5);
   });
@@ -1502,16 +1503,12 @@ describe('HlsParser', () => {
 
     await video.createSegmentIndex();
     await audio.createSegmentIndex();
+    goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+    goog.asserts.assert(audio.segmentIndex != null, 'Null segmentIndex!');
 
-    const videoPosition = video.segmentIndex.find(0);
-    const audioPosition = audio.segmentIndex.find(0);
-    goog.asserts.assert(
-        videoPosition != null, 'Cannot find first video segment');
-    goog.asserts.assert(
-        audioPosition != null, 'Cannot find first audio segment');
+    const videoReference = Array.from(video.segmentIndex)[0];
+    const audioReference = Array.from(audio.segmentIndex)[0];
 
-    const videoReference = video.segmentIndex.get(videoPosition);
-    const audioReference = audio.segmentIndex.get(audioPosition);
     expect(videoReference).not.toBe(null);
     expect(audioReference).not.toBe(null);
     if (videoReference) {
@@ -1590,6 +1587,7 @@ describe('HlsParser', () => {
     const actualManifest = await parser.start('test:/master', playerInterface);
     const actualVideo = actualManifest.variants[0].video;
     await actualVideo.createSegmentIndex();
+    goog.asserts.assert(actualVideo.segmentIndex != null, 'Null segmentIndex!');
 
     // Verify that the stream contains two segment references, each of the
     // SegmentReference object contains the InitSegmentReference with expected
@@ -2100,8 +2098,11 @@ describe('HlsParser', () => {
 
       const manifest = await parser.start('test:/master', playerInterface);
       const presentationTimeline = manifest.presentationTimeline;
+
       const video = manifest.variants[0].video;
       await video.createSegmentIndex();
+      goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+
       const refs = Array.from(video.segmentIndex);
       expect(refs.length).toBe(1);
 
@@ -2526,6 +2527,8 @@ describe('HlsParser', () => {
 
       await video.createSegmentIndex();
       await audio.createSegmentIndex();
+      goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+      goog.asserts.assert(audio.segmentIndex != null, 'Null segmentIndex!');
 
       // We check that the references are correct to check that the entire
       // flow has gone well.
@@ -2571,6 +2574,8 @@ describe('HlsParser', () => {
 
       await video.createSegmentIndex();
       await audio.createSegmentIndex();
+      goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+      goog.asserts.assert(audio.segmentIndex != null, 'Null segmentIndex!');
 
       // We check that the references are correct to check that the entire
       // flow has gone well.
@@ -2616,6 +2621,8 @@ describe('HlsParser', () => {
 
       await video.createSegmentIndex();
       await audio.createSegmentIndex();
+      goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+      goog.asserts.assert(audio.segmentIndex != null, 'Null segmentIndex!');
 
       // We check that the references are correct to check that the entire
       // flow has gone well.
