@@ -53,7 +53,7 @@ filterDescribe('Offline', supportsStorage, () => {
   });
 
   it('stores, plays, and deletes clear content', async () => {
-    const content = await storage.store('test:sintel');
+    const content = await storage.store('test:sintel').promise;
     expect(content).toBeTruthy();
 
     const contentUri = content.offlineUri;
@@ -83,7 +83,7 @@ filterDescribe('Offline', supportsStorage, () => {
         shaka.test.TestScheme.setupPlayer(player, 'sintel-enc');
 
         storage.configure('offline.usePersistentLicense', true);
-        const content = await storage.store('test:sintel-enc');
+        const content = await storage.store('test:sintel-enc').promise;
 
         // Work around http://crbug.com/887535 in which load cannot happen right
         // after close.  Experimentally, we seem to need a ~1s delay, so we're
@@ -122,7 +122,8 @@ filterDescribe('Offline', supportsStorage, () => {
         shaka.test.TestScheme.setupPlayer(player, 'multidrm_no_init_data');
 
         storage.configure('offline.usePersistentLicense', false);
-        const content = await storage.store('test:multidrm_no_init_data');
+        const content =
+            await storage.store('test:multidrm_no_init_data').promise;
 
         const contentUri = content.offlineUri;
         goog.asserts.assert(
