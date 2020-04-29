@@ -168,7 +168,7 @@ without rebuilding.
 ```html
   <head>
     <!-- Closure base: -->
-    <script src="third_party/closure/goog/base.js"></script>
+    <script src="node_modules/google-closure-library/closure/goog/base.js"></script>
     <!-- Deps file: -->
     <script src="dist/deps.js"></script>
     <!-- Shaka Player uncompiled library: -->

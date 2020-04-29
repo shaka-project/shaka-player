@@ -149,23 +149,20 @@ shaka.test.TestScheme = class {
 
   /**
    * Creates the manifests and generators.
-   * @param {*} shaka
+   * @param {shakaNamespaceType} compiledShaka
    * @param {string} suffix
    * @return {!Promise}
    */
-  static createManifests(shaka, suffix) {
-    /** @type {?} */
-    const windowShaka = window['shaka'];
-
+  static createManifests(compiledShaka, suffix) {
     /**
      * @param {AVMetadataType} metadata
      * @return {!shaka.test.IStreamGenerator}
      */
     function createStreamGenerator(metadata) {
       if (metadata.segmentUri.includes('.ts')) {
-        return new windowShaka.test.TSVodStreamGenerator(metadata.segmentUri);
+        return new shaka.test.TSVodStreamGenerator(metadata.segmentUri);
       }
-      return new windowShaka.test.Mp4VodStreamGenerator(
+      return new shaka.test.Mp4VodStreamGenerator(
           metadata.initSegmentUri, metadata.mdhdOffset, metadata.segmentUri,
           metadata.tfdtOffset, metadata.segmentDuration);
     }
@@ -194,7 +191,7 @@ shaka.test.TestScheme = class {
       }
 
       if (data[contentType].delaySetup) {
-        stream.createSegmentIndex = () => windowShaka.test.Util.delay(1);
+        stream.createSegmentIndex = () => shaka.test.Util.delay(1);
       }
 
       if (data.licenseServers) {
@@ -224,10 +221,10 @@ shaka.test.TestScheme = class {
 
     const promises = [];
     // Include 'window' to use uncompiled version version of the library.
-    const DATA = windowShaka.test.TestScheme.DATA;
-    const GENERATORS = windowShaka.test.TestScheme.GENERATORS;
-    const MANIFESTS = windowShaka.test.TestScheme.MANIFESTS;
-    const ContentType = windowShaka.util.ManifestParserUtils.ContentType;
+    const DATA = shaka.test.TestScheme.DATA;
+    const GENERATORS = shaka.test.TestScheme.GENERATORS;
+    const MANIFESTS = shaka.test.TestScheme.MANIFESTS;
+    const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
     for (const name in DATA) {
       GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};
@@ -240,37 +237,37 @@ shaka.test.TestScheme = class {
         }
       }
 
-      const manifest =
-          windowShaka.test.ManifestGenerator.generate((manifest) => {
-            manifest.presentationTimeline.setDuration(data.duration);
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline.setDuration(data.duration);
 
-            manifest.addVariant(0, (variant) => {
-              if (data[ContentType.VIDEO]) {
-                variant.addVideo(1, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.VIDEO, name);
-                });
-              }
-              if (data[ContentType.AUDIO]) {
-                variant.addAudio(2, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.AUDIO, name);
-                });
-              }
+        manifest.addVariant(0, (variant) => {
+          if (data[ContentType.VIDEO]) {
+            variant.addVideo(1, (stream) => {
+              addStreamInfo(
+                  stream, variant, data, ContentType.VIDEO, name);
             });
+          }
+          if (data[ContentType.AUDIO]) {
+            variant.addAudio(2, (stream) => {
+              addStreamInfo(
+                  stream, variant, data, ContentType.AUDIO, name);
+            });
+          }
+        });
 
-            if (data.text) {
-              manifest.addTextStream(3, (stream) => {
-                stream.mimeType = data.text.mimeType;
-                stream.codecs = data.text.codecs;
-                stream.textStream(getAbsoluteUri(data));
+        if (data.text) {
+          manifest.addTextStream(3, (stream) => {
+            stream.mimeType = data.text.mimeType;
+            stream.codecs = data.text.codecs;
+            stream.textStream(getAbsoluteUri(data));
 
-                if (data.text.language) {
-                  stream.language = data.text.language;
-                }
-              });
+            if (data.text.language) {
+              stream.language = data.text.language;
             }
-          }, shaka);
+          });
+        }
+      }, compiledShaka);
+
       MANIFESTS[name + suffix] = manifest;
     }
 
@@ -280,7 +277,7 @@ shaka.test.TestScheme = class {
     const data = DATA['sintel'];
     const periodDuration = 10;
     let idCount = 1;
-    const manifest = windowShaka.test.ManifestGenerator.generate((manifest) => {
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.presentationTimeline.setDuration(periodDuration);
 
       // Variant in English, res 426x182
@@ -335,7 +332,7 @@ shaka.test.TestScheme = class {
         stream.codecs = data.text.codecs;
         stream.textStream(getAbsoluteUri(data));
       });
-    }, shaka);
+    }, compiledShaka);
     MANIFESTS['sintel_multi_lingual_multi_res' + suffix] = manifest;
 
     return Promise.all(promises);

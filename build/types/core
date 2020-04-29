@@ -94,3 +94,6 @@
 +../../lib/util/timer.js
 +../../lib/util/uint8array_utils.js
 +../../lib/util/xml_utils.js
+
++../../third_party/closure-uri/uri.js
++../../third_party/closure-uri/utils.js

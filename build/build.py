@@ -62,6 +62,16 @@ common_closure_opts = [
     #   "Private property foo_ is never modified, use the @const annotation"
     '--jscomp_off=jsdocMissingConst',
 
+    # Turn off complaints like:
+    #   "Object is a reference type with no nullability modifier that is
+    #   explicitly set to null."
+    # and:
+    #   "Property defineClass of type goog has been deprecated"
+    # Even the Closure Library's base.js doesn't pass these checks yet as of
+    # the 20200406 release.
+    '--jscomp_off=lintChecks',
+    '--jscomp_off=deprecated',
+
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
     '--extra_annotation_name=exportInterface',
@@ -151,13 +161,9 @@ class Build(object):
   def add_closure(self):
     """Adds the closure library and externs."""
     # Add externs and closure dependencies.
-    source_base = shakaBuildHelpers.get_source_base()
-    match = re.compile(r'.*\.js$')
     self.include |= set(
-        shakaBuildHelpers.get_all_files(
-            os.path.join(source_base, 'externs'), match) +
-        shakaBuildHelpers.get_all_files(
-            os.path.join(source_base, 'third_party', 'closure'), match))
+        [shakaBuildHelpers.get_closure_base_js_path()] +
+        shakaBuildHelpers.get_all_js_files('externs'))
 
   def add_core(self):
     """Adds the core library."""
@@ -333,6 +339,10 @@ def main(args):
 
   parsed_args, commands = parser.parse_known_args(args)
 
+  # Update node modules if needed.
+  if not shakaBuildHelpers.update_node_modules():
+    return 1
+
   # If no commands are given then use complete  by default.
   if len(commands) == 0:
     commands.append('+@complete')
@@ -343,10 +353,6 @@ def main(args):
   custom_build = Build()
 
   if not custom_build.parse_build(commands, os.getcwd()):
-    return 1
-
-  # Update node modules if needed.
-  if not shakaBuildHelpers.update_node_modules():
     return 1
 
   name = parsed_args.name

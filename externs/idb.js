@@ -14,7 +14,7 @@
 
 /**
  * @constructor
- * @extends {IDBRequest}
+ * @extends {IDBRequest<!IDBDatabase>}
  * @suppress {duplicate}
  * The upstream extern doesn't have the correct type for Result.
  */

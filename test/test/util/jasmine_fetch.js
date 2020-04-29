@@ -61,7 +61,7 @@ jasmine.Fetch = class {
     // public constructor for that.  So we make this look-alike instead.
     const exception = new Error('The operation was aborted. ');
     exception.name = 'AbortError';
-    exception['code'] = DOMException['ABORT_ERR'];
+    exception['code'] = DOMException.ABORT_ERR;
     return exception;
   }
 

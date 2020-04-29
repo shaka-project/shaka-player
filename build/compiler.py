@@ -112,7 +112,8 @@ class ClosureCompiler(object):
         if not _must_build(self.compiled_js_path, self.source_files):
           return True
 
-    jar = _get_source_path('third_party/closure/compiler.jar')
+    jar = _get_source_path(
+        'node_modules/google-closure-compiler-java/compiler.jar')
 
     output_options = []
     if self.output_compiled_bundle:
@@ -175,7 +176,8 @@ class ClosureCompiler(object):
     with shakaBuildHelpers.open_file(wrapper_input_path, 'r') as f:
       wrapper_code = f.read().replace('%output%', '"%output%"')
 
-    jar = _get_source_path('third_party/closure/compiler.jar')
+    jar = _get_source_path(
+        'node_modules/google-closure-compiler-java/compiler.jar')
     cmd_line = ['java', '-jar', jar, '-O', 'WHITESPACE_ONLY']
 
     proc = shakaBuildHelpers.execute_subprocess(
@@ -393,12 +395,11 @@ class Jsdoc(object):
 
     # To avoid getting out of sync with the source files jsdoc actually reads,
     # parse the config file and locate all source files based on that.
-    match = re.compile(r'.*\.js$')
     with open(self.config_path, 'rb') as f:
       config = json.load(f)
     for path in config['source']['include']:
       full_path = _get_source_path(path)
-      self.source_files += shakaBuildHelpers.get_all_files(full_path, match)
+      self.source_files += shakaBuildHelpers.get_all_js_files(full_path)
 
   def build(self, force=False):
     """Build the documentation.

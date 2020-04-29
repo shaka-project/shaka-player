@@ -55,13 +55,17 @@ def complete_build_files():
 
 def get_lint_files():
   """Returns the absolute paths to all the files to run the linter over."""
-  match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(*path_components):
-    return shakaBuildHelpers.get_all_files(
-        os.path.join(base, *path_components), match)
-  main_sources = (get('test') + get('lib') + get('externs') + get('demo') +
-      get('ui') + get('build'))
+  get = shakaBuildHelpers.get_all_js_files
+  main_sources = (
+      get('lib') +
+      # TODO: get third_party/closure-uri in compliance and then lint it.
+      # get('third_party') +
+      get('ui') +
+      get('externs') +
+      get('test') +
+      get('demo') +
+      get('build'))
   main_sources.remove(os.path.join(base, 'build', 'wrapper.template.js'))
   tool_sources = [
       os.path.join(base, '.eslintrc.js'),
@@ -131,13 +135,11 @@ def check_complete(_):
   if not complete_build:
     return False
 
-  match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
   all_files = set()
-  all_files.update(shakaBuildHelpers.get_all_files(
-      os.path.join(base, 'lib'), match))
-  all_files.update(shakaBuildHelpers.get_all_files(
-      os.path.join(base, 'ui'), match))
+  all_files.update(shakaBuildHelpers.get_all_js_files('lib'))
+  all_files.update(shakaBuildHelpers.get_all_js_files('ui'))
+  all_files.update(shakaBuildHelpers.get_all_js_files('third_party'))
   missing_files = all_files - complete_build
 
   if missing_files:
@@ -159,10 +161,8 @@ def check_spelling(_):
     return False
 
   base = shakaBuildHelpers.get_source_base()
-  complete_build.update(shakaBuildHelpers.get_all_files(
-      os.path.join(base, 'test'), re.compile(r'.*\.js$')))
-  complete_build.update(shakaBuildHelpers.get_all_files(
-      os.path.join(base, 'demo'), re.compile(r'.*\.js$')))
+  complete_build.update(shakaBuildHelpers.get_all_js_files('test'))
+  complete_build.update(shakaBuildHelpers.get_all_js_files('demo'))
   complete_build.update(shakaBuildHelpers.get_all_files(
       os.path.join(base, 'build'), re.compile(r'.*\.(js|py)$')))
 
@@ -207,10 +207,8 @@ def check_eslint_disable(_):
     return False
 
   base = shakaBuildHelpers.get_source_base()
-  complete_build.update(shakaBuildHelpers.get_all_files(
-      os.path.join(base, 'test'), re.compile(r'.*\.js$')))
-  complete_build.update(shakaBuildHelpers.get_all_files(
-      os.path.join(base, 'demo'), re.compile(r'.*\.js$')))
+  complete_build.update(shakaBuildHelpers.get_all_js_files('test'))
+  complete_build.update(shakaBuildHelpers.get_all_js_files('demo'))
 
   has_error = False
   for path in complete_build:
@@ -273,15 +271,15 @@ def check_tests(args):
   if not complete_build:
     return False
 
-  match = re.compile(r'.*\.js$')
   base = shakaBuildHelpers.get_source_base()
-  def get(*path_components):
-    return shakaBuildHelpers.get_all_files(
-        os.path.join(base, *path_components), match)
+  closure_base_js = shakaBuildHelpers.get_closure_base_js_path()
+  get = shakaBuildHelpers.get_all_js_files
 
   files = complete_build
-  files.update(set(get('externs') + get('test') +
-                   get('third_party', 'closure')))
+  files.update(set(
+      get('externs') +
+      get('test') +
+      [closure_base_js]))
   files.add(os.path.join(base, 'demo', 'common', 'asset.js'))
   files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
   files.add(os.path.join(base, 'demo', 'common', 'message_ids.js'))

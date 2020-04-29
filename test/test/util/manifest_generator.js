@@ -17,14 +17,12 @@ goog.provide('shaka.test.ManifestGenerator');
  */
 shaka.test.ManifestGenerator = class {
   /**
-   * @param {function(!shaka.test.ManifestGenerator.Manifest)=}
-   *   func
-   * @param {?=} shaka
+   * @param {function(!shaka.test.ManifestGenerator.Manifest)=} func
+   * @param {shakaNamespaceType=} compiledShaka
    * @return {shaka.extern.Manifest}
    */
-  static generate(func, shaka) {
-    const generator =
-        new window['shaka'].test.ManifestGenerator.Manifest(shaka);
+  static generate(func, compiledShaka) {
+    const generator = new shaka.test.ManifestGenerator.Manifest(compiledShaka);
     if (func) {
       func(generator);
     }
@@ -75,16 +73,14 @@ shaka.test.ManifestGenerator = class {
 };
 
 shaka.test.ManifestGenerator.Manifest = class {
-  // TODO(joeyparrish): Upgrade these question marks to "typeof shaka" after
-  // compiler update to 20190910 or later.  We currently get NO TYPE CHECKS for
-  // any Shaka library calls made by the manifest generator through shaka_.
-  /** @param {?=} shaka */
-  constructor(shaka) {
-    /** @private {?} */
-    this.shaka_ = shaka || window['shaka'];
+  /** @param {shakaNamespaceType=} compiledShaka */
+  constructor(compiledShaka) {
+    /** @private {shakaNamespaceType} */
+    this.shaka_ = compiledShaka || window['shaka'];
 
     /** @type {!Array.<shaka.extern.Variant>} */
     this.variants = [];
+
     /** @type {!Array.<shaka.extern.Stream>} */
     this.textStreams = [];
 

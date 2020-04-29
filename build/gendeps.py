@@ -24,19 +24,23 @@ import sys
 import shakaBuildHelpers
 
 
+# The relative path in each of these is relative to Closure's base.js, which
+# lives at node_modules/google-closure-library/closure/goog/base.js
 deps_args = [
-    '--root_with_prefix=lib ../../../lib',
-    '--root_with_prefix=ui ../../../ui',
-    '--root_with_prefix=third_party/closure ../../../third_party/closure',
-    '--root_with_prefix=third_party/language-mapping-list ' +
-        '../../../third_party/language-mapping-list',
-    '--root_with_prefix=dist ../../../dist',
-    '--root_with_prefix=demo ../../../demo',
+    '--root_with_prefix=lib ../../../../lib',
+    '--root_with_prefix=ui ../../../../ui',
+    '--root_with_prefix=third_party ../../../../third_party',
+    '--root_with_prefix=dist ../../../../dist',
+    '--root_with_prefix=demo ../../../../demo',
 ]
 
 
 def main(_):
   """Generates the uncompiled dependencies files."""
+  # Update node modules if needed.
+  if not shakaBuildHelpers.update_node_modules():
+    return 1
+
   logging.info('Generating Closure dependencies...')
 
   # Make the dist/ folder, ignore errors.
@@ -46,7 +50,9 @@ def main(_):
   except OSError:
     pass
   os.chdir(base)
-  deps_writer = os.path.join('third_party', 'closure', 'deps', 'depswriter.py')
+  deps_writer = os.path.join(
+      'node_modules', 'google-closure-library',
+      'closure', 'bin', 'build', 'depswriter.py')
 
   try:
     cmd_line = [sys.executable or 'python', deps_writer] + deps_args

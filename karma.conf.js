@@ -82,7 +82,7 @@ module.exports = (config) => {
       'node_modules/eme-encryption-scheme-polyfill/dist/eme-encryption-scheme-polyfill.js',
 
       // load closure base, the deps tree, and the uncompiled library
-      'third_party/closure/goog/base.js',
+      'node_modules/google-closure-library/closure/goog/base.js',
       'dist/deps.js',
       'shaka-player.uncompiled.js',
 
@@ -114,8 +114,11 @@ module.exports = (config) => {
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'ui/**/*.js', included: false},
       {pattern: 'ui/**/*.less', included: false},
-      {pattern: 'third_party/closure/goog/**/*.js', included: false},
-      {pattern: 'third_party/language-mapping-list/*.js', included: false},
+      {pattern: 'third_party/**/*.js', included: false},
+      {
+        pattern: 'node_modules/google-closure-library/closure/goog/**/*.js',
+        included: false,
+      },
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
@@ -227,7 +230,7 @@ module.exports = (config) => {
         'lib/**/*.js': ['babel', 'sourcemap'],
         'ui/**/*.js': ['babel', 'sourcemap'],
         'test/**/*.js': ['babel', 'sourcemap'],
-        'third_party/language-mapping-list/*.js': ['babel', 'sourcemap'],
+        'third_party/**/*.js': ['babel', 'sourcemap'],
       },
 
       babelPreprocessor: {

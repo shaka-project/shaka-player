@@ -8,6 +8,37 @@ goog.provide('shaka.test.Util');
 
 
 /**
+ * A stand-in type for the "shaka" namespace.  Used when loading the compiled
+ * library or when referencing it in ManifestGenerator or TestScheme.
+ *
+ * The new compiler has a "typeof" annotation for classes, but it warns of an
+ * incomplete type when used on the entire library namespace.  So instead, we
+ * use this type, which maps out parts of the compiled namespace used in
+ * top-level integration tests.
+ *
+ * @typedef {{
+ *   Player: typeof shaka.Player,
+ *   media: {
+ *     SegmentReference: typeof shaka.media.SegmentReference,
+ *     InitSegmentReference: typeof shaka.media.InitSegmentReference,
+ *     SegmentIndex: typeof shaka.media.SegmentIndex,
+ *     PresentationTimeline: typeof shaka.media.PresentationTimeline
+ *   },
+ *   net: {
+ *     NetworkingEngine: typeof shaka.net.NetworkingEngine
+ *   },
+ *   ui: {
+ *     Overlay: typeof shaka.ui.Overlay
+ *   },
+ *   util: {
+ *     StringUtils: typeof shaka.util.StringUtils
+ *   }
+ * }}
+ */
+let shakaNamespaceType;
+
+
+/**
  * @extends {Promise}
  */
 shaka.test.StatusPromise = class {
@@ -316,15 +347,17 @@ shaka.test.Util = class {
 
   /**
    * @param {boolean} loadUncompiled
-   * @return {*}
+   * @return {!Promise.<shakaNamespaceType>}
    */
   static async loadShaka(loadUncompiled) {
     /** @type {!shaka.util.PublicPromise} */
     const loaded = new shaka.util.PublicPromise();
+    /** @type {shakaNamespaceType} */
     let compiledShaka;
+
     if (loadUncompiled) {
       // For debugging purposes, use the uncompiled library.
-      compiledShaka = shaka;
+      compiledShaka = window['shaka'];
       loaded.resolve();
     } else {
       // Load the compiled library as a module.
