@@ -758,8 +758,9 @@ describe('DrmEngine', () => {
       expect(session.generateRequest)
           .toHaveBeenCalledWith('keyids', jasmine.any(Uint8Array));
 
-      const initData = JSON.parse(shaka.util.StringUtils.fromUTF8(
-          session.generateRequest.calls.argsFor(0)[1]));
+      const initData = /** @type {{kids: !Array.<string>}} */(JSON.parse(
+          shaka.util.StringUtils.fromUTF8(
+              session.generateRequest.calls.argsFor(0)[1])));
       const keyId1 = Uint8ArrayUtils.toHex(
           Uint8ArrayUtils.fromBase64(initData.kids[0]));
       const keyId2 = Uint8ArrayUtils.toHex(

@@ -329,8 +329,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
   }
 
   /**
-   * @param {?} message
-   * @param {!Object} bus
+   * @param {*} message
+   * @param {!cast.receiver.CastMessageBus} bus
    * @param {string=} senderId
    */
   function fakeIncomingMessage(message, bus, senderId) {

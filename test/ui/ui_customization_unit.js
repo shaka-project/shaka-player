@@ -5,7 +5,7 @@
 
 describe('UI Customization', () => {
   const UiUtils = shaka.test.UiUtils;
-  /** @type {!Element} */
+  /** @type {!HTMLLinkElement} */
   let cssLink;
   /** @type {!HTMLElement} */
   let container;
@@ -14,7 +14,7 @@ describe('UI Customization', () => {
 
   beforeAll(async () => {
     // Add css file
-    cssLink = document.createElement('link');
+    cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
   });
 

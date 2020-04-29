@@ -16,7 +16,7 @@ async function drmStorageSupport() {
 
   const support = await shaka.Player.probeSupport();
   const widevineSupport = support.drm['com.widevine.alpha'];
-  return widevineSupport && widevineSupport.persistentState;
+  return !!(widevineSupport && widevineSupport.persistentState);
 }
 
 filterDescribe('Storage', storageSupport, () => {

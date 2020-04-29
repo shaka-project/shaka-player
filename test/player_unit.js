@@ -734,14 +734,14 @@ describe('Player', () => {
     it('does not pollute other advanced DRM configs', () => {
       player.configure('drm.advanced.foo', {});
       player.configure('drm.advanced.bar', {});
-      const fooConfig1 = player.getConfiguration().drm.advanced.foo;
-      const barConfig1 = player.getConfiguration().drm.advanced.bar;
+      const fooConfig1 = player.getConfiguration().drm.advanced['foo'];
+      const barConfig1 = player.getConfiguration().drm.advanced['bar'];
       expect(fooConfig1.distinctiveIdentifierRequired).toBe(false);
       expect(barConfig1.distinctiveIdentifierRequired).toBe(false);
 
       player.configure('drm.advanced.foo.distinctiveIdentifierRequired', true);
-      const fooConfig2 = player.getConfiguration().drm.advanced.foo;
-      const barConfig2 = player.getConfiguration().drm.advanced.bar;
+      const fooConfig2 = player.getConfiguration().drm.advanced['foo'];
+      const barConfig2 = player.getConfiguration().drm.advanced['bar'];
       expect(fooConfig2.distinctiveIdentifierRequired).toBe(true);
       expect(barConfig2.distinctiveIdentifierRequired).toBe(false);
     });
@@ -1585,7 +1585,7 @@ describe('Player', () => {
       // choices are limited only by channel count and key status.
       for (const variant of manifest.variants) {
         const keyId = (variant.audio.id % 2) ? 'aaa' : 'bbb';
-        variant.audio.keyId = keyId;
+        variant.audio.keyIds = new Set([keyId]);
         variant.video.roles = [];
         variant.audio.roles = [];
       }

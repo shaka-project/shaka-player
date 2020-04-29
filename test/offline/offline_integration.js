@@ -58,9 +58,9 @@ filterDescribe('Offline', supportsStorage, () => {
 
     const contentUri = content.offlineUri;
     goog.asserts.assert(
-        contentUri, 'Stored content should have an offline uri.');
+        contentUri != null, 'Stored content should have an offline uri.');
 
-    await player.load(content.offlineUri);
+    await player.load(contentUri);
 
     video.play();
     await playTo(/* end= */ 3, /* timeout= */ 10);

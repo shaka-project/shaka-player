@@ -223,7 +223,7 @@ jasmine.SpyStrategy = function() {};
 
 /**
  * @param {...*} varArgs
- * @return {*}
+ * @return {?}
  */
 jasmine.SpyStrategy.prototype.exec = function(varArgs) {};
 
@@ -271,15 +271,15 @@ jasmine.SpyStrategy.prototype.stub = function() {};
 jasmine.CallContext = function() {};
 
 
-/** @const {*} */
+/** @const {?} */
 jasmine.CallContext.prototype.object;
 
 
-/** @const {!Array.<*>} */
+/** @const {!Array.<?>} */
 jasmine.CallContext.prototype.args;
 
 
-/** @const {*} */
+/** @const {?} */
 jasmine.CallContext.prototype.returnValue;
 
 
@@ -300,12 +300,12 @@ jasmine.CallTracker.prototype.count = function() {};
 
 /**
  * @param {number} i
- * @return {!Array.<*>}
+ * @return {!Array.<?>}
  */
 jasmine.CallTracker.prototype.argsFor = function(i) {};
 
 
-/** @return {!Array.<!Array.<*>>} */
+/** @return {!Array.<!Array.<?>>} */
 jasmine.CallTracker.prototype.allArgs = function() {};
 
 
@@ -375,9 +375,13 @@ jasmine.any = function(factory) {};
 jasmine.anything = function() {};
 
 
+/** @typedef {{ sample: ? }} */
+jasmine.ObjectContainingType;
+
+
 /**
  * @param {!Object} value
- * @return {!Object}
+ * @return {jasmine.ObjectContainingType}
  */
 jasmine.objectContaining = function(value) {};
 

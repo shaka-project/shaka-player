@@ -23,7 +23,7 @@ describe('UITextDisplayer', () => {
    *   font-size: '10px',
    * }
    * @param {string} cssStr
-   * @return {Object.<string, string|number>}
+   * @return {!Object.<string, string|number>}
    */
   function parseCssText(cssStr) {
     // Remove the white spaces in the string.

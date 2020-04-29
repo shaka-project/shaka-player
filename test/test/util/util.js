@@ -20,13 +20,14 @@ shaka.test.StatusPromise = class {
     this.status;
 
     // TODO: investigate using expectAsync() for this when possible.
-    p.status = 'pending';
-    p.then(() => {
-      p.status = 'resolved';
+    const p2 = /** @type {!shaka.test.StatusPromise} */(p);
+    p2.status = 'pending';
+    p2.then(() => {
+      p2.status = 'resolved';
     }, () => {
-      p.status = 'rejected';
+      p2.status = 'rejected';
     });
-    return /** @type {!shaka.test.StatusPromise} */(p);
+    return p2;
   }
 };
 
@@ -104,7 +105,7 @@ shaka.test.Util = class {
 
   /**
    * @param {!shaka.util.Error} error
-   * @return {!Object}
+   * @return {jasmine.ObjectContainingType}
    */
   static jasmineError(error) {
     // NOTE: Safari will add extra properties to any thrown object, and some of
@@ -213,8 +214,10 @@ shaka.test.Util = class {
     const isInit = first instanceof shaka.media.InitSegmentReference &&
         second instanceof shaka.media.InitSegmentReference;
     if (isSegment || isInit) {
-      const a = first.getUris();
-      const b = second.getUris();
+      const firstRef = /** @type {shaka.media.AnySegmentReference} */(first);
+      const secondRef = /** @type {shaka.media.AnySegmentReference} */(second);
+      const a = firstRef.getUris();
+      const b = secondRef.getUris();
       if (typeof a !== 'object' || typeof b !== 'object' ||
           typeof a.length != 'number' || typeof b.length !== 'number') {
         return false;
@@ -225,10 +228,10 @@ shaka.test.Util = class {
       }
 
       // Make shallow copies of each, without their getUris fields.
-      const trimmedFirst = Object.assign({}, /** @type {Object} */(first));
-      delete trimmedFirst.getUris;
-      const trimmedSecond = Object.assign({}, /** @type {Object} */(second));
-      delete trimmedSecond.getUris;
+      const trimmedFirst = Object.assign({}, /** @type {Object} */(firstRef));
+      delete trimmedFirst['getUris'];
+      const trimmedSecond = Object.assign({}, /** @type {Object} */(secondRef));
+      delete trimmedSecond['getUris'];
 
       // Compare those using Jasmine's utility, which will compare the fields of
       // an object and the items of an array.

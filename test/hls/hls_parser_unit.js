@@ -2061,7 +2061,7 @@ describe('HlsParser', () => {
       // We are assuming that the time will be pulled out of the main mp4
       // segment, so if we see a request that has a range header, we will stop
       // the parser.
-      /** @type {!Map.<string, !ArrayBuffer>} */
+      /** @type {!Map.<string, !BufferSource>} */
       const responses = new Map();
       responses.set('test:/main.mp4', segmentData);
       responses.set('test:/init.mp4', initSegmentData);

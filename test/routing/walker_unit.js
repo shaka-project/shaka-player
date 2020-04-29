@@ -289,11 +289,11 @@ describe('Walker', () => {
     const goToC = startNewRoute(nodeC, /* interruptible= */ false);
     const goToB = startNewRoute(nodeB, /* interruptible= */ true);
 
-    /** @type {jasmine.Spy} */
+    /** @type {!jasmine.Spy} */
     const canceledCSpy = jasmine.createSpy('cancel c');
     goToC.onCancel = shaka.test.Util.spyFunc(canceledCSpy);
 
-    /** @type {jasmine.Spy} */
+    /** @type {!jasmine.Spy} */
     const canceledBSpy = jasmine.createSpy('cancel b');
     goToB.onCancel = shaka.test.Util.spyFunc(canceledBSpy);
 

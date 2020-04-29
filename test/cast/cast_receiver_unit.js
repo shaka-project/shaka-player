@@ -271,6 +271,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
 
       fakeInitState = {
+        manifest: null,
+        startTime: null,
         player: {
           configure: fakeConfig,
         },
@@ -307,7 +309,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       // The rest is done async:
       await shaka.test.Util.shortDelay();
       expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          fakeInitState['playerAfterLoad'].setTextTrackVisibility);
+          fakeInitState.playerAfterLoad.setTextTrackVisibility);
       expect(mockVideo.loop).toBe(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });
@@ -418,7 +420,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
 
       // State was still transferred, though:
       expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          fakeInitState['playerAfterLoad'].setTextTrackVisibility);
+          fakeInitState.playerAfterLoad.setTextTrackVisibility);
       expect(mockVideo.loop).toBe(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });
@@ -988,8 +990,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
   }
 
   /**
-   * @param {?} message
-   * @param {!Object} bus
+   * @param {*} message
+   * @param {!cast.receiver.CastMessageBus} bus
    * @param {string=} senderId
    */
   function fakeIncomingMessage(message, bus, senderId) {

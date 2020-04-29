@@ -5,7 +5,7 @@
 
 describe('Ad UI', () => {
   const UiUtils = shaka.test.UiUtils;
-  /** @type {!Element} */
+  /** @type {!HTMLLinkElement} */
   let cssLink;
   /** @type {!HTMLElement} */
   let container;
@@ -19,7 +19,7 @@ describe('Ad UI', () => {
 
   beforeAll(async () => {
     // Add css file
-    cssLink = document.createElement('link');
+    cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
     shaka.Player.setAdManagerFactory(() => new shaka.test.FakeAdManager());
   });

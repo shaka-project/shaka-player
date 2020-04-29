@@ -20,7 +20,7 @@ describe('UI', () => {
   let eventManager;
   /** @type {shaka.test.Waiter} */
   let waiter;
-  /** @type {!Element} */
+  /** @type {!HTMLLinkElement} */
   let cssLink;
   /** @type {!shaka.ui.Controls} */
   let controls;
@@ -28,7 +28,7 @@ describe('UI', () => {
   let compiledShaka;
 
   beforeAll(async () => {
-    cssLink = document.createElement('link');
+    cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
 
     compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
@@ -72,7 +72,9 @@ describe('UI', () => {
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
 
-    controls = ui.getControls();
+    const tempControls = ui.getControls();
+    goog.asserts.assert(tempControls != null, 'Controls are null!');
+    controls = tempControls;
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake((event) => {

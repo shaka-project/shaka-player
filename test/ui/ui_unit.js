@@ -11,12 +11,12 @@ describe('UI', () => {
 
   /** @type {shaka.Player} */
   let player;
-  /** @type {!Element} */
+  /** @type {!HTMLLinkElement} */
   let cssLink;
 
   beforeAll(async () => {
     // Add css file
-    cssLink = document.createElement('link');
+    cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
     await UiUtils.setupCSS(cssLink);
   });
 
