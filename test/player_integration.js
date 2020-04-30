@@ -92,6 +92,7 @@ describe('Player', () => {
         pauseTime: jasmine.any(Number),
         bufferingTime: jasmine.any(Number),
         licenseTime: jasmine.any(Number),
+        liveLatency: jasmine.any(Number),
 
         // We should have loaded the first Period by now, so we should have a
         // history.
