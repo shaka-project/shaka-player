@@ -230,14 +230,6 @@ describe('Player Src Equals', () => {
     expect(player.getTextTracks()).toEqual([]);
   });
 
-  it('ignores disabled text tracks on the video element', async () => {
-    const textTrack = video.addTextTrack('subtitles', 'label');
-    textTrack.mode = 'disabled';
-
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
-    expect(player.getTextTracks()).toEqual([]);
-  });
-
   // TODO: test HLS on platforms with native HLS
   it('allows selecting text tracks', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
