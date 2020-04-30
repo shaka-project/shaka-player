@@ -41,6 +41,8 @@ const fs = require('fs');
 // The annotations we will consider "exporting" a symbol.
 const EXPORT_REGEX = /@(?:export|exportInterface|expose)\b/;
 
+// TODO: revisit this when Closure Compiler supports partially-exported classes.
+let partiallyExportedClassesDetected = false;
 
 /**
  * Topological sort of general objects using a DFS approach.
@@ -736,12 +738,29 @@ function generateExterns(names, inputPath) {
     } else if (isPartiallyExportedClassAssignmentNode(node)) {
       // Some classes are not exported, but contain exported members.  These
       // need to have externs generated, too.
+
+      // But wait!  The latest compiler won't actually export those correctly!
+      // TODO: File a bug against the Closure Compiler.
+      // In the mean time, log these now and throw an error at the end to make
+      // sure we are generating usable releases.  This tends to affect our
+      // plugin registration APIs, and apps should definitely be able to use
+      // those!
+      if (!partiallyExportedClassesDetected) {
+        partiallyExportedClassesDetected = true;
+        console.log('The Closure Compiler does not handle partially-exported ' +
+            'classes correctly!  The following classes need to be exported:');
+      }
+
+      const name = getIdentifierString(node.expression.left);
+      console.log(' * ' + name);
+
       return createExternFromPartiallyExportedClassAssignmentNode(names, node);
     } else {
       // Ignore anything else, and don't generate any externs.
       return '';
     }
   });
+
   const externs = rawExterns.join('');
 
   return {
@@ -778,6 +797,12 @@ function main(args) {
   // Generate externs for all input paths.
   const names = new Set();
   const results = inputPaths.map((path) => generateExterns(names, path));
+
+  // TODO: revisit this when the compiler supports partially-exported classes.
+  if (partiallyExportedClassesDetected) {
+    throw new Error(
+        'Partially exported classes are not supported in the compiler!');
+  }
 
   // Sort them in dependency order.
   const sorted = topologicalSort(results, /* getDeps= */ (object) => {

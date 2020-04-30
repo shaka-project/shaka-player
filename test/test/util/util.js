@@ -322,14 +322,23 @@ shaka.test.Util = class {
       // Load the compiled library as a module.
       // All tests in this suite will use the compiled library.
       require(['/base/dist/shaka-player.ui.js'], (shakaModule) => {
-        compiledShaka = shakaModule;
-        compiledShaka.net.NetworkingEngine.registerScheme(
-            'test', shaka.test.TestScheme.plugin);
-        compiledShaka.media.ManifestParser.registerParserByMime(
-            'application/x-test-manifest',
-            shaka.test.TestScheme.ManifestParser.factory);
+        try {
+          compiledShaka = shakaModule;
+          compiledShaka.net.NetworkingEngine.registerScheme(
+              'test', shaka.test.TestScheme.plugin);
+          compiledShaka.media.ManifestParser.registerParserByMime(
+              'application/x-test-manifest',
+              shaka.test.TestScheme.ManifestParser.factory);
 
-        loaded.resolve();
+          loaded.resolve();
+
+          // We need to catch thrown exceptions here to propertly report errors
+          // in the registration process above.
+          // eslint-disable-next-line no-restricted-syntax
+        } catch (error) {
+          loaded.reject('Failed to register with compiled player.');
+          shaka.log.error('Error registering with compiled player.', error);
+        }
       }, (error) => {
         loaded.reject('Failed to load compiled player.');
         shaka.log.error('Error loading compiled player.', error);
