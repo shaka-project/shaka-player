@@ -724,6 +724,46 @@ describe('HlsParser', function() {
     await testHlsParser(master, media, manifest);
   });
 
+  it('parses characteristics from audio tags', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
+      'URI="audio"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
+      'CHARACTERISTICS="public.accessibility.describes-video",URI="audio2"\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(0)
+              .addPartialVariant()
+                .language('en')
+                .addPartialStream(ContentType.VIDEO)
+                .addPartialStream(ContentType.AUDIO)
+                  .language('en')
+              .addPartialVariant()
+                .language('en')
+                .addPartialStream(ContentType.VIDEO)
+                .addPartialStream(ContentType.AUDIO)
+                  .language('en')
+                  .roles(['public.accessibility.describes-video'])
+          .build();
+
+    await testHlsParser(master, media, manifest);
+  });
+
   it('should call filterAllPeriods for parsing', function(done) {
     const master = [
       '#EXTM3U\n',
