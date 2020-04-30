@@ -17,6 +17,9 @@ describe('StreamingEngine', () => {
 
   /** @type {!HTMLVideoElement} */
   let video;
+  /** @type {{start: number, end: number}} */
+  let segmentAvailability;
+  /** @type {!shaka.test.FakePresentationTimeline} */
   let timeline;
 
   /** @type {!shaka.media.Playhead} */
@@ -24,6 +27,7 @@ describe('StreamingEngine', () => {
   /** @type {shaka.extern.StreamingConfiguration} */
   let config;
 
+  /** @type {!shaka.test.FakeNetworkingEngine} */
   let netEngine;
   /** @type {!shaka.media.MediaSourceEngine} */
   let mediaSourceEngine;
@@ -83,9 +87,13 @@ describe('StreamingEngine', () => {
     await createVodStreamGenerator(metadata.audio, ContentType.AUDIO);
     await createVodStreamGenerator(metadata.video, ContentType.VIDEO);
 
+    segmentAvailability = {
+      start: 0,
+      end: 60,
+    };
+
     timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-        /* segmentAvailabilityStart= */ 0,
-        /* segmentAvailabilityEnd= */ 60,
+        segmentAvailability,
         /* presentationDuration= */ 60,
         /* maxSegmentDuration= */ metadata.video.segmentDuration,
         /* isLive= */ false);
@@ -121,9 +129,13 @@ describe('StreamingEngine', () => {
     // The generator's AST is set to 295 seconds in the past, so the live-edge
     // is at 295 - 10 seconds.
     // -10 to account for maxSegmentDuration.
+    segmentAvailability = {
+      start: 275 - 10,
+      end: 295 - 10,
+    };
+
     timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-        /* segmentAvailabilityStart= */ 275 - 10,
-        /* segmentAvailabilityEnd= */ 295 - 10,
+        segmentAvailability,
         /* presentationDuration= */ Infinity,
         /* maxSegmentDuration= */ metadata.video.segmentDuration,
         /* isLive= */ true);
@@ -189,7 +201,8 @@ describe('StreamingEngine', () => {
           const segment = generators[type].getSegment(position, wallClockTime);
           expect(segment).not.toBeNull();
           return segment;
-        });
+        },
+        /* delays= */{audio: 0, video: 0, text: 0});
   }
 
   function setupPlayhead() {
@@ -302,8 +315,8 @@ describe('StreamingEngine', () => {
     beforeEach(async () => {
       await setupLive();
       slideSegmentAvailabilityWindow = window.setInterval(() => {
-        timeline.segmentAvailabilityStart++;
-        timeline.segmentAvailabilityEnd++;
+        segmentAvailability.start++;
+        segmentAvailability.end++;
       }, 1000);
     });
 
@@ -337,7 +350,7 @@ describe('StreamingEngine', () => {
 
       // Seek outside the availability window right away. The playhead
       // should adjust the video's current time.
-      video.currentTime = timeline.segmentAvailabilityEnd + 120;
+      video.currentTime = segmentAvailability.end + 120;
       video.play();
 
       // Wait until the repositioning is complete so we don't
@@ -362,7 +375,7 @@ describe('StreamingEngine', () => {
 
       // Seek outside the availability window right away. The playhead
       // should adjust the video's current time.
-      video.currentTime = timeline.segmentAvailabilityStart - 120;
+      video.currentTime = segmentAvailability.start - 120;
       expect(video.currentTime).toBeGreaterThan(0);
 
       video.play();
@@ -498,10 +511,14 @@ describe('StreamingEngine', () => {
       await createVodStreamGenerator(metadata.audio, ContentType.AUDIO);
       await createVodStreamGenerator(metadata.video, ContentType.VIDEO);
 
+      segmentAvailability = {
+        start: 0,
+        end: 30,
+      };
+
       timeline =
           shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-              /* segmentAvailabilityStart= */ 0,
-              /* segmentAvailabilityEnd= */ 30,
+              segmentAvailability,
               /* presentationDuration= */ 30,
               /* maxSegmentDuration= */ metadata.video.segmentDuration,
               /* isLive= */ false);

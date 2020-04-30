@@ -34,14 +34,26 @@ describe('StreamingEngine', () => {
 
   /** @type {!shaka.test.FakeMediaSourceEngine} */
   let mediaSourceEngine;
+  /** @type {{audio: number, video: number, text: number}} */
+  let netEngineDelays;
+  /** @type {!shaka.test.FakeNetworkingEngine} */
   let netEngine;
+  /** @type {{start: number, end: number}} */
+  let segmentAvailability;
+  /** @type {!shaka.test.FakePresentationTimeline} */
   let timeline;
 
+  /** @type {?shaka.extern.Stream} */
   let audioStream;
+  /** @type {?shaka.extern.Stream} */
   let videoStream;
+  /** @type {shaka.extern.Variant} */
   let variant;
+  /** @type {shaka.extern.Stream} */
   let textStream;
+  /** @type {shaka.extern.Variant} */
   let alternateVariant;
+  /** @type {shaka.extern.Stream} */
   let alternateVideoStream;
 
   /** @type {shaka.extern.Manifest} */
@@ -164,9 +176,13 @@ describe('StreamingEngine', () => {
         /* segmentsInFirstPeriod= */ 2,
         /* segmentsInSecondPeriod= */ 2);
 
+    segmentAvailability = {
+      start: 0,
+      end: 40,
+    };
+
     timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-        /* segmentAvailabilityStart= */ 0,
-        /* segmentAvailabilityEnd= */ 40,
+        segmentAvailability,
         /* presentationDuration= */ 40,
         /* maxSegmentDuration= */ 10,
         /* isLive= */ false);
@@ -268,10 +284,14 @@ describe('StreamingEngine', () => {
     // Keep in mind that the fake event loop in the tests ticks in whole
     // seconds, so real async processes may take a surprising amount of fake
     // time to complete.  To test actual boundary conditions, you can change
-    // timeline.segmentAvailabilityStart in the test setup.
+    // segmentAvailability.start in the test setup.
+    segmentAvailability = {
+      start: 90,
+      end: 140,
+    };
+
     timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
-        /* segmentAvailabilityStart= */ 90,
-        /* segmentAvailabilityEnd= */ 140,
+        segmentAvailability,
         /* presentationDuration= */ 140,
         /* maxSegmentDuration= */ 10,
         /* isLive= */ true);
@@ -286,6 +306,11 @@ describe('StreamingEngine', () => {
       segmentsInFirstPeriod, segmentsInSecondPeriod) {
     // Create the fake NetworkingEngine. Note: the StreamingEngine should never
     // request a segment that does not exist.
+    netEngineDelays = {
+      audio: 0,
+      video: 0,
+      text: 0,
+    };
     netEngine = shaka.test.StreamingEngineUtil.createFakeNetworkingEngine(
         // Init segment generator:
         (type, periodIndex) => {
@@ -298,7 +323,8 @@ describe('StreamingEngine', () => {
           expect((periodIndex == 0 && position <= segmentsInFirstPeriod) ||
                  (periodIndex == 1 && position <= segmentsInSecondPeriod));
           return segmentData[type].segments[position];
-        });
+        },
+        /* delays= */ netEngineDelays);
   }
 
   function setupManifest(
@@ -697,9 +723,9 @@ describe('StreamingEngine', () => {
 
     // Make requests for different types take different amounts of time.
     // This would let some media types buffer faster than others if unchecked.
-    netEngine.delays.text = 0.1;
-    netEngine.delays.audio = 1.0;
-    netEngine.delays.video = 10.0;
+    netEngineDelays.text = 0.1;
+    netEngineDelays.audio = 1.0;
+    netEngineDelays.video = 10.0;
 
     mediaSourceEngine.appendBuffer.and.callFake((type, data, start, end) => {
       // Call to the underlying implementation.
@@ -783,13 +809,12 @@ describe('StreamingEngine', () => {
 
       // For these tests, we don't care about specific data appended.
       // Just return any old ArrayBuffer for any requested segment.
-      netEngine = {
-        request: (requestType, request) => {
-          const buffer = new ArrayBuffer(0);
-          const response = {uri: request.uris[0], data: buffer, headers: {}};
-          return shaka.util.AbortableOperation.completed(response);
-        },
-      };
+      netEngine.request.and.callFake((requestType, request) => {
+        const buffer = new ArrayBuffer(0);
+        /** @type {shaka.extern.Response} */
+        const response = {uri: request.uris[0], data: buffer, headers: {}};
+        return shaka.util.AbortableOperation.completed(response);
+      });
 
       // For these tests, we also don't need FakeMediaSourceEngine to verify
       // its input data.
@@ -1306,8 +1331,8 @@ describe('StreamingEngine', () => {
     });
 
     it('outside segment availability window', async () => {
-      timeline.segmentAvailabilityStart = 90;
-      timeline.segmentAvailabilityEnd = 110;
+      segmentAvailability.start = 90;
+      segmentAvailability.end = 110;
 
       presentationTimeInSeconds = 90;
 
@@ -1320,7 +1345,8 @@ describe('StreamingEngine', () => {
       // Seek forward to an unbuffered and unavailable region in the second
       // Period; set playing to false since the playhead can't move at the
       // seek target.
-      expect(timeline.getSegmentAvailabilityEnd()).toBeLessThan(125);
+      expect(Util.invokeSpy(timeline.getSegmentAvailabilityEnd))
+          .toBeLessThan(125);
       presentationTimeInSeconds = 125;
       playing = false;
       streamingEngine.seeked();
@@ -1336,8 +1362,10 @@ describe('StreamingEngine', () => {
             expect(presentationTimeInSeconds).toBe(125);
             if (startTime >= 100) {
               // Ignore a possible call for the first Period.
-              expect(timeline.getSegmentAvailabilityStart()).toBe(100);
-              expect(timeline.getSegmentAvailabilityEnd()).toBe(120);
+              expect(Util.invokeSpy(timeline.getSegmentAvailabilityStart))
+                  .toBe(100);
+              expect(Util.invokeSpy(timeline.getSegmentAvailabilityEnd))
+                  .toBe(120);
               playing = true;
               mediaSourceEngine.appendBuffer.and.callFake(
                   originalAppendBuffer);
@@ -1374,10 +1402,12 @@ describe('StreamingEngine', () => {
     });
 
     it('from Stream setup', async () => {
+      const createSegmentIndexSpy = Util.funcSpy(
+          videoStream.createSegmentIndex);
+
       // Don't use returnValue with Promise.reject, or it may be detected as an
       // unhandled Promise rejection.
-      videoStream.createSegmentIndex.and.callFake(
-          () => Promise.reject('FAKE_ERROR'));
+      createSegmentIndexSpy.and.callFake(() => Promise.reject('FAKE_ERROR'));
 
       onError.and.callFake((error) => {
         expect(error).toBe('FAKE_ERROR');
@@ -1400,10 +1430,12 @@ describe('StreamingEngine', () => {
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.HTTP_ERROR);
 
+      const createSegmentIndexSpy = Util.funcSpy(
+          alternateVideoStream.createSegmentIndex);
+
       // Don't use returnValue with Promise.reject, or it may be detected as an
       // unhandled Promise rejection.
-      alternateVideoStream.createSegmentIndex.and.callFake(
-          () => Promise.reject(expectedError));
+      createSegmentIndexSpy.and.callFake(() => Promise.reject(expectedError));
 
       onError.and.callFake((error) => {
         expect(error).toBe(expectedError);
@@ -1519,19 +1551,18 @@ describe('StreamingEngine', () => {
     it('ignores text stream failures if configured to', async () => {
       setupVod();
       const textUri = '0_text_0';
-      const originalNetEngine = netEngine;
-      netEngine = {
-        request: jasmine.createSpy('request'),
-      };
-      netEngine.request.and.callFake((requestType, request) => {
-        if (request.uris[0] == textUri) {
-          return shaka.util.AbortableOperation.failed(new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.NETWORK,
-              shaka.util.Error.Code.BAD_HTTP_STATUS, textUri, 404));
-        }
-        return originalNetEngine.request(requestType, request);
-      });
+      // eslint-disable-next-line no-restricted-syntax
+      const originalNetEngineRequest = netEngine.request.bind(netEngine);
+      netEngine.request = jasmine.createSpy('request').and.callFake(
+          (requestType, request) => {
+            if (request.uris[0] == textUri) {
+              return shaka.util.AbortableOperation.failed(new shaka.util.Error(
+                  shaka.util.Error.Severity.CRITICAL,
+                  shaka.util.Error.Category.NETWORK,
+                  shaka.util.Error.Code.BAD_HTTP_STATUS, textUri, 404));
+            }
+            return originalNetEngineRequest(requestType, request);
+          });
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.ignoreTextStreamFailures = true;
@@ -1578,8 +1609,13 @@ describe('StreamingEngine', () => {
 
       await runTest();
       expect(onError).toHaveBeenCalledTimes(1);
-      expect(netEngine.attempts).toBeGreaterThan(1);
       expect(mediaSourceEngine.endOfStream).toHaveBeenCalledTimes(1);
+
+      const targetCalls = netEngine.request.calls.all().filter((data) => {
+        const request = data.args[1];
+        return request.uris[0] == targetUri;
+      });
+      expect(targetCalls.length).toBeGreaterThan(1);
     });
 
     it('does not retry if configured not to', async () => {
@@ -1612,8 +1648,13 @@ describe('StreamingEngine', () => {
 
       await runTest();
       expect(onError).toHaveBeenCalledTimes(1);
-      expect(netEngine.attempts).toBe(1);
       expect(mediaSourceEngine.endOfStream).not.toHaveBeenCalled();
+
+      const targetCalls = netEngine.request.calls.all().filter((data) => {
+        const request = data.args[1];
+        return request.uris[0] == targetUri;
+      });
+      expect(targetCalls.length).toBe(1);
     });
 
     it('does not invoke the callback if the error is handled', async () => {
@@ -2422,44 +2463,42 @@ describe('StreamingEngine', () => {
 
       // For these tests, we don't care about specific data appended.
       // Just return any old ArrayBuffer for any requested segment.
-      netEngine = {
-        request: (requestType, request) => {
-          const buffer = new ArrayBuffer(0);
-          const response = {uri: request.uris[0], data: buffer, headers: {}};
-          const bytes = new shaka.net.NetworkingEngine.NumBytesRemainingClass();
-          bytes.setBytes(200);
+      netEngine.request.and.callFake((requestType, request) => {
+        const buffer = new ArrayBuffer(0);
+        const response = {uri: request.uris[0], data: buffer, headers: {}};
+        const bytes = new shaka.net.NetworkingEngine.NumBytesRemainingClass();
+        bytes.setBytes(200);
 
-          const delay = new shaka.util.PublicPromise();
-          delayedRequests.push(delay);
+        const delay = new shaka.util.PublicPromise();
+        delayedRequests.push(delay);
 
-          const run = async () => {
-            shaka.log.v1('new request', request.uris[0]);
-            if (shouldDelayRequests) {
-              shaka.log.v1('delaying request', request.uris[0]);
-              await delay;
-            }
-            // Only add if the segment was appended; if it was aborted this
-            // won't be called.
-            shaka.log.v1('completing request', request.uris[0]);
-            requestUris.push(request.uris[0]);
-            return response;
-          };
+        const run = async () => {
+          shaka.log.v1('new request', request.uris[0]);
+          if (shouldDelayRequests) {
+            shaka.log.v1('delaying request', request.uris[0]);
+            await delay;
+          }
+          // Only add if the segment was appended; if it was aborted this
+          // won't be called.
+          shaka.log.v1('completing request', request.uris[0]);
+          requestUris.push(request.uris[0]);
+          return response;
+        };
 
-          const abort = () => {
-            shaka.log.v1('aborting request', request.uris[0]);
-            delay.reject(new shaka.util.Error(
-                shaka.util.Error.Severity.CRITICAL,
-                shaka.util.Error.Category.PLAYER,
-                shaka.util.Error.Code.OPERATION_ABORTED));
-            return Promise.resolve();
-          };
+        const abort = () => {
+          shaka.log.v1('aborting request', request.uris[0]);
+          delay.reject(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.PLAYER,
+              shaka.util.Error.Code.OPERATION_ABORTED));
+          return Promise.resolve();
+        };
 
-          lastPendingRequest = new shaka.net.NetworkingEngine.PendingRequest(
-              run(), abort, bytes);
-          spyOn(lastPendingRequest, 'abort').and.callThrough();
-          return lastPendingRequest;
-        },
-      };
+        lastPendingRequest = new shaka.net.NetworkingEngine.PendingRequest(
+            run(), abort, bytes);
+        spyOn(lastPendingRequest, 'abort').and.callThrough();
+        return lastPendingRequest;
+      });
 
       // For these tests, we also don't need FakeMediaSourceEngine to verify
       // its input data.
@@ -2745,13 +2784,12 @@ describe('StreamingEngine', () => {
 
       // For these tests, we don't care about specific data appended.
       // Just return any old ArrayBuffer for any requested segment.
-      netEngine = {
-        request: (requestType, request) => {
-          const buffer = new ArrayBuffer(0);
-          const response = {uri: request.uris[0], data: buffer, headers: {}};
-          return shaka.util.AbortableOperation.completed(response);
-        },
-      };
+      netEngine.request.and.callFake((requestType, request) => {
+        const buffer = new ArrayBuffer(0);
+        /** @type {shaka.extern.Response} */
+        const response = {uri: request.uris[0], data: buffer, headers: {}};
+        return shaka.util.AbortableOperation.completed(response);
+      });
 
       // For these tests, we also don't need FakeMediaSourceEngine to verify
       // its input data.
@@ -2918,13 +2956,13 @@ describe('StreamingEngine', () => {
    * Slides the segment availability window forward by 1 second.
    */
   function slideSegmentAvailabilityWindow() {
-    timeline.segmentAvailabilityStart++;
-    timeline.segmentAvailabilityEnd++;
+    segmentAvailability.start++;
+    segmentAvailability.end++;
   }
 
   /**
-   * @param {!Object} netEngine A NetworkingEngine look-alike from
-   *   shaka.test.StreamingEngineUtil.createFakeNetworkingEngine()
+   * @param {!shaka.test.FakeNetworkingEngine} netEngine A NetworkingEngine
+   *   look-alike.
    * @param {string} targetUri
    * @param {shaka.util.Error.Code} errorCode
    */
@@ -2932,11 +2970,11 @@ describe('StreamingEngine', () => {
     // eslint-disable-next-line no-restricted-syntax
     const originalNetEngineRequest = netEngine.request.bind(netEngine);
 
-    netEngine.attempts = 0;
+    let attempts = 0;
     netEngine.request = jasmine.createSpy('request').and.callFake(
         (requestType, request) => {
           if (request.uris[0] == targetUri) {
-            if (++netEngine.attempts == 1) {
+            if (++attempts == 1) {
               const data = [targetUri];
 
               if (errorCode == shaka.util.Error.Code.BAD_HTTP_STATUS) {

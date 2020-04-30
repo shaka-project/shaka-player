@@ -22,17 +22,12 @@ shaka.test.StreamingEngineUtil = class {
    * @param {function(string, number, number): BufferSource} getSegment Media
    *   segment generator: takes a content type, a Period number, and a segment
    *   position; returns a media segment.
-   * @return {!Object} A NetworkingEngine look-alike.
+   * @param {{audio: number, video: number, text: number}} delays Artificial
+   *   delays per content type, in seconds.
+   * @return {!shaka.test.FakeNetworkingEngine}
    */
-  static createFakeNetworkingEngine(getInitSegment, getSegment) {
-    const netEngine = {
-      request: jasmine.createSpy('request'),
-      delays: {  // Artificial delays per content type, in seconds.
-        audio: 0,
-        video: 0,
-        text: 0,
-      },
-    };
+  static createFakeNetworkingEngine(getInitSegment, getSegment, delays) {
+    const netEngine = new shaka.test.FakeNetworkingEngine();
 
     netEngine.request.and.callFake((requestType, request) => {
       expect(requestType).toBeTruthy();
@@ -63,25 +58,10 @@ shaka.test.StreamingEngineUtil = class {
       const p = new Promise((resolve) => {
         setTimeout(() => {
           resolve(response);
-        }, netEngine.delays[contentType] * 1000);
+        }, delays[contentType] * 1000);
       });
       return shaka.util.AbortableOperation.notAbortable(p);
     });
-
-    netEngine.expectRequest = (uri, type) => {
-      shaka.test.FakeNetworkingEngine.expectRequest(
-          netEngine.request, uri, type);
-    };
-
-    netEngine.expectNoRequest = (uri, type) => {
-      shaka.test.FakeNetworkingEngine.expectNoRequest(
-          netEngine.request, uri, type);
-    };
-
-    netEngine.expectRangeRequest = (uri, startByte, endByte) => {
-      shaka.test.FakeNetworkingEngine.expectRangeRequest(
-          netEngine.request, uri, startByte, endByte);
-    };
 
     return netEngine;
   }
@@ -94,68 +74,35 @@ shaka.test.StreamingEngineUtil = class {
    * return value of getSegmentAvailabilityStart() and
    * getSegmentAvailabilityEnd() respectively.
    *
-   * @param {number} segmentAvailabilityStart The initial value of
-   *   |segmentAvailabilityStart|.
-   * @param {number} segmentAvailabilityEnd The initial value of
-   *   |segmentAvailabilityEnd|.
+   * @param {{start: number, end: number}} segmentAvailability The segment
+   *   availability window, which the caller can adjust by reference during a
+   *   test.
    * @param {number} presentationDuration
    * @param {number} maxSegmentDuration
    * @param {boolean} isLive
-   * @return {!Object} A PresentationTimeline look-alike.
-   *
+   * @return {!shaka.test.FakePresentationTimeline} A PresentationTimeline
+   *   look-alike.
    */
   static createFakePresentationTimeline(
-      segmentAvailabilityStart, segmentAvailabilityEnd, presentationDuration,
-      maxSegmentDuration, isLive) {
-    const timeline = {
-      getDuration: jasmine.createSpy('getDuration'),
-      setDuration: jasmine.createSpy('setDuration'),
-      getMaxSegmentDuration: jasmine.createSpy('getMaxSegmentDuration'),
-      isLive: jasmine.createSpy('isLive'),
-      getEarliestStart: jasmine.createSpy('getEarliestStart'),
-      getSegmentAvailabilityStart:
-          jasmine.createSpy('getSegmentAvailabilityStart'),
-      getSegmentAvailabilityEnd:
-          jasmine.createSpy('getSegmentAvailabilityEnd'),
-      getSafeSeekRangeStart: jasmine.createSpy('getSafeSeekRangeStart'),
-      getSeekRangeStart: jasmine.createSpy('getSeekRangeStart'),
-      getSeekRangeEnd: jasmine.createSpy('getSeekRangeEnd'),
-      segmentAvailabilityStart: segmentAvailabilityStart,
-      segmentAvailabilityEnd: segmentAvailabilityEnd,
-    };
+      segmentAvailability, presentationDuration, maxSegmentDuration, isLive) {
+    const timeline = new shaka.test.FakePresentationTimeline();
 
     timeline.getDuration.and.returnValue(presentationDuration);
-
     timeline.getMaxSegmentDuration.and.returnValue(maxSegmentDuration);
+    timeline.isLive.and.returnValue(isLive);
+    timeline.isInProgress.and.returnValue(false);
 
-    timeline.isLive.and.callFake(() => {
-      return isLive;
-    });
+    timeline.getSeekRangeStart.and.callFake(
+        () => segmentAvailability.start);
 
-    timeline.getEarliestStart.and.callFake(() => {
-      return timeline.segmentAvailabilityStart;
-    });
+    timeline.getSeekRangeEnd.and.callFake(
+        () => segmentAvailability.end);
 
-    timeline.getSegmentAvailabilityStart.and.callFake(() => {
-      return timeline.segmentAvailabilityStart;
-    });
+    timeline.getSegmentAvailabilityStart.and.callFake(
+        () => segmentAvailability.start);
 
-    timeline.getSegmentAvailabilityEnd.and.callFake(() => {
-      return timeline.segmentAvailabilityEnd;
-    });
-
-    timeline.getSafeSeekRangeStart.and.callFake((delay) => {
-      return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityStart) +
-          delay;
-    });
-
-    timeline.getSeekRangeStart.and.callFake(() => {
-      return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityStart);
-    });
-
-    timeline.getSeekRangeEnd.and.callFake(() => {
-      return shaka.test.Util.invokeSpy(timeline.getSegmentAvailabilityEnd);
-    });
+    timeline.getSegmentAvailabilityEnd.and.callFake(
+        () => segmentAvailability.end);
 
     return timeline;
   }
@@ -184,6 +131,8 @@ shaka.test.StreamingEngineUtil = class {
   static createManifest(
       presentationTimeline, periodStartTimes, presentationDuration,
       segmentDurations, initSegmentRanges) {
+    const Util = shaka.test.Util;
+
     /**
      * @param {string} type
      * @param {number} time
@@ -359,14 +308,11 @@ shaka.test.StreamingEngineUtil = class {
       segmentIndex.find.and.callFake((time) => find(type, time));
       segmentIndex.get.and.callFake((pos) => get(type, pos));
 
-      const createSegmentIndexSpy = jasmine.createSpy('createSegmentIndex');
+      const createSegmentIndexSpy = Util.funcSpy(stream.createSegmentIndex);
       createSegmentIndexSpy.and.callFake(() => {
         stream.segmentIndex = segmentIndex;
         return Promise.resolve();
       });
-
-      stream.createSegmentIndex =
-          shaka.test.Util.spyFunc(createSegmentIndexSpy);
     }
 
     if (trickModeVideo) {
@@ -385,7 +331,7 @@ shaka.test.StreamingEngineUtil = class {
    *
    * @param {string} type
    * @param {number} id
-   * @return {!Object}
+   * @return {shaka.extern.Stream}
    */
   static createMockStream(type, id) {
     return {
@@ -400,19 +346,32 @@ shaka.test.StreamingEngineUtil = class {
    * Creates a mock audio Stream.
    *
    * @param {number} id
-   * @return {!Object}
+   * @return {shaka.extern.Stream}
    */
   static createMockAudioStream(id) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const Util = shaka.test.Util;
+
     return {
       id: id,
-      createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
+      originalId: id.toString(),
+      createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
       bandwidth: 192000,
       type: ContentType.AUDIO,
+      label: '',
+      language: 'und',
       drmInfos: [],
+      encrypted: false,
+      keyIds: new Set(),
+      audioSamplingRate: 44100,
+      channelsCount: 2,
+      closedCaptions: null,
+      emsgSchemeIdUris: null,
+      primary: false,
+      roles: [],
     };
   }
 
@@ -420,13 +379,16 @@ shaka.test.StreamingEngineUtil = class {
    * Creates a mock video Stream.
    *
    * @param {number} id
-   * @return {!Object}
+   * @return {shaka.extern.Stream}
    */
   static createMockVideoStream(id) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const Util = shaka.test.Util;
+
     return {
       id: id,
-      createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
+      originalId: id.toString(),
+      createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
@@ -434,7 +396,17 @@ shaka.test.StreamingEngineUtil = class {
       width: 600,
       height: 400,
       type: ContentType.VIDEO,
+      label: '',
+      language: 'und',
       drmInfos: [],
+      encrypted: false,
+      keyIds: new Set(),
+      audioSamplingRate: null,
+      channelsCount: null,
+      closedCaptions: null,
+      emsgSchemeIdUris: null,
+      primary: false,
+      roles: [],
     };
   }
 
@@ -442,18 +414,32 @@ shaka.test.StreamingEngineUtil = class {
    * Creates a mock text Stream.
    *
    * @param {number} id
-   * @return {!Object}
+   * @return {shaka.extern.Stream}
    */
   static createMockTextStream(id) {
     const ManifestParserUtils = shaka.util.ManifestParserUtils;
+    const Util = shaka.test.Util;
+
     return {
       id: id,
-      createSegmentIndex: jasmine.createSpy('createSegmentIndex'),
+      originalId: id.toString(),
+      createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
       mimeType: 'text/vtt',
+      codecs: '',
       kind: ManifestParserUtils.TextStreamKind.SUBTITLE,
       type: ManifestParserUtils.ContentType.TEXT,
+      label: '',
+      language: 'und',
       drmInfos: [],
+      encrypted: false,
+      keyIds: new Set(),
+      audioSamplingRate: null,
+      channelsCount: null,
+      closedCaptions: null,
+      emsgSchemeIdUris: null,
+      primary: false,
+      roles: [],
     };
   }
 };

@@ -284,6 +284,14 @@ shaka.test.Util = class {
   }
 
   /**
+   * @param {!Function} func
+   * @return {!jasmine.Spy}
+   */
+  static funcSpy(func) {
+    return /** @type {!jasmine.Spy} */(func);
+  }
+
+  /**
    * @param {!jasmine.Spy} spy
    * @return {!Function}
    */

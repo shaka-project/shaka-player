@@ -245,6 +245,7 @@ shaka.test.FakePresentationTimeline = class {
     const getStart = jasmine.createSpy('getSeekRangeStart');
     const getEnd = jasmine.createSpy('getSeekRangeEnd');
     const getSafeStart = jasmine.createSpy('getSafeSeekRangeStart');
+
     getSafeStart.and.callFake((delay) => {
       const end = shaka.test.Util.invokeSpy(getEnd);
       return Math.min(shaka.test.Util.invokeSpy(getStart) + delay, end);
@@ -301,6 +302,9 @@ shaka.test.FakePresentationTimeline = class {
 
     /** @type {!jasmine.Spy} */
     this.getSeekRangeEnd = getEnd;
+
+    /** @type {!jasmine.Spy} */
+    this.getMaxSegmentDuration = jasmine.createSpy('getMaxSegmentDuration');
   }
 };
 
