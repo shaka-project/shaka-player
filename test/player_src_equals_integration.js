@@ -244,6 +244,16 @@ describe('Player Src Equals', () => {
     }
   });
 
+  it('ignores extra text track on the video element', async () => {
+    // The extra text track with label "Shaka Player TextTrack" should not be
+    // listed.
+    video.addTextTrack('subtitles', /* label= */ shaka.Player.TextTrackLabel);
+
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+    expect(player.getTextTracks()).toEqual([]);
+  });
+
+
   // TODO: test HLS on platforms with native HLS
   it('returns no languages or roles for simple mp4 content', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime */ null);
