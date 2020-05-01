@@ -10,9 +10,9 @@ support. After this tutorial you will know how to:
  - Play downloaded content.
  - Remove downloaded content.
 
-This tutorial assumes that you only need to download content one at a time.
-Concurrent downloads can be done with multiple instances of
-`shaka.offline.Storage`.
+The app in this tutorial is very simple and only downloads one thing at a time,
+to simplify the UI.  `shaka.offline.Storage` will allow you to perform multiple
+downloads at once.
 
 ## Offline API
 
@@ -331,7 +331,7 @@ the title of the content and the time we downloaded it, but the metadata can
 contain anything you want. The metadata is optional, so you can ignore it if
 you want.
 
-`storage.store` returns a Promise that resolves to a
+`storage.store` returns an IAbortableOperation that resolves to a
 `shaka.externs.StoredContent` instance (a summary of the stored content).
 
 At this point, the content is now stored offline and it's ready to be played.
