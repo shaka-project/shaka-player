@@ -238,7 +238,6 @@ shaka.ui.TextDisplayer = class {
   setCaptionStyles_(captions, cue, isNested) {
     const Cue = shaka.text.Cue;
     const captionsStyle = captions.style;
-    const panelStyle = this.textContainer_.style;
 
     // Set white-space to 'pre-line' to enable showing line breaks in the text.
     captionsStyle.whiteSpace = 'pre-line';
@@ -254,6 +253,7 @@ shaka.ui.TextDisplayer = class {
     captionsStyle.paddingRight = shaka.ui.TextDisplayer.convertLengthValue_(
         cue.linePadding, cue, this.videoContainer_
     );
+    captionsStyle.position = 'absolute';
 
     if (cue.backgroundImage) {
       captionsStyle.backgroundImage = 'url(\'' + cue.backgroundImage + '\')';
@@ -318,21 +318,21 @@ shaka.ui.TextDisplayer = class {
       if (cue.lineInterpretation == Cue.lineInterpretation.PERCENTAGE) {
         if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
           if (cue.lineAlign == Cue.lineAlign.START) {
-            panelStyle.top = cue.line + '%';
+            captionsStyle.top = cue.line + '%';
           } else if (cue.lineAlign == Cue.lineAlign.END) {
-            panelStyle.bottom = cue.line + '%';
+            captionsStyle.bottom = cue.line + '%';
           }
         } else if (cue.writingMode == Cue.writingMode.VERTICAL_LEFT_TO_RIGHT) {
           if (cue.lineAlign == Cue.lineAlign.START) {
-            panelStyle.left = cue.line + '%';
+            captionsStyle.left = cue.line + '%';
           } else if (cue.lineAlign == Cue.lineAlign.END) {
-            panelStyle.right = cue.line + '%';
+            captionsStyle.right = cue.line + '%';
           }
         } else {
           if (cue.lineAlign == Cue.lineAlign.START) {
-            panelStyle.right = cue.line + '%';
+            captionsStyle.right = cue.line + '%';
           } else if (cue.lineAlign == Cue.lineAlign.END) {
-            panelStyle.left = cue.line + '%';
+            captionsStyle.left = cue.line + '%';
           }
         }
       }
@@ -346,7 +346,6 @@ shaka.ui.TextDisplayer = class {
       captionsStyle.width = cue.region.width + widthUnit;
       captionsStyle.top = cue.region.viewportAnchorY + viewportAnchorUnit;
       captionsStyle.left = cue.region.viewportAnchorX + viewportAnchorUnit;
-      captionsStyle.position = 'absolute';
     }
 
     captionsStyle.lineHeight = cue.lineHeight;
@@ -355,20 +354,20 @@ shaka.ui.TextDisplayer = class {
     // direction defined by the writing direction.
     if (cue.position) {
       if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
-        panelStyle.paddingLeft = cue.position;
+        captionsStyle.paddingLeft = cue.position;
       } else {
-        panelStyle.paddingTop = cue.position;
+        captionsStyle.paddingTop = cue.position;
       }
     }
 
     // The positionAlign attribute is an alignment for the text container in
     // the dimension of the writing direction.
     if (cue.positionAlign == Cue.positionAlign.LEFT) {
-      panelStyle.cssFloat = 'left';
+      captionsStyle.cssFloat = 'left';
     } else if (cue.positionAlign == Cue.positionAlign.RIGHT) {
-      panelStyle.cssFloat = 'right';
+      captionsStyle.cssFloat = 'right';
     } else {
-      panelStyle.margin = 'auto';
+      captionsStyle.margin = 'auto';
     }
 
     captionsStyle.textAlign = cue.textAlign;
@@ -379,9 +378,9 @@ shaka.ui.TextDisplayer = class {
     // interpreted as a percentage of the video, as defined by the writing
     // direction.
     if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
-      panelStyle.width = cue.size + '%';
+      captionsStyle.width = cue.size + '%';
     } else {
-      panelStyle.height = cue.size + '%';
+      captionsStyle.height = cue.size + '%';
     }
   }
 
