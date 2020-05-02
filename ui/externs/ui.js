@@ -145,51 +145,7 @@ shaka.extern.UIConfiguration;
  * @exportDoc
  */
 shaka.extern.IUIElement = class {
-  /**
-   * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
-   */
-  constructor(parent, controls) {
-    /**
-     * @protected {HTMLElement}
-     * @exportDoc
-     */
-    this.parent;
-
-    /**
-     * @protected {shaka.ui.Controls}
-     * @exportDoc
-     */
-    this.controls;
-
-    /**
-     * @protected {shaka.util.EventManager}
-     * @exportDoc
-     */
-    this.eventManager;
-
-    /**
-     * @protected {shaka.ui.Localization}
-     * @exportDoc
-     */
-    this.localization;
-
-    /**
-     * @protected {shaka.Player}
-     * @exportDoc
-     */
-    this.player;
-
-    /**
-     * @protected {HTMLMediaElement}
-     * @exportDoc
-     */
-    this.video;
-  }
-
-  /**
-   * @override
-   */
+  /** @override */
   release() {}
 };
 
