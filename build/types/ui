@@ -30,7 +30,6 @@
 +../../ui/small_play_button.js
 +../../ui/skip_ad_button.js
 +../../ui/spacer.js
-+../../ui/text_displayer.js
 +../../ui/text_selection.js
 +../../ui/ui.js
 +../../ui/ui_utils.js

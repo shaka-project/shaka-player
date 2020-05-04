@@ -19,6 +19,7 @@ describe('CastUtils', () => {
       'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
       'getManifestParserFactory',  // Would not serialize.
+      'setVideoContainer',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',

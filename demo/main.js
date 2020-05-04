@@ -1176,18 +1176,13 @@ shakaDemo.Main = class {
         this.controls_.setEnabledNativeControls(false);
       }
       // Also set text displayer, as appropriate.
-      // Make an alias for "this" so that it can be captured inside the
-      // non-arrow function below.
-      const self = this;
-      // eslint-disable-next-line no-restricted-syntax
-      const textDisplayer = function() {
-        if (self.nativeControlsEnabled_) {
-          return new shaka.text.SimpleTextDisplayer(self.video_);
-        } else {
-          return new shaka.ui.TextDisplayer(self.video_, self.container_);
-        }
-      };
-      this.player_.configure('textDisplayFactory', textDisplayer);
+      // Use SimpleTextDisplayer in native control, and use UITextDisplayer
+      // otherwise.
+      if (this.nativeControlsEnabled_) {
+        this.player_.setVideoContainer(null);
+      } else {
+        this.player_.setVideoContainer(this.container_);
+      }
 
       // Finally, the asset can be loaded.
       let manifestUri = asset.manifestUri;

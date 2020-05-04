@@ -77,6 +77,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.updateLocalizedStrings_();
 
     this.updateTextLanguages_();
+
+    this.onTracksChanged_();
   }
 
 

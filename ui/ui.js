@@ -9,7 +9,6 @@ goog.provide('shaka.ui.Overlay');
 goog.require('goog.asserts');
 goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
-goog.require('shaka.ui.TextDisplayer');
 goog.require('shaka.util.Platform');
 
 
@@ -50,9 +49,7 @@ shaka.ui.Overlay = class {
 
     // If the browser's native controls are disabled, use UI TextDisplayer.
     if (!video.controls) {
-      const textDisplayer =
-          () => new shaka.ui.TextDisplayer(video, videoContainer);
-      player.configure('textDisplayFactory', textDisplayer);
+      player.setVideoContainer(videoContainer);
     }
 
     videoContainer['ui'] = this;

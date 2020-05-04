@@ -50,6 +50,7 @@
 +../../lib/text/cue.js
 +../../lib/text/simple_text_displayer.js
 +../../lib/text/text_engine.js
++../../lib/text/ui_text_displayer.js
 
 +../../lib/util/abortable_operation.js
 +../../lib/util/array_utils.js
