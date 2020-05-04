@@ -1,66 +1,26 @@
-# Shaka Upgrade Guide, v2.4 => v2.6
+# Shaka Upgrade Guide, v2.5 => v2.6
 
-This is a detailed guide for upgrading from Shaka Player v2.4 to v2.6.
+This is a detailed guide for upgrading from Shaka Player v2.5 to v2.6.
 Feel free to skim or to search for the class and method names you are using in
 your application.
 
 
 #### What's New in v2.6?
 
-Shaka v2.6 introduces several improvements over v2.4, including:
-  - An official Shaka Player UI library to provide customizable and styleable
-    video controls
-    - Load dist/shaka-player.ui.js
-    - See tutorial in docs/tutorials/ui.md
+Shaka v2.6 introduces several improvements over v2.5, including:
   - Ad-insertion APIs (integrated with the Google IMA SDK)
-  - Complete redesign of the demo app
-  - FairPlay support
-  - Native HLS support on iOS and Safari
-  - Support for single-file playback
-  - Network requests can be aborted when switching streams
+  - Ad-related UI elements
   - Offline storage operations can be aborted
   - Support for concurrent operations in a single shaka.offline.Storage instance
-  - Stable Track objects across DASH Periods
-  - Partial support for SMPTE-TT subtitles
-  - Improved service worker in demo app PWA
-  - Drift tolerance for live DASH streams (on by default)
-  - PlayReady license URL parsing (ms:laurl)
-  - Support for CEA captions in DASH
-  - Merged CEA captions in text tracks API
-  - New config field to ignore manifest minBufferTime
+  - Config field `manifest.dash.defaultPresentationDelay` has been moved to
+    `manifest.defaultPresentationDelay` and now applies to both DASH & HLS
   - New config field `streaming.inaccurateManifestTolerance` to control
     assumptions about manifest accuracy
   - New fields in getStats()
-  - Configuration for presentation delay
-  - Offline storage without a Player instance
-  - A safe margin parameter was added for clearing the buffer
-  - Widevine SAMPLE-AES support in HLS
-
-
-#### Extern namespace change
-
-If you use the Closure Compiler in your own project, you need to know that v2.6
-changes the namespace for our externs, such as plugin interfaces and manifest
-types.  The namespace has changed from `shakaExtern` to `shaka.extern`.  You
-MUST update any references to `shakaExtern`.
-
-```js
-// v2.4:
-/**
- * @param {shaka.net.NetworkingEngine.RequestType} type
- * @param {shakaExtern.Request} request
- * @return {!Promise}
- */
-function myFilter(type, request) { /* ... */ }
-
-// v2.6:
-/**
- * @param {shaka.net.NetworkingEngine.RequestType} type
- * @param {shaka.extern.Request} request
- * @return {!Promise}
- */
-function myFilter(type, request) { /* ... */ }
-```
+  - Stable Track objects across DASH Periods
+  - New loop button available in UI overflow menu (`'loop'`, hidden by default)
+  - New playback rate submenu in UI overflow menu (`'playback_rate'`, shown by
+    default)
 
 
 #### Player Factory parameter change
@@ -100,6 +60,21 @@ const uri = player.getAssetUri();
 ```
 
 
+#### UI API change
+
+In v2.5.1, the method `shaka.ui.Overlay.getPlayer()` was deprecated and moved
+to `ui.getControls().getPlayer()`.  In v2.6, the old location was removed.
+Applications that use this method MUST update to the new location.
+
+```js
+// v2.5:
+const player = ui.getPlayer();
+
+// v2.6:
+const player = ui.getControls().getPlayer();
+```
+
+
 #### Embedded text (CEA 608/708) API change
 
 The CEA-specific methods `Player.selectEmbeddedTextTrack()` and
@@ -131,7 +106,7 @@ Backward compatibility will be provided until v2.7.  Applications SHOULD update
 to use the new location.
 
 ```js
-// v2.4:
+// v2.5:
 if (shaka.util.Uint8ArrayUtils.equal(array1, array2) { ...
 
 // v2.6:
@@ -159,7 +134,7 @@ This change affects the following types:
  - {@link shaka.extern.TextParserPlugin}
 
 ```js
-// v2.4:
+// v2.5:
 class MyAbrManager {
   // ...
 }
@@ -175,6 +150,37 @@ player.configure('abrFactory', () => new MyAbrManager());
 shaka.media.ManifestParser.registerParserByMime(
     'text/foo', () => new MyManifestParser());
 ```
+
+
+#### FairPlay configuration changes
+
+The init data format in our Safari EME polyfill has been updated to match the
+init data format of Safari's unprefixed EME implementation.  This means init
+data will arrive in the "skd" format, which is different from what was provided
+by the polyfill in v2.5.  This format is a buffer containing a UTF-8 string,
+which is a URL that begins with `skd://`.  Init data processing done by the
+`drm.initDataTransform` callback MUST be updated.
+
+The signature of the configurable callback `drm.initDataTransform` has changed.
+Applications using this for FairPlay content MUST update their callbacks.  A
+new parameter has been added to the callback signature.
+
+```js
+// v2.5:
+function initDataTransform(/** Uint8Array */ initData,
+                           /** shaka.extern.DrmInfo */ drmInfo) {}
+
+// v2.6:
+function initDataTransform(/** Uint8Array */ initData,
+                           /** string */ initDataType,
+                           /** shaka.extern.DrmInfo */ drmInfo) {}
+```
+
+The new default for `drm.initDataTransform` should work for most content.
+Please try the default first (without configuring your own callback).  If init
+data transformation is still needed, please use the utilities provided in
+{@link shaka.util.FairPlayUtils}, {@link shaka.util.StringUtils} to make this
+processing easier.  You can refer to {@tutorial fairplay} as well.
 
 
 #### Misc configuration changes
@@ -197,7 +203,7 @@ The config field `manifest.dash.initialSegmentLimit` has been added to control
 memory usage during DASH `<SegmentTemplate>` parsing.
 
 The config field `streaming.inaccurateManifestTolerance` (in seconds) has been
-added to control off-by-one behavior in streaming.  Compared with v2.4.x
+added to control off-by-one behavior in streaming.  Compared with v2.5.x
 behavior, the default for this field should reduce the frequency with which we
 have to fetch an additional segment before a seek target.  For less accurate
 manifests, the tolerance can be increased.  For completely accurate manifests,
@@ -209,7 +215,10 @@ See {@link shaka.extern.ManifestConfiguration} and
 
 #### Offline API changes
 
-In v2.6, there is no longer any restriction on concurrent operations.
+In v2.6, the offline storage method `Storage.getStoreInProgress()` is now
+deprecated and always returns `false`.  There is no longer any restriction on
+concurrent operations.  This method will be removed in v2.7.  Applications
+SHOULD stop using it.
 
 The method `Storage.store()` now returns an instance of `IAbortableOperation`
 instead of `Promise`.  This allows applications to call `op.abort()` to stop an
@@ -220,7 +229,7 @@ will work like `Promise`s in v2.6.  (Applications MAY `await` them or call
 `Promise`-like, so applications SHOULD update at this time to use `op.promise`.
 
 ```js
-// v2.4:
+// v2.5:
 try {
   const result = await storage.store();
 } catch (error) {
@@ -278,10 +287,6 @@ const storage = new shaka.offline.Storage(player);
 player.configure('offline.trackSelectionCallback', myTrackSelectionCallback);
 ```
 
-A new method has been introduced to allow an application to clean up and release
-any offline EME sessions that were not cleanly released:
-`Storage.removeEmeSessions()`.  Applications MAY use this if desired.
-
 See {@link shaka.offline.Storage} for details.
 
 
@@ -325,84 +330,17 @@ The following new fields have been added:
 See {@link shaka.extern.Stats stats} for details.
 
 
-#### Network scheme plugin changes
+#### New UI elements
 
-In v2.5, we added a new parameter to network scheme plugins to allow plugins to
-provide progress events.  This callback is only provided to your plugin for
-segment requests, so you must handle the case where this is not provided.  The
-use of this callback enables `StreamingEngine` to converge more quickly on the
-ideal bandwidth estimate.  Applications SHOULD update their custom network
-scheme plugins to provide progress events if feasible.
+The following new UI elements have been added:
 
-```js
-// v2.6:
-function mySchemePlugin(uri, request, requestType, progressUpdated) {
-  /// ...
+ - Ad-related elements (shown automatically during an ad, not currently
+   configurable)
+ - Overflow menu toggle for looping video (`'loop'`, not shown by default)
+ - Overflow menu item and submenu for playback rate (`'playback_rate'`, shown
+   by default)
 
-    if (progressUpdated) {
-      progressUpdated(/* timeElapsedMilliseconds= */ currentTime - lastTime,
-                      /* bytesLoaded= */, loaded - lastLoaded,
-                      /* byteRemaining= */, contentLength - loaded);
-      lastTime = currentTime;
-      lastLoaded = loaded;
-    }
-
-  /// ...
-}
-shaka.net.NetworkingEngine.registerScheme('foo', mySchemePlugin);
-```
-
-See {@link shaka.extern.ProgressUpdated} and {@link shaka.extern.SchemePlugin}
-for details.
-
-
-#### Network filter changes
-
-A new request type was introduced in v2.5:
-`shaka.net.NetworkingEngine.RequestType.TIMING`.  This is used for time sync
-requests in the DASH parser.  Previously, these requests used the type
-`MANIFEST`.  Applications which look for specific request types in a filter MAY
-use this information if desired.
-
-
-#### NetworkingEngine changes
-
-In v2.3, the `request()` method on `shaka.net.NetworkingEngine` returned a
-`Promise`.  In v2.5, it returns an implementation of
-`IAbortableOperation.<shaka.extern.Response>`, which contains a `Promise`.
-
-All applications which make application-level requests via `NetworkingEngine`
-MUST update to the new API.  The old API was removed in v2.5.
-
-```js
-// v2.3:
-try {
-  const response = await player.getNetworkingEngine().request(type, request);
-} catch (error) {
-  // Request failed!
-}
-
-// v2.6:
-const operation = player.getNetworkingEngine().request(type, request);
-
-// The operation can also be aborted on some condition.
-onSomeCondition(() => {
-  operation.abort();
-});
-
-// Use operation.promise to get the response.
-try {
-  const response = await operation.promise;
-} catch (error) {
-  if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
-    // Request aborted!
-  } else {
-    // Request failed!
-  }
-}
-```
-
-See {@link shaka.net.NetworkingEngine} for details.
+See {@tutorial ui-customization}.
 
 
 #### AbrManager plugin changes
@@ -419,16 +357,8 @@ See {@link shaka.extern.AbrManager} for details.
 
 #### TextDisplayer plugin changes
 
-The `Cue` objects consumed by `TextDisplayer` have changed in v2.5 and v2.6.
-
- - `Cue.writingDirection` has been split into `Cue.writingMode` and
-   `Cue.direction` to fix bugs in the handling of these attributes
-
-All application-specific TextDisplayer plugins MUST be updated.
-v2.6 does not have backward compatibility for this!
-
-In addition, the following new fields have been added and MAY be used by
-`TextDisplayer` plugins:
+The `Cue` objects consumed by `TextDisplayer` have changed in v2.6.  The
+following new fields have been added and MAY be used by `TextDisplayer` plugins:
 
  - `Cue.backgroundImage`
  - `Cue.border`
@@ -438,6 +368,30 @@ In addition, the following new fields have been added and MAY be used by
  - `Cue.opacity`
 
 See {@link shaka.extern.Cue} for details.
+
+
+#### UI element plugin changes
+
+The interface {@link shaka.extern.IUIElement} now has a synchronous `release()`
+method instead of an asynchronous `destroy()` method.  Backward compatibility
+will be provided until v2.7.  Applications with UI element plugins SHOULD
+update their plugins to replace `destroy()` with `release()`.
+
+```js
+// v2.5:
+class MyUIElement {
+  async destroy() {
+    // Release resources asynchronously.
+  }
+}
+
+// v2.6:
+class MyUIElement {
+  release() {
+    // Release resources synchronously.
+  }
+}
+```
 
 
 #### Built-in network scheme plugin changes
