@@ -16,11 +16,16 @@
 
   // We provide "global" for use by Closure, and "window" for use by the Shaka
   // library itself.  Both point to "innerGlobal" above.
-  (function(window, global) {
+  // We also provide "module", which is always undefined, to prevent compiled-in
+  // code from doing its own exports that conflict with ours.
+  (function(window, global, module) {
 
 %output%
 
-  }).call(exportTo, innerGlobal, innerGlobal);
+  }).call(/* this= */ exportTo,
+          /* window= */ innerGlobal,
+          /* global= */ innerGlobal,
+          /* module= */ undefined);
 
   if (typeof exports != 'undefined') {
     // CommonJS module loader.  Use "exports" instead of "module.exports" to
