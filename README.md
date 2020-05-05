@@ -39,7 +39,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Tizen TV³  | -        | -       | -       | -       | -        | -      |**Y**|
 
 NOTES:
- - ¹: On macOS, only Safari 11+ is supported.  On iOS, only iOS 12+ is
+ - ¹: On macOS, only Safari 12+ is supported.  On iOS, only iOS 12+ is
    supported.  Older versions will be rejected.
  - ²: The latest stable Chromecast firmware is tested. Both sender and receiver
    can be implemented with Shaka Player.
