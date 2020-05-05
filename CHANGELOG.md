@@ -1,3 +1,81 @@
+## 2.5.11 (2020-05-05)
+
+New Features:
+  - Add role information to text and audio tracks in src= mode
+    - https://github.com/google/shaka-player/pull/2543
+  - Parse HLS CHARACTERISTICS attribute and populate track roles
+    - https://github.com/google/shaka-player/pull/2534
+  - Recognize new CMAF file extensions cmfv, cmfa, cmft in HLS
+    - https://github.com/google/shaka-player/pull/2473
+  - Add configuration to enable/disable fullscreen-on-rotate
+    - https://github.com/google/shaka-player/issues/2494
+  - Add configuration to enable keyboard playback controls
+    - https://github.com/google/shaka-player/issues/2489
+  - Dismiss UI overflow menus on window click
+  - Add non-standard DASH PlayReady UUID
+    - https://github.com/google/shaka-player/pull/2474
+
+Bugfixes:
+  - Fix FairPlay event handling
+    - https://github.com/google/shaka-player/issues/2214
+  - Fix load() Promise hang on iOS
+    - https://github.com/google/shaka-player/issues/2483
+  - Fix language normalization with native HLS
+    - https://github.com/google/shaka-player/issues/2480
+  - Fix display of duplicate cues
+    - https://github.com/google/shaka-player/issues/2497
+  - Fix TTML position parsing
+    - https://github.com/google/shaka-player/issues/2477
+    - https://github.com/google/shaka-player/pull/2493
+  - Fix display of line-positioned subtitles
+    - https://github.com/google/shaka-player/issues/2524
+  - Update to mux.js 5.5.4 to fix closed caption parsing bug
+    - https://github.com/videojs/mux.js/pull/330
+    - https://github.com/videojs/mux.js/pull/333
+  - Fix language and role preferences in src= mode
+    - https://github.com/google/shaka-player/pull/2535
+    - https://github.com/google/shaka-player/pull/2506
+  - Fix extra text track in src= mode
+    - https://github.com/google/shaka-player/issues/2516
+  - Fix Safari-prefixed fullscreen APIs
+    - https://github.com/google/shaka-player/issues/2528
+  - Fix display of nested cues with native text display
+    - https://github.com/google/shaka-player/issues/2263
+  - Fix getPlayheadTimeAsDate while loading/buffering
+  - Recover from timed-out Cast connection
+    - https://github.com/google/shaka-player/issues/2446
+  - Fix DRM exceptions on WebOS TVs
+    - https://github.com/google/shaka-player/issues/2512
+    - https://github.com/google/shaka-player/pull/2513
+  - Fix frameRate restrictions
+  - Filter out metadata text tracks in Player tracks API
+    - https://github.com/google/shaka-player/pull/2519
+  - Fix PlayRateController leak
+  - Fix buffer check in StallDetector
+    - https://github.com/google/shaka-player/issues/1809
+  - Fix offline storage picking high-bandwidth codecs
+    - https://github.com/google/shaka-player/issues/2390
+  - Fix nested TTML cues with non-ASCII characters
+    - https://github.com/google/shaka-player/issues/2478
+  - Fix UI updates when enabling captions
+    - https://github.com/google/shaka-player/issues/2484
+  - Fix ratechange events w/ src= playback
+    - https://github.com/google/shaka-player/issues/2488
+  - Fix serialization of Error objects over Cast
+  - Fix missing EME polyfill in Cast receiver
+  - Use the module wrapper in debug builds
+    - https://github.com/google/shaka-player/issues/2465
+
+Docs:
+  - Fix broken docs for UI control events
+    - https://github.com/google/shaka-player/issues/2385
+  - Add FAQ entry about minBufferTime
+    - https://github.com/google/shaka-player/issues/2000
+
+Demo App:
+  - Push demo app footer to the bottom of the page
+
+
 ## 2.5.10 (2020-03-24)
 
 New Features:
