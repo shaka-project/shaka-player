@@ -1168,19 +1168,16 @@ shakaDemo.Main = class {
       this.controls_.getCastProxy().setAppData({'asset': asset});
 
       // Enable the correct set of controls before loading.
+      // The video container influences the TextDisplayer used.
       if (this.nativeControlsEnabled_) {
         this.controls_.setEnabledShakaControls(false);
         this.controls_.setEnabledNativeControls(true);
+        // This will force the player to use SimpleTextDisplayer.
+        this.player_.setVideoContainer(null);
       } else {
         this.controls_.setEnabledShakaControls(true);
         this.controls_.setEnabledNativeControls(false);
-      }
-      // Also set text displayer, as appropriate.
-      // Use SimpleTextDisplayer in native control, and use UITextDisplayer
-      // otherwise.
-      if (this.nativeControlsEnabled_) {
-        this.player_.setVideoContainer(null);
-      } else {
+        // This will force the player to use UITextDisplayer.
         this.player_.setVideoContainer(this.container_);
       }
 
