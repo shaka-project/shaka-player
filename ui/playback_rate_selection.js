@@ -39,7 +39,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
         });
 
     this.eventManager.listen(this.player, 'ratechange', () => {
-      this.updatePlaybackRateSelection_();
+      this.updatePlaybackRateSelection_(this.player.getPlaybackRate());
     });
 
     /** @type {!Map.<string, number>} */
@@ -56,7 +56,6 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
     this.addPlaybackRates_();
-    this.updatePlaybackRateSelection_();
   }
 
   /**
@@ -76,10 +75,10 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
   /**
    * Update checkmark icon and related class and attribute for the chosen rate
    * button.
+   * @param {number} rate The video playback rate.
    * @private
    */
-  updatePlaybackRateSelection_() {
-    const rate = this.player.getExpectedPlaybackRate();
+  updatePlaybackRateSelection_(rate) {
     // Remove the old checkmark icon and related tags and classes if it exists.
     const checkmarkIcon = shaka.ui.Utils.getDescendantIfExists(
         this.menu, 'material-icons shaka-chosen-item');
