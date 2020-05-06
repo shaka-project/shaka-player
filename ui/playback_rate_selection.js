@@ -56,6 +56,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
     this.addPlaybackRates_();
+    this.updatePlaybackRateSelection_(this.player.getPlaybackRate());
   }
 
   /**
