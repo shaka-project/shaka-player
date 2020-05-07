@@ -628,6 +628,70 @@ describe('PeriodCombiner', () => {
     expect(audio.originalId).toBe('44100,48000');
   });
 
+
+  it('Matches streams with most roles in common', async () => {
+    const makeAudioStreamWithRoles = (roles) => {
+      const stream = makeAudioStream('en');
+      stream.roles = roles;
+      return stream;
+    };
+
+    const stream1 = makeAudioStreamWithRoles(['role1', 'role2']);
+    stream1.originalId = 'stream1';
+
+    const stream2 = makeAudioStreamWithRoles(['role1']);
+    stream2.originalId = 'stream2';
+
+    const stream3 = makeAudioStreamWithRoles(['role1', 'role2']);
+    stream3.originalId = 'stream3';
+
+    const stream4 = makeAudioStreamWithRoles(['role1']);
+    stream4.originalId = 'stream4';
+
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          stream1,
+          stream2,
+        ],
+        textStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          stream3,
+          stream4,
+        ],
+        textStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const variants = combiner.getVariants();
+
+    expect(variants).toEqual(jasmine.arrayWithExactContents([
+      makeAVVariant(1080, 'en'),
+      makeAVVariant(1080, 'en'),
+    ]));
+
+    // We can use the originalId field to see what each track is composed of.
+    const audio1 = variants[0].audio;
+    expect(audio1.roles).toEqual(['role1', 'role2']);
+    expect(audio1.originalId).toBe('stream1,stream3');
+
+    const audio2 = variants[1].audio;
+    expect(audio2.roles).toEqual(['role1']);
+    expect(audio2.originalId).toBe('stream2,stream4');
+  });
+
   /** @type {number} */
   let nextId = 0;
 
