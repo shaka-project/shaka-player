@@ -94,7 +94,7 @@ The only browsers capable of playing TS natively are Edge and Chromecast.  You
 will get a `CONTENT_UNSUPPORTED_BY_BROWSER` error on other browsers due to
 their lack of TS support.
 
-You can enable transmuxing by [including mux.js][] v5.5.4+ in your application.
+You can enable transmuxing by [including mux.js][] v5.6.3+ in your application.
 If Shaka Player detects that mux.js has been loaded, we will use it to transmux
 TS content into MP4 on-the-fly, so that the content can be played by the
 browser.
