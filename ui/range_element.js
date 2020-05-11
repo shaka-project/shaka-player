@@ -159,16 +159,25 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
 
     const changedTouch = /** @type {TouchEvent} */ (event).changedTouches[0];
     const rect = this.bar.getBoundingClientRect();
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
 
     // Calculate the range value based on the touch position.
-    let value = (this.bar.max / rect.width) *
-      (changedTouch.clientX - rect.left);
+
+    // Pixels from the left of the range element
+    const touchPosition = changedTouch.clientX - rect.left;
+
+    // Pixels per unit value of the range element.
+    const scale = (max - min) / rect.width;
+
+    // Touch position in units, which may be outside the allowed range.
+    let value = min + scale * touchPosition;
 
     // Keep value within bounds.
-    if (value < this.bar.min) {
-      value = this.bar.min;
-    } else if (value > this.bar.max) {
-      value = this.bar.max;
+    if (value < min) {
+      value = min;
+    } else if (value > max) {
+      value = max;
     }
 
     this.bar.value = value;
