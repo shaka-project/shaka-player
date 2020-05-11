@@ -151,7 +151,15 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const max = parseFloat(this.bar.max);
 
     // Calculate the range value based on the touch position.
-    let value = (max / rect.width) * (changedTouch.clientX - rect.left);
+
+    // Pixels from the left of the range element
+    const touchPosition = changedTouch.clientX - rect.left;
+
+    // Pixels per unit value of the range element.
+    const scale = (max - min) / rect.width;
+
+    // Touch position in units, which may be outside the allowed range.
+    let value = min + scale * touchPosition;
 
     // Keep value within bounds.
     if (value < min) {
