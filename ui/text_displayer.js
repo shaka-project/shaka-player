@@ -378,10 +378,12 @@ shaka.ui.TextDisplayer = class {
     // The size is a number giving the size of the text container, to be
     // interpreted as a percentage of the video, as defined by the writing
     // direction.
-    if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
-      captionsStyle.width = cue.size + '%';
-    } else {
-      captionsStyle.height = cue.size + '%';
+    if (cue.size) {
+      if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
+        captionsStyle.width = cue.size + '%';
+      } else {
+        captionsStyle.height = cue.size + '%';
+      }
     }
   }
 };
