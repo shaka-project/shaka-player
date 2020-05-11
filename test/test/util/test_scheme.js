@@ -532,6 +532,14 @@ shaka.test.TestScheme.DATA = {
     duration: 30,
   },
 
+  // https://github.com/google/shaka-player/issues/2553
+  'forced_subs_simulation': {
+    audio: sintelAudioSegment,
+    text: vttSegment,
+    textLanguages: ['de', 'de'],  // one of these is the "forced subs" track
+    duration: 30,
+  },
+
   'sintel-enc': {
     video: sintelEncryptedVideo,
     audio: sintelEncryptedAudio,

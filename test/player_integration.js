@@ -299,6 +299,37 @@ describe('Player', () => {
       expect(displayer.isTextVisible()).toBe(true);
       expect(cues.length).toBeGreaterThan(0);
     });
+
+    // https://github.com/google/shaka-player/issues/2553
+    it('does not change the selected track', async () => {
+      player.configure('streaming.alwaysStreamText', false);
+      await player.load('test:forced_subs_simulation_compiled');
+
+      // In this content, both text tracks have the same language and role, and
+      // so should look identical in terms of choosing one to match a
+      // preference.  This is important to the test, so verify it first.
+      const tracks = player.getTextTracks();
+      expect(tracks[0].language).toBe(tracks[1].language);
+      expect(tracks[0].roles).toEqual(tracks[1].roles);
+
+      const getTracksActive = () => player.getTextTracks().map((t) => t.active);
+
+      // If we choose a track first, then turn on text, the track should not
+      // change.  Try this with both tracks.
+      player.setTextTrackVisibility(false);
+
+      player.selectTextTrack(tracks[0]);
+      expect(getTracksActive()).toEqual([true, false]);
+      player.setTextTrackVisibility(true);
+      expect(getTracksActive()).toEqual([true, false]);
+
+      player.setTextTrackVisibility(false);
+
+      player.selectTextTrack(tracks[1]);
+      expect(getTracksActive()).toEqual([false, true]);
+      player.setTextTrackVisibility(true);
+      expect(getTracksActive()).toEqual([false, true]);
+    });
   });  // describe('setTextTrackVisibility')
 
   describe('plays', () => {
