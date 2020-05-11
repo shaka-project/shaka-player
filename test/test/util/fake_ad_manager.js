@@ -30,7 +30,7 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   }
 
   /** @override */
-  initServerSide(adContainer, video) {}
+  initServerSide(adContainer, video, locale) {}
 
   /** @override */
   requestServerSideStream(imaRequest, backupUrl = '') {

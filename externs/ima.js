@@ -256,8 +256,9 @@ google.ima.dai.api.StreamManager = class {
   /**
    * @param {HTMLMediaElement} videoElement
    * @param {HTMLElement=} adUiElement
+   * @param {google.ima.dai.api.UiSettings=} uiSettings
    */
-  constructor(videoElement, adUiElement = undefined) {}
+  constructor(videoElement, adUiElement = undefined, uiSettings = undefined) {}
 
   /** @param {number} streamTime */
   contentTimeForStreamTime(streamTime) {}
@@ -294,6 +295,16 @@ google.ima.dai.api.StreamManager = class {
 
   /** @override */
   dispatchEvent() {}
+};
+
+
+/** @const */
+google.ima.dai.api.UiSettings = class {
+  /** @return {number} */
+  getLocale() {}
+
+  /** @param {string} locale */
+  setLocale(locale) {}
 };
 
 

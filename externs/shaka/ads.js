@@ -56,8 +56,9 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {!HTMLElement} adContainer
    * @param {!HTMLMediaElement} video
+   * @param {string} locale
    */
-  initServerSide(adContainer, video) {}
+  initServerSide(adContainer, video, locale) {}
 
   /**
    * @param {!google.ima.dai.api.StreamRequest} imaRequest
