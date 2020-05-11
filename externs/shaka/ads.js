@@ -54,6 +54,11 @@ shaka.extern.IAdManager = class extends EventTarget {
   requestClientSideAds(imaRequest) {}
 
   /**
+   * @return {shaka.ads.ClientSideAd}
+   */
+  getCurrentCSAd() {}
+
+  /**
    * @param {!HTMLElement} adContainer
    * @param {!HTMLMediaElement} video
    */
@@ -70,6 +75,11 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {Object} adTagParameters
    */
   replaceServerSideAdTagParameters(adTagParameters) {}
+
+  /**
+   * @return {shaka.ads.ServerSideAd}
+   */
+  getCurrentSSAd() {}
 
   /**
    * Get statistics for the current playback session. If the player is not

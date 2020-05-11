@@ -30,6 +30,9 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   }
 
   /** @override */
+  getCurrentCSAd() {}
+
+  /** @override */
   initServerSide(adContainer, video) {}
 
   /** @override */
@@ -39,6 +42,9 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
 
   /** @override */
   replaceServerSideAdTagParameters(adTagParameters) {}
+
+  /** @override */
+  getCurrentSSAd() {}
 
   /** @override */
   getStats() {
