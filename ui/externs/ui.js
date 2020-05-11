@@ -138,14 +138,61 @@ shaka.extern.UIConfiguration;
 
 
 /**
- * Interface for UI elements.
+ * Interface for UI elements.  UI elements should inherit from the concrete base
+ * class shaka.ui.Element.  The members defined in this extern's constructor are
+ * all available from the base class, and are defined here to keep the compiler
+ * from renaming them.
  *
  * @extends {shaka.util.IReleasable}
  * @interface
  * @exportDoc
  */
 shaka.extern.IUIElement = class {
-  /** @override */
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   */
+  constructor(parent, controls) {
+    /**
+     * @protected {HTMLElement}
+     * @exportDoc
+     */
+    this.parent;
+
+    /**
+     * @protected {shaka.ui.Controls}
+     * @exportDoc
+     */
+    this.controls;
+
+    /**
+     * @protected {shaka.util.EventManager}
+     * @exportDoc
+     */
+    this.eventManager;
+
+    /**
+     * @protected {shaka.ui.Localization}
+     * @exportDoc
+     */
+    this.localization;
+
+    /**
+     * @protected {shaka.Player}
+     * @exportDoc
+     */
+    this.player;
+
+    /**
+     * @protected {HTMLMediaElement}
+     * @exportDoc
+     */
+    this.video;
+  }
+
+  /**
+   * @override
+   */
   release() {}
 };
 

@@ -22,9 +22,11 @@ describe('UI', () => {
   let waiter;
   /** @type {!HTMLLinkElement} */
   let cssLink;
+  /** @type {!shaka.ui.Overlay} */
+  let ui;
   /** @type {!shaka.ui.Controls} */
   let controls;
-
+  /** @type {shakaNamespaceType} */
   let compiledShaka;
 
   beforeAll(async () => {
@@ -65,7 +67,7 @@ describe('UI', () => {
       // TODO: Cast receiver id to test chromecast integration
     };
 
-    const ui = new compiledShaka.ui.Overlay(player, videoContainer, video);
+    ui = new compiledShaka.ui.Overlay(player, videoContainer, video);
     ui.configure(config);
 
     // Grab event manager from the uncompiled library:
@@ -530,6 +532,49 @@ describe('UI', () => {
           /* modifier= */ formatResolution);
     }
   });  // describe('resolution selection')
+
+  describe('uncompiled UI element plugin', () => {
+    it('has access to the features of the compiled base class', () => {
+      let constructed = false;
+
+      /** @extends {shaka.ui.Element} */
+      const TestElement = class extends compiledShaka.ui.Element {
+        /**
+         * @param {!HTMLElement} parent
+         * @param {!shaka.ui.Controls} controls
+         */
+        constructor(parent, controls) {
+          super(parent, controls);
+          constructed = true;
+
+          // The compiled base class's protected members should still have their
+          // original names.  Otherwise, apps can't register uncompiled plugins.
+          expect(this.parent).not.toBeUndefined();
+          expect(this.controls).not.toBeUndefined();
+          expect(this.eventManager).not.toBeUndefined();
+          expect(this.localization).not.toBeUndefined();
+          expect(this.player).not.toBeUndefined();
+          expect(this.video).not.toBeUndefined();
+        }
+      };
+
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      const TestElementFactory = class {
+        /** @override */
+        create(rootElement, controls) {
+          return new TestElement(rootElement, controls);
+        }
+      };
+
+      compiledShaka.ui.Controls.registerElement(
+          'test_element', new TestElementFactory());
+
+      constructed = false;
+      ui.configure('controlPanelElements', ['test_element']);
+      // The constructor contains expectations, so make sure we called it.
+      expect(constructed).toBe(true);
+    });
+  });  // describe('UI element plugins')
 
   /**
    * @param {!Array.<!shaka.extern.Track>} tracks
