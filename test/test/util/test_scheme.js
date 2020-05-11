@@ -48,6 +48,9 @@ let ExtraMetadataType;
  *   video: AVMetadataType,
  *   audio: AVMetadataType,
  *   text: TextMetadataType,
+ *   videoResolutions: (!Array.<!Array.<number>>|undefined),
+ *   audioLanguages: (!Array.<string>|undefined),
+ *   textLanguages: (!Array.<string>|undefined),
  *   duration: number,
  *   licenseServers: (!Object.<string, string>|undefined),
  *   licenseRequestHeaders: (!Object.<string, string>|undefined)
@@ -196,10 +199,6 @@ shaka.test.TestScheme = class {
           data[contentType].segmentDuration);
       stream.closedCaptions = data[contentType].closedCaptions;
 
-      if (data[contentType].language) {
-        stream.language = data[contentType].language;
-      }
-
       if (data[contentType].delaySetup) {
         stream.createSegmentIndex = () => shaka.test.Util.delay(1);
       }
@@ -247,103 +246,97 @@ shaka.test.TestScheme = class {
         }
       }
 
+      let nextId = 0;
+
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.presentationTimeline.setDuration(data.duration);
 
-        manifest.addVariant(0, (variant) => {
-          if (data[ContentType.VIDEO]) {
-            variant.addVideo(1, (stream) => {
-              addStreamInfo(
-                  stream, variant, data, ContentType.VIDEO, name);
+        const videoResolutions = data.videoResolutions || [undefined];
+        const audioLanguages = data.audioLanguages ||
+            (data.audio && [data.audio.language]) || [undefined];
+
+        if (data.video && data.audio) {
+          const resMap = new Map();
+          const langMap = new Map();
+          for (const res of videoResolutions) {
+            for (const lang of audioLanguages) {
+              manifest.addVariant(nextId++, (variant) => {
+                if (resMap.has(res)) {
+                  variant.addExistingStream(resMap.get(res));
+                } else {
+                  resMap.set(res, nextId);
+                  variant.addVideo(nextId++, (stream) => {
+                    addStreamInfo(
+                        stream, variant, data, ContentType.VIDEO, name);
+                    if (res) {
+                      stream.size(res[0], res[1]);
+                    }
+                  });
+                }
+
+                if (langMap.has(lang)) {
+                  variant.addExistingStream(langMap.get(lang));
+                } else {
+                  langMap.set(lang, nextId);
+                  variant.addAudio(nextId++, (stream) => {
+                    addStreamInfo(
+                        stream, variant, data, ContentType.AUDIO, name);
+                    if (lang) {
+                      stream.language = lang;
+                    }
+                  });
+                }
+
+                if (lang) {
+                  variant.language = lang;
+                }
+              });
+            }
+          }
+        } else if (data.video) {
+          for (const res of videoResolutions) {
+            manifest.addVariant(nextId++, (variant) => {
+              variant.addVideo(nextId++, (stream) => {
+                addStreamInfo(stream, variant, data, ContentType.VIDEO, name);
+                if (res) {
+                  stream.size(res[0], res[1]);
+                }
+              });
             });
           }
-          if (data[ContentType.AUDIO]) {
-            variant.addAudio(2, (stream) => {
-              addStreamInfo(
-                  stream, variant, data, ContentType.AUDIO, name);
+        } else if (data.audio) {
+          for (const lang of audioLanguages) {
+            manifest.addVariant(nextId++, (variant) => {
+              variant.addAudio(nextId++, (stream) => {
+                addStreamInfo(stream, variant, data, ContentType.AUDIO, name);
+                if (lang) {
+                  variant.language = lang;
+                  stream.language = lang;
+                }
+              });
             });
           }
-        });
+        }
 
         if (data.text) {
-          manifest.addTextStream(3, (stream) => {
-            stream.mimeType = data.text.mimeType;
-            stream.codecs = data.text.codecs || '';
-            stream.textStream(getAbsoluteUri(data));
+          const textLanguages = data.textLanguages || [data.text.language];
 
-            if (data.text.language) {
-              stream.language = data.text.language;
-            }
-          });
+          for (const lang of textLanguages) {
+            manifest.addTextStream(nextId++, (stream) => {
+              stream.mimeType = data.text.mimeType;
+              stream.codecs = data.text.codecs || '';
+              stream.textStream(getAbsoluteUri(data));
+
+              if (lang) {
+                stream.language = lang;
+              }
+            });
+          }
         }
       }, compiledShaka);
 
       MANIFESTS[name + suffix] = manifest;
     }
-
-    // Custom generator for multiple streams with different languages and
-    // resolutions.
-    // TODO: Can this be generalized from the DATA array instead?
-    const data = DATA['sintel'];
-    const periodDuration = 10;
-    let idCount = 1;
-    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.presentationTimeline.setDuration(periodDuration);
-
-      // Variant in English, res 426x182
-      manifest.addVariant(idCount++, (variant) => {
-        variant.language = 'en';
-        variant.addVideo(idCount++, (stream) => {
-          stream.size(426, 182);
-          addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
-        });
-        variant.addAudio(idCount++, (stream) => {
-          stream.language = 'en';
-          addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
-        });
-      });
-
-      // Same language, different resolution
-      manifest.addVariant(idCount++, (variant) => {
-        variant.language = 'en';
-        variant.addVideo(idCount++, (stream) => {
-          stream.size(640, 272);
-          addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
-        });
-        variant.addAudio(idCount++, (stream) => {
-          stream.language = 'en';
-          addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
-        });
-      });
-
-      // Same resolution, different language
-      manifest.addVariant(idCount++, (variant) => {
-        variant.language = 'es';
-        variant.addVideo(idCount++, (stream) => {
-          stream.size(640, 272);
-          addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
-        });
-        variant.addAudio(idCount++, (stream) => {
-          stream.language = 'es';
-          addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
-        });
-      });
-
-      manifest.addTextStream(idCount++, (stream) => {
-        stream.language = 'zh';
-        stream.mimeType = data.text.mimeType;
-        stream.codecs = data.text.codecs || '';
-        stream.textStream(getAbsoluteUri(data));
-      });
-
-      manifest.addTextStream(idCount++, (stream) => {
-        stream.language = 'fr';
-        stream.mimeType = data.text.mimeType;
-        stream.codecs = data.text.codecs || '';
-        stream.textStream(getAbsoluteUri(data));
-      });
-    }, compiledShaka);
-    MANIFESTS['sintel_multi_lingual_multi_res' + suffix] = manifest;
 
     return Promise.all(promises);
   }
@@ -515,7 +508,18 @@ shaka.test.TestScheme.DATA = {
     duration: 30,
   },
 
-  // 'sintel_multi_lingual_multi_res' : Generated by createManifests().
+  'sintel_multi_lingual_multi_res': {
+    video: sintelVideoSegment,
+    audio: sintelAudioSegment,
+    text: vttSegment,
+    videoResolutions: [
+      [426, 182],
+      [640, 272],
+    ],
+    audioLanguages: ['en', 'es'],
+    textLanguages: ['zh', 'fr'],
+    duration: 10,
+  },
 
   'sintel_audio_only': {
     audio: sintelAudioSegment,
