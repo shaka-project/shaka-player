@@ -357,8 +357,16 @@ See {@link shaka.extern.AbrManager} for details.
 
 #### TextDisplayer plugin changes
 
-The `Cue` objects consumed by `TextDisplayer` have changed in v2.6.  The
-following new fields have been added and MAY be used by `TextDisplayer` plugins:
+The `Cue` objects consumed by `TextDisplayer` have changed in v2.6.
+
+ - `Cue.size` now defaults to `0`, which should be interpretted as "auto" (fit
+   to text).
+
+All application-specific TextDisplayer plugins MUST be updated.
+v2.6 does not have backward compatibility for this!
+
+In addition, the following new fields have been added and MAY be used by
+`TextDisplayer` plugins:
 
  - `Cue.backgroundImage`
  - `Cue.border`

@@ -154,7 +154,7 @@ shaka.extern.Cue = class {
     this.positionAlign;
 
     /**
-     * Size of the cue box (in percents).
+     * Size of the cue box (in percents), where 0 means "auto".
      * @type {number}
      * @exportDoc
      */

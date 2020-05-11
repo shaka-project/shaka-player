@@ -423,6 +423,8 @@ The `Cue` objects consumed by `TextDisplayer` have changed in v2.5 and v2.6.
 
  - `Cue.writingDirection` has been split into `Cue.writingMode` and
    `Cue.direction` to fix bugs in the handling of these attributes
+ - `Cue.size` now defaults to `0`, which should be interpretted as "auto" (fit
+   to text).
 
 All application-specific TextDisplayer plugins MUST be updated.
 v2.6 does not have backward compatibility for this!
