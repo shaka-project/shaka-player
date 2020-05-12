@@ -106,7 +106,6 @@ describe('UI', () => {
     document.head.removeChild(cssLink);
   });
 
-
   describe('language selections', () => {
     /** @type {!Map.<string, !HTMLElement>} */
     let languagesToButtons;
@@ -145,8 +144,7 @@ describe('UI', () => {
             () => player.getVariantTracks(),
             (language) => player.selectAudioLanguage(language));
       });
-    });
-
+    });  // describe('audio')
 
     describe('caption selection', () => {
       beforeEach(() => {
@@ -212,7 +210,6 @@ describe('UI', () => {
         expect(offButtonChosen).not.toBe(null);
       });
 
-
       /**
        * @return {Element}
        */
@@ -223,8 +220,7 @@ describe('UI', () => {
         expect(offButton).not.toBe(null);
         return offButton;
       }
-    });
-
+    });  // describe('caption selection')
 
     /**
      * @param {!Array.<shaka.extern.LanguageRole>} languagesAndRoles
@@ -244,7 +240,6 @@ describe('UI', () => {
       );
     }
 
-
     /**
      * @param {string} language
      * @return {string}
@@ -252,7 +247,6 @@ describe('UI', () => {
     function getNativeName(language) {
       return mozilla.LanguageMapping[language].nativeName;
     }
-
 
     /**
      * Make sure languages specified by the manifest match what we show on UI.
@@ -264,7 +258,6 @@ describe('UI', () => {
 
       verifyItems(langsFromContentNative, languageButtons);
     }
-
 
     /**
      * @param {string} playerEventName
@@ -280,7 +273,6 @@ describe('UI', () => {
       await waiter.waitForEvent(player, playerEventName);
       expect(getSelectedTrack(getTracks()).language).toBe(newLanguage);
     }
-
 
     /**
      * @param {string} controlsEventName
@@ -313,8 +305,7 @@ describe('UI', () => {
 
       expect(isChosen).not.toBe(null);
     }
-  });
-
+  });  // describe('language selections')
 
   describe('resolution selection', () => {
     /** @type {!Map.<number, !HTMLElement>} */
@@ -335,7 +326,6 @@ describe('UI', () => {
     let preferredLanguage;
     /** @type {!shaka.extern.Track} */
     let oldResolutionTrack;
-
 
     beforeEach(async () => {
       oldResolution = 182;
@@ -369,14 +359,12 @@ describe('UI', () => {
       }
     });
 
-
     it('contains all the relevant resolutions', () => {
       const formattedResolutions = resolutionsFromContent.map((res) => {
         return formatResolution(res);
       });
       verifyItems(formattedResolutions, resolutionButtons);
     });
-
 
     it('changing resolution via UI has effect on the player', async () => {
       // Update the tracks
@@ -392,7 +380,6 @@ describe('UI', () => {
       tracks = player.getVariantTracks();
       expect(getSelectedTrack(tracks).height).toBe(newResolution);
     });
-
 
     it('changing resolution via API has effect on the UI', async () => {
       updateResolutionButtonsAndMap();
@@ -416,7 +403,6 @@ describe('UI', () => {
       expect(isChosen).not.toBe(null);
     });
 
-
     it('selecting Auto via UI enables ABR', async () => {
       // We disabled abr in beforeEach()
       expect(player.getConfiguration().abr.enabled).toBe(false);
@@ -431,7 +417,6 @@ describe('UI', () => {
       expect(player.getConfiguration().abr.enabled).toBe(true);
     });
 
-
     it('selecting specific resolution disables ABR', async () => {
       const config = {abr: {enabled: true}};
       player.configure(config);
@@ -445,7 +430,6 @@ describe('UI', () => {
       await p;
       expect(player.getConfiguration().abr.enabled).toBe(false);
     });
-
 
     it('enabling ABR via API gets the Auto button selected', async () => {
       expect(player.getConfiguration().abr.enabled).toBe(false);
@@ -483,7 +467,6 @@ describe('UI', () => {
       expect(resolutionButton.classList.contains('shaka-hidden')).toBe(false);
     });
 
-
     /**
      * @return {Element}
      */
@@ -495,7 +478,6 @@ describe('UI', () => {
       return auto;
     }
 
-
     /**
      * Gets the resolution to the same format it
      * appears in the UI: height + 'p'.
@@ -506,7 +488,6 @@ describe('UI', () => {
     function formatResolution(height) {
       return height.toString() + 'p';
     }
-
 
     /**
      * @param {!Array.<!shaka.extern.Track>} tracks
@@ -525,7 +506,6 @@ describe('UI', () => {
 
       return trackWithRes;
     }
-
 
     function updateResolutionButtonsAndMap() {
       tracks = player.getVariantTracks();
@@ -549,7 +529,7 @@ describe('UI', () => {
           /* choices= */ resolutionsFromContent,
           /* modifier= */ formatResolution);
     }
-  });
+  });  // describe('resolution selection')
 
   /**
    * @param {!Array.<!shaka.extern.Track>} tracks
@@ -589,7 +569,6 @@ describe('UI', () => {
     return map;
   }
 
-
   /**
    * Filter out buttons with given classes.
    *
@@ -609,7 +588,6 @@ describe('UI', () => {
           return true;
         });
   }
-
 
   /**
    * Make sure elements from content match their UI representation.
