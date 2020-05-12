@@ -537,11 +537,27 @@ describe('UI', () => {
     it('has access to the features of the compiled base class', () => {
       let constructed = false;
 
+      // For the uncompiled element below, we won't want to create real
+      // controls.  Real controls would create a CastProxy which would conflict
+      // with the compiled version instantiated above.
+      const fakeControls = /** @type {!shaka.ui.Controls} */({
+        getLocalization: () => null,
+        getPlayer: () => player,
+        getVideo: () => null,
+      });
+
+      /** @extends {shaka.ui.Element} */
+      const UncompiledElementType = class extends shaka.ui.Element {};
+      const uncompiledElement = new UncompiledElementType(
+          videoContainer, fakeControls);
+      uncompiledElement.release();
+
       /** @extends {shaka.ui.Element} */
       const TestElement = class extends compiledShaka.ui.Element {
         /**
          * @param {!HTMLElement} parent
          * @param {!shaka.ui.Controls} controls
+         * @suppress {checkTypes} since we use "in" and "[]" on a struct.
          */
         constructor(parent, controls) {
           super(parent, controls);
@@ -549,12 +565,18 @@ describe('UI', () => {
 
           // The compiled base class's protected members should still have their
           // original names.  Otherwise, apps can't register uncompiled plugins.
-          expect(this.parent).not.toBeUndefined();
-          expect(this.controls).not.toBeUndefined();
-          expect(this.eventManager).not.toBeUndefined();
-          expect(this.localization).not.toBeUndefined();
-          expect(this.player).not.toBeUndefined();
-          expect(this.video).not.toBeUndefined();
+          // Rather than list them and potentially let them get out of date, use
+          // the uncompiled library as a reference.
+          for (const k in uncompiledElement) {
+            if (k.endsWith('_')) {
+              // Skip private members.
+              continue;
+            }
+
+            // All public and protected members of the uncompiled base class
+            // should be available on "this" with their original names.
+            expect(this[k]).withContext(k).toBeDefined();
+          }
         }
       };
 

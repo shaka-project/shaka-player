@@ -188,6 +188,18 @@ shaka.extern.IUIElement = class {
      * @exportDoc
      */
     this.video;
+
+    /**
+     * @protected {shaka.extern.IAdManager}
+     * @exportDoc
+     */
+    this.adManager;
+
+    /**
+     * @protected {shaka.extern.IAd}
+     * @exportDoc
+     */
+    this.ad;
   }
 
   /**
