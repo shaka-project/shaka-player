@@ -54,7 +54,7 @@ shaka.extern.IAdManager = class extends EventTarget {
   requestClientSideAds(imaRequest) {}
 
   /**
-   * @return {shaka.ads.ClientSideAd}
+   * @return {shaka.extern.IAd}
    */
   getCurrentCSAd() {}
 
@@ -77,7 +77,7 @@ shaka.extern.IAdManager = class extends EventTarget {
   replaceServerSideAdTagParameters(adTagParameters) {}
 
   /**
-   * @return {shaka.ads.ServerSideAd}
+   * @return {shaka.extern.IAd}
    */
   getCurrentSSAd() {}
 
