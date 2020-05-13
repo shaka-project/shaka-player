@@ -1973,6 +1973,8 @@ describe('HlsParser', () => {
     let segmentDataStartTime;
     /** @type {!Uint8Array} */
     let tsSegmentData;
+    /** @type {!Uint8Array} */
+    let nullTsPacketData;
 
     const master = [
       '#EXTM3U\n',
@@ -2026,6 +2028,10 @@ describe('HlsParser', () => {
       // 180000 (TS PTS) divided by fixed TS timescale (90000) = 2s.
       // 2000 (MP4 PTS) divided by parsed MP4 timescale (1000) = 2s.
       segmentDataStartTime = 2;
+      nullTsPacketData = new Uint8Array([
+        0x47, // TS sync byte (fixed value)
+        0x1f, 0xff, // null packet (packet ID 8191)
+      ]);
     });
 
     it('parses start time from mp4 segment', async () => {
@@ -2066,6 +2072,46 @@ describe('HlsParser', () => {
           .setResponseText('test:/master', master)
           .setResponseText('test:/video', tsMediaPlaylist)
           .setResponseValue('test:/main.ts', tsSegmentData);
+
+      const expectedRef = ManifestParser.makeReference(
+          /* uri= */ 'test:/main.ts',
+          /* startTime= */ 0,
+          /* endTime= */ 5,
+          /* baseUri= */ '',
+          expectedStartByte,
+          expectedEndByte);
+      // In VOD content, we set the timestampOffset to align the
+      // content to presentation time 0.
+      expectedRef.timestampOffset = -segmentDataStartTime;
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      const video = manifest.variants[0].video;
+      await video.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(video, [expectedRef]);
+
+      // Make sure the segment data was fetched with the correct byte
+      // range.
+      fakeNetEngine.expectRangeRequest(
+          'test:/main.ts',
+          expectedStartByte,
+          partialEndByte);
+    });
+
+    it('parses start time from ts segments with null packets', async () => {
+      const tsMediaPlaylist = media.replace(/\.mp4/g, '.ts');
+
+      // Each packet is 188 bytes, so allocate space for 3.
+      const tsSegmentWithNullPackets = new Uint8Array(188 * 3);
+      // The first two are "null" packets.
+      tsSegmentWithNullPackets.set(nullTsPacketData, /* offset= */ 0);
+      tsSegmentWithNullPackets.set(nullTsPacketData, /* offset= */ 188);
+      // The third has a timestamp.
+      tsSegmentWithNullPackets.set(tsSegmentData, /* offset= */ 188 * 2);
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', tsMediaPlaylist)
+          .setResponseValue('test:/main.ts', tsSegmentWithNullPackets);
 
       const expectedRef = ManifestParser.makeReference(
           /* uri= */ 'test:/main.ts',
