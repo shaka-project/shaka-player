@@ -257,7 +257,6 @@ shaka.ui.TextDisplayer = class {
     captionsStyle.backgroundColor = cue.backgroundColor;
     captionsStyle.color = cue.color;
     captionsStyle.direction = cue.direction;
-    captionsStyle.position = 'absolute';
 
     if (cue.backgroundImage) {
       captionsStyle.backgroundImage = 'url(\'' + cue.backgroundImage + '\')';
@@ -323,6 +322,7 @@ shaka.ui.TextDisplayer = class {
     // TODO: Implement lineAlignment of 'CENTER'.
     if (cue.line) {
       if (cue.lineInterpretation == Cue.lineInterpretation.PERCENTAGE) {
+        captionsStyle.position = 'absolute';
         if (cue.writingMode == Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM) {
           if (cue.lineAlign == Cue.lineAlign.START) {
             captionsStyle.top = cue.line + '%';
@@ -351,6 +351,7 @@ shaka.ui.TextDisplayer = class {
           cue.region.viewportAnchorUnits == percentageUnit ? '%' : 'px';
       captionsStyle.height = cue.region.height + heightUnit;
       captionsStyle.width = cue.region.width + widthUnit;
+      captionsStyle.position = 'absolute';
       captionsStyle.top = cue.region.viewportAnchorY + viewportAnchorUnit;
       captionsStyle.left = cue.region.viewportAnchorX + viewportAnchorUnit;
     }
