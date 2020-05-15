@@ -28,7 +28,9 @@ goog.provide('shaka.test.Util');
  *     NetworkingEngine: typeof shaka.net.NetworkingEngine
  *   },
  *   ui: {
- *     Overlay: typeof shaka.ui.Overlay
+ *     Overlay: typeof shaka.ui.Overlay,
+ *     Controls: typeof shaka.ui.Controls,
+ *     Element: typeof shaka.ui.Element
  *   },
  *   util: {
  *     StringUtils: typeof shaka.util.StringUtils
