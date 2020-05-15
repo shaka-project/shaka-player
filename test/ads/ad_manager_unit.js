@@ -39,7 +39,7 @@ describe('Ad manager', () => {
         shaka.util.Error.Code.SS_IMA_SDK_MISSING);
 
     expect(() => adManager.initServerSide(
-        adContainer, mockVideo, '')).toThrow(error);
+        adContainer, mockVideo)).toThrow(error);
   });
 
   it('doesn\'t request CS ads until CS is initialized', () => {

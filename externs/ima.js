@@ -168,6 +168,11 @@ google.ima.AdPodInfo = class {
 /** @const */
 google.ima.ImaSdkSettings = class {
   /**
+   * @param {string} locale
+   */
+  setLocale(locale) {}
+
+  /**
    * @param {string} player
    */
   setPlayerType(player) {}

@@ -40,6 +40,11 @@ shaka.extern.AdsStats;
  * @exportDoc
  */
 shaka.extern.IAdManager = class extends EventTarget {
+  /**
+   * @param {string} locale
+   */
+  setLocale(locale) {}
+
   onAssetUnload() {}
 
   /**
@@ -56,9 +61,8 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {!HTMLElement} adContainer
    * @param {!HTMLMediaElement} video
-   * @param {string} locale
    */
-  initServerSide(adContainer, video, locale) {}
+  initServerSide(adContainer, video) {}
 
   /**
    * @param {!google.ima.dai.api.StreamRequest} imaRequest

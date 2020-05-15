@@ -19,6 +19,9 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   }
 
   /** @override */
+  setLocale(locale) {}
+
+  /** @override */
   initClientSide(adContainer, video) {}
 
   /** @override */
@@ -30,7 +33,7 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   }
 
   /** @override */
-  initServerSide(adContainer, video, locale) {}
+  initServerSide(adContainer, video) {}
 
   /** @override */
   requestServerSideStream(imaRequest, backupUrl = '') {
