@@ -19,6 +19,9 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   }
 
   /** @override */
+  setLocale(locale) {}
+
+  /** @override */
   initClientSide(adContainer, video) {}
 
   /** @override */

@@ -40,6 +40,11 @@ shaka.extern.AdsStats;
  * @exportDoc
  */
 shaka.extern.IAdManager = class extends EventTarget {
+  /**
+   * @param {string} locale
+   */
+  setLocale(locale) {}
+
   onAssetUnload() {}
 
   /**
