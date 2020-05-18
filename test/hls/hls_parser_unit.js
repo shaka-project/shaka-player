@@ -2155,6 +2155,26 @@ describe('HlsParser', () => {
       expect(refs[0].endTime - refs[0].startTime).toBe(5);
       expect(presentationTimeline.getDuration()).toBe(5);
     });
+
+    it('forces full segment request', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
+
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.hls.useFullSegmentsForStartTime = true;
+      parser.configure(config);
+      await parser.start('test:/master', playerInterface);
+
+      // Make sure the segment data was fetched with the correct byte
+      // range.
+      fakeNetEngine.expectRangeRequest(
+          'test:/main.mp4',
+          expectedStartByte,
+          expectedEndByte);
+    });
   });
 
   it('correctly detects VOD streams as non-live', async () => {
