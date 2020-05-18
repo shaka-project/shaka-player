@@ -15,6 +15,12 @@ var google = {};
 /** @const */
 google.ima = {};
 
+/** @const */
+google.ima.settings = {};
+
+/** @param {string} locale */
+google.ima.settings.setLocale = function(locale) {};
+
 
 /**
  * @implements {EventTarget}

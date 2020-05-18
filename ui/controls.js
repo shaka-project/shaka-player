@@ -181,6 +181,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Start this timer after we are finished initializing everything,
     this.timeAndSeekRangeTimer_.tickEvery(/* seconds= */ 0.125);
+
+    this.eventManager_.listen(this.localization_,
+        shaka.ui.Localization.LOCALE_CHANGED, (e) => {
+          const locale = e['locales'][0];
+          this.adManager_.setLocale(locale);
+        });
   }
 
   /**

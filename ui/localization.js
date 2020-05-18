@@ -121,8 +121,6 @@ shaka.ui.Localization = class {
 
     this.updateCurrentMap_();
 
-    this.events_.dispatchEvent(new shaka.util.FakeEvent(Class.LOCALE_CHANGED));
-
     // Check if we have support for the exact locale requested. Even through we
     // will do our best to return the most relevant results, we need to tell
     // app that some data may be missing.
@@ -132,14 +130,27 @@ shaka.ui.Localization = class {
 
     if (missing.length) {
       /** @type {shaka.ui.Localization.UnknownLocalesEvent} */
-      const e = {
+      const eMissing = {
         'locales': missing,
       };
 
       this.events_.dispatchEvent(new shaka.util.FakeEvent(
           Class.UNKNOWN_LOCALES,
-          e));
+          eMissing));
     }
+
+    const found = shaka.util.Iterables.filter(
+        this.currentLocales_,
+        (locale) => this.localizations_.has(locale));
+
+    /** @type {shaka.ui.Localization.LocaleChangedEvent} */
+    const eFound = {
+      'locales': found.length ? found : [this.fallbackLocale_],
+    };
+
+    this.events_.dispatchEvent(new shaka.util.FakeEvent(
+        Class.LOCALE_CHANGED,
+        eFound));
   }
 
   /**
@@ -503,3 +514,15 @@ shaka.ui.Localization.UnknownLocalizationEvent;
  * @exportDoc
  */
 shaka.ui.Localization.MissingLocalizationsEvent;
+
+/**
+ * @typedef {{
+ *   'locales': !Array.<string>
+ * }}
+ *
+ * @property {!Array.<string>} locales
+ *    The new set of locales that user wanted,
+ *    and that were successfully found.
+ * @exportDoc
+ */
+shaka.ui.Localization.LocaleChangedEvent;
