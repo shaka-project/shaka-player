@@ -182,6 +182,8 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreEmptyAdaptationSet')
         .addBoolInput_('Ignore HLS Text Stream Failures',
             'manifest.hls.ignoreTextStreamFailures')
+        .addBoolInput_('Use Full Segments For Start Time',
+            'manifest.hls.useFullSegmentsForStartTime')
         .addNumberInput_('Availability Window Override',
                          'manifest.availabilityWindowOverride',
                          /* canBeDecimal = */ true,
