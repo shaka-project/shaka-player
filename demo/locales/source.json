@@ -303,6 +303,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures"
   },
+  "DEMO_USE_FULL_SEGMENTS_FOR_START_TIME": {
+    "description": "The name of a configuration value.",
+    "message": "Use Full Segments For Start Time"
+  },
   "DEMO_IGNORE_MIN_BUFFER_TIME": {
     "description": "The name of a configuration value.",
     "message": "Ignore Min Buffer Time"
