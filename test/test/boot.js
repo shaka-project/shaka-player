@@ -235,17 +235,22 @@ function getClientArg(name) {
           name: 'less',
           main: 'dist/less',
         },
+        {
+          name: 'fontfaceonload',
+          main: 'dist/fontfaceonload',
+        },
       ],
     });
 
     // Load required AMD modules, then proceed with tests.
-    require(['sprintf-js', 'less'],
-        (sprintfJs, less) => {
+    require(['sprintf-js', 'less', 'fontfaceonload'],
+        (sprintfJs, less, FontFaceOnload) => {
           // These external interfaces are declared as "const" in the externs.
           // Avoid "const"-ness complaints from the compiler by assigning these
           // using bracket notation.
           window['sprintf'] = sprintfJs.sprintf;
           window['less'] = less;
+          window['FontFaceOnload'] = FontFaceOnload;
 
           done();
         });

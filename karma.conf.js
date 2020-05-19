@@ -6,9 +6,11 @@
 // Karma configuration
 // Install required modules by running "npm install"
 
+const Jimp = require('jimp');
 const fs = require('fs');
 const path = require('path');
 const rimraf = require('rimraf');
+const util = require('karma/common/util');
 const which = require('which');
 
 /**
@@ -60,8 +62,20 @@ module.exports = (config) => {
       'jasmine',
     ],
 
+    // An expressjs middleware, essentially a component that handles requests
+    // in Karma's webserver.  This one is custom, and will let us take
+    // screenshots of browsers connected through WebDriver.
+    middleware: ['webdriver-screenshot'],
+
     plugins: [
-      'karma-*',  // default
+      'karma-*',  // default plugins
+
+      // An inline plugin which supplies the webdriver-screenshot middleware.
+      {
+        'middleware:webdriver-screenshot': [
+          'factory', WebDriverScreenshotMiddlewareFactory,
+        ],
+      },
     ],
 
     // list of files / patterns to load in the browser
@@ -140,6 +154,9 @@ module.exports = (config) => {
     // https://support.saucelabs.com/customer/en/portal/articles/2440724
 
     client: {
+      // Hide the list of connected clients in Karma, to make screenshots more
+      // stable.
+      clientDisplayNone: true,
       // Only capture the client's logs if the settings want logging.
       captureConsole: !!settings.logging && settings.logging != 'none',
       // |args| must be an array; pass a key-value map as the sole client
@@ -394,3 +411,261 @@ function allUsableBrowserLaunchers(config) {
 
   return browsers;
 }
+
+/**
+ * This is a factory for a "middleware" component that handles requests in
+ * Karma's webserver.  This one will let us take screenshots of browsers
+ * connected through WebDriver.  The factory uses Karma's dependency injection
+ * system to get a reference to the launcher module, which we will use to get
+ * access to the remote browsers.
+ *
+ * @param {karma.Launcher} launcher
+ * @return {karma.Middleware}
+ */
+function WebDriverScreenshotMiddlewareFactory(launcher) {
+  return screenshotMiddleware;
+
+  /**
+   * Extract URL params from the request.
+   *
+   * @param {express.Request} request
+   * @return {!Object.<string, string>}
+   */
+  function getParams(request) {
+    return util.parseQueryParams(request._parsedUrl.search);
+  }
+
+  /**
+   * Find the browser associated with the "id" parameter of the request.
+   * This ID was assigned by Karma when the browser was launched, and passed to
+   * the web server from the Jasmine tests.
+   *
+   * If the browser is not found, this function will return null.
+   *
+   * @param {string} id
+   * @return {karma.Launcher.Browser|null}
+   */
+  function getBrowser(id) {
+    const browser = launcher._browsers.find((b) => b.id == id);
+    if (!browser) {
+      return null;
+    }
+    return browser;
+  }
+
+  /**
+   * @param {karma.Launcher.Browser} browser
+   * @return {wd.remote|null} A WebDriver client, an object from the "wd"
+   *   package, created by "wd.remote()".
+   */
+  function getWebDriverClient(browser) {
+    // If this browser was launched by the WebDriver launcher, the launcher's
+    // browser object has a WebDriver client in the "browser" field.  Yes, this
+    // looks weird.
+    const webDriverClient = browser.browser;
+
+    // To make sure we have an actual WebDriver client and to screen out other
+    // launchers who may also have a "browser" field in their browser object,
+    // we check to make sure it has a screenshot method.
+    if (webDriverClient && webDriverClient.takeScreenshot) {
+      return webDriverClient;
+    }
+    return null;
+  }
+
+  /**
+   * @param {wd.remote} webDriverClient A WebDriver client, an object from the
+   *   "wd" package, created by "wd.remote()".
+   * @return {!Promise.<!Buffer>} A Buffer containing a PNG screenshot
+   */
+  function getScreenshot(webDriverClient) {
+    return new Promise((resolve, reject) => {
+      webDriverClient.takeScreenshot((error, pngBase64) => {
+        if (error) {
+          reject(error);
+        } else {
+          // Convert the screenshot to a binary buffer.
+          resolve(Buffer.from(pngBase64, 'base64'));
+        }
+      });
+    });
+  }
+
+  /**
+   * Take a screenshot, write it to disk, and diff it against the old one.
+   * Write the diff to disk, as well.
+   *
+   * @param {karma.Launcher.Browser} browser
+   * @param {!Object.<string, string>} params
+   * @return {!Promise.<number>} The number of pixels changed between the old
+   *   and new screenshots, after cropping and scaling.
+   */
+  async function diffScreenshot(browser, params) {
+    const webDriverClient = getWebDriverClient(browser);
+    if (!webDriverClient) {
+      throw new Error('No screenshot support!');
+    }
+
+    /** @type {!Buffer} */
+    const fullPageScreenshotData = await getScreenshot(webDriverClient);
+
+    // Crop the screenshot to the dimensions specified in the test.
+    // Jimp is picky about types, so convert these strings to numbers.
+    const x = parseFloat(params.x);
+    const y = parseFloat(params.y);
+    const width = parseFloat(params.width);
+    const height = parseFloat(params.height);
+    const bodyWidth = parseFloat(params.bodyWidth);
+    const bodyHeight = parseFloat(params.bodyHeight);
+
+    /** @type {!Jimp.image} */
+    const fullScreenshot = (await Jimp.read(fullPageScreenshotData));
+
+    // Because WebDriver may screenshot at a different resolution than we
+    // saw in JS, convert the crop region coordinates to the screenshot scale,
+    // then crop, then resize.  This order produces the most accurate cropped
+    // screenshot.
+
+    // Scaling by height breaks everything on Android, which has screenshots
+    // that are taller than expected based on the body size.  So use width only.
+    const scale = fullScreenshot.bitmap.width / bodyWidth;
+
+    /** @type {!Jimp.image} */
+    const newScreenshot = fullScreenshot.clone()
+        .crop(
+            // Sub-pixel rendering in browsers makes this much trickier than you
+            // might expect.  Offsets are not necessarily integers even before
+            // we scale them, but the image has been quantized into pixels at
+            // that scale.  Experimentation with different rounding methods has
+            // led to the conclusion that rounding up is the only way to get
+            // consistent results.
+            Math.ceil(x * scale),
+            Math.ceil(y * scale),
+            Math.ceil(width * scale),
+            Math.ceil(height * scale))
+        .resize(width, height, Jimp.RESIZE_BICUBIC);
+
+    // Get the WebDriver spec (including browser name, platform, etc)
+    const spec = browser.spec;
+    // Compute the folder for the screenshots for this platform.
+    const baseFolder = `${__dirname}/test/test/assets/screenshots`;
+    const folder = `${baseFolder}/${spec.browserName}-${spec.platform}`;
+
+    const oldScreenshotPath = `${folder}/${params.name}.png`;
+    const fullScreenshotPath = `${folder}/${params.name}.png-full`;
+    const newScreenshotPath = `${folder}/${params.name}.png-new`;
+    const diffScreenshotPath = `${folder}/${params.name}.png-diff`;
+
+    /** @type {!Jimp.image} */
+    let oldScreenshot;
+    if (!fs.existsSync(oldScreenshotPath)) {
+      // If the "official" screenshot doesn't exist yet, create a blank image
+      // in memory.
+      oldScreenshot = new Jimp(width, height);
+    } else {
+      oldScreenshot = await Jimp.read(oldScreenshotPath);
+    }
+
+    // Compare the new screenshot to the old one and produce a diff image.
+    // Initially, the image data will be raw pixels, 4 bytes per pixel.
+    const diff = Jimp.diff(oldScreenshot, newScreenshot, /* threshold= */ 0);
+
+    // Write the screenshot and diff to disk.  This makes it easy to review
+    // the diff on failure or update the "official" screenshot easily when
+    // needed.
+    fs.mkdirSync(folder, {recursive: true});
+    fs.writeFileSync(
+        fullScreenshotPath, await fullScreenshot.getBufferAsync('image/png'));
+    fs.writeFileSync(
+        newScreenshotPath, await newScreenshot.getBufferAsync('image/png'));
+    fs.writeFileSync(
+        diffScreenshotPath, await diff.image.getBufferAsync('image/png'));
+
+    // "percent" is, surprisingly, a number between 0 and 1, not between 0 and
+    // 100.  Convert this to a number of pixels changed, which has been found to
+    // be a more effective and less flaky metric.
+    const pixelsChanged =
+        diff.percent * diff.image.bitmap.width * diff.image.bitmap.height;
+    return pixelsChanged;
+  }
+
+  /**
+   * This function is the middleware.  It gets request and response objects and
+   * a next() callback which passes control off to the next middleware in the
+   * system.  This is similar to how expressjs works.
+   *
+   * @param {karma.MiddleWare.Request} request
+   * @param {karma.MiddleWare.Response} response
+   * @param {function()} next
+   */
+  async function screenshotMiddleware(request, response, next) {
+    const pathname = request._parsedUrl.pathname;
+
+    if (pathname == '/screenshot/isSupported') {
+      const params = getParams(request);
+      const browser = getBrowser(params.id);
+      if (!browser) {
+        response.writeHead(404);
+        response.end('No such browser!');
+        return;
+      }
+
+      const webDriverClient = getWebDriverClient(browser);
+      // TODO: Not sure how to check for this in the client's capabilities.
+      // When we add platforms to the Selenium grid which can't take
+      // screenshots, how will we know which is which from here?  If we have to
+      // take a screenshot and catch an error to find out, make sure we cache
+      // that result for the sake of performance.
+      const isSupported = !!webDriverClient;
+
+      response.setHeader('Content-Type', 'application/json');
+      response.end(JSON.stringify(isSupported));
+    } else if (pathname == '/screenshot/diff') {
+      const params = getParams(request);
+      const browser = getBrowser(params.id);
+      if (!browser) {
+        response.writeHead(404);
+        response.end('No such browser!');
+        return;
+      }
+
+      // Check the URL parameters.
+      const requiredParams = [
+        'x', 'y', 'width', 'height', 'bodyWidth', 'bodyHeight', 'name',
+      ];
+      for (const k of requiredParams) {
+        if (!params[k]) {
+          response.writeHead(400);
+          response.end(`Screenshot param ${k} is missing!`);
+          return;
+        }
+      }
+
+      // To avoid creating an open HTTP endpoint where anyone can write to any
+      // path on the filesystem, only accept alphanumeric names (plus
+      // underscore and dash).  No colons, periods, forward slashes, or
+      // backslashes should ever be added to this regex, as any of those could
+      // be used on some platform to write outside of the screenshots folder.
+      if (!params.name.match(/[a-zA-Z0-9_-]+/)) {
+        response.writeHead(400);
+        response.end(`Screenshot name not valid: "${params.name}"`);
+        return;
+      }
+
+      try {
+        const pixelsChanged = await diffScreenshot(browser, params);
+        response.setHeader('Content-Type', 'application/json');
+        response.end(JSON.stringify(pixelsChanged));
+      } catch (error) {
+        console.error(error);
+        response.writeHead(500);
+        response.end('Screenshot error: ' + JSON.stringify(error));
+      }
+    } else {
+      // Requests for paths that we don't handle are passed on to the next
+      // middleware in the system.
+      next();
+    }
+  }
+}
+WebDriverScreenshotMiddlewareFactory.$inject = ['launcher'];

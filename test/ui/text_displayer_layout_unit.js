@@ -1,0 +1,216 @@
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const Util = shaka.test.Util;
+
+filterDescribe('UITextDisplayer layout', Util.supportsScreenshots, () => {
+  const UiUtils = shaka.test.UiUtils;
+
+  /** @type {!HTMLLinkElement} */
+  let cssLink;
+  /** @type {!HTMLElement} */
+  let videoContainer;
+  /** @type {!shaka.test.FakeVideo} */
+  let mockVideo;
+  /** @type {!shaka.text.UITextDisplayer} */
+  let textDisplayer;
+
+  // Legacy Edge seems to have inconsistent font kerning.  A one-pixel offset in
+  // the position of one character appears about 60% of the time, requiring us
+  // to have this change tolerance in our tests.  So far, all past bugs in our
+  // implementation that we have tests for would exceed this threshold by a lot.
+  const threshold = 160;  // px
+
+  const originalCast = window.chrome && window.chrome.cast;
+
+  function createTextDisplayer() {
+    textDisplayer = new shaka.text.UITextDisplayer(
+        /** @type {!HTMLMediaElement} */(mockVideo),
+        videoContainer);
+    textDisplayer.setTextVisibility(true);
+  }
+
+  beforeAll(async () => {
+    // Disable cast so the UI controls don't create cast sessions.
+    if (window.chrome) {
+      window.chrome['cast'] = null;
+    }
+
+    // Add css file
+    cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
+    await UiUtils.setupCSS(cssLink);
+
+    // There's no actual video inside this container, but subtitles will be
+    // positioned within this space.
+    videoContainer = /** @type {!HTMLElement} */(document.createElement('div'));
+    document.body.appendChild(videoContainer);
+
+    // The container we screenshot will be 16:9 and small.
+    videoContainer.style.width = '320px';
+    videoContainer.style.height = '180px';
+
+    // The background is green so we can better see the background color of the
+    // text spans within the subtitles, and so it is easier to identify cropping
+    // issues.
+    videoContainer.style.backgroundColor = 'green';
+
+    // Make sure the video container is in the top-left corner of the iframe
+    // that contains the tests.
+    videoContainer.style.top = '0';
+    videoContainer.style.left = '0';
+    videoContainer.style.position = 'fixed';
+    videoContainer.style.margin = '0';
+    videoContainer.style.padding = '0';
+
+    // Some of the styles in our CSS are only applied within this class.  Add
+    // this explicitly, since we don't instantiate controls in all of the tests.
+    videoContainer.classList.add('shaka-video-container');
+
+    await Util.waitForFont('Roboto');
+  });
+
+  beforeEach(() => {
+    mockVideo = new shaka.test.FakeVideo();
+    createTextDisplayer();
+  });
+
+  afterEach(async () => {
+    await textDisplayer.destroy();
+  });
+
+  afterAll(() => {
+    document.body.removeChild(videoContainer);
+    document.head.removeChild(cssLink);
+    if (window.chrome) {
+      window.chrome['cast'] = originalCast;
+    }
+  });
+
+  it('basic cue', async () => {
+    textDisplayer.append([
+      new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9'),
+    ]);
+
+    await Util.checkScreenshot(videoContainer, 'basic-cue', threshold);
+  });
+
+  it('cue with newline', async () => {
+    textDisplayer.append([
+      new shaka.text.Cue(0, 1, 'Captain\'s log,\nstardate 41636.9'),
+    ]);
+
+    await Util.checkScreenshot(videoContainer, 'cue-with-newline', threshold);
+  });
+
+  it('two basic cues', async () => {
+    textDisplayer.append([
+      new shaka.text.Cue(0, 1, 'Captain\'s log,'),
+      new shaka.text.Cue(0, 1, 'stardate 41636.9'),
+    ]);
+
+    await Util.checkScreenshot(videoContainer, 'two-basic-cues', threshold);
+  });
+
+  // Regression test for #2497
+  // Only one cue should be displayed.
+  it('duplicate cues', async () => {
+    textDisplayer.append([
+      new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9'),
+      new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9'),
+    ]);
+
+    await Util.checkScreenshot(videoContainer, 'duplicate-cues', threshold);
+  });
+
+  // Regression test for #2524
+  it('two nested cues', async () => {
+    const cue = new shaka.text.Cue(0, 1, '');
+    cue.nestedCues = [
+      new shaka.text.Cue(0, 1, 'Captain\'s log,'),
+      new shaka.text.Cue(0, 1, 'stardate 41636.9'),
+    ];
+    textDisplayer.append([cue]);
+
+    await Util.checkScreenshot(videoContainer, 'two-nested-cues', threshold);
+  });
+
+  // Regression test for #2157 and #2584
+  it('region positioning', async () => {
+    const nestedCue = new shaka.text.Cue(
+        0, 1, 'Captain\'s log, stardate 41636.9');
+
+    const cue = new shaka.text.Cue(0, 1, '');
+    cue.region.id = '1';
+    cue.region.viewportAnchorX = 70;  // %
+    cue.region.viewportAnchorY = 35;  // %
+    cue.region.width = 30;  // %
+    cue.region.height = 65;  // %
+    cue.nestedCues = [nestedCue];
+    textDisplayer.append([cue]);
+
+    await Util.checkScreenshot(videoContainer, 'region-position', threshold);
+  });
+
+  it('moves cues to avoid controls', async () => {
+    let ui;
+
+    try {
+      // Set up UI controls.  The video element is in a paused state by default,
+      // so the controls should be shown.  The video is not in the DOM and is
+      // purely temporary.
+      const player = new shaka.Player(null);
+      ui = new shaka.ui.Overlay(
+          player, videoContainer, shaka.test.UiUtils.createVideoElement());
+      // Turn off every part of the UI that we can, so that the screenshot is
+      // less likey to change because of something unrelated to text rendering.
+      ui.configure('controlPanelElements', []);
+      ui.configure('addSeekBar', false);
+      ui.configure('addBigPlayButton', false);
+      ui.configure('enableFullscreenOnRotation', false);
+
+      // Recreate the text displayer so that the text container comes after the
+      // controls (as it does in production).  This is important for the CSS
+      // that moves the cues above the controls when they are shown.
+      await textDisplayer.destroy();
+      createTextDisplayer();
+
+      const cue = new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9');
+      cue.region.id = '1';
+      // Position the cue *explicitly* at the bottom of the screen.
+      cue.region.viewportAnchorX = 0;  // %
+      cue.region.viewportAnchorY = 100;  // %
+      textDisplayer.append([cue]);
+
+      await Util.checkScreenshot(
+          videoContainer, 'cue-with-controls', threshold);
+    } finally {
+      await ui.destroy();
+    }
+  });
+
+  // Regression test for #2188
+  it('bitmap-based cues', async () => {
+    const cue = new shaka.text.Cue(0, 1, '');
+    cue.region.id = '1';
+    cue.region.height = 15;  // %
+    // eslint-disable-next-line max-len
+    cue.backgroundImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAAA8BAMAAABMVCNvAAAAElBMVEX9/vtRldU+uUv6vAnvNjWzvsvH461AAAABvUlEQVRIx7WWwY6CMBRFYQb2Nhn22sS9o5m9icy+aPn/X5lS6r221gfTxLsC0pN7XovE6j1p9d6UcB/apYTUU/YlhT7bArCwUocUg9sCsMxVF7i2Pwd3+v93/Ty5uEbZtVVd+nacphw08oJzMUmhzxWgyYHDBHbRo9sMHmVX5bOJTENyrq0rMjB1EUG61ipMBtBEYM41qakVXLk3eVdyagMQrqNB47ProO4hGCbu+/4MMHUlp6J2F8c58pR3bRVj/B1cm94nB2IlatSDq53BW8Z1i4UEed3PueQqhxTkA781L10JBb2aNwAvGdddAj66NhKon0C6onHZtXKhKxolVx46XbtyUHLdRaaxqyXISoBxYfQOftFVBPnZuSfrSpCFcBXAYwp2HlrtSrBi1BrXlFt2RSEGXOn6DRCc6EpQgYMoXGWQIbLsSpCizAOIABQ4yZVgV2VAwfXlgPJvi6DJgnUGvMEUA0qgBTh6cOCAsmsD8LdDIQYUKiuA50FdBwy4DFqAtXCCDMAGYEtOCDYBrgYfFfn/G0ALsAInVgYruIaHnQSxcroKI1ZrU9/PuQmmq9OO43xhhUI5jR3lBX8x/RKsZNOu/wAAAABJRU5ErkJggg==';
+    textDisplayer.append([cue]);
+
+    await Util.checkScreenshot(videoContainer, 'bitmap-cue', threshold);
+  });
+});

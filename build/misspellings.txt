@@ -27,6 +27,7 @@
     r'(?i)suc+es+ful+y': 'successfully',
     r'(?i)tol+[ae]r+[ae]nce': 'tolerance',
     r'(?i)uncomplied': 'uncompiled',
+    r'(?i)udpate': 'update',
     r'(?i)wether': 'whether',
     r'(?i)@returns': '@return',
     r'(?i)varint': 'variant',

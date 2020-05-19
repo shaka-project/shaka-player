@@ -292,7 +292,12 @@ shaka.test.Util = class {
             !!xhr.response) {
           resolve(/** @type {!ArrayBuffer} */(xhr.response));
         } else {
-          reject(xhr.status);
+          let message = '';
+          if (xhr.response) {
+            message = ': ' + shaka.util.StringUtils.fromUTF8(
+                /** @type {!ArrayBuffer} */(xhr.response));
+          }
+          reject(xhr.status + message);
         }
       };
 
@@ -437,6 +442,124 @@ shaka.test.Util = class {
     const waiter = new shaka.test.Waiter(eventManager)
         .failOnTimeout(false).timeoutAfter(timeout);
     return waiter.waitForEnd(target);
+  }
+
+  /**
+   * Waits for a particular font to be loaded.  Useful in screenshot tests to
+   * make sure we have consistent results with regard to the web fonts we load
+   * in the UI.
+   *
+   * @param {string} name
+   * @return {!Promise}
+   */
+  static async waitForFont(name) {
+    await new Promise((resolve, reject) => {
+      // https://github.com/zachleat/fontfaceonload
+      // eslint-disable-next-line new-cap
+      FontFaceOnload(name, {
+        success: resolve,
+        error: () => {
+          reject(new Error('Timeout waiting for font ' + name + ' to load'));
+        },
+        timeout: 10 * 1000,  // ms
+      });
+    });
+
+    // Wait one extra tick to make sure the font rendering on the page has been
+    // updated.  Without this, we saw some rare test flake in Firefox on Mac.
+    await this.shortDelay();
+  }
+
+  /**
+   * Checks with Karma to see if this browser can take a screenshot.
+   *
+   * Only WebDriver-connected browsers can take a screenshot, and only Karma
+   * knows if the browser is connected via WebDriver.  So this must be checked
+   * in Karma via an HTTP request.
+   *
+   * @return {!Promise.<boolean>}
+   */
+  static async supportsScreenshots() {
+    // We need our own ID for Karma to look up the WebDriver connection.
+    const parentUrlParams = window.parent.location.search;
+    goog.asserts.assert(parentUrlParams.includes('id='), 'No ID in URL!');
+
+    const buffer = await shaka.test.Util.fetch(
+        '/screenshot/isSupported' + parentUrlParams);
+    const json = shaka.util.StringUtils.fromUTF8(buffer);
+    const ok = /** @type {boolean} */(JSON.parse(json));
+    return ok;
+  }
+
+  /**
+   * Asks Karma to take a screenshot for us via the WebDriver connection and
+   * compare it to the "official" screenshot for this test and platform.  Sets
+   * an expectation that the new screenshot does not differ from the official
+   * screenshot more than a fixed threshold.
+   *
+   * Only works on browsers connected via WebDriver.  Use supportsScreenshots()
+   * to filter screenshot-dependent tests.
+   *
+   * @param {!HTMLElement} element The HTML element to screenshot.  Must be
+   *   within the bounds of the viewport.
+   * @param {string} name An identifier for the screenshot.  Use alphanumeric
+   *   plus dash and underscore only.
+   * @param {number} threshold A change threshold in pixels.
+   * @return {!Promise}
+   */
+  static async checkScreenshot(element, name, threshold=0) {
+    // Make sure the DOM is up-to-date and layout has settled before continuing.
+    // Without this delay, or with a shorter delay, we sometimes get missing
+    // elements in our UITextDisplayer tests on some platforms.
+    await this.delay(0.1);
+
+    // We need our own ID for Karma to look up the WebDriver connection.
+    const parentUrlParams = window.parent.location.search;
+    goog.asserts.assert(parentUrlParams.includes('id='), 'No ID in URL!');
+
+    // Tests run in an iframe.  So we also need the coordinates of that iframe
+    // within the page, so that the screenshot can be consistently cropped to
+    // the element we care about.
+    const iframe = /** @type {HTMLIFrameElement} */(
+      window.parent.document.getElementById('context'));
+    const iframeRect = iframe.getBoundingClientRect();
+    const elementRect = element.getBoundingClientRect();
+    const x = iframeRect.left + elementRect.left;
+    const y = iframeRect.top + elementRect.top;
+    const width = elementRect.width;
+    const height = elementRect.height;
+
+    // Furthermore, the screenshot may not be at the scale you expect.  Measure
+    // the browser window size in JavaScript and communicate that to Karma, too,
+    // so it can convert coordinates before cropping.  This value, as opposed to
+    // document.body.getBoundingClientRect(), seems to most accurately reflect
+    // the size of the screenshot area.  On Safari, the width seems to be off by
+    // 15px for some reason, no matter what method we use to measure the
+    // viewport, whether or not the scroll bars are showing, whether or not
+    // window.scrollbars.visible is true, etc.
+    const offset = shaka.util.Platform.isApple() ? 15 : 0;
+    const bodyWidth = window.parent.innerWidth - offset;
+    const bodyHeight = window.parent.innerHeight;
+
+    // In addition to the id param from the top-level window, pass these
+    // parameters to the screenshot endpoint in Karma.
+    const params = {x, y, width, height, bodyWidth, bodyHeight, name};
+
+    let paramsString = '';
+    for (const k in params) {
+      paramsString += '&' + k + '=' + params[k];
+    }
+
+    const buffer = await shaka.test.Util.fetch(
+        '/screenshot/diff' + parentUrlParams + paramsString);
+    const json = shaka.util.StringUtils.fromUTF8(buffer);
+    const pixelsChanged = /** @type {number} */(JSON.parse(json));
+
+    // If the change threshold is exceeded, you can review the new screenshot
+    // and the diff image in the screenshots folder.  Look for images that end
+    // with "-new" and "-diff".  If cropping doesn't work right, you can view
+    // the full-page screenshot in the image that ends with "-full".
+    expect(pixelsChanged).withContext(name).not.toBeGreaterThan(threshold);
   }
 };
 

@@ -205,6 +205,18 @@ requirement: {
 }
 
 
+# Disallow DOMRect.x and y.
+requirement: {
+  type: BANNED_PROPERTY
+  value: 'DOMRect.prototype.x'
+  value: 'DOMRect.prototype.y'
+  error_message: 'DOMRect "x" and "y" are not supported on IE11 and legacy '
+                 'Edge; use "left" and "top" instead.'
+  # The built-in set and map polyfills trigger this ban somehow.
+  whitelist_regexp: 'synthetic:es6/'
+}
+
+
 # Disallow fdescribe.
 requirement: {
   type: BANNED_NAME
