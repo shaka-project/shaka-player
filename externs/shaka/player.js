@@ -518,7 +518,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   initDataTransform:
  *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
  *         undefined),
- *   logLicenseExchange: boolean
+ *   logLicenseExchange: boolean,
+ *   updateExpirationTime: number
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -553,6 +554,9 @@ shaka.extern.AdvancedDrmConfiguration;
  *   This includes the init data, request, and response data, printed as base64
  *   strings.  Don't use in production, for debugging only; has no affect in
  *   release builds as logging is removed.
+ * @property {number} updateExpirationTime
+ *   <i>Defaults to 1.</i> <br>
+ *   The frequency in seconds with which to check the expiration of a session.
  *
  * @exportDoc
  */

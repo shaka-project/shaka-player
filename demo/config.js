@@ -127,7 +127,12 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DELAY_LICENSE,
             'drm.delayLicenseRequestUntilPlayed')
         .addBoolInput_(MessageIds.LOG_LICENSE_EXCHANGE,
-            'drm.logLicenseExchange');
+            'drm.logLicenseExchange')
+        .addNumberInput_(MessageIds.UPDATE_EXPIRATION_TIME,
+            'drm.updateExpirationTime',
+            /* canBeDecimal= */ false,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true);
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const robustnessSuggestions = [
       'SW_SECURE_CRYPTO',
