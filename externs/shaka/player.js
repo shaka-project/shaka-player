@@ -311,6 +311,9 @@ shaka.extern.TrackList;
  *   minFrameRate: number,
  *   maxFrameRate: number,
  *
+ *   minChannelsCount: number,
+ *   maxChannelsCount: number,
+ *
  *   minBandwidth: number,
  *   maxBandwidth: number
  * }}
@@ -344,6 +347,11 @@ shaka.extern.TrackList;
  *   The minimum framerate of a variant track.
  * @property {number} maxFrameRate
  *   The maximum framerate of a variant track.
+ *
+ * @property {number} minChannelsCount
+ *   The minimum channels count of a variant track.
+ * @property {number} maxChannelsCount
+ *   The maximum channels count of a variant track.
  *
  * @property {number} minBandwidth
  *   The minimum bandwidth of a variant track, in bit/sec.

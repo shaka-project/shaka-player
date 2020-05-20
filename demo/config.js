@@ -247,6 +247,10 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.MAX_PIXELS, prefix + 'maxPixels')
         .addNumberInput_(MessageIds.MIN_FRAMERATE, prefix + 'minFrameRate')
         .addNumberInput_(MessageIds.MAX_FRAMERATE, prefix + 'maxFrameRate')
+        .addNumberInput_(MessageIds.MIN_CHANNELS_COUNT, prefix +
+            'minChannelsCount')
+        .addNumberInput_(MessageIds.MAX_CHANNELS_COUNT, prefix +
+            'maxChannelsCount')
         .addNumberInput_(MessageIds.MIN_BANDWIDTH, prefix + 'minBandwidth')
         .addNumberInput_(MessageIds.MAX_BANDWIDTH, prefix + 'maxBandwidth');
   }

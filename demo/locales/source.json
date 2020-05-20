@@ -415,6 +415,10 @@
     "description": "The name of a configuration value.",
     "message": "Max Bandwidth"
   },
+  "DEMO_MAX_CHANNELS_COUNT": {
+    "description": "The name of a configuration value.",
+    "message": "Max Channels Count"
+  },
   "DEMO_MAX_FRAMERATE": {
     "description": "The name of a configuration value.",
     "message": "Max Framerate"
@@ -438,6 +442,10 @@
   "DEMO_MIN_BANDWIDTH": {
     "description": "The name of a configuration value.",
     "message": "Min Bandwidth"
+  },
+  "DEMO_MIN_CHANNELS_COUNT": {
+    "description": "The name of a configuration value.",
+    "message": "Min Channels Count"
   },
   "DEMO_MIN_FRAMERATE": {
     "description": "The name of a configuration value.",
