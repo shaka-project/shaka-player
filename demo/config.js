@@ -130,7 +130,7 @@ shakaDemo.Config = class {
             'drm.logLicenseExchange')
         .addNumberInput_(MessageIds.UPDATE_EXPIRATION_TIME,
             'drm.updateExpirationTime',
-            /* canBeDecimal= */ false,
+            /* canBeDecimal= */ true,
             /* canBeZero= */ false,
             /* canBeUnset= */ true);
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
