@@ -526,7 +526,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
  *       ((function(!Uint8Array, ?shaka.extern.DrmInfo):!Uint8Array)|undefined),
- *   fairPlayTransform: boolean
+ *   fairPlayTransform: boolean,
+ *   updateExpirationTime: number
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -561,6 +562,9 @@ shaka.extern.AdvancedDrmConfiguration;
  *   FairPlay examples; if false, don't transform.  Defaults to
  *   <code>true</code>.  Starting in v2.6 this will go away and we will never
  *   provide default license request/response transforms.
+ * @property {number} updateExpirationTime
+ *   <i>Defaults to 1.</i> <br>
+ *   The frequency in seconds with which to check the expiration of a session.
  *
  * @exportDoc
  */

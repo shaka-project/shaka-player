@@ -130,8 +130,13 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.DrmConfiguration');
     this.addSection_('DRM', docLink)
         .addBoolInput_('Delay License Request Until Played',
-                       'drm.delayLicenseRequestUntilPlayed');
-    const advanced = shakaDemoMain.getConfiguration().drm.advanced;
+                       'drm.delayLicenseRequestUntilPlayed')
+        .addNumberInput_('Update expiration time',
+            'drm.updateExpirationTime',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true);
+    const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const robustnessSuggestions = [
       'SW_SECURE_CRYPTO',
       'SW_SECURE_DECODE',
