@@ -695,6 +695,10 @@
     "description": "An error message that shows why an asset cannot be stored offline: the browser does not support storing things offline, in general.",
     "message": "Your browser does not support offline storage."
   },
+  "DEMO_UPDATE_EXPIRATION_TIME": {
+    "description": "The name of a configuration value.",
+    "message": "Update expiration time"
+  },
   "DEMO_UPLYNK": {
     "description": "Text that describes an asset that comes from the Verizon Digital Media Services asset library.",
     "message": "[PROPER_NAME:Verizon Digital Media Services]"
