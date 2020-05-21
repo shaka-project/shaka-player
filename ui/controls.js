@@ -19,6 +19,7 @@
 goog.provide('shaka.ui.Controls');
 goog.provide('shaka.ui.ControlsPanel');
 
+goog.require('goog.asserts');
 goog.require('shaka.log');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -222,6 +223,11 @@ shaka.ui.Controls.prototype.destroy = async function() {
   if (this.timeAndSeekRangeTimer_) {
     this.timeAndSeekRangeTimer_.stop();
     this.timeAndSeekRangeTimer_ = null;
+  }
+
+  if (this.controlsContainer_) {
+    this.videoContainer_.removeChild(this.controlsContainer_);
+    this.controlsContainer_ = null;
   }
 
   if (this.castProxy_) {
@@ -562,6 +568,8 @@ shaka.ui.Controls.prototype.getLocalPlayer = function() {
  * @export
  */
 shaka.ui.Controls.prototype.getControlsContainer = function() {
+  goog.asserts.assert(
+      this.controlsContainer_, 'No controls container after destruction!');
   return this.controlsContainer_;
 };
 
@@ -668,7 +676,7 @@ shaka.ui.Controls.prototype.createDOM_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.addControlsContainer_ = function() {
-  /** @private {!HTMLElement} */
+  /** @private {HTMLElement} */
   this.controlsContainer_ = shaka.util.Dom.createHTMLElement('div');
   this.controlsContainer_.classList.add('shaka-controls-container');
   this.videoContainer_.appendChild(this.controlsContainer_);
