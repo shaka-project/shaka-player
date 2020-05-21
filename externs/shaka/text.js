@@ -23,16 +23,16 @@ shaka.extern.CueRegion = class {
     this.id;
 
     /**
-     * The X offset to start the rendering area in anchorUnits of the video
-     * width.
+     * The X offset to start the rendering area in viewportAnchorUnits of the
+     * video width.
      * @type {number}
      * @exportDoc
      */
     this.viewportAnchorX;
 
     /**
-     * The X offset to start the rendering area in anchorUnits of the video
-     * height.
+     * The X offset to start the rendering area in viewportAnchorUnits of the
+     * video height.
      * @type {number}
      * @exportDoc
      */
