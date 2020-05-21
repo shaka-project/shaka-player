@@ -62,10 +62,14 @@ shaka.ui.Overlay = class {
    * @export
    */
   async destroy() {
-    await this.controls_.destroy();
+    if (this.controls_) {
+      await this.controls_.destroy();
+    }
     this.controls_ = null;
 
-    await this.player_.destroy();
+    if (this.player_) {
+      await this.player_.destroy();
+    }
     this.player_ = null;
   }
 
