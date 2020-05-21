@@ -7,6 +7,7 @@
 goog.provide('shaka.ui.Controls');
 goog.provide('shaka.ui.ControlsPanel');
 
+goog.require('goog.asserts');
 goog.require('shaka.Deprecate');
 goog.require('shaka.log');
 goog.require('shaka.ui.Locales');
@@ -216,6 +217,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // or player.  This makes sure those destructions will not trigger event
     // listeners in the UI which would then invoke the cast proxy or player.
     this.releaseChildElements_();
+
+    if (this.controlsContainer_) {
+      this.videoContainer_.removeChild(this.controlsContainer_);
+      this.controlsContainer_ = null;
+    }
 
     if (this.castProxy_) {
       await this.castProxy_.destroy();
@@ -508,6 +514,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   getControlsContainer() {
+    goog.asserts.assert(
+        this.controlsContainer_, 'No controls container after destruction!');
     return this.controlsContainer_;
   }
 
@@ -686,7 +694,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   addControlsContainer_() {
-    /** @private {!HTMLElement} */
+    /** @private {HTMLElement} */
     this.controlsContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.controlsContainer_.classList.add('shaka-controls-container');
     this.videoContainer_.appendChild(this.controlsContainer_);
