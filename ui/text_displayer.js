@@ -374,8 +374,6 @@ shaka.ui.TextDisplayer = class {
       captionsStyle.cssFloat = 'left';
     } else if (cue.positionAlign == Cue.positionAlign.RIGHT) {
       captionsStyle.cssFloat = 'right';
-    } else {
-      captionsStyle.margin = 'auto';
     }
 
     captionsStyle.textAlign = cue.textAlign;
