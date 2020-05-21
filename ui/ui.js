@@ -80,11 +80,15 @@ shaka.ui.Overlay = function(player, videoContainer, video) {
  * @export
  */
 shaka.ui.Overlay.prototype.destroy = async function() {
-  await this.controls_.destroy();
-  this.controls_ = null;
+  if (this.controls_) {
+    await this.controls_.destroy();
+    this.controls_ = null;
+  }
 
-  await this.player_.destroy();
-  this.player_ = null;
+  if (this.player_) {
+    await this.player_.destroy();
+    this.player_ = null;
+  }
 };
 
 
