@@ -654,7 +654,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.videoContainer_.classList.add('shaka-video-container');
     this.localVideo_.classList.add('shaka-video');
 
-    this.addSkimContainer_();
+    this.addScrimContainer_();
 
     if (this.config_.addBigPlayButton) {
       this.addPlayButton_();
@@ -717,12 +717,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /** @private */
-  addSkimContainer_() {
+  addScrimContainer_() {
     // This is the container that gets styled by CSS to have the
-    // black gradient skim at the end of the controls.
-    const skimContainer = shaka.util.Dom.createHTMLElement('div');
-    skimContainer.classList.add('shaka-skim-container');
-    this.controlsContainer_.appendChild(skimContainer);
+    // black gradient scrim at the end of the controls.
+    const scrimContainer = shaka.util.Dom.createHTMLElement('div');
+    scrimContainer.classList.add('shaka-scrim-container');
+    this.controlsContainer_.appendChild(scrimContainer);
   }
 
   /** @private */
