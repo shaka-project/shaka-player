@@ -54,7 +54,7 @@ describe('Player Src Equals', () => {
     /** @type {function():number} */
     const getBufferEnd = () => {
       const buffered = player.getBufferedInfo().total;
-      return buffered.length ? buffered[0].end : 0;
+      return buffered.length ? buffered[buffered.length - 1].end : 0;
     };
 
     await loadWithSrcEquals(LARGE_MP4_CONTENT_URI);
@@ -104,7 +104,7 @@ describe('Player Src Equals', () => {
     const eventManager = new shaka.util.EventManager();
 
     const ready = new Promise((resolve) => {
-      eventManager.listenOnce(video, 'loadedmetadata', resolve);
+      eventManager.listenOnce(video, 'loadeddata', resolve);
     });
 
     await player.attach(video, /* initMediaSource= */ false);

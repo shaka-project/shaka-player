@@ -390,7 +390,7 @@ describe('Player Src Equals', () => {
     const eventManager = new shaka.util.EventManager();
 
     const ready = new Promise((resolve) => {
-      eventManager.listenOnce(video, 'loadedmetadata', resolve);
+      eventManager.listenOnce(video, 'loadeddata', resolve);
     });
 
     await player.attach(video, /* initMediaSource= */ false);
@@ -400,12 +400,15 @@ describe('Player Src Equals', () => {
     // point ensures it is safe to interact with the media element.
     await ready;
 
-    // The initial seek is triggered off of the same event we waited for in
-    // "ready" above, so it may not have happened yet.  If we have an explicit
-    // start time, add a short delay to allow for the initial-seek promise chain
-    // to resolve.
+    // The initial seek is triggered about the same time this ready promise
+    // resolves.  Wait (with short timeout) for movement, so that the
+    // initial-seek promise chain has time to resolve before we test our
+    // expectations.
     if (startTime != null) {
-      await shaka.test.Util.shortDelay();
+      const waiter = new shaka.test.Waiter(eventManager);
+      if (video.currentTime == 0) {
+        await waiter.timeoutAfter(1).failOnTimeout(true).waitForMovement(video);
+      }
     }
 
     eventManager.release();
