@@ -387,6 +387,10 @@
     "description": "The label on a field that allows users to select whether to log data about the license exchange",
     "message": "Log license exchange data"
   },
+  "DEMO_LOW_LATENCY": {
+    "description": "The name of a configuration value.",
+    "message": "Low Latency Streaming"
+  },
   "DEMO_MANIFEST_RETRY_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "Manifest Retry Parameters"

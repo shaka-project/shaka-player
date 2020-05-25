@@ -661,7 +661,8 @@ shaka.extern.HlsManifestConfiguration;
  *   disableText: boolean,
  *   defaultPresentationDelay: number,
  *   dash: shaka.extern.DashManifestConfiguration,
- *   hls: shaka.extern.HlsManifestConfiguration
+ *   hls: shaka.extern.HlsManifestConfiguration,
+ *   lowLatencyMode: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -692,6 +693,8 @@ shaka.extern.HlsManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
+ * @property {boolean} lowLatencyMode
+ *  If <code>true</code>, low latency streaming mode is enabled.
  *
  * @exportDoc
  */

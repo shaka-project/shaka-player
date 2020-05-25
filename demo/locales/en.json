@@ -96,6 +96,7 @@
   "DEMO_LOG_LEVEL_V": "Verbose",
   "DEMO_LOG_LEVEL_VV": "Very Verbose",
   "DEMO_LOG_LICENSE_EXCHANGE": "Log license exchange data",
+  "DEMO_LOW_LATENCY": "Low Latency Mode",
   "DEMO_MANIFEST_RETRY_SECTION_HEADER": "Manifest Retry Parameters",
   "DEMO_MANIFEST_SEARCH": "Manifest",
   "DEMO_MANIFEST_SECTION_HEADER": "Manifest",
