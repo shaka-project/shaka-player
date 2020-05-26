@@ -277,6 +277,23 @@ describe('DashParser SegmentTemplate', function() {
       await Dash.testSegmentIndex(source, references);
     });
 
+    it('uses PTO with t attribute missing', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate startNumber="0" presentationTimeOffset="10"',
+        '    media="$Number$-$Time$-$Bandwidth$.mp4">',
+        '  <SegmentTimeline>',
+        '    <S d="15" r="2" />',
+        '  </SegmentTimeline>',
+        '</SegmentTemplate>',
+      ], /* duration= */ 35);
+      const references = [
+        ManifestParser.makeReference('0-0-500.mp4', 0, -10, 5, baseUri),
+        ManifestParser.makeReference('1-15-500.mp4', 1, 5, 20, baseUri),
+        ManifestParser.makeReference('2-30-500.mp4', 2, 20, 35, baseUri),
+      ];
+      await Dash.testSegmentIndex(source, references);
+    });
+
     it('with @startnumber = 0', async () => {
       let source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="0" duration="10"',
