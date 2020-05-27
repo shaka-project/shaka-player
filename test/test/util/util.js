@@ -533,12 +533,8 @@ shaka.test.Util = class {
     // the browser window size in JavaScript and communicate that to Karma, too,
     // so it can convert coordinates before cropping.  This value, as opposed to
     // document.body.getBoundingClientRect(), seems to most accurately reflect
-    // the size of the screenshot area.  On Safari, the width seems to be off by
-    // 15px for some reason, no matter what method we use to measure the
-    // viewport, whether or not the scroll bars are showing, whether or not
-    // window.scrollbars.visible is true, etc.
-    const offset = shaka.util.Platform.isApple() ? 15 : 0;
-    const bodyWidth = window.parent.innerWidth - offset;
+    // the size of the screenshot area.
+    const bodyWidth = window.parent.innerWidth;
     const bodyHeight = window.parent.innerHeight;
 
     // In addition to the id param from the top-level window, pass these
