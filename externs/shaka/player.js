@@ -398,6 +398,19 @@ shaka.extern.SupportType;
 
 
 /**
+ * @typedef {!Object.<string, ?>}
+ *
+ * @description
+ * ID3 metadata in format defined by
+ * https://id3.org/id3v2.3.0#Declared_ID3v2_frames
+ * The content of the field.
+ *
+ * @exportDoc
+ */
+shaka.extern.ID3Metadata;
+
+
+/**
  * @typedef {{
  *   schemeIdUri: string,
  *   value: string,

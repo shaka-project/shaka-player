@@ -85,11 +85,16 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {shaka.extern.TimelineRegionInfo} region
    */
-  onTimedMetadata(region) {}
+  onDashTimedMetadata(region) {}
 
   /**
-   * @param {{key: string, data: ?}} value ID3 metadata
-   * https://id3.org/id3v2.3.0#Declared_ID3v2_frames
+   * @param {!Array.<shaka.extern.ID3Metadata>} metadata
+   * @param {number} timestampOffset
+   */
+  onHlsTimedMetadata(metadata, timestampOffset) {}
+
+  /**
+   * @param {shaka.extern.ID3Metadata} value
    */
   onCueMetadataChange(value) {}
 };
