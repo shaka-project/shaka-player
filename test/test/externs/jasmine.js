@@ -667,6 +667,7 @@ jasmine.matchersUtil = {};
 /**
  * @param {*} first
  * @param {*} second
+ * @param {*} customEqualityTesters
  * @return {boolean}
  */
-jasmine.matchersUtil.equals = function(first, second) {};
+jasmine.matchersUtil.equals = function(first, second, customEqualityTesters) {};

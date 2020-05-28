@@ -596,6 +596,46 @@ describe('HlsParser live', () => {
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
     });
 
+    it('parses streams with Partial Segments', async () => {
+      const mediaWithPartialSegments = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4"\n',
+        '#EXT-X-PART:DURATION=2,URI="partial2.mp4"\n',
+        '#EXTINF:4,\n',
+        'main.mp4\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithPartialSegments)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData)
+          .setResponseValue('test:/partial.mp4', segmentData)
+          .setResponseValue('test:/partial2.mp4', segmentData);
+
+      const partialRef = ManifestParser.makeReference(
+          'test:/partial.mp4', segmentDataStartTime, segmentDataStartTime + 2,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
+
+      const partialRef2 = ManifestParser.makeReference(
+          'test:/partial2.mp4', segmentDataStartTime + 2,
+          segmentDataStartTime + 4, /* baseUri= */ '', /* startByte= */ 0,
+          /* endByte= */ null);
+
+      const ref = ManifestParser.makeReference(
+          'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 4,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* timestampOffset= */ 0, [partialRef, partialRef2]);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      const video = manifest.variants[0].video;
+      await video.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(video, [ref]);
+    });
+
     describe('update', () => {
       it('adds new segments when they appear', async () => {
         const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
