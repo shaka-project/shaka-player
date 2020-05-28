@@ -15,7 +15,7 @@
  *
  * @const {string}
  */
-const CACHE_NAME = 'shaka-player-v2.6+';
+const CACHE_NAME = 'shaka-player-v3.0+';
 
 
 /**

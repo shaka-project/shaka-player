@@ -47,7 +47,7 @@ NOTES:
    team. Tizen 2016 model is community-supported and untested by us.
  - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11
    can play clear content on Windows 8.0. IE 11 does not support adaptive
-   playback on Windows 7 and under.  (IE support will stop in v2.7:
+   playback on Windows 7 and under.  (IE support will stop in v3.1:
    https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.
@@ -152,7 +152,7 @@ NOTES:
    site with encrypted media, the user will be prompted to enable DRM.
  - ³: PlayReady in Edge does not seem to work on a VM or over Remote Desktop.
  - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only.  (IE
-   support will stop in v2.7:
+   support will stop in v3.1:
    https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.

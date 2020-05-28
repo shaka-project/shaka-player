@@ -91,7 +91,7 @@ assets together seamlessly with little effort.
 
 All media times in the manifest are relative to the presentation, *not* the
 Period.  This means that you must account for period start times in your segment
-references.  (This changed in Shaka Player v2.6.)
+references.  (This changed in Shaka Player v3.0.)
 
 **Note**: Because of browser requirements regarding MSE, we don't support
 changing MIME types or codecs after starting.  This means that all Periods must

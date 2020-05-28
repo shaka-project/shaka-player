@@ -1,10 +1,10 @@
-# Shaka Player Manifest Upgrade Guide (v2.6)
+# Shaka Player Manifest Upgrade Guide (v3.0)
 
-v2.6 introduced many changes to the `shaka.extern.Manifest` structure.
+v3.0 introduced many changes to the `shaka.extern.Manifest` structure.
 This is a detailed guide for upgrading `ManifestParser` plugins or applications
 using `Player.getManifest()` to extract information about content.  Any
 application with a custom `ManifestParser` or which uses `Player.getManifest()`
-MUST be upgraded for compatibility with v2.6.
+MUST be upgraded for compatibility with v3.0.
 
 
 #### Registration
@@ -57,7 +57,7 @@ this.playerInterface_.filterAllPeriods(periods);
 // Call this after any new periods are added
 this.playerInterface_.filterNewPeriod(someNewPeriod);
 
-// v2.6:
+// v3.0:
 // Call this after the initial parsing or after any new streams are added
 this.playerInterface_.filter(manifest);
 ```
@@ -79,7 +79,7 @@ timeline.notifySegments(segmentList, /* periodStart= */ 0);
 // v2.5:
 timeline.notifySegments(segmentList, /* isFirstPeriod= */ true);
 
-// v2.6:
+// v3.0:
 timeline.notifySegments(segmentList);
 ```
 
@@ -192,7 +192,7 @@ const ref = new shaka.media.SegmentReference(
     /* startByte= */ 0,
     /* endByte= */ null);
 
-// v2.6
+// v3.0
 const ref = new shaka.media.SegmentReference(
     /* startTime= */ 100,  // <-- period start 100 + period-relative timestamp 0
     /* endTime= */ 110,
@@ -215,7 +215,7 @@ updated to account for all changes below.
 The asynchronous `destroy` method has been replaced with the synchronous
 `release` method.  Applications which destroy `SegmentIndex` objects SHOULD be
 updated to call `release` instead.  Backward compatibility will be removed in
-v2.7.
+v3.1.
 
 The `find` method still returns a position which can be passed to `get`, but
 this position is no longer part of the underlying `SegmentReference` object.
@@ -230,7 +230,7 @@ implementation.  If your custom `ManifestParser` plugin was relying on the old
 merge behavior rather than its documentation, you MUST update your plugin.  See
 also the `replace` method.
 
-The `replace` method was present in v2.5, but has only in v2.6 been exported to
+The `replace` method was present in v2.5, but has only in v3.0 been exported to
 applications.  It will allow a `ManifestParser` plugin to completely replace the
 reference array without merging.  Whereas `merge` is O(N), `replace` is O(1).
 

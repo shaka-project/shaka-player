@@ -885,11 +885,11 @@ New Features:
 
 Deprecated:
   - Passing a ManifestParser factory to Player.load is deprecated and support
-    will be removed in v2.6. Instead, please register any custom parsers with a
+    will be removed in v3.0. Instead, please register any custom parsers with a
     MIME type, and pass a MIME type instead.  MIME types can also be used to
     force the selection of any built-in manifest parsers.
   - The |manifestUri| method on Player was changed to |assetUri|. The old method
-    is deprecated and will be removed in v2.6.
+    is deprecated and will be removed in v3.0.
 
 
 ## 2.4.4 (2018-08-23)

@@ -1,13 +1,13 @@
-# Shaka Upgrade Guide, v2.5 => v2.6
+# Shaka Upgrade Guide, v2.5 => v3.0
 
-This is a detailed guide for upgrading from Shaka Player v2.5 to v2.6.
+This is a detailed guide for upgrading from Shaka Player v2.5 to v3.0.
 Feel free to skim or to search for the class and method names you are using in
 your application.
 
 
-#### What's New in v2.6?
+#### What's New in v3.0?
 
-Shaka v2.6 introduces several improvements over v2.5, including:
+Shaka v3.0 introduces several improvements over v2.5, including:
   - Ad-insertion APIs (integrated with the Google IMA SDK)
   - Ad-related UI elements
   - Offline storage operations can be aborted
@@ -27,7 +27,7 @@ Shaka v2.6 introduces several improvements over v2.5, including:
 
 The optional `Factory` parameter in `Player.load()` and `Storage.store()` has
 been changed to a MIME type string.  The `Factory` parameter was deprecated in
-v2.5 and removed in v2.6.  Applications MUST update to use MIME types instead of
+v2.5 and removed in v3.0.  Applications MUST update to use MIME types instead of
 explicit factories.  Any registered factory can be referenced by its registered
 MIME type.
 
@@ -36,7 +36,7 @@ MIME type.
 player.load('foo.mpd', /* startTime= */ 0,
     /* factory= */ shaka.dash.DashParser);
 
-// v2.6:
+// v3.0:
 player.load('foo.mpd', /* startTime= */ 0,
     /* mimeType= */ 'application/dash+xml');
 ```
@@ -47,7 +47,7 @@ See {@link shaka.Player#load} for details.
 #### Manifest URI API change
 
 The method `Player.getManifestUri()` has been renamed to `Player.getAssetUri()`.
-The older method was deprecated in v2.5 and was removed in v2.6.  Applications
+The older method was deprecated in v2.5 and was removed in v3.0.  Applications
 MUST update to the new method, whose name more accurately reflects our support
 for non-manifest content.
 
@@ -55,7 +55,7 @@ for non-manifest content.
 // v2.4:
 const uri = player.getManifestUri();
 
-// v2.6:
+// v3.0:
 const uri = player.getAssetUri();
 ```
 
@@ -63,14 +63,14 @@ const uri = player.getAssetUri();
 #### UI API change
 
 In v2.5.1, the method `shaka.ui.Overlay.getPlayer()` was deprecated and moved
-to `ui.getControls().getPlayer()`.  In v2.6, the old location was removed.
+to `ui.getControls().getPlayer()`.  In v3.0, the old location was removed.
 Applications that use this method MUST update to the new location.
 
 ```js
 // v2.5:
 const player = ui.getPlayer();
 
-// v2.6:
+// v3.0:
 const player = ui.getControls().getPlayer();
 ```
 
@@ -79,7 +79,7 @@ const player = ui.getControls().getPlayer();
 
 The CEA-specific methods `Player.selectEmbeddedTextTrack()` and
 `Player.usingEmbeddedTextTrack()` were deprecated in v2.5 and were removed in
-v2.6.  CEA captions now show up in the standard text track APIs:
+v3.0.  CEA captions now show up in the standard text track APIs:
 `getTextTracks()`, `selectTextTrack()`, `getTextLanguages()`,
 `getTextLanguagesAndRoles()`, and `selectTextLanguage()`.  Applications MUST
 update to using the track APIs.  If you have content with VTT or TTML subtitles,
@@ -89,7 +89,7 @@ you should already be using these APIs.
 // v2.4:
 player.selectEmbeddedTextTrack();
 
-// v2.6:
+// v3.0:
 const tracks = player.getTextTracks();
 const desiredTrack = someProcessToChooseOne(tracks);
 player.selectTextTrack(desiredTrack);
@@ -98,18 +98,18 @@ player.selectTextTrack(desiredTrack);
 
 #### Utility method changes
 
-In v2.6, the method `shaka.util.Uint8ArrayUtils.equal` has been moved to
+In v3.0, the method `shaka.util.Uint8ArrayUtils.equal` has been moved to
 `shaka.util.BufferUtils.equal`.  The new method supports both `ArrayBuffer` and
 subclasses of `ArrayBufferView` like `Uint8Array`.
 
-Backward compatibility will be provided until v2.7.  Applications SHOULD update
+Backward compatibility will be provided until v3.1.  Applications SHOULD update
 to use the new location.
 
 ```js
 // v2.5:
 if (shaka.util.Uint8ArrayUtils.equal(array1, array2) { ...
 
-// v2.6:
+// v3.0:
 if (shaka.util.BufferUtils.equal(array1, array2) { ...
 ```
 
@@ -117,12 +117,12 @@ if (shaka.util.BufferUtils.equal(array1, array2) { ...
 #### Configurable factory changes
 
 All configuration fields and plugin registration interfaces that accept
-factories have been changed in v2.6.  These factories SHOULD now be functions
+factories have been changed in v3.0.  These factories SHOULD now be functions
 that return an object and MAY be arrow functions.  This makes our configuration
 and plugin registration interfaces consistent and improves usability in some
 cases.
 
-Backward compatibility is provided until v2.7.  If we detect that a factory
+Backward compatibility is provided until v3.1.  If we detect that a factory
 needs to be called with `new`, we will do so and log a deprecation warning.
 Applications SHOULD update their factories.
 
@@ -145,7 +145,7 @@ class MyManifestParser {
 }
 shaka.media.ManifestParser.registerParserByMime('text/foo', MyManifestParser);
 
-// v2.6:
+// v3.0:
 player.configure('abrFactory', () => new MyAbrManager());
 shaka.media.ManifestParser.registerParserByMime(
     'text/foo', () => new MyManifestParser());
@@ -170,7 +170,7 @@ new parameter has been added to the callback signature.
 function initDataTransform(/** Uint8Array */ initData,
                            /** shaka.extern.DrmInfo */ drmInfo) {}
 
-// v2.6:
+// v3.0:
 function initDataTransform(/** Uint8Array */ initData,
                            /** string */ initDataType,
                            /** shaka.extern.DrmInfo */ drmInfo) {}
@@ -185,12 +185,12 @@ processing easier.  You can refer to {@tutorial fairplay} as well.
 
 #### Misc configuration changes
 
-The configurable callback `manifest.dash.customScheme` has been removed in v2.6
+The configurable callback `manifest.dash.customScheme` has been removed in v3.0
 and is no longer supported.
 
 The config field `manifest.dash.defaultPresentationDelay` has been moved to
 `manifest.defaultPresentationDelay`.  Backward compatibility is provided until
-v2.7.  Applications using this field SHOULD update to use the new location.
+v3.1.  Applications using this field SHOULD update to use the new location.
 
 The `manifest.defaultPresentationDelay` field now affects both DASH and HLS
 content.  The default value is `0`, which is interpretted differently for DASH
@@ -215,17 +215,17 @@ See {@link shaka.extern.ManifestConfiguration} and
 
 #### Offline API changes
 
-In v2.6, the offline storage method `Storage.getStoreInProgress()` is now
+In v3.0, the offline storage method `Storage.getStoreInProgress()` is now
 deprecated and always returns `false`.  There is no longer any restriction on
-concurrent operations.  This method will be removed in v2.7.  Applications
+concurrent operations.  This method will be removed in v3.1.  Applications
 SHOULD stop using it.
 
 The method `Storage.store()` now returns an instance of `IAbortableOperation`
 instead of `Promise`.  This allows applications to call `op.abort()` to stop an
 operation in progress.  The operation `Promise` can now be found on
-`op.promise`.  Backward compatibility is provided until v2.7; these operations
-will work like `Promise`s in v2.6.  (Applications MAY `await` them or call
-`.then()` on them.)  In v2.7, these returned operations will no longer be
+`op.promise`.  Backward compatibility is provided until v3.1; these operations
+will work like `Promise`s in v3.0.  (Applications MAY `await` them or call
+`.then()` on them.)  In v3.1, these returned operations will no longer be
 `Promise`-like, so applications SHOULD update at this time to use `op.promise`.
 
 ```js
@@ -236,7 +236,7 @@ try {
   // Store failed!
 }
 
-// v2.6:
+// v3.0:
 const op = storage.store();
 cancelButton.onclick = async () => {
   await op.abort();
@@ -253,11 +253,11 @@ try {
 }
 ```
 
-In v2.6, `shaka.offline.Storage.configure()` now takes a complete `Player`
+In v3.0, `shaka.offline.Storage.configure()` now takes a complete `Player`
 configuration object instead of a separate one.  The fields that were previously
 part of the `Storage` config (`trackSelectionCallback`, `progressCallback`, and
 `usePersistentLicense`) have been moved inside the `offline` field.  The old
-field locations were deprecated in v2.5 and removed in v2.6.  Applications MUST
+field locations were deprecated in v2.5 and removed in v3.0.  Applications MUST
 update to use the new field locations.
 
 ```js
@@ -266,7 +266,7 @@ storage.configure({
   trackSelectionCallback: myTrackSelectionCallback,
 });
 
-// v2.6:
+// v3.0:
 const storage = new shaka.offline.Storage();
 storage.configure({
   offline: {
@@ -345,11 +345,11 @@ See {@tutorial ui-customization}.
 
 #### AbrManager plugin changes
 
-In v2.6, we added a method to the `shaka.extern.AbrManager` interface called
+In v3.0, we added a method to the `shaka.extern.AbrManager` interface called
 `playbackRateChanged(rate)`.  This allows implementations to consider the
 current playback rate in their ABR decisions.
 
-Backward compatibility will be provided until v2.7.  Applications with custom
+Backward compatibility will be provided until v3.1.  Applications with custom
 `AbrManager` plugins SHOULD update to add this method to their implementations.
 
 See {@link shaka.extern.AbrManager} for details.
@@ -357,13 +357,13 @@ See {@link shaka.extern.AbrManager} for details.
 
 #### TextDisplayer plugin changes
 
-The `Cue` objects consumed by `TextDisplayer` have changed in v2.6.
+The `Cue` objects consumed by `TextDisplayer` have changed in v3.0.
 
  - `Cue.size` now defaults to `0`, which should be interpretted as "auto" (fit
    to text).
 
 All application-specific TextDisplayer plugins MUST be updated.
-v2.6 does not have backward compatibility for this!
+v3.0 does not have backward compatibility for this!
 
 In addition, the following new fields have been added and MAY be used by
 `TextDisplayer` plugins:
@@ -382,7 +382,7 @@ See {@link shaka.extern.Cue} for details.
 
 The interface {@link shaka.extern.IUIElement} now has a synchronous `release()`
 method instead of an asynchronous `destroy()` method.  Backward compatibility
-will be provided until v2.7.  Applications with UI element plugins SHOULD
+will be provided until v3.1.  Applications with UI element plugins SHOULD
 update their plugins to replace `destroy()` with `release()`.
 
 ```js
@@ -393,7 +393,7 @@ class MyUIElement {
   }
 }
 
-// v2.6:
+// v3.0:
 class MyUIElement {
   release() {
     // Release resources synchronously.
@@ -423,7 +423,7 @@ function MySchemePlugin(uri, request, requestType, progressUpdated) {
 }
 shaka.net.NetworkingEngine.registerScheme('data', MySchemePlugin);
 
-// v2.6:
+// v3.0:
 function MySchemePlugin(uri, request, requestType, progressUpdated) {
   return shaka.net.DataUriPlugin.parse(
       uri, request, requestType, progressUpdated);
@@ -433,9 +433,9 @@ function MySchemePlugin(uri, request, requestType, progressUpdated) {
 
 #### Manifest parser plugin API changes
 
-v2.6 introduced many changes to the {@link shaka.extern.Manifest} structure.
+v3.0 introduced many changes to the {@link shaka.extern.Manifest} structure.
 Any application with a custom {@link shaka.extern.ManifestParser} or which uses
-{@link shaka.Player#getManifest} MUST be upgraded for compatibility with v2.6.
+{@link shaka.Player#getManifest} MUST be upgraded for compatibility with v3.0.
 
 If your application meets either of these criteria, please refer to
 {@tutorial upgrade-manifest} for detailed instructions on upgrading.

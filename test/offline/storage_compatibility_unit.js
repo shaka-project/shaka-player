@@ -52,7 +52,7 @@ const compatibilityTestsMetadata = [
     // This is the v3 version of the database, which is actually identical to
     // the "clean" version of the v2 database.  The version number was
     // incremented to overcome the "broken" v2 databases.  This format was
-    // introduced in v2.3.2 and deprecated in v2.6.
+    // introduced in v2.3.2 and deprecated in v3.0.
     name: 'v3',
     dbImagePath: '/base/test/test/assets/db-dump-v3.json',
     manifestKey: 1,
@@ -78,7 +78,7 @@ const compatibilityTestsMetadata = [
         /* manifestStore= */ 'manifest-v3'),
   },
   {
-    // This is the v5 version of the database, introduced in v2.6.
+    // This is the v5 version of the database, introduced in v3.0.
     name: 'v5',
     dbImagePath: '/base/test/test/assets/db-dump-v5.json',
     manifestKey: 1,

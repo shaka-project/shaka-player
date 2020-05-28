@@ -824,7 +824,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
         if (typeof element.release != 'function') {
           shaka.Deprecate.deprecateFeature(
-              2, 7,
+              3, 1,
               'shaka.extern.IUIElement',
               'Please update UI elements to have a release() method.');
 

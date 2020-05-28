@@ -97,7 +97,7 @@ shaka.extern.UIVolumeBarColors;
  *   at the start of the seek bar as played (using the "played" color).
  *   <br>
  *   A value of false matches the default behavior of Chrome's native controls
- *   and Shaka Player v2.6+.
+ *   and Shaka Player v3.0+.
  *   <br>
  *   A value of true matches the default behavior of Shaka Player v2.5.
  *   <br>

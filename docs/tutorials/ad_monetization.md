@@ -3,7 +3,7 @@
 Shaka Player provides an API for serving ads to make monetization easier
 for apps. Our current API is tailored for our integration with the
 [Interactive Media Ads][] SDKs, but we plan to extend our support to
-other ad providers in v2.7+.
+other ad providers in v3.1+.
 Please note that the current API is likely to undergo significant
 changes as our support extends.
 
