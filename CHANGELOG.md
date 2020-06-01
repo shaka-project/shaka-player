@@ -1,3 +1,101 @@
+## 3.0.0 (2020-06-03)
+
+Ad Features (BETA):
+  - Integration with Google IMA Ads SDK
+    - https://github.com/google/shaka-player/issues/2222
+  - Ad-related UI elements
+
+Offline Features:
+  - Allow offline downloads to be aborted
+    - https://github.com/google/shaka-player/issues/2417
+    - https://github.com/google/shaka-player/issues/1362
+    - https://github.com/google/shaka-player/issues/1301
+  - Store creation time with offline assets
+    - https://github.com/google/shaka-player/pull/2406
+  - Allow multiple concurrent storage operations on one Storage instance
+    - https://github.com/google/shaka-player/issues/1432
+    - https://github.com/google/shaka-player/issues/2432
+  - Make trackSelectionCallback async
+    - https://github.com/google/shaka-player/pull/2387
+  - Allow storage of manifests that are missing inline init data
+    - https://github.com/google/shaka-player/pull/2042
+
+HLS Features:
+  - Add support for HLS Discontinuity
+    - https://github.com/google/shaka-player/issues/2397
+    - https://github.com/google/shaka-player/issues/1335
+  - Add support for multiple EXT-X-MAP tags
+    - https://github.com/google/shaka-player/issues/1335
+    - https://github.com/google/shaka-player/issues/2397
+  - Improve HLS startup latency
+    - https://github.com/google/shaka-player/issues/1558
+  - Add variable substitution support to HLS parser
+    - https://github.com/google/shaka-player/pull/2509
+  - Add a presentationDelay config for HLS live
+    - https://github.com/google/shaka-player/issues/2373
+
+UI Features:
+  - Expand translations: now available in 45 languages (18 built-in by default)
+  - Support setting source through HTML src attribute or source tag
+    - https://github.com/google/shaka-player/issues/2088
+  - Large play button is configurable, and only shows on mobile UI by default
+  - Add playback speed selection to UI
+    - https://github.com/google/shaka-player/issues/2362
+    - https://github.com/google/shaka-player/issues/1676
+  - Add loop control element to UI
+    - https://github.com/google/shaka-player/issues/2362
+  - Improve buffering spinner visibility
+    - https://github.com/google/shaka-player/issues/2110
+
+Subtitle/Caption Features:
+  - Add support for ebutts:linePadding in TTML
+    - https://github.com/google/shaka-player/pull/2443
+  - Add support for cell resolution units and font percentage in TTML
+    - https://github.com/google/shaka-player/issues/2403
+    - https://github.com/google/shaka-player/pull/2442
+  - Add support for tts:border, tts:letterSpacing and tts:opacity in TTML
+    - https://github.com/google/shaka-player/pull/2408
+
+Other Features:
+  - Add liveLatency to stats
+    - https://github.com/google/shaka-player/pull/2508
+  - Allow configuration of presumed manifest accuracy, reduces extra fetches
+    - https://github.com/google/shaka-player/issues/2291
+  - Take into account the playbackRate in bandwidth calculations
+    - https://github.com/google/shaka-player/pull/2329
+  - Add check for E-AC3 JOC in DASH
+    - https://github.com/google/shaka-player/issues/2296
+  - Improve startup performance by lazily creating segment indexes
+  - Support pre-standard DASH MIME type
+  - Allow running tests without Babel
+
+Broken compatibility:
+  - Remove support for custom DASH ContentProtection schemas
+    - https://github.com/google/shaka-player/issues/2356
+  - Signature for config callback "drm.initDataTransform" changed
+
+Deprecated (with backward compatibility until v4.0):
+  - Uint8ArrayUtils.equal() moved to BufferUtils
+  - Factory methods are no longer called with "new"
+    - https://github.com/google/shaka-player/issues/1521
+  - Config "manifest.dash.defaultPresentationDelay" moved to
+    "manifest.defaultPresentationDelay"
+  - Storage.getStoreInProgress() deprecated (not needed with concurrent storage
+    operations)
+
+Removed after deprecation in v2.5:
+  - Player.selectEmbeddedTextTrack
+  - Player.usingEmbeddedTextTrack
+  - Player.getManifestUri (renamed to getAssetUri)
+  - load() factory parameter (replaced with MIME type parameter)
+  - Storage configuration fields (moved into Player config under "offline")
+  - UI getPlayer() moved to getControls().getPlayer()
+
+Demo App Features:
+  - Added trick play controls option
+  - Add 'audio only' to the search terms
+
+
 ## 2.5.12 (2020-05-29)
 
 Bugfixes:
