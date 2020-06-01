@@ -102,7 +102,7 @@ In v3.0, the method `shaka.util.Uint8ArrayUtils.equal` has been moved to
 `shaka.util.BufferUtils.equal`.  The new method supports both `ArrayBuffer` and
 subclasses of `ArrayBufferView` like `Uint8Array`.
 
-Backward compatibility will be provided until v3.1.  Applications SHOULD update
+Backward compatibility will be provided until v4.0.  Applications SHOULD update
 to use the new location.
 
 ```js
@@ -122,7 +122,7 @@ that return an object and MAY be arrow functions.  This makes our configuration
 and plugin registration interfaces consistent and improves usability in some
 cases.
 
-Backward compatibility is provided until v3.1.  If we detect that a factory
+Backward compatibility is provided until v4.0.  If we detect that a factory
 needs to be called with `new`, we will do so and log a deprecation warning.
 Applications SHOULD update their factories.
 
@@ -190,7 +190,7 @@ and is no longer supported.
 
 The config field `manifest.dash.defaultPresentationDelay` has been moved to
 `manifest.defaultPresentationDelay`.  Backward compatibility is provided until
-v3.1.  Applications using this field SHOULD update to use the new location.
+v4.0.  Applications using this field SHOULD update to use the new location.
 
 The `manifest.defaultPresentationDelay` field now affects both DASH and HLS
 content.  The default value is `0`, which is interpretted differently for DASH
@@ -217,15 +217,15 @@ See {@link shaka.extern.ManifestConfiguration} and
 
 In v3.0, the offline storage method `Storage.getStoreInProgress()` is now
 deprecated and always returns `false`.  There is no longer any restriction on
-concurrent operations.  This method will be removed in v3.1.  Applications
+concurrent operations.  This method will be removed in v4.0.  Applications
 SHOULD stop using it.
 
 The method `Storage.store()` now returns an instance of `IAbortableOperation`
 instead of `Promise`.  This allows applications to call `op.abort()` to stop an
 operation in progress.  The operation `Promise` can now be found on
-`op.promise`.  Backward compatibility is provided until v3.1; these operations
+`op.promise`.  Backward compatibility is provided until v4.0; these operations
 will work like `Promise`s in v3.0.  (Applications MAY `await` them or call
-`.then()` on them.)  In v3.1, these returned operations will no longer be
+`.then()` on them.)  In v4.0, these returned operations will no longer be
 `Promise`-like, so applications SHOULD update at this time to use `op.promise`.
 
 ```js
@@ -349,7 +349,7 @@ In v3.0, we added a method to the `shaka.extern.AbrManager` interface called
 `playbackRateChanged(rate)`.  This allows implementations to consider the
 current playback rate in their ABR decisions.
 
-Backward compatibility will be provided until v3.1.  Applications with custom
+Backward compatibility will be provided until v4.0.  Applications with custom
 `AbrManager` plugins SHOULD update to add this method to their implementations.
 
 See {@link shaka.extern.AbrManager} for details.
@@ -382,7 +382,7 @@ See {@link shaka.extern.Cue} for details.
 
 The interface {@link shaka.extern.IUIElement} now has a synchronous `release()`
 method instead of an asynchronous `destroy()` method.  Backward compatibility
-will be provided until v3.1.  Applications with UI element plugins SHOULD
+will be provided until v4.0.  Applications with UI element plugins SHOULD
 update their plugins to replace `destroy()` with `release()`.
 
 ```js

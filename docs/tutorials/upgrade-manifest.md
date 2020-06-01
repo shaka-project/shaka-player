@@ -215,7 +215,7 @@ updated to account for all changes below.
 The asynchronous `destroy` method has been replaced with the synchronous
 `release` method.  Applications which destroy `SegmentIndex` objects SHOULD be
 updated to call `release` instead.  Backward compatibility will be removed in
-v3.1.
+v4.0.
 
 The `find` method still returns a position which can be passed to `get`, but
 this position is no longer part of the underlying `SegmentReference` object.
