@@ -489,6 +489,29 @@ describe('HlsParser live', () => {
           expect(manifest.presentationTimeline.getDelay()).toBe(15);
         });
 
+    it('sets 3 times partial target duration as presentation delay for low' +
+        'latency mode', async () => {
+      const mediaWithPartialDuration = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PART-INF:PART-TARGET=0.5\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXTINF:2,\n',
+        'main.mp4\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithPartialDuration)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
+
+      config.lowLatencyMode = true;
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.presentationTimeline.getDelay()).toBe(1.5);
+    });
+
     describe('availabilityWindowOverride', () => {
       async function testWindowOverride(expectedWindow) {
         fakeNetEngine
