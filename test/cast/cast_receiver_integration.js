@@ -265,6 +265,13 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       CastReceiverManager: {
         getInstance: () => mockReceiverManager,
       },
+      media: {
+        // Defined by the SDK, but we aren't loading it here.
+        MetadataType: {
+          GENERIC: 0,
+          MUSIC_TRACK: 3,
+        },
+      },
     };
   }
 

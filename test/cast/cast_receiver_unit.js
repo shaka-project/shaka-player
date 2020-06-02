@@ -852,6 +852,139 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     });
   });
 
+  describe('content metadata methods', () => {
+    beforeEach(async () => {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+      fakeConnectedSenders(1);
+
+      mockPlayer.load.and.callFake(() => {
+        mockVideo.duration = 1;
+        mockPlayer.getAssetUri = () => 'URI A';
+        return Promise.resolve();
+      });
+      fakeIncomingMessage({
+        type: 'init',
+        initState: {manifest: 'URI A'},
+        appData: {},
+      }, mockShakaMessageBus);
+
+      // The messages will show up asychronously:
+      await Util.shortDelay();
+      expectMediaInfo('URI A', 1);
+      mockGenericMessageBus.messages = [];
+    });
+
+    it('setContentMetadata sets arbitrary metadata', () => {
+      // In reality, this should follow one of the object formats defined by the
+      // Cast SDK.  For unit testing, it can be anything.
+      const metadata = {
+        foo: 42,
+        bar: 'any old bar',
+      };
+      receiver.setContentMetadata(metadata);
+
+      getStatus();
+      expectMediaInfo('URI A', 1, metadata);
+    });
+
+    it('setContentTitle sets the title individually', () => {
+      const title = 'Title of the Song';
+      receiver.setContentTitle(title);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.GENERIC,
+        title,
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('setContentImage sets the image individually', () => {
+      const imageUrl = 'https://i.ytimg.com/vi/281ax7Ovlsg/hqdefault.jpg';
+      receiver.setContentImage(imageUrl);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.GENERIC,
+        images: [
+          {url: imageUrl},
+        ],
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('setContentArtist sets the artist individually', () => {
+      const artist = 'Da Vinci\'s Notebook';
+
+      receiver.setContentArtist(artist);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.MUSIC_TRACK,
+        artist,
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('setContentArtist creates music metadata after title', () => {
+      const title = 'Title of the Song';
+      const artist = 'Da Vinci\'s Notebook';
+      // https://www.youtube.com/watch?v=734wnHnnNR4
+
+      receiver.setContentTitle(title);
+      receiver.setContentArtist(artist);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.MUSIC_TRACK,
+        title,
+        artist,
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('setContentArtist creates music metadata before title', () => {
+      const title = 'Title of the Song';
+      const artist = 'Da Vinci\'s Notebook';
+      // https://www.youtube.com/watch?v=734wnHnnNR4
+
+      receiver.setContentArtist(artist);
+      receiver.setContentTitle(title);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.MUSIC_TRACK,
+        title,
+        artist,
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('clearContentMetadata clears all metadata', () => {
+      const title = 'Title of the Song';
+
+      receiver.setContentTitle(title);
+      receiver.clearContentMetadata();
+
+      const expectedMetadata = undefined;
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    function getStatus() {
+      const message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'GET_STATUS',
+      };
+
+      mockGenericMessageBus.broadcast.calls.reset();
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockGenericMessageBus.broadcast).toHaveBeenCalledTimes(1);
+    }
+  });
+
   describe('destroy', () => {
     beforeEach(() => {
       receiver = new CastReceiver(
@@ -898,6 +1031,13 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     return {
       CastReceiverManager: {
         getInstance: () => mockReceiverManager,
+      },
+      media: {
+        // Defined by the SDK, but we aren't loading it here.
+        MetadataType: {
+          GENERIC: 0,
+          MUSIC_TRACK: 3,
+        },
       },
     };
   }
@@ -1001,22 +1141,36 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     bus.onMessage(messageEvent);
   }
 
-  function expectMediaInfo(expectedUri, expectedDuration) {
+  /**
+   * @param {string} expectedUri
+   * @param {number} expectedDuration
+   * @param {Object=} metadata
+   */
+  function expectMediaInfo(expectedUri, expectedDuration, metadata=null) {
     expect(mockGenericMessageBus.messages.length).toBeGreaterThan(0);
     if (mockGenericMessageBus.messages.length == 0) {
       return;
     }
+
+    const expectedMedia = {
+      contentId: expectedUri,
+      streamType: 'BUFFERED',
+      duration: expectedDuration,
+      contentType: '',
+    };
+
+    if (metadata) {
+      // This field only sometimes shows up.
+      // Setting it to null would cause the check below to fail.
+      expectedMedia.metadata = metadata;
+    }
+
     expect(mockGenericMessageBus.messages[0]).toEqual(
         {
           requestId: 0,
           type: 'MEDIA_STATUS',
           status: [jasmine.objectContaining({
-            media: {
-              contentId: expectedUri,
-              streamType: 'BUFFERED',
-              duration: expectedDuration,
-              contentType: '',
-            },
+            media: expectedMedia,
           })],
         }
     );

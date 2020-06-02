@@ -118,6 +118,20 @@ cast.receiver.CastReceiverManager = class {
 
 
 /** @const */
+cast.receiver.media = {};
+
+
+/** @enum {number} */
+cast.receiver.media.MetadataType = {
+  'GENERIC': 0,
+  'MOVIE': 1,
+  'TV_SHOW': 2,
+  'MUSIC_TRACK': 3,
+  'PHOTO': 4,
+};
+
+
+/** @const */
 cast.__platform__ = class {
   /**
    * @param {string} type
