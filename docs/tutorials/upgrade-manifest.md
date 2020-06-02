@@ -227,12 +227,7 @@ The `merge` method has been simplified.  It was already documented to only
 support extending the reference array without replacing anything or interleaving
 new references into the old ones.  Now it is actually a true statement about the
 implementation.  If your custom `ManifestParser` plugin was relying on the old
-merge behavior rather than its documentation, you MUST update your plugin.  See
-also the `replace` method.
-
-The `replace` method was present in v2.5, but has only in v3.0 been exported to
-applications.  It will allow a `ManifestParser` plugin to completely replace the
-reference array without merging.  Whereas `merge` is O(N), `replace` is O(1).
+merge behavior rather than its documentation, you MUST update your plugin.
 
 The `evict` method now takes a presentation timestamp.  See related changes in
 the `SegmentReference` section above.
