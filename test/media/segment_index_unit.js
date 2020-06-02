@@ -524,15 +524,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
           inputRefs0.concat(inputRefs1, inputRefs2));
     });
 
-    it('updates through replace', () => {
-      metaIndex.appendSegmentIndex(index0);
-      metaIndex.appendSegmentIndex(index1);
-      expect(Array.from(metaIndex)).toEqual(inputRefs0.concat(inputRefs1));
-
-      index1.replace(inputRefs2);
-      expect(Array.from(metaIndex)).toEqual(inputRefs0.concat(inputRefs2));
-    });
-
     it('tracks evictions with stable positions', () => {
       metaIndex.appendSegmentIndex(index0);
       metaIndex.appendSegmentIndex(index1);
