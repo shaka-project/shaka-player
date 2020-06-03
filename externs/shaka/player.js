@@ -78,6 +78,8 @@ shaka.extern.StateChange;
  *   licenseTime: number,
  *   liveLatency: number,
  *
+ *   maxSegmentDuration: number,
+ *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
  * }}
@@ -127,6 +129,9 @@ shaka.extern.StateChange;
  * @property {number} liveLatency
  *   The time between the capturing of a frame and the end user having it
  *   displayed on their screen.
+ *
+ * @property {number} maxSegmentDuration
+ *   The presentation's max segment duration in seconds, or NaN.
  *
  * @property {!Array.<shaka.extern.TrackChoice>} switchHistory
  *   A history of the stream changes.

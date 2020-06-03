@@ -93,6 +93,8 @@ describe('Player', () => {
         licenseTime: jasmine.any(Number),
         liveLatency: jasmine.any(Number),
 
+        maxSegmentDuration: jasmine.any(Number),
+
         // We should have loaded the first Period by now, so we should have a
         // history.
         switchHistory: jasmine.arrayContaining([{
