@@ -795,8 +795,10 @@ describe('CastReceiver', function() {
 
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockGenericMessageBus.broadcast.calls.count()).toEqual(1);
-      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
-          '"requestId":0,"type":"MEDIA_STATUS"')).toBe(true);
+
+      // This covers the lack of scrubber in the Google Home app, as described
+      // in https://github.com/google/shaka-player/issues/2606
+      expectMediaInfo('URI A', 1);
     }));
 
     it('play', checkAndRun(() => {
