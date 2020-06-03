@@ -476,6 +476,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.frameRate = undefined;
       /** @type {(string|undefined)} */
       this.pixelAspectRatio = undefined;
+      /** @type {(string|undefined)} */
+      this.storageAspectRatio = undefined;
       /** @type {(number|undefined)} */
       this.bandwidth = undefined;
       /** @type {(number|undefined)} */

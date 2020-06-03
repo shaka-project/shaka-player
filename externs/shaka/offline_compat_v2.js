@@ -67,6 +67,7 @@ shaka.extern.PeriodDBV2;
  *   codecs: string,
  *   frameRate: (number|undefined),
  *   pixelAspectRatio: (string|undefined),
+ *   storageAspectRatio: (string|undefined),
  *   kind: (string|undefined),
  *   language: string,
  *   label: ?string,
@@ -99,6 +100,8 @@ shaka.extern.PeriodDBV2;
  *   The Stream's framerate in frames per second.
  * @property {(string|undefined)} pixelAspectRatio
  *   The Stream's pixel aspect ratio
+ * @property {(string|undefined)} storageAspectRatio
+ *   The Stream's storage aspect ratio
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
