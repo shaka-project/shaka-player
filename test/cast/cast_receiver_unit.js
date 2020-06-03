@@ -635,11 +635,11 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       fakeConnectedSenders(1);
-      mockPlayer.load = () => {
+      mockPlayer.load.and.callFake(() => {
         mockVideo.duration = 1;
         mockPlayer.getAssetUri = () => 'URI A';
         return Promise.resolve();
-      };
+      });
       fakeIncomingMessage({
         type: 'init',
         initState: {manifest: 'URI A'},
@@ -665,12 +665,12 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     });
 
     it('for correct manifest after loading new', async () => {
-      // Change media information, but only after half a second.
-      mockPlayer.load = async () => {
+      // Change media information, but only after a delay.
+      mockPlayer.load.and.callFake(async () => {
         await Util.shortDelay();
         mockVideo.duration = 2;
         mockPlayer.getAssetUri = () => 'URI B';
-      };
+      });
       fakeIncomingMessage({
         type: 'asyncCall',
         id: '5',
@@ -687,11 +687,11 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     });
 
     it('after LOAD system message', async () => {
-      mockPlayer.load = () => {
+      mockPlayer.load.and.callFake(() => {
         mockVideo.duration = 2;
         mockPlayer.getAssetUri = () => 'URI B';
         return Promise.resolve();
-      };
+      });
       const message = {
         // Arbitrary number
         'requestId': 0,
@@ -710,35 +710,29 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       expectMediaInfo('URI B', 2);
       expect(mockGenericMessageBus.messages.length).toBe(0);
     });
-
-    function expectMediaInfo(expectedUri, expectedDuration) {
-      expect(mockGenericMessageBus.messages.length).toBeGreaterThan(0);
-      if (mockGenericMessageBus.messages.length == 0) {
-        return;
-      }
-      expect(mockGenericMessageBus.messages[0]).toEqual(
-          {
-            requestId: 0,
-            type: 'MEDIA_STATUS',
-            status: [jasmine.objectContaining({
-              media: {
-                contentId: expectedUri,
-                streamType: 'BUFFERED',
-                duration: expectedDuration,
-                contentType: '',
-              },
-            })],
-          }
-      );
-      mockGenericMessageBus.messages.shift();
-    }
   });
 
   describe('respects generic control messages', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       fakeConnectedSenders(1);
+
+      mockPlayer.load.and.callFake(() => {
+        mockVideo.duration = 1;
+        mockPlayer.getAssetUri = () => 'URI A';
+        return Promise.resolve();
+      });
+      fakeIncomingMessage({
+        type: 'init',
+        initState: {manifest: 'URI A'},
+        appData: {},
+      }, mockShakaMessageBus);
+
+      // The messages will show up asychronously:
+      await Util.shortDelay();
+      expectMediaInfo('URI A', 1);
+      mockGenericMessageBus.messages = [];
     });
 
     it('get status', () => {
@@ -846,11 +840,13 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       mockGenericMessageBus.broadcast.calls.reset();
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockGenericMessageBus.broadcast).toHaveBeenCalledTimes(1);
-      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
-          '"requestId":0,' +
-          '"type":"INVALID_REQUEST",' +
-          '"reason":"INVALID_COMMAND"'))
-          .toBe(true);
+      expect(mockGenericMessageBus.messages).toEqual(jasmine.arrayContaining([
+        jasmine.objectContaining({
+          requestId: 0,
+          type: 'INVALID_REQUEST',
+          reason: 'INVALID_COMMAND',
+        }),
+      ]));
     });
   });
 
@@ -1001,5 +997,27 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       data: serialized,
     };
     bus.onMessage(messageEvent);
+  }
+
+  function expectMediaInfo(expectedUri, expectedDuration) {
+    expect(mockGenericMessageBus.messages.length).toBeGreaterThan(0);
+    if (mockGenericMessageBus.messages.length == 0) {
+      return;
+    }
+    expect(mockGenericMessageBus.messages[0]).toEqual(
+        {
+          requestId: 0,
+          type: 'MEDIA_STATUS',
+          status: [jasmine.objectContaining({
+            media: {
+              contentId: expectedUri,
+              streamType: 'BUFFERED',
+              duration: expectedDuration,
+              contentType: '',
+            },
+          })],
+        }
+    );
+    mockGenericMessageBus.messages.shift();
   }
 });
