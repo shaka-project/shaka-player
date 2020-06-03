@@ -151,6 +151,28 @@ describe('TtmlTextParser', () => {
         {periodStart: 7, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports nested cues with an offset', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 69.05,
+            endTime: 3730.2,
+            payload: '',
+            nestedCues: [
+              {
+                payload: 'Nested cue',
+                startTime: 69.05,
+                endTime: 3730.2,
+              },
+            ],
+          },
+        ],
+        '<tt><body><div>' +
+        '<p begin="01:02.05" end="01:02:03.200"><span>Nested cue</span></p>' +
+        '</div></body></tt>',
+        {periodStart: 7, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('supports time in 0.00h 0.00m 0.00s format', () => {
     verifyHelper(
         [
