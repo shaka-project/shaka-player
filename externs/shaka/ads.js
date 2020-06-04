@@ -89,7 +89,7 @@ shaka.extern.IAdManager = class extends EventTarget {
   onDashTimedMetadata(region) {}
 
   /**
-   * @param {!Array.<shaka.extern.ID3Metadata>} metadata
+   * @param {shaka.extern.ID3Metadata} metadata
    * @param {number} timestampOffset
    */
   onHlsTimedMetadata(metadata, timestampOffset) {}
