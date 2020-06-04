@@ -36,7 +36,7 @@ describe('DashParser SegmentTemplate', () => {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filter: (manifest) => {},
+      filter: (manifest) => Promise.resolve(),
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,

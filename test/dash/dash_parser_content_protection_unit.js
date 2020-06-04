@@ -32,7 +32,7 @@ describe('DashParser ContentProtection', () => {
 
     const playerInterface = {
       networkingEngine: netEngine,
-      filter: (manifest) => {},
+      filter: (manifest) => Promise.resolve(),
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,

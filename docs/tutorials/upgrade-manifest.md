@@ -48,6 +48,8 @@ Instead of `filterNewPeriod` and `filterAllPeriods`, there is now a single
 callback: {@link shaka.extern.ManifestParser.PlayerInterface#filter}.  This
 should be invoked any time new text streams or variants are added to the
 manifest.  `ManifestParser` plugins MUST be updated to use the new callback.
+Keep in mind that the new `filter` method is asynchronous, and thus it should
+probably be used in conjunction with `.then()` or `await`.
 
 ```js
 // v2.5:
@@ -59,7 +61,7 @@ this.playerInterface_.filterNewPeriod(someNewPeriod);
 
 // v3.0:
 // Call this after the initial parsing or after any new streams are added
-this.playerInterface_.filter(manifest);
+await this.playerInterface_.filter(manifest);
 ```
 
 

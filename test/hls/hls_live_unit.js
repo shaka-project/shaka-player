@@ -103,7 +103,7 @@ describe('HlsParser live', () => {
 
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     playerInterface = {
-      filter: () => {},
+      filter: () => Promise.resolve(),
       networkingEngine: fakeNetEngine,
       onError: fail,
       onEvent: fail,
