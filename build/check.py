@@ -163,6 +163,7 @@ def check_spelling(_):
   base = shakaBuildHelpers.get_source_base()
   complete_build.update(shakaBuildHelpers.get_all_js_files('test'))
   complete_build.update(shakaBuildHelpers.get_all_js_files('demo'))
+  complete_build.update(shakaBuildHelpers.get_all_js_files('externs'))
   complete_build.update(shakaBuildHelpers.get_all_files(
       os.path.join(base, 'build'), re.compile(r'.*\.(js|py)$')))
 
