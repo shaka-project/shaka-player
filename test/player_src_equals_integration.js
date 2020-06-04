@@ -362,13 +362,15 @@ describe('Player Src Equals', () => {
     await ready;
 
     // The initial seek is triggered about the same time this ready promise
-    // resolves.  Wait (with short timeout) for movement, so that the
-    // initial-seek promise chain has time to resolve before we test our
-    // expectations.
+    // resolves.  Wait (with timeout) for movement, so that the initial-seek
+    // promise chain has time to resolve before we test our expectations.
     if (startTime != null) {
       const waiter = new shaka.test.Waiter(eventManager);
       if (video.currentTime == 0) {
-        await waiter.timeoutAfter(1).failOnTimeout(true).waitForMovement(video);
+        // A one-second timeout is too short for Chromecast, but a longer
+        // timeout doesn't hurt anyone.  This will always resolve as fast as
+        // playback can actually start.
+        await waiter.timeoutAfter(5).failOnTimeout(true).waitForMovement(video);
       }
     }
 
