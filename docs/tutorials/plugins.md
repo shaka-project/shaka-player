@@ -49,6 +49,7 @@ __Subtitle/caption displayers__
 __Networking plugins__
   - Selected by URI scheme (http, https, etc.)
   - Register with {@link shaka.net.NetworkingEngine.registerScheme}
+  - Returns an {@link shaka.util.AbortableOperation} object, to allow aborting
   - Default networking plugins:
     - HTTP(S) XHR: {@linksource shaka.net.HttpXHRPlugin}
     - HTTP(S) Fetch: {@linksource shaka.net.HttpFetchPlugin}
@@ -117,7 +118,9 @@ this is what `build/types/networking` looks like:
 
 ```sh
 # All standard networking scheme plugins.
-+../../lib/net/http_plugin.js
++../../lib/net/http_xhr_plugin.js
++../../lib/net/http_fetch_plugin.js
++../../lib/net/http_plugin_utils.js
 +../../lib/net/data_uri_plugin.js
 ```
 
