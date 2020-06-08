@@ -254,7 +254,9 @@ shaka.ui.TextDisplayer = class {
     // Set white-space to 'pre-line' to enable showing line breaks in the text.
     captionsStyle.whiteSpace = 'pre-line';
     captions.textContent = cue.payload;
-    captionsStyle.backgroundColor = cue.backgroundColor;
+    if (isNested) {
+      captionsStyle.backgroundColor = cue.backgroundColor;
+    }
     captionsStyle.color = cue.color;
     captionsStyle.direction = cue.direction;
 
