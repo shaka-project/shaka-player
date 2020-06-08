@@ -2260,6 +2260,7 @@ describe('StreamingEngine', function() {
       runTest(function() {
         if (++count == 3) {
           streamingEngine.destroy();
+          PromiseMock.flush();
 
           // Retry streaming, which should fail and return false.
           netEngine.request.calls.reset();
@@ -3297,6 +3298,50 @@ describe('StreamingEngine', function() {
     presentationTimeInSeconds = startTime;
     playing = true;
   }
+
+  describe('destroy', () => {
+    it('aborts pending network operations', () => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+
+      // Track the incoming request and whether it was aborted.
+      let isRequested = false;
+      let isAborted = false;
+
+      netEngine.request.and.callFake((requestType, request) => {
+        isRequested = true;
+
+        const abortOp = () => {
+          isAborted = true;
+          return Promise.resolve();
+        };
+
+        // This will never complete, but can be aborted.
+        const hungPromise = new Promise(() => {});
+        return new shaka.util.AbortableOperation(hungPromise, abortOp);
+      });
+
+      // General setup.
+      createStreamingEngine();
+      onStartupComplete.and.callFake(() => setupFakeGetTime(0));
+      onChooseStreams.and.callFake(defaultOnChooseStreams.bind(null));
+      streamingEngine.start();
+      playing = true;
+
+      // Simulate time passing.
+      Util.fakeEventLoop(1);
+
+      // By now the request should have fired.
+      expect(isRequested).toBe(true);
+
+      // Destroy StreamingEngine.
+      streamingEngine.destroy();
+      PromiseMock.flush();
+
+      // The request should have been aborted.
+      expect(isAborted).toBe(true);
+    });
+  });
 
   /**
    * Slides the segment availability window forward by 1 second.
