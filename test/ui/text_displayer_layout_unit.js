@@ -213,4 +213,35 @@ filterDescribe('UITextDisplayer layout', Util.supportsScreenshots, () => {
 
     await Util.checkScreenshot(videoContainer, 'bitmap-cue', threshold);
   });
+
+  // Regression test for #2623
+  it('colors background for nested cues but not parent', async () => {
+    const cue = new shaka.text.Cue(0, 1, '');
+    cue.nestedCues = [
+      new shaka.text.Cue(0, 1, 'Captain\'s log,'),
+      new shaka.text.Cue(0, 1, 'stardate 41636.9'),
+    ];
+
+    // These are shown.
+    cue.nestedCues[0].backgroundColor = 'blue';
+    cue.nestedCues[1].backgroundColor = 'yellow';
+
+    // This is not.
+    cue.backgroundColor = 'purple';
+
+    textDisplayer.append([cue]);
+
+    await Util.checkScreenshot(videoContainer, 'nested-cue-bg', threshold);
+  });
+
+  // Related to the fix for #2623
+  it('colors background for flat cues', async () => {
+    const cue = new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9');
+    // This is shown.
+    cue.backgroundColor = 'purple';
+
+    textDisplayer.append([cue]);
+
+    await Util.checkScreenshot(videoContainer, 'flat-cue-bg', threshold);
+  });
 });
