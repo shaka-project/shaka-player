@@ -1,4 +1,4 @@
-## 3.0.0 (2020-06-03)
+## 3.0.0 (2020-06-09)
 
 Ad Features (BETA):
   - Integration with Google IMA Ads SDK
@@ -57,6 +57,8 @@ Subtitle/Caption Features:
     - https://github.com/google/shaka-player/pull/2408
 
 Other Features:
+  - Add API to set Cast content metadata in CastReceiver
+    - https://github.com/google/shaka-player/issues/2606
   - Add liveLatency to stats
     - https://github.com/google/shaka-player/pull/2508
   - Allow configuration of presumed manifest accuracy, reduces extra fetches
@@ -68,6 +70,15 @@ Other Features:
   - Improve startup performance by lazily creating segment indexes
   - Support pre-standard DASH MIME type
   - Allow running tests without Babel
+
+Bugfixes:
+  - Fix background color of nested cues
+    - https://github.com/google/shaka-player/issues/2623
+    - https://github.com/google/shaka-player/pull/2624
+  - Fix seeking from Google Home app while casting
+    - https://github.com/google/shaka-player/issues/2606
+  - Fix cancelation of pending network requests on load() and destroy()
+    - https://github.com/google/shaka-player/issues/2619
 
 Broken compatibility:
   - Remove support for custom DASH ContentProtection schemas
