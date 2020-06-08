@@ -2952,6 +2952,48 @@ describe('StreamingEngine', () => {
     expect(alternateVideoStream.createSegmentIndex).not.toHaveBeenCalled();
   });
 
+  describe('destroy', () => {
+    it('aborts pending network operations', async () => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+
+      // Track the incoming request and whether it was aborted.
+      let isRequested = false;
+      let isAborted = false;
+
+      netEngine.request.and.callFake((requestType, request) => {
+        isRequested = true;
+
+        const abortOp = () => {
+          isAborted = true;
+          return Promise.resolve();
+        };
+
+        // This will never complete, but can be aborted.
+        const hungPromise = new Promise(() => {});
+        return new shaka.util.AbortableOperation(hungPromise, abortOp);
+      });
+
+      // General setup.
+      createStreamingEngine();
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+
+      // Simulate time passing.
+      await Util.fakeEventLoop(1);
+
+      // By now the request should have fired.
+      expect(isRequested).toBe(true);
+
+      // Destroy StreamingEngine.
+      await streamingEngine.destroy();
+
+      // The request should have been aborted.
+      expect(isAborted).toBe(true);
+    });
+  });
+
   /**
    * Slides the segment availability window forward by 1 second.
    */
