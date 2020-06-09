@@ -846,8 +846,12 @@ function main(args) {
   // Get externs.
   const externs = sorted.map((x) => x.externs).join('');
 
+  // Get license header.
+  const licenseHeader = fs.readFileSync(__dirname + '/license-header', 'utf-8');
+
   // Output generated externs, with an appropriate header.
   fs.writeFileSync(outputPath,
+      licenseHeader +
       '/**\n' +
       ' * @fileoverview Generated externs.  DO NOT EDIT!\n' +
       ' * @externs\n' +
