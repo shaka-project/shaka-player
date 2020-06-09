@@ -34,9 +34,9 @@ First, you'll need to include the IMA SDK(s) on your HTML page:
     <!-- Shaka Player ui compiled library default CSS: -->
     <link rel="stylesheet" type="text/css" href="dist/controls.css">
     <!-- IMA HTML5 SDK (for serving Client Side ads): -->
-    <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+    <script type="text/javascript" src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
     <!-- IMA DAI SDK (for serving Server Side ads): -->
-    <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+    <script type="text/javascript" src="https://imasdk.googleapis.com/js/sdkloader/ima3_dai.js"></script>
     <!-- Your application source: -->
     <script src="myapp.js"></script>
   </head>
