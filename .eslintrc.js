@@ -132,6 +132,14 @@ module.exports = {
         // Style rules that don't seem to be in the Google style config: {{{
         "array-bracket-newline": ["error", "consistent"],
         // }}}
+
+      'spaced-comment': ['error', 'always', {
+        // Characters which may be glued to the start of a comment block, but
+        // which do not violate the rule.  The "*" is for jsdoc's "/**" syntax,
+        // and the "!" is for the "/*!" of license headers which are passed
+        // verbatim through the compiler.
+        'markers': ['*', '!'],
+      }],
     },
     "overrides": [
         {
