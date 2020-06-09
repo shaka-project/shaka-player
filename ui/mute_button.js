@@ -41,7 +41,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     /** @private {!HTMLElement} */
     this.button_ = shaka.util.Dom.createHTMLElement('button');
     this.button_.classList.add('shaka-mute-button');
-    this.button_.classList.add('material-icons');
+    this.button_.classList.add('material-icons-round');
     this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.MUTE;
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();

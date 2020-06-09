@@ -72,7 +72,7 @@ shaka.ui.Utils.focusOnTheChosenItem = function(menu) {
  */
 shaka.ui.Utils.checkmarkIcon = function() {
   const icon = shaka.util.Dom.createHTMLElement('i');
-  icon.classList.add('material-icons');
+  icon.classList.add('material-icons-round');
   icon.classList.add('shaka-chosen-item');
   icon.textContent = shaka.ui.Enums.MaterialDesignIcons.CHECKMARK;
   // Screen reader should ignore icon text.
