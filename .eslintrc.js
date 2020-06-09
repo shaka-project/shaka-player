@@ -170,6 +170,13 @@ module.exports = {
     'no-whitespace-before-property': 'error',
     'nonblock-statement-body-position': ['error', 'below'],
     'operator-assignment': 'error',
+    'spaced-comment': ['error', 'always', {
+      // Characters which may be glued to the start of a comment block, but
+      // which do not violate the rule.  The "*" is for jsdoc's "/**" syntax,
+      // and the "!" is for the "/*!" of license headers which are passed
+      // verbatim through the compiler.
+      'markers': ['*', '!'],
+    }],
     // }}}
 
     // "ECMAScript 6" rules: {{{
