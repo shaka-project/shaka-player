@@ -37,7 +37,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.pipIcon_ = shaka.util.Dom.createHTMLElement('i');
-    this.pipIcon_.classList.add('material-icons');
+    this.pipIcon_.classList.add('material-icons-round');
     this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;
     this.pipButton_.appendChild(this.pipIcon_);
 

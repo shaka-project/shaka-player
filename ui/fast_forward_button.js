@@ -27,7 +27,7 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
 
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
-    this.button_.classList.add('material-icons');
+    this.button_.classList.add('material-icons-round');
     this.button_.classList.add('shaka-fast-forward-button');
     this.button_.textContent =
       shaka.ui.Enums.MaterialDesignIcons.FAST_FORWARD;
