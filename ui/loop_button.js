@@ -34,7 +34,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.icon_ = shaka.util.Dom.createHTMLElement('i');
-    this.icon_.classList.add('material-icons');
+    this.icon_.classList.add('material-icons-round');
     this.icon_.textContent = shaka.ui.Enums.MaterialDesignIcons.LOOP;
     this.button_.appendChild(this.icon_);
 

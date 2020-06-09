@@ -366,7 +366,7 @@ shakaDemo.Custom = class {
       button.classList.add('mdl-button--fab');
       button.classList.add('mdl-button--colored');
       const icon = document.createElement('i');
-      icon.classList.add('material-icons');
+      icon.classList.add('material-icons-round');
       icon.textContent = name;
       button.appendChild(icon);
     } else {
