@@ -1,3 +1,9 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 (function() {
   // This is "window" in browsers and "global" in nodejs.
   // See https://github.com/google/shaka-player/issues/1445
