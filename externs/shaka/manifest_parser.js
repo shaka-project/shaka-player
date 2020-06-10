@@ -93,6 +93,14 @@ shaka.extern.ManifestParser = class {
    * @exportDoc
    */
   onExpirationUpdated(sessionId, expiration) {}
+
+  /**
+   * Adds the ability to launch events to the parser.
+   *
+   * @param {function(!Event)} onEvent
+   * @exportDoc
+   */
+  setOnEvent(onEvent) {}
 };
 
 

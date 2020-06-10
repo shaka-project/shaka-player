@@ -152,6 +152,9 @@ shaka.test.FakeManifestParser = class {
 
     /** @type {!jasmine.Spy} */
     this.onExpirationUpdated = jasmine.createSpy('onExpirationUpdated');
+
+    /** @type {!jasmine.Spy} */
+    this.setOnEvent = jasmine.createSpy('setOnEvent');
   }
 };
 

@@ -1524,6 +1524,9 @@ filterDescribe('Storage', storageSupport, () => {
 
     /** @override */
     onExpirationUpdated(session, number) {}
+
+    /** @override */
+    setOnEvent(onEvent) {}
   };
 
   /**

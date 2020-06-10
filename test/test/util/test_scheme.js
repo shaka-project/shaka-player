@@ -649,6 +649,9 @@ shaka.test.TestScheme.ManifestParser = class {
 
   /** @override */
   onExpirationUpdated() {}
+
+  /** @override */
+  setOnEvent() {}
 };
 
 
