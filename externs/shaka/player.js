@@ -560,7 +560,7 @@ shaka.extern.AdvancedDrmConfiguration;
  *   <b>Temporary, for v2.5.x only.</b><br>
  *   If true, transform the FairPlay license request/response according to the
  *   FairPlay examples; if false, don't transform.  Defaults to
- *   <code>true</code>.  Starting in v2.6 this will go away and we will never
+ *   <code>true</code>.  Starting in v3.0 this will go away and we will never
  *   provide default license request/response transforms.
  * @property {number} updateExpirationTime
  *   <i>Defaults to 1.</i> <br>

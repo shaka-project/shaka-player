@@ -20,7 +20,7 @@ Candidate features for future release cycles
 
 =====
 
-v2.6 - 2020 Q2
+v3.0 - 2020 Q2
  - Code health improvements
  - Conversion to ES6
  - Isolate DASH periods to the DASH parser

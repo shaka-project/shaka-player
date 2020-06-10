@@ -29,7 +29,7 @@ describe('CastUtils', function() {
       'destroy',  // Should use CastProxy.destroy instead
       'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
-      // TODO(vaage): Remove |getManifestUri| references in v2.6.
+      // TODO(vaage): Remove |getManifestUri| references in v3.0.
       'getManifestUri',  // Handled specially by CastProxy
       'getManifestParserFactory',  // Would not serialize.
 

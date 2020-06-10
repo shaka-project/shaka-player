@@ -59,7 +59,7 @@ function myFilter(type, request) { /* ... */ }
 
 The optional `Factory` parameter in `Player.load()` and `Storage.store()` has
 been changed to a MIME type string.  The `Factory` parameter is now deprecated
-and will be removed in v2.6.  Applications SHOULD update to use MIME types
+and will be removed in v3.0.  Applications SHOULD update to use MIME types
 instead of explicit factories.  Any registered factory can be referenced by its
 registered MIME type.
 
@@ -79,7 +79,7 @@ See {@link shaka.Player#load} for details.
 #### Manifest URI API change
 
 The method `Player.getManifestUri()` has been renamed to `Player.getAssetUri()`.
-The older method is now deprecated and will be removed in v2.6.  Applications
+The older method is now deprecated and will be removed in v3.0.  Applications
 SHOULD update to the new method, whose name more accurately reflects our new
 support for non-manifest content.
 
@@ -96,7 +96,7 @@ const uri = player.getAssetUri();
 
 The CEA-specific methods `Player.selectEmbeddedTextTrack()` and
 `Player.usingEmbeddedTextTrack()` are now deprecated and will be removed in
-v2.6.  CEA captions now show up in the standard text track APIs:
+v3.0.  CEA captions now show up in the standard text track APIs:
 `getTextTracks()`, `selectTextTrack()`, `getTextLanguages()`,
 `getTextLanguagesAndRoles()`, and `selectTextLanguage()`.  Applications SHOULD
 update to using the track APIs.  If you have content with VTT or TTML subtitles,
@@ -254,7 +254,7 @@ In v2.5, `shaka.offline.Storage.configure()` now takes a complete `Player`
 configuration object instead of a separate one.  The fields that were previously
 part of the `Storage` config (`trackSelectionCallback`, `progressCallback`, and
 `usePersistentLicense`) have been moved inside the `offline` field.  The old
-field locations are now deprecated and will be removed in v2.6.  Applications
+field locations are now deprecated and will be removed in v3.0.  Applications
 SHOULD update to use the new field locations.
 
 ```js
