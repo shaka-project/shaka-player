@@ -527,6 +527,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {!HTMLElement}
+   * @export
+   */
+  getServerSideAdContainer() {
+    return this.daiAdContainer_;
+  }
+
+  /**
    * @return {!shaka.extern.UIConfiguration}
    * @export
    */
@@ -678,6 +686,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (!this.spinnerContainer_) {
       this.addBufferingSpinner_();
     }
+
+    this.addDaiAdContainer_();
 
     this.addControlsButtonPanel_();
 
@@ -844,6 +854,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
             name);
       }
     }
+  }
+
+
+  /**
+   * Adds a container for server side ad UI with IMA SDK.
+   *
+   * @private
+   */
+  addDaiAdContainer_() {
+    /** @private {!HTMLElement} */
+    this.daiAdContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.daiAdContainer_.classList.add('shaka-server-side-ad-container');
+    this.controlsContainer_.appendChild(this.daiAdContainer_);
   }
 
   /**
