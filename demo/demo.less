@@ -153,6 +153,10 @@ html, body {
   display: inline-block;
   margin-left: auto;
   margin-right: auto;
+
+  /* Some very long URLs can appear in the error text, and word wrapping is very
+   * helpful. */
+  overflow-wrap: anywhere;
 }
 
 .input-disabled {
