@@ -27,6 +27,12 @@
   font-family: 'Material Icons Round';
 }
 
+/* Conflicting styles between the icons font & the MDL buttons caused some
+ * icons not to be centered in their MDL button.  This fixes it. */
+.mdl-button .material-icons {
+  line-height: 36px;
+}
+
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
  * class with the same name, which can be used in the application directly. */
 .hidden() {
