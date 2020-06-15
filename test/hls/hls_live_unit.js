@@ -637,7 +637,7 @@ describe('HlsParser live', () => {
       expect(ref.startTime).not.toBeLessThan(rolloverOffset);
     });
 
-    it('parses streams with Partial Segments', async () => {
+    it('parses streams with partial segments', async () => {
       const mediaWithPartialSegments = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:5\n',
@@ -670,7 +670,7 @@ describe('HlsParser live', () => {
           'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 4,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
           /* timestampOffset= */ 0, [partialRef, partialRef2]);
-
+      config.lowLatencyMode = true;
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.variants[0].video;
       await video.createSegmentIndex();
@@ -872,7 +872,7 @@ describe('HlsParser live', () => {
         fakeNetEngine.expectRangeRequest(
             'test:/main.mp4',
             expectedStartByte,
-            partialEndByte);  // Partial segment request
+            partialEndByte);  // partial segment request
       });
 
       it('skips older segments', async () => {

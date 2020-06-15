@@ -448,7 +448,7 @@ describe('ManifestTextParser', () => {
           'https://test/manifest.m3u8');
     });
 
-    it('parses segments with Partial Segments', () => {
+    it('parses segments with partial segments', () => {
       const manifestTextWithPartialSegments = '#EXTM3U\n' +
         '#EXT-X-TARGETDURATION:6\n' +
         '#EXTINF:5\n' +
