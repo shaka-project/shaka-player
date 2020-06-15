@@ -28,6 +28,9 @@ goog.provide('shaka.test.Util');
  *   net: {
  *     NetworkingEngine: typeof shaka.net.NetworkingEngine
  *   },
+ *   offline: {
+ *     Storage: typeof shaka.offline.Storage
+ *   },
  *   ui: {
  *     Overlay: typeof shaka.ui.Overlay,
  *     Controls: typeof shaka.ui.Controls,
