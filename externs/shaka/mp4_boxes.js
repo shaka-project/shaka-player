@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 /**
  * @externs
  */
@@ -91,5 +90,20 @@ shaka.extern.ParsedTRUNBox;
  *    offset is based of the start of the sample. If this value is
  *    missing, the accumated durations preceeding this time sample will
  *    be used to create the start time.
+ *
+ * @exportDoc
  */
 shaka.extern.TRUNSample;
+
+/**
+ * @typedef {{
+ *    trackId: !number
+ *  }}
+ *
+ * @property {!number} trackId
+ *    Unique ID indicative of this track
+ *
+ * @exportDoc
+ */
+shaka.extern.ParsedTKHDBox;
+
