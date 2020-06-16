@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -1419,12 +1420,12 @@ shakaDemo.Main = class {
         'Asset should have imaIds!');
 
     const adManager = this.player_.getAdManager();
-    const controlsContainer = this.controls_.getControlsContainer();
+    const container = this.controls_.getServerSideAdContainer();
     try {
       // If IMA is blocked by an AdBlocker, init() will throw.
       // If that happens, return our backup uri.
       goog.asserts.assert(this.video_ != null, 'Video should not be null!');
-      adManager.initServerSide(controlsContainer, this.video_);
+      adManager.initServerSide(container, this.video_);
       let request;
       if (asset.imaIds.assetKey.length) {
         // LIVE stream

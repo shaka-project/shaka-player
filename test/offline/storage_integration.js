@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -444,22 +445,62 @@ filterDescribe('Storage', storageSupport, () => {
   // To allow us to control the network order, our manifests for these tests
   // could not repeat/reuse segments uris.
   describe('reports progress on store', () => {
-    const audioSegment1Uri = 'audio-segment-1';
-    const audioSegment2Uri = 'audio-segment-2';
-    const audioSegment3Uri = 'audio-segment-3';
-    const audioSegment4Uri = 'audio-segment-4';
+    const audioSegment1Uri = 'fake:audio-segment-1';
+    const audioSegment2Uri = 'fake:audio-segment-2';
+    const audioSegment3Uri = 'fake:audio-segment-3';
+    const audioSegment4Uri = 'fake:audio-segment-4';
 
-    const videoSegment1Uri = 'video-segment-1';
-    const videoSegment2Uri = 'video-segment-2';
-    const videoSegment3Uri = 'video-segment-3';
-    const videoSegment4Uri = 'video-segment-4';
+    const videoSegment1Uri = 'fake:video-segment-1';
+    const videoSegment2Uri = 'fake:video-segment-2';
+    const videoSegment3Uri = 'fake:video-segment-3';
+    const videoSegment4Uri = 'fake:video-segment-4';
 
-    /** @type {!shaka.Player} */
-    let player;
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(() => {
+    /** @type {!Object.<string, function():!Promise.<ArrayBuffer>>} */
+    let fakeResponses = {};
+
+    let compiledShaka;
+
+    beforeAll(async () => {
+      compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
+
+      compiledShaka.net.NetworkingEngine.registerScheme(
+          'fake', (uri, req, type, progress) => {
+            if (fakeResponses[uri]) {
+              const operation = async () => {
+                const data = await fakeResponses[uri]();
+                return {
+                  uri,
+                  data,
+                  headers: {},
+                };
+              };
+              return shaka.util.AbortableOperation.notAbortable(operation());
+            } else {
+              return shaka.util.AbortableOperation.failed(
+                  new shaka.util.Error(
+                      shaka.util.Error.Severity.RECOVERABLE,
+                      shaka.util.Error.Category.NETWORK,
+                      shaka.util.Error.Code.HTTP_ERROR));
+            }
+          });
+    });
+
+    beforeEach(async () => {
+      await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
+
+      storage = new compiledShaka.offline.Storage();
+
+      // Since we are using specific manifest with only one video and one audio
+      // we can return all the tracks.
+      storage.configure({
+        offline: {
+          trackSelectionCallback: (tracks) => { return tracks; },
+        },
+      });
+
       // Use these promises to ensure that the data from networking
       // engine arrives in the correct order.
       const delays = {};
@@ -472,15 +513,17 @@ filterDescribe('Storage', storageSupport, () => {
       delays[videoSegment3Uri] = new shaka.util.PublicPromise();
       delays[videoSegment4Uri] = new shaka.util.PublicPromise();
 
-      /** @type {!shaka.test.FakeNetworkingEngine} */
-      const netEngine = new shaka.test.FakeNetworkingEngine();
-
-      // Since the promise chains will be built so that each stream can be
-      // downloaded in parallel, we can force the network requests to
-      // resolve in lock-step (audio seg 0, video seg 0, audio seg 1,
-      // video seg 1, ...).
-      const setResponseFor = (segment, dependingOn) => {
-        netEngine.setResponse(segment, async () => {
+      /**
+       * Since the promise chains will be built so that each stream can be
+       * downloaded in parallel, we can force the network requests to
+       * resolve in lock-step (audio seg 0, video seg 0, audio seg 1,
+       * video seg 1, ...).
+       *
+       * @param {string} segment A URI
+       * @param {?string} dependingOn Another URI, or null
+       */
+      function setResponseFor(segment, dependingOn) {
+        fakeResponses[segment] = async () => {
           if (dependingOn) {
             await delays[dependingOn];
           }
@@ -489,8 +532,9 @@ filterDescribe('Storage', storageSupport, () => {
           // now.
           delays[segment].resolve();
           return new ArrayBuffer(16);
-        });
-      };
+        };
+      }
+      fakeResponses = {};
       setResponseFor(audioSegment1Uri, null);
       setResponseFor(audioSegment2Uri, videoSegment1Uri);
       setResponseFor(audioSegment3Uri, videoSegment2Uri);
@@ -499,26 +543,14 @@ filterDescribe('Storage', storageSupport, () => {
       setResponseFor(videoSegment2Uri, audioSegment2Uri);
       setResponseFor(videoSegment3Uri, audioSegment3Uri);
       setResponseFor(videoSegment4Uri, audioSegment4Uri);
-
-      // Use a real Player as Storage will use it to get a networking
-      // engine.
-      player = new shaka.Player(null, (player) => {
-        player.createNetworkingEngine = () => netEngine;
-      });
-
-      storage = new shaka.offline.Storage(player);
-      // Since we are using specific manifest with only one video and one audio
-      // we can return all the tracks.
-      storage.configure({
-        offline: {
-          trackSelectionCallback: (tracks) => { return tracks; },
-        },
-      });
     });
 
     afterEach(async () => {
       await storage.destroy();
-      await player.destroy();
+    });
+
+    afterAll(() => {
+      compiledShaka.net.NetworkingEngine.unregisterScheme('fake');
     });
 
     it('uses stream bandwidth', async () => {
@@ -588,7 +620,7 @@ filterDescribe('Storage', storageSupport, () => {
           progressCallback: progressCallback,
         },
       });
-      shaka.media.ManifestParser.registerParserByMime(
+      compiledShaka.media.ManifestParser.registerParserByMime(
           fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
 
       // Store a manifest with bandwidth only for the variant (no per
@@ -625,24 +657,24 @@ filterDescribe('Storage', storageSupport, () => {
             stream.bandwidth = kbps(3);
           });
         });
-      });
+      }, compiledShaka);
 
       const audio = manifest.variants[0].audio;
       goog.asserts.assert(audio, 'Created manifest with audio, where is it?');
       overrideSegmentIndex(audio, [
-        makeReference(audioSegment1Uri, 0, 1),
-        makeReference(audioSegment2Uri, 1, 2),
-        makeReference(audioSegment3Uri, 2, 3),
-        makeReference(audioSegment4Uri, 3, 4),
+        makeReference(audioSegment1Uri, 0, 1, compiledShaka),
+        makeReference(audioSegment2Uri, 1, 2, compiledShaka),
+        makeReference(audioSegment3Uri, 2, 3, compiledShaka),
+        makeReference(audioSegment4Uri, 3, 4, compiledShaka),
       ]);
 
       const video = manifest.variants[0].video;
       goog.asserts.assert(video, 'Created manifest with video, where is it?');
       overrideSegmentIndex(video, [
-        makeReference(videoSegment1Uri, 0, 1),
-        makeReference(videoSegment2Uri, 1, 2),
-        makeReference(videoSegment3Uri, 2, 3),
-        makeReference(videoSegment4Uri, 3, 4),
+        makeReference(videoSegment1Uri, 0, 1, compiledShaka),
+        makeReference(videoSegment2Uri, 1, 2, compiledShaka),
+        makeReference(videoSegment3Uri, 2, 3, compiledShaka),
+        makeReference(videoSegment4Uri, 3, 4, compiledShaka),
       ]);
 
       return manifest;
@@ -1433,6 +1465,7 @@ filterDescribe('Storage', storageSupport, () => {
    */
   function overrideSegmentIndex(stream, segments) {
     const index = new shaka.media.SegmentIndex(segments);
+    stream.createSegmentIndex = () => Promise.resolve();
     stream.segmentIndex = index;
   }
 
@@ -1609,9 +1642,13 @@ filterDescribe('Storage', storageSupport, () => {
    * @param {string} uri
    * @param {number} startTime
    * @param {number} endTime
+   * @param {shakaNamespaceType=} compiledShaka
    * @return {shaka.media.SegmentReference}
    */
-  function makeReference(uri, startTime, endTime) {
+  function makeReference(uri, startTime, endTime, compiledShaka) {
+    /** @type {shakaNamespaceType} */
+    const shaka = compiledShaka || window['shaka'];
+
     return new shaka.media.SegmentReference(
         startTime,
         endTime,

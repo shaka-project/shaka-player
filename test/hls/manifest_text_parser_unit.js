@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -443,6 +444,63 @@ describe('ManifestTextParser', () => {
           // segment-related tags.
           manifestText + '#EXT-X-ENDLIST',
 
+          // manifest URI:
+          'https://test/manifest.m3u8');
+    });
+
+    it('parses segments with Partial Segments', () => {
+      const manifestTextWithPartialSegments = '#EXTM3U\n' +
+        '#EXT-X-TARGETDURATION:6\n' +
+        '#EXTINF:5\n' +
+        'uri\n' +
+        '#EXT-X-PART:DURATION=1,URI="uri2.1"\n' +
+        '#EXT-X-PART:DURATION=1,URI="uri2.2"\n' +
+        '#EXTINF:2\n' +
+        'uri2\n' +
+        '#EXT-X-PART:DURATION=1,URI="uri3.1"\n';
+
+      const partialSegments1 = [
+        new shaka.hls.Tag(/* id= */ 3, 'EXT-X-PART',
+            [
+              new shaka.hls.Attribute('DURATION', '1'),
+              new shaka.hls.Attribute('URI', 'uri2.1'),
+            ]),
+        new shaka.hls.Tag(/* id= */ 4, 'EXT-X-PART',
+            [
+              new shaka.hls.Attribute('DURATION', '1'),
+              new shaka.hls.Attribute('URI', 'uri2.2'),
+            ]),
+      ];
+
+      const partialSegments2 = [
+        new shaka.hls.Tag(/* id= */ 6, 'EXT-X-PART',
+            [
+              new shaka.hls.Attribute('DURATION', '1'),
+              new shaka.hls.Attribute('URI', 'uri3.1'),
+            ]),
+      ];
+
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MEDIA,
+            tags: [
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+            ],
+            segments: [
+              new shaka.hls.Segment(
+                  /* absoluteUri= */ 'https://test/uri',
+                  /* tags= */ [new shaka.hls.Tag(2, 'EXTINF', [], '5')]),
+              new shaka.hls.Segment(
+                  /* absoluteUri= */ 'https://test/uri2',
+                  /* tags= */ [new shaka.hls.Tag(5, 'EXTINF', [], '2')],
+                  /* partialSegments= */ partialSegments1),
+              new shaka.hls.Segment(
+                  /* absoluteUri= */ '',
+                  /* tags= */ [],
+                  /* partialSegments= */ partialSegments2),
+            ],
+          },
+          manifestTextWithPartialSegments,
           // manifest URI:
           'https://test/manifest.m3u8');
     });

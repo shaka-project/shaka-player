@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -785,7 +786,7 @@ describe('MediaSourceEngine', () => {
     });
 
     it('clears the given data', async () => {
-      mockMediaSource.durationGetter_.and.returnValue(20);
+      mockMediaSource.durationGetter.and.returnValue(20);
       const p = mediaSourceEngine.clear(ContentType.AUDIO);
       audioSourceBuffer.updateend();
 
@@ -821,7 +822,7 @@ describe('MediaSourceEngine', () => {
       const originalTime = 10;
       mockVideo.currentTime = originalTime;
 
-      mockMediaSource.durationGetter_.and.returnValue(20);
+      mockMediaSource.durationGetter.and.returnValue(20);
       const p = mediaSourceEngine.clear(ContentType.AUDIO);
       audioSourceBuffer.updateend();
 
@@ -933,7 +934,7 @@ describe('MediaSourceEngine', () => {
 
   describe('setDuration', () => {
     beforeEach(async () => {
-      mockMediaSource.durationGetter_.and.returnValue(0);
+      mockMediaSource.durationGetter.and.returnValue(0);
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
       captureEvents(videoSourceBuffer, ['updateend', 'error']);
       const initObject = new Map();
@@ -944,7 +945,7 @@ describe('MediaSourceEngine', () => {
 
     it('sets the given duration', async () => {
       await mediaSourceEngine.setDuration(100);
-      expect(mockMediaSource.durationSetter_).toHaveBeenCalledWith(100);
+      expect(mockMediaSource.durationSetter).toHaveBeenCalledWith(100);
     });
 
     it('waits for all previous operations to complete', async () => {
@@ -960,7 +961,7 @@ describe('MediaSourceEngine', () => {
       const p3 =
           new shaka.test.StatusPromise(mediaSourceEngine.setDuration(100));
 
-      expect(mockMediaSource.durationSetter_).not.toHaveBeenCalled();
+      expect(mockMediaSource.durationSetter).not.toHaveBeenCalled();
       expect(p1.status).toBe('pending');
       expect(p2.status).toBe('pending');
       expect(p3.status).toBe('pending');
@@ -972,7 +973,7 @@ describe('MediaSourceEngine', () => {
       videoSourceBuffer.updateend();
       await p2;
       await p3;
-      expect(mockMediaSource.durationSetter_).toHaveBeenCalledWith(100);
+      expect(mockMediaSource.durationSetter).toHaveBeenCalledWith(100);
     });
 
     it('makes subsequent operations wait', async () => {
@@ -987,13 +988,13 @@ describe('MediaSourceEngine', () => {
 
       // The setter hasn't been called yet because blocking multiple queues
       // takes an extra tick, even when they are empty.
-      expect(mockMediaSource.durationSetter_).not.toHaveBeenCalled();
+      expect(mockMediaSource.durationSetter).not.toHaveBeenCalled();
 
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
       expect(videoSourceBuffer.appendBuffer).not.toHaveBeenCalled();
 
       await p1;
-      expect(mockMediaSource.durationSetter_).toHaveBeenCalled();
+      expect(mockMediaSource.durationSetter).toHaveBeenCalled();
       // The next operations have already been kicked off.
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
@@ -1008,7 +1009,7 @@ describe('MediaSourceEngine', () => {
     });
 
     it('runs subsequent operations if this operation throws', async () => {
-      mockMediaSource.durationSetter_.and.throwError(new Error());
+      mockMediaSource.durationSetter.and.throwError(new Error());
       /** @type {!Promise} */
       const p1 = mediaSourceEngine.setDuration(100);
       mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null,
@@ -1017,7 +1018,7 @@ describe('MediaSourceEngine', () => {
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
 
       await expectAsync(p1).toBeRejected();
-      expect(mockMediaSource.durationSetter_).toHaveBeenCalled();
+      expect(mockMediaSource.durationSetter).toHaveBeenCalled();
       await Util.shortDelay();
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       audioSourceBuffer.updateend();
@@ -1149,14 +1150,15 @@ describe('MediaSourceEngine', () => {
       readyState: 'open',
       addSourceBuffer: jasmine.createSpy('addSourceBuffer'),
       endOfStream: jasmine.createSpy('endOfStream'),
-      durationGetter_: jasmine.createSpy('duration getter'),
-      durationSetter_: jasmine.createSpy('duration setter'),
+      durationGetter: jasmine.createSpy('duration getter'),
+      durationSetter: jasmine.createSpy('duration setter'),
       addEventListener: jasmine.createSpy('addEventListener'),
       removeEventListener: () => {},
     };
-    Object.defineProperty(
-        mediaSource, 'duration',
-        {get: mediaSource.durationGetter_, set: mediaSource.durationSetter_});
+    Object.defineProperty(mediaSource, 'duration', {
+      get: Util.spyFunc(mediaSource.durationGetter),
+      set: Util.spyFunc(mediaSource.durationSetter),
+    });
     return mediaSource;
   }
 

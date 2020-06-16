@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -1581,5 +1582,50 @@ describe('DashParser Manifest', () => {
     const variant = manifest.variants[0];
     expect(variant.audio).toBeTruthy();
     expect(variant.video).toBeTruthy();
+  });
+
+  // Regression #2650 in v3.0.0
+  // A later BaseURL was being applied to earlier Representations, specifically
+  // in the context of SegmentTimeline.
+  it('uses the correct BaseURL for SegmentTimeline', async () => {
+    const manifestText = [
+      '<MPD type="static">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <SegmentTemplate media="$Number$.mp4" startNumber="1">',
+      '        <SegmentTimeline>',
+      '          <S t="0" d="30" />',
+      '        </SegmentTimeline>',
+      '      </SegmentTemplate>',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>http://example.com/r0/</BaseURL>',
+      '      </Representation>',
+      '      <Representation id="video-hd" width="1920" height="1080">',
+      '        <BaseURL>http://example.com/r1/</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    const video0 = manifest.variants[0].video;
+    await video0.createSegmentIndex();
+    goog.asserts.assert(video0.segmentIndex, 'Null segmentIndex!');
+    const segment0 = Array.from(video0.segmentIndex)[0];
+    const uri0 = segment0.getUris()[0];
+
+    const video1 = manifest.variants[1].video;
+    await video1.createSegmentIndex();
+    goog.asserts.assert(video1.segmentIndex, 'Null segmentIndex!');
+    const segment1 = Array.from(video1.segmentIndex)[0];
+    const uri1 = segment1.getUris()[0];
+
+    expect(uri0).toBe('http://example.com/r0/1.mp4');
+    expect(uri1).toBe('http://example.com/r1/1.mp4');
   });
 });

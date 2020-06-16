@@ -1,5 +1,6 @@
 // vim: foldmethod=marker:foldmarker={{{,}}}
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -28,8 +29,9 @@ const commonNoRestrictedSyntax = [
     'message': 'Use for-of instead of forEach',
   },
   {
-    'selector': 'CallExpression[callee.property.name=/^(bind|call|apply)$/]',
-    'message': 'Don\'t use Function bind/call/apply.',
+    // NOTE: prefer-spread rule covers .apply() already.
+    'selector': 'CallExpression[callee.property.name=/^(bind|call)$/]',
+    'message': 'Don\'t use Function bind/call.',
   },
   {
     'selector': 'MemberExpression[property.name="prototype"]',
@@ -78,7 +80,6 @@ module.exports = {
 
     // Temporary Google style overrides while we get in compliance with the
     // latest style guide {{{
-    'prefer-spread': 'off',
     'require-jsdoc': 'off',
     // }}}
 
@@ -170,6 +171,13 @@ module.exports = {
     'no-whitespace-before-property': 'error',
     'nonblock-statement-body-position': ['error', 'below'],
     'operator-assignment': 'error',
+    'spaced-comment': ['error', 'always', {
+      // Characters which may be glued to the start of a comment block, but
+      // which do not violate the rule.  The "*" is for jsdoc's "/**" syntax,
+      // and the "!" is for the "/*!" of license headers which are passed
+      // verbatim through the compiler.
+      'markers': ['*', '!'],
+    }],
     // }}}
 
     // "ECMAScript 6" rules: {{{
