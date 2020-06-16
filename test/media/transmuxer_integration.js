@@ -154,9 +154,9 @@ describe('Transmuxer', () => {
             goog.asserts.assert(
                 box.version == 0 || box.version == 1,
                 'TFDT version can only be 0 or 1');
-            mp4Timestamp = (box.version == 0) ?
-                box.reader.readUint32() :
-                box.reader.readUint64();
+            const parsedTFDTBox = shaka.util.Mp4BoxParsers.parseTFDT(
+                box.reader, box.version);
+            mp4Timestamp = parsedTFDTBox.baseMediaDecodeTime;
             parsed = true;
           })
           .parse(transmuxedData.data);
