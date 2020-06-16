@@ -200,6 +200,7 @@ shaka.ui.Overlay = class {
       doubleClickForFullscreen: true,
       enableKeyboardPlaybackControls: true,
       enableFullscreenOnRotation: true,
+      forceLandscapeOnFullscreen: true,
     };
 
     // On mobile, by default, hide the volume slide and the small play/pause

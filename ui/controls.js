@@ -600,6 +600,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   async toggleFullScreen() {
     if (document.fullscreenElement) {
+      if (screen.orientation) {
+        screen.orientation.unlock();
+      }
       await document.exitFullscreen();
     } else {
       // If we are in PiP mode, leave PiP mode first.
@@ -608,6 +611,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           await document.exitPictureInPicture();
         }
         await this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
+        if (this.config_.forceLandscapeOnFullscreen && screen.orientation) {
+          try {
+            // Locking to 'landscape' should let it be either
+            // 'landscape-primary' or 'landscape-secondary' as appropriate.
+            await screen.orientation.lock('landscape');
+          } catch (error) {
+            // If screen.orientation.lock does not work on a device, it will
+            // be rejected with an error. Suppress that error.
+          }
+        }
       } catch (error) {
         this.dispatchEvent(new shaka.util.FakeEvent('error', {
           detail: error,
