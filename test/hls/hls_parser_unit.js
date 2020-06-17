@@ -22,6 +22,8 @@ describe('HlsParser', () => {
   let fakeNetEngine;
   /** @type {!shaka.hls.HlsParser} */
   let parser;
+  /** @type {!jasmine.Spy} */
+  let onEventSpy;
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
   /** @type {shaka.extern.ManifestConfiguration} */
@@ -77,11 +79,12 @@ describe('HlsParser', () => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    onEventSpy = jasmine.createSpy('onEvent');
     playerInterface = {
       filter: () => Promise.resolve(),
       networkingEngine: fakeNetEngine,
       onError: fail,
-      onEvent: fail,
+      onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onTimelineRegionAdded: fail,
     };
 
@@ -2743,6 +2746,153 @@ describe('HlsParser', () => {
       const audioReference = Array.from(audio.segmentIndex)[0];
       expect(audioReference.getUris())
           .toEqual(['test:/host/segment.mp4?token=1']);
+    });
+  });
+
+  describe('EXT-X-SESSION-DATA', () => {
+    it('parses value data', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-SESSION-DATA:DATA-ID="fooId",VALUE="fooValue"\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a"\n',
+        'audio',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXTINF:5,\n',
+        '#EXT-X-BYTERANGE:121090@616\n',
+        'main.mp4',
+      ].join('');
+
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.anyTimeline();
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+
+      await testHlsParser(master, media, manifest);
+
+      const eventValue = {
+        type: 'sessiondata',
+        id: 'fooId',
+        value: 'fooValue',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue));
+    });
+
+    it('parses value data with language', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-SESSION-DATA:DATA-ID="fooId",LANGUAGE="en",VALUE="fooValue"\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a"\n',
+        'audio',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXTINF:5,\n',
+        '#EXT-X-BYTERANGE:121090@616\n',
+        'main.mp4',
+      ].join('');
+
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.anyTimeline();
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+
+      await testHlsParser(master, media, manifest);
+
+      const eventValue = {
+        type: 'sessiondata',
+        id: 'fooId',
+        language: 'en',
+        value: 'fooValue',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue));
+    });
+
+    it('parses uri data', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-SESSION-DATA:DATA-ID="fooId",URI="foo.json"\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a"\n',
+        'audio',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXTINF:5,\n',
+        '#EXT-X-BYTERANGE:121090@616\n',
+        'main.mp4',
+      ].join('');
+
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.anyTimeline();
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+
+      await testHlsParser(master, media, manifest);
+
+      const eventValue = {
+        type: 'sessiondata',
+        id: 'fooId',
+        uri: 'test:/foo.json',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue));
+    });
+
+    it('parses mutiple data', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-SESSION-DATA:DATA-ID="fooId",LANGUAGE="en",VALUE="fooValue"\n',
+        '#EXT-X-SESSION-DATA:DATA-ID="fooId",LANGUAGE="es",VALUE="fooValue"\n',
+        '#EXT-X-SESSION-DATA:DATA-ID="fooId",URI="foo.json"\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a"\n',
+        'audio',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXTINF:5,\n',
+        '#EXT-X-BYTERANGE:121090@616\n',
+        'main.mp4',
+      ].join('');
+
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.anyTimeline();
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.AUDIO, (stream) => {
+            stream.mime('audio/mp4', 'mp4a');
+          });
+        });
+      });
+
+      await testHlsParser(master, media, manifest);
+
+      expect(onEventSpy).toHaveBeenCalledTimes(3);
     });
   });
 });
