@@ -2893,6 +2893,29 @@ describe('HlsParser', () => {
       await testHlsParser(master, media, manifest);
 
       expect(onEventSpy).toHaveBeenCalledTimes(3);
+      const eventValue1 = {
+        type: 'sessiondata',
+        id: 'fooId',
+        language: 'en',
+        value: 'fooValue',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue1));
+      const eventValue2 = {
+        type: 'sessiondata',
+        id: 'fooId',
+        language: 'es',
+        value: 'fooValue',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue2));
+      const eventValue3 = {
+        type: 'sessiondata',
+        id: 'fooId',
+        uri: 'test:/foo.json',
+      };
+      expect(onEventSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining(eventValue3));
     });
   });
 });
