@@ -1,5 +1,5 @@
 # Inband closed caption support.
 
 +../../lib/cea/mp4_cea_parser.js
-+../../lib/cea/parser.js
++../../lib/cea/cea_parser.js
 +../../lib/cea/sei_processor.js
