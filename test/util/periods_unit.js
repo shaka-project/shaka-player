@@ -398,7 +398,6 @@ describe('PeriodCombiner', () => {
     expect(english.audio.originalId).toBe('es,en');
   });
 
-
   it('Multiple representations of the same resolution', async () => {
     /** @type {shaka.extern.Stream} */
     const video1 = makeVideoStream(480);
@@ -691,6 +690,63 @@ describe('PeriodCombiner', () => {
     const audio2 = variants[1].audio;
     expect(audio2.roles).toEqual(['role1']);
     expect(audio2.originalId).toBe('stream2,stream4');
+  });
+
+  it('Identical streams except for ID', async () => {
+    // When two video or audio or text streams have the same characteristics,
+    // this should at least succeed for single-period live streams.  We can
+    // create an output for each input based purely on their IDs.
+
+    /** @type {shaka.extern.Stream} */
+    const video1 = makeVideoStream(480);
+    /** @type {shaka.extern.Stream} */
+    const video2 = makeVideoStream(480);
+    /** @type {shaka.extern.Stream} */
+    const audio1 = makeAudioStream('en');
+    /** @type {shaka.extern.Stream} */
+    const audio2 = makeAudioStream('en');
+    /** @type {shaka.extern.Stream} */
+    const text1 = makeTextStream('es');
+    /** @type {shaka.extern.Stream} */
+    const text2 = makeTextStream('es');
+
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          video1,
+          video2,
+        ],
+        audioStreams: [
+          audio1,
+          audio2,
+        ],
+        textStreams: [
+          text1,
+          text2,
+        ],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+    const variants = combiner.getVariants();
+    expect(variants).toEqual(jasmine.arrayWithExactContents([
+      makeAVVariant(480, 'en', /* channels= */ 2),
+      makeAVVariant(480, 'en', /* channels= */ 2),
+      makeAVVariant(480, 'en', /* channels= */ 2),
+      makeAVVariant(480, 'en', /* channels= */ 2),
+    ]));
+
+    const textStreams = combiner.getTextStreams();
+    expect(textStreams).toEqual(jasmine.arrayWithExactContents([
+      jasmine.objectContaining({
+        language: 'es',
+      }),
+      jasmine.objectContaining({
+        language: 'es',
+      }),
+    ]));
   });
 
   /** @type {number} */

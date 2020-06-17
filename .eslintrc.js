@@ -29,8 +29,9 @@ const commonNoRestrictedSyntax = [
     'message': 'Use for-of instead of forEach',
   },
   {
-    'selector': 'CallExpression[callee.property.name=/^(bind|call|apply)$/]',
-    'message': 'Don\'t use Function bind/call/apply.',
+    // NOTE: prefer-spread rule covers .apply() already.
+    'selector': 'CallExpression[callee.property.name=/^(bind|call)$/]',
+    'message': 'Don\'t use Function bind/call.',
   },
   {
     'selector': 'MemberExpression[property.name="prototype"]',
@@ -79,7 +80,6 @@ module.exports = {
 
     // Temporary Google style overrides while we get in compliance with the
     // latest style guide {{{
-    'prefer-spread': 'off',
     'require-jsdoc': 'off',
     // }}}
 

@@ -527,6 +527,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {!HTMLElement}
+   * @export
+   */
+  getServerSideAdContainer() {
+    return this.daiAdContainer_;
+  }
+
+  /**
    * @return {!shaka.extern.UIConfiguration}
    * @export
    */
@@ -592,6 +600,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   async toggleFullScreen() {
     if (document.fullscreenElement) {
+      if (screen.orientation) {
+        screen.orientation.unlock();
+      }
       await document.exitFullscreen();
     } else {
       // If we are in PiP mode, leave PiP mode first.
@@ -600,6 +611,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
           await document.exitPictureInPicture();
         }
         await this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
+        if (this.config_.forceLandscapeOnFullscreen && screen.orientation) {
+          try {
+            // Locking to 'landscape' should let it be either
+            // 'landscape-primary' or 'landscape-secondary' as appropriate.
+            await screen.orientation.lock('landscape');
+          } catch (error) {
+            // If screen.orientation.lock does not work on a device, it will
+            // be rejected with an error. Suppress that error.
+          }
+        }
       } catch (error) {
         this.dispatchEvent(new shaka.util.FakeEvent('error', {
           detail: error,
@@ -678,6 +699,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (!this.spinnerContainer_) {
       this.addBufferingSpinner_();
     }
+
+    this.addDaiAdContainer_();
 
     this.addControlsButtonPanel_();
 
@@ -844,6 +867,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
             name);
       }
     }
+  }
+
+
+  /**
+   * Adds a container for server side ad UI with IMA SDK.
+   *
+   * @private
+   */
+  addDaiAdContainer_() {
+    /** @private {!HTMLElement} */
+    this.daiAdContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.daiAdContainer_.classList.add('shaka-server-side-ad-container');
+    this.controlsContainer_.appendChild(this.daiAdContainer_);
   }
 
   /**
