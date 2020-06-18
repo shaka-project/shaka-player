@@ -1,3 +1,38 @@
+## 3.0.1 (2020-06-18)
+
+Bugfixes:
+  - Fix failure with identical text streams
+    - https://github.com/google/shaka-player/issues/2646
+  - Fix offline progress callbacks in release mode
+    - https://github.com/google/shaka-player/issues/2652
+  - Fix bad segment URLs in DASH SegmentTimeline
+    - https://github.com/google/shaka-player/issues/2650
+  - Correct license headers in compiled output
+    - https://github.com/google/shaka-player/issues/2638
+  - Set an explicit font size for icons in UI
+    - https://github.com/google/shaka-player/issues/2633
+  - Apply upstream styles for icons font in UI
+    - https://github.com/google/shaka-player/issues/2633
+  - Export shaka.util.FairPlayUtils and shaka.util.BufferUtils
+    - https://github.com/google/shaka-player/issues/2626
+    - https://github.com/google/shaka-player/pull/2628
+
+Ad changes (BETA):
+  - Correct IMA SDK URLs in service worker and docs
+  - Fix UI not showing up for server side ad streams
+    - https://github.com/google/shaka-player/issues/2592
+  - Expose more client side IMA info to apps
+
+Demo App:
+  - Fix centering of MDL icons
+  - Fix error text overflow
+  - Fix missing icon for demo app menu
+
+Docs:
+  - Update Manifest Parser tutorial
+    - https://github.com/google/shaka-player/issues/2634
+
+
 ## 3.0.0 (2020-06-09)
 
 Ad Features (BETA):
