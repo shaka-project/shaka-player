@@ -28,6 +28,9 @@ shakaDemo.Main = class {
     /** @type {?ShakaDemoAssetInfo} */
     this.selectedAsset = null;
 
+    /** @type {shaka.ui.Localization} */
+    this.localization_ = null;
+
     /**
      * The configuration asked for by the user. I.e., not from the asset.
      * @private {shaka.extern.PlayerConfiguration}
@@ -103,16 +106,15 @@ shakaDemo.Main = class {
    * Set up the application with errors to show that load failed.
    * This does not dispatch the shaka-main-loaded event, so it will not cause
    * the nav bar buttons to be set up.
+   * @param {!shaka.ui.FailReasonCode} reasonCode
+   * @return {!Promise}
    */
-  initFailed() {
+  async initFailed(reasonCode) {
     this.initCommon_();
 
-    // Process a synthetic error about lack of browser support.
-    const severity = shaka.util.Error.Severity.CRITICAL;
-    const message = 'Your browser is not supported!';
-    const href = 'https://github.com/google/shaka-player#' +
-                 'platform-and-browser-support-matrix';
-    this.handleError_(severity, message, href);
+    // Set up version links, so the user can switch to compiled mode if
+    // necessary.
+    this.makeVersionLinks_();
 
     const errorCloseButton =
         document.getElementById('error-display-close-button');
@@ -128,13 +130,38 @@ shakaDemo.Main = class {
       elementsToDisable.push(element);
     }
     // The hamburger menu close button is added programmatically by MDL, and
-    // thus isn't given our 'disableonfail' clas.
-    elementsToDisable.push(document.getElementsByClassName(
-        'mdl-layout__drawer-button'));
+    // thus isn't given our 'disableonfail' class.
+    for (const element of document.getElementsByClassName(
+        'mdl-layout__drawer-button')) {
+      elementsToDisable.push(element);
+    }
     for (const element of elementsToDisable) {
       element.tabIndex = -1;
       element.classList.add('disabled-by-fail');
     }
+
+    // Because the UI did not load, this will need to set up a localization
+    // object manually.
+    this.localization_ = new shaka.ui.Localization(/* fallbackLocale= */ 'en');
+    this.localization_.changeLocale(navigator.languages || []);
+    await this.setupLocalization_();
+
+    // Process a synthetic error about lack of browser support.
+    const severity = shaka.util.Error.Severity.CRITICAL;
+    let href = '';
+    let message = '';
+    switch (reasonCode) {
+      case shaka.ui.FailReasonCode.NO_BROWSER_SUPPORT:
+        message = this.getLocalizedString(
+            shakaDemo.MessageIds.FAILURE_NO_BROWSER_SUPPORT);
+        href = 'https://github.com/google/shaka-player#' +
+                'platform-and-browser-support-matrix';
+        break;
+      case shaka.ui.FailReasonCode.PLAYER_FAILED_TO_LOAD:
+        message = this.getLocalizedString(shakaDemo.MessageIds.FAILURE_MISC);
+        break;
+    }
+    this.handleError_(severity, message, href);
   }
 
   /**
@@ -351,44 +378,8 @@ shakaDemo.Main = class {
       this.onCastStatusChange_(event['newStatus']);
     });
 
-    // Set up localization lazy-loading.
-    const applyNewLocaleIfPossible = () => {
-      this.localizeHTMLElements_();
-      this.dispatchEventWithName_('shaka-main-locale-changed');
-    };
-    const localization = this.controls_.getLocalization();
-    const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
-    localization.addEventListener(UNKNOWN_LOCALES, (event) => {
-      for (const locale of event['locales']) {
-        // This will leave promise rejections uncaught; this is acceptable, as
-        // this function is actually expected to fail fairly often, and has
-        // built-in fallback behavior (from localization events) without needing
-        // to catch the promise rejection.
-        this.loadUILocale_(locale).then(() => {
-          if (locale == this.uiLocale_) {
-            applyNewLocaleIfPossible();
-          }
-        });
-      }
-    });
-    const LOCALE_CHANGED = shaka.ui.Localization.LOCALE_CHANGED;
-    localization.addEventListener(LOCALE_CHANGED, (event) => {
-      applyNewLocaleIfPossible();
-    });
-    const initialLocaleLoads = [];
-    initialLocaleLoads.push(this.loadUILocale_(this.uiLocale_));
-    if (this.uiLocale_.includes('-')) {
-      // Also try to load the 'base' localization.
-      // This is so that, for example, the uiLocale_ is set to 'en-US', it will
-      // try to load 'en'.
-      initialLocaleLoads.push(this.loadUILocale_(this.uiLocale_.split('-')[0]));
-    }
-    if (!this.uiLocale_.startsWith('en')) {
-      // Load 'en' as a fallback option, if not already loaded.
-      initialLocaleLoads.push(this.loadUILocale_('en'));
-    }
-    await Promise.all(initialLocaleLoads);
-    this.localizeHTMLElements_();
+    this.localization_ = this.controls_.getLocalization();
+    await this.setupLocalization_();
 
     const drawerCloseButton = document.getElementById('drawer-close-button');
     drawerCloseButton.addEventListener('click', () => {
@@ -412,6 +403,50 @@ shakaDemo.Main = class {
       this.hideElement_(drawerCloseButton);
     });
     this.hideElement_(drawerCloseButton);
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  async setupLocalization_() {
+    // Set up localization lazy-loading.
+    const applyNewLocaleIfPossible = () => {
+      this.localizeHTMLElements_();
+      this.dispatchEventWithName_('shaka-main-locale-changed');
+    };
+    const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
+    this.localization_.addEventListener(UNKNOWN_LOCALES, (event) => {
+      for (const locale of event['locales']) {
+        // This will leave promise rejections uncaught; this is acceptable, as
+        // this function is actually expected to fail fairly often, and has
+        // built-in fallback behavior (from localization events) without needing
+        // to catch the promise rejection.
+        this.loadUILocale_(locale).then(() => {
+          if (locale == this.uiLocale_) {
+            applyNewLocaleIfPossible();
+          }
+        });
+      }
+    });
+    const LOCALE_CHANGED = shaka.ui.Localization.LOCALE_CHANGED;
+    this.localization_.addEventListener(LOCALE_CHANGED, (event) => {
+      applyNewLocaleIfPossible();
+    });
+    const initialLocaleLoads = [];
+    initialLocaleLoads.push(this.loadUILocale_(this.uiLocale_));
+    if (this.uiLocale_.includes('-')) {
+      // Also try to load the 'base' localization.
+      // This is so that, for example, the uiLocale_ is set to 'en-US', it will
+      // try to load 'en'.
+      initialLocaleLoads.push(this.loadUILocale_(this.uiLocale_.split('-')[0]));
+    }
+    if (!this.uiLocale_.startsWith('en')) {
+      // Load 'en' as a fallback option, if not already loaded.
+      initialLocaleLoads.push(this.loadUILocale_('en'));
+    }
+    await Promise.all(initialLocaleLoads);
+    this.localizeHTMLElements_();
   }
 
   /** @return {boolean} */
@@ -741,7 +776,7 @@ shakaDemo.Main = class {
    * @return {string}
    */
   getLocalizedString(string) {
-    return this.controls_.getLocalization().resolve(string);
+    return this.localization_.resolve(string);
   }
 
   /**
@@ -754,7 +789,6 @@ shakaDemo.Main = class {
       return;
     }
 
-    const localization = this.controls_.getLocalization();
     const load = async (urlBase) => {
       const url = urlBase + '/locales/' + locale + '.json';
 
@@ -762,7 +796,7 @@ shakaDemo.Main = class {
         const text = await this.loadText_(url);
         const obj = /** @type {!Object.<string, string>} */(JSON.parse(text));
         const map = new Map(Object.entries(obj));
-        localization.insert(locale, map);
+        this.localization_.insert(locale, map);
       } catch (error) {
         console.warn('Unable to load locale', locale, 'for url', url);
       }
@@ -777,7 +811,7 @@ shakaDemo.Main = class {
     // Fall back to browser languages after the demo page setting.
     const preferredLocales = [locale].concat(navigator.languages);
 
-    this.controls_.getLocalization().changeLocale(preferredLocales);
+    this.localization_.changeLocale(preferredLocales);
   }
 
   /** @return {string} */
@@ -890,35 +924,7 @@ shakaDemo.Main = class {
     }
 
     // Add compiled/uncompiled links.
-    let buildType = 'uncompiled';
-    if ('build' in params) {
-      buildType = params['build'];
-    } else if ('compiled' in params) {
-      buildType = 'compiled';
-    }
-    for (const type of ['compiled', 'debug_compiled', 'uncompiled']) {
-      const elem = document.getElementById(type.split('_').join('-') + '-link');
-      goog.asserts.assert(
-          elem instanceof HTMLAnchorElement, 'Wrong element type!');
-      if (buildType == type) {
-        elem.setAttribute('disabled', '');
-        elem.removeAttribute('href');
-        elem.title = 'currently selected';
-      } else {
-        elem.removeAttribute('disabled');
-        elem.addEventListener('click', () => {
-          const rawParams = location.hash.substr(1).split(';');
-          const newParams = rawParams.filter((param) => {
-            // Remove current build type param(s).
-            return param != 'compiled' && param.split('=')[0] != 'build';
-          });
-          newParams.push('build=' + type);
-          this.setNewHashSilent_(newParams.join(';'));
-          location.reload();
-          return false;
-        });
-      }
-    }
+    this.makeVersionLinks_();
 
     // Disable custom controls.
     this.nativeControlsEnabled_ = 'nativecontrols' in params;
@@ -948,6 +954,40 @@ shakaDemo.Main = class {
         shaka.log.setLevel(shaka.log.Level.DEBUG);
       } else if ('info' in params) {
         shaka.log.setLevel(shaka.log.Level.INFO);
+      }
+    }
+  }
+
+  /** @private */
+  makeVersionLinks_() {
+    const params = this.getParams_();
+    let buildType = 'uncompiled';
+    if ('build' in params) {
+      buildType = params['build'];
+    } else if ('compiled' in params) {
+      buildType = 'compiled';
+    }
+    for (const type of ['compiled', 'debug_compiled', 'uncompiled']) {
+      const elem = document.getElementById(type.split('_').join('-') + '-link');
+      goog.asserts.assert(
+          elem instanceof HTMLAnchorElement, 'Wrong element type!');
+      if (buildType == type) {
+        elem.setAttribute('disabled', '');
+        elem.removeAttribute('href');
+        elem.title = 'currently selected';
+      } else {
+        elem.removeAttribute('disabled');
+        elem.addEventListener('click', () => {
+          const rawParams = location.hash.substr(1).split(';');
+          const newParams = rawParams.filter((param) => {
+            // Remove current build type param(s).
+            return param != 'compiled' && param.split('=')[0] != 'build';
+          });
+          newParams.push('build=' + type);
+          this.setNewHashSilent_(newParams.join(';'));
+          location.reload();
+          return false;
+        });
       }
     }
   }
@@ -1710,5 +1750,9 @@ document.addEventListener('shaka-ui-loaded', () => {
   shakaDemo.Main.initWrapper(() => shakaDemoMain.init());
 });
 document.addEventListener('shaka-ui-load-failed', (event) => {
-  shakaDemo.Main.initWrapper(() => shakaDemoMain.initFailed());
+  shakaDemo.Main.initWrapper(() => {
+    const reasonCode = /** @type {!shaka.ui.FailReasonCode} */ (
+      event['detail']['reasonCode']);
+    shakaDemoMain.initFailed(reasonCode);
+  });
 });
