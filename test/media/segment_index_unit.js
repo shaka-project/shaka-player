@@ -386,6 +386,67 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const expectedRefs = [refs1[0]].concat(refs2);
       expect(index1.references).toEqual(expectedRefs);
     });
+
+    it('references with only preload hinted segments', () => {
+      // refs1:  [[(preload-hint)[0,0]]]
+      // refs2:  [[[0,5][5,10]]]
+      // Merged: [[[0,5][5,10]]]
+
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      // A segment with only preload hinted partial segment.
+      const preloadRefs1 = [
+        makeReference(uri(0.0), 0, 0),
+      ];
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const partialRefs2 = [
+        // Previous preload hinted segment is replaced with a partial segment.
+        makeReference(uri(0.5), 0, 5),
+        makeReference(uri(5.10), 5, 10),
+      ];
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const refs1 = [
+        makeReference(uri(0.0), 0, 0, preloadRefs1),
+      ];
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const refs2 = [
+        makeReference(uri(0.10), 0, 10, partialRefs2),
+      ];
+      const index1 = new shaka.media.SegmentIndex(refs1);
+      index1.merge(refs2);
+      expect(index1.references.length).toBe(1);
+      expect(index1.references).toEqual(refs2);
+    });
+
+    it('references with preload hinted segments', () => {
+      // refs1:  [[[0,5],(preload-hint)[5,5]]]
+      // refs2:  [[[0,5][5,10][10,15]]]
+      // Merged: [[[0,5][5,10][10,15]]]
+
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const partialRefs1 = [
+        makeReference(uri(0.5), 0, 5),
+        // Preload hinted partial segment
+        makeReference(uri(5.5), 5, 5),
+      ];
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const partialRefs2 = [
+        makeReference(uri(0.5), 0, 5),
+        makeReference(uri(5.10), 5, 10),
+        makeReference(uri(10.15), 10, 15),
+      ];
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const refs1 = [
+        makeReference(uri(0.5), 0, 5, partialRefs1),
+      ];
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const refs2 = [
+        makeReference(uri(0.15), 0, 15, partialRefs2),
+      ];
+      const index1 = new shaka.media.SegmentIndex(refs1);
+      index1.merge(refs2);
+      expect(index1.references.length).toBe(1);
+      expect(index1.references).toEqual(refs2);
+    });
   });
 
   describe('evict', () => {
