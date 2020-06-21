@@ -100,7 +100,7 @@ const video = document.getElementById('video');
 const ui = video['ui'];
 // If you're using a non-UI build, this is the div you'll need to create
 // for your layout.
-var container = video.ui.getControls().getControlsContainer();
+var container = video.ui.getControls().getServerSideAdContainer();
 adManager.initServerSide(container, video);
 ```
 
@@ -127,8 +127,6 @@ See [google.ima.dai.api.VODStreamRequest][] for details on the request object.
 [google.ima.dai.api.VODStreamRequest]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/VODStreamRequest
 
 Requesting a LIVE stream:
-Please note that we don't support ad tracking information for DAI LIVE streams
-at the moment. It is on our road map for a future release.
 
 ```js
 var streamRequest = new google.ima.dai.api.LiveStreamRequest();

@@ -624,7 +624,7 @@ describe('Player', () => {
           if (arguments.length > 2000) {
             throw new RangeError('Synthetic Range Error');
           }
-          // eslint-disable-next-line no-restricted-syntax
+          // eslint-disable-next-line prefer-spread
           return oldFromCharCode.apply(null, arguments);
         };
         await player.load('/base/test/test/assets/large_file.mpd');

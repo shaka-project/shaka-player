@@ -38,6 +38,7 @@ goog.require('shaka.polyfill.IndexedDB');
 goog.require('shaka.polyfill.InputEvent');
 goog.require('shaka.polyfill.MathRound');
 goog.require('shaka.polyfill.MediaSource');
+goog.require('shaka.polyfill.Orientation');
 goog.require('shaka.polyfill.PatchedMediaKeysApple');
 goog.require('shaka.polyfill.PatchedMediaKeysMs');
 goog.require('shaka.polyfill.PatchedMediaKeysNop');

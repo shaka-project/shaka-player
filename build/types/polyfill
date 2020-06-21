@@ -8,6 +8,7 @@
 +../../lib/polyfill/languages.js
 +../../lib/polyfill/mathround.js
 +../../lib/polyfill/mediasource.js
++../../lib/polyfill/orientation.js
 +../../lib/polyfill/patchedmediakeys_apple.js
 +../../lib/polyfill/patchedmediakeys_ms.js
 +../../lib/polyfill/patchedmediakeys_nop.js

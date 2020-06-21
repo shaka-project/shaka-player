@@ -20,6 +20,19 @@
 @progress-circle-size: 45px;
 @progress-circle-thickness: 5px;
 
+/* This class name is used by MDL, but we use a slightly different font.  So
+ * here we override the font family for the MDL class.  Without this, the menu
+ * on the left side of the screen has no icon. */
+.material-icons {
+  font-family: 'Material Icons Round';
+}
+
+/* Conflicting styles between the icons font & the MDL buttons caused some
+ * icons not to be centered in their MDL button.  This fixes it. */
+.mdl-button .material-icons {
+  line-height: 36px;
+}
+
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
  * class with the same name, which can be used in the application directly. */
 .hidden() {
@@ -135,6 +148,10 @@ html, body {
   display: inline-block;
   margin-left: auto;
   margin-right: auto;
+
+  /* Some very long URLs can appear in the error text, and word wrapping is very
+   * helpful. */
+  overflow-wrap: anywhere;
 }
 
 .input-disabled {

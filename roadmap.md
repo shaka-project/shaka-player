@@ -9,14 +9,17 @@ The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
 
 Candidate features for future release cycles
- - Low-latency live (LHLS, equivalent for DASH)
  - MediaCapabilities to make performance-based decisions
  - Codec-switching
- - Background fetch for offline storage
  - Preload API
  - Thumbnail tracks
- - Own CEA parser, use mux.js only for TS
+ - Background fetch for offline storage
+ - PlayReady "recommendation" key system support
  - Smaller, more modular binary
+
+v3.1 - 2020 Q3
+ - Low-latency live (LL-HLS, LL-DASH)
+ - Own CEA parser, use mux.js only for TS
 
 =====
 

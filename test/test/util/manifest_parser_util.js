@@ -52,10 +52,12 @@ shaka.test.ManifestParser = class {
    * @param {number=} startByte
    * @param {?number=} endByte
    * @param {number=} timestampOffset
+   * @param {!Array.<!shaka.media.SegmentReference>=} partialReferences
    * @return {!shaka.media.SegmentReference}
    */
   static makeReference(uri, start, end, baseUri = '',
-      startByte = 0, endByte = null, timestampOffset) {
+      startByte = 0, endByte = null, timestampOffset = 0,
+      partialReferences = []) {
     const getUris = () => [baseUri + uri];
 
     // If a test wants to verify these, they can be set explicitly after
@@ -77,6 +79,8 @@ shaka.test.ManifestParser = class {
         initSegmentReference,
         timestampOffset,
         appendWindowStart,
-        appendWindowEnd);
+        appendWindowEnd,
+        partialReferences,
+    );
   }
 };
