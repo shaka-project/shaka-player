@@ -127,6 +127,8 @@
   "DEMO_OFFLINE": "Downloadable",
   "DEMO_OFFLINE_SEARCH": "Filters for assets that can be stored offline.",
   "DEMO_OFFLINE_SECTION_HEADER": "Offline",
+  "DEMO_FAILURE_MISC": "Shaka Player failed to load! If you are using an ad blocker, try switching to compiled mode at the bottom of the page.",
+  "DEMO_FAILURE_NO_BROWSER_SUPPORT": "Your browser is not supported!",
   "DEMO_PLAY": "Play",
   "DEMO_PLAYREADY": "PlayReady DRM",
   "DEMO_PROJECT_LINKS_HEADER": "PROJECT LINKS",

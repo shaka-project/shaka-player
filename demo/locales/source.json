@@ -511,6 +511,14 @@
     "description": "The header for a section of configuration values.",
     "message": "Offline"
   },
+  "DEMO_FAILURE_MISC": {
+    "description": "An error displayed if Shaka Player fails to load for a miscellaneous reason.",
+    "message": "Shaka Player failed to load! If you are using an ad blocker, try switching to compiled mode at the bottom of the page."
+  },
+  "DEMO_FAILURE_NO_BROWSER_SUPPORT": {
+    "description": "An error displayed if Shaka Player is unable to load due to lack of browser support.",
+    "message": "Your browser is not supported!"
+  },
   "DEMO_PLAY": {
     "description": "A button to play the attached asset.",
     "message": "Play"
