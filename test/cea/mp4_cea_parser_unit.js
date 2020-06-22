@@ -23,10 +23,9 @@ describe('Mp4CeaParser', () => {
   });
 
   it('parses cea data from mp4 stream', () => {
-    let cea708Packets;
     const cea708Parser = new shaka.cea.Mp4CeaParser();
 
-    const expectedCea708Packets = new Uint8Array([
+    const expectedCea708Packet = new Uint8Array([
       0xb5, 0x00, 0x31, 0x47, 0x41,
       0x39, 0x34, 0x03, 0xce, 0xff,
       0xfd, 0x94, 0x20, 0xfd, 0x94,
@@ -41,11 +40,11 @@ describe('Mp4CeaParser', () => {
     ]);
 
     cea708Parser.init(ceaInitSegment);
-    cea708Parser.parse(ceaSegment, (data) => {
-      cea708Packets = data;
-    });
+    const cea708Packets = cea708Parser.parse(ceaSegment);
+    shaka.log.info(cea708Packets);
     expect(cea708Packets).toBeDefined();
-    expect(cea708Packets).toEqual(expectedCea708Packets);
+    expect(cea708Packets[cea708Packets.length-1].packet)
+        .toEqual(expectedCea708Packet);
   });
 
   it('parses an invalid init segment', () => {
