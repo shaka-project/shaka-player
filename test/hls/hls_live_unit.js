@@ -147,6 +147,8 @@ describe('HlsParser live', () => {
         .setResponseText('test:/audio', initialMedia)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseValue('test:/main2.mp4', segmentData)
+        .setResponseValue('test:/main3.mp4', segmentData)
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
     const manifest = await parser.start('test:/master', playerInterface);
@@ -165,7 +167,8 @@ describe('HlsParser live', () => {
         .setResponseText('test:/video', updatedMedia)
         .setResponseText('test:/redirected/video', updatedMedia)
         .setResponseText('test:/video2', updatedMedia)
-        .setResponseText('test:/audio', updatedMedia);
+        .setResponseText('test:/audio', updatedMedia)
+        .setResponseText('test:/video?_HLS_skip=YES', updatedMedia);
 
     await delayForUpdatePeriod();
     for (const variant of manifest.variants) {
@@ -442,6 +445,18 @@ describe('HlsParser live', () => {
       '#EXT-X-DISCONTINUITY-SEQUENCE:31\n',
       '#EXTINF:2,\n',
       'main2.mp4\n',
+    ].join('');
+
+    const mediaWithSkippedSegments = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+      '#EXTINF:2,\n',
+      'main3.mp4\n',
     ].join('');
 
     it('starts presentation as VOD when ENDLIST is present', async () => {
@@ -858,6 +873,21 @@ describe('HlsParser live', () => {
             'test:/main.mp4',
             expectedStartByte,
             partialEndByte);  // Partial segment request
+      });
+
+      it('skips older segments', async () => {
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
+        const ref3 = ManifestParser.makeReference('test:/main3.mp4', 6, 8);
+
+        config.lowLatencyMode = true;
+        parser.configure(config);
+        // With 'SKIPPED-SEGMENTS', ref1 is skipped from the playlist,
+        // and ref1 should be in the SegmentReferences list.
+        // ref3 should be appended to the SegmentReferences list.
+        await testUpdate(
+            master, mediaWithAdditionalSegment, [ref1, ref2],
+            mediaWithSkippedSegments, [ref1, ref2, ref3]);
       });
     });  // describe('update')
   });  // describe('playlist type LIVE')
