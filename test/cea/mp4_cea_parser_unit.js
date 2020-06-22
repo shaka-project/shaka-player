@@ -41,7 +41,6 @@ describe('Mp4CeaParser', () => {
 
     cea708Parser.init(ceaInitSegment);
     const cea708Packets = cea708Parser.parse(ceaSegment);
-    shaka.log.info(cea708Packets);
     expect(cea708Packets).toBeDefined();
     expect(cea708Packets[cea708Packets.length-1].packet)
         .toEqual(expectedCea708Packet);
