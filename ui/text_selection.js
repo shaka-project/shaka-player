@@ -164,10 +164,10 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   async onTextTrackSelected_(track) {
-    await this.player.setTextTrackVisibility(true);
     if (this.player) {  // May have become null while awaiting
       this.player.selectTextLanguage(track.language, track.roles[0]);
     }
+    await this.player.setTextTrackVisibility(true);
   }
 
 
