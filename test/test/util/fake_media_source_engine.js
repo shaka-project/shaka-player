@@ -89,6 +89,10 @@ shaka.test.FakeMediaSourceEngine = class {
         .and.callFake((type) => this.clearImpl_(type));
 
     /** @type {!jasmine.Spy} */
+    this.resetCaptionParser = jasmine.createSpy('resetCaptionParser')
+        .and.stub();
+
+    /** @type {!jasmine.Spy} */
     this.bufferStart = jasmine.createSpy('bufferStart')
         .and.callFake((type) => this.bufferStartImpl_(type));
 
