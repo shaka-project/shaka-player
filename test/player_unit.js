@@ -342,7 +342,7 @@ describe('Player', () => {
         expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
       });
 
-      it('unloads current stream when captions are turned off', async () => {
+      it('unloads text stream when captions are turned off', async () => {
         await player.setTextTrackVisibility(true);
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(streamingEngine.switchTextStream).toHaveBeenCalled();
