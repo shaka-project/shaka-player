@@ -882,10 +882,8 @@ describe('StreamingEngine', () => {
     });
 
     it('will not reset caption parser when text streams change', async () => {
-      streamingEngine.start().catch(fail);
+      await streamingEngine.start();
       playing = true;
-
-      await Util.fakeEventLoop(1);
 
       mediaSourceEngine.clear.calls.reset();
       streamingEngine.switchTextStream(newTextStream);
