@@ -350,8 +350,6 @@ describe('Player', () => {
             .not.toBe(null);
         streamingEngine.switchTextStream.calls.reset();
 
-        expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
-            .not.toBe(null);
         await player.setTextTrackVisibility(false);
         expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
         expect(streamingEngine.unloadTextStream).toHaveBeenCalled();
