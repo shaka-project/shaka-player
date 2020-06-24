@@ -546,8 +546,6 @@ describe('StreamingEngine', () => {
     });
 
     it('sets the current text stream to null', async () => {
-      setupVod();
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
 
       streamingEngine.switchVariant(variant);
