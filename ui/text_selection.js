@@ -164,9 +164,12 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   async onTextTrackSelected_(track) {
-    if (this.player) {  // May have become null while awaiting
-      this.player.selectTextLanguage(track.language, track.roles[0]);
-    }
+    // setTextTrackVisibility should be called after selectTextLanguage.
+    // selectTextLanguage sets a text stream, and setTextTrackVisiblity(true)
+    // will set a text stream if it isn't already set. Consequently, reversing
+    // the order of these calls makes two languages display simultaneously
+    // if captions are turned off -> on in a different language.
+    this.player.selectTextLanguage(track.language, track.roles[0]);
     await this.player.setTextTrackVisibility(true);
   }
 

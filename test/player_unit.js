@@ -353,6 +353,8 @@ describe('Player', () => {
         await player.setTextTrackVisibility(false);
         expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
         expect(streamingEngine.unloadTextStream).toHaveBeenCalled();
+        expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
+            .toBe(null);
       });
     });
   });  // describe('load/unload')
