@@ -62,13 +62,15 @@ describe('TextEngine', () => {
         () => {
           const closedCaptionsType =
            shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
-          const originalMuxjs = window.muxjs;
+          const originalMuxjs = shaka.dependencies.muxjs();
           expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(true);
           try {
-            window['muxjs'] = null;
+            shaka.dependencies.add(shaka.dependencies.Allowed.muxjs, null);
             expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(false);
           } finally {
-            window['muxjs'] = originalMuxjs;
+            shaka.dependencies.add(
+                shaka.dependencies.Allowed.muxjs, originalMuxjs
+            );
           }
         });
   });

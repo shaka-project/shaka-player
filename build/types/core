@@ -8,6 +8,8 @@
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
 
++../../lib/dependencies/all.js
+
 +../../lib/deprecate/deprecate.js
 +../../lib/deprecate/enforcer.js
 +../../lib/deprecate/version.js

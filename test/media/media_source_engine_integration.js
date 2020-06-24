@@ -38,7 +38,6 @@ describe('MediaSourceEngine', () => {
     goog.asserts.assert(
         shaka.media.MuxJSClosedCaptionParser.isSupported(),
         'Where is MuxJS?');
-
     textDisplayer = new shaka.test.FakeTextDisplayer();
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(

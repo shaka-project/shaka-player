@@ -12,7 +12,6 @@ goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.util.Platform');
 
-
 /**
  * @implements {shaka.util.IDestroyable}
  * @export
