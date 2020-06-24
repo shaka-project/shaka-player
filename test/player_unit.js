@@ -341,21 +341,6 @@ describe('Player', () => {
         expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
         expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
       });
-
-      it('sets the text stream to null when captions turn off', async () => {
-        await player.setTextTrackVisibility(true);
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-        expect(streamingEngine.switchTextStream).toHaveBeenCalled();
-        expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
-            .not.toBe(null);
-        streamingEngine.switchTextStream.calls.reset();
-
-        await player.setTextTrackVisibility(false);
-        expect(streamingEngine.switchTextStream).not.toHaveBeenCalled();
-        expect(streamingEngine.unloadTextStream).toHaveBeenCalled();
-        expect(shaka.test.Util.invokeSpy(streamingEngine.getCurrentTextStream))
-            .toBe(null);
-      });
     });
   });  // describe('load/unload')
 
