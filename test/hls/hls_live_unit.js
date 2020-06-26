@@ -489,10 +489,10 @@ describe('HlsParser live', () => {
           expect(manifest.presentationTimeline.getDelay()).toBe(15);
         });
 
-    it('sets 3 times partial target duration as presentation delay for low' +
-        'latency mode', async () => {
-      const mediaWithPartialDuration = [
+    it('sets presentation delay for low latency mode', async () => {
+      const mediaWithLowLatency = [
         '#EXTM3U\n',
+        '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,PART-HOLD-BACK=1.8\n',
         '#EXT-X-TARGETDURATION:5\n',
         '#EXT-X-PART-INF:PART-TARGET=0.5\n',
         '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
@@ -503,13 +503,16 @@ describe('HlsParser live', () => {
 
       fakeNetEngine
           .setResponseText('test:/master', master)
-          .setResponseText('test:/video', mediaWithPartialDuration)
+          .setResponseText('test:/video', mediaWithLowLatency)
           .setResponseValue('test:/init.mp4', initSegmentData)
           .setResponseValue('test:/main.mp4', segmentData);
 
       config.lowLatencyMode = true;
+      parser.configure(config);
       const manifest = await parser.start('test:/master', playerInterface);
-      expect(manifest.presentationTimeline.getDelay()).toBe(1.5);
+      // Presentation delay should be the value of 'PART-HOLD-BACK' if not
+      // configured.
+      expect(manifest.presentationTimeline.getDelay()).toBe(1.8);
     });
 
     describe('availabilityWindowOverride', () => {
