@@ -14,7 +14,7 @@ assignees: ''
   If you want to know whether we will support a feature, please file the feature request template instead.
 -->
 
-**Have you read the[Tutorials](http://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)?**
+**Have you read the [Tutorials](http://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)?**
 
 
 **Have you read the [FAQ](https://bit.ly/ShakaFAQ) and checked for duplicate open issues?**
