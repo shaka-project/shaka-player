@@ -58,7 +58,7 @@ const video = document.getElementById('video');
 const ui = video['ui'];
 // If you're using a non-UI build, this is the div you'll need to create
 // for your layout.
-var container = video.ui.getControls().getControlsContainer();
+const container = video.ui.getControls().getControlsContainer();
 adManager.initClientSide(container, video);
 ```
 
@@ -66,7 +66,7 @@ With the client side logic initialized, you can request ads at any time during
 the presentation.
 
 ```js
-var adsRequest = new google.ima.AdsRequest();
+const adsRequest = new google.ima.AdsRequest();
 // Your ad tag url should go here. We are using a sample ad tag from the
 // IMA HTML5 SDK implementation guide for this tutorial.
 adsRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
@@ -100,7 +100,7 @@ const video = document.getElementById('video');
 const ui = video['ui'];
 // If you're using a non-UI build, this is the div you'll need to create
 // for your layout.
-var container = video.ui.getControls().getServerSideAdContainer();
+const container = video.ui.getControls().getServerSideAdContainer();
 adManager.initServerSide(container, video);
 ```
 
@@ -110,7 +110,7 @@ dynamically inserted ads.
 Requesting a VOD stream:
 
 ```js
-var streamRequest = new google.ima.dai.api.VODStreamRequest();
+const streamRequest = new google.ima.dai.api.VODStreamRequest();
 // Your stream information will go here. We are using IMA's sample stream info
 // in this tutorial.
 streamRequest.contentSourceId = '2528370';
@@ -129,7 +129,7 @@ See [google.ima.dai.api.VODStreamRequest][] for details on the request object.
 Requesting a LIVE stream:
 
 ```js
-var streamRequest = new google.ima.dai.api.LiveStreamRequest();
+const streamRequest = new google.ima.dai.api.LiveStreamRequest();
 // Your stream information will go here. We are using IMA's sample stream info
 // in this tutorial.
 streamRequest.assetKey = 'sN_IYUG8STe1ZzhIIE_ksA';
