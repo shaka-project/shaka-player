@@ -31,9 +31,12 @@ loads the manifest:
   });
 
   // Try to load a manifest.
-  player.load(manifestUri).then(function() {
-    // The video should now be playing!
-  }).catch(onError);
+  try {
+    await player.load(manifestUri);
+    // The video should now be playing!  
+  } catch (e) {
+    onError(e);
+  }
 ```
 
 Since the endpoint is `/no_auth`, this should play without authentication.
