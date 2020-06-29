@@ -33,11 +33,12 @@ Registering code in the app:
 
 ```js
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service_worker.js').then(function() {
+  try {
+    await navigator.serviceWorker.register('/service_worker.js');
     console.log('Service worker registered successfully');
-  }).catch(function(err) {
-    console.error('Error registering service worker', err);
-  });
+  } catch(e) {
+    console.error('Error registering service worker', e);
+  }
 } else {
   console.error('Browser doesn\'t support service workers');
 }
