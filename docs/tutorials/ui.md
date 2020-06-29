@@ -42,7 +42,7 @@ Set up controls with HTML data attributes:
 ```js
 // myapp.js
 
-var manifestUri =
+const manifestUri =
     'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
 
 async function init() {

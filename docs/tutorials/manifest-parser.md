@@ -21,8 +21,8 @@ MyManifestParser.prototype.configure = function(config) {
 };
 
 MyManifestParser.prototype.start = function(uri, playerInterface) {
-  var type = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-  var request = {
+  const type = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+  const request = {
     uris: [uri],
     method: 'GET',
     retryParameters: this.config_.retryParameters
@@ -192,16 +192,16 @@ segments will be updated and new segments will be added.  You can also call
 `evict` to remove old references to reduce the memory footprint.
 
 ```js
-var references = refs.map(function(r, i) {
+const references = refs.map(function(r, i) {
   // Should return an array of possible URI choices; this is used for failover
   // in the event of network error.  This is a function to defer calculations.
-  var getUris = function() { return [r.uri]; };
+  const getUris = function() { return [r.uri]; };
 
   return new shaka.media.SegmentReference(i, r.start, r.end, getUris, 0, null);
 });
 
-var index = new shaka.media.SegmentIndex(references);
-var streamFunctions = {
+const index = new shaka.media.SegmentIndex(references);
+const streamFunctions = {
   createSegmentIndex: function() { return Promise.resolve(); },
   findSegmentPosition: index.find.bind(index),
   getSegmentReference: index.get.bind(index)
@@ -236,7 +236,7 @@ MyManifestParser.prototype.loadManifest_ = function(data) {
   // |data| is the response data from load(); but in this example, we ignore it.
 
   // The arguments are only used for live.
-  var timeline = new shaka.media.PresentationTimeline(null, 0);
+  const timeline = new shaka.media.PresentationTimeline(null, 0);
   timeline.setDuration(3600);  // seconds
 
   return {
@@ -281,10 +281,10 @@ MyManifestParser.prototype.loadVariant_ = function(hasVideo, hasAudio) {
 };
 
 MyManifestParser.prototype.loadStream_ = function(type) {
-  var getUris = function() { return ['https://example.com/init']; };
-  var init = new shaka.media.InitSegmentReference(getUris, 0, null);
+  const getUris = function() { return ['https://example.com/init']; };
+  const init = new shaka.media.InitSegmentReference(getUris, 0, null);
 
-  var index = new shaka.media.SegmentIndex([
+  const index = new shaka.media.SegmentIndex([
     // Times are in seconds, relative to the Period
     this.loadReference_(0, 0, 10),
     this.loadReference_(1, 10, 20),
@@ -320,7 +320,7 @@ MyManifestParser.prototype.loadStream_ = function(type) {
 };
 
 MyManifestParser.prototype.loadReference_ = function(i, start, end) {
-  var getUris = function() { return ['https://example.com/ref_' + i]; };
+  const getUris = function() { return ['https://example.com/ref_' + i]; };
   return new shaka.media.SegmentReference(i, start, end, getUris, 0, null);
 };
 ```

@@ -126,7 +126,7 @@ myapp.SkipButton = class extends shaka.ui.Element {
 
     // Listen for clicks on the button to start the next playback
     this.eventManager.listen(this.button_, 'click', () => {
-      let nextManifest = /* Your logic to pick the next video to be played */
+      const nextManifest = /* Your logic to pick the next video to be played */
         myapp.getNextManifest();
 
       // shaka.ui.Element gives us access to the player object as member of the class

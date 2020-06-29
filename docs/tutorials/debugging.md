@@ -9,7 +9,7 @@ and make a bad change.
 First, let's change `manifestUri` by removing the last letter.
 
 ```js
-var manifestUri =
+const manifestUri =
     'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp';
 ```
 
