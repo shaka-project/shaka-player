@@ -52,9 +52,12 @@ loads the manifest:
   });
 
   // Try to load a manifest.
-  player.load(manifestUri).then(function() {
+  try {
+    await player.load(manifestUri);
     // The video should now be playing!
-  }).catch(onError);
+  } catch(e) {
+    onError(e);
+  }
 ```
 
 This license server is expecting a wrapped request, so if we try to play now, we
