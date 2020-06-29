@@ -101,8 +101,8 @@ function initApp() {
 
 function initPlayer() {
   // Create a Player instance.
-  var video = document.getElementById('video');
-  var player = new shaka.Player(video);
+  const video = document.getElementById('video');
+  const player = new shaka.Player(video);
 
   // Attach player and storage to the window to make it easy to access
   // in the JS console and so we can access it in other methods.
@@ -113,7 +113,7 @@ function initPlayer() {
 
   initStorage(player);
 
-  var downloadButton = document.getElementById('download-button');
+  const downloadButton = document.getElementById('download-button');
   downloadButton.onclick = onDownloadClick;
 
   // Update the content list to show what items we initially have
@@ -137,7 +137,7 @@ function selectTracks(tracks) {
   // Note that this is just an example of an arbitrary algorithm, and not a best
   // practice for storing content offline.  Decide what your app needs, or keep
   // the default (user-pref-matching audio, best SD video, all text).
-  var found = tracks
+  const found = tracks
       .filter(function(track) { return track.type == 'variant'; })
       .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
       .pop();
@@ -172,9 +172,9 @@ function downloadContent(manifestUri, title) {
  * complete.
  */
 function onDownloadClick() {
-  var downloadButton = document.getElementById('download-button');
-  var manifestUri = document.getElementById('asset-uri-input').value;
-  var title = document.getElementById('asset-title-input').value;
+  const downloadButton = document.getElementById('download-button');
+  const manifestUri = document.getElementById('asset-uri-input').value;
+  const title = document.getElementById('asset-title-input').value;
 
   // Disable the download button to prevent user from requesting
   // another download until this download is complete.
@@ -205,7 +205,7 @@ function onDownloadClick() {
  * user whether or not they have an internet connection.
  */
 function updateOnlineStatus() {
-  var signal = document.getElementById('online-signal');
+  const signal = document.getElementById('online-signal');
   if (navigator.onLine) {
     signal.innerHTML = 'ONLINE';
     signal.style.background = 'green';
@@ -220,7 +220,7 @@ function updateOnlineStatus() {
  * have made.
  */
 function setDownloadProgress(content, progress) {
-  var progressBar = document.getElementById('progress-bar');
+  const progressBar = document.getElementById('progress-bar');
   progressBar.value = progress * progressBar.max;
 }
 
@@ -229,17 +229,17 @@ function setDownloadProgress(content, progress) {
  * list of downloaded content.
  */
 function refreshContentList() {
-  var contentTable = document.getElementById('content-table');
+  const contentTable = document.getElementById('content-table');
 
   // Clear old rows from the table.
   while (contentTable.rows.length) {
     contentTable.deleteRow(0);
   }
 
-  var addRow = function(content) {
-    var append = -1;
+  const addRow = function(content) {
+    const append = -1;
 
-    var row = contentTable.insertRow(append);
+    const row = contentTable.insertRow(append);
     row.insertCell(append).innerHTML = content.offlineUri;
     Object.keys(content.appMetadata)
         .map(function(key) {
@@ -270,7 +270,7 @@ function refreshContentList() {
  * will need to do that.
  */
 function createButton(text, action) {
-  var button = document.createElement('button');
+  const button = document.createElement('button');
   button.innerHTML = text;
   button.onclick = action;
   return button;
@@ -318,7 +318,7 @@ code:
   // Construct a metadata object to be stored alongside the content.
   // This can hold any information the app wants to be stored with
   // the content.
-  var metadata = {
+  const metadata = {
     'title': title,
     'downloaded': new Date()
   };
@@ -457,8 +457,8 @@ function initApp() {
 
 function initPlayer() {
   // Create a Player instance.
-  var video = document.getElementById('video');
-  var player = new shaka.Player(video);
+  const video = document.getElementById('video');
+  const player = new shaka.Player(video);
 
   // Attach player and storage to the window to make it easy to access
   // in the JS console and so we can access it in other methods.
@@ -469,7 +469,7 @@ function initPlayer() {
 
   initStorage(player);
 
-  var downloadButton = document.getElementById('download-button');
+  const downloadButton = document.getElementById('download-button');
   downloadButton.onclick = onDownloadClick;
 
   // Update the content list to show what items we initially have
@@ -493,7 +493,7 @@ function selectTracks(tracks) {
   // Note that this is just an example of an arbitrary algorithm, and not a best
   // practice for storing content offline.  Decide what your app needs, or keep
   // the default (user-pref-matching audio, best SD video, all text).
-  var found = tracks
+  const found = tracks
       .filter(function(track) { return track.type == 'variant'; })
       .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
       .pop();
@@ -528,7 +528,7 @@ function downloadContent(manifestUri, title) {
   // Construct a metadata object to be stored along side the content.
   // This can hold any information the app wants to be stored with the
   // content.
-  var metadata = {
+  const metadata = {
     'title': title,
     'downloaded': Date()
   };
@@ -543,9 +543,9 @@ function downloadContent(manifestUri, title) {
  * complete.
  */
 function onDownloadClick() {
-  var downloadButton = document.getElementById('download-button');
-  var manifestUri = document.getElementById('asset-uri-input').value;
-  var title = document.getElementById('asset-title-input').value;
+  const downloadButton = document.getElementById('download-button');
+  const manifestUri = document.getElementById('asset-uri-input').value;
+  const title = document.getElementById('asset-title-input').value;
 
   // Disable the download button to prevent user from requesting
   // another download until this download is complete.
@@ -576,7 +576,7 @@ function onDownloadClick() {
  * user whether or not they have an internet connection.
  */
 function updateOnlineStatus() {
-  var signal = document.getElementById('online-signal');
+  const signal = document.getElementById('online-signal');
   if (navigator.onLine) {
     signal.innerHTML = 'ONLINE';
     signal.style.background = 'green';
@@ -591,7 +591,7 @@ function updateOnlineStatus() {
  * have made.
  */
 function setDownloadProgress(content, progress) {
-  var progressBar = document.getElementById('progress-bar');
+  const progressBar = document.getElementById('progress-bar');
   progressBar.value = progress * progressBar.max;
 }
 
@@ -600,17 +600,17 @@ function setDownloadProgress(content, progress) {
  * list of downloaded content.
  */
 function refreshContentList() {
-  var contentTable = document.getElementById('content-table');
+  const contentTable = document.getElementById('content-table');
 
   // Clear old rows from the table.
   while (contentTable.rows.length) {
     contentTable.deleteRow(0);
   }
 
-  var addRow = function(content) {
-    var append = -1;
+  const addRow = function(content) {
+    const append = -1;
 
-    var row = contentTable.insertRow(append);
+    const row = contentTable.insertRow(append);
     row.insertCell(append).innerHTML = content.offlineUri;
     Object.keys(content.appMetadata)
         .map(function(key) {
@@ -641,7 +641,7 @@ function refreshContentList() {
  * will need to do that.
  */
 function createButton(text, action) {
-  var button = document.createElement('button');
+  const button = document.createElement('button');
   button.innerHTML = text;
   button.onclick = action;
   return button;
