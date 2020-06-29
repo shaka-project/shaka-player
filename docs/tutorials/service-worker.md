@@ -46,7 +46,7 @@ if ('serviceWorker' in navigator) {
 Service worker code (`/service_worker.js`):
 
 ```js
-var CACHE_NAME = 'segment-cache-v1';
+const CACHE_NAME = 'segment-cache-v1';
 
 function shouldCache(url) {
   return url.endsWith('.mp4') || url.endsWith('.m4s');
@@ -81,7 +81,7 @@ function loadFromCacheOrFetch(request) {
 function cacheResponse(cache, request, response) {
   // Response objects are read-only, so to add our custom header, we need to
   // recreate the object.
-  var init = {
+  const init = {
     status: response.status,
     statusText: response.statusText,
     headers: {'X-Shaka-From-Cache': true}
