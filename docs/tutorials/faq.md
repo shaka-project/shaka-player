@@ -87,6 +87,16 @@ you see JSON, you will need to [unwrap the response][wrapping].
 
 <hr>
 
+**Q:** Why doesn't getStats() work in Safari?
+
+**A:** To play HLS content on Safari, we default to using Apple's native src=
+playback.  Since the browser handles playback, we don't get much information.
+
+If you want to disable native playback and use MediaSource playback instead,
+configure [`.streaming.useNativeHlsOnSafari`][StreamingConfiguration] to false.
+
+<hr>
+
 **Q:** Why doesn't my HLS content work?
 
 **A:** If your HLS content uses MPEG2-TS, you may need to enable transmuxing.
