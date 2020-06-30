@@ -11,6 +11,28 @@
  * @externs
  */
 
+/**
+ * @extends {NetworkInformation}
+ * @extends {EventTarget}
+ * @interface
+ */
+class NetworkInformationEvent {
+  /** @override */
+  addEventListener(type, listener, useCapture) {}
+
+  /** @override */
+  removeEventListener(type, listener, useCapture) {}
+
+  /** @override */
+  dispatchEvent(event) {}
+}
+
+
+/** @type {NetworkInformationEvent} */
+const NetworkInformation = {};
 
 /** @type {boolean} */
 NetworkInformation.prototype.saveData;
+
+/** @type {number} */
+NetworkInformation.prototype.downlink;
