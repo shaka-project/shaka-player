@@ -119,6 +119,7 @@
   "DEMO_MULTIPLE_LANGUAGES": "Multiple languages",
   "DEMO_NAME": "Name",
   "DEMO_NAME_ERROR": "Must be a unique name.",
+  "DEMO_NETWORK_INFORMATION": "Use Network Information API",
   "DEMO_NIMBLE_STREAMER": "Nimble Streamer",
   "DEMO_NPM": "Package on NPM",
   "DEMO_NUMBER_DECIMAL_WARNING": "Must be a positive number.",
