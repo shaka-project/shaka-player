@@ -544,6 +544,20 @@ describe('StreamingEngine', () => {
         }
       });
     });
+
+    it('sets the current text stream to null', async () => {
+      createStreamingEngine();
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      expect(streamingEngine.getCurrentTextStream()).not.toBe(null);
+
+      await streamingEngine.start();
+      playing = true;
+
+      streamingEngine.unloadTextStream();
+      expect(streamingEngine.getCurrentTextStream()).toBe(null);
+    });
   });
 
   it('initializes and plays live', async () => {
@@ -774,6 +788,7 @@ describe('StreamingEngine', () => {
     let sameAudioVariant;
     let sameVideoVariant;
     let initialTextStream;
+    let newTextStream;
 
     beforeEach(() => {
       // Set up a manifest with multiple variants and a text stream.
@@ -801,12 +816,16 @@ describe('StreamingEngine', () => {
         manifest.addTextStream(20, (stream) => {
           stream.useSegmentTemplate('text-20-%d.mp4', 10);
         });
+        manifest.addTextStream(21, (stream) => {
+          stream.useSegmentTemplate('text-21-%d.mp4', 10);
+        });
       });
 
       initialVariant = manifest.variants[0];
       sameAudioVariant = manifest.variants[1];
       sameVideoVariant = manifest.variants[2];
       initialTextStream = manifest.textStreams[0];
+      newTextStream = manifest.textStreams[1];
 
       // For these tests, we don't care about specific data appended.
       // Just return any old ArrayBuffer for any requested segment.
@@ -874,6 +893,17 @@ describe('StreamingEngine', () => {
       streamingEngine.switchTextStream(initialTextStream);
       await Util.fakeEventLoop(1);
       expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
+    });
+
+    it('will not reset caption parser when text streams change', async () => {
+      await streamingEngine.start();
+      playing = true;
+
+      mediaSourceEngine.clear.calls.reset();
+      streamingEngine.switchTextStream(newTextStream);
+      await Util.fakeEventLoop(1);
+      expect(mediaSourceEngine.clear).toHaveBeenCalled();
+      expect(mediaSourceEngine.resetCaptionParser).not.toHaveBeenCalled();
     });
   });
 
@@ -1088,6 +1118,8 @@ describe('StreamingEngine', () => {
         presentationTimeInSeconds -= 20;
         expect(presentationTimeInSeconds).toBeLessThan(20);
         streamingEngine.seeked();
+
+        expect(mediaSourceEngine.resetCaptionParser).toHaveBeenCalled();
 
         onTick.and.callFake(() => {
           // Verify that all buffers have been cleared.

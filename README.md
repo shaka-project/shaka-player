@@ -191,24 +191,30 @@ attributes.
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 
-## Important Links ##
+## Documentation & Important Links ##
 
- * [development roadmap](roadmap.md)
- * [hosted demo](http://shaka-player-demo.appspot.com) (sources in `demo/`)
- * [hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
- * [hosted builds on jsDelivr](https://www.jsdelivr.com/package/npm/shaka-player)
- * [announcement list](https://groups.google.com/forum/#!forum/shaka-player-users)
+ * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
+ * [API documentation](https://shaka-player-demo.appspot.com/docs/api/index.html)
+ * [Tutorials](https://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
+ * [Hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
+ * [Hosted builds on jsDelivr](https://www.jsdelivr.com/package/npm/shaka-player)
+ * [Development roadmap](roadmap.md)
+ * [Announcement list](https://groups.google.com/forum/#!forum/shaka-player-users)
      ([join](docs/announcement-list-join-group.png) for release and survey
       announcements)
- * [hosted API docs](http://shaka-player-demo.appspot.com/docs/api/index.html)
- * [tutorials](http://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
+
+
+## FAQ ##
+
+For general help and before filing any bugs, please read the
+[FAQ](docs/tutorials/faq.md).
 
 
 ## Contributing ##
 
 If you have improvements or fixes, we would love to have your contributions.
-Please read CONTRIBUTING.md for more information on the process we would like
-contributors to follow.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md)
+for more information on the process we would like contributors to follow.
 
 
 ## Framework Integrations ##
@@ -226,8 +232,3 @@ Shaka + Next.js integration:
 
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!
-
-## FAQ ##
-
-For general help and before filing any bugs, please read the
-[FAQ](docs/tutorials/faq.md).

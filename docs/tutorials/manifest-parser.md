@@ -21,8 +21,8 @@ MyManifestParser.prototype.configure = function(config) {
 };
 
 MyManifestParser.prototype.start = async function(uri, playerInterface) {
-  var type = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-  var request = {
+  const type = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+  const request = {
     uris: [uri],
     method: 'GET',
     retryParameters: this.config_.retryParameters
@@ -181,10 +181,10 @@ It handles merging new segments, and expanding the list of segments for live
 streams.
 
 ```js
-var references = refs.map(function(r) {
+const references = refs.map(function(r) {
   // Should return an array of possible URI choices; this is used for failover
   // in the event of network error.  This is a function to defer calculations.
-  var getUris = function() { return [r.uri]; };
+  const getUris = function() { return [r.uri]; };
 
   return new shaka.media.SegmentReference(
       r.start, r.end, getUris,
@@ -196,7 +196,7 @@ var references = refs.map(function(r) {
       /* appendWindowEnd */ Infinity);
 });
 
-var index = new shaka.media.SegmentIndex(references);
+const index = new shaka.media.SegmentIndex(references);
 ```
 
 To merge updates, simply create a new array of segments and call `merge`.  Any
@@ -242,7 +242,7 @@ MyManifestParser.prototype.loadManifest_ = function(data) {
   // |data| is the response data from load(); but in this example, we ignore it.
 
   // The arguments are only used for live.
-  var timeline = new shaka.media.PresentationTimeline(null, 0);
+  const timeline = new shaka.media.PresentationTimeline(null, 0);
   timeline.setDuration(3600);  // seconds
 
   return {
@@ -276,11 +276,11 @@ MyManifestParser.prototype.loadVariant_ = function(hasVideo, hasAudio) {
 };
 
 MyManifestParser.prototype.loadStream_ = function(type) {
-  var getUris = function() { return ['https://example.com/init']; };
-  var initSegmentReference = new shaka.media.InitSegmentReference(getUris,
+  const getUris = function() { return ['https://example.com/init']; };
+  const initSegmentReference = new shaka.media.InitSegmentReference(getUris,
       /* startByte= */ 0, /* endByte= */ null);
 
-  var index = new shaka.media.SegmentIndex([
+  const index = new shaka.media.SegmentIndex([
     // Times are in seconds, relative to the presentation
     this.loadReference_(0, 0, 10, initSegmentReference),
     this.loadReference_(1, 10, 20, initSegmentReference),
@@ -321,7 +321,7 @@ MyManifestParser.prototype.loadStream_ = function(type) {
 
 MyManifestParser.prototype.loadReference_ =
     function(position, start, end, initSegmentReference) {
-  var getUris = function() { return ['https://example.com/ref_' + position]; };
+  const getUris = function() { return ['https://example.com/ref_' + position]; };
   return new shaka.media.SegmentReference(
       start, end, getUris,
       /* startByte */ 0,

@@ -15,9 +15,9 @@ To start, we're going to use the code from {@tutorial basic-usage}, but use this
 manifest and license server:
 
 ```js
-var manifestUri =
+const manifestUri =
     'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd';
-var licenseServer = 'https://cwip-shaka-proxy.appspot.com/no_auth';
+const licenseServer = 'https://cwip-shaka-proxy.appspot.com/no_auth';
 ```
 
 We'll also need to configure the player to use this license server before it
@@ -31,9 +31,12 @@ loads the manifest:
   });
 
   // Try to load a manifest.
-  player.load(manifestUri).then(function() {
-    // The video should now be playing!
-  }).catch(onError);
+  try {
+    await player.load(manifestUri);
+    // The video should now be playing!  
+  } catch (e) {
+    onError(e);
+  }
 ```
 
 Since the endpoint is `/no_auth`, this should play without authentication.
@@ -44,7 +47,7 @@ Since the endpoint is `/no_auth`, this should play without authentication.
 First, we'll try authentication using headers.  Change the license server to:
 
 ```js
-var licenseServer = 'https://cwip-shaka-proxy.appspot.com/header_auth';
+const licenseServer = 'https://cwip-shaka-proxy.appspot.com/header_auth';
 ```
 
 This endpoint requires a specific header value to deliver a license.  If you
@@ -79,7 +82,7 @@ Next, we'll try authentication using URL parameters.  Change the license server
 to:
 
 ```js
-var licenseServer = 'https://cwip-shaka-proxy.appspot.com/param_auth';
+const licenseServer = 'https://cwip-shaka-proxy.appspot.com/param_auth';
 ```
 
 This endpoint requires a specific URL parameter to deliver a license.  If you
@@ -110,7 +113,7 @@ Finally, let's try using cookies for authentication.  Change the license server
 to:
 
 ```js
-var licenseServer = 'https://cwip-shaka-proxy.appspot.com/cookie_auth';
+const licenseServer = 'https://cwip-shaka-proxy.appspot.com/cookie_auth';
 ```
 
 This endpoint requires a specific cookie to deliver a license.  If you try to
@@ -161,7 +164,7 @@ pointing your browser to the server's [delete\_cookie][] page.  Then set your
 license server back to:
 
 ```js
-var licenseServer = 'https://cwip-shaka-proxy.appspot.com/no_auth';
+const licenseServer = 'https://cwip-shaka-proxy.appspot.com/no_auth';
 ```
 
 Since `allowCrossSiteCredentials` is `true` and that endpoint doesn't
@@ -194,9 +197,9 @@ of an asynchronous filter.
 To start, change the license server and add two additional variables:
 
 ```js
-var licenseServer = 'https://cwip-shaka-proxy.appspot.com/header_auth';
-var authTokenServer = 'https://cwip-shaka-proxy.appspot.com/get_auth_token';
-var authToken = null;
+const licenseServer = 'https://cwip-shaka-proxy.appspot.com/header_auth';
+const authTokenServer = 'https://cwip-shaka-proxy.appspot.com/get_auth_token';
+const authToken = null;
 ```
 
 Now change the request filter:
@@ -215,11 +218,11 @@ Now change the request filter:
 
     console.log('Need auth token.');
     // Start an asynchronous request, and return a Promise chain based on that.
-    var authRequest = {
+    const authRequest = {
       uris: [authTokenServer],
       method: 'POST',
     };
-    var requestType = shaka.net.NetworkingEngine.RequestType.APP;
+    const requestType = shaka.net.NetworkingEngine.RequestType.APP;
     return player.getNetworkingEngine().request(requestType, authRequest)
         .promise.then(function(response) {
           // This endpoint responds with the value we should use in the header.

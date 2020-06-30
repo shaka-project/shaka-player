@@ -42,7 +42,7 @@ Set up controls with HTML data attributes:
 ```js
 // myapp.js
 
-var manifestUri =
+const manifestUri =
     'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
 
 async function init() {
@@ -86,8 +86,9 @@ function onUIErrorEvent(errorEvent) {
   onPlayerError(event.detail);
 }
 
-function initFailed() {
-  // Handle the failure to load
+function initFailed(errorEvent) {
+  // Handle the failure to load; errorEvent.detail.reasonCode has a
+  // shaka.ui.FailReasonCode describing why.
   console.error('Unable to load the UI library!');
 }
 

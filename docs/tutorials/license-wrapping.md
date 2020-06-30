@@ -36,9 +36,9 @@ To start, we're going to use the code from {@tutorial basic-usage}, but use this
 manifest and license server:
 
 ```js
-var manifestUri =
+const manifestUri =
     'https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd';
-var licenseServer = 'https://cwip-shaka-proxy.appspot.com/wrapped_request';
+const licenseServer = 'https://cwip-shaka-proxy.appspot.com/wrapped_request';
 ```
 
 We'll also need to configure the player to use this license server before it
@@ -52,9 +52,12 @@ loads the manifest:
   });
 
   // Try to load a manifest.
-  player.load(manifestUri).then(function() {
+  try {
+    await player.load(manifestUri);
     // The video should now be playing!
-  }).catch(onError);
+  } catch(e) {
+    onError(e);
+  }
 ```
 
 This license server is expecting a wrapped request, so if we try to play now, we
@@ -64,13 +67,13 @@ license request, we must register a request filter:
 ```js
   player.getNetworkingEngine().registerRequestFilter(function(type, request) {
     // Alias some utilities provided by the library.
-    var StringUtils = shaka.util.StringUtils;
-    var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+    const StringUtils = shaka.util.StringUtils;
+    const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
     // Only manipulate license requests:
     if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
       // Create the wrapped request structure.
-      var wrapped = {};
+      const wrapped = {};
 
       // Encode the raw license request in base64.
       // The server we are using in this tutorial expects this field and this
@@ -89,7 +92,7 @@ license request, we must register a request filter:
       wrapped.pEqualsNP = false;  // maybe?
 
       // Encode the wrapped request as JSON.
-      var wrappedJson = JSON.stringify(wrapped);
+      const wrappedJson = JSON.stringify(wrapped);
       // Convert the JSON string back into an ArrayBuffer to replace the request
       // body.
       request.body = StringUtils.toUTF8(wrappedJson);
@@ -123,7 +126,7 @@ that looks like this:
 Change the license server to:
 
 ```js
-var licenseServer =
+const licenseServer =
     'https://cwip-shaka-proxy.appspot.com/wrapped_request_and_response';
 ```
 
@@ -135,18 +138,18 @@ using a request filter:
 ```js
   player.getNetworkingEngine().registerResponseFilter(function(type, response) {
     // Alias some utilities provided by the library.
-    var StringUtils = shaka.util.StringUtils;
-    var Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+    const StringUtils = shaka.util.StringUtils;
+    const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
     // Only manipulate license responses:
     if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
       // This is the wrapped license, which is a JSON string.
-      var wrappedString = StringUtils.fromUTF8(response.data);
+      const wrappedString = StringUtils.fromUTF8(response.data);
       // Parse the JSON string into an object.
-      var wrapped = JSON.parse(wrappedString);
+      const wrapped = JSON.parse(wrappedString);
 
       // This is a base64-encoded version of the raw license.
-      var rawLicenseBase64 = wrapped.rawLicenseBase64;
+      const rawLicenseBase64 = wrapped.rawLicenseBase64;
       // Decode that base64 string into a Uint8Array and replace the response
       // data.  The raw license will be fed to the Widevine CDM.
       response.data = Uint8ArrayUtils.fromBase64(rawLicenseBase64);

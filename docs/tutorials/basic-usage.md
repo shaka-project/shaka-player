@@ -32,7 +32,7 @@ Basic usage of Shaka Player is very easy:
 ```js
 // myapp.js
 
-var manifestUri =
+const manifestUri =
     'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd';
 
 function initApp() {
@@ -49,10 +49,10 @@ function initApp() {
   }
 }
 
-function initPlayer() {
+async function initPlayer() {
   // Create a Player instance.
-  var video = document.getElementById('video');
-  var player = new shaka.Player(video);
+  const video = document.getElementById('video');
+  const player = new shaka.Player(video);
 
   // Attach player to the window to make it easy to access in the JS console.
   window.player = player;
@@ -62,10 +62,14 @@ function initPlayer() {
 
   // Try to load a manifest.
   // This is an asynchronous process.
-  player.load(manifestUri).then(function() {
+  try {
+    await player.load(manifestUri);
     // This runs if the asynchronous load is successful.
     console.log('The video has now been loaded!');
-  }).catch(onError);  // onError is executed if the asynchronous load fails.
+  } catch (e) {
+    // onError is executed if the asynchronous load fails.
+    onError(e);
+  }
 }
 
 function onErrorEvent(event) {
