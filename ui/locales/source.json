@@ -11,6 +11,10 @@
     "description": "The text content of a label that shows how much time is left in the current ad.",
     "message": "Ad: [AD_TIME:0:05/0:10]"
   },
+  "AIRPLAY": {
+    "description": "Label for a button used to open the native AirPlay dialog in the browser and select a destination to AirPlay to.",
+    "message": "Cast..."
+  },
   "AUTO_QUALITY": {
     "description": "Label for a button used to allow the video player to select the resolution/quality of the video automatically.",
     "meaning": "Automatic",

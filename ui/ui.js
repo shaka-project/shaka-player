@@ -131,6 +131,11 @@ shaka.ui.Overlay = class {
 
     goog.asserts.assert(this.player_ != null, 'Should have a player!');
 
+    // Check AirPlay support
+    if (window.WebKitPlaybackTargetAvailabilityEvent) {
+      this.config_.overflowMenuButtons.push('airplay');
+    }
+
     this.controls_.configure(this.config_);
 
     this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
