@@ -119,6 +119,18 @@ buffering settings) while some will not have any effect until the next call to
 `load()` (such as DRM settings, manifest settings, and language settings).
 
 
+#### Low latency streaming
+
+To enable low latency live streaming:
+1. Set `.streaming.inaccurateManifestTolerance` to 0.
+2. Set `.streaming.rebufferingGoal` to the length of 1 partial segment target
+duration (for example, 0.6 second).
+```js
+player.configure('streaming.inaccurateManifestTolerance', 0);
+player.configure('streaming.rebufferingGoal', 0.6);
+```
+
+
 #### Detailed API Docs
 
 For more detail on individual configuration options, please see the API docs for
