@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -26,10 +27,12 @@ describe('Mp4BoxParsers', () => {
     let tkhdParsed = false;
     let mdhdParsed = false;
     let defaultSampleDuration;
+    let defaultSampleSize;
     let trackId;
     let timescale;
 
     const expectedDefaultSampleDuration = 512;
+    const expectedDefaultSampleSize = 0;
     const expectedTrackId = 1;
     const expectedTimescale = 12288;
 
@@ -42,6 +45,7 @@ describe('Mp4BoxParsers', () => {
               box.reader);
 
           defaultSampleDuration = parsedTREXBox.defaultSampleDuration;
+          defaultSampleSize = parsedTREXBox.defaultSampleSize;
           trexParsed = true;
         })
         .box('trak', Mp4Parser.children)
@@ -70,6 +74,7 @@ describe('Mp4BoxParsers', () => {
     expect(tkhdParsed).toBe(true);
     expect(mdhdParsed).toBe(true);
     expect(defaultSampleDuration).toBe(expectedDefaultSampleDuration);
+    expect(defaultSampleSize).toBe(expectedDefaultSampleSize);
     expect(trackId).toBe(expectedTrackId);
     expect(timescale).toBe(expectedTimescale);
   });
