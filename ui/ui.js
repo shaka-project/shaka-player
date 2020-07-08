@@ -131,11 +131,6 @@ shaka.ui.Overlay = class {
 
     goog.asserts.assert(this.player_ != null, 'Should have a player!');
 
-    // Check AirPlay support
-    if (window.WebKitPlaybackTargetAvailabilityEvent) {
-      this.config_.overflowMenuButtons.push('airplay');
-    }
-
     this.controls_.configure(this.config_);
 
     this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
@@ -207,6 +202,11 @@ shaka.ui.Overlay = class {
       enableFullscreenOnRotation: true,
       forceLandscapeOnFullscreen: true,
     };
+
+    // Check AirPlay support
+    if (window.WebKitPlaybackTargetAvailabilityEvent) {
+      config.overflowMenuButtons.push('airplay');
+    }
 
     // On mobile, by default, hide the volume slide and the small play/pause
     // button and show the big play/pause button in the center.
