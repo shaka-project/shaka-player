@@ -14,3 +14,10 @@
 
 /** @type {boolean} */
 NetworkInformation.prototype.saveData;
+
+/**
+ * @param {string} type
+ * @param {Function} listener
+ */
+NetworkInformation.prototype.addEventListener =
+    function(type, listener) {};

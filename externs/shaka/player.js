@@ -815,6 +815,7 @@ shaka.extern.StreamingConfiguration;
 /**
  * @typedef {{
  *   enabled: boolean,
+ *   useNetworkInformation: boolean,
  *   defaultBandwidthEstimate: number,
  *   restrictions: shaka.extern.Restrictions,
  *   switchInterval: number,
@@ -824,6 +825,9 @@ shaka.extern.StreamingConfiguration;
  *
  * @property {boolean} enabled
  *   If true, enable adaptation by the current AbrManager.  Defaults to true.
+ * @property {boolean} useNetworkInformation
+ *   If true, use Network Information API in the current AbrManager.
+ *   Defaults to true.
  * @property {number} defaultBandwidthEstimate
  *   The default bandwidth estimate to use if there is not enough data, in
  *   bit/sec.

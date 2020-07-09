@@ -479,6 +479,10 @@
     "description": "An error message that is displayed if the user presents an invalid name for a custom asset.",
     "message": "Must be a unique name."
   },
+  "DEMO_NETWORK_INFORMATION": {
+    "description": "The name of a configuration value.",
+    "message": "Use Network Information API."
+  },
   "DEMO_NIMBLE_STREAMER": {
     "description": "Text that describes an asset that comes from the Nimble Streamer asset library.",
     "message": "[PROPER_NAME:Nimble Streamer]"

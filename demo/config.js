@@ -222,6 +222,8 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.AbrConfiguration');
     this.addSection_(MessageIds.ADAPTATION_SECTION_HEADER, docLink)
         .addBoolInput_(MessageIds.ENABLED, 'abr.enabled')
+        .addBoolInput_(MessageIds.NETWORK_INFORMATION,
+            'abr.useNetworkInformation')
         .addNumberInput_(MessageIds.BANDWIDTH_ESTIMATE,
             'abr.defaultBandwidthEstimate')
         .addNumberInput_(MessageIds.BANDWIDTH_DOWNGRADE,
