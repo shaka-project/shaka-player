@@ -94,11 +94,30 @@ UI layout can be reconfigured at any point after it's been created.
 Please note that custom layouts might need CSS adjustments to look good.
 
 #### Changing seek bar progress colors
-<!-- TODO: Is there a better way to do this? (The actual thing, not the tutorial) -->
 The seek bar consists of three segments: past (already played part of the presentation),
-future-buffered and future-unbuffered. The segments colors are set when the seek bar is created.
-To customize the colors, change the values of `shaka.ui.Constants.SEEK_BAR_BASE_COLOR` ,
-`shaka.ui.Constants.SEEK_BAR_PLAYED_COLOR`, and `shaka.ui.Constants.SEEK_BAR_BUFFERED_COLOR` in ui/controls.js
+future-buffered and future-unbuffered.
+To customize the colors, add your values to the config object under `seekBarColors`:
+ ```js
+const config = {
+  'seekBarColors': {
+    base: 'rgba(255, 255, 255, 0.3)',
+    buffered: 'rgba(255, 255, 255, 0.54)',
+    played: 'rgb(255, 255, 255)',
+  }
+}
+ui.configure(config);
+```
+
+If you're using our ad API, you can also specify the color for the ad break markers on
+the timeline:
+ ```js
+const config = {
+  'seekBarColors': {
+    adBreaks: 'rgb(255, 204, 0)',
+  }
+}
+ui.configure(config);
+```
 
 
 #### Creating custom elements and adding them to the UI
