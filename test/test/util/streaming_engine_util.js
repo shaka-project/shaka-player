@@ -20,7 +20,7 @@ shaka.test.StreamingEngineUtil = class {
    * @param {function(string, number): BufferSource} getInitSegment Init segment
    *   generator: takes a content type and a Period number; returns an init
    *   segment.
-   * @param {function(string, number, number): BufferSource} getSegment Media
+   * @param {function(string, number, number): ?BufferSource} getSegment Media
    *   segment generator: takes a content type, a Period number, and a segment
    *   position; returns a media segment.
    * @param {{audio: number, video: number, text: number}} delays Artificial
@@ -53,6 +53,13 @@ shaka.test.StreamingEngineUtil = class {
         expect(position).toBeGreaterThan(-1);
         expect(Math.floor(position)).toBe(position);
         buffer = getSegment(contentType, periodIndex, position);
+        if (buffer == null) {
+          return shaka.util.AbortableOperation.failed(new shaka.util.Error(
+              shaka.util.Error.Severity.CRITICAL,
+              shaka.util.Error.Category.NETWORK,
+              shaka.util.Error.Code.BAD_HTTP_STATUS,
+              '', 404));
+        }
       }
 
       const response = {uri: request.uris[0], data: buffer, headers: {}};
