@@ -64,7 +64,11 @@ describe('Player', () => {
       wit(testName, async () => {
         const idFor = shakaAssets.identifierForKeySystem;
         if (!asset.isClear() &&
-            !asset.drm.some((keySystem) => support.drm[idFor(keySystem)])) {
+            !asset.drm.some((keySystem) => {
+              // Demo assets use an enum here, which we look up in idFor.
+              // Command-line assets use a direct key system ID.
+              return support.drm[idFor(keySystem)] || support.drm[keySystem];
+            })) {
           pending('None of the required key systems are supported.');
         }
 
