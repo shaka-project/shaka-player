@@ -20,6 +20,7 @@ Candidate features for future release cycles
 v3.1 - 2020 Q3
  - Low-latency live (LL-HLS, LL-DASH)
  - Own CEA parser, use mux.js only for TS
+ - PlayReady support in HLS
 
 =====
 
