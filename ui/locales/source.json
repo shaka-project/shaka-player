@@ -13,7 +13,7 @@
   },
   "AIRPLAY": {
     "description": "Label for a button used to open the native AirPlay dialog in the browser and select a destination to AirPlay to.",
-    "message": "Cast..."
+    "message": "AirPlay"
   },
   "AUTO_QUALITY": {
     "description": "Label for a button used to allow the video player to select the resolution/quality of the video automatically.",
