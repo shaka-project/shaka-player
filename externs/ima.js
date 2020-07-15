@@ -290,6 +290,12 @@ google.ima.dai.api.StreamManager = class {
   /** @param {Object} metadata */
   onTimedMetadata(metadata) {}
 
+  /**
+   * @param {?Element} clickElement the element used as the ad click through.
+   */
+  setClickElement(clickElement) {}
+
+
   /** @param {number} streamTime */
   previousCuePointForStreamTime(streamTime) {}
 
@@ -311,8 +317,14 @@ google.ima.dai.api.StreamManager = class {
   /** @param {number} contentTime */
   streamTimeForContentTime(contentTime) {}
 
-  /** @override */
-  addEventListener() {}
+  /**
+   * @param {string|Array} type
+   * @param {Function|Object} handler
+   * @param {boolean|!AddEventListenerOptions=} capture
+   * @param {Object=} handlerScope
+   * @override
+   */
+  addEventListener(type, handler, capture, handlerScope) {}
 
   /** @override */
   removeEventListener() {}
@@ -387,11 +399,15 @@ google.ima.dai.api.AdProgressData.prototype.duration;
 
 
 /** @type {number} */
-google.ima.dai.api.AdProgressData.prototype.currentTime;
+google.ima.dai.api.AdProgressData.prototype.url;
 
 
 /** @type {number} */
-google.ima.dai.api.AdProgressData.prototype.url;
+google.ima.dai.api.AdProgressData.prototype.totalAds;
+
+
+/** @type {number} */
+google.ima.dai.api.AdProgressData.prototype.adPosition;
 
 
 /** @const */
@@ -408,6 +424,18 @@ google.ima.dai.api.StreamData.prototype.url;
 
 /** @type {!Array.<!google.ima.dai.api.CuePoint>} */
 google.ima.dai.api.StreamData.prototype.cuepoints;
+
+
+/** @type {string} */
+google.ima.dai.api.StreamData.prototype.errorMessage;
+
+
+/** @type {string} */
+google.ima.dai.api.StreamData.prototype.streamId;
+
+
+/** @type {?Array<{url: string, language: string, language_name: string}>} */
+google.ima.dai.api.StreamData.prototype.subtitles;
 
 
 /** @const */
@@ -438,6 +466,10 @@ google.ima.dai.api.StreamRequest.prototype.authToken;
 
 /** @type {string} */
 google.ima.dai.api.StreamRequest.prototype.streamActivityMonitorId;
+
+
+/** @type {?string} */
+google.ima.dai.api.StreamRequest.prototype.format;
 
 
 /** @const */
