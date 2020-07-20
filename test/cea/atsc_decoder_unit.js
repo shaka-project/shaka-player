@@ -118,7 +118,7 @@ describe('AtscDecoder', () => {
         startTime: startTimeCaption1,
         endTime: startTimeCaption2,
         stream: 'CC2',
-        text: '<i><c.bg_yellow>test</i> </c>',
+        text: '<i></i><i><c.bg_yellow>test</c></i><c.bg_yellow> </c>',
       }];
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
