@@ -183,7 +183,7 @@ shaka.extern.IUIElement = class {
     this.localization;
 
     /**
-     * @protected {shaka.Player}
+     * @protected {shaka.Player|shaka.extern.Player}
      * @exportDoc
      */
     this.player;
@@ -215,4 +215,70 @@ shaka.extern.IUIElement.Factory = class {
    * @return {!shaka.extern.IUIElement}
    */
   create(rootElement, controls) {}
+};
+
+/**
+ * @struct
+ * @implements {shaka.util.IDestroyable}
+ * @extends {shaka.util.FakeEventTarget}
+ *
+ */
+shaka.extern.Player = class {
+/**
+ * Get the range of time (in seconds) that seeking is allowed. If the player has
+ * not loaded content, this will return a range from 0 to 0.
+ * @param {boolean=} real
+ * @return {{start: number, end: number}}
+ *
+ */
+  seekRange(real) {}
+
+  /**
+   * Get if the player is playing live content. If the player has not loaded
+   * content, this will return |false|.
+   *
+   * @return {boolean}
+   *
+   */
+  isLive() {}
+  /**
+ * Check if the player is currently in a buffering state (has too little content
+ * to play smoothly). If the player has not loaded content, this will return
+ * |false|.
+ *
+ * @return {boolean}
+ *
+ */
+isBuffering() {}
+/**
+ * Cancel trick-play. If the player has not loaded content or is still loading
+ * content this will be a no-op.
+ *
+ *
+ */
+  cancelTrickPlay() {}
+  /**
+ * After destruction, a Player object cannot be used again.
+ *
+ * @override
+ *
+ */
+  destroy() {}
+
+/**
+ * Tell the player to load the content at |assetUri| and start playback at
+ * |startTime|. Before calling |load|, a call to |attach| must have succeeded.
+ *
+ * Calls to |load| will interrupt any in-progress calls to |load| but cannot
+ * interrupt calls to |attach|, |detach|, or |unload|.
+ *
+ * @param {string} assetUri
+ * @param {?number=} startTime
+ *    When |startTime| is |null| or |undefined|, playback will start at the
+ *    default start time (startTime=0 for VOD and startTime=liveEdge for LIVE).
+ * @param {string|shaka.extern.ManifestParser.Factory=} mimeType
+ * @return {!Promise}
+ *
+ */
+  load(assetUri, startTime, mimeType) {}
 };

@@ -57,7 +57,7 @@ shaka.ui.Element = class {
     this.localization = this.controls.getLocalization();
 
     /**
-     * @protected {shaka.Player}
+     * @protected {shaka.Player|shaka.extern.Player}
      * @exportInterface
      */
     this.player = this.controls.getPlayer();

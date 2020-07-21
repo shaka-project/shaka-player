@@ -67,7 +67,7 @@ shaka.ui.Controls = function(player, videoContainer, video, config, castProxy) {
   /** @private {HTMLMediaElement} */
   this.localVideo_ = video;
 
-  /** @private {shaka.Player} */
+  /** @private {shaka.extern.Player} */
   this.player_ = this.castProxy_['getPlayer']();
 
   /** @private {shaka.Player} */
@@ -542,7 +542,7 @@ shaka.ui.Controls.prototype.getLocalVideo = function() {
 
 
 /**
- * @return {shaka.Player}
+ * @return {shaka.extern.Player}
  * @export
  */
 shaka.ui.Controls.prototype.getPlayer = function() {

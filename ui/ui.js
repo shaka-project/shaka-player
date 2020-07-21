@@ -152,7 +152,7 @@ shaka.ui.Overlay.prototype.configure = function(config, value) {
 
 
 /**
- * @return {shaka.Player}
+ * @return {shaka.Player|shaka.extern.Player}
  * @export
  * @deprecated Use getControls().getPlayer() instead.
  */
