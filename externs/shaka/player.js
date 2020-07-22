@@ -768,15 +768,18 @@ shaka.extern.ManifestConfiguration;
  *   jump in the stream skipping more content. This is helpful for lower
  *   bandwidth scenarios. Defaults to 5 if not provided.
  * @property {boolean} stallEnabled
- *   When set to <code>true</code>, the stall detector logic will run, skipping
- *   forward <code>stallSkip</code> seconds whenever the playhead stops moving
- *   for <code>stallThreshold</code> seconds.
+ *   When set to <code>true</code>, the stall detector logic will run.  If the
+ *   playhead stops moving for <code>stallThreshold</code> seconds, the player
+ *   will either seek or pause/play to resolve the stall, depending on the value
+ *   of <code>stallSkip</code>.
  * @property {number} stallThreshold
  *   The maximum number of seconds that may elapse without the playhead moving
  *   (when playback is expected) before it will be labeled as a stall.
  * @property {number} stallSkip
  *   The number of seconds that the player will skip forward when a stall has
- *   been detected.
+ *   been detected.  If 0, the player will pause and immediately play instead of
+ *   seeking.  A value of 0 is recommended and provided as default on TV
+ *   platforms (WebOS, Tizen, Chromecast, etc).
  * @property {boolean} useNativeHlsOnSafari
  *   Desktop Safari has both MediaSource and their native HLS implementation.
  *   Depending on the application's needs, it may prefer one over the other.
