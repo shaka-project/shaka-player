@@ -164,13 +164,18 @@ Microsoft Documentation: https://docs.microsoft.com/en-us/playready/overview/sec
 - `3000`
 - `2000`
 
-`com.microsoft.playready` key system ignores given robustness and stays at a `2000` decryption level.
+`com.microsoft.playready` key system ignores given robustness and stays at a
+`2000` decryption level.
 
-If you specify a robustness into the configuration, Shaka will try to load and  start the key session with the
-`com.microsoft.playready.recommendation` key system. That key system correctly implements the EME specification
-and will use the given decryption robustness.
+If you specify a robustness into the configuration, Shaka will try to load and
+start the key session with the `com.microsoft.playready.recommendation` key
+system. That key system correctly implements the EME specification and will use
+the given decryption robustness.
 
-NB: Audio Hardware DRM is not supported
+It's up to you to detect and set the robustness if the playing platform is able
+to handle it.
+
+NB: Audio Hardware DRM is not supported (PlayReady limitation)
 
 ##### Other key-systems
 
