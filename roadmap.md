@@ -16,6 +16,7 @@ Candidate features for future release cycles
  - Background fetch for offline storage
  - PlayReady "recommendation" key system support
  - Smaller, more modular binary
+ - Official TypeScript defs, generated from source
 
 v3.1 - 2020 Q3
  - Low-latency live (LL-HLS, LL-DASH)
