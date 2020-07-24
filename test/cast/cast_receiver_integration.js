@@ -189,6 +189,11 @@ describe('CastReceiver', function() {
   drmIt('sends reasonably-sized updates', checkAndRunWithDrm((done) => {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
+    fakeInitState.player.configure['drm'] = {
+      'servers': {
+        'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+      },
+    };
 
     eventManager.listenOnce(video, 'loadeddata', function() {
       // Wait for an update message.
@@ -213,6 +218,11 @@ describe('CastReceiver', function() {
   drmIt('has a reasonable average message size', checkAndRunWithDrm((done) => {
     // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
     fakeInitState.manifest = 'test:sintel-enc';
+    fakeInitState.player.configure['drm'] = {
+      'servers': {
+        'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+      },
+    };
 
     eventManager.listenOnce(video, 'loadeddata', function() {
       // Collect 50 update messages, and average their length.
