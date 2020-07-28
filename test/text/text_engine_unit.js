@@ -58,18 +58,11 @@ describe('TextEngine', () => {
       expect(TextEngine.isTypeSupported(dummyMimeType)).toBe(false);
     });
 
-    it('reports support when it\'s closed captions and muxjs is available',
+    it('reports support when it\'s closed captions',
         () => {
           const closedCaptionsType =
            shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
-          const originalMuxjs = window.muxjs;
           expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(true);
-          try {
-            window['muxjs'] = null;
-            expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(false);
-          } finally {
-            window['muxjs'] = originalMuxjs;
-          }
         });
   });
 
