@@ -11,12 +11,10 @@ describe('Cea608Memory', () => {
   /** @type {!string} */
   const stream = 'CC1';
 
-  const createCue = (startTime, endTime, text) => {
+  const createClosedCaption = (startTime, endTime, text) => {
     return {
-      startTime,
-      endTime,
+      cue: new shaka.text.Cue(startTime, endTime, text),
       stream,
-      text,
     };
   };
 
@@ -35,8 +33,8 @@ describe('Cea608Memory', () => {
           c.charCodeAt(0));
     }
     memory.forceEmit(t1, t2);
-    const cues = memory.decoder_.getCues();
-    const expectedCues = [createCue(t1, t2, text)];
+    const cues = memory.decoder_.getParsedClosedCaptions();
+    const expectedCues = [createClosedCaption(t1, t2, text)];
     expect(cues).toEqual(expectedCues);
   });
 
@@ -72,8 +70,8 @@ describe('Cea608Memory', () => {
       }
     }
     memory.forceEmit(t1, t2);
-    const expectedCues = [createCue(t1, t2, expectedText)];
-    const cues = memory.decoder_.getCues();
+    const expectedCues = [createClosedCaption(t1, t2, expectedText)];
+    const cues = memory.decoder_.getParsedClosedCaptions();
     expect(cues).toEqual(expectedCues);
   });
 
@@ -90,8 +88,8 @@ describe('Cea608Memory', () => {
 
     const expectedText =
         '<u><i><c.red><i><c.bg_green><u></u></c></i></c></i></u>';
-    const cues = memory.decoder_.getCues();
-    const expectedCues = [createCue(t1, t2, expectedText)];
+    const cues = memory.decoder_.getParsedClosedCaptions();
+    const expectedCues = [createClosedCaption(t1, t2, expectedText)];
     expect(cues).toEqual(expectedCues);
   });
 
@@ -106,8 +104,8 @@ describe('Cea608Memory', () => {
     }
     memory.eraseChar();
     memory.forceEmit(t1, t2);
-    const expectedCues = [createCue(t1, t2, expectedText)];
-    const cues = memory.decoder_.getCues();
+    const expectedCues = [createClosedCaption(t1, t2, expectedText)];
+    const cues = memory.decoder_.getParsedClosedCaptions();
     expect(cues).toEqual(expectedCues);
   });
 
@@ -121,22 +119,22 @@ describe('Cea608Memory', () => {
           c.charCodeAt(0));
       memory.setRow(memory.getRow() + 1); // increment row
     }
-    const expectedCues = [createCue(t1, t2, expectedText)];
+    const expectedCues = [createClosedCaption(t1, t2, expectedText)];
     memory.forceEmit(t1, t2);
 
     // Expect the correct cue to be emitted.
-    const cues = memory.decoder_.getCues();
+    const cues = memory.decoder_.getParsedClosedCaptions();
     expect(cues).toEqual(expectedCues);
 
     // Erase the memory and currently buffered cues.
     memory.eraseBuffer();
-    memory.decoder_.clearCues();
+    memory.decoder_.clearParsedClosedCaptions();
 
     // Force out the new memory.
     memory.forceEmit(t1, t2);
 
     // Expect the forced out memory to be blank. We just cleared it.
-    expect(memory.decoder_.getCues()).toEqual([]);
+    expect(memory.decoder_.getParsedClosedCaptions()).toEqual([]);
   });
 
   it('erases the entire buffer', () => {
@@ -150,11 +148,11 @@ describe('Cea608Memory', () => {
           c.charCodeAt(0));
       memory.setRow(memory.getRow() + 1); // increment row
     }
-    const expectedCues1 = [createCue(t1, t2, expectedText1)];
+    const expectedCues1 = [createClosedCaption(t1, t2, expectedText1)];
     memory.forceEmit(t1, t2);
 
     // Expect the correct cue to be emitted.
-    const cues = memory.decoder_.getCues();
+    const cues = memory.decoder_.getParsedClosedCaptions();
     expect(cues).toEqual(expectedCues1);
 
     // Move + clear the first 2 rows, and clear currently buffered cues.
@@ -163,12 +161,12 @@ describe('Cea608Memory', () => {
     const rowsToMove = 2;
     memory.moveRows(dstRowIdx, srcRowIdx, rowsToMove);
     memory.resetRows(srcRowIdx, rowsToMove - 1);
-    memory.decoder_.clearCues();
+    memory.decoder_.clearParsedClosedCaptions();
 
     // Force out the new memory.
     memory.forceEmit(t1, t2);
 
-    const expectedCues2 = [createCue(t1, t2, expectedText2)];
-    expect(memory.decoder_.getCues()).toEqual(expectedCues2);
+    const expectedCues2 = [createClosedCaption(t1, t2, expectedText2)];
+    expect(memory.decoder_.getParsedClosedCaptions()).toEqual(expectedCues2);
   });
 });

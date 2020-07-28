@@ -13,6 +13,13 @@ describe('AtscDecoder', () => {
   /** @type {!shaka.cea.AtscDecoder} */
   const decoder = new shaka.cea.AtscDecoder();
 
+  const createClosedCaption = (stream, startTime, endTime, text) => {
+    return {
+      cue: new shaka.text.Cue(startTime, endTime, text),
+      stream,
+    };
+  };
+
   describe('decodes cea608', () => {
     const edmCodeByte2 = 0x2c; // Erase displayed memory byte 2.
 
@@ -49,13 +56,12 @@ describe('AtscDecoder', () => {
 
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
+      const expectedText = '<u><c.green>green text</c></u>';
 
-      const expectedCues = [{
-        startTime: startTimeCaption1,
-        endTime: startTimeCaption2,
-        stream: 'CC3',
-        text: '<u><c.green>green text</c></u>',
-      }];
+      const expectedCues = [
+        createClosedCaption(
+            'CC3', startTimeCaption1, startTimeCaption2, expectedText),
+      ];
 
       decoder.extract(greenTextCC3Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
@@ -81,13 +87,12 @@ describe('AtscDecoder', () => {
 
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
+      const expectedText = '-- <u><c.red>red</c></u> --';
 
-      const expectedCues = [{
-        startTime: startTimeCaption1,
-        endTime: startTimeCaption2,
-        stream: 'CC2',
-        text: '-- <u><c.red>red</c></u> --',
-      }];
+      const expectedCues = [
+        createClosedCaption(
+            'CC2', startTimeCaption1, startTimeCaption2, expectedText),
+      ];
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
@@ -113,13 +118,13 @@ describe('AtscDecoder', () => {
 
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
+      const expectedText =
+        '<i></i><i><c.bg_yellow>test</c></i><c.bg_yellow> </c>';
 
-      const expectedCues = [{
-        startTime: startTimeCaption1,
-        endTime: startTimeCaption2,
-        stream: 'CC2',
-        text: '<i></i><i><c.bg_yellow>test</c></i><c.bg_yellow> </c>',
-      }];
+      const expectedCues = [
+        createClosedCaption(
+            'CC2', startTimeCaption1, startTimeCaption2, expectedText),
+      ];
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
@@ -144,13 +149,11 @@ describe('AtscDecoder', () => {
 
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
-
-      const expectedCues = [{
-        startTime: startTimeCaption1,
-        endTime: startTimeCaption2,
-        stream: 'CC2',
-        text: '♪üå',
-      }];
+      const expectedText = '♪üå';
+      const expectedCues = [
+        createClosedCaption(
+            'CC2', startTimeCaption1, startTimeCaption2, expectedText),
+      ];
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
@@ -170,13 +173,12 @@ describe('AtscDecoder', () => {
 
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
+      const expectedText = 'test';
 
-      const expectedCues = [{
-        startTime: startTimeCaption1,
-        endTime: startTimeCaption2,
-        stream: 'CC1',
-        text: 'test',
-      }];
+      const expectedCues = [
+        createClosedCaption(
+            'CC1', startTimeCaption1, startTimeCaption2, expectedText),
+      ];
 
       decoder.extract(paintonCaptionCC1Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
@@ -188,6 +190,8 @@ describe('AtscDecoder', () => {
     it('rollup captions (2 lines) on CC1', () => {
       const controlCount1 = 0x03;
       const controlCount2 = 0x02;
+      const stream = 'CC1';
+
       // Carriage return on CC1
       const carriageReturnControlCode = new Uint8Array([0x94, 0xad]);
       const packets = [
@@ -227,30 +231,12 @@ describe('AtscDecoder', () => {
       }
       decoder.extract(eraseDisplayedMemory, 6);
 
-      const expectedCues = [{
-        startTime: 1,
-        endTime: 2,
-        stream: 'CC1',
-        text: '1.',
-      },
-      {
-        startTime: 2,
-        endTime: 3,
-        stream: 'CC1',
-        text: '1.\n2.',
-      },
-      {
-        startTime: 3,
-        endTime: 4,
-        stream: 'CC1',
-        text: '2.\n3.',
-      },
-      {
-        startTime: 4,
-        endTime: 5,
-        stream: 'CC1',
-        text: '3.\n4.',
-      }];
+      const expectedCues = [
+        createClosedCaption(stream, 1, 2, '1.'),
+        createClosedCaption(stream, 2, 3, '1.\n2.'),
+        createClosedCaption(stream, 3, 4, '2.\n3.'),
+        createClosedCaption(stream, 4, 5, '3.\n4.'),
+      ];
 
       const cues = decoder.decode();
 
@@ -260,6 +246,8 @@ describe('AtscDecoder', () => {
     it('PAC shifts entire 2-line rollup window to a new row on CC1', () => {
       const controlCount1 = 0x03;
       const controlCount2 = 0x02;
+      const stream = 'CC1';
+
       // Carriage return on CC1
       const carriageReturnControlCode = new Uint8Array([0x94, 0xad]);
       const packets = [
@@ -287,18 +275,10 @@ describe('AtscDecoder', () => {
       }
       decoder.extract(eraseDisplayedMemory, 3);
 
-      const expectedCues = [{
-        startTime: 1,
-        endTime: 2,
-        stream: 'CC1',
-        text: '1.',
-      },
-      {
-        startTime: 2,
-        endTime: 3,
-        stream: 'CC1',
-        text: '1.\n2.',
-      }];
+      const expectedCues = [
+        createClosedCaption(stream, 1, 2, '1.'),
+        createClosedCaption(stream, 2, 3, '1.\n2.'),
+      ];
 
       const cues = decoder.decode();
 
