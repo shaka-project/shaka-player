@@ -57,6 +57,8 @@ const ShakaDemoAssetInfo = class {
     this.features = [shakaAssets.Feature.VOD];
     /** @type {!Map.<string, string>} */
     this.licenseServers = new Map();
+    /** @type {!Map.<string, boolean>} */
+    this.persistentStates = new Map();
     /** @type {!Map.<string, string>} */
     this.licenseRequestHeaders = new Map();
     /** @type {?shaka.extern.RequestFilter} */
@@ -256,6 +258,17 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   *
+   * @param {string} keySystem
+   * @param {boolean} persistentStateRequired
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setPersistentStateRequired(keySystem, persistentStateRequired) {
+    this.persistentStates.set(keySystem, persistentStateRequired);
+    return this;
+  }
+
+  /**
    * @param {shakaAssets.ExtraText} extraText
    * @return {!ShakaDemoAssetInfo}
    */
@@ -357,13 +370,31 @@ const ShakaDemoAssetInfo = class {
    */
   getConfiguration() {
     const config = /** @type {shaka.extern.PlayerConfiguration} */(
-      {drm: {}, manifest: {dash: {}}});
+      {drm: {advanced: {}}, manifest: {dash: {}}});
     if (this.licenseServers.size) {
       config.drm.servers = {};
       this.licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
       });
     }
+
+    if (this.persistentStates.size) {
+      this.persistentStates.forEach((value, key) => {
+        if (!config.drm.advanced[key]) {
+          config.drm.advanced[key] = {
+            distinctiveIdentifierRequired: false,
+            persistentStateRequired: false,
+            videoRobustness: '',
+            audioRobustness: '',
+            serverCertificate: new Uint8Array(0),
+            individualizationServer: '',
+          };
+        }
+
+        config.drm.advanced[key].persistentStateRequired = value;
+      });
+    }
+
     if (this.clearKeys.size) {
       config.drm.clearKeys = {};
       this.clearKeys.forEach((value, key) => {
