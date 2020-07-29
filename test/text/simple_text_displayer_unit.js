@@ -93,8 +93,7 @@ describe('SimpleTextDisplayer', function() {
       shakaCue.nestedCues = [nestedCue1, nestedCue2];
       verifyHelper(
           [
-            {start: 10, end: 20, text: 'Test2'},
-            {start: 10, end: 20, text: 'Test1'},
+            {start: 10, end: 20, text: 'Test1 Test2'},
           ],
           [shakaCue]);
     });

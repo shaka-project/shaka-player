@@ -200,16 +200,20 @@ shaka.ui.TextDisplayer = class {
    *
    * @param {Element} container
    * @param {!shaka.extern.Cue} cue
+   * @param {boolean} isNested
    * @return {!Element} the created captions container
    * @private
    */
-  displayNestedCue_(container, cue) {
+  displayLeafCue_(container, cue, isNested) {
     const captions = shaka.util.Dom.createHTMLElement('span');
+    if (isNested) {
+      captions.classList.add('shaka-nested-cue');
+    }
 
     if (cue.spacer) {
       captions.style.display = 'block';
     } else {
-      this.setCaptionStyles_(captions, cue, /* isNested= */ true);
+      this.setCaptionStyles_(captions, cue, /* isLeaf= */ true);
     }
 
     container.appendChild(captions);
@@ -228,33 +232,35 @@ shaka.ui.TextDisplayer = class {
     if (cue.nestedCues.length) {
       const nestedCuesContainer = shaka.util.Dom.createHTMLElement('p');
       nestedCuesContainer.style.width = '100%';
-      this.setCaptionStyles_(nestedCuesContainer, cue, /* isNested= */ false);
+      this.setCaptionStyles_(nestedCuesContainer, cue, /* isLeaf= */ false);
 
       for (let i = 0; i < cue.nestedCues.length; i++) {
-        this.displayNestedCue_(nestedCuesContainer, cue.nestedCues[i]);
+        this.displayLeafCue_(
+            nestedCuesContainer, cue.nestedCues[i], /* isNested= */ true);
       }
 
       container.appendChild(nestedCuesContainer);
       this.currentCuesMap_.set(cue, nestedCuesContainer);
     } else {
-      this.currentCuesMap_.set(cue, this.displayNestedCue_(container, cue));
+      this.currentCuesMap_.set(cue,
+          this.displayLeafCue_(container, cue, /* isNested= */ false));
     }
   }
 
   /**
    * @param {!HTMLElement} captions
    * @param {!shaka.extern.Cue} cue
-   * @param {boolean} isNested
+   * @param {boolean} isLeaf
    * @private
    */
-  setCaptionStyles_(captions, cue, isNested) {
+  setCaptionStyles_(captions, cue, isLeaf) {
     const Cue = shaka.text.Cue;
     const captionsStyle = captions.style;
 
     // Set white-space to 'pre-line' to enable showing line breaks in the text.
     captionsStyle.whiteSpace = 'pre-line';
     captions.textContent = cue.payload;
-    if (isNested) {
+    if (isLeaf) {
       captionsStyle.backgroundColor = cue.backgroundColor;
     }
     captionsStyle.color = cue.color;
@@ -287,13 +293,19 @@ shaka.ui.TextDisplayer = class {
     } else {
       captionsStyle.justifyContent = 'flex-end';
     }
+
     if (cue.nestedCues.length) {
-      captionsStyle.alignItems = 'center';
       captionsStyle.display = 'flex';
-      captionsStyle.flexDirection = 'column';
+      captionsStyle.flexDirection = 'row';
       captionsStyle.margin = '0';
+      // Setting flexDirection to "row" inverts the sense of align and justify.
+      // Now align is vertical and justify is horizontal.  See comments above on
+      // vertical alignment for displayAlign.
+      captionsStyle.alignItems = captionsStyle.justifyContent;
+      captionsStyle.justifyContent = 'center';
     }
-    if (isNested) {
+
+    if (isLeaf) {
       // Work around an IE 11 flexbox bug in which center-aligned items can
       // overflow their container.  See
       // https://github.com/philipwalton/flexbugs/tree/6e720da8#flexbug-2
@@ -345,7 +357,7 @@ shaka.ui.TextDisplayer = class {
           }
         }
       }
-    } else if (cue.region && cue.region.id && !isNested) {
+    } else if (cue.region && cue.region.id && !isLeaf) {
       const percentageUnit = shaka.text.CueRegion.units.PERCENTAGE;
       const heightUnit = cue.region.heightUnits == percentageUnit ? '%' : 'px';
       const widthUnit = cue.region.widthUnits == percentageUnit ? '%' : 'px';
