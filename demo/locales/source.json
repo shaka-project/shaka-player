@@ -103,6 +103,10 @@
     "description": "The name of a configuration value.",
     "message": "Buffer Behind"
   },
+  "DEMO_CANCEL_BUTTON": {
+    "description": "A button to cancel the creation or editing of a custom asset.",
+    "message": "Cancel"
+  },
   "DEMO_CAPTIONS": {
     "description": "A tag that marks an asset as having closed captions.",
     "message": "Captions"
@@ -222,6 +226,10 @@
   "DEMO_DRM_SYSTEM": {
     "description": "The label on a field that allows users to provide a Digital Rights Management (DRM) system identifier for a custom asset.",
     "message": "Custom [JARGON:DRM] System"
+  },
+  "DEMO_DRM_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "[JARGON:DRM]"
   },
   "DEMO_DURATION_BACKOFF": {
     "description": "The name of a configuration value.",
@@ -391,6 +399,10 @@
     "description": "The name of a configuration value.",
     "message": "Low Latency Streaming"
   },
+  "DEMO_MAIN_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Main"
+  },
   "DEMO_MANIFEST_RETRY_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "Manifest Retry Parameters"
@@ -462,6 +474,10 @@
   "DEMO_MIN_WIDTH": {
     "description": "The name of a configuration value.",
     "message": "Min Width"
+  },
+  "DEMO_MISC_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Misc"
   },
   "DEMO_MP2TS": {
     "description": "Text that describes an asset that uses the MPEG-2 TS container.",
@@ -570,6 +586,10 @@
   "DEMO_SAFE_SKIP_DISTANCE": {
     "description": "The name of a configuration value.",
     "message": "Safe Skip Distance"
+  },
+  "DEMO_SAVE_BUTTON": {
+    "description": "A button to save a custom asset.",
+    "message": "Save"
   },
   "DEMO_SHAKA": {
     "description": "Text that describes an asset that comes from the Shaka Player asset library.",
