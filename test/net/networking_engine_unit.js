@@ -1200,6 +1200,6 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
   /** @return {shaka.extern.Response} */
   function createResponse() {
-    return {uri: '', data: new ArrayBuffer(5), headers: {}};
+    return {uri: '', originalUri: '', data: new ArrayBuffer(5), headers: {}};
   }
 });  // describe('NetworkingEngine')

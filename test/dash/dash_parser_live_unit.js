@@ -453,6 +453,7 @@ describe('DashParser Live', () => {
         shaka.util.AbortableOperation.completed({
           uri: redirectedUri,
           data: manifestData,
+          originalUri,
         }));
 
     const manifest = await parser.start(originalUri, playerInterface);
@@ -461,7 +462,7 @@ describe('DashParser Live', () => {
     // But includes a redirect
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
     const netRequest = fakeNetEngine.request.calls.argsFor(0)[1];
-    expect(netRequest.uris).toEqual([redirectedUri, originalUri]);
+    expect(netRequest.uris).toEqual([redirectedUri]);
 
     // Since the manifest request was redirected, the segment refers to
     // the redirected base.

@@ -831,8 +831,9 @@ describe('StreamingEngine', () => {
       // Just return any old ArrayBuffer for any requested segment.
       netEngine.request.and.callFake((requestType, request) => {
         const buffer = new ArrayBuffer(0);
+        const uri = request.uris[0];
         /** @type {shaka.extern.Response} */
-        const response = {uri: request.uris[0], data: buffer, headers: {}};
+        const response = {uri, originalUri: uri, data: buffer, headers: {}};
         return shaka.util.AbortableOperation.completed(response);
       });
 
@@ -2819,8 +2820,9 @@ describe('StreamingEngine', () => {
       // Just return any old ArrayBuffer for any requested segment.
       netEngine.request.and.callFake((requestType, request) => {
         const buffer = new ArrayBuffer(0);
+        const uri = request.uris[0];
         /** @type {shaka.extern.Response} */
-        const response = {uri: request.uris[0], data: buffer, headers: {}};
+        const response = {uri, originalUri: uri, data: buffer, headers: {}};
         return shaka.util.AbortableOperation.completed(response);
       });
 
