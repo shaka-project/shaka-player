@@ -13,12 +13,20 @@ describe('AtscDecoder', () => {
   /** @type {!shaka.cea.AtscDecoder} */
   const decoder = new shaka.cea.AtscDecoder();
 
-  const createClosedCaption = (stream, startTime, endTime, text) => {
+  // Returns a closed caption with one nested cue, containing default styles.
+  const createDefaultClosedCaption = (stream, startTime, endTime, payload) => {
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    const nestedCue = new shaka.text.Cue(startTime, endTime, payload);
+    nestedCue.color = 'white'; // Default text color.
+    nestedCue.backgroundColor = 'black'; // Default background color.
+    topLevelCue.nestedCues.push(nestedCue);
+
     return {
-      cue: new shaka.text.Cue(startTime, endTime, text),
       stream,
+      cue: topLevelCue,
     };
   };
+
 
   describe('decodes cea608', () => {
     const edmCodeByte2 = 0x2c; // Erase displayed memory byte 2.
@@ -56,11 +64,22 @@ describe('AtscDecoder', () => {
 
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
-      const expectedText = '<u><c.green>green text</c></u>';
+      const expectedText = 'green text';
+
+      const topLevelCue = new shaka.text.Cue(
+          startTimeCaption1, startTimeCaption2, '');
+      const nestedCue = new shaka.text.Cue(
+          startTimeCaption1, startTimeCaption2, expectedText);
+      nestedCue.color = 'green';
+      nestedCue.backgroundColor = 'black';
+      nestedCue.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
+      topLevelCue.nestedCues.push(nestedCue);
 
       const expectedCues = [
-        createClosedCaption(
-            'CC3', startTimeCaption1, startTimeCaption2, expectedText),
+        {
+          stream: 'CC3',
+          cue: topLevelCue,
+        },
       ];
 
       decoder.extract(greenTextCC3Packet, startTimeCaption1);
@@ -87,11 +106,38 @@ describe('AtscDecoder', () => {
 
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
-      const expectedText = '-- <u><c.red>red</c></u> --';
+      const expectedText1 = '--';
+      const expectedText2 = 'red';
+      const expectedText3 = '--';
+
+      // Since there are three style changes, there should be three nested cues.
+      const topLevelCue = new shaka.text.Cue(
+          startTimeCaption1, startTimeCaption2, '');
+
+
+      const nestedCue1 = new shaka.text.Cue(
+          startTimeCaption1, startTimeCaption2, expectedText1);
+      nestedCue1.color = shaka.cea.Cea608Memory.DEFAULT_TXT_COLOR;
+      nestedCue1.backgroundColor = shaka.cea.Cea608Memory.DEFAULT_BG_COLOR;
+
+      const nestedCue2 = new shaka.text.Cue(
+          startTimeCaption1, startTimeCaption2, expectedText2);
+      nestedCue2.color = 'red';
+      nestedCue2.backgroundColor = shaka.cea.Cea608Memory.DEFAULT_BG_COLOR;
+      nestedCue2.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
+
+      const nestedCue3 = new shaka.text.Cue(
+          startTimeCaption1, startTimeCaption2, expectedText3);
+      nestedCue3.color = shaka.cea.Cea608Memory.DEFAULT_TXT_COLOR;
+      nestedCue3.backgroundColor = shaka.cea.Cea608Memory.DEFAULT_BG_COLOR;
+
+      topLevelCue.nestedCues.push(nestedCue1, nestedCue2, nestedCue3);
 
       const expectedCues = [
-        createClosedCaption(
-            'CC2', startTimeCaption1, startTimeCaption2, expectedText),
+        {
+          stream: 'CC2',
+          cue: topLevelCue,
+        },
       ];
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
@@ -108,7 +154,7 @@ describe('AtscDecoder', () => {
         ...atscCaptionInitBytes, captionData, 0xff,
         0xfc, 0x1c, 0x20, // Pop-on mode (RCL control code).
         0xfc, 0x19, 0x6e, // White Italics PAC.
-        0xfc, 0x98, 0x2a, // Background attribute red.
+        0xfc, 0x98, 0x2a, // Background attribute yellow.
         0xfc, 0xf4, 0xe5, // t, e
         0xfc, 0x73, 0xf4, // s, t
         0xfc, 0x19, 0x20, // Midrow style control code to clear styles.
@@ -118,12 +164,22 @@ describe('AtscDecoder', () => {
 
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
-      const expectedText =
-        '<i></i><i><c.bg_yellow>test</c></i><c.bg_yellow> </c>';
+      const expectedText = 'test';
+
+      const topLevelCue = new shaka.text.Cue(
+          startTimeCaption1, startTimeCaption2, '');
+      const nestedCue = new shaka.text.Cue(
+          startTimeCaption1, startTimeCaption2, expectedText);
+      nestedCue.color = 'white';
+      nestedCue.backgroundColor = 'yellow';
+      nestedCue.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
+      topLevelCue.nestedCues.push(nestedCue);
 
       const expectedCues = [
-        createClosedCaption(
-            'CC2', startTimeCaption1, startTimeCaption2, expectedText),
+        {
+          stream: 'CC2',
+          cue: topLevelCue,
+        },
       ];
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
@@ -151,7 +207,7 @@ describe('AtscDecoder', () => {
       const startTimeCaption2 = 2;
       const expectedText = '♪üå';
       const expectedCues = [
-        createClosedCaption(
+        createDefaultClosedCaption(
             'CC2', startTimeCaption1, startTimeCaption2, expectedText),
       ];
 
@@ -176,7 +232,7 @@ describe('AtscDecoder', () => {
       const expectedText = 'test';
 
       const expectedCues = [
-        createClosedCaption(
+        createDefaultClosedCaption(
             'CC1', startTimeCaption1, startTimeCaption2, expectedText),
       ];
 
@@ -232,10 +288,10 @@ describe('AtscDecoder', () => {
       decoder.extract(eraseDisplayedMemory, 6);
 
       const expectedCues = [
-        createClosedCaption(stream, 1, 2, '1.'),
-        createClosedCaption(stream, 2, 3, '1.\n2.'),
-        createClosedCaption(stream, 3, 4, '2.\n3.'),
-        createClosedCaption(stream, 4, 5, '3.\n4.'),
+        createDefaultClosedCaption(stream, 1, 2, '1.'),
+        createDefaultClosedCaption(stream, 2, 3, '1.\n2.'),
+        createDefaultClosedCaption(stream, 3, 4, '2.\n3.'),
+        createDefaultClosedCaption(stream, 4, 5, '3.\n4.'),
       ];
 
       const cues = decoder.decode();
@@ -276,8 +332,8 @@ describe('AtscDecoder', () => {
       decoder.extract(eraseDisplayedMemory, 3);
 
       const expectedCues = [
-        createClosedCaption(stream, 1, 2, '1.'),
-        createClosedCaption(stream, 2, 3, '1.\n2.'),
+        createDefaultClosedCaption(stream, 1, 2, '1.'),
+        createDefaultClosedCaption(stream, 2, 3, '1.\n2.'),
       ];
 
       const cues = decoder.decode();
