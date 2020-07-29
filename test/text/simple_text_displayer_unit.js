@@ -90,8 +90,7 @@ describe('SimpleTextDisplayer', () => {
       shakaCue.nestedCues = [nestedCue1, nestedCue2];
       verifyHelper(
           [
-            {startTime: 10, endTime: 20, text: 'Test2'},
-            {startTime: 10, endTime: 20, text: 'Test1'},
+            {startTime: 10, endTime: 20, text: 'Test1 Test2'},
           ],
           [shakaCue]);
     });
