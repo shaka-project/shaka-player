@@ -231,17 +231,16 @@ shaka.extern.Player = class {
  * @return {{start: number, end: number}}
  *
  */
-  seekRange(real) {}
-
-  /**
-   * Get if the player is playing live content. If the player has not loaded
-   * content, this will return |false|.
-   *
-   * @return {boolean}
-   *
-   */
-  isLive() {}
-  /**
+seekRange(real) {}
+/**
+ * Get if the player is playing live content. If the player has not loaded
+ * content, this will return |false|.
+ *
+ * @return {boolean}
+ *
+ */
+isLive() {}
+/**
  * Check if the player is currently in a buffering state (has too little content
  * to play smoothly). If the player has not loaded content, this will return
  * |false|.
@@ -256,14 +255,14 @@ isBuffering() {}
  *
  *
  */
-  cancelTrickPlay() {}
-  /**
+cancelTrickPlay() {}
+/**
  * After destruction, a Player object cannot be used again.
  *
  * @override
  *
  */
-  destroy() {}
+destroy() {}
 
 /**
  * Tell the player to load the content at |assetUri| and start playback at
@@ -280,5 +279,94 @@ isBuffering() {}
  * @return {!Promise}
  *
  */
-  load(assetUri, startTime, mimeType) {}
+load(assetUri, startTime, mimeType) {}
+/**
+ * Return a copy of the current configuration.  Modifications of the returned
+ * value will not affect the Player's active configuration.  You must call
+ * player.configure() to make changes.
+ *
+ * @return {shaka.extern.PlayerConfiguration}
+ */
+getConfiguration() {}
+/**
+ * Get the current playhead position as a date. This should only be called when
+ * the player has loaded a live stream. If the player has not loaded a live
+ * stream, this will return |null|.
+ *
+ * @return {Date}
+ */
+getPlayheadTimeAsDate() {}
+/**
+ * Check if the text displayer is enabled.
+ *
+ * @return {boolean}
+ */
+isTextTrackVisible() {}
+/**
+ * Enable or disable the text displayer.  If the player is in an unloaded state,
+ * the request will be applied next time content is loaded.
+ *
+ * @param {boolean} isVisible
+ * @return {!Promise}
+ */
+setTextTrackVisibility(isVisible) {}
+/**
+ * Return a list of variant tracks that can be switched to in the current
+ * period. If there are multiple periods, you must seek to the period in order
+ * to get variants from that period.
+ *
+ * If the player has not loaded content, this will return an empty list.
+ *
+ * @return {!Array.<shaka.extern.Track>}
+ */
+getVariantTracks() {}
+/**
+ * Check if the manifest contains only audio-only content. If the player has not
+ * loaded content, this will return |false|.
+ *
+ * The player does not support content that contain more than one type of
+ * variants (i.e. mixing audio-only, video-only, audio-video). Content will be
+ * filtered to only contain one type of variant.
+ *
+ * @return {boolean}
+ */
+isAudioOnly() {}
+/**
+ * Return a list of text tracks that can be switched to in the current period.
+ * If there are multiple periods, you must seek to a period in order to get
+ * text tracks from that period.
+ *
+ * If the player has not loaded content, this will return an empty list.
+ *
+ * @export
+ */
+getTextTracks() {}
+/**
+ * Add an event listener to this object.
+ *
+ * @param {string} type The event type to listen for.
+ * @param {shaka.util.FakeEventTarget.ListenerType} listener The callback or
+ *   listener object to invoke.
+ * @param {(!AddEventListenerOptions|boolean)=} options Ignored.
+ * @override
+ */
+addEventListener(type, listener, options) {}
+/**
+ * Remove an event listener from this object.
+ *
+ * @param {string} type The event type for which you wish to remove a listener.
+ * @param {shaka.util.FakeEventTarget.ListenerType} listener The callback or
+ *   listener object to remove.
+ * @param {(EventListenerOptions|boolean)=} options Ignored.
+ * @override
+ */
+removeEventListener(type, listener, options) {}
+/**
+ * Dispatch an event from this object.
+ *
+ * @param {!Event} event The event to be dispatched from this object.
+ * @return {boolean} True if the default action was prevented.
+ * @override
+ */
+dispatchEvent(event) {}
 };
