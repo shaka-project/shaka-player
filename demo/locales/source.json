@@ -271,6 +271,10 @@
     "description": "Text that describes an asset that comes from the GPAC project asset library.",
     "message": "[PROPER_NAME:GPAC]"
   },
+  "DEMO_HEADERS_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Headers"
+  },
   "DEMO_HIGH_DEFINITION": {
     "description": "Text that describes an asset that has a high definition video stream.",
     "message": "High definition"
@@ -358,6 +362,18 @@
   "DEMO_LICENSE_CERTIFICATE_URL": {
     "description": "The label on a field that allows users to provide a license certificate for a custom asset.",
     "message": "Custom License Certificate URL"
+  },
+  "DEMO_LICENSE_HEADER_NAME": {
+    "description": "A field for picking the name of the header to add.",
+    "message": "Header Name"
+  },
+  "DEMO_LICENSE_HEADER_TITLE": {
+    "description": "A header denoting a set of fields to add a license header.",
+    "message": "License Header"
+  },
+  "DEMO_LICENSE_HEADER_VALUE": {
+    "description": "A field for picking the value of the header to add.",
+    "message": "Header Value"
   },
   "DEMO_LICENSE_SERVER_URL": {
     "description": "The label on a field that allows users to provide a license server for a custom asset.",

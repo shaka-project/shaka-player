@@ -110,6 +110,133 @@ shakaDemo.Custom = class {
    * @return {!Element} div
    * @private
    */
+  makeAssetDialogContentsHeaders_(assetInProgress, inputsToCheck) {
+    const headersDiv = document.createElement('div');
+
+    // Because this field can theoretically contain an unlimited number of
+    // values, it has to take up an entire section by itself.
+    const makeEmptyRow = () => {
+      makePreFilledRow(/* headerName= */ null, /* headerValue= */ null);
+    };
+    /**
+     * @type {!Array.<{
+     *   headerName: ?string,
+     *   div: !Element,
+     * }>}
+     */
+    const collisionCheckEntries = [];
+    /** @type {function(?string, ?string)} */
+    const makePreFilledRow = (headerName, headerValue) => {
+      const div = document.createElement('div');
+      headersDiv.appendChild(div);
+      const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
+      const headerText = shakaDemo.MessageIds.LICENSE_HEADER_TITLE;
+      const container = new shakaDemo.InputContainer(
+          div, headerText, containerStyle,
+          /* docLink= */ null);
+
+      const collisionCheckEntry = {
+        headerName,
+        div,
+      };
+      collisionCheckEntries.push(collisionCheckEntry);
+
+      // Don't add a new row for a row that was pre-filled.
+      let firstTime = !headerName;
+      const onChange = (newHeaderName, newHeaderValue) => {
+        if (headerName) {
+          // In case the header named changed, remove the old header.
+          assetInProgress.licenseRequestHeaders.delete(headerName);
+        }
+        // Set the new values.
+        headerName = newHeaderName;
+        collisionCheckEntry.headerName = newHeaderName;
+        headerValue = newHeaderValue;
+        if (!headerName || !headerValue) {
+          if (!firstTime) {
+            // The user has set a field that used to be filled to empty.
+            // This signals that they probably want to remove this header.
+            headersDiv.removeChild(div);
+          }
+          return;
+        }
+        if (firstTime) {
+          firstTime = false;
+          // You have filled out this row for the first time; add a new row, in
+          // case the user wants to add more headers.
+          makeEmptyRow();
+          // Update the componentHandler, to account for the new MDL elements.
+          componentHandler.upgradeDom();
+        }
+        assetInProgress.addLicenseRequestHeader(headerName, headerValue);
+        // Eliminate any OTHER header with the same name. Assume this newly
+        // added/modified one is the "correct" one.
+        for (const entry of collisionCheckEntries) {
+          if (entry == collisionCheckEntry) {
+            // You can't "collide" with yourself.
+            continue;
+          }
+          if (headerName != entry.headerName) {
+            // It's not a collision.
+            continue;
+          }
+          // Remove the entry for the old field from the array.
+          const idx = collisionCheckEntries.indexOf(entry);
+          collisionCheckEntries.splice(idx, 1);
+          // Remove the div for the old field from the overall headers div.
+          headersDiv.removeChild(entry.div);
+          break;
+        }
+      };
+
+      const nameSetup = (input, container) => {
+        if (headerName) {
+          input.value = headerName;
+        }
+      };
+      const nameOnChange = (input) => {
+        onChange(input.value, headerValue);
+      };
+      const licenseHeaderName = shakaDemoMain.getLocalizedString(
+          shakaDemo.MessageIds.LICENSE_HEADER_NAME);
+      this.makeField_(container, licenseHeaderName, nameSetup, nameOnChange);
+
+      const valueSetup = (input, container) => {
+        if (headerValue) {
+          input.value = headerValue;
+        }
+      };
+      const valueOnChange = (input) => {
+        onChange(headerName, input.value);
+      };
+      const licenseHeaderValue = shakaDemoMain.getLocalizedString(
+          shakaDemo.MessageIds.LICENSE_HEADER_VALUE);
+      this.makeField_(container, licenseHeaderValue, valueSetup, valueOnChange);
+    };
+    if (assetInProgress.licenseRequestHeaders.size == 0) {
+      // It starts out with a single empty row, but each time you start filling
+      // out one for the first time it adds a new one. Empty rows are ignored in
+      // the actual data.
+      makeEmptyRow();
+    } else {
+      // Make a row for each header.
+      for (const headerName of assetInProgress.licenseRequestHeaders.keys()) {
+        makePreFilledRow(
+            headerName, assetInProgress.licenseRequestHeaders.get(headerName));
+      }
+      // ...and also an empty one at the end.
+      makeEmptyRow();
+    }
+
+    return headersDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
   makeAssetDialogContentsMisc_(assetInProgress, inputsToCheck) {
     const miscDiv = document.createElement('div');
     const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
@@ -386,6 +513,8 @@ shakaDemo.Custom = class {
         assetInProgress, inputsToCheck, iconDiv);
     const drmDiv = this.makeAssetDialogContentsDrm_(
         assetInProgress, inputsToCheck);
+    const headersDiv = this.makeAssetDialogContentsHeaders_(
+        assetInProgress, inputsToCheck);
     const miscDiv = this.makeAssetDialogContentsMisc_(
         assetInProgress, inputsToCheck);
     const finishDiv = this.makeAssetDialogContentsFinish_(
@@ -422,12 +551,15 @@ shakaDemo.Custom = class {
     addTabButton(
         shakaDemo.MessageIds.DRM_TAB, drmDiv, /* startOn= */ false);
     addTabButton(
+        shakaDemo.MessageIds.HEADERS_TAB, headersDiv, /* startOn= */ false);
+    addTabButton(
         shakaDemo.MessageIds.MISC_TAB, miscDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
     this.dialog_.appendChild(tabDiv);
     this.dialog_.appendChild(mainDiv);
     this.dialog_.appendChild(drmDiv);
+    this.dialog_.appendChild(headersDiv);
     this.dialog_.appendChild(miscDiv);
     this.dialog_.appendChild(finishDiv);
     this.dialog_.appendChild(iconDiv);
