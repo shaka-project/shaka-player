@@ -227,11 +227,24 @@
   font-size: 20px;
   line-height: 1.4;  // relative to font size.
 
+  /* This makes nested elements have this specific font size, too.  Without
+   * this, defaults at the app level for generic elements like <p> may be
+   * specific enough to override font size for those elements in captions. */
+  * {
+    font-size: 20px;
+    line-height: 1.4;  // relative to font size.
+  }
+
   span {
     /* These are defaults which are overridden by JS or cue styles. */
     background-color: rgba(0, 0, 0, 0.8);
     color: rgb(255, 255, 255);
     display: inline-block;
+  }
+
+  .shaka-nested-cue:not(:last-of-type):after {
+    content: " ";
+    white-space: pre;
   }
 }
 
