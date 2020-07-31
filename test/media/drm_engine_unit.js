@@ -477,7 +477,7 @@ describe('DrmEngine', () => {
           .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
             distinctiveIdentifier: 'optional',
             persistentState: 'required',
-            sessionTypes: ['temporary'],
+            sessionTypes: ['persistent-license'],
           })]);
     });
 
@@ -1863,6 +1863,7 @@ describe('DrmEngine', () => {
       // Key IDs in manifest
       tweakDrmInfos((drmInfos) => {
         drmInfos[0].keyIds = new Set(['deadbeefdeadbeefdeadbeefdeadbeef']);
+        drmInfos[0].initData = [{initDataType: 'niceInitDataType'}];
       });
 
       config.advanced['drm.abc'] = {
@@ -1887,7 +1888,8 @@ describe('DrmEngine', () => {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
-        initData: [],
+        initData: [{initDataType: 'niceInitDataType'}],
+        initDataTypes: ['niceInitDataType'],
         keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       });
     });
