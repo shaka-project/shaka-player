@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('AtscDecoder', () => {
-  /** @type {!shaka.test.CeaUtils} */
+describe('CeaDecoder', () => {
   const ceaUtils = shaka.test.CeaUtils;
 
   /** @type {!Uint8Array} */
@@ -13,8 +12,8 @@ describe('AtscDecoder', () => {
     0xb5, 0x00, 0x31, 0x47, 0x41, 0x39, 0x34, 0x03,
   ]);
 
-  /** @type {!shaka.cea.AtscDecoder} */
-  const decoder = new shaka.cea.AtscDecoder();
+  /** @type {!shaka.cea.CeaDecoder} */
+  const decoder = new shaka.cea.CeaDecoder();
 
   describe('decodes cea608', () => {
     const edmCodeByte2 = 0x2c; // Erase displayed memory byte 2.

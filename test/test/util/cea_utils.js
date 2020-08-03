@@ -48,7 +48,6 @@ shaka.test.CeaUtils = class {
 
   /**
    * Returns a cue with custom underline, italics, color, background color.
-   * @param {!string} stream
    * @param {!number} startTime
    * @param {!number} endTime
    * @param {!string} payload

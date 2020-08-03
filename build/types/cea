@@ -1,6 +1,6 @@
 # Inband closed caption support.
 
-+../../lib/cea/atsc_decoder.js
++../../lib/cea/cea_decoder.js
 +../../lib/cea/cea608_data_channel.js
 +../../lib/cea/cea608_memory.js
 +../../lib/cea/i_caption_decoder.js

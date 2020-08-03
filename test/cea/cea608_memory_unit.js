@@ -5,7 +5,6 @@
  */
 
 describe('Cea608Memory', () => {
-  /** @type {!shaka.test.CeaUtils} */
   const ceaUtils = shaka.test.CeaUtils;
 
   /** @type {!shaka.cea.Cea608Memory} */
@@ -15,8 +14,8 @@ describe('Cea608Memory', () => {
   const stream = 'CC1';
 
   beforeEach(() => {
-    memory = new shaka.cea.Cea608Memory(new shaka.cea.AtscDecoder(),
-        0, 0 // F1 + C1 -> CC1
+    memory = new shaka.cea.Cea608Memory(new shaka.cea.CeaDecoder(),
+        0, 0, false // F1 + C1 -> CC1
     );
   });
 
@@ -29,7 +28,7 @@ describe('Cea608Memory', () => {
           c.charCodeAt(0));
     }
     memory.forceEmit(t1, t2);
-    const captions = memory.decoder_.getParsedClosedCaptions();
+    const captions = memory.getDecoder().getParsedClosedCaptions();
     const expectedCaptions = [
       ceaUtils.createDefaultClosedCaption(stream, t1, t2, text),
     ];
@@ -71,7 +70,7 @@ describe('Cea608Memory', () => {
     const expectedCaptions = [
       ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
     ];
-    const captions = memory.decoder_.getParsedClosedCaptions();
+    const captions = memory.getDecoder().getParsedClosedCaptions();
     expect(captions).toEqual(expectedCaptions);
   });
 
@@ -112,7 +111,7 @@ describe('Cea608Memory', () => {
     ];
 
     memory.forceEmit(t1, t2);
-    const captions = memory.decoder_.getParsedClosedCaptions();
+    const captions = memory.getDecoder().getParsedClosedCaptions();
     expect(captions).toEqual(expectedCaptions);
   });
 
@@ -144,7 +143,7 @@ describe('Cea608Memory', () => {
       ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
     ];
 
-    const captions = memory.decoder_.getParsedClosedCaptions();
+    const captions = memory.getDecoder().getParsedClosedCaptions();
     expect(captions).toEqual(expectedCaptions);
   });
 
@@ -157,7 +156,7 @@ describe('Cea608Memory', () => {
     memory.forceEmit(t1, t2);
 
     const expectedCaptions = [];
-    const captions = memory.decoder_.getParsedClosedCaptions();
+    const captions = memory.getDecoder().getParsedClosedCaptions();
     expect(captions).toEqual(expectedCaptions);
   });
 
@@ -176,7 +175,7 @@ describe('Cea608Memory', () => {
       ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
     ];
 
-    const captions = memory.decoder_.getParsedClosedCaptions();
+    const captions = memory.getDecoder().getParsedClosedCaptions();
     expect(captions).toEqual(expectedCaptions);
   });
 
@@ -192,7 +191,7 @@ describe('Cea608Memory', () => {
     }
 
     memory.forceEmit(t1, t2);
-    const captions = memory.decoder_.getParsedClosedCaptions();
+    const captions = memory.getDecoder().getParsedClosedCaptions();
     const expectedCaptions = [
       ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
     ];
@@ -202,13 +201,13 @@ describe('Cea608Memory', () => {
 
     // Erase the memory and currently buffered captions.
     memory.eraseBuffer();
-    memory.decoder_.clearParsedClosedCaptions();
+    memory.getDecoder().clearParsedClosedCaptions();
 
     // Force out the new memory.
     memory.forceEmit(t1, t2);
 
     // Expect the forced out memory to be blank. We just cleared it.
-    expect(memory.decoder_.getParsedClosedCaptions()).toEqual([]);
+    expect(memory.getDecoder().getParsedClosedCaptions()).toEqual([]);
   });
 
   it('shifts rows correctly', () => {
@@ -229,7 +228,7 @@ describe('Cea608Memory', () => {
     memory.forceEmit(t1, t2);
 
     // Expect the correct cue to be emitted.
-    const captions = memory.decoder_.getParsedClosedCaptions();
+    const captions = memory.getDecoder().getParsedClosedCaptions();
     expect(captions).toEqual(expectedCaptions1);
 
     // Move + clear the first 2 rows, and clear currently buffered captions.
@@ -238,7 +237,7 @@ describe('Cea608Memory', () => {
     const rowsToMove = 2;
     memory.moveRows(dstRowIdx, srcRowIdx, rowsToMove);
     memory.resetRows(srcRowIdx, rowsToMove - 1);
-    memory.decoder_.clearParsedClosedCaptions();
+    memory.getDecoder().clearParsedClosedCaptions();
 
     // Force out the new memory.
     memory.forceEmit(t1, t2);
@@ -246,7 +245,7 @@ describe('Cea608Memory', () => {
     const expectedCaptions2 = [
       ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText2),
     ];
-    expect(memory.decoder_.getParsedClosedCaptions())
+    expect(memory.getDecoder().getParsedClosedCaptions())
         .toEqual(expectedCaptions2);
   });
 });
