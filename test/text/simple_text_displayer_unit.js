@@ -84,7 +84,7 @@ describe('SimpleTextDisplayer', () => {
 
     it('appends nested cues', () => {
       const shakaCue = new shaka.text.Cue(10, 20, '');
-      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1 ');
       const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
 
       shakaCue.nestedCues = [nestedCue1, nestedCue2];

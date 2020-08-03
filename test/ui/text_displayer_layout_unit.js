@@ -6,6 +6,7 @@
 
 const Util = shaka.test.Util;
 
+// TODO: Move this suite to the text/ folder where it belongs
 filterDescribe('UITextDisplayer layout', Util.supportsScreenshots, () => {
   const UiUtils = shaka.test.UiUtils;
 
@@ -129,7 +130,7 @@ filterDescribe('UITextDisplayer layout', Util.supportsScreenshots, () => {
   it('two nested cues', async () => {
     const cue = new shaka.text.Cue(0, 1, '');
     cue.nestedCues = [
-      new shaka.text.Cue(0, 1, 'Captain\'s log,'),
+      new shaka.text.Cue(0, 1, 'Captain\'s log, '),
       new shaka.text.Cue(0, 1, 'stardate 41636.9'),
     ];
     textDisplayer.append([cue]);
@@ -203,19 +204,22 @@ filterDescribe('UITextDisplayer layout', Util.supportsScreenshots, () => {
     await Util.checkScreenshot(videoContainer, 'bitmap-cue', threshold);
   });
 
-  // Regression test for #2623
-  it('colors background for nested cues but not parent', async () => {
+  // Used to be a regression test for #2623, but that should have been fixed in
+  // the TTML parser instead.  Now we ensure that backgroundColor is honored at
+  // all levels, making this a regression test for the fix to our original fix.
+  // :-)
+  it('honors background settings at all levels', async () => {
     const cue = new shaka.text.Cue(0, 1, '');
     cue.nestedCues = [
-      new shaka.text.Cue(0, 1, 'Captain\'s log,'),
+      new shaka.text.Cue(0, 1, 'Captain\'s '),
+      new shaka.text.Cue(0, 1, 'log, '),
       new shaka.text.Cue(0, 1, 'stardate 41636.9'),
     ];
 
-    // These are shown.
+    // These middle nested cue will show through to the parent cue's background.
     cue.nestedCues[0].backgroundColor = 'blue';
-    cue.nestedCues[1].backgroundColor = 'yellow';
-
-    // This is not.
+    cue.nestedCues[1].backgroundColor = 'transparent';
+    cue.nestedCues[2].backgroundColor = 'yellow';
     cue.backgroundColor = 'purple';
 
     textDisplayer.append([cue]);
@@ -223,7 +227,6 @@ filterDescribe('UITextDisplayer layout', Util.supportsScreenshots, () => {
     await Util.checkScreenshot(videoContainer, 'nested-cue-bg', threshold);
   });
 
-  // Related to the fix for #2623
   it('colors background for flat cues', async () => {
     const cue = new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9');
     // This is shown.
@@ -232,5 +235,30 @@ filterDescribe('UITextDisplayer layout', Util.supportsScreenshots, () => {
     textDisplayer.append([cue]);
 
     await Util.checkScreenshot(videoContainer, 'flat-cue-bg', threshold);
+  });
+
+  // https://github.com/google/shaka-player/issues/2761
+  it('deeply-nested cues', async () => {
+    const makeCue = (text, fg = '', bg = '', nestedCues = []) => {
+      const cue = new shaka.text.Cue(0, 1, text);
+      cue.color = fg;
+      cue.backgroundColor = bg;
+      cue.nestedCues = nestedCues;
+      return cue;
+    };
+
+    const cue = makeCue('', '', '', [
+      makeCue('', '', 'black', [
+        makeCue('Captain\'s '),
+        makeCue('log, ', 'red'),
+        makeCue('stardate ', 'green', 'blue', [
+          makeCue('41636.9', 'purple'),
+        ]),
+      ]),
+    ]);
+
+    textDisplayer.append([cue]);
+
+    await Util.checkScreenshot(videoContainer, 'deeply-nested-cues', threshold);
   });
 });
