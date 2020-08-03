@@ -615,6 +615,80 @@ describe('DrmEngine', () => {
           })]);
     });
 
+    it('selects the correct configuration for PlayReady with robustness / persistentState', async () => {
+      // Leave only one drmInfo
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.encrypted = true;
+            stream.addDrmInfo('com.microsoft.playready');
+          });
+          variant.addAudio(2, (stream) => {
+            stream.encrypted = true;
+            stream.addDrmInfo('com.microsoft.playready');
+          });
+        });
+      });
+
+      // Add manifest-supplied license servers for both.
+      tweakDrmInfos((drmInfos) => {
+        for (const drmInfo of drmInfos) {
+            drmInfo.licenseServerUri = 'https://com.microsoft.playready/license';
+        }
+      });
+
+      setRequestMediaKeySystemAccessSpy(['com.microsoft.playready.recommendation']);
+      config.servers = {'com.microsoft.playready': 'https://com.microsoft.playready/license'};
+      config.advanced['com.microsoft.playready'] = {
+        audioRobustness: 'good',
+        videoRobustness: 'really_really_ridiculously_good',
+        serverCertificate: null,
+        individualizationServer: '',
+        distinctiveIdentifierRequired: false,
+        persistentStateRequired: true,
+      };
+
+      drmEngine.configure(config);
+
+      const variants = manifest.variants;
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+
+      expect(drmEngine.initialized()).toBe(true);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('com.microsoft.playready.recommendation', [jasmine.objectContaining({
+            videoCapabilities: [jasmine.objectContaining({
+              robustness: 'good',
+            })],
+            videoCapabilities: [jasmine.objectContaining({
+              robustness: 'really_really_ridiculously_good',
+            })],
+            persistentState: 'required',
+          })]);
+    });
+
+    it('sets unique initDataTypes if specified from the initData', async () => {
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initDataType: 'cenc', initData: new Uint8Array(5), keyId: null},
+          {initDataType: 'cenc', initData: new Uint8Array(5), keyId: null},
+        ];
+      });
+
+      drmEngine.configure(config);
+
+      const variants = manifest.variants;
+
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds)
+
+      expect(drmEngine.initialized()).toBe(true);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
+            initDataTypes: ['cenc'],
+          })]);
+    })
+
     it('fails if license server is not configured', async () => {
       setRequestMediaKeySystemAccessSpy(['drm.abc']);
 
@@ -771,6 +845,30 @@ describe('DrmEngine', () => {
           .toHaveBeenCalledWith('webm', initData2);
       expect(session3.generateRequest)
           .toHaveBeenCalledWith('cenc', initData3);
+    });
+
+    it('creates sessions with the correct sessionType', async () => {
+      // Set up init data overrides in the manifest:
+      /** @type {!Uint8Array} */
+      const initData = new Uint8Array(5);
+
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initData: initData, initDataType: 'cenc', keyId: 'abc'},
+        ];
+      });
+
+      mockMediaKeySystemAccess.getConfiguration.and.returnValue({
+        persistentState: 'required',
+        audioCapabilities: [{contentType: 'audio/webm'}],
+        videoCapabilities: [{contentType: 'video/mp4; codecs="fake"'}],
+      });
+
+      await initAndAttach();
+
+      // expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
+      expect(mockMediaKeys.createSession).toHaveBeenCalledWith('persistent-license');
+      expect(session1.generateRequest).toHaveBeenCalledWith('cenc', initData);
     });
 
     it('ignores duplicate init data overrides', async () => {
@@ -1889,7 +1987,6 @@ describe('DrmEngine', () => {
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
         initData: [{initDataType: 'niceInitDataType'}],
-        initDataTypes: ['niceInitDataType'],
         keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       });
     });
