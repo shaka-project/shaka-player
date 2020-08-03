@@ -1,4 +1,5 @@
 
+shaka.extern = {};
 /**
  * @interface
  * @extends {EventTarget}
