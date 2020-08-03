@@ -107,8 +107,8 @@ describe('AtscDecoder', () => {
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
       const expectedText1 = '-- ';
-      const expectedText2 = 'red ';
-      const expectedText3 = '--';
+      const expectedText2 = 'red';
+      const expectedText3 = ' --';
 
       // Since there are three style changes, there should be three nested cues.
       const topLevelCue = new shaka.text.Cue(
