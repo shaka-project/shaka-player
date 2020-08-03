@@ -35,16 +35,40 @@ describe('DataUriPlugin', function() {
         'data:;base64,SGVsbG8sIFdvcmxkIQ%3D%3D', '', 'Hello, World!', done);
   });
 
-  it('supports extra colin', function(done) {
+  it('supports extra colon', function(done) {
     testSucceeds('data:,Hello:', '', 'Hello:', done);
   });
 
-  it('supports extra semi-colin', function(done) {
+  it('supports extra semi-colon', function(done) {
     testSucceeds('data:,Hello;', '', 'Hello;', done);
   });
 
   it('supports extra comma', function(done) {
     testSucceeds('data:,Hello,', '', 'Hello,', done);
+  });
+
+  it('supports character set metadata', function(done) {
+    testSucceeds(
+        'data:text/plain;charset=UTF-8,Hello,',
+        'text/plain',
+        'Hello,',
+        done);
+  });
+
+  it('supports arbitrary metadata', function(done) {
+    testSucceeds(
+        'data:text/plain;foo=bar,Hello,',
+        'text/plain',
+        'Hello,',
+        done);
+  });
+
+  it('supports arbitrary metadata with base64 encoding', function(done) {
+    testSucceeds(
+        'data:text/plain;foo=bar;base64,SGVsbG8sIFdvcmxkIQ%3D%3D',
+        'text/plain',
+        'Hello, World!',
+        done);
   });
 
   it('fails for empty URI', function(done) {
