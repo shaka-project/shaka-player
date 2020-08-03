@@ -439,6 +439,10 @@
     "description": "The name of a configuration value.",
     "message": "Max Width"
   },
+  "DEMO_MICROSOFT": {
+    "description": "Text that describes an asset that comes from the Microsoft.",
+    "message": "[PROPER_NAME:Microsoft]"
+  },
   "DEMO_MIN_BANDWIDTH": {
     "description": "The name of a configuration value.",
     "message": "Min Bandwidth"
