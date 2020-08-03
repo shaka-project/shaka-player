@@ -5,6 +5,9 @@
  */
 
 describe('AtscDecoder', () => {
+  /** @type {!shaka.test.CeaUtils} */
+  const ceaUtils = shaka.test.CeaUtils;
+
   /** @type {!Uint8Array} */
   const atscCaptionInitBytes = new Uint8Array([
     0xb5, 0x00, 0x31, 0x47, 0x41, 0x39, 0x34, 0x03,
@@ -12,21 +15,6 @@ describe('AtscDecoder', () => {
 
   /** @type {!shaka.cea.AtscDecoder} */
   const decoder = new shaka.cea.AtscDecoder();
-
-  // Returns a closed caption with one nested cue, containing default styles.
-  const createDefaultClosedCaption = (stream, startTime, endTime, payload) => {
-    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    const nestedCue = new shaka.text.Cue(startTime, endTime, payload);
-    nestedCue.color = 'white'; // Default text color.
-    nestedCue.backgroundColor = 'black'; // Default background color.
-    topLevelCue.nestedCues.push(nestedCue);
-
-    return {
-      stream,
-      cue: topLevelCue,
-    };
-  };
-
 
   describe('decodes cea608', () => {
     const edmCodeByte2 = 0x2c; // Erase displayed memory byte 2.
@@ -68,14 +56,15 @@ describe('AtscDecoder', () => {
 
       const topLevelCue = new shaka.text.Cue(
           startTimeCaption1, startTimeCaption2, '');
-      const nestedCue = new shaka.text.Cue(
-          startTimeCaption1, startTimeCaption2, expectedText);
-      nestedCue.color = 'green';
-      nestedCue.backgroundColor = 'black';
-      nestedCue.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
+
+      const nestedCue = ceaUtils.createStyledCue(
+          startTimeCaption1, startTimeCaption2, expectedText,
+          true, false, 'green', 'black'
+      );
+
       topLevelCue.nestedCues.push(nestedCue);
 
-      const expectedCues = [
+      const expectedCaptions = [
         {
           stream: 'CC3',
           cue: topLevelCue,
@@ -84,9 +73,9 @@ describe('AtscDecoder', () => {
 
       decoder.extract(greenTextCC3Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
-      const cues = decoder.decode();
+      const captions = decoder.decode();
 
-      expect(cues).toEqual(expectedCues);
+      expect(captions).toEqual(expectedCaptions);
     });
 
     it('popon captions that change color and underline midrow on CC2', () => {
@@ -114,26 +103,21 @@ describe('AtscDecoder', () => {
       const topLevelCue = new shaka.text.Cue(
           startTimeCaption1, startTimeCaption2, '');
 
+      const nestedCue1 = ceaUtils.createStyledCue(
+          startTimeCaption1, startTimeCaption2, expectedText1,
+          false, false, 'white', 'black');
 
-      const nestedCue1 = new shaka.text.Cue(
-          startTimeCaption1, startTimeCaption2, expectedText1);
-      nestedCue1.color = shaka.cea.Cea608Memory.DEFAULT_TXT_COLOR;
-      nestedCue1.backgroundColor = shaka.cea.Cea608Memory.DEFAULT_BG_COLOR;
+      const nestedCue2 = ceaUtils.createStyledCue(
+          startTimeCaption1, startTimeCaption2, expectedText2,
+          true, false, 'red', 'black');
 
-      const nestedCue2 = new shaka.text.Cue(
-          startTimeCaption1, startTimeCaption2, expectedText2);
-      nestedCue2.color = 'red';
-      nestedCue2.backgroundColor = shaka.cea.Cea608Memory.DEFAULT_BG_COLOR;
-      nestedCue2.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
-
-      const nestedCue3 = new shaka.text.Cue(
-          startTimeCaption1, startTimeCaption2, expectedText3);
-      nestedCue3.color = shaka.cea.Cea608Memory.DEFAULT_TXT_COLOR;
-      nestedCue3.backgroundColor = shaka.cea.Cea608Memory.DEFAULT_BG_COLOR;
+      const nestedCue3 = ceaUtils.createStyledCue(
+          startTimeCaption1, startTimeCaption2, expectedText3,
+          false, false, 'white', 'black');
 
       topLevelCue.nestedCues.push(nestedCue1, nestedCue2, nestedCue3);
 
-      const expectedCues = [
+      const expectedCaptions = [
         {
           stream: 'CC2',
           cue: topLevelCue,
@@ -142,9 +126,9 @@ describe('AtscDecoder', () => {
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
-      const cues = decoder.decode();
+      const captions = decoder.decode();
 
-      expect(cues).toEqual(expectedCues);
+      expect(captions).toEqual(expectedCaptions);
     });
 
     it('italicized popon captions on a yellow background on CC2', () => {
@@ -166,16 +150,21 @@ describe('AtscDecoder', () => {
       const startTimeCaption2 = 2;
       const expectedText = 'test';
 
+      // 2 nested cues, one contains styled text, one contains a midrow space.
       const topLevelCue = new shaka.text.Cue(
           startTimeCaption1, startTimeCaption2, '');
-      const nestedCue = new shaka.text.Cue(
-          startTimeCaption1, startTimeCaption2, expectedText);
-      nestedCue.color = 'white';
-      nestedCue.backgroundColor = 'yellow';
-      nestedCue.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
-      topLevelCue.nestedCues.push(nestedCue);
 
-      const expectedCues = [
+      const nestedCue1 = ceaUtils.createStyledCue(
+          startTimeCaption1, startTimeCaption2, expectedText,
+          false, true, 'white', 'yellow');
+
+      const nestedCue2 = ceaUtils.createStyledCue(
+          startTimeCaption1, startTimeCaption2, ' ',
+          false, false, 'white', 'yellow');
+
+      topLevelCue.nestedCues.push(nestedCue1, nestedCue2);
+
+      const expectedCaptions = [
         {
           stream: 'CC2',
           cue: topLevelCue,
@@ -184,9 +173,9 @@ describe('AtscDecoder', () => {
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
-      const cues = decoder.decode();
+      const captions = decoder.decode();
 
-      expect(cues).toEqual(expectedCues);
+      expect(captions).toEqual(expectedCaptions);
     });
 
     it('popon captions with special characters on CC2', () => {
@@ -206,15 +195,15 @@ describe('AtscDecoder', () => {
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
       const expectedText = '♪üå';
-      const expectedCues = [
-        createDefaultClosedCaption(
+      const expectedCaptions = [
+        ceaUtils.createDefaultClosedCaption(
             'CC2', startTimeCaption1, startTimeCaption2, expectedText),
       ];
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
-      const cues = decoder.decode();
-      expect(cues).toEqual(expectedCues);
+      const captions = decoder.decode();
+      expect(captions).toEqual(expectedCaptions);
     });
 
     it('painton captions on CC1', () => {
@@ -231,16 +220,16 @@ describe('AtscDecoder', () => {
       const startTimeCaption2 = 2;
       const expectedText = 'test';
 
-      const expectedCues = [
-        createDefaultClosedCaption(
+      const expectedCaptions = [
+        ceaUtils.createDefaultClosedCaption(
             'CC1', startTimeCaption1, startTimeCaption2, expectedText),
       ];
 
       decoder.extract(paintonCaptionCC1Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
-      const cues = decoder.decode();
+      const captions = decoder.decode();
 
-      expect(cues).toEqual(expectedCues);
+      expect(captions).toEqual(expectedCaptions);
     });
 
     it('rollup captions (2 lines) on CC1', () => {
@@ -287,16 +276,16 @@ describe('AtscDecoder', () => {
       }
       decoder.extract(eraseDisplayedMemory, 6);
 
-      const expectedCues = [
-        createDefaultClosedCaption(stream, 1, 2, '1.'),
-        createDefaultClosedCaption(stream, 2, 3, '1.\n2.'),
-        createDefaultClosedCaption(stream, 3, 4, '2.\n3.'),
-        createDefaultClosedCaption(stream, 4, 5, '3.\n4.'),
+      const expectedCaptions = [
+        ceaUtils.createDefaultClosedCaption(stream, 1, 2, '1.'),
+        ceaUtils.createDefaultClosedCaption(stream, 2, 3, '1.\n2.'),
+        ceaUtils.createDefaultClosedCaption(stream, 3, 4, '2.\n3.'),
+        ceaUtils.createDefaultClosedCaption(stream, 4, 5, '3.\n4.'),
       ];
 
-      const cues = decoder.decode();
+      const captions = decoder.decode();
 
-      expect(cues).toEqual(expectedCues);
+      expect(captions).toEqual(expectedCaptions);
     });
 
     it('PAC shifts entire 2-line rollup window to a new row on CC1', () => {
@@ -331,14 +320,14 @@ describe('AtscDecoder', () => {
       }
       decoder.extract(eraseDisplayedMemory, 3);
 
-      const expectedCues = [
-        createDefaultClosedCaption(stream, 1, 2, '1.'),
-        createDefaultClosedCaption(stream, 2, 3, '1.\n2.'),
+      const expectedCaptions = [
+        ceaUtils.createDefaultClosedCaption(stream, 1, 2, '1.'),
+        ceaUtils.createDefaultClosedCaption(stream, 2, 3, '1.\n2.'),
       ];
 
-      const cues = decoder.decode();
+      const captions = decoder.decode();
 
-      expect(cues).toEqual(expectedCues);
+      expect(captions).toEqual(expectedCaptions);
     });
   });
 

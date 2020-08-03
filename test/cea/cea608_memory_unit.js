@@ -5,25 +5,14 @@
  */
 
 describe('Cea608Memory', () => {
+  /** @type {!shaka.test.CeaUtils} */
+  const ceaUtils = shaka.test.CeaUtils;
+
   /** @type {!shaka.cea.Cea608Memory} */
   let memory;
 
   /** @type {!string} */
   const stream = 'CC1';
-
-  // Returns a closed caption with one nested cue, containing default styles.
-  const createDefaultClosedCaption = (startTime, endTime, payload) => {
-    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    const nestedCue = new shaka.text.Cue(startTime, endTime, payload);
-    nestedCue.color = 'white'; // Default text color.
-    nestedCue.backgroundColor = 'black'; // Default background color.
-    topLevelCue.nestedCues.push(nestedCue);
-
-    return {
-      stream,
-      cue: topLevelCue,
-    };
-  };
 
   beforeEach(() => {
     memory = new shaka.cea.Cea608Memory(new shaka.cea.AtscDecoder(),
@@ -40,9 +29,11 @@ describe('Cea608Memory', () => {
           c.charCodeAt(0));
     }
     memory.forceEmit(t1, t2);
-    const cues = memory.decoder_.getParsedClosedCaptions();
-    const expectedCaptions = [createDefaultClosedCaption(t1, t2, text)];
-    expect(cues).toEqual(expectedCaptions);
+    const captions = memory.decoder_.getParsedClosedCaptions();
+    const expectedCaptions = [
+      ceaUtils.createDefaultClosedCaption(stream, t1, t2, text),
+    ];
+    expect(captions).toEqual(expectedCaptions);
   });
 
   it('adds and emits a series of special characters from the buffer', () => {
@@ -77,12 +68,14 @@ describe('Cea608Memory', () => {
       }
     }
     memory.forceEmit(t1, t2);
-    const expectedCaptions = [createDefaultClosedCaption(t1, t2, expectedText)];
-    const cues = memory.decoder_.getParsedClosedCaptions();
-    expect(cues).toEqual(expectedCaptions);
+    const expectedCaptions = [
+      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
+    ];
+    const captions = memory.decoder_.getParsedClosedCaptions();
+    expect(captions).toEqual(expectedCaptions);
   });
 
-  it('assigns styling appropriately to cues', () => {
+  it('assigns styling appropriately to captions', () => {
     const t1 = 1;
     const t2 = 2;
     const expectedText = 'test';
@@ -102,55 +95,60 @@ describe('Cea608Memory', () => {
           c.charCodeAt(0));
     }
 
+    const nestedCue1 = ceaUtils.createStyledCue(t1, t2, expectedText, true,
+        true, 'red', shaka.cea.Cea608Memory.DEFAULT_BG_COLOR);
+
+    const nestedCue2 = ceaUtils.createStyledCue(t1, t2, expectedText, false,
+        false, 'red', shaka.cea.Cea608Memory.DEFAULT_BG_COLOR);
+
+    const topLevelCue = new shaka.text.Cue(t1, t2, '');
+    topLevelCue.nestedCues.push(nestedCue1, nestedCue2);
+
+    const expectedCaptions = [
+      {
+        stream,
+        cue: topLevelCue,
+      },
+    ];
+
     memory.forceEmit(t1, t2);
-    const captions = memory.decoder_.getParsedClosedCaptions();
-    const topLevelCue = captions[0].cue;
-
-    expect(topLevelCue).toBeDefined();
-    expect(topLevelCue.nestedCues[0].payload).toEqual(expectedText);
-    expect(topLevelCue.nestedCues.length).toEqual(2);
-    expect(topLevelCue.nestedCues[0].color).toEqual('red');
-    expect(topLevelCue.nestedCues[0].textDecoration).toEqual(
-        [shaka.text.Cue.textDecoration.UNDERLINE]);
-    expect(topLevelCue.nestedCues[0].fontStyle).toEqual(
-        shaka.text.Cue.fontStyle.ITALIC);
-
-    expect(topLevelCue.nestedCues[1].payload).toEqual(expectedText);
-    expect(topLevelCue.nestedCues[1].color).toEqual('red');
-    expect(topLevelCue.nestedCues[1].textDecoration).toEqual([]);
-    expect(topLevelCue.nestedCues[1].fontStyle).toEqual(
-        shaka.text.Cue.fontStyle.NORMAL);
-  });
-
-  it('emits new lines between non-empty cues, but not otherwise', () => {
-    const t1 = 1;
-    const t2 = 2;
-    const text = 'test';
-    const expectedText = 'test\n\ntest';
-    memory.setRow(memory.getRow()+1);
-    for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
-          c.charCodeAt(0));
-    }
-
-    memory.setRow(memory.getRow()+1);
-    memory.setRow(memory.getRow()+1);
-
-    for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
-          c.charCodeAt(0));
-    }
-
-    memory.setRow(memory.getRow()+1);
-    memory.setRow(memory.getRow()+1);
-    memory.forceEmit(t1, t2);
-
-    const expectedCaptions = [createDefaultClosedCaption(t1, t2, expectedText)];
     const captions = memory.decoder_.getParsedClosedCaptions();
     expect(captions).toEqual(expectedCaptions);
   });
 
-  it('emits no nested cues when there\'s no non-empty rows', () => {
+  it('emits new lines between non-empty captions, but not otherwise', () => {
+    const t1 = 1;
+    const t2 = 2;
+    const text = 'test';
+    const expectedText = 'test\n\ntest';
+
+    memory.setRow(memory.getRow()+1);
+    for (const c of text) {
+      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+          c.charCodeAt(0));
+    }
+
+    memory.setRow(memory.getRow()+1);
+    memory.setRow(memory.getRow()+1);
+
+    for (const c of text) {
+      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+          c.charCodeAt(0));
+    }
+
+    memory.setRow(memory.getRow()+1);
+    memory.setRow(memory.getRow()+1);
+    memory.forceEmit(t1, t2);
+
+    const expectedCaptions = [
+      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
+    ];
+
+    const captions = memory.decoder_.getParsedClosedCaptions();
+    expect(captions).toEqual(expectedCaptions);
+  });
+
+  it('emits no nested captions when there\'s no non-empty rows', () => {
     const t1 = 1;
     const t2 = 2;
     memory.setRow(memory.getRow()+1);
@@ -174,9 +172,12 @@ describe('Cea608Memory', () => {
     }
     memory.eraseChar();
     memory.forceEmit(t1, t2);
-    const expectedCaptions = [createDefaultClosedCaption(t1, t2, expectedText)];
-    const cues = memory.decoder_.getParsedClosedCaptions();
-    expect(cues).toEqual(expectedCaptions);
+    const expectedCaptions = [
+      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
+    ];
+
+    const captions = memory.decoder_.getParsedClosedCaptions();
+    expect(captions).toEqual(expectedCaptions);
   });
 
   it('erases the entire buffer', () => {
@@ -189,14 +190,17 @@ describe('Cea608Memory', () => {
           c.charCodeAt(0));
       memory.setRow(memory.getRow() + 1); // increment row
     }
-    const expectedCaptions = [createDefaultClosedCaption(t1, t2, expectedText)];
+
     memory.forceEmit(t1, t2);
+    const captions = memory.decoder_.getParsedClosedCaptions();
+    const expectedCaptions = [
+      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
+    ];
 
-    // Expect the correct cue to be emitted.
-    const cues = memory.decoder_.getParsedClosedCaptions();
-    expect(cues).toEqual(expectedCaptions);
+    // Assert that the correct caption was emitted.
+    expect(captions).toEqual(expectedCaptions);
 
-    // Erase the memory and currently buffered cues.
+    // Erase the memory and currently buffered captions.
     memory.eraseBuffer();
     memory.decoder_.clearParsedClosedCaptions();
 
@@ -207,7 +211,7 @@ describe('Cea608Memory', () => {
     expect(memory.decoder_.getParsedClosedCaptions()).toEqual([]);
   });
 
-  it('erases the entire buffer', () => {
+  it('shifts rows correctly', () => {
     const t1 = 1;
     const t2 = 2;
     const text = 'test';
@@ -218,14 +222,17 @@ describe('Cea608Memory', () => {
           c.charCodeAt(0));
       memory.setRow(memory.getRow() + 1); // increment row
     }
-    const expectedCaptions1 = [createDefaultClosedCaption(t1, t2, expectedText1)];
+    const expectedCaptions1 = [
+      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText1),
+    ];
+
     memory.forceEmit(t1, t2);
 
     // Expect the correct cue to be emitted.
-    const cues = memory.decoder_.getParsedClosedCaptions();
-    expect(cues).toEqual(expectedCaptions1);
+    const captions = memory.decoder_.getParsedClosedCaptions();
+    expect(captions).toEqual(expectedCaptions1);
 
-    // Move + clear the first 2 rows, and clear currently buffered cues.
+    // Move + clear the first 2 rows, and clear currently buffered captions.
     const srcRowIdx = 1;
     const dstRowIdx = 5;
     const rowsToMove = 2;
@@ -236,7 +243,10 @@ describe('Cea608Memory', () => {
     // Force out the new memory.
     memory.forceEmit(t1, t2);
 
-    const expectedCaptions2 = [createDefaultClosedCaption(t1, t2, expectedText2)];
-    expect(memory.decoder_.getParsedClosedCaptions()).toEqual(expectedCaptions2);
+    const expectedCaptions2 = [
+      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText2),
+    ];
+    expect(memory.decoder_.getParsedClosedCaptions())
+        .toEqual(expectedCaptions2);
   });
 });
