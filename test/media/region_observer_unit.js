@@ -33,7 +33,8 @@ describe('RegionObserver', () => {
     onExitRegion = jasmine.createSpy('onExitRegion');
     onSkipRegion = jasmine.createSpy('onSkipRegion');
 
-    timeline = new shaka.media.RegionTimeline();
+    timeline = new shaka.media.RegionTimeline(
+        () => { return {start: 0, end: 100}; });
 
     observer = new shaka.media.RegionObserver(timeline);
     observer.setListeners(
