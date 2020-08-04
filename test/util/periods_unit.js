@@ -435,6 +435,75 @@ describe('PeriodCombiner', () => {
     expect(highBandwidth.video.originalId).toBe('480');
   });
 
+
+  it('Filters out duplicate streams', async () => {
+    // v1 and v3 are duplicates
+    const v1 = makeVideoStream(1280);
+    v1.frameRate = 30000/1001;
+    v1.originalId = 'v1';
+    v1.bandwidth = 6200000;
+
+    const v2 = makeVideoStream(1920);
+    v2.frameRate = 30000/1001;
+    v2.originalId = 'v2';
+    v2.bandwidth = 8000000;
+
+    const v3 = makeVideoStream(1280);
+    v3.frameRate = 30000/1001;
+    v3.originalId = 'v3';
+    v3.bandwidth = 6200000;
+
+    // a1 and a2 are duplicats
+    const a1 = makeAudioStream('en', /* channels= */ 2);
+    a1.originalId = 'a1';
+    a1.bandwidth = 65106;
+    a1.roles = ['role1', 'role2'];
+
+    const a2 = makeAudioStream('en', /* channels= */ 2);
+    a2.originalId = 'a2';
+    a2.bandwidth = 65106;
+    a2.roles = ['role1', 'role2'];
+
+    const a3 = makeAudioStream('en', /* channels= */ 2);
+    a3.originalId = 'a3';
+    a3.bandwidth = 97065;
+    a2.roles = ['role1', 'role2'];
+
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          v1,
+          v2,
+          v3,
+        ],
+        audioStreams: [
+          a1,
+          a2,
+          a3,
+        ],
+        textStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+    const variants = combiner.getVariants();
+    expect(variants.length).toBe(4);
+
+    // v3 should've been filtered out
+    const videoIds = variants.map((v) => v.video.originalId);
+    for (const id of videoIds) {
+      expect(id).not.toBe('v3');
+    }
+
+    // a2 should've been filtered out
+    const audioIds = variants.map((v) => v.audio.originalId);
+    for (const id of audioIds) {
+      expect(id).not.toBe('a2');
+    }
+  });
+
   it('Text track gaps', async () => {
     /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
     const periods = [
@@ -690,63 +759,6 @@ describe('PeriodCombiner', () => {
     const audio2 = variants[1].audio;
     expect(audio2.roles).toEqual(['role1']);
     expect(audio2.originalId).toBe('stream2,stream4');
-  });
-
-  it('Identical streams except for ID', async () => {
-    // When two video or audio or text streams have the same characteristics,
-    // this should at least succeed for single-period live streams.  We can
-    // create an output for each input based purely on their IDs.
-
-    /** @type {shaka.extern.Stream} */
-    const video1 = makeVideoStream(480);
-    /** @type {shaka.extern.Stream} */
-    const video2 = makeVideoStream(480);
-    /** @type {shaka.extern.Stream} */
-    const audio1 = makeAudioStream('en');
-    /** @type {shaka.extern.Stream} */
-    const audio2 = makeAudioStream('en');
-    /** @type {shaka.extern.Stream} */
-    const text1 = makeTextStream('es');
-    /** @type {shaka.extern.Stream} */
-    const text2 = makeTextStream('es');
-
-    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
-    const periods = [
-      {
-        id: '1',
-        videoStreams: [
-          video1,
-          video2,
-        ],
-        audioStreams: [
-          audio1,
-          audio2,
-        ],
-        textStreams: [
-          text1,
-          text2,
-        ],
-      },
-    ];
-
-    await combiner.combinePeriods(periods, /* isDynamic= */ true);
-    const variants = combiner.getVariants();
-    expect(variants).toEqual(jasmine.arrayWithExactContents([
-      makeAVVariant(480, 'en', /* channels= */ 2),
-      makeAVVariant(480, 'en', /* channels= */ 2),
-      makeAVVariant(480, 'en', /* channels= */ 2),
-      makeAVVariant(480, 'en', /* channels= */ 2),
-    ]));
-
-    const textStreams = combiner.getTextStreams();
-    expect(textStreams).toEqual(jasmine.arrayWithExactContents([
-      jasmine.objectContaining({
-        language: 'es',
-      }),
-      jasmine.objectContaining({
-        language: 'es',
-      }),
-    ]));
   });
 
   /** @type {number} */
