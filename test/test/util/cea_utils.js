@@ -11,39 +11,16 @@ goog.provide('shaka.test.CeaUtils');
  */
 shaka.test.CeaUtils = class {
   /**
-   * Returns a closed caption containing default styles.
-   * All new line characters are converted into linebreak cues nested
-   * inside the top-level cue.
-   * @param {!string} stream
+   * Returns a cue with no underline/italics, and default colors
    * @param {!number} startTime
    * @param {!number} endTime
    * @param {!string} payload
    */
-  static createDefaultClosedCaption(stream, startTime, endTime, payload) {
-    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
-    let currentCue = shaka.test.CeaUtils.createStyledCue(startTime, endTime, '',
-        false, false, 'white', 'black');
-
-    for (const char of payload) {
-      if (char == '\n') {
-        if (currentCue.payload) {
-          topLevelCue.nestedCues.push(currentCue);
-        }
-        const lineBreakCue = new shaka.text.Cue(startTime, endTime, '');
-        lineBreakCue.spacer = true;
-        topLevelCue.nestedCues.push(lineBreakCue);
-        currentCue = shaka.test.CeaUtils.createStyledCue(startTime, endTime, '',
-            false, false, 'white', 'black');
-      } else {
-        currentCue.payload += char;
-      }
-    }
-    topLevelCue.nestedCues.push(currentCue);
-
-    return {
-      stream,
-      cue: topLevelCue,
-    };
+  static createDefaultCue(startTime, endTime, payload) {
+    const cue = new shaka.text.Cue(startTime, endTime, payload);
+    cue.color = shaka.cea.Cea608Memory.DEFAULT_TXT_COLOR;
+    cue.backgroundColor = shaka.cea.Cea608Memory.DEFAULT_BG_COLOR;
+    return cue;
   }
 
   /**
@@ -68,6 +45,18 @@ shaka.test.CeaUtils = class {
     }
     cue.color = textColor;
     cue.backgroundColor = backgroundColor;
+    return cue;
+  }
+
+  /**
+   * Returns a cue that corresponds to a linebreak.
+   * @param {!number} startTime
+   * @param {!number} endTime
+   * @return {!shaka.text.Cue}
+   */
+  static createLineBreakCue(startTime, endTime) {
+    const cue = new shaka.text.Cue(startTime, endTime, /* payload= */ '');
+    cue.spacer = true;
     return cue;
   }
 };

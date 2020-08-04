@@ -7,6 +7,8 @@
 describe('Cea608Memory', () => {
   const ceaUtils = shaka.test.CeaUtils;
 
+  const CharSet = shaka.cea.Cea608Memory.CharSet;
+
   /** @type {!shaka.cea.Cea608Memory} */
   let memory;
 
@@ -14,116 +16,137 @@ describe('Cea608Memory', () => {
   const stream = 'CC1';
 
   beforeEach(() => {
-    memory = new shaka.cea.Cea608Memory(new shaka.cea.CeaDecoder(),
-        0, 0, false // F1 + C1 -> CC1
-    );
+    // Create a CC1 Memory: F1 + C1 -> CC1
+    memory = new shaka.cea.Cea608Memory(/* fieldNum= */ 0, /* channelNum= */ 0);
   });
 
   it('adds and emits a series of basic characters from the buffer', () => {
     const text = 'test word';
-    const t1 = 1;
-    const t2 = 2;
+    const startTime = 1;
+    const endTime = 2;
     for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
           c.charCodeAt(0));
     }
-    memory.forceEmit(t1, t2);
-    const captions = memory.getDecoder().getParsedClosedCaptions();
-    const expectedCaptions = [
-      ceaUtils.createDefaultClosedCaption(stream, t1, t2, text),
-    ];
-    expect(captions).toEqual(expectedCaptions);
+    const caption = memory.forceEmit(startTime, endTime);
+
+    const expectedNestedCue = ceaUtils.createDefaultCue(
+        startTime, endTime, text);
+
+    const expectedNestedCues = [expectedNestedCue];
+
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    topLevelCue.nestedCues = expectedNestedCues;
+
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
+
+    expect(caption).toEqual(expectedCaption);
   });
 
   it('adds and emits a series of special characters from the buffer', () => {
-    const t1 = 1;
-    const t2 = 2;
+    const startTime = 1;
+    const endTime = 2;
     const expectedText = '½¿èôÇ©ë»ö{ß¦';
     const charGroups = [
       {
-        set: shaka.cea.Cea608Memory.CharSet.SPECIAL_NORTH_AMERICAN,
+        set: CharSet.SPECIAL_NORTH_AMERICAN,
         chars: [0x32, 0x33, 0x3a, 0x3e], // ½, ¿, è, ô
       },
 
       {
-        set: shaka.cea.Cea608Memory.CharSet.SPANISH_FRENCH,
+        set: CharSet.SPANISH_FRENCH,
         chars: [0x32, 0x2b, 0x36, 0x3f], // Ç, ©, ë, »
       },
 
       {
-        set: shaka.cea.Cea608Memory.CharSet.PORTUGUESE_GERMAN,
+        set: CharSet.PORTUGUESE_GERMAN,
         chars: [0x33, 0x29, 0x34, 0x37], // ö, {, ß, ¦
       },
     ];
     for (const group of charGroups) {
       for (const c of group.chars) {
-        if (group.set === shaka.cea.Cea608Memory.CharSet.SPANISH_FRENCH ||
-            group.set === shaka.cea.Cea608Memory.CharSet.PORTUGUESE_GERMAN) {
-          // Add basic char, since this group does backspace on preceding chars.
+        if (group.set === CharSet.SPANISH_FRENCH ||
+            group.set === CharSet.PORTUGUESE_GERMAN) {
+          // As per the CEA-608 spec, a char received from these extended sets
+          // does a backspace over a preceding char. Thus, the spec mandates any
+          // extended char to be preceded by a basic char, which serves as a
+          // fallback for systems that can't decode the extended char.
           memory.addChar(
-              shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN, 0x20);
+              CharSet.BASIC_NORTH_AMERICAN, 0x20);
         }
         memory.addChar(group.set, c);
       }
     }
-    memory.forceEmit(t1, t2);
-    const expectedCaptions = [
-      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
-    ];
-    const captions = memory.getDecoder().getParsedClosedCaptions();
-    expect(captions).toEqual(expectedCaptions);
+
+    const expectedNestedCue = ceaUtils.createDefaultCue(
+        startTime, endTime, expectedText);
+    const expectedNestedCues = [expectedNestedCue];
+
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    topLevelCue.nestedCues = expectedNestedCues;
+
+    const expectedCaption= {
+      stream,
+      cue: topLevelCue,
+    };
+
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toEqual(expectedCaption);
   });
 
-  it('assigns styling appropriately to captions', () => {
-    const t1 = 1;
-    const t2 = 2;
+  it('assigns styling appropriately to caption', () => {
+    const startTime = 1;
+    const endTime = 2;
     const expectedText = 'test';
 
     memory.setUnderline(true);
     memory.setItalics(true);
     memory.setTextColor('red');
     for (const c of expectedText) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
           c.charCodeAt(0));
     }
 
     memory.setUnderline(false);
     memory.setItalics(false);
     for (const c of expectedText) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
           c.charCodeAt(0));
     }
 
-    const nestedCue1 = ceaUtils.createStyledCue(t1, t2, expectedText, true,
-        true, 'red', shaka.cea.Cea608Memory.DEFAULT_BG_COLOR);
+    const nestedCue1 = ceaUtils.createStyledCue(startTime, endTime,
+        expectedText, /* underline= */ true,
+        /* italics= */ true, /* textColor= */ 'red',
+        /* backgroundColor= */ shaka.cea.Cea608Memory.DEFAULT_BG_COLOR);
 
-    const nestedCue2 = ceaUtils.createStyledCue(t1, t2, expectedText, false,
-        false, 'red', shaka.cea.Cea608Memory.DEFAULT_BG_COLOR);
+    const nestedCue2 = ceaUtils.createStyledCue(startTime, endTime,
+        expectedText, /* underline= */ false,
+        /* italics= */ false, /* textColor= */ 'red',
+        /* backgroundColor= */ shaka.cea.Cea608Memory.DEFAULT_BG_COLOR);
 
-    const topLevelCue = new shaka.text.Cue(t1, t2, '');
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
     topLevelCue.nestedCues.push(nestedCue1, nestedCue2);
 
-    const expectedCaptions = [
-      {
-        stream,
-        cue: topLevelCue,
-      },
-    ];
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
 
-    memory.forceEmit(t1, t2);
-    const captions = memory.getDecoder().getParsedClosedCaptions();
-    expect(captions).toEqual(expectedCaptions);
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toEqual(expectedCaption);
   });
 
-  it('emits new lines between non-empty captions, but not otherwise', () => {
-    const t1 = 1;
-    const t2 = 2;
+  it('trims leading and trailing newlines', () => {
+    const startTime = 1;
+    const endTime = 2;
     const text = 'test';
-    const expectedText = 'test\n\ntest';
 
     memory.setRow(memory.getRow()+1);
     for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
           c.charCodeAt(0));
     }
 
@@ -131,121 +154,152 @@ describe('Cea608Memory', () => {
     memory.setRow(memory.getRow()+1);
 
     for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
           c.charCodeAt(0));
     }
 
     memory.setRow(memory.getRow()+1);
     memory.setRow(memory.getRow()+1);
-    memory.forceEmit(t1, t2);
 
-    const expectedCaptions = [
-      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
+    const expectedNestedCue = ceaUtils.createDefaultCue(
+        startTime, endTime, text);
+
+    const expectedNestedCues = [
+      expectedNestedCue,
+      ceaUtils.createLineBreakCue(startTime, endTime),
+      ceaUtils.createLineBreakCue(startTime, endTime),
+      expectedNestedCue,
     ];
 
-    const captions = memory.getDecoder().getParsedClosedCaptions();
-    expect(captions).toEqual(expectedCaptions);
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    topLevelCue.nestedCues = expectedNestedCues;
+
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
+
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toEqual(expectedCaption);
   });
 
-  it('emits no nested captions when there\'s no non-empty rows', () => {
-    const t1 = 1;
-    const t2 = 2;
+  it('does not emit caption when all rows are empty', () => {
+    const startTime = 1;
+    const endTime = 2;
     memory.setRow(memory.getRow()+1);
     memory.setRow(memory.getRow()+1);
     memory.setRow(memory.getRow()+1);
-    memory.forceEmit(t1, t2);
+    memory.forceEmit(startTime, endTime);
 
-    const expectedCaptions = [];
-    const captions = memory.getDecoder().getParsedClosedCaptions();
-    expect(captions).toEqual(expectedCaptions);
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toBe(null);
   });
 
   it('erases a character from the buffer', () => {
-    const t1 = 1;
-    const t2 = 2;
+    const startTime = 1;
+    const endTime = 2;
     const text = 'testt';
     const expectedText = 'test';
     for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
           c.charCodeAt(0));
     }
     memory.eraseChar();
-    memory.forceEmit(t1, t2);
-    const expectedCaptions = [
-      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
+
+    const expectedNestedCue = ceaUtils.createDefaultCue(
+        startTime, endTime, expectedText);
+
+    const expectedNestedCues = [
+      expectedNestedCue,
     ];
 
-    const captions = memory.getDecoder().getParsedClosedCaptions();
-    expect(captions).toEqual(expectedCaptions);
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    topLevelCue.nestedCues = expectedNestedCues;
+
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
+
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toEqual(expectedCaption);
   });
 
-  it('erases the entire buffer', () => {
-    const t1 = 1;
-    const t2 = 2;
-    const text = '0123456789abcde';
-    const expectedText = '0\n1\n2\n3\n4\n5\n6\n7\n8\n9\na\nb\nc\nd\ne';
-    for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
-          c.charCodeAt(0));
-      memory.setRow(memory.getRow() + 1); // increment row
-    }
+  describe('eraseBuffer', () => {
+    it('erases the entire buffer', () => {
+      const startTime = 1;
+      const endTime = 2;
+      const text = '0123456789abcde';
 
-    memory.forceEmit(t1, t2);
-    const captions = memory.getDecoder().getParsedClosedCaptions();
-    const expectedCaptions = [
-      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText),
-    ];
+      // Add characters to the memory buffer.
+      for (const c of text) {
+        memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+            c.charCodeAt(0));
+        memory.setRow(memory.getRow() + 1); // increment row
+      }
 
-    // Assert that the correct caption was emitted.
-    expect(captions).toEqual(expectedCaptions);
+      // Erase the entire memory buffer.
+      memory.eraseBuffer();
 
-    // Erase the memory and currently buffered captions.
-    memory.eraseBuffer();
-    memory.getDecoder().clearParsedClosedCaptions();
+      // Force out the memory buffer.
+      const caption = memory.forceEmit(startTime, endTime);
 
-    // Force out the new memory.
-    memory.forceEmit(t1, t2);
-
-    // Expect the forced out memory to be blank. We just cleared it.
-    expect(memory.getDecoder().getParsedClosedCaptions()).toEqual([]);
+      // Expect the forced out memory to be blank. We just cleared it.
+      expect(caption).toBe(null);
+    });
   });
 
-  it('shifts rows correctly', () => {
-    const t1 = 1;
-    const t2 = 2;
-    const text = 'test';
-    const expectedText1 = 't\ne\ns\nt';
-    const expectedText2 = 's\nt\nt\ne';
-    for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
-          c.charCodeAt(0));
-      memory.setRow(memory.getRow() + 1); // increment row
-    }
-    const expectedCaptions1 = [
-      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText1),
-    ];
+  describe('moveRows', () => {
+    it('moves a set number of rows to a new position in the buffer', () => {
+      const startTime = 1;
+      const endTime = 2;
+      const text = 'test';
 
-    memory.forceEmit(t1, t2);
+      // Add the text to the buffer, each character on separate rows.
+      for (const c of text) {
+        memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+            c.charCodeAt(0));
+        memory.setRow(memory.getRow() + 1); // increment row
+      }
 
-    // Expect the correct cue to be emitted.
-    const captions = memory.getDecoder().getParsedClosedCaptions();
-    expect(captions).toEqual(expectedCaptions1);
+      // Move first 2 rows down to 5th row, and then clear their old positions.
+      const srcRowIdx = 1;
+      const dstRowIdx = 5;
+      const rowsToMove = 2;
+      memory.moveRows(dstRowIdx, srcRowIdx, rowsToMove);
+      memory.resetRows(srcRowIdx, rowsToMove - 1);
 
-    // Move + clear the first 2 rows, and clear currently buffered captions.
-    const srcRowIdx = 1;
-    const dstRowIdx = 5;
-    const rowsToMove = 2;
-    memory.moveRows(dstRowIdx, srcRowIdx, rowsToMove);
-    memory.resetRows(srcRowIdx, rowsToMove - 1);
-    memory.getDecoder().clearParsedClosedCaptions();
+      const expectedNestedCue1 = ceaUtils.createDefaultCue(
+          startTime, endTime, 's');
+      const expectedNestedCue2 = ceaUtils.createDefaultCue(
+          startTime, endTime, 't');
+      const expectedNestedCue3 = ceaUtils.createDefaultCue(
+          startTime, endTime, 't');
+      const expectedNestedCue4 = ceaUtils.createDefaultCue(
+          startTime, endTime, 'e');
 
-    // Force out the new memory.
-    memory.forceEmit(t1, t2);
+      // Expected text is 's\nt\nt\ne'
+      const expectedNestedCues = [
+        expectedNestedCue1,
+        ceaUtils.createLineBreakCue(startTime, endTime),
+        expectedNestedCue2,
+        ceaUtils.createLineBreakCue(startTime, endTime),
+        expectedNestedCue3,
+        ceaUtils.createLineBreakCue(startTime, endTime),
+        expectedNestedCue4,
+      ];
 
-    const expectedCaptions2 = [
-      ceaUtils.createDefaultClosedCaption(stream, t1, t2, expectedText2),
-    ];
-    expect(memory.getDecoder().getParsedClosedCaptions())
-        .toEqual(expectedCaptions2);
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.nestedCues = expectedNestedCues;
+
+      const expectedCaption = {
+        stream,
+        cue: topLevelCue,
+      };
+
+      // Force out the new memory.
+      const caption = memory.forceEmit(startTime, endTime);
+      expect(caption).toEqual(expectedCaption);
+    });
   });
 });

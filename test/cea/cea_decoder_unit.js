@@ -7,6 +7,9 @@
 describe('CeaDecoder', () => {
   const ceaUtils = shaka.test.CeaUtils;
 
+  /** @type {!string} */
+  const DEFAULT_BG_COLOR = shaka.cea.Cea608Memory.DEFAULT_BG_COLOR;
+
   /** @type {!Uint8Array} */
   const atscCaptionInitBytes = new Uint8Array([
     0xb5, 0x00, 0x31, 0x47, 0x41, 0x39, 0x34, 0x03,
@@ -102,19 +105,21 @@ describe('CeaDecoder', () => {
       const topLevelCue = new shaka.text.Cue(
           startTimeCaption1, startTimeCaption2, '');
 
-      const nestedCue1 = ceaUtils.createStyledCue(
-          startTimeCaption1, startTimeCaption2, expectedText1,
-          false, false, 'white', 'black');
+      const nestedCue1 = ceaUtils.createDefaultCue(
+          startTimeCaption1, startTimeCaption2, expectedText1);
 
       const nestedCue2 = ceaUtils.createStyledCue(
           startTimeCaption1, startTimeCaption2, expectedText2,
-          true, false, 'red', 'black');
+          /* underline= */ true, /* italics= */ false,
+          /* textColor= */ 'red', /* backgroundColor= */ DEFAULT_BG_COLOR);
 
-      const nestedCue3 = ceaUtils.createStyledCue(
-          startTimeCaption1, startTimeCaption2, expectedText3,
-          false, false, 'white', 'black');
+      const nestedCue3 = ceaUtils.createDefaultCue(
+          startTimeCaption1, startTimeCaption2, expectedText3);
 
-      topLevelCue.nestedCues.push(nestedCue1, nestedCue2, nestedCue3);
+      const expectedNestedCues = [
+        nestedCue1, nestedCue2, nestedCue3,
+      ];
+      topLevelCue.nestedCues = expectedNestedCues;
 
       const expectedCaptions = [
         {
@@ -150,25 +155,27 @@ describe('CeaDecoder', () => {
       const expectedText = 'test';
 
       // 2 nested cues, one contains styled text, one contains a midrow space.
-      const topLevelCue = new shaka.text.Cue(
-          startTimeCaption1, startTimeCaption2, '');
 
       const nestedCue1 = ceaUtils.createStyledCue(
           startTimeCaption1, startTimeCaption2, expectedText,
-          false, true, 'white', 'yellow');
+          /* underline= */ false, /* italics= */ true,
+          /* textColor= */ 'white', /* backgroundColor= */ 'yellow');
 
       const nestedCue2 = ceaUtils.createStyledCue(
-          startTimeCaption1, startTimeCaption2, ' ',
-          false, false, 'white', 'yellow');
+          startTimeCaption1, startTimeCaption2, /* payload= */ ' ',
+          /* underline= */ false, /* italics= */ false,
+          /* textColor= */ 'white', /* backgroundColor= */ 'yellow');
 
-      topLevelCue.nestedCues.push(nestedCue1, nestedCue2);
+      const expectedNestedCues = [nestedCue1, nestedCue2];
 
-      const expectedCaptions = [
-        {
-          stream: 'CC2',
-          cue: topLevelCue,
-        },
-      ];
+      const topLevelCue = new shaka.text.Cue(startTimeCaption1,
+          startTimeCaption2, '');
+      topLevelCue.nestedCues = expectedNestedCues;
+
+      const expectedCaptions = [{
+        stream: 'CC2',
+        cue: topLevelCue,
+      }];
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
@@ -194,10 +201,20 @@ describe('CeaDecoder', () => {
       const startTimeCaption1 = 1;
       const startTimeCaption2 = 2;
       const expectedText = '♪üå';
-      const expectedCaptions = [
-        ceaUtils.createDefaultClosedCaption(
-            'CC2', startTimeCaption1, startTimeCaption2, expectedText),
-      ];
+
+      const expectedNestedCue = ceaUtils.createDefaultCue(
+          startTimeCaption1, startTimeCaption2, expectedText);
+
+      const expectedNestedCues = [expectedNestedCue];
+
+      const topLevelCue = new shaka.text.Cue(startTimeCaption1,
+          startTimeCaption2, '');
+      topLevelCue.nestedCues = expectedNestedCues;
+
+      const expectedCaptions = [{
+        stream: 'CC2',
+        cue: topLevelCue,
+      }];
 
       decoder.extract(midrowStyleChangeCC2Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
@@ -219,10 +236,19 @@ describe('CeaDecoder', () => {
       const startTimeCaption2 = 2;
       const expectedText = 'test';
 
-      const expectedCaptions = [
-        ceaUtils.createDefaultClosedCaption(
-            'CC1', startTimeCaption1, startTimeCaption2, expectedText),
-      ];
+      const expectedNestedCue = ceaUtils.createDefaultCue(
+          startTimeCaption1, startTimeCaption2, expectedText);
+
+      const expectedNestedCues = [expectedNestedCue];
+
+      const topLevelCue = new shaka.text.Cue(startTimeCaption1,
+          startTimeCaption2, '');
+      topLevelCue.nestedCues = expectedNestedCues;
+
+      const expectedCaptions = [{
+        stream: 'CC1',
+        cue: topLevelCue,
+      }];
 
       decoder.extract(paintonCaptionCC1Packet, startTimeCaption1);
       decoder.extract(eraseDisplayedMemory, startTimeCaption2);
@@ -235,6 +261,11 @@ describe('CeaDecoder', () => {
       const controlCount1 = 0x03;
       const controlCount2 = 0x02;
       const stream = 'CC1';
+      const time1 = 1;
+      const time2 = 2;
+      const time3 = 3;
+      const time4 = 4;
+      const time5 = 5;
 
       // Carriage return on CC1
       const carriageReturnControlCode = new Uint8Array([0x94, 0xad]);
@@ -275,11 +306,74 @@ describe('CeaDecoder', () => {
       }
       decoder.extract(eraseDisplayedMemory, 6);
 
+      const nestedCue1 = ceaUtils.createDefaultCue(
+          /* startTime= */ time1, /* endTime= */ time2, /* payload= */ '1.');
+      const nestedCue2 = ceaUtils.createDefaultCue(
+          /* startTime= */ time2, /* endTime= */ time3, /* payload= */ '1.');
+      const nestedCue3 = ceaUtils.createDefaultCue(
+          /* startTime= */ time2, /* endTime= */ time3, /* payload= */ '2.');
+      const nestedCue4 = ceaUtils.createDefaultCue(
+          /* startTime= */ time3, /* endTime= */ time4, /* payload= */ '2.');
+      const nestedCue5 = ceaUtils.createDefaultCue(
+          /* startTime= */ time3, /* endTime= */ time4, /* payload= */ '3.');
+      const nestedCue6 = ceaUtils.createDefaultCue(
+          /* startTime= */ time4, /* endTime= */ time5, /* payload= */ '3.');
+      const nestedCue7 = ceaUtils.createDefaultCue(
+          /* startTime= */ time4, /* endTime= */ time5, /* payload= */ '4.');
+
+
+      // Top level cue corresponding to the first closed caption.
+      const topLevelCue1 = new shaka.text.Cue(
+          /* startTime= */ time1, /* endTime= */ time2, '');
+      topLevelCue1.nestedCues = [nestedCue1];
+
+      // Top level cue corresponding to the second closed caption.
+      const topLevelCue2 = new shaka.text.Cue(
+          /* startTime= */ time2, /* endTime= */ time3, '');
+      topLevelCue2.nestedCues = [
+        nestedCue2,
+        ceaUtils.createLineBreakCue(
+            /* startTime= */ time2, /* endTime= */ time3),
+        nestedCue3,
+      ];
+
+      // Top level cue corresponding to the third closed caption.
+      const topLevelCue3 = new shaka.text.Cue(
+          /* startTime= */ time3, /* endTime= */ time4, '');
+      topLevelCue3.nestedCues = [
+        nestedCue4,
+        ceaUtils.createLineBreakCue(
+            /* startTime= */ time3, /* endTime= */ time4),
+        nestedCue5,
+      ];
+
+      // Top level cue corresponding to the fourth closed caption.
+      const topLevelCue4 = new shaka.text.Cue(
+          /* startTime= */ time4, /* endTime= */ time5, '');
+      topLevelCue4.nestedCues = [
+        nestedCue6,
+        ceaUtils.createLineBreakCue(
+            /* startTime= */ time4, /* endTime= */ time5),
+        nestedCue7,
+      ];
+
       const expectedCaptions = [
-        ceaUtils.createDefaultClosedCaption(stream, 1, 2, '1.'),
-        ceaUtils.createDefaultClosedCaption(stream, 2, 3, '1.\n2.'),
-        ceaUtils.createDefaultClosedCaption(stream, 3, 4, '2.\n3.'),
-        ceaUtils.createDefaultClosedCaption(stream, 4, 5, '3.\n4.'),
+        {
+          stream,
+          cue: topLevelCue1,
+        },
+        {
+          stream,
+          cue: topLevelCue2,
+        },
+        {
+          stream,
+          cue: topLevelCue3,
+        },
+        {
+          stream,
+          cue: topLevelCue4,
+        },
       ];
 
       const captions = decoder.decode();
@@ -319,9 +413,36 @@ describe('CeaDecoder', () => {
       }
       decoder.extract(eraseDisplayedMemory, 3);
 
+      const nestedCue1 = ceaUtils.createDefaultCue(
+          /* startTime= */ 1, /* endTime= */ 2, /* payload= */ '1.');
+      const nestedCue2 = ceaUtils.createDefaultCue(
+          /* startTime= */ 2, /* endTime= */ 3, /* payload= */ '1.');
+      const nestedCue3 = ceaUtils.createDefaultCue(
+          /* startTime= */ 2, /* endTime= */ 3, /* payload= */ '2.');
+
+      // Top level cue corresponding to the first closed caption.
+      const topLevelCue1 = new shaka.text.Cue(/* startTime= */ 1,
+          /* endTime= */ 2, '');
+      topLevelCue1.nestedCues = [nestedCue1];
+
+      // Top level cue corresponding to the second closed caption.
+      const topLevelCue2 = new shaka.text.Cue(/* startTime= */ 2,
+          /* endTime= */ 3, '');
+      topLevelCue2.nestedCues = [
+        nestedCue2,
+        ceaUtils.createLineBreakCue(/* startTime= */ 2, /* endTime= */ 3),
+        nestedCue3,
+      ];
+
       const expectedCaptions = [
-        ceaUtils.createDefaultClosedCaption(stream, 1, 2, '1.'),
-        ceaUtils.createDefaultClosedCaption(stream, 2, 3, '1.\n2.'),
+        {
+          stream,
+          cue: topLevelCue1,
+        },
+        {
+          stream,
+          cue: topLevelCue2,
+        },
       ];
 
       const captions = decoder.decode();

@@ -380,8 +380,8 @@ shaka.test.FakeClosedCaptionParser = class {
   }
 
   /** @override */
-  parseFrom(data, onCaptions) {
-    return shaka.test.Util.invokeSpy(this.parseFromSpy, data, onCaptions);
+  parseFrom(data) {
+    return shaka.test.Util.invokeSpy(this.parseFromSpy, data);
   }
 
   /** @override */

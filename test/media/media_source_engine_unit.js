@@ -587,8 +587,8 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-      mockClosedCaptionParser.parseFromSpy.and.callFake((data, onCaptions) => {
-        onCaptions(['foo', 'bar']);
+      mockClosedCaptionParser.parseFromSpy.and.callFake((data) => {
+        return ['foo', 'bar'];
       });
 
       await mediaSourceEngine.init(initObject, false);
