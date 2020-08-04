@@ -721,6 +721,26 @@ describe('DrmEngine', function() {
       }).catch(fail).then(done);
     });
 
+    // https://github.com/google/shaka-player/issues/2754
+    it('ignores duplicate init data from newInitData', async () => {
+      /** @type {!Uint8Array} */
+      const initData = new Uint8Array(1);
+
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData =
+            [{initData: initData, initDataType: 'cenc', keyId: 'abc'}];
+      });
+
+      await drmEngine.initForPlayback(
+          manifest.periods[0].variants, manifest.offlineSessionIds);
+      drmEngine.newInitData('cenc', initData);
+      await drmEngine.attach(mockVideo);
+
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
+      expect(session1.generateRequest).toHaveBeenCalledWith(
+          'cenc', initData.buffer);
+    });
+
     it('uses clearKeys config to override DrmInfo', async () => {
       manifest.periods[0].variants[0].drmInfos[0].keySystem =
           'com.fake.NOT.clearkey';
@@ -2121,5 +2141,15 @@ describe('DrmEngine', function() {
    */
   function keyStatusBatchTime() {
     return shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME_;
+  }
+
+  /**
+   * @param {function(!Array.<shaka.extern.DrmInfo>)} callback
+   */
+  function tweakDrmInfos(callback) {
+    if (manifest.periods[0].variants[0].video.encrypted ||
+        manifest.periods[0].variants[0].audio.encrypted) {
+      callback(manifest.periods[0].variants[0].drmInfos);
+    }
   }
 });
