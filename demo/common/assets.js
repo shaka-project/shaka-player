@@ -31,6 +31,7 @@ shakaAssets.Source = {
   UPLYNK: shakaDemo.MessageIds.UPLYNK,
   APPLE: shakaDemo.MessageIds.APPLE,
   IRT: shakaDemo.MessageIds.IRT,
+  MICROSOFT: shakaDemo.MessageIds.MICROSOFT,
 };
 
 
@@ -753,7 +754,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Low Latency DASH Live',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
-      /* manifestUri= */ 'https://vm2.dashif.org/livesim-chunked/chunkdur_1/ato_7/testpic4_8s/Manifest300.mpd',
+      /* manifestUri= */ 'https://livesim.dashif.org/livesim-chunked/chunkdur_1/ato_7/testpic4_8s/Manifest300.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
@@ -1062,6 +1063,21 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.LIVE),
+  // }}}
+
+  // MICROSOFT assets {{{
+  // Src: http://subtitling.irt.de/cmaf/#urls
+  // Note: According to the website, these assets may not be available 24/7.
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny: the Dark Truths of a Video Dev Cartoon (HLS - PlayReady)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dark_truth.png',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/media/dash/APPLEENC_CBCS_BBB_1080p/1080p_alternate.m3u8',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addKeySystem(shakaAssets.KeySystem.PLAYREADY)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addLicenseServer('com.microsoft.playready', 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,ck:W31bfVt9W31bfVt9W31bfQ==,ckt:aescbc)'),
   // }}}
 ];
 /* eslint-enable max-len */

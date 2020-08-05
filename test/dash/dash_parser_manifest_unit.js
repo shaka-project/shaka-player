@@ -343,16 +343,16 @@ describe('DashParser Manifest', () => {
           '        <SegmentTemplate media="1.mp4" duration="1" />',
           '      </Representation>',
           '    </AdaptationSet>',
-          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '    <AdaptationSet mimeType="video/mp4" lang="fr" group="1">',
           '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
-          '         value="CC1=lang:eng;CC3=lang:swe"/>',
+          '         value="CC1=lang:fr;CC3=lang:zh"/>',
           '      <Representation bandwidth="200">',
           '        <SegmentTemplate media="1.mp4" duration="1" />',
           '      </Representation>',
           '    </AdaptationSet>',
-          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '    <AdaptationSet mimeType="video/mp4" lang="ru" group="1">',
           '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
-          '         value="1=lang:eng;3=lang:swe,war:1,er:1"/>',
+          '         value="1=lang:ru;3=lang:hu,war:1,er:1"/>',
           '      <Representation bandwidth="200">',
           '        <SegmentTemplate media="1.mp4" duration="1" />',
           '      </Representation>',
@@ -370,13 +370,23 @@ describe('DashParser Manifest', () => {
         const stream2 = manifest.variants[1].video;
         const stream3 = manifest.variants[2].video;
 
-        const expectedClosedCaptions = new Map(
+        const expectedClosedCaptions1 = new Map(
             [['CC1', shaka.util.LanguageUtils.normalize('eng')],
               ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
         );
-        expect(stream1.closedCaptions).toEqual(expectedClosedCaptions);
-        expect(stream2.closedCaptions).toEqual(expectedClosedCaptions);
-        expect(stream3.closedCaptions).toEqual(expectedClosedCaptions);
+
+        const expectedClosedCaptions2 = new Map(
+            [['CC1', shaka.util.LanguageUtils.normalize('fr')],
+              ['CC3', shaka.util.LanguageUtils.normalize('zh')]]
+        );
+
+        const expectedClosedCaptions3 = new Map(
+            [['CC1', shaka.util.LanguageUtils.normalize('ru')],
+              ['CC3', shaka.util.LanguageUtils.normalize('hu')]]
+        );
+        expect(stream1.closedCaptions).toEqual(expectedClosedCaptions1);
+        expect(stream2.closedCaptions).toEqual(expectedClosedCaptions2);
+        expect(stream3.closedCaptions).toEqual(expectedClosedCaptions3);
       });
 
   it('Detects E-AC3 JOC content by SupplementalProperty', async () => {
@@ -1031,7 +1041,7 @@ describe('DashParser Manifest', () => {
       '      </Representation>',
       '    </AdaptationSet>',
       '    <AdaptationSet mimeType="video/mp4">',
-      '      <Representation id="1" bandwidth="1">',
+      '      <Representation id="1" bandwidth="2">',
       '        <SegmentTemplate media="2.mp4">',
       '          <SegmentTimeline>',
       '            <S t="0" d="30" />',
@@ -1078,11 +1088,13 @@ describe('DashParser Manifest', () => {
       '        <SegmentTemplate media="1-$Number$.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
-      '    <AdaptationSet mimeType="audio/mp4">',
+      '    <AdaptationSet mimeType="audio/mp4" lang="en">',
       '      <Representation id="2" bandwidth="0">',
       '        <SegmentTemplate media="2-$Number$.mp4" duration="1" />',
       '      </Representation>',
-      '      <Representation id="3">',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="audio/mp4" lang="de">',
+      '      <Representation id="3" >',
       '        <SegmentTemplate media="3-$Number$.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',

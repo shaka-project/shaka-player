@@ -179,7 +179,7 @@ module.exports = (config) => {
         uncompiled: !!settings.uncompiled,
 
         // Limit which tests to run. If undefined, all tests should run.
-        specFilter: settings.filter,
+        filter: settings.filter,
 
         // Set what level of logs for the player to print.
         logLevel: SHAKA_LOG_MAP[settings.logging],
