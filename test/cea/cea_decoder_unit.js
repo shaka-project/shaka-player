@@ -449,31 +449,51 @@ describe('CeaDecoder', () => {
 
       expect(captions).toEqual(expectedCaptions);
     });
-  });
 
-  it('resets the decoder on >=45 bad frames on CC1', () => {
-    const controlCount = 0x0f;
-    const captionData = 0xc0 | controlCount;
-    const badFrames = [];
-    const badFrameCount = 15;
-    for (let i = 0; i<badFrameCount; i++) {
-      badFrames.push(0xfc, 0x0, 0x0);
-    }
+    it('does not emit text sent while in CEA-608 Text Mode', () => {
+      const controlCount = 0x03;
+      const captionData = 0xc0 | controlCount;
+      const textModePacket = new Uint8Array([
+        ...atscCaptionInitBytes, captionData, 0xff,
+        0xfc, 0x94, 0x2a, // Text mode (Text restart control code).
+        0xfc, 0xf4, 0xe5, // t, e
+        0xfc, 0x73, 0xf4, // s, t
+      ]);
 
-    const badFramesBuffer = new Uint8Array([
-      ...atscCaptionInitBytes, captionData, 0xff,
-      ...new Uint8Array(badFrames),
-    ]);
+      const startTimeCaption1 = 1;
+      const startTimeCaption2 = 2;
 
-    // 3*15 = 45 total bad frames extracted.
-    for (let i = 0; i < 3; i++) {
-      decoder.extract(badFramesBuffer, i+1);
-    }
+      decoder.extract(textModePacket, startTimeCaption1);
+      decoder.extract(eraseDisplayedMemory, startTimeCaption2);
 
-    spyOn(decoder, 'reset').and.callThrough();
-    decoder.decode();
+      const captions = decoder.decode();
+      expect(captions).toEqual([]);
+    });
 
-    expect(decoder.reset).toHaveBeenCalledTimes(1);
+    it('resets the decoder on >=45 bad frames on CC1', () => {
+      const controlCount = 0x0f;
+      const captionData = 0xc0 | controlCount;
+      const badFrames = [];
+      const badFrameCount = 15;
+      for (let i = 0; i<badFrameCount; i++) {
+        badFrames.push(0xfc, 0x0, 0x0);
+      }
+
+      const badFramesBuffer = new Uint8Array([
+        ...atscCaptionInitBytes, captionData, 0xff,
+        ...new Uint8Array(badFrames),
+      ]);
+
+      // 3*15 = 45 total bad frames extracted.
+      for (let i = 0; i < 3; i++) {
+        decoder.extract(badFramesBuffer, i+1);
+      }
+
+      spyOn(decoder, 'reset').and.callThrough();
+      decoder.decode();
+
+      expect(decoder.reset).toHaveBeenCalledTimes(1);
+    });
   });
 });
 
