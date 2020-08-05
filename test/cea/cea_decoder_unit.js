@@ -10,9 +10,16 @@ describe('CeaDecoder', () => {
   /** @type {!string} */
   const DEFAULT_BG_COLOR = shaka.cea.Cea608Memory.DEFAULT_BG_COLOR;
 
-  /** @type {!Uint8Array} */
+  /**
+   * Initialization bytes for CC packet.
+   * Includes padding bytes, USA country code, and ATSC provider code.
+   * @type {!Uint8Array}
+   */
   const atscCaptionInitBytes = new Uint8Array([
-    0xb5, 0x00, 0x31, 0x47, 0x41, 0x39, 0x34, 0x03,
+    0xb5, // USA country code.
+    0x00, 0x31, // ATSC provider code.
+    0x47, 0x41, 0x39, 0x34, // ATSC user identifier.
+    0x03, // User data type for cc_data.
   ]);
 
   /** @type {!shaka.cea.CeaDecoder} */
