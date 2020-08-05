@@ -10,7 +10,12 @@
  */
 
 
-/** @const */
+/**
+ * @typedef {{
+ *   mp4: typeof muxjs.mp4
+ * }}
+ * @const
+*/
 var muxjs = {};
 
 

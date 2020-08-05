@@ -618,10 +618,9 @@ describe('MediaSourceEngine', () => {
 
     it('appends closed caption data only when mux.js is available',
         async () => {
-          const originalMuxjs = window.muxjs;
-
+          const originalMuxjs = shaka.dependencies.muxjs();
           try {
-            window['muxjs'] = null;
+            shaka.dependencies.add(shaka.dependencies.Allowed.muxjs, null);
             const initObject = new Map();
             initObject.set(ContentType.VIDEO, fakeVideoStream);
             await mediaSourceEngine.init(initObject, false);
@@ -640,7 +639,9 @@ describe('MediaSourceEngine', () => {
             expect(mockTextEngine.storeAndAppendClosedCaptions).not
                 .toHaveBeenCalled();
           } finally {
-            window['muxjs'] = originalMuxjs;
+            shaka.dependencies.add(
+                shaka.dependencies.Allowed.muxjs, originalMuxjs
+            );
           }
         });
   });
