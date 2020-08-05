@@ -33,7 +33,7 @@ describe('CeaDecoder', () => {
 
     // Erases displayed memory on every captioning mode.
     const eraseDisplayedMemory = new Uint8Array([
-      ...atscCaptionInitBytes, 0xc4, 0xff,
+      ...atscCaptionInitBytes, 0xc4, /* padding= */ 0xff,
       0xfc, 0x94, edmCodeByte2, // EDM on CC1
       0xfc, 0x1c, edmCodeByte2, // EDM on CC2
       0xfd, 0x15, edmCodeByte2, // EDM on CC3
@@ -48,7 +48,7 @@ describe('CeaDecoder', () => {
       const controlCount = 0x08;
       const captionData = 0xc0 | controlCount;
       const greenTextCC3Packet = new Uint8Array([
-        ...atscCaptionInitBytes, captionData, 0xff,
+        ...atscCaptionInitBytes, captionData, /* padding= */ 0xff,
         0xfd, 0x15, 0x20, // Pop-on mode (RCL control code)
         0xfd, 0x13, 0xe3, // PAC to underline and color text green on last row.
         0xfd, 0x67, 0xf2, // g, r
@@ -90,7 +90,7 @@ describe('CeaDecoder', () => {
       const controlCount = 0x08;
       const captionData = 0xc0 | controlCount;
       const midrowStyleChangeCC2Packet = new Uint8Array([
-        ...atscCaptionInitBytes, captionData, 0xff,
+        ...atscCaptionInitBytes, captionData, /* padding= */ 0xff,
         0xfc, 0x1c, 0x20, // Pop-on mode (RCL control code).
         0xfc, 0xad, 0xad, // -, -
         0xfc, 0x19, 0x29, // Red + underline midrow style control code.
@@ -142,7 +142,7 @@ describe('CeaDecoder', () => {
       const controlCount = 0x08;
       const captionData = 0xc0 | controlCount;
       const midrowStyleChangeCC2Packet = new Uint8Array([
-        ...atscCaptionInitBytes, captionData, 0xff,
+        ...atscCaptionInitBytes, captionData, /* padding= */ 0xff,
         0xfc, 0x1c, 0x20, // Pop-on mode (RCL control code).
         0xfc, 0x19, 0x6e, // White Italics PAC.
         0xfc, 0x98, 0x2a, // Background attribute yellow.
@@ -188,7 +188,7 @@ describe('CeaDecoder', () => {
       const controlCount = 0x07;
       const captionData = 0xc0 | controlCount;
       const midrowStyleChangeCC2Packet = new Uint8Array([
-        ...atscCaptionInitBytes, captionData, 0xff,
+        ...atscCaptionInitBytes, captionData, /* padding= */ 0xff,
         0xfc, 0x1c, 0x20, // Pop-on mode (RCL control code).
         0xfc, 0x19, 0x37, // Special North American character (♪)
         0xfc, 0x20, 0x80, // SP, invalid. SP will be replaced by extended char.
@@ -224,7 +224,7 @@ describe('CeaDecoder', () => {
       const controlCount = 0x03;
       const captionData = 0xc0 | controlCount;
       const paintonCaptionCC1Packet = new Uint8Array([
-        ...atscCaptionInitBytes, captionData, 0xff,
+        ...atscCaptionInitBytes, captionData, /* padding= */ 0xff,
         0xfc, 0x94, 0x29, // Paint-on mode (RDC control code).
         0xfc, 0xf4, 0xe5, // t, e
         0xfc, 0x73, 0xf4, // s, t
@@ -267,31 +267,31 @@ describe('CeaDecoder', () => {
       const carriageReturnControlCode = new Uint8Array([0x94, 0xad]);
       const packets = [
         new Uint8Array([
-          ...atscCaptionInitBytes, 0xc0 | controlCount1, 0xff,
+          ...atscCaptionInitBytes, 0xc0 | controlCount1, /* padding= */ 0xff,
           0xfc, 0x94, 0x25, // Roll-up 2 rows control code.
           0xfc, ...carriageReturnControlCode,
           0xfc, ...blankPaddingControlCode,
         ]),
         new Uint8Array([
-          ...atscCaptionInitBytes, 0xc0 | controlCount1, 0xff,
+          ...atscCaptionInitBytes, 0xc0 | controlCount1, /* padding= */ 0xff,
           0xfc, 0x31, 0xae, // 1, .
           0xfc, ...carriageReturnControlCode,
           0xfc, ...blankPaddingControlCode,
         ]),
         new Uint8Array([
-          ...atscCaptionInitBytes, 0xc0 | controlCount1, 0xff,
+          ...atscCaptionInitBytes, 0xc0 | controlCount1, /* padding= */ 0xff,
           0xfc, 0x32, 0xae, // 2, .
           0xfc, ...carriageReturnControlCode,
           0xfc, ...blankPaddingControlCode,
         ]),
         new Uint8Array([
-          ...atscCaptionInitBytes, 0xc0 | controlCount1, 0xff,
+          ...atscCaptionInitBytes, 0xc0 | controlCount1, /* padding= */ 0xff,
           0xfc, 0xb3, 0xae, // 3, .
           0xfc, ...carriageReturnControlCode,
           0xfc, ...blankPaddingControlCode,
         ]),
         new Uint8Array([
-          ...atscCaptionInitBytes, 0xc0 | controlCount2, 0xff,
+          ...atscCaptionInitBytes, 0xc0 | controlCount2, /* padding= */ 0xff,
           0xfc, 0x34, 0xae, // 4, .
           0xfc, 0x94, 0x2f, // EOC
         ]),
@@ -385,19 +385,19 @@ describe('CeaDecoder', () => {
       const carriageReturnControlCode = new Uint8Array([0x94, 0xad]);
       const packets = [
         new Uint8Array([
-          ...atscCaptionInitBytes, 0xc0 | controlCount1, 0xff,
+          ...atscCaptionInitBytes, 0xc0 | controlCount1, /* padding= */ 0xff,
           0xfc, 0x94, 0x25, // Roll-up 2 rows control code.
           0xfc, ...carriageReturnControlCode,
           0xfc, 0x97, 0x23, // Blank padding control code
         ]),
         new Uint8Array([
-          ...atscCaptionInitBytes, 0xc0 | controlCount1, 0xff,
+          ...atscCaptionInitBytes, 0xc0 | controlCount1, /* padding= */ 0xff,
           0xfc, 0x31, 0xae, // 1, .
           0xfc, ...carriageReturnControlCode,
           0xfc, 0x97, 0x23, // Blank padding control code
         ]),
         new Uint8Array([
-          ...atscCaptionInitBytes, 0xc0 | controlCount2, 0xff,
+          ...atscCaptionInitBytes, 0xc0 | controlCount2, /* padding= */ 0xff,
           0xfc, 0x32, 0xae, // 2, .
           0xfc, 0x92, 0xe0, // PAC control code to move to row 4.
         ]),
@@ -449,7 +449,7 @@ describe('CeaDecoder', () => {
       const controlCount = 0x03;
       const captionData = 0xc0 | controlCount;
       const textModePacket = new Uint8Array([
-        ...atscCaptionInitBytes, captionData, 0xff,
+        ...atscCaptionInitBytes, captionData, /* padding= */ 0xff,
         0xfc, 0x94, 0x2a, // Text mode (Text restart control code).
         0xfc, 0xf4, 0xe5, // t, e
         0xfc, 0x73, 0xf4, // s, t
@@ -475,7 +475,7 @@ describe('CeaDecoder', () => {
       }
 
       const badFramesBuffer = new Uint8Array([
-        ...atscCaptionInitBytes, captionData, 0xff,
+        ...atscCaptionInitBytes, captionData, /* padding= */ 0xff,
         ...new Uint8Array(badFrames),
       ]);
 
