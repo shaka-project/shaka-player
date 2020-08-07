@@ -557,6 +557,17 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
     const newScreenshotPath = `${folder}/${params.name}.png-new`;
     const diffScreenshotPath = `${folder}/${params.name}.png-diff`;
 
+    // Write the full screenshot to disk.  This should be done early in case a
+    // later stage fails and we need to analyze what happened.
+    fs.mkdirSync(folder, {recursive: true});
+    fs.writeFileSync(
+        fullScreenshotPath, await fullScreenshot.getBufferAsync('image/png'));
+
+    // Write the cropped screenshot to disk next.  This is used in review
+    // changes and to update the "official" screenshot when needed.
+    fs.writeFileSync(
+        newScreenshotPath, await newScreenshot.getBufferAsync('image/png'));
+
     /** @type {!Jimp.image} */
     let oldScreenshot;
     if (!fs.existsSync(oldScreenshotPath)) {
@@ -571,14 +582,7 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
     // Initially, the image data will be raw pixels, 4 bytes per pixel.
     const diff = Jimp.diff(oldScreenshot, newScreenshot, /* threshold= */ 0);
 
-    // Write the screenshot and diff to disk.  This makes it easy to review
-    // the diff on failure or update the "official" screenshot easily when
-    // needed.
-    fs.mkdirSync(folder, {recursive: true});
-    fs.writeFileSync(
-        fullScreenshotPath, await fullScreenshot.getBufferAsync('image/png'));
-    fs.writeFileSync(
-        newScreenshotPath, await newScreenshot.getBufferAsync('image/png'));
+    // Write the diff to disk.  This is used to review when there are changes.
     fs.writeFileSync(
         diffScreenshotPath, await diff.image.getBufferAsync('image/png'));
 
