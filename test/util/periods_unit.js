@@ -761,6 +761,55 @@ describe('PeriodCombiner', () => {
     expect(audio2.originalId).toBe('stream2,stream4');
   });
 
+  describe('compareClosestPreferLower', () => {
+    const PeriodCombiner = shaka.util.PeriodCombiner;
+    const {BETTER, EQUAL, WORSE} = shaka.util.PeriodCombiner.BetterOrWorse;
+
+    it('Prefers value equal to the output', () => {
+      let isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
+          /* output= */ 5, /* bestValue= */ 5, /* candidateValue= */ 3);
+      expect(isCandidateBetter).toBe(WORSE);
+
+      // Make sure it works correctly whether it's the candidate or the best
+      // value that is equel to the output.
+      isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
+          /* output= */ 5, /* bestValue= */ 3, /* candidateValue= */ 5);
+      expect(isCandidateBetter).toBe(BETTER);
+    });
+
+    it('Prefers a value lower than the output', () => {
+      let isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
+          /* output= */ 5, /* bestValue= */ 3, /* candidateValue= */ 6);
+      expect(isCandidateBetter).toBe(WORSE);
+
+      isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
+          /* output= */ 5, /* bestValue= */ 7, /* candidateValue= */ 2);
+      expect(isCandidateBetter).toBe(BETTER);
+    });
+
+    it('If both values are lower than the output,' +
+       ' prefer the one that\'s closer', () => {
+      let isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
+          /* output= */ 5, /* bestValue= */ 4, /* candidateValue= */ 3);
+      expect(isCandidateBetter).toBe(WORSE);
+
+      isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
+          /* output= */ 5, /* bestValue= */ 2, /* candidateValue= */ 3);
+      expect(isCandidateBetter).toBe(BETTER);
+    });
+
+    it('If both values are greater than the output,' +
+       ' prefer the one that\'s closer', () => {
+      let isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
+          /* output= */ 5, /* bestValue= */ 6, /* candidateValue= */ 7);
+      expect(isCandidateBetter).toBe(WORSE);
+
+      isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
+          /* output= */ 5, /* bestValue= */ 9, /* candidateValue= */ 8);
+      expect(isCandidateBetter).toBe(BETTER);
+    });
+  });
+
   /** @type {number} */
   let nextId = 0;
 
