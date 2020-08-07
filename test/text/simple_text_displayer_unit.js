@@ -95,6 +95,30 @@ describe('SimpleTextDisplayer', () => {
           [shakaCue]);
     });
 
+    // Regression test for b/159050711
+    it('maintains the styles of the parent cue', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1 ');
+      const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
+
+      shakaCue.nestedCues = [nestedCue1, nestedCue2];
+
+      shakaCue.lineAlign = Cue.lineAlign.CENTER;
+      nestedCue1.lineAlign = Cue.lineAlign.START;
+      nestedCue2.lineAlign = Cue.lineAlign.START;
+
+      verifyHelper(
+          [
+            {
+              startTime: 10,
+              endTime: 20,
+              text: 'Test1 Test2',
+              lineAlign: 'center',
+            },
+          ],
+          [shakaCue]);
+    });
+
     it('skips duplicate cues', () => {
       const cue1 = new shaka.text.Cue(10, 20, 'Test');
       displayer.append([cue1]);
