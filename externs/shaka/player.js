@@ -721,7 +721,8 @@ shaka.extern.ManifestConfiguration;
  *   stallThreshold: number,
  *   stallSkip: number,
  *   useNativeHlsOnSafari: boolean,
- *   inaccurateManifestTolerance: number
+ *   inaccurateManifestTolerance: number,
+ *   prefetchLimit: number
  * }}
  *
  * @description

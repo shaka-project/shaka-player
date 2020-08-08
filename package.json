@@ -1,13 +1,13 @@
 {
-  "name": "shaka-player",
-  "description": "DASH/EME video player library",
-  "version": "3.0.0",
-  "homepage": "https://github.com/google/shaka-player",
-  "author": "Google",
+  "name": "drishti-shaka",
+  "description": "DASH/EME video player library with networking speedup",
+  "version": "1.0.4",
+  "homepage": "https://github.com/sabyasachiroy/shaka-player",
+  "author": "Sabyasachi Roy",
   "maintainers": [
     {
-      "name": "Joey Parrish",
-      "email": "joeyparrish@google.com"
+      "name": "Sabyasachi Roy",
+      "email": "sabyasachiroy@gmail.com"
     }
   ],
   "devDependencies": {
@@ -60,14 +60,14 @@
   "main": "dist/shaka-player.compiled.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/google/shaka-player.git"
+    "url": "git+https://github.com/sabyasachiroy/shaka-player.git"
   },
   "bugs": {
-    "url": "https://github.com/google/shaka-player/issues"
+    "url": "https://github.com/sabyasachiroy/shaka-player/issues"
   },
   "license": "Apache-2.0",
   "scripts": {
-    "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
+    "prepublishOnly": "python build/all.py --force"
   },
   "dependencies": {
     "eme-encryption-scheme-polyfill": "^2.0.1"
