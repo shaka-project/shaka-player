@@ -21,7 +21,7 @@ describe('Cea608Memory', () => {
   };
 
   beforeEach(() => {
-    memory = new shaka.cea.Cea608Memory(new shaka.cea.AtscDecoder(),
+    memory = new shaka.cea.Cea608Memory(new shaka.cea.CeaDecoder(),
         0, 0 // F1 + C1 -> CC1
     );
   });

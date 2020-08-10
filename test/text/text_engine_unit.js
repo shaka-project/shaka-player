@@ -61,7 +61,7 @@ describe('TextEngine', () => {
     it('reports support when it\'s closed captions and muxjs is available',
         () => {
           const closedCaptionsType =
-           shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
+           shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE;
           const originalMuxjs = window.muxjs;
           expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(true);
           try {
