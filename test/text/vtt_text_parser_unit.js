@@ -586,6 +586,60 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports payload stylized', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10,
+            endTime: 20,
+            payload: 'Test',
+            fontWeight: Cue.fontWeight.BOLD,
+          },
+          {
+            startTime: 20,
+            endTime: 30,
+            payload: 'Test2',
+            fontStyle: Cue.fontStyle.ITALIC,
+          },
+          {
+            startTime: 30,
+            endTime: 40,
+            payload: 'Test3',
+            textDecoration: [Cue.textDecoration.UNDERLINE],
+          },
+          {
+            startTime: 40,
+            endTime: 50,
+            payload: 'Test4',
+          },
+          {
+            startTime: 50,
+            endTime: 60,
+            payload: 'Test5',
+            fontWeight: Cue.fontWeight.BOLD,
+          },
+          {
+            startTime: 70,
+            endTime: 80,
+            payload: 'Test<b>6</b>',
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        '<b>Test</b>\n\n' +
+        '00:00:20.000 --> 00:00:30.000\n' +
+        '<i>Test2</i>\n\n' +
+        '00:00:30.000 --> 00:00:40.000\n' +
+        '<u>Test3</u>\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        '<a>Test4</a>\n\n' +
+        '00:00:50.000 --> 00:01:00.000\n' +
+        '<b>Test<i>5</i></b>\n\n' +
+        '00:01:10.000 --> 00:01:20.000\n' +
+        'Test<b>6</b>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
 
   /**
    * @param {!Array} cues
