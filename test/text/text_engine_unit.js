@@ -58,18 +58,12 @@ describe('TextEngine', () => {
       expect(TextEngine.isTypeSupported(dummyMimeType)).toBe(false);
     });
 
-    it('reports support when it\'s closed captions and muxjs is available',
+    it('reports support when it\'s closed captions',
         () => {
           const closedCaptionsType =
            shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE;
           const originalMuxjs = window.muxjs;
           expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(true);
-          try {
-            window['muxjs'] = null;
-            expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(false);
-          } finally {
-            window['muxjs'] = originalMuxjs;
-          }
         });
   });
 
@@ -124,13 +118,12 @@ describe('TextEngine', () => {
 
   describe('storeAndAppendClosedCaptions', () => {
     it('appends closed captions with selected id', () => {
+      const startTime = 0;
+      const endTime = 1;
+      const text = 'captions';
       const caption = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 0,
-        endTime: 1,
+        cue: new shaka.text.Cue(startTime, endTime, text),
         stream: 'CC1',
-        text: 'captions',
       };
 
       textEngine.setSelectedClosedCaptionId('CC1', 0);
@@ -140,13 +133,12 @@ describe('TextEngine', () => {
     });
 
     it('does not append closed captions without selected id', () => {
+      const startTime = 1;
+      const endTime = 2;
+      const text = 'caption2';
       const caption = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 1,
-        endTime: 2,
+        cue: new shaka.text.Cue(startTime, endTime, text),
         stream: 'CC1',
-        text: 'caption2',
       };
 
       textEngine.setSelectedClosedCaptionId('CC3', 0);
@@ -157,28 +149,16 @@ describe('TextEngine', () => {
 
     it('stores closed captions', () => {
       const caption0 = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 0,
-        endTime: 1,
+        cue: new shaka.text.Cue(0, 1, 'caption1'),
         stream: 'CC1',
-        text: 'caption1',
       };
       const caption1 = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 1,
-        endTime: 2,
+        cue: new shaka.text.Cue(1, 2, 'caption2'),
         stream: 'CC1',
-        text: 'caption2',
       };
       const caption2 = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 1,
-        endTime: 2,
+        cue: new shaka.text.Cue(1, 2, 'caption3'),
         stream: 'CC3',
-        text: 'caption3',
       };
 
       textEngine.setSelectedClosedCaptionId('CC1', 0);
@@ -205,13 +185,12 @@ describe('TextEngine', () => {
     });
 
     it('offsets closed captions to account for video offset', () => {
+      const startTime = 0;
+      const endTime = 1;
+      const text = 'captions';
       const caption = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 0,
-        endTime: 1,
+        cue: new shaka.text.Cue(startTime, endTime, text),
         stream: 'CC1',
-        text: 'captions',
       };
 
       textEngine.setSelectedClosedCaptionId('CC1', 0);

@@ -35,15 +35,11 @@ describe('MediaSourceEngine', () => {
     metadata = shaka.test.TestScheme.DATA['sintel'];
     generators = shaka.test.TestScheme.GENERATORS['sintel'];
 
-    goog.asserts.assert(
-        shaka.media.MuxJSClosedCaptionParser.isSupported(),
-        'Where is MuxJS?');
-
     textDisplayer = new shaka.test.FakeTextDisplayer();
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
-        new shaka.media.MuxJSClosedCaptionParser(),
+        new shaka.media.ClosedCaptionParser(),
         textDisplayer);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];

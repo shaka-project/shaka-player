@@ -18,7 +18,6 @@ function getClientArg(name) {
   }
 }
 
-
 // Executed before test utilities and tests are loaded, but after Shaka Player
 // is loaded in uncompiled mode.
 (() => {
@@ -57,24 +56,6 @@ function getClientArg(name) {
     fail(message);
   });
 
-  // Use a RegExp if --specFilter is set, else empty string will match all.
-  const specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
-
-  /**
-   * A filter over all Jasmine specs.
-   * @param {jasmine.Spec} spec
-   * @return {boolean}
-   */
-  function specFilter(spec) {
-    // If the browser is not supported, don't run the tests.
-    // If the user specified a RegExp, only run the matched tests.
-    // Running zero tests is considered an error so the test run will fail on
-    // unsupported browsers or if the filter doesn't match any specs.
-    return shaka.Player.isBrowserSupported() &&
-        specFilterRegExp.test(spec.getFullName());
-  }
-  jasmine.getEnv().specFilter = specFilter;
-
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
   // detected.
@@ -98,18 +79,6 @@ function getClientArg(name) {
     shaka.log.setLevel(Number(logLevel));
   } else {
     shaka.log.setLevel(shaka.log.Level.INFO);
-  }
-
-  // Set random and seed if specified.
-  if (getClientArg('random')) {
-    jasmine.getEnv().randomizeTests(true);
-
-    const seed = getClientArg('seed');
-    if (seed) {
-      jasmine.getEnv().seed(seed.toString());
-    }
-  } else {
-    jasmine.getEnv().randomizeTests(false);
   }
 
   /**
@@ -285,3 +254,42 @@ function getClientArg(name) {
   // simpler answer.
   shaka.util.Error.createStack = false;
 })();
+
+// Shim Jasmine's execute function.  The karma-jasmine adapter will configure
+// jasmine in a way that prevents us from setting our own specFilter config.
+// There is no configuration that will stop karma-jasmine from doing this.
+// So we hook into Jasmine's execute function (the last step of karma-jasmine's
+// startup) to set our own config first.
+// See also https://github.com/karma-runner/karma-jasmine/issues/273
+/** @type {!jasmine.Env} */
+const jasmineEnv = jasmine.getEnv();
+// eslint-disable-next-line no-restricted-syntax
+const originalJasmineExecute = jasmineEnv.execute.bind(jasmineEnv);
+jasmineEnv.execute = () => {
+  // Use a RegExp if --filter is set, else empty string will match all.
+  const specFilterRegExp = new RegExp(getClientArg('filter') || '');
+  const isBrowserSupported = shaka.Player.isBrowserSupported();
+
+  /**
+   * A filter over all Jasmine specs.
+   * @param {jasmine.Spec} spec
+   * @return {boolean}
+   */
+  function specFilter(spec) {
+    // If the browser is not supported, don't run the tests.
+    // If the user specified a RegExp, only run the matched tests.
+    // Running zero tests is considered an error so the test run will fail on
+    // unsupported browsers or if the filter doesn't match any specs.
+    return isBrowserSupported && specFilterRegExp.test(spec.getFullName());
+  }
+
+  // Set jasmine config.
+  const jasmineConfig = {
+    specFilter,
+    random: !!getClientArg('random'),
+    seed: getClientArg('seed'),
+  };
+
+  jasmineEnv.configure(jasmineConfig);
+  originalJasmineExecute();
+};

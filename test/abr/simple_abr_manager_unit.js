@@ -62,6 +62,7 @@ describe('SimpleAbrManager', () => {
 
     config = shaka.util.PlayerConfiguration.createDefault().abr;
     config.defaultBandwidthEstimate = defaultBandwidthEstimate;
+    config.useNetworkInformation = false;
 
     variants = manifest.variants;
 
@@ -83,7 +84,6 @@ describe('SimpleAbrManager', () => {
 
   it('uses custom default estimate', () => {
     config.defaultBandwidthEstimate = 3e6;
-    config.useNetworkInformation = false;
     abrManager.configure(config);
     const chosen = abrManager.chooseVariant();
     expect(chosen.id).toBe(104);

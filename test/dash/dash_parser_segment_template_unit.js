@@ -129,6 +129,44 @@ describe('DashParser SegmentTemplate', () => {
       const manifest = await parser.start('dummy://foo', playerInterface);
       expect(manifest.presentationTimeline.getSeekRangeStart()).toBe(30);
     });
+
+    it('limits segment count for Live', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$.mp4" duration="1" />',
+      ]);
+
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.dash.initialSegmentLimit = 100;
+      parser.configure(config);
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex, 'Should have created index');
+
+      const segments = Array.from(stream.segmentIndex);
+      expect(segments.length).toBe(config.dash.initialSegmentLimit);
+    });
+
+    it('doesn\'t limit segment count for VOD', async () => {
+      const source = Dash.makeSimpleManifestText([
+        '<SegmentTemplate media="s$Number$.mp4" duration="1" />',
+      ], /* duration= */ 200);
+
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.dash.initialSegmentLimit = 100;
+      parser.configure(config);
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
+      goog.asserts.assert(stream.segmentIndex, 'Should have created index');
+
+      const segments = Array.from(stream.segmentIndex);
+      expect(segments.length).toBe(200);
+    });
   });
 
   describe('index', () => {

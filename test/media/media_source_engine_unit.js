@@ -587,8 +587,8 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-      mockClosedCaptionParser.parseFromSpy.and.callFake((data, onCaptions) => {
-        onCaptions(['foo', 'bar']);
+      mockClosedCaptionParser.parseFromSpy.and.callFake((data) => {
+        return ['foo', 'bar'];
       });
 
       await mediaSourceEngine.init(initObject, false);
@@ -615,34 +615,6 @@ describe('MediaSourceEngine', () => {
 
       expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
     });
-
-    it('appends closed caption data only when mux.js is available',
-        async () => {
-          const originalMuxjs = window.muxjs;
-
-          try {
-            window['muxjs'] = null;
-            const initObject = new Map();
-            initObject.set(ContentType.VIDEO, fakeVideoStream);
-            await mediaSourceEngine.init(initObject, false);
-
-            const appendBuffer = mediaSourceEngine.appendBuffer(
-                ContentType.VIDEO, buffer, null, null, true);
-            // In MediaSourceEngine, appendBuffer() is async and Promise-based,
-            // but at the browser level, it's event-based. MediaSourceEngine
-            // waits for the 'updateend' event from the SourceBuffer, and uses
-            // that to resolve the appendBuffer Promise. Here, we must trigger
-            // the event on the fake/mock SourceBuffer before waiting on the
-            // appendBuffer Promise.
-            videoSourceBuffer.updateend();
-            await appendBuffer;
-            expect(mockClosedCaptionParser.initSpy).not.toHaveBeenCalled();
-            expect(mockTextEngine.storeAndAppendClosedCaptions).not
-                .toHaveBeenCalled();
-          } finally {
-            window['muxjs'] = originalMuxjs;
-          }
-        });
   });
 
   describe('remove', () => {
@@ -1191,7 +1163,7 @@ describe('MediaSourceEngine', () => {
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
         'setAppendWindow', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
-        'storeAndAppendClosedCaptions',
+        'storeAndAppendClosedCaptions', 'convertMuxjsCaptionsToShakaCaptions',
       ]);
 
       const resolve = () => Promise.resolve();

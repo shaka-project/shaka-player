@@ -869,4 +869,38 @@ describe('Player', () => {
       await expectAsync(p).toBeRejected();  // Timeout
     });
   });  // describe('adaptation')
+
+  /** Regression test for Issue #2741 */
+  describe('unloading', () => {
+    drmIt('unloads properly after DRM error', async () => {
+      const drmSupport = await shaka.media.DrmEngine.probeSupport();
+      if (!drmSupport['com.widevine.alpha'] &&
+          !drmSupport['com.microsoft.playready']) {
+        pending('Skipping DRM error test, only runs on Widevine and PlayReady');
+      }
+
+      let unloadPromise = null;
+      const errorPromise = new Promise((resolve, reject) => {
+        onErrorSpy.and.callFake((event) => {
+          unloadPromise = player.unload();
+          onErrorSpy.and.callThrough();
+          resolve();
+        });
+      });
+
+      // Load an encrypted asset with the wrong license servers, so it errors.
+      const bogusUrl = 'http://foo/widevine';
+      player.configure('drm.servers', {
+        'com.widevine.alpha': bogusUrl,
+        'com.microsoft.playready': bogusUrl,
+      });
+      await player.load('test:sintel-enc_compiled');
+
+      await errorPromise;
+      expect(unloadPromise).not.toBeNull();
+      if (unloadPromise) {
+        await unloadPromise;
+      }
+    });
+  });  // describe('unloading')
 });

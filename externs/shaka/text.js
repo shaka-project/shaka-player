@@ -126,7 +126,8 @@ shaka.extern.Cue = class {
     this.endTime;
 
     /**
-     * The text payload of the cue.
+     * The text payload of the cue.  If nestedCues is non-empty, this should be
+     * empty.  Top-level block containers should have no payload of their own.
      * @type {!string}
      * @exportDoc
      */
@@ -344,14 +345,15 @@ shaka.extern.Cue = class {
     this.id;
 
     /**
-     * Nested cues
+     * Nested cues, which should be laid out horizontally in one block.
      * @type {Array.<!shaka.extern.Cue>}
      * @exportDoc
      */
     this.nestedCues;
 
     /**
-     * Whether or not the cue only acts as a spacer between two cues
+     * Whether or not the cue only acts as a line break between two nested cues.
+     * Should only appear in nested cues.
      * @type {boolean}
      * @exportDoc
      */

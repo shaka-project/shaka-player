@@ -179,7 +179,7 @@ module.exports = (config) => {
         uncompiled: !!settings.uncompiled,
 
         // Limit which tests to run. If undefined, all tests should run.
-        specFilter: settings.filter,
+        filter: settings.filter,
 
         // Set what level of logs for the player to print.
         logLevel: SHAKA_LOG_MAP[settings.logging],
@@ -611,13 +611,25 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
         return;
       }
 
+      let isSupported = false;
       const webDriverClient = getWebDriverClient(browser);
-      // TODO: Not sure how to check for this in the client's capabilities.
-      // When we add platforms to the Selenium grid which can't take
-      // screenshots, how will we know which is which from here?  If we have to
-      // take a screenshot and catch an error to find out, make sure we cache
-      // that result for the sake of performance.
-      const isSupported = !!webDriverClient;
+
+      if (webDriverClient) {
+        // Some platforms in our Selenium grid can't take screenshots.  We don't
+        // have a good way to check for this in the platform capabilities
+        // reported by Selenium, so we have to take a screenshot to find out.
+        // The result is cached for the sake of performance.
+        if (webDriverClient.canTakeScreenshot === undefined) {
+          try {
+            await getScreenshot(webDriverClient);
+            webDriverClient.canTakeScreenshot = true;
+          } catch (error) {
+            webDriverClient.canTakeScreenshot = false;
+          }
+        }
+
+        isSupported = webDriverClient.canTakeScreenshot;
+      }
 
       response.setHeader('Content-Type', 'application/json');
       response.end(JSON.stringify(isSupported));

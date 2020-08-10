@@ -5,170 +5,295 @@
  */
 
 describe('Cea608Memory', () => {
+  const CeaUtils = shaka.test.CeaUtils;
+
+  const CharSet = shaka.cea.Cea608Memory.CharSet;
+
   /** @type {!shaka.cea.Cea608Memory} */
   let memory;
 
   /** @type {!string} */
   const stream = 'CC1';
 
-  const createCue = (startTime, endTime, text) => {
-    return {
-      startTime,
-      endTime,
-      stream,
-      text,
-    };
-  };
-
   beforeEach(() => {
-    memory = new shaka.cea.Cea608Memory(new shaka.cea.CeaDecoder(),
-        0, 0 // F1 + C1 -> CC1
-    );
+    // Create a CC1 Memory: F1 + C1 -> CC1
+    memory = new shaka.cea.Cea608Memory(/* fieldNum= */ 0, /* channelNum= */ 0);
   });
 
   it('adds and emits a series of basic characters from the buffer', () => {
     const text = 'test word';
-    const t1 = 1;
-    const t2 = 2;
+    const startTime = 1;
+    const endTime = 2;
     for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
           c.charCodeAt(0));
     }
-    memory.forceEmit(t1, t2);
-    const cues = memory.decoder_.getCues();
-    const expectedCues = [createCue(t1, t2, text)];
-    expect(cues).toEqual(expectedCues);
+    const caption = memory.forceEmit(startTime, endTime);
+
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, text),
+    ];
+
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
+
+    expect(caption).toEqual(expectedCaption);
   });
 
   it('adds and emits a series of special characters from the buffer', () => {
-    const t1 = 1;
-    const t2 = 2;
+    const startTime = 1;
+    const endTime = 2;
     const expectedText = '½¿èôÇ©ë»ö{ß¦';
     const charGroups = [
       {
-        set: shaka.cea.Cea608Memory.CharSet.SPECIAL_NORTH_AMERICAN,
+        set: CharSet.SPECIAL_NORTH_AMERICAN,
         chars: [0x32, 0x33, 0x3a, 0x3e], // ½, ¿, è, ô
       },
 
       {
-        set: shaka.cea.Cea608Memory.CharSet.SPANISH_FRENCH,
+        set: CharSet.SPANISH_FRENCH,
         chars: [0x32, 0x2b, 0x36, 0x3f], // Ç, ©, ë, »
       },
 
       {
-        set: shaka.cea.Cea608Memory.CharSet.PORTUGUESE_GERMAN,
+        set: CharSet.PORTUGUESE_GERMAN,
         chars: [0x33, 0x29, 0x34, 0x37], // ö, {, ß, ¦
       },
     ];
     for (const group of charGroups) {
       for (const c of group.chars) {
-        if (group.set === shaka.cea.Cea608Memory.CharSet.SPANISH_FRENCH ||
-            group.set === shaka.cea.Cea608Memory.CharSet.PORTUGUESE_GERMAN) {
-          // Add basic char, since this group does backspace on preceding chars.
+        if (group.set === CharSet.SPANISH_FRENCH ||
+            group.set === CharSet.PORTUGUESE_GERMAN) {
+          // As per the CEA-608 spec, a char received from these extended sets
+          // does a backspace over a preceding char. Thus, the spec mandates any
+          // extended char to be preceded by a basic char, which serves as a
+          // fallback for systems that can't decode the extended char.
           memory.addChar(
-              shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN, 0x20);
+              CharSet.BASIC_NORTH_AMERICAN, 0x20);
         }
         memory.addChar(group.set, c);
       }
     }
-    memory.forceEmit(t1, t2);
-    const expectedCues = [createCue(t1, t2, expectedText)];
-    const cues = memory.decoder_.getCues();
-    expect(cues).toEqual(expectedCues);
+
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, expectedText),
+    ];
+
+    const expectedCaption= {
+      stream,
+      cue: topLevelCue,
+    };
+
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toEqual(expectedCaption);
   });
 
-  it('opens style tags which close appropriately on emit', () => {
-    const t1 = 1;
-    const t2 = 2;
-    memory.openStyleTag('u');
-    memory.openStyleTag('i');
-    memory.openStyleTag('c.red');
-    memory.openStyleTag('i');
-    memory.openStyleTag('c.bg_green');
-    memory.openStyleTag('u');
-    memory.forceEmit(t1, t2);
+  it('assigns styling appropriately to caption', () => {
+    const startTime = 1;
+    const endTime = 2;
+    const expectedText = 'test';
 
-    const expectedText =
-        '<u><i><c.red><i><c.bg_green><u></u></c></i></c></i></u>';
-    const cues = memory.decoder_.getCues();
-    const expectedCues = [createCue(t1, t2, expectedText)];
-    expect(cues).toEqual(expectedCues);
+    memory.setUnderline(true);
+    memory.setItalics(true);
+    memory.setTextColor('red');
+    for (const c of expectedText) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+          c.charCodeAt(0));
+    }
+
+    memory.setUnderline(false);
+    memory.setItalics(false);
+    for (const c of expectedText) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+          c.charCodeAt(0));
+    }
+
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    topLevelCue.nestedCues = [
+      CeaUtils.createStyledCue(startTime, endTime,
+          expectedText, /* underline= */ true,
+          /* italics= */ true, /* textColor= */ 'red',
+          /* backgroundColor= */ shaka.cea.Cea608Memory.DEFAULT_BG_COLOR),
+
+      CeaUtils.createStyledCue(startTime, endTime,
+          expectedText, /* underline= */ false,
+          /* italics= */ false, /* textColor= */ 'red',
+          /* backgroundColor= */ shaka.cea.Cea608Memory.DEFAULT_BG_COLOR),
+    ];
+
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
+
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toEqual(expectedCaption);
+  });
+
+  it('trims leading and trailing newlines', () => {
+    const startTime = 1;
+    const endTime = 2;
+    const text = 'test';
+
+    memory.setRow(memory.getRow()+1);
+    for (const c of text) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+          c.charCodeAt(0));
+    }
+
+    memory.setRow(memory.getRow()+1);
+    memory.setRow(memory.getRow()+1);
+
+    for (const c of text) {
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+          c.charCodeAt(0));
+    }
+
+    memory.setRow(memory.getRow()+1);
+    memory.setRow(memory.getRow()+1);
+
+    // At this point, the memory looks like this:
+    // [1]:
+    // [2]: test
+    // [3]:
+    // [4]: test
+    // ...
+    // So we expect that test\n\ntest is emitted
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, text),
+      CeaUtils.createLineBreakCue(startTime, endTime),
+      CeaUtils.createLineBreakCue(startTime, endTime),
+      CeaUtils.createDefaultCue(startTime, endTime, text),
+    ];
+
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
+
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toEqual(expectedCaption);
+  });
+
+  it('does not emit caption when all rows are empty', () => {
+    const startTime = 1;
+    const endTime = 2;
+    memory.setRow(memory.getRow()+1);
+    memory.setRow(memory.getRow()+1);
+    memory.setRow(memory.getRow()+1);
+    memory.forceEmit(startTime, endTime);
+
+    // Nothing was added to the buffer, so nothing should be emitted.
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toBe(null);
   });
 
   it('erases a character from the buffer', () => {
-    const t1 = 1;
-    const t2 = 2;
+    const startTime = 1;
+    const endTime = 2;
     const text = 'testt';
     const expectedText = 'test';
     for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
+      memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
           c.charCodeAt(0));
     }
-    memory.eraseChar();
-    memory.forceEmit(t1, t2);
-    const expectedCues = [createCue(t1, t2, expectedText)];
-    const cues = memory.decoder_.getCues();
-    expect(cues).toEqual(expectedCues);
+    memory.eraseChar(); // Erase the last 't' from 'testt'
+
+    const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+    topLevelCue.nestedCues = [
+      CeaUtils.createDefaultCue(startTime, endTime, expectedText),
+    ];
+
+    const expectedCaption = {
+      stream,
+      cue: topLevelCue,
+    };
+
+    const caption = memory.forceEmit(startTime, endTime);
+    expect(caption).toEqual(expectedCaption);
   });
 
-  it('erases the entire buffer', () => {
-    const t1 = 1;
-    const t2 = 2;
-    const text = '0123456789abcde';
-    const expectedText = '0\n1\n2\n3\n4\n5\n6\n7\n8\n9\na\nb\nc\nd\ne';
-    for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
-          c.charCodeAt(0));
-      memory.setRow(memory.getRow() + 1); // increment row
-    }
-    const expectedCues = [createCue(t1, t2, expectedText)];
-    memory.forceEmit(t1, t2);
+  describe('eraseBuffer', () => {
+    it('erases the entire buffer', () => {
+      const startTime = 1;
+      const endTime = 2;
+      const text = '0123456789abcde';
 
-    // Expect the correct cue to be emitted.
-    const cues = memory.decoder_.getCues();
-    expect(cues).toEqual(expectedCues);
+      // Add characters to the memory buffer.
+      for (const c of text) {
+        memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+            c.charCodeAt(0));
+        memory.setRow(memory.getRow() + 1); // increment row
+      }
 
-    // Erase the memory and currently buffered cues.
-    memory.eraseBuffer();
-    memory.decoder_.clearCues();
+      // Erase the entire memory buffer.
+      memory.eraseBuffer();
 
-    // Force out the new memory.
-    memory.forceEmit(t1, t2);
+      // Force out the memory buffer.
+      const caption = memory.forceEmit(startTime, endTime);
 
-    // Expect the forced out memory to be blank. We just cleared it.
-    expect(memory.decoder_.getCues()).toEqual([]);
+      // Expect the forced out memory to be blank. We just cleared it.
+      expect(caption).toBe(null);
+    });
   });
 
-  it('erases the entire buffer', () => {
-    const t1 = 1;
-    const t2 = 2;
-    const text = 'test';
-    const expectedText1 = 't\ne\ns\nt';
-    const expectedText2 = 's\nt\nt\ne';
-    for (const c of text) {
-      memory.addChar(shaka.cea.Cea608Memory.CharSet.BASIC_NORTH_AMERICAN,
-          c.charCodeAt(0));
-      memory.setRow(memory.getRow() + 1); // increment row
-    }
-    const expectedCues1 = [createCue(t1, t2, expectedText1)];
-    memory.forceEmit(t1, t2);
+  describe('moveRows', () => {
+    it('moves a set number of rows to a new position in the buffer', () => {
+      const startTime = 1;
+      const endTime = 2;
+      const text = 'test';
 
-    // Expect the correct cue to be emitted.
-    const cues = memory.decoder_.getCues();
-    expect(cues).toEqual(expectedCues1);
+      // Add the text to the buffer, each character on separate rows.
+      // At this point, the memory looks like:
+      // [1]: t
+      // [2]: e
+      // [3]: s
+      // [4]: t
+      for (const c of text) {
+        memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+            c.charCodeAt(0));
+        memory.setRow(memory.getRow() + 1); // increment row
+      }
 
-    // Move + clear the first 2 rows, and clear currently buffered cues.
-    const srcRowIdx = 1;
-    const dstRowIdx = 5;
-    const rowsToMove = 2;
-    memory.moveRows(dstRowIdx, srcRowIdx, rowsToMove);
-    memory.resetRows(srcRowIdx, rowsToMove - 1);
-    memory.decoder_.clearCues();
+      // Move first 2 rows down to 5th row, and then clear their old positions.
+      // After these operations, the memory looks like:
+      // [1]:
+      // [2]:
+      // [3]: s
+      // [4]: t
+      // [5]: t
+      // [6]: e
+      const srcRowIdx = 1;
+      const dstRowIdx = 5;
+      const rowsToMove = 2;
+      memory.moveRows(dstRowIdx, srcRowIdx, rowsToMove);
+      memory.resetRows(srcRowIdx, rowsToMove - 1);
 
-    // Force out the new memory.
-    memory.forceEmit(t1, t2);
+      // Expected text is 's\nt\nt\ne'
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(startTime, endTime, 's'),
+        CeaUtils.createLineBreakCue(startTime, endTime),
+        CeaUtils.createDefaultCue(startTime, endTime, 't'),
+        CeaUtils.createLineBreakCue(startTime, endTime),
+        CeaUtils.createDefaultCue(startTime, endTime, 't'),
+        CeaUtils.createLineBreakCue(startTime, endTime),
+        CeaUtils.createDefaultCue(startTime, endTime, 'e'),
+      ];
 
-    const expectedCues2 = [createCue(t1, t2, expectedText2)];
-    expect(memory.decoder_.getCues()).toEqual(expectedCues2);
+      const expectedCaption = {
+        stream,
+        cue: topLevelCue,
+      };
+
+      // Force out the new memory.
+      const caption = memory.forceEmit(startTime, endTime);
+      expect(caption).toEqual(expectedCaption);
+    });
   });
 });

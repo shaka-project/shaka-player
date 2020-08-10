@@ -132,6 +132,11 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     drmIt('sends reasonably-sized updates', async () => {
       // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
       fakeInitState.manifest = 'test:sintel-enc';
+      fakeInitState.player.configure['drm'] = {
+        'servers': {
+          'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+        },
+      };
 
       const p = waitForLoadedData();
 
@@ -155,6 +160,11 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     drmIt('has reasonable average message size', async () => {
       // Use an encrypted asset, to make sure DRM info doesn't balloon the size.
       fakeInitState.manifest = 'test:sintel-enc';
+      fakeInitState.player.configure['drm'] = {
+        'servers': {
+          'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+        },
+      };
 
       const p = waitForLoadedData();
 

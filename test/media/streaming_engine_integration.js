@@ -266,6 +266,13 @@ describe('StreamingEngine', () => {
     });
 
     it('plays at high playback rates', async () => {
+      // Experimentally, we find that playback rates above 2x in this test seem
+      // to cause decoder failures on Tizen 3.  This is out of our control, and
+      // seems to be a Tizen bug, so this test is skipped on Tizen completely.
+      if (shaka.util.Platform.isTizen()) {
+        pending('High playbackRate tests cause decoder errors on Tizen 3.');
+      }
+
       // Let's go!
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();

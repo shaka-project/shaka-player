@@ -11,10 +11,16 @@ describe('RegionTimeline', () => {
   /** @type {!jasmine.Spy} */
   let onNewRegion;
 
+  /** @type {!jasmine.Spy} */
+  let onSeekRange;
+
   beforeEach(() => {
     onNewRegion = jasmine.createSpy('onNewRegion');
 
-    timeline = new shaka.media.RegionTimeline();
+    onSeekRange = jasmine.createSpy('onSeekRange');
+    onSeekRange.and.returnValue({start: 0, end: 100});
+
+    timeline = new shaka.media.RegionTimeline(onSeekRange);
     timeline.setListeners(shaka.test.Util.spyFunc(onNewRegion));
   });
 
@@ -74,6 +80,25 @@ describe('RegionTimeline', () => {
       region3,
     ]);
   });
+
+  it('filters out regions that end before the start of the seek range',
+      async () => {
+        onSeekRange.and.returnValue({start: 5, end: 100});
+        const region1 = createRegion('urn:foo', 'my-region', 0, 3);
+        const region2 = createRegion('urn:foo', 'my-region', 3, 10);
+        const region3 = createRegion('urn:foo', 'my-region', 5, 10);
+        timeline.addRegion(region1);
+        timeline.addRegion(region2);
+        timeline.addRegion(region3);
+        expect(onNewRegion).toHaveBeenCalledTimes(3);
+        let regions = Array.from(timeline.regions());
+        expect(regions.length).toBe(3);
+        // Give the timeline time to filter regions
+        await shaka.test.Util.delay(
+            shaka.media.RegionTimeline.REGION_FILTER_INTERVAL * 2);
+        regions = Array.from(timeline.regions());
+        expect(regions).toEqual([region2, region3]);
+      });
 
   /**
    * @param {string} schemeIdUri

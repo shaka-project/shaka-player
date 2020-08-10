@@ -205,10 +205,26 @@ shaka.test.TestScheme = class {
       }
 
       if (data.licenseServers) {
-        for (const keySystem in data.licenseServers) {
+        // Real content typically doesn't contain license server URLs, but if it
+        // does, we use them in preference over everything else.  There is a
+        // config to override that for DASH, but this test utility isn't DASH
+        // and that player config wouldn't do any good for a test case.
+        //
+        // So, we don't put the specific license servers into the manifest
+        // structure.  That should always be done in the player config instead,
+        // and we have the static setupPlayer() method above to do that in
+        // tests.
+        //
+        // Instead, we place generic DrmInfo for all common key systems here,
+        // and tests can use any of them by configuring a license server.
+        const commonKeySystems = [
+          'com.apple.fps.1_0',
+          'com.microsoft.playready',
+          'com.widevine.alpha',
+        ];
+        for (const keySystem of commonKeySystems) {
           stream.encrypted = true;
           stream.addDrmInfo(keySystem, (drmInfo) => {
-            drmInfo.licenseServerUri = data.licenseServers[keySystem];
             if (data[contentType].initData) {
               drmInfo.addCencInitData(data[contentType].initData);
             }
