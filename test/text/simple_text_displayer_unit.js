@@ -72,6 +72,17 @@ describe('SimpleTextDisplayer', function() {
 
     it('appends equal time cues in reverse order', function() {
       // Regression test for https://github.com/google/shaka-player/issues/848
+
+      // When VTTCue is seen as the real thing (because of the presence of
+      // VTTCue.prototype.line), then the reverse-order behavior comes into
+      // play.  The reverse order is only needed because of VTTCue spec
+      // behavior.
+
+      // First we test the behavior with a real-looking VTTCue (in which
+      // prototype.line merely exists).  This simulates Chrome, Firefox, and
+      // Safari.
+      // eslint-disable-next-line no-restricted-syntax
+      window.VTTCue.prototype['line'] = 'auto';
       verifyHelper(
           [
             {start: 20, end: 40, text: 'Test1'},
@@ -79,9 +90,31 @@ describe('SimpleTextDisplayer', function() {
             {start: 20, end: 40, text: 'Test3'},
           ],
           [
+            // Reverse order to compensate for the way line='auto' is
+            // implemented in browsers.
             new shaka.text.Cue(20, 40, 'Test3'),
             new shaka.text.Cue(20, 40, 'Test2'),
             new shaka.text.Cue(20, 40, 'Test1'),
+          ]);
+
+      // Next we test the behavior with a VTTCue which is seen as a cheap
+      // polyfill (in which prototype.line does not exist).  This simulates IE
+      // and legacy Edge.
+      // eslint-disable-next-line no-restricted-syntax
+      delete window.VTTCue.prototype['line'];
+      displayer.remove(0, Infinity);  // Clear the cues from above.
+      verifyHelper(
+          [
+            {start: 20, end: 40, text: 'Test1'},
+            {start: 20, end: 40, text: 'Test2'},
+            {start: 20, end: 40, text: 'Test3'},
+          ],
+          [
+            // Input order, since the displayer sees this as a fake VTTCue
+            // implementation.
+            new shaka.text.Cue(20, 40, 'Test1'),
+            new shaka.text.Cue(20, 40, 'Test2'),
+            new shaka.text.Cue(20, 40, 'Test3'),
           ]);
     });
 
