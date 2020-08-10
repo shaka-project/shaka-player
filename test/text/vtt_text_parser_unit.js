@@ -592,36 +592,93 @@ describe('VttTextParser', () => {
           {
             startTime: 10,
             endTime: 20,
-            payload: 'Test',
-            fontWeight: Cue.fontWeight.BOLD,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: 'Test',
+                fontWeight: Cue.fontWeight.BOLD,
+              },
+            ],
           },
           {
             startTime: 20,
             endTime: 30,
-            payload: 'Test2',
-            fontStyle: Cue.fontStyle.ITALIC,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 30,
+                payload: 'Test2',
+                fontStyle: Cue.fontStyle.ITALIC,
+              },
+            ],
           },
           {
             startTime: 30,
             endTime: 40,
-            payload: 'Test3',
-            textDecoration: [Cue.textDecoration.UNDERLINE],
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 30,
+                endTime: 40,
+                payload: 'Test3',
+                textDecoration: [Cue.textDecoration.UNDERLINE],
+              },
+            ],
           },
           {
             startTime: 40,
             endTime: 50,
-            payload: 'Test4',
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 40,
+                endTime: 50,
+                payload: 'Test4',
+              },
+            ],
           },
           {
             startTime: 50,
             endTime: 60,
-            payload: 'Test5',
-            fontWeight: Cue.fontWeight.BOLD,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 50,
+                endTime: 60,
+                payload: 'Test',
+                fontWeight: Cue.fontWeight.BOLD,
+                fontStyle: Cue.fontStyle.NORMAL,
+              },
+              {
+                startTime: 50,
+                endTime: 60,
+                payload: '5',
+                fontWeight: Cue.fontWeight.BOLD,
+                fontStyle: Cue.fontStyle.ITALIC,
+              },
+            ],
           },
           {
             startTime: 70,
             endTime: 80,
-            payload: 'Test<b>6</b>',
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 70,
+                endTime: 80,
+                payload: 'Test',
+                fontWeight: Cue.fontWeight.NORMAL,
+              },
+              {
+                startTime: 70,
+                endTime: 80,
+                payload: '6',
+                fontWeight: Cue.fontWeight.BOLD,
+              },
+            ],
           },
         ],
         'WEBVTT\n\n' +
@@ -649,9 +706,17 @@ describe('VttTextParser', () => {
   function verifyHelper(cues, text, time) {
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
-
     const result = new shaka.text.VttTextParser().parseMedia(data, time);
-    expect(result).toEqual(cues.map((c) => jasmine.objectContaining(c)));
+
+    const expected = cues.map((cue) => {
+      if (cue.nestedCues) {
+        cue.nestedCues = cue.nestedCues.map(
+            (nestedCue) => jasmine.objectContaining(nestedCue)
+        );
+      }
+      return jasmine.objectContaining(cue);
+    });
+    expect(result).toEqual(expected);
   }
 
   /**
