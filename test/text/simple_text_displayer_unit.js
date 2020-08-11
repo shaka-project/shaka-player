@@ -95,6 +95,52 @@ describe('SimpleTextDisplayer', () => {
           [shakaCue]);
     });
 
+    it('creates style tags for cues with underline/italics properties', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+
+      // First cue is underlined and italicized.
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
+      nestedCue1.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
+      nestedCue1.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
+
+      // Second cue is only italicized.
+      const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
+      nestedCue2.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
+
+      // Third cue has no underline or italics.
+      const nestedCue3 = new shaka.text.Cue(10, 20, 'Test3');
+
+      // Fourth cue is only underlined.
+      const nestedCue4 = new shaka.text.Cue(10, 20, 'Test4');
+      nestedCue4.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
+
+      const expectedText = '<i><u>Test1</u></i><i>Test2</i>Test3<u>Test4</u>';
+      shakaCue.nestedCues = [nestedCue1, nestedCue2, nestedCue3, nestedCue4];
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, text: expectedText},
+          ],
+          [shakaCue]);
+    });
+
+    it('adds linebreaks when a linebreak cue is seen', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
+
+      // Second cue is a linebreak cue.
+      const nestedCue2 = new shaka.text.Cue(10, 20, '');
+      nestedCue2.spacer = true;
+
+      const nestedCue3 = new shaka.text.Cue(10, 20, 'Test2');
+
+      shakaCue.nestedCues = [nestedCue1, nestedCue2, nestedCue3];
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, text: 'Test1\nTest2'},
+          ],
+          [shakaCue]);
+    });
+
     it('skips duplicate cues', () => {
       const cue1 = new shaka.text.Cue(10, 20, 'Test');
       displayer.append([cue1]);
