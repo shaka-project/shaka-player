@@ -680,6 +680,32 @@ describe('VttTextParser', () => {
               },
             ],
           },
+          {
+            startTime: 80,
+            endTime: 90,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 80,
+                endTime: 90,
+                payload: 'Test ',
+                fontWeight: Cue.fontWeight.BOLD,
+                fontStyle: Cue.fontStyle.NORMAL,
+              },
+              {
+                startTime: 80,
+                endTime: 90,
+                payload: '7',
+                fontWeight: Cue.fontWeight.BOLD,
+                fontStyle: Cue.fontStyle.ITALIC,
+              },
+            ],
+          },
+          {
+            startTime: 90,
+            endTime: 100,
+            payload: '<b>Test<i>8</b>',
+          },
         ],
         'WEBVTT\n\n' +
         '00:00:10.000 --> 00:00:20.000\n' +
@@ -693,7 +719,11 @@ describe('VttTextParser', () => {
         '00:00:50.000 --> 00:01:00.000\n' +
         '<b>Test<i>5</i></b>\n\n' +
         '00:01:10.000 --> 00:01:20.000\n' +
-        'Test<b>6</b>',
+        'Test<b>6</b>\n\n' +
+        '00:01:20.000 --> 00:01:30.000\n' +
+        '<b>Test <i>7</i></b>\n\n' +
+        '00:01:30.000 --> 00:01:40.000\n' +
+        '<b>Test<i>8</b>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
