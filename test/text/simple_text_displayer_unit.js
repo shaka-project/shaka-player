@@ -95,7 +95,7 @@ describe('SimpleTextDisplayer', () => {
           [shakaCue]);
     });
 
-    it('creates style tags for cues with underline/italics properties', () => {
+    it('creates style tags for cues with underline/italics/bold', () => {
       const shakaCue = new shaka.text.Cue(10, 20, '');
 
       // First cue is underlined and italicized.
@@ -103,18 +103,20 @@ describe('SimpleTextDisplayer', () => {
       nestedCue1.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
       nestedCue1.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
 
-      // Second cue is only italicized.
+      // Second cue is italicized and bolded.
       const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
       nestedCue2.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
+      nestedCue2.fontWeight = shaka.text.Cue.fontWeight.BOLD;
 
-      // Third cue has no underline or italics.
+      // Third cue has no bold, italics, or underline.
       const nestedCue3 = new shaka.text.Cue(10, 20, 'Test3');
 
       // Fourth cue is only underlined.
       const nestedCue4 = new shaka.text.Cue(10, 20, 'Test4');
       nestedCue4.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
 
-      const expectedText = '<i><u>Test1</u></i><i>Test2</i>Test3<u>Test4</u>';
+      const expectedText =
+          '<i><u>Test1</u></i><b><i>Test2</i></b>Test3<u>Test4</u>';
       shakaCue.nestedCues = [nestedCue1, nestedCue2, nestedCue3, nestedCue4];
       verifyHelper(
           [
