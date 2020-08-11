@@ -187,7 +187,13 @@ describe('MediaSourceEngine', function() {
       shaka.media.MediaSourceEngine.createObjectURL =
         Util.spyFunc(createObjectURLSpy);
 
-      let mediaSourceSpy = jasmine.createSpy('MediaSource').and.callFake(() => {
+      const mediaSourceSpy = jasmine.createSpy('MediaSource');
+      // Because this is a fake constructor, it must be callable with "new".
+      // This will cause jasmine to invoke the callback with "new" as well, so
+      // the callback must be a "function".  This detail is hidden when babel
+      // transpiles the tests.
+      // eslint-disable-next-line prefer-arrow-callback, no-restricted-syntax
+      mediaSourceSpy.and.callFake(function() {
         return mockMediaSource;
       });
       window.MediaSource = Util.spyFunc(mediaSourceSpy);
@@ -1196,8 +1202,13 @@ describe('MediaSourceEngine', function() {
   }
 
   function createMockTextEngineCtor() {
-    let ctor = jasmine.createSpy('TextEngine');
-    ctor.isTypeSupported = function() { return true; };
+    const ctor = jasmine.createSpy('TextEngine');
+    ctor['isTypeSupported'] = () => true;
+    // Because this is a fake constructor, it must be callable with "new".
+    // This will cause jasmine to invoke the callback with "new" as well, so
+    // the callback must be a "function".  This detail is hidden when babel
+    // transpiles the tests.
+    // eslint-disable-next-line prefer-arrow-callback, no-restricted-syntax
     ctor.and.callFake(function() {
       expect(mockTextEngine).toBeFalsy();
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
