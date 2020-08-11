@@ -38,12 +38,12 @@ def main(args):
       # Skip hidden files like .gitignore and non-folders
       continue
 
-    # If any platforms were specified, only update those.
-    if len(args):
-      if not platform in args:
+    for child in os.listdir(platformFolder):
+      # If any args were specified, use them to filter.  Either the platform or
+      # base of the filename must match the filter.
+      if args and not platform in args and not child.split('.')[0] in args:
         continue
 
-    for child in os.listdir(platformFolder):
       fullPath = os.path.join(platformFolder, child)
       # If this has the "-new" suffix, it was just written by the layout tests.
       # Rename it to overwrite the "official" version, which is stored in

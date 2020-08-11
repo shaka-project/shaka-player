@@ -103,6 +103,10 @@
     "description": "The name of a configuration value.",
     "message": "Buffer Behind"
   },
+  "DEMO_CANCEL_BUTTON": {
+    "description": "A button to cancel the creation or editing of a custom asset.",
+    "message": "Cancel"
+  },
   "DEMO_CAPTIONS": {
     "description": "A tag that marks an asset as having closed captions.",
     "message": "Captions"
@@ -223,6 +227,10 @@
     "description": "The label on a field that allows users to provide a Digital Rights Management (DRM) system identifier for a custom asset.",
     "message": "Custom [JARGON:DRM] System"
   },
+  "DEMO_DRM_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "[JARGON:DRM]"
+  },
   "DEMO_DURATION_BACKOFF": {
     "description": "The name of a configuration value.",
     "message": "Duration Backoff"
@@ -262,6 +270,10 @@
   "DEMO_GPAC": {
     "description": "Text that describes an asset that comes from the GPAC project asset library.",
     "message": "[PROPER_NAME:GPAC]"
+  },
+  "DEMO_HEADERS_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Headers"
   },
   "DEMO_HIGH_DEFINITION": {
     "description": "Text that describes an asset that has a high definition video stream.",
@@ -351,6 +363,18 @@
     "description": "The label on a field that allows users to provide a license certificate for a custom asset.",
     "message": "Custom License Certificate URL"
   },
+  "DEMO_LICENSE_HEADER_NAME": {
+    "description": "A field for picking the name of the header to add.",
+    "message": "Header Name"
+  },
+  "DEMO_LICENSE_HEADER_TITLE": {
+    "description": "A header denoting a set of fields to add a license header.",
+    "message": "License Header"
+  },
+  "DEMO_LICENSE_HEADER_VALUE": {
+    "description": "A field for picking the value of the header to add.",
+    "message": "Header Value"
+  },
   "DEMO_LICENSE_SERVER_URL": {
     "description": "The label on a field that allows users to provide a license server for a custom asset.",
     "message": "Custom License Server URL"
@@ -390,6 +414,10 @@
   "DEMO_LOW_LATENCY": {
     "description": "The name of a configuration value.",
     "message": "Low Latency Streaming"
+  },
+  "DEMO_MAIN_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Main"
   },
   "DEMO_MANIFEST_RETRY_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
@@ -462,6 +490,10 @@
   "DEMO_MIN_WIDTH": {
     "description": "The name of a configuration value.",
     "message": "Min Width"
+  },
+  "DEMO_MISC_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Misc"
   },
   "DEMO_MP2TS": {
     "description": "Text that describes an asset that uses the MPEG-2 TS container.",
@@ -570,6 +602,10 @@
   "DEMO_SAFE_SKIP_DISTANCE": {
     "description": "The name of a configuration value.",
     "message": "Safe Skip Distance"
+  },
+  "DEMO_SAVE_BUTTON": {
+    "description": "A button to save a custom asset.",
+    "message": "Save"
   },
   "DEMO_SHAKA": {
     "description": "Text that describes an asset that comes from the Shaka Player asset library.",

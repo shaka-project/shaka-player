@@ -83,7 +83,7 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('span');
+    const captions = textContainer.querySelector('div');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({
@@ -105,7 +105,7 @@ describe('UITextDisplayer', () => {
 
   it('correctly displays styles for nested cues', async () => {
     /** @type {!shaka.text.Cue} */
-    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+    const cue = new shaka.text.Cue(0, 100, '');
     const nestedCue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
     cue.nestedCues = [nestedCue];
     nestedCue.textAlign = 'center';
@@ -170,7 +170,7 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('span');
+    const captions = textContainer.querySelector('div');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({
@@ -200,7 +200,7 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('span');
+    const captions = textContainer.querySelector('div');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({'font-size': expectedFontSize}));
@@ -214,7 +214,7 @@ describe('UITextDisplayer', () => {
     await shaka.test.Util.delay(0.5);
     /** @type {Element} */
     const textContainer = videoContainer.querySelector('.shaka-text-container');
-    let captions = textContainer.querySelectorAll('span');
+    let captions = textContainer.querySelectorAll('div');
     // Expect textContainer to display this cue.
     expect(captions.length).toBe(1);
 
@@ -222,7 +222,7 @@ describe('UITextDisplayer', () => {
     textDisplayer.append([cue2]);
     // Wait until updateCaptions_() gets called.
     await shaka.test.Util.delay(0.5);
-    captions = textContainer.querySelectorAll('span');
+    captions = textContainer.querySelectorAll('div');
     // Expect textContainer to display one cue without duplication.
     expect(captions.length).toBe(1);
   });

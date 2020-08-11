@@ -207,12 +207,12 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {string} keySystem
-   * @param {string} licenseRequestHeader
+   * @param {string} headerName
+   * @param {string} headerValue
    * @return {!ShakaDemoAssetInfo}
    */
-  addLicenseRequestHeader(keySystem, licenseRequestHeader) {
-    this.licenseRequestHeaders.set(keySystem, licenseRequestHeader);
+  addLicenseRequestHeader(headerName, headerValue) {
+    this.licenseRequestHeaders.set(headerName, headerValue);
     return this;
   }
 
