@@ -49,7 +49,8 @@ shakaDemo.Custom = class {
     addButtonContainer.classList.add('add-button-container');
     container.appendChild(addButtonContainer);
     // Style it as an MDL Floating Action Button (FAB).
-    const addButton = this.makeButton_('add', /* isFAB= */ true, () => {
+    const buttonStyle = shakaDemo.Custom.ButtonStyle_.FAB;
+    const addButton = this.makeButton_('add', buttonStyle, () => {
       this.showAssetDialog_(ShakaDemoAssetInfo.makeBlankAsset());
     });
     addButtonContainer.appendChild(addButton);
@@ -89,21 +90,189 @@ shakaDemo.Custom = class {
   }
 
   /**
-   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * A utility to simplify the creation of fields on the dialog.
+   * @param {!shakaDemo.InputContainer} container
+   * @param {string} name
+   * @param {function(!HTMLInputElement, !Element)} setup
+   * @param {function(!Element)} onChange
    * @private
    */
-  showAssetDialog_(assetInProgress) {
-    // Remove buttons for any previous assets.
-    shaka.util.Dom.removeAllChildren(this.dialog_);
+  makeField_(container, name, setup, onChange) {
+    container.addRow(/* labelString= */ null, /* tooltipString= */ null);
+    const input = new shakaDemo.TextInput(container, name, onChange);
+    input.extra().textContent = name;
+    setup(input.input(), input.container());
+  }
 
-    const inputDiv = document.createElement('div');
-    this.dialog_.appendChild(inputDiv);
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsHeaders_(assetInProgress, inputsToCheck) {
+    const headersDiv = document.createElement('div');
 
-    const iconDiv = document.createElement('div');
-    this.dialog_.appendChild(iconDiv);
+    // Because this field can theoretically contain an unlimited number of
+    // values, it has to take up an entire section by itself.
+    const makeEmptyRow = () => {
+      makePreFilledRow(/* headerName= */ null, /* headerValue= */ null);
+    };
+    /**
+     * @type {!Array.<{
+     *   headerName: ?string,
+     *   div: !Element,
+     * }>}
+     */
+    const collisionCheckEntries = [];
+    /** @type {function(?string, ?string)} */
+    const makePreFilledRow = (headerName, headerValue) => {
+      const div = document.createElement('div');
+      headersDiv.appendChild(div);
+      const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
+      const headerText = shakaDemo.MessageIds.LICENSE_HEADER_TITLE;
+      const container = new shakaDemo.InputContainer(
+          div, headerText, containerStyle,
+          /* docLink= */ null);
 
-    // An array of inputs which have validity checks which we care about.
-    const inputsToCheck = [];
+      const collisionCheckEntry = {
+        headerName,
+        div,
+      };
+      collisionCheckEntries.push(collisionCheckEntry);
+
+      // Don't add a new row for a row that was pre-filled.
+      let firstTime = !headerName;
+      const onChange = (newHeaderName, newHeaderValue) => {
+        if (headerName) {
+          // In case the header named changed, remove the old header.
+          assetInProgress.licenseRequestHeaders.delete(headerName);
+        }
+        // Set the new values.
+        headerName = newHeaderName;
+        collisionCheckEntry.headerName = newHeaderName;
+        headerValue = newHeaderValue;
+        if (!headerName || !headerValue) {
+          if (!firstTime) {
+            // The user has set a field that used to be filled to empty.
+            // This signals that they probably want to remove this header.
+            headersDiv.removeChild(div);
+          }
+          return;
+        }
+        if (firstTime) {
+          firstTime = false;
+          // You have filled out this row for the first time; add a new row, in
+          // case the user wants to add more headers.
+          makeEmptyRow();
+          // Update the componentHandler, to account for the new MDL elements.
+          componentHandler.upgradeDom();
+        }
+        assetInProgress.addLicenseRequestHeader(headerName, headerValue);
+        // Eliminate any OTHER header with the same name. Assume this newly
+        // added/modified one is the "correct" one.
+        for (const entry of collisionCheckEntries) {
+          if (entry == collisionCheckEntry) {
+            // You can't "collide" with yourself.
+            continue;
+          }
+          if (headerName != entry.headerName) {
+            // It's not a collision.
+            continue;
+          }
+          // Remove the entry for the old field from the array.
+          const idx = collisionCheckEntries.indexOf(entry);
+          collisionCheckEntries.splice(idx, 1);
+          // Remove the div for the old field from the overall headers div.
+          headersDiv.removeChild(entry.div);
+          break;
+        }
+      };
+
+      const nameSetup = (input, container) => {
+        if (headerName) {
+          input.value = headerName;
+        }
+      };
+      const nameOnChange = (input) => {
+        onChange(input.value, headerValue);
+      };
+      const licenseHeaderName = shakaDemoMain.getLocalizedString(
+          shakaDemo.MessageIds.LICENSE_HEADER_NAME);
+      this.makeField_(container, licenseHeaderName, nameSetup, nameOnChange);
+
+      const valueSetup = (input, container) => {
+        if (headerValue) {
+          input.value = headerValue;
+        }
+      };
+      const valueOnChange = (input) => {
+        onChange(headerName, input.value);
+      };
+      const licenseHeaderValue = shakaDemoMain.getLocalizedString(
+          shakaDemo.MessageIds.LICENSE_HEADER_VALUE);
+      this.makeField_(container, licenseHeaderValue, valueSetup, valueOnChange);
+    };
+    if (assetInProgress.licenseRequestHeaders.size == 0) {
+      // It starts out with a single empty row, but each time you start filling
+      // out one for the first time it adds a new one. Empty rows are ignored in
+      // the actual data.
+      makeEmptyRow();
+    } else {
+      // Make a row for each header.
+      for (const headerName of assetInProgress.licenseRequestHeaders.keys()) {
+        makePreFilledRow(
+            headerName, assetInProgress.licenseRequestHeaders.get(headerName));
+      }
+      // ...and also an empty one at the end.
+      makeEmptyRow();
+    }
+
+    return headersDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsMisc_(assetInProgress, inputsToCheck) {
+    const miscDiv = document.createElement('div');
+    const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
+    const container = new shakaDemo.InputContainer(
+        miscDiv, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
+
+    // Make the ad tag URL field.
+    const adTagSetup = (input, container) => {
+      if (assetInProgress.adTagUri) {
+        input.value = assetInProgress.adTagUri;
+      }
+    };
+    const adTagOnChange = (input) => {
+      assetInProgress.adTagUri = input.value;
+    };
+    const adTagURLName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.AD_TAG_URL);
+    this.makeField_(
+        container, adTagURLName, adTagSetup, adTagOnChange);
+
+    return miscDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsDrm_(assetInProgress, inputsToCheck) {
+    const drmDiv = document.createElement('div');
+    const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
+    const container = new shakaDemo.InputContainer(
+        drmDiv, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
 
     // The license server and drm system fields need to know each others
     // contents, and react to each others changes, to work.
@@ -129,23 +298,76 @@ shakaDemo.Custom = class {
       }
     };
 
+    // Make the license server URL field.
+    const licenseSetup = (input, container) => {
+      licenseServerUrlInput = input;
+      const drmSystems = assetInProgress.licenseServers.keys();
+      // Custom assets have only a single license server URL, no matter how
+      // many key systems they have. Thus, it's safe to say that the license
+      // server URL associated with the first key system is the asset's
+      // over-all license server URL.
+      const drmSystem = drmSystems.next();
+      if (drmSystem && drmSystem.value) {
+        input.value = assetInProgress.licenseServers.get(drmSystem.value);
+      }
+    };
+    const licenseOnChange = (input) => {
+      setLicenseServerURLs();
+    };
+    const licenseServerURLName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.LICENSE_SERVER_URL);
+    this.makeField_(
+        container, licenseServerURLName, licenseSetup, licenseOnChange);
+
+    // Make the license certificate URL field.
+    const certSetup = (input, container) => {
+      if (assetInProgress.certificateUri) {
+        input.value = assetInProgress.certificateUri;
+      }
+    };
+    const certOnChange = (input) => {
+      assetInProgress.certificateUri = input.value;
+    };
+    const licenseCertificateURLName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.LICENSE_CERTIFICATE_URL);
+    this.makeField_(
+        container, licenseCertificateURLName, certSetup, certOnChange);
+
+    // Make the drm system field.
+    const drmSetup = (input, container) => {
+      customDrmSystemInput = input;
+      const drmSystems = assetInProgress.licenseServers.keys();
+      for (const drmSystem of drmSystems) {
+        if (!shakaDemo.Main.commonDrmSystems.includes(drmSystem)) {
+          input.value = drmSystem;
+          break;
+        }
+      }
+    };
+    const drmOnChange = (input) => {
+      setLicenseServerURLs();
+    };
+    const DRMSystemName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.DRM_SYSTEM);
+    this.makeField_(
+        container, DRMSystemName, drmSetup, drmOnChange);
+
+    return drmDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @param {!Element} iconDiv
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsMain_(assetInProgress, inputsToCheck, iconDiv) {
+    const mainDiv = document.createElement('div');
     const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
     const container = new shakaDemo.InputContainer(
-        inputDiv, /* headerText= */ null, containerStyle,
+        mainDiv, /* headerText= */ null, containerStyle,
         /* docLink= */ null);
-
-    /**
-     * A utility to simplify the creation of fields on the dialog.
-     * @param {string} name
-     * @param {function(!Element, !Element)} setup
-     * @param {function(!Element)} onChange
-     */
-    const makeField = (name, setup, onChange) => {
-      container.addRow(null, null);
-      const input = new shakaDemo.TextInput(container, name, onChange);
-      input.extra().textContent = name;
-      setup(input.input(), input.container());
-    };
 
     // Make the manifest URL field.
     const manifestSetup = (input, container) => {
@@ -168,71 +390,8 @@ shakaDemo.Custom = class {
     };
     const manifestURLName = shakaDemoMain.getLocalizedString(
         shakaDemo.MessageIds.MANIFEST_URL);
-    makeField(manifestURLName, manifestSetup, manifestOnChange);
-
-    // Make the license server URL field.
-    const licenseSetup = (input, container) => {
-      licenseServerUrlInput = input;
-      const drmSystems = assetInProgress.licenseServers.keys();
-      // Custom assets have only a single license server URL, no matter how
-      // many key systems they have. Thus, it's safe to say that the license
-      // server URL associated with the first key system is the asset's
-      // over-all license server URL.
-      const drmSystem = drmSystems.next();
-      if (drmSystem && drmSystem.value) {
-        input.value = assetInProgress.licenseServers.get(drmSystem.value);
-      }
-    };
-    const licenseOnChange = (input) => {
-      setLicenseServerURLs();
-    };
-    const licenseServerURLName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.LICENSE_SERVER_URL);
-    makeField(licenseServerURLName, licenseSetup, licenseOnChange);
-
-    // Make the license certificate URL field.
-    const certSetup = (input, container) => {
-      if (assetInProgress.certificateUri) {
-        input.value = assetInProgress.certificateUri;
-      }
-    };
-    const certOnChange = (input) => {
-      assetInProgress.certificateUri = input.value;
-    };
-    const licenseCertificateURLName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.LICENSE_CERTIFICATE_URL);
-    makeField(licenseCertificateURLName, certSetup, certOnChange);
-
-    // Make the drm system field.
-    const drmSetup = (input, container) => {
-      customDrmSystemInput = input;
-      const drmSystems = assetInProgress.licenseServers.keys();
-      for (const drmSystem of drmSystems) {
-        if (!shakaDemo.Main.commonDrmSystems.includes(drmSystem)) {
-          input.value = drmSystem;
-          break;
-        }
-      }
-    };
-    const drmOnChange = (input) => {
-      setLicenseServerURLs();
-    };
-    const DRMSystemName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.DRM_SYSTEM);
-    makeField(DRMSystemName, drmSetup, drmOnChange);
-
-    // Make the ad tag URL field.
-    const adTagSetup = (input, container) => {
-      if (assetInProgress.adTagUri) {
-        input.value = assetInProgress.adTagUri;
-      }
-    };
-    const adTagOnChange = (input) => {
-      assetInProgress.adTagUri = input.value;
-    };
-    const adTagURLName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.AD_TAG_URL);
-    makeField(adTagURLName, adTagSetup, adTagOnChange);
+    this.makeField_(
+        container, manifestURLName, manifestSetup, manifestOnChange);
 
     // Make the name field.
     const nameSetup = (input, container) => {
@@ -266,7 +425,8 @@ shakaDemo.Custom = class {
     };
     const nameName = shakaDemoMain.getLocalizedString(
         shakaDemo.MessageIds.NAME);
-    makeField(nameName, nameSetup, nameOnChange);
+    this.makeField_(
+        container, nameName, nameSetup, nameOnChange);
 
     // Make the icon field.
     const iconSetup = (input, container) => {
@@ -296,12 +456,25 @@ shakaDemo.Custom = class {
 
     const iconURLName = shakaDemoMain.getLocalizedString(
         shakaDemo.MessageIds.ICON_URL);
-    makeField(iconURLName, iconSetup, iconOnChange);
+    this.makeField_(
+        container, iconURLName, iconSetup, iconOnChange);
 
-    // Create the buttons at the bottom of the dialog.
-    const buttonsDiv = document.createElement('tr');
-    inputDiv.appendChild(buttonsDiv);
-    buttonsDiv.appendChild(this.makeButton_('Save', /* isFAB= */ false, () => {
+    return mainDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsFinish_(assetInProgress, inputsToCheck) {
+    const finishDiv = document.createElement('tr');
+
+    const buttonStyle = shakaDemo.Custom.ButtonStyle_.RAISED;
+    const saveString =
+        shakaDemoMain.getLocalizedString(shakaDemo.MessageIds.SAVE_BUTTON);
+    finishDiv.appendChild(this.makeButton_(saveString, buttonStyle, () => {
       for (const input of inputsToCheck) {
         if (!input.validity.valid) {
           return;
@@ -313,10 +486,83 @@ shakaDemo.Custom = class {
       this.remakeSavedList_();
       this.dialog_.close();
     }));
-    buttonsDiv.appendChild(this.makeButton_(
-        'Cancel', /* isFAB= */ false, () => {
-          this.dialog_.close();
-        }));
+    const cancelString =
+        shakaDemoMain.getLocalizedString(shakaDemo.MessageIds.CANCEL_BUTTON);
+    finishDiv.appendChild(this.makeButton_(cancelString, buttonStyle, () => {
+      this.dialog_.close();
+    }));
+
+    return finishDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @private
+   */
+  showAssetDialog_(assetInProgress) {
+    // Remove buttons for any previous assets.
+    shaka.util.Dom.removeAllChildren(this.dialog_);
+
+    // An array of inputs which have validity checks which we care about.
+    /** @type {!Array.<!HTMLInputElement>} */
+    const inputsToCheck = [];
+
+    // Make the contents divs.
+    const iconDiv = document.createElement('div');
+    const mainDiv = this.makeAssetDialogContentsMain_(
+        assetInProgress, inputsToCheck, iconDiv);
+    const drmDiv = this.makeAssetDialogContentsDrm_(
+        assetInProgress, inputsToCheck);
+    const headersDiv = this.makeAssetDialogContentsHeaders_(
+        assetInProgress, inputsToCheck);
+    const miscDiv = this.makeAssetDialogContentsMisc_(
+        assetInProgress, inputsToCheck);
+    const finishDiv = this.makeAssetDialogContentsFinish_(
+        assetInProgress, inputsToCheck);
+
+    // Make the buttons that control which tab is visible.
+    const tabDiv = document.createElement('tr');
+    const tabsToHide = [];
+    const buttonsToSwitch = [];
+    const addTabButton = (messageId, tabToShow, startOn) => {
+      const buttonStyle = shakaDemo.Custom.ButtonStyle_.PLAIN;
+      const name = shakaDemoMain.getLocalizedString(messageId);
+      const button = this.makeButton_(name, buttonStyle, () => {
+        for (const tab of tabsToHide) {
+          tab.classList.add('hidden');
+        }
+        tabToShow.classList.remove('hidden');
+        for (const button of buttonsToSwitch) {
+          button.classList.remove('mdl-button--accent');
+        }
+        button.classList.add('mdl-button--accent');
+      });
+      tabDiv.appendChild(button);
+      tabsToHide.push(tabToShow);
+      buttonsToSwitch.push(button);
+      if (startOn) {
+        button.classList.add('mdl-button--accent');
+      } else {
+        tabToShow.classList.add('hidden');
+      }
+    };
+    addTabButton(
+        shakaDemo.MessageIds.MAIN_TAB, mainDiv, /* startOn= */ true);
+    addTabButton(
+        shakaDemo.MessageIds.DRM_TAB, drmDiv, /* startOn= */ false);
+    addTabButton(
+        shakaDemo.MessageIds.HEADERS_TAB, headersDiv, /* startOn= */ false);
+    addTabButton(
+        shakaDemo.MessageIds.MISC_TAB, miscDiv, /* startOn= */ false);
+
+    // Append the divs in the desired order.
+    this.dialog_.appendChild(tabDiv);
+    this.dialog_.appendChild(mainDiv);
+    this.dialog_.appendChild(drmDiv);
+    this.dialog_.appendChild(headersDiv);
+    this.dialog_.appendChild(miscDiv);
+    this.dialog_.appendChild(finishDiv);
+    this.dialog_.appendChild(iconDiv);
 
     // Update the componentHandler, to account for the new MDL elements.
     componentHandler.upgradeDom();
@@ -355,24 +601,30 @@ shakaDemo.Custom = class {
 
   /**
    * @param {string} name
-   * @param {boolean} isFAB Should this button be styled as a Material Design
-   *   Floating Action Button (FAB)?
+   * @param {shakaDemo.Custom.ButtonStyle_} buttonStyle
+   *   What style should this button be in?
    * @param {function()} callback
    * @return {!Element}
    * @private
    */
-  makeButton_(name, isFAB, callback) {
+  makeButton_(name, buttonStyle, callback) {
     const button = document.createElement('button');
-    if (isFAB) {
-      button.classList.add('mdl-button--fab');
-      button.classList.add('mdl-button--colored');
-      const icon = document.createElement('i');
-      icon.classList.add('material-icons-round');
-      icon.textContent = name;
-      button.appendChild(icon);
-    } else {
-      button.textContent = name;
-      button.classList.add('mdl-button--raised');
+    switch (buttonStyle) {
+      case shakaDemo.Custom.ButtonStyle_.FAB: {
+        button.classList.add('mdl-button--fab');
+        button.classList.add('mdl-button--colored');
+        const icon = document.createElement('i');
+        icon.classList.add('material-icons-round');
+        icon.textContent = name;
+        button.appendChild(icon);
+      } break;
+      case shakaDemo.Custom.ButtonStyle_.RAISED:
+        button.textContent = name;
+        button.classList.add('mdl-button--raised');
+        break;
+      case shakaDemo.Custom.ButtonStyle_.PLAIN:
+        button.textContent = name;
+        break;
     }
     button.addEventListener('click', callback);
     button.classList.add('mdl-button');
@@ -451,6 +703,17 @@ shakaDemo.Custom = class {
       this.updateSelected_();
     }
   }
+};
+
+
+/**
+ * @enum {number}
+ * @private
+ */
+shakaDemo.Custom.ButtonStyle_ = {
+  RAISED: 0,
+  FAB: 1,
+  PLAIN: 2,
 };
 
 
