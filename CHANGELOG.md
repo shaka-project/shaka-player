@@ -1,3 +1,22 @@
+## 2.5.15 (2020-08-12)
+
+Bugfixes:
+  - Fix TTML style inheritance
+  - Fix ordering of cues on IE and Edge
+  - Fix src= playback on WebOS
+    - https://github.com/google/shaka-player/pull/2777
+  - Filter timeline regions by seek range
+    - https://github.com/google/shaka-player/issues/2716
+  - Don't send duplicate license requests
+    - https://github.com/google/shaka-player/issues/2754
+  - Fix data URI parsing when charset present
+  - Fix rendering of TTML nested cues and spacers
+    - https://github.com/google/shaka-player/issues/2760
+
+Docs:
+  - Correct very outdated docs on test.py
+
+
 ## 2.5.14 (2020-07-28)
 
 Bugfixes:
