@@ -177,8 +177,8 @@ describe('UITextDisplayer', () => {
         videoContainer.querySelector('.shaka-text-container');
     const captionContainer = textContainer.querySelector('div');
 
-    expect(captionContainer.style.top).toEqual('0%');
-    expect(captionContainer.style.left).toEqual('25%');
+    expect(captionContainer.style.top).toBe('0%');
+    expect(captionContainer.style.left).toBe('25%');
   });
 
   it('correctly displays styles for cellResolution units', async () => {
