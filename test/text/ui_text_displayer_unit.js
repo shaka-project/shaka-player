@@ -144,6 +144,43 @@ describe('UITextDisplayer', () => {
         }));
   });
 
+  it('correctly anchors CueRegion objects', async () => {
+    const cue = new shaka.text.Cue(0, 100, '');
+    const nestedCue = new shaka.text.Cue(0, 100, 'test');
+    const region = new shaka.text.CueRegion();
+
+    region.id = 'test';
+
+    // Region occupies 50% of both the height and width.
+    region.height = 50;
+    region.width = 50;
+
+    // Pin the bottom center of the region...
+    region.regionAnchorX = 50;
+    region.regionAnchorY = 100;
+
+    // To the center of the video.
+    region.viewportAnchorX = 50;
+    region.viewportAnchorY = 50;
+
+    cue.region = region;
+    cue.nestedCues.push(nestedCue);
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    // Wait until updateCaptions_() gets called.
+    await shaka.test.Util.delay(0.5);
+
+    // Verify the top-level cue corresponds to a div that is correctly
+    // anchored and positioned based off its region.
+    const textContainer =
+        videoContainer.querySelector('.shaka-text-container');
+    const captionContainer = textContainer.querySelector('div');
+
+    expect(captionContainer.style.top).toEqual('0%');
+    expect(captionContainer.style.left).toEqual('25%');
+  });
+
   it('correctly displays styles for cellResolution units', async () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
