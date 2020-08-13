@@ -37,6 +37,8 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Opera¹     |untested⁵ |untested⁵|untested⁵|untested⁵|**Native**| -      | -   |
 |Chromecast²| -        | -       | -       | -       | -        | -      |**Y**|
 |Tizen TV³  | -        | -       | -       | -       | -        | -      |**Y**|
+|WebOS⁶     | -        | -       | -       | -       | -        | -      |**Y**|
+|Xbox One⁶  | -        | -       | -       | -       | -        | -      |**Y**|
 
 NOTES:
  - ¹: On macOS, only Safari 12+ is supported.  On iOS, only iOS 12+ is
@@ -51,6 +53,10 @@ NOTES:
    https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.
+ - ⁶: These are expected to work, but is community-supported and untested by
+   us. (Official support for LG WebOS TV:
+   https://github.com/google/shaka-player/issues/1330, Official support for
+   Xbox One: https://github.com/google/shaka-player/issues/1705)
 
 We support iOS 12+ through Apple's native HLS player.  We provide the same
 top-level API, but we just set the video's `src` element to the manifest/media.
@@ -110,7 +116,7 @@ DASH features **not** supported:
 
 HLS features supported:
  - VOD, Live, and Event types
- - Encrypted content with Widevine
+ - Encrypted content with PlayReady and Widevine
  - ISO-BMFF / MP4 / CMAF support
  - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.6.3+, must be
    separately included)
@@ -119,8 +125,6 @@ HLS features supported:
  - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
 
 HLS features **not** supported:
- - Encrypted content with PlayReady:
-   https://github.com/google/shaka-player/issues/1145
  - Key rotation: https://github.com/google/shaka-player/issues/917
  - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
  - Raw AAC, MP3, etc (without an MP4 container):
@@ -141,6 +145,8 @@ HLS features **not** supported:
 |Opera     |untested⁵ | -       | -       |untested⁵ |
 |Chromecast|**Y**     |**Y**    | -       |untested⁵ |
 |Tizen TV  |**Y**     |**Y**    | -       |untested⁵ |
+|WebOS⁷    |untested⁷ |untested⁷| -       |untested⁷ |
+|Xbox One⁷ | -        |untested⁷| -       | -        |
 
 Other DRM systems should work out of the box if they are interoperable and
 compliant to the EME spec.
@@ -158,6 +164,16 @@ NOTES:
    Player team.
  - ⁶: ClearKey is a useful tool for debugging, and does not provide actual
    content security.
+ - ⁷: These are expected to work, but is community-supported and untested by
+   us.
+
+|Manifest  |Widevine  |PlayReady|FairPlay |ClearKey  |
+|:--------:|:--------:|:-------:|:-------:|:--------:|
+|DASH      |**Y**     |**Y**    | -       |**Y**     |
+|HLS       |**Y**     |**Y**    |**Y** ¹  | -        |
+
+NOTES:
+ - ¹: We support FairPlay through Apple's native HLS player.
 
 
 ## Media container and subtitle support
