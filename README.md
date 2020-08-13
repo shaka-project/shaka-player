@@ -53,8 +53,8 @@ NOTES:
    https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.
- - ⁶: These are expected to work, but is community-supported and untested by
-   us. (Official support for LG WebOS TV:
+ - ⁶: These are expected to work, WebOS and Xbox One are community supported
+   and untested by us. (Official support for LG WebOS TV:
    https://github.com/google/shaka-player/issues/1330, Official support for
    Xbox One: https://github.com/google/shaka-player/issues/1705)
 
@@ -164,8 +164,8 @@ NOTES:
    Player team.
  - ⁶: ClearKey is a useful tool for debugging, and does not provide actual
    content security.
- - ⁷: These are expected to work, but is community-supported and untested by
-   us.
+ - ⁷: These are expected to work, WebOS and Xbox One are community supported
+   and untested by us.
 
 |Manifest  |Widevine  |PlayReady|FairPlay |ClearKey  |
 |:--------:|:--------:|:-------:|:-------:|:--------:|
