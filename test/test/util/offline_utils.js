@@ -22,6 +22,7 @@ shaka.test.OfflineUtils = class {
       originalManifestUri: originalUri,
       streams: [],
       sessionIds: [],
+      initDatas: [],
       size: 1024,
     };
   }

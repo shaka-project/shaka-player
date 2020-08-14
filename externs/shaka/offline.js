@@ -67,6 +67,7 @@ shaka.extern.StoredContent;
  *   expiration: number,
  *   streams: !Array.<shaka.extern.StreamDB>,
  *   sessionIds: !Array.<string>,
+ *   initDatas: !Array.<Uint8Array>,
  *   drmInfo: ?shaka.extern.DrmInfo,
  *   appMetadata: Object
  * }}
@@ -87,6 +88,8 @@ shaka.extern.StoredContent;
  *   The Streams that are stored.
  * @property {!Array.<string>} sessionIds
  *   The DRM offline session IDs for the media.
+ * @property {!Array.<Uint8Array>} initDatas
+ *   The DRM offline initData's for the media.
  * @property {?shaka.extern.DrmInfo} drmInfo
  *   The DRM info used to initialize EME.
  * @property {Object} appMetadata

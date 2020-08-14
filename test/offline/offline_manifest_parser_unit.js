@@ -206,6 +206,7 @@ filterDescribe('OfflineManifestParser', offlineManifestParserSupport, () => {
       expiration: Infinity,
       streams: [],
       sessionIds: [sessionId],
+      initDatas: [],
       drmInfo: null,
       appMetadata: {},
     };
