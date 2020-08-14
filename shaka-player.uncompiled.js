@@ -18,6 +18,7 @@ goog.require('shaka.cast.CastReceiver');
 goog.require('shaka.cea.CeaDecoder');
 goog.require('shaka.cea.Cea608DataChannel');
 goog.require('shaka.cea.Cea608Memory');
+goog.require('shaka.cea.Cea708Window');
 goog.require('shaka.cea.Mp4CeaParser');
 goog.require('shaka.dash.DashParser');
 goog.require('shaka.hls.HlsParser');
