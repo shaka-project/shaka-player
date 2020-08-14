@@ -86,6 +86,7 @@ describe('HlsParser', () => {
       onError: fail,
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onTimelineRegionAdded: fail,
+      isLowLatencyMode: () => false,
     };
 
     parser = new shaka.hls.HlsParser();

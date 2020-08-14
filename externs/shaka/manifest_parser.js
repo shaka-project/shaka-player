@@ -103,7 +103,8 @@ shaka.extern.ManifestParser = class {
  *   filter: function(shaka.extern.Manifest):!Promise,
  *   onTimelineRegionAdded: function(shaka.extern.TimelineRegionInfo),
  *   onEvent: function(!Event),
- *   onError: function(!shaka.util.Error)
+ *   onError: function(!shaka.util.Error),
+ *   isLowLatencyMode: function():boolean
  * }}
  *
  * @description
@@ -123,6 +124,8 @@ shaka.extern.ManifestParser = class {
  *   Should be called to raise events.
  * @property {function(!shaka.util.Error)} onError
  *   Should be called when an error occurs.
+ * @property {function():boolean} isLowLatencyMode
+ *   Return true if low latency streaming mode is enabled.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;
