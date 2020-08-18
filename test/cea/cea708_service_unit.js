@@ -61,8 +61,8 @@ describe('Cea708Service', () => {
   /**
    * Takes in a CEA-708 service and array of 708 packets with control codes,
    * and returns all the captions inside of them, using the service to decode.
-   * @param {!Array<!number>} bytes
-   * @param {!number} pts
+   * @param {!shaka.cea.Cea708Service} service
+   * @param {...!shaka.cea.DtvccPacket} packets
    */
   const getCaptionsFromPackets = (service, ...packets) => {
     const captions = [];
