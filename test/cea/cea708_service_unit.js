@@ -558,7 +558,7 @@ describe('Cea708Service', () => {
     const toggleWindow = [0x8b, 0xff];
     const displayWindow = [0x89, 0xff];
     const deleteWindow = [0x8c, 0xff];
-    const clearWindow = [0x8b, 0xff];
+    const clearWindow = [0x88, 0xff];
 
     it('handles display, toggle, and delete commands on windows', () => {
       // Define a visible window, add some text, and toggle it off,
