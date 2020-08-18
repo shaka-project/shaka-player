@@ -70,6 +70,7 @@ shaka.extern.StateChange;
  *   corruptedFrames: number,
  *   estimatedBandwidth: number,
  *
+ *   completionPercent: number,
  *   loadLatency: number,
  *   manifestTimeSeconds: number,
  *   drmTimeSeconds: number,
@@ -111,6 +112,10 @@ shaka.extern.StateChange;
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
  *
+ * @property {number} completionPercent
+ *   This is the greatest completion percent that the user has experienced in
+ *   playback.  Also known as the "high water mark".  Is NaN when there is no
+ *   known duration, such as for livestreams.
  * @property {number} loadLatency
  *   This is the number of seconds it took for the video element to have enough
  *   data to begin playback.  This is measured from the time load() is called to
