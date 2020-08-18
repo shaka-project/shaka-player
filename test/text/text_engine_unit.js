@@ -60,9 +60,14 @@ describe('TextEngine', () => {
 
     it('reports support when it\'s closed captions',
         () => {
-          const closedCaptionsType =
+          const cea608closedCaptionsType =
            shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE;
-          expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(true);
+          const cea708closedCaptionsType =
+           shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE;
+          expect(TextEngine.isTypeSupported(
+              cea608closedCaptionsType)).toBe(true);
+          expect(TextEngine.isTypeSupported(
+              cea708closedCaptionsType)).toBe(true);
         });
   });
 

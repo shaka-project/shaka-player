@@ -645,5 +645,29 @@ describe('Cea708Service', () => {
           packet3, packet4, packet5, packet6);
       expect(captions).toEqual(expectedCaptions);
     });
+
+    it('handles C2 and C3 no-op control codes correctly', () => {
+      // As of CEA-708, the C2 and C3 control code group has no operations.
+      // However, the bytes are reserved for future modifications to the spec,
+      // and so the correct # of bytes should be skipped if they are seen.
+      const packets = [
+        // C2 control code data.
+        [0x1008, 0x00], // C2 Packet 1.
+        [0x1010, 0x00, 0x00], // C2 Packet 2.
+        [0x1018, 0x00, 0x00, 0x00], // C2 Packet 3.
+
+        // C3 control code data.
+        [0x1080, 0x00, 0x00, 0x00, 0x00], // C3 packet 1.
+        [0x1088, 0x00, 0x00, 0x00, 0x00, 0x00], // C3 packet 2.
+      ];
+      const expectedSkips = [1, 2, 3, 4, 5]; // As per the CEA-708-E spec.
+
+      for (let i = 0; i < packets.length; i++) {
+        const packet = createCea708PacketFromBytes(packets[i]);
+        spyOn(packet, 'skip');
+        getCaptionsFromPackets(service, packet);
+        expect(packet.skip).toHaveBeenCalledWith(expectedSkips[i]);
+      }
+    });
   });
 });
