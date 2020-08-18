@@ -171,7 +171,7 @@ describe('Cea708Window', () => {
     topLevelCue.nestedCues = [
       CeaUtils.createStyledCue(startTime, endTime, text1, /* underline= */ true,
           /* italics= */ true, textColor1,
-          shaka.cea.CeaDecoderUtils.DEFAULT_BG_COLOR),
+          shaka.cea.CeaUtils.DEFAULT_BG_COLOR),
       CeaUtils.createStyledCue(startTime, endTime, text2,
           /* underline= */ false, /* italics= */ false,
           textColor1, backgroundColor1),

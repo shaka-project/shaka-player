@@ -180,8 +180,8 @@ describe('Cea708Service', () => {
       CeaUtils.createStyledCue(
           startTime, endTime, text,
           /* underline= */ true, /* italics= */ true,
-          /* textColor= */ shaka.cea.CeaDecoderUtils.DEFAULT_TXT_COLOR,
-          /* backgroundColor= */ shaka.cea.CeaDecoderUtils.DEFAULT_BG_COLOR),
+          /* textColor= */ shaka.cea.CeaUtils.DEFAULT_TXT_COLOR,
+          /* backgroundColor= */ shaka.cea.CeaUtils.DEFAULT_BG_COLOR),
       CeaUtils.createDefaultCue(startTime, endTime, /* payload= */ text),
     ];
 

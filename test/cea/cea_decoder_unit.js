@@ -8,7 +8,7 @@ describe('CeaDecoder', () => {
   const CeaUtils = shaka.test.CeaUtils;
 
   /** @type {!string} */
-  const DEFAULT_BG_COLOR = shaka.cea.CeaDecoderUtils.DEFAULT_BG_COLOR;
+  const DEFAULT_BG_COLOR = shaka.cea.CeaUtils.DEFAULT_BG_COLOR;
 
   /**
    * Initialization bytes for CC packet.
