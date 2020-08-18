@@ -67,20 +67,18 @@ shaka.ui.LanguageUtils = class {
 
     // 5. Add new buttons
     /** @type {!Set.<string>} */
-    // const combinationsMade = new Set();
+    const combinationsMade = new Set();
     const selectedCombination = selectedTrack ? getCombination(
         selectedTrack.language, getRolesString(selectedTrack)) : '';
 
     for (const track of tracks) {
-      shaka.log.info('track!');
-      shaka.log.info(track);
       const language = track.language;
       const rolesString = getRolesString(track);
       const combinationName = getCombination(language, rolesString);
-      /* if (combinationsMade.has(combinationName)) {
+      if (combinationsMade.has(combinationName)) {
         continue;
       }
-      combinationsMade.add(combinationName);*/
+      combinationsMade.add(combinationName);
 
       const button = shaka.util.Dom.createButton();
       button.addEventListener('click', () => {

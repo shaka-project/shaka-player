@@ -492,7 +492,7 @@ describe('CeaDecoder', () => {
     // Hide window (2 bytes), with a bitmap provided to indicate all windows.
     const hideWindow = new Uint8Array([
       ...atscCaptionInitBytes, 0xc2, /* padding= */ 0xff,
-      0xff, 0x02, 0b00100010, // Service #1 and 2 bytes follow
+      0xff, 0x02, 0x22, // Service #1, and 2 bytes will follow.
       0xfe, 0x8a, 0xff,
     ]);
 
@@ -510,7 +510,7 @@ describe('CeaDecoder', () => {
         0xff, 0x07, (serviceNumber << 5) | 12,
 
         // Define window (7 bytes). Visible window #0 with 10 rows, 10 columns.
-        0xfe, 0x98, 0b00111000,
+        0xfe, 0x98, 0x38,
         0xfe, 0x00, 0x00,
         0xfe, 0x0a, 0x0a,
         0xfe, 0x00,
@@ -565,8 +565,11 @@ describe('CeaDecoder', () => {
       // the block without interrupting playback.
       spyOn(shaka.log, 'warnOnce').and.callThrough();
 
-      decoder.decode();
+      const captions = decoder.decode();
+      expect(shaka.log.warnOnce).toHaveBeenCalledWith('CEA708_INVALID_DATA',
+          'Buffer read out of bounds / invalid CEA-708 Data.');
       expect(shaka.log.warnOnce).toHaveBeenCalledTimes(1);
+      expect(captions).toEqual([]);
     });
   });
 });
