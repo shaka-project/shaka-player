@@ -30,7 +30,10 @@ describe('Cea708Window', () => {
 
   beforeEach(() => {
     window = new shaka.cea.Cea708Window(/* windowNum= */ 0);
-    window.defineWindow(/* visible= */ true, 0, 0, 0, 0, rowCount, colCount);
+    window.defineWindow(
+        /* visible= */ true, /* verticalAnchor= */ 0,
+        /* horAnchor= */ 0, /* anchorId= */ 0, /* relativeToggle= */ false,
+        rowCount, colCount);
     window.setStartTime(startTime);
   });
 
@@ -127,7 +130,7 @@ describe('Cea708Window', () => {
 
       // Nothing should have emitted, a horizontal carriage return wipes the row
       // and sets the column position to the beginning of the row.
-      expect(caption).toEqual(null);
+      expect(caption).toBe(null);
     });
   });
 

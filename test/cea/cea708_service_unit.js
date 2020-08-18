@@ -663,7 +663,7 @@ describe('Cea708Service', () => {
       const expectedSkips = [1, 2, 3, 4, 5]; // As per the CEA-708-E spec.
 
       for (let i = 0; i < packets.length; i++) {
-        const packet = createCea708PacketFromBytes(packets[i]);
+        const packet = createCea708PacketFromBytes(packets[i], /* pts= */ 1);
         spyOn(packet, 'skip');
         getCaptionsFromPackets(service, packet);
         expect(packet.skip).toHaveBeenCalledWith(expectedSkips[i]);

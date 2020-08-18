@@ -30,7 +30,7 @@ describe('DtvccPacket', () => {
     let i = 0;
     while (dtvccPacket.hasMoreData()) {
       const data = dtvccPacket.readBlock();
-      expect(data).toEqual(dataBytes[i]);
+      expect(data).toBe(dataBytes[i]);
       i++;
     }
     expect(dtvccPacket.getPosition()).toBe(2);

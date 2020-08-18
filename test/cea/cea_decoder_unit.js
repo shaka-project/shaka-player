@@ -157,18 +157,13 @@ describe('CeaDecoder', () => {
       const startTimeCaption2 = 2;
       const expectedText = 'test';
 
-      // 2 nested cues, one contains styled text, one contains a midrow space.
+      // A single nested cue containing yellow, italicized text.
       const topLevelCue = new shaka.text.Cue(startTimeCaption1,
           startTimeCaption2, '');
       topLevelCue.nestedCues = [
         CeaUtils.createStyledCue(
             startTimeCaption1, startTimeCaption2, expectedText,
             /* underline= */ false, /* italics= */ true,
-            /* textColor= */ 'white', /* backgroundColor= */ 'yellow'),
-
-        CeaUtils.createStyledCue(
-            startTimeCaption1, startTimeCaption2, /* payload= */ ' ',
-            /* underline= */ false, /* italics= */ false,
             /* textColor= */ 'white', /* backgroundColor= */ 'yellow'),
       ];
 

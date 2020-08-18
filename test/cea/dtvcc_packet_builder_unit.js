@@ -5,8 +5,6 @@
  */
 
 describe('DtvccPacketBuilder', () => {
-  const CeaUtils = shaka.test.CeaUtils;
-
   /** @type {!shaka.cea.DtvccPacketBuilder} */
   let dtvccPacketBuilder;
 
@@ -119,14 +117,14 @@ describe('DtvccPacketBuilder', () => {
     // was sent yet. So these bytes should have been ignored by the builder.
     dtvccPacketBuilder.addByte({
       pts: 0,
-      type: DTVCC_PACKET_START,
-      byte: dtvccStartByte,
+      type: DTVCC_PACKET_DATA,
+      byte: 0,
       order: 0,
     });
     dtvccPacketBuilder.addByte({
       pts: 0,
-      type: DTVCC_PACKET_START,
-      byte: dtvccStartByte,
+      type: DTVCC_PACKET_DATA,
+      byte: 0,
       order: 0,
     });
 
