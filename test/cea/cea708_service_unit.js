@@ -10,18 +10,44 @@ describe('Cea708Service', () => {
   /** @type {!shaka.cea.Cea708Service} */
   let service;
 
-  // Hide window (2 bytes), with a bitmap provided to indicate all windows.
+  /**
+   * Hide window (2 bytes), with a bitmap provided to indicate all windows.
+   * @type {!Array<!number>}
+   */
   const hideWindow = [0x8a, 0xff];
 
-  // Define window (7 bytes), defines window #0 to be a visible window
-  // with 32 rows and 32 columns. (We specify 31 for each since decoder adds 1).
+  /**
+   * Define window (7 bytes), defines window #0 to be a visible window
+   * with 32 rows and 32 columns. (We specify 31 for each since decoder adds 1).
+   * @type {!Array<!number>}
+   */
   const defineWindow = [
-    0x98, 0b00111000, 0x00, 0x00, 0x1f, 0x1f, 0x00,
+    0x98, 0x38, 0x00, 0x00, 0x1f, 0x1f, 0x00,
   ];
 
-  // Takes in a array of bytes, and converts it into a CEA-708 DTVCC Packet.
-  const createCea708PacketFromBytes = (controlCodes, pts) => {
-    const cea708Bytes = controlCodes.map((code, i) => {
+  /** @type {!number} */
+  const startTime = 1;
+
+  /** @type {!number} */
+  const endTime = 2;
+
+  /**
+   * We arbitrarily pick service 1 for all of these tests.
+   * @type {!number}
+   */
+  const serviceNumber = 1;
+
+  /** @type {!string} */
+  const stream = `svc${serviceNumber}`;
+
+  /**
+   * Takes in a array of bytes and a presentation timestamp (in seconds),
+   * and converts it into a CEA-708 DTVCC Packet.
+   * @param {!Array<!number>} bytes
+   * @param {!number} pts
+   */
+  const createCea708PacketFromBytes = (bytes, pts) => {
+    const cea708Bytes = bytes.map((code, i) => {
       return {
         pts,
         type: shaka.cea.DtvccPacketBuilder.DTVCC_PACKET_DATA,
@@ -29,12 +55,15 @@ describe('Cea708Service', () => {
         order: i,
       };
     });
-
     return new shaka.cea.DtvccPacket(cea708Bytes);
   };
 
-  // Takes in a service and array of packets with control codes,
-  // and returns all the captions inside of them.
+  /**
+   * Takes in a CEA-708 service and array of 708 packets with control codes,
+   * and returns all the captions inside of them, using the service to decode.
+   * @param {!Array<!number>} bytes
+   * @param {!number} pts
+   */
   const getCaptionsFromPackets = (service, ...packets) => {
     const captions = [];
     for (const packet of packets) {
@@ -49,13 +78,10 @@ describe('Cea708Service', () => {
   };
 
   beforeEach(() => {
-    // We arbitrarily pick service 1 for all of these tests.
-    service = new shaka.cea.Cea708Service(/* serviceNumber= */ 1);
+    service = new shaka.cea.Cea708Service(serviceNumber);
   });
 
   it('decodes regular unstyled caption text', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -73,7 +99,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -83,8 +109,6 @@ describe('Cea708Service', () => {
   });
 
   it('setPenLocation sets the pen location correctly', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -115,7 +139,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -125,8 +149,6 @@ describe('Cea708Service', () => {
   });
 
   it('setPenAttributes sets underline and italics correctly', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -165,7 +187,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -175,8 +197,6 @@ describe('Cea708Service', () => {
   });
 
   it('setPenColor sets foreground and background color correctly', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -208,7 +228,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -218,8 +238,6 @@ describe('Cea708Service', () => {
   });
 
   it('handles special characters from the G0, G1, G2, and G3 groups', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 text control code
@@ -264,7 +282,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -274,8 +292,6 @@ describe('Cea708Service', () => {
   });
 
   it('adds an underline for unsupported chars from the G2/G3 groups', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G2 control codes that add text.
@@ -304,7 +320,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -313,8 +329,6 @@ describe('Cea708Service', () => {
   });
 
   it('handles the reset command correctly', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -336,7 +350,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -348,8 +362,6 @@ describe('Cea708Service', () => {
   });
 
   it('handles the setWindowAttributes command correctly', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -374,7 +386,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -384,8 +396,6 @@ describe('Cea708Service', () => {
   });
 
   it('handles the carriage return command correctly', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -412,7 +422,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -422,8 +432,6 @@ describe('Cea708Service', () => {
   });
 
   it('handles the horizontal carriage return command correctly', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -457,7 +465,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -467,8 +475,6 @@ describe('Cea708Service', () => {
   });
 
   it('handles the ASCII form-feed command correctly', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -491,7 +497,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -501,8 +507,6 @@ describe('Cea708Service', () => {
   });
 
   it('handles the ASCII form-feed command correctly', () => {
-    const startTime = 1;
-    const endTime = 2;
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -534,7 +538,7 @@ describe('Cea708Service', () => {
 
     const expectedCaptions = [
       {
-        stream: 'svc1',
+        stream,
         cue: topLevelCue,
       },
     ];
@@ -542,6 +546,30 @@ describe('Cea708Service', () => {
     const captions = getCaptionsFromPackets(service, packet1, packet2);
 
     expect(captions).toEqual(expectedCaptions);
+  });
+
+  it('handles C2 and C3 no-op control codes correctly', () => {
+    // As of CEA-708, the C2 and C3 control code group has no operations.
+    // However, the bytes are reserved for future modifications to the spec,
+    // and so the correct # of bytes should be skipped if they are seen.
+    const packets = [
+      // C2 control code data.
+      [0x1008, 0x00], // C2 Packet 1.
+      [0x1010, 0x00, 0x00], // C2 Packet 2.
+      [0x1018, 0x00, 0x00, 0x00], // C2 Packet 3.
+
+      // C3 control code data.
+      [0x1080, 0x00, 0x00, 0x00, 0x00], // C3 packet 1.
+      [0x1088, 0x00, 0x00, 0x00, 0x00, 0x00], // C3 packet 2.
+    ];
+    const expectedSkips = [1, 2, 3, 4, 5]; // As per the CEA-708-E spec.
+
+    for (let i = 0; i < packets.length; i++) {
+      const packet = createCea708PacketFromBytes(packets[i], /* pts= */ 1);
+      spyOn(packet, 'skip');
+      getCaptionsFromPackets(service, packet);
+      expect(packet.skip).toHaveBeenCalledWith(expectedSkips[i]);
+    }
   });
 
   describe('handles commands that change the display of windows', () => {
@@ -596,12 +624,12 @@ describe('Cea708Service', () => {
 
       const expectedCaptions = [
         {
-          stream: 'svc1',
+          stream,
           cue: topLevelCue1,
         },
 
         {
-          stream: 'svc1',
+          stream,
           cue: topLevelCue2,
         },
       ];
@@ -636,7 +664,7 @@ describe('Cea708Service', () => {
 
       const expectedCaptions = [
         {
-          stream: 'svc1',
+          stream,
           cue: topLevelCue,
         },
       ];
@@ -644,30 +672,6 @@ describe('Cea708Service', () => {
       const captions = getCaptionsFromPackets(service, packet1, packet2,
           packet3, packet4, packet5, packet6);
       expect(captions).toEqual(expectedCaptions);
-    });
-
-    it('handles C2 and C3 no-op control codes correctly', () => {
-      // As of CEA-708, the C2 and C3 control code group has no operations.
-      // However, the bytes are reserved for future modifications to the spec,
-      // and so the correct # of bytes should be skipped if they are seen.
-      const packets = [
-        // C2 control code data.
-        [0x1008, 0x00], // C2 Packet 1.
-        [0x1010, 0x00, 0x00], // C2 Packet 2.
-        [0x1018, 0x00, 0x00, 0x00], // C2 Packet 3.
-
-        // C3 control code data.
-        [0x1080, 0x00, 0x00, 0x00, 0x00], // C3 packet 1.
-        [0x1088, 0x00, 0x00, 0x00, 0x00, 0x00], // C3 packet 2.
-      ];
-      const expectedSkips = [1, 2, 3, 4, 5]; // As per the CEA-708-E spec.
-
-      for (let i = 0; i < packets.length; i++) {
-        const packet = createCea708PacketFromBytes(packets[i], /* pts= */ 1);
-        spyOn(packet, 'skip');
-        getCaptionsFromPackets(service, packet);
-        expect(packet.skip).toHaveBeenCalledWith(expectedSkips[i]);
-      }
     });
   });
 });

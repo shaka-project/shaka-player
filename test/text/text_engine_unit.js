@@ -60,14 +60,11 @@ describe('TextEngine', () => {
 
     it('reports support when it\'s closed captions',
         () => {
-          const cea608closedCaptionsType =
-           shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE;
-          const cea708closedCaptionsType =
-           shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE;
+          // Both CEA-608 and CEA-708 is supported by our closed caption parser.
           expect(TextEngine.isTypeSupported(
-              cea608closedCaptionsType)).toBe(true);
+              shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE)).toBe(true);
           expect(TextEngine.isTypeSupported(
-              cea708closedCaptionsType)).toBe(true);
+              shaka.util.MimeUtils.CEA708_CLOSED_CAPTION_MIMETYPE)).toBe(true);
         });
   });
 
