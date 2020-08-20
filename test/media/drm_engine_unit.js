@@ -260,6 +260,7 @@ describe('DrmEngine', () => {
       expect(drmEngine.initialized()).toBe(true);
       expect(drmEngine.willSupport('audio/webm')).toBeTruthy();
       expect(drmEngine.willSupport('video/mp4; codecs="fake"')).toBeTruthy();
+      expect(drmEngine.willSupport('video/mp4; codecs="FAKE"')).toBeTruthy();
 
       // Because DrmEngine will err on being too accepting, make sure it will
       // reject something. However, we can only check that it is actually
