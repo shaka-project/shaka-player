@@ -169,6 +169,13 @@ filterDescribe('TextDisplayer layout', Util.supportsScreenshots, () => {
       // little _after_ appending cues in order to consistently show subtitles
       // natively on the video element.
       beforeScreenshot = async () => {
+        // Seek to the beginning so that we can reasonably wait for movement
+        // after playing below.  If somehow the playhead ends up at the end of
+        // the video, we should seek back before we play.
+        video.currentTime = 0;
+
+        // The video must be played a little now, after the cues were appended,
+        // but before the screenshot.
         video.play();
         await waiter.failOnTimeout(false).timeoutAfter(5)
             .waitForMovement(video);
