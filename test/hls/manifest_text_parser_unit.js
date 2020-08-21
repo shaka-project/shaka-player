@@ -455,10 +455,10 @@ describe('ManifestTextParser', () => {
         '#EXTINF:5\n' +
         'uri\n' +
         '#EXT-X-PART:DURATION=1,URI="uri2.1"\n' +
-        '#EXT-X-PART:DURATION=1,URI="uri2.2"\n' +
+        '#EXT-X-PART:DURATION=1,URI="uri2.2"\n' + // partialSegments1
         '#EXTINF:2\n' +
         'uri2\n' +
-        '#EXT-X-PART:DURATION=1,URI="uri3.1"\n';
+        '#EXT-X-PART:DURATION=1,URI="uri3.1"\n'; // partialSegments2
 
       const mapTag = new shaka.hls.Tag(/* id= */ 2, 'EXT-X-MAP',
           /* attributes= */ [new shaka.hls.Attribute('URI', 'init.mp4')]);
@@ -511,6 +511,65 @@ describe('ManifestTextParser', () => {
             ],
           },
           manifestTextWithPartialSegments,
+          // manifest URI:
+          'https://test/manifest.m3u8');
+    });
+
+    it('parses segments with preload hint segments', () => {
+      // const manifestTextWithPreloadSegments = '#EXTM3U\n' +
+      //   '#EXT-X-TARGETDURATION:6\n' +
+      //   '#EXT-X-MAP:URI="init.mp4"\n' +
+      //   '#EXTINF:5\n' +
+      //   'uri\n' +
+      //   '#EXT-X-PRELOAD-HINT:TYPE=MAP,URI="init.mp4\n' +
+      //   '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="uri2.1\n';
+
+
+      const manifestTextWithPreloadSegments = '#EXTM3U\n' +
+        '#EXT-X-TARGETDURATION:6\n' +
+        '#EXT-X-MAP:URI="init.mp4"\n' + // mapTag
+        '#EXTINF:5\n' +
+        'uri\n' +
+        '#EXT-X-PRELOAD-HINT:TYPE=MAP,URI="init.mp4"\n' + // preloadMapTag
+        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="uri2.1"\n'; // 1st preloadSegment
+
+      const mapTag = new shaka.hls.Tag(/* id= */ 2, 'EXT-X-MAP',
+          /* attributes= */ [new shaka.hls.Attribute('URI', 'init.mp4')]);
+
+      const preloadMapTag = new shaka.hls.Tag(/* id= */ 4, 'EXT-X-MAP',
+          /* attributes= */ [
+            new shaka.hls.Attribute('TYPE', 'MAP'),
+            new shaka.hls.Attribute('URI', 'init.mp4'),
+          ]);
+
+      const preloadSegment = [
+        new shaka.hls.Tag(/* id= */ 5, 'EXT-X-PRELOAD-HINT',
+            [
+              new shaka.hls.Attribute('TYPE', 'PART'),
+              new shaka.hls.Attribute('URI', 'uri2.1'),
+            ]),
+      ];
+
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MEDIA,
+            tags: [
+              new shaka.hls.Tag(/* id= */ 0, 'EXT-X-TARGETDURATION', [], '6'),
+            ],
+            segments: [
+              new shaka.hls.Segment(
+                  /* absoluteUri= */ 'https://test/uri',
+                  /* tags= */ [
+                    new shaka.hls.Tag(3, 'EXTINF', [], '5'),
+                    mapTag,
+                  ]),
+              new shaka.hls.Segment(
+                  /* absoluteUri= */ '',
+                  /* tags= */ [preloadMapTag],
+                  /* partialSegments= */ preloadSegment),
+            ],
+          },
+          manifestTextWithPreloadSegments,
           // manifest URI:
           'https://test/manifest.m3u8');
     });
