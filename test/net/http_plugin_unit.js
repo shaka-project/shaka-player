@@ -188,6 +188,22 @@ function httpPluginTests(usingFetch) {
       expect(actual).toBeTruthy();
       expect(actual.body).toBeUndefined();
     });
+
+    it('succeeds and triggers the chunked stream data callback', async () => {
+      const uri = 'https://foo.bar/';
+      // streamDataCallback should get called to handle the ReadableStream
+      // chunked data.
+      const streamDataCallback = jasmine.createSpy('streamDataCallback');
+
+      const request = shaka.net.NetworkingEngine.makeRequest(
+          [uri], retryParameters, Util.spyFunc(streamDataCallback));
+      const response =
+          await plugin(uri, request, requestType, progressUpdated).promise;
+
+      expect(mostRecentRequest().url).toBe(uri);
+      expect(response).toBeTruthy();
+      expect(streamDataCallback).toHaveBeenCalledTimes(1);
+    });
   }
 
   it('succeeds with 204 status', async () => {

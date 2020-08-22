@@ -603,6 +603,33 @@ describe('StreamingEngine', () => {
     }
   });
 
+  it('appends the ReadableStream data with low latency mode', async () => {
+    // Use the VOD manifests to test the streamDataCallback function in the low
+    // latency mode.
+    setupVod();
+
+    const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+    config.lowLatencyMode = true;
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    mediaSourceEngine.appendBuffer.and.stub();
+    createStreamingEngine(config);
+
+    // Here we go!
+    streamingEngine.switchVariant(variant);
+    streamingEngine.switchTextStream(textStream);
+    await streamingEngine.start();
+    playing = true;
+
+    await runTest();
+
+    // In the mocks in StreamingEngineUtil, streamDataCallback will be triggered
+    // twice for each segment.
+    // appendBuffer should be called once for each init segment of the
+    // audio / video segment, and twice for each segment.
+    // 8 init segments + 12 segments * 2 = 32.
+    expect(mediaSourceEngine.appendBuffer).toHaveBeenCalledTimes(32);
+  });
+
   it('plays when a small gap is present at the beginning', async () => {
     const drift = 0.050;  // 50 ms
 

@@ -53,6 +53,15 @@ shaka.test.StreamingEngineUtil = class {
         expect(position).toBeGreaterThan(-1);
         expect(Math.floor(position)).toBe(position);
         buffer = getSegment(contentType, periodIndex, position);
+
+        // Mock that each segment request gets the response of a ReadableStream
+        // with two chunks of data.
+        // The streamDataCallback function gets called twice.
+        if (request.streamDataCallback) {
+          request.streamDataCallback(buffer);
+          request.streamDataCallback(new ArrayBuffer(0));
+        }
+
         if (buffer == null) {
           return shaka.util.AbortableOperation.failed(new shaka.util.Error(
               shaka.util.Error.Severity.CRITICAL,
