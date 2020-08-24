@@ -609,7 +609,7 @@
   },
   "DEMO_SOURCE_SEARCH": {
     "description": "A header on a search field that filters by the source of the asset.",
-    "message": "SOURCE"
+    "message": "Source"
   },
   "DEMO_STALL_DETECTOR_ENABLED": {
     "description": "The name of a configuration value.",
