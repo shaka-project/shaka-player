@@ -7,7 +7,9 @@
 
 goog.provide('shaka.ui.LoopButton');
 
+goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');

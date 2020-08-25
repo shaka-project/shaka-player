@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.Spacer');
 
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.util.Dom');
 
