@@ -79,6 +79,7 @@ describe('HlsParser', () => {
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     playerInterface = {
       filter: () => Promise.resolve(),
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       networkingEngine: fakeNetEngine,
       onError: fail,
       onEvent: fail,

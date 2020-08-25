@@ -647,6 +647,8 @@ shaka.test.TestScheme.ManifestParser = class {
       throw new Error('Unknown manifest!');
     }
 
+    playerInterface.makeTextStreamsForClosedCaptions(manifest);
+
     // Invoke filtering interfaces similar to how a real parser would.
     // This makes sure the filtering functions are covered implicitly by
     // tests. This covers regression
