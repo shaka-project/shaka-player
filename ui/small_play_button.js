@@ -7,6 +7,8 @@
 
 goog.provide('shaka.ui.SmallPlayButton');
 
+goog.require('shaka.ui.Controls');
+goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.PlayButton');
 
 

@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.Element');
 
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.util.EventManager');
 
 
