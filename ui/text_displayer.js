@@ -36,7 +36,7 @@ shaka.ui.TextDisplayer = class {
     /** @private {boolean} */
     this.isTextVisible_ = false;
 
-    /** @private {!Array.<!shaka.extern.Cue>} */
+    /** @private {!Array.<!shaka.text.Cue>} */
     this.cues_ = [];
 
     /** @private {HTMLMediaElement} */
@@ -76,14 +76,8 @@ shaka.ui.TextDisplayer = class {
       // into two segments.
       // To avoid displaying duplicate cues, if the current cue list already
       // contains the cue, skip it.
-      const containsCue = this.cues_.some((cueInList) => {
-        if (cueInList.payload == cue.payload &&
-            cueInList.startTime == cue.startTime &&
-            cueInList.endTime == cue.endTime) {
-          return true;
-        }
-        return false;
-      });
+      const containsCue = this.cues_.some(
+          (cueInList) => shaka.text.Cue.equal(cueInList, cue));
       if (!containsCue) {
         this.cues_.push(cue);
       }
