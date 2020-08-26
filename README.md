@@ -102,7 +102,7 @@ DASH features supported:
  - Key rotation
  - Trick mode tracks
  - WebVTT and TTML
- - CEA-608 captions
+ - CEA-608/708 captions
 
 DASH features **not** supported:
  - Xlink with actuate=onRequest
@@ -113,7 +113,6 @@ DASH features **not** supported:
    bitrates
  - Timescales so large that timestamps cannot be represented as integers in
    JavaScript (2^53): https://github.com/google/shaka-player/issues/1667
- - CEA-708 captions
 
 
 ## HLS features
@@ -125,7 +124,7 @@ HLS features supported:
  - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.6.3+, must be
    separately included)
  - WebVTT and TTML
- - CEA-608 captions
+ - CEA-608/708 captions
  - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
 
 HLS features **not** supported:
@@ -207,6 +206,8 @@ Shaka Player supports:
   - CEA-608
     - Supported embedded in MP4
     - With help from [mux.js][] v5.6.3+, supported embedded in TS
+  - CEA-708
+    - Supported embedded in MP4
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
