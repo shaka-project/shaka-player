@@ -10,16 +10,27 @@ so the exact milestone for future features is not pre-determined.
 
 Candidate features for future release cycles
  - MediaCapabilities to make performance-based decisions
+   https://github.com/google/shaka-player/issues/1391
  - Codec-switching
+   https://github.com/google/shaka-player/issues/1528
  - Preload API
+   https://github.com/google/shaka-player/issues/880
  - Thumbnail tracks
+   DASH: https://github.com/google/shaka-player/issues/559
+   HLS: https://github.com/google/shaka-player/issues/2429
  - Background fetch for offline storage
+   https://github.com/google/shaka-player/issues/879
  - PlayReady "recommendation" key system support
+   https://github.com/google/shaka-player/issues/1495
  - Smaller, more modular binary
+ - Official TypeScript defs, generated from source
+   https://github.com/google/shaka-player/issues/1030
 
 v3.1 - 2020 Q3
  - Low-latency live (LL-HLS, LL-DASH)
+   https://github.com/google/shaka-player/issues/1525
  - Own CEA parser, use mux.js only for TS
+   https://github.com/google/shaka-player/issues/2648
 
 =====
 
