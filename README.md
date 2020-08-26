@@ -103,6 +103,7 @@ DASH features supported:
  - Trick mode tracks
  - WebVTT and TTML
  - CEA-608 captions
+    - With help from [mux.js][] v5.6.3+, supported embedded in TS and MP4
 
 DASH features **not** supported:
  - Xlink with actuate=onRequest
@@ -126,6 +127,7 @@ HLS features supported:
    separately included)
  - WebVTT and TTML
  - CEA-608 captions
+    - With help from [mux.js][] v5.6.3+, supported embedded in TS and MP4
  - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
 
 HLS features **not** supported:
@@ -205,8 +207,7 @@ Shaka Player supports:
   - TTML
     - Supported in both XML form and embedded in MP4
   - CEA-608
-    - Supported embedded in MP4
-    - With help from [mux.js][] v5.6.3+, supported embedded in TS
+    - With help from [mux.js][] v5.6.3+, supported embedded in TS and MP4
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
