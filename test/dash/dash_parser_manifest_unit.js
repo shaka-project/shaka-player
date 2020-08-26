@@ -35,6 +35,7 @@ describe('DashParser Manifest', () => {
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onError: fail,
+      isLowLatencyMode: () => false,
     };
   });
 

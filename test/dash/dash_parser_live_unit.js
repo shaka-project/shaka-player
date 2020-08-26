@@ -30,6 +30,7 @@ describe('DashParser Live', () => {
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
+      isLowLatencyMode: () => false,
     };
   });
 
@@ -679,9 +680,7 @@ describe('DashParser Live', () => {
       '</MPD>',
     ].join('\n');
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.lowLatencyMode = true;
-    parser.configure(config);
+    playerInterface.isLowLatencyMode = () => true;
 
     Date.now = () => 600000; /* 10 minutes */
     const manifest = await parser.start('dummy://foo', playerInterface);

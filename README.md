@@ -31,6 +31,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Chrome¹    |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Y**   | -   |
 |Firefox¹   |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -      | -   |
 |Edge¹      |**Y**     | -       | -       | -       | -        | -      | -   |
+|Edge Chromium|**Y**     |**Y**    | -       |untested⁵|**Native**| -      | -   |
 |IE ≤ 10    | N        | -       | -       | -       | -        | -      | -   |
 |IE 11      |**Y** ⁴   | -       | -       | -       | -        | -      | -   |
 |Safari¹    | -        |**Y**    | -       | -       |**iPadOS 13<br>Native**| - | - |
@@ -100,6 +101,8 @@ DASH features supported:
    manifest)
  - Key rotation
  - Trick mode tracks
+ - WebVTT and TTML
+ - CEA-608 captions
 
 DASH features **not** supported:
  - Xlink with actuate=onRequest
@@ -110,6 +113,7 @@ DASH features **not** supported:
    bitrates
  - Timescales so large that timestamps cannot be represented as integers in
    JavaScript (2^53): https://github.com/google/shaka-player/issues/1667
+ - CEA-708 captions
 
 
 ## HLS features
@@ -121,7 +125,7 @@ HLS features supported:
  - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.6.3+, must be
    separately included)
  - WebVTT and TTML
- - CEA-608/708 captions
+ - CEA-608 captions
  - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
 
 HLS features **not** supported:
@@ -129,6 +133,8 @@ HLS features **not** supported:
  - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
  - Raw AAC, MP3, etc (without an MP4 container):
    https://github.com/google/shaka-player/issues/2337
+ - CEA-708 in TS container not supported in mux.js yet:
+   https://github.com/videojs/mux.js/pull/346
 
 [mux.js]: https://github.com/videojs/mux.js/releases
 
@@ -140,6 +146,7 @@ HLS features **not** supported:
 |Chrome¹   |**Y**     | -       | -       |**Y**     |
 |Firefox²  |**Y**     | -       | -       |**Y**     |
 |Edge³     | -        |**Y**    | -       | -        |
+|Edge Chromium|**Y**     |**Y**    | -       |**Y**     |
 |IE 11⁴    | -        |**Y**    | -       | -        |
 |Safari    | -        | -       |**Y**    | -        |
 |Opera     |untested⁵ | -       | -       |untested⁵ |
@@ -197,6 +204,9 @@ Shaka Player supports:
     - Supported in both text form and embedded in MP4
   - TTML
     - Supported in both XML form and embedded in MP4
+  - CEA-608
+    - Supported embedded in MP4
+    - With help from [mux.js][] v5.6.3+, supported embedded in TS
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported

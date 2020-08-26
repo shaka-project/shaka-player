@@ -109,6 +109,7 @@ describe('HlsParser live', () => {
       onError: fail,
       onEvent: fail,
       onTimelineRegionAdded: fail,
+      isLowLatencyMode: () => false,
     };
 
     parser = new shaka.hls.HlsParser();
@@ -522,8 +523,8 @@ describe('HlsParser live', () => {
           .setResponseValue('test:/init.mp4', initSegmentData)
           .setResponseValue('test:/main.mp4', segmentData);
 
-      config.lowLatencyMode = true;
-      parser.configure(config);
+      playerInterface.isLowLatencyMode = () => true;
+
       const manifest = await parser.start('test:/master', playerInterface);
       // Presentation delay should be the value of 'PART-HOLD-BACK' if not
       // configured.
@@ -638,15 +639,17 @@ describe('HlsParser live', () => {
     });
 
     it('parses streams with partial segments', async () => {
+      playerInterface.isLowLatencyMode = () => true;
       const mediaWithPartialSegments = [
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:5\n',
         '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
         '#EXT-X-MEDIA-SEQUENCE:0\n',
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4"\n',
-        '#EXT-X-PART:DURATION=2,URI="partial2.mp4"\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4"\n', // partialRef
+        '#EXT-X-PART:DURATION=2,URI="partial2.mp4"\n', // partialRef2
         '#EXTINF:4,\n',
-        'main.mp4\n',
+        'main.mp4\n', // ref
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4"\n', // partialRef3
       ].join('');
 
       fakeNetEngine
@@ -666,15 +669,26 @@ describe('HlsParser live', () => {
           segmentDataStartTime + 4, /* baseUri= */ '', /* startByte= */ 0,
           /* endByte= */ null);
 
+      const partialRef3 = ManifestParser.makeReference(
+          'test:/partial.mp4', segmentDataStartTime + 4,
+          segmentDataStartTime + 6,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
+
       const ref = ManifestParser.makeReference(
           'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 4,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
           /* timestampOffset= */ 0, [partialRef, partialRef2]);
-      config.lowLatencyMode = true;
+
+      // ref2 is not fully published yet, so it doens't have a segment uri.
+      const ref2 = ManifestParser.makeReference(
+          '', segmentDataStartTime + 4, segmentDataStartTime + 6,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* timestampOffset= */ 0, [partialRef3]);
+
       const manifest = await parser.start('test:/master', playerInterface);
       const video = manifest.variants[0].video;
       await video.createSegmentIndex();
-      ManifestParser.verifySegmentIndex(video, [ref]);
+      ManifestParser.verifySegmentIndex(video, [ref, ref2]);
     });
 
     describe('update', () => {
@@ -876,12 +890,11 @@ describe('HlsParser live', () => {
       });
 
       it('skips older segments', async () => {
+        playerInterface.isLowLatencyMode = () => true;
+
         const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
         const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
         const ref3 = ManifestParser.makeReference('test:/main3.mp4', 6, 8);
-
-        config.lowLatencyMode = true;
-        parser.configure(config);
         // With 'SKIPPED-SEGMENTS', ref1 is skipped from the playlist,
         // and ref1 should be in the SegmentReferences list.
         // ref3 should be appended to the SegmentReferences list.

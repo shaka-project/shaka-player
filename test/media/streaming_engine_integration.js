@@ -200,7 +200,6 @@ describe('StreamingEngine', () => {
         (type, periodNumber, position) => {
           const wallClockTime = Date.now() / 1000;
           const segment = generators[type].getSegment(position, wallClockTime);
-          expect(segment).not.toBeNull();
           return segment;
         },
         /* delays= */{audio: 0, video: 0, text: 0});

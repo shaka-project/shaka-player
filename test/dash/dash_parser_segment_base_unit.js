@@ -32,6 +32,7 @@ describe('DashParser SegmentBase', () => {
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
+      isLowLatencyMode: () => false,
     };
   });
 
