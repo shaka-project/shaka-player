@@ -83,17 +83,6 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('ignores offset', () => {
-    verifyHelper(
-        [
-          {startTime: 20, endTime: 40, payload: 'Test'},
-        ],
-        'WEBVTT\n\n' +
-        '00:00:20.000 --> 00:00:40.000\n' +
-        'Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
-  });
-
   it('supports cues with no settings', () => {
     verifyHelper(
         [
@@ -407,12 +396,12 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('uses segment time', () => {
+  it('uses time offset from periodStart, not segmentStart', () => {
     verifyHelper(
         [
           {
-            startTime: 40, // Note these are 20s off of the cue
-            endTime: 60,   // because using relative timestamps
+            startTime: 70,
+            endTime: 80,
             payload: 'Test',
             textAlign: 'center',
             size: 56,
@@ -420,9 +409,9 @@ describe('VttTextParser', () => {
           },
         ],
         'WEBVTT\n\n' +
-        '0:00:20.000 --> 0:00:40.000 align:center size:56% vertical:lr\n' +
+        '0:00:10.000 --> 0:00:20.000 align:center size:56% vertical:lr\n' +
         'Test',
-        {periodStart: 0, segmentStart: 20, segmentEnd: 0});
+        {periodStart: 60, segmentStart: 80, segmentEnd: 100});
   });
 
 

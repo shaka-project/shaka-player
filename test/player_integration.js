@@ -85,6 +85,7 @@ describe('Player', () => {
         corruptedFrames: jasmine.any(Number),
         estimatedBandwidth: jasmine.any(Number),
 
+        completionPercent: jasmine.any(Number),
         loadLatency: jasmine.any(Number),
         manifestTimeSeconds: jasmine.any(Number),
         drmTimeSeconds: jasmine.any(Number),

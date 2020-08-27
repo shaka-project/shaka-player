@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.OverflowMenu');
 
 goog.require('goog.asserts');
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.log');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
@@ -17,6 +18,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.Iterables');
 
 
 /**

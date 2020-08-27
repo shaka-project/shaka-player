@@ -31,12 +31,15 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Chrome¹    |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Y**   | -   |
 |Firefox¹   |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -      | -   |
 |Edge¹      |**Y**     | -       | -       | -       | -        | -      | -   |
+|Edge Chromium|**Y**     |**Y**    | -       |untested⁵|**Native**| -      | -   |
 |IE ≤ 10    | N        | -       | -       | -       | -        | -      | -   |
 |IE 11      |**Y** ⁴   | -       | -       | -       | -        | -      | -   |
 |Safari¹    | -        |**Y**    | -       | -       |**iPadOS 13<br>Native**| - | - |
 |Opera¹     |untested⁵ |untested⁵|untested⁵|untested⁵|**Native**| -      | -   |
 |Chromecast²| -        | -       | -       | -       | -        | -      |**Y**|
 |Tizen TV³  | -        | -       | -       | -       | -        | -      |**Y**|
+|WebOS⁶     | -        | -       | -       | -       | -        | -      |**Y**|
+|Xbox One⁶  | -        | -       | -       | -       | -        | -      |**Y**|
 
 NOTES:
  - ¹: On macOS, only Safari 12+ is supported.  On iOS, only iOS 12+ is
@@ -51,6 +54,10 @@ NOTES:
    https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.
+ - ⁶: These are expected to work, WebOS and Xbox One are community supported
+   and untested by us. (Official support for LG WebOS TV:
+   https://github.com/google/shaka-player/issues/1330, Official support for
+   Xbox One: https://github.com/google/shaka-player/issues/1705)
 
 We support iOS 12+ through Apple's native HLS player.  We provide the same
 top-level API, but we just set the video's `src` element to the manifest/media.
@@ -94,6 +101,8 @@ DASH features supported:
    manifest)
  - Key rotation
  - Trick mode tracks
+ - WebVTT and TTML
+ - CEA-608 captions
 
 DASH features **not** supported:
  - Xlink with actuate=onRequest
@@ -104,27 +113,28 @@ DASH features **not** supported:
    bitrates
  - Timescales so large that timestamps cannot be represented as integers in
    JavaScript (2^53): https://github.com/google/shaka-player/issues/1667
+ - CEA-708 captions
 
 
 ## HLS features
 
 HLS features supported:
  - VOD, Live, and Event types
- - Encrypted content with Widevine
+ - Encrypted content with PlayReady and Widevine
  - ISO-BMFF / MP4 / CMAF support
  - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.6.3+, must be
    separately included)
  - WebVTT and TTML
- - CEA-608/708 captions
+ - CEA-608 captions
  - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
 
 HLS features **not** supported:
- - Encrypted content with PlayReady:
-   https://github.com/google/shaka-player/issues/1145
  - Key rotation: https://github.com/google/shaka-player/issues/917
  - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
  - Raw AAC, MP3, etc (without an MP4 container):
    https://github.com/google/shaka-player/issues/2337
+ - CEA-708 in TS container not supported in mux.js yet:
+   https://github.com/videojs/mux.js/pull/346
 
 [mux.js]: https://github.com/videojs/mux.js/releases
 
@@ -136,11 +146,14 @@ HLS features **not** supported:
 |Chrome¹   |**Y**     | -       | -       |**Y**     |
 |Firefox²  |**Y**     | -       | -       |**Y**     |
 |Edge³     | -        |**Y**    | -       | -        |
+|Edge Chromium|**Y**     |**Y**    | -       |**Y**     |
 |IE 11⁴    | -        |**Y**    | -       | -        |
 |Safari    | -        | -       |**Y**    | -        |
 |Opera     |untested⁵ | -       | -       |untested⁵ |
 |Chromecast|**Y**     |**Y**    | -       |untested⁵ |
 |Tizen TV  |**Y**     |**Y**    | -       |untested⁵ |
+|WebOS⁷    |untested⁷ |untested⁷| -       |untested⁷ |
+|Xbox One⁷ | -        |untested⁷| -       | -        |
 
 Other DRM systems should work out of the box if they are interoperable and
 compliant to the EME spec.
@@ -158,6 +171,16 @@ NOTES:
    Player team.
  - ⁶: ClearKey is a useful tool for debugging, and does not provide actual
    content security.
+ - ⁷: These are expected to work, WebOS and Xbox One are community supported
+   and untested by us.
+
+|Manifest  |Widevine  |PlayReady|FairPlay |ClearKey  |
+|:--------:|:--------:|:-------:|:-------:|:--------:|
+|DASH      |**Y**     |**Y**    | -       |**Y**     |
+|HLS       |**Y**     |**Y**    |**Y** ¹  | -        |
+
+NOTES:
+ - ¹: We support FairPlay through Apple's native HLS player.
 
 
 ## Media container and subtitle support
@@ -181,6 +204,9 @@ Shaka Player supports:
     - Supported in both text form and embedded in MP4
   - TTML
     - Supported in both XML form and embedded in MP4
+  - CEA-608
+    - Supported embedded in MP4
+    - With help from [mux.js][] v5.6.3+, supported embedded in TS
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported

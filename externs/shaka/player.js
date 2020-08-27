@@ -70,6 +70,7 @@ shaka.extern.StateChange;
  *   corruptedFrames: number,
  *   estimatedBandwidth: number,
  *
+ *   completionPercent: number,
  *   loadLatency: number,
  *   manifestTimeSeconds: number,
  *   drmTimeSeconds: number,
@@ -111,6 +112,10 @@ shaka.extern.StateChange;
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
  *
+ * @property {number} completionPercent
+ *   This is the greatest completion percent that the user has experienced in
+ *   playback.  Also known as the "high water mark".  Is NaN when there is no
+ *   known duration, such as for livestreams.
  * @property {number} loadLatency
  *   This is the number of seconds it took for the video element to have enough
  *   data to begin playback.  This is measured from the time load() is called to
@@ -662,8 +667,7 @@ shaka.extern.HlsManifestConfiguration;
  *   disableText: boolean,
  *   defaultPresentationDelay: number,
  *   dash: shaka.extern.DashManifestConfiguration,
- *   hls: shaka.extern.HlsManifestConfiguration,
- *   lowLatencyMode: boolean
+ *   hls: shaka.extern.HlsManifestConfiguration
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -694,8 +698,6 @@ shaka.extern.HlsManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
- * @property {boolean} lowLatencyMode
- *  If <code>true</code>, low latency streaming mode is enabled.
  *
  * @exportDoc
  */
@@ -721,7 +723,8 @@ shaka.extern.ManifestConfiguration;
  *   stallThreshold: number,
  *   stallSkip: number,
  *   useNativeHlsOnSafari: boolean,
- *   inaccurateManifestTolerance: number
+ *   inaccurateManifestTolerance: number,
+ *   lowLatencyMode: boolean
  * }}
  *
  * @description
@@ -809,7 +812,10 @@ shaka.extern.ManifestConfiguration;
  *   The maximum difference, in seconds, between the times in the manifest and
  *   the times in the segments.  Larger values allow us to compensate for more
  *   drift (up to one segment duration).  Smaller values reduce the incidence of
- *   extra segment requests necessary to compensate for drift
+ *   extra segment requests necessary to compensate for drift.
+ * @property {boolean} lowLatencyMode
+ *  If <code>true</code>, low latency streaming mode is enabled.
+ *
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

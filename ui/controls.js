@@ -10,15 +10,21 @@ goog.provide('shaka.ui.ControlsPanel');
 
 goog.require('goog.asserts');
 goog.require('shaka.Deprecate');
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.log');
+goog.require('shaka.ui.AdCounter');
+goog.require('shaka.ui.AdPosition');
+goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.Utils');
+goog.require('shaka.cast.CastProxy');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
+goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
 
 
