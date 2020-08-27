@@ -690,12 +690,12 @@ describe('DrmEngine', function() {
 
       initAndAttach().then(function() {
         expect(mockMediaKeys.createSession.calls.count()).toBe(3);
-        expect(session1.generateRequest).
-            toHaveBeenCalledWith('cenc', initData1.buffer);
-        expect(session2.generateRequest).
-            toHaveBeenCalledWith('webm', initData2.buffer);
-        expect(session3.generateRequest).
-            toHaveBeenCalledWith('cenc', initData3.buffer);
+        expect(session1.generateRequest)
+            .toHaveBeenCalledWith('cenc', initData1);
+        expect(session2.generateRequest)
+            .toHaveBeenCalledWith('webm', initData2);
+        expect(session3.generateRequest)
+            .toHaveBeenCalledWith('cenc', initData3);
       }).catch(fail).then(done);
     });
 
@@ -717,8 +717,8 @@ describe('DrmEngine', function() {
 
       initAndAttach().then(function() {
         expect(mockMediaKeys.createSession.calls.count()).toBe(1);
-        expect(session1.generateRequest).
-            toHaveBeenCalledWith('cenc', initData1.buffer);
+        expect(session1.generateRequest)
+            .toHaveBeenCalledWith('cenc', initData1);
       }).catch(fail).then(done);
     });
 
@@ -738,8 +738,8 @@ describe('DrmEngine', function() {
       await drmEngine.attach(mockVideo);
 
       expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
-      expect(session1.generateRequest).toHaveBeenCalledWith(
-          'cenc', initData.buffer);
+      expect(session1.generateRequest)
+          .toHaveBeenCalledWith('cenc', initData);
     });
 
     it('uses clearKeys config to override DrmInfo', async () => {
@@ -769,8 +769,8 @@ describe('DrmEngine', function() {
       expect(manifest.periods[0].variants[0].drmInfos[0].keySystem).
           toBe('org.w3.clearkey');
 
-      expect(session.generateRequest).
-          toHaveBeenCalledWith('keyids', jasmine.any(ArrayBuffer));
+      expect(session.generateRequest)
+          .toHaveBeenCalledWith('keyids', jasmine.any(Uint8Array));
 
       let initData = JSON.parse(shaka.util.StringUtils.fromUTF8(
           session.generateRequest.calls.argsFor(0)[1]));
@@ -898,10 +898,10 @@ describe('DrmEngine', function() {
             {initDataType: 'cenc', initData: initData2, keyId: null});
 
         expect(mockMediaKeys.createSession.calls.count()).toBe(2);
-        expect(session1.generateRequest).
-            toHaveBeenCalledWith('webm', initData1.buffer);
-        expect(session2.generateRequest).
-            toHaveBeenCalledWith('cenc', initData2.buffer);
+        expect(session1.generateRequest)
+            .toHaveBeenCalledWith('webm', initData1);
+        expect(session2.generateRequest)
+            .toHaveBeenCalledWith('cenc', initData2);
       });
 
       it('suppresses duplicate initDatas', async () => {
@@ -915,8 +915,8 @@ describe('DrmEngine', function() {
             {initDataType: 'cenc', initData: initData2, keyId: null});
 
         expect(mockMediaKeys.createSession.calls.count()).toBe(1);
-        expect(session1.generateRequest).
-            toHaveBeenCalledWith('webm', initData1.buffer);
+        expect(session1.generateRequest)
+            .toHaveBeenCalledWith('webm', initData1);
       });
 
       it('is ignored when init data is in DrmInfo', async () => {
