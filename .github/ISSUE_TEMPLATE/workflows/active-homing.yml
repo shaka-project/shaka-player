@@ -1,0 +1,84 @@
+name: active homing
+
+on:
+  schedule:
+    # run at 00:00 UTC every day
+    - cron: "0 0 * * *"
+
+    # TODO: remove next line before merge
+  push:
+
+jobs:
+  homing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      # get shaka latest release tag name
+      - uses: actions/github-script@v2
+        id: shaka-latest-release
+        with:
+          result-encoding: string
+          script: |
+            return await github.repos
+            .getRelease({
+              owner: "google",
+              repo: "shaka-player",
+              release_id: "latest",
+            })
+            .then(({ data }) => data.tag_name);
+
+      # early return if same latest to shaka-version.txt
+      - name: compare Shaka latest version to shaka-version.txt
+        run: |
+          if [echo "${{steps.shaka-latest-release.outputs.result}}" | diff -q shaka-version.txt /dev/stdin > /dev/null] \
+          then \
+          echo "No update found" \
+          exit 1 \
+          fi
+
+      - name: make branch and pull from shaka latest
+        run: |
+          git config --global user.name ${NAME}
+          git config --global user.email ${EMAIL}
+
+          git remote add upstream https://github.com/${UPSTREAM_OWNER}/${UPSTREAM_REPO}.git
+          git fetch upstream
+          git checkout -b ${BRANCH}-${{ steps.shaka-latest-release.outputs.result }} refs/tags/${{ steps.shaka-latest-release.outputs.result }}
+
+      # write latest to shaka-version.txt
+      - name: write Shaka latest version to shaka-version.txt
+        run: |
+          echo ${{steps.shaka-latest-release.outputs.result}} > shaka-version.txt
+
+      # create active homing PR
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.PAT }}
+          commit-message: fire active homing missile
+          committer: ${NAME} <${EMAIL}>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          branch: ${BRANCH}-${{ steps.shaka-latest-release.outputs.result }}
+          title: "Update shaka player to ${{ steps.shaka-latest-release.outputs.result }}"
+          body: |
+            Update Shaka Player
+
+            see: [Shaka ${{ steps.shaka-latest-release.outputs.result}}][1]
+
+            [1]: https://github.com/${UPSTREAM_OWNER}/${UPSTREAM_REPO}/releases/tag/${{steps.shaka-latest-release.outputs.result}}
+          draft: false
+
+      - name: Check output
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+
+env:
+  NAME: active-homing
+  EMAIL: noreply@github.com
+  VERSION_TXT: shaka-version.txt
+  UPSTREAM_OWNER: google
+  UPSTREAM_REPO: shaka-player
+  BRANCH: upstream/update-shaka-player
