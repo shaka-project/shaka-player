@@ -51,7 +51,7 @@ describe('Cea708Service', () => {
       return {
         pts,
         type: shaka.cea.DtvccPacketBuilder.DTVCC_PACKET_DATA,
-        byte: code,
+        value: code,
         order: i,
       };
     });

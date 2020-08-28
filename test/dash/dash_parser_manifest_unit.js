@@ -360,7 +360,6 @@ describe('DashParser Manifest', () => {
 
         /** @type {shaka.extern.Manifest} */
         const manifest = await parser.start('dummy://foo', playerInterface);
-        // First Representation should be dropped.
         const stream1 = manifest.variants[0].video;
         const stream2 = manifest.variants[1].video;
 
@@ -377,7 +376,7 @@ describe('DashParser Manifest', () => {
         expect(stream2.closedCaptions).toEqual(expectedClosedCaptions2);
       });
 
-  it('correctly parses CEA-708 caption tags with service #s and languages',
+  it('correctly parses CEA-708 caption tags with service numbers and languages',
       async () => {
         const source = [
           '<MPD minBufferTime="PT75S">',
@@ -469,6 +468,13 @@ describe('DashParser Manifest', () => {
           '        <SegmentTemplate media="1.mp4" duration="1" />',
           '      </Representation>',
           '    </AdaptationSet>',
+          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
+          '         value="eng;swe;fre;pol"/>',
+          '      <Representation bandwidth="200">',
+          '        <SegmentTemplate media="1.mp4" duration="1" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
           '  </Period>',
           '</MPD>',
         ].join('\n');
@@ -477,12 +483,25 @@ describe('DashParser Manifest', () => {
 
         /** @type {shaka.extern.Manifest} */
         const manifest = await parser.start('dummy://foo', playerInterface);
-        const stream = manifest.variants[0].video;
-        const expectedClosedCaptions = new Map(
+        const stream1 = manifest.variants[0].video;
+        const stream2 = manifest.variants[1].video;
+
+        const expectedClosedCaptions1 = new Map(
             [['CC1', shaka.util.LanguageUtils.normalize('eng')],
               ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
         );
-        expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
+
+        const expectedClosedCaptions2 = new Map(
+            [
+              ['CC1', shaka.util.LanguageUtils.normalize('eng')],
+              ['CC2', shaka.util.LanguageUtils.normalize('swe')],
+              ['CC3', shaka.util.LanguageUtils.normalize('fre')],
+              ['CC4', shaka.util.LanguageUtils.normalize('pol')],
+            ]
+        );
+
+        expect(stream1.closedCaptions).toEqual(expectedClosedCaptions1);
+        expect(stream2.closedCaptions).toEqual(expectedClosedCaptions2);
       });
 
   it('correctly parses CEA-608 caption tags with no channel and language info',

@@ -16,20 +16,20 @@ describe('DtvccPacket', () => {
     const dataBytes = [{
       pts: 0,
       type: shaka.cea.DtvccPacketBuilder.DTVCC_PACKET_DATA,
-      byte: 0,
+      value: 0,
       order: 0,
     },
     {
       pts: 0,
       type: shaka.cea.DtvccPacketBuilder.DTVCC_PACKET_DATA,
-      byte: 0x1,
+      value: 0x1,
       order: 0,
     }];
 
     dtvccPacket = new shaka.cea.DtvccPacket(dataBytes);
     let i = 0;
     while (dtvccPacket.hasMoreData()) {
-      const data = dtvccPacket.readBlock();
+      const data = dtvccPacket.readByte();
       expect(data).toBe(dataBytes[i]);
       i++;
     }
@@ -40,7 +40,7 @@ describe('DtvccPacket', () => {
     const dataBytes = [{
       pts: 0,
       type: shaka.cea.DtvccPacketBuilder.DTVCC_PACKET_DATA,
-      byte: 0,
+      value: 0,
       order: 0,
     }];
     dtvccPacket = new shaka.cea.DtvccPacket(dataBytes);
@@ -57,7 +57,7 @@ describe('DtvccPacket', () => {
     });
 
     it('on unbuffered reads', () => {
-      expect(() => dtvccPacket.readBlock()).toThrow(error);
+      expect(() => dtvccPacket.readByte()).toThrow(error);
     });
   });
 });

@@ -195,7 +195,10 @@ describe('Cea708Window', () => {
       for (const c of text) {
         window.setCharacter(c);
       }
-      window.setJustification(0); // Left-justified.
+
+      // Left-justified.
+      window.setJustification(
+          /** @type {shaka.cea.Cea708Window.TextJustification} */ (0));
       topLevelCue.textAlign = shaka.text.Cue.textAlign.LEFT;
       topLevelCue.nestedCues = [
         CeaUtils.createDefaultCue(startTime, endTime, text),
@@ -213,7 +216,10 @@ describe('Cea708Window', () => {
       for (const c of text) {
         window.setCharacter(c);
       }
-      window.setJustification(1); // Right-justified.
+
+      // Right-justified.
+      window.setJustification(
+          /** @type {shaka.cea.Cea708Window.TextJustification} */ (1));
       topLevelCue.textAlign = shaka.text.Cue.textAlign.RIGHT;
       topLevelCue.nestedCues = [
         CeaUtils.createDefaultCue(startTime, endTime, text),

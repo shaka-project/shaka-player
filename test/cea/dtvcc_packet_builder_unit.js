@@ -28,7 +28,7 @@ describe('DtvccPacketBuilder', () => {
     dtvccPacketBuilder.addByte({
       pts: 0,
       type: DTVCC_PACKET_START,
-      byte: dtvccStartByte,
+      value: dtvccStartByte,
       order: 0,
     });
 
@@ -36,7 +36,7 @@ describe('DtvccPacketBuilder', () => {
       {
         pts: 0,
         type: DTVCC_PACKET_DATA,
-        byte: 0,
+        value: 0,
         order: 0,
       },
     ];
@@ -46,7 +46,7 @@ describe('DtvccPacketBuilder', () => {
     }
 
     const expectedPackets = [new shaka.cea.DtvccPacket(cea708PacketDataBytes)];
-    const parsedPackets = dtvccPacketBuilder.getParsedPackets();
+    const parsedPackets = dtvccPacketBuilder.getBuiltPackets();
     expect(parsedPackets).toEqual(expectedPackets);
   });
 
@@ -57,7 +57,7 @@ describe('DtvccPacketBuilder', () => {
     dtvccPacketBuilder.addByte({
       pts: 0,
       type: DTVCC_PACKET_START,
-      byte: dtvccStartByte,
+      value: dtvccStartByte,
       order: 0,
     });
 
@@ -65,7 +65,7 @@ describe('DtvccPacketBuilder', () => {
     dtvccPacketBuilder.addByte({
       pts: 0,
       type: DTVCC_PACKET_START,
-      byte: dtvccStartByte,
+      value: dtvccStartByte,
       order: 0,
     });
 
@@ -74,12 +74,12 @@ describe('DtvccPacketBuilder', () => {
     dtvccPacketBuilder.addByte({
       pts: 0,
       type: DTVCC_PACKET_START,
-      byte: dtvccStartByte,
+      value: dtvccStartByte,
       order: 0,
     });
 
     // Expect no packets to be returned, since no packets completed processing.
-    const parsedPackets = dtvccPacketBuilder.getParsedPackets();
+    const parsedPackets = dtvccPacketBuilder.getBuiltPackets();
     expect(parsedPackets).toEqual([]);
   });
 
@@ -90,7 +90,7 @@ describe('DtvccPacketBuilder', () => {
     dtvccPacketBuilder.addByte({
       pts: 0,
       type: DTVCC_PACKET_START,
-      byte: dtvccStartByte,
+      value: dtvccStartByte,
       order: 0,
     });
 
@@ -101,14 +101,14 @@ describe('DtvccPacketBuilder', () => {
     dtvccPacketBuilder.addByte({
       pts: 0,
       type: DTVCC_PACKET_START,
-      byte: dtvccStartByte,
+      value: dtvccStartByte,
       order: 0,
     });
 
     // Even though the right number of data bytes were given according to the
     // start packet, the packet builder was cleared in between. So no packets
     // should have been returned.
-    const parsedPackets = dtvccPacketBuilder.getParsedPackets();
+    const parsedPackets = dtvccPacketBuilder.getBuiltPackets();
     expect(parsedPackets).toEqual([]);
   });
 
@@ -118,13 +118,13 @@ describe('DtvccPacketBuilder', () => {
     dtvccPacketBuilder.addByte({
       pts: 0,
       type: DTVCC_PACKET_DATA,
-      byte: 0,
+      value: 0,
       order: 0,
     });
     dtvccPacketBuilder.addByte({
       pts: 0,
       type: DTVCC_PACKET_DATA,
-      byte: 0,
+      value: 0,
       order: 0,
     });
 
@@ -134,7 +134,7 @@ describe('DtvccPacketBuilder', () => {
     dtvccPacketBuilder.addByte({
       pts: 0,
       type: DTVCC_PACKET_START,
-      byte: dtvccStartByte,
+      value: dtvccStartByte,
       order: 0,
     });
 
@@ -142,7 +142,7 @@ describe('DtvccPacketBuilder', () => {
       {
         pts: 0,
         type: DTVCC_PACKET_DATA,
-        byte: 0,
+        value: 0,
         order: 0,
       },
     ];
@@ -152,7 +152,7 @@ describe('DtvccPacketBuilder', () => {
     }
 
     const expectedPackets = [new shaka.cea.DtvccPacket(cea708PacketDataBytes)];
-    const parsedPackets = dtvccPacketBuilder.getParsedPackets();
+    const parsedPackets = dtvccPacketBuilder.getBuiltPackets();
     expect(parsedPackets).toEqual(expectedPackets);
   });
 });
