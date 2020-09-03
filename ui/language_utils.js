@@ -13,6 +13,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.LanguageUtils');
+goog.requireType('shaka.ui.Localization');
 
 
 shaka.ui.LanguageUtils = class {

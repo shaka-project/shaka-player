@@ -9,6 +9,9 @@ goog.provide('shaka.ui.Element');
 
 goog.require('shaka.ads.AdManager');
 goog.require('shaka.util.EventManager');
+goog.requireType('shaka.Player');
+goog.requireType('shaka.ui.Controls');
+goog.requireType('shaka.ui.Localization');
 
 
 /**
@@ -65,7 +68,7 @@ shaka.ui.Element = class {
     this.adManager = this.player.getAdManager();
 
     /**
-     * @protected {shaka.extern.IAd}
+     * @protected {?shaka.extern.IAd}
      * @exportInterface
      */
     this.ad = null;

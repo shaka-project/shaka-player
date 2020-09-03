@@ -9,6 +9,7 @@ goog.provide('shaka.ui.RangeElement');
 
 goog.require('shaka.ui.Element');
 goog.require('shaka.util.Dom');
+goog.requireType('shaka.ui.Controls');
 
 
 /**

@@ -17,6 +17,7 @@ goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
+goog.requireType('shaka.ui.Controls');
 
 
 /**

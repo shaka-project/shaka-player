@@ -15,6 +15,8 @@ goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
+goog.requireType('shaka.ads.CuePoint');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
