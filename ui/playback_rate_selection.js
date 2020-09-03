@@ -15,6 +15,7 @@ goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.requireType('shaka.ui.Controls');
 
 /**
  * @extends {shaka.ui.SettingsMenu}

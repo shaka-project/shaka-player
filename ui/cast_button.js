@@ -17,6 +17,8 @@ goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.FakeEvent');
+goog.requireType('shaka.cast.CastProxy');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
