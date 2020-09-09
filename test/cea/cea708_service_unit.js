@@ -603,8 +603,6 @@ describe('Cea708Service', () => {
       // This should force the displayed window to emit the caption, 'testtest'.
       const packet6 = createCea708PacketFromBytes(deleteWindow, time4);
 
-      // The form feed would have wiped the entire window including new
-      // lines, and the text after is just 'test'.
       const text1 = 'test';
       const text2 = 'testtest';
       const topLevelCue1 = new shaka.text.Cue(
