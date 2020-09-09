@@ -8,10 +8,6 @@ describe('DtvccPacket', () => {
   /** @type {!shaka.cea.DtvccPacket} */
   let dtvccPacket;
 
-  beforeEach(() => {
-
-  });
-
   it('reads all data from a packet', () => {
     const dataBytes = [{
       pts: 0,

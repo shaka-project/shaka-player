@@ -197,8 +197,7 @@ describe('Cea708Window', () => {
       }
 
       // Left-justified.
-      window.setJustification(
-          /** @type {shaka.cea.Cea708Window.TextJustification} */ (0));
+      window.setJustification(shaka.cea.Cea708Window.TextJustification.LEFT);
       topLevelCue.textAlign = shaka.text.Cue.textAlign.LEFT;
       topLevelCue.nestedCues = [
         CeaUtils.createDefaultCue(startTime, endTime, text),
@@ -218,8 +217,7 @@ describe('Cea708Window', () => {
       }
 
       // Right-justified.
-      window.setJustification(
-          /** @type {shaka.cea.Cea708Window.TextJustification} */ (1));
+      window.setJustification(shaka.cea.Cea708Window.TextJustification.RIGHT);
       topLevelCue.textAlign = shaka.text.Cue.textAlign.RIGHT;
       topLevelCue.nestedCues = [
         CeaUtils.createDefaultCue(startTime, endTime, text),
@@ -320,9 +318,12 @@ describe('Cea708Window', () => {
     for (const c of text3) {
       window.setCharacter(c);
     }
+
+    // There should be two spaces between the words on the first row,
+    // and then the last row with text should appear 3 linebreaks later.
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
     topLevelCue.nestedCues = [
-      CeaUtils.createDefaultCue(startTime, endTime, text1+text2),
+      CeaUtils.createDefaultCue(startTime, endTime, text1+'  '+text2),
       CeaUtils.createLineBreakCue(startTime, endTime),
       CeaUtils.createLineBreakCue(startTime, endTime),
       CeaUtils.createLineBreakCue(startTime, endTime),
@@ -338,7 +339,7 @@ describe('Cea708Window', () => {
 
   it('cuts off text that exceeds the column size on a given row', () => {
     const text = '0123456789012345678901234567890123'; // this text is 34 chars.
-    const trimmedText = '01234567890123456789012345678901';
+    const trimmedText = text.substr(0, 32);
     for (const c of text) {
       window.setCharacter(c);
     }

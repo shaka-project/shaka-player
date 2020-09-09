@@ -21,7 +21,7 @@ describe('DtvccPacketBuilder', () => {
   it('parses and returns a full packet correctly', () => {
     // Last 6 bits of the first byte in a DTVCC_PACKET_START is
     // packetSize. The number of data bytes that follow should be
-    // packetSize * 2 -1, as per the spec.
+    // packetSize * 2 - 1, as per the spec.
     const dtvccStartByte = 0x01;
 
     // Add the byte for DTVCC_PACKET_START.
@@ -51,7 +51,7 @@ describe('DtvccPacketBuilder', () => {
   });
 
   it('does not return a half-processed packet', () => {
-    const dtvccStartByte = 0x02; // 2 * 2 -1 = 3 data bytes should follow.
+    const dtvccStartByte = 0x02; // 2 * 2 - 1 = 3 data bytes should follow.
 
     // Add the byte for DTVCC_PACKET_START.
     dtvccPacketBuilder.addByte({
@@ -84,7 +84,7 @@ describe('DtvccPacketBuilder', () => {
   });
 
   it('clears the packet builder', () => {
-    const dtvccStartByte = 0x01; // 1 * 2 -1 = 1 data bytes should follow.
+    const dtvccStartByte = 0x01; // 1 * 2 - 1 = 1 data bytes should follow.
 
     // Add the byte for DTVCC_PACKET_START.
     dtvccPacketBuilder.addByte({
@@ -128,7 +128,7 @@ describe('DtvccPacketBuilder', () => {
       order: 0,
     });
 
-    const dtvccStartByte = 0b00000001; // 1 * 2 -1 = 1 data bytes should follow.
+    const dtvccStartByte = 0x01; // 1 * 2 - 1 = 1 data bytes should follow.
 
     // Add the byte for DTVCC_PACKET_START.
     dtvccPacketBuilder.addByte({

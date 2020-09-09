@@ -333,7 +333,7 @@ describe('DashParser Manifest', () => {
         /* appendWindowEnd= */ 30));
   });
 
-  it('correctly parses caption tags with channels, services, and languages',
+  it('correctly parses mixed captions with channels, services, and languages',
       async () => {
         const source = [
           '<MPD minBufferTime="PT75S">',

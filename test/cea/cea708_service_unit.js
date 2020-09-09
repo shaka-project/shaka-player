@@ -474,7 +474,7 @@ describe('Cea708Service', () => {
     expect(captions).toEqual(expectedCaptions);
   });
 
-  it('handles the ASCII form-feed command correctly', () => {
+  it('handles the ASCII backspace command correctly', () => {
     const controlCodes = [
       ...defineWindow,
       // Series of G0 control codes that add text.
@@ -487,8 +487,7 @@ describe('Cea708Service', () => {
     const packet1 = createCea708PacketFromBytes(controlCodes, startTime);
     const packet2 = createCea708PacketFromBytes(hideWindow, endTime);
 
-    // The form feed would have wiped the entire window including new
-    // lines, and the text after is just 'test'.
+    // Backspace should have erased the last 't' in 'test'.
     const text = 'tes';
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
     topLevelCue.nestedCues = [
@@ -528,8 +527,8 @@ describe('Cea708Service', () => {
     const packet1 = createCea708PacketFromBytes(controlCodes, startTime);
     const packet2 = createCea708PacketFromBytes(hideWindow, endTime);
 
-    // The form feed would have wiped the entire window including new
-    // lines, and the text after is just 'test'.
+    // The form feed control code would have wiped the entire window
+    // including new lines, and the text after is just 'test'.
     const text = 'test';
     const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
     topLevelCue.nestedCues = [
