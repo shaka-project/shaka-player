@@ -117,12 +117,12 @@ describe('Cea608Memory', () => {
       CeaUtils.createStyledCue(startTime, endTime,
           expectedText, /* underline= */ true,
           /* italics= */ true, /* textColor= */ 'red',
-          /* backgroundColor= */ shaka.cea.Cea608Memory.DEFAULT_BG_COLOR),
+          /* backgroundColor= */ shaka.cea.CeaUtils.DEFAULT_BG_COLOR),
 
       CeaUtils.createStyledCue(startTime, endTime,
           expectedText, /* underline= */ false,
           /* italics= */ false, /* textColor= */ 'red',
-          /* backgroundColor= */ shaka.cea.Cea608Memory.DEFAULT_BG_COLOR),
+          /* backgroundColor= */ shaka.cea.CeaUtils.DEFAULT_BG_COLOR),
     ];
 
     const expectedCaption = {
