@@ -65,6 +65,19 @@ await this.playerInterface_.filter(manifest);
 ```
 
 
+#### Embedded Captions
+
+There is another new method inside the player interface,
+`makeTextStreamsForClosedCaptions`.
+This method must be called on the manifest initially, and after each time new
+content is added, in order for embedded captions, such as CEA 608 captions,
+to work.
+
+```js
+this.playerInterface_.makeTextStreamsForClosedCaptions(manifest);
+```
+
+
 #### PresentationTimeline
 
 The API for {@link shaka.media.PresentationTimeline} has changed.

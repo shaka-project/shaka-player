@@ -2813,7 +2813,7 @@ describe('StreamingEngine', () => {
           stream.useSegmentTemplate('video-120-%d.mp4', 10);
         });
         manifest.addTextStream(3, (stream) => {
-          stream.mimeType = shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
+          stream.mimeType = shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE;
         });
       });
 

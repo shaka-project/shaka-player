@@ -233,6 +233,9 @@ After adding new content, you should call the `filter` method on the player
 interface.  This removes any streams that were added that are incompatible with
 the platform.  Keep in mind that this is an asynchronous method, and thus you
 will need to use it in conjunction with `.then()` or `await`.
+You should also call the `makeTextStreamsForClosedCaptions` method on the
+player interface, which is required for embedded captions (for example, CEA
+608) to work; it makes dummy text streams to represent these tracks.
 
 
 ## Full Manifest Parser Example

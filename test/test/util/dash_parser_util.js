@@ -37,6 +37,7 @@ shaka.test.Dash = class {
     const playerInterface = {
       networkingEngine: networkingEngine,
       filter: () => {},
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
@@ -66,6 +67,7 @@ shaka.test.Dash = class {
     const playerInterface = {
       networkingEngine: networkingEngine,
       filter: () => {},
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
