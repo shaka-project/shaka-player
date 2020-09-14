@@ -147,6 +147,7 @@ requirement: {
   whitelist_regexp: 'lib/debug/log.js'
   whitelist_regexp: 'test/test/boot.js'
   whitelist_regexp: 'node_modules/'
+  whitelist_regexp: '[synthetic:es6/promise/promise]'
 }
 
 # Disallow querySelector and querySelectorAll since they aren't supported on
