@@ -39,7 +39,7 @@
     for (var k in exportTo.shaka) {
       exports[k] = exportTo.shaka[k];
     }
-  } else if (typeof define != 'undefined' && define.amd) {
+  } else if (typeof define == 'function' && define.amd) {
     // AMD module loader.
     define(function(){
       return exportTo.shaka;
