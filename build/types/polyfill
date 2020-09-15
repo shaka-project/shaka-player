@@ -3,7 +3,6 @@
 +../../node_modules/eme-encryption-scheme-polyfill/index.js
 +../../lib/polyfill/encryption_scheme.js
 +../../lib/polyfill/fullscreen.js
-+../../lib/polyfill/indexed_db.js
 +../../lib/polyfill/input_event.js
 +../../lib/polyfill/languages.js
 +../../lib/polyfill/mathround.js
