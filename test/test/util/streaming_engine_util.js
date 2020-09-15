@@ -45,6 +45,12 @@ shaka.test.StreamingEngineUtil = class {
       const contentType = parts[1];
 
       let buffer;
+      const chunkedData = new Uint8Array([
+        0x00, 0x00, 0x00, 0x0C, // size
+        0x6d, 0x64, 0x61, 0x74, // type: mdat
+        0x00, 0x11, 0x22, 0x33, // payload
+      ]);
+
       if (parts[2] == 'init') {
         buffer = getInitSegment(contentType, periodIndex);
       } else {
@@ -55,11 +61,11 @@ shaka.test.StreamingEngineUtil = class {
         buffer = getSegment(contentType, periodIndex, position);
 
         // Mock that each segment request gets the response of a ReadableStream
-        // with two chunks of data.
+        // with two chunks of data, each contains one MDAT box.
         // The streamDataCallback function gets called twice.
         if (request.streamDataCallback) {
-          request.streamDataCallback(buffer);
-          request.streamDataCallback(new ArrayBuffer(0));
+          request.streamDataCallback(chunkedData);
+          request.streamDataCallback(chunkedData);
         }
 
         if (buffer == null) {

@@ -622,12 +622,14 @@ describe('StreamingEngine', () => {
 
     await runTest();
 
-    // In the mocks in StreamingEngineUtil, streamDataCallback will be triggered
-    // twice for each segment.
+    // In the mocks in StreamingEngineUtil, each segment gets fetched as two
+    // chunks of data, and each chunk contains one MDAT box.
+    // The streamDataCallback function will be triggered twice for each
+    // audio/video MP4 segment.
     // appendBuffer should be called once for each init segment of the
     // audio / video segment, and twice for each segment.
-    // 8 init segments + 12 segments * 2 = 32.
-    expect(mediaSourceEngine.appendBuffer).toHaveBeenCalledTimes(32);
+    // 8 init segments + 8 audio/video segments * 2 + 4 text segments = 28.
+    expect(mediaSourceEngine.appendBuffer).toHaveBeenCalledTimes(28);
   });
 
   it('plays when a small gap is present at the beginning', async () => {
