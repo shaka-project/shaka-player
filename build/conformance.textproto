@@ -97,6 +97,12 @@ requirement: {
 }
 
 
+requirement: {
+  type: BANNED_CODE_PATTERN
+  value: 'function template () { new Date().getTime() }'
+  error_message: 'Use Date.now() instead.'
+}
+
 # Disallow console logging.
 requirement: {
   type: BANNED_PROPERTY_CALL
