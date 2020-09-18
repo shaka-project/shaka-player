@@ -22,6 +22,9 @@
     }
   },
   "plugins": [ "docs/jsdoc-plugin" ],
+  "markdown": {
+    "idInHeadings": true
+  },
   "opts": {
     "pedantic": true,
     "private": true,
