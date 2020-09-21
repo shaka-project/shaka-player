@@ -111,6 +111,8 @@ describe('HlsParser live', () => {
       onEvent: fail,
       onTimelineRegionAdded: fail,
       isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
     };
 
     parser = new shaka.hls.HlsParser();

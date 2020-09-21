@@ -724,7 +724,8 @@ shaka.extern.ManifestConfiguration;
  *   stallSkip: number,
  *   useNativeHlsOnSafari: boolean,
  *   inaccurateManifestTolerance: number,
- *   lowLatencyMode: boolean
+ *   lowLatencyMode: boolean,
+ *   autoLowLatencyMode: boolean
  * }}
  *
  * @description
@@ -814,7 +815,10 @@ shaka.extern.ManifestConfiguration;
  *   drift (up to one segment duration).  Smaller values reduce the incidence of
  *   extra segment requests necessary to compensate for drift.
  * @property {boolean} lowLatencyMode
- *  If <code>true</code>, low latency streaming mode is enabled.
+ *   If <code>true</code>, low latency streaming mode is enabled.
+ * @property {boolean} autoLowLatencyMode
+ *   If <code>true</code>, low latency streaming mode is enabled if the stream
+ *   supports low latency.
  *
  * @exportDoc
  */
