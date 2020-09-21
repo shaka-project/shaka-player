@@ -815,7 +815,10 @@ shaka.extern.ManifestConfiguration;
  *   drift (up to one segment duration).  Smaller values reduce the incidence of
  *   extra segment requests necessary to compensate for drift.
  * @property {boolean} lowLatencyMode
- *   If <code>true</code>, low latency streaming mode is enabled.
+ *   If <code>true</code>, low latency streaming mode is enabled. If
+ *   lowLatencyMode is set to true, inaccurateManifestTolerance is set to 0
+ *   unless specified, and rebufferingGoal to 0.01 unless specified at the same
+ *   time.
  * @property {boolean} autoLowLatencyMode
  *   If <code>true</code>, low latency streaming mode is enabled if the stream
  *   supports low latency.
