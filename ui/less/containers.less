@@ -204,7 +204,6 @@
   bottom: 0%;
   width: 100%;
   min-width: 48px;
-  text-align: center;
 
   /* When the controls fade in or out, it takes 600ms. Thus, when the text
    * container adjusts to the presence or absence of controls, we should wait
@@ -214,14 +213,6 @@
    * distracting. */
   transition: bottom cubic-bezier(0.4, 0, 0.6, 1) 100ms;
   transition-delay: 500ms;
-
-  /* Set the captions in the middle horizontally by default. */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  /* Set the captions at the bottom by default. */
-  justify-content: flex-end;
 
   /* These are defaults which are overridden by JS or cue styles. */
   font-size: 20px;
