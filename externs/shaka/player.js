@@ -592,6 +592,7 @@ shaka.extern.DrmConfiguration;
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
  *   xlinkFailGracefully: boolean,
+ *   ignoreMaxSegmentDuration: boolean,
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
  *   initialSegmentLimit: number,
@@ -612,6 +613,10 @@ shaka.extern.DrmConfiguration;
  *   existing contents. If false, xlink-related errors will be propagated
  *   to the application and will result in a playback failure. Defaults to
  *   false if not provided.
+  * @property {boolean} ignoreMaxSegmentDuration
+ *   If true will cause DASH parser to ignore <code>maxSegmentDuration</code> from
+ *   manifest. It allows player to calculate the max segment duration from the
+ *   segments that downloaded.
  * @property {boolean} ignoreMinBufferTime
  *   If true will cause DASH parser to ignore <code>minBufferTime</code> from
  *   manifest. It allows player config to take precedence over manifest for
