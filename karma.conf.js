@@ -86,6 +86,10 @@ module.exports = (config) => {
       'node_modules/es6-promise-polyfill/promise.js',
       //   Babel polyfill, required for async/await
       'node_modules/babel-polyfill/dist/polyfill.js',
+      //   TextDecoder polyfill, required for TextDecoder/TextEncoder on IE and
+      //   legacy Edge
+      //   eslint-disable-next-line max-len
+      'node_modules/fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js',
 
       // muxjs module next
       'node_modules/mux.js/dist/mux.min.js',

@@ -772,6 +772,59 @@ describe('Playhead', () => {
     expect(playhead.getTime()).not.toBeLessThan(5);
   });  // clamps playhead even before seeking completes
 
+  // Regression test for:
+  //  - https://github.com/google/shaka-player/pull/2849
+  //  - https://github.com/google/shaka-player/issues/2748
+  //  - https://github.com/google/shaka-player/issues/2848
+  it('does not apply seek range before initial seek has completed', () => {
+    // These attributes allow the seek range callback to do its thing.
+    video.readyState = HTMLMediaElement.HAVE_METADATA;
+    video.paused = false;
+
+    // Simulate a smart TV in which seeking is not immediately reflected.
+    // In these scenarios, currentTime remains 0 long enough for the seek range
+    // polling to kick in.
+    const currentTimeSetterSpy = jasmine.createSpy('currentTimeSetter');
+    Object.defineProperty(video, 'currentTime', {
+      get: () => 0,
+      set: Util.spyFunc(currentTimeSetterSpy),
+    });
+
+    timeline.isLive.and.returnValue(true);
+    timeline.getDuration.and.returnValue(Infinity);
+    timeline.getSeekRangeStart.and.returnValue(5);
+    timeline.getSeekRangeEnd.and.returnValue(60);
+
+    playhead = new shaka.media.MediaSourcePlayhead(
+        video,
+        manifest,
+        config,
+        /* startTime= */ 30,
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
+
+    /**
+     * Prevent retries on the initial start time seek.  This will ensure that
+     * only one call is made for the initial seek, and that any additional calls
+     * can be rightly attributed to the application of the seek range.
+     * @suppress {accessControls}
+     */
+    function stopRetries() {
+      const mediaSourcePlayhead =
+      /** @type {shaka.media.MediaSourcePlayhead} */(playhead);
+      mediaSourcePlayhead.videoWrapper_.mover_.timer_.stop();
+      mediaSourcePlayhead.videoWrapper_.mover_.maxAttempts_ = 1;
+      mediaSourcePlayhead.videoWrapper_.mover_.remainingAttempts_ = 1;
+    }
+    stopRetries();
+
+    // Let the Playhead poll the seek range.  It should NOT push us back inside
+    // it, since the start time should be used instead of the current time.
+    jasmine.clock().tick(1000);
+    // The one and only call was for the initial seek to the start time.
+    expect(currentTimeSetterSpy).toHaveBeenCalledTimes(1);
+  });  // does not apply seek range before initial seek has completed
+
   describe('gap jumping', () => {
     beforeEach(() => {
       timeline.isLive.and.returnValue(false);
