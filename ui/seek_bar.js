@@ -121,6 +121,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.setValue(this.video.currentTime);
     this.update();
     this.updateAriaLabel_();
+
+    if (this.ad) {
+      // There was already an ad.
+      shaka.ui.Utils.setDisplay(this.container, false);
+    }
   }
 
   /** @override */
