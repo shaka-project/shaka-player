@@ -112,6 +112,11 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     });
 
     this.updateAriaLabel_();
+
+    if (this.ad) {
+      // There was already an ad.
+      shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
+    }
   }
 
   /** @override */

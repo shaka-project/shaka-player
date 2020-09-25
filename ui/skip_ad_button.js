@@ -92,6 +92,11 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
         this.button_, 'click', () => {
           this.ad.skip();
         });
+
+    if (this.ad) {
+      // There was already an ad.
+      this.onAdStarted_();
+    }
   }
 
   /**

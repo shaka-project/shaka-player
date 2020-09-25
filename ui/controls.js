@@ -408,6 +408,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.releaseChildElements_();
     } else {
       this.addControlsContainer_();
+      // The client-side ad container is only created once, and is never
+      // re-created or uprooted in the DOM, even when the DOM is re-created,
+      // since that seemingly breaks the IMA SDK.
+      this.addClientAdContainer_();
     }
 
     // Create the new layout
@@ -469,6 +473,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (enabled) {
       this.setEnabledShakaControls(false);
     }
+  }
+
+  /**
+   * @export
+   * @return {?shaka.extern.IAd}
+   */
+  getAd() {
+    return this.ad_;
   }
 
   /**
@@ -543,6 +555,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   getServerSideAdContainer() {
     return this.daiAdContainer_;
+  }
+
+  /**
+   * @return {!HTMLElement}
+   * @export
+   */
+  getClientSideAdContainer() {
+    return this.clientAdContainer_;
   }
 
   /**
@@ -779,7 +799,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.adPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.adPanel_.classList.add('shaka-ad-controls');
-    shaka.ui.Utils.setDisplay(this.adPanel_, false);
+    shaka.ui.Utils.setDisplay(this.adPanel_, this.ad_ != null);
     this.bottomControls_.appendChild(this.adPanel_);
 
     const adPosition = new shaka.ui.AdPosition(this.adPanel_, this);
@@ -915,6 +935,18 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
+
+  /**
+   * Adds a container for server side ad UI with IMA SDK.
+   *
+   * @private
+   */
+  addClientAdContainer_() {
+    /** @private {!HTMLElement} */
+    this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
+    this.videoContainer_.appendChild(this.clientAdContainer_);
+  }
 
   /**
    * Adds static event listeners.  This should only add event listeners to
