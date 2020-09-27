@@ -80,6 +80,7 @@
   "DEMO_IGNORE_HLS_TEXT_FAILURES": "Ignore HLS Text Stream Failures",
   "DEMO_USE_FULL_SEGMENTS_FOR_START_TIME": "Use Full Segments For Start Time",
   "DEMO_IGNORE_MIN_BUFFER_TIME": "Ignore Min Buffer Time",
+  "DEMO_IGNORE_MAX_SEGMENT_DURATION": "Ignore Max Segment Duration",
   "DEMO_IGNORE_TEXT_FAILURES": "Ignore Text Stream Failures",
   "DEMO_INACCURATE_MANIFEST_TOLERANCE": "Inaccurate Manifest Tolerance",
   "DEMO_INITIAL_SEGMENT_LIMIT": "Initial Segment Limit",

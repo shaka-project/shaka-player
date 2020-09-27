@@ -323,6 +323,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore Min Buffer Time"
   },
+  "DEMO_IGNORE_MAX_SEGMENT_DURATION": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore Max Segment Duration"
+  },
   "DEMO_IGNORE_TEXT_FAILURES": {
     "description": "The name of a configuration value.",
     "message": "Ignore Text Stream Failures"

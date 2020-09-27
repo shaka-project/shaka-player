@@ -1485,6 +1485,58 @@ describe('DashParser Manifest', () => {
     expect(minBufferTime).toBe(75);
   });
 
+  it('get manifest value if ignoreMaxSegmentDuration is false', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S" maxSegmentDuration="PT3S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreMaxSegmentDuration = false;
+    parser.configure(config);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const maxSegmentDuration =
+      manifest.presentationTimeline.getMaxSegmentDuration();
+    expect(maxSegmentDuration).toBe(3);
+  });
+
+  it('get manifest value if ignoreMaxSegmentDuration is true', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S" maxSegmentDuration="PT3S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreMaxSegmentDuration = true;
+    parser.configure(config);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const maxSegmentDuration =
+      manifest.presentationTimeline.getMaxSegmentDuration();
+    expect(maxSegmentDuration).toBe(1);
+  });
+
   it('does not set presentationDelay to NaN', async () => {
     // NOTE: This is a regression test for #2015. It ensures that, if
     // ignoreMinBufferTime is true and there is no suggestedPresentationDelay,
