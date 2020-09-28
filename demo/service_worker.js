@@ -108,10 +108,6 @@ const OPTIONAL_RESOURCES = [
 
   // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
-
-  // The IMA ads SDK.
-  'http://imasdk.googleapis.com/js/sdkloader/ima3.js',
-  'http://imasdk.googleapis.com/js/sdkloader/ima3_dai.js',
 ].map(resolveRelativeUrl);
 
 
