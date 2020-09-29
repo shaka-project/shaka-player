@@ -5,20 +5,6 @@
  */
 
 describe('SrtTextParser', () => {
-  const originalLogWarning = shaka.log.warning;
-
-  /** @type {!jasmine.Spy} */
-  let logWarningSpy;
-
-  beforeEach(() => {
-    logWarningSpy = jasmine.createSpy('shaka.log.warning');
-    shaka.log.warning = shaka.test.Util.spyFunc(logWarningSpy);
-  });
-
-  afterEach(() => {
-    shaka.log.warning = originalLogWarning;
-  });
-
   it('supports no cues', () => {
     verifyHelper([],
         '',
@@ -59,7 +45,7 @@ describe('SrtTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports cues', () => {
+  it('supports multiple cues', () => {
     verifyHelper(
         [
           {startTime: 20, endTime: 40, payload: 'Test', id: '1'},
@@ -80,8 +66,10 @@ describe('SrtTextParser', () => {
    * @param {shaka.extern.TextParser.TimeContext} time
    */
   function verifyHelper(cues, text, time) {
-    const data =
-        shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
+    const BufferUtils = shaka.util.BufferUtils;
+    const StringUtils = shaka.util.StringUtils;
+
+    const data = BufferUtils.toUint8(StringUtils.toUTF8(text));
 
     const parser = new shaka.text.SrtTextParser();
     const result = parser.parseMedia(data, time);
