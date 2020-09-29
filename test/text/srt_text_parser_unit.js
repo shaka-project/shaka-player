@@ -48,8 +48,8 @@ describe('SrtTextParser', () => {
   it('supports multiple cues', () => {
     verifyHelper(
         [
-          {startTime: 20, endTime: 40, payload: 'Test', id: '1'},
-          {startTime: 40, endTime: 50, payload: 'Test2', id: '2'},
+          {startTime: 20, endTime: 40, payload: 'Test'},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
         ],
         '1\n' +
         '00:00:20,000 --> 00:00:40,000\n' +
