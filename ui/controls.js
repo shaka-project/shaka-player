@@ -148,7 +148,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      */
     this.timeAndSeekRangeTimer_ = new shaka.util.Timer(() => {
       // Suppress timer-based updates if the controls are hidden.
-      if (this.isOpaque_()) {
+      if (this.isOpaque()) {
         this.updateTimeAndSeekRange_();
       }
     });
@@ -1027,7 +1027,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // open.
     this.hideSettingsMenusTimer_.stop();
 
-    if (!this.isOpaque_()) {
+    if (!this.isOpaque()) {
       // Only update the time and seek range on mouse movement if it's the very
       // first movement and we're about to show the controls.  Otherwise, the
       // seek bar will be updated much more rapidly during mouse movement.  Do
@@ -1124,7 +1124,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    if (this.isOpaque_()) {
+    if (this.isOpaque()) {
       this.lastTouchEventTime_ = Date.now();
       // The controls are showing.
       // Let this event continue and become a click.
@@ -1255,9 +1255,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
-   * @private
+   * @export
    */
-  isOpaque_() {
+  isOpaque() {
     if (!this.enabled_) {
       return false;
     }
@@ -1274,7 +1274,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   seek_(currentTime, event) {
     this.video_.currentTime = currentTime;
-    if (this.isOpaque_()) {
+    if (this.isOpaque()) {
       // Only update the time and seek range if it's visible.
       this.updateTimeAndSeekRange_();
     }
