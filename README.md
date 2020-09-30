@@ -209,6 +209,7 @@ Shaka Player supports:
   - CEA-708
     - Supported embedded in MP4
   - SubRip (SRT)
+    - Only UTF-8 encoding
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
