@@ -110,16 +110,6 @@ goog.require('shaka.util.Dom');
         this.onOverflowMenuButtonClick_();
       });
 
-    this.eventManager.listen(
-      this.controlsContainer_, 'touchstart', (event) => {
-        // If the overflow menu is showing, hide it on a touch event
-        if (this.overflowMenu_.classList.contains('shaka-displayed')) {
-          shaka.ui.Utils.setDisplay(this.overflowMenu_, false);
-          // Stop this event from becoming a click event.
-          event.preventDefault();
-        }
-      });
-
     this.updateAriaLabel_();
   }
 
