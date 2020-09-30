@@ -459,7 +459,7 @@ describe('PeriodCombiner', () => {
     a3.bandwidth = 97065;
     a2.roles = ['role1', 'role2'];
 
-    // t1 and t3 are duplicats
+    // t1 and t3 are duplicates
     const t1 = makeTextStream('en');
     t1.originalId = 't1';
     t1.roles = ['role1'];
@@ -508,6 +508,15 @@ describe('PeriodCombiner', () => {
     const audioIds = variants.map((v) => v.audio.originalId);
     for (const id of audioIds) {
       expect(id).not.toBe('a2');
+    }
+
+    const textStreams = combiner.getTextStreams();
+    expect(textStreams.length).toBe(2);
+
+    // t3 should've been filtered out
+    const textIds = textStreams.map((t) => t.originalId);
+    for (const id of textIds) {
+      expect(id).not.toBe('t3');
     }
   });
 
