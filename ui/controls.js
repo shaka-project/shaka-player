@@ -734,6 +734,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.eventManager_.listen(this.controlsContainer_, 'click', () => {
       this.onContainerClick_();
     });
+
+    this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
+      if (this.config_.doubleClickForFullscreen) {
+        this.toggleFullScreen();
+      }
+    });
   }
 
   /** @private */
@@ -898,12 +904,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
-
-    this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
-      if (this.config_.doubleClickForFullscreen) {
-        this.toggleFullScreen();
-      }
-    });
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
