@@ -462,14 +462,13 @@ describe('PeriodCombiner', () => {
     // t1 and t3 are duplicats
     const t1 = makeTextStream('en');
     t1.originalId = 't1';
-    t1.bandwidth = 65106;
     t1.roles = ['role1'];
 
-    const t2 = makeAudioStream('en');
+    const t2 = makeTextStream('en');
     t2.originalId = 't2';
     t2.roles = ['role1', 'role2'];
 
-    const t3 = makeAudioStream('en');
+    const t3 = makeTextStream('en');
     t3.originalId = 't3';
     t3.roles = ['role1'];
 
