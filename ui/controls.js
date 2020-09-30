@@ -81,7 +81,7 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
   /** @private {boolean} */
   this.isSeeking_ = false;
 
-  /** @private {!Array.<!Element>} */
+  /** @private {!Array.<!HTMLElement>} */
   this.settingsMenus_ = [];
 
   /**
@@ -128,13 +128,8 @@ shaka.ui.Controls = function(player, videoContainer, video, config) {
    * @private {shaka.util.Timer}
    */
   this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
-    /** type {function(!HTMLElement)} */
-    const hide = (control) => {
-      shaka.ui.Utils.setDisplay(control, /* visible= */ false);
-    };
-
     for (const menu of this.settingsMenus_) {
-      hide(/** @type {!HTMLElement} */ (menu));
+      shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
     }
   });
 
