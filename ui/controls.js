@@ -688,6 +688,12 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
   this.eventManager_.listen(this.controlsContainer_, 'click', (e) => {
     this.onContainerClick_(e);
   });
+
+  this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
+    if (this.config_.doubleClickForFullscreen) {
+      this.toggleFullScreen();
+    }
+  });
 };
 
 
@@ -836,12 +842,6 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
 
   // Listen for click events to dismiss the settings menus.
   this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
-
-  this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
-    if (this.config_.doubleClickForFullscreen) {
-      this.toggleFullScreen();
-    }
-  });
 
   this.eventManager_.listen(this.video_,
       'play', this.onPlayStateChange_.bind(this));
