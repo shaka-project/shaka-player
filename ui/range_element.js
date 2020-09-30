@@ -74,14 +74,18 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.parent.appendChild(this.container);
 
     this.eventManager.listen(this.bar, 'mousedown', () => {
-      this.isChanging_ = true;
-      this.onChangeStart();
+      if (this.controls.isOpaque()) {
+        this.isChanging_ = true;
+        this.onChangeStart();
+      }
     });
 
     this.eventManager.listen(this.bar, 'touchstart', (e) => {
-      this.isChanging_ = true;
-      this.setBarValueForTouch_(e);
-      this.onChangeStart();
+      if (this.controls.isOpaque()) {
+        this.isChanging_ = true;
+        this.setBarValueForTouch_(e);
+        this.onChangeStart();
+      }
     });
 
     this.eventManager.listen(this.bar, 'input', () => {
@@ -89,19 +93,25 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.bar, 'touchmove', (e) => {
-      this.setBarValueForTouch_(e);
-      this.onChange();
+      if (this.isChanging_) {
+        this.setBarValueForTouch_(e);
+        this.onChange();
+      }
     });
 
     this.eventManager.listen(this.bar, 'touchend', (e) => {
-      this.isChanging_ = false;
-      this.setBarValueForTouch_(e);
-      this.onChangeEnd();
+      if (this.isChanging_) {
+        this.isChanging_ = false;
+        this.setBarValueForTouch_(e);
+        this.onChangeEnd();
+      }
     });
 
     this.eventManager.listen(this.bar, 'mouseup', () => {
-      this.isChanging_ = false;
-      this.onChangeEnd();
+      if (this.isChanging_) {
+        this.isChanging_ = false;
+        this.onChangeEnd();
+      }
     });
   }
 
