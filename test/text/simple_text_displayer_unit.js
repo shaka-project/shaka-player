@@ -5,6 +5,12 @@
  */
 
 
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.text.Cue');
+goog.require('shaka.text.SimpleTextDisplayer');
+goog.require('shaka.util.Functional');
+goog.requireType('shaka.test.FakeTextTrack');
+
 describe('SimpleTextDisplayer', () => {
   const originalVTTCue = window.VTTCue;
   const Cue = shaka.text.Cue;
