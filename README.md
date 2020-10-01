@@ -208,6 +208,8 @@ Shaka Player supports:
     - With help from [mux.js][] v5.6.3+, supported embedded in TS
   - CEA-708
     - Supported embedded in MP4
+  - SubRip (SRT)
+    - UTF-8 encoding only
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
