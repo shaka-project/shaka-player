@@ -968,6 +968,14 @@ shaka.ui.Controls.prototype.onMouseStill_ = function() {
  * @private
  */
 shaka.ui.Controls.prototype.isHovered_ = function() {
+  if (!window.matchMedia('hover: hover').matches) {
+    // This is primarily a touch-screen device, so the :hover query below
+    // doesn't make sense.  In spite of this, the :hover query on an element
+    // can still return true on such a device after a touch ends.
+    // See https://bit.ly/34dBORX for details.
+    return false;
+  }
+
   return this.showOnHoverControls_.some((element) => {
     return element.matches(':hover');
   });
