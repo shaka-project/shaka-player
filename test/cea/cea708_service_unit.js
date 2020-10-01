@@ -4,6 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cea.Cea708Service');
+goog.require('shaka.cea.CeaUtils');
+goog.require('shaka.cea.DtvccPacket');
+goog.require('shaka.cea.DtvccPacketBuilder');
+goog.require('shaka.test.CeaUtils');
+goog.require('shaka.text.Cue');
+
 describe('Cea708Service', () => {
   const CeaUtils = shaka.test.CeaUtils;
 

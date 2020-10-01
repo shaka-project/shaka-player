@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cea.Mp4CeaParser');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+
 describe('Mp4CeaParser', () => {
   const ceaInitSegmentUri = '/base/test/test/assets/cea-init.mp4';
   const ceaSegmentUri = '/base/test/test/assets/cea-segment.mp4';
