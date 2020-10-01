@@ -312,17 +312,16 @@ describe('Player Src Equals', () => {
     expect(stats.drmTimeSeconds).toBeNaN(); // There's no DRM.
   });
 
-  // Because we have no manifest, we can't add text tracks.
-  it('cannot add text tracks', async () => {
+  it('plays with external text tracks', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
 
-    expect(() => {
-      player.addTextTrack(
-          'test:need-a-uri-for-text',
-          'en-US',
-          'main',
-          'text/mp4');
-    }).toThrow();
+    const locationUri = new goog.Uri(location.href);
+    const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
+    const absoluteUri = locationUri.resolve(partialUri);
+    const newTrack = player.addTextTrack(
+        absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
+
+    expect(newTrack).toBeTruthy();
   });
 
   // Since we are not in-charge of streaming, calling |retryStreaming| should
