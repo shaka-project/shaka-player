@@ -5,6 +5,10 @@
  */
 
 
+goog.require('shaka.media.StallDetector');
+goog.require('shaka.media.StallDetector.Implementation');
+goog.require('shaka.test.Util');
+
 describe('StallDetector', () => {
   /**
    * @implements {shaka.media.StallDetector.Implementation}

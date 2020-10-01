@@ -5,6 +5,15 @@
  */
 
 
+goog.require('shaka.hls.Attribute');
+goog.require('shaka.hls.ManifestTextParser');
+goog.require('shaka.hls.PlaylistType');
+goog.require('shaka.hls.Segment');
+goog.require('shaka.hls.Tag');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.StringUtils');
+
 describe('ManifestTextParser', () => {
   /** @type {!shaka.hls.ManifestTextParser} */
   let parser;

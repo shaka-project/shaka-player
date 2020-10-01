@@ -5,6 +5,18 @@
  */
 
 
+goog.require('goog.asserts');
+goog.require('shaka.media.MediaSourceEngine');
+goog.require('shaka.media.Transmuxer');
+goog.require('shaka.test.FakeClosedCaptionParser');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.test.FakeTransmuxer');
+goog.require('shaka.test.StatusPromise');
+goog.require('shaka.test.Util');
+goog.require('shaka.text.TextEngine');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.ManifestParserUtils');
+
 /**
  * @typedef {{
  *   length: number,
