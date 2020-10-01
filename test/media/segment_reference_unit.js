@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.SegmentReference');
+
 describe('SegmentReference', () => {
   it('returns in getters values from constructor parameters', () => {
     const initSegmentReference = new shaka.media.InitSegmentReference(

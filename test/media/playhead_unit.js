@@ -5,6 +5,13 @@
  */
 
 
+goog.require('shaka.media.MediaSourcePlayhead');
+goog.require('shaka.test.FakePresentationTimeline');
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.PlayerConfiguration');
+goog.requireType('shaka.media.Playhead');
+
 /**
  * @typedef {{start: number, end: number}}
  *
