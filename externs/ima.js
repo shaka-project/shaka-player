@@ -227,11 +227,18 @@ google.ima.AdEvent.Type = {
 
 /**
  * @typedef {{
+ *   adsResponse: ?string,
  *   adTagUrl: string,
  * }}
  *
  * @description Request for the ad server
  * @property {string} adTagUrl
+ *   Specifies the ad tag url that is requested from the ad server.
+ * @property {?string} adsResponse
+ *   Specifies a VAST 2.0 document to be used as the ads response instead of
+ *   making a request via an ad tag url. This can be useful for debugging
+ *   and other situations where a VAST response is already available.
+ *   This parameter is optional.
  * @exportDoc
  */
 google.ima.AdsRequest;
