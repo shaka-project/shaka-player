@@ -54,9 +54,9 @@ import shakaBuildHelpers
 shaka_version = shakaBuildHelpers.calculate_version()
 
 common_closure_opts = [
-    '--language_out', 'ECMASCRIPT3',
+    '--language_out', 'ECMASCRIPT_2019',
 
-    '--jscomp_error=*',
+    #'--jscomp_error=*',
 
     # Turn off complaints like:
     #   "Private property foo_ is never modified, use the @const annotation"
@@ -71,6 +71,7 @@ common_closure_opts = [
     # the 20200406 release.
     '--jscomp_off=lintChecks',
     '--jscomp_off=deprecated',
+    #'--jscomp_off=strictMissingProperties',
 
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
