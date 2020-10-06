@@ -70,6 +70,10 @@ shakaDemo.Main = class {
 
     /** @private {?number} */
     this.currentErrorSeverity_ = null;
+
+    // Override the icon for the MDL library's menu button.
+    // eslint-disable-next-line no-restricted-syntax
+    MaterialLayout.prototype.Constant_.MENU_ICON = 'settings';
   }
 
   /**
