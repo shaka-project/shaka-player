@@ -33,5 +33,11 @@ const MaterialLayout = function() {};
 
 MaterialLayout.prototype.toggleDrawer = function() {};
 
+/** @const */
+MaterialLayout.prototype.Constant_ = {};
+
+/** @type {string} */
+MaterialLayout.prototype.Constant_.MENU_ICON;
+
 /** @const {?MaterialLayout} */
 Element.prototype.MaterialLayout;
