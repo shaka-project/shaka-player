@@ -653,7 +653,10 @@ describe('DrmEngine', () => {
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
       drmEngine.configure(config);
 
-      await initAndAttach();
+      const variants = manifest.variants;
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+
+      // Should be set merely after init, without waiting for attach.
       expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(cert);
     });
 
