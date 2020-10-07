@@ -8,8 +8,6 @@
 // |HTMLMediaElement.src=|. These tests are to verify that all |shaka.Player|
 // public methods behaviour correctly when playing content video |src=|.
 describe('Player Src Equals', () => {
-  const Util = shaka.test.Util;
-
   const SMALL_MP4_CONTENT_URI = '/base/test/test/assets/small.mp4';
 
   /** @type {!HTMLVideoElement} */
@@ -18,6 +16,8 @@ describe('Player Src Equals', () => {
   let player;
   /** @type {!shaka.util.EventManager} */
   let eventManager;
+  /** @type {shaka.test.Waiter} */
+  let waiter;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -28,6 +28,7 @@ describe('Player Src Equals', () => {
     player = new shaka.Player();
     player.addEventListener('error', fail);
     eventManager = new shaka.util.EventManager();
+    waiter = new shaka.test.Waiter(eventManager);
   });
 
   afterEach(async () => {
@@ -101,8 +102,7 @@ describe('Player Src Equals', () => {
 
     // Start playback and wait for the playhead to move.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be before
     // seeking.
@@ -112,8 +112,7 @@ describe('Player Src Equals', () => {
     // Trigger a seek and then wait for the seek to take effect.
     // This seek target is very close to the duration of the video.
     video.currentTime = 10;
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be after
     // seeking.
@@ -140,8 +139,7 @@ describe('Player Src Equals', () => {
 
     // For playback to begin so that we have some content buffered.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     const buffered = player.getBufferedInfo();
 
@@ -165,8 +163,7 @@ describe('Player Src Equals', () => {
 
     // Let playback run for a little.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     let videoRateChange = false;
     let playerRateChange = false;
@@ -283,8 +280,7 @@ describe('Player Src Equals', () => {
 
     // Start playback and wait. We should see the playhead move.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
     await shaka.test.Util.delay(1.5);
 
     // When checking if the playhead moved, check for less progress than time we
@@ -301,8 +297,7 @@ describe('Player Src Equals', () => {
     // Wait some time for playback to start so that we will have a load latency
     // value.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Get the stats and check that some stats have been filled in.
     const stats = player.getStats();
@@ -368,7 +363,7 @@ describe('Player Src Equals', () => {
         // A one-second timeout is too short for Chromecast, but a longer
         // timeout doesn't hurt anyone.  This will always resolve as fast as
         // playback can actually start.
-        await waiter.timeoutAfter(5).failOnTimeout(true).waitForMovement(video);
+        await waiter.waitForMovementOrFailOnTimeout(video, 5);
       }
     }
 

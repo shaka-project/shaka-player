@@ -17,6 +17,8 @@ filterDescribe('Offline', supportsStorage, () => {
   let video;
   /** @type {!shaka.util.EventManager} */
   let eventManager;
+  /** @type {shaka.test.Waiter} */
+  let waiter;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -32,6 +34,7 @@ filterDescribe('Offline', supportsStorage, () => {
     player.addEventListener('error', fail);
 
     eventManager = new shaka.util.EventManager();
+    waiter = new shaka.test.Waiter(eventManager);
 
     // Make sure we are starting with a blank slate.
     await shaka.offline.Storage.deleteAll();
@@ -144,7 +147,7 @@ filterDescribe('Offline', supportsStorage, () => {
    * @return {!Promise}
    */
   async function playTo(endSeconds, timeoutSeconds) {
-    await shaka.test.Util.waitUntilPlayheadReaches(
-        eventManager, video, endSeconds, timeoutSeconds);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(
+        video, endSeconds, timeoutSeconds);
   }
 });

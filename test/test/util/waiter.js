@@ -6,6 +6,7 @@
 
 goog.provide('shaka.test.Waiter');
 
+goog.require('shaka.test.Util');
 
 shaka.test.Waiter = class {
   /** @param {!shaka.util.EventManager} eventManager */
@@ -60,6 +61,20 @@ shaka.test.Waiter = class {
   }
 
   /**
+   * Wait for the video playhead to move forward by some meaningful delta.
+   * If this happens before |timeout| seconds pass, the Promise is resolved.
+   * Otherwise, the Promise is rejected.
+   *
+   * @param {!HTMLMediaElement} target
+   * @param {number} timeout in seconds, after which the Promise fails
+   * @return {!Promise}
+   */
+  waitForMovementOrFailOnTimeout(target, timeout) {
+    this.timeoutAfter(timeout).failOnTimeout(true);
+    return this.waitForMovement(target);
+  }
+
+  /**
    * Wait for the video playhead to reach a certain target time.
    * Promise is resolved when the playhead reaches |timeGoal| or the video ends.
    *
@@ -90,6 +105,22 @@ shaka.test.Waiter = class {
     return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
   }
 
+
+  /**
+   * Wait for the video playhead to reach a certain target time.
+   * If the playhead reaches |timeGoal| or the video ends before |timeout|
+   * seconds pass, the Promise is resolved.
+   * Otherwise, the Promise is rejected.
+   * @param {!HTMLMediaElement} mediaElement
+   * @param {number} timeGoal The time to wait for the playhead to reach.
+   * @param {number} timeout Timeout in seconds, after which the Promise fails.
+   * @return {!Promise}
+   */
+  waitUntilPlayheadReachesOrFailOnTimeout(mediaElement, timeGoal, timeout) {
+    this.timeoutAfter(timeout).failOnTimeout(true);
+    return this.waitUntilPlayheadReaches(mediaElement, timeGoal);
+  }
+
   /**
    * Wait for the video to end.
    *
@@ -101,6 +132,19 @@ shaka.test.Waiter = class {
       return Promise.resolve();
     }
     return this.waitForEvent(mediaElement, 'ended');
+  }
+
+  /**
+   * Wait for the video to end or for |timeout| seconds to pass, whichever
+   * occurs first.  The Promise is resolved when either of these happens.
+   *
+   * @param {!HTMLMediaElement} target
+   * @param {number} timeout in seconds, after which the Promise succeeds
+   * @return {!Promise}
+   */
+  waitForEndOrTimeout(target, timeout) {
+    this.failOnTimeout(false).timeoutAfter(timeout);
+    return this.waitForEnd(target);
   }
 
   /**

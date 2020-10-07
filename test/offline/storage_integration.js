@@ -464,7 +464,8 @@ filterDescribe('Storage', storageSupport, () => {
     let compiledShaka;
 
     beforeAll(async () => {
-      compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
+      compiledShaka =
+          await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
 
       compiledShaka.net.NetworkingEngine.registerScheme(
           'fake', (uri, req, type, progress) => {

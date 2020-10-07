@@ -22,10 +22,14 @@ describe('Player', () => {
 
   let compiledShaka;
 
+  /** @type {!shaka.test.Waiter} */
+  let waiter;
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
-    compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
+    compiledShaka =
+        await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
     support = await compiledShaka.Player.probeSupport();
   });
 
@@ -34,6 +38,7 @@ describe('Player', () => {
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
+    waiter = new shaka.test.Waiter(eventManager);
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake((event) => fail(event.detail));
@@ -123,10 +128,10 @@ describe('Player', () => {
 
         // Wait for the video to start playback.  If it takes longer than 20
         // seconds, fail the test.
-        await Util.waitForMovementOrFailOnTimeout(eventManager, video, 20);
+        await waiter.waitForMovementOrFailOnTimeout(video, 20);
 
         // Play for 30 seconds, but stop early if the video ends.
-        await Util.waitForEndOrTimeout(eventManager, video, 30);
+        await waiter.waitForEndOrTimeout(video, 30);
 
         if (video.ended) {
           checkEndedTime();
@@ -146,10 +151,10 @@ describe('Player', () => {
 
             // Wait for the video to start playback again after seeking.  If it
             // takes longer than 20 seconds, fail the test.
-            await Util.waitForMovementOrFailOnTimeout(eventManager, video, 20);
+            await waiter.waitForMovementOrFailOnTimeout(video, 20);
 
             // Play for 30 seconds, but stop early if the video ends.
-            await Util.waitForEndOrTimeout(eventManager, video, 30);
+            await waiter.waitForEndOrTimeout(video, 30);
 
             // By now, ended should be true.
             expect(video.ended).toBe(true);
