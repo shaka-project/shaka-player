@@ -11,6 +11,7 @@
     }
   ],
   "devDependencies": {
+    "@teppeis/clutz": "^1.0.29-4c95e12.v20190929",
     "awesomplete": "^1.1.4",
     "babel-core": "^6.26.3",
     "babel-plugin-istanbul": "^4.1.6",

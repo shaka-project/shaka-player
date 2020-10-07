@@ -224,6 +224,35 @@ class ExternGenerator(object):
     return True
 
 
+class TsDefGenerator(object):
+  def __init__(self, source_files, build_name):
+    self.source_files = _canonicalize_source_files(source_files)
+    self.output = _get_source_path('dist/' + build_name + '.d.ts')
+
+  def generate(self, force=False):
+    """Generates externs for the files in |self.source_files|.
+
+    Args:
+      force: Generate the output even if the inputs have not changed.
+
+    Returns:
+      True on success; False on failure.
+    """
+    if not force and not _must_build(self.output, self.source_files):
+      return True
+
+    def_generator = _get_source_path('build/generateTsDefs.py')
+
+    cmd_line = [def_generator, '--output', self.output]
+    cmd_line += self.source_files
+
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+      logging.error('TS defs generation failed')
+      return False
+
+    return True
+
+
 class Less(object):
   def __init__(self, main_source_file, all_source_files, output):
     # Less only takes one input file, but that input may import others.
