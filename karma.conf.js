@@ -569,7 +569,12 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
 
     // Compare the new screenshot to the old one and produce a diff image.
     // Initially, the image data will be raw pixels, 4 bytes per pixel.
-    const diff = Jimp.diff(oldScreenshot, newScreenshot, /* threshold= */ 0);
+    // The threshold parameter affects the sensitivity of individual pixel
+    // comparisons.  Setting it too low means small rendering changes in the
+    // browser can cause failures even when a human can't see the difference,
+    // and setting it too high means human-noticeable changes could go
+    // undetected by a test.
+    const diff = Jimp.diff(oldScreenshot, newScreenshot, /* threshold= */ 0.05);
 
     // Write the screenshot and diff to disk.  This makes it easy to review
     // the diff on failure or update the "official" screenshot easily when
