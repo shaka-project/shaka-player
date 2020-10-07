@@ -5,8 +5,6 @@
  */
 
 describe('Player', () => {
-  const Util = shaka.test.Util;
-
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
 
@@ -19,11 +17,15 @@ describe('Player', () => {
 
   let compiledShaka;
 
+  /** @type {shaka.test.Waiter} */
+  let waiter;
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
 
-    compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
+    compiledShaka =
+        await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
   });
 
   beforeEach(async () => {
@@ -32,6 +34,7 @@ describe('Player', () => {
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
+    waiter = new shaka.test.Waiter(eventManager);
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake((event) => {
@@ -72,7 +75,7 @@ describe('Player', () => {
       // API and to check for renaming.
       await player.load('test:sintel_compiled');
       video.play();
-      await Util.waitUntilPlayheadReaches(eventManager, video, 1, 10);
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
       const stats = player.getStats();
       const expected = {
@@ -140,7 +143,7 @@ describe('Player', () => {
     it('does not cause cues to be null', async () => {
       await player.load('test:sintel_compiled');
       video.play();
-      await Util.waitUntilPlayheadReaches(eventManager, video, 1, 10);
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
       // This TextTrack was created as part of load() when we set up the
       // TextDisplayer.
@@ -261,7 +264,7 @@ describe('Player', () => {
 
       // Play until a time at which the external cues would be on screen.
       video.play();
-      await Util.waitUntilPlayheadReaches(eventManager, video, 4, 20);
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
       expect(displayer.isTextVisible()).toBe(true);
@@ -278,10 +281,6 @@ describe('Player', () => {
 
       player.configure('textDisplayFactory', () => displayer);
 
-      const eventManager = new shaka.util.EventManager();
-      /** @type {shaka.test.Waiter} */
-      const waiter = new shaka.test.Waiter(eventManager);
-
       await player.load('test:sintel_no_text_compiled');
       const locationUri = new goog.Uri(location.href);
       const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
@@ -297,7 +296,7 @@ describe('Player', () => {
 
       // Play until a time at which the external cues would be on screen.
       video.play();
-      await Util.waitUntilPlayheadReaches(eventManager, video, 4, 20);
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
       expect(displayer.isTextVisible()).toBe(true);
@@ -367,7 +366,7 @@ describe('Player', () => {
     it('at higher playback rates', async () => {
       await player.load('test:sintel_compiled');
       video.play();
-      await Util.waitUntilPlayheadReaches(eventManager, video, 1, 10);
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
       // Enabling trick play should change our playback rate to the same rate.
       player.trickPlay(2);
@@ -395,7 +394,7 @@ describe('Player', () => {
       player = new compiledShaka.Player(video);
       await player.load('test:sintel_compiled', 0, testSchemeMimeType);
       video.play();
-      await Util.waitUntilPlayheadReaches(eventManager, video, 1, 10);
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
     });
 
     /**
@@ -434,7 +433,7 @@ describe('Player', () => {
     it('does not throw on destroy', async () => {
       await player.load('test:sintel_compiled');
       video.play();
-      await Util.waitUntilPlayheadReaches(eventManager, video, 1, 10);
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
       await player.unload();
       // Before we fixed #1187, the call to destroy() on textDisplayer was
       // renamed in the compiled version and could not be called.
