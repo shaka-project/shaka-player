@@ -146,8 +146,6 @@ class ClosureCompiler(object):
     cmd_line = ['java', '-jar', jar] + output_options + options
     cmd_line += self.source_files
 
-    print "cmd_line", cmd_line
-
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('Build failed')
       return False
