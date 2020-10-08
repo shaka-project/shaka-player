@@ -71,7 +71,6 @@ common_closure_opts = [
     # the 20200406 release.
     '--jscomp_off=lintChecks',
     '--jscomp_off=deprecated',
-    '--jscomp_off=strictMissingProperties',
 
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
