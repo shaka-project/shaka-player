@@ -5,6 +5,7 @@
     r'(?i)arti?fi?ci?ai?l': 'artificial',
     r'(?i)cur+ent': 'current',
     r'(?i)ful+screen': 'fullscreen',
+    r'(?i)futher': 'further',
     r'(?i)gene?ra?tor': 'generator',
     r'(?i)(?:(in|)n*)ac+ur+ate': r'\1accurate',
     r'(?i)in?ter[ai]ble': 'iterable',
