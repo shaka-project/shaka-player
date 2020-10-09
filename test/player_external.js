@@ -4,6 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('ShakaDemoAssetInfo');
+goog.require('shaka.test.Loader');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.util.EventManager');
+goog.requireType('shaka.Player');
+goog.requireType('shaka.net.NetworkingEngine.RequestType');
+
 describe('Player', () => {
   const Util = shaka.test.Util;
   const Feature = shakaAssets.Feature;
