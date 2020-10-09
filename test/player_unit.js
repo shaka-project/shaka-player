@@ -4,6 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.Player');
+goog.require('shaka.log');
+goog.require('shaka.media.BufferingObserver');
+goog.require('shaka.media.ManifestParser');
+goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.test.FakeAbrManager');
+goog.require('shaka.test.FakeDrmEngine');
+goog.require('shaka.test.FakeManifestParser');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.FakePlayhead');
+goog.require('shaka.test.FakeStreamingEngine');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.ConfigUtils');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.ManifestParserUtils');
+goog.requireType('shaka.media.Playhead');
+
 describe('Player', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Util = shaka.test.Util;
