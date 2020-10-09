@@ -58,6 +58,15 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.video.currentTime = this.getValue();
     });
 
+    /**
+     * When user is scrubbing the seek bar - we should pause the video - see https://git.io/JUhHG
+     * but will conditionally pause or play the video after scrubbing
+     * depending on its previous state
+     *
+     * @private {boolean}
+     */
+    this.wasPlaying_ = false;
+
     this.eventManager.listen(this.localization,
         shaka.ui.Localization.LOCALE_UPDATED,
         () => this.updateAriaLabel_());
@@ -89,6 +98,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @override
    */
   onChangeStart() {
+    this.wasPlaying_ = !this.video.paused;
     this.controls.setSeeking(true);
     this.video.pause();
   }
@@ -131,7 +141,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // call the event so that we can respond immediately.
     this.seekTimer_.tickNow();
     this.controls.setSeeking(false);
-    this.video.play();
+
+    if (this.wasPlaying_) {
+      this.video.play();
+    }
   }
 
   /** @return {boolean} */
