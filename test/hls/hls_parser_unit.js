@@ -733,7 +733,8 @@ describe('HlsParser', function() {
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
       'URI="audio"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
-      'CHARACTERISTICS="public.accessibility.describes-video",URI="audio2"\n',
+      'CHARACTERISTICS="public.accessibility.describes-video,',
+      'public.accessibility.describes-music-and-sound",URI="audio2"\n',
     ].join('');
 
     const media = [
@@ -758,7 +759,10 @@ describe('HlsParser', function() {
                 .addPartialStream(ContentType.VIDEO)
                 .addPartialStream(ContentType.AUDIO)
                   .language('en')
-                  .roles(['public.accessibility.describes-video'])
+                  .roles([
+                    'public.accessibility.describes-video',
+                    'public.accessibility.describes-music-and-sound',
+                  ])
           .build();
 
     await testHlsParser(master, media, manifest);
