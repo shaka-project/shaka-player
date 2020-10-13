@@ -3169,12 +3169,13 @@ describe('Player', () => {
     });
 
     describe('getAudioLanguagesAndRoles', () => {
-      it('ignores video roles', async () => {
+      it('ignores video roles and labels', async () => {
         manifest = shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.addVariant(0, (variant) => {
             variant.language = 'en';
             variant.addVideo(1, (stream) => {
               stream.roles = ['video-only-role'];
+              stream.label = 'should not show up';
             });
             variant.addAudio(2, (stream) => {
               stream.roles = ['audio-only-role'];
@@ -3186,18 +3187,47 @@ describe('Player', () => {
         await player.load(fakeManifestUri, 0, fakeMimeType);
 
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'en', role: 'audio-only-role'},
+          {language: 'en', role: 'audio-only-role', label: null},
         ]);
       });
 
       it('lists all language-role combinations', async () => {
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'fr', role: ''},
-          {language: 'en', role: 'main'},
-          {language: 'en', role: 'commentary'},
-          {language: 'de', role: 'foo'},
-          {language: 'de', role: 'bar'},
+          {language: 'fr', role: '', label: null},
+          {language: 'en', role: 'main', label: null},
+          {language: 'en', role: 'commentary', label: null},
+          {language: 'de', role: 'foo', label: null},
+          {language: 'de', role: 'bar', label: null},
+        ]);
+      });
+
+      it('associates audio streams with their labels', async () => {
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(1, (stream) => {
+              stream.roles = ['role-1'];
+              stream.language = 'en';
+              stream.label = 'english';
+            });
+          });
+          manifest.addVariant(0, (variant) => {
+            variant.language = 'es';
+            variant.addAudio(2, (stream) => {
+              stream.roles = ['role-2', 'role-3'];
+              stream.language = 'es';
+              stream.label = 'spanish';
+            });
+          });
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(player.getAudioLanguagesAndRoles()).toEqual([
+          {language: 'en', role: 'role-1', label: 'english'},
+          {language: 'es', role: 'role-2', label: 'spanish'},
+          {language: 'es', role: 'role-3', label: 'spanish'},
         ]);
       });
 
@@ -3212,7 +3242,7 @@ describe('Player', () => {
 
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'und', role: ''},
+          {language: 'und', role: '', label: null},
         ]);
       });
     });
@@ -3221,11 +3251,11 @@ describe('Player', () => {
       it('lists all language-role combinations', async () => {
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getTextLanguagesAndRoles()).toEqual([
-          {language: 'es', role: 'baz'},
-          {language: 'es', role: 'qwerty'},
-          {language: 'en', role: 'main'},
-          {language: 'en', role: 'caption'},
-          {language: 'en', role: 'subtitle'},
+          {language: 'es', role: 'baz', label: null},
+          {language: 'es', role: 'qwerty', label: null},
+          {language: 'en', role: 'main', label: null},
+          {language: 'en', role: 'caption', label: null},
+          {language: 'en', role: 'subtitle', label: null},
         ]);
       });
     });

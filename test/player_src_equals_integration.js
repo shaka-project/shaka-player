@@ -267,7 +267,7 @@ describe('Player Src Equals', () => {
       // role, while others, such as Edge, do not.  For the purposes of this
       // test, it doesn't matter what the role is.
       expect(player.getAudioLanguagesAndRoles()).toEqual(
-          [{language: 'en', role: jasmine.any(String)}]);
+          [{language: 'en', role: jasmine.any(String), label: null}]);
     } else {
       expect(player.getAudioLanguages()).toEqual([]);
       expect(player.getAudioLanguagesAndRoles()).toEqual([]);
