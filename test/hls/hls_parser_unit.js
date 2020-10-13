@@ -795,7 +795,8 @@ describe('HlsParser', () => {
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
       'URI="audio"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
-      'CHARACTERISTICS="public.accessibility.describes-video",URI="audio2"\n',
+      'CHARACTERISTICS="public.accessibility.describes-video,',
+      'public.accessibility.describes-music-and-sound",URI="audio2"\n',
     ].join('');
 
     const media = [
@@ -821,7 +822,10 @@ describe('HlsParser', () => {
         variant.addPartialStream(ContentType.VIDEO);
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
-          stream.roles = ['public.accessibility.describes-video'];
+          stream.roles = [
+            'public.accessibility.describes-video',
+            'public.accessibility.describes-music-and-sound',
+          ];
         });
       });
     });
