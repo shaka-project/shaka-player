@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.util.Iterables');
+
 describe('Iterables', () => {
   const Iterables = shaka.util.Iterables;
 

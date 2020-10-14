@@ -71,7 +71,9 @@ common_closure_opts = [
     # the 20200406 release.
     '--jscomp_off=lintChecks',
     '--jscomp_off=deprecated',
-
+    # Turn off complaints like:
+    #   "Built-in 'Reflect.setPrototypeOf' not supported in output version es3."
+    '--jscomp_off=missingPolyfill',
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
     '--extra_annotation_name=exportInterface',
@@ -84,7 +86,6 @@ common_closure_opts = [
 ]
 common_closure_defines = [
     '-D', 'COMPILED=true',
-    '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
     '-D', 'goog.ENABLE_DEBUG_LOADER=false',
 ]
 

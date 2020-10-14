@@ -6,6 +6,10 @@
 
 goog.provide('shaka.test.CeaUtils');
 
+goog.require('shaka.cea.CeaUtils');
+goog.require('shaka.text.Cue');
+
+
 /**
  * Testing helpers to assist tests for Closed Caption decoders for CEA captions.
  */
