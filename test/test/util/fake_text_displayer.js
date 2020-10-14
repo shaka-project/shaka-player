@@ -6,6 +6,8 @@
 
 goog.provide('shaka.test.FakeTextDisplayer');
 
+goog.require('shaka.test.Util');
+
 
 /**
  * @implements {shaka.extern.TextDisplayer}

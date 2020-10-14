@@ -6,6 +6,21 @@
 
 goog.provide('shaka.test.Loader');
 
+goog.require('shaka.log');
+goog.require('shaka.test.TestScheme');
+goog.require('shaka.util.PublicPromise');
+goog.requireType('shaka.Player');
+goog.requireType('shaka.media.InitSegmentReference');
+goog.requireType('shaka.media.PresentationTimeline');
+goog.requireType('shaka.media.SegmentIndex');
+goog.requireType('shaka.media.SegmentReference');
+goog.requireType('shaka.net.NetworkingEngine');
+goog.requireType('shaka.offline.Storage');
+goog.requireType('shaka.ui.Controls');
+goog.requireType('shaka.ui.Element');
+goog.requireType('shaka.ui.Overlay');
+goog.requireType('shaka.util.StringUtils');
+
 
 /**
  * A stand-in type for the "shaka" namespace.  Used when loading the compiled

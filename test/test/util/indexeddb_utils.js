@@ -6,6 +6,11 @@
 
 goog.provide('shaka.test.IndexedDBUtils');
 
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Functional');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.PublicPromise');
+
 
 shaka.test.IndexedDBUtils = class {
   /**

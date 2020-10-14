@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.PeriodCombiner');
+
 describe('PeriodCombiner', () => {
   // These test cases don't really read well as "it" statements.  Phrasing them
   // that way would make the names very long, so here we break with that

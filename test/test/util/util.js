@@ -7,6 +7,14 @@
 goog.provide('shaka.test.StatusPromise');
 goog.provide('shaka.test.Util');
 
+goog.require('goog.asserts');
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.util.Functional');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.StringUtils');
+goog.requireType('shaka.util.Error');
+
 
 /**
  * @extends {Promise}

@@ -16,6 +16,16 @@ goog.provide('shaka.test.FakeTextTrack');
 goog.provide('shaka.test.FakeTransmuxer');
 goog.provide('shaka.test.FakeVideo');
 
+goog.require('shaka.test.Util');
+goog.require('shaka.abr.SimpleAbrManager');
+goog.require('shaka.media.IClosedCaptionParser');
+goog.require('shaka.media.Playhead');
+goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.media.SegmentIndex');
+goog.require('shaka.media.StreamingEngine');
+goog.require('shaka.media.Transmuxer');
+
+
 /**
  * @fileoverview Defines simple mocks for library types.
  * @suppress {checkTypes} Suppress errors about missmatches between the

@@ -6,7 +6,11 @@
 
 goog.provide('shaka.test.Waiter');
 
+goog.require('shaka.log');
+goog.require('shaka.media.TimeRangesUtils');
 goog.require('shaka.test.Util');
+goog.require('shaka.util.EventManager');
+
 
 shaka.test.Waiter = class {
   /** @param {!shaka.util.EventManager} eventManager */

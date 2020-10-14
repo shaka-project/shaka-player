@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.log');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.FakeEventTarget');
+
 describe('FakeEventTarget', () => {
   const Util = shaka.test.Util;
   const originalLogError = shaka.log.error;
