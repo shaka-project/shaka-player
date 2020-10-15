@@ -68,10 +68,7 @@ pipeline {
         stage('Publish') {
             steps {
                 sh '''
-TS=$(date +%s)
-echo "Jenkins CI/CD ${TS}" > notes.txt;
-tar -cvzf dist.tgz dist/;
-hub release create --copy -F notes.txt -a dist.tgz v5.0.1-alpha-${TS}
+which hub
 '''
             }
         }
