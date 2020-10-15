@@ -68,11 +68,10 @@ pipeline {
         stage('Publish') {
             steps {
                 sh '''
-set -x;
-COMMIT_LOG=`git log -1 --format='%ci %H %s'`;
+TS=$(date +%s)
+echo "Jenkins CI/CD ${TS}" > notes.txt;
 tar -cvzf dist.tgz dist/;
-docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd \
-    github-release upload   --owner=ogheorghies   --repo=tivocorp/shaka-player   --tag="latest"   --release-name="release 1"   --body="${COMMIT_LOG}" dist.tgz
+hub release create --copy -F notes.txt -a dist.tgz v5.0.1-alpha-${TS}
 '''
             }
         }
