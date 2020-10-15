@@ -59,21 +59,21 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'docker --version'
-                sh 'git --version'
-                sh 'git fetch --tags'
-                sh 'whoami; id -u; id -g; ls -l'
+                sh 'HOME=${HOME}'
                 sh 'docker build . -t shaka-builder-a24bb4cd'
-                sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" shaka-builder-a24bb4cd rm -rf /.npm || true'
-                sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" shaka-builder-a24bb4cd rm -rf .npm || true'
-                sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls -l'
                 sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ./build/all.py --force'
             }
         }
 
         stage('Publish') {
             steps {
-                sh "echo 'publish'"
+                sh ```
+set -x
+COMMIT_LOG=`git log -1 --format='%ci %H %s'`;
+tar -cvzf dist.tgz dist/;
+docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd \
+    github-release upload   --owner=ogheorghies   --repo=tivocorp/shaka-player   --tag="latest"   --release-name="release 1"   --body="${COMMIT_LOG}" dist.tgz
+                ```
             }
         }
     }
