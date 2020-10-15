@@ -1,3 +1,4 @@
 FROM alpine:3.12
 
 RUN apk add --update nodejs npm python2 git openjdk8
+RUN npm install -g github-release-cli
