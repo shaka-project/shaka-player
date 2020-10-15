@@ -63,7 +63,6 @@ pipeline {
                 sh 'git --version'
                 sh 'git fetch --tags'
                 sh 'whoami; id -u; id -g'
-                sh 'ls -l node_modules/wd/build/safe-execute.js'
                 sh 'docker build . -t shaka-player-builder-e6f431ca4fe1'
                 sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" shaka-player-builder-e6f431ca4fe1 rm -rfv $(ls ${PWD})'
                 sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" shaka-player-builder-e6f431ca4fe1 ls -l'
