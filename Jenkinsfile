@@ -69,7 +69,7 @@ pipeline {
             steps {
                 sh '''
 wget -O hub.tgz  --progress=dot:mega https://github.com/github/hub/releases/download/v2.14.2/hub-linux-amd64-2.14.2.tgz
-mkdir hub; tar -xvf hub.tgz -C hub --strip-components 1
+[ -d hub ] || mkdir hub; tar -xvf  --overwrite hub.tgz -C hub --strip-components 1
 TS=$(date +%s)
 
 tar -cvzf dist-${TS}.tgz dist/
