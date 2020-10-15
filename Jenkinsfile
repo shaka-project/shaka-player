@@ -64,6 +64,7 @@ pipeline {
                 sh 'git fetch --tags'
                 sh 'whoami; id -u; id -g; ls -l'
                 sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" alpine:3.12 ls -l'
+                sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" alpine:3.12 ./build/all.py --force'
             }
         }
 
