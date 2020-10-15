@@ -61,6 +61,7 @@ pipeline {
             steps {
                 sh "echo 'build'"
                 sh "ls -l"
+                sh "build/all.py"
             }
         }
 
