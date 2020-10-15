@@ -66,7 +66,8 @@ pipeline {
                 sh 'ls -l node_modules/wd/build/safe-execute.js'
                 sh 'ls -l; set -x; rm -rf node_modules; rm -rf dist; ls -l'
                 sh 'docker build . -t shaka-player-builder-e6f431ca4fe1'
-                sh 'docker --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" shaka-player-builder-e6f431ca4fe1 ls -l'
+                sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD} shaka-player-builder-e6f431ca4fe1 rm -v node_modules/wd/build/safe-execute.js"
+                sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" shaka-player-builder-e6f431ca4fe1 ls -l'
                 sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" shaka-player-builder-e6f431ca4fe1 python build/all.py --force'
             }
         }
