@@ -62,7 +62,7 @@ pipeline {
                 sh 'docker --version'
                 sh 'git --version'
                 sh 'git fetch --tags'
-                sh 'whoami; id -u; id -g'
+                sh 'whoami; id -u; id -g; ls -l'
                 sh 'docker build . -t shaka-player-builder-e6f431ca4fe1'
                 sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" shaka-player-builder-e6f431ca4fe1 ls -l'
                 sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" shaka-player-builder-e6f431ca4fe1 python build/all.py --force'
