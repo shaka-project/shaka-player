@@ -67,13 +67,13 @@ pipeline {
 
         stage('Publish') {
             steps {
-                sh ```
-set -x
+                sh '''
+set -x;
 COMMIT_LOG=`git log -1 --format='%ci %H %s'`;
 tar -cvzf dist.tgz dist/;
 docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd \
     github-release upload   --owner=ogheorghies   --repo=tivocorp/shaka-player   --tag="latest"   --release-name="release 1"   --body="${COMMIT_LOG}" dist.tgz
-                ```
+'''
             }
         }
     }
