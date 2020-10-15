@@ -60,7 +60,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh "docker build . -t shaka-player-builder-e6f431ca4fe1"
-                sh "docker run --rm -v${PWD}:/shaka-player -w /shaka-player shaka-player-builder-e6f431ca4fe1 build/all.py"
+                sh "docker run --rm -v${PWD}:${PWD} -w ${PWD} shaka-player-builder-e6f431ca4fe1 ./build/all.py"
             }
         }
 
