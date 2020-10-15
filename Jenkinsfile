@@ -74,7 +74,7 @@ TS=$(date +%s)
 
 tar -cvzf dist-${TS}.tgz dist/
 
-./hub/bin/hub create -m "Inception ${TS}" -a dist-${TS}.tgz v5.0.1-alpha.tivo.${TS}
+./hub/bin/hub release create -m "Inception ${TS}" -a dist-${TS}.tgz v5.0.1-alpha.tivo.${TS}
 '''
             }
         }
