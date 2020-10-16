@@ -8,6 +8,11 @@
 goog.provide('shakaDemo.AssetCard');
 
 
+goog.require('goog.asserts');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.Tooltips');
+goog.requireType('ShakaDemoAssetInfo');
+
 /**
  * Creates and contains an MDL card that presents info about the given asset.
  * @final

@@ -5,8 +5,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * @fileoverview
+ * @suppress {missingRequire}
+ */
 
 goog.require('ShakaDemoAssetInfo');
+goog.require('shakaDemo.MessageIds');
 
 
 // Types and enums {{{
