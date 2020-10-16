@@ -8,6 +8,13 @@
 goog.provide('shakaDemo.Custom');
 
 
+goog.require('ShakaDemoAssetInfo');
+goog.require('shakaDemo.AssetCard');
+goog.require('shakaDemo.InputContainer');
+goog.require('shakaDemo.Main');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.TextInput');
+
 /** @type {?shakaDemo.Custom} */
 let shakaDemoCustom;
 

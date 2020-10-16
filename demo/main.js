@@ -7,6 +7,11 @@
 
 goog.provide('shakaDemo.Main');
 
+goog.require('ShakaDemoAssetInfo');
+goog.require('goog.asserts');
+goog.require('shakaDemo.CloseButton');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.Utils');
 
 /**
  * Shaka Player demo, main section.
@@ -898,7 +903,7 @@ shakaDemo.Main = class {
       if (advanced) {
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           if (!advanced[drmSystem]) {
-            advanced[drmSystem] = shakaDemo.Config.emptyAdvancedConfiguration();
+            advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
           }
           if ('videoRobustness' in params) {
             advanced[drmSystem].videoRobustness = params['videoRobustness'];
@@ -1700,6 +1705,18 @@ shakaDemo.Main = class {
       this.selectedAsset = ShakaDemoAssetInfo.makeBlankAsset();
       this.showPlayer_();
     }
+  }
+
+  /** @return {!shaka.extern.AdvancedDrmConfiguration} */
+  static defaultAdvancedDrmConfig() {
+    return {
+      distinctiveIdentifierRequired: false,
+      persistentStateRequired: false,
+      videoRobustness: '',
+      audioRobustness: '',
+      serverCertificate: new Uint8Array(0),
+      individualizationServer: '',
+    };
   }
 };
 

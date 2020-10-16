@@ -7,6 +7,7 @@
 
 goog.provide('shakaDemo.Tooltips');
 
+goog.requireType('shakaDemo.MessageIds');
 
 /**
  * Creates and contains a tooltip.
