@@ -1,9 +1,0 @@
-# The complete library, containing every available plugin.
-
-+@ads
-+@cast
-+@networking
-+@manifests
-+@polyfill
-+@text
-+@ui

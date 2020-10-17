@@ -1,6 +1,0 @@
-# All standard networking scheme plugins.
-
-+../../lib/net/http_xhr_plugin.js
-+../../lib/net/http_fetch_plugin.js
-+../../lib/net/http_plugin_utils.js
-+../../lib/net/data_uri_plugin.js
