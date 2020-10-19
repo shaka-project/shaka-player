@@ -233,3 +233,127 @@ shaka.extern.IUIElement.Factory = class {
    */
   create(rootElement, controls) {}
 };
+
+
+/**
+ * Interface for UI range elements.  UI range elements should inherit from the
+ * concrete base class shaka.ui.RangeElement.  The members defined in this
+ * extern's constructor are all available from the base class, and are defined
+ * here to keep the compiler from renaming them.
+ *
+ * @extends {shaka.extern.IUIElement}
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUIRangeElement = class {
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   * @param {!Array.<string>} containerClassNames
+   * @param {!Array.<string>} barClassNames
+   */
+  constructor(parent, controls, containerClassNames, barClassNames) {
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.container;
+
+    /**
+     * @protected {!HTMLInputElement}
+     * @exportDoc
+     */
+    this.bar;
+  }
+
+  /**
+   * @param {number} min
+   * @param {number} max
+   */
+  setRange(min, max) {}
+
+  /**
+   * Called when user interaction begins.
+   * To be overridden by subclasses.
+   */
+  onChangeStart() {}
+
+  /**
+   * Called when a new value is set by user interaction.
+   * To be overridden by subclasses.
+   */
+  onChange() {}
+
+  /**
+   * Called when user interaction ends.
+   * To be overridden by subclasses.
+   */
+  onChangeEnd() {}
+
+  /** @return {number} */
+  getValue() {}
+
+  /** @param {number} value */
+  setValue(value) {}
+};
+
+/**
+ * Interface for UI settings menus.  UI settings menus should inherit from the
+ * concrete base class shaka.ui.SettingsMenu.  The members defined in this
+ * extern's constructor are all available from the base class, and are defined
+ * here to keep the compiler from renaming them.
+ *
+ * @extends {shaka.extern.IUIElement}
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUISettingsMenu = class {
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   * @param {string} iconText
+   */
+  constructor(parent, controls, iconText) {
+    /**
+     * @protected {!HTMLButtonElement}
+     * @exportDoc
+     */
+    this.button;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.icon;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.nameSpan;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.currentSelection;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.menu;
+
+    /**
+     * @protected {!HTMLButtonElement}
+     * @exportDoc
+     */
+    this.backButton;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.backSpan;
+  }
+};
