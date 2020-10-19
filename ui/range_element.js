@@ -32,7 +32,7 @@ goog.require('shaka.util.Dom');
  * updated at the same time.  This can happen when seeking during playback or
  * when casting.
  *
- * @extends {shaka.ui.Element}
+ * @implements {shaka.extern.IUIRangeElement}
  * @export
  */
 shaka.ui.RangeElement = class extends shaka.ui.Element {
@@ -116,8 +116,8 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   }
 
   /**
-   * @param {number} min
-   * @param {number} max
+   * @override
+   * @export
    */
   setRange(min, max) {
     this.bar.min = min;
@@ -127,27 +127,39 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   /**
    * Called when user interaction begins.
    * To be overridden by subclasses.
+   * @override
+   * @export
    */
   onChangeStart() {}
 
   /**
    * Called when a new value is set by user interaction.
    * To be overridden by subclasses.
+   * @override
+   * @export
    */
   onChange() {}
 
   /**
    * Called when user interaction ends.
    * To be overridden by subclasses.
+   * @override
+   * @export
    */
   onChangeEnd() {}
 
-  /** @return {number} */
+  /**
+   * @override
+   * @export
+   */
   getValue() {
     return parseFloat(this.bar.value);
   }
 
-  /** @param {number} value */
+  /**
+   * @override
+   * @export
+   */
   setValue(value) {
     // The user interaction overrides any external values being pushed in.
     if (this.isChanging_) {
