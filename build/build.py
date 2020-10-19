@@ -71,7 +71,9 @@ common_closure_opts = [
     # the 20200406 release.
     '--jscomp_off=lintChecks',
     '--jscomp_off=deprecated',
-
+    # Turn off complaints like:
+    #   "Built-in 'Reflect.setPrototypeOf' not supported in output version es3."
+    '--jscomp_off=missingPolyfill',
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
     '--extra_annotation_name=exportInterface',
@@ -84,7 +86,6 @@ common_closure_opts = [
 ]
 common_closure_defines = [
     '-D', 'COMPILED=true',
-    '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
     '-D', 'goog.ENABLE_DEBUG_LOADER=false',
 ]
 
@@ -281,10 +282,6 @@ class Build(object):
     build_name = 'shaka-player.' + name
     closure = compiler.ClosureCompiler(self.include, build_name)
 
-    # Don't pass node modules to the extern generator.
-    local_include = set([f for f in self.include if 'node_modules' not in f])
-    generator = compiler.ExternGenerator(local_include, build_name)
-
     closure_opts = common_closure_opts + common_closure_defines
     if is_debug:
       closure_opts += debug_closure_opts + debug_closure_defines
@@ -294,7 +291,21 @@ class Build(object):
     if not closure.compile(closure_opts, force):
       return False
 
-    if not generator.generate(force):
+    # Don't pass node modules to the extern generator.
+    local_include = set([f for f in self.include if 'node_modules' not in f])
+    extern_generator = compiler.ExternGenerator(local_include, build_name)
+
+    if not extern_generator.generate(force):
+      return False
+
+    generated_externs = [extern_generator.output]
+    shaka_externs = shakaBuildHelpers.get_all_js_files('externs')
+    if self.has_ui():
+      shaka_externs += shakaBuildHelpers.get_all_js_files('ui/externs')
+    ts_def_generator = compiler.TsDefGenerator(
+        generated_externs + shaka_externs, build_name)
+
+    if not ts_def_generator.generate(force):
       return False
 
     return True

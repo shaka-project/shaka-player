@@ -8,6 +8,9 @@
 goog.provide('shakaDemo.InputContainer');
 
 
+goog.require('shakaDemo.Tooltips');
+goog.requireType('shakaDemo.MessageIds');
+
 /**
  * Creates elements for containing inputs. It represents a single "section" of
  * input.

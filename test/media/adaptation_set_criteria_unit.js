@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.PreferenceBasedCriteria');
+goog.require('shaka.test.ManifestGenerator');
+goog.requireType('shaka.media.AdaptationSet');
+
 describe('AdaptationSetCriteria', () => {
   describe('preference based selection', () => {
     it('chooses variants in user\'s preferred language', () => {

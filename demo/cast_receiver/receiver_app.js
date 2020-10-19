@@ -5,6 +5,7 @@
  */
 
 goog.require('goog.asserts');
+goog.require('ShakaDemoAssetInfo');
 
 
 /**

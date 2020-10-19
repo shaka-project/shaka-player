@@ -11,6 +11,7 @@
     }
   ],
   "devDependencies": {
+    "@teppeis/clutz": "^1.0.29-4c95e12.v20190929",
     "awesomplete": "^1.1.4",
     "babel-core": "^6.26.3",
     "babel-plugin-istanbul": "^4.1.6",
@@ -26,8 +27,8 @@
     "esprima": "^4.0.1",
     "fastestsmallesttextencoderdecoder": "^1.0.22",
     "fontfaceonload": "^1.0.2",
-    "google-closure-compiler-java": "^20200517.0.0",
-    "google-closure-library": "^20200517.0.0",
+    "google-closure-compiler-java": "^20201006.0.0",
+    "google-closure-library": "^20200830.0.0",
     "htmlhint": "^0.11.0",
     "jasmine-ajax": "^4.0.0",
     "jimp": "^0.11.0",

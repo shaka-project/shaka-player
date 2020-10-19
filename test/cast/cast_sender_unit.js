@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cast.CastSender');
+goog.require('shaka.cast.CastUtils');
+goog.require('shaka.test.StatusPromise');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+
 describe('CastSender', () => {
   const CastSender = shaka.cast.CastSender;
   const CastUtils = shaka.cast.CastUtils;

@@ -6,6 +6,15 @@
 
 goog.provide('shaka.test.ManifestGenerator');
 
+goog.require('goog.asserts');
+goog.require('shaka.test.FakeSegmentIndex');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.Uint8ArrayUtils');
+goog.requireType('shaka.media.InitSegmentReference');
+goog.requireType('shaka.media.PresentationTimeline');
+goog.requireType('shaka.media.SegmentIndex');
+
 
 /**
  * @summary

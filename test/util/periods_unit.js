@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.PeriodCombiner');
+
 describe('PeriodCombiner', () => {
   // These test cases don't really read well as "it" statements.  Phrasing them
   // that way would make the names very long, so here we break with that
@@ -711,6 +715,36 @@ describe('PeriodCombiner', () => {
     const audio = variants[0].audio;
     expect(audio.audioSamplingRate).toBe(44100);
     expect(audio.originalId).toBe('44100,48000');
+  });
+
+  it('ignores newly added codecs', async () => {
+    const newCodec = makeVideoStream(720);
+    newCodec.codecs = 'foo.abcd';
+
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [],
+        textStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(1080),
+          newCodec,
+        ],
+        audioStreams: [],
+        textStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const variants = combiner.getVariants();
+    expect(variants.length).toBe(1);
   });
 
 

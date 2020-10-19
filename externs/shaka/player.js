@@ -962,7 +962,8 @@ shaka.extern.PlayerConfiguration;
 /**
  * @typedef {{
  *   language: string,
- *   role: string
+ *   role: string,
+ *   label: ?string
  * }}
  *
  * @property {string} language
@@ -970,6 +971,8 @@ shaka.extern.PlayerConfiguration;
  * @property {string} role
  *    The role name for the stream. If the stream has no role, <code>role</code>
  *    will be <code>''</code>.
+ * @property {?string} label
+ *    The label of the audio stream, if it has one.
  * @exportDoc
  */
 shaka.extern.LanguageRole;
