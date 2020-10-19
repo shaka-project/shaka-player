@@ -85,7 +85,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.isSeeking_ = false;
 
     /** @private {!Array.<!HTMLElement>} */
-    this.settingsMenus_ = [];
+    this.menus_ = [];
 
     /**
      * Individual controls which, when hovered or tab-focused, will force the
@@ -132,7 +132,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
-      for (const menu of this.settingsMenus_) {
+      for (const menu of this.menus_) {
         shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
       }
     });
@@ -590,7 +590,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   anySettingsMenusAreOpen() {
-    return this.settingsMenus_.some(
+    return this.menus_.some(
         (menu) => !menu.classList.contains('shaka-hidden'));
   }
 
@@ -693,15 +693,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.addControlsButtonPanel_();
 
-    this.settingsMenus_ = Array.from(
+    this.menus_ = Array.from(
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
+    this.menus_.push(...Array.from(
+        this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
 
     if (this.config_.addSeekBar) {
       this.seekBar_ = new shaka.ui.SeekBar(this.bottomControls_, this);
       this.elements_.push(this.seekBar_);
     } else {
       // Settings menus need to be positioned lower if the seekbar is absent.
-      for (const menu of this.settingsMenus_) {
+      for (const menu of this.menus_) {
         menu.classList.add('shaka-low-position');
       }
     }
@@ -1298,11 +1300,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.seekBar_.update();
 
       if (this.seekBar_.isShowing()) {
-        for (const menu of this.settingsMenus_) {
+        for (const menu of this.menus_) {
           menu.classList.remove('shaka-low-position');
         }
       } else {
-        for (const menu of this.settingsMenus_) {
+        for (const menu of this.menus_) {
           menu.classList.add('shaka-low-position');
         }
       }
@@ -1359,7 +1361,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   keepFocusInMenu_(event) {
-    const openSettingsMenus = this.settingsMenus_.filter(
+    const openSettingsMenus = this.menus_.filter(
         (menu) => !menu.classList.contains('shaka-hidden'));
     const settingsMenu = openSettingsMenus[0];
     if (settingsMenu.childNodes.length) {
