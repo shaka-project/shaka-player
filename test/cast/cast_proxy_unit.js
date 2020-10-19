@@ -4,6 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cast.CastProxy');
+goog.require('shaka.cast.CastSender');
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.PublicPromise');
+
 describe('CastProxy', () => {
   const CastProxy = shaka.cast.CastProxy;
   const FakeEvent = shaka.util.FakeEvent;

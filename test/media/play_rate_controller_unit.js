@@ -5,6 +5,9 @@
  */
 
 
+goog.require('shaka.media.PlayRateController');
+goog.require('shaka.test.Util');
+
 describe('PlayRateController', () => {
   /** @type {!jasmine.Spy} */
   let getPlayRateSpy;

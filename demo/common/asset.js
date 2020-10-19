@@ -5,6 +5,11 @@
  */
 
 
+/**
+ * @fileoverview
+ * @suppress {missingRequire}
+ */
+
 goog.provide('ShakaDemoAssetInfo');
 
 goog.require('shakaDemo.MessageIds');

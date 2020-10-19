@@ -6,6 +6,8 @@
 
 goog.provide('shaka.test.OfflineUtils');
 
+goog.require('shaka.util.BufferUtils');
+
 
 shaka.test.OfflineUtils = class {
   /**

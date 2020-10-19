@@ -6,6 +6,10 @@
 
 goog.provide('shaka.test.FakeMediaSourceEngine');
 
+goog.require('shaka.media.MediaSourceEngine');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.util.ManifestParserUtils');
+
 
 /**
  * @summary

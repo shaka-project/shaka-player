@@ -6,6 +6,9 @@
 
 goog.provide('shaka.test.ManifestParser');
 
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.SegmentReference');
+
 
 shaka.test.ManifestParser = class {
   /**

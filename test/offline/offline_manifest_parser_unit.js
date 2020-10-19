@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.offline.OfflineManifestParser');
+goog.require('shaka.offline.OfflineUri');
+goog.require('shaka.offline.StorageMuxer');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+
 /** @return {boolean} */
 const offlineManifestParserSupport = () => shaka.offline.StorageMuxer.support();
 filterDescribe('OfflineManifestParser', offlineManifestParserSupport, () => {

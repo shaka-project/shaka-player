@@ -4,12 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.Uri');
+goog.require('shaka.Player');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.util.EventManager');
+
 // These tests are for testing Shaka Player's integration with
 // |HTMLMediaElement.src=|. These tests are to verify that all |shaka.Player|
 // public methods behaviour correctly when playing content video |src=|.
 describe('Player Src Equals', () => {
-  const Util = shaka.test.Util;
-
   const SMALL_MP4_CONTENT_URI = '/base/test/test/assets/small.mp4';
 
   /** @type {!HTMLVideoElement} */
@@ -18,6 +23,8 @@ describe('Player Src Equals', () => {
   let player;
   /** @type {!shaka.util.EventManager} */
   let eventManager;
+  /** @type {shaka.test.Waiter} */
+  let waiter;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -28,6 +35,7 @@ describe('Player Src Equals', () => {
     player = new shaka.Player();
     player.addEventListener('error', fail);
     eventManager = new shaka.util.EventManager();
+    waiter = new shaka.test.Waiter(eventManager);
   });
 
   afterEach(async () => {
@@ -101,8 +109,7 @@ describe('Player Src Equals', () => {
 
     // Start playback and wait for the playhead to move.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be before
     // seeking.
@@ -112,8 +119,7 @@ describe('Player Src Equals', () => {
     // Trigger a seek and then wait for the seek to take effect.
     // This seek target is very close to the duration of the video.
     video.currentTime = 10;
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be after
     // seeking.
@@ -140,8 +146,7 @@ describe('Player Src Equals', () => {
 
     // For playback to begin so that we have some content buffered.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     const buffered = player.getBufferedInfo();
 
@@ -165,8 +170,7 @@ describe('Player Src Equals', () => {
 
     // Let playback run for a little.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     let videoRateChange = false;
     let playerRateChange = false;
@@ -263,7 +267,7 @@ describe('Player Src Equals', () => {
       // role, while others, such as Edge, do not.  For the purposes of this
       // test, it doesn't matter what the role is.
       expect(player.getAudioLanguagesAndRoles()).toEqual(
-          [{language: 'en', role: jasmine.any(String)}]);
+          [{language: 'en', role: jasmine.any(String), label: null}]);
     } else {
       expect(player.getAudioLanguages()).toEqual([]);
       expect(player.getAudioLanguagesAndRoles()).toEqual([]);
@@ -283,8 +287,7 @@ describe('Player Src Equals', () => {
 
     // Start playback and wait. We should see the playhead move.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
     await shaka.test.Util.delay(1.5);
 
     // When checking if the playhead moved, check for less progress than time we
@@ -301,8 +304,7 @@ describe('Player Src Equals', () => {
     // Wait some time for playback to start so that we will have a load latency
     // value.
     video.play();
-    await Util.waitForMovementOrFailOnTimeout(
-        eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Get the stats and check that some stats have been filled in.
     const stats = player.getStats();
@@ -312,17 +314,16 @@ describe('Player Src Equals', () => {
     expect(stats.drmTimeSeconds).toBeNaN(); // There's no DRM.
   });
 
-  // Because we have no manifest, we can't add text tracks.
-  it('cannot add text tracks', async () => {
+  it('plays with external text tracks', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
 
-    expect(() => {
-      player.addTextTrack(
-          'test:need-a-uri-for-text',
-          'en-US',
-          'main',
-          'text/mp4');
-    }).toThrow();
+    const locationUri = new goog.Uri(location.href);
+    const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
+    const absoluteUri = locationUri.resolve(partialUri);
+    const newTrack = player.addTextTrack(
+        absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
+
+    expect(newTrack).toBeTruthy();
   });
 
   // Since we are not in-charge of streaming, calling |retryStreaming| should
@@ -368,7 +369,7 @@ describe('Player Src Equals', () => {
         // A one-second timeout is too short for Chromecast, but a longer
         // timeout doesn't hurt anyone.  This will always resolve as fast as
         // playback can actually start.
-        await waiter.timeoutAfter(5).failOnTimeout(true).waitForMovement(video);
+        await waiter.waitForMovementOrFailOnTimeout(video, 5);
       }
     }
 

@@ -4,6 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.offline.ManifestConverter');
+goog.require('shaka.offline.indexeddb.V1StorageCell');
+goog.require('shaka.offline.indexeddb.V2StorageCell');
+goog.require('shaka.offline.indexeddb.V5StorageCell');
+goog.require('shaka.test.CannedIDB');
+goog.require('shaka.test.IndexedDBUtils');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.StringUtils');
+
 // All of the database dumps referenced below were originally made from the
 // "Heliocentrism" content in our demo app.
 // https://storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd

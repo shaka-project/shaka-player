@@ -4,6 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.Player');
+goog.require('shaka.offline.Storage');
+goog.require('shaka.test.TestScheme');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.util.EventManager');
+
 /** @return {boolean} */
 const supportsStorage = () => shaka.offline.Storage.support();
 
@@ -17,6 +26,8 @@ filterDescribe('Offline', supportsStorage, () => {
   let video;
   /** @type {!shaka.util.EventManager} */
   let eventManager;
+  /** @type {shaka.test.Waiter} */
+  let waiter;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -32,6 +43,7 @@ filterDescribe('Offline', supportsStorage, () => {
     player.addEventListener('error', fail);
 
     eventManager = new shaka.util.EventManager();
+    waiter = new shaka.test.Waiter(eventManager);
 
     // Make sure we are starting with a blank slate.
     await shaka.offline.Storage.deleteAll();
@@ -144,7 +156,7 @@ filterDescribe('Offline', supportsStorage, () => {
    * @return {!Promise}
    */
   async function playTo(endSeconds, timeoutSeconds) {
-    await shaka.test.Util.waitUntilPlayheadReaches(
-        eventManager, video, endSeconds, timeoutSeconds);
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(
+        video, endSeconds, timeoutSeconds);
   }
 });
