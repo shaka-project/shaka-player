@@ -5,7 +5,7 @@
  */
 
 // Test basic manifest parsing functionality.
-describe('DashParser Manifest', () => {
+fdescribe('DashParser Manifest', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Dash = shaka.test.Dash;
   const mp4IndexSegmentUri = '/base/test/test/assets/index-segment.mp4';
@@ -1435,9 +1435,12 @@ describe('DashParser Manifest', () => {
     expect(stream).toBeUndefined();
   });
 
-  it('override manifest value if ignoreMinBufferTime is true', async () => {
+  /** @type {shaka.extern.ManifestConfiguration} */
+  /** @return {!Promise.<shaka.extern.Manifest>} */
+  function getParsedManifest(config) {
     const manifestText = [
-      '<MPD minBufferTime="PT75S">',
+      '<MPD minBufferTime="PT75S" maxSegmentDuration="PT3S" ' +
+      'suggestedPresentationDelay="PT25S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
       '      <Representation id="video-sd" width="640" height="480">',
@@ -1450,90 +1453,43 @@ describe('DashParser Manifest', () => {
     ].join('\n');
 
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.ignoreMinBufferTime = true;
     parser.configure(config);
+    return parser.start('dummy://foo', playerInterface);
+  }
 
+  async function getMaxSegmentDuration(ignore) {
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreMaxSegmentDuration = ignore;
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
-    const minBufferTime = manifest.minBufferTime;
+    const manifest = await getParsedManifest(config);
+    return manifest.presentationTimeline.getMaxSegmentDuration();
+  }
+
+  async function getMinBufferTime(ignore) {
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreMinBufferTime = ignore;
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await getParsedManifest(config);
+    return manifest.minBufferTime;
+  }
+
+  it('override manifest value if ignoreMinBufferTime is true', () => {
+    const minBufferTime = getMinBufferTime(true);
     expect(minBufferTime).toBe(0);
   });
 
-  it('get manifest value if ignoreMinBufferTime is false', async () => {
-    const manifestText = [
-      '<MPD minBufferTime="PT75S">',
-      '  <Period id="1" duration="PT30S">',
-      '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation id="video-sd" width="640" height="480">',
-      '        <BaseURL>v-sd.mp4</BaseURL>',
-      '        <SegmentBase indexRange="100-200" />',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>',
-    ].join('\n');
-
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.ignoreMinBufferTime = false;
-    parser.configure(config);
-
-    /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
-    const minBufferTime = manifest.minBufferTime;
+  it('get manifest value if ignoreMinBufferTime is false', () => {
+    const minBufferTime = getMinBufferTime(false);
     expect(minBufferTime).toBe(75);
   });
 
-  it('get manifest value if ignoreMaxSegmentDuration is false', async () => {
-    const manifestText = [
-      '<MPD minBufferTime="PT75S" maxSegmentDuration="PT3S">',
-      '  <Period id="1" duration="PT30S">',
-      '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation id="video-sd" width="640" height="480">',
-      '        <BaseURL>v-sd.mp4</BaseURL>',
-      '        <SegmentBase indexRange="100-200" />',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>',
-    ].join('\n');
-
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.ignoreMaxSegmentDuration = false;
-    parser.configure(config);
-
-    /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
-    const maxSegmentDuration =
-      manifest.presentationTimeline.getMaxSegmentDuration();
+  it('get manifest value if ignoreMaxSegmentDuration is false', () => {
+    const maxSegmentDuration = getMaxSegmentDuration(false);
     expect(maxSegmentDuration).toBe(3);
   });
 
-  it('get manifest value if ignoreMaxSegmentDuration is true', async () => {
-    const manifestText = [
-      '<MPD minBufferTime="PT75S" maxSegmentDuration="PT3S">',
-      '  <Period id="1" duration="PT30S">',
-      '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation id="video-sd" width="640" height="480">',
-      '        <BaseURL>v-sd.mp4</BaseURL>',
-      '        <SegmentBase indexRange="100-200" />',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>',
-    ].join('\n');
-
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.dash.ignoreMaxSegmentDuration = true;
-    parser.configure(config);
-
-    /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
-    const maxSegmentDuration =
-      manifest.presentationTimeline.getMaxSegmentDuration();
+  it('ignore manifest value if ignoreMaxSegmentDuration is true', () => {
+    const maxSegmentDuration = getMaxSegmentDuration(true);
     expect(maxSegmentDuration).toBe(1);
   });
 
@@ -1541,26 +1497,11 @@ describe('DashParser Manifest', () => {
     // NOTE: This is a regression test for #2015. It ensures that, if
     // ignoreMinBufferTime is true and there is no suggestedPresentationDelay,
     // we do not erroneously set presentationDelay to NaN.
-    const manifestText = [
-      '<MPD minBufferTime="PT75S">',
-      '  <Period id="1" duration="PT30S">',
-      '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation id="video-sd" width="640" height="480">',
-      '        <BaseURL>v-sd.mp4</BaseURL>',
-      '        <SegmentBase indexRange="100-200" />',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>',
-    ].join('\n');
-
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreMinBufferTime = true;
-    parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await getParsedManifest(config);
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
     expect(presentationDelay).not.toBeNaN();
@@ -1568,27 +1509,12 @@ describe('DashParser Manifest', () => {
   });
 
   it('Honors the ignoreSuggestedPresentationDelay config', async () => {
-    const manifestText = [
-      '<MPD minBufferTime="PT2S" suggestedPresentationDelay="PT25S">',
-      '  <Period id="1" duration="PT30S">',
-      '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation id="video-sd" width="640" height="480">',
-      '        <BaseURL>v-sd.mp4</BaseURL>',
-      '        <SegmentBase indexRange="100-200" />',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>',
-    ].join('\n');
-
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreSuggestedPresentationDelay = true;
     config.defaultPresentationDelay = 10;
-    parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await getParsedManifest(config);
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
     expect(presentationDelay).toBe(config.defaultPresentationDelay);
@@ -1598,26 +1524,11 @@ describe('DashParser Manifest', () => {
     // When sugguestedPresentDelay should be ignored, and
     // config.defaultpresentdelay is not set other than 0, use 1.5*minBufferTime
     // as the presentationDelay.
-    const manifestText = [
-      '<MPD minBufferTime="PT2S" suggestedPresentationDelay="PT25S">',
-      '  <Period id="1" duration="PT30S">',
-      '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation id="video-sd" width="640" height="480">',
-      '        <BaseURL>v-sd.mp4</BaseURL>',
-      '        <SegmentBase indexRange="100-200" />',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>',
-    ].join('\n');
-
-    fakeNetEngine.setResponseText('dummy://foo', manifestText);
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.dash.ignoreSuggestedPresentationDelay = true;
-    parser.configure(config);
 
     /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    const manifest = await getParsedManifest(config);
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
     expect(presentationDelay).toBe(1.5*manifest.minBufferTime);

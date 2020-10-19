@@ -621,7 +621,8 @@ shaka.extern.DrmConfiguration;
   * @property {boolean} ignoreMaxSegmentDuration
  *   If true will cause DASH parser to ignore <code>maxSegmentDuration</code>
  *   from manifest. It allows player to calculate the max segment duration
- *   from the segments that downloaded.
+ *   from the segments that downloaded. Defaults to <code>false</code> if not
+ *   provided.
  * @property {boolean} autoCorrectDrift
  *   If <code>true</code>, ignore the <code>availabilityStartTime</code> in the
  *   manifest and instead use the segments to determine the live edge.  This
