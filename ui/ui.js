@@ -417,6 +417,7 @@ shaka.ui.TrackLabelFormat = {
   'LANGUAGE': 0,
   'ROLE': 1,
   'LANGUAGE_ROLE': 2,
+  'LABEL': 3,
 };
 
 /**

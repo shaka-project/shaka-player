@@ -117,7 +117,10 @@ shaka.extern.UIVolumeBarColors;
  *   audio variant selection.
  *   LANGUAGE means that only the language of the item is shown.
  *   ROLE means that only the role of the item is shown.
- *   LANGUAGE_ROLE means both are shown, or just language if there is no role.
+ *   LANGUAGE_ROLE means both language and role are shown, or just language if
+ *   there is no role.
+ *   LABEL means the non-standard DASH "label" attribute or the HLS "NAME"
+ *   attribute are shown.
  *   Defaults to LANGUAGE.
  * @property {number} fadeDelay
  *   The delay (in seconds) before fading out the controls once the user stops

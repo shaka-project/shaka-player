@@ -111,6 +111,16 @@ shaka.ui.LanguageUtils = class {
             span.textContent += ': ' + rolesString;
           }
           break;
+        case shaka.ui.TrackLabelFormat.LABEL:
+          if (track.label) {
+            span.textContent = track.label;
+          } else {
+            // Fallback behavior. This probably shouldn't happen.
+            shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
+                'label, but the UI is configured to only show labels.');
+            span.textContent = '?';
+          }
+          break;
       }
 
       if (updateChosen && (combinationName == selectedCombination)) {
