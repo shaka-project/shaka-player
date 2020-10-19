@@ -17,6 +17,7 @@ goog.requireType('shaka.ui.Controls');
 
 /**
  * @extends {shaka.ui.Element}
+ * @implements {shaka.extern.IUISettingsMenu}
  * @export
  */
 shaka.ui.SettingsMenu = class extends shaka.ui.Element {
