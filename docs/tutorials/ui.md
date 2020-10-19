@@ -106,7 +106,7 @@ set up a listener for the 'caststatuschanged' events.
 <!-- Add a data-shaka-player-cast-receiver-id tag to provide a Cast Application ID that
            the cast button will cast to; the value provided here is the sample cast receiver. -->
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="A15A181D">
+         data-shaka-player-cast-receiver-id="7B25EC44">
     </div>
 ```
 
