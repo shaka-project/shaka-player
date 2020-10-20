@@ -49,14 +49,6 @@ pipeline {
             }
         }
 
-        stage('AWS Auth') {
-            steps {
-                withCredentials(ecr_publish_credentials_env) {
-                    sh "echo ${aws} ecr get-login --no-include-email | bash"
-                }
-            }
-        }
-
         stage('Build') {
             steps {
                 sh 'HOME=${HOME}'
