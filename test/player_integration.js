@@ -301,7 +301,7 @@ describe('Player', () => {
       const locationUri = new goog.Uri(location.href);
       const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
       const absoluteUri = locationUri.resolve(partialUri);
-      const newTrack = player.addTextTrack(
+      const newTrack = await player.addTextTrackAsync(
           absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
 
       expect(player.getTextTracks()).toEqual([newTrack]);
@@ -360,7 +360,7 @@ describe('Player', () => {
       const locationUri = new goog.Uri(location.href);
       const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
       const absoluteUri = locationUri.resolve(partialUri);
-      const newTrack = player.addTextTrack(
+      const newTrack = await player.addTextTrackAsync(
           absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
 
       expect(newTrack.language).toBe('en');
