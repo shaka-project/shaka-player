@@ -21,6 +21,7 @@ goog.requireType('shaka.ui.Controls');
 
 /**
  * @extends {shaka.ui.RangeElement}
+ * @implements {shaka.extern.ISeekBar}
  * @final
  * @export
  */
@@ -191,7 +192,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     }
   }
 
-  /** @return {boolean} */
+  /**
+   *  @return {boolean} 
+   * 
+   * @override
+  */
   isShowing() {
     // It is showing by default, so it is hidden if shaka-hidden is in the list.
     return !this.container.classList.contains('shaka-hidden');
@@ -200,6 +205,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   /**
    * Called by Controls on a timer to update the state of the seek bar.
    * Also called internally when the user interacts with the input element.
+   * 
+   * @override
    */
   update() {
     const colors = this.config_.seekBarColors;

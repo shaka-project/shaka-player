@@ -357,3 +357,49 @@ shaka.extern.IUISettingsMenu = class {
     this.backSpan;
   }
 };
+
+/**
+ * Interface for SeekBars. SeekBars should inherit from the concrete base
+ * class shaka.ui.Element.  
+ *
+ * @extends {shaka.extern.IUIElement }
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.ISeekBar = class {
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   */
+  constructor(parent, controls) {
+  }
+
+  /** @return {number} */
+  getValue() {}
+
+  /** @param {number} value */
+  setValue(value) {}
+
+  /**
+   * to update the state of the seek bar.
+   */
+  update() {}
+
+  /** @return {boolean} */
+  isShowing() {}
+};
+
+/**
+ * A factory for creating a SeekBar element.
+ *
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.ISeekBar.SeekBarFactory = class {
+  /**
+   * @param {!HTMLElement} rootElement
+   * @param {!shaka.ui.Controls} controls
+   * @return {!shaka.extern.ISeekBar}
+   */
+  create(rootElement, controls) {}
+};

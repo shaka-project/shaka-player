@@ -78,7 +78,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {?shaka.extern.IAd} */
     this.ad_ = null;
 
-    /** @private {?shaka.ui.SeekBar} */
+    /** @private {?shaka.extern.ISeekBar} */
     this.seekBar_ = null;
 
     /** @private {boolean} */
@@ -351,6 +351,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   static registerElement(name, factory) {
     shaka.ui.ControlsPanel.elementNamesToFactories_.set(name, factory);
+  }
+
+  /**
+   * @param {!shaka.extern.ISeekBar.SeekBarFactory} factory
+   * @export
+   */
+  static registerSeekBarFactory(factory) {
+    shaka.ui.ControlsPanel.seekBarFactory_ = factory;
   }
 
   /**
@@ -711,15 +719,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.menus_.push(...Array.from(
         this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
 
-    if (this.config_.addSeekBar) {
-      this.seekBar_ = new shaka.ui.SeekBar(this.bottomControls_, this);
-      this.elements_.push(this.seekBar_);
-    } else {
-      // Settings menus need to be positioned lower if the seekbar is absent.
-      for (const menu of this.menus_) {
-        menu.classList.add('shaka-low-position');
-      }
-    }
+    this.addSeekBar_();
 
     this.showOnHoverControls_ = Array.from(
         this.videoContainer_.getElementsByClassName(
@@ -890,6 +890,36 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.daiAdContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.daiAdContainer_.classList.add('shaka-server-side-ad-container');
     this.controlsContainer_.appendChild(this.daiAdContainer_);
+  }
+
+
+  /**
+   * Adds a seekbar depending on the configuration.
+   * By default an instance of shaka.ui.SeekBar is created
+   * This behaviour can be overriden by providing a SeekBar factory using the 
+   * registerSeekBarFactory function.
+   * 
+   * @private
+   */
+  addSeekBar_(){
+
+    if (this.config_.addSeekBar) {
+      
+      if( shaka.ui.ControlsPanel.seekBarFactory_ == null )
+      {
+        this.seekBar_ = new shaka.ui.SeekBar(this.bottomControls_, this);
+      }
+      else{
+        this.seekBar_ = shaka.ui.ControlsPanel.seekBarFactory_.create(this.controlsButtonPanel_, this);
+      }
+
+      this.elements_.push(this.seekBar_);
+    } else {
+      // Settings menus need to be positioned lower if the seekbar is absent.
+      for (const menu of this.menus_) {
+        menu.classList.add('shaka-low-position');
+      }
+    }
   }
 
   /**
@@ -1447,3 +1477,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
+
+/** @private {?shaka.extern.ISeekBar.SeekBarFactory} */
+shaka.ui.ControlsPanel.seekBarFactory_ = null;
