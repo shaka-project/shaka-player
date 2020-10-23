@@ -107,6 +107,7 @@ python build/build.py +@complete -@polyfill
 python build/build.py +@complete -@polyfill -@text
 ```
 
+To see the complete list of categories, its in [`build/types/`](https://github.com/google/shaka-player/tree/master/build/types)
 
 #### Build Configs
 
