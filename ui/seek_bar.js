@@ -21,7 +21,7 @@ goog.requireType('shaka.ui.Controls');
 
 /**
  * @extends {shaka.ui.RangeElement}
- * @implements {shaka.extern.ISeekBar}
+ * @implements {shaka.extern.IUISeekBar}
  * @final
  * @export
  */
@@ -369,5 +369,23 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   updateAriaLabel_() {
     this.bar.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(shaka.ui.Locales.Ids.SEEK));
+  }
+};
+
+
+/**
+ * @implements {shaka.extern.IUISeekBar.Factory}
+ * @export
+ */
+
+shaka.ui.SeekBar.Factory = class {
+  /**
+   * Creates a shaka.ui.SeekBar. Use this factory to register the default
+   * SeekBar when needed
+   *
+   * @override
+   */
+  create(rootElement, controls) {
+    return new shaka.ui.SeekBar(rootElement, controls);
   }
 };

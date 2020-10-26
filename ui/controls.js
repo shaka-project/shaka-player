@@ -18,6 +18,7 @@ goog.require('shaka.ui.AdPosition');
 goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
@@ -25,7 +26,7 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
-goog.require('shaka.ui.SeekBarFactory');
+
 goog.requireType('shaka.Player');
 
 
@@ -78,7 +79,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {?shaka.extern.IAd} */
     this.ad_ = null;
 
-    /** @private {?shaka.extern.ISeekBar} */
+    /** @private {?shaka.extern.IUISeekBar} */
     this.seekBar_ = null;
 
     /** @private {boolean} */
@@ -354,10 +355,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * @param {!shaka.extern.ISeekBarFactory} factory
+   * @param {!shaka.extern.IUISeekBar.Factory} factory
    * @export
    */
-  static registerSeekBarFactory(factory) {
+  static registerSeekBar(factory) {
     shaka.ui.ControlsPanel.seekBarFactory_ = factory;
   }
 
@@ -1471,5 +1472,5 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
 
-/** @private {?shaka.extern.ISeekBarFactory} */
-shaka.ui.ControlsPanel.seekBarFactory_ = new shaka.ui.SeekBarFactory();
+/** @private {?shaka.extern.IUISeekBar.Factory} */
+shaka.ui.ControlsPanel.seekBarFactory_ = new shaka.ui.SeekBar.Factory();

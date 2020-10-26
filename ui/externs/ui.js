@@ -365,7 +365,7 @@ shaka.extern.IUISettingsMenu = class {
  * @interface
  * @exportDoc
  */
-shaka.extern.ISeekBar = class {
+shaka.extern.IUISeekBar = class {
   /** @return {number} */
   getValue() {}
 
@@ -388,11 +388,11 @@ shaka.extern.ISeekBar = class {
  * @interface
  * @exportDoc
  */
-shaka.extern.ISeekBarFactory = class {
+shaka.extern.IUISeekBar.Factory = class {
   /**
    * @param {!HTMLElement} rootElement
    * @param {!shaka.ui.Controls} controls
-   * @return {!shaka.extern.ISeekBar}
+   * @return {!shaka.extern.IUISeekBar}
    */
   create(rootElement, controls) {}
 };
