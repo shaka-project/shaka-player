@@ -408,6 +408,7 @@ shaka.test.StreamingEngineUtil = class {
       emsgSchemeIdUris: null,
       primary: false,
       roles: [],
+      forced: false,
     };
   }
 
@@ -443,6 +444,7 @@ shaka.test.StreamingEngineUtil = class {
       emsgSchemeIdUris: null,
       primary: false,
       roles: [],
+      forced: false,
     };
   }
 
@@ -476,6 +478,7 @@ shaka.test.StreamingEngineUtil = class {
       emsgSchemeIdUris: null,
       primary: false,
       roles: [],
+      forced: false,
     };
   }
 };
