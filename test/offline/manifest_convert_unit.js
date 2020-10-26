@@ -491,6 +491,7 @@ describe('ManifestConverter', () => {
       trickModeVideo: null,
       emsgSchemeIdUris: null,
       roles: streamDb.roles,
+      forced: streamDb.forced,
       channelsCount: streamDb.channelsCount,
       audioSamplingRate: streamDb.audioSamplingRate,
       closedCaptions: streamDb.closedCaptions,
