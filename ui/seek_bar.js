@@ -193,8 +193,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   }
 
   /**
-   *  @return {boolean} 
-   * 
    * @override
   */
   isShowing() {
@@ -203,9 +201,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   }
 
   /**
-   * Called by Controls on a timer to update the state of the seek bar.
-   * Also called internally when the user interacts with the input element.
-   * 
    * @override
    */
   update() {

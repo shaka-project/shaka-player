@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 /**
  * @externs
  * @suppress {duplicate} To prevent compiler errors with the namespace
@@ -360,20 +359,13 @@ shaka.extern.IUISettingsMenu = class {
 
 /**
  * Interface for SeekBars. SeekBars should inherit from the concrete base
- * class shaka.ui.Element.  
+ * class shaka.ui.Element.
  *
- * @extends {shaka.extern.IUIElement }
+ * @extends {shaka.extern.IUIElement}
  * @interface
  * @exportDoc
  */
 shaka.extern.ISeekBar = class {
-  /**
-   * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
-   */
-  constructor(parent, controls) {
-  }
-
   /** @return {number} */
   getValue() {}
 
@@ -381,7 +373,8 @@ shaka.extern.ISeekBar = class {
   setValue(value) {}
 
   /**
-   * to update the state of the seek bar.
+   * Called by Controls on a timer to update the state of the seek bar.
+   * Also called internally when the user interacts with the input element.
    */
   update() {}
 
@@ -395,7 +388,7 @@ shaka.extern.ISeekBar = class {
  * @interface
  * @exportDoc
  */
-shaka.extern.ISeekBar.SeekBarFactory = class {
+shaka.extern.ISeekBarFactory = class {
   /**
    * @param {!HTMLElement} rootElement
    * @param {!shaka.ui.Controls} controls

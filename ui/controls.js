@@ -18,7 +18,6 @@ goog.require('shaka.ui.AdPosition');
 goog.require('shaka.ui.BigPlayButton');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.SeekBar');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
@@ -26,6 +25,7 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
+goog.require('shaka.ui.SeekBarFactory');
 goog.requireType('shaka.Player');
 
 
@@ -354,7 +354,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * @param {!shaka.extern.ISeekBar.SeekBarFactory} factory
+   * @param {!shaka.extern.ISeekBarFactory} factory
    * @export
    */
   static registerSeekBarFactory(factory) {
@@ -896,23 +896,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /**
    * Adds a seekbar depending on the configuration.
    * By default an instance of shaka.ui.SeekBar is created
-   * This behaviour can be overriden by providing a SeekBar factory using the 
+   * This behaviour can be overriden by providing a SeekBar factory using the
    * registerSeekBarFactory function.
-   * 
+   *
    * @private
    */
-  addSeekBar_(){
-
+  addSeekBar_() {
     if (this.config_.addSeekBar) {
-      
-      if( shaka.ui.ControlsPanel.seekBarFactory_ == null )
-      {
-        this.seekBar_ = new shaka.ui.SeekBar(this.bottomControls_, this);
-      }
-      else{
-        this.seekBar_ = shaka.ui.ControlsPanel.seekBarFactory_.create(this.controlsButtonPanel_, this);
-      }
-
+      this.seekBar_ = shaka.ui.ControlsPanel.seekBarFactory_.create(
+          this.bottomControls_, this);
       this.elements_.push(this.seekBar_);
     } else {
       // Settings menus need to be positioned lower if the seekbar is absent.
@@ -921,6 +913,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     }
   }
+
 
   /**
    * Adds static event listeners.  This should only add event listeners to
@@ -1478,5 +1471,5 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
 
-/** @private {?shaka.extern.ISeekBar.SeekBarFactory} */
-shaka.ui.ControlsPanel.seekBarFactory_ = null;
+/** @private {?shaka.extern.ISeekBarFactory} */
+shaka.ui.ControlsPanel.seekBarFactory_ = new shaka.ui.SeekBarFactory();
