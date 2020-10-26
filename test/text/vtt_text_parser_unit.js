@@ -584,6 +584,16 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports only two digits in the timestamp', () => {
+    verifyHelper(
+        [
+          {startTime: 20, endTime: 40, payload: 'Test'},
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.00 --> 00:00:40.00\n' +
+        'Test',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
 
   /**
    * @param {!Array} cues
