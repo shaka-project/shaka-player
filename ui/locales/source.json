@@ -135,7 +135,7 @@
     "message": "Skip ahead to live"
   },
   "SUBTITLE_FORCED": {
-    "description": "Label used to identify a forced subtitle.",
+    "description": "Label used to identify a subtitle track that is forced to be shown.",
     "message": "Forced"
   },
   "UNDETERMINED_LANGUAGE": {
