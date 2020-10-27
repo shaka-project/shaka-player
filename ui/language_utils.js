@@ -98,10 +98,12 @@ shaka.ui.LanguageUtils = class {
 
       span.textContent =
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
-      if (forced) {
-        span.textContent += ' (' + forcedString + ')';
-      }
       switch (trackLabelFormat) {
+        case shaka.ui.TrackLabelFormat.LANGUAGE:
+          if (forced) {
+            span.textContent += ' (' + forcedString + ')';
+          }
+          break;
         case shaka.ui.TrackLabelFormat.ROLE:
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
