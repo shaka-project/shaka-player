@@ -820,8 +820,10 @@ shaka.extern.ManifestConfiguration;
  *   unless specified, and rebufferingGoal to 0.01 unless specified at the same
  *   time.
  * @property {boolean} autoLowLatencyMode
- *   If <code>true</code>, low latency streaming mode is enabled if the stream
- *   supports low latency.
+ *   If the stream is low latency and the user has not configured the low
+ *   latency mode, but if it has been configured to activate the low
+ *   latency mode if a stream of this type is detected, we automatically
+ *   activate the low latency mode. Defaults to false.
  *
  * @exportDoc
  */
