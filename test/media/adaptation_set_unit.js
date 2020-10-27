@@ -214,6 +214,7 @@ describe('AdaptationSet', () => {
       originalId: String(id),
       primary: false,
       roles: roles,
+      forced: false,
       trickModeVideo: null,
       type: '',
     };

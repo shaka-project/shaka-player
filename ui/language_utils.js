@@ -78,6 +78,9 @@ shaka.ui.LanguageUtils = class {
 
     for (const track of tracks) {
       const language = track.language;
+      const forced = track.forced;
+      const LocIds = shaka.ui.Locales.Ids;
+      const forcedString = localization.resolve(LocIds.SUBTITLE_FORCED);
       const rolesString = getRolesString(track);
       const combinationName = getCombination(language, rolesString);
       if (combinationsMade.has(combinationName)) {
@@ -96,6 +99,11 @@ shaka.ui.LanguageUtils = class {
       span.textContent =
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
       switch (trackLabelFormat) {
+        case shaka.ui.TrackLabelFormat.LANGUAGE:
+          if (forced) {
+            span.textContent += ' (' + forcedString + ')';
+          }
+          break;
         case shaka.ui.TrackLabelFormat.ROLE:
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
@@ -105,10 +113,16 @@ shaka.ui.LanguageUtils = class {
           } else {
             span.textContent = rolesString;
           }
+          if (forced) {
+            span.textContent += ' (' + forcedString + ')';
+          }
           break;
         case shaka.ui.TrackLabelFormat.LANGUAGE_ROLE:
           if (rolesString) {
             span.textContent += ': ' + rolesString;
+          }
+          if (forced) {
+            span.textContent += ' (' + forcedString + ')';
           }
           break;
         case shaka.ui.TrackLabelFormat.LABEL:

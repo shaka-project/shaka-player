@@ -512,6 +512,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.emsgSchemeIdUris = null;
       /** @type {!Array.<string>} */
       this.roles = [];
+      /** @type {boolean} */
+      this.forced = false;
       /** @type {?number} */
       this.channelsCount = null;
       /** @type {?number} */

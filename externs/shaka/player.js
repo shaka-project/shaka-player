@@ -213,6 +213,7 @@ shaka.extern.BufferedInfo;
  *   primary: boolean,
  *   roles: !Array.<string>,
  *   audioRoles: Array.<string>,
+ *   forced: boolean,
  *   videoId: ?number,
  *   audioId: ?number,
  *   channelsCount: ?number,
@@ -278,6 +279,9 @@ shaka.extern.BufferedInfo;
  *   The roles of the audio in the track, e.g. <code>'main'</code> or
  *   <code>'commentary'</code>. Will be null for text tracks or variant tracks
  *   without audio.
+ * @property {boolean} forced
+ *   True indicates that this in the forced text language for the content.
+ *   This flag is based on signals from the manifest.
  * @property {?number} videoId
  *   (only for variant tracks) The video stream id.
  * @property {?number} audioId

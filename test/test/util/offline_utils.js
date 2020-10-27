@@ -55,6 +55,7 @@ shaka.test.OfflineUtils = class {
       segments: [],
       variantIds: [],
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
       closedCaptions: null,
