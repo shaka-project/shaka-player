@@ -117,7 +117,10 @@ shaka.extern.UIVolumeBarColors;
  *   audio variant selection.
  *   LANGUAGE means that only the language of the item is shown.
  *   ROLE means that only the role of the item is shown.
- *   LANGUAGE_ROLE means both are shown, or just language if there is no role.
+ *   LANGUAGE_ROLE means both language and role are shown, or just language if
+ *   there is no role.
+ *   LABEL means the non-standard DASH "label" attribute or the HLS "NAME"
+ *   attribute are shown.
  *   Defaults to LANGUAGE.
  * @property {number} fadeDelay
  *   The delay (in seconds) before fading out the controls once the user stops
@@ -229,4 +232,128 @@ shaka.extern.IUIElement.Factory = class {
    * @return {!shaka.extern.IUIElement}
    */
   create(rootElement, controls) {}
+};
+
+
+/**
+ * Interface for UI range elements.  UI range elements should inherit from the
+ * concrete base class shaka.ui.RangeElement.  The members defined in this
+ * extern's constructor are all available from the base class, and are defined
+ * here to keep the compiler from renaming them.
+ *
+ * @extends {shaka.extern.IUIElement}
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUIRangeElement = class {
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   * @param {!Array.<string>} containerClassNames
+   * @param {!Array.<string>} barClassNames
+   */
+  constructor(parent, controls, containerClassNames, barClassNames) {
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.container;
+
+    /**
+     * @protected {!HTMLInputElement}
+     * @exportDoc
+     */
+    this.bar;
+  }
+
+  /**
+   * @param {number} min
+   * @param {number} max
+   */
+  setRange(min, max) {}
+
+  /**
+   * Called when user interaction begins.
+   * To be overridden by subclasses.
+   */
+  onChangeStart() {}
+
+  /**
+   * Called when a new value is set by user interaction.
+   * To be overridden by subclasses.
+   */
+  onChange() {}
+
+  /**
+   * Called when user interaction ends.
+   * To be overridden by subclasses.
+   */
+  onChangeEnd() {}
+
+  /** @return {number} */
+  getValue() {}
+
+  /** @param {number} value */
+  setValue(value) {}
+};
+
+/**
+ * Interface for UI settings menus.  UI settings menus should inherit from the
+ * concrete base class shaka.ui.SettingsMenu.  The members defined in this
+ * extern's constructor are all available from the base class, and are defined
+ * here to keep the compiler from renaming them.
+ *
+ * @extends {shaka.extern.IUIElement}
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUISettingsMenu = class {
+  /**
+   * @param {!HTMLElement} parent
+   * @param {!shaka.ui.Controls} controls
+   * @param {string} iconText
+   */
+  constructor(parent, controls, iconText) {
+    /**
+     * @protected {!HTMLButtonElement}
+     * @exportDoc
+     */
+    this.button;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.icon;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.nameSpan;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.currentSelection;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.menu;
+
+    /**
+     * @protected {!HTMLButtonElement}
+     * @exportDoc
+     */
+    this.backButton;
+
+    /**
+     * @protected {!HTMLElement}
+     * @exportDoc
+     */
+    this.backSpan;
+  }
 };
