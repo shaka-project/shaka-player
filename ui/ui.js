@@ -8,8 +8,14 @@
 goog.provide('shaka.ui.Overlay');
 
 goog.require('goog.asserts');
+goog.require('shaka.Player');
+goog.require('shaka.log');
 goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
+goog.require('shaka.util.ConfigUtils');
+goog.require('shaka.util.Dom');
+goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Platform');
 
 /**
@@ -411,6 +417,7 @@ shaka.ui.TrackLabelFormat = {
   'LANGUAGE': 0,
   'ROLE': 1,
   'LANGUAGE_ROLE': 2,
+  'LABEL': 3,
 };
 
 /**

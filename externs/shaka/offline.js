@@ -115,6 +115,7 @@ shaka.extern.ManifestDB;
  *   segments: !Array.<shaka.extern.SegmentDB>,
  *   variantIds: !Array.<number>,
  *   roles: !Array.<string>,
+ *   forced: boolean,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
  *   closedCaptions: Map.<string, string>
@@ -158,6 +159,8 @@ shaka.extern.ManifestDB;
  * @property {!Array.<string>} roles
  *   The roles of the stream as they appear on the manifest,
  *   e.g. 'main', 'caption', or 'commentary'.
+ * @property {boolean} forced
+ *   Whether the stream set was forced.
  * @property {?number} channelsCount
  *   The channel count information for the audio stream.
  * @property {?number} audioSamplingRate

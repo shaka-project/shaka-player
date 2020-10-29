@@ -4,6 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.Dash');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.LanguageUtils');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.StringUtils');
+goog.requireType('shaka.dash.DashParser');
+
 // Test basic manifest parsing functionality.
 describe('DashParser Manifest', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -32,9 +47,11 @@ describe('DashParser Manifest', () => {
     playerInterface = {
       networkingEngine: fakeNetEngine,
       filter: (manifest) => Promise.resolve(),
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onError: fail,
+      isLowLatencyMode: () => false,
     };
   });
 
@@ -331,7 +348,7 @@ describe('DashParser Manifest', () => {
         /* appendWindowEnd= */ 30));
   });
 
-  it('correctly parses closed captions with channels and languages',
+  it('correctly parses mixed captions with channels, services, and languages',
       async () => {
         const source = [
           '<MPD minBufferTime="PT75S">',
@@ -343,16 +360,9 @@ describe('DashParser Manifest', () => {
           '        <SegmentTemplate media="1.mp4" duration="1" />',
           '      </Representation>',
           '    </AdaptationSet>',
-          '    <AdaptationSet mimeType="video/mp4" lang="fr" group="1">',
-          '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
-          '         value="CC1=lang:fr;CC3=lang:zh"/>',
-          '      <Representation bandwidth="200">',
-          '        <SegmentTemplate media="1.mp4" duration="1" />',
-          '      </Representation>',
-          '    </AdaptationSet>',
           '    <AdaptationSet mimeType="video/mp4" lang="ru" group="1">',
-          '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
-          '         value="1=lang:ru;3=lang:hu,war:1,er:1"/>',
+          '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-708:2015"',
+          '         value="1=lang:bos;3=lang:cze,war:1,er:1"/>',
           '      <Representation bandwidth="200">',
           '        <SegmentTemplate media="1.mp4" duration="1" />',
           '      </Representation>',
@@ -365,10 +375,8 @@ describe('DashParser Manifest', () => {
 
         /** @type {shaka.extern.Manifest} */
         const manifest = await parser.start('dummy://foo', playerInterface);
-        // First Representation should be dropped.
         const stream1 = manifest.variants[0].video;
         const stream2 = manifest.variants[1].video;
-        const stream3 = manifest.variants[2].video;
 
         const expectedClosedCaptions1 = new Map(
             [['CC1', shaka.util.LanguageUtils.normalize('eng')],
@@ -376,17 +384,67 @@ describe('DashParser Manifest', () => {
         );
 
         const expectedClosedCaptions2 = new Map(
-            [['CC1', shaka.util.LanguageUtils.normalize('fr')],
-              ['CC3', shaka.util.LanguageUtils.normalize('zh')]]
-        );
-
-        const expectedClosedCaptions3 = new Map(
-            [['CC1', shaka.util.LanguageUtils.normalize('ru')],
-              ['CC3', shaka.util.LanguageUtils.normalize('hu')]]
+            [['svc1', shaka.util.LanguageUtils.normalize('bos')],
+              ['svc3', shaka.util.LanguageUtils.normalize('cze')]]
         );
         expect(stream1.closedCaptions).toEqual(expectedClosedCaptions1);
         expect(stream2.closedCaptions).toEqual(expectedClosedCaptions2);
-        expect(stream3.closedCaptions).toEqual(expectedClosedCaptions3);
+      });
+
+  it('correctly parses CEA-708 caption tags with service numbers and languages',
+      async () => {
+        const source = [
+          '<MPD minBufferTime="PT75S">',
+          '  <Period id="1" duration="PT30S">',
+          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-708:2015"',
+          '         value="1=lang:eng;3=lang:swe,er"/>',
+          '      <Representation bandwidth="200">',
+          '        <SegmentTemplate media="1.mp4" duration="1" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('dummy://foo', source);
+
+        /** @type {shaka.extern.Manifest} */
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const stream = manifest.variants[0].video;
+        const expectedClosedCaptions = new Map(
+            [['svc1', shaka.util.LanguageUtils.normalize('eng')],
+              ['svc3', shaka.util.LanguageUtils.normalize('swe')]]
+        );
+        expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
+      });
+
+  it('correctly parses CEA-708 caption tags without service #s and languages',
+      async () => {
+        const source = [
+          '<MPD minBufferTime="PT75S">',
+          '  <Period id="1" duration="PT30S">',
+          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-708:2015"',
+          '         value="eng;swe"/>',
+          '      <Representation bandwidth="200">',
+          '        <SegmentTemplate media="1.mp4" duration="1" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
+
+        fakeNetEngine.setResponseText('dummy://foo', source);
+
+        /** @type {shaka.extern.Manifest} */
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const stream = manifest.variants[0].video;
+        const expectedClosedCaptions = new Map(
+            [['svc1', shaka.util.LanguageUtils.normalize('eng')],
+              ['svc2', shaka.util.LanguageUtils.normalize('swe')]]
+        );
+        expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
       });
 
   it('Detects E-AC3 JOC content by SupplementalProperty', async () => {
@@ -413,34 +471,55 @@ describe('DashParser Manifest', () => {
     expect(stream.mimeType).toBe('audio/eac3-joc');
   });
 
-  it('correctly parses closed captions without channel numbers', async () => {
-    const source = [
-      '<MPD minBufferTime="PT75S">',
-      '  <Period id="1" duration="PT30S">',
-      '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
-      '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
-      '         value="eng;swe"/>',
-      '      <Representation bandwidth="200">',
-      '        <SegmentTemplate media="1.mp4" duration="1" />',
-      '      </Representation>',
-      '    </AdaptationSet>',
-      '  </Period>',
-      '</MPD>',
-    ].join('\n');
+  it('correctly parses CEA-608 closed caption tags without channel numbers',
+      async () => {
+        const source = [
+          '<MPD minBufferTime="PT75S">',
+          '  <Period id="1" duration="PT30S">',
+          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
+          '         value="eng;swe"/>',
+          '      <Representation bandwidth="200">',
+          '        <SegmentTemplate media="1.mp4" duration="1" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+          '      <Accessibility schemeIdUri="urn:scte:dash:cc:cea-608:2015"',
+          '         value="eng;swe;fre;pol"/>',
+          '      <Representation bandwidth="200">',
+          '        <SegmentTemplate media="1.mp4" duration="1" />',
+          '      </Representation>',
+          '    </AdaptationSet>',
+          '  </Period>',
+          '</MPD>',
+        ].join('\n');
 
-    fakeNetEngine.setResponseText('dummy://foo', source);
+        fakeNetEngine.setResponseText('dummy://foo', source);
 
-    /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
-    const stream = manifest.variants[0].video;
-    const expectedClosedCaptions = new Map(
-        [['CC1', shaka.util.LanguageUtils.normalize('eng')],
-          ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
-    );
-    expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
-  });
+        /** @type {shaka.extern.Manifest} */
+        const manifest = await parser.start('dummy://foo', playerInterface);
+        const stream1 = manifest.variants[0].video;
+        const stream2 = manifest.variants[1].video;
 
-  it('correctly parses closed captions with no channel and language info',
+        const expectedClosedCaptions1 = new Map(
+            [['CC1', shaka.util.LanguageUtils.normalize('eng')],
+              ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
+        );
+
+        const expectedClosedCaptions2 = new Map(
+            [
+              ['CC1', shaka.util.LanguageUtils.normalize('eng')],
+              ['CC2', shaka.util.LanguageUtils.normalize('swe')],
+              ['CC3', shaka.util.LanguageUtils.normalize('fre')],
+              ['CC4', shaka.util.LanguageUtils.normalize('pol')],
+            ]
+        );
+
+        expect(stream1.closedCaptions).toEqual(expectedClosedCaptions1);
+        expect(stream2.closedCaptions).toEqual(expectedClosedCaptions2);
+      });
+
+  it('correctly parses CEA-608 caption tags with no channel and language info',
       async () => {
         const source = [
           '<MPD minBufferTime="PT75S">',
@@ -972,12 +1051,17 @@ describe('DashParser Manifest', () => {
       '        <SegmentBase indexRange="100-200" />',
       '      </Representation>',
       '    </AdaptationSet>',
-      '    <AdaptationSet id="1" mimeType="application/mp4" codecs="stpp">',
+      '    <AdaptationSet',
+      '      id="1"',
+      '      mimeType="application/mp4"',
+      '      codecs="stpp"',
+      '      lang="en"',
+      '    >',
       '      <Representation>',
       '        <SegmentTemplate media="1.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
-      '    <AdaptationSet id="2">',
+      '    <AdaptationSet id="2" lang="fr">',
       '      <Representation mimeType="application/mp4" codecs="wvtt">',
       '        <SegmentTemplate media="2.mp4" duration="1" />',
       '      </Representation>',
@@ -1563,6 +1647,38 @@ describe('DashParser Manifest', () => {
     const textStream = manifest.textStreams[0];
     expect(textStream.roles).toEqual(['captions', 'foo']);
     expect(textStream.kind).toBe('caption');
+  });
+
+  it('converts Roles element to "forced"', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" contentType="text">',
+      '      <Accessibility schemeIdUri="urn:mpeg:dash:role:2011" ',
+      '          value="captions" />',
+      '      <Accessibility schemeIdUri="urn:mpeg:dash:role:2011" ',
+      '          value="forced_subtitle" />',
+      '      <Accessibility schemeIdUri="foobar" value="bar" />',
+      '      <Representation id="text-en" mimeType="text/webvtt">',
+      '        <BaseURL>t-en.vtt</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const textStream = manifest.textStreams[0];
+    expect(textStream.roles).toEqual(['captions', 'forced_subtitle']);
+    expect(textStream.forced).toBe(true);
   });
 
   it('Does not error when image adaptation sets are present', async () => {

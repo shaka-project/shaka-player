@@ -7,12 +7,16 @@
 
 goog.provide('shaka.ui.SeekBar');
 
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
+goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
+goog.requireType('shaka.ads.CuePoint');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
@@ -69,6 +73,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.markAdBreaks_();
     });
 
+    /**
+     * When user is scrubbing the seek bar - we should pause the video - see https://git.io/JUhHG
+     * but will conditionally pause or play the video after scrubbing
+     * depending on its previous state
+     *
+     * @private {boolean}
+     */
+    this.wasPlaying_ = false;
 
     /** @private {!Array.<!shaka.ads.CuePoint>} */
     this.adCuePoints_ = [];
@@ -130,6 +142,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @override
    */
   onChangeStart() {
+    this.wasPlaying_ = !this.video.paused;
     this.controls.setSeeking(true);
     this.video.pause();
   }
@@ -172,7 +185,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // call the event so that we can respond immediately.
     this.seekTimer_.tickNow();
     this.controls.setSeeking(false);
-    this.video.play();
+
+    if (this.wasPlaying_) {
+      this.video.play();
+    }
   }
 
   /** @return {boolean} */

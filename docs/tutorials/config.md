@@ -121,13 +121,22 @@ buffering settings) while some will not have any effect until the next call to
 
 #### Low latency streaming
 
-To enable low latency live streaming:
-1. Set `.streaming.inaccurateManifestTolerance` to 0.
-2. Set `.streaming.rebufferingGoal` to the length of 1 partial segment target
-duration (for example, 0.6 second).
+With `.streaming.lowLatencyMode` set to true,
+`.streaming.inaccurateManifestTolerance` is set to 0 by default, and
+`.streaming.rebufferingGoal` is set to 0.01 by default.
+
+To customize the values of inaccurateManifestTolerance and rebufferingGoal
+with low latency mode, you can set the fields in the same or subsequent
+call to configure().
 ```js
-player.configure('streaming.inaccurateManifestTolerance', 0);
-player.configure('streaming.rebufferingGoal', 0.6);
+player.configure({
+  streaming: {
+    lowLatencyMode: true,
+    inaccurateManifestTolerance: 0,
+    rebufferingGoal: 0.01,
+  }
+});
+
 ```
 
 

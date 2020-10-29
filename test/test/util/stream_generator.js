@@ -10,6 +10,13 @@ goog.provide('shaka.test.Mp4VodStreamGenerator');
 goog.provide('shaka.test.StreamGenerator');
 goog.provide('shaka.test.TSVodStreamGenerator');
 
+goog.require('goog.asserts');
+goog.require('shaka.log');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.BufferUtils');
+goog.require('shaka.util.DataViewReader');
+goog.require('shaka.util.Uint8ArrayUtils');
+
 
 /**
  * @summary

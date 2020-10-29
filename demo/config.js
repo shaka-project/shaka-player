@@ -7,6 +7,16 @@
 
 goog.provide('shakaDemo.Config');
 
+goog.require('goog.asserts');
+goog.require('shakaDemo.BoolInput');
+goog.require('shakaDemo.DatalistInput');
+goog.require('shakaDemo.InputContainer');
+goog.require('shakaDemo.Main');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.NumberInput');
+goog.require('shakaDemo.SelectInput');
+goog.require('shakaDemo.TextInput');
+goog.requireType('shakaDemo.Input');
 
 /** @type {?shakaDemo.Config} */
 let shakaDemoConfig;
@@ -108,18 +118,6 @@ shakaDemo.Config = class {
     componentHandler.upgradeDom();
   }
 
-  /** @return {!shaka.extern.AdvancedDrmConfiguration} */
-  static emptyAdvancedConfiguration() {
-    return {
-      distinctiveIdentifierRequired: false,
-      persistentStateRequired: false,
-      videoRobustness: '',
-      audioRobustness: '',
-      serverCertificate: new Uint8Array(0),
-      individualizationServer: '',
-    };
-  }
-
   /** @private */
   addDrmSection_() {
     const MessageIds = shakaDemo.MessageIds;
@@ -148,7 +146,7 @@ shakaDemo.Config = class {
         // Add in any common drmSystem not currently in advanced.
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           if (!(drmSystem in advanced)) {
-            advanced[drmSystem] = shakaDemo.Config.emptyAdvancedConfiguration();
+            advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
           }
         }
         // Set the robustness.
@@ -209,9 +207,7 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DISABLE_VIDEO,
             'manifest.disableVideo')
         .addBoolInput_(MessageIds.DISABLE_TEXT,
-            'manifest.disableText')
-        .addBoolInput_(MessageIds.LOW_LATENCY,
-            'manifest.lowLatencyMode');
+            'manifest.disableText');
 
     this.addRetrySection_('manifest', MessageIds.MANIFEST_RETRY_SECTION_HEADER);
   }
@@ -322,7 +318,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.INACCURATE_MANIFEST_TOLERANCE,
             'streaming.inaccurateManifestTolerance',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_(MessageIds.LOW_LATENCY,
+            'streaming.lowLatencyMode');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,

@@ -8,9 +8,14 @@
 goog.provide('shaka.ui.SkipAdButton');
 
 goog.require('goog.asserts');
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.Timer');
+goog.requireType('shaka.ui.Controls');
 
 
 /**

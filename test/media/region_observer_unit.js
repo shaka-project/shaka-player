@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.RegionObserver');
+goog.require('shaka.media.RegionTimeline');
+goog.require('shaka.test.Util');
+goog.requireType('shaka.media.IPlayheadObserver');
+
 describe('RegionObserver', () => {
   /** @type {!shaka.media.RegionTimeline} */
   let timeline;

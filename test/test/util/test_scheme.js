@@ -6,6 +6,21 @@
 
 goog.provide('shaka.test.TestScheme');
 
+goog.require('goog.asserts');
+goog.require('goog.Uri');
+goog.require('shaka.Player');
+goog.require('shaka.media.ManifestParser');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.Mp4VodStreamGenerator');
+goog.require('shaka.test.TSVodStreamGenerator');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.ManifestParserUtils');
+goog.requireType('shaka.net.NetworkingEngine.RequestType');
+goog.requireType('shaka.test.IStreamGenerator');
+
 
 /**
  * @typedef {{
@@ -646,6 +661,8 @@ shaka.test.TestScheme.ManifestParser = class {
     if (!manifest) {
       throw new Error('Unknown manifest!');
     }
+
+    playerInterface.makeTextStreamsForClosedCaptions(manifest);
 
     // Invoke filtering interfaces similar to how a real parser would.
     // This makes sure the filtering functions are covered implicitly by

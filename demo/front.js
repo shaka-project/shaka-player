@@ -8,6 +8,10 @@
 goog.provide('shakaDemo.Front');
 
 
+goog.require('shakaDemo.AssetCard');
+goog.require('shakaDemo.MessageIds');
+goog.requireType('ShakaDemoAssetInfo');
+
 /** @type {?shakaDemo.Front} */
 let shakaDemoFront;
 

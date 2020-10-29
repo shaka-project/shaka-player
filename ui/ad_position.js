@@ -7,9 +7,13 @@
 
 goog.provide('shaka.ui.AdPosition');
 
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.requireType('shaka.ui.Controls');
 
 
 /**

@@ -6,6 +6,16 @@
 
 goog.provide('shaka.test.Dash');
 
+goog.require('goog.asserts');
+goog.require('shaka.dash.DashParser');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.ManifestParser');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.StringUtils');
+goog.requireType('shaka.media.SegmentReference');
+goog.requireType('shaka.util.Error');
+
 
 /** @summary Utilities for working with the DASH parser. */
 shaka.test.Dash = class {
@@ -37,9 +47,11 @@ shaka.test.Dash = class {
     const playerInterface = {
       networkingEngine: networkingEngine,
       filter: () => {},
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
+      isLowLatencyMode: () => false,
     };
     const manifest = await dashParser.start('dummy://foo', playerInterface);
     const stream = manifest.variants[0].video;
@@ -65,9 +77,11 @@ shaka.test.Dash = class {
     const playerInterface = {
       networkingEngine: networkingEngine,
       filter: () => {},
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
+      isLowLatencyMode: () => false,
     };
     const p = dashParser.start('dummy://foo', playerInterface);
     await expectAsync(p).toBeRejectedWith(

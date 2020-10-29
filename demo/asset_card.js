@@ -8,6 +8,11 @@
 goog.provide('shakaDemo.AssetCard');
 
 
+goog.require('goog.asserts');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.Tooltips');
+goog.requireType('ShakaDemoAssetInfo');
+
 /**
  * Creates and contains an MDL card that presents info about the given asset.
  * @final
@@ -365,16 +370,16 @@ shakaDemo.AssetCard = class {
     if (this.asset_.storedProgress < 1) {
       this.progressCircle_.classList.remove('hidden');
       for (const button of this.actions_.childNodes) {
-        goog.asserts.assert(
-            button instanceof HTMLButtonElement, 'Wrong node type!');
-        button.disabled = true;
+        if (button instanceof HTMLButtonElement) {
+          button.disabled = true;
+        }
       }
     } else {
       this.progressCircle_.classList.add('hidden');
       for (const button of this.actions_.childNodes) {
-        goog.asserts.assert(
-            button instanceof HTMLButtonElement, 'Wrong node type!');
-        button.disabled = false;
+        if (button instanceof HTMLButtonElement) {
+          button.disabled = false;
+        }
       }
     }
     this.styleProgressCircle_(this.asset_.storedProgress);

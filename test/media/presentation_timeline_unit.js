@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.test.ManifestParser');
+
 describe('PresentationTimeline', () => {
   const originalDateNow = Date.now;
   const makeSegmentReference = (startTime, endTime) => {

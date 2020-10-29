@@ -5,6 +5,14 @@
  */
 
 
+goog.require('shaka.net.HttpFetchPlugin');
+goog.require('shaka.net.HttpXHRPlugin');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.net.NetworkingEngine.RequestType');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.BufferUtils');
+goog.require('shaka.util.Error');
+
 /**
  * Add a set of http plugin tests, for the given scheme plugin.
  *
@@ -187,6 +195,22 @@ function httpPluginTests(usingFetch) {
       const actual = jasmine.Fetch.requests.mostRecent();
       expect(actual).toBeTruthy();
       expect(actual.body).toBeUndefined();
+    });
+
+    it('succeeds and triggers the chunked stream data callback', async () => {
+      const uri = 'https://foo.bar/';
+      // streamDataCallback should get called to handle the ReadableStream
+      // chunked data.
+      const streamDataCallback = jasmine.createSpy('streamDataCallback');
+
+      const request = shaka.net.NetworkingEngine.makeRequest(
+          [uri], retryParameters, Util.spyFunc(streamDataCallback));
+      const response =
+          await plugin(uri, request, requestType, progressUpdated).promise;
+
+      expect(mostRecentRequest().url).toBe(uri);
+      expect(response).toBeTruthy();
+      expect(streamDataCallback).toHaveBeenCalledTimes(1);
     });
   }
 

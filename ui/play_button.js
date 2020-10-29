@@ -7,10 +7,13 @@
 
 goog.provide('shaka.ui.PlayButton');
 
+goog.require('shaka.ads.AdManager');
+goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
+goog.requireType('shaka.ui.Controls');
 
 
 /**

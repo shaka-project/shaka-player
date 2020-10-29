@@ -4,6 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.Player');
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.text.Cue');
+goog.require('shaka.text.SimpleTextDisplayer');
+goog.require('shaka.text.UITextDisplayer');
+goog.require('shaka.ui.Overlay');
+goog.require('shaka.util.EventManager');
+
 const Util = shaka.test.Util;
 
 // TODO: Move this suite to the text/ folder where it belongs
@@ -169,6 +180,13 @@ filterDescribe('TextDisplayer layout', Util.supportsScreenshots, () => {
       // little _after_ appending cues in order to consistently show subtitles
       // natively on the video element.
       beforeScreenshot = async () => {
+        // Seek to the beginning so that we can reasonably wait for movement
+        // after playing below.  If somehow the playhead ends up at the end of
+        // the video, we should seek back before we play.
+        video.currentTime = 0;
+
+        // The video must be played a little now, after the cues were appended,
+        // but before the screenshot.
         video.play();
         await waiter.failOnTimeout(false).timeoutAfter(5)
             .waitForMovement(video);

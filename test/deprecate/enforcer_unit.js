@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.deprecate.Enforcer');
+goog.require('shaka.deprecate.Version');
+goog.require('shaka.test.Util');
+
 describe('Enforcer', () => {
   const Enforcer = shaka.deprecate.Enforcer;
   const Version = shaka.deprecate.Version;

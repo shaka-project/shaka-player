@@ -8,6 +8,8 @@
 goog.provide('shaka.ui.Utils');
 
 goog.require('goog.asserts');
+goog.require('shaka.ui.Enums');
+goog.require('shaka.util.Dom');
 
 
 shaka.ui.Utils = class {

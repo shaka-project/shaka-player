@@ -9,11 +9,15 @@ goog.provide('shaka.ui.SettingsMenu');
 
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.FakeEvent');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
  * @extends {shaka.ui.Element}
+ * @implements {shaka.extern.IUISettingsMenu}
  * @export
  */
 shaka.ui.SettingsMenu = class extends shaka.ui.Element {

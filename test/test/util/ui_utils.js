@@ -7,6 +7,11 @@
 
 goog.provide('shaka.test.UiUtils');
 
+goog.require('shaka.Player');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.ui.Overlay');
+goog.require('shaka.util.EventManager');
+
 
 shaka.test.UiUtils = class {
   /**

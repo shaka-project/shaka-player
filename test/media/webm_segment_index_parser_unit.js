@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.WebmSegmentIndexParser');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+
 describe('WebmSegmentIndexParser', () => {
   const indexSegmentUri = '/base/test/test/assets/index-segment.webm';
   const initSegmentUri = '/base/test/test/assets/init-segment.webm';

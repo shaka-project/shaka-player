@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.text.Cue');
+goog.require('shaka.text.TextEngine');
+goog.require('shaka.util.MimeUtils');
+
 describe('TextEngine', () => {
   const TextEngine = shaka.text.TextEngine;
 
@@ -60,9 +65,11 @@ describe('TextEngine', () => {
 
     it('reports support when it\'s closed captions',
         () => {
-          const closedCaptionsType =
-           shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
-          expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(true);
+          // Both CEA-608 and CEA-708 is supported by our closed caption parser.
+          expect(TextEngine.isTypeSupported(
+              shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE)).toBe(true);
+          expect(TextEngine.isTypeSupported(
+              shaka.util.MimeUtils.CEA708_CLOSED_CAPTION_MIMETYPE)).toBe(true);
         });
   });
 

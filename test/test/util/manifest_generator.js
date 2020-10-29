@@ -6,6 +6,15 @@
 
 goog.provide('shaka.test.ManifestGenerator');
 
+goog.require('goog.asserts');
+goog.require('shaka.test.FakeSegmentIndex');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.Uint8ArrayUtils');
+goog.requireType('shaka.media.InitSegmentReference');
+goog.requireType('shaka.media.PresentationTimeline');
+goog.requireType('shaka.media.SegmentIndex');
+
 
 /**
  * @summary
@@ -503,6 +512,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.emsgSchemeIdUris = null;
       /** @type {!Array.<string>} */
       this.roles = [];
+      /** @type {boolean} */
+      this.forced = false;
       /** @type {?number} */
       this.channelsCount = null;
       /** @type {?number} */

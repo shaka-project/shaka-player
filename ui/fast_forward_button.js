@@ -7,7 +7,10 @@
 
 goog.provide('shaka.ui.FastForwardButton');
 
+goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');

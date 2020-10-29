@@ -7,12 +7,16 @@
 
 goog.provide('shaka.ui.AudioLanguageSelection');
 
+goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
+goog.require('shaka.ui.Utils');
+goog.require('shaka.util.FakeEvent');
+goog.requireType('shaka.ui.Controls');
 
 /**
  * @extends {shaka.ui.SettingsMenu}

@@ -4,6 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.dash.ContentProtection');
+goog.require('shaka.dash.DashParser');
+goog.require('shaka.test.Dash');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.Uint8ArrayUtils');
+
 // Test DRM-related parsing.
 describe('DashParser ContentProtection', () => {
   const Dash = shaka.test.Dash;
@@ -34,9 +43,11 @@ describe('DashParser ContentProtection', () => {
     const playerInterface = {
       networkingEngine: netEngine,
       filter: (manifest) => Promise.resolve(),
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
+      isLowLatencyMode: () => false,
     };
 
     const actual = await dashParser.start(

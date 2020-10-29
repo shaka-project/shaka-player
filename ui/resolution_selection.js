@@ -8,12 +8,16 @@
 goog.provide('shaka.ui.ResolutionSelection');
 
 goog.require('goog.asserts');
+goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.FakeEvent');
+goog.requireType('shaka.ui.Controls');
 
 
 /**

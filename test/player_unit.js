@@ -4,6 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.Player');
+goog.require('shaka.log');
+goog.require('shaka.media.BufferingObserver');
+goog.require('shaka.media.ManifestParser');
+goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.test.FakeAbrManager');
+goog.require('shaka.test.FakeDrmEngine');
+goog.require('shaka.test.FakeManifestParser');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.FakePlayhead');
+goog.require('shaka.test.FakeStreamingEngine');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.ConfigUtils');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.ManifestParserUtils');
+goog.requireType('shaka.media.Playhead');
+
 describe('Player', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Util = shaka.test.Util;
@@ -746,6 +768,27 @@ describe('Player', () => {
       expect(fooConfig2.distinctiveIdentifierRequired).toBe(true);
       expect(barConfig2.distinctiveIdentifierRequired).toBe(false);
     });
+
+    it('sets default streaming configuration with low latency mode', () => {
+      player.configure({
+        streaming: {
+          lowLatencyMode: true,
+          rebufferingGoal: 1,
+          inaccurateManifestTolerance: 1,
+        },
+      });
+      expect(player.getConfiguration().streaming.rebufferingGoal).toBe(1);
+      expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
+          .toBe(1);
+
+      // When low latency streaming gets enabled, rebufferingGoal will default
+      // to 0.01 if unless specified, and inaccurateManifestTolerance will
+      // default to 0 unless specified.
+      player.configure('streaming.lowLatencyMode', true);
+      expect(player.getConfiguration().streaming.rebufferingGoal).toBe(0.01);
+      expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
+          .toBe(0);
+    });
   });
 
   describe('resetConfiguration', () => {
@@ -1020,6 +1063,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          forced: false,
           videoId: 1,
           audioId: 3,
           channelsCount: 6,
@@ -1049,6 +1093,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          forced: false,
           videoId: 2,
           audioId: 3,
           channelsCount: 6,
@@ -1078,6 +1123,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          forced: false,
           videoId: 1,
           audioId: 4,
           channelsCount: 2,
@@ -1107,6 +1153,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          forced: false,
           videoId: 2,
           audioId: 4,
           channelsCount: 2,
@@ -1136,6 +1183,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary', 'main'],
           audioRoles: ['commentary'],
+          forced: false,
           videoId: 1,
           audioId: 5,
           channelsCount: 2,
@@ -1165,6 +1213,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary'],
           audioRoles: ['commentary'],
+          forced: false,
           videoId: 2,
           audioId: 5,
           channelsCount: 2,
@@ -1194,6 +1243,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: [],
+          forced: false,
           videoId: 1,
           audioId: 6,
           channelsCount: 2,
@@ -1223,6 +1273,7 @@ describe('Player', () => {
           primary: false,
           roles: [],
           audioRoles: [],
+          forced: false,
           videoId: 2,
           audioId: 6,
           channelsCount: 2,
@@ -1250,6 +1301,7 @@ describe('Player', () => {
           primary: false,
           roles: [],
           audioRoles: null,
+          forced: false,
           channelsCount: null,
           audioSamplingRate: null,
           audioBandwidth: null,
@@ -1279,6 +1331,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: null,
+          forced: false,
           channelsCount: null,
           audioSamplingRate: null,
           audioBandwidth: null,
@@ -1308,6 +1361,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary'],
           audioRoles: null,
+          forced: false,
           channelsCount: null,
           audioSamplingRate: null,
           audioBandwidth: null,
@@ -3126,12 +3180,13 @@ describe('Player', () => {
     });
 
     describe('getAudioLanguagesAndRoles', () => {
-      it('ignores video roles', async () => {
+      it('ignores video roles and labels', async () => {
         manifest = shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.addVariant(0, (variant) => {
             variant.language = 'en';
             variant.addVideo(1, (stream) => {
               stream.roles = ['video-only-role'];
+              stream.label = 'should not show up';
             });
             variant.addAudio(2, (stream) => {
               stream.roles = ['audio-only-role'];
@@ -3143,18 +3198,47 @@ describe('Player', () => {
         await player.load(fakeManifestUri, 0, fakeMimeType);
 
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'en', role: 'audio-only-role'},
+          {language: 'en', role: 'audio-only-role', label: null},
         ]);
       });
 
       it('lists all language-role combinations', async () => {
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'fr', role: ''},
-          {language: 'en', role: 'main'},
-          {language: 'en', role: 'commentary'},
-          {language: 'de', role: 'foo'},
-          {language: 'de', role: 'bar'},
+          {language: 'fr', role: '', label: null},
+          {language: 'en', role: 'main', label: null},
+          {language: 'en', role: 'commentary', label: null},
+          {language: 'de', role: 'foo', label: null},
+          {language: 'de', role: 'bar', label: null},
+        ]);
+      });
+
+      it('associates audio streams with their labels', async () => {
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(1, (stream) => {
+              stream.roles = ['role-1'];
+              stream.language = 'en';
+              stream.label = 'english';
+            });
+          });
+          manifest.addVariant(0, (variant) => {
+            variant.language = 'es';
+            variant.addAudio(2, (stream) => {
+              stream.roles = ['role-2', 'role-3'];
+              stream.language = 'es';
+              stream.label = 'spanish';
+            });
+          });
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(player.getAudioLanguagesAndRoles()).toEqual([
+          {language: 'en', role: 'role-1', label: 'english'},
+          {language: 'es', role: 'role-2', label: 'spanish'},
+          {language: 'es', role: 'role-3', label: 'spanish'},
         ]);
       });
 
@@ -3169,7 +3253,7 @@ describe('Player', () => {
 
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'und', role: ''},
+          {language: 'und', role: '', label: null},
         ]);
       });
     });
@@ -3178,11 +3262,11 @@ describe('Player', () => {
       it('lists all language-role combinations', async () => {
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getTextLanguagesAndRoles()).toEqual([
-          {language: 'es', role: 'baz'},
-          {language: 'es', role: 'qwerty'},
-          {language: 'en', role: 'main'},
-          {language: 'en', role: 'caption'},
-          {language: 'en', role: 'subtitle'},
+          {language: 'es', role: 'baz', label: null},
+          {language: 'es', role: 'qwerty', label: null},
+          {language: 'en', role: 'main', label: null},
+          {language: 'en', role: 'caption', label: null},
+          {language: 'en', role: 'subtitle', label: null},
         ]);
       });
     });

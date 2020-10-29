@@ -70,6 +70,7 @@ shaka.extern.StateChange;
  *   corruptedFrames: number,
  *   estimatedBandwidth: number,
  *
+ *   completionPercent: number,
  *   loadLatency: number,
  *   manifestTimeSeconds: number,
  *   drmTimeSeconds: number,
@@ -111,6 +112,10 @@ shaka.extern.StateChange;
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
  *
+ * @property {number} completionPercent
+ *   This is the greatest completion percent that the user has experienced in
+ *   playback.  Also known as the "high water mark".  Is NaN when there is no
+ *   known duration, such as for livestreams.
  * @property {number} loadLatency
  *   This is the number of seconds it took for the video element to have enough
  *   data to begin playback.  This is measured from the time load() is called to
@@ -208,6 +213,7 @@ shaka.extern.BufferedInfo;
  *   primary: boolean,
  *   roles: !Array.<string>,
  *   audioRoles: Array.<string>,
+ *   forced: boolean,
  *   videoId: ?number,
  *   audioId: ?number,
  *   channelsCount: ?number,
@@ -273,6 +279,9 @@ shaka.extern.BufferedInfo;
  *   The roles of the audio in the track, e.g. <code>'main'</code> or
  *   <code>'commentary'</code>. Will be null for text tracks or variant tracks
  *   without audio.
+ * @property {boolean} forced
+ *   True indicates that this in the forced text language for the content.
+ *   This flag is based on signals from the manifest.
  * @property {?number} videoId
  *   (only for variant tracks) The video stream id.
  * @property {?number} audioId
@@ -662,8 +671,7 @@ shaka.extern.HlsManifestConfiguration;
  *   disableText: boolean,
  *   defaultPresentationDelay: number,
  *   dash: shaka.extern.DashManifestConfiguration,
- *   hls: shaka.extern.HlsManifestConfiguration,
- *   lowLatencyMode: boolean
+ *   hls: shaka.extern.HlsManifestConfiguration
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -694,8 +702,6 @@ shaka.extern.HlsManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
- * @property {boolean} lowLatencyMode
- *  If <code>true</code>, low latency streaming mode is enabled.
  *
  * @exportDoc
  */
@@ -721,7 +727,8 @@ shaka.extern.ManifestConfiguration;
  *   stallThreshold: number,
  *   stallSkip: number,
  *   useNativeHlsOnSafari: boolean,
- *   inaccurateManifestTolerance: number
+ *   inaccurateManifestTolerance: number,
+ *   lowLatencyMode: boolean
  * }}
  *
  * @description
@@ -809,7 +816,13 @@ shaka.extern.ManifestConfiguration;
  *   The maximum difference, in seconds, between the times in the manifest and
  *   the times in the segments.  Larger values allow us to compensate for more
  *   drift (up to one segment duration).  Smaller values reduce the incidence of
- *   extra segment requests necessary to compensate for drift
+ *   extra segment requests necessary to compensate for drift.
+ * @property {boolean} lowLatencyMode
+ *  If <code>true</code>, low latency streaming mode is enabled. If
+ *   lowLatencyMode is set to true, inaccurateManifestTolerance is set to 0
+ *   unless specified, and rebufferingGoal to 0.01 unless specified at the same
+ *   time.
+ *
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -953,7 +966,8 @@ shaka.extern.PlayerConfiguration;
 /**
  * @typedef {{
  *   language: string,
- *   role: string
+ *   role: string,
+ *   label: ?string
  * }}
  *
  * @property {string} language
@@ -961,6 +975,8 @@ shaka.extern.PlayerConfiguration;
  * @property {string} role
  *    The role name for the stream. If the stream has no role, <code>role</code>
  *    will be <code>''</code>.
+ * @property {?string} label
+ *    The label of the audio stream, if it has one.
  * @exportDoc
  */
 shaka.extern.LanguageRole;

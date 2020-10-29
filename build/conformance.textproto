@@ -133,6 +133,12 @@ requirement: {
   whitelist_regexp: 'lib/util/buffer_utils.js'
 }
 
+requirement: {
+  type: BANNED_CODE_PATTERN
+  value: 'function template () { new Date().getTime() }'
+  error_message: 'Use Date.now() instead.'
+}
+
 # Disallow console logging.
 requirement: {
   type: BANNED_PROPERTY_CALL
@@ -147,6 +153,7 @@ requirement: {
   whitelist_regexp: 'lib/debug/log.js'
   whitelist_regexp: 'test/test/boot.js'
   whitelist_regexp: 'node_modules/'
+  whitelist_regexp: '[synthetic:es6/promise/promise]'
 }
 
 # Disallow querySelector and querySelectorAll since they aren't supported on

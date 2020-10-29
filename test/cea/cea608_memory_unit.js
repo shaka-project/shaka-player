@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cea.Cea608Memory');
+goog.require('shaka.cea.CeaUtils');
+goog.require('shaka.test.CeaUtils');
+goog.require('shaka.text.Cue');
+
 describe('Cea608Memory', () => {
   const CeaUtils = shaka.test.CeaUtils;
 
@@ -117,12 +122,12 @@ describe('Cea608Memory', () => {
       CeaUtils.createStyledCue(startTime, endTime,
           expectedText, /* underline= */ true,
           /* italics= */ true, /* textColor= */ 'red',
-          /* backgroundColor= */ shaka.cea.Cea608Memory.DEFAULT_BG_COLOR),
+          /* backgroundColor= */ shaka.cea.CeaUtils.DEFAULT_BG_COLOR),
 
       CeaUtils.createStyledCue(startTime, endTime,
           expectedText, /* underline= */ false,
           /* italics= */ false, /* textColor= */ 'red',
-          /* backgroundColor= */ shaka.cea.Cea608Memory.DEFAULT_BG_COLOR),
+          /* backgroundColor= */ shaka.cea.CeaUtils.DEFAULT_BG_COLOR),
     ];
 
     const expectedCaption = {

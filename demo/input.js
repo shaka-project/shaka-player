@@ -11,6 +11,9 @@ goog.provide('shakaDemo.NumberInput');
 goog.provide('shakaDemo.SelectInput');
 goog.provide('shakaDemo.TextInput');
 
+goog.require('shakaDemo.MessageIds');
+goog.requireType('shakaDemo.InputContainer');
+
 /**
  * Creates and contains the MDL elements of a type of input.
  */

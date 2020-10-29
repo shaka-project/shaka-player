@@ -4,6 +4,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.MediaSourceEngine');
+goog.require('shaka.media.MediaSourcePlayhead');
+goog.require('shaka.media.SegmentIndex');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.media.StreamingEngine');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.FakeClosedCaptionParser');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.test.Mp4LiveStreamGenerator');
+goog.require('shaka.test.Mp4VodStreamGenerator');
+goog.require('shaka.test.StreamingEngineUtil');
+goog.require('shaka.test.TestScheme');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.util.EventManager');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.Platform');
+goog.require('shaka.util.PlayerConfiguration');
+goog.requireType('shaka.media.Playhead');
+goog.requireType('shaka.media.PresentationTimeline');
+goog.requireType('shaka.test.FakeNetworkingEngine');
+goog.requireType('shaka.test.FakePresentationTimeline');
+
 describe('StreamingEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Util = shaka.test.Util;
@@ -200,7 +225,6 @@ describe('StreamingEngine', () => {
         (type, periodNumber, position) => {
           const wallClockTime = Date.now() / 1000;
           const segment = generators[type].getSegment(position, wallClockTime);
-          expect(segment).not.toBeNull();
           return segment;
         },
         /* delays= */{audio: 0, video: 0, text: 0});

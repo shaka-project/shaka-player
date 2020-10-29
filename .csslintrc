@@ -8,6 +8,6 @@
       }],
       "selector-list-comma-newline-after": "always-multi-line",
       "selector-pseudo-element-colon-notation": "single",
-      "unit-whitelist": ["em", "%", "px", "s", "deg", "vmin", "ms", "vh"]
+      "unit-allowed-list": ["em", "%", "px", "s", "deg", "vmin", "ms", "vh"]
     }
 }

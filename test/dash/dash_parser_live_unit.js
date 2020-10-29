@@ -4,6 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.dash.DashParser');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.ManifestParser');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.StringUtils');
+goog.requireType('shaka.util.PublicPromise');
+
 describe('DashParser Live', () => {
   const Util = shaka.test.Util;
   const ManifestParser = shaka.test.ManifestParser;
@@ -27,9 +40,11 @@ describe('DashParser Live', () => {
     playerInterface = {
       networkingEngine: fakeNetEngine,
       filter: (manifest) => Promise.resolve(),
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
+      isLowLatencyMode: () => false,
     };
   });
 
@@ -679,9 +694,7 @@ describe('DashParser Live', () => {
       '</MPD>',
     ].join('\n');
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
-    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-    config.lowLatencyMode = true;
-    parser.configure(config);
+    playerInterface.isLowLatencyMode = () => true;
 
     Date.now = () => 600000; /* 10 minutes */
     const manifest = await parser.start('dummy://foo', playerInterface);

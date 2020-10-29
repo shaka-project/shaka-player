@@ -86,6 +86,10 @@ module.exports = (config) => {
       'node_modules/es6-promise-polyfill/promise.js',
       //   Babel polyfill, required for async/await
       'node_modules/babel-polyfill/dist/polyfill.js',
+      //   TextDecoder polyfill, required for TextDecoder/TextEncoder on IE and
+      //   legacy Edge
+      //   eslint-disable-next-line max-len
+      'node_modules/fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js',
 
       // muxjs module next
       'node_modules/mux.js/dist/mux.min.js',
@@ -580,7 +584,12 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
 
     // Compare the new screenshot to the old one and produce a diff image.
     // Initially, the image data will be raw pixels, 4 bytes per pixel.
-    const diff = Jimp.diff(oldScreenshot, newScreenshot, /* threshold= */ 0);
+    // The threshold parameter affects the sensitivity of individual pixel
+    // comparisons.  Setting it too low means small rendering changes in the
+    // browser can cause failures even when a human can't see the difference,
+    // and setting it too high means human-noticeable changes could go
+    // undetected by a test.
+    const diff = Jimp.diff(oldScreenshot, newScreenshot, /* threshold= */ 0.05);
 
     // Write the diff to disk.  This is used to review when there are changes.
     fs.writeFileSync(
