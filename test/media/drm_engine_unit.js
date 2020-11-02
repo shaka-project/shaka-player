@@ -861,32 +861,6 @@ describe('DrmEngine', () => {
           .toHaveBeenCalledWith('cenc', initData3);
     });
 
-    it('creates sessions with the correct sessionType', async () => {
-      // Set up init data overrides in the manifest:
-      /** @type {!Uint8Array} */
-      const initData = new Uint8Array(5);
-
-      tweakDrmInfos((drmInfos) => {
-        drmInfos[0].initData = [
-          {initData: initData, initDataType: 'cenc', keyId: 'abc'},
-        ];
-      });
-
-      mockMediaKeySystemAccess.getConfiguration.and.returnValue({
-        persistentState: 'required',
-        audioCapabilities: [{contentType: 'audio/webm'}],
-        videoCapabilities: [{contentType: 'video/mp4; codecs="fake"'}],
-      });
-
-      await initAndAttach();
-
-      // expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
-      expect(mockMediaKeys.createSession).toHaveBeenCalledWith(
-          'persistent-license'
-      );
-      expect(session1.generateRequest).toHaveBeenCalledWith('cenc', initData);
-    });
-
     it('ignores duplicate init data overrides', async () => {
       // Set up init data overrides in the manifest;
       // The second initData has a different keyId from the first,
