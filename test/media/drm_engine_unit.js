@@ -636,13 +636,6 @@ describe('DrmEngine', () => {
         });
       });
 
-      // Add manifest-supplied license servers for both.
-      tweakDrmInfos((drmInfos) => {
-        for (const drmInfo of drmInfos) {
-          drmInfo.licenseServerUri = 'https://com.microsoft.playready/license';
-        }
-      });
-
       setRequestMediaKeySystemAccessSpy([
         'com.microsoft.playready.recommendation',
       ]);
