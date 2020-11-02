@@ -481,7 +481,7 @@ describe('DrmEngine', () => {
           .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
             distinctiveIdentifier: 'optional',
             persistentState: 'required',
-            sessionTypes: ['persistent-license'],
+            sessionTypes: ['temporary'],
           })]);
     });
 
