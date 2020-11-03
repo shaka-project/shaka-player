@@ -167,9 +167,9 @@ Microsoft Documentation: https://docs.microsoft.com/en-us/playready/overview/sec
 `com.microsoft.playready` key system ignores given robustness and stays at a
 `2000` decryption level.
 
-Shaka will firstly try to request a MediaKeyAccess with the recommendation keySystem
-`com.microsoft.playready.recommendation` and in case it fails, silently fallback to
-`com.microsoft.playready`.
+On Edge, Shaka will firstly try to request a MediaKeyAccess with the
+recommendation keySystem `com.microsoft.playready.recommendation` and in case
+it fails, silently fallback to `com.microsoft.playready`.
 
 NB: Audio Hardware DRM is not supported (PlayReady limitation)
 
