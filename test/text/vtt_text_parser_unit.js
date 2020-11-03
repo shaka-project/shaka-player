@@ -17,6 +17,7 @@ describe('VttTextParser', () => {
   const Cue = shaka.text.Cue;
   const CueRegion = shaka.text.CueRegion;
   const originalLogWarning = shaka.log.warning;
+  const anyString = jasmine.any(String);
 
   /** @type {!jasmine.Spy} */
   let logWarningSpy;
@@ -172,28 +173,36 @@ describe('VttTextParser', () => {
   it('rejects invalid time values', () => {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00.020    --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n0:00.020  --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:00.20  --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:100.20 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:00.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:00:00:00.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:61.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n61:00.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
   });
 
   it('supports vertical setting', () => {
@@ -762,11 +771,20 @@ describe('VttTextParser', () => {
    * @param {shaka.util.Error.Code} code
    * @param {string} text
    * @param {shaka.extern.TextParser.TimeContext} time
+   * @param {*=} errorData
    */
-  function errorHelper(code, text, time) {
-    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
-        code));
+  function errorHelper(code, text, time, errorData = undefined) {
+    let shakaError;
+    if (errorData) {
+      shakaError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
+          code, errorData);
+    } else {
+      shakaError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
+          code);
+    }
+    const error = shaka.test.Util.jasmineError(shakaError);
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     expect(() => new shaka.text.VttTextParser().parseMedia(data, time))
