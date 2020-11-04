@@ -654,14 +654,14 @@ describe('StreamingEngine', () => {
     // audio/video MP4 segment.
     // appendBuffer should be called once for each init segment of the
     // audio / video segment, and twice for each segment.
-    // 8 init segments + 8 audio/video segments * 2 + 4 text segments = 28.
+    // 4 init segments + 8 audio/video segments * 2 + 4 text segments = 24.
     if (window.ReadableStream) {
-      expect(mediaSourceEngine.appendBuffer).toHaveBeenCalledTimes(28);
+      expect(mediaSourceEngine.appendBuffer).toHaveBeenCalledTimes(24);
     } else {
       // If ReadableStream is not supported by the browser, fall back to regular
       // streaming.
-      // 8 init segments + 8 audio/video segments + 4 text segments = 20.
-      expect(mediaSourceEngine.appendBuffer).toHaveBeenCalledTimes(20);
+      // 4 init segments + 8 audio/video segments + 4 text segments = 16.
+      expect(mediaSourceEngine.appendBuffer).toHaveBeenCalledTimes(16);
     }
   });
 
