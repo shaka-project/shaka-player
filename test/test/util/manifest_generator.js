@@ -405,6 +405,8 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     this.initData = null;
     /** @type {Set.<string>} */
     this.keyIds = new Set();
+    /** @type {Array.<string>} */
+    this.sessionTypes = [];
 
     /** @type {shaka.extern.DrmInfo} */
     const foo = this;

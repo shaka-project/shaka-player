@@ -538,6 +538,7 @@ describe('DrmEngine', () => {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: null,
+        sessionType: '',
         individualizationServer: '',
         distinctiveIdentifierRequired: true,
         persistentStateRequired: true,
@@ -594,6 +595,7 @@ describe('DrmEngine', () => {
         audioRobustness: 'bad',
         videoRobustness: 'so_bad_it_hurts',
         serverCertificate: null,
+        sessionType: '',
         individualizationServer: '',
         distinctiveIdentifierRequired: false,
         persistentStateRequired: false,
@@ -646,6 +648,7 @@ describe('DrmEngine', () => {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: null,
+        sessionType: '',
         individualizationServer: '',
         distinctiveIdentifierRequired: false,
         persistentStateRequired: true,
@@ -1951,6 +1954,7 @@ describe('DrmEngine', () => {
         videoRobustness: 'really_really_ridiculously_good',
         distinctiveIdentifierRequired: true,
         serverCertificate: null,
+        sessionType: '',
         individualizationServer: '',
         persistentStateRequired: true,
       };
@@ -2297,6 +2301,7 @@ describe('DrmEngine', () => {
       persistentStateRequired: false,
       serverCertificate: serverCert,
       individualizationServer: '',
+      sessionType: '',
       videoRobustness: '',
     };
   }
