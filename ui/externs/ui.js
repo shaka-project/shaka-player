@@ -359,7 +359,9 @@ shaka.extern.IUISettingsMenu = class {
 
 /**
  * Interface for SeekBars. SeekBars should inherit from the concrete base
- * class shaka.ui.Element.
+ * class shaka.ui.Element. If you do not need to totaly rebuild the
+ * SeekBar, you should consider using shaka.ui.RangeElement or
+ * shaka.ui.SeekBar as your base class.
  *
  * @extends {shaka.extern.IUIElement}
  * @interface
