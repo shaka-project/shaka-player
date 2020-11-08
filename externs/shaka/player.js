@@ -980,3 +980,21 @@ shaka.extern.PlayerConfiguration;
  * @exportDoc
  */
 shaka.extern.LanguageRole;
+
+
+/**
+ * @typedef {{
+ *   payload: string,
+ *   startTime: number,
+ *   endTime: number
+ * }}
+ *
+ * @property {string} payload
+ *    The text payload of the chapter.
+ * @property {number} startTime
+ *    The time that describes the beginning of the range of the chapter.
+ * @property {number} endTime
+ *    The time that describes the end of the range of chapter.
+ * @exportDoc
+ */
+shaka.extern.Chapter;

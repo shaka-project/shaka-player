@@ -326,6 +326,58 @@ describe('Player Src Equals', () => {
     expect(newTrack).toBeTruthy();
   });
 
+  it('add external chapters in vtt format', async () => {
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+
+    const locationUri = new goog.Uri(location.href);
+    const partialUri = new goog.Uri('/base/test/test/assets/chapters.vtt');
+    const absoluteUri = locationUri.resolve(partialUri);
+    await player.addChaptersTrack(absoluteUri.toString(), 'en');
+
+    await shaka.test.Util.delay(1.5);
+
+    const chapters = player.getChapters('en');
+    expect(chapters.length).toBe(3);
+    const chapter1 = chapters[0];
+    expect(chapter1.payload).toBe('Chapter 1');
+    expect(chapter1.startTime).toBe(0);
+    expect(chapter1.endTime).toBe(5);
+    const chapter2 = chapters[1];
+    expect(chapter2.payload).toBe('Chapter 2');
+    expect(chapter2.startTime).toBe(5);
+    expect(chapter2.endTime).toBe(30);
+    const chapter3 = chapters[2];
+    expect(chapter3.payload).toBe('Chapter 3');
+    expect(chapter3.startTime).toBe(30);
+    expect(chapter3.endTime).toBe(61.349);
+  });
+
+  it('add external chapters in srt format', async () => {
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+
+    const locationUri = new goog.Uri(location.href);
+    const partialUri = new goog.Uri('/base/test/test/assets/chapters.srt');
+    const absoluteUri = locationUri.resolve(partialUri);
+    await player.addChaptersTrack(absoluteUri.toString(), 'en');
+
+    await shaka.test.Util.delay(1.5);
+
+    const chapters = player.getChapters('en');
+    expect(chapters.length).toBe(3);
+    const chapter1 = chapters[0];
+    expect(chapter1.payload).toBe('Chapter 1');
+    expect(chapter1.startTime).toBe(0);
+    expect(chapter1.endTime).toBe(5);
+    const chapter2 = chapters[1];
+    expect(chapter2.payload).toBe('Chapter 2');
+    expect(chapter2.startTime).toBe(5);
+    expect(chapter2.endTime).toBe(30);
+    const chapter3 = chapters[2];
+    expect(chapter3.payload).toBe('Chapter 3');
+    expect(chapter3.startTime).toBe(30);
+    expect(chapter3.endTime).toBe(61.349);
+  });
+
   // Since we are not in-charge of streaming, calling |retryStreaming| should
   // have no effect.
   it('requesting streaming retry does nothing', async () => {
