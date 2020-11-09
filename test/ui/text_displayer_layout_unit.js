@@ -8,12 +8,9 @@ goog.require('shaka.Player');
 goog.require('shaka.test.FakeVideo');
 goog.require('shaka.test.UiUtils');
 goog.require('shaka.test.Util');
-goog.require('shaka.test.Waiter');
 goog.require('shaka.text.Cue');
-goog.require('shaka.text.SimpleTextDisplayer');
 goog.require('shaka.text.UITextDisplayer');
 goog.require('shaka.ui.Overlay');
-goog.require('shaka.util.EventManager');
 
 const Util = shaka.test.Util;
 

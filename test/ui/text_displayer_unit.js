@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.test.Util');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.text.Cue');
+goog.require('shaka.text.UITextDisplayer');
+
 describe('UITextDisplayer', () => {
   /** @type {!HTMLElement} */
   let videoContainer;

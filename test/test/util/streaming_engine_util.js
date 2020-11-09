@@ -14,7 +14,6 @@ goog.require('shaka.test.FakePresentationTimeline');
 goog.require('shaka.test.FakeSegmentIndex');
 goog.require('shaka.test.Util');
 goog.require('shaka.util.AbortableOperation');
-goog.require('shaka.util.Error');
 goog.require('shaka.util.ManifestParserUtils');
 goog.requireType('shaka.media.PresentationTimeline');
 

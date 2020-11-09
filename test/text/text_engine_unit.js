@@ -5,7 +5,6 @@
  */
 
 goog.require('shaka.test.FakeTextDisplayer');
-goog.require('shaka.text.Cue');
 goog.require('shaka.text.TextEngine');
 goog.require('shaka.util.MimeUtils');
 

@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.Uri');
 goog.require('shaka.Player');
 goog.require('shaka.test.UiUtils');
 goog.require('shaka.test.Util');

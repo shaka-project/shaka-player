@@ -7,7 +7,6 @@ goog.require('goog.asserts');
 goog.require('shaka.media.Transmuxer');
 goog.require('shaka.test.Util');
 goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.Mp4BoxParsers');
 goog.require('shaka.util.Mp4Parser');
 
 describe('Transmuxer', () => {

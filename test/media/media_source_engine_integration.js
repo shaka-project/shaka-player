@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.ClosedCaptionParser');
+goog.require('goog.asserts');
 goog.require('shaka.media.MediaSourceEngine');
+goog.require('shaka.media.MuxJSClosedCaptionParser');
 goog.require('shaka.test.FakeTextDisplayer');
 goog.require('shaka.test.TestScheme');
 goog.require('shaka.test.UiUtils');
