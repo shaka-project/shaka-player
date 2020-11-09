@@ -56,6 +56,29 @@ function getClientArg(name) {
   goog.asserts.assert = jasmineAssert;
   console.assert = /** @type {?} */(jasmineAssert);
 
+  /**
+   * Patches a function on Element to fail an assertion if we use a namespaced
+   * name on it.  We should use the namespace-aware versions instead.
+   */
+  function patchNamespaceFunction(type, name) {
+    // eslint-disable-next-line no-restricted-syntax
+    const real = type.prototype[name];
+    /** @this {Element} @suppress {lintChecks} */
+    // eslint-disable-next-line no-restricted-syntax
+    type.prototype[name] = function(arg) {
+      // Ignore xml: namespaces since it's builtin.
+      if (!arg.startsWith('xml:') && !arg.startsWith('xmlns:') &&
+          arg.includes(':')) {
+        fail('Use namespace-aware ' + name);
+      }
+      // eslint-disable-next-line no-restricted-syntax
+      return real.apply(this, arguments);
+    };
+  }
+  patchNamespaceFunction(Element, 'getAttribute');
+  patchNamespaceFunction(Element, 'hasAttribute');
+  patchNamespaceFunction(Element, 'getElementsByTagName');
+
   // As of Feb 2018, this is only implemented in Chrome.
   // https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection
   window.addEventListener('unhandledrejection', (event) => {

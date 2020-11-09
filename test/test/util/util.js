@@ -158,9 +158,17 @@ shaka.test.Util.expectToEqualElementCompare_ = function(actual, expected) {
  * @private
  */
 shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
-  let prospectiveDiff = 'The difference was in ' +
+  const prospectiveDiff = 'The difference was in ' +
       (actual.outerHTML || actual.textContent) + ' vs ' +
       (expected['outerHTML'] || expected.textContent) + ': ';
+  const getAttr = (obj, attr) => {
+    if (attr.namespaceURI) {
+      return shaka.util.XmlUtils.getAttributeNS(
+          obj, attr.namespaceURI, attr.localName);
+    } else {
+      return obj.getAttribute(attr.localName);
+    }
+  };
 
   if (!(actual instanceof Element) && !(expected instanceof Element)) {
     // Compare them as nodes.
@@ -178,16 +186,14 @@ shaka.test.Util.expectToEqualElementRecursive_ = function(actual, expected) {
     if (actual.attributes.length != expected.attributes.length) {
       return prospectiveDiff + 'Different attribute list length.';
     }
-    for (let i = 0; i < actual.attributes.length; i++) {
-      let aAttrib = actual.attributes[i].nodeName;
-      let aAttribVal = actual.getAttribute(aAttrib);
-      let eAttrib = expected.attributes[i].nodeName;
-      let eAttribVal = expected.getAttribute(eAttrib);
-      if (aAttrib != eAttrib || aAttribVal != eAttribVal) {
-        let diffNote =
-            aAttrib + '=' + aAttribVal + ' vs ' + eAttrib + '=' + eAttribVal;
-        return prospectiveDiff + 'Attribute #' + i +
-            ' was different (' + diffNote + ').';
+
+    for (const attr of Array.from(actual.attributes)) {
+      const valueA = getAttr(actual, attr);
+      const valueB = getAttr(expected, attr);
+      if (valueA != valueB) {
+        const name = (attr.prefix ? attr.prefix + ':' : '') + attr.localName;
+        return `${prospectiveDiff} Attribute ${name} was different ` +
+               `(${valueA} vs ${valueB})`;
       }
     }
 
