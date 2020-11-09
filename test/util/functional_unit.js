@@ -28,21 +28,35 @@ describe('Functional', () => {
     /** @typedef {{val: number}} */
     let DummyObjType;
 
-    // Normally, our tests are transpiled by Babel to allow them to run on all
-    // browsers.  However, that would convert all of these into plain functions,
-    // which would defeat the purpose.  Therefore, we're using eval to make sure
-    // these get defined in exactly this way.  Furthermore, to make sure these
-    // are returned to names that are in scope of this test suite in strict mode
-    // (used by Babel), each eval must use an assignment syntax to a dummy
-    // variable, then return it.
-    const FactoryFunction = /** @type {function():DummyObjType} */(eval(
-        'const f = function() { return { val: 1 }; }; f;'));
-    const FactoryArrowFunction = /** @type {function():DummyObjType} */(eval(
-        'const f = () => { return { val: 1 }; }; f;'));
-    const Es5ConstructorFunction = /** @type {function():DummyObjType} */(eval(
-        'const f = function() { this.val = 1; }; f;'));
-    const Es6Class = /** @type {function():DummyObjType} */(eval(
-        'const f = class { constructor() { this.val = 1; } }; f;'));
+    // Wait to create these in beforeAll().  That way, the calls will not happen
+    // on platforms that don't support ES6.  The filter doesn't remove the body
+    // of the "describe" block, only the bodies of before/after and it.
+    /** @type {function():DummyObjType} */
+    let FactoryFunction;
+    /** @type {function():DummyObjType} */
+    let FactoryArrowFunction;
+    /** @type {function():DummyObjType} */
+    let Es5ConstructorFunction;
+    /** @type {function():DummyObjType} */
+    let Es6Class;
+
+    beforeAll(() => {
+      // Normally, our tests are transpiled by Babel to allow them to run on all
+      // browsers.  However, that would convert all of these into plain
+      // functions, which would defeat the purpose.  Therefore, we're using eval
+      // to make sure these get defined in exactly this way.  Furthermore, to
+      // make sure these are returned to names that are in scope of this test
+      // suite in strict mode (used by Babel), each eval must use an assignment
+      // syntax to a dummy variable, then return it.
+      FactoryFunction = /** @type {function():DummyObjType} */(eval(
+          'const f = function() { return { val: 1 }; }; f;'));
+      FactoryArrowFunction = /** @type {function():DummyObjType} */(eval(
+          'const f = () => { return { val: 1 }; }; f;'));
+      Es5ConstructorFunction = /** @type {function():DummyObjType} */(eval(
+          'const f = function() { this.val = 1; }; f;'));
+      Es6Class = /** @type {function():DummyObjType} */(eval(
+          'const f = class { constructor() { this.val = 1; } }; f;'));
+    });
 
     it('supports true factory functions', () => {
       const obj = Functional.callFactory(FactoryFunction);
