@@ -36,6 +36,7 @@ shaka.extern = {};
  * @property {string} adBreaks
  *   The CSS background color applied to the portion of the seek bar showing
  *   when the ad breaks are scheduled to occur on the timeline.
+ * @exportDoc
  */
 shaka.extern.UISeekBarColors;
 
@@ -51,10 +52,14 @@ shaka.extern.UISeekBarColors;
  * @property {string} level
  *   The CSS background color applied to the portion of the volume bar showing
  *   the volume level.
+ * @exportDoc
  */
 shaka.extern.UIVolumeBarColors;
 
 /**
+ * @description
+ * The UI's configuration options.
+ *
  * @typedef {{
  *   controlPanelElements: !Array.<string>,
  *   overflowMenuButtons: !Array.<string>,
@@ -142,6 +147,7 @@ shaka.extern.UIVolumeBarColors;
  *   enters fullscreen.  Note that this behavior is based on an experimental
  *   browser API, and may not work on all platforms.
  *   Defaults to true.
+ * @exportDoc
  */
 shaka.extern.UIConfiguration;
 
