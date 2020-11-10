@@ -195,7 +195,6 @@ shakaDemo.Config = class {
                          /* canBeZero = */ false,
                          /* canBeUnset = */ true)
         .addTextInput_('Clock Sync URI', 'manifest.dash.clockSyncUri')
-        .addBoolInput_('Ignore DRM Info', 'manifest.dash.ignoreDrmInfo')
         .addNumberInput_('Default Presentation Delay',
                          'manifest.dash.defaultPresentationDelay')
         .addNumberInput_('Ignore DASH suggestedPresentationDelay',
