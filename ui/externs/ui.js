@@ -44,6 +44,7 @@ shaka.extern = {};
  * @property {string} played
  *   The CSS background color applied to the portion of the seek bar showing
  *   what has been played already.
+ * @exportDoc
  */
 shaka.extern.UISeekBarColors;
 
@@ -59,10 +60,14 @@ shaka.extern.UISeekBarColors;
  * @property {string} level
  *   The CSS background color applied to the portion of the volume bar showing
  *   the volume level.
+ * @exportDoc
  */
 shaka.extern.UIVolumeBarColors;
 
 /**
+ * @description
+ * The UI's configuration options.
+ *
  * @typedef {{
  *   controlPanelElements: !Array.<string>,
  *   overflowMenuButtons: !Array.<string>,
@@ -141,6 +146,7 @@ shaka.extern.UIVolumeBarColors;
  * @property {boolean} enableFullscreenOnRotation
  *   Whether or not to enter/exit fullscreen mode when the screen is rotated.
  *   Defaults to true.
+ * @exportDoc
  */
 shaka.extern.UIConfiguration;
 
