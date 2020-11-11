@@ -71,7 +71,7 @@ shaka.extern.UIVolumeBarColors;
  *   showUnbufferedStart: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
- *   trackLabelFormat: shaka.ui.TrackLabelFormat,
+ *   trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
  *   fadeDelay: number,
  *   doubleClickForFullscreen: boolean,
  *   enableKeyboardPlaybackControls: boolean,
@@ -116,7 +116,7 @@ shaka.extern.UIVolumeBarColors;
  *   The CSS colors applied to the volume bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you
  *   cannot do this in pure CSS.
- * @property {shaka.ui.TrackLabelFormat} trackLabelFormat
+ * @property {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
  *   An enum that determines what is shown in the labels for text track and
  *   audio variant selection.
  *   LANGUAGE means that only the language of the item is shown.

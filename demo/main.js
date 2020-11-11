@@ -115,7 +115,7 @@ shakaDemo.Main = class {
    * Set up the application with errors to show that load failed.
    * This does not dispatch the shaka-main-loaded event, so it will not cause
    * the nav bar buttons to be set up.
-   * @param {!shaka.ui.FailReasonCode} reasonCode
+   * @param {!shaka.ui.Overlay.FailReasonCode} reasonCode
    * @return {!Promise}
    */
   async initFailed(reasonCode) {
@@ -160,13 +160,13 @@ shakaDemo.Main = class {
     let href = '';
     let message = '';
     switch (reasonCode) {
-      case shaka.ui.FailReasonCode.NO_BROWSER_SUPPORT:
+      case shaka.ui.Overlay.FailReasonCode.NO_BROWSER_SUPPORT:
         message = this.getLocalizedString(
             shakaDemo.MessageIds.FAILURE_NO_BROWSER_SUPPORT);
         href = 'https://github.com/google/shaka-player#' +
                 'platform-and-browser-support-matrix';
         break;
-      case shaka.ui.FailReasonCode.PLAYER_FAILED_TO_LOAD:
+      case shaka.ui.Overlay.FailReasonCode.PLAYER_FAILED_TO_LOAD:
         message = this.getLocalizedString(shakaDemo.MessageIds.FAILURE_MISC);
         break;
     }
@@ -1784,7 +1784,7 @@ document.addEventListener('shaka-ui-loaded', () => {
 });
 document.addEventListener('shaka-ui-load-failed', (event) => {
   shakaDemo.Main.initWrapper(() => {
-    const reasonCode = /** @type {!shaka.ui.FailReasonCode} */ (
+    const reasonCode = /** @type {!shaka.ui.Overlay.FailReasonCode} */ (
       event['detail']['reasonCode']);
     shakaDemoMain.initFailed(reasonCode);
   });
