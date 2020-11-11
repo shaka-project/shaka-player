@@ -549,8 +549,9 @@ shaka.extern.EmsgInfo;
  *   The server that handles an <code>'individualiation-request'</code>.  If the
  *   server isn't given, it will default to the license server.
  * @property {string} sessionType
- *   <i>Defaults temporary in most cases.</i> <br>
- *   The MediaKey Session type to create when initiating a DRM session.
+ *   <i>Defaults to <code>'temporary'</code> for streaming.</i> <br>
+ *   The MediaKey session type to create streaming licenses with.  This doesn't
+ *   affect offline storage.
  *
  * @exportDoc
  */
