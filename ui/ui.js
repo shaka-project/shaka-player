@@ -17,6 +17,7 @@
 
 
 goog.provide('shaka.ui.Overlay');
+goog.provide('shaka.ui.Overlay.TrackLabelFormat');
 
 goog.require('goog.asserts');
 goog.require('shaka.Deprecate');
@@ -224,7 +225,7 @@ shaka.ui.Overlay.prototype.defaultConfig_ = function() {
       base: 'rgba(255, 255, 255, 0.54)',
       level: 'rgb(255, 255, 255)',
     },
-    trackLabelFormat: shaka.ui.TrackLabelFormat.LANGUAGE,
+    trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
     fadeDelay: 0,
     doubleClickForFullscreen: true,
     enableKeyboardPlaybackControls: true,
@@ -406,11 +407,19 @@ shaka.ui.Overlay.setupUIandAutoLoad_ = async function(container, video) {
  * @enum {number}
  * @export
  */
-shaka.ui.TrackLabelFormat = {
+shaka.ui.Overlay.TrackLabelFormat = {
   'LANGUAGE': 0,
   'ROLE': 1,
   'LANGUAGE_ROLE': 2,
 };
+
+/**
+ * "shaka.ui.TrackLabelFormat" is deprecated and will be removed in v4.
+ *
+ * @deprecated
+ * @enum {number}
+ */
+shaka.ui.TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
 
 if (document.readyState == 'complete') {
   // Don't fire this event synchronously.  In a compiled bundle, the "shaka"
