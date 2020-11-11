@@ -1559,6 +1559,53 @@ describe('Player', function() {
       expect(getActiveTextTrack().id).toBe(spanishTextTrack.id);
     });
 
+    // Regression test for https://github.com/google/shaka-player/issues/2906
+    // and https://github.com/google/shaka-player/issues/2909.
+    it('selectAudioLanguage() can choose role-less tracks', async () => {
+      // For this test, we use a different (and simpler) manifest.
+      // Both audio tracks are English; one has a role, and one has no roles.
+      // The role=description track comes first to reproduce the conditions in
+      // #2909.
+      manifest = new shaka.test.ManifestGenerator()
+        .addPeriod(0)
+          .addVariant(100)
+            .language('en')
+            .addVideo(1)
+              .bandwidth(1000)
+              .size(100, 200)
+              .roles([])
+            .addAudio(2)
+              .bandwidth(100)
+              .roles(['description'])
+          .addVariant(101)
+            .language('en')
+            .addExistingStream(1)  // video
+            .addAudio(3)
+              .bandwidth(100)
+              .roles([])
+       .build();
+
+      // No explicit preferred audio language is also part of #2909.
+      player.configure('preferredAudioLanguage', undefined);
+
+      // Load again to get this test-specific manifest loaded.
+      let parser = new shaka.test.FakeManifestParser(manifest);
+      let factory = function() { return parser; };
+      await player.load(fakeManifestUri, 0, factory);
+
+      // #2909: The initial choice should be for the role-less track, even
+      // though it is second in the manifest.
+      expect(getActiveVariantTrack().audioRoles).toEqual([]);
+
+      player.selectAudioLanguage('en', 'description');
+      expect(getActiveVariantTrack().audioRoles).toEqual(['description']);
+
+      // #2906: Selecting no particular role should prefer the track without any
+      // roles.
+      player.selectAudioLanguage('en');
+      expect(getActiveVariantTrack().audioRoles).toEqual([]);
+    });
+
     it('selectTextLanguage() does not change selected variant track', () => {
       // This came up in a custom application that allows to select
       // from all tracks regardless of selected language.
