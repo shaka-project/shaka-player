@@ -161,6 +161,14 @@ def main(args):
       action='store_true')
 
   parsed_args = parser.parse_args(args)
+
+  # Make the dist/ folder, ignore errors.
+  base = shakaBuildHelpers.get_source_base()
+  try:
+    os.mkdir(os.path.join(base, 'dist'))
+  except OSError:
+    pass
+
   force = parsed_args.force
 
   # Update node modules if needed.
