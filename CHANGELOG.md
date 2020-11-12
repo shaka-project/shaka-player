@@ -1,3 +1,68 @@
+## 3.0.6 (2020-11-12)
+
+Bugfixes:
+  - Fix handling of metadata tracks for src= playback
+    - https://github.com/google/shaka-player/pull/2971
+  - Fix handling of role-less audio tracks
+    - https://github.com/google/shaka-player/issues/2906
+    - https://github.com/google/shaka-player/issues/2909
+  - Fix support for multi-period encrypted live
+    - https://github.com/google/shaka-player/issues/2979
+    - https://github.com/google/shaka-player/issues/2645
+  - Export UI externs
+    - https://github.com/google/shaka-player/issues/2948
+  - Fix duplicate init segment requests on manifest updates
+    - https://github.com/google/shaka-player/issues/2856
+    - https://github.com/google/shaka-player/pull/2942
+  - Fix hard-coded TTML namespaces
+    - https://github.com/google/shaka-player/issues/2756
+  - Fix test failure on IE11
+  - Filter out "chapters" tracks during src= playback
+    - https://github.com/google/shaka-player/pull/2960
+  - Fix compatibility for plugin factories
+    - https://github.com/google/shaka-player/issues/2958
+  - Be more permissive in vtt files
+    - https://github.com/google/shaka-player/pull/2941
+  - Fix renaming of UI base class protected members
+    - https://github.com/google/shaka-player/issues/2923
+  - Make submenu CSS apply to all submenus
+    - https://github.com/google/shaka-player/issues/2925
+  - Export FakeEvent for use by UI plugins
+    - https://github.com/google/shaka-player/issues/2923
+  - Recognize mp4a and mp4v extensions in HLS
+  - Support multiple CHARACTERISTICS values in HLS
+    - https://github.com/google/shaka-player/pull/2905
+  - Don't auto-play after seeking while paused in the UI
+    - https://github.com/google/shaka-player/pull/2898
+
+Ad changes (BETA):
+  - Allow apps to supply adsResponse property for IMA
+    - https://github.com/google/shaka-player/issues/2892
+    - https://github.com/google/shaka-player/pull/2946
+
+Docs:
+  - Add link to complete list of build categories
+    - https://github.com/google/shaka-player/pull/2934
+  - Correct receiver IDs in the UI tutorial
+    - https://github.com/google/shaka-player/issues/2926
+  - Update required Node version
+    - https://github.com/google/shaka-player/issues/2913
+
+Demo App:
+  - Add test streams for CEA-608
+    - https://github.com/google/shaka-player/pull/2939
+  - Add new low latency DASH manifest
+    - https://github.com/google/shaka-player/pull/2963
+  - Remove redundant switch for manifest.dash.ignoreDrmInfo
+
+Misc:
+  - Add mkdir to make all build commands self-contained
+    - https://github.com/google/shaka-player/issues/2973
+    - https://github.com/google/shaka-player/pull/2977
+  - Generate TypeScript defs with Clutz
+    - https://github.com/google/shaka-player/issues/1030
+
+
 ## 3.0.5 (2020-10-07)
 
 Bugfixes:
