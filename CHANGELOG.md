@@ -1,3 +1,42 @@
+## 2.5.18 (2020-11-12)
+
+Bugfixes:
+  - Fix handling of role-less audio tracks
+    - https://github.com/google/shaka-player/issues/2906
+    - https://github.com/google/shaka-player/issues/2909
+  - Export UI externs
+    - https://github.com/google/shaka-player/issues/2948
+  - Fix hard-coded TTML namespaces
+    - https://github.com/google/shaka-player/issues/2756
+  - Filter out "chapters" tracks during src= playback
+    - https://github.com/google/shaka-player/pull/2960
+  - Fix renaming of UI base class protected members
+    - https://github.com/google/shaka-player/issues/2923
+  - Export FakeEvent for use by UI plugins
+    - https://github.com/google/shaka-player/issues/2923
+  - Recognize mp4a and mp4v extensions in HLS
+  - Support multiple CHARACTERISTICS values in HLS
+    - https://github.com/google/shaka-player/pull/2905
+  - Don't auto-play after seeking while paused in the UI
+    - https://github.com/google/shaka-player/pull/2898
+
+Docs:
+  - Add link to complete list of build categories
+    - https://github.com/google/shaka-player/pull/2934
+  - Update required Node version
+    - https://github.com/google/shaka-player/issues/2913
+  - Correct receiver app IDs in the UI tutorial
+    - https://github.com/google/shaka-player/issues/2926
+
+Demo App:
+  - Remove redundant switch for manifest.dash.ignoreDrmInfo
+
+Misc:
+  - Add mkdir to make all build commands self-contained
+    - https://github.com/google/shaka-player/issues/2973
+    - https://github.com/google/shaka-player/pull/2977
+
+
 ## 2.5.17 (2020-10-06)
 
 Bugfixes:
