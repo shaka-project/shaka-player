@@ -157,7 +157,7 @@ describe('TtmlTextParser', () => {
               },
               {
                 payload: '',
-                spacer: true,
+                lineBreak: true,
                 startTime: 62.05,
                 endTime: 3723.2,
               },
@@ -192,7 +192,7 @@ describe('TtmlTextParser', () => {
               },
               {
                 payload: '',
-                spacer: true,
+                lineBreak: true,
                 startTime: 62.05,
                 endTime: 3723.2,
               },
@@ -909,7 +909,7 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('inserts spacer cues for <br> tags', () => {
+  it('inserts line breaks for <br> tags', () => {
     verifyHelper(
         [{
           startTime: 62.05,
@@ -923,7 +923,7 @@ describe('TtmlTextParser', () => {
             startTime: 62.05,
             endTime: 3723.2,
             payload: '',
-            spacer: true,
+            lineBreak: true,
           }, {
             startTime: 62.05,
             endTime: 3723.2,
@@ -953,7 +953,7 @@ describe('TtmlTextParser', () => {
               startTime: 62.05,
               endTime: 3723.2,
               payload: '',
-              spacer: true,
+              lineBreak: true,
             }, {
               startTime: 62.05,
               endTime: 3723.2,
