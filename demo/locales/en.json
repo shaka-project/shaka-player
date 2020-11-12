@@ -14,6 +14,7 @@
   "DEMO_AUDIO_ONLY_SEARCH": "Filters for assets that do not have video streams.",
   "DEMO_AUDIO_ROBUSTNESS": "Audio Robustness",
   "DEMO_AUTO_CORRECT_DASH_DRIFT": "Auto-Correct DASH Drift",
+  "DEMO_AUTO_LOW_LATENCY": "Auto Low Latency Mode",
   "DEMO_AVAILABILITY_WINDOW_OVERRIDE": "Availability Window Override",
   "DEMO_AXINOM": "Axinom",
   "DEMO_AZURE_MEDIA_SERVICES": "Azure Media Services",
