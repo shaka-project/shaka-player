@@ -13,6 +13,7 @@ goog.require('shaka.media.SegmentReference');
 goog.require('shaka.util.Functional');
 goog.require('shaka.util.Iterables');
 goog.require('shaka.util.StringUtils');
+goog.require('shaka.util.XmlUtils');
 goog.requireType('shaka.util.Error');
 
 
@@ -164,6 +165,14 @@ shaka.test.Util = class {
     const prospectiveDiff = 'The difference was in ' +
         (actual.outerHTML || actual.textContent) + ' vs ' +
         (expected['outerHTML'] || expected.textContent) + ': ';
+    const getAttr = (obj, attr) => {
+      if (attr.namespaceURI) {
+        return shaka.util.XmlUtils.getAttributeNS(
+            obj, attr.namespaceURI, attr.localName);
+      } else {
+        return obj.getAttribute(attr.localName);
+      }
+    };
 
     if (!(actual instanceof Element) && !(expected instanceof Element)) {
       // Compare them as nodes.
@@ -181,16 +190,13 @@ shaka.test.Util = class {
       if (actual.attributes.length != expected.attributes.length) {
         return prospectiveDiff + 'Different attribute list length.';
       }
-      for (const i of shaka.util.Iterables.range(actual.attributes.length)) {
-        const aAttrib = actual.attributes[i].nodeName;
-        const aAttribVal = actual.getAttribute(aAttrib);
-        const eAttrib = expected.attributes[i].nodeName;
-        const eAttribVal = expected.getAttribute(eAttrib);
-        if (aAttrib != eAttrib || aAttribVal != eAttribVal) {
-          const diffNote =
-              aAttrib + '=' + aAttribVal + ' vs ' + eAttrib + '=' + eAttribVal;
-          return prospectiveDiff + 'Attribute #' + i +
-              ' was different (' + diffNote + ').';
+      for (const attr of Array.from(actual.attributes)) {
+        const valueA = getAttr(actual, attr);
+        const valueB = getAttr(expected, attr);
+        if (valueA != valueB) {
+          const name = (attr.prefix ? attr.prefix + ':' : '') + attr.localName;
+          return `${prospectiveDiff} Attribute ${name} was different ` +
+                 `(${valueA} vs ${valueB})`;
         }
       }
 

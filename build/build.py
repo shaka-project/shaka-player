@@ -350,6 +350,13 @@ def main(args):
 
   parsed_args, commands = parser.parse_known_args(args)
 
+  # Make the dist/ folder, ignore errors.
+  base = shakaBuildHelpers.get_source_base()
+  try:
+    os.mkdir(os.path.join(base, 'dist'))
+  except OSError:
+    pass
+
   # Update node modules if needed.
   if not shakaBuildHelpers.update_node_modules():
     return 1

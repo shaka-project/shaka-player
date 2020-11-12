@@ -1527,6 +1527,67 @@ describe('Player', () => {
       expect(getActiveTextTrack().id).toBe(spanishTextTrack.id);
     });
 
+    // Regression test for https://github.com/google/shaka-player/issues/2906
+    // and https://github.com/google/shaka-player/issues/2909.
+    it('selectAudioLanguage() can choose role-less tracks', async () => {
+      // For this test, we use a different (and simpler) manifest.
+      // Both audio tracks are English; one has a role, and one has no roles.
+      // The role=description track comes first to reproduce the conditions in
+      // #2909.
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(100, (variant) => {
+          variant.bandwidth = 1300;
+          variant.language = 'en';
+          variant.addVideo(1, (stream) => {
+            stream.originalId = 'video';
+            stream.bandwidth = 1000;
+            stream.width = 100;
+            stream.height = 200;
+            stream.frameRate = 1000000 / 42000;
+            stream.pixelAspectRatio = '59:54';
+            stream.roles = [];
+          });
+          variant.addAudio(2, (stream) => {
+            stream.originalId = 'audio-en-description';
+            stream.bandwidth = 100;
+            stream.channelsCount = 2;
+            stream.audioSamplingRate = 48000;
+            stream.roles = ['description'];
+          });
+        });
+        manifest.addVariant(101, (variant) => {
+          variant.bandwidth = 2300;
+          variant.language = 'en';
+          variant.addExistingStream(1);  // video
+          variant.addAudio(3, (stream) => {
+            stream.originalId = 'audio-en';
+            stream.bandwidth = 100;
+            stream.channelsCount = 2;
+            stream.audioSamplingRate = 48000;
+            stream.roles = [];
+          });
+        });
+      });
+
+      // No explicit preferred audio language is also part of #2909.
+      player.configure('preferredAudioLanguage', undefined);
+
+      // Load again to get this test-specific manifest loaded.
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      // #2909: The initial choice should be for the role-less track, even
+      // though it is second in the manifest.
+      expect(getActiveVariantTrack().audioRoles).toEqual([]);
+
+      player.selectAudioLanguage('en', 'description');
+      expect(getActiveVariantTrack().audioRoles).toEqual(['description']);
+
+      // #2906: Selecting no particular role should prefer the track without any
+      // roles.
+      player.selectAudioLanguage('en');
+      expect(getActiveVariantTrack().audioRoles).toEqual([]);
+    });
+
     it('selectTextLanguage() does not change selected variant track', () => {
       // This came up in a custom application that allows to select
       // from all tracks regardless of selected language.
