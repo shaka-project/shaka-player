@@ -708,7 +708,7 @@ describe('HlsParser live', () => {
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 429,
           /* timestampOffset= */ 0, [partialRef, partialRef2]);
 
-      // ref2 is not fully published yet, so it doens't have a segment uri.
+      // ref2 is not fully published yet, so it doesn't have a segment uri.
       const ref2 = ManifestParser.makeReference(
           '', segmentDataStartTime + 4, segmentDataStartTime + 6,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
