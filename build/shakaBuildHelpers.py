@@ -144,6 +144,13 @@ def execute_subprocess(args, **kwargs):
   Returns:
     The same value as subprocess.Popen.
   """
+  # Windows can't run scripts directly, even if executable.  We need to
+  # explicitly run the interpreter.
+  if args[0].endswith('.js'):
+    raise ValueError('Use "node" to run JavaScript scripts')
+  if args[0].endswith('.py'):
+    raise ValueError('Use sys.executable to run Python scripts')
+
   if os.environ.get('PRINT_ARGUMENTS'):
     logging.info(' '.join([quote_argument(x) for x in args]))
   try:
