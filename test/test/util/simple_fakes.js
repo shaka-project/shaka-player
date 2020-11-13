@@ -433,8 +433,12 @@ shaka.test.FakeSegmentIndex = class {
 
     /** @type {!jasmine.Spy} */
     this[Symbol.iterator] = jasmine.createSpy('Symbol.iterator')
-        .and.callFake(() => {
-          let nextPosition = 0;
+        .and.callFake(() => this.getIteratorForTime(0));
+
+    /** @type {!jasmine.Spy} */
+    this.getIteratorForTime = jasmine.createSpy('getIteratorForTime')
+        .and.callFake((time) => {
+          let nextPosition = this.find(time);
 
           return {
             next: () => {
