@@ -978,7 +978,7 @@ describe('DashParser Manifest', () => {
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation bandwidth="1">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
       '        <SegmentTemplate media="1.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
@@ -1013,7 +1013,7 @@ describe('DashParser Manifest', () => {
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation bandwidth="1">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
       '        <SegmentTemplate media="1.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
@@ -1037,7 +1037,7 @@ describe('DashParser Manifest', () => {
     const variant = manifest.variants[0];
     const trickModeVideo = variant && variant.video &&
                          variant.video.trickModeVideo;
-    expect(trickModeVideo).toBe(null);
+    expect(trickModeVideo).toBeUndefined();
   });
 
   it('skips unrecognized EssentialProperty elements', async () => {
