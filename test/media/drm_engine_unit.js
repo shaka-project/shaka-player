@@ -621,6 +621,56 @@ describe('DrmEngine', function() {
             'drm.abc'));
       }
     });
+
+    it('maps TS MIME types through the transmuxer', async () => {
+      const originalIsSupported = shaka.media.Transmuxer.isSupported;
+
+      try {
+        // Mock out isSupported on Transmuxer so that we don't have to care
+        // about what MediaSource supports under that.  All we really care about
+        // is the translation of MIME types.
+        shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
+          return mimeType.startsWith('video/mp2t');
+        };
+
+        // The default mock for this is so unrealistic, some of our test
+        // conditions would always fail.  Make it realistic enough for this
+        // test case by returning the same types we are supposed to be querying
+        // for.  That way, supportsVariant() should work produce the correct
+        // result after translating the types of the variant's streams.
+        mockMediaKeySystemAccess.getConfiguration.and.callFake(() => {
+          return {
+            audioCapabilities: [{contentType: 'audio/mp4; codecs="abar"'}],
+            videoCapabilities: [{contentType: 'video/mp4; codecs="vbar"'}],
+          };
+        });
+
+        requestMediaKeySystemAccessSpy.and.callFake(
+            fakeRequestMediaKeySystemAccess.bind(null, ['drm.abc']));
+
+        const variants = manifest.periods[0].variants;
+        variants[0].video.mimeType = 'video/mp2t';
+        variants[0].audio.mimeType = 'video/mp2t';
+
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+        expect(drmEngine.initialized()).toBe(true);
+
+        expect(requestMediaKeySystemAccessSpy)
+            .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
+              audioCapabilities: [jasmine.objectContaining({
+                contentType: 'audio/mp4; codecs="abar"',
+              })],
+              videoCapabilities: [jasmine.objectContaining({
+                contentType: 'video/mp4; codecs="vbar"',
+              })],
+            })]);
+
+        expect(drmEngine.supportsVariant(variants[0])).toBeTruthy();
+      } finally {
+        // Restore the mock.
+        shaka.media.Transmuxer.isSupported = originalIsSupported;
+      }
+    });
   });  // describe('init')
 
   describe('attach', function() {
