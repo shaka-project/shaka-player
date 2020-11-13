@@ -59,6 +59,10 @@
     "description": "The name of a configuration value.",
     "message": "Auto-Correct [PROPER_NAME:DASH] Drift"
   },
+  "DEMO_AUTO_LOW_LATENCY": {
+    "description": "The name of a configuration value.",
+    "message": "Auto Low Latency Streaming"
+  },
   "DEMO_AVAILABILITY_WINDOW_OVERRIDE": {
     "description": "The name of a configuration value.",
     "message": "Availability Window Override"
