@@ -1033,11 +1033,7 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
     expect(manifest.textStreams.length).toBe(0);
-
-    const variant = manifest.variants[0];
-    const trickModeVideo = variant && variant.video &&
-                         variant.video.trickModeVideo;
-    expect(trickModeVideo).toBeUndefined();
+    expect(manifest.variants[0].video.trickModeVideo).toBeUndefined();
   });
 
   it('skips unrecognized EssentialProperty elements', async () => {
