@@ -835,14 +835,14 @@ describe('DashParser Manifest', function() {
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation bandwidth="1">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
       '        <SegmentTemplate media="1.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
       '      <EssentialProperty value="1" ',
       '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
-      '      <Representation bandwidth="1">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
       '        <SegmentTemplate media="2.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
@@ -863,6 +863,35 @@ describe('DashParser Manifest', function() {
       id: 2,
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
     }));
+  });
+
+  it('ignore incompatible trickmode tracks', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <EssentialProperty value="1" ',
+      '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
+      '      <Representation bandwidth="1" codecs="foo">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.periods[0].variants.length).toBe(1);
+    expect(manifest.periods[0].textStreams.length).toBe(0);
+    expect(manifest.periods[0].variants[0].video.trickModeVideo)
+        .toBeUndefined();
   });
 
   it('skips unrecognized EssentialProperty elements', async () => {
