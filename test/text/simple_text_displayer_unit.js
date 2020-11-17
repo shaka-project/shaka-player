@@ -123,7 +123,7 @@ describe('SimpleTextDisplayer', () => {
 
     it('appends nested cues', () => {
       const shakaCue = new shaka.text.Cue(10, 20, '');
-      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1 ');
       const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
 
       shakaCue.nestedCues = [nestedCue1, nestedCue2];
@@ -137,7 +137,7 @@ describe('SimpleTextDisplayer', () => {
     // Regression test for b/159050711
     it('maintains the styles of the parent cue', () => {
       const shakaCue = new shaka.text.Cue(10, 20, '');
-      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1 ');
       const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
 
       shakaCue.nestedCues = [nestedCue1, nestedCue2];
@@ -154,6 +154,24 @@ describe('SimpleTextDisplayer', () => {
               text: 'Test1 Test2',
               lineAlign: 'center',
             },
+          ],
+          [shakaCue]);
+    });
+
+    it('adds linebreaks when a linebreak cue is seen', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
+
+      // Second cue is a linebreak cue.
+      const nestedCue2 = new shaka.text.Cue(10, 20, '');
+      nestedCue2.spacer = true;
+
+      const nestedCue3 = new shaka.text.Cue(10, 20, 'Test2');
+
+      shakaCue.nestedCues = [nestedCue1, nestedCue2, nestedCue3];
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, text: 'Test1\nTest2'},
           ],
           [shakaCue]);
     });
