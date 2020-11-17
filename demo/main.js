@@ -347,9 +347,21 @@ shakaDemo.Main = class {
     // are pressed also.
     const drawerButton = document.querySelector('.mdl-layout__drawer-button');
     goog.asserts.assert(drawerButton, 'There should be a drawer button.');
-    drawerButton.addEventListener('click', () => {
+    const openDrawer = () => {
       this.dispatchEventWithName_('shaka-main-drawer-state-change');
       this.showNode_(drawerCloseButton);
+    };
+    // Listen to both the "click" and "keydown" events on the drawer button,
+    // since the element is actually a div rather than a button, which means
+    // that it doesn't fire "click" events when activated by keyboard input.
+    drawerButton.addEventListener('click', openDrawer);
+    drawerButton.addEventListener('keydown', (event) => {
+      const key = (/** @type {!KeyboardEvent} */ (event)).key;
+      // Ignore "keydown" input for keys that won't trigger the button (i.e.
+      // anything besides spacebar or enter).
+      if (key == ' ' || key == 'Spacebar' || key == 'Enter') {
+        openDrawer();
+      }
     });
     const obfuscator = document.querySelector('.mdl-layout__obfuscator');
     goog.asserts.assert(obfuscator, 'There should be an obfuscator.');
