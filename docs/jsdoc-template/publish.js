@@ -415,7 +415,6 @@ function linktoExternal(longName, name) {
  * @param {object} members The members that will be used to create the sidebar.
  * @param {array<object>} members.classes
  * @param {array<object>} members.externals
- * @param {array<object>} members.globals
  * @param {array<object>} members.mixins
  * @param {array<object>} members.modules
  * @param {array<object>} members.namespaces
@@ -425,7 +424,6 @@ function linktoExternal(longName, name) {
  * @return {string} The HTML for the navigation sidebar.
  */
 function buildNav(members) {
-    var globalNav;
     var nav = '<h2><a href="index.html">Home</a></h2>';
     var seen = {};
     var seenTutorials = {};
@@ -459,25 +457,6 @@ function buildNav(members) {
       logger.error('Section %s in navOrder is unrecognized!', name);
     });
 
-    if (members.globals.length) {
-        globalNav = '';
-
-        members.globals.forEach(function(g) {
-            if ( g.kind !== 'typedef' && !hasOwnProp.call(seen, g.longname) ) {
-                globalNav += '<li>' + linkto(g.longname, g.name) + '</li>';
-            }
-            seen[g.longname] = true;
-        });
-
-        if (!globalNav) {
-            // turn the heading into a link so you can actually get to the global page
-            nav += '<h3>' + linkto('global', 'Global') + '</h3>';
-        }
-        else {
-            nav += '<h3>Global</h3><ul>' + globalNav + '</ul>';
-        }
-    }
-
     return nav;
 }
 
@@ -506,7 +485,6 @@ exports.publish = function(taffyData, opts, tutorials) {
     var externals;
     var files;
     var fromDir;
-    var globalUrl;
     var indexUrl;
     var interfaces;
     var members;
@@ -536,9 +514,6 @@ exports.publish = function(taffyData, opts, tutorials) {
     // doesn't try to hand them out later
     indexUrl = helper.getUniqueFilename('index');
     // don't call registerLink() on this one! 'index' is also a valid longname
-
-    globalUrl = helper.getUniqueFilename('global');
-    helper.registerLink('global', globalUrl);
 
     // set up templating
     view.layout = conf.default.layoutFile ?
@@ -746,20 +721,15 @@ exports.publish = function(taffyData, opts, tutorials) {
         generateSourceFiles(sourceFiles, opts.encoding);
     }
 
-    if (members.globals.length) { generate('Global', [{kind: 'globalobj'}], globalUrl); }
-
     // index page displays information from package.json and lists files
     files = find({kind: 'file'});
     packages = find({kind: 'package'});
 
-    generate('Home',
-        packages.concat(
-            [{
-                kind: 'mainpage',
-                readme: opts.readme,
-                longname: (opts.mainpagetitle) ? opts.mainpagetitle : 'Main Page'
-            }]
-        ).concat(files), indexUrl);
+    generate('Home', [{
+        kind: 'mainpage',
+        readme: opts.readme,
+        longname: (opts.mainpagetitle) ? opts.mainpagetitle : 'Main Page'
+    }], indexUrl);
 
     // set up the lists that we'll use to generate pages
     classes = taffy(members.classes);
