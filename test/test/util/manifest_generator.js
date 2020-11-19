@@ -7,8 +7,8 @@
 goog.provide('shaka.test.ManifestGenerator');
 
 goog.require('goog.asserts');
-goog.require('shaka.test.FakeSegmentIndex');
 goog.require('shaka.test.Util');
+goog.require('shaka.util.Iterables');
 goog.require('shaka.util.ManifestParserUtils');
 goog.require('shaka.util.Uint8ArrayUtils');
 goog.requireType('shaka.media.InitSegmentReference');
@@ -470,7 +470,8 @@ shaka.test.ManifestGenerator.Stream = class {
           jasmine.createSpy('createSegmentIndex').and.callFake(() => {
             return Promise.resolve();
           });
-      const segmentIndex = new shaka.test.FakeSegmentIndex();
+      const shaka_ = manifest ? manifest.shaka_ : shaka;
+      const segmentIndex = new shaka_.media.SegmentIndex([]);
 
       /** @type {?string} */
       this.originalId = null;
@@ -568,36 +569,33 @@ shaka.test.ManifestGenerator.Stream = class {
   useSegmentTemplate(template, segmentDuration, segmentSize = null) {
     goog.asserts.assert(this.manifest_,
         'A top-level generated Manifest is required to use this method!');
+    goog.asserts.assert(
+        segmentDuration, 'Must pass a non-zero segment duration');
 
+    const shaka_ = this.manifest_.shaka_;
     const totalDuration = this.manifest_.presentationTimeline.getDuration();
+    goog.asserts.assert(
+        isFinite(totalDuration), 'Must specify a manifest duration');
     const segmentCount = totalDuration / segmentDuration;
-    const duration = this.manifest_.presentationTimeline.getDuration();
+    const references = [];
 
-    this.createSegmentIndex = () => Promise.resolve();
-
-    this.segmentIndex.find = (time) => Math.floor(time / segmentDuration);
-
-    this.segmentIndex.get = (index) => {
-      goog.asserts.assert(!isNaN(index), 'Invalid index requested!');
-      if (index < 0 || index >= segmentCount || isNaN(index)) {
-        return null;
-      }
+    for (const index of shaka.util.Iterables.range(segmentCount)) {
       const getUris = () => [sprintf(template, index)];
       const start = index * segmentDuration;
       const end = Math.min(totalDuration, (index + 1) * segmentDuration);
-      goog.asserts.assert(this.manifest_,
-          'A top-level generated Manifest is required to use this method!');
-      return new this.manifest_.shaka_.media.SegmentReference(
+      references.push(new shaka_.media.SegmentReference(
           /* startTime= */ start,
           /* endTime= */ end,
           getUris,
           /* startByte= */ 0,
-          /* endByte= */ /** @type {?number} */(segmentSize),
+          /* endByte= */ segmentSize,
           this.initSegmentReference_,
           /* timestampOffset= */ 0,
           /* appendWindowStart= */ 0,
-          /* appendWindowEnd= */ duration);
-    };
+          /* appendWindowEnd= */ totalDuration));
+    }
+    this.segmentIndex = new shaka_.media.SegmentIndex(references);
+    return this;
   }
 
   /**
@@ -611,10 +609,6 @@ shaka.test.ManifestGenerator.Stream = class {
         'A top-level generated Manifest is required to use this method!');
 
     const duration = this.manifest_.presentationTimeline.getDuration();
-
-    this.createSegmentIndex = () => {
-      return Promise.resolve();
-    };
     this.segmentIndex =
         this.manifest_.shaka_.media.SegmentIndex.forSingleSegment(
             /* startTime= */ 0, duration, [uri]);

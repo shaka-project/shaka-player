@@ -164,17 +164,6 @@ describe('Player', () => {
   describe('destroy', () => {
     it('cleans up all dependencies', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
-
-      await player.load(fakeManifestUri, 0, fakeMimeType);
-      await player.destroy();
-
-      expect(abrManager.stop).toHaveBeenCalled();
-      expect(networkingEngine.destroy).toHaveBeenCalled();
-      expect(drmEngine.destroy).toHaveBeenCalled();
-      expect(playhead.release).toHaveBeenCalled();
-      expect(mediaSourceEngine.destroy).toHaveBeenCalled();
-      expect(streamingEngine.destroy).toHaveBeenCalled();
-
       const segmentIndexes = [];
       for (const variant of manifest.variants) {
         if (variant.audio) {
@@ -187,6 +176,20 @@ describe('Player', () => {
       for (const textStream of manifest.textStreams) {
         segmentIndexes.push(textStream.segmentIndex);
       }
+      for (const segmentIndex of segmentIndexes) {
+        spyOn(segmentIndex, 'release');
+      }
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      await player.destroy();
+
+      expect(abrManager.stop).toHaveBeenCalled();
+      expect(networkingEngine.destroy).toHaveBeenCalled();
+      expect(drmEngine.destroy).toHaveBeenCalled();
+      expect(playhead.release).toHaveBeenCalled();
+      expect(mediaSourceEngine.destroy).toHaveBeenCalled();
+      expect(streamingEngine.destroy).toHaveBeenCalled();
+
       for (const segmentIndex of segmentIndexes) {
         if (segmentIndex) {
           expect(segmentIndex.release).toHaveBeenCalled();

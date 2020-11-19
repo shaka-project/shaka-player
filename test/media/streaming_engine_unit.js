@@ -819,6 +819,7 @@ describe('StreamingEngine', () => {
     beforeEach(() => {
       // Set up a manifest with multiple variants and a text stream.
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline.setDuration(60);
         manifest.addVariant(0, (variant) => {
           variant.addAudio(10, (stream) => {
             stream.useSegmentTemplate('audio-10-%d.mp4', 10);
@@ -2894,6 +2895,7 @@ describe('StreamingEngine', () => {
 
     beforeEach(() => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline.setDuration(60);
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.useSegmentTemplate('video-110-%d.mp4', 10);
