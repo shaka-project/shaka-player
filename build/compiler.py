@@ -419,7 +419,7 @@ class Jsdoc(object):
 
     # To avoid getting out of sync with the source files jsdoc actually reads,
     # parse the config file and locate all source files based on that.
-    with open(self.config_path, 'rb') as f:
+    with open(self.config_path, 'r') as f:
       config = json.load(f)
     for path in config['source']['include']:
       full_path = _get_source_path(path)
