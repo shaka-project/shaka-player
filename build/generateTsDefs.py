@@ -49,29 +49,29 @@ def GenerateTsDefs(inputs, output):
   contents = shakaBuildHelpers.execute_get_output(command)
 
   # Remove the prefix clutz puts on all namespaces.
-  contents = contents.replace('\xe0\xb2\xa0_\xe0\xb2\xa0.clutz.', '')
+  contents = contents.replace(b'\xe0\xb2\xa0_\xe0\xb2\xa0.clutz.', b'')
   # Replace "GlobalObject" (from Clutz) with TypeScript-native "object".
-  contents = re.sub(r'\bGlobalObject\b', 'object', contents)
+  contents = re.sub(br'\bGlobalObject\b', b'object', contents)
   # Remove "Global" from Clutz's Global{Date,Element,Event,EventTarget} and use
   # their original definitions instead.
   contents = re.sub(
-      r'\bGlobal(Date|Element|Event|EventTarget)\b', r'\1', contents)
+      br'\bGlobal(Date|Element|Event|EventTarget)\b', br'\1', contents)
   # Remove "protected", which appears on some fields, and is only supported on
   # methods.
-  contents = re.sub(r'^\s*protected ', '', contents, flags=re.MULTILINE)
+  contents = re.sub(br'^\s*protected ', b'', contents, flags=re.MULTILINE)
   # Clutz really likes EventTargets, so it wants IAdManager to extend it twice.
   contents = contents.replace(
-      'extends EventTarget extends EventTarget',
-      'extends EventTarget')
+      b'extends EventTarget extends EventTarget',
+      b'extends EventTarget')
   # Some types allow you to return a Promise or nothing, but the Clutz output of
   # "Promise | null | undefined" doesn't work in TypeScript.  We need to use
   # "Promise | void" instead.
-  contents = contents.replace('| null | undefined', '| void')
+  contents = contents.replace(b'| null | undefined', b'| void')
   # shaka.util.Error extends Error and implements shaka.extern.Error, but this
   # confuses TypeScript when both are called "Error" in context of the namespace
   # declaration for "shaka.util".  Therefore we need to declare this
   # "GlobalError" type, which is already referenced by Clutz but never defined.
-  global_error_def = 'declare class GlobalError extends Error {}\n\n'
+  global_error_def = b'declare class GlobalError extends Error {}\n\n'
   contents = global_error_def + contents
   # There are some types that implement multiple interfaces, such as IReleasable
   # and Iteratable.  Also, there are tools used inside Google that (for some
@@ -83,24 +83,24 @@ def GenerateTsDefs(inputs, output):
   # interface, which is not needed outside the library.
   # TODO: This only covers one very specific pattern, and could be brittle.
   contents = contents.replace(
-      'implements shaka.util.IReleasable , ', 'implements ')
+      b'implements shaka.util.IReleasable , ', b'implements ')
   # Finally, Clutz includes a bunch of basic defs for a browser environment
   # generated from Closure compiler's builtins.  Remove these.
-  sections = re.split(r'\n(?=// Generated from .*)', contents)
+  sections = re.split(br'\n(?=// Generated from .*)', contents)
   sections = filter(
-      lambda s: not s.startswith('// Generated from externs.zip'),
+      lambda s: not s.startswith(b'// Generated from externs.zip'),
       sections)
-  contents = '\n'.join(sections) + '\n'
+  contents = b'\n'.join(sections) + b'\n'
 
   license_header_path = os.path.join(
       shakaBuildHelpers.get_source_base(), 'build/license-header')
 
-  with open(license_header_path, 'r') as f:
+  with open(license_header_path, 'rb') as f:
     license_header = f.read()
 
-  with open(output, 'w') as f:
+  with open(output, 'wb') as f:
     f.write(license_header)
-    f.write('\n')
+    f.write(b'\n')
     f.write(contents)
 
 
