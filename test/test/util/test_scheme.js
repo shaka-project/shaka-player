@@ -213,6 +213,7 @@ shaka.test.TestScheme = class {
       stream.useSegmentTemplate(
           'test:' + name + '/' + contentType + '/%d',
           data[contentType].segmentDuration);
+      stream.segmentIndex.markImmutable();
       stream.closedCaptions = data[contentType].closedCaptions;
 
       if (data[contentType].delaySetup) {
@@ -550,7 +551,7 @@ shaka.test.TestScheme.DATA = {
     ],
     audioLanguages: ['en', 'es'],
     textLanguages: ['zh', 'fr'],
-    duration: 10,
+    duration: 30,
   },
 
   'sintel_audio_only': {
@@ -606,6 +607,7 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/captions-test.ts',
       mimeType: 'video/mp2t',
       codecs: 'avc1.64001e',
+      segmentDuration: 2,
     },
     text: {
       mimeType: 'application/cea-608',

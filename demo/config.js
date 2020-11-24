@@ -319,7 +319,9 @@ shakaDemo.Config = class {
             'streaming.inaccurateManifestTolerance',
             /* canBeDecimal= */ true)
         .addBoolInput_(MessageIds.LOW_LATENCY,
-            'streaming.lowLatencyMode');
+            'streaming.lowLatencyMode')
+        .addBoolInput_(MessageIds.AUTO_LOW_LATENCY,
+            'streaming.autoLowLatencyMode');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,

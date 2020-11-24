@@ -248,7 +248,7 @@ def main(args):
   combined_localizations = {}
   for locale in args.locales:
     path = os.path.join(args.source, locale + '.json')
-    with open(path, 'rb') as f:
+    with open(path, 'r') as f:
       combined_localizations[locale] = json.load(f)
 
   doc = GenerateLocalizations(combined_localizations, args.class_name)

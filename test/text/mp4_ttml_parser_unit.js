@@ -96,7 +96,7 @@ describe('Mp4TtmlParser', () => {
         nestedCues: [{
           payload: '...you have your robotics, and I',
         }, {
-          spacer: true,
+          lineBreak: true,
         }, {
           payload: 'just want to be awesome in space.',
         }],
@@ -107,7 +107,7 @@ describe('Mp4TtmlParser', () => {
         nestedCues: [{
           payload: 'Why don\'t you just admit that',
         }, {
-          spacer: true,
+          lineBreak: true,
         }, {
           payload: 'you\'re freaked out by my robot hand?',
         }],
@@ -128,7 +128,7 @@ describe('Mp4TtmlParser', () => {
         nestedCues: [{
           payload: 'I\'m freaked out! I have nightmares',
         }, {
-          spacer: true,
+          lineBreak: true,
         }, {
           payload: 'that I\'m being chased...',
         }],
@@ -144,7 +144,7 @@ describe('Mp4TtmlParser', () => {
         nestedCues: [{
           payload: '"Fourty years later"',
         }, {
-          spacer: true,
+          lineBreak: true,
         }, {
           payload: 'Whatever, Thom. We\'re done.',
         }],
