@@ -681,7 +681,7 @@
   },
   "DEMO_TEXT_LANGUAGE_FORCED": {
     "description": "The name of a configuration value.",
-    "message": "Preferred Text Language Forcded"
+    "message": "Preferred Text Language Forced"
   },
   "DEMO_TIMEOUT": {
     "description": "The name of a configuration value.",
