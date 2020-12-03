@@ -720,6 +720,8 @@ shaka.extern.ManifestConfiguration;
  *   startAtSegmentBoundary: boolean,
  *   smallGapLimit: number,
  *   jumpLargeGaps: boolean,
+ *   gapThreshold: number,
+ *   gapJumpingPollInterval: number,
  *   durationBackoff: number,
  *   forceTransmuxTS: boolean,
  *   safeSeekOffset: number,

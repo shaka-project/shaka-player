@@ -5,9 +5,17 @@
  */
 
 goog.require('shaka.media.TimeRangesUtils');
+goog.require('shaka.util.PlayerConfiguration');
 
 describe('TimeRangesUtils', () => {
   const TimeRangesUtils = shaka.media.TimeRangesUtils;
+
+  /** @type {shaka.extern.StreamingConfiguration} */
+  let config;
+
+  beforeEach(() => {
+    config = shaka.util.PlayerConfiguration.createDefault().streaming;
+  });
 
   describe('isBuffered', () => {
     it('still works when passed null', () => {
@@ -90,12 +98,12 @@ describe('TimeRangesUtils', () => {
 
   describe('getGapIndex', () => {
     it('still works when passed null', () => {
-      expect(TimeRangesUtils.getGapIndex(null, 10)).toBe(null);
+      expect(TimeRangesUtils.getGapIndex(null, 10, config)).toBe(null);
     });
 
     it('still works whith nothing buffered', () => {
       const b = createFakeBuffered([]);
-      expect(TimeRangesUtils.getGapIndex(b, 10)).toBe(null);
+      expect(TimeRangesUtils.getGapIndex(b, 10, config)).toBe(null);
     });
 
 
@@ -122,7 +130,8 @@ describe('TimeRangesUtils', () => {
       it(name, () => {
         const b = createFakeBuffered(
             [{start: 10, end: 20}, {start: 30, end: 40}, {start: 50, end: 60}]);
-        expect(TimeRangesUtils.getGapIndex(b, data.time)).toBe(data.expected);
+        expect(TimeRangesUtils.getGapIndex(b, data.time, config))
+            .toBe(data.expected);
       });
     }
   });
