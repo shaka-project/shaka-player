@@ -253,7 +253,7 @@
   },
   "DEMO_FORCE_HTTPS": {
     "description": "The name of a configuration value.",
-    "message": "Force [JARGON:HTTPs]"
+    "message": "Force [JARGON:HTTPS]"
   },
   "DEMO_FORCE_TRANSMUX_TS": {
     "description": "The name of a configuration value.",
