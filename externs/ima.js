@@ -153,6 +153,9 @@ google.ima.Ad = class {
   getDuration() {}
 
   /** @return {number} */
+  getMinSuggestedDuration() {}
+
+  /** @return {number} */
   getSkipTimeOffset() {}
 
   /** @return {google.ima.AdPodInfo} */
