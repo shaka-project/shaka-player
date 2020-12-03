@@ -266,6 +266,7 @@ shakaDemo.Config = class {
     const prefix = category + '.retryParameters.';
     const docLink = this.resolveExternLink_('.RetryParameters');
     this.addSection_(sectionName, docLink)
+        .addBoolInput_(MessageIds.FORCE_HTTPS, prefix + 'forceHTTPs')
         .addNumberInput_(MessageIds.MAX_ATTEMPTS, prefix + 'maxAttempts')
         .addNumberInput_(MessageIds.BASE_DELAY, prefix + 'baseDelay',
             /* canBeDecimal= */ true)

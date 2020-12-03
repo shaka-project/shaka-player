@@ -251,6 +251,10 @@
     "description": "Text that describes an asset that is protected with the Fairplay Digital Rights Management system.",
     "message": "[PROPER_NAME:Fairplay] [JARGON:DRM]"
   },
+  "DEMO_FORCE_HTTPS": {
+    "description": "The name of a configuration value.",
+    "message": "Force [JARGON:HTTPs]"
+  },
   "DEMO_FORCE_TRANSMUX_TS": {
     "description": "The name of a configuration value.",
     "message": "Force Transmux [JARGON:MPEG-2 TS]"

@@ -85,6 +85,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
   describe('retry', () => {
     it('will retry', async () => {
       const request = createRequest('reject://foo', {
+        forceHTTPs: false,
         maxAttempts: 2,
         baseDelay: 0,
         backoffFactor: 0,
@@ -104,6 +105,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     it('will retry twice', async () => {
       const request = createRequest('reject://foo', {
+        forceHTTPs: false,
         maxAttempts: 3,
         baseDelay: 0,
         backoffFactor: 0,
@@ -123,6 +125,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     it('will fail overall', async () => {
       const request = createRequest('reject://foo', {
+        forceHTTPs: false,
         maxAttempts: 3,
         baseDelay: 0,
         backoffFactor: 0,
@@ -161,6 +164,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
       it('uses baseDelay', async () => {
         const request = createRequest('reject://foo', {
+          forceHTTPs: false,
           maxAttempts: 2,
           baseDelay: baseDelay,
           fuzzFactor: 0,
@@ -177,6 +181,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
       it('uses backoffFactor', async () => {
         const request = createRequest('reject://foo', {
+          forceHTTPs: false,
           maxAttempts: 3,
           baseDelay: baseDelay,
           fuzzFactor: 0,
@@ -196,6 +201,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
       it('uses fuzzFactor', async () => {
         const request = createRequest('reject://foo', {
+          forceHTTPs: false,
           maxAttempts: 2,
           baseDelay: baseDelay,
           fuzzFactor: 1,
@@ -217,6 +223,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     it('uses multiple URIs', async () => {
       const request = createRequest('', {
+        forceHTTPs: false,
         maxAttempts: 3,
         baseDelay: 0,
         backoffFactor: 0,
@@ -231,6 +238,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     it('won\'t retry for CRITICAL error', async () => {
       const request = createRequest('reject://foo', {
+        forceHTTPs: false,
         maxAttempts: 5,
         baseDelay: 0,
         backoffFactor: 0,
@@ -537,6 +545,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     it('if rejects will stop requests', async () => {
       const request = createRequest('resolve://foo', {
+        forceHTTPs: false,
         maxAttempts: 3,
         baseDelay: 0,
         backoffFactor: 0,
@@ -553,6 +562,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     it('if throws will stop requests', async () => {
       const request = createRequest('resolve://foo', {
+        forceHTTPs: false,
         maxAttempts: 3,
         baseDelay: 0,
         backoffFactor: 0,
@@ -760,6 +770,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
       filter.and.returnValue(p);
 
       const request = createRequest('resolve://foo', {
+        forceHTTPs: false,
         maxAttempts: 1,
         baseDelay: 0,
         backoffFactor: 0,
@@ -839,6 +850,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     it('does not allow further retries', async () => {
       const request = createRequest('reject://foo', {
+        forceHTTPs: false,
         maxAttempts: 3,
         baseDelay: 0,
         backoffFactor: 0,
@@ -912,6 +924,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
 
     beforeEach(() => {
       request = createRequest('reject://foo', {
+        forceHTTPs: false,
         maxAttempts: 3,
         baseDelay: 0,
         backoffFactor: 0,

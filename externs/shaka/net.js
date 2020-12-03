@@ -12,6 +12,7 @@
 
 /**
  * @typedef {{
+ *   forceHTTPs: boolean,
  *   maxAttempts: number,
  *   baseDelay: number,
  *   backoffFactor: number,
@@ -22,6 +23,8 @@
  * @description
  *   Parameters for retrying requests.
  *
+ * @property {boolean} forceHTTPs
+ *   If true, if the protocol is HTTP change it to HTTPs.
  * @property {number} maxAttempts
  *   The maximum number of times the request should be attempted.
  * @property {number} baseDelay
