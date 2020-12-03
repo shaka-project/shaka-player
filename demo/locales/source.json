@@ -679,6 +679,10 @@
     "description": "The name of a configuration value.",
     "message": "Preferred Text Language"
   },
+  "DEMO_TEXT_LANGUAGE_FORCED": {
+    "description": "The name of a configuration value.",
+    "message": "Preferred Text Language Forcded"
+  },
   "DEMO_TIMEOUT": {
     "description": "The name of a configuration value.",
     "message": "Timeout Factor"

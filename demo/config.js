@@ -366,6 +366,8 @@ shakaDemo.Config = class {
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
     this.addNumberInput_(MessageIds.AUDIO_CHANNEL_COUNT,
         'preferredAudioChannelCount');
+    this.addBoolInput_(MessageIds.TEXT_LANGUAGE_FORCED,
+        'preferredTextLanguageForced');
   }
 
   /** @private */
