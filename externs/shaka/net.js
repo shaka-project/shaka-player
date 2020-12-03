@@ -33,6 +33,7 @@
  *   For example, 0.5 means "between 50% below and 50% above the retry delay."
  * @property {number} timeout
  *   The request timeout, in milliseconds.  Zero means "unlimited".
+ *   <i>Defaults to 30000 milliseconds.</i>
  *
  * @tutorial network-and-buffering-config
  *
