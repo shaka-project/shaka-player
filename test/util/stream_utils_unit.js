@@ -60,6 +60,24 @@ describe('StreamUtils', () => {
       expect(chosen[0]).toBe(manifest.textStreams[2]);
     });
 
+    it('no chooses text streams if there are not forced language', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addTextStream(1, (stream) => {
+          stream.language = 'en';
+        });
+        manifest.addTextStream(2, (stream) => {
+          stream.language = 'es';
+        });
+      });
+
+      const chosen = StreamUtils.filterStreamsByLanguageAndRole(
+          manifest.textStreams,
+          'es',
+          '',
+          true);
+      expect(chosen.length).toBe(0);
+    });
+
     it('chooses primary text streams', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(1);

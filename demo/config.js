@@ -367,7 +367,7 @@ shakaDemo.Config = class {
     this.addNumberInput_(MessageIds.AUDIO_CHANNEL_COUNT,
         'preferredAudioChannelCount');
     this.addBoolInput_(MessageIds.TEXT_LANGUAGE_FORCED,
-        'preferredTextLanguageForced');
+        'preferForcedSubs');
   }
 
   /** @private */
