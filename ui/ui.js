@@ -436,7 +436,7 @@ shaka.ui.Overlay.FailReasonCode = {
 };
 
 
-/*
+/**
  * "shaka.ui.FailReasonCode" is deprecated and will be removed in v4.
  *
  * @deprecated
