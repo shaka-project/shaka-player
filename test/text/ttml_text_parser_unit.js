@@ -621,7 +621,7 @@ describe('TtmlTextParser', () => {
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
-        '<region xml:id="subtitleArea" tts:extent="50px 16px" ' +
+        '<region xml:id="subtitleArea" tts:extent="50px 16px"/>' +
         '</layout>' +
         '<body region="subtitleArea"><div>' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
