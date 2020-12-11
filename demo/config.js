@@ -266,7 +266,6 @@ shakaDemo.Config = class {
     const prefix = category + '.retryParameters.';
     const docLink = this.resolveExternLink_('.RetryParameters');
     this.addSection_(sectionName, docLink)
-        .addBoolInput_(MessageIds.FORCE_HTTPS, prefix + 'forceHTTPS')
         .addNumberInput_(MessageIds.MAX_ATTEMPTS, prefix + 'maxAttempts')
         .addNumberInput_(MessageIds.BASE_DELAY, prefix + 'baseDelay',
             /* canBeDecimal= */ true)
@@ -322,7 +321,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.LOW_LATENCY,
             'streaming.lowLatencyMode')
         .addBoolInput_(MessageIds.AUTO_LOW_LATENCY,
-            'streaming.autoLowLatencyMode');
+            'streaming.autoLowLatencyMode')
+        .addBoolInput_(MessageIds.FORCE_HTTPS,
+            'streaming.forceHTTPS');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
