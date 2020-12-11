@@ -565,7 +565,7 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports region settings in pixels', () => {
+  it('supports region settings in pixels (origin)', () => {
     verifyHelper(
         [
           {
@@ -595,7 +595,9 @@ describe('TtmlTextParser', () => {
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
         '</div></body></tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
 
+  it('supports region settings in pixels (extent)', () => {
     verifyHelper(
         [
           {
@@ -619,7 +621,136 @@ describe('TtmlTextParser', () => {
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
-        '<region xml:id="subtitleArea" tts:extent="50px 16px" ' +
+        '<region xml:id="subtitleArea" tts:extent="50px 16px"/>' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports region settings in pixels: origin (with global extent)', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 10,
+              viewportAnchorY: 10,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 100,
+              height: 100,
+              heightUnits: CueRegion.units.PERCENTAGE,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.NONE,
+            },
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" tts:extent="1920px 1080px">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="108px 192px"/>' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports region settings in pixels: extent (with global extent)', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 0,
+              viewportAnchorY: 0,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 30,
+              height: 30,
+              heightUnits: CueRegion.units.PERCENTAGE,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.NONE,
+            },
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" tts:extent="1920px 1080px">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:extent="576px 324px" ' +
+        'tts:writingMode="lrtb" />' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports region settings in percentage (origin)', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 50,
+              viewportAnchorY: 16,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 100,
+              height: 100,
+              heightUnits: CueRegion.units.PERCENTAGE,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.NONE,
+            },
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" tts:extent="1920px 1080px">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="50% 16%"/>' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports region settings in percentage (extent)', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 0,
+              viewportAnchorY: 0,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 50,
+              height: 16,
+              heightUnits: CueRegion.units.PERCENTAGE,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.NONE,
+            },
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" tts:extent="1920px 1080px">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:extent="50% 16%" ' +
         'tts:writingMode="lrtb" />' +
         '</layout>' +
         '<body region="subtitleArea"><div>' +
