@@ -748,6 +748,69 @@ describe('PeriodCombiner', () => {
   });
 
 
+  it('Matches streams with no roles', async () => {
+    const stream1 = makeAudioStream('en', /* channels= */ 2);
+    stream1.originalId = '1';
+    stream1.bandwidth = 129597;
+    stream1.codecs = 'mp4a.40.2';
+
+    const stream2 = makeAudioStream('en', /* channels= */ 2);
+    stream2.originalId = '2';
+    stream2.bandwidth = 129637;
+    stream2.codecs = 'mp4a.40.2';
+    stream2.roles = ['description'];
+
+    const stream3 = makeAudioStream('en', /* channels= */ 2);
+    stream3.originalId = '3';
+    stream3.bandwidth = 131037;
+    stream3.codecs = 'mp4a.40.2';
+
+    const stream4 = makeAudioStream('en', /* channels= */ 2);
+    stream4.originalId = '4';
+    stream4.bandwidth = 131034;
+    stream4.codecs = 'mp4a.40.2';
+    stream4.roles = ['description'];
+
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '0',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          stream1,
+          stream2,
+        ],
+        textStreams: [],
+      },
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          stream3,
+          stream4,
+        ],
+        textStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+    const variants = combiner.getVariants();
+    expect(variants.length).toBe(2);
+    // We can use the originalId field to see what each track is composed of.
+    const audio1 = variants[0].audio;
+    expect(audio1.roles).toEqual([]);
+    expect(audio1.originalId).toBe('1,3');
+
+    const audio2 = variants[1].audio;
+    expect(audio2.roles).toEqual(['description']);
+    expect(audio2.originalId).toBe('2,4');
+  });
+
+
   it('Matches streams with most roles in common', async () => {
     const makeAudioStreamWithRoles = (roles) => {
       const stream = makeAudioStream('en');
