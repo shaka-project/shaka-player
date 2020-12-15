@@ -461,7 +461,13 @@ describe('PeriodCombiner', () => {
     const a3 = makeAudioStream('en', /* channels= */ 2);
     a3.originalId = 'a3';
     a3.bandwidth = 97065;
-    a2.roles = ['role1', 'role2'];
+    a3.roles = ['role1', 'role2'];
+
+    const a4 = makeAudioStream('en', /* channels= */ 2);
+    a4.originalId = 'a4';
+    a4.bandwidth = 97065;
+    a4.roles = ['role1', 'role2'];
+    a4.label = 'Surround';
 
     // t1 and t3 are duplicates
     const t1 = makeTextStream('en');
@@ -489,6 +495,7 @@ describe('PeriodCombiner', () => {
           a1,
           a2,
           a3,
+          a4,
         ],
         textStreams: [
           t1,
@@ -500,7 +507,7 @@ describe('PeriodCombiner', () => {
 
     await combiner.combinePeriods(periods, /* isDynamic= */ true);
     const variants = combiner.getVariants();
-    expect(variants.length).toBe(4);
+    expect(variants.length).toBe(6);
 
     // v3 should've been filtered out
     const videoIds = variants.map((v) => v.video.originalId);
