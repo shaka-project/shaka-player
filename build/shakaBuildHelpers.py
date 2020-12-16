@@ -294,7 +294,16 @@ def get_node_binary(module_name, bin_name=None):
   if os.path.isdir(path):
     json_path = os.path.join(path, 'package.json')
     package_data = json.load(open_file(json_path, 'r'))
-    bin_path = os.path.join(path, package_data['bin'][bin_name])
+    bin_data = package_data['bin']
+
+    if type(bin_data) is str or type(bin_data) is unicode:
+      # There's only one binary here.
+      bin_rel_path = bin_data
+    else:
+      # It's a dictionary, so look up the specific binary we want.
+      bin_rel_path = bin_data[bin_name]
+
+    bin_path = os.path.join(path, bin_rel_path)
     return ['node', bin_path]
 
   # Not found locally, assume it can be found in os.environ['PATH'].
