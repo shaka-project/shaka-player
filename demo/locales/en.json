@@ -62,6 +62,7 @@
   "DEMO_EDIT_CUSTOM": "Edit",
   "DEMO_ENABLED": "Enabled",
   "DEMO_FAIRPLAY": "Fairplay DRM",
+  "DEMO_FORCE_HTTPS": "Force HTTPS",
   "DEMO_FORCE_TRANSMUX_TS": "Force Transmux TS",
   "DEMO_FRONT_INTRO_DISMISS": "Dismiss",
   "DEMO_FRONT_INTRO_ONE": "This is a demo of Google's Shaka Player, a JavaScript library for adaptive video streaming.",

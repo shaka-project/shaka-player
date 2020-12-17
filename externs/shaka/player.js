@@ -729,7 +729,8 @@ shaka.extern.ManifestConfiguration;
  *   useNativeHlsOnSafari: boolean,
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
- *   autoLowLatencyMode: boolean
+ *   autoLowLatencyMode: boolean,
+ *   forceHTTPS: boolean
  * }}
  *
  * @description
@@ -828,6 +829,8 @@ shaka.extern.ManifestConfiguration;
  *   lowLatencyMode, but if it has been configured to activate the
  *   lowLatencyMode if a stream of this type is detected, we automatically
  *   activate the lowLatencyMode. Defaults to false.
+ * @property {boolean} forceHTTPS
+ *   If true, if the protocol is HTTP change it to HTTPs.
  *
  * @exportDoc
  */
