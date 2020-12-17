@@ -123,7 +123,7 @@ HLS features supported:
  - VOD, Live, and Event types
  - Encrypted content with PlayReady and Widevine
  - ISO-BMFF / MP4 / CMAF support
- - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.6.3+, must be
+ - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.7.0+, must be
    separately included)
  - WebVTT and TTML
  - CEA-608 captions
@@ -135,8 +135,6 @@ HLS features **not** supported:
  - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
  - Raw AAC, MP3, etc (without an MP4 container):
    https://github.com/google/shaka-player/issues/2337
- - CEA-708 in TS container not supported in mux.js yet:
-   https://github.com/videojs/mux.js/pull/346
 
 [mux.js]: https://github.com/videojs/mux.js/releases
 
@@ -199,7 +197,7 @@ Shaka Player supports:
       SegmentTemplate@index
     - Not supported in HLS
   - MPEG-2 TS
-    - With help from [mux.js][] v5.6.3+, can be played on any browser which
+    - With help from [mux.js][] v5.7.0+, can be played on any browser which
       supports MP4
     - Can find and parse timestamps to find segment start time in HLS
   - WebVTT
@@ -207,7 +205,9 @@ Shaka Player supports:
   - TTML
     - Supported in both XML form and embedded in MP4
   - CEA-608
-    - With help from [mux.js][] v5.6.3+, supported embedded in TS and MP4
+    - With help from [mux.js][] v5.7.0+, supported embedded in TS and MP4
+  - CEA-708
+    - With help from [mux.js][] v5.7.0+, supported embedded in TS and MP4
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
