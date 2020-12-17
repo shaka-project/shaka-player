@@ -143,6 +143,7 @@
   "DEMO_FAILURE_NO_BROWSER_SUPPORT": "Your browser is not supported!",
   "DEMO_PLAY": "Play",
   "DEMO_PLAYREADY": "PlayReady DRM",
+  "DEMO_PREFER_FORCED_SUBS": "Prefer Forced Subs",
   "DEMO_PROJECT_LINKS_HEADER": "PROJECT LINKS",
   "DEMO_PROMPT_NO": "No",
   "DEMO_PROMPT_YES": "Yes",

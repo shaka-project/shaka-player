@@ -575,6 +575,10 @@
     "description": "Text that describes an asset that is protected with the Playready Digital Rights Management system.",
     "message": "[PROPER_NAME:PlayReady] [JARGON:DRM]"
   },
+  "DEMO_PREFER_FORCED_SUBS": {
+    "description": "The name of a configuration value.",
+    "message": "Prefer Forced Subs"
+  },
   "DEMO_PROJECT_LINKS_HEADER": {
     "description": "A header for a section of the footer, that contains links to various project-related things.",
     "message": "PROJECT LINKS"
