@@ -125,8 +125,13 @@ filterDescribe('UITextDisplayer layout', Util.supportsScreenshots, () => {
   // Regression test for #2497
   // Only one cue should be displayed.
   it('duplicate cues', async () => {
+    // In reality, this occurs when a VTT cue crossed a segment boundary and
+    // appears in more than one segment.  So we must simulate this with two
+    // calls to append().
     textDisplayer.append([
       new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9'),
+    ]);
+    textDisplayer.append([
       new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9'),
     ]);
 
