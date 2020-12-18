@@ -83,12 +83,16 @@ shaka.ui.TextDisplayer = class {
    * @export
    */
   append(cues) {
+    // Clone the cues list for performace optimization. We can avoid the cues
+    // list growing during the comparisons for duplicate cues.
+    // See: https://github.com/google/shaka-player/issues/3018
+    const cuesList = [...this.cues_];
     for (const cue of cues) {
       // When a VTT cue spans a segment boundary, the cue will be duplicated
       // into two segments.
       // To avoid displaying duplicate cues, if the current cue list already
       // contains the cue, skip it.
-      const containsCue = this.cues_.some(
+      const containsCue = cuesList.some(
           (cueInList) => shaka.text.Cue.equal(cueInList, cue));
       if (!containsCue) {
         this.cues_.push(cue);
