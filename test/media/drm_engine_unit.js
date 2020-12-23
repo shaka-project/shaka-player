@@ -264,7 +264,7 @@ describe('DrmEngine', function() {
       // Because DrmEngine will err on being too accepting, make sure it will
       // reject something. However, we can only check that it is actually
       // thing on non-Edge browsers because of https://bit.ly/2IcEgv0
-      if (!navigator.userAgent.includes('Edge/')) {
+      if (!shaka.util.Platform.isEdge()) {
         expect(drmEngine.willSupport('this-should-fail')).toBeFalsy();
       }
     });
