@@ -44,6 +44,9 @@ jobs:
           overwrite: true
           body: "This is my release text"
 
+      - name: install gh-pages-multi
+        run: sudo npm i -g @koumoul/gh-pages-multi
+
       - name: Collect files for demo page
         run: |
           rm -rf tmp
@@ -69,10 +72,13 @@ jobs:
           cp --parent node_modules/fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js tmp
 
       - name: Setup credential to publish page
-        run: git remote set-url origin https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/harmonicinc-com/shaka-player.git
+        run: |
+          git config --global user.email "johnny.yiu@harmonicinc.com"
+          git config --global user.name "Johnny Yiu"
+          git remote set-url origin https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/harmonicinc-com/shaka-player.git
 
       - name: Publish demo page to github page (version)
-        run: gh-pages-multi deploy --title "Harmonic Shaka Player Demo" -s tmp -t ${{ env.RELEASE_VERSION }}
+        run: gh-pages-multi deploy --title "Harmonic Shaka Player Demo" -s tmp -t ${{ env.RELEASE_VERSION }} --no-history
 
       - name: Publish demo page to github page
         run: gh-pages-multi deploy --title "Harmonic Shaka Player Demo" -s tmp -t latest --no-history

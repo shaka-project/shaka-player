@@ -70,7 +70,6 @@
   },
   "license": "Apache-2.0",
   "scripts": {
-    "preinstall": "npm i -g @koumoul/gh-pages-multi",
     "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
   },
   "dependencies": {
