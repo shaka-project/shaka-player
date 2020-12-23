@@ -1366,6 +1366,24 @@ describe('DashParser Manifest', () => {
           {'urn:dolby:dash:audio_channel_configuration:2011': 'x'});
     });
 
+    it('parses MPEG channel configuration scheme', async () => {
+      // Parses a simple channel count.
+      await testAudioChannelConfiguration(2,
+          {'urn:mpeg:mpegB:cicp:ChannelConfiguration': '2'});
+
+      // Parses a high channel count.
+      await testAudioChannelConfiguration(24,
+          {'urn:mpeg:mpegB:cicp:ChannelConfiguration': '13'});
+
+      // Results in null if the value is not an integer.
+      await testAudioChannelConfiguration(null,
+          {'urn:mpeg:mpegB:cicp:ChannelConfiguration': 'foo'});
+
+      // Results in null if the value is not in a spec range.
+      await testAudioChannelConfiguration(null,
+          {'urn:mpeg:mpegB:cicp:ChannelConfiguration': '100'});
+    });
+
     it('ignores unrecognized schemes', async () => {
       await testAudioChannelConfiguration(null, {'foo': 'bar'});
 
