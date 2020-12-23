@@ -209,6 +209,8 @@ Shaka Player supports:
     - With help from [mux.js][] v5.7.0+, supported embedded in TS
   - SubRip (SRT)
     - UTF-8 encoding only
+  - SubViewer (SBV)
+    - UTF-8 encoding only
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
