@@ -60,6 +60,7 @@ def main(args):
         # in Karma.
         if os.path.exists(officialPath):
           output = shakaBuildHelpers.execute_get_output([
+              'node',
               pixelsChangedTool,
               officialPath,
               fullPath,
