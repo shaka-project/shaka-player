@@ -909,7 +909,7 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports smpte:backgroundImage attribute', () => {
+  it('supports smpte:backgroundImage attribute alt namespace', () => {
     verifyHelper(
         [
           {
