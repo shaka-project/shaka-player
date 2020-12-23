@@ -43,3 +43,36 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
           body: "This is my release text"
+
+      - name: Collect files for demo page
+        run: |
+          rm -rf tmp
+          mkdir tmp
+          cp -r demo tmp
+          cp .github_page_deploy/demo/index.html tmp/demo/index.html
+          cp .github_page_deploy/index.html tmp/index.html
+          cp .github_page_deploy/.nojekyll  tmp/.nojekyll
+          cp .github_page_deploy/demo/main.js tmp/demo/main.js
+          cp .github_page_deploy/demo/load.js tmp/demo/load.js
+          cp -r dist tmp
+          cp --parent ui/controls.less tmp
+          cp -r --parent ui/locales tmp
+          cp -r --parent ui/less tmp
+          cp -r --parent demo/locales tmp
+          cp --parent node_modules/mux.js/dist/mux.min.js tmp
+          cp --parent node_modules/material-design-lite/dist/material.min.js tmp
+          cp --parent node_modules/dialog-polyfill/dist/dialog-polyfill.js tmp
+          cp --parent node_modules/awesomplete/awesomplete.min.js tmp
+          cp --parent node_modules/popper.js/dist/umd/popper.min.js tmp
+          cp --parent node_modules/tippy.js/umd/index.min.js tmp
+          cp --parent node_modules/pwacompat/pwacompat.min.js tmp
+          cp --parent node_modules/fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js tmp
+
+      - name: Setup credential to publish page
+        run: git remote set-url origin https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/harmonicinc-com/shaka-player.git
+
+      - name: Publish demo page to github page (version)
+        run: gh-pages-multi deploy --title "Harmonic Shaka Player Demo" -s tmp -t ${{ env.RELEASE_VERSION }}
+
+      - name: Publish demo page to github page
+        run: gh-pages-multi deploy --title "Harmonic Shaka Player Demo" -s tmp -t latest --no-history
