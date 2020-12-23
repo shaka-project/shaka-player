@@ -226,7 +226,7 @@ attributes.
 
 
 ## Documentation & Important Links ##
-
+ * [Demo](https://harmonicinc-com.github.io/shaka-player/)
  * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
  * [API documentation](https://shaka-player-demo.appspot.com/docs/api/index.html)
  * [Tutorials](https://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)

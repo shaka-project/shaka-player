@@ -52,6 +52,7 @@ jobs:
           rm -rf tmp
           mkdir tmp
           cp -r demo tmp
+          cp -r docs tmp
           cp .github_page_deploy/demo/index.html tmp/demo/index.html
           cp .github_page_deploy/index.html tmp/index.html
           cp .github_page_deploy/.nojekyll  tmp/.nojekyll
