@@ -58,6 +58,19 @@ describe('LrcTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports different time formats', () => {
+    verifyHelper(
+        [
+          {startTime: 0.1, endTime: 10.001, payload: 'Test'},
+          {startTime: 10.001, endTime: 20.02, payload: 'Test2'},
+          {startTime: 20.02, endTime: 22.02, payload: 'Test3'},
+        ],
+        '[00:00.10]Test\n' +
+        '[00:10.001]Test2\n' +
+        '[00:20.02]Test3',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   /**
    * @param {!Array} cues
    * @param {string} text
