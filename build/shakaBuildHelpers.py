@@ -296,7 +296,7 @@ def get_node_binary(module_name, bin_name=None):
     package_data = json.load(open_file(json_path, 'r'))
     bin_data = package_data['bin']
 
-    if type(bin_data) is str or type(bin_data) is unicode:
+    if type(bin_data) is str or type(bin_data) is str:
       # There's only one binary here.
       bin_rel_path = bin_data
     else:
