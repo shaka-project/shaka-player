@@ -71,9 +71,9 @@ describe('LrcTextParser', () => {
         '[00:00.1]Test\n' +
         '[00:10.001]Test2\n' +
         '[00:20.02]Test3\n' +
-        '[00:30.1]Test4\n' +
-        '[00:40.001]Test5\n' +
-        '[00:50.02]Test6',
+        '[00:30,1]Test4\n' +
+        '[00:40,001]Test5\n' +
+        '[00:50,02]Test6',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
