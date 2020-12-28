@@ -64,9 +64,9 @@ describe('LrcTextParser', () => {
           {startTime: 0.1, endTime: 10.001, payload: 'Test'},
           {startTime: 10.001, endTime: 20.02, payload: 'Test2'},
           {startTime: 20.02, endTime: 30.1, payload: 'Test3'},
-          {startTime: 30.1, endTime: 40.001, payload: 'Test'},
-          {startTime: 40.001, endTime: 50.02, payload: 'Test2'},
-          {startTime: 50.02, endTime: 52.02, payload: 'Test3'},
+          {startTime: 30.1, endTime: 40.001, payload: 'Test4'},
+          {startTime: 40.001, endTime: 50.02, payload: 'Test5'},
+          {startTime: 50.02, endTime: 52.02, payload: 'Test6'},
         ],
         '[00:00.1]Test\n' +
         '[00:10.001]Test2\n' +
