@@ -152,6 +152,25 @@ describe('SsaTextParser', () => {
         });
   });
 
+  it('supports different time formats', () => {
+    verifyHelper(
+        [
+          {startTime: 0, endTime: 2, payload: 'Test'},
+          {startTime: 4.5, endTime: 6.1, payload: 'Test2'},
+          {startTime: 8.01, endTime: 10.001, payload: 'Test3'},
+        ],
+        '[Events]\n' +
+        'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, ' +
+        'Effect, Text\n' +
+        'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
+        ',,{\\pos(400,570)}Test\n' +
+        'Dialogue: 0,0:00:04.5,0:00:06.1,DefaultVCD, NTP,0000,0000,0000' +
+        ',,{\\pos(400,570)}Test2\n' +
+        'Dialogue: 0,0:00:08.01,0:00:10.001,DefaultVCD, NTP,0000,0000,0000' +
+        ',,{\\pos(400,570)}Test3',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('supports multiple cues', () => {
     verifyHelper(
         [
