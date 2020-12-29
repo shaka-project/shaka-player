@@ -785,9 +785,8 @@ describe('TtmlTextParser', function() {
         'base64EncodedImage</smpte:image>' +
         '</metadata>' +
         '<body>' +
-        '<div>' +
-        '<p begin="01:02.05" end="01:02:03.200" ' +
-        'smpte:backgroundImage="#img_0" />' +
+        '<div smpte:backgroundImage="#img_0">' +
+        '<p begin="01:02.05" end="01:02:03.200" />' +
         '</div>' +
         '</body>' +
         '</tt>',
