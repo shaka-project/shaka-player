@@ -784,13 +784,9 @@ describe('TtmlTextParser', () => {
         '<smpte:image imagetype="PNG" encoding="Base64" xml:id="img_0">' +
         'base64EncodedImage</smpte:image>' +
         '</metadata>' +
-        '<body>' +
-        '<div>' +
-        '<p begin="01:02.05" end="01:02:03.200" ' +
-        'smpte:backgroundImage="#img_0" />' +
-        '</div>' +
-        '</body>' +
-        '</tt>',
+        '<body><div smpte:backgroundImage="#img_0">' +
+        '<p begin="01:02.05" end="01:02:03.200"></p>' +
+        '</div></body></tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
