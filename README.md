@@ -209,6 +209,8 @@ Shaka Player supports:
     - With help from [mux.js][] v5.7.0+, supported embedded in TS
   - SubRip (SRT)
     - UTF-8 encoding only
+  - LyRiCs (LRC)
+    - UTF-8 encoding only
   - SubStation Alpha (SSA, ASS)
     - UTF-8 encoding only
 
