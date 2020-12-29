@@ -1,5 +1,6 @@
 # Optional plugins related to text parsing and displaying.
 
++../../lib/text/lrc_text_parser.js
 +../../lib/text/mp4_ttml_parser.js
 +../../lib/text/mp4_vtt_parser.js
 +../../lib/text/sbv_text_parser.js
