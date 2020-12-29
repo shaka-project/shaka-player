@@ -321,7 +321,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.LOW_LATENCY,
             'streaming.lowLatencyMode')
         .addBoolInput_(MessageIds.AUTO_LOW_LATENCY,
-            'streaming.autoLowLatencyMode');
+            'streaming.autoLowLatencyMode')
+        .addBoolInput_(MessageIds.FORCE_HTTPS,
+            'streaming.forceHTTPS');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
@@ -366,6 +368,8 @@ shakaDemo.Config = class {
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
     this.addNumberInput_(MessageIds.AUDIO_CHANNEL_COUNT,
         'preferredAudioChannelCount');
+    this.addBoolInput_(MessageIds.PREFER_FORCED_SUBS,
+        'preferForcedSubs');
   }
 
   /** @private */
