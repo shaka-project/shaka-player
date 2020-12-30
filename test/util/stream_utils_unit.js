@@ -499,4 +499,153 @@ describe('StreamUtils', () => {
       expect(manifest.textStreams[1].id).toBe(2);
     });
   });
+
+  describe('filterVariantsByHeight_', () => {
+    const avc1Variant1080 = /** @type {shaka.extern.Variant} */(
+      /** @type {?} */({
+        bandwidth: 5058558,
+        audio: {
+          bandwidth: 129998,
+          codecs: 'mp4a.40.2',
+        },
+        video: {
+          bandwidth: 4928560,
+          codecs: 'avc1.640028',
+          height: 1080,
+          width: 1920,
+        },
+      })
+    );
+
+    const vp9Variant1080 = /** @type {shaka.extern.Variant} */(
+      /** @type {?} */({
+        bandwidth: 4911000,
+        audio: {
+          bandwidth: 129998,
+          codecs: 'mp4a.40.2',
+        },
+        video: {
+          bandwidth: 4781002,
+          codecs: 'vp09.00.40.08.00.02.02.02.00',
+          height: 1080,
+          width: 1920,
+        },
+      })
+    );
+
+    const vp9Variant2160 = /** @type {shaka.extern.Variant} */(
+      /** @type {?} */({
+        bandwidth: 10850316,
+        audio: {
+          bandwidth: 65992,
+          codecs: 'mp4a.40.2',
+        },
+        video: {
+          bandwidth: 10784324,
+          codecs: 'vp09.00.50.08.00.02.02.02.00',
+          height: 2160,
+          width: 3840,
+        },
+      })
+    );
+
+    it('filters variants by height', () => {
+      const variantsByCodecs = StreamUtils.getVariantsByCodecs_([
+        avc1Variant1080,
+        vp9Variant1080,
+        vp9Variant2160,
+      ]);
+
+      const actual = StreamUtils.filterVariantsByHeight_(
+          variantsByCodecs
+      ).getAll();
+
+      const expected = StreamUtils.getVariantsByCodecs_([
+        avc1Variant1080,
+        vp9Variant1080,
+      ]).getAll();
+
+      expect(actual).toEqual(expected);
+    });
+
+    describe('findBestCodecs_', () => {
+      it('returns best codecs with same heights', () => {
+        const variantsByCodecs = StreamUtils.getVariantsByCodecs_([
+          avc1Variant1080,
+          vp9Variant1080,
+          vp9Variant2160,
+        ]);
+
+        const filteredVariantsByCodecs = StreamUtils.filterVariantsByHeight_(
+            variantsByCodecs
+        );
+
+        const bestCodecs = StreamUtils.findBestCodecs_(
+            filteredVariantsByCodecs
+        );
+
+        expect(bestCodecs).toBe('vp09-mp4a');
+      });
+
+      it('returns best codecs without same heights', () => {
+        const variantsByCodecs = StreamUtils.getVariantsByCodecs_([
+          avc1Variant1080,
+          vp9Variant2160,
+        ]);
+
+        const filteredVariantsByCodecs = StreamUtils.filterVariantsByHeight_(
+            variantsByCodecs
+        );
+
+        const bestCodecs = StreamUtils.findBestCodecs_(
+            filteredVariantsByCodecs
+        );
+
+        expect(bestCodecs).toBe('avc1-mp4a');
+      });
+    });
+  });
+
+  describe('getGroupVariantCodecs_', () => {
+    it('returns group of codecs', () => {
+      const variant = /** @type {shaka.extern.Variant} */(
+        /** @type {?} */({
+          audio: {
+            codecs: 'mp4a.40.2',
+          },
+          video: {
+            codecs: 'avc1.640028',
+          },
+        })
+      );
+
+      expect(StreamUtils.getGroupVariantCodecs_(variant)).toBe('avc1-mp4a');
+    });
+
+    it('returns group of codecs without audio', () => {
+      const variant = /** @type {shaka.extern.Variant} */(
+        /** @type {?} */({
+          audio: null,
+          video: {
+            codecs: 'avc1.640028',
+          },
+        })
+      );
+
+      expect(StreamUtils.getGroupVariantCodecs_(variant)).toBe('avc1-');
+    });
+
+    it('returns group of codecs without video', () => {
+      const variant = /** @type {shaka.extern.Variant} */(
+        /** @type {?} */({
+          audio: {
+            codecs: 'mp4a.40.2',
+          },
+          video: null,
+        })
+      );
+
+      expect(StreamUtils.getGroupVariantCodecs_(variant)).toBe('-mp4a');
+    });
+  });
 });
