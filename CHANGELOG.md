@@ -1,3 +1,45 @@
+## 2.5.19 (2021-01-06)
+
+Bugfixes:
+  - Remove legacy Edge workarounds on new Edge
+  - Fix viewport anchor calculations in TTML
+    - https://github.com/google/shaka-player/pull/3065
+  - Fix slow memory leak related to MediaSource object URLs
+    - https://github.com/google/shaka-player/issues/2953
+  - Improve cue comparison performance
+    - https://github.com/google/shaka-player/issues/3018
+  - Fix race condition in text stream scheduling
+    - https://github.com/google/shaka-player/issues/2764
+  - Fix exception when removing content from buffer
+    - https://github.com/google/shaka-player/issues/2982
+    - https://github.com/google/shaka-player/pull/3042
+  - Work around misreported AC-3 support on Tizen
+    - https://github.com/google/shaka-player/issues/2989
+  - Fix trick-mode tracks associated with multiple regular tracks
+    - https://github.com/google/shaka-player/pull/2992
+  - Fix TS DRM failures
+    - https://github.com/google/shaka-player/issues/2981
+  - Ignore incompatible TrickMode streams
+    - https://github.com/google/shaka-player/pull/2984
+
+Build:
+  - Fix build issues with Python 3
+    - https://github.com/google/shaka-player/issues/3004
+  - Fix running build scripts on Windows
+    - https://github.com/google/shaka-player/issues/2988
+  - Fix build error about stylelint paths
+  - Fix build failure in context of node module
+
+Demo App:
+  - Fix keyboard navigation in settings
+    - https://github.com/google/shaka-player/issues/2986
+
+Docs:
+  - Clean up doc generation
+  - Fix docs generation for enums in ui
+    - https://github.com/google/shaka-player/issues/2698
+
+
 ## 2.5.18 (2020-11-12)
 
 Bugfixes:
