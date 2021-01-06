@@ -13,6 +13,7 @@ goog.require('ShakaDemoAssetInfo');
  * @suppress {missingProvide}
  */
 class ShakaReceiverApp {
+  /** */
   constructor() {
     /** @private {HTMLVideoElement} */
     this.video_ = null;
