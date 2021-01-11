@@ -562,6 +562,7 @@ describe('UI', () => {
         getLocalization: () => null,
         getPlayer: () => player,
         getVideo: () => null,
+        getAd: () => null,
       });
 
       /** @extends {shaka.ui.Element} */

@@ -276,7 +276,6 @@ class Less(object):
     if not force and not _must_build(self.output, self.all_source_files):
       return True
 
-    lessc = shakaBuildHelpers.get_node_binary('less', 'lessc')
     less_options = [
       # Enable the "clean-CSS" plugin to minify the output and strip out comments.
       '--clean-css',
@@ -284,7 +283,12 @@ class Less(object):
       '--source-map=' + self.output + '.map',
     ]
 
-    cmd_line = lessc + less_options + [self.main_source_file, self.output]
+    cmd_line = [
+      'npx', 'lessc',
+    ] + less_options + [
+      self.main_source_file,
+      self.output,
+    ]
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('Externs generation failed')
@@ -322,8 +326,10 @@ class Linter(object):
     if not force and not _must_build(self.output, deps):
       return True
 
-    eslint = shakaBuildHelpers.get_node_binary('eslint')
-    cmd_line = eslint + ['--config', self.config_path] + self.source_files
+    cmd_line = [
+      'npx', 'eslint',
+      '--config', self.config_path,
+    ] + self.source_files
 
     if fix:
       cmd_line += ['--fix']
@@ -358,8 +364,8 @@ class CssLinter(object):
     if not force and not _must_build(self.output, deps):
       return True
 
-    stylelint = shakaBuildHelpers.get_node_binary('stylelint')
-    cmd_line = stylelint + [
+    cmd_line = [
+        'npx', 'stylelint',
         '--config', self.config_path,
         # The "default ignores" is something like **/node_modules/**, which
         # means that if we run the build scripts from inside the installed node
@@ -398,8 +404,10 @@ class HtmlLinter(object):
     if not force and not _must_build(self.output, deps):
       return True
 
-    htmlhint = shakaBuildHelpers.get_node_binary('htmlhint')
-    cmd_line = htmlhint + ['--config=' + self.config_path] + self.source_files
+    cmd_line = [
+      'npx', 'htmlhint',
+      '--config=' + self.config_path,
+    ] + self.source_files
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       return False
@@ -452,8 +460,10 @@ class Jsdoc(object):
 
     # Jsdoc expects to run from the base dir.
     with shakaBuildHelpers.InDir(base):
-      jsdoc = shakaBuildHelpers.get_node_binary('jsdoc')
-      cmd_line = jsdoc + ['-c', self.config_path]
+      cmd_line = [
+        'npx', 'jsdoc',
+        '-c', self.config_path,
+      ]
       if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
         return False
 

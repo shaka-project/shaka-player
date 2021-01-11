@@ -201,6 +201,12 @@
 .shaka-text-container {
   .absolute-position();
 
+  /* Make sure the text container doesn't steal pointer events from another
+   * layer, such as the ad container.  There is nothing interactive in this
+   * layer, so this should be fine. */
+  pointer-events: none;
+
+  /* Place the text container on the bottom of the video container. */
   bottom: 0%;
   width: 100%;
   min-width: 48px;

@@ -447,29 +447,43 @@ describe('PeriodCombiner', () => {
     v3.originalId = 'v3';
     v3.bandwidth = 6200000;
 
-    // a1 and a2 are duplicats
+    // a1 and a2 are duplicates.
     const a1 = makeAudioStream('en', /* channels= */ 2);
     a1.originalId = 'a1';
     a1.bandwidth = 65106;
     a1.roles = ['role1', 'role2'];
+    a1.codecs = 'mp4a.40.2';
 
     const a2 = makeAudioStream('en', /* channels= */ 2);
     a2.originalId = 'a2';
     a2.bandwidth = 65106;
     a2.roles = ['role1', 'role2'];
+    a2.codecs = 'mp4a.40.2';
 
     const a3 = makeAudioStream('en', /* channels= */ 2);
     a3.originalId = 'a3';
     a3.bandwidth = 97065;
     a3.roles = ['role1', 'role2'];
+    a2.codecs = 'mp4a.40.2';
 
+    // a4 has a different label from a3, and should not
+    // be filtered out.
     const a4 = makeAudioStream('en', /* channels= */ 2);
     a4.originalId = 'a4';
     a4.bandwidth = 97065;
     a4.roles = ['role1', 'role2'];
     a4.label = 'Surround';
+    a4.codecs = 'mp4a.40.2';
 
-    // t1 and t3 are duplicates
+    // a5 has a different codec from a3, and should not
+    // be filtered out.
+    const a5 = makeAudioStream('en', /* channels= */ 2);
+    a5.originalId = 'a5';
+    a5.bandwidth = 97065;
+    a5.roles = ['role1', 'role2'];
+    a5.codecs = 'ec-3';
+
+    // t1 and t3 are duplicates.
     const t1 = makeTextStream('en');
     t1.originalId = 't1';
     t1.roles = ['role1'];
@@ -496,6 +510,7 @@ describe('PeriodCombiner', () => {
           a2,
           a3,
           a4,
+          a5,
         ],
         textStreams: [
           t1,
@@ -507,7 +522,7 @@ describe('PeriodCombiner', () => {
 
     await combiner.combinePeriods(periods, /* isDynamic= */ true);
     const variants = combiner.getVariants();
-    expect(variants.length).toBe(6);
+    expect(variants.length).toBe(8);
 
     // v3 should've been filtered out
     const videoIds = variants.map((v) => v.video.originalId);

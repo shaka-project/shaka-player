@@ -14,6 +14,13 @@
 
 const Jimp = require('jimp');
 
+/**
+ * Compare two images and output the number of changed pixels.  Uses the same
+ * node module as the comparisons done in the tests through Karma.
+ *
+ * @param {string} oldPath
+ * @param {string} newPath
+ */
 async function main(oldPath, newPath) {
   const oldImage = await Jimp.read(oldPath);
   const newImage = await Jimp.read(newPath);
