@@ -730,7 +730,8 @@ shaka.extern.ManifestConfiguration;
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
  *   autoLowLatencyMode: boolean,
- *   forceHTTPS: boolean
+ *   forceHTTPS: boolean,
+ *   preferNativeHls: boolean
  * }}
  *
  * @description
@@ -831,6 +832,8 @@ shaka.extern.ManifestConfiguration;
  *   activate the lowLatencyMode. Defaults to false.
  * @property {boolean} forceHTTPS
  *   If true, if the protocol is HTTP change it to HTTPs.
+ * @property {boolean} preferNativeHls
+ *   If true, prefer native HLS playback when possible, regardless of platform.
  *
  * @exportDoc
  */

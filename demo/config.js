@@ -323,7 +323,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.AUTO_LOW_LATENCY,
             'streaming.autoLowLatencyMode')
         .addBoolInput_(MessageIds.FORCE_HTTPS,
-            'streaming.forceHTTPS');
+            'streaming.forceHTTPS')
+        .addBoolInput_(MessageIds.PREFER_NATIVE_HLS,
+            'streaming.preferNativeHls');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
