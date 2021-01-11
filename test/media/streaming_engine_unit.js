@@ -897,9 +897,11 @@ describe('StreamingEngine', () => {
           });
         });
         manifest.addTextStream(20, (stream) => {
+          stream.setInitSegmentReference(['text-20-init'], 0, null);
           stream.useSegmentTemplate('text-20-%d.mp4', 10);
         });
         manifest.addTextStream(21, (stream) => {
+          stream.setInitSegmentReference(['text-21-init'], 0, null);
           stream.useSegmentTemplate('text-21-%d.mp4', 10);
         });
       });
@@ -987,10 +989,9 @@ describe('StreamingEngine', () => {
     });
 
     // See https://github.com/google/shaka-player/issues/2956
-    it('works with fast stream switches during update', async () => {
+    it('works with fast variant switches during update', async () => {
       // Delay the appendBuffer call until later so we are waiting for this to
       // finish when we switch.
-      const Util = shaka.test.Util;
       const p = new shaka.util.PublicPromise();
       const old = mediaSourceEngine.appendBuffer;
       // Replace the whole spy since we want to call the original.
@@ -1012,6 +1013,39 @@ describe('StreamingEngine', () => {
       await Util.fakeEventLoop(5);
 
       expect(Util.invokeSpy(mediaSourceEngine.bufferEnd, 'video')).toBe(10);
+    });
+
+    it('works with fast text stream switches during update', async () => {
+      // Delay the appendBuffer call until later so we are waiting for this to
+      // finish when we switch.
+      const p = new shaka.util.PublicPromise();
+
+      const old = mediaSourceEngine.appendBuffer;
+      // Replace the whole spy since we want to call the original.
+      mediaSourceEngine.appendBuffer =
+          jasmine.createSpy('appendBuffer')
+              .and.callFake(async (type, data, start, end) => {
+                await p;
+                return Util.invokeSpy(old, type, data, start, end);
+              });
+
+      await streamingEngine.start();
+      playing = true;
+
+      await Util.fakeEventLoop(3);
+      netEngine.request.calls.reset();
+
+      streamingEngine.switchTextStream(newTextStream);
+      streamingEngine.switchTextStream(initialTextStream);
+      p.resolve();
+
+      await Util.fakeEventLoop(5);
+
+      const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+      // Quickly switching back to text1, and text init segment should be
+      // fetched again.
+      netEngine.expectRequest('text-20-init', segmentType);
+      netEngine.expectNoRequest('text-21-init', segmentType);
     });
   });
 

@@ -27,10 +27,11 @@ shaka.ui.LanguageUtils = class {
    * @param {shaka.ui.Localization} localization
    * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
    */
-  // TODO: Do the benefits of having this common code in a method still
-  // outweigh the complexity of the parameter list?
   static updateTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, trackLabelFormat) {
+    // TODO: Do the benefits of having this common code in a method still
+    // outweigh the complexity of the parameter list?
+
     // Using array.filter(f)[0] as an alternative to array.find(f) which is
     // not supported in IE11.
     const activeTracks = tracks.filter((track) => {
