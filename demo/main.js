@@ -20,6 +20,7 @@ goog.require('shakaDemo.Utils');
  * configuration, etc).
  */
 shakaDemo.Main = class {
+  /** */
   constructor() {
     /** @private {HTMLVideoElement} */
     this.video_ = null;

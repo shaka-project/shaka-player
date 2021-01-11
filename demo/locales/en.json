@@ -144,6 +144,7 @@
   "DEMO_PLAY": "Play",
   "DEMO_PLAYREADY": "PlayReady DRM",
   "DEMO_PREFER_FORCED_SUBS": "Prefer Forced Subs",
+  "DEMO_PREFER_NATIVE_HLS": "Prefer native HLS playback when available",
   "DEMO_PROJECT_LINKS_HEADER": "PROJECT LINKS",
   "DEMO_PROMPT_NO": "No",
   "DEMO_PROMPT_YES": "Yes",
