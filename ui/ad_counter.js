@@ -71,6 +71,11 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
         this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
           this.reset_();
         });
+
+    if (this.ad) {
+      // There was already an ad.
+      this.onAdStarted_();
+    }
   }
 
   /**

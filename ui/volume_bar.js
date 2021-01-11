@@ -60,6 +60,11 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     // Initialize volume display and label.
     this.onPresentationVolumeChange_();
     this.updateAriaLabel_();
+
+    if (this.ad) {
+      // There was already an ad.
+      this.onChange();
+    }
   }
 
   /**

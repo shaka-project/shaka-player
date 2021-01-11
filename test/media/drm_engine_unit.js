@@ -16,6 +16,7 @@ goog.require('shaka.test.Util');
 goog.require('shaka.util.AbortableOperation');
 goog.require('shaka.util.BufferUtils');
 goog.require('shaka.util.Error');
+goog.require('shaka.util.Platform');
 goog.require('shaka.util.PlayerConfiguration');
 goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.StringUtils');
@@ -282,7 +283,7 @@ describe('DrmEngine', () => {
       // Because DrmEngine will err on being too accepting, make sure it will
       // reject something. However, we can only check that it is actually
       // thing on non-Edge browsers because of https://bit.ly/2IcEgv0
-      if (!navigator.userAgent.includes('Edge/')) {
+      if (!shaka.util.Platform.isLegacyEdge()) {
         expect(drmEngine.willSupport('this-should-fail')).toBeFalsy();
       }
     });
