@@ -28,7 +28,8 @@
  *    size: number,
  *    version: ?number,
  *    flags: ?number,
- *    reader: !shaka.util.DataViewReader
+ *    reader: !shaka.util.DataViewReader,
+ *    has64BitSize: boolean
  * }}
  *
  * @property {!shaka.util.Mp4Parser} parser
@@ -52,6 +53,9 @@
  * @property {!shaka.util.DataViewReader} reader
  *   The reader for this box is only for this box. Reading or not reading to
  *   the end will have no affect on the parser reading other sibling boxes.
+ * @property {boolean} has64BitSize
+ *   If true, the box header had a 64-bit size field.  This affects the offsets
+ *   of other fields.
  * @exportDoc
  */
 shaka.extern.ParsedBox;
