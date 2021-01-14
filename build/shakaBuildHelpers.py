@@ -32,6 +32,11 @@ import subprocess
 import sys
 import time
 
+# Python 3 no longer has a separate unicode type.  For type-checking done in
+# get_node_binary, create an alias to the str type.
+if sys.version_info[0] == 3:
+  unicode = str
+
 
 def _node_modules_last_update_path():
   return os.path.join(get_source_base(), 'node_modules', '.last_update')
