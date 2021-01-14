@@ -407,8 +407,9 @@ class Launcher:
       logging.error('Failed to update node modules')
       return 1
 
+    karma = shakaBuildHelpers.get_node_binary('karma')
     cmd = ['xvfb-run', '--auto-servernum'] if self.parsed_args.use_xvfb else []
-    cmd += ['npx', 'karma', 'start']
+    cmd += karma + ['start']
     cmd += [karma_conf] if karma_conf else []
     cmd += ['--settings', json.dumps(self.karma_config)]
 

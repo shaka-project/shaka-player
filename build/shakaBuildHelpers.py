@@ -251,6 +251,46 @@ def get_all_files(dir_path, exp=None):
   return ret
 
 
+def get_node_binary(module_name, bin_name=None):
+  """Returns an array to be used in the command-line execution of a node binary.
+
+  For example, this may return ['eslint'] (global install)
+  or ['node', 'path/to/node_modules/eslint/bin/eslint.js'] (local install).
+
+  Arguments:
+    module_name: A string, the name of the module.
+    bin_name: An optional string, the name of the binary, which defaults to
+              module_name if not provided.
+
+  Returns:
+    An array of strings which form the command-line to call the binary.
+  """
+
+  if not bin_name:
+    bin_name = module_name
+
+  # Check local modules first.
+  base = get_source_base()
+  path = os.path.join(base, 'node_modules', module_name)
+  if os.path.isdir(path):
+    json_path = os.path.join(path, 'package.json')
+    package_data = json.load(open_file(json_path, 'r'))
+    bin_data = package_data['bin']
+
+    if type(bin_data) is str or type(bin_data) is unicode:
+      # There's only one binary here.
+      bin_rel_path = bin_data
+    else:
+      # It's a dictionary, so look up the specific binary we want.
+      bin_rel_path = bin_data[bin_name]
+
+    bin_path = os.path.join(path, bin_rel_path)
+    return ['node', bin_path]
+
+  # Not found locally, assume it can be found in os.environ['PATH'].
+  return [bin_name]
+
+
 class InDir(object):
   """A Context Manager that changes directories temporarily and safely."""
   def __init__(self, path):
