@@ -35,8 +35,9 @@ def GenerateTsDefs(inputs, output):
     inputs: A list of paths to Closure extern files.
     output: A path to a TypeScript def output file.
   """
-  command = [
-      'npx', 'clutz',
+  clutz = shakaBuildHelpers.get_node_binary('@teppeis/clutz', 'clutz')
+
+  command = clutz + [
       '--closure_env', 'BROWSER',
       '--externs',
   ] + inputs + [
