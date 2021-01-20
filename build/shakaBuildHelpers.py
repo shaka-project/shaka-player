@@ -32,6 +32,11 @@ import subprocess
 import sys
 import time
 
+# Python 3 no longer has a separate unicode type.  For type-checking done in
+# get_node_binary, create an alias to the str type.
+if sys.version_info[0] == 3:
+  unicode = str
+
 
 def _node_modules_last_update_path():
   return os.path.join(get_source_base(), 'node_modules', '.last_update')
@@ -268,6 +273,46 @@ def get_all_files(dir_path, exp=None):
         ret.append(os.path.join(root, f))
   ret.sort()
   return ret
+
+
+def get_node_binary(module_name, bin_name=None):
+  """Returns an array to be used in the command-line execution of a node binary.
+
+  For example, this may return ['eslint'] (global install)
+  or ['node', 'path/to/node_modules/eslint/bin/eslint.js'] (local install).
+
+  Arguments:
+    module_name: A string, the name of the module.
+    bin_name: An optional string, the name of the binary, which defaults to
+              module_name if not provided.
+
+  Returns:
+    An array of strings which form the command-line to call the binary.
+  """
+
+  if not bin_name:
+    bin_name = module_name
+
+  # Check local modules first.
+  base = get_source_base()
+  path = os.path.join(base, 'node_modules', module_name)
+  if os.path.isdir(path):
+    json_path = os.path.join(path, 'package.json')
+    package_data = json.load(open_file(json_path, 'r'))
+    bin_data = package_data['bin']
+
+    if type(bin_data) is str or type(bin_data) is unicode:
+      # There's only one binary here.
+      bin_rel_path = bin_data
+    else:
+      # It's a dictionary, so look up the specific binary we want.
+      bin_rel_path = bin_data[bin_name]
+
+    bin_path = os.path.join(path, bin_rel_path)
+    return ['node', bin_path]
+
+  # Not found locally, assume it can be found in os.environ['PATH'].
+  return [bin_name]
 
 
 class InDir(object):
