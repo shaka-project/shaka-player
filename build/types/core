@@ -16,6 +16,7 @@
 +../../lib/media/adaptation_set_criteria.js
 +../../lib/media/buffering_observer.js
 +../../lib/media/closed_caption_parser.js
++../../lib/media/content_workarounds.js
 +../../lib/media/drm_engine.js
 +../../lib/media/gap_jumping_controller.js
 +../../lib/media/manifest_parser.js
