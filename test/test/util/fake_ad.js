@@ -47,6 +47,13 @@ shaka.test.FakeAd = class {
   }
 
   /**
+   * @override
+   */
+  getMinSuggestedDuration() {
+    return this.duration_;
+  }
+
+  /**
    * @param {number} duration
    */
   setDuration(duration) {
