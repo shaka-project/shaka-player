@@ -216,6 +216,33 @@ describe('SsaTextParser', () => {
         });
   });
 
+  it('supports color & backgroundColor style', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 2,
+            payload: 'Test',
+            color: '#FCFCB4',
+            backgroundColor: '#080000',
+          },
+        ],
+        '[V4+ Styles]\n' +
+        'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, ' +
+        'OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ' +
+        'ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, ' +
+        'Alignment, MarginL, MarginR, MarginV, Encoding\n' +
+        'Style: DefaultVCD, Arial,28,&H00B4FCFC,&H00B4FCFC,&H00000008,' +
+        '&H80000008,-1,0,0,0,100,100,0.00,0.00,1,1.00,2.00,2,30,30,30,0\n\n' +
+        '[Events]\n' +
+        'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, ' +
+        'Effect, Text\n' +
+        'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
+        ',,{\\pos(400,570)}Test',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
+        });
+  });
+
   it('supports bold style', () => {
     verifyHelper(
         [
