@@ -57,6 +57,7 @@ goog.require('shaka.text.SrtTextParser');
 goog.require('shaka.text.SsaTextParser');
 goog.require('shaka.text.TtmlTextParser');
 goog.require('shaka.text.VttTextParser');
+goog.require('shaka.text.WebVttGenerator');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.PlayButton');
 goog.require('shaka.ui.SettingsMenu');
