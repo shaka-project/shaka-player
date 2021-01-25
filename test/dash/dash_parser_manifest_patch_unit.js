@@ -40,7 +40,7 @@ describe('DashParser Manifest Patch', () => {
 
     beforeEach(() => {
       mpd = [
-        '<MPD minBufferTime="PT75S" timeShiftBufferDepth="PT10S"',
+        '<MPD minBufferTime="PT75S" timeShiftBufferDepth="PT120S"',
         ' type="dynamic"',
         ' availabilityStartTime="1970-01-01T00:00:00Z"',
         ' maxSegmentDuration="PT5S"',
@@ -51,7 +51,7 @@ describe('DashParser Manifest Patch', () => {
         ' DASH-MPDPATCH.xsd">',
         '  <PatchLocation ttl="60"',
         '   >patch.mpd?publishTime=2020-12-12T03:40:55.51Z</PatchLocation>',
-        '  <Period id="1" duration="PT30S">',
+        '  <Period id="1">',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <SegmentTemplate timescale="1" media="1.mp4">',
         '        <SegmentTimeline>',
@@ -223,6 +223,195 @@ describe('DashParser Manifest Patch', () => {
 
       expect(node).not.toBe(null);
       expect(node.childElementCount).toBe(1);
+    });
+  });
+  
+  describe('Evict out of window segments', () => {
+    /** @type {string} */
+    let mpdUri;
+
+    /** @type {string} */
+    let patchUri;
+
+    beforeEach(() => {
+      mpdUri = 'dummy://foo/manifest.mpd';
+      patchUri = 'dummy://foo/patch.mpd?publishTime=2020-12-12T03:40:55.51Z';
+    });
+
+    it('remove earliest segment', async () => {
+      const mpd = [
+        '<MPD minBufferTime="PT75S" timeShiftBufferDepth="PT50S"',
+        ' type="dynamic"',
+        ' availabilityStartTime="1970-01-01T00:00:00Z"',
+        ' maxSegmentDuration="PT5S"',
+        ' suggestedPresentationDelay="PT0S"',
+        ' xmlns="urn:mpeg:dash:schema:mpd-patch:2011"',
+        ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
+        ' xsi:schemaLocation="urn:mpeg:dash:schema:mpd-patch:2020',
+        ' DASH-MPDPATCH.xsd">',
+        '  <PatchLocation ttl="60"',
+        '   >patch.mpd?publishTime=2020-12-12T03:40:55.51Z</PatchLocation>',
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <SegmentTemplate timescale="1" media="1.mp4">',
+        '        <SegmentTimeline>',
+        '          <S t="0" d="30" />',
+        '          <S t="30" d="30" />',
+        '          <S t="60" d="30" />',
+        '        </SegmentTimeline>',
+        '      </SegmentTemplate>',
+        '      <Representation id="1" bandwidth="1" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+      const patchContents = [
+        '<Patch xmlns="urn:mpeg:dash:schema:mpd-patch:2020">',
+        '   <add sel="/MPD/Period[@id=\'1\']/AdaptationSet[1]',
+        '     /SegmentTemplate/SegmentTimeline/S[3]" type="@r">1</add>',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText(mpdUri, mpd);
+      fakeNetEngine.setResponseText(patchUri, patchContents);
+
+      await parser.start(mpdUri, playerInterface);
+      await parser.update();
+      /** @type {Element} */
+      const dom = parser.getMpd();
+
+      const xpath = [
+        '/MPD/Period[@id=\'1\']/AdaptationSet[1]',
+        '/SegmentTemplate/SegmentTimeline',
+      ].join('\n');
+      const evaluator = new XPathEvaluator();
+      const node = shaka.dash.DashParser.getNodeByXPath(evaluator, dom, xpath);
+
+      expect(node).not.toBe(null);
+      expect(node.childElementCount).toBe(2);
+    });
+
+    it('remove segments with r attribute', async () => {
+      const mpd = [
+        '<MPD minBufferTime="PT75S" timeShiftBufferDepth="PT200S"',
+        ' type="dynamic"',
+        ' availabilityStartTime="1970-01-01T00:00:00Z"',
+        ' maxSegmentDuration="PT5S"',
+        ' suggestedPresentationDelay="PT0S"',
+        ' xmlns="urn:mpeg:dash:schema:mpd-patch:2011"',
+        ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
+        ' xsi:schemaLocation="urn:mpeg:dash:schema:mpd-patch:2020',
+        ' DASH-MPDPATCH.xsd">',
+        '  <PatchLocation ttl="60"',
+        '   >patch.mpd?publishTime=2020-12-12T03:40:55.51Z</PatchLocation>',
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <SegmentTemplate timescale="1" media="1.mp4">',
+        '        <SegmentTimeline>',
+        '          <S t="0" d="30" r="10"/>',
+        '          <S t="330" d="30" />',
+        '        </SegmentTimeline>',
+        '      </SegmentTemplate>',
+        '      <Representation id="1" bandwidth="1" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+      const patchContents = [
+        '<Patch xmlns="urn:mpeg:dash:schema:mpd-patch:2020">',
+        '   <add sel="/MPD/Period[@id=\'1\']/AdaptationSet[1]',
+        '     /SegmentTemplate/SegmentTimeline/S[2]" type="@r">1</add>',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText(mpdUri, mpd);
+      fakeNetEngine.setResponseText(patchUri, patchContents);
+
+      await parser.start(mpdUri, playerInterface);
+      await parser.update();
+      /** @type {Element} */
+      const dom = parser.getMpd();
+
+      const evaluator = new XPathEvaluator();
+      let xpath = [
+        '/MPD/Period[@id=\'1\']/AdaptationSet[1]',
+        '/SegmentTemplate/SegmentTimeline',
+      ].join('\n');
+      let node = shaka.dash.DashParser.getNodeByXPath(evaluator, dom, xpath);
+
+      expect(node).not.toBe(null);
+      expect(node.childElementCount).toBe(2);
+
+      xpath = [
+        '/MPD/Period[@id=\'1\']/AdaptationSet[1]',
+        '/SegmentTemplate/SegmentTimeline/S[1]',
+      ].join('\n');
+      node = shaka.dash.DashParser.getNodeByXPath(evaluator, dom, xpath);
+      expect(node).not.toBe(null);
+      expect(node.getAttribute('r')).toBe('5');
+    });
+
+    it('remove period without segments', async () => {
+      const mpd = [
+        '<MPD minBufferTime="PT75S" timeShiftBufferDepth="PT40S"',
+        ' type="dynamic"',
+        ' availabilityStartTime="1970-01-01T00:00:00Z"',
+        ' maxSegmentDuration="PT5S"',
+        ' suggestedPresentationDelay="PT0S"',
+        ' xmlns="urn:mpeg:dash:schema:mpd-patch:2011"',
+        ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
+        ' xsi:schemaLocation="urn:mpeg:dash:schema:mpd-patch:2020',
+        ' DASH-MPDPATCH.xsd">',
+        '  <PatchLocation ttl="60"',
+        '   >patch.mpd?publishTime=2020-12-12T03:40:55.51Z</PatchLocation>',
+        '  <Period id="1">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <SegmentTemplate timescale="1" media="1.mp4">',
+        '        <SegmentTimeline>',
+        '          <S t="0" d="30" />',
+        '          <S t="30" d="30" />',
+        '        </SegmentTimeline>',
+        '      </SegmentTemplate>',
+        '      <Representation id="1" bandwidth="1" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '  <Period id="2" start="PT60.0S">',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <SegmentTemplate timescale="1" media="1.mp4">',
+        '        <SegmentTimeline>',
+        '          <S t="0" d="30"/>',
+        '          <S t="30" d="30" />',
+        '        </SegmentTimeline>',
+        '      </SegmentTemplate>',
+        '      <Representation id="1" bandwidth="1" />',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+      const patchContents = [
+        '<Patch xmlns="urn:mpeg:dash:schema:mpd-patch:2020">',
+        '   <add sel="/MPD/Period[@id=\'2\']/AdaptationSet[1]',
+        '     /SegmentTemplate/SegmentTimeline/S[2]" type="@r">1</add>',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText(mpdUri, mpd);
+      fakeNetEngine.setResponseText(patchUri, patchContents);
+
+      await parser.start(mpdUri, playerInterface);
+      await parser.update();
+      /** @type {Element} */
+      const dom = parser.getMpd();
+
+      const evaluator = new XPathEvaluator();
+      let xpath = [
+        '/MPD/Period[@id=\'1\']'
+      ].join('\n');
+      let node = shaka.dash.DashParser.getNodeByXPath(evaluator, dom, xpath);
+      expect(node).toBe(null);
+
+      xpath = [
+        '/MPD/Period[@id=\'2\']'
+      ].join('\n');
+      node = shaka.dash.DashParser.getNodeByXPath(evaluator, dom, xpath);
+      expect(node).not.toBe(null);
     });
   });
 });
