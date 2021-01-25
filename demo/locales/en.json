@@ -77,6 +77,7 @@
   "DEMO_ICON_URL": "Icon URL",
   "DEMO_IGNORE_DASH_DRM": "Ignore DASH DRM Info",
   "DEMO_IGNORE_DASH_EMPTY_ADAPTATION_SET": "Ignore empty DASH AdaptationSets",
+  "DEMO_IGNORE_DASH_MAX_SEGMENT_DURATION": "Ignore DASH maxSegmentDuration",
   "DEMO_IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY": "Ignore DASH suggestedPresentationDelay",
   "DEMO_IGNORE_HLS_TEXT_FAILURES": "Ignore HLS Text Stream Failures",
   "DEMO_USE_FULL_SEGMENTS_FOR_START_TIME": "Use Full Segments For Start Time",
