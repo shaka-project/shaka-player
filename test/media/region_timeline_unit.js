@@ -23,7 +23,8 @@ describe('RegionTimeline', () => {
     onSeekRange = jasmine.createSpy('onSeekRange');
     onSeekRange.and.returnValue({start: 0, end: 100});
 
-    timeline = new shaka.media.RegionTimeline(onSeekRange);
+    timeline = new shaka.media.RegionTimeline(
+        shaka.test.Util.spyFunc(onSeekRange));
     timeline.setListeners(shaka.test.Util.spyFunc(onNewRegion));
   });
 

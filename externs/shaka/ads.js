@@ -124,6 +124,14 @@ shaka.extern.IAd = class {
   getDuration() {}
 
   /**
+   * Gets the minimum suggested duration.  Defaults to being equivalent to
+   * getDuration() for server-side ads.
+   * @see http://bit.ly/3q3U6hI
+   * @return {number}
+   */
+  getMinSuggestedDuration() {}
+
+  /**
    * @return {number}
    */
   getRemainingTime() {}

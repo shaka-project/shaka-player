@@ -1,3 +1,212 @@
+## 3.0.7 (2021-01-06)
+
+Bugfixes:
+  - Fix text failures triggered by rapid stream switches
+  - Remove legacy Edge workarounds on new Edge
+  - Fix viewport anchor calculations in TTML
+    - https://github.com/google/shaka-player/pull/3065
+  - Fix slow memory leak related to MediaSource object URLs
+    - https://github.com/google/shaka-player/issues/2953
+  - Fix clicking in interactive client-side ads
+    - https://github.com/google/shaka-player/issues/3053
+  - Improve cue comparison performance
+    - https://github.com/google/shaka-player/issues/3018
+  - Fix race condition in text stream scheduling
+    - https://github.com/google/shaka-player/issues/2764
+  - Fix multiple stream-merging issues with DASH multi-period content
+    - https://github.com/google/shaka-player/issues/2785
+    - https://github.com/google/shaka-player/issues/2884
+  - Fix exception when removing content from buffer
+    - https://github.com/google/shaka-player/issues/2982
+    - https://github.com/google/shaka-player/pull/3042
+  - Fix memory leak in DASH with SegmentTimeline
+    - https://github.com/google/shaka-player/issues/3038
+    - https://github.com/google/shaka-player/pull/3039
+  - Fix trick-mode tracks associated with multiple regular tracks
+    - https://github.com/google/shaka-player/pull/2992
+  - Fix TS DRM failures
+    - https://github.com/google/shaka-player/issues/2981
+  - Work around misreported AC-3 support on Tizen
+    - https://github.com/google/shaka-player/issues/2989
+  - Ignore incompatible TrickMode streams
+    - https://github.com/google/shaka-player/pull/2984
+  - Fix rare exception thrown when switching streams
+    - https://github.com/google/shaka-player/issues/2956
+    - https://github.com/google/shaka-player/issues/2970
+  - Fix rendering of line breaks in text cues
+    - https://github.com/google/shaka-player/issues/2828
+
+Ads (BETA):
+  - Fix ad disappearance when reconfiguring UI during an ad
+    - https://github.com/google/shaka-player/issues/2869
+    - https://github.com/google/shaka-player/issues/2943
+  - Fix stopping ad manager after adblock
+
+Build:
+  - Fix build issues with Python 3
+    - https://github.com/google/shaka-player/issues/3003
+    - https://github.com/google/shaka-player/issues/3004
+  - Fix running build scripts on Windows
+    - https://github.com/google/shaka-player/issues/2988
+  - Fix build error about stylelint paths
+  - Fix build failure in context of node module
+
+Demo App:
+  - Fix keyboard navigation in settings
+    - https://github.com/google/shaka-player/issues/2986
+
+Docs:
+  - Clean up doc generation
+  - Fix docs generation for enums in ui
+    - https://github.com/google/shaka-player/issues/2698
+
+
+## 2.5.19 (2021-01-06)
+
+Bugfixes:
+  - Remove legacy Edge workarounds on new Edge
+  - Fix viewport anchor calculations in TTML
+    - https://github.com/google/shaka-player/pull/3065
+  - Fix slow memory leak related to MediaSource object URLs
+    - https://github.com/google/shaka-player/issues/2953
+  - Improve cue comparison performance
+    - https://github.com/google/shaka-player/issues/3018
+  - Fix race condition in text stream scheduling
+    - https://github.com/google/shaka-player/issues/2764
+  - Fix exception when removing content from buffer
+    - https://github.com/google/shaka-player/issues/2982
+    - https://github.com/google/shaka-player/pull/3042
+  - Work around misreported AC-3 support on Tizen
+    - https://github.com/google/shaka-player/issues/2989
+  - Fix trick-mode tracks associated with multiple regular tracks
+    - https://github.com/google/shaka-player/pull/2992
+  - Fix TS DRM failures
+    - https://github.com/google/shaka-player/issues/2981
+  - Ignore incompatible TrickMode streams
+    - https://github.com/google/shaka-player/pull/2984
+
+Build:
+  - Fix build issues with Python 3
+    - https://github.com/google/shaka-player/issues/3004
+  - Fix running build scripts on Windows
+    - https://github.com/google/shaka-player/issues/2988
+  - Fix build error about stylelint paths
+  - Fix build failure in context of node module
+
+Demo App:
+  - Fix keyboard navigation in settings
+    - https://github.com/google/shaka-player/issues/2986
+
+Docs:
+  - Clean up doc generation
+  - Fix docs generation for enums in ui
+    - https://github.com/google/shaka-player/issues/2698
+
+
+## 3.0.6 (2020-11-12)
+
+Bugfixes:
+  - Fix handling of metadata tracks for src= playback
+    - https://github.com/google/shaka-player/pull/2971
+  - Fix handling of role-less audio tracks
+    - https://github.com/google/shaka-player/issues/2906
+    - https://github.com/google/shaka-player/issues/2909
+  - Fix support for multi-period encrypted live
+    - https://github.com/google/shaka-player/issues/2979
+    - https://github.com/google/shaka-player/issues/2645
+  - Export UI externs
+    - https://github.com/google/shaka-player/issues/2948
+  - Fix duplicate init segment requests on manifest updates
+    - https://github.com/google/shaka-player/issues/2856
+    - https://github.com/google/shaka-player/pull/2942
+  - Fix hard-coded TTML namespaces
+    - https://github.com/google/shaka-player/issues/2756
+  - Fix test failure on IE11
+  - Filter out "chapters" tracks during src= playback
+    - https://github.com/google/shaka-player/pull/2960
+  - Fix compatibility for plugin factories
+    - https://github.com/google/shaka-player/issues/2958
+  - Be more permissive in vtt files
+    - https://github.com/google/shaka-player/pull/2941
+  - Fix renaming of UI base class protected members
+    - https://github.com/google/shaka-player/issues/2923
+  - Make submenu CSS apply to all submenus
+    - https://github.com/google/shaka-player/issues/2925
+  - Export FakeEvent for use by UI plugins
+    - https://github.com/google/shaka-player/issues/2923
+  - Recognize mp4a and mp4v extensions in HLS
+  - Support multiple CHARACTERISTICS values in HLS
+    - https://github.com/google/shaka-player/pull/2905
+  - Don't auto-play after seeking while paused in the UI
+    - https://github.com/google/shaka-player/pull/2898
+
+Ad changes (BETA):
+  - Allow apps to supply adsResponse property for IMA
+    - https://github.com/google/shaka-player/issues/2892
+    - https://github.com/google/shaka-player/pull/2946
+
+Docs:
+  - Add link to complete list of build categories
+    - https://github.com/google/shaka-player/pull/2934
+  - Correct receiver IDs in the UI tutorial
+    - https://github.com/google/shaka-player/issues/2926
+  - Update required Node version
+    - https://github.com/google/shaka-player/issues/2913
+
+Demo App:
+  - Add test streams for CEA-608
+    - https://github.com/google/shaka-player/pull/2939
+  - Add new low latency DASH manifest
+    - https://github.com/google/shaka-player/pull/2963
+  - Remove redundant switch for manifest.dash.ignoreDrmInfo
+
+Misc:
+  - Add mkdir to make all build commands self-contained
+    - https://github.com/google/shaka-player/issues/2973
+    - https://github.com/google/shaka-player/pull/2977
+  - Generate TypeScript defs with Clutz
+    - https://github.com/google/shaka-player/issues/1030
+
+
+## 2.5.18 (2020-11-12)
+
+Bugfixes:
+  - Fix handling of role-less audio tracks
+    - https://github.com/google/shaka-player/issues/2906
+    - https://github.com/google/shaka-player/issues/2909
+  - Export UI externs
+    - https://github.com/google/shaka-player/issues/2948
+  - Fix hard-coded TTML namespaces
+    - https://github.com/google/shaka-player/issues/2756
+  - Filter out "chapters" tracks during src= playback
+    - https://github.com/google/shaka-player/pull/2960
+  - Fix renaming of UI base class protected members
+    - https://github.com/google/shaka-player/issues/2923
+  - Export FakeEvent for use by UI plugins
+    - https://github.com/google/shaka-player/issues/2923
+  - Recognize mp4a and mp4v extensions in HLS
+  - Support multiple CHARACTERISTICS values in HLS
+    - https://github.com/google/shaka-player/pull/2905
+  - Don't auto-play after seeking while paused in the UI
+    - https://github.com/google/shaka-player/pull/2898
+
+Docs:
+  - Add link to complete list of build categories
+    - https://github.com/google/shaka-player/pull/2934
+  - Update required Node version
+    - https://github.com/google/shaka-player/issues/2913
+  - Correct receiver app IDs in the UI tutorial
+    - https://github.com/google/shaka-player/issues/2926
+
+Demo App:
+  - Remove redundant switch for manifest.dash.ignoreDrmInfo
+
+Misc:
+  - Add mkdir to make all build commands self-contained
+    - https://github.com/google/shaka-player/issues/2973
+    - https://github.com/google/shaka-player/pull/2977
+
+
 ## 3.0.5 (2020-10-07)
 
 Bugfixes:

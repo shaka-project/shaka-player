@@ -10,6 +10,7 @@ goog.provide('shaka.ui.LanguageUtils');
 goog.require('mozilla.LanguageMapping');
 goog.require('shaka.log');
 goog.require('shaka.ui.Locales');
+goog.require('shaka.ui.Overlay.TrackLabelFormat');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.LanguageUtils');
@@ -24,12 +25,13 @@ shaka.ui.LanguageUtils = class {
    * @param {boolean} updateChosen
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
-   * @param {shaka.ui.TrackLabelFormat} trackLabelFormat
+   * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
    */
-  // TODO: Do the benefits of having this common code in a method still
-  // outweigh the complexity of the parameter list?
   static updateTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, trackLabelFormat) {
+    // TODO: Do the benefits of having this common code in a method still
+    // outweigh the complexity of the parameter list?
+
     // Using array.filter(f)[0] as an alternative to array.find(f) which is
     // not supported in IE11.
     const activeTracks = tracks.filter((track) => {
@@ -99,12 +101,12 @@ shaka.ui.LanguageUtils = class {
       span.textContent =
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
       switch (trackLabelFormat) {
-        case shaka.ui.TrackLabelFormat.LANGUAGE:
+        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
           if (forced) {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
-        case shaka.ui.TrackLabelFormat.ROLE:
+        case shaka.ui.Overlay.TrackLabelFormat.ROLE:
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
             shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
@@ -117,7 +119,7 @@ shaka.ui.LanguageUtils = class {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
-        case shaka.ui.TrackLabelFormat.LANGUAGE_ROLE:
+        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
           if (rolesString) {
             span.textContent += ': ' + rolesString;
           }
@@ -125,7 +127,7 @@ shaka.ui.LanguageUtils = class {
             span.textContent += ' (' + forcedString + ')';
           }
           break;
-        case shaka.ui.TrackLabelFormat.LABEL:
+        case shaka.ui.Overlay.TrackLabelFormat.LABEL:
           if (track.label) {
             span.textContent = track.label;
           } else {

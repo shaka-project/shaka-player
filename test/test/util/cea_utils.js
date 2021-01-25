@@ -60,7 +60,7 @@ shaka.test.CeaUtils = class {
    */
   static createLineBreakCue(startTime, endTime) {
     const cue = new shaka.text.Cue(startTime, endTime, /* payload= */ '');
-    cue.spacer = true;
+    cue.lineBreak = true;
     return cue;
   }
 };

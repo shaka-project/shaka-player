@@ -355,8 +355,18 @@ shaka.extern.Cue = class {
      * @type {boolean}
      * @exportDoc
      */
+    this.lineBreak;
+
+    /**
+     * @deprecated
+     * "spacer" is deprecated and will be removed in v4. Use "lineBreak"
+     * instead.
+     * Whether or not the cue only acts as a line break between two nested cues.
+     * Should only appear in nested cues.
+     * @type {boolean}
+     * @exportDoc
+     */
     this.spacer;
-    // TODO: Rename "spacer" to "lineBreak".
   }
 };
 

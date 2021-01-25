@@ -18,8 +18,9 @@ shaka.ui.Utils = class {
    * @param {string} className
    * @return {!HTMLElement}
    */
-  // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
   static getFirstDescendantWithClassName(element, className) {
+    // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
+
     const descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
     goog.asserts.assert(descendant != null, 'Should not be null!');
 

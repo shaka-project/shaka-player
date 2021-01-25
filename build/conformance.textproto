@@ -300,6 +300,7 @@ requirement: {
   error_message: 'Using "eval" is not allowed'
   whitelist_regexp: 'demo/demo_utils.js'
   whitelist_regexp: 'node_modules/google-closure-library/closure/goog/base.js'
+  whitelist_regexp: 'test/util/functional_unit.js'
 }
 requirement: {
   type: BANNED_NAME
@@ -307,6 +308,7 @@ requirement: {
   error_message: 'Using "eval" is not allowed'
   whitelist_regexp: 'demo/demo_utils.js'
   whitelist_regexp: 'node_modules/google-closure-library/closure/goog/base.js'
+  whitelist_regexp: 'test/util/functional_unit.js'
 }
 
 

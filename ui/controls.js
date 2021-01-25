@@ -26,6 +26,7 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
+
 goog.requireType('shaka.Player');
 
 
@@ -78,7 +79,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {?shaka.extern.IAd} */
     this.ad_ = null;
 
-    /** @private {?shaka.ui.SeekBar} */
+    /** @private {?shaka.extern.IUISeekBar} */
     this.seekBar_ = null;
 
     /** @private {boolean} */
@@ -354,6 +355,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {!shaka.extern.IUISeekBar.Factory} factory
+   * @export
+   */
+  static registerSeekBar(factory) {
+    shaka.ui.ControlsPanel.seekBarFactory_ = factory;
+  }
+
+  /**
    * This allows the application to inhibit casting.
    *
    * @param {boolean} allow
@@ -399,6 +408,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.releaseChildElements_();
     } else {
       this.addControlsContainer_();
+      // The client-side ad container is only created once, and is never
+      // re-created or uprooted in the DOM, even when the DOM is re-created,
+      // since that seemingly breaks the IMA SDK.
+      this.addClientAdContainer_();
     }
 
     // Create the new layout
@@ -460,6 +473,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (enabled) {
       this.setEnabledShakaControls(false);
     }
+  }
+
+  /**
+   * @export
+   * @return {?shaka.extern.IAd}
+   */
+  getAd() {
+    return this.ad_;
   }
 
   /**
@@ -534,6 +555,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   getServerSideAdContainer() {
     return this.daiAdContainer_;
+  }
+
+  /**
+   * @return {!HTMLElement}
+   * @export
+   */
+  getClientSideAdContainer() {
+    return this.clientAdContainer_;
   }
 
   /**
@@ -634,11 +663,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   showAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
+    this.controlsContainer_.setAttribute('ad-active', 'true');
   }
 
   /** @export */
   hideAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
+    this.controlsContainer_.removeAttribute('ad-active');
   }
 
   /**
@@ -711,15 +742,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.menus_.push(...Array.from(
         this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
 
-    if (this.config_.addSeekBar) {
-      this.seekBar_ = new shaka.ui.SeekBar(this.bottomControls_, this);
-      this.elements_.push(this.seekBar_);
-    } else {
-      // Settings menus need to be positioned lower if the seekbar is absent.
-      for (const menu of this.menus_) {
-        menu.classList.add('shaka-low-position');
-      }
-    }
+    this.addSeekBar_();
 
     this.showOnHoverControls_ = Array.from(
         this.videoContainer_.getElementsByClassName(
@@ -778,7 +801,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.adPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.adPanel_.classList.add('shaka-ad-controls');
-    shaka.ui.Utils.setDisplay(this.adPanel_, false);
+    shaka.ui.Utils.setDisplay(this.adPanel_, this.ad_ != null);
     this.bottomControls_.appendChild(this.adPanel_);
 
     const adPosition = new shaka.ui.AdPosition(this.adPanel_, this);
@@ -890,6 +913,41 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.daiAdContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.daiAdContainer_.classList.add('shaka-server-side-ad-container');
     this.controlsContainer_.appendChild(this.daiAdContainer_);
+  }
+
+
+  /**
+   * Adds a seekbar depending on the configuration.
+   * By default an instance of shaka.ui.SeekBar is created
+   * This behaviour can be overriden by providing a SeekBar factory using the
+   * registerSeekBarFactory function.
+   *
+   * @private
+   */
+  addSeekBar_() {
+    if (this.config_.addSeekBar) {
+      this.seekBar_ = shaka.ui.ControlsPanel.seekBarFactory_.create(
+          this.bottomControls_, this);
+      this.elements_.push(this.seekBar_);
+    } else {
+      // Settings menus need to be positioned lower if the seekbar is absent.
+      for (const menu of this.menus_) {
+        menu.classList.add('shaka-low-position');
+      }
+    }
+  }
+
+
+  /**
+   * Adds a container for server side ad UI with IMA SDK.
+   *
+   * @private
+   */
+  addClientAdContainer_() {
+    /** @private {!HTMLElement} */
+    this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
+    this.videoContainer_.appendChild(this.clientAdContainer_);
   }
 
   /**
@@ -1447,3 +1505,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
+
+/** @private {?shaka.extern.IUISeekBar.Factory} */
+shaka.ui.ControlsPanel.seekBarFactory_ = new shaka.ui.SeekBar.Factory();

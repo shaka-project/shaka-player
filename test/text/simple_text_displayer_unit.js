@@ -194,7 +194,7 @@ describe('SimpleTextDisplayer', () => {
 
       // Second cue is a linebreak cue.
       const nestedCue2 = new shaka.text.Cue(10, 20, '');
-      nestedCue2.spacer = true;
+      nestedCue2.lineBreak = true;
 
       const nestedCue3 = new shaka.text.Cue(10, 20, 'Test2');
 

@@ -291,8 +291,12 @@ class Build(object):
     if not closure.compile(closure_opts, force):
       return False
 
-    # Don't pass node modules to the extern generator.
-    local_include = set([f for f in self.include if 'node_modules' not in f])
+    # Don't pass local node modules to the extern generator.  But don't simply
+    # exclude the string 'node_modules', either, since Shaka Player could be
+    # rebuilt after installing it as a node module.
+    node_modules_path = os.path.join(
+        shakaBuildHelpers.get_source_base(), 'node_modules')
+    local_include = set([f for f in self.include if node_modules_path not in f])
     extern_generator = compiler.ExternGenerator(local_include, build_name)
 
     if not extern_generator.generate(force):
@@ -349,6 +353,13 @@ def main(args):
       default='ui')
 
   parsed_args, commands = parser.parse_known_args(args)
+
+  # Make the dist/ folder, ignore errors.
+  base = shakaBuildHelpers.get_source_base()
+  try:
+    os.mkdir(os.path.join(base, 'dist'))
+  except OSError:
+    pass
 
   # Update node modules if needed.
   if not shakaBuildHelpers.update_node_modules():

@@ -48,6 +48,8 @@ describe('DashParser ContentProtection', () => {
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
     };
 
     const actual = await dashParser.start(

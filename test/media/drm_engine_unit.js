@@ -6,6 +6,7 @@
 
 goog.require('shaka.log');
 goog.require('shaka.media.DrmEngine');
+goog.require('shaka.media.Transmuxer');
 goog.require('shaka.net.DataUriPlugin');
 goog.require('shaka.net.NetworkingEngine');
 goog.require('shaka.test.FakeNetworkingEngine');
@@ -15,6 +16,7 @@ goog.require('shaka.test.Util');
 goog.require('shaka.util.AbortableOperation');
 goog.require('shaka.util.BufferUtils');
 goog.require('shaka.util.Error');
+goog.require('shaka.util.Platform');
 goog.require('shaka.util.PlayerConfiguration');
 goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.StringUtils');
@@ -281,7 +283,7 @@ describe('DrmEngine', () => {
       // Because DrmEngine will err on being too accepting, make sure it will
       // reject something. However, we can only check that it is actually
       // thing on non-Edge browsers because of https://bit.ly/2IcEgv0
-      if (!navigator.userAgent.includes('Edge/')) {
+      if (!shaka.util.Platform.isLegacyEdge()) {
         expect(drmEngine.willSupport('this-should-fail')).toBeFalsy();
       }
     });
@@ -628,6 +630,55 @@ describe('DrmEngine', () => {
       await expectAsync(
           drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
           .toBeRejectedWith(expected);
+    });
+
+    it('maps TS MIME types through the transmuxer', async () => {
+      const originalIsSupported = shaka.media.Transmuxer.isSupported;
+
+      try {
+        // Mock out isSupported on Transmuxer so that we don't have to care
+        // about what MediaSource supports under that.  All we really care about
+        // is the translation of MIME types.
+        shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
+          return mimeType.startsWith('video/mp2t');
+        };
+
+        // The default mock for this is so unrealistic, some of our test
+        // conditions would always fail.  Make it realistic enough for this
+        // test case by returning the same types we are supposed to be querying
+        // for.  That way, supportsVariant() should work produce the correct
+        // result after translating the types of the variant's streams.
+        mockMediaKeySystemAccess.getConfiguration.and.callFake(() => {
+          return {
+            audioCapabilities: [{contentType: 'audio/mp4; codecs="abar"'}],
+            videoCapabilities: [{contentType: 'video/mp4; codecs="vbar"'}],
+          };
+        });
+
+        setRequestMediaKeySystemAccessSpy(['drm.abc']);
+
+        const variants = manifest.variants;
+        variants[0].video.mimeType = 'video/mp2t';
+        variants[0].audio.mimeType = 'video/mp2t';
+
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+        expect(drmEngine.initialized()).toBe(true);
+
+        expect(requestMediaKeySystemAccessSpy)
+            .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
+              audioCapabilities: [jasmine.objectContaining({
+                contentType: 'audio/mp4; codecs="abar"',
+              })],
+              videoCapabilities: [jasmine.objectContaining({
+                contentType: 'video/mp4; codecs="vbar"',
+              })],
+            })]);
+
+        expect(drmEngine.supportsVariant(variants[0])).toBeTruthy();
+      } finally {
+        // Restore the mock.
+        shaka.media.Transmuxer.isSupported = originalIsSupported;
+      }
     });
   });  // describe('init')
 

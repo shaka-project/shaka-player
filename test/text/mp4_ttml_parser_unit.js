@@ -93,14 +93,24 @@ describe('Mp4TtmlParser', () => {
       {
         startTime: 27,
         endTime: 30.5,
-        payload: '...you have your robotics, and I\n'+
-            'just want to be awesome in space.',
+        nestedCues: [{
+          payload: '...you have your robotics, and I',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'just want to be awesome in space.',
+        }],
       },
       {
         startTime: 30.8,
         endTime: 34,
-        payload: 'Why don\'t you just admit that\nyou\'re freaked out by my' +
-            ' robot hand?',
+        nestedCues: [{
+          payload: 'Why don\'t you just admit that',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'you\'re freaked out by my robot hand?',
+        }],
       },
       {
         startTime: 34.5,
@@ -115,8 +125,13 @@ describe('Mp4TtmlParser', () => {
       {
         startTime: 38,
         endTime: 41,
-        payload: 'I\'m freaked out! I have nightmares\nthat I\'m being' +
-            ' chased...',
+        nestedCues: [{
+          payload: 'I\'m freaked out! I have nightmares',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'that I\'m being chased...',
+        }],
       },
       {
         startTime: 41,
@@ -126,7 +141,13 @@ describe('Mp4TtmlParser', () => {
       {
         startTime: 42.2,
         endTime: 45,
-        payload: '"Fourty years later"\nWhatever, Thom. We\'re done.',
+        nestedCues: [{
+          payload: '"Fourty years later"',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'Whatever, Thom. We\'re done.',
+        }],
       },
       {
         startTime: 50,
@@ -142,6 +163,18 @@ describe('Mp4TtmlParser', () => {
   });
 
   function verifyHelper(/** !Array */ expected, /** !Array */ actual) {
-    expect(actual).toEqual(expected.map((c) => jasmine.objectContaining(c)));
+    const mapExpected = (cue) => {
+      if (cue.region) {
+        cue.region = jasmine.objectContaining(cue.region);
+      }
+
+      if (cue.nestedCues) {
+        cue.nestedCues = cue.nestedCues.map(mapExpected);
+      }
+
+      return jasmine.objectContaining(cue);
+    };
+
+    expect(actual).toEqual(expected.map(mapExpected));
   }
 });

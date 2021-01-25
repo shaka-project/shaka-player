@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 /**
  * @externs
  * @suppress {duplicate} To prevent compiler errors with the namespace
@@ -37,6 +36,7 @@ shaka.extern = {};
  * @property {string} adBreaks
  *   The CSS background color applied to the portion of the seek bar showing
  *   when the ad breaks are scheduled to occur on the timeline.
+ * @exportDoc
  */
 shaka.extern.UISeekBarColors;
 
@@ -52,10 +52,14 @@ shaka.extern.UISeekBarColors;
  * @property {string} level
  *   The CSS background color applied to the portion of the volume bar showing
  *   the volume level.
+ * @exportDoc
  */
 shaka.extern.UIVolumeBarColors;
 
 /**
+ * @description
+ * The UI's configuration options.
+ *
  * @typedef {{
  *   controlPanelElements: !Array.<string>,
  *   overflowMenuButtons: !Array.<string>,
@@ -66,7 +70,7 @@ shaka.extern.UIVolumeBarColors;
  *   showUnbufferedStart: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
  *   volumeBarColors: shaka.extern.UIVolumeBarColors,
- *   trackLabelFormat: shaka.ui.TrackLabelFormat,
+ *   trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
  *   fadeDelay: number,
  *   doubleClickForFullscreen: boolean,
  *   enableKeyboardPlaybackControls: boolean,
@@ -112,7 +116,7 @@ shaka.extern.UIVolumeBarColors;
  *   The CSS colors applied to the volume bar.  This allows you to override the
  *   colors used in the linear gradient constructed in JavaScript, since you
  *   cannot do this in pure CSS.
- * @property {shaka.ui.TrackLabelFormat} trackLabelFormat
+ * @property {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
  *   An enum that determines what is shown in the labels for text track and
  *   audio variant selection.
  *   LANGUAGE means that only the language of the item is shown.
@@ -143,6 +147,7 @@ shaka.extern.UIVolumeBarColors;
  *   enters fullscreen.  Note that this behavior is based on an experimental
  *   browser API, and may not work on all platforms.
  *   Defaults to true.
+ * @exportDoc
  */
 shaka.extern.UIConfiguration;
 
@@ -356,4 +361,46 @@ shaka.extern.IUISettingsMenu = class {
      */
     this.backSpan;
   }
+};
+
+/**
+ * Interface for SeekBars. SeekBars should inherit from the concrete base
+ * class shaka.ui.Element. If you do not need to totaly rebuild the
+ * SeekBar, you should consider using shaka.ui.RangeElement or
+ * shaka.ui.SeekBar as your base class.
+ *
+ * @extends {shaka.extern.IUIElement}
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUISeekBar = class {
+  /** @return {number} */
+  getValue() {}
+
+  /** @param {number} value */
+  setValue(value) {}
+
+  /**
+   * Called by Controls on a timer to update the state of the seek bar.
+   * Also called internally when the user interacts with the input element.
+   */
+  update() {}
+
+  /** @return {boolean} */
+  isShowing() {}
+};
+
+/**
+ * A factory for creating a SeekBar element.
+ *
+ * @interface
+ * @exportDoc
+ */
+shaka.extern.IUISeekBar.Factory = class {
+  /**
+   * @param {!HTMLElement} rootElement
+   * @param {!shaka.ui.Controls} controls
+   * @return {!shaka.extern.IUISeekBar}
+   */
+  create(rootElement, controls) {}
 };
