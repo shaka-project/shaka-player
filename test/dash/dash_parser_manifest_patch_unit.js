@@ -225,7 +225,7 @@ describe('DashParser Manifest Patch', () => {
       expect(node.childElementCount).toBe(1);
     });
   });
-  
+
   describe('Evict out of window segments', () => {
     /** @type {string} */
     let mpdUri;
@@ -402,13 +402,13 @@ describe('DashParser Manifest Patch', () => {
 
       const evaluator = new XPathEvaluator();
       let xpath = [
-        '/MPD/Period[@id=\'1\']'
+        '/MPD/Period[@id=\'1\']',
       ].join('\n');
       let node = shaka.dash.DashParser.getNodeByXPath(evaluator, dom, xpath);
       expect(node).toBe(null);
 
       xpath = [
-        '/MPD/Period[@id=\'2\']'
+        '/MPD/Period[@id=\'2\']',
       ].join('\n');
       node = shaka.dash.DashParser.getNodeByXPath(evaluator, dom, xpath);
       expect(node).not.toBe(null);
