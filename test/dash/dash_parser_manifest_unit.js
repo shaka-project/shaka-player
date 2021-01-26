@@ -1627,7 +1627,7 @@ describe('DashParser Manifest', () => {
     expect(maxSegmentDuration).toBe(1);
   });
 
-  it('get manifest value if ignoreMaxSegmentDuration is false', async () => {
+  it('gets manifest value if ignoreMaxSegmentDuration is false', async () => {
     const manifestText = [
       '<MPD maxSegmentDuration="PT5S">',
       '  <Period id="1" duration="PT30S">',
