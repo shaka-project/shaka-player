@@ -4,6 +4,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.Player');
+goog.require('shaka.log');
+goog.require('shaka.media.BufferingObserver');
+goog.require('shaka.media.ManifestParser');
+goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.test.FakeAbrManager');
+goog.require('shaka.test.FakeDrmEngine');
+goog.require('shaka.test.FakeManifestParser');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.FakePlayhead');
+goog.require('shaka.test.FakeStreamingEngine');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.ConfigUtils');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.ManifestParserUtils');
+goog.requireType('shaka.media.Playhead');
+
 describe('Player', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Util = shaka.test.Util;
@@ -142,17 +164,6 @@ describe('Player', () => {
   describe('destroy', () => {
     it('cleans up all dependencies', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
-
-      await player.load(fakeManifestUri, 0, fakeMimeType);
-      await player.destroy();
-
-      expect(abrManager.stop).toHaveBeenCalled();
-      expect(networkingEngine.destroy).toHaveBeenCalled();
-      expect(drmEngine.destroy).toHaveBeenCalled();
-      expect(playhead.release).toHaveBeenCalled();
-      expect(mediaSourceEngine.destroy).toHaveBeenCalled();
-      expect(streamingEngine.destroy).toHaveBeenCalled();
-
       const segmentIndexes = [];
       for (const variant of manifest.variants) {
         if (variant.audio) {
@@ -165,6 +176,20 @@ describe('Player', () => {
       for (const textStream of manifest.textStreams) {
         segmentIndexes.push(textStream.segmentIndex);
       }
+      for (const segmentIndex of segmentIndexes) {
+        spyOn(segmentIndex, 'release');
+      }
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      await player.destroy();
+
+      expect(abrManager.stop).toHaveBeenCalled();
+      expect(networkingEngine.destroy).toHaveBeenCalled();
+      expect(drmEngine.destroy).toHaveBeenCalled();
+      expect(playhead.release).toHaveBeenCalled();
+      expect(mediaSourceEngine.destroy).toHaveBeenCalled();
+      expect(streamingEngine.destroy).toHaveBeenCalled();
+
       for (const segmentIndex of segmentIndexes) {
         if (segmentIndex) {
           expect(segmentIndex.release).toHaveBeenCalled();
@@ -1041,6 +1066,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          forced: false,
           videoId: 1,
           audioId: 3,
           channelsCount: 6,
@@ -1070,6 +1096,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          forced: false,
           videoId: 2,
           audioId: 3,
           channelsCount: 6,
@@ -1099,6 +1126,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          forced: false,
           videoId: 1,
           audioId: 4,
           channelsCount: 2,
@@ -1128,6 +1156,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: ['main'],
+          forced: false,
           videoId: 2,
           audioId: 4,
           channelsCount: 2,
@@ -1157,6 +1186,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary', 'main'],
           audioRoles: ['commentary'],
+          forced: false,
           videoId: 1,
           audioId: 5,
           channelsCount: 2,
@@ -1186,6 +1216,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary'],
           audioRoles: ['commentary'],
+          forced: false,
           videoId: 2,
           audioId: 5,
           channelsCount: 2,
@@ -1215,6 +1246,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: [],
+          forced: false,
           videoId: 1,
           audioId: 6,
           channelsCount: 2,
@@ -1244,6 +1276,7 @@ describe('Player', () => {
           primary: false,
           roles: [],
           audioRoles: [],
+          forced: false,
           videoId: 2,
           audioId: 6,
           channelsCount: 2,
@@ -1271,6 +1304,7 @@ describe('Player', () => {
           primary: false,
           roles: [],
           audioRoles: null,
+          forced: false,
           channelsCount: null,
           audioSamplingRate: null,
           audioBandwidth: null,
@@ -1300,6 +1334,7 @@ describe('Player', () => {
           primary: false,
           roles: ['main'],
           audioRoles: null,
+          forced: false,
           channelsCount: null,
           audioSamplingRate: null,
           audioBandwidth: null,
@@ -1329,6 +1364,7 @@ describe('Player', () => {
           primary: false,
           roles: ['commentary'],
           audioRoles: null,
+          forced: false,
           channelsCount: null,
           audioSamplingRate: null,
           audioBandwidth: null,
@@ -1492,6 +1528,67 @@ describe('Player', () => {
       player.selectTextTrack(spanishTextTrack);
       player.selectAudioLanguage('es');
       expect(getActiveTextTrack().id).toBe(spanishTextTrack.id);
+    });
+
+    // Regression test for https://github.com/google/shaka-player/issues/2906
+    // and https://github.com/google/shaka-player/issues/2909.
+    it('selectAudioLanguage() can choose role-less tracks', async () => {
+      // For this test, we use a different (and simpler) manifest.
+      // Both audio tracks are English; one has a role, and one has no roles.
+      // The role=description track comes first to reproduce the conditions in
+      // #2909.
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(100, (variant) => {
+          variant.bandwidth = 1300;
+          variant.language = 'en';
+          variant.addVideo(1, (stream) => {
+            stream.originalId = 'video';
+            stream.bandwidth = 1000;
+            stream.width = 100;
+            stream.height = 200;
+            stream.frameRate = 1000000 / 42000;
+            stream.pixelAspectRatio = '59:54';
+            stream.roles = [];
+          });
+          variant.addAudio(2, (stream) => {
+            stream.originalId = 'audio-en-description';
+            stream.bandwidth = 100;
+            stream.channelsCount = 2;
+            stream.audioSamplingRate = 48000;
+            stream.roles = ['description'];
+          });
+        });
+        manifest.addVariant(101, (variant) => {
+          variant.bandwidth = 2300;
+          variant.language = 'en';
+          variant.addExistingStream(1);  // video
+          variant.addAudio(3, (stream) => {
+            stream.originalId = 'audio-en';
+            stream.bandwidth = 100;
+            stream.channelsCount = 2;
+            stream.audioSamplingRate = 48000;
+            stream.roles = [];
+          });
+        });
+      });
+
+      // No explicit preferred audio language is also part of #2909.
+      player.configure('preferredAudioLanguage', undefined);
+
+      // Load again to get this test-specific manifest loaded.
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      // #2909: The initial choice should be for the role-less track, even
+      // though it is second in the manifest.
+      expect(getActiveVariantTrack().audioRoles).toEqual([]);
+
+      player.selectAudioLanguage('en', 'description');
+      expect(getActiveVariantTrack().audioRoles).toEqual(['description']);
+
+      // #2906: Selecting no particular role should prefer the track without any
+      // roles.
+      player.selectAudioLanguage('en');
+      expect(getActiveVariantTrack().audioRoles).toEqual([]);
     });
 
     it('selectTextLanguage() does not change selected variant track', () => {
@@ -3147,12 +3244,13 @@ describe('Player', () => {
     });
 
     describe('getAudioLanguagesAndRoles', () => {
-      it('ignores video roles', async () => {
+      it('ignores video roles and labels', async () => {
         manifest = shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.addVariant(0, (variant) => {
             variant.language = 'en';
             variant.addVideo(1, (stream) => {
               stream.roles = ['video-only-role'];
+              stream.label = 'should not show up';
             });
             variant.addAudio(2, (stream) => {
               stream.roles = ['audio-only-role'];
@@ -3164,18 +3262,47 @@ describe('Player', () => {
         await player.load(fakeManifestUri, 0, fakeMimeType);
 
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'en', role: 'audio-only-role'},
+          {language: 'en', role: 'audio-only-role', label: null},
         ]);
       });
 
       it('lists all language-role combinations', async () => {
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'fr', role: ''},
-          {language: 'en', role: 'main'},
-          {language: 'en', role: 'commentary'},
-          {language: 'de', role: 'foo'},
-          {language: 'de', role: 'bar'},
+          {language: 'fr', role: '', label: null},
+          {language: 'en', role: 'main', label: null},
+          {language: 'en', role: 'commentary', label: null},
+          {language: 'de', role: 'foo', label: null},
+          {language: 'de', role: 'bar', label: null},
+        ]);
+      });
+
+      it('associates audio streams with their labels', async () => {
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.language = 'en';
+            variant.addAudio(1, (stream) => {
+              stream.roles = ['role-1'];
+              stream.language = 'en';
+              stream.label = 'english';
+            });
+          });
+          manifest.addVariant(0, (variant) => {
+            variant.language = 'es';
+            variant.addAudio(2, (stream) => {
+              stream.roles = ['role-2', 'role-3'];
+              stream.language = 'es';
+              stream.label = 'spanish';
+            });
+          });
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(player.getAudioLanguagesAndRoles()).toEqual([
+          {language: 'en', role: 'role-1', label: 'english'},
+          {language: 'es', role: 'role-2', label: 'spanish'},
+          {language: 'es', role: 'role-3', label: 'spanish'},
         ]);
       });
 
@@ -3190,7 +3317,7 @@ describe('Player', () => {
 
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getAudioLanguagesAndRoles()).toEqual([
-          {language: 'und', role: ''},
+          {language: 'und', role: '', label: null},
         ]);
       });
     });
@@ -3199,11 +3326,11 @@ describe('Player', () => {
       it('lists all language-role combinations', async () => {
         await player.load(fakeManifestUri, 0, fakeMimeType);
         expect(player.getTextLanguagesAndRoles()).toEqual([
-          {language: 'es', role: 'baz'},
-          {language: 'es', role: 'qwerty'},
-          {language: 'en', role: 'main'},
-          {language: 'en', role: 'caption'},
-          {language: 'en', role: 'subtitle'},
+          {language: 'es', role: 'baz', label: null},
+          {language: 'es', role: 'qwerty', label: null},
+          {language: 'en', role: 'main', label: null},
+          {language: 'en', role: 'caption', label: null},
+          {language: 'en', role: 'subtitle', label: null},
         ]);
       });
     });

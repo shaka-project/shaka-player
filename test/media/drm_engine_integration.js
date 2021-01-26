@@ -4,6 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.DrmEngine');
+goog.require('shaka.media.MediaSourceEngine');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.FakeClosedCaptionParser');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.util.EventManager');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.PublicPromise');
+
 describe('DrmEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
 

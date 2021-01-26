@@ -224,6 +224,36 @@ class ExternGenerator(object):
     return True
 
 
+class TsDefGenerator(object):
+  def __init__(self, source_files, build_name):
+    self.source_files = _canonicalize_source_files(source_files)
+    self.output = _get_source_path('dist/' + build_name + '.d.ts')
+
+  def generate(self, force=False):
+    """Generates externs for the files in |self.source_files|.
+
+    Args:
+      force: Generate the output even if the inputs have not changed.
+
+    Returns:
+      True on success; False on failure.
+    """
+    if not force and not _must_build(self.output, self.source_files):
+      return True
+
+    def_generator = _get_source_path('build/generateTsDefs.py')
+
+    cmd_line = [sys.executable or 'python', def_generator, '--output',
+                self.output]
+    cmd_line += self.source_files
+
+    if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
+      logging.error('TS defs generation failed')
+      return False
+
+    return True
+
+
 class Less(object):
   def __init__(self, main_source_file, all_source_files, output):
     # Less only takes one input file, but that input may import others.
@@ -246,7 +276,6 @@ class Less(object):
     if not force and not _must_build(self.output, self.all_source_files):
       return True
 
-    lessc = shakaBuildHelpers.get_node_binary('less', 'lessc')
     less_options = [
       # Enable the "clean-CSS" plugin to minify the output and strip out comments.
       '--clean-css',
@@ -254,7 +283,12 @@ class Less(object):
       '--source-map=' + self.output + '.map',
     ]
 
-    cmd_line = lessc + less_options + [self.main_source_file, self.output]
+    cmd_line = [
+      'npx', 'lessc',
+    ] + less_options + [
+      self.main_source_file,
+      self.output,
+    ]
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       logging.error('Externs generation failed')
@@ -292,8 +326,10 @@ class Linter(object):
     if not force and not _must_build(self.output, deps):
       return True
 
-    eslint = shakaBuildHelpers.get_node_binary('eslint')
-    cmd_line = eslint + ['--config', self.config_path] + self.source_files
+    cmd_line = [
+      'npx', 'eslint',
+      '--config', self.config_path,
+    ] + self.source_files
 
     if fix:
       cmd_line += ['--fix']
@@ -328,8 +364,15 @@ class CssLinter(object):
     if not force and not _must_build(self.output, deps):
       return True
 
-    stylelint = shakaBuildHelpers.get_node_binary('stylelint')
-    cmd_line = stylelint + ['--config', self.config_path] + self.source_files
+    cmd_line = [
+        'npx', 'stylelint',
+        '--config', self.config_path,
+        # The "default ignores" is something like **/node_modules/**, which
+        # means that if we run the build scripts from inside the installed node
+        # modules of shaka-player, all our sources will be filtered out if we
+        # don't disable the default ignores in stylelint.
+        '--disable-default-ignores',
+    ] + self.source_files
 
     if fix:
       cmd_line += ['--fix']
@@ -361,8 +404,10 @@ class HtmlLinter(object):
     if not force and not _must_build(self.output, deps):
       return True
 
-    htmlhint = shakaBuildHelpers.get_node_binary('htmlhint')
-    cmd_line = htmlhint + ['--config=' + self.config_path] + self.source_files
+    cmd_line = [
+      'npx', 'htmlhint',
+      '--config=' + self.config_path,
+    ] + self.source_files
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
       return False
@@ -389,7 +434,7 @@ class Jsdoc(object):
 
     # To avoid getting out of sync with the source files jsdoc actually reads,
     # parse the config file and locate all source files based on that.
-    with open(self.config_path, 'rb') as f:
+    with open(self.config_path, 'r') as f:
       config = json.load(f)
     for path in config['source']['include']:
       full_path = _get_source_path(path)
@@ -415,8 +460,10 @@ class Jsdoc(object):
 
     # Jsdoc expects to run from the base dir.
     with shakaBuildHelpers.InDir(base):
-      jsdoc = shakaBuildHelpers.get_node_binary('jsdoc')
-      cmd_line = jsdoc + ['-c', self.config_path]
+      cmd_line = [
+        'npx', 'jsdoc',
+        '-c', self.config_path,
+      ]
       if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
         return False
 

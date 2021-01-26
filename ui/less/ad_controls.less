@@ -11,12 +11,26 @@
   text-shadow: 1px 1px 4px black;
 }
 
+.shaka-controls-container[ad-active="true"] {
+  /* While showing an ad, pass pointer events through to the ad container. */
+  pointer-events: none;
+
+  /* Except in the bottom controls, which should still be clickable. */
+  .shaka-bottom-controls {
+    pointer-events: auto;
+  }
+}
+
 .shaka-server-side-ad-container {
   .fill-container();
 
   &:not([ad-active="true"]) {
     pointer-events: none;
   }
+}
+
+.shaka-client-side-ad-container {
+  .absolute-position();
 }
 
 .shaka-controls-container {

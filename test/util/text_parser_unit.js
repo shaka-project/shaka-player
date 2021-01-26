@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.util.TextParser');
+
 describe('TextParser', () => {
   const TextParser = shaka.util.TextParser;
 

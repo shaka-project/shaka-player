@@ -4,6 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.Dash');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.LanguageUtils');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.StringUtils');
+goog.requireType('shaka.dash.DashParser');
+
 // Test basic manifest parsing functionality.
 fdescribe('DashParser Manifest', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -37,6 +52,8 @@ fdescribe('DashParser Manifest', () => {
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
       onError: fail,
       isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
     };
   });
 
@@ -961,14 +978,14 @@ fdescribe('DashParser Manifest', () => {
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
-      '      <Representation bandwidth="1">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
       '        <SegmentTemplate media="1.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
       '      <EssentialProperty value="1" ',
       '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
-      '      <Representation bandwidth="1">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
       '        <SegmentTemplate media="2.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
@@ -989,6 +1006,82 @@ fdescribe('DashParser Manifest', () => {
       id: 2,
       type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
     }));
+  });
+
+  it('trick-mode track with multiple AdaptationSet elements', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation bandwidth="2" codecs="avc1.4d401f">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="3" mimeType="video/mp4">',
+      '      <EssentialProperty value="1 2" ',
+      '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.variants.length).toBe(2);
+    expect(manifest.textStreams.length).toBe(0);
+
+    const variant = manifest.variants[0];
+    const trickModeVideo = variant && variant.video &&
+                         variant.video.trickModeVideo;
+    expect(trickModeVideo).toEqual(jasmine.objectContaining({
+      id: 3,
+      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+    }));
+
+    const variant2 = manifest.variants[1];
+    const trickModeVideo2 = variant2 && variant2.video &&
+                         variant2.video.trickModeVideo;
+    expect(trickModeVideo2).toEqual(jasmine.objectContaining({
+      id: 3,
+      type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+    }));
+  });
+
+  it('ignore incompatible trickmode tracks', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation bandwidth="1" codecs="avc1.4d401f">',
+      '        <SegmentTemplate media="1.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <EssentialProperty value="1" ',
+      '        schemeIdUri="http://dashif.org/guidelines/trickmode" />',
+      '      <Representation bandwidth="1" codecs="foo">',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.variants.length).toBe(1);
+    expect(manifest.textStreams.length).toBe(0);
+    expect(manifest.variants[0].video.trickModeVideo).toBeUndefined();
   });
 
   it('skips unrecognized EssentialProperty elements', async () => {
@@ -1036,12 +1129,17 @@ fdescribe('DashParser Manifest', () => {
       '        <SegmentBase indexRange="100-200" />',
       '      </Representation>',
       '    </AdaptationSet>',
-      '    <AdaptationSet id="1" mimeType="application/mp4" codecs="stpp">',
+      '    <AdaptationSet',
+      '      id="1"',
+      '      mimeType="application/mp4"',
+      '      codecs="stpp"',
+      '      lang="en"',
+      '    >',
       '      <Representation>',
       '        <SegmentTemplate media="1.mp4" duration="1" />',
       '      </Representation>',
       '    </AdaptationSet>',
-      '    <AdaptationSet id="2">',
+      '    <AdaptationSet id="2" lang="fr">',
       '      <Representation mimeType="application/mp4" codecs="wvtt">',
       '        <SegmentTemplate media="2.mp4" duration="1" />',
       '      </Representation>',
@@ -1266,6 +1364,24 @@ fdescribe('DashParser Manifest', () => {
       // Results in null if the value is not a valid hex number.
       await testAudioChannelConfiguration(null,
           {'urn:dolby:dash:audio_channel_configuration:2011': 'x'});
+    });
+
+    it('parses MPEG channel configuration scheme', async () => {
+      // Parses a simple channel count.
+      await testAudioChannelConfiguration(2,
+          {'urn:mpeg:mpegB:cicp:ChannelConfiguration': '2'});
+
+      // Parses a high channel count.
+      await testAudioChannelConfiguration(24,
+          {'urn:mpeg:mpegB:cicp:ChannelConfiguration': '13'});
+
+      // Results in null if the value is not an integer.
+      await testAudioChannelConfiguration(null,
+          {'urn:mpeg:mpegB:cicp:ChannelConfiguration': 'foo'});
+
+      // Results in null if the value is not in a spec range.
+      await testAudioChannelConfiguration(null,
+          {'urn:mpeg:mpegB:cicp:ChannelConfiguration': '100'});
     });
 
     it('ignores unrecognized schemes', async () => {
@@ -1590,6 +1706,38 @@ fdescribe('DashParser Manifest', () => {
     const textStream = manifest.textStreams[0];
     expect(textStream.roles).toEqual(['captions', 'foo']);
     expect(textStream.kind).toBe('caption');
+  });
+
+  it('converts Roles element to "forced"', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" contentType="text">',
+      '      <Accessibility schemeIdUri="urn:mpeg:dash:role:2011" ',
+      '          value="captions" />',
+      '      <Accessibility schemeIdUri="urn:mpeg:dash:role:2011" ',
+      '          value="forced_subtitle" />',
+      '      <Accessibility schemeIdUri="foobar" value="bar" />',
+      '      <Representation id="text-en" mimeType="text/webvtt">',
+      '        <BaseURL>t-en.vtt</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const textStream = manifest.textStreams[0];
+    expect(textStream.roles).toEqual(['captions', 'forced_subtitle']);
+    expect(textStream.forced).toBe(true);
   });
 
   it('Does not error when image adaptation sets are present', async () => {

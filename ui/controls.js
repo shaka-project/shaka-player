@@ -26,6 +26,7 @@ goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
 goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
+
 goog.requireType('shaka.Player');
 
 
@@ -78,14 +79,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {?shaka.extern.IAd} */
     this.ad_ = null;
 
-    /** @private {?shaka.ui.SeekBar} */
+    /** @private {?shaka.extern.IUISeekBar} */
     this.seekBar_ = null;
 
     /** @private {boolean} */
     this.isSeeking_ = false;
 
-    /** @private {!Array.<!Element>} */
-    this.settingsMenus_ = [];
+    /** @private {!Array.<!HTMLElement>} */
+    this.menus_ = [];
 
     /**
      * Individual controls which, when hovered or tab-focused, will force the
@@ -132,13 +133,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
-      /** @type {function(!HTMLElement)} */
-      const hide = (control) => {
-        shaka.ui.Utils.setDisplay(control, /* visible= */ false);
-      };
-
-      for (const menu of this.settingsMenus_) {
-        hide(/** @type {!HTMLElement} */ (menu));
+      for (const menu of this.menus_) {
+        shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
       }
     });
 
@@ -153,7 +149,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      */
     this.timeAndSeekRangeTimer_ = new shaka.util.Timer(() => {
       // Suppress timer-based updates if the controls are hidden.
-      if (this.isOpaque_()) {
+      if (this.isOpaque()) {
         this.updateTimeAndSeekRange_();
       }
     });
@@ -359,6 +355,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {!shaka.extern.IUISeekBar.Factory} factory
+   * @export
+   */
+  static registerSeekBar(factory) {
+    shaka.ui.ControlsPanel.seekBarFactory_ = factory;
+  }
+
+  /**
    * This allows the application to inhibit casting.
    *
    * @param {boolean} allow
@@ -404,6 +408,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.releaseChildElements_();
     } else {
       this.addControlsContainer_();
+      // The client-side ad container is only created once, and is never
+      // re-created or uprooted in the DOM, even when the DOM is re-created,
+      // since that seemingly breaks the IMA SDK.
+      this.addClientAdContainer_();
     }
 
     // Create the new layout
@@ -465,6 +473,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (enabled) {
       this.setEnabledShakaControls(false);
     }
+  }
+
+  /**
+   * @export
+   * @return {?shaka.extern.IAd}
+   */
+  getAd() {
+    return this.ad_;
   }
 
   /**
@@ -542,6 +558,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @return {!HTMLElement}
+   * @export
+   */
+  getClientSideAdContainer() {
+    return this.clientAdContainer_;
+  }
+
+  /**
    * @return {!shaka.extern.UIConfiguration}
    * @export
    */
@@ -595,7 +619,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   anySettingsMenusAreOpen() {
-    return this.settingsMenus_.some(
+    return this.menus_.some(
         (menu) => !menu.classList.contains('shaka-hidden'));
   }
 
@@ -639,11 +663,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   showAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
+    this.controlsContainer_.setAttribute('ad-active', 'true');
   }
 
   /** @export */
   hideAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
+    this.controlsContainer_.removeAttribute('ad-active');
   }
 
   /**
@@ -711,18 +737,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.addControlsButtonPanel_();
 
-    this.settingsMenus_ = Array.from(
+    this.menus_ = Array.from(
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
+    this.menus_.push(...Array.from(
+        this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
 
-    if (this.config_.addSeekBar) {
-      this.seekBar_ = new shaka.ui.SeekBar(this.bottomControls_, this);
-      this.elements_.push(this.seekBar_);
-    } else {
-      // Settings menus need to be positioned lower if the seekbar is absent.
-      for (const menu of this.settingsMenus_) {
-        menu.classList.add('shaka-low-position');
-      }
-    }
+    this.addSeekBar_();
 
     this.showOnHoverControls_ = Array.from(
         this.videoContainer_.getElementsByClassName(
@@ -746,6 +766,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(this.controlsContainer_, 'click', () => {
       this.onContainerClick_();
+    });
+
+    this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
+      if (this.config_.doubleClickForFullscreen) {
+        this.toggleFullScreen();
+      }
     });
   }
 
@@ -775,7 +801,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.adPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.adPanel_.classList.add('shaka-ad-controls');
-    shaka.ui.Utils.setDisplay(this.adPanel_, false);
+    shaka.ui.Utils.setDisplay(this.adPanel_, this.ad_ != null);
     this.bottomControls_.appendChild(this.adPanel_);
 
     const adPosition = new shaka.ui.AdPosition(this.adPanel_, this);
@@ -889,6 +915,41 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.controlsContainer_.appendChild(this.daiAdContainer_);
   }
 
+
+  /**
+   * Adds a seekbar depending on the configuration.
+   * By default an instance of shaka.ui.SeekBar is created
+   * This behaviour can be overriden by providing a SeekBar factory using the
+   * registerSeekBarFactory function.
+   *
+   * @private
+   */
+  addSeekBar_() {
+    if (this.config_.addSeekBar) {
+      this.seekBar_ = shaka.ui.ControlsPanel.seekBarFactory_.create(
+          this.bottomControls_, this);
+      this.elements_.push(this.seekBar_);
+    } else {
+      // Settings menus need to be positioned lower if the seekbar is absent.
+      for (const menu of this.menus_) {
+        menu.classList.add('shaka-low-position');
+      }
+    }
+  }
+
+
+  /**
+   * Adds a container for server side ad UI with IMA SDK.
+   *
+   * @private
+   */
+  addClientAdContainer_() {
+    /** @private {!HTMLElement} */
+    this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
+    this.videoContainer_.appendChild(this.clientAdContainer_);
+  }
+
   /**
    * Adds static event listeners.  This should only add event listeners to
    * things that don't change (e.g. Player).  Dynamic elements (e.g. controls)
@@ -911,12 +972,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
-
-    this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
-      if (this.config_.doubleClickForFullscreen) {
-        this.toggleFullScreen();
-      }
-    });
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
@@ -1045,7 +1100,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // open.
     this.hideSettingsMenusTimer_.stop();
 
-    if (!this.isOpaque_()) {
+    if (!this.isOpaque()) {
       // Only update the time and seek range on mouse movement if it's the very
       // first movement and we're about to show the controls.  Otherwise, the
       // seek bar will be updated much more rapidly during mouse movement.  Do
@@ -1100,6 +1155,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   isHovered_() {
+    if (!window.matchMedia('hover: hover').matches) {
+      // This is primarily a touch-screen device, so the :hover query below
+      // doesn't make sense.  In spite of this, the :hover query on an element
+      // can still return true on such a device after a touch ends.
+      // See https://bit.ly/34dBORX for details.
+      return false;
+    }
+
     return this.showOnHoverControls_.some((element) => {
       return element.matches(':hover');
     });
@@ -1142,7 +1205,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    if (this.isOpaque_()) {
+    if (this.isOpaque()) {
       this.lastTouchEventTime_ = Date.now();
       // The controls are showing.
       // Let this event continue and become a click.
@@ -1273,9 +1336,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
-   * @private
+   * @export
    */
-  isOpaque_() {
+  isOpaque() {
     if (!this.enabled_) {
       return false;
     }
@@ -1292,7 +1355,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   seek_(currentTime, event) {
     this.video_.currentTime = currentTime;
-    if (this.isOpaque_()) {
+    if (this.isOpaque()) {
       // Only update the time and seek range if it's visible.
       this.updateTimeAndSeekRange_();
     }
@@ -1308,11 +1371,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.seekBar_.update();
 
       if (this.seekBar_.isShowing()) {
-        for (const menu of this.settingsMenus_) {
+        for (const menu of this.menus_) {
           menu.classList.remove('shaka-low-position');
         }
       } else {
-        for (const menu of this.settingsMenus_) {
+        for (const menu of this.menus_) {
           menu.classList.add('shaka-low-position');
         }
       }
@@ -1369,7 +1432,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   keepFocusInMenu_(event) {
-    const openSettingsMenus = this.settingsMenus_.filter(
+    const openSettingsMenus = this.menus_.filter(
         (menu) => !menu.classList.contains('shaka-hidden'));
     const settingsMenu = openSettingsMenus[0];
     if (settingsMenu.childNodes.length) {
@@ -1442,3 +1505,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
+
+/** @private {?shaka.extern.IUISeekBar.Factory} */
+shaka.ui.ControlsPanel.seekBarFactory_ = new shaka.ui.SeekBar.Factory();

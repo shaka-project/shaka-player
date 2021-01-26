@@ -4,6 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.media.SegmentIndex');
+goog.require('shaka.offline.ManifestConverter');
+goog.require('shaka.offline.OfflineUri');
+goog.require('shaka.util.ManifestParserUtils');
+goog.requireType('shaka.media.SegmentReference');
+
 describe('ManifestConverter', () => {
   describe('createVariants', () => {
     const audioType = 'audio';
@@ -281,6 +289,7 @@ describe('ManifestConverter', () => {
       segments: [],
       variantIds,
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
       closedCaptions: null,
@@ -349,6 +358,7 @@ describe('ManifestConverter', () => {
       ],
       variantIds,
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
       closedCaptions: null,
@@ -394,6 +404,7 @@ describe('ManifestConverter', () => {
       ],
       variantIds,
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
       closedCaptions: null,
@@ -438,6 +449,7 @@ describe('ManifestConverter', () => {
       ],
       variantIds: [],
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
       closedCaptions: null,
@@ -479,6 +491,7 @@ describe('ManifestConverter', () => {
       trickModeVideo: null,
       emsgSchemeIdUris: null,
       roles: streamDb.roles,
+      forced: streamDb.forced,
       channelsCount: streamDb.channelsCount,
       audioSamplingRate: streamDb.audioSamplingRate,
       closedCaptions: streamDb.closedCaptions,

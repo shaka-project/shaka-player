@@ -4,6 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.test.Dash');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+goog.requireType('shaka.dash.DashParser');
+
 describe('DashParser SegmentBase', () => {
   const Dash = shaka.test.Dash;
 
@@ -34,6 +41,8 @@ describe('DashParser SegmentBase', () => {
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
     };
   });
 

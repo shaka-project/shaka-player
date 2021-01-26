@@ -4,6 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.Player');
+goog.require('shaka.log');
+goog.require('shaka.polyfill');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.Platform');
+
+// If ENABLE_DEBUG_LOADER is not set to false, goog.require() will try to load
+// extra sources on-the-fly using pre-computed pathes in deps.js, which is not
+// applicable for the tests.
+goog['ENABLE_DEBUG_LOADER'] = false;
 
 /**
  * Gets the value of an argument passed from karma.
@@ -40,6 +51,29 @@ function getClientArg(name) {
   }
   goog.asserts.assert = jasmineAssert;
   console.assert = /** @type {?} */(jasmineAssert);
+
+  /**
+   * Patches a function on Element to fail an assertion if we use a namespaced
+   * name on it.  We should use the namespace-aware versions instead.
+   */
+  function patchNamespaceFunction(type, name) {
+    // eslint-disable-next-line no-restricted-syntax
+    const real = type.prototype[name];
+    /** @this {Element} */
+    // eslint-disable-next-line no-restricted-syntax
+    type.prototype[name] = function(arg) {
+      // Ignore xml: namespaces since it's builtin.
+      if (!arg.startsWith('xml:') && !arg.startsWith('xmlns:') &&
+          arg.includes(':')) {
+        fail('Use namespace-aware ' + name);
+      }
+      // eslint-disable-next-line no-restricted-syntax
+      return real.apply(this, arguments);
+    };
+  }
+  patchNamespaceFunction(Element, 'getAttribute');
+  patchNamespaceFunction(Element, 'hasAttribute');
+  patchNamespaceFunction(Element, 'getElementsByTagName');
 
   // As of Feb 2018, this is only implemented in Chrome.
   // https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection

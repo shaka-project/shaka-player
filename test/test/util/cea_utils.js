@@ -6,6 +6,10 @@
 
 goog.provide('shaka.test.CeaUtils');
 
+goog.require('shaka.cea.CeaUtils');
+goog.require('shaka.text.Cue');
+
+
 /**
  * Testing helpers to assist tests for Closed Caption decoders for CEA captions.
  */
@@ -56,7 +60,7 @@ shaka.test.CeaUtils = class {
    */
   static createLineBreakCue(startTime, endTime) {
     const cue = new shaka.text.Cue(startTime, endTime, /* payload= */ '');
-    cue.spacer = true;
+    cue.lineBreak = true;
     return cue;
   }
 };

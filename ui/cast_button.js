@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.CastButton');
 
+goog.require('shaka.cast.CastProxy');
 goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');

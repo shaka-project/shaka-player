@@ -8,6 +8,13 @@
 goog.provide('shakaDemo.Search');
 
 
+goog.require('shakaDemo.AssetCard');
+goog.require('shakaDemo.BoolInput');
+goog.require('shakaDemo.InputContainer');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.SelectInput');
+goog.requireType('ShakaDemoAssetInfo');
+
 /** @type {?shakaDemo.Search} */
 let shakaDemoSearch;
 

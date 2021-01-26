@@ -4,6 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.Player');
+goog.require('shaka.cast.CastUtils');
+goog.require('shaka.media.MediaSourceEngine');
+goog.require('shaka.media.TimeRangesUtils');
+goog.require('shaka.test.FakeClosedCaptionParser');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.EventManager');
+goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.FakeEventTarget');
+goog.require('shaka.util.ManifestParserUtils');
+
 describe('CastUtils', () => {
   const CastUtils = shaka.cast.CastUtils;
   const FakeEvent = shaka.util.FakeEvent;

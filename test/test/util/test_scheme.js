@@ -6,6 +6,21 @@
 
 goog.provide('shaka.test.TestScheme');
 
+goog.require('goog.asserts');
+goog.require('goog.Uri');
+goog.require('shaka.Player');
+goog.require('shaka.media.ManifestParser');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.Mp4VodStreamGenerator');
+goog.require('shaka.test.TSVodStreamGenerator');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.ManifestParserUtils');
+goog.requireType('shaka.net.NetworkingEngine.RequestType');
+goog.requireType('shaka.test.IStreamGenerator');
+
 
 /**
  * @typedef {{
@@ -198,6 +213,7 @@ shaka.test.TestScheme = class {
       stream.useSegmentTemplate(
           'test:' + name + '/' + contentType + '/%d',
           data[contentType].segmentDuration);
+      stream.segmentIndex.markImmutable();
       stream.closedCaptions = data[contentType].closedCaptions;
 
       if (data[contentType].delaySetup) {
@@ -535,7 +551,7 @@ shaka.test.TestScheme.DATA = {
     ],
     audioLanguages: ['en', 'es'],
     textLanguages: ['zh', 'fr'],
-    duration: 10,
+    duration: 30,
   },
 
   'sintel_audio_only': {
@@ -591,6 +607,7 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/captions-test.ts',
       mimeType: 'video/mp2t',
       codecs: 'avc1.64001e',
+      segmentDuration: 2,
     },
     text: {
       mimeType: 'application/cea-608',

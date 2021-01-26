@@ -111,17 +111,12 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
       this.onOverflowMenuButtonClick_();
     });
 
-    this.eventManager.listen(
-        this.controlsContainer_, 'touchstart', (event) => {
-        // If the overflow menu is showing, hide it on a touch event
-          if (!this.overflowMenu_.classList.contains('shaka-hidden')) {
-            shaka.ui.Utils.setDisplay(this.overflowMenu_, false);
-            // Stop this event from becoming a click event.
-            event.preventDefault();
-          }
-        });
-
     this.updateAriaLabel_();
+
+    if (this.ad) {
+      // There was already an ad.
+      shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
+    }
   }
 
   /** @override */
@@ -155,7 +150,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.overflowMenu_.classList.add('shaka-overflow-menu');
     this.overflowMenu_.classList.add('shaka-no-propagation');
     this.overflowMenu_.classList.add('shaka-show-controls-on-mouse-over');
-    this.overflowMenu_.classList.add('shaka-settings-menu');
     this.overflowMenu_.classList.add('shaka-hidden');
     this.controlsContainer_.appendChild(this.overflowMenu_);
   }

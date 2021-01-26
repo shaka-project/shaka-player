@@ -59,6 +59,10 @@
     "description": "The name of a configuration value.",
     "message": "Auto-Correct [PROPER_NAME:DASH] Drift"
   },
+  "DEMO_AUTO_LOW_LATENCY": {
+    "description": "The name of a configuration value.",
+    "message": "Auto Low Latency Streaming"
+  },
   "DEMO_AVAILABILITY_WINDOW_OVERRIDE": {
     "description": "The name of a configuration value.",
     "message": "Availability Window Override"
@@ -247,6 +251,10 @@
     "description": "Text that describes an asset that is protected with the Fairplay Digital Rights Management system.",
     "message": "[PROPER_NAME:Fairplay] [JARGON:DRM]"
   },
+  "DEMO_FORCE_HTTPS": {
+    "description": "The name of a configuration value.",
+    "message": "Force [JARGON:HTTPS]"
+  },
   "DEMO_FORCE_TRANSMUX_TS": {
     "description": "The name of a configuration value.",
     "message": "Force Transmux [JARGON:MPEG-2 TS]"
@@ -306,10 +314,6 @@
   "DEMO_IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY": {
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:DASH] [JARGON:suggestedPresentationDelay]"
-  },
-  "DEMO_IGNORE_DRM": {
-    "description": "The name of a configuration value.",
-    "message": "Ignore [JARGON:DRM] Info"
   },
   "DEMO_IGNORE_HLS_TEXT_FAILURES": {
     "description": "The name of a configuration value.",
@@ -574,6 +578,14 @@
   "DEMO_PLAYREADY": {
     "description": "Text that describes an asset that is protected with the Playready Digital Rights Management system.",
     "message": "[PROPER_NAME:PlayReady] [JARGON:DRM]"
+  },
+  "DEMO_PREFER_FORCED_SUBS": {
+    "description": "The name of a configuration value.",
+    "message": "Prefer Forced Subs"
+  },
+  "DEMO_PREFER_NATIVE_HLS": {
+    "description": "The name of a configuration value.",
+    "message": "Prefer native HLS playback when available"
   },
   "DEMO_PROJECT_LINKS_HEADER": {
     "description": "A header for a section of the footer, that contains links to various project-related things.",

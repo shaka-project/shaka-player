@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.Mp4SegmentIndexParser');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+
 describe('Mp4SegmentIndexParser', () => {
   const Util = shaka.test.Util;
 

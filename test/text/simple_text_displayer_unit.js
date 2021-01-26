@@ -5,6 +5,12 @@
  */
 
 
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.text.Cue');
+goog.require('shaka.text.SimpleTextDisplayer');
+goog.require('shaka.util.Functional');
+goog.requireType('shaka.test.FakeTextTrack');
+
 describe('SimpleTextDisplayer', () => {
   const originalVTTCue = window.VTTCue;
   const Cue = shaka.text.Cue;
@@ -188,7 +194,7 @@ describe('SimpleTextDisplayer', () => {
 
       // Second cue is a linebreak cue.
       const nestedCue2 = new shaka.text.Cue(10, 20, '');
-      nestedCue2.spacer = true;
+      nestedCue2.lineBreak = true;
 
       const nestedCue3 = new shaka.text.Cue(10, 20, 'Test2');
 

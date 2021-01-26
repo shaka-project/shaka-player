@@ -4,6 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.Player');
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.text.Cue');
+goog.require('shaka.text.SimpleTextDisplayer');
+goog.require('shaka.text.UITextDisplayer');
+goog.require('shaka.ui.Overlay');
+goog.require('shaka.util.EventManager');
+
 const Util = shaka.test.Util;
 
 // TODO: Move this suite to the text/ folder where it belongs
@@ -281,6 +292,8 @@ filterDescribe('TextDisplayer layout', Util.supportsScreenshots, () => {
       const cue = new shaka.text.Cue(0, 1, '');
       cue.region.id = '1';
       cue.region.height = 15;  // %
+      cue.region.viewportAnchorX = 20; // %
+      cue.region.viewportAnchorY = 10; // %
       // eslint-disable-next-line max-len
       cue.backgroundImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAAA8BAMAAABMVCNvAAAAElBMVEX9/vtRldU+uUv6vAnvNjWzvsvH461AAAABvUlEQVRIx7WWwY6CMBRFYQb2Nhn22sS9o5m9icy+aPn/X5lS6r221gfTxLsC0pN7XovE6j1p9d6UcB/apYTUU/YlhT7bArCwUocUg9sCsMxVF7i2Pwd3+v93/Ty5uEbZtVVd+nacphw08oJzMUmhzxWgyYHDBHbRo9sMHmVX5bOJTENyrq0rMjB1EUG61ipMBtBEYM41qakVXLk3eVdyagMQrqNB47ProO4hGCbu+/4MMHUlp6J2F8c58pR3bRVj/B1cm94nB2IlatSDq53BW8Z1i4UEed3PueQqhxTkA781L10JBb2aNwAvGdddAj66NhKon0C6onHZtXKhKxolVx46XbtyUHLdRaaxqyXISoBxYfQOftFVBPnZuSfrSpCFcBXAYwp2HlrtSrBi1BrXlFt2RSEGXOn6DRCc6EpQgYMoXGWQIbLsSpCizAOIABQ4yZVgV2VAwfXlgPJvi6DJgnUGvMEUA0qgBTh6cOCAsmsD8LdDIQYUKiuA50FdBwy4DFqAtXCCDMAGYEtOCDYBrgYfFfn/G0ALsAInVgYruIaHnQSxcroKI1ZrU9/PuQmmq9OO43xhhUI5jR3lBX8x/RKsZNOu/wAAAABJRU5ErkJggg==';
       textDisplayer.append([cue]);

@@ -5,8 +5,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * @fileoverview
+ * @suppress {missingRequire}
+ */
 
 goog.require('ShakaDemoAssetInfo');
+goog.require('shakaDemo.MessageIds');
 
 
 // Types and enums {{{
@@ -756,6 +761,31 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
       /* manifestUri= */ 'https://livesim.dashif.org/livesim-chunked/chunkdur_1/ato_7/testpic4_8s/Manifest300.mpd',
       /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF CEA-608 VOD',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim.dashif.org/dash/vod/testpic_2s/cea608.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF CEA-608 Live',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://livesim.dashif.org/livesim/testpic_2s/cea608.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Akamai Low Latency DASH Live',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'https://akamaibroadcasteruseast.akamaized.net/cmaf/live/657078/akasource/out.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),

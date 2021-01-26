@@ -213,6 +213,7 @@ shaka.extern.BufferedInfo;
  *   primary: boolean,
  *   roles: !Array.<string>,
  *   audioRoles: Array.<string>,
+ *   forced: boolean,
  *   videoId: ?number,
  *   audioId: ?number,
  *   channelsCount: ?number,
@@ -278,6 +279,9 @@ shaka.extern.BufferedInfo;
  *   The roles of the audio in the track, e.g. <code>'main'</code> or
  *   <code>'commentary'</code>. Will be null for text tracks or variant tracks
  *   without audio.
+ * @property {boolean} forced
+ *   True indicates that this in the forced text language for the content.
+ *   This flag is based on signals from the manifest.
  * @property {?number} videoId
  *   (only for variant tracks) The video stream id.
  * @property {?number} audioId
@@ -730,7 +734,10 @@ shaka.extern.ManifestConfiguration;
  *   stallSkip: number,
  *   useNativeHlsOnSafari: boolean,
  *   inaccurateManifestTolerance: number,
- *   lowLatencyMode: boolean
+ *   lowLatencyMode: boolean,
+ *   autoLowLatencyMode: boolean,
+ *   forceHTTPS: boolean,
+ *   preferNativeHls: boolean
  * }}
  *
  * @description
@@ -820,10 +827,19 @@ shaka.extern.ManifestConfiguration;
  *   drift (up to one segment duration).  Smaller values reduce the incidence of
  *   extra segment requests necessary to compensate for drift.
  * @property {boolean} lowLatencyMode
- *  If <code>true</code>, low latency streaming mode is enabled. If
+ *   If <code>true</code>, low latency streaming mode is enabled. If
  *   lowLatencyMode is set to true, inaccurateManifestTolerance is set to 0
  *   unless specified, and rebufferingGoal to 0.01 unless specified at the same
  *   time.
+ * @property {boolean} autoLowLatencyMode
+ *   If the stream is low latency and the user has not configured the
+ *   lowLatencyMode, but if it has been configured to activate the
+ *   lowLatencyMode if a stream of this type is detected, we automatically
+ *   activate the lowLatencyMode. Defaults to false.
+ * @property {boolean} forceHTTPS
+ *   If true, if the protocol is HTTP change it to HTTPs.
+ * @property {boolean} preferNativeHls
+ *   If true, prefer native HLS playback when possible, regardless of platform.
  *
  * @exportDoc
  */
@@ -913,6 +929,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredVariantRole: string,
  *   preferredTextRole: string,
  *   preferredAudioChannelCount: number,
+ *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
@@ -946,6 +963,11 @@ shaka.extern.OfflineConfiguration;
  *   The preferred role to use for text tracks.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ * @property {boolean} preferForcedSubs
+ *   If true, a forced text track is preferred.  Defaults to false.
+ *   If the content has no forced captions and the value is true,
+ *   no text track is chosen.
+ *   Changing this during playback will not affect the current playback.
  * @property {shaka.extern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  These are "hard"
  *   restrictions.  Any track that fails to meet these restrictions will not
@@ -968,7 +990,8 @@ shaka.extern.PlayerConfiguration;
 /**
  * @typedef {{
  *   language: string,
- *   role: string
+ *   role: string,
+ *   label: ?string
  * }}
  *
  * @property {string} language
@@ -976,6 +999,8 @@ shaka.extern.PlayerConfiguration;
  * @property {string} role
  *    The role name for the stream. If the stream has no role, <code>role</code>
  *    will be <code>''</code>.
+ * @property {?string} label
+ *    The label of the audio stream, if it has one.
  * @exportDoc
  */
 shaka.extern.LanguageRole;

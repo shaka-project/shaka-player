@@ -4,6 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cast.CastReceiver');
+goog.require('shaka.cast.CastUtils');
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.Platform');
+goog.require('shaka.util.PublicPromise');
+
 // The receiver is only meant to run on the Chromecast, so we have the
 // ability to use modern APIs there that may not be available on all of the
 // browsers our library supports.  Because of this, CastReceiver tests will

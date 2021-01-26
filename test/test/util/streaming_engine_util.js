@@ -6,6 +6,19 @@
 
 goog.provide('shaka.test.StreamingEngineUtil');
 
+goog.require('goog.asserts');
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.FakePresentationTimeline');
+goog.require('shaka.test.FakeSegmentIndex');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.ManifestParserUtils');
+goog.requireType('shaka.media.PresentationTimeline');
+
+
 shaka.test.StreamingEngineUtil = class {
   /**
    * Creates a FakeNetworkingEngine.
@@ -395,6 +408,7 @@ shaka.test.StreamingEngineUtil = class {
       emsgSchemeIdUris: null,
       primary: false,
       roles: [],
+      forced: false,
     };
   }
 
@@ -430,6 +444,7 @@ shaka.test.StreamingEngineUtil = class {
       emsgSchemeIdUris: null,
       primary: false,
       roles: [],
+      forced: false,
     };
   }
 
@@ -463,6 +478,7 @@ shaka.test.StreamingEngineUtil = class {
       emsgSchemeIdUris: null,
       primary: false,
       roles: [],
+      forced: false,
     };
   }
 };

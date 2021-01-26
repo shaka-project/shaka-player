@@ -21,6 +21,7 @@ goog.requireType('shaka.ui.Controls');
 
 /**
  * @extends {shaka.ui.RangeElement}
+ * @implements {shaka.extern.IUISeekBar}
  * @final
  * @export
  */
@@ -73,6 +74,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.markAdBreaks_();
     });
 
+    /**
+     * When user is scrubbing the seek bar - we should pause the video - see https://git.io/JUhHG
+     * but will conditionally pause or play the video after scrubbing
+     * depending on its previous state
+     *
+     * @private {boolean}
+     */
+    this.wasPlaying_ = false;
 
     /** @private {!Array.<!shaka.ads.CuePoint>} */
     this.adCuePoints_ = [];
@@ -113,6 +122,11 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.setValue(this.video.currentTime);
     this.update();
     this.updateAriaLabel_();
+
+    if (this.ad) {
+      // There was already an ad.
+      shaka.ui.Utils.setDisplay(this.container, false);
+    }
   }
 
   /** @override */
@@ -134,6 +148,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @override
    */
   onChangeStart() {
+    this.wasPlaying_ = !this.video.paused;
     this.controls.setSeeking(true);
     this.video.pause();
   }
@@ -176,18 +191,22 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // call the event so that we can respond immediately.
     this.seekTimer_.tickNow();
     this.controls.setSeeking(false);
-    this.video.play();
+
+    if (this.wasPlaying_) {
+      this.video.play();
+    }
   }
 
-  /** @return {boolean} */
+  /**
+   * @override
+  */
   isShowing() {
     // It is showing by default, so it is hidden if shaka-hidden is in the list.
     return !this.container.classList.contains('shaka-hidden');
   }
 
   /**
-   * Called by Controls on a timer to update the state of the seek bar.
-   * Also called internally when the user interacts with the input element.
+   * @override
    */
   update() {
     const colors = this.config_.seekBarColors;
@@ -355,5 +374,23 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   updateAriaLabel_() {
     this.bar.setAttribute(shaka.ui.Constants.ARIA_LABEL,
         this.localization.resolve(shaka.ui.Locales.Ids.SEEK));
+  }
+};
+
+
+/**
+ * @implements {shaka.extern.IUISeekBar.Factory}
+ * @export
+ */
+
+shaka.ui.SeekBar.Factory = class {
+  /**
+   * Creates a shaka.ui.SeekBar. Use this factory to register the default
+   * SeekBar when needed
+   *
+   * @override
+   */
+  create(rootElement, controls) {
+    return new shaka.ui.SeekBar(rootElement, controls);
   }
 };
