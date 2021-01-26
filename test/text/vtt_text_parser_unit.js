@@ -578,7 +578,7 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 95550, segmentEnd: 95560});
   });
 
-  it('support global style blocks', () => {
+  it('supports global style blocks', () => {
     verifyHelper(
         [
           {
@@ -609,7 +609,7 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('support global style blocks without blank lines', () => {
+  it('supports global style blocks without blank lines', () => {
     verifyHelper(
         [
           {
