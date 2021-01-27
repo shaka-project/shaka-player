@@ -224,7 +224,7 @@ describe('SsaTextParser', () => {
             endTime: 2,
             payload: 'Test',
             color: 'rgba(252,252,180,1)',
-            backgroundColor: 'rgba(8,0,0,0.5)',
+            backgroundColor: 'rgba(8,0,0,0)',
           },
         ],
         '[V4+ Styles]\n' +
@@ -233,7 +233,7 @@ describe('SsaTextParser', () => {
         'ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, ' +
         'Alignment, MarginL, MarginR, MarginV, Encoding\n' +
         'Style: DefaultVCD, Arial,28,&H00B4FCFC,&H00B4FCFC,&H00000008,' +
-        '&H80000008,-1,0,0,0,100,100,0.00,0.00,1,1.00,2.00,2,30,30,30,0\n\n' +
+        '&HFF000008,-1,0,0,0,100,100,0.00,0.00,1,1.00,2.00,2,30,30,30,0\n\n' +
         '[Events]\n' +
         'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, ' +
         'Effect, Text\n' +
