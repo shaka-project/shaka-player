@@ -600,7 +600,8 @@ shaka.extern.DrmConfiguration;
  *   autoCorrectDrift: boolean,
  *   initialSegmentLimit: number,
  *   ignoreSuggestedPresentationDelay: boolean,
- *   ignoreEmptyAdaptationSet: boolean
+ *   ignoreEmptyAdaptationSet: boolean,
+ *   ignoreMaxSegmentDuration: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -639,6 +640,10 @@ shaka.extern.DrmConfiguration;
  * @property {boolean} ignoreEmptyAdaptationSet
  *   If true will cause DASH parser to ignore
  *   empty <code>AdaptationSet</code> from manifest. Defaults to
+ *   <code>false</code> if not provided.
+ * @property {boolean} ignoreMaxSegmentDuration
+ *   If true will cause DASH parser to ignore
+ *   <code>maxSegmentDuration</code> from manifest. Defaults to
  *   <code>false</code> if not provided.
  * @exportDoc
  */

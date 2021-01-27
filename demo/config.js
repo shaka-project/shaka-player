@@ -182,6 +182,8 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreSuggestedPresentationDelay')
         .addBoolInput_(MessageIds.IGNORE_DASH_EMPTY_ADAPTATION_SET,
             'manifest.dash.ignoreEmptyAdaptationSet')
+        .addBoolInput_(MessageIds.IGNORE_DASH_MAX_SEGMENT_DURATION,
+            'manifest.dash.ignoreMaxSegmentDuration')
         .addBoolInput_(MessageIds.IGNORE_HLS_TEXT_FAILURES,
             'manifest.hls.ignoreTextStreamFailures')
         .addBoolInput_(MessageIds.USE_FULL_SEGMENTS_FOR_START_TIME,

@@ -311,6 +311,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore empty [PROPER_NAME:DASH] [JARGON:AdaptationSets]"
   },
+  "DEMO_IGNORE_DASH_MAX_SEGMENT_DURATION": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore [PROPER_NAME:DASH] [JARGON:maxSegmentDuration]"
+  },
   "DEMO_IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY": {
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:DASH] [JARGON:suggestedPresentationDelay]"
