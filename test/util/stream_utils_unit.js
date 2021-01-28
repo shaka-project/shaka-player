@@ -500,7 +500,7 @@ describe('StreamUtils', () => {
     });
   });
 
-  describe('filterVariantsByHeight_', () => {
+  describe('filterVariantsBySize_', () => {
     const avc1Variant1080 = /** @type {shaka.extern.Variant} */(
       /** @type {?} */({
         bandwidth: 5058558,
@@ -549,14 +549,14 @@ describe('StreamUtils', () => {
       })
     );
 
-    it('filters variants by height', () => {
+    it('filters variants by size', () => {
       const variantsByCodecs = StreamUtils.getVariantsByCodecs_([
         avc1Variant1080,
         vp9Variant1080,
         vp9Variant2160,
       ]);
 
-      const actual = StreamUtils.filterVariantsByHeight_(
+      const actual = StreamUtils.filterVariantsBySize_(
           variantsByCodecs
       ).getAll();
 
@@ -576,7 +576,7 @@ describe('StreamUtils', () => {
           vp9Variant2160,
         ]);
 
-        const filteredVariantsByCodecs = StreamUtils.filterVariantsByHeight_(
+        const filteredVariantsByCodecs = StreamUtils.filterVariantsBySize_(
             variantsByCodecs
         );
 
@@ -593,7 +593,7 @@ describe('StreamUtils', () => {
           vp9Variant2160,
         ]);
 
-        const filteredVariantsByCodecs = StreamUtils.filterVariantsByHeight_(
+        const filteredVariantsByCodecs = StreamUtils.filterVariantsBySize_(
             variantsByCodecs
         );
 
