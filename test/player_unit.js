@@ -683,6 +683,28 @@ describe('Player', () => {
       expect(seekRange.end).toBe(10);
     });
 
+    it('configures play and seek range after playback starts', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const seekRange = player.seekRange();
+      expect(seekRange.start).toBe(0);
+      expect(seekRange.end).toBe(Infinity);
+
+      // Change the configuration after the playback starts.
+      player.configure({playRangeStart: 5, playRangeEnd: 10});
+      const seekRange2 = player.seekRange();
+      expect(seekRange2.start).toBe(5);
+      expect(seekRange2.end).toBe(10);
+    });
+
     it('does not switch for plain configuration changes', async () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       streamingEngine.switchVariant.calls.reset();
