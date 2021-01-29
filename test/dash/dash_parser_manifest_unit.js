@@ -380,15 +380,15 @@ describe('DashParser Manifest', () => {
         const stream1 = manifest.variants[0].video;
         const stream2 = manifest.variants[1].video;
 
-        const expectedClosedCaptions1 = new Map(
-            [['CC1', shaka.util.LanguageUtils.normalize('eng')],
-              ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
-        );
+        const expectedClosedCaptions1 = new Map([
+          ['CC1', shaka.util.LanguageUtils.normalize('eng')],
+          ['CC3', shaka.util.LanguageUtils.normalize('swe')],
+        ]);
 
-        const expectedClosedCaptions2 = new Map(
-            [['svc1', shaka.util.LanguageUtils.normalize('bos')],
-              ['svc3', shaka.util.LanguageUtils.normalize('cze')]]
-        );
+        const expectedClosedCaptions2 = new Map([
+          ['svc1', shaka.util.LanguageUtils.normalize('bos')],
+          ['svc3', shaka.util.LanguageUtils.normalize('cze')],
+        ]);
         expect(stream1.closedCaptions).toEqual(expectedClosedCaptions1);
         expect(stream2.closedCaptions).toEqual(expectedClosedCaptions2);
       });
@@ -414,10 +414,10 @@ describe('DashParser Manifest', () => {
         /** @type {shaka.extern.Manifest} */
         const manifest = await parser.start('dummy://foo', playerInterface);
         const stream = manifest.variants[0].video;
-        const expectedClosedCaptions = new Map(
-            [['svc1', shaka.util.LanguageUtils.normalize('eng')],
-              ['svc3', shaka.util.LanguageUtils.normalize('swe')]]
-        );
+        const expectedClosedCaptions = new Map([
+          ['svc1', shaka.util.LanguageUtils.normalize('eng')],
+          ['svc3', shaka.util.LanguageUtils.normalize('swe')],
+        ]);
         expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
       });
 
@@ -442,10 +442,10 @@ describe('DashParser Manifest', () => {
         /** @type {shaka.extern.Manifest} */
         const manifest = await parser.start('dummy://foo', playerInterface);
         const stream = manifest.variants[0].video;
-        const expectedClosedCaptions = new Map(
-            [['svc1', shaka.util.LanguageUtils.normalize('eng')],
-              ['svc2', shaka.util.LanguageUtils.normalize('swe')]]
-        );
+        const expectedClosedCaptions = new Map([
+          ['svc1', shaka.util.LanguageUtils.normalize('eng')],
+          ['svc2', shaka.util.LanguageUtils.normalize('swe')],
+        ]);
         expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
       });
 
@@ -503,19 +503,17 @@ describe('DashParser Manifest', () => {
         const stream1 = manifest.variants[0].video;
         const stream2 = manifest.variants[1].video;
 
-        const expectedClosedCaptions1 = new Map(
-            [['CC1', shaka.util.LanguageUtils.normalize('eng')],
-              ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
-        );
+        const expectedClosedCaptions1 = new Map([
+          ['CC1', shaka.util.LanguageUtils.normalize('eng')],
+          ['CC3', shaka.util.LanguageUtils.normalize('swe')],
+        ]);
 
-        const expectedClosedCaptions2 = new Map(
-            [
-              ['CC1', shaka.util.LanguageUtils.normalize('eng')],
-              ['CC2', shaka.util.LanguageUtils.normalize('swe')],
-              ['CC3', shaka.util.LanguageUtils.normalize('fre')],
-              ['CC4', shaka.util.LanguageUtils.normalize('pol')],
-            ]
-        );
+        const expectedClosedCaptions2 = new Map([
+          ['CC1', shaka.util.LanguageUtils.normalize('eng')],
+          ['CC2', shaka.util.LanguageUtils.normalize('swe')],
+          ['CC3', shaka.util.LanguageUtils.normalize('fre')],
+          ['CC4', shaka.util.LanguageUtils.normalize('pol')],
+        ]);
 
         expect(stream1.closedCaptions).toEqual(expectedClosedCaptions1);
         expect(stream2.closedCaptions).toEqual(expectedClosedCaptions2);
