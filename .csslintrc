@@ -3,6 +3,7 @@
     "rules": {
       "font-family-no-missing-generic-family-keyword": null,
       "declaration-block-single-line-max-declarations": null,
+      "declaration-empty-line-before": null,
       "max-line-length": [ 80, {
         ignorePattern: "/^@import\\s+/",
       }],

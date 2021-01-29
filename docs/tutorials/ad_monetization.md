@@ -57,8 +57,9 @@ const adManager = player.getAdManager();
 const video = document.getElementById('video');
 const ui = video['ui'];
 // If you're using a non-UI build, this is the div you'll need to create
-// for your layout.
-const container = video.ui.getControls().getControlsContainer();
+// for your layout.  The ad manager will clear this div, when it unloads, so
+// don't pass in a div that contains non-ad elements.
+const container = video.ui.getControls().getClientSideAdContainer();
 adManager.initClientSide(container, video);
 ```
 

@@ -589,7 +589,7 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
     // browser can cause failures even when a human can't see the difference,
     // and setting it too high means human-noticeable changes could go
     // undetected by a test.
-    const diff = Jimp.diff(oldScreenshot, newScreenshot, /* threshold= */ 0.05);
+    const diff = Jimp.diff(oldScreenshot, newScreenshot, /* threshold= */ 0.07);
 
     // Write the diff to disk.  This is used to review when there are changes.
     fs.writeFileSync(

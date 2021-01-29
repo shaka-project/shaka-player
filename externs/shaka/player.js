@@ -600,7 +600,8 @@ shaka.extern.DrmConfiguration;
  *   autoCorrectDrift: boolean,
  *   initialSegmentLimit: number,
  *   ignoreSuggestedPresentationDelay: boolean,
- *   ignoreEmptyAdaptationSet: boolean
+ *   ignoreEmptyAdaptationSet: boolean,
+ *   ignoreMaxSegmentDuration: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -639,6 +640,10 @@ shaka.extern.DrmConfiguration;
  * @property {boolean} ignoreEmptyAdaptationSet
  *   If true will cause DASH parser to ignore
  *   empty <code>AdaptationSet</code> from manifest. Defaults to
+ *   <code>false</code> if not provided.
+ * @property {boolean} ignoreMaxSegmentDuration
+ *   If true will cause DASH parser to ignore
+ *   <code>maxSegmentDuration</code> from manifest. Defaults to
  *   <code>false</code> if not provided.
  * @exportDoc
  */
@@ -729,7 +734,9 @@ shaka.extern.ManifestConfiguration;
  *   useNativeHlsOnSafari: boolean,
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
- *   autoLowLatencyMode: boolean
+ *   autoLowLatencyMode: boolean,
+ *   forceHTTPS: boolean,
+ *   preferNativeHls: boolean
  * }}
  *
  * @description
@@ -828,6 +835,10 @@ shaka.extern.ManifestConfiguration;
  *   lowLatencyMode, but if it has been configured to activate the
  *   lowLatencyMode if a stream of this type is detected, we automatically
  *   activate the lowLatencyMode. Defaults to false.
+ * @property {boolean} forceHTTPS
+ *   If true, if the protocol is HTTP change it to HTTPs.
+ * @property {boolean} preferNativeHls
+ *   If true, prefer native HLS playback when possible, regardless of platform.
  *
  * @exportDoc
  */
@@ -917,6 +928,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredVariantRole: string,
  *   preferredTextRole: string,
  *   preferredAudioChannelCount: number,
+ *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
@@ -950,6 +962,11 @@ shaka.extern.OfflineConfiguration;
  *   The preferred role to use for text tracks.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ * @property {boolean} preferForcedSubs
+ *   If true, a forced text track is preferred.  Defaults to false.
+ *   If the content has no forced captions and the value is true,
+ *   no text track is chosen.
+ *   Changing this during playback will not affect the current playback.
  * @property {shaka.extern.Restrictions} restrictions
  *   The application restrictions to apply to the tracks.  These are "hard"
  *   restrictions.  Any track that fails to meet these restrictions will not

@@ -20,6 +20,7 @@ goog.require('shakaDemo.Utils');
  * configuration, etc).
  */
 shakaDemo.Main = class {
+  /** */
   constructor() {
     /** @private {HTMLVideoElement} */
     this.video_ = null;
@@ -1268,7 +1269,7 @@ shakaDemo.Main = class {
           // If that happens, just proceed to load.
           goog.asserts.assert(this.video_ != null, 'this.video should exist!');
           adManager.initClientSide(
-              this.controls_.getControlsContainer(), this.video_);
+              this.controls_.getClientSideAdContainer(), this.video_);
           const adRequest = new google.ima.AdsRequest();
           adRequest.adTagUrl = asset.adTagUri;
           adManager.requestClientSideAds(adRequest);

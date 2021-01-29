@@ -1,3 +1,108 @@
+## 3.0.7 (2021-01-06)
+
+Bugfixes:
+  - Fix text failures triggered by rapid stream switches
+  - Remove legacy Edge workarounds on new Edge
+  - Fix viewport anchor calculations in TTML
+    - https://github.com/google/shaka-player/pull/3065
+  - Fix slow memory leak related to MediaSource object URLs
+    - https://github.com/google/shaka-player/issues/2953
+  - Fix clicking in interactive client-side ads
+    - https://github.com/google/shaka-player/issues/3053
+  - Improve cue comparison performance
+    - https://github.com/google/shaka-player/issues/3018
+  - Fix race condition in text stream scheduling
+    - https://github.com/google/shaka-player/issues/2764
+  - Fix multiple stream-merging issues with DASH multi-period content
+    - https://github.com/google/shaka-player/issues/2785
+    - https://github.com/google/shaka-player/issues/2884
+  - Fix exception when removing content from buffer
+    - https://github.com/google/shaka-player/issues/2982
+    - https://github.com/google/shaka-player/pull/3042
+  - Fix memory leak in DASH with SegmentTimeline
+    - https://github.com/google/shaka-player/issues/3038
+    - https://github.com/google/shaka-player/pull/3039
+  - Fix trick-mode tracks associated with multiple regular tracks
+    - https://github.com/google/shaka-player/pull/2992
+  - Fix TS DRM failures
+    - https://github.com/google/shaka-player/issues/2981
+  - Work around misreported AC-3 support on Tizen
+    - https://github.com/google/shaka-player/issues/2989
+  - Ignore incompatible TrickMode streams
+    - https://github.com/google/shaka-player/pull/2984
+  - Fix rare exception thrown when switching streams
+    - https://github.com/google/shaka-player/issues/2956
+    - https://github.com/google/shaka-player/issues/2970
+  - Fix rendering of line breaks in text cues
+    - https://github.com/google/shaka-player/issues/2828
+
+Ads (BETA):
+  - Fix ad disappearance when reconfiguring UI during an ad
+    - https://github.com/google/shaka-player/issues/2869
+    - https://github.com/google/shaka-player/issues/2943
+  - Fix stopping ad manager after adblock
+
+Build:
+  - Fix build issues with Python 3
+    - https://github.com/google/shaka-player/issues/3003
+    - https://github.com/google/shaka-player/issues/3004
+  - Fix running build scripts on Windows
+    - https://github.com/google/shaka-player/issues/2988
+  - Fix build error about stylelint paths
+  - Fix build failure in context of node module
+
+Demo App:
+  - Fix keyboard navigation in settings
+    - https://github.com/google/shaka-player/issues/2986
+
+Docs:
+  - Clean up doc generation
+  - Fix docs generation for enums in ui
+    - https://github.com/google/shaka-player/issues/2698
+
+
+## 2.5.19 (2021-01-06)
+
+Bugfixes:
+  - Remove legacy Edge workarounds on new Edge
+  - Fix viewport anchor calculations in TTML
+    - https://github.com/google/shaka-player/pull/3065
+  - Fix slow memory leak related to MediaSource object URLs
+    - https://github.com/google/shaka-player/issues/2953
+  - Improve cue comparison performance
+    - https://github.com/google/shaka-player/issues/3018
+  - Fix race condition in text stream scheduling
+    - https://github.com/google/shaka-player/issues/2764
+  - Fix exception when removing content from buffer
+    - https://github.com/google/shaka-player/issues/2982
+    - https://github.com/google/shaka-player/pull/3042
+  - Work around misreported AC-3 support on Tizen
+    - https://github.com/google/shaka-player/issues/2989
+  - Fix trick-mode tracks associated with multiple regular tracks
+    - https://github.com/google/shaka-player/pull/2992
+  - Fix TS DRM failures
+    - https://github.com/google/shaka-player/issues/2981
+  - Ignore incompatible TrickMode streams
+    - https://github.com/google/shaka-player/pull/2984
+
+Build:
+  - Fix build issues with Python 3
+    - https://github.com/google/shaka-player/issues/3004
+  - Fix running build scripts on Windows
+    - https://github.com/google/shaka-player/issues/2988
+  - Fix build error about stylelint paths
+  - Fix build failure in context of node module
+
+Demo App:
+  - Fix keyboard navigation in settings
+    - https://github.com/google/shaka-player/issues/2986
+
+Docs:
+  - Clean up doc generation
+  - Fix docs generation for enums in ui
+    - https://github.com/google/shaka-player/issues/2698
+
+
 ## 3.0.6 (2020-11-12)
 
 Bugfixes:

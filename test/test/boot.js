@@ -90,6 +90,22 @@ function getClientArg(name) {
     fail(message);
   });
 
+  // Scrollbars ruin our screenshots on Safari.  In the past, we had applied
+  // fixed offsets to the width to correct the scaling factor, but this was a
+  // hack and inconsistent.  The best thing to do is completely disable
+  // scrollbars through CSS.  This ensures that neither the inner iframe nor the
+  // top-level window have scrollbars, which makes screenshots on Safari
+  // consistent across versions.
+  // Disable scrolling on the inner document, the execution context.
+  const innerStyle = document.createElement('style');
+  innerStyle.innerText = '::-webkit-scrollbar { display: none; }\n';
+  innerStyle.innerText += 'body { overflow: hidden }\n';
+  document.head.appendChild(innerStyle);
+  // Disable scrolling on the outer document, the host context.
+  const outerStyle = document.createElement('style');
+  outerStyle.innerText = innerStyle.innerText;
+  top.document.head.appendChild(outerStyle);
+
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
   // detected.

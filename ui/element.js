@@ -71,7 +71,7 @@ shaka.ui.Element = class {
      * @protected {?shaka.extern.IAd}
      * @exportInterface
      */
-    this.ad = null;
+    this.ad = controls.getAd();
 
     const AD_STARTED = shaka.ads.AdManager.AD_STARTED;
     this.eventManager.listen(this.adManager, AD_STARTED, (e) => {

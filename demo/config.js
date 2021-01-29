@@ -182,6 +182,8 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreSuggestedPresentationDelay')
         .addBoolInput_(MessageIds.IGNORE_DASH_EMPTY_ADAPTATION_SET,
             'manifest.dash.ignoreEmptyAdaptationSet')
+        .addBoolInput_(MessageIds.IGNORE_DASH_MAX_SEGMENT_DURATION,
+            'manifest.dash.ignoreMaxSegmentDuration')
         .addBoolInput_(MessageIds.IGNORE_HLS_TEXT_FAILURES,
             'manifest.hls.ignoreTextStreamFailures')
         .addBoolInput_(MessageIds.USE_FULL_SEGMENTS_FOR_START_TIME,
@@ -321,7 +323,11 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.LOW_LATENCY,
             'streaming.lowLatencyMode')
         .addBoolInput_(MessageIds.AUTO_LOW_LATENCY,
-            'streaming.autoLowLatencyMode');
+            'streaming.autoLowLatencyMode')
+        .addBoolInput_(MessageIds.FORCE_HTTPS,
+            'streaming.forceHTTPS')
+        .addBoolInput_(MessageIds.PREFER_NATIVE_HLS,
+            'streaming.preferNativeHls');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
@@ -366,6 +372,8 @@ shakaDemo.Config = class {
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
     this.addNumberInput_(MessageIds.AUDIO_CHANNEL_COUNT,
         'preferredAudioChannelCount');
+    this.addBoolInput_(MessageIds.PREFER_FORCED_SUBS,
+        'preferForcedSubs');
   }
 
   /** @private */
