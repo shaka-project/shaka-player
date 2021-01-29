@@ -382,7 +382,7 @@ function allUsableBrowserLaunchers(config) {
       // Most launchers requiring configuration through customLaunchers have
       // no DEFAULT_CMD.  Some launchers have DEFAULT_CMD, but not for this
       // platform.  Finally, WebDriver has DEFAULT_CMD, but still requires
-      // configuration, so we simply blacklist it by name.
+      // configuration, so we simply reject it by name.
       // eslint-disable-next-line no-restricted-syntax
       const DEFAULT_CMD = pluginConstructor.prototype.DEFAULT_CMD;
       if (!DEFAULT_CMD || !DEFAULT_CMD[process.platform]) {
