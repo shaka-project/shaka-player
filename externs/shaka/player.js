@@ -206,6 +206,7 @@ shaka.extern.BufferedInfo;
  *   height: ?number,
  *   frameRate: ?number,
  *   pixelAspectRatio: ?string,
+ *   hdr: ?string,
  *   mimeType: ?string,
  *   codecs: ?string,
  *   audioCodec: ?string,
@@ -258,6 +259,8 @@ shaka.extern.BufferedInfo;
  *   The video framerate provided in the manifest, if present.
  * @property {?string} pixelAspectRatio
  *   The video pixel aspect ratio provided in the manifest, if present.
+ * @property {?string} hdr
+ *   The video HDR provided in the manifest, if present.
  * @property {?string} mimeType
  *   The MIME type of the content provided in the manifest.
  * @property {?string} codecs
