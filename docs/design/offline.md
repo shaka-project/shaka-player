@@ -137,23 +137,6 @@ store a stream created by `StreamGenerator` and verify that the `StoredContent`
 structure is correct.  A test should also load the stored data and verify that
 it matches the generated segments.
 
-We should use a subset of IndexedDB supported by IE/Edge.  Note the "partial
-support" link on [caniuse].  Since the unsupported features seem to be about
-key-based arrays and compound indexes, we should be able to easily avoid those.
-Integration tests should help ensure that we are doing this correctly.
-
-Also note [caniuse]'s mention of bugs in Safari's IndexedDB implementation,
-detailed in [this blog post].  It is not clear yet if the Safari bugs are on iOS
-only or also on desktop.  We may be forced to blacklist offline support as we
-did with Safari 8 in `MediaSourceEngine.support()`.  If the bugs have been fixed
-in Safari 9 or don't affect desktop, we should be fine.  If the bugs do affect
-Safari 9 desktop, we could consider working around them.  The workaround seems
-to be to avoid autoincrement and to constructing string IDs for each object
-which are unique across all object stores.
-
-[caniuse]: http://caniuse.com/#feat=indexeddb
-[this blog post]: https://www.raymondcamden.com/2014/09/25/IndexedDB-on-iOS-8-Broken-Bad/
-
 
 #### Error conditions
 

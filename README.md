@@ -211,6 +211,8 @@ Shaka Player supports:
     - UTF-8 encoding only
   - LyRiCs (LRC)
     - UTF-8 encoding only
+  - SubStation Alpha (SSA, ASS)
+    - UTF-8 encoding only
   - SubViewer (SBV)
     - UTF-8 encoding only
 
