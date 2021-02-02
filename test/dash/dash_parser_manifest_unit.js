@@ -1737,4 +1737,63 @@ describe('DashParser Manifest', () => {
     expect(uri0).toBe('http://example.com/r0/1.mp4');
     expect(uri1).toBe('http://example.com/r1/1.mp4');
   });
+
+  // b/179025415: A "future" period (past the segment availability window end)
+  // would cause us to generate bogus segment references for that period.  This
+  // would happen upon update (once per segment duration), but not on initial
+  // load.
+  it('creates no references for future Periods', async () => {
+    // Pretend the live stream started 10 seconds ago.  This is long enough to
+    // have segments (1s each), but not long enough to have segments in the
+    // second period (30s into the live stream).
+    const availabilityStartTimeMilliseconds = Date.now() - 10e3;
+    const availabilityStartTime =
+        (new Date(availabilityStartTimeMilliseconds)).toISOString();
+    const manifestText = [
+      `<MPD type="dynamic" availabilityStartTime="${availabilityStartTime}">`,
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <SegmentTemplate media="$Number$.mp4" duration="1" />',
+      '      <Representation id="3" width="640" height="480">',
+      '        <BaseURL>http://example.com/p1/</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period id="4" duration="PT30S">',
+      '    <AdaptationSet id="5" mimeType="video/mp4">',
+      '      <SegmentTemplate media="$Number$.mp4" duration="1" />',
+      '      <Representation id="6" width="640" height="480">',
+      '        <BaseURL>http://example.com/p2/</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    const video0 = manifest.variants[0].video;
+    await video0.createSegmentIndex();
+
+    // Wait two segment durations, so that the updateEvery callback fires.
+    // In the original bug, we generated bogus references during update.
+    await shaka.test.Util.delay(2);
+
+    goog.asserts.assert(video0.segmentIndex, 'Null segmentIndex!');
+    const segments = Array.from(video0.segmentIndex);
+
+    // There should be some segments, but not more than the 30 that would appear
+    // in the complete first period.
+    expect(segments.length).toBeGreaterThan(0);
+    expect(segments.length).toBeLessThanOrEqual(30);
+
+    // We should also not find /p2/ (the second period URL) in any of them.
+    const segmentUris = segments.map((s) => s.getUris()[0]);
+    for (const uri of segmentUris) {
+      expect(uri).not.toContain('/p2/');
+    }
+  });
 });
