@@ -12,6 +12,7 @@ goog.require('shaka.test.UiUtils');
 goog.require('shaka.test.Util');
 goog.require('shaka.test.Waiter');
 goog.require('shaka.util.EventManager');
+goog.require('shaka.util.Platform');
 
 /** @return {boolean} */
 const supportsStorage = () => shaka.offline.Storage.support();
@@ -126,6 +127,16 @@ filterDescribe('Offline', supportsStorage, () => {
 
         if (!(widevineSupport || playreadySupport)) {
           pending('Widevine and PlayReady are not supported');
+          return;
+        }
+
+        if (shaka.util.Platform.isXboxOne()) {
+          // Axinom won't issue a license for an Xbox One.  The error message
+          // from the license server says "Your DRM client's security level is
+          // 150, but the entitlement message requires 2000 or higher."
+          // TODO: Stop using Axinom's license server.  Use
+          // https://testweb.playready.microsoft.com/Server/ServiceQueryStringSyntax
+          pending('Xbox One not supported by Axinom license server');
           return;
         }
 
