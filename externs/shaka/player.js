@@ -206,6 +206,7 @@ shaka.extern.BufferedInfo;
  *   height: ?number,
  *   frameRate: ?number,
  *   pixelAspectRatio: ?string,
+ *   hdr: ?string,
  *   mimeType: ?string,
  *   codecs: ?string,
  *   audioCodec: ?string,
@@ -258,6 +259,8 @@ shaka.extern.BufferedInfo;
  *   The video framerate provided in the manifest, if present.
  * @property {?string} pixelAspectRatio
  *   The video pixel aspect ratio provided in the manifest, if present.
+ * @property {?string} hdr
+ *   The video HDR provided in the manifest, if present.
  * @property {?string} mimeType
  *   The MIME type of the content provided in the manifest.
  * @property {?string} codecs
@@ -600,7 +603,8 @@ shaka.extern.DrmConfiguration;
  *   autoCorrectDrift: boolean,
  *   initialSegmentLimit: number,
  *   ignoreSuggestedPresentationDelay: boolean,
- *   ignoreEmptyAdaptationSet: boolean
+ *   ignoreEmptyAdaptationSet: boolean,
+ *   ignoreMaxSegmentDuration: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -639,6 +643,10 @@ shaka.extern.DrmConfiguration;
  * @property {boolean} ignoreEmptyAdaptationSet
  *   If true will cause DASH parser to ignore
  *   empty <code>AdaptationSet</code> from manifest. Defaults to
+ *   <code>false</code> if not provided.
+ * @property {boolean} ignoreMaxSegmentDuration
+ *   If true will cause DASH parser to ignore
+ *   <code>maxSegmentDuration</code> from manifest. Defaults to
  *   <code>false</code> if not provided.
  * @exportDoc
  */
@@ -885,6 +893,7 @@ shaka.extern.AbrConfiguration;
  * @typedef {{
  *   trackSelectionCallback:
  *       function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>,
+ *   downloadSizeCallback: function(number):!Promise<boolean>,
  *   progressCallback: function(shaka.extern.StoredContent,number),
  *   usePersistentLicense: boolean
  * }}
@@ -894,6 +903,10 @@ shaka.extern.AbrConfiguration;
  *   Called inside <code>store()</code> to determine which tracks to save from a
  *   manifest. It is passed an array of Tracks from the manifest and it should
  *   return an array of the tracks to store.
+ * @property {function(number):!Promise<boolean>} downloadSizeCallback
+ *   Called inside <code>store()</code> to determine if the content can be
+ *   downloaded due to its estimated size. The estimated size of the download is
+ *   passed and it must return if the download is allowed or not.
  * @property {function(shaka.extern.StoredContent,number)} progressCallback
  *   Called inside <code>store()</code> to give progress info back to the app.
  *   It is given the current manifest being stored and the progress of it being

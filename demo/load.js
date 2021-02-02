@@ -64,7 +64,7 @@ function shakaUncompiledModeSupported() {
     script.defer = true;
     // Setting async = false is important to make sure the script is imported
     // before the 'load' event fires.
-    script.async = false;  // eslint-disable-line id-blacklist
+    script.async = false;  // eslint-disable-line id-denylist
     document.head.appendChild(script);
 
     // Signal success, or else the Closure Library's loader will not load the
