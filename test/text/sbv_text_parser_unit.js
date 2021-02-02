@@ -76,7 +76,7 @@ describe('SbvTextParser', () => {
     const expected = cues.map((cue) => {
       if (cue.nestedCues) {
         cue.nestedCues = cue.nestedCues.map(
-            (nestedCue) => jasmine.objectContaining(nestedCue)
+            (nestedCue) => jasmine.objectContaining(nestedCue),
         );
       }
       return jasmine.objectContaining(cue);
