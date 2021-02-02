@@ -24,7 +24,7 @@ const Jimp = require('jimp');
 async function main(oldPath, newPath) {
   const oldImage = await Jimp.read(oldPath);
   const newImage = await Jimp.read(newPath);
-  const diff = Jimp.diff(oldImage, newImage, /* threshold= */ 0);
+  const diff = Jimp.diff(oldImage, newImage, /* threshold= */ 0.07);
   // "percent" is, surprisingly, a number between 0 and 1, not between 0 and
   // 100.  Convert this to a number of pixels.
   const pixelsChanged =

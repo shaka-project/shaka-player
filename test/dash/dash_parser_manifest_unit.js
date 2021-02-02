@@ -380,15 +380,15 @@ describe('DashParser Manifest', () => {
         const stream1 = manifest.variants[0].video;
         const stream2 = manifest.variants[1].video;
 
-        const expectedClosedCaptions1 = new Map(
-            [['CC1', shaka.util.LanguageUtils.normalize('eng')],
-              ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
-        );
+        const expectedClosedCaptions1 = new Map([
+          ['CC1', shaka.util.LanguageUtils.normalize('eng')],
+          ['CC3', shaka.util.LanguageUtils.normalize('swe')],
+        ]);
 
-        const expectedClosedCaptions2 = new Map(
-            [['svc1', shaka.util.LanguageUtils.normalize('bos')],
-              ['svc3', shaka.util.LanguageUtils.normalize('cze')]]
-        );
+        const expectedClosedCaptions2 = new Map([
+          ['svc1', shaka.util.LanguageUtils.normalize('bos')],
+          ['svc3', shaka.util.LanguageUtils.normalize('cze')],
+        ]);
         expect(stream1.closedCaptions).toEqual(expectedClosedCaptions1);
         expect(stream2.closedCaptions).toEqual(expectedClosedCaptions2);
       });
@@ -414,10 +414,10 @@ describe('DashParser Manifest', () => {
         /** @type {shaka.extern.Manifest} */
         const manifest = await parser.start('dummy://foo', playerInterface);
         const stream = manifest.variants[0].video;
-        const expectedClosedCaptions = new Map(
-            [['svc1', shaka.util.LanguageUtils.normalize('eng')],
-              ['svc3', shaka.util.LanguageUtils.normalize('swe')]]
-        );
+        const expectedClosedCaptions = new Map([
+          ['svc1', shaka.util.LanguageUtils.normalize('eng')],
+          ['svc3', shaka.util.LanguageUtils.normalize('swe')],
+        ]);
         expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
       });
 
@@ -442,10 +442,10 @@ describe('DashParser Manifest', () => {
         /** @type {shaka.extern.Manifest} */
         const manifest = await parser.start('dummy://foo', playerInterface);
         const stream = manifest.variants[0].video;
-        const expectedClosedCaptions = new Map(
-            [['svc1', shaka.util.LanguageUtils.normalize('eng')],
-              ['svc2', shaka.util.LanguageUtils.normalize('swe')]]
-        );
+        const expectedClosedCaptions = new Map([
+          ['svc1', shaka.util.LanguageUtils.normalize('eng')],
+          ['svc2', shaka.util.LanguageUtils.normalize('swe')],
+        ]);
         expect(stream.closedCaptions).toEqual(expectedClosedCaptions);
       });
 
@@ -503,19 +503,17 @@ describe('DashParser Manifest', () => {
         const stream1 = manifest.variants[0].video;
         const stream2 = manifest.variants[1].video;
 
-        const expectedClosedCaptions1 = new Map(
-            [['CC1', shaka.util.LanguageUtils.normalize('eng')],
-              ['CC3', shaka.util.LanguageUtils.normalize('swe')]]
-        );
+        const expectedClosedCaptions1 = new Map([
+          ['CC1', shaka.util.LanguageUtils.normalize('eng')],
+          ['CC3', shaka.util.LanguageUtils.normalize('swe')],
+        ]);
 
-        const expectedClosedCaptions2 = new Map(
-            [
-              ['CC1', shaka.util.LanguageUtils.normalize('eng')],
-              ['CC2', shaka.util.LanguageUtils.normalize('swe')],
-              ['CC3', shaka.util.LanguageUtils.normalize('fre')],
-              ['CC4', shaka.util.LanguageUtils.normalize('pol')],
-            ]
-        );
+        const expectedClosedCaptions2 = new Map([
+          ['CC1', shaka.util.LanguageUtils.normalize('eng')],
+          ['CC2', shaka.util.LanguageUtils.normalize('swe')],
+          ['CC3', shaka.util.LanguageUtils.normalize('fre')],
+          ['CC4', shaka.util.LanguageUtils.normalize('pol')],
+        ]);
 
         expect(stream1.closedCaptions).toEqual(expectedClosedCaptions1);
         expect(stream2.closedCaptions).toEqual(expectedClosedCaptions2);
@@ -1599,6 +1597,58 @@ describe('DashParser Manifest', () => {
     const manifest = await parser.start('dummy://foo', playerInterface);
     const minBufferTime = manifest.minBufferTime;
     expect(minBufferTime).toBe(75);
+  });
+
+  it('honors the ignoreMaxSegmentDuration config', async () => {
+    const manifestText = [
+      '<MPD maxSegmentDuration="PT5S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreMaxSegmentDuration = true;
+    parser.configure(config);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const maxSegmentDuration =
+        manifest.presentationTimeline.getMaxSegmentDuration();
+    expect(maxSegmentDuration).toBe(1);
+  });
+
+  it('gets manifest value if ignoreMaxSegmentDuration is false', async () => {
+    const manifestText = [
+      '<MPD maxSegmentDuration="PT5S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.ignoreMaxSegmentDuration = false;
+    parser.configure(config);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const maxSegmentDuration =
+        manifest.presentationTimeline.getMaxSegmentDuration();
+    expect(maxSegmentDuration).toBe(5);
   });
 
   it('does not set presentationDelay to NaN', async () => {
