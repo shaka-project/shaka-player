@@ -16,11 +16,8 @@ var google = {};
 /** @const */
 google.ima = {};
 
-/** @const */
-google.ima.settings = {};
-
-/** @param {string} locale */
-google.ima.settings.setLocale = function(locale) {};
+/** @type {!google.ima.ImaSdkSettings} */
+google.ima.settings;
 
 
 /**
@@ -191,6 +188,20 @@ google.ima.ImaSdkSettings = class {
    * @param {string} version
    */
   setPlayerVersion(version) {}
+
+  /**
+   * @param {google.ima.ImaSdkSettings.VpaidMode} vpaidMode
+   */
+  setVpaidMode(vpaidMode) {}
+};
+
+/**
+ * @enum {number}
+ */
+google.ima.ImaSdkSettings.VpaidMode = {
+  DISABLED: 0,
+  ENABLED: 1,
+  INSECURE: 2,
 };
 
 
