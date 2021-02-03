@@ -433,6 +433,10 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
    * @return {!Object.<string, string>}
    */
   function getParams(request) {
+    // This can be null for manually-connected browsers.
+    if (!request._parsedUrl.search) {
+      return {};
+    }
     return util.parseQueryParams(request._parsedUrl.search);
   }
 
@@ -443,10 +447,14 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
    *
    * If the browser is not found, this function will return null.
    *
-   * @param {string} id
+   * @param {?string} id
    * @return {karma.Launcher.Browser|null}
    */
   function getBrowser(id) {
+    if (!id) {
+      // No ID parameter?  No such browser.
+      return null;
+    }
     const browser = launcher._browsers.find((b) => b.id == id);
     if (!browser) {
       return null;
@@ -455,11 +463,17 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
   }
 
   /**
-   * @param {karma.Launcher.Browser} browser
+   * @param {?karma.Launcher.Browser} browser
    * @return {wd.remote|null} A WebDriver client, an object from the "wd"
    *   package, created by "wd.remote()".
    */
   function getWebDriverClient(browser) {
+    if (!browser) {
+      // If we didn't launch the browser, then there's definitely no WebDriver
+      // client for it.
+      return null;
+    }
+
     // If this browser was launched by the WebDriver launcher, the launcher's
     // browser object has a WebDriver client in the "browser" field.  Yes, this
     // looks weird.
@@ -610,15 +624,9 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
     if (pathname == '/screenshot/isSupported') {
       const params = getParams(request);
       const browser = getBrowser(params.id);
-      if (!browser) {
-        response.writeHead(404);
-        response.end('No such browser!');
-        return;
-      }
-
-      let isSupported = false;
       const webDriverClient = getWebDriverClient(browser);
 
+      let isSupported = false;
       if (webDriverClient) {
         // Some platforms in our Selenium grid can't take screenshots.  We don't
         // have a good way to check for this in the platform capabilities
