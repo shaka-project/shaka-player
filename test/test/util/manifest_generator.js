@@ -521,6 +521,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.audioSamplingRate = null;
       /** @type {Map.<string, string>} */
       this.closedCaptions = null;
+      /** @type {(string|undefined)} */
+      this.hdr = undefined;
     }
 
     /** @type {shaka.extern.Stream} */
