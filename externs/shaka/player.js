@@ -574,7 +574,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
  *         undefined),
  *   logLicenseExchange: boolean,
- *   updateExpirationTime: number
+ *   updateExpirationTime: number,
+ *   preferredKeySystems: !Array.<string>
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -612,6 +613,9 @@ shaka.extern.AdvancedDrmConfiguration;
  * @property {number} updateExpirationTime
  *   <i>Defaults to 1.</i> <br>
  *   The frequency in seconds with which to check the expiration of a session.
+ * @property {!Array.<string>} preferredKeySystems
+ *   <i>Defaults to an empty array. </i> <br>
+ *   Specifies the priorties of available DRM key systems.
  *
  * @exportDoc
  */

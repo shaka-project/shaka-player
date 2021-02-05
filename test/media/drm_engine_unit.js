@@ -257,6 +257,30 @@ function testDrmEngine(useMediaCapabilities) {
       }
     });
 
+    it('chooses systems by configured preferredKeySystems', async () => {
+      // Accept both drm.abc and drm.def.  Only one can be chosen.
+      setRequestMediaKeySystemAccessSpy(['drm.abc', 'drm.def']);
+      config.preferredKeySystems = ['drm.def'];
+      drmEngine.configure(config);
+      logErrorSpy.and.stub();
+
+      const variants = manifest.variants;
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
+          useMediaCapabilities);
+
+      if (useMediaCapabilities) {
+        expect(variants[0].decodingInfos.length).toBe(2);
+      } else {
+        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
+        // Although drm.def appears second in the manifest, it is queried first
+        // and also selected because it has a server configured.
+        const calls = requestMediaKeySystemAccessSpy.calls;
+        expect(calls.argsFor(0)[0]).toBe('drm.def');
+      }
+      expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
+          .toBe('drm.def');
+    });
+
     it('chooses systems with configured license servers', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
       setRequestMediaKeySystemAccessSpy(['drm.abc', 'drm.def']);
