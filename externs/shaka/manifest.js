@@ -168,7 +168,8 @@ shaka.extern.DrmInfo;
  *   video: ?shaka.extern.Stream,
  *   bandwidth: number,
  *   allowedByApplication: boolean,
- *   allowedByKeySystem: boolean
+ *   allowedByKeySystem: boolean,
+ *   decodingInfos: !Array.<MediaCapabilitiesDecodingInfo>
  * }}
  *
  * @description
@@ -203,6 +204,10 @@ shaka.extern.DrmInfo;
  *   <i>Defaults to true.</i><br>
  *   Set by the Player to indicate whether the variant is allowed to be played
  *   by the key system.
+ * @property {!Array.<MediaCapabilitiesDecodingInfo>} decodingInfos
+ *   <i>Defaults to [].</i><br>
+ *   Set by StreamUtils to indicate the results from MediaCapabilities
+ *   decodingInfo.
  *
  * @exportDoc
  */

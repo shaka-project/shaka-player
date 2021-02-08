@@ -302,6 +302,7 @@ shaka.test.StreamingEngineUtil = class {
       id: 0,
       language: 'und',
       primary: false,
+      decodingInfos: [],
     };
 
     if ('video' in segmentDurations) {

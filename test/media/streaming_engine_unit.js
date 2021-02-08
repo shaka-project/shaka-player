@@ -420,6 +420,7 @@ describe('StreamingEngine', () => {
       bandwidth: 0,
       allowedByApplication: true,
       allowedByKeySystem: true,
+      decodingInfos: [],
     };
     manifest.variants.push(alternateVariant);
   }
