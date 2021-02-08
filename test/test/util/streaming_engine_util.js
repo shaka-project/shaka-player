@@ -286,6 +286,7 @@ shaka.test.StreamingEngineUtil = class {
       offlineSessionIds: [],
       variants: [],
       textStreams: [],
+      imageStreams: [],
     };
 
     /** @type {shaka.extern.Variant} */

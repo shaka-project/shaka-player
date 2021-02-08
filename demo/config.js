@@ -208,7 +208,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DISABLE_VIDEO,
             'manifest.disableVideo')
         .addBoolInput_(MessageIds.DISABLE_TEXT,
-            'manifest.disableText');
+            'manifest.disableText')
+        .addBoolInput_(MessageIds.DISABLE_IMAGE,
+            'manifest.disableImage');
 
     this.addRetrySection_('manifest', MessageIds.MANIFEST_RETRY_SECTION_HEADER);
   }

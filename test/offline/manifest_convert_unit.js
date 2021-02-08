@@ -363,6 +363,7 @@ describe('ManifestConverter', () => {
       channelsCount: null,
       audioSamplingRate: null,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -410,6 +411,7 @@ describe('ManifestConverter', () => {
       channelsCount: null,
       audioSamplingRate: null,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -456,6 +458,7 @@ describe('ManifestConverter', () => {
       channelsCount: null,
       audioSamplingRate: null,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -499,6 +502,7 @@ describe('ManifestConverter', () => {
       channelsCount: streamDb.channelsCount,
       audioSamplingRate: streamDb.audioSamplingRate,
       closedCaptions: streamDb.closedCaptions,
+      tilesLayout: streamDb.tilesLayout,
     };
 
     expect(stream).toEqual(expectedStream);

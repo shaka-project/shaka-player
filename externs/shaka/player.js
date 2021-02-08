@@ -219,18 +219,20 @@ shaka.extern.BufferedInfo;
  *   audioId: ?number,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
+ *   tilesLayout: ?string,
  *   audioBandwidth: ?number,
  *   videoBandwidth: ?number,
  *   originalVideoId: ?string,
  *   originalAudioId: ?string,
- *   originalTextId: ?string
+ *   originalTextId: ?string,
+ *   originalImageId: ?string
  * }}
  *
  * @description
  * An object describing a media track.  This object should be treated as
  * read-only as changing any values does not have any effect.  This is the
  * public view of an audio/video paring (variant type) or text track (text
- * type).
+ * type) or image track (image type).
  *
  * @property {number} id
  *   The unique ID of the track.
@@ -239,7 +241,8 @@ shaka.extern.BufferedInfo;
  *   visible/audible in the buffer).
  *
  * @property {string} type
- *   The type of track, either <code>'variant'</code> or <code>'text'</code>.
+ *   The type of track, either <code>'variant'</code> or <code>'text'</code>
+ *   or <code>'image'</code>.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  *
@@ -293,6 +296,10 @@ shaka.extern.BufferedInfo;
  *   The count of the audio track channels.
  * @property {?number} audioSamplingRate
  *   Specifies the maximum sampling rate of the content.
+ * @property {?string} tilesLayout
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the arrangement
+ *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
  * @property {?number} audioBandwidth
  *   (only for variant tracks) The audio stream's bandwidth if known.
  * @property {?number} videoBandwidth
@@ -305,6 +312,9 @@ shaka.extern.BufferedInfo;
  *   any, as it appeared in the original manifest.
  * @property {?string} originalTextId
  *   (text tracks only) The original ID of the text track, if any, as it
+ *   appeared in the original manifest.
+ * @property {?string} originalImageId
+ *   (image tracks only) The original ID of the image track, if any, as it
  *   appeared in the original manifest.
  * @exportDoc
  */
@@ -677,6 +687,7 @@ shaka.extern.HlsManifestConfiguration;
  *   disableAudio: boolean,
  *   disableVideo: boolean,
  *   disableText: boolean,
+ *   disableImage: boolean,
  *   defaultPresentationDelay: number,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
@@ -697,6 +708,9 @@ shaka.extern.HlsManifestConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} disableText
  *   If <code>true</code>, the text tracks are ignored.
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableImage
+ *   If <code>true</code>, the image tracks are ignored.
  *   Defaults to <code>false</code>.
  * @property {number} defaultPresentationDelay
  *   A default <code>presentationDelay</code> value.
@@ -1011,3 +1025,28 @@ shaka.extern.PlayerConfiguration;
  * @exportDoc
  */
 shaka.extern.LanguageRole;
+
+
+/**
+ * @typedef {{
+ *   height: number,
+ *   left: number,
+ *   top: number,
+ *   uris: !Array.<string>,
+ *   width: number
+ * }}
+ *
+ * @property {number} height
+ *    The thumnnail height in percentage.
+ * @property {number} left
+ *    The thumnnail left position in percentage.
+ * @property {number} top
+ *    The thumnnail top position in percentage.
+ * @property {!Array.<string>} uris
+ *   An array of URIs to attempt.  They will be tried in the order they are
+ *   given.
+ * @property {number} width
+ *    The thumnnail width in percentage.
+ * @exportDoc
+ */
+shaka.extern.Thumbnail;

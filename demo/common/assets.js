@@ -131,6 +131,9 @@ shakaAssets.Feature = {
   DASH: shakaDemo.MessageIds.DASH,
   // Set if the asset is an HLS manifest.
   HLS: shakaDemo.MessageIds.HLS,
+
+  // Set if the asset has at least one image stream.
+  THUMBNAILS: shakaDemo.MessageIds.THUMBNAILS,
 };
 
 
@@ -789,6 +792,24 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF THUMBNAILS - Single adaption set, 7 tiles at 10x1, each thumb 320x180',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'http://dash.edgesuite.net/akamai/bbb_30fps/bbb_with_tiled_thumbnails.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.THUMBNAILS),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'DASH-IF THUMBNAILS - Two adaption sets with different thumb resolutions',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
+      /* manifestUri= */ 'http://dash.edgesuite.net/akamai/bbb_30fps/bbb_with_multiple_tiled_thumbnails.mpd',
+      /* source= */ shakaAssets.Source.DASH_IF)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.THUMBNAILS),
   // End DASH-IF Assets }}}
 
   // bitcodin assets {{{

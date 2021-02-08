@@ -94,6 +94,9 @@ shaka.test.ManifestGenerator.Manifest = class {
     /** @type {!Array.<shaka.extern.Stream>} */
     this.textStreams = [];
 
+    /** @type {!Array.<shaka.extern.Stream>} */
+    this.imageStreams = [];
+
     const timeline = new this.shaka_.media.PresentationTimeline(0, 0);
     timeline.setSegmentAvailabilityDuration(Infinity);
     timeline.notifyMaxSegmentDuration(10);
@@ -523,6 +526,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.closedCaptions = null;
       /** @type {(string|undefined)} */
       this.hdr = undefined;
+      /** @type {(string|undefined)} */
+      this.tilesLayout = undefined;
     }
 
     /** @type {shaka.extern.Stream} */

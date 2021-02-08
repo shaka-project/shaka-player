@@ -119,7 +119,8 @@ shaka.extern.ManifestDB;
  *   forced: boolean,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
- *   closedCaptions: Map.<string, string>
+ *   closedCaptions: Map.<string, string>,
+ *   tilesLayout: (string|undefined)
  * }}
  *
  * @property {number} id
@@ -174,6 +175,10 @@ shaka.extern.ManifestDB;
  *   as the value. If the channel number is not provided by the description,
  *   we'll set an 0-based index as the key.
  *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
+ * @property {(string|undefined)} tilesLayout
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the arrangement
+ *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
  */
 shaka.extern.StreamDB;
 

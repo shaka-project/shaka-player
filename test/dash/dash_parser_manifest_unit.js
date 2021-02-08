@@ -1828,6 +1828,7 @@ describe('DashParser Manifest', () => {
   });
 
   it('Does not error when image adaptation sets are present', async () => {
+    const idUri = 'http://dashif.org/guidelines/thumbnail_tile';
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
@@ -1844,6 +1845,11 @@ describe('DashParser Manifest', () => {
       '      </Representation>',
       '    </AdaptationSet>',
       '    <AdaptationSet contentType="image" id="3">',
+      '      <SegmentTemplate media="$Number$.jpg" ',
+      '        duration="2" startNumber="1"/>',
+      '      <Representation id="thumbnails" width="1024" height="1152">',
+      '        <EssentialProperty schemeIdUri="' + idUri + '" value="10x20"/>',
+      '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>',

@@ -148,6 +148,7 @@ describe('Playhead', () => {
     manifest = {
       variants: [],
       textStreams: [],
+      imageStreams: [],
       presentationTimeline: timeline,
       minBufferTime: 10,
       offlineSessionIds: [],
