@@ -1,3 +1,21 @@
+## 2.5.20 (2021-02-08)
+
+Bugfixes:
+  - Fix build in Python 3
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix broken build in directories with spaces
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix trick mode tracks in DASH (work around compiler bug)
+    - https://github.com/google/shaka-player/issues/3085
+    - https://github.com/google/shaka-player/pull/3087
+  - Fix DRM initialization on WebOS 3.0
+    - https://github.com/google/shaka-player/pull/3109
+  - Recognize "m4f" extension in HLS
+    - https://github.com/google/shaka-player/issues/3099
+    - https://github.com/google/shaka-player/pull/3111
+  - Fix header sizes for MP4 boxes with 64-bit size fields
+
+
 ## 2.5.19 (2021-01-06)
 
 Bugfixes:
