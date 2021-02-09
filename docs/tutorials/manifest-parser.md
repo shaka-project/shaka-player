@@ -219,6 +219,11 @@ index.updateEvery(updateIntervalSeconds, () => {
 });
 ```
 
+If the callback returns null, the update timer for this index will be stopped.
+(NOTE: This method was introduced in v3.0.0, but the interpretation of the
+callback's return changed in v3.0.8 to fix a bug in our DASH SegmentTemplate
+support.  We apologize for any inconvenience.)
+
 
 ## Manifest Updates
 

@@ -1,3 +1,55 @@
+## 3.0.8 (2021-02-08)
+
+Bugfixes:
+  - Fix memory leak in Webpack-bundled version
+    - https://github.com/google/shaka-player/issues/3092
+    - https://github.com/google/shaka-player/pull/3098
+  - Fix build in Python 3
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix broken build in directories with spaces
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix mixed clear/encrypted content on Xbox & Tizen
+    - https://github.com/google/shaka-player/issues/2759
+  - Fix trick mode tracks in DASH (work around compiler bug)
+    - https://github.com/google/shaka-player/issues/3085
+    - https://github.com/google/shaka-player/pull/3087
+  - Fix DRM initialization on WebOS 3.0
+    - https://github.com/google/shaka-player/pull/3109
+  - Fix segment refs for "future" DASH periods
+  - Recognize "m4f" extension in HLS
+    - https://github.com/google/shaka-player/issues/3099
+    - https://github.com/google/shaka-player/pull/3111
+  - Catch unhandled rejection while destroying StreamingEngine
+  - Fix header sizes for MP4 boxes with 64-bit size fields
+  - Fix load-time exception in nodejs
+
+Ads (BETA):
+  - Use the correct AdsLoader `AD_ERROR` event
+    - https://github.com/google/shaka-player/issues/3095
+    - https://github.com/google/shaka-player/pull/3105
+  - Expose getMinSuggestedDuration
+  - Add setVpaidMode to the IMA externs
+    - https://github.com/google/shaka-player/pull/3135
+
+
+## 2.5.20 (2021-02-08)
+
+Bugfixes:
+  - Fix build in Python 3
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix broken build in directories with spaces
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix trick mode tracks in DASH (work around compiler bug)
+    - https://github.com/google/shaka-player/issues/3085
+    - https://github.com/google/shaka-player/pull/3087
+  - Fix DRM initialization on WebOS 3.0
+    - https://github.com/google/shaka-player/pull/3109
+  - Recognize "m4f" extension in HLS
+    - https://github.com/google/shaka-player/issues/3099
+    - https://github.com/google/shaka-player/pull/3111
+  - Fix header sizes for MP4 boxes with 64-bit size fields
+
+
 ## 3.0.7 (2021-01-06)
 
 Bugfixes:
