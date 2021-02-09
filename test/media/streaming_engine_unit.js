@@ -2762,6 +2762,24 @@ describe('StreamingEngine', function() {
       expect(event.detail).toEqual(emsgObj);
     });
 
+    it('raises an event for registered embedded v1 emsg boxes', () => {
+      // same event but verison 1.
+      const v1EmsgSegment = Uint8ArrayUtils.fromHex(
+          '0000003f656d7367010000000000000100000000000000080000ffff00000001' +
+          '666f6f3a6261723a637573746f6d64617461736368656d6500310074657374');
+      segmentData[ContentType.VIDEO].segments[0] = v1EmsgSegment;
+      videoStream1.emsgSchemeIdUris = [emsgObj.schemeIdUri];
+
+      // Here we go!
+      streamingEngine.start();
+      runTest();
+
+      expect(onEvent).toHaveBeenCalledTimes(1);
+
+      const event = onEvent.calls.argsFor(0)[0];
+      expect(event.detail).toEqual(emsgObj);
+    });
+
     it('raises multiple events', function() {
       const dummyBox =
           shaka.util.Uint8ArrayUtils.fromHex('0000000c6672656501020304');
