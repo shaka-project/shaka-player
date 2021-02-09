@@ -471,7 +471,7 @@ describe('StreamUtils', () => {
       fakeDrmEngine = new shaka.test.FakeDrmEngine();
     });
 
-    it('filters text streams with the full MIME type', () => {
+    it('filters text streams with the full MIME type', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(1, (stream) => {
           stream.mimeType = 'text/vtt';
@@ -488,7 +488,8 @@ describe('StreamUtils', () => {
       });
 
       const noVariant = null;
-      shaka.util.StreamUtils.filterManifest(fakeDrmEngine, noVariant, manifest);
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, noVariant, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
