@@ -295,7 +295,7 @@ shaka.extern.BufferedInfo;
  * @property {?number} audioSamplingRate
  *   Specifies the maximum sampling rate of the content.
  * @property {boolean} spatialAudio
- *   True indicates that this in the spatial audio for the content.
+ *   True indicates that the content has spatial audio.
  *   This flag is based on signals from the manifest.
  * @property {?number} audioBandwidth
  *   (only for variant tracks) The audio stream's bandwidth if known.
