@@ -52,6 +52,7 @@
     "stylelint": "github:theodab/stylelint#941a097114756bf2bd8a4d4dff1f659bcc520eb4",
     "stylelint-config-standard": "^20.0.0",
     "tippy.js": "^4.3.1",
+    "ua-parser-js": "github:joeyparrish/ua-parser-js#9d154cc",
     "which": "^1.3.1"
   },
   "main": "dist/shaka-player.compiled.js",
