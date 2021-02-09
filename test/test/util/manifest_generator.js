@@ -519,6 +519,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.channelsCount = null;
       /** @type {?number} */
       this.audioSamplingRate = null;
+      /** @type {boolean} */
+      this.spatialAudio = false;
       /** @type {Map.<string, string>} */
       this.closedCaptions = null;
       /** @type {(string|undefined)} */
