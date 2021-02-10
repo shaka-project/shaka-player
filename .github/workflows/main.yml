@@ -38,8 +38,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./dist/shaka-player-${{ env.RELEASE_VERSION }}.zip
-          asset_name: shaka-player-${{ env.RELEASE_VERSION }}.zip
+          file: ./shaka-player-${{ env.RELEASE_VERSION }}.tgz
+          asset_name: shaka-player-${{ env.RELEASE_VERSION }}.tgz
           tag: ${{ github.ref }}
           overwrite: true
           body: "This is my release text"
