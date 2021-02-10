@@ -138,6 +138,32 @@ filterDescribe('UITextDisplayer layout', Util.supportsScreenshots, () => {
     await Util.checkScreenshot(videoContainer, 'duplicate-cues', threshold);
   });
 
+  // Regression test for #3151
+  // Only one cue should be displayed.  Note, however, that we don't control
+  // this in a browser's native display.  As of Feb 2021, only Firefox does
+  // the right thing in native text display.  Chrome, Edge, and Safari all
+  // show both cues in this edge case.  When we control the display of text
+  // through the UI & DOM, we can always get the timing right.
+  it('cues ending exactly now', async () => {
+    // At time exactly 1, this cue should _not_ be displayed any more.
+    textDisplayer.append([
+      new shaka.text.Cue(0, 1, 'This cue is over and gone.'),
+    ]);
+    // At time exactly 1, this cue should _just_ be starting.
+    textDisplayer.append([
+      new shaka.text.Cue(1, 2, 'This cue is just starting.'),
+    ]);
+
+    // Set the faked time.
+    mockVideo.currentTime = 1;
+
+    // Trigger the display update logic to notice the time change by
+    // appending an empty array.
+    textDisplayer.append([]);
+
+    await Util.checkScreenshot(videoContainer, 'end-time-edge-case', threshold);
+  });
+
   // Regression test for #2524
   it('two nested cues', async () => {
     const cue = new shaka.text.Cue(0, 1, '');
