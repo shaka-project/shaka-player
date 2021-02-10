@@ -32,7 +32,7 @@ jobs:
 
       - name: Zip release files
         run: tar  --transform 's,^,/shaka-player/,' -czf shaka-player-${{ env.RELEASE_VERSION }}.tgz  package.json dist/shaka-player.compiled.debug.js dist/shaka-player.ui.debug.js dist/controls.css dist/shaka-player.compiled.js dist/shaka-player.ui.js
-        working-directory: dist
+        working-directory: ./
 
       - name: Upload Release Asset
         uses: svenstaro/upload-release-action@v2
