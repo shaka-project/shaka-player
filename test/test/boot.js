@@ -96,15 +96,25 @@ function getClientArg(name) {
   // scrollbars through CSS.  This ensures that neither the inner iframe nor the
   // top-level window have scrollbars, which makes screenshots on Safari
   // consistent across versions.
+
   // Disable scrolling on the inner document, the execution context.
   const innerStyle = document.createElement('style');
   innerStyle.innerText = '::-webkit-scrollbar { display: none; }\n';
   innerStyle.innerText += 'body { overflow: hidden }\n';
   document.head.appendChild(innerStyle);
-  // Disable scrolling on the outer document, the host context.
-  const outerStyle = document.createElement('style');
-  outerStyle.innerText = innerStyle.innerText;
-  top.document.head.appendChild(outerStyle);
+
+  try {
+    // Disable scrolling on the outer document, the host context.
+    const outerStyle = document.createElement('style');
+    outerStyle.innerText = innerStyle.innerText;
+    top.document.head.appendChild(outerStyle);
+
+    // eslint-disable-next-line no-restricted-syntax
+  } catch (error) {
+    // On some platforms (Chromecast, Tizen), we are prevented from accessing
+    // the host context, even though it should be in the same origin.  Ignore
+    // errors here, so that the rest of the critical boot sequence can complete.
+  }
 
   // The spec filter callback occurs before calls to beforeAll, so we need to
   // install polyfills here to ensure that browser support is correctly
