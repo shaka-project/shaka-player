@@ -476,6 +476,23 @@ jasmine.Env = function() {};
 
 
 /**
+ * @typedef {{
+ *   random: (boolean|undefined),
+ *   seed: (string|undefined),
+ *   specFilter: (function(jasmine.Spec):boolean|undefined)
+ * }}
+ */
+jasmine.Configuration;
+
+
+/** @param {jasmine.Configuration} config */
+jasmine.Env.prototype.configure = function(config) {};
+
+
+jasmine.Env.prototype.execute = function() {};
+
+
+/**
  * @param {jasmine.Spec} spec
  * @return {boolean}
  */
