@@ -213,6 +213,8 @@ Shaka Player supports:
     - UTF-8 encoding only
   - SubStation Alpha (SSA, ASS)
     - UTF-8 encoding only
+  - SubViewer (SBV)
+    - UTF-8 encoding only
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported

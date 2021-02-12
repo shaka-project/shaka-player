@@ -53,6 +53,7 @@ goog.require('shaka.text.LrcTextParser');
 goog.require('shaka.text.Mp4TtmlParser');
 goog.require('shaka.text.Mp4VttParser');
 goog.require('shaka.text.TextEngine');
+goog.require('shaka.text.SbvTextParser');
 goog.require('shaka.text.SrtTextParser');
 goog.require('shaka.text.SsaTextParser');
 goog.require('shaka.text.TtmlTextParser');
