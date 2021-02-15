@@ -343,6 +343,8 @@ shakaDemo.Config = class {
 
     this.addBoolInput_(MessageIds.JUMP_LARGE_GAPS,
         'streaming.jumpLargeGaps')
+        .addBoolInput_(MessageIds.USE_LARGE_THRESHOLD,
+            'streaming.useLargeThreshold')
         .addBoolInput_(MessageIds.FORCE_TRANSMUX_TS,
             'streaming.forceTransmuxTS')
         .addBoolInput_(MessageIds.START_AT_SEGMENT_BOUNDARY,

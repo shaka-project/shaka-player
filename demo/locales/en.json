@@ -193,6 +193,7 @@
   "DEMO_UNSUPPORTED_NO_OFFLINE": "Your browser does not support offline storage.",
   "DEMO_UPDATE_EXPIRATION_TIME": "Update expiration time",
   "DEMO_UPLYNK": "Verizon Digital Media Services",
+  "DEMO_USE_LARGE_THRESHOLD": "Use large threshold",
   "DEMO_USE_NATIVE_HLS_SAFARI": "Use native HLS on Safari",
   "DEMO_USE_PERSISTENT_LICENSES": "Use Persistent Licenses",
   "DEMO_VIDEO_ROBUSTNESS": "Video Robustness",

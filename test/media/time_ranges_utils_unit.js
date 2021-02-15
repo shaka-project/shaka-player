@@ -90,12 +90,12 @@ describe('TimeRangesUtils', () => {
 
   describe('getGapIndex', () => {
     it('still works when passed null', () => {
-      expect(TimeRangesUtils.getGapIndex(null, 10)).toBe(null);
+      expect(TimeRangesUtils.getGapIndex(null, 10, false)).toBe(null);
     });
 
     it('still works whith nothing buffered', () => {
       const b = createFakeBuffered([]);
-      expect(TimeRangesUtils.getGapIndex(b, 10)).toBe(null);
+      expect(TimeRangesUtils.getGapIndex(b, 10, false)).toBe(null);
     });
 
 
@@ -122,7 +122,8 @@ describe('TimeRangesUtils', () => {
       it(name, () => {
         const b = createFakeBuffered(
             [{start: 10, end: 20}, {start: 30, end: 40}, {start: 50, end: 60}]);
-        expect(TimeRangesUtils.getGapIndex(b, data.time)).toBe(data.expected);
+        const gapIndex = TimeRangesUtils.getGapIndex(b, data.time, false);
+        expect(gapIndex).toBe(data.expected);
       });
     }
   });

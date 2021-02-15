@@ -775,6 +775,10 @@
     "description": "Text that describes an asset that comes from the Verizon Digital Media Services asset library.",
     "message": "[PROPER_NAME:Verizon Digital Media Services]"
   },
+  "DEMO_USE_LARGE_THRESHOLD": {
+    "description": "The name of a configuration value.",
+    "message": "Use large threshold"
+  },
   "DEMO_USE_NATIVE_HLS_SAFARI": {
     "description": "The name of a configuration value.",
     "message": "Use native [PROPER_NAME:HLS] on Safari"

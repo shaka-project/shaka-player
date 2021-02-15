@@ -728,6 +728,7 @@ shaka.extern.ManifestConfiguration;
  *   startAtSegmentBoundary: boolean,
  *   smallGapLimit: number,
  *   jumpLargeGaps: boolean,
+ *   useLargeThreshold: boolean,
  *   durationBackoff: number,
  *   forceTransmuxTS: boolean,
  *   safeSeekOffset: number,
@@ -787,6 +788,8 @@ shaka.extern.ManifestConfiguration;
  *   call <code>preventDefault()</code> on the event, the Player will jump the
  *   gap.  If <code>false</code>, then the event will be raised, but the gap
  *   will not be jumped.
+ * @property {boolean} useLargeThreshold
+ *   If <code>true</code>, jump gaps using a large threshold.
  * @property {number} durationBackoff
  *   By default, we will not allow seeking to exactly the duration of a
  *   presentation.  This field is the number of seconds before duration we will
