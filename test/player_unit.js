@@ -949,6 +949,8 @@ describe('Player', () => {
     let variantTracks;
     /** @type {!Array.<shaka.extern.Track>} */
     let textTracks;
+    /** @type {!Array.<shaka.extern.Track>} */
+    let imageTracks;
 
     beforeEach(async () => {
       // A manifest we can use to test track expectations.
@@ -1065,6 +1067,16 @@ describe('Player', () => {
           stream.mimeType = 'application/ttml+xml';
           stream.kind = 'caption';
           stream.roles = ['commentary'];
+        });
+
+        // Image tracks
+        manifest.addImageStream(53, (stream) => {
+          stream.originalId = 'thumbanil';
+          stream.width = 100;
+          stream.height = 200;
+          stream.bandwidth = 10;
+          stream.mimeType = 'image/jpeg';
+          stream.tilesLayout = '1x1'
         });
       });
 
@@ -1437,6 +1449,42 @@ describe('Player', () => {
         },
       ];
 
+      imageTracks = [
+        {
+          id: 53,
+          active: false,
+          type: ContentType.IMAGE,
+          language: '',
+          label: null,
+          kind: null,
+          mimeType: 'image/jpeg',
+          codecs: null,
+          audioCodec: null,
+          videoCodec: null,
+          primary: false,
+          roles: [],
+          audioRoles: null,
+          forced: false,
+          channelsCount: null,
+          audioSamplingRate: null,
+          tilesLayout: '1x1',
+          audioBandwidth: null,
+          videoBandwidth: null,
+          bandwidth: 10,
+          width: 100,
+          height: 200,
+          frameRate: null,
+          pixelAspectRatio: null,
+          hdr: null,
+          videoId: null,
+          audioId: null,
+          originalAudioId: null,
+          originalVideoId: null,
+          originalTextId: null,
+          originalImageId: 'thumbanil',
+        },
+      ];
+
       goog.asserts.assert(manifest, 'manifest must be non-null');
 
       // Language/channel prefs must be set before load.  Used in
@@ -1455,6 +1503,7 @@ describe('Player', () => {
     it('returns the correct tracks', () => {
       expect(player.getVariantTracks()).toEqual(variantTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
+      expect(player.getImageTracks()).toEqual(imageTracks);
     });
 
     it('returns empty arrays before tracks can be determined', async () => {
@@ -1464,6 +1513,7 @@ describe('Player', () => {
         // The player does not yet have a manifest.
         expect(player.getVariantTracks()).toEqual([]);
         expect(player.getTextTracks()).toEqual([]);
+        expect(player.getImageTracks()).toEqual([]);
 
         parser.playerInterface = playerInterface;
         return Promise.resolve(manifest);
@@ -1473,6 +1523,7 @@ describe('Player', () => {
 
       expect(player.getVariantTracks()).toEqual(variantTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
+      expect(player.getImageTracks()).toEqual(imageTracks);
     });
 
     it('doesn\'t disable AbrManager if switching variants', () => {
