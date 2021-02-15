@@ -1864,6 +1864,92 @@ describe('DashParser Manifest', () => {
     expect(variant.video).toBeTruthy();
   });
 
+  it('parse single representation of image adaptation sets', async () => {
+    const idUri = 'http://dashif.org/guidelines/thumbnail_tile';
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="3" mimeType="audio/mp4">',
+      '      <Representation id="audio-en">',
+      '        <BaseURL>a-en.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet contentType="image" id="3">',
+      '      <SegmentTemplate media="$Number$.jpg" ',
+      '        duration="2" startNumber="1"/>',
+      '      <Representation id="thumbnails" width="1024" height="1152">',
+      '        <EssentialProperty schemeIdUri="' + idUri + '" value="10x20"/>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.imageStreams.length).toBe(1);
+    const imageStream = manifest.imageStreams[0];
+    expect(imageStream.width).toBe(1024);
+    expect(imageStream.height).toBe(1152);
+    expect(imageStream.tilesLayout).toBe('10x20');
+  });
+
+
+  it('parse multiple representation of image adaptation sets', async () => {
+    const idUri = 'http://dashif.org/guidelines/thumbnail_tile';
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="3" mimeType="audio/mp4">',
+      '      <Representation id="audio-en">',
+      '        <BaseURL>a-en.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet contentType="image" id="3">',
+      '      <SegmentTemplate media="$Number$.jpg" ',
+      '        duration="2" startNumber="1"/>',
+      '      <Representation id="thumbnails" width="1024" height="1152">',
+      '        <EssentialProperty schemeIdUri="' + idUri + '" value="10x20"/>',
+      '      </Representation>',
+      '      <Representation id="thumbnails" width="2048" height="1152">',
+      '        <EssentialProperty schemeIdUri="' + idUri + '" value="20x20"/>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.imageStreams.length).toBe(2);
+    const firstImageStream = manifest.imageStreams[0];
+    expect(firstImageStream.width).toBe(1024);
+    expect(firstImageStream.height).toBe(1152);
+    expect(firstImageStream.tilesLayout).toBe('10x20')
+    const secondImageStream = manifest.imageStreams[1];
+    expect(secondImageStream.width).toBe(2048);
+    expect(secondImageStream.height).toBe(1152);
+    expect(secondImageStream.tilesLayout).toBe('20x20')
+  });
+
   // Regression #2650 in v3.0.0
   // A later BaseURL was being applied to earlier Representations, specifically
   // in the context of SegmentTimeline.

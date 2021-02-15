@@ -214,6 +214,22 @@ shaka.test.ManifestGenerator.Manifest = class {
   }
 
   /**
+   * Adds a image stream to the manifest.
+   *
+   * @param {number} id
+   * @param {function(!shaka.test.ManifestGenerator.Stream)=} func
+   */
+  addImageStream(id, func) {
+    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const stream = new shaka.test.ManifestGenerator.Stream(
+        this, /* isPartial= */ false, id, ContentType.IMAGE, 'und');
+    if (func) {
+      func(stream);
+    }
+    this.imageStreams.push(stream.build_());
+  }
+
+  /**
    * Adds a "partial" stream which, when used with jasmine, will only compare
    * the properties that were explicitly given to it.  All other properties will
    * be ignored.

@@ -498,5 +498,34 @@ describe('StreamUtils', () => {
       expect(manifest.textStreams[0].id).toBe(1);
       expect(manifest.textStreams[1].id).toBe(2);
     });
+
+    it('filters image streams', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addImageStream(1, (stream) => {
+          stream.mimeType = 'image/svg+xml';
+        });
+        manifest.addImageStream(2, (stream) => {
+          stream.mimeType = 'image/png';
+        });
+        manifest.addImageStream(3, (stream) => {
+          stream.mimeType = 'image/jpeg';
+        });
+        manifest.addImageStream(4, (stream) => {
+          stream.mimeType = 'image/bogus';
+        });
+      });
+
+      const noVariant = null;
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, noVariant, manifest);
+
+      // Covers a regression in which we would remove streams with codecs.
+      // The last two streams should be removed because their full MIME types
+      // are bogus.
+      expect(manifest.imageStreams.length).toBe(3);
+      expect(manifest.imageStreams[0].id).toBe(1);
+      expect(manifest.imageStreams[1].id).toBe(2);
+      expect(manifest.imageStreams[2].id).toBe(3);
+    });
   });
 });
