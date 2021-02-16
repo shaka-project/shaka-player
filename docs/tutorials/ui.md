@@ -170,6 +170,36 @@ NOTE: Please DO NOT specify both the `src` attribute on the `<video>` tag AND
 a `<source>` tag inside it.
 
 
+#### Programmatic UI setup.
+It is possible to set up the UI programmatically after the page loads.
+(One of the big use cases for this is building Shaka Player into UI frameworks
+that modify the DOM after the page load.)
+
+To create UI without the DOM-based setup, use the `shaka.ui.Overlay`
+constructor.
+
+```js
+// "local" because it is for local playback only, as opposed to the player proxy
+// object, which will route your calls to the ChromeCast receiver as necessary.
+const localPlayer = new shaka.Player(videoElement);
+// "Overlay" because the UI will add DOM elements inside the container,
+// to visually overlay the video element
+const ui = new shaka.ui.Overlay(localPlayer, videoContainerElement,
+  videoElement);
+
+// As with DOM-based setup, get access to the UI controls and player from the
+// UI.
+const controls = ui.getControls();
+
+// These are cast-enabled proxy objects, so that when you are casting,
+// your API calls will be routed to the remote playback session.
+const player = controls.getPlayer();
+const video = controls.getVideo();
+```
+
+
+
+
 #### Continue the Tutorials
 
 Next, check out {@tutorial ui-customization}.
