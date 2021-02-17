@@ -1943,11 +1943,11 @@ describe('DashParser Manifest', () => {
     const firstImageStream = manifest.imageStreams[0];
     expect(firstImageStream.width).toBe(1024);
     expect(firstImageStream.height).toBe(1152);
-    expect(firstImageStream.tilesLayout).toBe('10x20')
+    expect(firstImageStream.tilesLayout).toBe('10x20');
     const secondImageStream = manifest.imageStreams[1];
     expect(secondImageStream.width).toBe(2048);
     expect(secondImageStream.height).toBe(1152);
-    expect(secondImageStream.tilesLayout).toBe('20x20')
+    expect(secondImageStream.tilesLayout).toBe('20x20');
   });
 
   // Regression #2650 in v3.0.0

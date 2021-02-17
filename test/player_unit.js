@@ -1076,7 +1076,7 @@ describe('Player', () => {
           stream.height = 200;
           stream.bandwidth = 10;
           stream.mimeType = 'image/jpeg';
-          stream.tilesLayout = '1x1'
+          stream.tilesLayout = '1x1';
         });
       });
 
