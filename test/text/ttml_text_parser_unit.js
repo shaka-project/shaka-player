@@ -96,6 +96,31 @@ describe('TtmlTextParser', () => {
         jasmine.any(String));
   });
 
+  it('supports xml:space overriding default at span level', () => {
+    const ttBody = '\n' +
+        '  <body><div>\n' +
+        '    <p begin="01:02.03" end="01:02.05">\n' +
+        '      <span xml:space="preserve"> A    B   C  </span>\n' +
+        '    </p>\n' +
+        '  </div></body>\n';
+
+    // When xml:space="preserve", take them into account.
+    verifyHelper(
+        [
+          {
+            startTime: 62.03,
+            endTime: 62.05,
+            nestedCues: [{
+              payload: ' A    B   C  ',
+              startTime: 62.03,
+              endTime: 62.05,
+            }],
+          },
+        ],
+        '<tt>' + ttBody + '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('rejects invalid ttml', () => {
     const anyString = jasmine.any(String);
     errorHelper(shaka.util.Error.Code.INVALID_XML, '<test></test>', anyString);
