@@ -501,6 +501,9 @@ describe('StreamUtils', () => {
   });
 
   describe('chooseCodecsAndFilterManifest', () => {
+    const avc1Codecs = 'avc1.640028';
+    const vp09Codecs = 'vp09.00.40.08.00.02.02.02.00';
+
     const addVariant1080Avc1 = (manifest) => {
       manifest.addVariant(0, (variant) => {
         variant.bandwidth = 5058558;
@@ -509,7 +512,7 @@ describe('StreamUtils', () => {
         });
         variant.addVideo(2, (stream) => {
           stream.bandwidth = 4928560;
-          stream.codecs = 'avc1.640028';
+          stream.codecs = avc1Codecs;
           stream.size(1920, 1080);
         });
       });
@@ -523,7 +526,7 @@ describe('StreamUtils', () => {
         });
         variant.addVideo(5, (stream) => {
           stream.bandwidth = 4781002;
-          stream.codecs = 'vp09.00.40.08.00.02.02.02.00';
+          stream.codecs = vp09Codecs;
           stream.size(1920, 1080);
         });
       });
@@ -537,13 +540,13 @@ describe('StreamUtils', () => {
         });
         variant.addVideo(8, (stream) => {
           stream.bandwidth = 10784324;
-          stream.codecs = 'vp09.00.40.08.00.02.02.02.00';
+          stream.codecs = vp09Codecs;
           stream.size(3840, 2160);
         });
       });
     };
 
-    it('chooses variants with different sizes by codecs', () => {
+    it('chooses variants with different sizes (density) by codecs', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         addVariant1080Avc1(manifest);
         addVariant1080Vp9(manifest);
@@ -553,10 +556,11 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest);
 
       expect(manifest.variants.length).toBe(2);
-      expect(manifest.variants[0].id).toBe(3);
+      expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
+      expect(manifest.variants[1].video.codecs).toBe(vp09Codecs);
     });
 
-    it('chooses variants with same sizes by codecs', () => {
+    it('chooses variants with same sizes (density) by codecs', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         addVariant1080Avc1(manifest);
         addVariant1080Vp9(manifest);
@@ -565,7 +569,7 @@ describe('StreamUtils', () => {
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest);
 
       expect(manifest.variants.length).toBe(1);
-      expect(manifest.variants[0].id).toBe(3);
+      expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
     });
   });
 });
