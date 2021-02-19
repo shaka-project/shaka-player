@@ -568,7 +568,10 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
     const spec = browser.spec;
     // Compute the folder for the screenshots for this platform.
     const baseFolder = `${__dirname}/test/test/assets/screenshots`;
-    const folder = `${baseFolder}/${spec.browserName}-${spec.platform}`;
+    let folder = `${baseFolder}/${spec.browserName}`;
+    if (spec.platform) {
+      folder += `-${spec.platform}`;
+    }
 
     const oldScreenshotPath = `${folder}/${params.name}.png`;
     const fullScreenshotPath = `${folder}/${params.name}.png-full`;

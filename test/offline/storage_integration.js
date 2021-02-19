@@ -1273,6 +1273,44 @@ filterDescribe('Storage', storageSupport, () => {
     });
   });
 
+  describe('deduplication', () => {
+    const testSchemeMimeType = 'application/x-test-manifest';
+    const manifestUri = 'test:sintel';
+
+    // Regression test for https://github.com/google/shaka-player/issues/2781
+    it('does not cache failures or cancellations', async () => {
+      /** @type {shaka.offline.Storage} */
+      const storage = new shaka.offline.Storage();
+
+      try {
+        storage.getNetworkingEngine().registerRequestFilter(
+            (type, request) => {
+              if (type == shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+                throw new Error('Break download!');
+              }
+            });
+
+        const firstOperation = storage.store(
+            manifestUri, noMetadata, testSchemeMimeType);
+        // We killed the operation with a network failure, so this should be
+        // rejected.
+        await expectAsync(firstOperation.promise).toBeRejected();
+
+        // Clear the filter that caused the error.
+        storage.getNetworkingEngine().clearAllRequestFilters();
+
+        // Now we can try again, and it should be able to succeed, even though
+        // some downloads for the same URIs failed in the first attempt.  In
+        // #2781, this would fail because the network failure was cached.
+        const secondOperation = storage.store(
+            manifestUri, noMetadata, testSchemeMimeType);
+        await expectAsync(secondOperation.promise).toBeResolved();
+      } finally {
+        await storage.destroy();
+      }
+    });
+  });
+
   /**
    * @param {number} id
    * @param {number} height
