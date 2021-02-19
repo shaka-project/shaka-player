@@ -36,6 +36,9 @@ describe('DashParser Manifest', () => {
   /** @type {!ArrayBuffer} */
   let mp4Index;
 
+  /** @type {!string} */
+  const thumbnailScheme = 'http://dashif.org/guidelines/thumbnail_tile';
+
   beforeAll(async () => {
     mp4Index = await shaka.test.Util.fetch(mp4IndexSegmentUri);
   });
@@ -1828,7 +1831,6 @@ describe('DashParser Manifest', () => {
   });
 
   it('Does not error when image adaptation sets are present', async () => {
-    const idUri = 'http://dashif.org/guidelines/thumbnail_tile';
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
@@ -1848,7 +1850,7 @@ describe('DashParser Manifest', () => {
       '      <SegmentTemplate media="$Number$.jpg" ',
       '        duration="2" startNumber="1"/>',
       '      <Representation id="thumbnails" width="1024" height="1152">',
-      '        <EssentialProperty schemeIdUri="' + idUri + '" value="10x20"/>',
+      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="10x20"/>`, // eslint-disable-line max-len
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -1865,7 +1867,6 @@ describe('DashParser Manifest', () => {
   });
 
   it('parse single representation of image adaptation sets', async () => {
-    const idUri = 'http://dashif.org/guidelines/thumbnail_tile';
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
@@ -1885,7 +1886,7 @@ describe('DashParser Manifest', () => {
       '      <SegmentTemplate media="$Number$.jpg" ',
       '        duration="2" startNumber="1"/>',
       '      <Representation id="thumbnails" width="1024" height="1152">',
-      '        <EssentialProperty schemeIdUri="' + idUri + '" value="10x20"/>',
+      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="10x20"/>`, // eslint-disable-line max-len
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -1905,7 +1906,6 @@ describe('DashParser Manifest', () => {
 
 
   it('parse multiple representation of image adaptation sets', async () => {
-    const idUri = 'http://dashif.org/guidelines/thumbnail_tile';
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
@@ -1925,10 +1925,10 @@ describe('DashParser Manifest', () => {
       '      <SegmentTemplate media="$Number$.jpg" ',
       '        duration="2" startNumber="1"/>',
       '      <Representation id="thumbnails" width="1024" height="1152">',
-      '        <EssentialProperty schemeIdUri="' + idUri + '" value="10x20"/>',
+      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="10x20"/>`, // eslint-disable-line max-len
       '      </Representation>',
       '      <Representation id="thumbnails" width="2048" height="1152">',
-      '        <EssentialProperty schemeIdUri="' + idUri + '" value="20x20"/>',
+      `        <EssentialProperty schemeIdUri="${thumbnailScheme}" value="20x20"/>`, // eslint-disable-line max-len
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
