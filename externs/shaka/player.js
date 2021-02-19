@@ -1030,23 +1030,23 @@ shaka.extern.LanguageRole;
 /**
  * @typedef {{
  *   height: number,
- *   left: number,
- *   top: number,
+ *   positionX: number,
+ *   positionY: number,
  *   uris: !Array.<string>,
  *   width: number
  * }}
  *
  * @property {number} height
- *    The thumbnail height in percentage.
- * @property {number} left
- *    The thumbnail left position in percentage.
- * @property {number} top
- *    The thumbnail top position in percentage.
+ *    The thumbnail height in px.
+ * @property {number} positionX
+ *    The thumbnail left position in px.
+ * @property {number} positionY
+ *    The thumbnail top position in px.
  * @property {!Array.<string>} uris
  *   An array of URIs to attempt.  They will be tried in the order they are
  *   given.
  * @property {number} width
- *    The thumbnail width in percentage.
+ *    The thumbnail width in px.
  * @exportDoc
  */
 shaka.extern.Thumbnail;
