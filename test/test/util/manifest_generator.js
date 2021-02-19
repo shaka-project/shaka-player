@@ -214,7 +214,7 @@ shaka.test.ManifestGenerator.Manifest = class {
   }
 
   /**
-   * Adds a image stream to the manifest.
+   * Adds an image stream to the manifest.
    *
    * @param {number} id
    * @param {function(!shaka.test.ManifestGenerator.Stream)=} func

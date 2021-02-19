@@ -1037,16 +1037,16 @@ shaka.extern.LanguageRole;
  * }}
  *
  * @property {number} height
- *    The thumnnail height in percentage.
+ *    The thumbnail height in percentage.
  * @property {number} left
- *    The thumnnail left position in percentage.
+ *    The thumbnail left position in percentage.
  * @property {number} top
- *    The thumnnail top position in percentage.
+ *    The thumbnail top position in percentage.
  * @property {!Array.<string>} uris
  *   An array of URIs to attempt.  They will be tried in the order they are
  *   given.
  * @property {number} width
- *    The thumnnail width in percentage.
+ *    The thumbnail width in percentage.
  * @exportDoc
  */
 shaka.extern.Thumbnail;

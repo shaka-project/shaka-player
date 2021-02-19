@@ -1071,7 +1071,7 @@ describe('Player', () => {
 
         // Image tracks
         manifest.addImageStream(53, (stream) => {
-          stream.originalId = 'thumbanil';
+          stream.originalId = 'thumbnail';
           stream.width = 100;
           stream.height = 200;
           stream.bandwidth = 10;
@@ -1481,7 +1481,7 @@ describe('Player', () => {
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: null,
-          originalImageId: 'thumbanil',
+          originalImageId: 'thumbnail',
         },
       ];
 
