@@ -661,12 +661,12 @@ describe('DrmEngine', () => {
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith(
               'com.microsoft.playready.recommendation',
-              jasmine.any(Array)
+              jasmine.any(Array),
           );
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith(
               'com.microsoft.playready',
-              jasmine.any(Array)
+              jasmine.any(Array),
           );
     });
 
@@ -1559,8 +1559,41 @@ describe('DrmEngine', () => {
       mockVideo.setMediaKeys.calls.reset();
       await drmEngine.destroy();
       expect(session1.close).toHaveBeenCalled();
+      expect(session1.remove).not.toHaveBeenCalled();
       expect(session2.close).toHaveBeenCalled();
+      expect(session2.remove).not.toHaveBeenCalled();
       expect(mockVideo.setMediaKeys).toHaveBeenCalledWith(null);
+    });
+
+    it('tears down & removes active persistent sessions', async () => {
+      config.advanced['drm.abc'] = createAdvancedConfig(null);
+      config.advanced['drm.abc'].sessionType = 'persistent-license';
+
+      drmEngine.configure(config);
+
+      await initAndAttach();
+      const initData1 = new Uint8Array(1);
+      const initData2 = new Uint8Array(2);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData1, keyId: null});
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData2, keyId: null});
+
+      const message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
+      session2.on['message']({target: session2, message: message});
+      session2.update.and.returnValue(Promise.resolve());
+
+      await shaka.test.Util.shortDelay();
+      mockVideo.setMediaKeys.calls.reset();
+      await drmEngine.destroy();
+
+      expect(session1.close).toHaveBeenCalled();
+      expect(session1.remove).toHaveBeenCalled();
+
+      expect(session2.close).toHaveBeenCalled();
+      expect(session2.remove).toHaveBeenCalled();
     });
 
     it('swallows errors when closing sessions', async () => {
