@@ -504,6 +504,20 @@ shakaAssets.testAssets = [
         assetKey: '',
       }),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel (live, DASH, Server Side ads)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/tos-ttml/dash.mpd',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setIMAIds({
+        contentSourceId: '',
+        videoId: '',
+        assetKey: '_lDu24IaSYaYAMEfixipNQ',
+      }),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Tears of Steel (multicodec, surround + stereo)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/tos-surround/dash.mpd',
