@@ -246,7 +246,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   roles: !Array.<string>,
  *   forced: boolean,
  *   channelsCount: ?number,
- *   audioSamplingRate: ?number
+ *   audioSamplingRate: ?number,
  *   spatialAudio: boolean,
  *   closedCaptions: Map.<string, string>,
  *   tilesLayout: (string|undefined)

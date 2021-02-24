@@ -1478,6 +1478,7 @@ describe('Player', () => {
           forced: false,
           channelsCount: null,
           audioSamplingRate: null,
+          spatialAudio: false,
           tilesLayout: '1x1',
           audioBandwidth: null,
           videoBandwidth: null,
