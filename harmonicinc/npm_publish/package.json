@@ -1,0 +1,19 @@
+{
+  "name": "@harmonicinc/shaka-player",
+  "version": "3.0.10",
+  "description": "Forked from google/shaka-player by Harmonic Inc.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harmonicinc-com/shaka-player.git"
+  },
+  "author": "",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/harmonicinc-com/shaka-player/issues"
+  },
+  "homepage": "https://github.com/harmonicinc-com/shaka-player#readme"
+}
