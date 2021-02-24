@@ -381,4 +381,73 @@ describe('StreamUtils', function() {
       expect(textStreams[1].id).toBe(2);
     });
   });
+
+  describe('chooseCodecsAndFilterManifest', () => {
+    const avc1Codecs = 'avc1.640028';
+    const vp09Codecs = 'vp09.00.40.08.00.02.02.02.00';
+
+    const addVariant1080Avc1 = (generator) => {
+      generator
+          .addVariant(0)
+            .bandwidth(5058558)
+            .addAudio(1)
+              .bandwidth(129998)
+            .addVideo(2)
+              .bandwidth(4928560)
+              .mime('video/mp4', avc1Codecs)
+              .size(1920, 1080);
+    };
+
+    const addVariant1080Vp9 = (generator) => {
+      generator
+          .addVariant(3)
+            .bandwidth(4911000)
+            .addAudio(4)
+              .bandwidth(129998)
+            .addVideo(5)
+              .bandwidth(4781002)
+              .mime('video/mp4', vp09Codecs)
+              .size(1920, 1080);
+    };
+
+    const addVariant2160Vp9 = (generator) => {
+      generator
+          .addVariant(6)
+            .bandwidth(10850316)
+            .addAudio(7)
+              .bandwidth(129998)
+            .addVideo(8)
+              .bandwidth(10784324)
+              .mime('video/mp4', vp09Codecs)
+              .size(3840, 2160);
+    };
+
+    it('chooses variants with different sizes (density) by codecs', () => {
+      const generator = new shaka.test.ManifestGenerator();
+      generator.addPeriod(0);
+      addVariant1080Avc1(generator);
+      addVariant1080Vp9(generator);
+      addVariant2160Vp9(generator);
+      manifest = generator.build();
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2);
+
+      expect(manifest.periods[0].variants.length).toBe(2);
+      expect(manifest.periods[0].variants[0].video.codecs).toBe(vp09Codecs);
+      expect(manifest.periods[0].variants[1].video.codecs).toBe(vp09Codecs);
+    });
+
+    it('chooses variants with same sizes (density) by codecs', () => {
+      const generator = new shaka.test.ManifestGenerator();
+      generator.addPeriod(0);
+      addVariant1080Avc1(generator);
+      addVariant1080Vp9(generator);
+      manifest = generator.build();
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2);
+
+      expect(manifest.periods[0].variants.length).toBe(1);
+      expect(manifest.periods[0].variants[0].video.codecs).toBe(vp09Codecs);
+    });
+  });
 });
