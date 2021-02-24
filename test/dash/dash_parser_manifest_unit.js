@@ -476,6 +476,30 @@ describe('DashParser Manifest', () => {
     expect(stream.mimeType).toBe('audio/eac3-joc');
   });
 
+  it('Detects spatial audio', async () => {
+    const idUri = 'tag:dolby.com,2018:dash:EC3_ExtensionType:2018';
+    const source = [
+      '<MPD>',
+      '  <Period duration="PT30M">',
+      '    <AdaptationSet mimeType="audio/mp4" lang="\u2603">',
+      '      <Representation bandwidth="500">',
+      '        <SupplementalProperty schemeIdUri="' + idUri + '" value="JOC"/>',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="2.mp4" duration="1" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', source);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const stream = manifest.variants[0].audio;
+    expect(stream.spatialAudio).toBe(true);
+  });
+
   it('correctly parses CEA-608 closed caption tags without channel numbers',
       async () => {
         const source = [

@@ -199,6 +199,7 @@ describe('AdaptationSet', () => {
     return {
       audioSamplingRate: null,
       channelsCount: channelsCount,
+      spatialAudio: false,
       closedCaptions: null,
       codecs: codecs.join(','),
       createSegmentIndex: () => Promise.resolve(),

@@ -169,8 +169,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       const message = await waitForUpdateMessage();
       // Check that the update message is of a reasonable size. From previous
       // testing we found that the socket would silently reject data that got
-      // too big. 5KB is safely below the limit.
-      expect(message.length).toBeLessThan(5 * 1024);
+      // too big. 6KB is safely below the limit.
+      expect(message.length).toBeLessThan(6 * 1024);
     });
 
     drmIt('has reasonable average message size', async () => {

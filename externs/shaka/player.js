@@ -222,6 +222,7 @@ shaka.extern.BufferedInfo;
  *   tilesLayout: ?string,
  *   audioBandwidth: ?number,
  *   videoBandwidth: ?number,
+ *   spatialAudio: boolean,
  *   originalVideoId: ?string,
  *   originalAudioId: ?string,
  *   originalTextId: ?string,
@@ -300,6 +301,9 @@ shaka.extern.BufferedInfo;
  *   The value is a grid-item-dimension consisting of two positive decimal
  *   integers in the format: column-x-row ('4x3'). It describes the arrangement
  *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {boolean} spatialAudio
+ *   True indicates that the content has spatial audio.
+ *   This flag is based on signals from the manifest.
  * @property {?number} audioBandwidth
  *   (only for variant tracks) The audio stream's bandwidth if known.
  * @property {?number} videoBandwidth
