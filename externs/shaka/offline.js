@@ -119,6 +119,7 @@ shaka.extern.ManifestDB;
  *   forced: boolean,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
+ *   spatialAudio: boolean,
  *   closedCaptions: Map.<string, string>
  * }}
  *
@@ -167,7 +168,9 @@ shaka.extern.ManifestDB;
  * @property {?number} channelsCount
  *   The channel count information for the audio stream.
  * @property {?number} audioSamplingRate
- *   Specifies the maximum sampling rate of the content.
+ *   Specifies the maximum sampling rate of the content
+ * @property {boolean} spatialAudio
+ *   Whether the stream set has spatial audio.
  * @property {Map.<string, string>} closedCaptions
  *   A map containing the description of closed captions, with the caption
  *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code

@@ -221,6 +221,7 @@ shaka.extern.BufferedInfo;
  *   audioSamplingRate: ?number,
  *   audioBandwidth: ?number,
  *   videoBandwidth: ?number,
+ *   spatialAudio: boolean,
  *   originalVideoId: ?string,
  *   originalAudioId: ?string,
  *   originalTextId: ?string
@@ -293,6 +294,9 @@ shaka.extern.BufferedInfo;
  *   The count of the audio track channels.
  * @property {?number} audioSamplingRate
  *   Specifies the maximum sampling rate of the content.
+ * @property {boolean} spatialAudio
+ *   True indicates that the content has spatial audio.
+ *   This flag is based on signals from the manifest.
  * @property {?number} audioBandwidth
  *   (only for variant tracks) The audio stream's bandwidth if known.
  * @property {?number} videoBandwidth
