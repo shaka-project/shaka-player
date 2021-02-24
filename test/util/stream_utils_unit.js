@@ -553,7 +553,7 @@ describe('StreamUtils', () => {
         addVariant2160Vp9(manifest);
       });
 
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest);
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2);
 
       expect(manifest.variants.length).toBe(2);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
@@ -566,7 +566,7 @@ describe('StreamUtils', () => {
         addVariant1080Vp9(manifest);
       });
 
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest);
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2);
 
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
