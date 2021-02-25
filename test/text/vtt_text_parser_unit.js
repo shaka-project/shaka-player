@@ -817,6 +817,116 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports class with default color', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20, endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: 'Test',
+                color: '#FF0',
+              },
+            ],
+          },
+          {
+            startTime: 40, endTime: 50,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 40,
+                endTime: 50,
+                payload: 'Test2',
+                color: '#0FF',
+                backgroundColor: '#00F',
+              },
+            ],
+          },
+          {
+            startTime: 50, endTime: 60,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 50,
+                endTime: 60,
+                payload: 'Test 3',
+                color: '#F0F',
+                backgroundColor: '#000',
+              },
+            ],
+          },
+          {
+            startTime: 60,
+            endTime: 70,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: 'First row',
+              },
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: 'Test4.1',
+                color: '#FF0',
+              },
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: '',
+                lineBreak: true,
+              },
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: 'Second row',
+              },
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: 'Test4.2',
+                color: '#00F',
+              },
+            ],
+          },
+          {
+            startTime: 70,
+            endTime: 80,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 70,
+                endTime: 80,
+                payload: 'Test5.1',
+                color: '#F00',
+              },
+              {
+                startTime: 70,
+                endTime: 80,
+                payload: 'Test5.2',
+                color: '#0F0',
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '<c.yellow>Test</c>\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        '<c.cyan.bg_blue>Test2</c>\n\n' +
+        '00:00:50.000 --> 00:01:00.000\n' +
+        '<c.yellow.bg_blue.magenta.bg_black>Test 3</c>\n\n' +
+        '00:01:00.000 --> 00:01:10.000\n' +
+        'First row<c.yellow>Test4.1</c>\nSecond row<c.blue>Test4.2</c>\n\n' +
+        '00:01:10.000 --> 00:01:20.000\n' +
+        '<c.red>Test5.1<c.lime>Test5.2</c></c>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
 
   /**
    * @param {!Array} cues
