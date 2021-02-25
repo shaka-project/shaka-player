@@ -69,8 +69,13 @@ const ShakaDemoAssetInfo = class {
     this.extraConfig = null;
     /** @type {?string} */
     this.adTagUri = null;
-    /** @type {?shakaAssets.IMAIds} */
-    this.imaIds = null;
+    /** @type {?string} */
+    this.imaVideoId = null;
+    /** @type {?string} */
+    this.imaAssetKey = null;
+    /** @type {?string} */
+    this.imaContentSrcId = null;
+
 
     // Offline storage values.
     /** @type {?function()} */
@@ -202,12 +207,41 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {shakaAssets.IMAIds} imaIds
+   * @param {string} id
    * @return {!ShakaDemoAssetInfo}
    */
-  setIMAIds(imaIds) {
-    this.imaIds = imaIds;
-    this.addFeature(shakaAssets.Feature.ADS);
+  setIMAContentSourceId(id) {
+    this.imaContentSrcId = id;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} id
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setIMAVideoId(id) {
+    this.imaVideoId = id;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} key
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setIMAAssetKey(key) {
+    this.imaAssetKey = key;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
     return this;
   }
 
