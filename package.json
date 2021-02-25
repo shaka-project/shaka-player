@@ -32,7 +32,7 @@
     "jasmine-ajax": "^4.0.0",
     "jimp": "^0.11.0",
     "jsdoc": "github:joeyparrish/jsdoc#45c271fa",
-    "karma": "^5.1.1",
+    "karma": "^6.1.1",
     "karma-babel-preprocessor": "^7.0.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage": "^1.1.2",
