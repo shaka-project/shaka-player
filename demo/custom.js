@@ -244,11 +244,11 @@ shakaDemo.Custom = class {
    * @return {!Element} div
    * @private
    */
-  makeAssetDialogContentsMisc_(assetInProgress, inputsToCheck) {
-    const miscDiv = document.createElement('div');
+  makeAssetDialogContentsAds_(assetInProgress, inputsToCheck) {
+    const adsDiv = document.createElement('div');
     const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
     const container = new shakaDemo.InputContainer(
-        miscDiv, /* headerText= */ null, containerStyle,
+        adsDiv, /* headerText= */ null, containerStyle,
         /* docLink= */ null);
 
     // Make the ad tag URL field.
@@ -265,7 +265,49 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, adTagURLName, adTagSetup, adTagOnChange);
 
-    return miscDiv;
+    // Make the content source id field.
+    const contentSrcIdSetup = (input, container) => {
+      if (assetInProgress.imaContentSrcId) {
+        input.value = assetInProgress.imaContentSrcId;
+      }
+    };
+    const contentSrcIdOnChange = (input) => {
+      assetInProgress.imaContentSrcId = input.value;
+    };
+    const contentSrcIdName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_CONTENT_SRC_ID);
+    this.makeField_(
+        container, contentSrcIdName, contentSrcIdSetup, contentSrcIdOnChange);
+
+    // Make the video id field.
+    const videoIdSetup = (input, container) => {
+      if (assetInProgress.imaVideoId) {
+        input.value = assetInProgress.imaVideoId;
+      }
+    };
+    const videoIdOnChange = (input) => {
+      assetInProgress.imaVideoId = input.value;
+    };
+    const videoIdName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_VIDEO_ID);
+    this.makeField_(
+        container, videoIdName, videoIdSetup, videoIdOnChange);
+
+    // Make the asset key field.
+    const assetKeySetup = (input, container) => {
+      if (assetInProgress.imaAssetKey) {
+        input.value = assetInProgress.imaAssetKey;
+      }
+    };
+    const assetKeyChange = (input) => {
+      assetInProgress.imaAssetKey = input.value;
+    };
+    const assetKeyName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_ASSET_KEY);
+    this.makeField_(
+        container, assetKeyName, assetKeySetup, assetKeyChange);
+
+    return adsDiv;
   }
 
   /**
@@ -522,7 +564,7 @@ shakaDemo.Custom = class {
         assetInProgress, inputsToCheck);
     const headersDiv = this.makeAssetDialogContentsHeaders_(
         assetInProgress, inputsToCheck);
-    const miscDiv = this.makeAssetDialogContentsMisc_(
+    const adsDiv = this.makeAssetDialogContentsAds_(
         assetInProgress, inputsToCheck);
     const finishDiv = this.makeAssetDialogContentsFinish_(
         assetInProgress, inputsToCheck);
@@ -560,14 +602,14 @@ shakaDemo.Custom = class {
     addTabButton(
         shakaDemo.MessageIds.HEADERS_TAB, headersDiv, /* startOn= */ false);
     addTabButton(
-        shakaDemo.MessageIds.MISC_TAB, miscDiv, /* startOn= */ false);
+        shakaDemo.MessageIds.ADS_TAB, adsDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
     this.dialog_.appendChild(tabDiv);
     this.dialog_.appendChild(mainDiv);
     this.dialog_.appendChild(drmDiv);
     this.dialog_.appendChild(headersDiv);
-    this.dialog_.appendChild(miscDiv);
+    this.dialog_.appendChild(adsDiv);
     this.dialog_.appendChild(finishDiv);
     this.dialog_.appendChild(iconDiv);
 

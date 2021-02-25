@@ -11,13 +11,17 @@
     "description": "A tag that marks an asset as having one or more advertisements.",
     "message": "Ads"
   },
+  "DEMO_ADS_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Ads"
+  },
   "DEMO_AD_SEARCH": {
     "description": "A tooltip for an optional search term.",
     "message": "Filters for assets that have advertisements."
   },
   "DEMO_AD_TAG_URL": {
-    "message": "Ad Tag URL",
-    "description": "The label on a field that allows users to provide a Ad Tag URL for a custom asset."
+    "description": "The label on a field that allows users to provide a Ad Tag URL for a custom asset.",
+    "message": "Ad Tag URL"
   },
   "DEMO_ALL_CONTENT": {
     "description": "A link in the header, that switches to a page for browsing or searching through the entire content library.",
@@ -311,6 +315,18 @@
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures"
   },
+  "DEMO_IMA_ASSET_KEY": {
+    "description": "The label on a field that allows users to provide an asset key for a custom asset.",
+    "message": "Asset key (for LIVE DAI Content)"
+  },
+  "DEMO_IMA_CONTENT_SRC_ID": {
+    "description": "The label on a field that allows users to provide a content source id for a custom asset.",
+    "message": "Asset key (for VOD DAI Content)"
+  },
+  "DEMO_IMA_VIDEO_ID": {
+    "description": "The label on a field that allows users to provide a video id for a custom asset.",
+    "message": "Video ID (for VOD DAI Content)"
+  },
   "DEMO_USE_FULL_SEGMENTS_FOR_START_TIME": {
     "description": "The name of a configuration value.",
     "message": "Use Full Segments For Start Time"
@@ -478,10 +494,6 @@
   "DEMO_MIN_WIDTH": {
     "description": "The name of a configuration value.",
     "message": "Min Width"
-  },
-  "DEMO_MISC_TAB": {
-    "description": "The header for a tab within the custom asset creation dialog.",
-    "message": "Misc"
   },
   "DEMO_MP2TS": {
     "description": "Text that describes an asset that uses the MPEG-2 TS container.",
