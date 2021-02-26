@@ -5,14 +5,17 @@ These projects are intended to be good starting projects for new Shaka Player
 contributors, to complete relatively independently in a few weeks. Familiarity 
 with Javascript or Python will be helpful, but not required.
 
+To start, checkout our [demo][] and [tutorial][] page.
+
+If you have any questions, you can either post on our [Github][] page, or
+discuss with us via the [mailing list][], [Slack chanel][], or with the GSoC
+[mentor][].
+
 If you're interested in contributing to Shaka Player through Google Summer of 
 Code 2021 for other ideas or projects, please see our 
-[enhancement list][] and [roadmap][], and let us know via 
-[email](mailto:michellezhuo@google.com) or [Github page][]!
+[enhancement list][] and [roadmap][], and let us know email or [Github][]!
 
-
-
-## Shaka Player UI Library projects
+## Shaka Player UI Library Projects
 
 **Shaka Player** is an open-source JavaScript library for adaptive media. It 
 plays adaptive media formats (such as DASH and HLS) in a browser, without using 
@@ -36,11 +39,15 @@ layer for the applications. It is an alternate bundle from the base Shaka Player
 [Google Summer of Code 2021]:https://summerofcode.withgoogle.com/
 [enhancement list]:https://github.com/google/shaka-player/issues?q=is%3Aopen+is%3Aissue+label%3A%22contributions+welcome%22
 [roadmap]:https://github.com/google/shaka-player/blob/master/roadmap.md
-[Github page]:https://github.com/google/shaka-player
+[Github]:https://github.com/google/shaka-player
+[demo]:https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled
+[tutorial]:https://nightly-dot-shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html
+[mailing list]:https://groups.google.com/g/shaka-player-gsoc
+[Slack chanel]:https://app.slack.com/client/T0XKDDFM0/C01QRAFHLQK
+[mentor]:mailto:michellezhuo@google.com
 
 
-
-### Add close button to the UI library 
+### Add Close Button to the UI Library
 
 Estimated complexity: easy
 
@@ -57,9 +64,11 @@ for reference.
 
 ![Close button](https://user-images.githubusercontent.com/31563237/71356283-c479f000-2592-11ea-80aa-c0ff6992c001.png)
 
-[Shaka Demo page]: https://shaka-player-demo.appspot.com/demo/#audiolang=ru-RU;textlang=ru-RU;uilang=ru-RU;asset=https://storage.googleapis.com/shaka-demo-assets/sintel-widevine/dash.mpd;panel=HOME;build=compiled
+[Shaka Demo page]:https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled
+
 [implementation]:https://github.com/google/shaka-player/blob/master/demo/close_button.js
 
+[Github Issue](https://github.com/google/shaka-player/issues/2316)
 
 
 ### Add Overflow Menu Buttons to the UI Control Panel
@@ -90,9 +99,10 @@ placing them wherever the application developers want.
 ![Overflow menu]( 
 https://user-images.githubusercontent.com/28269801/109266388-dec5e400-77bc-11eb-9ac8-dda3dac53bf4.png)
 
+[Github Issue](https://github.com/google/shaka-player/issues/2676)
 
 
-### Add Video Stats panel in UI
+### Add Video Stats Panel in UI
 
 Estimated complexity: medium
 
@@ -108,55 +118,84 @@ This project involves:
 ![Stats panel1](https://user-images.githubusercontent.com/8983024/83487168-d305f500-a4aa-11ea-8c7b-8d6d7dbde65b.png)
 ![Stats panel2](https://user-images.githubusercontent.com/8983024/83487122-bcf83480-a4aa-11ea-9f46-2a489f128c7d.png)
 
+[Github Issue](https://github.com/google/shaka-player/issues/2607)
 
 
-## Shaka Streamer projects
+## Shaka Streamer Projects
 
 [Shaka Streamer](https://github.com/google/shaka-streamer) offers a simple 
 config-file based approach to preparing streaming media. It greatly simplifies 
 the process of using FFmpeg and Shaka Packager for both VOD and live content.
+
+Shaka Streamer connects FFmpeg and Shaka Packager in a pipeline, such that 
+output from FFmpeg is piped directly into the packager, and packaging and 
+transcoding of all resolutions, bitrates, and languages occur in parallel.
 
 Live documentation can be found 
 [here](https://google.github.io/shaka-streamer/).
 
 
 
-### Support concatenation of inputs
+### Support Concatenation of Inputs
 
 Estimated complexity: hard
 
 Languages: Python
 
-We’ll allow Shaka Streamer to transfer a xml/json file with a list of media
-files, stitch the multiple inputs together, and convert the media file to m3u8 or mpd playlist in turn as a continuous output.
+We’ll allow Shaka Streamer to take a new input type with a list of media files,
+stitch the multiple media files together, and convert them to a m3u8 or mpd
+playlist as a continuous output.
  
-For example, the input xml/json file is:
+For example, the input config can be:
 ```json
-{
-  "input_config": "input.yaml",
-  "pipeline_config": "pipeline.yaml",
-  "files": [
-  {
-    "source": "file1.mp4"
-  },
-  {
-    "source": "file2.mp4"
-  },
-  {
-    "source": "file3.mp4"
-  }
-  ]
-}
+inputs:
+    # The type of input.
+  - input_type: concat
+    # The media type is required at this level only.
+    media_type: video
+    list:
+      # These only need to have "name" attributes.
+      -name: foo1.mp4
+      -name: foo2.mp4
+       is_interlaced: True  # If you have an interlaced source in the list
+
+    # The type of input.
+  - input_type: concat
+    # The media type is required at this level only.
+    media_type: audio
+    language: "de"
+    list:
+      # These only need to have "name" attributes.
+      -name: foo1.mp4
+      -name: foo2.mp4
+       track_num: 2  # If the 0th audio track is not the one you want here...
+
 ```
-At the output, we will get an hls / dash playlist.
+At the output, we will get an hls / dash playlist, with the three media sources 
+stitched together.
+
+There are several ways to concatenate things in ffmpeg, with various
+limitations.
+1. Concat demuxer (same codecs, same time base, "etc" (ffmpeg doc is vague))
+2. Concat protocol (same file format, only concatenateable formats like TS
+   supported, analogous to "cat" command)
+3. Concat filter (same resolution required, otherwise no restrictions)
+4. External ffmpeg process (pre-encoding everything to match parameters first,
+then streaming it as one stream)
+
+[Github Issue](https://github.com/google/shaka-streamer/issues/43)
 
 
-
-### Add support for audio codecs
+### Add Support for More Audio Codecs
 
 Estimated complexity: medium
 
 Languages: Python
 
-Currently Shaka Streamer only supports video codecs, and we’ll expand our 
-support for audio codecs, ac-3 and ec-3.
+Currently Shaka Streamer supports a few video and audio codecs, and we’ll expand
+ our support for the audio codecs of [ac-3][] and [ec-3][].
+
+[ac-3]: https://en.wikipedia.org/wiki/Dolby_Digital
+[ec-3]: https://en.wikipedia.org/wiki/Dolby_Digital_Plus
+
+[Github Issue](https://github.com/google/shaka-streamer/issues/37)
