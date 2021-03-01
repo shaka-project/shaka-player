@@ -110,7 +110,7 @@
   "DEMO_MANIFEST_SEARCH": "Manifest",
   "DEMO_MANIFEST_SECTION_HEADER": "Manifest",
   "DEMO_MANIFEST_URL": "Manifest URL",
-  "DEMO_MANIFEST_URL_ERROR": "Must have a manifest URL.",
+  "DEMO_MANIFEST_URL_ERROR": "Must have a manifest URL, or IMA DAI id fields",
   "DEMO_MAX_ATTEMPTS": "Max Attempts",
   "DEMO_MAX_BANDWIDTH": "Max Bandwidth",
   "DEMO_MAX_FRAMERATE": "Max Framerate",

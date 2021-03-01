@@ -444,8 +444,8 @@
     "message": "Manifest URL"
   },
   "DEMO_MANIFEST_URL_ERROR": {
-    "description": "An error that is displayed if the user does not provide a manifest URL for a custom asset.",
-    "message": "Must have a manifest URL."
+    "description": "An error that is displayed if the user does not provide a manifest URL for a custom asset or identification fields in the Google Ad Manager system.",
+    "message": "Must have a manifest URL, or IMA DAI id fields."
   },
   "DEMO_MAX_ATTEMPTS": {
     "description": "The name of a configuration value.",
