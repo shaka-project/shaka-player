@@ -120,7 +120,8 @@ shaka.extern.ManifestDB;
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
  *   spatialAudio: boolean,
- *   closedCaptions: Map.<string, string>
+ *   closedCaptions: Map.<string, string>,
+ *   tilesLayout: (string|undefined)
  * }}
  *
  * @property {number} id
@@ -168,7 +169,7 @@ shaka.extern.ManifestDB;
  * @property {?number} channelsCount
  *   The channel count information for the audio stream.
  * @property {?number} audioSamplingRate
- *   Specifies the maximum sampling rate of the content
+ *   Specifies the maximum sampling rate of the content.
  * @property {boolean} spatialAudio
  *   Whether the stream set has spatial audio.
  * @property {Map.<string, string>} closedCaptions
@@ -177,6 +178,10 @@ shaka.extern.ManifestDB;
  *   as the value. If the channel number is not provided by the description,
  *   we'll set an 0-based index as the key.
  *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
+ * @property {(string|undefined)} tilesLayout
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the arrangement
+ *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
  */
 shaka.extern.StreamDB;
 

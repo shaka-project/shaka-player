@@ -15,6 +15,7 @@
  *   presentationTimeline: !shaka.media.PresentationTimeline,
  *   variants: !Array.<shaka.extern.Variant>,
  *   textStreams: !Array.<shaka.extern.Stream>,
+ *   imageStreams: !Array.<shaka.extern.Stream>,
  *   offlineSessionIds: !Array.<string>,
  *   minBufferTime: number
  * }}
@@ -60,6 +61,9 @@
  * @property {!Array.<shaka.extern.Stream>} textStreams
  *   <i>Required.</i> <br>
  *   The presentation's text streams.
+ * @property {!Array.<shaka.extern.Stream>} imageStreams
+ *   <i>Required.</i> <br>
+ *   The presentation's image streams
  * @property {!Array.<string>} offlineSessionIds
  *   <i>Defaults to [].</i> <br>
  *   An array of EME sessions to load for offline playback.
@@ -244,7 +248,8 @@ shaka.extern.CreateSegmentIndexFunction;
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
  *   spatialAudio: boolean,
- *   closedCaptions: Map.<string, string>
+ *   closedCaptions: Map.<string, string>,
+ *   tilesLayout: (string|undefined)
  * }}
  *
  * @description
@@ -346,6 +351,11 @@ shaka.extern.CreateSegmentIndexFunction;
  *   as the value. If the channel number is not provided by the description,
  *   we'll set an 0-based index as the key.
  *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
+ * @property {(string|undefined)} tilesLayout
+ *   <i>Image streams only.</i> <br>
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the arrangement
+ *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
  * @exportDoc
  */
 shaka.extern.Stream;

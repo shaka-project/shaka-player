@@ -1347,11 +1347,13 @@ filterDescribe('Storage', storageSupport, () => {
       channelsCount: 2,
       audioSamplingRate: 48000,
       spatialAudio: false,
+      tilesLayout: null,
       audioBandwidth: bandwidth * 0.33,
       videoBandwidth: bandwidth * 0.67,
       originalVideoId: videoId.toString(),
       originalAudioId: audioId.toString(),
       originalTextId: null,
+      originalImageId: null,
     };
   }
 
@@ -1387,11 +1389,13 @@ filterDescribe('Storage', storageSupport, () => {
       channelsCount: null,
       audioSamplingRate: null,
       spatialAudio: false,
+      tilesLayout: null,
       audioBandwidth: null,
       videoBandwidth: null,
       originalVideoId: null,
       originalAudioId: null,
       originalTextId: id.toString(),
+      originalImageId: null,
     };
   }
 

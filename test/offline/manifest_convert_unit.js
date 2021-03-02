@@ -365,6 +365,7 @@ describe('ManifestConverter', () => {
       audioSamplingRate: null,
       spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -413,6 +414,7 @@ describe('ManifestConverter', () => {
       audioSamplingRate: null,
       spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -460,6 +462,7 @@ describe('ManifestConverter', () => {
       audioSamplingRate: null,
       spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -504,6 +507,7 @@ describe('ManifestConverter', () => {
       audioSamplingRate: streamDb.audioSamplingRate,
       spatialAudio: streamDb.spatialAudio,
       closedCaptions: streamDb.closedCaptions,
+      tilesLayout: streamDb.tilesLayout,
     };
 
     expect(stream).toEqual(expectedStream);

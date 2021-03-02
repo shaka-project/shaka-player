@@ -211,6 +211,10 @@
     "description": "The name of a configuration value.",
     "message": "Disable Text"
   },
+  "DEMO_DISABLE_THUMBNAILS": {
+    "description": "The name of a configuration value.",
+    "message": "Disable Thumbnails"
+  },
   "DEMO_DISABLE_VIDEO": {
     "description": "The name of a configuration value.",
     "message": "Disable Video"
@@ -706,6 +710,10 @@
   "DEMO_TEXT_LANGUAGE": {
     "description": "The name of a configuration value.",
     "message": "Preferred Text Language"
+  },
+  "DEMO_THUMBNAILS": {
+    "description": "Text that describes an asset that has a thumbnail stream.",
+    "message": "Thumbnails"
   },
   "DEMO_TIMEOUT": {
     "description": "The name of a configuration value.",
