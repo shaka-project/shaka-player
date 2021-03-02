@@ -1253,7 +1253,7 @@ shakaDemo.Main = class {
       }
       // If it's a server side dai asset, request ad-containing manifest
       // from the ad manager.
-      if (asset.imaIds) {
+      if (asset.imaAssetKey || (asset.imaContentSrcId && asset.imaVideoId)) {
         manifestUri = await this.getManifestUriFromAdManager_(asset);
       }
       await this.player_.load(manifestUri);
@@ -1478,9 +1478,6 @@ shakaDemo.Main = class {
    * @private
    */
   async getManifestUriFromAdManager_(asset) {
-    goog.asserts.assert(asset.imaIds != null,
-        'Asset should have imaIds!');
-
     const adManager = this.player_.getAdManager();
     const container = this.controls_.getServerSideAdContainer();
     try {
@@ -1489,15 +1486,17 @@ shakaDemo.Main = class {
       goog.asserts.assert(this.video_ != null, 'Video should not be null!');
       adManager.initServerSide(container, this.video_);
       let request;
-      if (asset.imaIds.assetKey.length) {
+      if (asset.imaAssetKey != null) {
         // LIVE stream
         request = new google.ima.dai.api.LiveStreamRequest();
-        request.assetKey = asset.imaIds.assetKey;
+        request.assetKey = asset.imaAssetKey;
       } else {
+        goog.asserts.assert(asset.imaContentSrcId != null &&
+            asset.imaVideoId != null, 'Asset should have ima ids!');
         // VOD
         request = new google.ima.dai.api.VODStreamRequest();
-        request.contentSourceId = asset.imaIds.contentSourceId;
-        request.videoId = asset.imaIds.videoId;
+        request.contentSourceId = asset.imaContentSrcId;
+        request.videoId = asset.imaVideoId;
       }
 
       const uri = await adManager.requestServerSideStream(
