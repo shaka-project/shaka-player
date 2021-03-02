@@ -691,7 +691,7 @@ shaka.extern.HlsManifestConfiguration;
  *   disableAudio: boolean,
  *   disableVideo: boolean,
  *   disableText: boolean,
- *   disableImage: boolean,
+ *   disableThumbnails: boolean,
  *   defaultPresentationDelay: number,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
@@ -713,7 +713,7 @@ shaka.extern.HlsManifestConfiguration;
  * @property {boolean} disableText
  *   If <code>true</code>, the text tracks are ignored.
  *   Defaults to <code>false</code>.
- * @property {boolean} disableImage
+ * @property {boolean} disableThumbnails
  *   If <code>true</code>, the image tracks are ignored.
  *   Defaults to <code>false</code>.
  * @property {number} defaultPresentationDelay

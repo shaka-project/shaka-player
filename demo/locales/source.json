@@ -203,13 +203,13 @@
     "description": "The name of a configuration value.",
     "message": "Disable Audio"
   },
-  "DEMO_DISABLE_IMAGE": {
-    "description": "The name of a configuration value.",
-    "message": "Disable Image"
-  },
   "DEMO_DISABLE_TEXT": {
     "description": "The name of a configuration value.",
     "message": "Disable Text"
+  },
+  "DEMO_DISABLE_THUMBNAILS": {
+    "description": "The name of a configuration value.",
+    "message": "Disable Thumbnails"
   },
   "DEMO_DISABLE_VIDEO": {
     "description": "The name of a configuration value.",
