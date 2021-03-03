@@ -663,12 +663,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   showAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
+    shaka.ui.Utils.setDisplay(this.clientAdContainer_, true);
     this.controlsContainer_.setAttribute('ad-active', 'true');
   }
 
   /** @export */
   hideAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
+    shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
     this.controlsContainer_.removeAttribute('ad-active');
   }
 
@@ -947,6 +949,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
+    shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
     this.videoContainer_.appendChild(this.clientAdContainer_);
   }
 
