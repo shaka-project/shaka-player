@@ -912,6 +912,18 @@ describe('VttTextParser', () => {
               },
             ],
           },
+          {
+            startTime: 80,
+            endTime: 90,
+            payload: '<b><c.lime>Parse fail 1</b></c>',
+            nestedCues: [],
+          },
+          {
+            startTime: 90,
+            endTime: 100,
+            payload: '<c.lime><b>Parse fail 2</c></b>',
+            nestedCues: [],
+          },
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
@@ -923,10 +935,39 @@ describe('VttTextParser', () => {
         '00:01:00.000 --> 00:01:10.000\n' +
         'First row<c.yellow>Test4.1</c>\nSecond row<c.blue>Test4.2</c>\n\n' +
         '00:01:10.000 --> 00:01:20.000\n' +
-        '<c.red>Test5.1<c.lime>Test5.2</c></c>',
+        '<c.red>Test5.1<c.lime>Test5.2</c></c>\n\n' +
+        '00:01:20.000 --> 00:01:30.000\n' +
+        '<b><c.lime>Parse fail 1</b></c>\n\n' +
+        '00:01:30.000 --> 00:01:40.000\n' +
+        '<c.lime><b>Parse fail 2</c></b>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports default color overriding', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10, endTime: 20,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: 'Example 1',
+                color: '#F00',
+                backgroundColor: '#FF0',
+                fontSize: '10px',
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n' +
+        '::cue(bg_blue) { font-size: 10px; background-color: #FF0 }\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        '<c.red.bg_blue>Example 1</c>\n\n',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
 
   /**
    * @param {!Array} cues
