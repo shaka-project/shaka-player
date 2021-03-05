@@ -196,6 +196,23 @@ adManager.addEventListener(shaka.ads.AdManager.IMA_STREAM_MANAGER_LOADED, (e) =>
 [AdManager]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/reference/js/google.ima.AdsManager
 [StreamManager]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/StreamManager
 
+#### Disabling Cookies For Serving Limited Ads
+The server side IMA SDK allows limited ads to be served when the user does not
+give or denies consent to cookies. To allow this, set the `ltd` parameter using
+`StreamRequest.adTagParameters` as described in the [IMA limited ads guide][].
+To set up cookie-less manifest and segment requests, use an appropriate
+`requestFilter`.
+
+```js
+  player.getNetworkingEngine().registerRequestFilter(function(type, request) {
+    if (type == shaka.net.NetworkingEngine.RequestType.MANIFEST ||
+        type == shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+      request.withCredentials = false;
+    }
+  });
+```
+[IMA limited ads guide]: https://developers.devsite.corp.google.com/interactive-media-ads/docs/sdks/html5/dai/limited-ads
+
 #### Custom Ad Manager Implementations
 Our architecture supports custom ad manager implementations. Every ad manager
 should implement the {@linksource shaka.extern.IAdManager} interface. To make
