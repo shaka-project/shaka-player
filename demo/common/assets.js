@@ -879,6 +879,7 @@ shakaAssets.testAssets = [
 
   // MetaCDN assets {{{
   new ShakaDemoAssetInfo(
+<<<<<<< HEAD
       /* name= */ 'Car Ride (DASH, VOD, 180 Degrees)',
       /* iconUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/.png?scale=300:210',
       /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/Feature.DASH/.mpd',
@@ -891,20 +892,32 @@ shakaAssets.testAssets = [
       /* name= */ 'Car Ride (HLS, VOD, 180 Degrees)',
       /* iconUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/.png?scale=300:210',
       /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/Feature.HLS/.m3u8',
+=======
+      /* name= */ 'Car Ride (HLS, VOD, 180 Degrees)',
+      /* iconUri= */ 'TODO',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/Feature.HLS?format=.m3u8',
+>>>>>>> Addition of 180 degree HLS and DASH assets from MetaCDN
       /* source= */ shakaAssets.Source.METACDN)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.VOD),
   new ShakaDemoAssetInfo(
+<<<<<<< HEAD
       /* name= */ 'Queensland, Australia Landscape (DASH)',
       /* iconUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/.png?scale=300:210',
       /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/Feature.DASH/.mpd',
+=======
+      /* name= */ 'Car Ride (DASH, VOD, 180 Degrees)',
+      /* iconUri= */ 'TODO',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/Feature.DASH?format=.mpd',
+>>>>>>> Addition of 180 degree HLS and DASH assets from MetaCDN
       /* source= */ shakaAssets.Source.METACDN)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.VOD),
+<<<<<<< HEAD
   new ShakaDemoAssetInfo(
       /* name= */ 'Queensland, Australia Landscape (HLS)',
       /* iconUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/.png?scale=300:210',
@@ -914,6 +927,8 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.VOD),
+=======
+>>>>>>> Addition of 180 degree HLS and DASH assets from MetaCDN
   // End MetaCDN assets }}}
 
   // Nimble Streamer assets {{{
