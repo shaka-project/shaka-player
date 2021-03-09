@@ -475,6 +475,10 @@
     "description": "The name of a configuration value.",
     "message": "Max Width"
   },
+  "DEMO_METACDN": {
+    "description": "Text that describes an asset that comes from the MetaCDN asset library.",
+    "message": "[PROPER_NAME:Microsoft]"
+  },
   "DEMO_MICROSOFT": {
     "description": "Text that describes an asset that comes from the Microsoft.",
     "message": "[PROPER_NAME:Microsoft]"
