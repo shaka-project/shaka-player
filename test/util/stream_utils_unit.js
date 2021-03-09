@@ -498,5 +498,107 @@ describe('StreamUtils', () => {
       expect(manifest.textStreams[0].id).toBe(1);
       expect(manifest.textStreams[1].id).toBe(2);
     });
+
+    it('filters image streams', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addImageStream(1, (stream) => {
+          stream.mimeType = 'image/svg+xml';
+        });
+        manifest.addImageStream(2, (stream) => {
+          stream.mimeType = 'image/png';
+        });
+        manifest.addImageStream(3, (stream) => {
+          stream.mimeType = 'image/jpeg';
+        });
+        manifest.addImageStream(4, (stream) => {
+          stream.mimeType = 'image/bogus';
+        });
+      });
+
+      const noVariant = null;
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, noVariant, manifest);
+
+      // Covers a regression in which we would remove streams with codecs.
+      // The last two streams should be removed because their full MIME types
+      // are bogus.
+      expect(manifest.imageStreams.length).toBe(3);
+      expect(manifest.imageStreams[0].id).toBe(1);
+      expect(manifest.imageStreams[1].id).toBe(2);
+      expect(manifest.imageStreams[2].id).toBe(3);
+    });
+  });
+
+  describe('chooseCodecsAndFilterManifest', () => {
+    const avc1Codecs = 'avc1.640028';
+    const vp09Codecs = 'vp09.00.40.08.00.02.02.02.00';
+
+    const addVariant1080Avc1 = (manifest) => {
+      manifest.addVariant(0, (variant) => {
+        variant.bandwidth = 5058558;
+        variant.addAudio(1, (stream) => {
+          stream.bandwidth = 129998;
+        });
+        variant.addVideo(2, (stream) => {
+          stream.bandwidth = 4928560;
+          stream.codecs = avc1Codecs;
+          stream.size(1920, 1080);
+        });
+      });
+    };
+
+    const addVariant1080Vp9 = (manifest) => {
+      manifest.addVariant(3, (variant) => {
+        variant.bandwidth = 4911000;
+        variant.addAudio(4, (stream) => {
+          stream.bandwidth = 129998;
+        });
+        variant.addVideo(5, (stream) => {
+          stream.bandwidth = 4781002;
+          stream.codecs = vp09Codecs;
+          stream.size(1920, 1080);
+        });
+      });
+    };
+
+    const addVariant2160Vp9 = (manifest) => {
+      manifest.addVariant(6, (variant) => {
+        variant.bandwidth = 10850316;
+        variant.addAudio(7, (stream) => {
+          stream.bandwidth = 129998;
+        });
+        variant.addVideo(8, (stream) => {
+          stream.bandwidth = 10784324;
+          stream.codecs = vp09Codecs;
+          stream.size(3840, 2160);
+        });
+      });
+    };
+
+    it('chooses variants with different sizes (density) by codecs', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        addVariant1080Avc1(manifest);
+        addVariant1080Vp9(manifest);
+        addVariant2160Vp9(manifest);
+      });
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2);
+
+      expect(manifest.variants.length).toBe(2);
+      expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
+      expect(manifest.variants[1].video.codecs).toBe(vp09Codecs);
+    });
+
+    it('chooses variants with same sizes (density) by codecs', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        addVariant1080Avc1(manifest);
+        addVariant1080Vp9(manifest);
+      });
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2);
+
+      expect(manifest.variants.length).toBe(1);
+      expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
+    });
   });
 });

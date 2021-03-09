@@ -292,6 +292,7 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
     };
 
@@ -362,7 +363,9 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -409,7 +412,9 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -455,7 +460,9 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -498,7 +505,9 @@ describe('ManifestConverter', () => {
       forced: streamDb.forced,
       channelsCount: streamDb.channelsCount,
       audioSamplingRate: streamDb.audioSamplingRate,
+      spatialAudio: streamDb.spatialAudio,
       closedCaptions: streamDb.closedCaptions,
+      tilesLayout: streamDb.tilesLayout,
     };
 
     expect(stream).toEqual(expectedStream);
