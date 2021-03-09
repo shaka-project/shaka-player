@@ -497,7 +497,7 @@
   },
   "DEMO_METACDN": {
     "description": "Text that describes an asset that comes from the MetaCDN asset library.",
-    "message": "[PROPER_NAME:Microsoft]"
+    "message": "[PROPER_NAME:MetaCDN]"
   },
   "DEMO_MICROSOFT": {
     "description": "Text that describes an asset that comes from the Microsoft.",
