@@ -85,13 +85,26 @@ describe('SegmentIndex', /** @suppress {accessControls} */ function() {
       expect(pos).toBeNull();
     });
 
-    it('returns null if time is within a gap', function() {
-      let actual1 = makeReference(1, 10, 20, uri(10));
-      let actual2 = makeReference(2, 25, 30, uri(25));
-      let index = new shaka.media.SegmentIndex([actual1, actual2]);
+    it('works with two references if time == first end time', () => {
+      const actual1 = makeReference(1, 10, 20.12, uri(10));
+      const actual2 = makeReference(2, 20.13, 30, uri(20));
+      const index = new shaka.media.SegmentIndex([actual1, actual2]);
 
-      let pos = index.find(23);
-      expect(pos).toBeNull();
+      const pos = index.find(20.12);
+      goog.asserts.assert(pos != null, 'Null position!');
+      const ref = index.get(pos);
+      expect(ref).toBe(actual1);
+    });
+
+    it('works with time is between first endTime and second startTime', () => {
+      const actual1 = makeReference(1, 10, 20.12111, uri(10));
+      const actual2 = makeReference(2, 20.12113, 30, uri(20));
+      const index = new shaka.media.SegmentIndex([actual1, actual2]);
+
+      const pos = index.find(20.12112);
+      goog.asserts.assert(pos != null, 'Null position!');
+      const ref = index.get(pos);
+      expect(ref).toBe(actual1);
     });
   });
 
