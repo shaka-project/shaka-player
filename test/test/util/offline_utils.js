@@ -58,6 +58,7 @@ shaka.test.OfflineUtils = class {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
     };
   }

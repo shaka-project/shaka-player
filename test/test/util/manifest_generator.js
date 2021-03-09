@@ -94,6 +94,9 @@ shaka.test.ManifestGenerator.Manifest = class {
     /** @type {!Array.<shaka.extern.Stream>} */
     this.textStreams = [];
 
+    /** @type {!Array.<shaka.extern.Stream>} */
+    this.imageStreams = [];
+
     const timeline = new this.shaka_.media.PresentationTimeline(0, 0);
     timeline.setSegmentAvailabilityDuration(Infinity);
     timeline.notifyMaxSegmentDuration(10);
@@ -208,6 +211,22 @@ shaka.test.ManifestGenerator.Manifest = class {
       func(stream);
     }
     this.textStreams.push(stream.build_());
+  }
+
+  /**
+   * Adds an image stream to the manifest.
+   *
+   * @param {number} id
+   * @param {function(!shaka.test.ManifestGenerator.Stream)=} func
+   */
+  addImageStream(id, func) {
+    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const stream = new shaka.test.ManifestGenerator.Stream(
+        this, /* isPartial= */ false, id, ContentType.IMAGE, 'und');
+    if (func) {
+      func(stream);
+    }
+    this.imageStreams.push(stream.build_());
   }
 
   /**
@@ -519,10 +538,14 @@ shaka.test.ManifestGenerator.Stream = class {
       this.channelsCount = null;
       /** @type {?number} */
       this.audioSamplingRate = null;
+      /** @type {boolean} */
+      this.spatialAudio = false;
       /** @type {Map.<string, string>} */
       this.closedCaptions = null;
       /** @type {(string|undefined)} */
       this.hdr = undefined;
+      /** @type {(string|undefined)} */
+      this.tilesLayout = undefined;
     }
 
     /** @type {shaka.extern.Stream} */
