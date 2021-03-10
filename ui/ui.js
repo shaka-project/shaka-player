@@ -171,6 +171,7 @@ shaka.ui.Overlay = class {
   defaultConfig_() {
     const config = {
       controlPanelElements: [
+        'close',
         'play_pause',
         'time_and_duration',
         'spacer',

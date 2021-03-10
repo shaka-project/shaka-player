@@ -11,6 +11,7 @@
 +../../ui/cast_button.js
 +../../ui/controls.js
 +../../ui/constants.js
++../../ui/close_button.js
 +../../ui/enums.js
 +../../ui/element.js
 +../../ui/fast_forward_button.js

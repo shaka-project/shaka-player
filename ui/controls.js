@@ -262,6 +262,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
+   * @param {Element} element
+   * @private
+   */
+  hideElement_(element) {
+    element.classList.add('hidden');
+  }
+
+  /**
    * @event shaka.ui.Controls.CastStatusChangedEvent
    * @description Fired upon receiving a 'caststatuschanged' event from
    *    the cast proxy.
@@ -658,6 +666,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }));
       }
     }
+  }
+
+  /** @export */
+  unload() {
+    const videoBar = document.getElementById('video-bar');
+    this.hideElement_(videoBar);
+
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+    if (document.pictureInPictureElement) {
+      document.exitPictureInPicture();
+    }
+    this.player_.unload();
   }
 
   /** @export */
