@@ -265,7 +265,7 @@ shaka.test.StreamingEngineUtil = class {
       const d = segmentDurations[type];
       const getUris = () => [periodIndex + '_' + type + '_' + position];
       const periodStart = periodStartTimes[periodIndex];
-      const timestampOffset = timestampOffsets[type] || 0;
+      const timestampOffset = (timestampOffsets && timestampOffsets[type]) || 0;
       const appendWindowStart = periodStartTimes[periodIndex];
       const appendWindowEnd = periodIndex == periodStartTimes.length - 1?
           presentationDuration : periodStartTimes[periodIndex + 1];
