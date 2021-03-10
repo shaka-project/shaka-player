@@ -5,7 +5,8 @@ These projects are intended to be good starting projects for new Shaka Player
 contributors, to complete relatively independently in a few weeks. Familiarity 
 with Javascript or Python will be helpful, but not required.
 
-To start, checkout our [demo][] and [tutorial][] page.
+To start, checkout our [demo][] and [tutorial][] page, and
+[contributing guide][].
 
 If you have any questions, you can either post on our [Github][] page, or
 discuss with us via the [mailing list][], [Slack chanel][], or with the GSoC
@@ -45,6 +46,7 @@ layer for the applications. It is an alternate bundle from the base Shaka Player
 [mailing list]:https://groups.google.com/g/shaka-player-gsoc
 [Slack chanel]:https://app.slack.com/client/T0XKDDFM0/C01QRAFHLQK
 [mentor]:mailto:michellezhuo@google.com
+[contributing guide]:https://github.com/google/shaka-player/blob/master/CONTRIBUTING.md
 
 
 ### Add Close Button to the UI Library
