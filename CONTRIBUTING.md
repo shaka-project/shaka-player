@@ -5,7 +5,7 @@ just a few small guidelines you need to follow.
 
 1. File a bug at https://github.com/google/shaka-player/issues (if there isn't
    one already).  If your patch is going to be large, you should start a
-   discussion on the mailing list first to make sure it is in line with our
+   discussion on the [mailing list][] first to make sure it is in line with our
    design.
 
    Leave a comment to let us know that you are working on a PR for the issue.
@@ -47,6 +47,7 @@ just a few small guidelines you need to follow.
 
 9. Finally, push the commits to your fork and submit a [pull request][].
 
+[mailing list]: https://groups.google.com/g/shaka-player-users
 [forking]: https://help.github.com/articles/fork-a-repo
 [AUTHORS]: AUTHORS
 [CONTRIBUTORS]: CONTRIBUTORS
