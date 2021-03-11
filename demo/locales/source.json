@@ -283,6 +283,10 @@
     "description": "The name of a configuration value.",
     "message": "Fuzz Factor"
   },
+  "DEMO_GAP_DETECTION_THRESHOLD": {
+    "description": "The name of a configuration value.",
+    "message": "Gap detection threshold"
+  },
   "DEMO_GPAC": {
     "description": "Text that describes an asset that comes from the GPAC project asset library.",
     "message": "[PROPER_NAME:GPAC]"

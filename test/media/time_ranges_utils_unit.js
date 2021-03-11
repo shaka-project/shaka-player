@@ -5,9 +5,18 @@
  */
 
 goog.require('shaka.media.TimeRangesUtils');
+goog.require('shaka.util.Platform');
 
 describe('TimeRangesUtils', () => {
   const TimeRangesUtils = shaka.media.TimeRangesUtils;
+
+  let gapDetectionThreshold = 0.1;
+  if (shaka.util.Platform.isLegacyEdge() ||
+      shaka.util.Platform.isIE() ||
+      shaka.util.Platform.isTizen() ||
+      shaka.util.Platform.isChromecast()) {
+    gapDetectionThreshold = 0.5;
+  }
 
   describe('isBuffered', () => {
     it('still works when passed null', () => {
@@ -90,12 +99,14 @@ describe('TimeRangesUtils', () => {
 
   describe('getGapIndex', () => {
     it('still works when passed null', () => {
-      expect(TimeRangesUtils.getGapIndex(null, 10)).toBe(null);
+      expect(TimeRangesUtils.getGapIndex(
+          null, 10, gapDetectionThreshold)).toBe(null);
     });
 
     it('still works whith nothing buffered', () => {
       const b = createFakeBuffered([]);
-      expect(TimeRangesUtils.getGapIndex(b, 10)).toBe(null);
+      expect(TimeRangesUtils.getGapIndex(
+          b, 10, gapDetectionThreshold)).toBe(null);
     });
 
 
@@ -122,7 +133,8 @@ describe('TimeRangesUtils', () => {
       it(name, () => {
         const b = createFakeBuffered(
             [{start: 10, end: 20}, {start: 30, end: 40}, {start: 50, end: 60}]);
-        expect(TimeRangesUtils.getGapIndex(b, data.time)).toBe(data.expected);
+        expect(TimeRangesUtils.getGapIndex(
+            b, data.time, gapDetectionThreshold)).toBe(data.expected);
       });
     }
   });

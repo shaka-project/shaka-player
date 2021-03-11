@@ -70,6 +70,7 @@
   "DEMO_FRONT_INTRO_ONE": "This is a demo of Google's Shaka Player, a JavaScript library for adaptive video streaming.",
   "DEMO_FRONT_INTRO_TWO": "Choose a video to playback; more assets are available via the \"all content\" tab.",
   "DEMO_FUZZ_FACTOR": "Fuzz Factor",
+  "DEMO_GAP_DETECTION_THRESHOLD": "Gap detection threshold",
   "DEMO_GPAC": "GPAC",
   "DEMO_HEADERS_TAB": "Headers",
   "DEMO_HIGH_DEFINITION": "High definition",
