@@ -48,6 +48,16 @@ shaka.ui.CloseButton = class extends shaka.ui.Element {
           this.updateAriaLabel_();
         });
 
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
+          this.button_.classList.add('hidden');
+        });
+
+    this.eventManager.listen(
+        this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
+          this.button_.classList.remove('hidden');
+        });
+
     this.eventManager.listen(this.button_, 'click', async () => {
       await this.controls.unload();
     });
