@@ -5,8 +5,7 @@ just a few small guidelines you need to follow.
 
 1. File a bug at https://github.com/google/shaka-player/issues (if there isn't
    one already).  If your patch is going to be large, you should start a
-   discussion on the mailing list first to make sure it is in line with our
-   design.
+   discussion on GitHub first.
 
 2. For legal reasons, all contributors must sign a Contributor License
    Agreement, either for an individual or corporation, before a patch can be

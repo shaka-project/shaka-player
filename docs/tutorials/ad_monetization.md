@@ -174,7 +174,7 @@ adManager.addEventListener(shaka.ads.AdManager.AD_STARTED, (e) => {
 
 [full list of ad events]: https://shaka-player-demo.appspot.com/docs/api/shaka.ads.AdManager.html#.event:AdBreakReadyEvent
 
-#### Accomodating IMA Power Users
+#### Accommodating IMA Power Users
 If you have an existing IMA integration you want to plug into Shaka, or you want
 to use more intricate SDK capabilities not exposed through our API, we provide a
 way to do that.

@@ -159,7 +159,7 @@ group file.  For example:
 -@networking
 # Add my custom HTTP implementation
 +/path/to/my_http_plugin.js
-# Add an additional polyfill for some odd platform I'm targetting
+# Add an additional polyfill for some odd platform I'm targeting
 +/path/to/my_platform_polyfill.js
 ```
 

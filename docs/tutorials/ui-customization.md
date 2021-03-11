@@ -89,7 +89,7 @@ ui.configure(config);
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
 
-The presense of the seek bar and the big play button in the center of the video element can be
+The presence of the seek bar and the big play button in the center of the video element can be
 customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
 
 UI layout can be reconfigured at any point after it's been created.
