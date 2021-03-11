@@ -187,7 +187,7 @@ The config field `manifest.dash.defaultPresentationDelay` has been moved to
 v4.0.  Applications using this field SHOULD update to use the new location.
 
 The `manifest.defaultPresentationDelay` field now affects both DASH and HLS
-content.  The default value is `0`, which is interpretted differently for DASH
+content.  The default value is `0`, which is interpreted differently for DASH
 and HLS:
 
  - In DASH, `0` means a default of `1.5 * minBufferTime`.
@@ -423,7 +423,7 @@ The `Cue` objects consumed by `TextDisplayer` have changed in v2.5 and v3.0.
 
  - `Cue.writingDirection` has been split into `Cue.writingMode` and
    `Cue.direction` to fix bugs in the handling of these attributes
- - `Cue.size` now defaults to `0`, which should be interpretted as "auto" (fit
+ - `Cue.size` now defaults to `0`, which should be interpreted as "auto" (fit
    to text).
 
 All application-specific TextDisplayer plugins MUST be updated.
