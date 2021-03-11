@@ -46,6 +46,9 @@ shakaDemo.Custom = class {
     /** @private {!Set.<!ShakaDemoAssetInfo>} */
     this.assets_ = this.loadAssetInfos_();
 
+    /** @private {!HTMLInputElement} */
+    this.manifestField_;
+
     /** @private {!Array.<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
     this.savedList_ = document.createElement('div');
@@ -238,17 +241,18 @@ shakaDemo.Custom = class {
     return headersDiv;
   }
 
+
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
    * @param {!Array.<!HTMLInputElement>} inputsToCheck
    * @return {!Element} div
    * @private
    */
-  makeAssetDialogContentsMisc_(assetInProgress, inputsToCheck) {
-    const miscDiv = document.createElement('div');
+  makeAssetDialogContentsAds_(assetInProgress, inputsToCheck) {
+    const adsDiv = document.createElement('div');
     const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
     const container = new shakaDemo.InputContainer(
-        miscDiv, /* headerText= */ null, containerStyle,
+        adsDiv, /* headerText= */ null, containerStyle,
         /* docLink= */ null);
 
     // Make the ad tag URL field.
@@ -265,7 +269,64 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, adTagURLName, adTagSetup, adTagOnChange);
 
-    return miscDiv;
+    // Make the content source id field.
+    const contentSrcIdSetup = (input, container) => {
+      if (assetInProgress.imaContentSrcId) {
+        input.value = assetInProgress.imaContentSrcId;
+      }
+
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const contentSrcIdOnChange = (input) => {
+      assetInProgress.imaContentSrcId = input.value;
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const contentSrcIdName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_CONTENT_SRC_ID);
+    this.makeField_(
+        container, contentSrcIdName, contentSrcIdSetup, contentSrcIdOnChange);
+
+    // Make the video id field.
+    const videoIdSetup = (input, container) => {
+      if (assetInProgress.imaVideoId) {
+        input.value = assetInProgress.imaVideoId;
+      }
+
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const videoIdOnChange = (input) => {
+      assetInProgress.imaVideoId = input.value;
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const videoIdName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_VIDEO_ID);
+    this.makeField_(
+        container, videoIdName, videoIdSetup, videoIdOnChange);
+
+    // Make the asset key field.
+    const assetKeySetup = (input, container) => {
+      if (assetInProgress.imaAssetKey) {
+        input.value = assetInProgress.imaAssetKey;
+      }
+
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const assetKeyChange = (input) => {
+      assetInProgress.imaAssetKey = input.value;
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const assetKeyName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_ASSET_KEY);
+    this.makeField_(
+        container, assetKeyName, assetKeySetup, assetKeyChange);
+
+    return adsDiv;
   }
 
   /**
@@ -389,8 +450,9 @@ shakaDemo.Custom = class {
       container.appendChild(error);
 
       // Add a regex that will detect empty strings.
-      input.required = true;
+      input.required = this.checkManifestRequired_(assetInProgress);
       input.pattern = '^(?!([\r\n\t\f\v ]+)$).*$';
+      this.manifestField_ = input;
     };
     const manifestOnChange = (input) => {
       assetInProgress.manifestUri = input.value;
@@ -471,6 +533,18 @@ shakaDemo.Custom = class {
 
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @private
+   */
+  checkManifestRequired_(assetInProgress) {
+    // The manifest field is required unless we're getting the manifest
+    // from the Google Ad Manager using IMA ids.
+    const isDaiAdManifest = (assetInProgress.imaContentSrcId &&
+        assetInProgress.imaVideoId) || assetInProgress.imaAssetKey != null;
+    return !isDaiAdManifest;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
    * @param {!Array.<!HTMLInputElement>} inputsToCheck
    * @return {!Element} div
    * @private
@@ -522,7 +596,7 @@ shakaDemo.Custom = class {
         assetInProgress, inputsToCheck);
     const headersDiv = this.makeAssetDialogContentsHeaders_(
         assetInProgress, inputsToCheck);
-    const miscDiv = this.makeAssetDialogContentsMisc_(
+    const adsDiv = this.makeAssetDialogContentsAds_(
         assetInProgress, inputsToCheck);
     const finishDiv = this.makeAssetDialogContentsFinish_(
         assetInProgress, inputsToCheck);
@@ -560,14 +634,14 @@ shakaDemo.Custom = class {
     addTabButton(
         shakaDemo.MessageIds.HEADERS_TAB, headersDiv, /* startOn= */ false);
     addTabButton(
-        shakaDemo.MessageIds.MISC_TAB, miscDiv, /* startOn= */ false);
+        shakaDemo.MessageIds.ADS_TAB, adsDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
     this.dialog_.appendChild(tabDiv);
     this.dialog_.appendChild(mainDiv);
     this.dialog_.appendChild(drmDiv);
     this.dialog_.appendChild(headersDiv);
-    this.dialog_.appendChild(miscDiv);
+    this.dialog_.appendChild(adsDiv);
     this.dialog_.appendChild(finishDiv);
     this.dialog_.appendChild(iconDiv);
 

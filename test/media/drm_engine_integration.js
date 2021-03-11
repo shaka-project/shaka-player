@@ -257,10 +257,10 @@ describe('DrmEngine', () => {
       }
 
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoSegment, null, null,
+          ContentType.VIDEO, videoSegment, 0, 10,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioSegment, null, null,
+          ContentType.AUDIO, audioSegment, 0, 10,
           /* hasClosedCaptions= */ false);
 
       expect(video.buffered.end(0)).toBeGreaterThan(0);

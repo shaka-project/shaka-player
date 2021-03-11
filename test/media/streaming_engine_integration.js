@@ -637,6 +637,7 @@ describe('StreamingEngine', () => {
         offlineSessionIds: [],
         minBufferTime: 2,
         textStreams: [],
+        imageStreams: [],
         variants: [{
           id: 1,
           video: {

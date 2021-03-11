@@ -949,6 +949,8 @@ describe('Player', () => {
     let variantTracks;
     /** @type {!Array.<shaka.extern.Track>} */
     let textTracks;
+    /** @type {!Array.<shaka.extern.Track>} */
+    let imageTracks;
 
     beforeEach(async () => {
       // A manifest we can use to test track expectations.
@@ -1066,6 +1068,16 @@ describe('Player', () => {
           stream.kind = 'caption';
           stream.roles = ['commentary'];
         });
+
+        // Image tracks
+        manifest.addImageStream(53, (stream) => {
+          stream.originalId = 'thumbnail';
+          stream.width = 100;
+          stream.height = 200;
+          stream.bandwidth = 10;
+          stream.mimeType = 'image/jpeg';
+          stream.tilesLayout = '1x1';
+        });
       });
 
       variantTracks = [
@@ -1094,11 +1106,14 @@ describe('Player', () => {
           audioId: 3,
           channelsCount: 6,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 300,
           videoBandwidth: 1000,
           originalAudioId: 'audio-en-6c',
           originalVideoId: 'video-1kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 101,
@@ -1125,11 +1140,14 @@ describe('Player', () => {
           audioId: 3,
           channelsCount: 6,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 300,
           videoBandwidth: 2000,
           originalAudioId: 'audio-en-6c',
           originalVideoId: 'video-2kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 102,
@@ -1156,11 +1174,14 @@ describe('Player', () => {
           audioId: 4,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-en-2c',
           originalVideoId: 'video-1kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 103,
@@ -1187,11 +1208,14 @@ describe('Player', () => {
           audioId: 4,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-en-2c',
           originalVideoId: 'video-2kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 104,
@@ -1218,11 +1242,14 @@ describe('Player', () => {
           audioId: 5,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-commentary',
           originalVideoId: 'video-1kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 105,
@@ -1249,11 +1276,14 @@ describe('Player', () => {
           audioId: 5,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-commentary',
           originalVideoId: 'video-2kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 106,
@@ -1280,11 +1310,14 @@ describe('Player', () => {
           audioId: 6,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-es',
           originalVideoId: 'video-1kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 107,
@@ -1311,11 +1344,14 @@ describe('Player', () => {
           audioId: 6,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-es',
           originalVideoId: 'video-2kbps',
           originalTextId: null,
+          originalImageId: null,
         },
       ];
 
@@ -1337,6 +1373,8 @@ describe('Player', () => {
           forced: false,
           channelsCount: null,
           audioSamplingRate: null,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1350,6 +1388,7 @@ describe('Player', () => {
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: 'text-es',
+          originalImageId: null,
         },
         {
           id: 51,
@@ -1368,6 +1407,8 @@ describe('Player', () => {
           forced: false,
           channelsCount: null,
           audioSamplingRate: null,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1381,6 +1422,7 @@ describe('Player', () => {
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: 'text-en',
+          originalImageId: null,
         },
         {
           id: 52,
@@ -1398,7 +1440,9 @@ describe('Player', () => {
           audioRoles: null,
           forced: false,
           channelsCount: null,
+          spatialAudio: false,
           audioSamplingRate: null,
+          tilesLayout: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1412,6 +1456,44 @@ describe('Player', () => {
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: 'text-commentary',
+          originalImageId: null,
+        },
+      ];
+
+      imageTracks = [
+        {
+          id: 53,
+          active: false,
+          type: ContentType.IMAGE,
+          language: '',
+          label: null,
+          kind: null,
+          mimeType: 'image/jpeg',
+          codecs: null,
+          audioCodec: null,
+          videoCodec: null,
+          primary: false,
+          roles: [],
+          audioRoles: null,
+          forced: false,
+          channelsCount: null,
+          audioSamplingRate: null,
+          spatialAudio: false,
+          tilesLayout: '1x1',
+          audioBandwidth: null,
+          videoBandwidth: null,
+          bandwidth: 10,
+          width: 100,
+          height: 200,
+          frameRate: null,
+          pixelAspectRatio: null,
+          hdr: null,
+          videoId: null,
+          audioId: null,
+          originalAudioId: null,
+          originalVideoId: null,
+          originalTextId: null,
+          originalImageId: 'thumbnail',
         },
       ];
 
@@ -1433,6 +1515,7 @@ describe('Player', () => {
     it('returns the correct tracks', () => {
       expect(player.getVariantTracks()).toEqual(variantTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
+      expect(player.getImageTracks()).toEqual(imageTracks);
     });
 
     it('returns empty arrays before tracks can be determined', async () => {
@@ -1442,6 +1525,7 @@ describe('Player', () => {
         // The player does not yet have a manifest.
         expect(player.getVariantTracks()).toEqual([]);
         expect(player.getTextTracks()).toEqual([]);
+        expect(player.getImageTracks()).toEqual([]);
 
         parser.playerInterface = playerInterface;
         return Promise.resolve(manifest);
@@ -1451,6 +1535,7 @@ describe('Player', () => {
 
       expect(player.getVariantTracks()).toEqual(variantTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
+      expect(player.getImageTracks()).toEqual(imageTracks);
     });
 
     it('doesn\'t disable AbrManager if switching variants', () => {

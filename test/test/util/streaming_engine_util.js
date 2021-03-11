@@ -286,6 +286,7 @@ shaka.test.StreamingEngineUtil = class {
       offlineSessionIds: [],
       variants: [],
       textStreams: [],
+      imageStreams: [],
     };
 
     /** @type {shaka.extern.Variant} */
@@ -409,6 +410,7 @@ shaka.test.StreamingEngineUtil = class {
       primary: false,
       roles: [],
       forced: false,
+      spatialAudio: false,
     };
   }
 
@@ -445,6 +447,7 @@ shaka.test.StreamingEngineUtil = class {
       primary: false,
       roles: [],
       forced: false,
+      spatialAudio: false,
     };
   }
 
@@ -479,6 +482,7 @@ shaka.test.StreamingEngineUtil = class {
       primary: false,
       roles: [],
       forced: false,
+      spatialAudio: false,
     };
   }
 };
