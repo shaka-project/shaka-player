@@ -387,6 +387,9 @@ shakaDemo.Main = class {
     this.controls_.addEventListener('caststatuschanged', (event) => {
       this.onCastStatusChange_(event['newStatus']);
     });
+    this.controls_.addEventListener('playerunloaded', () => {
+      this.unload();
+    });
 
     this.localization_ = this.controls_.getLocalization();
     await this.setupLocalization_();
