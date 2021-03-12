@@ -5,7 +5,6 @@
  */
 
 goog.require('shakaDemo.AssetCard');
-goog.require('shakaDemo.CloseButton');
 goog.require('shakaDemo.Config');
 goog.require('shakaDemo.Custom');
 goog.require('shakaDemo.Utils');
