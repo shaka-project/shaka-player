@@ -295,6 +295,9 @@ shakaDemo.Config = class {
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.StreamingConfiguration');
     this.addSection_(MessageIds.STREAMING_SECTION_HEADER, docLink)
+        .addNumberInput_(MessageIds.GAP_DETECTION_THRESHOLD,
+            'streaming.gapDetectionThreshold',
+            /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.MAX_SMALL_GAP_SIZE,
             'streaming.smallGapLimit',
             /* canBeDecimal= */ true)

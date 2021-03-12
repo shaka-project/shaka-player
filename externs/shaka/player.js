@@ -744,6 +744,7 @@ shaka.extern.ManifestConfiguration;
  *   ignoreTextStreamFailures: boolean,
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
+ *   gapDetectionThreshold: number,
  *   smallGapLimit: number,
  *   jumpLargeGaps: boolean,
  *   durationBackoff: number,
@@ -795,6 +796,10 @@ shaka.extern.ManifestConfiguration;
  *   of a segment. This affects both explicit start times and calculated start
  *   time for live streams. This can put us further from the live edge. Defaults
  *   to <code>false</code>.
+ * @property {number} gapDetectionThreshold
+ *   TThe maximum distance (in seconds) before a gap when we'll automatically
+ *   jump. This value  defaults to <code>0.1</code>, except in Edge Legacy, IE,
+ *   Tizen, Chromecast that value defaults value is <code>0.5</code>
  * @property {number} smallGapLimit
  *   The limit (in seconds) for a gap in the media to be considered "small".
  *   Small gaps are jumped automatically without events.  Large gaps result
