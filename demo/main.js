@@ -9,7 +9,6 @@ goog.provide('shakaDemo.Main');
 
 goog.require('ShakaDemoAssetInfo');
 goog.require('goog.asserts');
-goog.require('shakaDemo.CloseButton');
 goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.Utils');
 
@@ -334,9 +333,7 @@ shakaDemo.Main = class {
       uiConfig.controlPanelElements.splice(
           index, 1, 'rewind', 'play_pause', 'fast_forward');
     }
-    if (!uiConfig.controlPanelElements.includes('close')) {
-      uiConfig.controlPanelElements.push('close');
-    }
+    uiConfig.addCloseButton = true;
     ui.configure(uiConfig);
   }
 
@@ -353,9 +350,7 @@ shakaDemo.Main = class {
       // Don't add the close button if in noInput mode; it doesn't make much
       // sense to stop playing a video if you can't start playing other videos.
 
-      // Register custom controls to the UI.
-      const closeFactory = new shakaDemo.CloseButton.Factory();
-      shaka.ui.Controls.registerElement('close', closeFactory);
+      // Register custom controls to the UI here
 
       // Configure UI.
       this.configureUI_();

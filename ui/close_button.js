@@ -7,14 +7,14 @@
 
 goog.provide('shaka.ui.CloseButton');
 
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.ui.Constants');
-goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
-
+goog.requireType('shaka.ui.Controls');
 
 /**
  * @extends {shaka.ui.Element}
@@ -71,19 +71,3 @@ shaka.ui.CloseButton = class extends shaka.ui.Element {
         this.localization.resolve(shaka.ui.Locales.Ids.CLOSE));
   }
 };
-
-
-/**
- * @implements {shaka.extern.IUIElement.Factory}
- * @final
- */
-shaka.ui.CloseButton.Factory = class {
-  /** @override */
-  create(rootElement, controls) {
-    return new shaka.ui.CloseButton(rootElement, controls);
-  }
-};
-
-shaka.ui.Controls.registerElement(
-    'close', new shaka.ui.CloseButton.Factory());
-

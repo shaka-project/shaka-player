@@ -65,6 +65,7 @@ shaka.extern.UIVolumeBarColors;
  *   overflowMenuButtons: !Array.<string>,
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
+ *   addCloseButton: boolean,
  *   castReceiverAppId: string,
  *   clearBufferOnQualityChange: boolean,
  *   showUnbufferedStart: boolean,
@@ -87,6 +88,8 @@ shaka.extern.UIVolumeBarColors;
  * @property {boolean} addBigPlayButton
  *   Whether or not a big play button in the center of the video
  *   should be part of the UI.
+ * @property {boolean} addCloseButton
+ *   Whether or not a close button should be part of the UI.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
  * @property {boolean} clearBufferOnQualityChange
