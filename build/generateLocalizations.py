@@ -32,7 +32,7 @@ import contextlib
 import json
 import os
 import sys
-
+import io
 import shakaBuildHelpers
 
 
@@ -248,7 +248,7 @@ def main(args):
   combined_localizations = {}
   for locale in args.locales:
     path = os.path.join(args.source, locale + '.json')
-    with open(path, 'r') as f:
+    with io.open(path, 'r' , encoding='utf8') as f:
       combined_localizations[locale] = json.load(f)
 
   doc = GenerateLocalizations(combined_localizations, args.class_name)
