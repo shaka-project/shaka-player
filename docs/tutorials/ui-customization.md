@@ -123,6 +123,18 @@ const config = {
 ui.configure(config);
 ```
 
+#### Adding a close button
+To display a close button at the top right corner of the video player.
+On click the button will unload the video player and will fire a {@link shaka.ui.Controls.PlayerUnloaded}
+event once the player unloads.
+
+Display of the close button can be toggled with the `addCloseButton` boolean in the config
+ ```js
+const config = {
+  'addCloseButton': true
+}
+ui.configure(config);
+```
 
 #### Creating custom elements and adding them to the UI
 It's possible to add custom application-specific buttons to the UI.
