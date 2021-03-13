@@ -89,7 +89,8 @@ shaka.extern.UIVolumeBarColors;
  *   Whether or not a big play button in the center of the video
  *   should be part of the UI.
  * @property {boolean} addCloseButton
- *   Whether or not a close button should be part of the UI.
+ *   Whether or not a close button on the top right of the video
+ *   should be part of the UI.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
  * @property {boolean} clearBufferOnQualityChange

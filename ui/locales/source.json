@@ -33,6 +33,10 @@
     "description": "Label for a button used to open the native Cast dialog in the browser and select a destination to Cast to.",
     "message": "Cast..."
   },
+  "CLOSE": {
+    "description": "Label for a button used to unload the video player.",
+    "message": "Close"
+  },
   "ENTER_LOOP_MODE": {
     "description": "Label for a button that controls the loop mode of a video player. This mode will loop (play over and over) currently selected video.",
     "message": "Loop the current video"
