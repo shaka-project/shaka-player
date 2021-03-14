@@ -34,8 +34,8 @@
   /* Where the menu appears. */
   position: absolute;
   z-index: 2;
-  right: 15px;
-  bottom: 30px;
+  right: 3%;
+  bottom: 4.4em;
 
   /* The buttons inside the menu. */
   button {
@@ -66,13 +66,6 @@
     /* TODO(b/116651454): eliminate hard-coded offsets */
     padding-left: 10px;
     padding-right: 10px;
-  }
-
-  /* If the seekbar is missing, this is positioned lower.
-   * TODO: Solve with flex layout instead? */
-  &.shaka-low-position {
-    /* TODO(b/116651454): eliminate hard-coded offsets */
-    bottom: 15px;
   }
 }
 
@@ -109,6 +102,17 @@
   span {
     /* TODO(b/116651454): eliminate hard-coded offsets */
     margin-left: 54px;
+  }
+}
+
+.shaka-video-container:fullscreen {
+  /* When in fulscreen mode, add a bottom margin to overflow menu so that it
+   * doesn't overlap with other buttons.  */
+  .shaka-controls-container {
+    .shaka-overflow-menu {
+      /* TODO: eliminate hard-coded offsets */
+      bottom: 6em;
+    }
   }
 }
 
