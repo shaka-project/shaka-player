@@ -361,7 +361,6 @@ class CssLinter(object):
     if sys.platform == 'win32':
       self.config_path = self.config_path.replace('\\', '/')
       self.source_files = [f.replace('\\', '/') for f in self.source_files]
-      
 
     stylelint = shakaBuildHelpers.get_node_binary('stylelint')
     cmd_line = stylelint + [
