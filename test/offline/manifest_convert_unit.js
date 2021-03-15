@@ -101,7 +101,7 @@ describe('ManifestConverter', () => {
           audioRobustness: 'very',
           videoRobustness: 'kinda_sorta',
           serverCertificate: new Uint8Array([1, 2, 3]),
-          sessionTypes: [],
+          sessionType: '',
           initData: [{
             initData: new Uint8Array([4, 5, 6]),
             initDataType: 'cenc',

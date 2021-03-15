@@ -1998,7 +1998,7 @@ describe('DrmEngine', () => {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
-        sessionTypes: ['temporary'],
+        sessionType: 'temporary',
         initData: [],
         keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       });
