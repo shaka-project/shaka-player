@@ -1589,10 +1589,10 @@ describe('DrmEngine', () => {
       mockVideo.setMediaKeys.calls.reset();
       await drmEngine.destroy();
 
-      expect(session1.close).toHaveBeenCalled();
+      expect(session1.close).not.toHaveBeenCalled();
       expect(session1.remove).toHaveBeenCalled();
 
-      expect(session2.close).toHaveBeenCalled();
+      expect(session2.close).not.toHaveBeenCalled();
       expect(session2.remove).toHaveBeenCalled();
     });
 
