@@ -88,7 +88,7 @@ def check_js_lint(args):
   return linter.lint(fix=args.fix, force=args.force)
 
 
-@_Check('css_lint')
+#@_Check('css_lint')
 def check_css_lint(args):
   """Runs the CSS linter."""
   logging.info('Linting CSS...')
