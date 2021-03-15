@@ -4,6 +4,7 @@
 +../../lib/abr/ewma.js
 +../../lib/abr/ewma_bandwidth_estimator.js
 +../../lib/abr/simple_abr_manager.js
++../../lib/abr/simple_ll_abr_manager.js
 
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
@@ -21,6 +22,7 @@
 +../../lib/media/content_workarounds.js
 +../../lib/media/drm_engine.js
 +../../lib/media/gap_jumping_controller.js
++../../lib/media/live_catchup_controller.js
 +../../lib/media/manifest_parser.js
 +../../lib/media/media_source_engine.js
 +../../lib/media/mp4_segment_index_parser.js

@@ -113,6 +113,13 @@ shaka.extern.AbrManager = class {
    * @exportDoc
    */
   configure(config) {}
+
+  /**
+   * Called when enter buffering state
+   *
+   * @exportDoc
+   */
+  onBuffering() {}
 };
 
 

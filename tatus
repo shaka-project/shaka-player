@@ -1,0 +1,225 @@
+[1mdiff --git a/build/types/core b/build/types/core[m
+[1mindex b0931189..92a01561 100644[m
+[1m--- a/build/types/core[m
+[1m+++ b/build/types/core[m
+[36m@@ -4,6 +4,7 @@[m
+ +../../lib/abr/ewma.js[m
+ +../../lib/abr/ewma_bandwidth_estimator.js[m
+ +../../lib/abr/simple_abr_manager.js[m
+[32m+[m[32m+../../lib/abr/simple_ll_abr_manager.js[m
+ [m
+ +../../lib/debug/asserts.js[m
+ +../../lib/debug/log.js[m
+[36m@@ -21,6 +22,7 @@[m
+ +../../lib/media/content_workarounds.js[m
+ +../../lib/media/drm_engine.js[m
+ +../../lib/media/gap_jumping_controller.js[m
+[32m+[m[32m+../../lib/media/live_catchup_controller.js[m
+ +../../lib/media/manifest_parser.js[m
+ +../../lib/media/media_source_engine.js[m
+ +../../lib/media/mp4_segment_index_parser.js[m
+[1mdiff --git a/demo/config.js b/demo/config.js[m
+[1mindex bbd1b417..aaa24f0e 100644[m
+[1m--- a/demo/config.js[m
+[1m+++ b/demo/config.js[m
+[36m@@ -329,6 +329,8 @@[m [mshakaDemo.Config = class {[m
+             'streaming.lowLatencyMode')[m
+         .addBoolInput_(MessageIds.AUTO_LOW_LATENCY,[m
+             'streaming.autoLowLatencyMode')[m
+[32m+[m[32m        .addBoolInput_(MessageIds.HARMONIC_LOW_LATENCY_ABR,[m
+[32m+[m[32m            'streaming.harmonicLowLatencyABR')[m
+         .addBoolInput_(MessageIds.FORCE_HTTPS,[m
+             'streaming.forceHTTPS')[m
+         .addBoolInput_(MessageIds.PREFER_NATIVE_HLS,[m
+[1mdiff --git a/externs/shaka/abr_manager.js b/externs/shaka/abr_manager.js[m
+[1mindex 56a7444d..edeb8b90 100644[m
+[1m--- a/externs/shaka/abr_manager.js[m
+[1m+++ b/externs/shaka/abr_manager.js[m
+[36m@@ -113,6 +113,13 @@[m [mshaka.extern.AbrManager = class {[m
+    * @exportDoc[m
+    */[m
+   configure(config) {}[m
+[32m+[m
+[32m+[m[32m  /**[m
+[32m+[m[32m   * Called when enter buffering state[m
+[32m+[m[32m   *[m
+[32m+[m[32m   * @exportDoc[m
+[32m+[m[32m   */[m
+[32m+[m[32m  onBuffering() {}[m
+ };[m
+ [m
+ [m
+[1mdiff --git a/externs/shaka/player.js b/externs/shaka/player.js[m
+[1mindex db88f8c3..e2884053 100644[m
+[1m--- a/externs/shaka/player.js[m
+[1m+++ b/externs/shaka/player.js[m
+[36m@@ -757,6 +757,7 @@[m [mshaka.extern.ManifestConfiguration;[m
+  *   inaccurateManifestTolerance: number,[m
+  *   lowLatencyMode: boolean,[m
+  *   autoLowLatencyMode: boolean,[m
+[32m+[m[32m *   harmonicLowLatencyABR: boolean,[m
+  *   forceHTTPS: boolean,[m
+  *   preferNativeHls: boolean[m
+  * }}[m
+[36m@@ -861,6 +862,8 @@[m [mshaka.extern.ManifestConfiguration;[m
+  *   lowLatencyMode, but if it has been configured to activate the[m
+  *   lowLatencyMode if a stream of this type is detected, we automatically[m
+  *   activate the lowLatencyMode. Defaults to false.[m
+[32m+[m[32m * @property {boolean} harmonicLowLatencyABR[m
+[32m+[m[32m *   If true, enable SimpleLLABRManager and LiveCatchUpController[m
+  * @property {boolean} forceHTTPS[m
+  *   If true, if the protocol is HTTP change it to HTTPs.[m
+  * @property {boolean} preferNativeHls[m
+[1mdiff --git a/lib/abr/simple_abr_manager.js b/lib/abr/simple_abr_manager.js[m
+[1mindex 4ddb2886..f3a0775c 100644[m
+[1m--- a/lib/abr/simple_abr_manager.js[m
+[1m+++ b/lib/abr/simple_abr_manager.js[m
+[36m@@ -241,6 +241,13 @@[m [mshaka.abr.SimpleAbrManager = class {[m
+     this.config_ = config;[m
+   }[m
+ [m
+[32m+[m[32m  /**[m
+[32m+[m[32m   * @override[m
+[32m+[m[32m   * @export[m
+[32m+[m[32m   */[m
+[32m+[m[32m  onBuffering() {[m
+[32m+[m[32m  }[m
+[32m+[m
+ [m
+   /**[m
+    * Calls switch_() with the variant chosen by chooseVariant().[m
+[1mdiff --git a/lib/player.js b/lib/player.js[m
+[1mindex e9e27f68..0d0551f6 100644[m
+[1m--- a/lib/player.js[m
+[1m+++ b/lib/player.js[m
+[36m@@ -7,6 +7,7 @@[m
+ goog.provide('shaka.Player');[m
+ [m
+ goog.require('goog.asserts');[m
+[32m+[m[32mgoog.require('shaka.abr.SimpleLLAbrManager');[m
+ goog.require('shaka.Deprecate');[m
+ goog.require('shaka.dash.DashParser');[m
+ goog.require('shaka.log');[m
+[36m@@ -19,6 +20,7 @@[m [mgoog.require('shaka.media.MediaSourceEngine');[m
+ goog.require('shaka.media.MediaSourcePlayhead');[m
+ goog.require('shaka.media.MetaSegmentIndex');[m
+ goog.require('shaka.media.ClosedCaptionParser');[m
+[32m+[m[32mgoog.require('shaka.media.LiveCatchUpController');[m
+ goog.require('shaka.media.PlayRateController');[m
+ goog.require('shaka.media.Playhead');[m
+ goog.require('shaka.media.PlayheadObserverManager');[m
+[36m@@ -441,6 +443,9 @@[m [mshaka.Player = class extends shaka.util.FakeEventTarget {[m
+     /** @private {shaka.media.StreamingEngine} */[m
+     this.streamingEngine_ = null;[m
+ [m
+[32m+[m[32m    /** @private {shaka.media.LiveCatchUpController} */[m
+[32m+[m[32m    this.liveCatchUpController_ = null;[m
+[32m+[m
+     /** @private {shaka.extern.ManifestParser} */[m
+     this.parser_ = null;[m
+ [m
+[36m@@ -1001,6 +1006,10 @@[m [mshaka.Player = class extends shaka.util.FakeEventTarget {[m
+       // element - the other values don't matter.[m
+       payload.mediaElement = currentPayload.mediaElement;[m
+ [m
+[32m+[m[32m      if (this.liveCatchUpController_) {[m
+[32m+[m[32m        this.liveCatchUpController_.disable();[m
+[32m+[m[32m      }[m
+[32m+[m
+       return {[m
+         node: destination,[m
+         payload: payload,[m
+[36m@@ -1808,7 +1817,9 @@[m [mshaka.Player = class extends shaka.util.FakeEventTarget {[m
+     this.eventManager_.listen(mediaElement, 'ended', updateStateHistory);[m
+     this.eventManager_.listen(mediaElement, 'ratechange', onRateChange);[m
+ [m
+[31m-    const abrFactory = this.config_.abrFactory;[m
+[32m+[m[32m    const abrFactory = this.config_.streaming.harmonicLowLatencyABR ?[m
+[32m+[m[32m      () => new shaka.abr.SimpleLLAbrManager() :[m
+[32m+[m[32m      this.config_.abrFactory;[m
+     if (!this.abrManager_ || this.abrManagerFactory_ != abrFactory) {[m
+       this.abrManagerFactory_ = abrFactory;[m
+       this.abrManager_ = shaka.util.Functional.callFactory(abrFactory);[m
+[36m@@ -1857,6 +1868,12 @@[m [mshaka.Player = class extends shaka.util.FakeEventTarget {[m
+     this.streamingEngine_ = this.createStreamingEngine();[m
+     this.streamingEngine_.configure(this.config_.streaming);[m
+ [m
+[32m+[m[32m    if (this.config_.streaming.lowLatencyMode &&[m
+[32m+[m[32m        this.config_.streaming.harmonicLowLatencyABR) {[m
+[32m+[m[32m      this.liveCatchUpController_ = this.createLiveCatchUpController();[m
+[32m+[m[32m      this.liveCatchUpController_.enable();[m
+[32m+[m[32m    }[m
+[32m+[m
+     // Set the load mode to "loaded with media source" as late as possible so[m
+     // that public methods won't try to access internal components until[m
+     // they're all initialized. We MUST switch to loaded before calling[m
+[36m@@ -2649,6 +2666,26 @@[m [mshaka.Player = class extends shaka.util.FakeEventTarget {[m
+     return new shaka.media.StreamingEngine(this.manifest_, playerInterface);[m
+   }[m
+ [m
+[32m+[m[32m  /**[m
+[32m+[m[32m   *[m
+[32m+[m[32m   * @return {!shaka.media.LiveCatchUpController}[m
+[32m+[m[32m   */[m
+[32m+[m[32m  createLiveCatchUpController() {[m
+[32m+[m[32m    const LiveCatchUpController = shaka.media.LiveCatchUpController;[m
+[32m+[m[32m    const TimeRangesUtils = shaka.media.TimeRangesUtils;[m
+[32m+[m
+[32m+[m[32m    /** @type {shaka.media.LiveCatchUpController.PlayerInterface} */[m
+[32m+[m[32m    const playerInterface = {[m
+[32m+[m[32m      getBufferEnd: () => TimeRangesUtils.bufferEnd(this.video_.buffered),[m
+[32m+[m[32m      getPlayRate: () => this.playRateController_ ?[m
+[32m+[m[32m        this.playRateController_.getRealRate() : 0,[m
+[32m+[m[32m      getPresentationTime: () => this.playhead_.getTime(),[m
+[32m+[m[32m      trickPlay: (rate) => this.trickPlay(rate),[m
+[32m+[m[32m    };[m
+[32m+[m
+[32m+[m[32m    return new LiveCatchUpController(this.manifest_, playerInterface);[m
+[32m+[m[32m  }[m
+[32m+[m
+   /**[m
+    * Changes configuration settings on the Player.  This checks the names of[m
+    * keys and the types of values to avoid coding errors.  If there are errors,[m
+[36m@@ -4742,6 +4779,10 @@[m [mshaka.Player = class extends shaka.util.FakeEventTarget {[m
+     // buffering.[m
+     const eventName = shaka.Player.EventName.Buffering;[m
+     this.dispatchEvent(this.makeEvent_(eventName, {'buffering': isBuffering}));[m
+[32m+[m
+[32m+[m[32m    if (isBuffering) {[m
+[32m+[m[32m      this.abrManager_.onBuffering();[m
+[32m+[m[32m    }[m
+   }[m
+ [m
+   /**[m
+[1mdiff --git a/lib/util/player_configuration.js b/lib/util/player_configuration.js[m
+[1mindex d5bba72e..764b1892 100644[m
+[1m--- a/lib/util/player_configuration.js[m
+[1m+++ b/lib/util/player_configuration.js[m
+[36m@@ -139,6 +139,7 @@[m [mshaka.util.PlayerConfiguration = class {[m
+       inaccurateManifestTolerance: 2,[m
+       lowLatencyMode: false,[m
+       autoLowLatencyMode: false,[m
+[32m+[m[32m      harmonicLowLatencyABR: false,[m
+       forceHTTPS: false,[m
+       preferNativeHls: false,[m
+     };[m
+[1mdiff --git a/shaka-player.uncompiled.js b/shaka-player.uncompiled.js[m
+[1mindex c9de193b..6fa245aa 100644[m
+[1m--- a/shaka-player.uncompiled.js[m
+[1m+++ b/shaka-player.uncompiled.js[m
+[36m@@ -12,6 +12,7 @@[m
+ goog.require('shaka.Deprecate');[m
+ goog.require('shaka.Player');[m
+ goog.require('shaka.abr.SimpleAbrManager');[m
+[32m+[m[32mgoog.require('shaka.abr.SimpleLLAbrManager');[m
+ goog.require('shaka.ads.AdManager');[m
+ goog.require('shaka.cast.CastProxy');[m
+ goog.require('shaka.cast.CastReceiver');[m
+[36m@@ -20,6 +21,7 @@[m [mgoog.require('shaka.hls.HlsParser');[m
+ goog.require('shaka.log');[m
+ goog.require('shaka.media.AdaptationSetCriteria');[m
+ goog.require('shaka.media.InitSegmentReference');[m
+[32m+[m[32mgoog.require('shaka.media.LiveCatchUpController');[m
+ goog.require('shaka.media.ManifestParser');[m
+ goog.require('shaka.media.PreferenceBasedCriteria');[m
+ goog.require('shaka.media.PresentationTimeline');[m

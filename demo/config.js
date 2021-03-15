@@ -329,6 +329,8 @@ shakaDemo.Config = class {
             'streaming.lowLatencyMode')
         .addBoolInput_(MessageIds.AUTO_LOW_LATENCY,
             'streaming.autoLowLatencyMode')
+        .addBoolInput_(MessageIds.HARMONIC_LOW_LATENCY_ABR,
+            'streaming.harmonicLowLatencyABR')
         .addBoolInput_(MessageIds.FORCE_HTTPS,
             'streaming.forceHTTPS')
         .addBoolInput_(MessageIds.PREFER_NATIVE_HLS,
