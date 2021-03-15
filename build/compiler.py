@@ -357,7 +357,8 @@ class CssLinter(object):
     deps = self.source_files + [self.config_path]
     if not force and not _must_build(self.output, deps):
       return True
-
+    
+    """Windows shows an error when the file location has '\\' so for windows the below if condition changes the'\\' with '/' in variable storing file locations """
     if os.name == 'nt' :
       self.config_path = self.config_path.replace('\\','/')
       for j in range(0,len(self.source_files)):  
