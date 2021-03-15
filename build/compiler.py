@@ -357,12 +357,12 @@ class CssLinter(object):
     deps = self.source_files + [self.config_path]
     if not force and not _must_build(self.output, deps):
       return True
-    
-    """Windows shows an error when the file location has '\\' so for windows the below if condition changes the'\\' with '/' in variable storing file locations """
-    if os.name == 'nt' :
+    """Windows shows an error when the file location has '\\' so for 
+        windows the below if condition changes the'\\' with '/' 
+        in variable storing file locations """
+    if sys.platform == 'win32' :
       self.config_path = self.config_path.replace('\\','/')
-      for j in range(0,len(self.source_files)):  
-        self.source_files[j] = self.source_files[j].replace('\\','/')
+      self​.​source_files​ ​=​ [​f​.​replace(​'​\\​'​, ​'/'​) ​for​ ​f​ ​in​ ​self​.source_files]
 
     stylelint = shakaBuildHelpers.get_node_binary('stylelint')
     cmd_line = stylelint + [
