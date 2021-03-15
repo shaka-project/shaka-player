@@ -353,7 +353,7 @@ class CssLinter(object):
 
     Returns:
       True on success; False on failure.
-    """  
+    """
     deps = self.source_files + [self.config_path]
     if not force and not _must_build(self.output, deps):
       return True
