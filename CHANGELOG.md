@@ -1,3 +1,39 @@
+## 2.5.21 (2021-03-12)
+
+Bugfixes:
+  - Fix giant gaps in SSAI content
+    - https://github.com/google/shaka-player/issues/3191
+  - Fix TTML background image attribute case
+    - https://github.com/google/shaka-player/issues/3196
+  - Avoid setting global Cast hook
+    - https://github.com/google/shaka-player/issues/3167
+  - Fix codec choice when resolutions differ
+    - https://github.com/google/shaka-player/pull/3072
+  - Fix autoplay for non-zero-start VOD
+    - https://github.com/google/shaka-player/issues/2987
+  - Support localized whitespace preservation in TTML
+    - https://github.com/google/shaka-player/issues/3011
+    - https://github.com/google/shaka-player/pull/3043
+  - Fix repeated seek on start for some content
+    - https://github.com/google/shaka-player/issues/2831
+  - Fix subtitle display in timing edge case
+    - https://github.com/google/shaka-player/issues/3151
+    - https://github.com/google/shaka-player/pull/3152
+  - Fixed build error on Windows
+    - https://github.com/google/shaka-player/pull/3211
+    - https://github.com/google/shaka-player/issues/3208
+    - https://github.com/google/shaka-player/issues/3204
+
+Docs:
+  - Fixed outdated info and typos
+    - https://github.com/google/shaka-player/pull/3206
+  - Fixed various typos
+    - https://github.com/google/shaka-player/pull/3222
+  - Document programmatic UI setup
+    - https://github.com/google/shaka-player/issues/2655
+  - Update doc for manifest and segment ALR
+
+
 ## 2.5.20 (2021-02-08)
 
 Bugfixes:
