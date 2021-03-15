@@ -354,19 +354,16 @@ class CssLinter(object):
     Returns:
       True on success; False on failure.
     """  
-
     deps = self.source_files + [self.config_path]
     if not force and not _must_build(self.output, deps):
       return True
 
     if os.name == 'nt' :
       self.config_path = self.config_path.replace('\\','/')
-      for j in range(0,len(self.source_files)):
-        
+      for j in range(0,len(self.source_files)):  
         self.source_files[j] = self.source_files[j].replace('\\','/')
 
     stylelint = shakaBuildHelpers.get_node_binary('stylelint')
-    
     cmd_line = stylelint + [
         '--config', self.config_path,
         # The "default ignores" is something like **/node_modules/**, which
