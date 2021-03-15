@@ -74,7 +74,7 @@ def check_css_lint(args):
   def get(*path_components):
     return shakaBuildHelpers.get_all_files(
         os.path.join(base, *path_components), match)
-  files = (get('ui') + get('demo'));
+  files = (get('ui') + get('demo'))
   config_path = os.path.join(base, '.csslintrc')
 
   linter = compiler.CssLinter(files, config_path)
