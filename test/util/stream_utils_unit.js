@@ -6,12 +6,25 @@
 
 goog.require('shaka.test.FakeDrmEngine');
 goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.Util');
 goog.require('shaka.util.StreamUtils');
 
 describe('StreamUtils', () => {
   const StreamUtils = shaka.util.StreamUtils;
 
   let manifest;
+  /** @type {!jasmine.Spy} */
+  let decodingInfoSpy;
+
+  const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
+
+  beforeEach(() => {
+    decodingInfoSpy = jasmine.createSpy('decodingInfo');
+  });
+
+  afterEach(() => {
+    navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
+  });
 
   describe('filterStreamsByLanguageAndRole', () => {
     it('chooses text streams in user\'s preferred language', () => {
@@ -474,11 +487,39 @@ describe('StreamUtils', () => {
         });
       });
 
-      await shaka.util.StreamUtils.getDecodingInfosForVariants(
-          manifest.variants);
+      await StreamUtils.getDecodingInfosForVariants(manifest.variants,
+          /* usePersistentLicenses= */false);
       expect(manifest.variants.length).toBeTruthy();
       expect(manifest.variants[0].decodingInfos.length).toBe(1);
       expect(manifest.variants[0].decodingInfos[0].supported).toBeTruthy();
+    });
+
+    it('handles decodingInfo exception', async () => {
+      navigator.mediaCapabilities.decodingInfo =
+          shaka.test.Util.spyFunc(decodingInfoSpy);
+      // If decodingInfo() fails, setDecodingInfo should finish without throwing
+      // an exception, and the variant should have no decodingInfo result.
+      decodingInfoSpy.and.throwError('MediaCapabilties.decodingInfo failed.');
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/mp4', 'avc1');
+            stream.encrypted = true;
+            stream.mime('video/mp4', 'avc1.4d400d');
+          });
+          variant.addAudio(2, (stream) => {
+            stream.mime('audio/mp4', 'mp4a.40.2');
+            stream.encrypted = true;
+            stream.addDrmInfo('com.widevine.alpha');
+          });
+        });
+      });
+
+      await StreamUtils.getDecodingInfosForVariants(manifest.variants,
+          /* usePersistentLicenses= */false);
+      expect(manifest.variants.length).toBe(1);
+      expect(manifest.variants[0].decodingInfos.length).toBe(0);
     });
   });
 
@@ -560,7 +601,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          /* useMediaCapabilities= */ true);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -587,7 +629,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          /* useMediaCapabilities= */ true);
       expect(manifest.variants.length).toBe(1);
     });
   });
