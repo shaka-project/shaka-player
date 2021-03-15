@@ -16,6 +16,7 @@ identical:
 retryParameters: {
   timeout: 0,       // timeout in ms, after which we abort; 0 means never
   stallTimeout: 0,  // stall timeout in ms, after which we abort; 0 means never
+  connectionTimeout: 0, // connection timeout in ms, after which we abort; 0 means never
   maxAttempts: 2,   // the maximum number of requests before we fail
   baseDelay: 1000,  // the base delay in ms between retries
   backoffFactor: 2, // the multiplicative backoff factor between retries

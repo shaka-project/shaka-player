@@ -143,6 +143,10 @@
     "description": "A link in the footer, to the release build of the demo.",
     "message": "Compiled (Release)"
   },
+  "DEMO_CONNECTION_TIMEOUT": {
+    "description": "The name of a configuration value.",
+    "message": "Connection timeout"
+  },
   "DEMO_CONFIG": {
     "description": "A title on the configuration panel, labeling it as configuration.",
     "message": "[PROPER_NAME:Shaka Player] Demo Config"

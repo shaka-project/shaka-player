@@ -91,6 +91,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
       rejectScheme.and.callFake(() => {
         if (rejectScheme.calls.count() == 1) {
@@ -111,6 +112,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
       rejectScheme.and.callFake(() => {
         if (rejectScheme.calls.count() < 3) {
@@ -131,6 +133,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
 
       // It is expected to fail with the most recent error, but at a CRITICAL
@@ -170,6 +173,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           backoffFactor: 2,
           timeout: 0,
           stallTimeout: 0,
+          connectionTimeout: 0,
         });
 
         await expectAsync(
@@ -187,6 +191,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           backoffFactor: 2,
           timeout: 0,
           stallTimeout: 0,
+          connectionTimeout: 0,
         });
 
         await expectAsync(
@@ -207,6 +212,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
           backoffFactor: 1,
           timeout: 0,
           stallTimeout: 0,
+          connectionTimeout: 0,
         });
 
         await expectAsync(
@@ -229,6 +235,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
       request.uris = ['reject://foo', 'resolve://foo'];
       await networkingEngine.request(requestType, request).promise;
@@ -244,6 +251,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
 
       error.severity = shaka.util.Error.Severity.CRITICAL;
@@ -551,6 +559,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
       filter.and.returnValue(Promise.reject(new Error('')));
 
@@ -568,6 +577,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
       filter.and.throwError(error);
 
@@ -776,6 +786,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
       /** @type {!shaka.test.StatusPromise} */
       const r = new StatusPromise(
@@ -856,6 +867,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
 
       /** @type {!shaka.util.PublicPromise} */
@@ -930,6 +942,7 @@ describe('NetworkingEngine', /** @suppress {accessControls} */ () => {
         fuzzFactor: 0,
         timeout: 0,
         stallTimeout: 0,
+        connectionTimeout: 0,
       });
 
       retrySpy = jasmine.createSpy('retry listener');

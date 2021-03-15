@@ -35,6 +35,7 @@
   "DEMO_CLOCK_SYNC_URI": "Clock Sync URI",
   "DEMO_COMPILED_DEBUG": "Compiled (Debug)",
   "DEMO_COMPILED_RELEASE": "Compiled (Release)",
+  "DEMO_CONNECTION_TIMEOUT": "Connection timeout",
   "DEMO_CONFIG": "Shaka Player Demo Config",
   "DEMO_CONTAINER_SEARCH": "Container",
   "DEMO_CUSTOM": "Custom",
