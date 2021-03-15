@@ -360,7 +360,8 @@ class CssLinter(object):
     # Windows shows an error when the file location has '\' .
     if sys.platform == 'win32':
       self.config_path = self.config_path.replace('\\', '/')
-      self​.​source_files​ ​=​ [​f​.​replace(​'​\\​'​, ​'/'​) ​for​ ​f​ ​in​ ​self​.source_files]
+      self.source_files = [f.replace('\\', '/') for f in self.source_files]
+      
 
     stylelint = shakaBuildHelpers.get_node_binary('stylelint')
     cmd_line = stylelint + [
