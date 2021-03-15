@@ -12,7 +12,7 @@ basic usage tutorial, after creating the UI overlay:
 const video = document.getElementById('video');
 const ui = video['ui'];
 const config = {
-  addSeekBar: false;
+  addSeekBar: false
 };
 ui.configure(config);
 ```
