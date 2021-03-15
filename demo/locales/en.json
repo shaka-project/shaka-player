@@ -166,6 +166,7 @@
   "DEMO_SOURCE_SEARCH": "Source",
   "DEMO_STALL_DETECTOR_ENABLED": "Stall Detector Enabled",
   "DEMO_STALL_THRESHOLD": "Stall Threshold",
+  "DEMO_STALL_TIMEOUT": "Stall timeout",
   "DEMO_START_AT_SEGMENT_BOUNDARY": "Start At Segment Boundary",
   "DEMO_STORED": "Downloaded",
   "DEMO_STORED_SEARCH": "Filters for assets that have been stored offline.",

@@ -667,6 +667,10 @@
     "description": "The name of a configuration value.",
     "message": "Stall Threshold"
   },
+  "DEMO_STALL_TIMEOUT": {
+    "description": "The name of a configuration value.",
+    "message": "Stall timeout"
+  },
   "DEMO_START_AT_SEGMENT_BOUNDARY": {
     "description": "The name of a configuration value.",
     "message": "Start At Segment Boundary"
