@@ -347,11 +347,6 @@ shakaDemo.Main = class {
     this.player_ = ui.getControls().getPlayer();
 
     if (!this.noInput_) {
-      // Don't add the close button if in noInput mode; it doesn't make much
-      // sense to stop playing a video if you can't start playing other videos.
-
-      // Register custom controls to the UI here
-
       // Configure UI.
       this.configureUI_();
     }
