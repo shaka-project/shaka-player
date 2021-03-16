@@ -29,9 +29,12 @@ describe('DrmEngine', () => {
       navigator.requestMediaKeySystemAccess;
   const originalLogError = shaka.log.error;
   const originalBatchTime = shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME;
+  const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
 
   /** @type {!jasmine.Spy} */
   let requestMediaKeySystemAccessSpy;
+  /** @type {!jasmine.Spy} */
+  let decodingInfoSpy;
   /** @type {!jasmine.Spy} */
   let logErrorSpy;
   /** @type {!jasmine.Spy} */
@@ -74,6 +77,9 @@ describe('DrmEngine', () => {
         jasmine.createSpy('requestMediaKeySystemAccess');
     navigator.requestMediaKeySystemAccess =
         shaka.test.Util.spyFunc(requestMediaKeySystemAccessSpy);
+    decodingInfoSpy = jasmine.createSpy('decodingInfo');
+    navigator.mediaCapabilities.decodingInfo =
+        shaka.test.Util.spyFunc(decodingInfoSpy);
 
     logErrorSpy = jasmine.createSpy('shaka.log.error');
     shaka.log.error = shaka.test.Util.spyFunc(logErrorSpy);
@@ -149,6 +155,7 @@ describe('DrmEngine', () => {
 
     navigator.requestMediaKeySystemAccess =
         originalRequestMediaKeySystemAccess;
+    navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
     shaka.log.error = originalLogError;
   });
 
@@ -2145,12 +2152,37 @@ describe('DrmEngine', () => {
   }
 
   function setRequestMediaKeySystemAccessSpy(acceptableKeySystems) {
+    // TODO: Setting both the requestMediaKeySystemAccessSpy and decodingInfoSpy
+    // as a temporary solution. Only decodingInfoSpy is needed once we use
+    // decodingInfo API to get mediaKeySystemAccess.
+    setDecodingInfoSpy(acceptableKeySystems);
     requestMediaKeySystemAccessSpy.and.callFake((keySystem) => {
       if (!acceptableKeySystems.includes(keySystem)) {
         return Promise.reject(new Error(''));
       }
       mockMediaKeySystemAccess.keySystem = keySystem;
       return Promise.resolve(mockMediaKeySystemAccess);
+    });
+  }
+
+  function setDecodingInfoSpy(acceptableKeySystems) {
+    decodingInfoSpy.and.callFake((config) => {
+      const keySystem = config && config.keySystemConfiguration ?
+          config.keySystemConfiguration.keySystem : null;
+      let res;
+      if (!config.keySystemConfiguration) {
+        // Unencrypted content, return supported decodingInfo.
+        res = {supported: true};
+      } else if (!acceptableKeySystems.includes(keySystem)) {
+        res = {supported: false};
+      } else {
+        mockMediaKeySystemAccess.keySystem = keySystem;
+        res = {
+          supported: true,
+          keySystemAccess: mockMediaKeySystemAccess,
+        };
+      }
+      return Promise.resolve(res);
     });
   }
 

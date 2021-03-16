@@ -871,38 +871,6 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
-  it('should call filter during parsing', async () => {
-    const master = [
-      '#EXTM3U\n',
-      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
-      'RESOLUTION=960x540,FRAME-RATE=60\n',
-      'video',
-    ].join('');
-
-    const media = [
-      '#EXTM3U\n',
-      '#EXT-X-PLAYLIST-TYPE:VOD\n',
-      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
-      '#EXTINF:5,\n',
-      '#EXT-X-BYTERANGE:121090@616\n',
-      'main.mp4',
-    ].join('');
-
-    fakeNetEngine
-        .setResponseText('test:/master', master)
-        .setResponseText('test:/audio', media)
-        .setResponseText('test:/video', media)
-        .setResponseValue('test:/init.mp4', initSegmentData)
-        .setResponseValue('test:/main.mp4', segmentData);
-
-    /** @type {!jasmine.Spy} */
-    const filter = jasmine.createSpy('filter');
-    playerInterface.filter = Util.spyFunc(filter);
-
-    await parser.start('test:/master', playerInterface);
-    expect(filter).toHaveBeenCalledTimes(1);
-  });
-
   it('fetch the start time for one audio/video stream and reuse for the others',
       async () => {
         const SEGMENT = shaka.net.NetworkingEngine.RequestType.SEGMENT;
