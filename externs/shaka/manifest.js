@@ -390,3 +390,37 @@ shaka.extern.PresentationLatencyData;
  *
  */
 shaka.extern.PrtData;
+
+/**
+ * @typedef {{
+ *   schemeIdUri: string,
+ *   value: string
+ * }}
+ */
+shaka.extern.ServiceDescription.Scope;
+
+/**
+ * @typedef {{
+ *   target: number,
+ *   max: number,
+ *   min: number
+ * }}
+ */
+shaka.extern.ServiceDescription.Latency;
+
+/**
+ * @typedef {{
+ *   max: number,
+ *   min: number
+ * }}
+*/
+shaka.extern.ServiceDescription.PlaybackRate;
+
+/**
+ * @typedef {{
+ *   scope: ?shaka.extern.ServiceDescription.Scope,
+ *   latency: ?shaka.extern.ServiceDescription.Latency,
+ *   playbackRate: ?shaka.extern.ServiceDescription.PlaybackRate
+ * }}
+  */
+shaka.extern.ServiceDescription;
