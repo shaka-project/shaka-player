@@ -257,7 +257,7 @@ shaka.ui.Overlay = class {
     // controls.
     const videos = document.querySelectorAll(
         '[data-shaka-player]');
-
+        
     if (!videos.length && !containers.length) {
       // No elements have been tagged with shaka attributes.
     } else if (videos.length && !containers.length) {

@@ -1267,6 +1267,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.computeOpacity();
   }
+//   onSpaceDown()
+//   {
+//     const status = this.video_.play();
+//      console.log(status)
+//     if (status !== undefined) {
+//       status.then(_ => {
+//         this.video_.play();
+//       })
+//       .catch(error => {
+//         this.video_.pause();
+//       });
+//   }
+// }
 
   /**
    * Support controls with keyboard inputs.
@@ -1314,12 +1327,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case 'End':
         this.seek_(this.player_.seekRange().end, event);
         break;
+
       // Pause or play by pressing space on the seek bar.
-      case ' ':
-        if (isSeekBar) {
-          this.onPlayPauseClick_();
-        }
-        break;
+      // These functionality works on KeyDown so shifted.
+      // case ' ':
+      //   if (isSeekBar) {
+      //     this.onPlayPauseClick_();
+      //   }
+      //   break;
     }
   }
 
@@ -1415,7 +1430,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (event.key == 'Escape') {
       this.hideSettingsMenusTimer_.tickNow();
     }
-
+    // If space key is entered then playing/pausing video
+    //preventDefault() will Just make default functionality disabled
+    if(event.key ==' ')
+    {
+      event.preventDefault();
+      this.playPausePresentation();
+    }
     if (anySettingsMenusAreOpen && this.pressedKeys_.has('Tab')) {
       // If Tab key or Shift+Tab keys are pressed when navigating through
       // an overflow settings menu, keep the focus to loop inside the
