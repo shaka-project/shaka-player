@@ -49,6 +49,12 @@
 
   /* Until we set a gradient background in JS, this will be the track color. */
   background: @track-default-color;
+
+  /* Add a thin outline over `range` when it receives focus  */
+  input:in-range:not([disabled]):focus {
+    outline: 1px solid red;
+    outline-offset: -1px;
+  }
 }
 
 /* The "track" is the pseudo-element inside the range element which represents

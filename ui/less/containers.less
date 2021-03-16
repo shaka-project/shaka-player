@@ -170,6 +170,14 @@
   }
 }
 
+/* Offset is set to negative in order to prevent element from
+   taking extra space when it receives focus */
+
+.shaka-controls-button-panel > button:not([disabled]):focus {
+  outline: 1px solid red;
+  outline-offset: -1px;
+}
+
 /* The container for the giant play button.  Sits above (Y axis) the
  * other video controls and seek bar, in the middle of the video frame, on top
  * of (Z axis) the video. */
