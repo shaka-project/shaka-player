@@ -2,7 +2,7 @@
 
 Shaka Player has an optional UI library that provides a high-quality accessible
 localized UI. It is an alternate bundle from the base
-Shaka Player library, that adds additional UI-specific classes and a streamlined
+Shaka Player library, which adds additional UI-specific classes and a streamlined
 declarative style of setup.
 
 
@@ -105,7 +105,7 @@ document.addEventListener('shaka-ui-load-failed', initFailed);
 If you'd like to take advantage of Shaka's built-in Chromecast support,
 you will need to provide us with your cast receiver application id.
 If you want to track cast status changes, you should also
-set up a listener for the 'caststatuschanged' events.
+set up a listener for the `caststatuschanged` events.
 
 ```html
 <!-- Add a data-shaka-player-cast-receiver-id tag to provide a Cast Application ID that
@@ -117,7 +117,7 @@ set up a listener for the 'caststatuschanged' events.
 
 With the UI library set up this way, it will provide a button for casting to a
 ChromeCast when appropriate, without any extra code.
-Next, let's add a listener to the 'caststatuschanged' event in myapp.js:
+Next, let's add a listener to the `caststatuschanged` event in myapp.js:
 
 
 ```js

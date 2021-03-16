@@ -157,14 +157,14 @@ Media segment times are all in terms of the presentation timeline.  So if the
 content was originally multi-period, the period start time must be accounted for
 in the reference's `timestampOffset` field.
 
-First we ask for the index that corresponds with a start time.  Then on update,
+First, we ask for the index that corresponds with a start time.  Then on the update,
 we increment the index and ask for segments in order. The value of the index
 doesn't matter, but indices must be sequential integers.
 
 #### createSegmentIndex():Promise
 
 This is called first before any other method.  This allows an index to be
-fetched over the network, if needed.  This method should return a Promise that
+fetched over the network if needed.  This method should return a Promise that
 will resolve when the segment index is ready.  This is only ever called once.
 
 #### segmentIndex
@@ -177,7 +177,7 @@ available segments.
 
 To help in handling segment references, there is a
 {@link shaka.media.SegmentIndex} type.  This is given an array of references.
-It handles merging new segments, and expanding the list of segments for live
+It handles merging new segments and expanding the list of segments for live
 streams.
 
 ```js
@@ -346,8 +346,8 @@ MyManifestParser.prototype.loadReference_ =
 
 If your content is encrypted, there are a few changes to the manifest you need
 to do.  First, for each Stream that contains encrypted content, you need to set
-`stream.encrypted` to true and put the key IDs that the stream is encrypted with
-in the `stream.keyIds` set.  Filling out the `keyIds` is technically optional,
+`stream.encrypted` to true and put the key IDs that the stream is encrypted within
+the `stream.keyIds` set.  Filling out the `keyIds` is technically optional,
 but it allows the player to choose streams more intelligently based on which
 keys are available.  If `keyIds` is not filled out, missing keys may cause
 playback to stall.

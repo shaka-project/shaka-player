@@ -45,37 +45,37 @@ ui.configure(config);
 ```
 
 The following elements can be added to the UI bar using this configuration value:
-* time_and_duration: adds an element tracking and displaying current progress of
+* `time_and_duration`: adds an element tracking and displaying current progress of
   the presentation and the full presentation duration in the "0:10 / 1:00"
   form where "0:10" (ten seconds) is the number of seconds passed from the start of the presentation
   and "1:00" (one minute) is the presentation duration.
-* play_pause: adds a button that plays/pauses the video on click.
-* mute: adds a button that mutes/unmutes the video on click.
-* volume: adds a volume slider.
-* fullscreen: adds a button that toggles full screen mode on click.
-* overflow_menu: adds a button that opens an overflow menu with additional settings
+* `play_pause`: adds a button that plays/pauses the video on click.
+* `mute`: adds a button that mutes/unmutes the video on click.
+* `volume`: adds a volume slider.
+* `fullscreen`: adds a button that toggles full screen mode on click.
+* `overflow_menu`: adds a button that opens an overflow menu with additional settings
   buttons. It's content is also configurable.
-* rewind: adds a button that rewinds the presentation on click; that is, it starts playing
+* `rewind`: adds a button that rewinds the presentation on click; that is, it starts playing
   the presentation backwards.
-* fast_forward: adds a button that fast forwards the presentation on click; that is, it
+* `fast_forward`: adds a button that fast forwards the presentation on click; that is, it
   starts playing the presentation at an increased speed
-* spacer: adds a chunk of empty space between the adjacent elements.
+* `spacer`: adds a chunk of empty space between the adjacent elements.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Similarly, the 'overflowMenuButtons' configuration option can be used to control
 the contents of the overflow menu.
 The following buttons can be added to the overflow menu:
-* captions: adds a button that controls the current text track selection (including turning it off).
+* `captions`: adds a button that controls the current text track selection (including turning it off).
   The button is visible only if the content has at least one text track.
-* cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
+* `cast`: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
-* quality: adds a button that controls enabling/disabling of abr and video resolution selection.
-* language: adds a button that controls audio language selection.
-* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
+* `quality`: adds a button that controls enabling/disabling of abr and video resolution selection.
+* `language`: adds a button that controls audio language selection.
+* `picture_in_picture`: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers.
-* loop: adds a button that controls if the currently selected video is played in a loop.
-* playback_rate: adds a button that controls the playback rate selection.
-* airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
+* `loop`: adds a button that controls if the currently selected video is played in a loop.
+* `playback_rate`: adds a button that controls the playback rate selection.
+* `airplay`: adds a button that opens a AirPlay dialog. The button is visible only if the browser
   supports AirPlay.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
@@ -91,7 +91,7 @@ ui.configure(config);
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
 
-The presence of the seek bar and the big play button in the center of the video element can be
+The presence of the seek bar and the big play button in the centre of the video element can be
 customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
 
 UI layout can be reconfigured at any point after it's been created.

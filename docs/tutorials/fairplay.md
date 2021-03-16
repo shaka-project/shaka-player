@@ -20,7 +20,7 @@ player.configure('drm.advanced.com\\.apple\\.fps\\.1_0.serverCertificate',
 
 ## Content ID
 
-Some FairPlay content use custom signaling for the content ID.  The content ID
+Some FairPlay content uses custom signalling for the content ID. The content ID
 is used by the browser to generate the license request.  If you don't use the
 default content ID derivation, you need to specify a custom init data transform:
 

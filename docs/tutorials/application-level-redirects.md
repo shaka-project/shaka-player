@@ -24,7 +24,7 @@ offer built-in ALR functionality in Shaka Player.  Instead, we give a full
 example here of how a particular ALR scheme might work.
 
 In this example, the ALR's full response body is the new URL.  It can be
-detected by looking for "http" in the beginning of the response body.  These
+detected by looking for "http" at the beginning of the response body.  These
 ALRs are done on manifest requests, for the specific purpose of cookie-based
 authentication.  So the filter below checks for `RequestType.MANIFEST` and sets
 `allowCrossSiteCredentials`.  Please customize these details for your own

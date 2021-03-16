@@ -43,13 +43,13 @@ First, you'll need to include the IMA SDK(s) on your HTML page:
 </html>
 ```
 
-#### Streaming with Client Side Ads Insertion
+#### Streaming with Client-side Ads Insertion
 
-To integrate Client Side ads into a presentation, you need to have your ad tag
+To integrate Client-side ads into a presentation, you need to have your ad tag
 URIs. If you're not using Shaka's UI library, you will also need to create a
 `<div>` over your video element to serve as an ad container.
 
-Start by initializing the client side logic.
+Start by initializing the client-side logic.
 With Shaka UI:
 
 ```js
@@ -63,7 +63,7 @@ const container = video.ui.getControls().getClientSideAdContainer();
 adManager.initClientSide(container, video);
 ```
 
-With the client side logic initialized, you can request ads at any time during
+With the client-side logic initialized, you can request ads at any time during
 the presentation.
 
 ```js
@@ -83,7 +83,7 @@ See: [google.ima.AdsRequest][] for details on the request object.
 
 #### Streaming with Server Side Ads Insertion
 
-To integrate Server Side ads into a presentation, you need to have a Google Ad
+To integrate Server-side ads into a presentation, you need to have a Google Ad
 Manager account and host your streams on Google Ad Manager's servers. To find
 out more about the Google Ad Manager service or sign up for an account, visit
 https://admanager.google.com/
@@ -92,7 +92,7 @@ If you're not using Shaka's UI library, you will
 also need to create a `<div>` over your video element to serve as an ad
 container.
 
-Start by initializing the server side logic.
+Start by initializing the server-side logic.
 With Shaka UI:
 
 ```js
@@ -105,7 +105,7 @@ const container = video.ui.getControls().getServerSideAdContainer();
 adManager.initServerSide(container, video);
 ```
 
-With server side logic initialized, you can request and load streams with
+With server-side logic initialized, you can request and load streams with
 dynamically inserted ads.
 
 Requesting a VOD stream:
@@ -145,11 +145,11 @@ See: [google.ima.dai.api.LiveStreamRequest][] for details on the request object.
 If you are using Shaka's UI library, we will automatically hook up our ad UI.
 
 #### Listening To Ad Events
-We unify Server Side and Client Side ad events into our own Shaka ad events and
-objects. which your application can listen to and interact with.
+We unify Server-side and Client-side ad events into our own Shaka ad events and
+objects, which your application can listen to and interact with.
 Check out the [full list of ad events][] for details.
 
-Let's register a simple listener to Shaka's AD_STARTED event. It will log the
+Let's register a simple listener to Shaka's `AD_STARTED` event. It will log the
 start of the ad in the console.
 
 ```js
@@ -178,8 +178,8 @@ adManager.addEventListener(shaka.ads.AdManager.AD_STARTED, (e) => {
 If you have an existing IMA integration you want to plug into Shaka, or you want
 to use more intricate SDK capabilities not exposed through our API, we provide a
 way to do that.
-Listen to the [shaka.ads.AdManager.ImaAdManagerLoadedEvent][] for Client Side
-or the [shaka.ads.AdManager.ImaStreamManagerLoadedEvent][] for Server Side to
+Listen to the [shaka.ads.AdManager.ImaAdManagerLoadedEvent][] for Client-side
+or the [shaka.ads.AdManager.ImaStreamManagerLoadedEvent][] for Server-side to
 get the IMA [AdManager][] or [StreamManager][] objects.
 
 ```js
@@ -197,7 +197,7 @@ adManager.addEventListener(shaka.ads.AdManager.IMA_STREAM_MANAGER_LOADED, (e) =>
 [StreamManager]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/StreamManager
 
 #### Disabling Cookies For Serving Limited Ads
-The server side IMA SDK allows limited ads to be served when the user does not
+The server-side IMA SDK allows limited ads to be served when the user does not
 give or denies consent to cookies. To allow this, set the `ltd` parameter using
 `StreamRequest.adTagParameters` as described in the [IMA limited ads guide][].
 To set up cookie-less manifest and segment requests, use an appropriate

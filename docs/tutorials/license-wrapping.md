@@ -1,6 +1,6 @@
 # License Wrapping
 
-Applications sometimes need to communicate extra information to or from its
+Applications sometimes need to communicate extra information to or from their
 license server.  EME, the API that browsers provide for DRM, does not offer a
 direct way to include extra information in a license request or extract extra
 information from a license response.  To pass extra information, applications
@@ -9,7 +9,7 @@ must "wrap" requests and "unwrap" responses as they pass through JavaScript.
 *Please note that the license server we are using in this tutorial is a
 Widevine license server, so you will need to use Chrome to follow along.
 Because EME requires a secure URL, you will also need to use localhost or
-https for this tutorial.  See the note at the top of {@tutorial drm-config}
+HTTPS for this tutorial.  See the note at the top of {@tutorial drm-config}
 for more information.*
 
 

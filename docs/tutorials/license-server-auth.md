@@ -8,7 +8,7 @@ authentication.
 *Please note that the license server we are using in this tutorial is a
 Widevine license server, so you will need to use Chrome to follow along.
 Because EME requires a secure URL, you will also need to use localhost or
-https for this tutorial.  See the note at the top of {@tutorial drm-config}
+HTTPS for this tutorial.  See the note at the top of {@tutorial drm-config}
 for more information.*
 
 To start, we're going to use the code from {@tutorial basic-usage}, but use this
@@ -72,7 +72,7 @@ Register the filter before calling `player.load()`:
 ```
 
 Load the page again, and the license request will succeed.  Although we are
-using a fixed value for the purposes of this tutorial, your application can
+using a fixed value for this tutorial, your application can
 derive appropriate authentication header(s) before or during the callback.
 
 
@@ -120,7 +120,7 @@ This endpoint requires a specific cookie to deliver a license.  If you try to
 use it without setting the parameter, you will see `Error code 6007`
 (`LICENSE_REQUEST_FAILED`) just as with the other endpoints.
 
-Cookies are set by a server to be returned to that server, and are not sent by
+Cookies are set by a server to be returned to that server and are not sent by
 the JavaScript application.  So to set the required cookie value, point your
 browser to the server's [set\_cookie][] page.
 
@@ -190,7 +190,7 @@ Since v2.1.0, we support asynchronous filters.  This allows you to pause a
 license request, make an additional request for an authorization token, then use
 that token to complete the license request.
 
-Any filter that returns a Promise is an asynchronous filter.  NetworkingEngine
+Any filter that returns a Promise is asynchronous filter.  NetworkingEngine
 uses Promises for requests, so it is easy to make an additional request as part
 of an asynchronous filter.
 

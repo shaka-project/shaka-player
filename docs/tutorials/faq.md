@@ -19,7 +19,7 @@ more tolerant of drift in future.  See [#999][999] for more info.
 **Q:** I am getting decoder errors or `VIDEO_ERROR` or error code 3016.
 
 **A:** This error is given to us when the browser can't play the content.  This
-is out of our control and is usually caused by bad content.  On Chrome you can
+is out of our control and is usually caused by bad content.  On Chrome, you can
 check `chrome://media-internals` for more info (see [#489(comment)][489]).
 
 <hr>
@@ -72,7 +72,7 @@ or it may require [extra authentication][auth].
 **not** the HTTPS certificate of the proxy or any files on your proxy.  This
 should be the certificate of the license server given by your provider.
 
-The certificate can only be used for that license server, but can be used with
+The certificate can only be used for that license server but can be used with
 different proxies so long as they use the same license server.  For Widevine,
 the certificate should be binary, so avoid fetching the response as a string
 (e.g. with `responseText`).
@@ -113,7 +113,7 @@ browser.
 
 **Q:** Why does it take so long to switch to HD?
 
-**A:** When Shaka Player's `AbrManager` makes a decision to adapt, we don't
+**A:** When Shaka Player's `AbrManager` decides to adapt, we don't
 clear any of the content that has already been buffered.  (We used to, but it
 does not work consistently across browsers and created a bad experience.)
 
@@ -123,9 +123,9 @@ configuration][buffering] and the docs for the
 [`.streaming.bufferingGoal`][StreamingConfiguration] configuration.
 
 Another factor is the segment size.  It may take up to 2 segments before Shaka
-Player has enough information to form a bandwidth estimate and make a decision.
+The Player has enough information to form a bandwidth estimate and make a decision.
 If your content uses 10-second segments, this means we may buffer 20 seconds
-of low quality video before we make a decision.  If it is too late to change
+of low-quality video before we make a decision.  If it is too late to change
 the segment size in your content library, you may want to adjust the "default"
 bandwidth estimate used by Shaka Player to select the first segments.  Use the
 [`.abr.defaultBandwidthEstimate`][AbrConfiguration] configuration to control
@@ -140,9 +140,9 @@ these initial decisions.
 inappropriate. Therefore, we do not provide a default network plugin for such
 requests.
 
-In other environments, for example Electron, it is appropriate.
+In other environments, for example, Electron, it is appropriate.
 In those cases, before Shaka Player loads a manifest, you can register the
-existing http plugin for `file://` requests:
+existing HTTP plugin for `file://` requests:
 ```js
 shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
 ```
@@ -154,7 +154,7 @@ shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
 **A:** Our support for CEA-708 captions requires transmuxing the TS files that
 contain said captions.  Edge and Chromecast, however, have native TS support and
 thus are not required to transmux.
-In order to force those platforms to transmux, set the
+To force those platforms to transmux, set the
 [`.streaming.forceTransmuxTS`][StreamingConfiguration] configuration to true.
 
 <hr>
@@ -188,7 +188,7 @@ works: `.drm.advanced.<key_system>.audioRobustness` and
 **Q:** Does Shaka Player support iOS?
 
 **A:** Starting in v2.5, we support it through Apple's native HLS player.  So
-you can use the same top-level APIs; but we are dependent on the browser
+you can use the same top-level APIs, but we are dependent on the browser
 handling the streaming.  So we won't support DASH on iOS since the browser
 doesn't support it.
 
@@ -202,12 +202,12 @@ supported.  This supports both DASH and HLS manifests.
 **Q:** The Nightly Demo isn't loading for me!
 
 **A:** Are you looking at the uncompiled build with an AdBlocker enabled?
-We're rolling out ad support which is triggering some ad blockers to block
+We're rolling out ad support which is triggering some adblockers to block
 requests for some of our source files. This only affects the uncompiled build.
-Switch to the compiled build (add "build=compiled" to the url) or temporarily
+Switch to the compiled build (add "build=compiled" to the URL) or temporarily
 disable your ad blocker to see the nightly uncompiled mode.
 Please note that if you want to test our ad logic, you might have to disable
-the ad blocker in compiled mode as well.
+the ad blocker in the compiled mode as well.
 
 <hr>
 
@@ -233,7 +233,7 @@ an HLS manifest, we do our best to guess what the codecs might be, but those
 guesses might not always be accurate.  If an HLS manifest has no codec
 information provided, we default to guessing that the video codec is
 `avc1.42E01E` and the audio codec is `mp4a.40.2`, which can cause problems if
-the stream is actually video-only or audio-only.  In this case, you can enable
+the stream is video-only or audio-only.  In this case, you can enable
 the [`.manifest.disableVideo`][ManifestConfiguration] or
 [`.manifest.disableAudio`][ManifestConfiguration] configurations to signal that
 your content does not have a video or audio stream.

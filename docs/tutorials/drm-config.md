@@ -3,7 +3,7 @@
 #### NOTE: EME and http URLs
 
 EME requires a secure URL to use.  This means you have to use `https` or be on
-`localhost`.  Currently only Chrome enforces it, but other browsers will in the
+`localhost`.  Currently, only Chrome enforces it, but other browsers will in the
 future.  Also, because of mixed content requirements, if your site is using
 `https`, then your manifest and every segment will also need to use `https` too.
 
@@ -43,13 +43,13 @@ all you need to do.
 #### Choosing a Key System
 
 Shaka Player is key-system-agnostic, meaning we don't prefer any key systems
-over any others.  We use EME to ask the browser what it supports, and make no
+over any others.  We use EME to ask the browser what it supports and make no
 assumptions.  If your browser supports multiple key systems, the first supported
 key system in the manifest is used.
 
 The interoperable encryption standard that DRM vendors are implementing is
 called Common Encryption (CENC).  Some DASH manifests don't specify any
-particular key system at all, but instead state that any CENC system will do:
+particular key system at all, but instead, state that any CENC system will do:
 
 ```xml
 <ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"/>
@@ -67,7 +67,7 @@ use it.
 The EME spec requires browsers to support a common key system called "Clear
 Key".  *(At the time of this writing (April 2016), only Chrome and Firefox
 have implemented "Clear Key".)*
-Clear Key uses unencrypted keys to decrypt CENC content, and can be useful
+Clear Key uses unencrypted keys to decrypt CENC content and can be useful
 for diagnosing problems and testing integrations.  To configure Clear Key,
 use the configuration field `drm.clearKeys` and provide a map of key IDs to
 content keys (both in hex):
@@ -90,7 +90,7 @@ your manifest.  Use this when you need to confirm that your keys are correct.
 
 #### Clear Key Licenses
 
-If your manifest actually specifies Clear Key, you can also use the normal
+If your manifest specifies Clear Key, you can also use the normal
 license request mechanism to retrieve keys based on key IDs.  The EME spec
 defines a JSON-based [license request format] and [license format] for the
 Clear Key CDM.  If you have a server that understands these, just configure
@@ -145,7 +145,7 @@ playback.  Passing in a higher security level than can be supported will cause
 default is the empty string, which is the lowest security level supported by the
 key system.
 
-Each key system has their own values for robustness.  The values for Widevine
+Each key system has its values for robustness.  The values for Widevine
 are well-known (see the [Chromium sources][]) and listed below, but
 values for other key systems are not known to us at this time.
 

@@ -1,7 +1,7 @@
 # Plugins and Customizing the Build
 
 Shaka has a plugin system to make it easier to extend and customize the
-library. The plugin interfaces are here to allow you extend or customize Shaka
+library. The plugin interfaces are here to allow you to extend or customize Shaka
 Player in one of these areas: manifest parsing, subtitle and caption parsing,
 networking, ABR, and polyfills.  Each of these parts of the system has its own
 plugin interface. Even our "built-in" parsers, such as DASH and WebVTT, are
@@ -175,7 +175,7 @@ with the appropriate interfaces after the library is loaded.
 
 If you have a great plugin that you'd like to contribute back to the community,
 we'd love to hear from you.  You can get in touch via our [issue tracker][] to
-discuss it, and once it's ready, you can send a [pull request][] on github.
+discuss it, and once it's ready, you can send a [pull request][] on GitHub.
 
 [issue tracker]: https://github.com/google/shaka-player/issues/new/choose
 [pull request]: https://github.com/google/shaka-player/pull/new/master
