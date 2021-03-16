@@ -173,6 +173,11 @@ it fails, silently fallback to `com.microsoft.playready`.
 
 NB: Audio Hardware DRM is not supported (PlayReady limitation)
 
+NB: If you are using **purchase persistent licenses**, you will need to set the
+`com.microsoft.playready` advancedConfig sessionType to `persistent-license`.
+Not doing so will result of the license being rejected by the CDM, without the
+fallback cited above.
+
 ##### Other key-systems
 
 Values for other key systems are not known to us at this time.
