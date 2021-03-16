@@ -1029,6 +1029,7 @@ shaka.extern.OfflineConfiguration;
  * @property {boolean} useMediaCapabilities
  *   If true, use MediaCapabilities.decodingInfo() to filter the manifest, and
  *   get MediaKeys information for encrypted content. Default to false.
+ *   Shaka Player's integration with MediaCapabilities is now in BETA.
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;
