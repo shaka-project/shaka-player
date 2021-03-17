@@ -164,7 +164,7 @@ doesn't matter, but indices must be sequential integers.
 #### createSegmentIndex():Promise
 
 This is called first before any other method.  This allows an index to be
-fetched over the network if needed.  This method should return a Promise that
+fetched over the network, if needed.  This method should return a Promise that
 will resolve when the segment index is ready.  This is only ever called once.
 
 #### segmentIndex

@@ -120,7 +120,7 @@ This endpoint requires a specific cookie to deliver a license.  If you try to
 use it without setting the parameter, you will see `Error code 6007`
 (`LICENSE_REQUEST_FAILED`) just as with the other endpoints.
 
-Cookies are set by a server to be returned to that server and are not sent by
+Cookies are set by a server to be returned to that server, and are not sent by
 the JavaScript application.  So to set the required cookie value, point your
 browser to the server's [set\_cookie][] page.
 

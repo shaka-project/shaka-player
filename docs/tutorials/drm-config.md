@@ -43,7 +43,7 @@ all you need to do.
 #### Choosing a Key System
 
 Shaka Player is key-system-agnostic, meaning we don't prefer any key systems
-over any others.  We use EME to ask the browser what it supports and make no
+over any others.  We use EME to ask the browser what it supports, and make no
 assumptions.  If your browser supports multiple key systems, the first supported
 key system in the manifest is used.
 
@@ -67,7 +67,7 @@ use it.
 The EME spec requires browsers to support a common key system called "Clear
 Key".  *(At the time of this writing (April 2016), only Chrome and Firefox
 have implemented "Clear Key".)*
-Clear Key uses unencrypted keys to decrypt CENC content and can be useful
+Clear Key uses unencrypted keys to decrypt CENC content, and can be useful
 for diagnosing problems and testing integrations.  To configure Clear Key,
 use the configuration field `drm.clearKeys` and provide a map of key IDs to
 content keys (both in hex):
@@ -90,7 +90,7 @@ your manifest.  Use this when you need to confirm that your keys are correct.
 
 #### Clear Key Licenses
 
-If your manifest specifies Clear Key, you can also use the normal
+If your manifest actually specifies Clear Key, you can also use the normal
 license request mechanism to retrieve keys based on key IDs.  The EME spec
 defines a JSON-based [license request format] and [license format] for the
 Clear Key CDM.  If you have a server that understands these, just configure

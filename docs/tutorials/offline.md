@@ -346,7 +346,7 @@ the TODO in “playContent” labeled “play offline content” with:
 window.player.load(content.offlineUri);
 ```
 
-Yes, that is all there is to play offline content. The player
+Yes, that is really all there is to play offline content. The player actually
 does not know that the content is offline. Behind the scenes, Shaka Player’s
 networking layer is redirecting the networking requests to offline storage.
 So all you need to do is pass the offline uri from any stored content instance

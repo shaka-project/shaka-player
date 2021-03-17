@@ -72,7 +72,7 @@ or it may require [extra authentication][auth].
 **not** the HTTPS certificate of the proxy or any files on your proxy.  This
 should be the certificate of the license server given by your provider.
 
-The certificate can only be used for that license server but can be used with
+The certificate can only be used for that license server, but can be used with
 different proxies so long as they use the same license server.  For Widevine,
 the certificate should be binary, so avoid fetching the response as a string
 (e.g. with `responseText`).
@@ -207,7 +207,7 @@ requests for some of our source files. This only affects the uncompiled build.
 Switch to the compiled build (add "build=compiled" to the URL) or temporarily
 disable your ad blocker to see the nightly uncompiled mode.
 Please note that if you want to test our ad logic, you might have to disable
-the ad blocker in the compiled mode as well.
+the ad blocker in compiled mode as well.
 
 <hr>
 
