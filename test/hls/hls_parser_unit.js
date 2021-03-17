@@ -288,6 +288,37 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('guesses video-only variant when text codecs are present', async () => {
+    const master = [
+      // NOTE: This manifest is technically invalid. It has text codecs, but
+      // no text stream. We're tesing text stream parsing elswhere, so this
+      // only has the stream we're interested in (video) for simplicity.
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,stpp.ttml.im1t"\n',
+      'video',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.mime('video/mp4', 'avc1');
+        });
+      });
+    });
+
+    await testHlsParser(master, media, manifest);
+  });
+
   it('parses audio-only variant', async () => {
     const master = [
       '#EXTM3U\n',
