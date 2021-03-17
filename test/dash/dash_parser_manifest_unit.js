@@ -133,8 +133,8 @@ describe('DashParser Manifest', () => {
         [
           '    <AdaptationSet contentType="video" mimeType="video/mp4"',
           '        codecs="avc1.4d401f" frameRate="1000000/42000">',
-          '      <Representation bandwidth="100" width="768" height="576" />',
           '      <Representation bandwidth="50" width="576" height="432" />',
+          '      <Representation bandwidth="100" width="768" height="576" />',
           '    </AdaptationSet>',
           '    <AdaptationSet mimeType="text/vtt"',
           '        lang="es" label="spanish">',
@@ -2076,5 +2076,43 @@ describe('DashParser Manifest', () => {
     for (const uri of segmentUris) {
       expect(uri).not.toContain('/p2/');
     }
+  });
+
+  it('parses ServiceConfiguration', async () => {
+    const manifestText = [
+      `<MPD type="dynamic"`,
+      '     availabilityStartTime="1970-01-01T00:00:00Z"',
+      '     timeShiftBufferDepth="PT60S"',
+      '     maxSegmentDuration="PT5S"',
+      '     suggestedPresentationDelay="PT0S">',
+      '  <ServiceDescription>',
+      '    <Scope schemeIdUri="1" value="scope1" />',
+      '    <Latency target="5000" max="7000" min="4000" />',
+      '    <PlaybackRate max="1.1" min="0.9" />',
+      '  </ServiceDescription>',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <SegmentTemplate media="$Number$.mp4" duration="1" />',
+      '      <Representation id="3" width="640" height="480">',
+      '        <BaseURL>http://example.com/p1/</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    await parser.start('dummy://foo', playerInterface);
+
+    const serviceDescription = parser.getServiceDescription();
+    expect(serviceDescription).toBeDefined();
+    expect(serviceDescription.scope.schemeIdUri).toBe('1');
+    expect(serviceDescription.scope.value).toBe('scope1');
+    expect(serviceDescription.latency.target).toBe(5000);
+    expect(serviceDescription.latency.max).toBe(7000);
+    expect(serviceDescription.latency.min).toBe(4000);
+    expect(serviceDescription.playbackRate.max).toBe(1.1);
+    expect(serviceDescription.playbackRate.min).toBe(0.9);
   });
 });
