@@ -86,6 +86,19 @@ describe('UI Customization', () => {
     UiUtils.confirmElementFound(container, 'shaka-play-button');
   });
 
+  it('close button only created when configured', async () => {
+    console.log("hello world, this is isbodh")
+    const ui =
+        UiUtils.createUIThroughAPI(container, video, {addCloseButton: false});
+    UiUtils.confirmElementMissing(container, 'shaka-close-button-container');
+    UiUtils.confirmElementMissing(container, 'shaka-close-button');
+    await ui.destroy();
+
+    UiUtils.createUIThroughAPI(container, video, {addCloseButton: true});
+    UiUtils.confirmElementFound(container, 'shaka-close-button-container');
+    UiUtils.confirmElementFound(container, 'shaka-close-button');
+  });
+
   it('settings menus are positioned lower when seek bar is absent', () => {
     const config = {addSeekBar: false};
     UiUtils.createUIThroughAPI(container, video, config);
