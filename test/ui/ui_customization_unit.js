@@ -87,7 +87,6 @@ describe('UI Customization', () => {
   });
 
   it('close button only created when configured', async () => {
-    console.log("hello world, this is isbodh")
     const ui =
         UiUtils.createUIThroughAPI(container, video, {addCloseButton: false});
     UiUtils.confirmElementMissing(container, 'shaka-close-button-container');
