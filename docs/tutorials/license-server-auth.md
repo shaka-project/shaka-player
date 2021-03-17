@@ -190,7 +190,7 @@ Since v2.1.0, we support asynchronous filters.  This allows you to pause a
 license request, make an additional request for an authorization token, then use
 that token to complete the license request.
 
-Any filter that returns a Promise is asynchronous filter.  NetworkingEngine
+Any filter that returns a Promise is an asynchronous filter.  NetworkingEngine
 uses Promises for requests, so it is easy to make an additional request as part
 of an asynchronous filter.
 

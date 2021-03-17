@@ -157,7 +157,7 @@ Media segment times are all in terms of the presentation timeline.  So if the
 content was originally multi-period, the period start time must be accounted for
 in the reference's `timestampOffset` field.
 
-First, we ask for the index that corresponds with a start time.  Then on the update,
+First, we ask for the index that corresponds with a start time.  Then on update,
 we increment the index and ask for segments in order. The value of the index
 doesn't matter, but indices must be sequential integers.
 
@@ -346,7 +346,7 @@ MyManifestParser.prototype.loadReference_ =
 
 If your content is encrypted, there are a few changes to the manifest you need
 to do.  First, for each Stream that contains encrypted content, you need to set
-`stream.encrypted` to true and put the key IDs that the stream is encrypted within
+`stream.encrypted` to true and put the key IDs that the stream is encrypted with in
 the `stream.keyIds` set.  Filling out the `keyIds` is technically optional,
 but it allows the player to choose streams more intelligently based on which
 keys are available.  If `keyIds` is not filled out, missing keys may cause

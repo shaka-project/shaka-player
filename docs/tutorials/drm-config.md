@@ -145,7 +145,7 @@ playback.  Passing in a higher security level than can be supported will cause
 default is the empty string, which is the lowest security level supported by the
 key system.
 
-Each key system has its values for robustness.  The values for Widevine
+Each key system has its own values for robustness.  The values for Widevine
 are well-known (see the [Chromium sources][]) and listed below, but
 values for other key systems are not known to us at this time.
 

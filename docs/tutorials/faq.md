@@ -123,7 +123,7 @@ configuration][buffering] and the docs for the
 [`.streaming.bufferingGoal`][StreamingConfiguration] configuration.
 
 Another factor is the segment size.  It may take up to 2 segments before Shaka
-The Player has enough information to form a bandwidth estimate and make a decision.
+Player has enough information to form a bandwidth estimate and make a decision.
 If your content uses 10-second segments, this means we may buffer 20 seconds
 of low-quality video before we make a decision.  If it is too late to change
 the segment size in your content library, you may want to adjust the "default"
@@ -202,7 +202,7 @@ supported.  This supports both DASH and HLS manifests.
 **Q:** The Nightly Demo isn't loading for me!
 
 **A:** Are you looking at the uncompiled build with an AdBlocker enabled?
-We're rolling out ad support which is triggering some adblockers to block
+We're rolling out ad support which is triggering some ad blockers to block
 requests for some of our source files. This only affects the uncompiled build.
 Switch to the compiled build (add "build=compiled" to the URL) or temporarily
 disable your ad blocker to see the nightly uncompiled mode.

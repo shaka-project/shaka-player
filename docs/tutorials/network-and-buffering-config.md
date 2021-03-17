@@ -31,7 +31,7 @@ So, for example, if the base delay is 1s, and the backoff factor is 2:
 4. delay of 4, retry at t = (3 + 4) = 7
 5. delay of 8, retry at t = (7 + 8) = 15
 
-and so on.  To avoid many clients hammering a server at the same time,
+and so on.  To avoid many clients hammering a server at the same exact time,
 we also apply a fuzz factor.  A fuzz factor of 0.5 means we fuzz the delay
 50% in either direction.  So if the ideal delay is 8, the actual delay will be
 randomly chosen between 4 and 12.  To extend our earlier example:

@@ -334,7 +334,7 @@ you want.
 `storage.store` returns an `IAbortableOperation` that resolves to a
 `shaka.externs.StoredContent` instance (a summary of the stored content).
 
-At this point, the content is now stored offline and's ready to be played.
+At this point, the content is now stored offline and is ready to be played.
 Next, we will add functionality to play offline content.
 
 ## Playing Offline Content
