@@ -1,6 +1,5 @@
 # Customizing the UI
 
-
 #### Configuring the layout
 
 Once the UI is created, you can pass in configuration options that change
@@ -12,12 +11,12 @@ basic usage tutorial, after creating the UI overlay:
 const video = document.getElementById('video');
 const ui = video['ui'];
 const config = {
-  addSeekBar: false
+  addSeekBar: false,
 };
 ui.configure(config);
 ```
 
-Controls will fire a [shaka.ui.Controls.UIUpdatedEvent][] event once the
+Controls will fire a {@link shaka.ui.Controls#.event:UIUpdatedEvent} event once the
 config takes effect.
 See the docs for {@link shaka.extern.UIConfiguration} for more information.
 
@@ -29,62 +28,66 @@ creating the UI overlay. This will configure UI to ONLY provide these two button
 
 ```js
 const config = {
-  'controlPanelElements': ['rewind', 'fast_forward']
-}
+  controlPanelElements: ['rewind', 'fast_forward'],
+};
 ui.configure(config);
 ```
+
 This call will result in the controls panel having only two elements: rewind
 button and fast forward button, in that order. If the reversed order is desired,
 the call should be:
 
 ```js
 const config = {
- 'controlPanelElements': ['fast_forward', 'rewind']
-}
+  controlPanelElements: ['fast_forward', 'rewind'],
+};
 ui.configure(config);
 ```
 
 The following elements can be added to the UI bar using this configuration value:
-* time_and_duration: adds an element tracking and displaying current progress of
+
+- time_and_duration: adds an element tracking and displaying current progress of
   the presentation and the full presentation duration in the "0:10 / 1:00"
   form where "0:10" (ten seconds) is the number of seconds passed from the start of the presentation
   and "1:00" (one minute) is the presentation duration.
-* play_pause: adds a button that plays/pauses the video on click.
-* mute: adds a button that mutes/unmutes the video on click.
-* volume: adds a volume slider.
-* fullscreen: adds a button that toggles full screen mode on click.
-* overflow_menu: adds a button that opens an overflow menu with additional settings
+- play_pause: adds a button that plays/pauses the video on click.
+- mute: adds a button that mutes/unmutes the video on click.
+- volume: adds a volume slider.
+- fullscreen: adds a button that toggles full screen mode on click.
+- overflow_menu: adds a button that opens an overflow menu with additional settings
   buttons. It's content is also configurable.
-* rewind: adds a button that rewinds the presentation on click; that is, it starts playing
+- rewind: adds a button that rewinds the presentation on click; that is, it starts playing
   the presentation backwards.
-* fast_forward: adds a button that fast forwards the presentation on click; that is, it
+- fast_forward: adds a button that fast forwards the presentation on click; that is, it
   starts playing the presentation at an increased speed
-* spacer: adds a chunk of empty space between the adjacent elements.
+- spacer: adds a chunk of empty space between the adjacent elements.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Similarly, the 'overflowMenuButtons' configuration option can be used to control
 the contents of the overflow menu.
 The following buttons can be added to the overflow menu:
-* captions: adds a button that controls the current text track selection (including turning it off).
+
+- captions: adds a button that controls the current text track selection (including turning it off).
   The button is visible only if the content has at least one text track.
-* cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
+- cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
-* quality: adds a button that controls enabling/disabling of abr and video resolution selection.
-* language: adds a button that controls audio language selection.
-* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
+- quality: adds a button that controls enabling/disabling of abr and video resolution selection.
+- language: adds a button that controls audio language selection.
+- picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
   that support it. Button is invisible on other browsers.
-* loop: adds a button that controls if the currently selected video is played in a loop.
-* playback_rate: adds a button that controls the playback rate selection.
-* airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
-  supports AirPlay.
+- loop: adds a button that controls if the currently selected video is played in a loop.
+- playback_rate: adds a button that controls the playback rate selection.
+- airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
+supports AirPlay.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
+
 ```js
 // Add only the cast button to the overflow menu, nothing else
 const config = {
-  'overflowMenuButtons' : ['cast']
-}
+  overflowMenuButtons: ['cast'],
+};
 ui.configure(config);
 ```
 
@@ -98,33 +101,36 @@ UI layout can be reconfigured at any point after it's been created.
 Please note that custom layouts might need CSS adjustments to look good.
 
 #### Changing seek bar progress colors
+
 The seek bar consists of three segments: past (already played part of the presentation),
 future-buffered and future-unbuffered.
 To customize the colors, add your values to the config object under `seekBarColors`:
- ```js
+
+```js
 const config = {
-  'seekBarColors': {
+  seekBarColors: {
     base: 'rgba(255, 255, 255, 0.3)',
     buffered: 'rgba(255, 255, 255, 0.54)',
     played: 'rgb(255, 255, 255)',
-  }
-}
+  },
+};
 ui.configure(config);
 ```
 
 If you're using our ad API, you can also specify the color for the ad break markers on
 the timeline:
- ```js
+
+```js
 const config = {
-  'seekBarColors': {
+  seekBarColors: {
     adBreaks: 'rgb(255, 204, 0)',
-  }
-}
+  },
+};
 ui.configure(config);
 ```
 
-
 #### Creating custom elements and adding them to the UI
+
 It's possible to add custom application-specific buttons to the UI.
 Each element has to have it's own class that implements the {@linksource shaka.extern.IUIElement}
 interface and register with {@linksource shaka.ui.Controls}.
@@ -149,7 +155,8 @@ myapp.SkipButton = class extends shaka.ui.Element {
 
     // Listen for clicks on the button to start the next playback
     this.eventManager.listen(this.button_, 'click', () => {
-      const nextManifest = /* Your logic to pick the next video to be played */
+      const nextManifest =
+        /* Your logic to pick the next video to be played */
         myapp.getNextManifest();
 
       // shaka.ui.Element gives us access to the player object as member of the class
@@ -157,7 +164,6 @@ myapp.SkipButton = class extends shaka.ui.Element {
     });
   }
 };
-
 
 // Factory that will create a button at run time.
 myapp.SkipButton.Factory = class {
@@ -169,8 +175,8 @@ myapp.SkipButton.Factory = class {
 // Register our factory with the controls, so controls can create button instances.
 shaka.ui.Controls.registerElement(
   /* This name will serve as a reference to the button in the UI configuration object */ 'skip',
-  new myapp.SkipButton.Factory());
-
+  new myapp.SkipButton.Factory()
+);
 ```
 
 We have our button. Let's see how we can add it to the layout.
@@ -183,11 +189,10 @@ add a line to the init() function in myapp.js
 // we used when registering the factory with the controls.
 uiConfig['controlPanelElements'] = ['rewind', 'fast_forward', 'skip'];
 ```
+
 <!-- TODO: Create a doc on best a11y practices for custom buttons and link to the
   localization docs explaining how to take advantage of our localization system. -->
 
 #### Continue the Tutorials
 
 Next, check out {@tutorial a11y} to make your custom buttons accessible to screen readers.
-
-[shaka.ui.Controls.UIUpdatedEvent]: https://shaka-player-demo.appspot.com/docs/api/shaka.ui.Controls.html#.event:UIUpdatedEvent
