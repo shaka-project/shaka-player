@@ -17,7 +17,7 @@ const config = {
 ui.configure(config);
 ```
 
-Controls will fire a {@link shaka.ui.Controls.UIUpdatedEvent} event once the
+Controls will fire a [shaka.ui.Controls.UIUpdatedEvent][] event once the
 config takes effect.
 See the docs for {@link shaka.extern.UIConfiguration} for more information.
 
@@ -189,3 +189,5 @@ uiConfig['controlPanelElements'] = ['rewind', 'fast_forward', 'skip'];
 #### Continue the Tutorials
 
 Next, check out {@tutorial a11y} to make your custom buttons accessible to screen readers.
+
+[shaka.ui.Controls.UIUpdatedEvent]: https://shaka-player-demo.appspot.com/docs/api/shaka.ui.Controls.html#.event:UIUpdatedEvent
