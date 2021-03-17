@@ -39,7 +39,7 @@ the call should be:
 
 ```js
 const config = {
- 'controlPanelElements': ['fast_forward', 'rewind'],
+ 'controlPanelElements': ['fast_forward', 'rewind']
 }
 ui.configure(config);
 ```
@@ -170,7 +170,7 @@ myapp.SkipButton.Factory = class {
 shaka.ui.Controls.registerElement(
   /* This name will serve as a reference to the button in the UI configuration object */ 'skip',
   new myapp.SkipButton.Factory());
-  
+
 ```
 
 We have our button. Let's see how we can add it to the layout.
