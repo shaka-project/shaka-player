@@ -1,5 +1,6 @@
 # Customizing the UI
 
+
 #### Configuring the layout
 
 Once the UI is created, you can pass in configuration options that change
@@ -28,19 +29,18 @@ creating the UI overlay. This will configure UI to ONLY provide these two button
 
 ```js
 const config = {
-  'controlPanelElements': ['rewind', 'fast_forward'],
-};
+  'controlPanelElements': ['rewind', 'fast_forward']
+}
 ui.configure(config);
 ```
-
 This call will result in the controls panel having only two elements: rewind
 button and fast forward button, in that order. If the reversed order is desired,
 the call should be:
 
 ```js
 const config = {
-  'controlPanelElements': ['fast_forward', 'rewind'],
-};
+ 'controlPanelElements': ['fast_forward', 'rewind'],
+}
 ui.configure(config);
 ```
 
@@ -76,14 +76,14 @@ The following buttons can be added to the overflow menu:
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * playback_rate: adds a button that controls the playback rate selection.
 * airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
-supports AirPlay.
+  supports AirPlay.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
 ```js
 // Add only the cast button to the overflow menu, nothing else
 const config = {
-  'overflowMenuButtons': ['cast'],
+  'overflowMenuButtons' : ['cast']
 }
 ui.configure(config);
 ```
@@ -98,11 +98,10 @@ UI layout can be reconfigured at any point after it's been created.
 Please note that custom layouts might need CSS adjustments to look good.
 
 #### Changing seek bar progress colors
-
 The seek bar consists of three segments: past (already played part of the presentation),
 future-buffered and future-unbuffered.
 To customize the colors, add your values to the config object under `seekBarColors`:
-```js
+ ```js
 const config = {
   'seekBarColors': {
     base: 'rgba(255, 255, 255, 0.3)',
@@ -115,7 +114,7 @@ ui.configure(config);
 
 If you're using our ad API, you can also specify the color for the ad break markers on
 the timeline:
-```js
+ ```js
 const config = {
   'seekBarColors': {
     adBreaks: 'rgb(255, 204, 0)',
@@ -123,6 +122,7 @@ const config = {
 }
 ui.configure(config);
 ```
+
 
 #### Creating custom elements and adding them to the UI
 It's possible to add custom application-specific buttons to the UI.
@@ -158,6 +158,7 @@ myapp.SkipButton = class extends shaka.ui.Element {
   }
 };
 
+
 // Factory that will create a button at run time.
 myapp.SkipButton.Factory = class {
   create(rootElement, controls) {
@@ -169,6 +170,7 @@ myapp.SkipButton.Factory = class {
 shaka.ui.Controls.registerElement(
   /* This name will serve as a reference to the button in the UI configuration object */ 'skip',
   new myapp.SkipButton.Factory());
+  
 ```
 
 We have our button. Let's see how we can add it to the layout.
