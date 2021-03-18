@@ -1474,7 +1474,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     if (!this.controlsContainer_.classList.contains(
-        'shaka-keyboard-navigation')) {
+        'shaka-keyboard-navigation')||
+        !this.config_.enableKeyboardPlaybackControls) {
       return;
     }
 
