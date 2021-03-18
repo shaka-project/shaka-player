@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.PipButton');
 
 goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -48,6 +49,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('display-none-if-on-control');
     this.pipNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.pipNameSpan_.textContent =
       this.localization.resolve(LocIds.PICTURE_IN_PICTURE);
@@ -234,4 +236,7 @@ shaka.ui.PipButton.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'picture_in_picture', new shaka.ui.PipButton.Factory());
+
+shaka.ui.Controls.registerElement(
     'picture_in_picture', new shaka.ui.PipButton.Factory());
