@@ -832,7 +832,7 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
   // Listen for key down events to detect tab and enable outline
   // for focused elements.
   this.eventManager_.listen(window, 'keydown', (e) => {
-    this.onKeyDown_(/** @type {!KeyboardEvent} */(e));
+    this.onWindowKeyDown_(/** @type {!KeyboardEvent} */(e));
   });
 
   // Listen for click events to dismiss the settings menus.
@@ -862,8 +862,8 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
         this.onCastStatusChange_(e);
       });
 
-  this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
-    this.onKeyUp_(/** @type {!KeyboardEvent} */(e));
+  this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
+    this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
   });
 
   if (screen.orientation) {
@@ -1101,7 +1101,7 @@ shaka.ui.Controls.prototype.onPlayStateChange_ = function() {
  * @param {!KeyboardEvent} event
  * @private
  */
-shaka.ui.Controls.prototype.onKeyUp_ = function(event) {
+shaka.ui.Controls.prototype.onControlsKeyDown_ = function(event) {
   let activeElement = document.activeElement;
   let isVolumeBar = activeElement && activeElement.classList ?
       activeElement.classList.contains('shaka-volume-bar') : false;
@@ -1123,24 +1123,28 @@ shaka.ui.Controls.prototype.onKeyUp_ = function(event) {
     case 'ArrowLeft':
       // If it's not focused on the volume bar, move the seek time backward
       // for 5 sec. Otherwise, the volume will be adjusted automatically.
-      if (!isVolumeBar) {
-        this.seek_(this.video_.currentTime - 5, event);
+      if (this.seekBar_ && !isVolumeBar) {
+        this.seek_(this.seekBar_.getValue() - 5);
       }
       break;
     case 'ArrowRight':
       // If it's not focused on the volume bar, move the seek time forward
       // for 5 sec. Otherwise, the volume will be adjusted automatically.
-      if (!isVolumeBar) {
-        this.seek_(this.video_.currentTime + 5, event);
+      if (this.seekBar_ && !isVolumeBar) {
+        this.seek_(this.seekBar_.getValue() + 5);
       }
       break;
     // Jump to the beginning of the video's seek range.
     case 'Home':
-      this.seek_(this.player_.seekRange().start, event);
+      if (this.seekBar_) {
+        this.seek_(this.player_.seekRange().start);
+      }
       break;
     // Jump to the end of the video's seek range.
     case 'End':
-      this.seek_(this.player_.seekRange().end, event);
+      if (this.seekBar_) {
+        this.seek_(this.player_.seekRange().end);
+      }
       break;
     // Pause or play by pressing space on the seek bar.
     case ' ':
@@ -1182,11 +1186,13 @@ shaka.ui.Controls.prototype.isOpaque = function() {
 /**
  * Update the video's current time based on the keyboard operations.
  * @param {number} currentTime
- * @param {!Event} event
  * @private
  */
-shaka.ui.Controls.prototype.seek_ = function(currentTime, event) {
-  this.video_.currentTime = currentTime;
+shaka.ui.Controls.prototype.seek_ = function(currentTime) {
+  goog.asserts.assert(
+      this.seekBar_, 'Caller of seek_ must check for seekBar_ first!');
+  this.seekBar_.changeTo(currentTime);
+
   if (this.isOpaque()) {
     // Only update the time and esek range if it's visible.
     this.updateTimeAndSeekRange_();
@@ -1227,7 +1233,7 @@ shaka.ui.Controls.prototype.updateTimeAndSeekRange_ = function() {
  * @param {!KeyboardEvent} event
  * @private
  */
-shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
+shaka.ui.Controls.prototype.onWindowKeyDown_ = function(event) {
   // Add the key to the pressed keys set when it's pressed.
   this.pressedKeys_.add(event.key);
 
@@ -1261,14 +1267,19 @@ shaka.ui.Controls.prototype.onKeyDown_ = function(event) {
  * menu (pressing Tab key to go forward, or pressing Shift + Tab keys to go
  * backward), make sure it's focused only on the elements of the overflow
  * panel.
- * This is called by onKeyDown_() function, when there's a settings overflow
- * menu open, and the Tab key / Shift+Tab keys are pressed.
+ * This is called by onWindowKeyDown_() function, when there's a settings
+ * overflow menu open, and the Tab key / Shift+Tab keys are pressed.
  * @param {!Event} event
  * @private
  */
 shaka.ui.Controls.prototype.keepFocusInMenu_ = function(event) {
   const openSettingsMenus = this.settingsMenus_.filter(
       (menu) => menu.classList.contains('shaka-displayed'));
+  if (!openSettingsMenus.length) {
+    // For example, this occurs when you hit escape to close the menu.
+    return;
+  }
+
   const settingsMenu = openSettingsMenus[0];
   if (settingsMenu.childNodes.length) {
     // Get the first and the last displaying child element from the overflow

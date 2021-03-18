@@ -284,6 +284,9 @@ shaka.extern.IUIRangeElement = class {
 
   /** @param {number} value */
   setValue(value) {}
+
+  /** @param {number} value */
+  changeTo(value) {}
 };
 
 /**
