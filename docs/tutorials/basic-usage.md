@@ -4,12 +4,12 @@ Basic usage of Shaka Player is very easy:
 
 1. Start with {@tutorial welcome} and compile the library.
 2. Create a simple HTML page with a video or audio element.
-3. In your application's JavaScript:
-  1. Install Shaka's polyfills.
-  2. Check for browser support.
-  3. Create a Player object to wrap the media element.
-  4. Listen for errors.
-  5. Load a manifest.
+3. In your application's JavaScript -
+    1. Install Shaka's polyfills.
+    2. Check for browser support.
+    3. Create a Player object to wrap the media element.
+    4. Listen for errors.
+    5. Load a manifest.
 
 ```html
 <!DOCTYPE html>
