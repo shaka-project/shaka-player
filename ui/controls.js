@@ -98,6 +98,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {boolean} */
     this.recentMouseMovement_ = false;
 
+    /** @private {boolean} */
+    this.continuousSeekBarUpdating_ = false;
+
+    /** @private {boolean} */
+    this.continuousSeekBarUpdatingTimer_ = false;
+
     /**
      * This timer is used to detect when the user has stopped moving the mouse
      * and we should fade out the ui.
@@ -153,6 +159,39 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         this.updateTimeAndSeekRange_();
       }
     });
+
+    /**
+     * This timer is used to regularly increase the current time
+     * by 2s when keyboard controls are enabled and arrow key
+     * is pressed for long
+     *
+     * @private {shaka.util.Timer}
+     */
+    this.seekbarIncreaseTimer_ = new shaka.util.Timer(() => {
+      // updates current time on seekbar
+      this.video_.currentTime += 2;
+      if (this.isOpaque()) {
+        this.updateTimeAndSeekRange_();
+      }
+    });
+
+    /**
+     * This timer is used to regularly decrease the current time
+     * by 2s when keyboard controls are enabled and arrow key
+     * is pressed for long
+     *
+     * @private {shaka.util.Timer}
+     */
+    this.seekbarDecreaseTimer_ = new shaka.util.Timer(() => {
+      // updates current time on seekbar
+      this.video_.currentTime -= 2;
+      if (this.isOpaque()) {
+        this.updateTimeAndSeekRange_();
+      }
+    });
+
+    /** @private {?number} */
+    this.continuousSeekBarUpdatingTime_ = null;
 
     /** @private {?number} */
     this.lastTouchEventTime_ = null;
@@ -1291,6 +1330,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
+    this.seekbarIncreaseTimer_.stop();
+    this.seekbarDecreaseTimer_.stop();
+
+    if (this.continuousSeekBarUpdating_) {
+      // to avoid changing current time after it has been updated
+      // by timer in onkeydown()
+      this.continuousSeekBarUpdating_ = false;
+      this.continuousSeekBarUpdatingTimer_ = false;
+      return;
+    }
+
     switch (event.key) {
       case 'ArrowLeft':
         // If it's not focused on the volume bar, move the seek time backward
@@ -1421,6 +1471,51 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // an overflow settings menu, keep the focus to loop inside the
       // overflow menu.
       this.keepFocusInMenu_(event);
+    }
+
+    if (!this.controlsContainer_.classList.contains(
+        'shaka-keyboard-navigation')) {
+      return;
+    }
+
+    const activeElement = document.activeElement;
+    const isVolumeBar = activeElement && activeElement.classList ?
+        activeElement.classList.contains('shaka-volume-bar') : false;
+
+    if (!this.continuousSeekBarUpdatingTimer_) {
+      this.continuousSeekBarUpdatingTime_ = Date.now();
+      this.continuousSeekBarUpdatingTimer_=true;
+    }
+
+    if (!this.continuousSeekBarUpdating_
+      && Date.now() > this.continuousSeekBarUpdatingTime_+1000) {
+      switch (event.key) {
+        case 'ArrowLeft':
+          // If it's not focused on the volume bar, the seek time moves
+          // 5s backwards for every 1 sec.
+          if (!isVolumeBar) {
+            this.seekbarDecreaseTimer_.tickEvery(0.1);
+          }
+          break;
+        case 'ArrowRight':
+          // If it's not focused on the volume bar, the seek time moves
+          // 5s Forwards for every 1 sec.
+          if (!isVolumeBar) {
+            this.seekbarIncreaseTimer_.tickEvery(0.1);
+          }
+          break;
+      }
+      // to avoid creating muliple seekbar update timers for every 1s
+      this.continuousSeekBarUpdating_ = true;
+    }
+
+    // TODO : replace ended with the value of the max time of video
+    if (this.video_.ended) {
+      this.seekbarIncreaseTimer_.stop();
+    }
+
+    if (this.video_.currentTime < 0) {
+      this.seekbarDecreaseTimer_.stop();
     }
   }
 
