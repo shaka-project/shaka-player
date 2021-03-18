@@ -1,3 +1,13 @@
+## 3.0.10 (2021-03-18)
+
+Bugfixes:
+  - Fix stalls in some multi-Period DASH content
+    - https://github.com/google/shaka-player/issues/3230
+  - Fix stylelint errors on Windows
+    - https://github.com/google/shaka-player/issues/2985
+    - https://github.com/google/shaka-player/pull/3214
+
+
 ## 3.0.9 (2021-03-15)
 
 Bugfixes:
