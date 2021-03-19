@@ -638,7 +638,7 @@ describe('TtmlTextParser', () => {
             payload: 'Test',
             region: {
               id: 'subtitleArea',
-              // Viewport 10% of extent, reflecting the fraction of origin/extent
+              // Viewport 10% of extent i.e the fraction of origin/extent
               viewportAnchorX: 10,
               viewportAnchorY: 10,
               regionAnchorX: 0,
