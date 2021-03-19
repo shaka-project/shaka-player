@@ -1,4 +1,5 @@
 goog.require('shaka.media.LiveCatchUpController');
+goog.require('shaka.test.StreamingEngineUtil');
 goog.require('shaka.test.Util');
 
 describe('LiveCatchUpController', () => {
@@ -28,6 +29,13 @@ describe('LiveCatchUpController', () => {
     trickPlaySpy = jasmine.createSpy('trickPlay');
     getServiceDescriptionSpy = jasmine.createSpy('getServiceDescription');
 
+    const timeline = shaka.test.StreamingEngineUtil
+        .createFakePresentationTimeline(
+            {start: 0, end: 800},
+            /* presentationDuration= */ Infinity,
+            /* maxSegmentDuration= */ 2,
+            /* isLive= */ true);
+
     const playerInterface = {
       getBufferEnd: shaka.test.Util.spyFunc(getBufferEndSpy),
       getPlayRate: shaka.test.Util.spyFunc(getPlayRateSpy),
@@ -36,7 +44,8 @@ describe('LiveCatchUpController', () => {
       getServiceDescription: shaka.test.Util.spyFunc(getServiceDescriptionSpy),
     };
 
-    controller = new shaka.media.LiveCatchUpController(playerInterface);
+    controller = new shaka.media.LiveCatchUpController(
+        timeline, playerInterface);
     controller.enable();
   });
 
