@@ -638,8 +638,8 @@ describe('TtmlTextParser', () => {
             payload: 'Test',
             region: {
               id: 'subtitleArea',
-              viewportAnchorX: 10,
-              viewportAnchorY: 10,
+              viewportAnchorX: 10 * 9/16,
+              viewportAnchorY: 10 * 16/9,
               regionAnchorX: 0,
               regionAnchorY: 0,
               width: 100,
