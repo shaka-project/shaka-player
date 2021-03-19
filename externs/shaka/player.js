@@ -757,7 +757,7 @@ shaka.extern.ManifestConfiguration;
  *   inaccurateManifestTolerance: number,
  *   lowLatencyMode: boolean,
  *   autoLowLatencyMode: boolean,
- *   liveCatchup: boolean,
+ *   liveCatchUp: shaka.extern.LiveCatchUpConfiguration,
  *   forceHTTPS: boolean,
  *   preferNativeHls: boolean
  * }}
@@ -862,8 +862,8 @@ shaka.extern.ManifestConfiguration;
  *   lowLatencyMode, but if it has been configured to activate the
  *   lowLatencyMode if a stream of this type is detected, we automatically
  *   activate the lowLatencyMode. Defaults to false.
- * @property {boolean} liveCatchup
- *   If true, enable variable play rate to catch up live edge
+ * @property {shaka.extern.LiveCatchUpConfiguration} liveCatchUp
+ *   Parameters for live catch up
  * @property {boolean} forceHTTPS
  *   If true, if the protocol is HTTP change it to HTTPs.
  * @property {boolean} preferNativeHls
@@ -1018,6 +1018,20 @@ shaka.extern.OfflineConfiguration;
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;
+
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   minBuffer: number
+ * }}
+ *
+ * @property {boolean} enabled
+ *   If true, enable LiveCatchUpController.  Defaults to false.
+ * @property {number} minBuffer
+ *   The minimum buffer to keep. No effect at the moment.
+ * @exportDoc
+ */
+shaka.extern.LiveCatchUpConfiguration;
 
 
 /**
