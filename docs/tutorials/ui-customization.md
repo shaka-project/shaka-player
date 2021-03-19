@@ -17,7 +17,7 @@ const config = {
 ui.configure(config);
 ```
 
-Controls will fire a {@link shaka.ui.Controls.UIUpdatedEvent} event once the
+Controls will fire a {@link shaka.ui.Controls#event:UIUpdatedEvent} event once the
 config takes effect.
 See the docs for {@link shaka.extern.UIConfiguration} for more information.
 
