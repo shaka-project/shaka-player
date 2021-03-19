@@ -646,6 +646,9 @@ describe('DrmEngine', () => {
 
       setRequestMediaKeySystemAccessSpy([
         'com.microsoft.playready',
+        // Specific case for tests on the Chromecast platform since
+        // com.microsoft.playready is changed into the keySystem below
+        'com.chromecast.playready',
       ]);
       config.servers = {
         'com.microsoft.playready': 'https://com.microsoft.playready/license',
@@ -665,7 +668,8 @@ describe('DrmEngine', () => {
           );
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith(
-              'com.microsoft.playready',
+              jasmine.stringMatching(
+                  /^com\.(microsoft|chromecast)\.playready$/),
               jasmine.any(Array),
           );
     });
