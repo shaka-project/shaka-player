@@ -638,8 +638,9 @@ describe('TtmlTextParser', () => {
             payload: 'Test',
             region: {
               id: 'subtitleArea',
-              viewportAnchorX: 10 * 9/16,
-              viewportAnchorY: 10 * 16/9,
+              // Viewport 10% of extent, reflecting the fraction of origin/extent
+              viewportAnchorX: 10,
+              viewportAnchorY: 10,
               regionAnchorX: 0,
               regionAnchorY: 0,
               width: 100,
@@ -653,7 +654,7 @@ describe('TtmlTextParser', () => {
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" tts:extent="1920px 1080px">' +
         '<layout>' +
-        '<region xml:id="subtitleArea" tts:origin="108px 192px"/>' +
+        '<region xml:id="subtitleArea" tts:origin="192px 108px"/>' +
         '</layout>' +
         '<body region="subtitleArea"><div>' +
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
