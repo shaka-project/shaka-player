@@ -28,7 +28,6 @@ describe('DrmEngine', () => {
 
   const originalRequestMediaKeySystemAccess =
       navigator.requestMediaKeySystemAccess;
-  const originalPlatformIsEdge = shaka.util.Platform.isEdge;
   const originalLogError = shaka.log.error;
   const originalBatchTime = shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME;
 
@@ -152,7 +151,6 @@ describe('DrmEngine', () => {
     navigator.requestMediaKeySystemAccess =
         originalRequestMediaKeySystemAccess;
     shaka.log.error = originalLogError;
-    shaka.util.Platform.isEdge = originalPlatformIsEdge;
   });
 
   describe('supportsVariants', () => {
@@ -628,7 +626,10 @@ describe('DrmEngine', () => {
     });
 
     it('should silently try PlayReady recommendation keySytem', async () => {
-      shaka.util.Platform.isEdge = () => true;
+      if (!shaka.util.Platform.isEdge()) {
+        pending('PlayReady recommendation is only available on Edge');
+        return;
+      }
 
       // Leave only one drmInfo
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -646,9 +647,6 @@ describe('DrmEngine', () => {
 
       setRequestMediaKeySystemAccessSpy([
         'com.microsoft.playready',
-        // Specific case for tests on the Chromecast platform since
-        // com.microsoft.playready is changed into the keySystem below
-        'com.chromecast.playready',
       ]);
       config.servers = {
         'com.microsoft.playready': 'https://com.microsoft.playready/license',
@@ -668,8 +666,7 @@ describe('DrmEngine', () => {
           );
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith(
-              jasmine.stringMatching(
-                  /^com\.(microsoft|chromecast)\.playready$/),
+              'com.microsoft.playready',
               jasmine.any(Array),
           );
     });
