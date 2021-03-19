@@ -148,6 +148,7 @@ describe('Playhead', () => {
     manifest = {
       variants: [],
       textStreams: [],
+      imageStreams: [],
       presentationTimeline: timeline,
       minBufferTime: 10,
       offlineSessionIds: [],
@@ -1269,6 +1270,53 @@ describe('Playhead', () => {
 
       expect(seekCount).toBe(1);
       expect(currentTime).toBe(10);
+    });
+
+    it('doesn\'t gap jump if paused', () => {
+      const buffered = [{start: 10, end: 20}];
+      video.buffered = createFakeBuffered(buffered);
+      video.currentTime = 5;
+      video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
+      video.paused = true;
+
+      config.jumpLargeGaps = true;
+      playhead = new shaka.media.MediaSourcePlayhead(
+          video,
+          manifest,
+          config,
+          /* startTime= */ 5,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      playhead.notifyOfBufferingChange();
+      jasmine.clock().tick(500);
+
+      // There should NOT have been a gap jump.
+      expect(video.currentTime).toBe(5);
+    });
+
+    // Regression test for https://github.com/google/shaka-player/issues/2987
+    it('does gap jump if paused at 0', () => {
+      const buffered = [{start: 10, end: 20}];
+      video.buffered = createFakeBuffered(buffered);
+      video.currentTime = 0;
+      video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
+      video.paused = true;
+
+      config.jumpLargeGaps = true;
+      playhead = new shaka.media.MediaSourcePlayhead(
+          video,
+          manifest,
+          config,
+          /* startTime= */ 0,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      playhead.notifyOfBufferingChange();
+      jasmine.clock().tick(500);
+
+      // There SHOULD have been a gap jump.
+      expect(video.currentTime).toBe(10);
     });
 
     /**

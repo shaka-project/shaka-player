@@ -398,6 +398,8 @@ shakaDemo.Search = class {
         shakaDemo.MessageIds.AD_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.AUDIO_ONLY, FEATURE,
         shakaDemo.MessageIds.AUDIO_ONLY_SEARCH);
+    this.makeBooleanInput_(specialContainer, Feature.THUMBNAILS, FEATURE,
+        shakaDemo.MessageIds.THUMBNAILS);
 
     container.appendChild(this.resultsDiv_);
   }

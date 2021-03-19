@@ -1174,15 +1174,13 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       expectedMedia.metadata = metadata;
     }
 
-    expect(mockGenericMessageBus.messages[0]).toEqual(
-        {
-          requestId: 0,
-          type: 'MEDIA_STATUS',
-          status: [jasmine.objectContaining({
-            media: expectedMedia,
-          })],
-        }
-    );
+    expect(mockGenericMessageBus.messages[0]).toEqual({
+      requestId: 0,
+      type: 'MEDIA_STATUS',
+      status: [jasmine.objectContaining({
+        media: expectedMedia,
+      })],
+    });
     mockGenericMessageBus.messages.shift();
   }
 });

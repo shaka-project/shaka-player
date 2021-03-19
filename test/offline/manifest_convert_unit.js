@@ -292,6 +292,7 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
     };
 
@@ -335,6 +336,7 @@ describe('ManifestConverter', () => {
       codecs: 'avc1.42c01e',
       frameRate: 22,
       pixelAspectRatio: '59:54',
+      hdr: undefined,
       kind: undefined,
       language: '',
       label: null,
@@ -361,7 +363,9 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -381,6 +385,7 @@ describe('ManifestConverter', () => {
       codecs: 'mp4a.40.2',
       frameRate: undefined,
       pixelAspectRatio: undefined,
+      hdr: undefined,
       kind: undefined,
       language: 'en',
       label: null,
@@ -407,7 +412,9 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -426,6 +433,7 @@ describe('ManifestConverter', () => {
       codecs: '',
       frameRate: undefined,
       pixelAspectRatio: undefined,
+      hdr: undefined,
       kind: undefined,
       language: 'en',
       label: null,
@@ -452,7 +460,9 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -478,6 +488,7 @@ describe('ManifestConverter', () => {
       codecs: streamDb.codecs,
       frameRate: streamDb.frameRate,
       pixelAspectRatio: streamDb.pixelAspectRatio,
+      hdr: streamDb.hdr,
       width: streamDb.width || undefined,
       height: streamDb.height || undefined,
       kind: streamDb.kind,
@@ -494,7 +505,9 @@ describe('ManifestConverter', () => {
       forced: streamDb.forced,
       channelsCount: streamDb.channelsCount,
       audioSamplingRate: streamDb.audioSamplingRate,
+      spatialAudio: streamDb.spatialAudio,
       closedCaptions: streamDb.closedCaptions,
+      tilesLayout: streamDb.tilesLayout,
     };
 
     expect(stream).toEqual(expectedStream);

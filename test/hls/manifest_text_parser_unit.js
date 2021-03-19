@@ -323,15 +323,13 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
-              new shaka.hls.Segment('https://test/test.mp4',
-                  [
-                    new shaka.hls.Tag(
-                        /* id= */ 2,
-                        'EXTINF',
-                        [new shaka.hls.Attribute('pid', '180')],
-                        '5.99467'
-                    ),
-                  ]),
+              new shaka.hls.Segment('https://test/test.mp4', [
+                new shaka.hls.Tag(
+                    /* id= */ 2,
+                    'EXTINF',
+                    [new shaka.hls.Attribute('pid', '180')],
+                    '5.99467'),
+              ]),
             ],
           },
 

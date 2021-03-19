@@ -123,7 +123,7 @@ describe('DashParser Live', () => {
       return new shaka.media.SegmentReference(
           ref.startTime,
           ref.endTime,
-          ref.getUris,
+          ref.getUrisInner,
           ref.startByte,
           ref.endByte,
           ref.initSegmentReference,

@@ -94,6 +94,9 @@ shaka.test.ManifestGenerator.Manifest = class {
     /** @type {!Array.<shaka.extern.Stream>} */
     this.textStreams = [];
 
+    /** @type {!Array.<shaka.extern.Stream>} */
+    this.imageStreams = [];
+
     const timeline = new this.shaka_.media.PresentationTimeline(0, 0);
     timeline.setSegmentAvailabilityDuration(Infinity);
     timeline.notifyMaxSegmentDuration(10);
@@ -211,6 +214,22 @@ shaka.test.ManifestGenerator.Manifest = class {
   }
 
   /**
+   * Adds an image stream to the manifest.
+   *
+   * @param {number} id
+   * @param {function(!shaka.test.ManifestGenerator.Stream)=} func
+   */
+  addImageStream(id, func) {
+    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const stream = new shaka.test.ManifestGenerator.Stream(
+        this, /* isPartial= */ false, id, ContentType.IMAGE, 'und');
+    if (func) {
+      func(stream);
+    }
+    this.imageStreams.push(stream.build_());
+  }
+
+  /**
    * Adds a "partial" stream which, when used with jasmine, will only compare
    * the properties that were explicitly given to it.  All other properties will
    * be ignored.
@@ -262,6 +281,8 @@ shaka.test.ManifestGenerator.Variant = class {
       this.allowedByApplication = true;
       /** @type {boolean} */
       this.allowedByKeySystem = true;
+      /** @type {!Array.<MediaCapabilitiesDecodingInfo>} */
+      this.decodingInfos = [];
     }
 
     /** @type {shaka.extern.Variant} */
@@ -519,8 +540,14 @@ shaka.test.ManifestGenerator.Stream = class {
       this.channelsCount = null;
       /** @type {?number} */
       this.audioSamplingRate = null;
+      /** @type {boolean} */
+      this.spatialAudio = false;
       /** @type {Map.<string, string>} */
       this.closedCaptions = null;
+      /** @type {(string|undefined)} */
+      this.hdr = undefined;
+      /** @type {(string|undefined)} */
+      this.tilesLayout = undefined;
     }
 
     /** @type {shaka.extern.Stream} */

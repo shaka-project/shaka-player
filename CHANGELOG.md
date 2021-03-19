@@ -1,3 +1,167 @@
+## 3.0.10 (2021-03-18)
+
+Bugfixes:
+  - Fix stalls in some multi-Period DASH content
+    - https://github.com/google/shaka-player/issues/3230
+  - Fix stylelint errors on Windows
+    - https://github.com/google/shaka-player/issues/2985
+    - https://github.com/google/shaka-player/pull/3214
+
+
+## 3.0.9 (2021-03-15)
+
+Bugfixes:
+  - Fixed build error on Windows
+    - https://github.com/google/shaka-player/issues/3208
+    - https://github.com/google/shaka-player/issues/3204
+    - https://github.com/google/shaka-player/pull/3211
+  - Exported SegmentReference.getUris
+    - https://github.com/google/shaka-player/issues/3096
+  - Fix giant gaps in SSAI content
+    - https://github.com/google/shaka-player/issues/3191
+  - Fix TTML background image attribute case
+    - https://github.com/google/shaka-player/issues/3196
+  - Avoid setting global Cast hook
+    - https://github.com/google/shaka-player/issues/3167
+  - Fix codec choice when resolutions differ
+    - https://github.com/google/shaka-player/issues/3056
+    - https://github.com/google/shaka-player/pull/3072
+  - Fix autoplay for non-zero-start VOD
+    - https://github.com/google/shaka-player/issues/2987
+  - Allow playing Periods with missing text
+    - https://github.com/google/shaka-player/issues/2957
+  - Support localized whitespace preservation in TTML
+    - https://github.com/google/shaka-player/issues/3011
+    - https://github.com/google/shaka-player/pull/3043
+  - Fix offline storage after a failure
+    - https://github.com/google/shaka-player/issues/2781
+  - Fix repeated seek on start for some content
+    - https://github.com/google/shaka-player/issues/2831
+  - Fix subtitle display in timing edge case
+    - https://github.com/google/shaka-player/issues/3151
+    - https://github.com/google/shaka-player/pull/3152
+  - Support version 1 emsg boxes
+    - https://github.com/google/shaka-player/issues/1539
+    - https://github.com/google/shaka-player/pull/3147
+    - https://github.com/google/shaka-player/pull/3198
+
+Ads (BETA):
+  - Change the value of the 'mpt' param we set for tracking
+  - Expose native IMA stream manager for SS DAI
+  - Hide the ad container when ads aren't playing
+    - https://github.com/google/shaka-player/issues/3121
+  - Add "limited ads" section to the ads tutorial
+  - Expand the IMA integration tutorial
+    - https://github.com/google/shaka-player/issues/3168
+
+Docs:
+  - Fixed various typos
+    - https://github.com/google/shaka-player/pull/3222
+  - Fixed outdated info and typos
+    - https://github.com/google/shaka-player/pull/3206
+  - Document programmatic UI setup
+    - https://github.com/google/shaka-player/issues/2655
+  - Update doc for manifest and segment ALR
+  - Add vue.js, nuxt.js and video.js integration examples
+    - https://github.com/google/shaka-player/pull/3160
+
+Demo App:
+  - Make it possible to add custom ad assets with no manifest uri.
+    - https://github.com/google/shaka-player/issues/3136
+  - Add an ADS tab to the custom content page
+    - https://github.com/google/shaka-player/issues/3136
+  - Add DAI live DASH example to DEMO app
+    - https://github.com/google/shaka-player/pull/3170
+
+
+## 2.5.21 (2021-03-12)
+
+Bugfixes:
+  - Fix giant gaps in SSAI content
+    - https://github.com/google/shaka-player/issues/3191
+  - Fix TTML background image attribute case
+    - https://github.com/google/shaka-player/issues/3196
+  - Avoid setting global Cast hook
+    - https://github.com/google/shaka-player/issues/3167
+  - Fix codec choice when resolutions differ
+    - https://github.com/google/shaka-player/pull/3072
+  - Fix autoplay for non-zero-start VOD
+    - https://github.com/google/shaka-player/issues/2987
+  - Support localized whitespace preservation in TTML
+    - https://github.com/google/shaka-player/issues/3011
+    - https://github.com/google/shaka-player/pull/3043
+  - Fix repeated seek on start for some content
+    - https://github.com/google/shaka-player/issues/2831
+  - Fix subtitle display in timing edge case
+    - https://github.com/google/shaka-player/issues/3151
+    - https://github.com/google/shaka-player/pull/3152
+  - Fixed build error on Windows
+    - https://github.com/google/shaka-player/pull/3211
+    - https://github.com/google/shaka-player/issues/3208
+    - https://github.com/google/shaka-player/issues/3204
+
+Docs:
+  - Fixed outdated info and typos
+    - https://github.com/google/shaka-player/pull/3206
+  - Fixed various typos
+    - https://github.com/google/shaka-player/pull/3222
+  - Document programmatic UI setup
+    - https://github.com/google/shaka-player/issues/2655
+  - Update doc for manifest and segment ALR
+
+
+## 3.0.8 (2021-02-08)
+
+Bugfixes:
+  - Fix memory leak in Webpack-bundled version
+    - https://github.com/google/shaka-player/issues/3092
+    - https://github.com/google/shaka-player/pull/3098
+  - Fix build in Python 3
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix broken build in directories with spaces
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix mixed clear/encrypted content on Xbox & Tizen
+    - https://github.com/google/shaka-player/issues/2759
+  - Fix trick mode tracks in DASH (work around compiler bug)
+    - https://github.com/google/shaka-player/issues/3085
+    - https://github.com/google/shaka-player/pull/3087
+  - Fix DRM initialization on WebOS 3.0
+    - https://github.com/google/shaka-player/pull/3109
+  - Fix segment refs for "future" DASH periods
+  - Recognize "m4f" extension in HLS
+    - https://github.com/google/shaka-player/issues/3099
+    - https://github.com/google/shaka-player/pull/3111
+  - Catch unhandled rejection while destroying StreamingEngine
+  - Fix header sizes for MP4 boxes with 64-bit size fields
+  - Fix load-time exception in nodejs
+
+Ads (BETA):
+  - Use the correct AdsLoader `AD_ERROR` event
+    - https://github.com/google/shaka-player/issues/3095
+    - https://github.com/google/shaka-player/pull/3105
+  - Expose getMinSuggestedDuration
+  - Add setVpaidMode to the IMA externs
+    - https://github.com/google/shaka-player/pull/3135
+
+
+## 2.5.20 (2021-02-08)
+
+Bugfixes:
+  - Fix build in Python 3
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix broken build in directories with spaces
+    - https://github.com/google/shaka-player/issues/3102
+  - Fix trick mode tracks in DASH (work around compiler bug)
+    - https://github.com/google/shaka-player/issues/3085
+    - https://github.com/google/shaka-player/pull/3087
+  - Fix DRM initialization on WebOS 3.0
+    - https://github.com/google/shaka-player/pull/3109
+  - Recognize "m4f" extension in HLS
+    - https://github.com/google/shaka-player/issues/3099
+    - https://github.com/google/shaka-player/pull/3111
+  - Fix header sizes for MP4 boxes with 64-bit size fields
+
+
 ## 3.0.7 (2021-01-06)
 
 Bugfixes:

@@ -211,6 +211,10 @@ Shaka Player supports:
     - UTF-8 encoding only
   - LyRiCs (LRC)
     - UTF-8 encoding only
+  - SubStation Alpha (SSA, ASS)
+    - UTF-8 encoding only
+  - SubViewer (SBV)
+    - UTF-8 encoding only
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
@@ -259,6 +263,15 @@ Shaka + ReactJS integrations:
 
 Shaka + Next.js integration:
 - https://github.com/amit08255/shaka-player-react-with-ui-config/tree/master/nextjs-shaka-player
+
+Shaka + Vue.js integrations:
+- https://github.com/davidjamesherzog/shaka-player-vuejs
+
+Shaka + Nuxt.js integration:
+- https://github.com/davidjamesherzog/shaka-player-nuxtjs
+
+Shaka + video.js integration:
+- https://github.com/davidjamesherzog/videojs-shaka
 
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!
