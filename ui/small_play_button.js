@@ -36,7 +36,11 @@ shaka.ui.SmallPlayButton = class extends shaka.ui.PlayButton {
   /** @override */
   updateIcon() {
     const Icons = shaka.ui.Enums.MaterialDesignIcons;
-    this.button.textContent = this.isPaused() ? Icons.PLAY : Icons.PAUSE;
+    if (this.video.ended) {
+      this.button.textContent = Icons.REPLAY;
+    } else {
+      this.button.textContent = this.isPaused() ? Icons.PLAY : Icons.PAUSE;
+    }
   }
 };
 
