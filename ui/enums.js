@@ -46,4 +46,5 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'FAST_FORWARD': 'fast_forward',
   'PLAY': 'play_arrow',
   'PAUSE': 'pause',
+  'REPLAY': 'replay',
 };
