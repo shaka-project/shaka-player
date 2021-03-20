@@ -147,9 +147,8 @@ If you are using Shaka's UI library, we will automatically hook up our ad UI.
 #### Listening To Ad Events
 We unify Server Side and Client Side ad events into our own Shaka ad events and
 objects. which your application can listen to and interact with.
-Check out the
-{@link shaka.ads.AdManager#event:AdBreakReadyEvent|full list of ad events} for
-details.
+Check out the {@link shaka.ads.AdManager#event:AdBreakReadyEvent|full list of 
+ad events} for details.
 
 Let's register a simple listener to Shaka's AD_STARTED event. It will log the
 start of the ad in the console.
@@ -179,9 +178,8 @@ If you have an existing IMA integration you want to plug into Shaka, or you want
 to use more intricate SDK capabilities not exposed through our API, we provide a
 way to do that.
 Listen to the {@link shaka.ads.AdManager#event:ImaAdManagerLoadedEvent} for
-Client Side or the
-{@link shaka.ads.AdManager#event:ImaStreamManagerLoadedEvent} for Server Side
-to get the IMA [AdManager][] or [StreamManager][] objects.
+Client Side or the {@link shaka.ads.AdManager#event:ImaStreamManagerLoadedEvent}
+for Server Side to get the IMA [AdManager][] or [StreamManager][] objects.
 
 ```js
 adManager.addEventListener(shaka.ads.AdManager.IMA_AD_MANAGER_LOADED, (e) => {
