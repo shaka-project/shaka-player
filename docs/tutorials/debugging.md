@@ -138,7 +138,7 @@ Error code 1001 object shaka.util.Error  myapp.js:48
 ```
 
 So much more information!  We can now see that the failed HEAD request caused
-load() to fail.
+`load()` to fail.
 
 
 #### Advanced: Loading the uncompiled library

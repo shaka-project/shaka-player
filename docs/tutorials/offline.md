@@ -668,7 +668,7 @@ storage, set:
 usePersistentLicense: false
 ```
 
-By default, shaka.offline.Storage stores persistent licenses. If you want this
+By default, `shaka.offline.Storage` stores persistent licenses. If you want this
 behaviour and you know you are on a supported platform, you can omit the
 setting or set it explicitly with:
 
