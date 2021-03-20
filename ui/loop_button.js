@@ -143,8 +143,8 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     const labelText = this.video.loop ? LocIds.ON : LocIds.OFF;
 
     this.currentState_.textContent = this.localization.resolve(labelText);
-  
-    const icon = this.video.loop ? Icons.UNLOOP : Icons.LOOP
+
+    const icon = this.video.loop ? Icons.UNLOOP : Icons.LOOP;
 
     this.icon_.textContent = icon;
 

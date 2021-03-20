@@ -161,4 +161,4 @@ shaka.ui.OverflowMenu.registerElement(
     'airplay', new shaka.ui.AirPlayButton.Factory());
 
 shaka.ui.Controls.registerElement(
-  'airplay', new shaka.ui.AirPlayButton.Factory());
+    'airplay', new shaka.ui.AirPlayButton.Factory());
