@@ -12,12 +12,12 @@ basic usage tutorial, after creating the UI overlay:
 const video = document.getElementById('video');
 const ui = video['ui'];
 const config = {
-  addSeekBar: false;
+  addSeekBar: false
 };
 ui.configure(config);
 ```
 
-Controls will fire a {@link shaka.ui.Controls.UIUpdatedEvent} event once the
+Controls will fire a {@link shaka.ui.Controls#event:UIUpdatedEvent} event once the
 config takes effect.
 See the docs for {@link shaka.extern.UIConfiguration} for more information.
 
@@ -91,7 +91,7 @@ ui.configure(config);
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
 
-The presense of the seek bar and the big play button in the center of the video element can be
+The presence of the seek bar and the big play button in the center of the video element can be
 customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
 
 UI layout can be reconfigured at any point after it's been created.

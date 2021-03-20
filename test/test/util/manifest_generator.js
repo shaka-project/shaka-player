@@ -281,6 +281,8 @@ shaka.test.ManifestGenerator.Variant = class {
       this.allowedByApplication = true;
       /** @type {boolean} */
       this.allowedByKeySystem = true;
+      /** @type {!Array.<MediaCapabilitiesDecodingInfo>} */
+      this.decodingInfos = [];
     }
 
     /** @type {shaka.extern.Variant} */

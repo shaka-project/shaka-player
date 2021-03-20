@@ -304,6 +304,9 @@ shaka.extern.IUIRangeElement = class {
 
   /** @param {number} value */
   setValue(value) {}
+
+  /** @param {number} value */
+  changeTo(value) {}
 };
 
 /**
@@ -373,7 +376,7 @@ shaka.extern.IUISettingsMenu = class {
  * SeekBar, you should consider using shaka.ui.RangeElement or
  * shaka.ui.SeekBar as your base class.
  *
- * @extends {shaka.extern.IUIElement}
+ * @extends {shaka.extern.IUIRangeElement}
  * @interface
  * @exportDoc
  */

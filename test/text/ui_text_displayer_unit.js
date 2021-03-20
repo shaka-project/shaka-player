@@ -88,7 +88,7 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('div');
+    const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({
@@ -175,7 +175,7 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('div');
+    const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({
@@ -205,7 +205,7 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('div');
+    const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({'font-size': expectedFontSize}));

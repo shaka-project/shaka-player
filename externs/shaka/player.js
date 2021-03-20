@@ -612,6 +612,7 @@ shaka.extern.DrmConfiguration;
  * @typedef {{
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
+ *   disableXlinkProcessing: boolean,
  *   xlinkFailGracefully: boolean,
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
@@ -629,6 +630,9 @@ shaka.extern.DrmConfiguration;
  *   If true will cause DASH parser to ignore DRM information specified
  *   by the manifest and treat it as if it signaled no particular key
  *   system and contained no init data. Defaults to false if not provided.
+ * @property {boolean} disableXlinkProcessing
+ *   If true, xlink-related processing will be disabled. Defaults to
+ *   <code>false</code> if not provided.
  * @property {boolean} xlinkFailGracefully
  *   If true, xlink-related errors will result in a fallback to the tag's
  *   existing contents. If false, xlink-related errors will be propagated
@@ -744,6 +748,7 @@ shaka.extern.ManifestConfiguration;
  *   ignoreTextStreamFailures: boolean,
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
+ *   gapDetectionThreshold: number,
  *   smallGapLimit: number,
  *   jumpLargeGaps: boolean,
  *   durationBackoff: number,
@@ -795,6 +800,10 @@ shaka.extern.ManifestConfiguration;
  *   of a segment. This affects both explicit start times and calculated start
  *   time for live streams. This can put us further from the live edge. Defaults
  *   to <code>false</code>.
+ * @property {number} gapDetectionThreshold
+ *   TThe maximum distance (in seconds) before a gap when we'll automatically
+ *   jump. This value  defaults to <code>0.1</code>, except in Edge Legacy, IE,
+ *   Tizen, Chromecast that value defaults value is <code>0.5</code>
  * @property {number} smallGapLimit
  *   The limit (in seconds) for a gap in the media to be considered "small".
  *   Small gaps are jumped automatically without events.  Large gaps result

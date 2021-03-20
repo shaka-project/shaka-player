@@ -176,6 +176,8 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreDrmInfo')
         .addBoolInput_(MessageIds.AUTO_CORRECT_DASH_DRIFT,
             'manifest.dash.autoCorrectDrift')
+        .addBoolInput_(MessageIds.DISABLE_XLINK_PROCESSING,
+            'manifest.dash.disableXlinkProcessing')
         .addBoolInput_(MessageIds.XLINK_FAIL_GRACEFULLY,
             'manifest.dash.xlinkFailGracefully')
         .addBoolInput_(MessageIds.IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY,
@@ -295,6 +297,9 @@ shakaDemo.Config = class {
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.StreamingConfiguration');
     this.addSection_(MessageIds.STREAMING_SECTION_HEADER, docLink)
+        .addNumberInput_(MessageIds.GAP_DETECTION_THRESHOLD,
+            'streaming.gapDetectionThreshold',
+            /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.MAX_SMALL_GAP_SIZE,
             'streaming.smallGapLimit',
             /* canBeDecimal= */ true)

@@ -38,5 +38,6 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'PAUSE': 'pause',
   'LOOP': 'loop',
   'AIRPLAY': 'airplay',
+  'REPLAY': 'replay',
   'CLOSE': 'close',
 };

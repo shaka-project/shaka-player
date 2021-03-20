@@ -73,6 +73,6 @@
     "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
   },
   "dependencies": {
-    "eme-encryption-scheme-polyfill": "^2.0.1"
+    "eme-encryption-scheme-polyfill": "^2.0.2"
   }
 }

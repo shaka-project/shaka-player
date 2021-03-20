@@ -3,14 +3,14 @@
 The goal of this tutorial is to introduce Shaka's configuration system and the
 concepts on which it is built.  More detail can be found in the API docs.
 
-Shaka's Player object has a hierarchical configuration.  The overall player
+Shaka's `Player` object has a hierarchical configuration.  The overall player
 config contains sub-configs for various parts of the system, such as manifests,
 streaming, and DRM.
 
 To see the current config, you can use `player.getConfiguration()`.  If you run
 this without setting anything first, you get the default configuration.
 
-Player also has a `configure()` method that takes it's argument(s) in one of two
+`Player` also has a `configure()` method that takes it's argument(s) in one of two
 forms:
 
 1. A plain, anonymous object.  Any fields you leave out of the config object
