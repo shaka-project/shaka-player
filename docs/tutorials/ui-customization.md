@@ -125,7 +125,7 @@ ui.configure(config);
 
 #### Adding a close button
 To display a close button at the top right corner of the video player.
-On click the button will unload the video player and will fire a {@link shaka.ui.Controls.PlayerUnloaded}
+On click the button will unload the video player and will fire a {@link shaka.ui.Controls#event:PlayerUnloaded}
 event once the player unloads.
 
 Display of the close button can be toggled with the `addCloseButton` boolean in the config
