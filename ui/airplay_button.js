@@ -10,6 +10,7 @@ goog.provide('shaka.ui.AirPlayButton');
 goog.require('goog.asserts');
 goog.require('shaka.Player');
 goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -46,6 +47,7 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('display-none-if-on-control');
     this.airplayNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     label.appendChild(this.airplayNameSpan_);
 
@@ -157,3 +159,6 @@ shaka.ui.AirPlayButton.Factory = class {
 
 shaka.ui.OverflowMenu.registerElement(
     'airplay', new shaka.ui.AirPlayButton.Factory());
+
+shaka.ui.Controls.registerElement(
+  'airplay', new shaka.ui.AirPlayButton.Factory());
