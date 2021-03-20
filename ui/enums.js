@@ -37,5 +37,6 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'PLAYBACK_RATE': 'slow_motion_video',
   'PAUSE': 'pause',
   'LOOP': 'loop',
+  'UNLOOP': 'sync_disabled',
   'AIRPLAY': 'airplay',
 };
