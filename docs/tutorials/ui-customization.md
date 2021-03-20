@@ -66,6 +66,7 @@ The following elements can be added to the UI bar using this configuration value
 * airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
   supports AirPlay.
 * cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
+  at least one Chromecast device on the same network available for casting.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Similarly, the 'overflowMenuButtons' configuration option can be used to control
