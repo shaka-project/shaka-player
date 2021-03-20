@@ -1854,6 +1854,37 @@ describe('DashParser Manifest', () => {
     expect(textStream.forced).toBe(true);
   });
 
+  it('supports HDR signaling', async () => {
+    const hdrProfile =
+        'http://dashif.org/guidelines/dash-if-uhd#hevc-hdr-pq10';
+    const manifestText = [
+      `<MPD minBufferTime="PT75S" profiles="${hdrProfile}">`,
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation codecs="hvc1.2.4.L153.B0">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="3" mimeType="audio/mp4">',
+      '      <Representation id="audio-en">',
+      '        <BaseURL>a-en.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    expect(manifest.variants.length).toBe(1);
+    const stream = manifest.variants[0].video;
+    expect(stream.hdr).toBe('PQ');
+  });
+
   it('Does not error when image adaptation sets are present', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
