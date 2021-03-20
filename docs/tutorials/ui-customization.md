@@ -5,8 +5,8 @@
 
 Once the UI is created, you can pass in configuration options that change
 the look and functioning of the UI bar. For example, if you wanted to not have
-a seek bar, you could add the following line to the `init()` function from the UI
-basic usage tutorial, after creating the UI overlay:
+a seek bar, you could add the following line to the `init()` function from the
+UI basic usage tutorial, after creating the UI overlay:
 
 ```js
 const video = document.getElementById('video');
