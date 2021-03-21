@@ -45,7 +45,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
-    label.classList.add('display-none-if-on-control');
+    label.classList.add('shaka-overflow-menu-only');
     this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.nameSpan_.textContent = this.localization.resolve(LocIds.LOOP);
     label.appendChild(this.nameSpan_);

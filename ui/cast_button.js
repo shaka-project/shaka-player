@@ -52,7 +52,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
-    label.classList.add('display-none-if-on-control');
+    label.classList.add('shaka-overflow-menu-only');
     this.castNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     label.appendChild(this.castNameSpan_);
 
