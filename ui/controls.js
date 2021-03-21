@@ -1204,7 +1204,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(event);
     }
 
-    console.log(this.pressedKeys_);
     if (!this.config_.enableKeyboardPlaybackControls) {
       return;
     }
