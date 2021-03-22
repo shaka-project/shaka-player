@@ -55,8 +55,11 @@
       background: rgb(224, 224, 224);
     }
 
-    /* When buttons are not aria-disabled, those will indicate as pointers */
-    &:not([aria-disabled=true]), &:not([aria-disabled=true]) label {
+    /* The button is clickable, showing cursor pointer */
+    cursor: pointer;
+
+    /* The label inside button is also showing cursor pointer  */
+    label {
       cursor: pointer;
     }
 
