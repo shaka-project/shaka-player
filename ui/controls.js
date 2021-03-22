@@ -866,6 +866,10 @@ shaka.ui.Controls.prototype.addEventListeners_ = function() {
     this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
   });
 
+  this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
+    this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
+  });
+
   if (screen.orientation) {
     this.eventManager_.listen(screen.orientation, 'change', () => {
       this.onScreenRotation_();
@@ -1112,9 +1116,6 @@ shaka.ui.Controls.prototype.onControlsKeyDown_ = function(event) {
     this.onMouseMove_(event);
   }
 
-  // When the key is released, remove it from the pressed keys set.
-  this.pressedKeys_.delete(event.key);
-
   if (!this.config_.enableKeyboardPlaybackControls) {
     return;
   }
@@ -1153,6 +1154,17 @@ shaka.ui.Controls.prototype.onControlsKeyDown_ = function(event) {
       }
       break;
     }
+};
+
+
+/**
+ * Support controls with keyboard inputs.
+ * @param {!KeyboardEvent} event
+ * @private
+ */
+shaka.ui.Controls.prototype.onControlsKeyUp_ = function(event) {
+  // When the key is released, remove it from the pressed keys set.
+  this.pressedKeys_.delete(event.key);
 };
 
 
