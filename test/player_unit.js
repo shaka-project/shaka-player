@@ -34,6 +34,7 @@ describe('Player', () => {
   const originalLogWarn = shaka.log.warning;
   const originalLogAlwaysWarn = shaka.log.alwaysWarn;
   const originalIsTypeSupported = window.MediaSource.isTypeSupported;
+  const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
 
   const fakeManifestUri = 'fake-manifest-uri';
   const fakeMimeType = 'application/test';
@@ -85,6 +86,22 @@ describe('Player', () => {
     window.MediaSource.isTypeSupported = (mimeType) => {
       const type = mimeType.split('/')[0];
       return type == 'video' || type == 'audio';
+    };
+
+    // Since this is not an integration test, we don't want MediaCapabilities to
+    // fail assertions based on browser support for types.  Pretend that all
+    // video and audio types are supported.
+    navigator.mediaCapabilities.decodingInfo = async (config) => {
+      await Promise.resolve();
+      const videoType = config['video'] ?
+          config['video'].contentType.split('/')[0] : null;
+      const audioType = config['audio'] ?
+          config['audio'].contentType.split('/')[0] : null;
+      if (videoType == 'video' || audioType == 'audio') {
+        return {supported: true};
+      } else {
+        return {supported: false};
+      }
     };
 
     // Many tests assume the existence of a manifest, so create a basic one.
@@ -158,6 +175,7 @@ describe('Player', () => {
       shaka.log.alwaysWarn = originalLogAlwaysWarn;
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
       shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
+      navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
     }
   });
 
@@ -2409,6 +2427,11 @@ describe('Player', () => {
     it('throws CONTENT_UNSUPPORTED_BY_BROWSER', async () => {
       window.MediaSource.isTypeSupported = (mimeType) => false;
 
+      navigator.mediaCapabilities.decodingInfo = async (config) => {
+        await Promise.resolve();
+        return {supported: false};
+      };
+
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(0);
@@ -2771,6 +2794,11 @@ describe('Player', () => {
       // because of MSE support.  We are specifically testing EME-based
       // filtering of codecs.
       expect(MediaSource.isTypeSupported('video/unsupported')).toBe(true);
+
+      const decodingResult = await navigator.mediaCapabilities.decodingInfo({
+        'video': {'contentType': 'video/unsupported'},
+      });
+      expect(decodingResult.supported).toBe(true);
 
       // Make sure that drm engine will reject the variant with an unsupported
       // video mime type.

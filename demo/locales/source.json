@@ -219,6 +219,10 @@
     "description": "The name of a configuration value.",
     "message": "Disable Video"
   },
+  "DEMO_DISABLE_XLINK_PROCESSING": {
+    "description": "The name of a configuration value.",
+    "message": "Disable [JARGON:Xlink] processing"
+  },
   "DEMO_DOCUMENTATION": {
     "description": "A link in the footer, to the Shaka Player documentation.",
     "message": "Documentation"

@@ -527,6 +527,51 @@ describe('StreamUtils', () => {
       expect(manifest.imageStreams[1].id).toBe(2);
       expect(manifest.imageStreams[2].id).toBe(3);
     });
+
+    it('filters transport streams', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.language = 'en';
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/mp2t', 'avc1.42c00d');
+          });
+          variant.addAudio(2, (stream) => {
+            stream.mime('video/mp2t', 'mp4a.40.2');
+          });
+        });
+      });
+
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, /* currentVariant= */ null, manifest);
+
+      // Covers a regression in which we would remove streams with codecs.
+      // The last two streams should be removed because their full MIME types
+      // are bogus.
+      expect(manifest.variants.length).toBe(1);
+      expect(manifest.variants[0].video.id).toBe(1);
+      expect(manifest.variants[0].audio.id).toBe(2);
+    });
+
+    // MediaCapabilities decodingInfo requires valid bandwidth, frameRate,
+    // width, height as part of the input. Fill in default values if those info
+    // are not available from the manifest.
+    it('tolerates empty bandwidth, frameRate, width, height', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.language = 'en';
+          variant.addVideo(1, (stream) => {
+            stream.codecs = 'avc1.4d401f';
+          });
+          variant.addAudio(2, (stream) => {
+            stream.codecs = 'mp4a.40.2';
+          });
+        });
+      });
+
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, /* currentVariant= */ null, manifest);
+      expect(manifest.variants.length).toBe(1);
+    });
   });
 
   describe('chooseCodecsAndFilterManifest', () => {
