@@ -1,28 +1,38 @@
 ## Description
 
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
+<!--
+  Give the PR a helpful title that summaries what this PR changes. Here, include
+  a summary of the change and which issue is fixed. Also include relevant
+  motivation and context. List any dependencies that are required for this
+  change.
 
-Fixes # (issue)
+  If this fixes any issues, include lines like this:
+  Fixes #123
+-->
+
 
 ## Screenshots (optional)
 
-## Type of change
+<!--
+  If you change the UI, add before and after screenshots demonstrating your
+  changes.
+-->
 
-<!--Please delete options that are not relevant.-->
+
+## Type of change
 
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] Breaking change (fix or feature that would cause existing functionality to
+  not work as expected)
 - [ ] This change requires a documentation update
 
 ## Checklist:
 
-<!--Please delete options that are not relevant.-->
-
+- [ ] I have signed the Google CLA <https://cla.developers.google.com>
 - [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
+- [ ] I have verified my change on multiple browsers on different platforms
+- [ ] I have run `./build/all.py` and the build passes
+- [ ] I have run `./build/test.py` and all tests pass
