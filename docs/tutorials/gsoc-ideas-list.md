@@ -1,5 +1,39 @@
 # Google Summer of Code Ideas List
 
+## Update 03.22:
+
+We've received many interests, questions and enhancement ideas for Shaka Player.
+Thank you so much! 
+
+We have a few updates regarding the GSoC application.
+1. We’re adding a few projects to our list soon, please stay tuned. Please hold
+   to start working on the projects until the GSoC program officially starts.
+2. We encourage you to focus on the proposal of the listed projects now. You can
+   reference your work-in-progress PRs when applying for GSoC. However, please
+   understand that we have limited capacity now and would not be able to provide
+   close guidance until the GSoC officially starts in the summer. You are
+   welcome to send us a PR once you have a complete, fully-tested,
+   ready-for-review solution.
+3. If you have questions, please send it to the Google group.
+4. Please be mindful of posting on the Github page just to claim that you are
+   "interested" in working on a task, since it may spam other subscribed
+   developers, and also confuse other students applying for GSoC at the same
+   time. 
+5. Please be kind and only @us for urgent issues on Github regarding your
+   questions or PRs, since that might spam the team members who are not GSoC
+   mentors.
+
+### Slack channel:
+The [video-dev][] is a Slack workspace for general video developers, and you
+can join the [#shaka-player][] channel in the video-dev workspace. You can post
+your questions at the #shaka-player channel. However, we don’t use Slack as a
+primary tool for communication, so please expect a slower response.
+
+[video-dev]: https://video-dev.herokuapp.com/
+[#shaka-player]: https://video-dev.slack.com/archives/C01QRAFHLQK
+
+
+# Introduction
 This is a collection of project ideas for [Google Summer of Code 2021][]. 
 These projects are intended to be good starting projects for new Shaka Player 
 contributors, to complete relatively independently in a few weeks. Familiarity 
@@ -8,13 +42,9 @@ with Javascript or Python will be helpful, but not required.
 To start, checkout our [demo][] and [tutorial][] page, and
 [contributing guide][].
 
-If you have any questions, you can either post on our [Github][] page, or
-discuss with us via the [mailing list][], [Slack chanel][], or with the GSoC
-[mentor][].
+If you have any questions, you can discuss with us via the [mailing list][] 
+or with the GSoC [mentor][].
 
-If you're interested in contributing to Shaka Player through Google Summer of 
-Code 2021 for other ideas or projects, please see our 
-[enhancement list][] and [roadmap][], and let us know email or [Github][]!
 
 ## Shaka Player UI Library Projects
 
