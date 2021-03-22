@@ -1022,13 +1022,19 @@ shaka.extern.PlayerConfiguration;
 /**
  * @typedef {{
  *   enabled: boolean,
- *   minBuffer: number
+ *   minBuffer: number,
+ *   playbackRateMaxOverride: number,
+ *   playbackRateMinOverride: number
  * }}
  *
  * @property {boolean} enabled
  *   If true, enable LiveCatchUpController.  Defaults to false.
  * @property {number} minBuffer
  *   The minimum buffer to keep. No effect at the moment.
+ * @property {number} playbackRateMaxOverride
+ *   If not zero, override PlaybackRate.max in manifest
+ * @property {number} playbackRateMinOverride
+ *   If not zero, override PlaybackRate.min in manifest
  * @exportDoc
  */
 shaka.extern.LiveCatchUpConfiguration;
