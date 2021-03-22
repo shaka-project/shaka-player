@@ -1264,11 +1264,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onKeyPress_(event) {
-    const activeElement = document.activeElement;
-    // Show the control panel if it is on focus or any button is pressed.
-    if (this.controlsContainer_.contains(activeElement)) {
-      this.onMouseMove_(event);
-    }
+    // Show the control panel if any button is pressed.
+    this.onMouseMove_(event);
 
     if (!this.config_.enableKeyboardPlaybackControls) {
       return;
