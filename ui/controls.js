@@ -1270,8 +1270,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(event);
     }
 
-    // When the key is released, remove it from the pressed keys set.
-    this.pressedKeys_.delete(event.key);
 
     if (!this.config_.enableKeyboardPlaybackControls) {
       return;
