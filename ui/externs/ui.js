@@ -75,7 +75,8 @@ shaka.extern.UIVolumeBarColors;
  *   doubleClickForFullscreen: boolean,
  *   enableKeyboardPlaybackControls: boolean,
  *   enableFullscreenOnRotation: boolean,
- *   forceLandscapeOnFullscreen: boolean
+ *   forceLandscapeOnFullscreen: boolean,
+ *   toggleFullscreenOnfPress: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -146,6 +147,10 @@ shaka.extern.UIVolumeBarColors;
  *   Whether or not the device should rotate to landscape mode when the video
  *   enters fullscreen.  Note that this behavior is based on an experimental
  *   browser API, and may not work on all platforms.
+ *   Defaults to true.
+ * @property {boolean} toggleFullscreenOnfPress
+ *   Whether or not f pressing on the UI should cause it to enter
+ *   fullscreen.
  *   Defaults to true.
  * @exportDoc
  */
