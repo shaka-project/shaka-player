@@ -5,8 +5,8 @@
 
 Once the UI is created, you can pass in configuration options that change
 the look and functioning of the UI bar. For example, if you wanted to not have
-a seek bar, you could add the following line to the init() function from the UI
-basic usage tutorial, after creating the UI overlay:
+a seek bar, you could add the following line to the `init()` function from the
+UI basic usage tutorial, after creating the UI overlay:
 
 ```js
 const video = document.getElementById('video');
@@ -24,7 +24,7 @@ See the docs for {@link shaka.extern.UIConfiguration} for more information.
 #### Customizing the number and order of controls
 
 For example, let's say that all you care about for your app is rewinding and
-fast-forwarding. You could add the following line to init(), right before
+fast-forwarding. You could add the following line to `init()`, right before
 creating the UI overlay. This will configure UI to ONLY provide these two buttons:
 
 ```js
@@ -175,7 +175,7 @@ shaka.ui.Controls.registerElement(
 
 We have our button. Let's see how we can add it to the layout.
 Similar to specifying the order of shaka-provided controls, we'll need to
-add a line to the init() function in myapp.js
+add a line to the `init()` function in myapp.js
 
 ```js
 // This will add three buttons to the controls panel (in that order): shaka-provided
