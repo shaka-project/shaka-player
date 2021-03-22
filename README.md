@@ -31,7 +31,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Chrome¹    |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Y**   | -   |
 |Firefox¹   |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -      | -   |
 |Edge¹      |**Y**     | -       | -       | -       | -        | -      | -   |
-|Edge Chromium|**Y**     |**Y**    | -       |untested⁵|**Native**| -      | -   |
+|Edge Chromium|**Y**     |**Y**    |**Y**     |untested⁵|**Native**| -      | -   |
 |IE ≤ 10    | N        | -       | -       | -       | -        | -      | -   |
 |IE 11      |**Y** ⁴   | -       | -       | -       | -        | -      | -   |
 |Safari¹    | -        |**Y**    | -       | -       |**iPadOS 13<br>Native**| - | - |
