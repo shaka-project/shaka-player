@@ -967,7 +967,8 @@ shaka.extern.OfflineConfiguration;
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
- *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
+ *   textDisplayFactory: shaka.extern.TextDisplayer.Factory,
+ *   useMediaCapabilities: boolean
  * }}
  *
  * @property {shaka.extern.DrmConfiguration} drm
@@ -1016,6 +1017,9 @@ shaka.extern.OfflineConfiguration;
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
  *   A factory to construct a text displayer. Note that, if this is changed
  *   during playback, it will cause the text tracks to be reloaded.
+ * @property {boolean} useMediaCapabilities
+ *   If true, use MediaCapabilities.decodingInfo() to filter the manifest, and
+ *   get MediaKeys information for encrypted content. Default to false.
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;

@@ -503,6 +503,10 @@
     "description": "The name of a configuration value.",
     "message": "Max Width"
   },
+  "DEMO_USE_MEDIA_CAPABILITIES": {
+    "description": "The name of a configuration value.",
+    "message": "Use [JARGON:MediaCapabilities]"
+  },
   "DEMO_MICROSOFT": {
     "description": "Text that describes an asset that comes from the Microsoft.",
     "message": "[PROPER_NAME:Microsoft]"

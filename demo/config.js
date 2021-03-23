@@ -334,7 +334,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.FORCE_HTTPS,
             'streaming.forceHTTPS')
         .addBoolInput_(MessageIds.PREFER_NATIVE_HLS,
-            'streaming.preferNativeHls');
+            'streaming.preferNativeHls')
+        .addBoolInput_(MessageIds.USE_MEDIA_CAPABILITIES,
+            'useMediaCapabilities');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
