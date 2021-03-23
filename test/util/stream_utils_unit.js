@@ -464,6 +464,24 @@ describe('StreamUtils', () => {
     });
   });
 
+  describe('getDecodingInfosForVariants', () => {
+    it('for multiplexd content', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/mp2t', 'avc1.4d400d,mp4a.40.2');
+          });
+        });
+      });
+
+      await shaka.util.StreamUtils.getDecodingInfosForVariants(
+          manifest.variants);
+      expect(manifest.variants.length).toBeTruthy();
+      expect(manifest.variants[0].decodingInfos.length).toBe(1);
+      expect(manifest.variants[0].decodingInfos[0].supported).toBeTruthy();
+    });
+  });
+
   describe('filterManifest', () => {
     let fakeDrmEngine;
 
