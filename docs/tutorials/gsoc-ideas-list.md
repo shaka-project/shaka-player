@@ -25,24 +25,32 @@ We have a few updates regarding the GSoC application.
 
 ### Slack channel:
 The {@link https://video-dev.herokuapp.com/|video-dev} is a Slack workspace 
-for general video developers, and you can join the {@link https://video-dev.slack.com/archives/C01QRAFHLQK|#shaka-player} channel in the video-dev 
-workspace. You can post your questions at the #shaka-player channel. However, 
-we don’t use Slack as a primary tool for communication, so please expect a 
-slower response.
+for general video developers, and you can join the {@link 
+https://video-dev.slack.com/archives/C01QRAFHLQK|#shaka-player} channel in 
+the video-dev workspace. You can post your questions at the #shaka-player 
+channel. However, we don’t use Slack as a primary tool for communication, 
+so please expect a slower response.
 
 
 # Introduction
-This is a collection of project ideas for {@link https://summerofcode.withgoogle.com/|Google Summer of Code 2021}. 
+This is a collection of project ideas for {@link 
+https://summerofcode.withgoogle.com/|Google Summer of Code 2021}. 
 These projects are intended to be good starting projects for new Shaka Player 
 contributors, to complete relatively independently in a few weeks. Familiarity 
 with Javascript or Python will be helpful, but not required.
 
 To start, checkout our 
-{@link https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled|demo} and {@link https://nightly-dot-shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html
-|tutorial} page, and {@link https://github.com/google/shaka-player/blob/master/CONTRIBUTING.md|contributing guide}.
+{@link 
+https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled
+|demo} and {@link 
+https://nightly-dot-shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html
+|tutorial} page, and {@link 
+https://github.com/google/shaka-player/blob/master/CONTRIBUTING.md
+|contributing guide}.
 
-If you have any questions, you can discuss with us via the {@link https://groups.google.com/g/shaka-player-gsoc|mailing list} 
-or with the GSoC [mentor][].
+If you have any questions, you can discuss with us via the {@link
+https://groups.google.com/g/shaka-player-gsoc|mailing list} or with 
+the GSoC [mentor][].
 
 
 ## Shaka Player UI Library Projects
@@ -74,16 +82,18 @@ Estimated complexity: easy
 
 Languages: Javascript
 
-The Shaka UI library provides a few buttons for the application developer to 
-add onto their UI, such as the Play/Pause button, Fullscreen button, etc.
+The Shaka UI library provides a few buttons for the application developer to add
+onto their UI, such as the Play/Pause button, Fullscreen button, etc.
 This project will add the Close button as a new compontent of the UI library, 
 similar to the Close button on the {@link 
-https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled|Shaka demo page}. 
-The Close button will allow users to stop playing the video and close the video 
-element.
+https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled
+|Shaka demo page}. The Close button will allow users to stop playing the 
+video and close the video element.
 
-The {@link https://github.com/google/shaka-player/blob/master/demo/close_button.js|implementation} of the demo page Close 
-button is a good starting point for reference.
+The {@link 
+https://github.com/google/shaka-player/blob/master/demo/close_button.js
+|implementation} of the demo page Close button is a good starting 
+point for reference.
 
 ![Close button](https://user-images.githubusercontent.com/31563237/71356283-c479f000-2592-11ea-80aa-c0ff6992c001.png)
 
@@ -212,6 +222,8 @@ Estimated complexity: medium
 Languages: Python
 
 Currently Shaka Streamer supports a few video and audio codecs, and we’ll expand
- our support for the audio codecs of {@link https://en.wikipedia.org/wiki/Dolby_Digital|ac-3} and {@link https://en.wikipedia.org/wiki/Dolby_Digital_Plus|ec-3}.
+ our support for the audio codecs of {@link https://en.wikipedia.org/wiki/Dolby_Digital
+ |ac-3} and {@link 
+ https://en.wikipedia.org/wiki/Dolby_Digital_Plus|ec-3}.
 
 {@link https://github.com/google/shaka-streamer/issues/37|Github Issue}
