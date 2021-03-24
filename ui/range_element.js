@@ -172,8 +172,6 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     const min = parseFloat(this.bar.min);
     const max = parseFloat(this.bar.max);
 
-    // setting bar value to max makes the video load
-    // forever, so setting bar value 0.125s less than max
     if (value > max) {
       this.bar.value = max;
     } else if (value < min) {
