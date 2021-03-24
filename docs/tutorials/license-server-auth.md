@@ -134,9 +134,12 @@ happened?
 Cookies are considered "credentials" by the browser's XmlHttpRequest API, and
 credentials may not be sent cross-origin unless:
 
-1. {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Requests_with_credentials|
+1. {@link 
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Requests_with_credentials|
 explicitly requested by the application} AND
-2. {https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Access-Control-Allow-Credentials|explicitly allowed by the destination server}
+2. {@link 
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Access-Control-Allow-Credentials
+|explicitly allowed by the destination server}
 
 Our `cookie_auth` endpoint sends back headers that allow credentialed requests,
 so we set a flag in our request filter to send credentials cross-site:
@@ -160,8 +163,9 @@ always send credentials when we have them?"
 If a server does not explicitly allow credentials to be sent cross-origin,
 setting this flag would cause the request to fail *even if the client has no
 cookies to send*.  If you'd like to try this out, clear your cookies by
-pointing your browser to the server's {@link http://cwip-shaka-proxy.appspot.com/delete_cookie|delete\_cookie} page.  Then set your
-license server back to:
+pointing your browser to the server's {@link 
+http://cwip-shaka-proxy.appspot.com/delete_cookie|delete\_cookie} page.  
+Then set your license server back to:
 
 ```js
 const licenseServer = 'https://cwip-shaka-proxy.appspot.com/no_auth';
