@@ -7,8 +7,12 @@ EME requires a secure URL to use.  This means you have to use `https` or be on
 future.  Also, because of mixed content requirements, if your site is using
 `https`, then your manifest and every segment will also need to use `https` too.
 
-See: Chrome's {@link https://groups.google.com/a/chromium.org/forum/#!msg/blink-dev/tXmKPlXsnCQ/ptOETCUvBwAJ|announcement}, Firefox's {@link https://bugzilla.mozilla.org/show_bug.cgi?id=1322517|intent to remove}, and
-how to {@link https://www.chromium.org/Home/chromium-security/deprecating-powerful-features-on-insecure-origins|disable for testing}.
+See: Chrome's {@link 
+https://groups.google.com/a/chromium.org/forum/#!msg/blink-dev/tXmKPlXsnCQ/ptOETCUvBwAJ
+|announcement}, Firefox's {@link https://bugzilla.mozilla.org/show_bug.cgi?id=1322517
+|intent to remove}, and how to {@link 
+https://www.chromium.org/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
+|disable for testing}.
 
 
 #### License Servers
@@ -141,8 +145,10 @@ default is the empty string, which is the lowest security level supported by the
 key system.
 
 Each key system has their own values for robustness.  The values for Widevine
-are well-known (see the {@link https://cs.chromium.org/chromium/src/components/cdm/renderer/widevine_key_system_properties.h?q=SW_SECURE_CRYPTO&l=22|Chromium sources}) and listed below, but values 
-for other key systems are not known to us at this time.
+are well-known (see the {@link 
+https://cs.chromium.org/chromium/src/components/cdm/renderer/widevine_key_system_properties.h?q=SW_SECURE_CRYPTO&l=22
+|Chromium sources}) and listed below, but values for other key systems are not
+known to us at this time.
 
 
 - `SW_SECURE_CRYPTO`
