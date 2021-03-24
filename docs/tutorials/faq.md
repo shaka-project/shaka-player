@@ -7,13 +7,17 @@ bad content.  But now in v2, we don't.
 
 This requires setting up clock sync for live streams.  This can be done by
 adding a `<UTCTiming>` element to the manifest or by setting the
-{@link https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration|
-`.manifest.dash.clockSyncUri`} configuration. 
-See {@link https://github.com/google/shaka-player/issues/386#issuecomment-227898001|#386(comment)} for more info.
+{@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration
+|`.manifest.dash.clockSyncUri`} configuration.
+See {@link 
+https://github.com/google/shaka-player/issues/386#issuecomment-227898001
+|#386(comment)} for more info.
 
 We also have issues with "drifting" DASH streams.  If your encoder experiences
 drift, you may need to address that with the encoder.  We have plans to be
-more tolerant of drift in future.  See {@link https://github.com/google/shaka-player/issues/999|#999} for more info.
+more tolerant of drift in future.  See {@link 
+https://github.com/google/shaka-player/issues/999|#999} for more info.
 
 <hr>
 
@@ -30,10 +34,12 @@ https://github.com/google/shaka-player/issues/489#issuecomment-240466224|
 **Q:** I am getting `HTTP_ERROR` or error code 1002.
 
 **A:** The browser rejected the request.  Look at the browser logs for more
-info.  This is usually a {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS|CORS} error, which means you need 
-particular headers in the response.  Additionally, with some manifests, we will 
-send a `Range` header.  This will require explicit approval through the CORS 
-header `Access-Control-Allow-Headers`.
+info.  This is usually a {@link 
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS|CORS}
+error, which means you need particular headers in the response.  
+Additionally, with some manifests, we will send a `Range` header.  
+This will require explicit approval through the CORS header 
+`Access-Control-Allow-Headers`.
 
 This can also happen with mixed-content restrictions.  If the site is using
 `https:`, then your manifest and segments must also.
@@ -46,8 +52,9 @@ This can also happen with mixed-content restrictions.  If the site is using
 **A:** The most common cause is that you are not using a secure origin.  The
 EME API in the browser requires a secure origin, which means `https` or
 `localhost`.  Chrome enforces this requirement, but other browsers may not yet.
-See the {@link https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins|announcement} for 
-more info.
+See the {@link 
+https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
+|announcement} for more info.
 
 You should also check that your platform/browser actually supports the key
 system.  If your manifest contains only PlayReady, it will need to be played on
@@ -67,8 +74,9 @@ store clear content or store only the content offline (i.e. set
 **Q:** I am getting `LICENSE_REQUEST_FAILED` or error code 6007.
 
 **A:** See `HTTP_ERROR`.  If you are getting a bad HTTP status, the server
-rejected the request.  Your proxy may require {@link https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html|wrapping} the 
-request or it may require {@link 
+rejected the request.  Your proxy may require {@link 
+https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
+|wrapping} the request or it may require {@link 
 https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
 |extra authentication}.
 
@@ -91,7 +99,9 @@ the certificate should be binary, so avoid fetching the response as a string
 
 **A:** Check the DevTools network tab for the response.  Verify that the
 response data looks correct.  For Widevine, the response should be binary.  If
-you see JSON, you will need to {@link https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html|unwrap the response}.
+you see JSON, you will need to {@link 
+https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
+|unwrap the response}.
 
 <hr>
 
@@ -101,7 +111,8 @@ you see JSON, you will need to {@link https://shaka-player-demo.appspot.com/docs
 playback.  Since the browser handles playback, we don't get much information.
 
 If you want to disable native playback and use MediaSource playback instead,
-configure {@link https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration|
+configure {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration|
 `.streaming.useNativeHlsOnSafari`} to false.
 
 <hr>
@@ -113,10 +124,11 @@ The only browsers capable of playing TS natively are Edge and Chromecast.  You
 will get a `CONTENT_UNSUPPORTED_BY_BROWSER` error on other browsers due to
 their lack of TS support.
 
-You can enable transmuxing by {@link https://github.com/google/shaka-player/blob/967f3399/demo/index.html#L39|including mux.js} v5.6.3+ in your 
-application. If Shaka Player detects that mux.js has been loaded, we will use 
-it to transmux TS content into MP4 on-the-fly, so that the content can be 
-played by the browser.
+You can enable transmuxing by {@link 
+https://github.com/google/shaka-player/blob/967f3399/demo/index.html#L39|
+including mux.js} v5.6.3+ in your application. If Shaka Player detects that 
+mux.js has been loaded, we will use it to transmux TS content into MP4 
+on-the-fly, so that the content can be played by the browser.
 
 <hr>
 
@@ -128,9 +140,9 @@ does not work consistently across browsers and created a bad experience.)
 
 This means that if you want to see the results of a new decision sooner, you
 should have a less aggressive buffering goal.  See the tutorial on [buffering
-configuration][buffering] and the docs for the
-{@link https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration|
-`.streaming.bufferingGoal`} configuration.
+configuration][buffering] and the docs for the {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration
+|`.streaming.bufferingGoal`} configuration.
 
 Another factor is the segment size. It may take up to 2 segments before Shaka
 Player has enough information to form a bandwidth estimate and make a decision.
@@ -166,8 +178,9 @@ shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
 **A:** Our support for CEA-708 captions requires transmuxing the TS files that
 contain said captions. Edge and Chromecast, however, have native TS support and
 thus are not required to transmux. In order to force those platforms to 
-transmux, set the {@link https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration|
-`.streaming.forceTransmuxTS`} configuration to true.
+transmux, set the {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration
+|`.streaming.forceTransmuxTS`} configuration to true.
 
 <hr>
 
@@ -176,7 +189,8 @@ transmux, set the {@link https://shaka-player-demo.appspot.com/docs/api/shaka.ex
 **A:** We can't handle content that creates timestamps too large to be
 represented as Numbers in JavaScript (2^53).  Very large timescales require very
 large timestamps (in timescale units), which means we are unable to substitute
-the correct values for `$Time$` in a `<SegmentTemplate>`.  {@link https://github.com/peterolson/BigInteger.js|BigInteger.js} is
+the correct values for `$Time$` in a `<SegmentTemplate>`.  {@link
+https://github.com/peterolson/BigInteger.js|BigInteger.js} is
 too large to become a required dependency for Shaka Player.
 
 We recommend reducing your timescale or avoiding `$Time` in `<SegmentTemplate>`.
@@ -193,8 +207,9 @@ For most content, this warning can be safely ignored (see
 <https://crbug.com/720013>).  If your content requires a specific robustness
 level, it is suggested to set it in the player configuration to ensure playback
 works: `.drm.advanced.<key_system>.audioRobustness` and
-`.drm.advanced.<key_system>.videoRobustness` (see
-{@link https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AdvancedDrmConfiguration|docs}).
+`.drm.advanced.<key_system>.videoRobustness` (see {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AdvancedDrmConfiguration
+|docs}).
 
 <hr>
 
@@ -248,7 +263,9 @@ guesses might not always be accurate.  If an HLS manifest has no codec
 information provided, we default to guessing that the video codec is
 `avc1.42E01E` and the audio codec is `mp4a.40.2`, which can cause problems if
 the stream is actually video-only or audio-only.  In this case, you can enable
-the {@link https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.ManifestConfiguration|
-`.manifest.disableVideo`} or {@link https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.ManifestConfiguration|
-`.manifest.disableAudio`} configurations to signal that your content does not 
+the {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.ManifestConfiguration
+|`.manifest.disableVideo`} or {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.ManifestConfiguration
+|`.manifest.disableAudio`} configurations to signal that your content does not 
 have a video or audio stream.
