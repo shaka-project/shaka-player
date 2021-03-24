@@ -102,10 +102,10 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     let selectedTrack = tracks.find((track) => track.active);
     if (this.flag ==1 && tracks.find((track) =>
       track.height ==
-      Number((this.currentSelection.textContent.toString()).slice(0, 3))) !==
+      Number((this.currentSelection.textContent.toString()).slice(0, -1))) !==
       undefined) {
       selectedTrack = tracks.find((track) => track.height ==
-      Number((this.currentSelection.textContent.toString()).slice(0, 3)));
+      Number((this.currentSelection.textContent.toString()).slice(0, -1)));
       const tempTrack = tracks.find((track) => track.active);
       for (let i=0; i < tracks.length; i++) {
         if (tracks[i].id === tempTrack.id) {
