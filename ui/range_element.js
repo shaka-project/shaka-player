@@ -55,6 +55,7 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     /** @private {shaka.util.Timer} */
     this.endFakeChangeTimer_ = new shaka.util.Timer(() => {
       this.onChangeEnd();
+      this.isChanging_ = false;
     });
 
     this.bar.classList.add('shaka-range-element');

@@ -1213,6 +1213,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         // If it's not focused on the volume bar, move the seek time backward
         // for 5 sec. Otherwise, the volume will be adjusted automatically.
         if (this.seekBar_ && !isVolumeBar) {
+          event.preventDefault();
           this.seek_(this.seekBar_.getValue() - 5);
         }
         break;
@@ -1220,6 +1221,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         // If it's not focused on the volume bar, move the seek time forward
         // for 5 sec. Otherwise, the volume will be adjusted automatically.
         if (this.seekBar_ && !isVolumeBar) {
+          event.preventDefault();
           this.seek_(this.seekBar_.getValue() + 5);
         }
         break;
