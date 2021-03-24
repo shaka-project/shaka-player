@@ -98,14 +98,16 @@ Shaka Player makes a number of requests to various servers while streaming.  You
 need to make sure that Shaka has correct access to those resources.  Browsers
 impose several restrictions on the content that a webpage has access to.
 
-One restriction is {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS|CORS} (Cross-Origin Resource Sharing). 
-This requires network requests to be made to the same origin, or for the server 
-to explicitly give access.  An "origin" refers to the domain name (e.g. 
-`api.example.com`), the scheme (e.g. `https:`), and the port (e.g. 80). If you 
-host your assets on a different origin than your web app, then you'll need to 
-set CORS headers on the asset server to ensure we have access.  For some 
-content, this will also require allowing the `Range` header by sending the CORS 
-header `Access-Control-Allow-Headers`.
+One restriction is {@link 
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
+|CORS} (Cross-Origin Resource Sharing).  This requires network requests to 
+be made to the same origin, or for the server to explicitly give access.  
+An "origin" refers to the domain name (e.g. `api.example.com`), the scheme 
+(e.g. `https:`), and the port (e.g. 80). If you host your assets on a 
+different origin than your web app, then you'll need to set CORS headers 
+on the asset server to ensure we have access.  For some content, this will 
+also require allowing the `Range` header by sending the CORS header 
+`Access-Control-Allow-Headers`.
 
 Another restriction is called mixed-content.  If your webpage is accessed using
 `https:`, then all resources that are loaded also need to be loaded using
