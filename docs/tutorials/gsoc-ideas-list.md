@@ -24,25 +24,24 @@ We have a few updates regarding the GSoC application.
    mentors.
 
 ### Slack channel:
-The [video-dev][] is a Slack workspace for general video developers, and you
-can join the [#shaka-player][] channel in the video-dev workspace. You can post
-your questions at the #shaka-player channel. However, we don’t use Slack as a
-primary tool for communication, so please expect a slower response.
-
-[video-dev]: https://video-dev.herokuapp.com/
-[#shaka-player]: https://video-dev.slack.com/archives/C01QRAFHLQK
+The {@link https://video-dev.herokuapp.com/|video-dev} is a Slack workspace 
+for general video developers, and you can join the {@link https://video-dev.slack.com/archives/C01QRAFHLQK|#shaka-player} channel in the video-dev 
+workspace. You can post your questions at the #shaka-player channel. However, 
+we don’t use Slack as a primary tool for communication, so please expect a 
+slower response.
 
 
 # Introduction
-This is a collection of project ideas for [Google Summer of Code 2021][]. 
+This is a collection of project ideas for {@link https://summerofcode.withgoogle.com/|Google Summer of Code 2021}. 
 These projects are intended to be good starting projects for new Shaka Player 
 contributors, to complete relatively independently in a few weeks. Familiarity 
 with Javascript or Python will be helpful, but not required.
 
-To start, checkout our [demo][] and [tutorial][] page, and
-[contributing guide][].
+To start, checkout our 
+{@link https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled|demo} and {@link https://nightly-dot-shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html
+|tutorial} page, and {@link https://github.com/google/shaka-player/blob/master/CONTRIBUTING.md|contributing guide}.
 
-If you have any questions, you can discuss with us via the [mailing list][] 
+If you have any questions, you can discuss with us via the {@link https://groups.google.com/g/shaka-player-gsoc|mailing list} 
 or with the GSoC [mentor][].
 
 
@@ -67,17 +66,7 @@ layer for the applications. It is an alternate bundle from the base Shaka Player
  library, that adds additional UI-specific classes and a streamlined declarative
  style of setup.
 
-[Google Summer of Code 2021]:https://summerofcode.withgoogle.com/
-[enhancement list]:https://github.com/google/shaka-player/issues?q=is%3Aopen+is%3Aissue+label%3A%22contributions+welcome%22
-[roadmap]:https://github.com/google/shaka-player/blob/master/roadmap.md
-[Github]:https://github.com/google/shaka-player
-[demo]:https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled
-[tutorial]:https://nightly-dot-shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html
-[mailing list]:https://groups.google.com/g/shaka-player-gsoc
-[Slack chanel]:https://app.slack.com/client/T0XKDDFM0/C01QRAFHLQK
 [mentor]:mailto:michellezhuo@google.com
-[contributing guide]:https://github.com/google/shaka-player/blob/master/CONTRIBUTING.md
-
 
 ### Add Close Button to the UI Library
 
@@ -85,22 +74,20 @@ Estimated complexity: easy
 
 Languages: Javascript
 
-The Shaka UI library provides a few buttons for the application developer to add
- onto their UI, such as the Play/Pause button, Fullscreen button, etc.
+The Shaka UI library provides a few buttons for the application developer to 
+add onto their UI, such as the Play/Pause button, Fullscreen button, etc.
 This project will add the Close button as a new compontent of the UI library, 
-similar to the Close button on the [Shaka demo page][]. The Close button will 
-allow users to stop playing the video and close the video element.
+similar to the Close button on the {@link 
+https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled|Shaka demo page}. 
+The Close button will allow users to stop playing the video and close the video 
+element.
 
-The [implementation][] of the demo page Close button is a good starting point 
-for reference.
+The {@link https://github.com/google/shaka-player/blob/master/demo/close_button.js|implementation} of the demo page Close 
+button is a good starting point for reference.
 
 ![Close button](https://user-images.githubusercontent.com/31563237/71356283-c479f000-2592-11ea-80aa-c0ff6992c001.png)
 
-[Shaka Demo page]:https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled
-
-[implementation]:https://github.com/google/shaka-player/blob/master/demo/close_button.js
-
-[Github Issue](https://github.com/google/shaka-player/issues/2316)
+{@link https://github.com/google/shaka-player/issues/2316|Github Issue}
 
 
 ### Add Overflow Menu Buttons to the UI Control Panel
@@ -131,7 +118,7 @@ placing them wherever the application developers want.
 ![Overflow menu]( 
 https://user-images.githubusercontent.com/28269801/109266388-dec5e400-77bc-11eb-9ac8-dda3dac53bf4.png)
 
-[Github Issue](https://github.com/google/shaka-player/issues/2676)
+{@link https://github.com/google/shaka-player/issues/2676|Github Issue}
 
 
 ### Add Video Stats Panel in UI
@@ -150,13 +137,13 @@ This project involves:
 ![Stats panel1](https://user-images.githubusercontent.com/8983024/83487168-d305f500-a4aa-11ea-8c7b-8d6d7dbde65b.png)
 ![Stats panel2](https://user-images.githubusercontent.com/8983024/83487122-bcf83480-a4aa-11ea-9f46-2a489f128c7d.png)
 
-[Github Issue](https://github.com/google/shaka-player/issues/2607)
+{@link https://github.com/google/shaka-player/issues/2607|Github Issue}
 
 
 ## Shaka Streamer Projects
 
-[Shaka Streamer](https://github.com/google/shaka-streamer) offers a simple 
-config-file based approach to preparing streaming media. It greatly simplifies 
+{@link https://github.com/google/shaka-streamer|Shaka Streamer} offers a simple
+ config-file based approach to preparing streaming media. It greatly simplifies 
 the process of using FFmpeg and Shaka Packager for both VOD and live content.
 
 Shaka Streamer connects FFmpeg and Shaka Packager in a pipeline, such that 
@@ -164,7 +151,7 @@ output from FFmpeg is piped directly into the packager, and packaging and
 transcoding of all resolutions, bitrates, and languages occur in parallel.
 
 Live documentation can be found 
-[here](https://google.github.io/shaka-streamer/).
+{@link https://google.github.io/shaka-streamer/|here}.
 
 
 
@@ -215,7 +202,7 @@ limitations.
 4. External ffmpeg process (pre-encoding everything to match parameters first,
 then streaming it as one stream)
 
-[Github Issue](https://github.com/google/shaka-streamer/issues/43)
+{@link https://github.com/google/shaka-streamer/issues/43|Github Issue}
 
 
 ### Add Support for More Audio Codecs
@@ -225,9 +212,6 @@ Estimated complexity: medium
 Languages: Python
 
 Currently Shaka Streamer supports a few video and audio codecs, and we’ll expand
- our support for the audio codecs of [ac-3][] and [ec-3][].
+ our support for the audio codecs of {@link https://en.wikipedia.org/wiki/Dolby_Digital|ac-3} and {@link https://en.wikipedia.org/wiki/Dolby_Digital_Plus|ec-3}.
 
-[ac-3]: https://en.wikipedia.org/wiki/Dolby_Digital
-[ec-3]: https://en.wikipedia.org/wiki/Dolby_Digital_Plus
-
-[Github Issue](https://github.com/google/shaka-streamer/issues/37)
+{@link https://github.com/google/shaka-streamer/issues/37|Github Issue}

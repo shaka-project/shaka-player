@@ -122,7 +122,8 @@ use it without setting the parameter, you will see `Error code 6007`
 
 Cookies are set by a server to be returned to that server, and are not sent by
 the JavaScript application.  So to set the required cookie value, point your
-browser to the server's [set\_cookie][] page.
+browser to the server's {@link http://cwip-shaka-proxy.appspot.com/set_cookie|
+set\_cookie} page.
 
 Open the JavaScript console and check the value of `document.cookie` to confirm
 that you have the cookie. You should see `"CWIP-Auth-Cookie=VGhpc0lzQVRlc3QK"`.
@@ -133,8 +134,9 @@ happened?
 Cookies are considered "credentials" by the browser's XmlHttpRequest API, and
 credentials may not be sent cross-origin unless:
 
-1. [explicitly requested by the application](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Requests_with_credentials) AND
-2. [explicitly allowed by the destination server](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Access-Control-Allow-Credentials)
+1. {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Requests_with_credentials|
+explicitly requested by the application} AND
+2. {https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Access-Control-Allow-Credentials|explicitly allowed by the destination server}
 
 Our `cookie_auth` endpoint sends back headers that allow credentialed requests,
 so we set a flag in our request filter to send credentials cross-site:
@@ -149,8 +151,6 @@ so we set a flag in our request filter to send credentials cross-site:
 
 Load the page again, and the license request will succeed.
 
-[set\_cookie]: http://cwip-shaka-proxy.appspot.com/set_cookie
-
 
 #### Always Sending Credentials
 
@@ -160,7 +160,7 @@ always send credentials when we have them?"
 If a server does not explicitly allow credentials to be sent cross-origin,
 setting this flag would cause the request to fail *even if the client has no
 cookies to send*.  If you'd like to try this out, clear your cookies by
-pointing your browser to the server's [delete\_cookie][] page.  Then set your
+pointing your browser to the server's {@link http://cwip-shaka-proxy.appspot.com/delete_cookie|delete\_cookie} page.  Then set your
 license server back to:
 
 ```js
@@ -176,8 +176,6 @@ Credentials flag is 'true', but the 'Access-Control-Allow-Credentials' header
 is ''. It must be 'true' to allow credentials. Origin 'http://localhost' is
 therefore not allowed access.
 ```
-
-[delete\_cookie]: http://cwip-shaka-proxy.appspot.com/delete_cookie
 
 
 #### Asynchronous Credentials

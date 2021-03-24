@@ -1,8 +1,9 @@
 # Service Worker Caching
 
-[Service workers][1] provide a way to have a script run in the background even
-when the page is not loaded.  It can respond to push events from other sites and
-can act as a transparent cache for the page.
+{@link https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API|
+Service workers} provide a way to have a script run in the background even
+when the page is not loaded.  It can respond to push events from other sites 
+and can act as a transparent cache for the page.
 
 We strongly recommend against using service workers to cache content for offline
 playback.  There are many subtle issues introduced when you try to cache content
@@ -13,8 +14,6 @@ all of these issues for you.  See {@tutorial offline} and
 For other use cases, this doc will show a basic example of how to create a cache
 that will not interfere with Shaka Player's bandwidth estimation. This is NOT a
 tutorial of service workers in general.
-
-[1]: https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
 
 
 ## Cache Header

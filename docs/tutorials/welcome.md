@@ -1,26 +1,21 @@
 # Welcome to Shaka Player
 
 Shaka Player is a JavaScript library for adaptive video streaming.
-It plays [DASH][] content without browser plugins using
-[MediaSource Extensions][] and [Encrypted Media Extensions][].
+It plays {@link http://dashif.org/|DASH} content without browser plugins using
+{@link http://w3c.github.io/media-source/|MediaSource Extensions} and 
+{@link https://w3c.github.io/encrypted-media/|Encrypted Media Extensions}.
 
 Shaka Player is meant to be deployed after being compiled. The tools you need
 to compile the sources and documentation are included in the sources:
-[Closure Compiler][], [Closure Linter][], and [JSDoc][].
+{@link https://developers.google.com/closure/compiler/|Closure Compiler}, 
+{@link https://developers.google.com/closure/utilities/docs/linter_howto
+|Closure Linter}, and {@link http://usejsdoc.org/|JSDoc}.
 
 If you are integrating Shaka Player into another Closure-based project, our
 build process will generate externs for Shaka Player itself.
 
 If you installed Shaka Player via npm, the source has been compiled and the
 externs have been generated.
-
-[DASH]: http://dashif.org/
-[MediaSource Extensions]: http://w3c.github.io/media-source/
-[Encrypted Media Extensions]: https://w3c.github.io/encrypted-media/
-
-[Closure Compiler]: https://developers.google.com/closure/compiler/
-[Closure Linter]: https://developers.google.com/closure/utilities/docs/linter_howto
-[JSDoc]: http://usejsdoc.org/
 
 
 #### Prerequisites
@@ -93,8 +88,8 @@ can find a complete list of testing options with `--help`.
 #### Join the announcement list
 
 If you want to receive release or survey announcements, you should join our
-[mailing list](https://groups.google.com/forum/#!forum/shaka-player-users).
-The list is very low volume.
+{@link https://groups.google.com/forum/#!forum/shaka-player-users|
+mailing list}. The list is very low volume.
 
 
 #### Continue the Tutorials

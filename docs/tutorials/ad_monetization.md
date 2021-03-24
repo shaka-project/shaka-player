@@ -2,18 +2,17 @@
 
 Shaka Player provides an API for serving ads to make monetization easier
 for apps. Our current API is tailored for our integration with the
-[Interactive Media Ads][] SDKs, but we plan to extend our support to
-other ad providers in v3.1+.
+{@link https://developers.google.com/interactive-media-ads|Interactive Media 
+Ads} SDKs, but we plan to extend our support to other ad providers in v3.1+.
 Please note that the current API is likely to undergo significant
 changes as our support extends.
 
 #### IMA SDK Integration
 
-Shaka Player provides an integration with the [Interactive Media Ads][] SDKs.
-We support both Client Side and Server Side ad insertion.
+Shaka Player provides an integration with the 
+{@link https://developers.google.com/interactive-media-ads|Interactive 
+Media Ads} SDKs. We support both Client Side and Server Side ad insertion.
 
-
-[Interactive Media Ads]: https://developers.google.com/interactive-media-ads
 
 Both the Client Side and the Server Side ad insertion experiences are available
 through the {@linksource shaka.extern.IAdManager} object on the Player.
@@ -77,9 +76,9 @@ adsRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
 adManager.requestClientSideAds(adsRequest);
 ```
 
-See: [google.ima.AdsRequest][] for details on the request object.
+See {@link https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/reference/js/ima.AdsRequest|google.ima.AdsRequest} for 
+details on the request object.
 
-[google.ima.AdsRequest]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/reference/js/ima.AdsRequest
 
 #### Streaming with Server Side Ads Insertion
 
@@ -123,9 +122,8 @@ player.load(uri);
 `shaka.extern.IAdManager.requestServerSideStream()` returns a Promise with a
 manifest URI that points to a stream with ads inserted.
 
-See [google.ima.dai.api.VODStreamRequest][] for details on the request object.
-
-[google.ima.dai.api.VODStreamRequest]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/VODStreamRequest
+See: { @link https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/VODStreamRequest|
+google.ima.dai.api.VODStreamRequest} for details on the request object.
 
 Requesting a LIVE stream:
 
@@ -138,9 +136,8 @@ const uri = await adManager.requestServerSideStream(streamRequest);
 player.load(uri);
 ```
 
-See: [google.ima.dai.api.LiveStreamRequest][] for details on the request object.
-
-[google.ima.dai.api.LiveStreamRequest]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/LiveStreamRequest
+See: {@link https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/LiveStreamRequest|
+google.ima.dai.api.LiveStreamRequest} for details on the request object.
 
 If you are using Shaka's UI library, we will automatically hook up our ad UI.
 
@@ -179,7 +176,8 @@ to use more intricate SDK capabilities not exposed through our API, we provide a
 way to do that.
 Listen to the {@link shaka.ads.AdManager#event:ImaAdManagerLoadedEvent} for
 Client Side or the {@link shaka.ads.AdManager#event:ImaStreamManagerLoadedEvent}
-for Server Side to get the IMA [AdManager][] or [StreamManager][] objects.
+for Server Side to get the IMA 
+{@link https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/reference/js/google.ima.AdsManager|AdManager} or {@link https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/StreamManager|StreamManager} objects.
 
 ```js
 adManager.addEventListener(shaka.ads.AdManager.IMA_AD_MANAGER_LOADED, (e) => {
@@ -190,15 +188,12 @@ adManager.addEventListener(shaka.ads.AdManager.IMA_STREAM_MANAGER_LOADED, (e) =>
   const imaStreamManager = e['imaStreamManager'];
 });
 ```
-[AdManager]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/reference/js/google.ima.AdsManager
-[StreamManager]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/StreamManager
 
 #### Disabling Cookies For Serving Limited Ads
 The server side IMA SDK allows limited ads to be served when the user does not
 give or denies consent to cookies. To allow this, set the `ltd` parameter using
-`StreamRequest.adTagParameters` as described in the [IMA limited ads guide][].
-To set up cookie-less manifest and segment requests, use an appropriate
-`requestFilter`.
+`StreamRequest.adTagParameters` as described in the {@link https://developers.devsite.corp.google.com/interactive-media-ads/docs/sdks/html5/dai/limited-ads|IMA limited ads guide}. To set up 
+cookie-less manifest and segment requests, use an appropriate `requestFilter`.
 
 ```js
   player.getNetworkingEngine().registerRequestFilter(function(type, request) {
@@ -208,7 +203,6 @@ To set up cookie-less manifest and segment requests, use an appropriate
     }
   });
 ```
-[IMA limited ads guide]: https://developers.devsite.corp.google.com/interactive-media-ads/docs/sdks/html5/dai/limited-ads
 
 #### Custom Ad Manager Implementations
 Our architecture supports custom ad manager implementations. Every ad manager

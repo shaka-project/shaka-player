@@ -2,8 +2,9 @@
 
 Not all browsers will follow an HTTP redirect on a preflighted cross-origin
 request.  For more detailed background on Cross-Origin Resource Sharing (CORS),
-see [MDN's CORS article](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
-and in particular, the section titled "Preflighted requests and redirects".
+see {@link https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS|
+MDN's CORS article} and in particular, the section titled "Preflighted 
+requests and redirects".
 
 Some services have decided to work around this limitation by not using HTTP
 redirects at all, but rather using a technique called Application-Level

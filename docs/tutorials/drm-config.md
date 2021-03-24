@@ -7,12 +7,8 @@ EME requires a secure URL to use.  This means you have to use `https` or be on
 future.  Also, because of mixed content requirements, if your site is using
 `https`, then your manifest and every segment will also need to use `https` too.
 
-See: Chrome's [announcement][], Firefox's [intent to remove][firefox_bug], and
-how to [disable for testing][allow_http].
-
-[allow_http]: https://www.chromium.org/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
-[announcement]: https://groups.google.com/a/chromium.org/forum/#!msg/blink-dev/tXmKPlXsnCQ/ptOETCUvBwAJ
-[firefox_bug]: https://bugzilla.mozilla.org/show_bug.cgi?id=1322517
+See: Chrome's {@link https://groups.google.com/a/chromium.org/forum/#!msg/blink-dev/tXmKPlXsnCQ/ptOETCUvBwAJ|announcement}, Firefox's {@link https://bugzilla.mozilla.org/show_bug.cgi?id=1322517|intent to remove}, and
+how to {@link https://www.chromium.org/Home/chromium-security/deprecating-powerful-features-on-insecure-origins|disable for testing}.
 
 
 #### License Servers
@@ -92,9 +88,12 @@ your manifest.  Use this when you need to confirm that your keys are correct.
 
 If your manifest actually specifies Clear Key, you can also use the normal
 license request mechanism to retrieve keys based on key IDs.  The EME spec
-defines a JSON-based [license request format] and [license format] for the
-Clear Key CDM.  If you have a server that understands these, just configure
-a license server as normal:
+defines a JSON-based 
+{@ link https://w3c.github.io/encrypted-media/#clear-key-request-format|
+license request format} and 
+{@link https://w3c.github.io/encrypted-media/#clear-key-license-format|
+license format} for the Clear Key CDM.  If you have a server that understands 
+these, just configure a license server as normal:
 
 ```js
 player.configure({
@@ -105,10 +104,6 @@ player.configure({
   }
 });
 ```
-
-[license request format]: https://w3c.github.io/encrypted-media/#clear-key-request-format
-[license format]: https://w3c.github.io/encrypted-media/#clear-key-license-format
-
 
 #### Advanced DRM Configuration
 
@@ -146,10 +141,9 @@ default is the empty string, which is the lowest security level supported by the
 key system.
 
 Each key system has their own values for robustness.  The values for Widevine
-are well-known (see the [Chromium sources][]) and listed below, but
-values for other key systems are not known to us at this time.
+are well-known (see the {@link https://cs.chromium.org/chromium/src/components/cdm/renderer/widevine_key_system_properties.h?q=SW_SECURE_CRYPTO&l=22|Chromium sources}) and listed below, but values 
+for other key systems are not known to us at this time.
 
-[Chromium sources]: https://cs.chromium.org/chromium/src/components/cdm/renderer/widevine_key_system_properties.h?q=SW_SECURE_CRYPTO&l=22
 
 - `SW_SECURE_CRYPTO`
 - `SW_SECURE_DECODE`
