@@ -756,7 +756,7 @@ describe('Player', () => {
       // buffering goal so we append another segment.
       player.configure('streaming.bufferingGoal', 40);
       await waitUntilBuffered(40);
-      expect(getBufferedBehind()).toBeLessThan(10);
+      expect(getBufferedBehind()).toBeLessThanOrEqual(10);
     });
 
     function getBufferedAhead() {
