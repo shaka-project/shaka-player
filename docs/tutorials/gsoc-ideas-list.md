@@ -222,8 +222,8 @@ Estimated complexity: medium
 Languages: Python
 
 Currently Shaka Streamer supports a few video and audio codecs, and we’ll expand
- our support for the audio codecs of {@link https://en.wikipedia.org/wiki/Dolby_Digital
- |ac-3} and {@link 
+ our support for the audio codecs of {@link 
+ https://en.wikipedia.org/wiki/Dolby_Digital|ac-3} and {@link 
  https://en.wikipedia.org/wiki/Dolby_Digital_Plus|ec-3}.
 
 {@link https://github.com/google/shaka-streamer/issues/37|Github Issue}
