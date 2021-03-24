@@ -8,7 +8,8 @@ plugin interface. Even our "built-in" parsers, such as DASH and WebVTT, are
 actually just plugins we build by default.
 
 Plugins can be written outside the library (in your application), or
-they can be built into the library to take advantage of the {@link https://github.com/google/closure-compiler|Closure compiler}.
+they can be built into the library to take advantage of the {@link 
+https://github.com/google/closure-compiler|Closure compiler}.
 
 
 
@@ -175,6 +176,7 @@ with the appropriate interfaces after the library is loaded.
 #### Giving Back
 
 If you have a great plugin that you'd like to contribute back to the community,
-we'd love to hear from you.  You can get in touch via our {@link https://github.com/google/shaka-player/issues/new/choose|issue tracker} to
+we'd love to hear from you.  You can get in touch via our {@link 
+https://github.com/google/shaka-player/issues/new/choose|issue tracker} to
 discuss it, and once it's ready, you can send a {@link 
 https://github.com/google/shaka-player/pull/new/master|pull request} on github.
