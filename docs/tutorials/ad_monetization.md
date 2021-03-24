@@ -76,8 +76,9 @@ adsRequest.adTagUrl = 'https://pubads.g.doubleclick.net/gampad/ads?' +
 adManager.requestClientSideAds(adsRequest);
 ```
 
-See {@link https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/reference/js/ima.AdsRequest|google.ima.AdsRequest} for 
-details on the request object.
+See: {@link 
+https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/reference/js/ima.AdsRequest
+|google.ima.AdsRequest} for details on the request object.
 
 
 #### Streaming with Server Side Ads Insertion
@@ -176,8 +177,11 @@ to use more intricate SDK capabilities not exposed through our API, we provide a
 way to do that.
 Listen to the {@link shaka.ads.AdManager#event:ImaAdManagerLoadedEvent} for
 Client Side or the {@link shaka.ads.AdManager#event:ImaStreamManagerLoadedEvent}
-for Server Side to get the IMA 
-{@link https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/reference/js/google.ima.AdsManager|AdManager} or {@link https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/StreamManager|StreamManager} objects.
+for Server Side to get the IMA {@link 
+https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/reference/js/google.ima.AdsManager
+|AdManager} or {@link 
+https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/StreamManager|
+StreamManager} objects.
 
 ```js
 adManager.addEventListener(shaka.ads.AdManager.IMA_AD_MANAGER_LOADED, (e) => {
@@ -192,8 +196,10 @@ adManager.addEventListener(shaka.ads.AdManager.IMA_STREAM_MANAGER_LOADED, (e) =>
 #### Disabling Cookies For Serving Limited Ads
 The server side IMA SDK allows limited ads to be served when the user does not
 give or denies consent to cookies. To allow this, set the `ltd` parameter using
-`StreamRequest.adTagParameters` as described in the {@link https://developers.devsite.corp.google.com/interactive-media-ads/docs/sdks/html5/dai/limited-ads|IMA limited ads guide}. To set up 
-cookie-less manifest and segment requests, use an appropriate `requestFilter`.
+`StreamRequest.adTagParameters` as described in the {@link 
+https://developers.devsite.corp.google.com/interactive-media-ads/docs/sdks/html5/dai/limited-ads|
+IMA limited ads guide}. To set up cookie-less manifest and segment requests, use an 
+appropriate `requestFilter`.
 
 ```js
   player.getNetworkingEngine().registerRequestFilter(function(type, request) {
