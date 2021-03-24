@@ -123,8 +123,9 @@ player.load(uri);
 `shaka.extern.IAdManager.requestServerSideStream()` returns a Promise with a
 manifest URI that points to a stream with ads inserted.
 
-See: {@link https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/VODStreamRequest|
-google.ima.dai.api.VODStreamRequest} for details on the request object.
+See: {@link 
+https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/VODStreamRequest
+|google.ima.dai.api.VODStreamRequest} for details on the request object.
 
 Requesting a LIVE stream:
 
@@ -137,8 +138,9 @@ const uri = await adManager.requestServerSideStream(streamRequest);
 player.load(uri);
 ```
 
-See: {@link https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/LiveStreamRequest|
-google.ima.dai.api.LiveStreamRequest} for details on the request object.
+See: {@link 
+https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/LiveStreamRequest
+|google.ima.dai.api.LiveStreamRequest} for details on the request object.
 
 If you are using Shaka's UI library, we will automatically hook up our ad UI.
 
