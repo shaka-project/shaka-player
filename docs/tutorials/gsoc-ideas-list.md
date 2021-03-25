@@ -39,8 +39,9 @@ These projects are intended to be good starting projects for new Shaka Player
 contributors, to complete relatively independently in a few weeks. Familiarity 
 with Javascript or Python will be helpful, but not required.
 
-To start, checkout our [demo][] and [tutorial][] page, and
-[contributing guide][].
+To start, checkout our [demo][] and {@link 
+https://nightly-dot-shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html
+|tutorial} page, and [contributing guide][].
 
 If you have any questions, you can discuss with us via the [mailing list][] 
 or with the GSoC [mentor][].

@@ -7,7 +7,9 @@ bad content.  But now in v2, we don't.
 
 This requires setting up clock sync for live streams.  This can be done by
 adding a `<UTCTiming>` element to the manifest or by setting the
-[`.manifest.dash.clockSyncUri`][DashManifestConfiguration] configuration.
+{@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration
+|`.manifest.dash.clockSyncUri`} configuration.
 See [#386(comment)][386] for more info.
 
 We also have issues with "drifting" DASH streams.  If your encoder experiences
@@ -48,7 +50,9 @@ See the [announcement][eme_https] for more info.
 You should also check that your platform/browser actually supports the key
 system.  If your manifest contains only PlayReady, it will need to be played on
 IE/Edge, a Chromecast, or another device with PlayReady.
-See the [DRM tutorial][drm_tutorial] for more info.
+See the {@link 
+https://shaka-player-demo.appspot.com/docs/api/tutorial-drm-config.html|
+DRM tutorial} for more info.
 
 This will also happen if you use `Storage` to store protected content (when
 `usePersistentLicense` is true).  Currently, persistent licenses are supported
@@ -61,8 +65,11 @@ store clear content or store only the content offline (i.e. set
 **Q:** I am getting `LICENSE_REQUEST_FAILED` or error code 6007.
 
 **A:** See `HTTP_ERROR`.  If you are getting a bad HTTP status, the server
-rejected the request.  Your proxy may require [wrapping][wrapping] the request
-or it may require [extra authentication][auth].
+rejected the request.  Your proxy may require {@link 
+https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
+|wrapping} the request or it may require {@link 
+https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
+|extra authentication}.
 
 <hr>
 
@@ -83,7 +90,9 @@ the certificate should be binary, so avoid fetching the response as a string
 
 **A:** Check the DevTools network tab for the response.  Verify that the
 response data looks correct.  For Widevine, the response should be binary.  If
-you see JSON, you will need to [unwrap the response][wrapping].
+you see JSON, you will need to {@link 
+https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
+|unwrap the response}.
 
 <hr>
 
@@ -93,7 +102,9 @@ you see JSON, you will need to [unwrap the response][wrapping].
 playback.  Since the browser handles playback, we don't get much information.
 
 If you want to disable native playback and use MediaSource playback instead,
-configure [`.streaming.useNativeHlsOnSafari`][StreamingConfiguration] to false.
+configure {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration|
+`.streaming.useNativeHlsOnSafari`} to false.
 
 <hr>
 
@@ -118,18 +129,22 @@ clear any of the content that has already been buffered.  (We used to, but it
 does not work consistently across browsers and created a bad experience.)
 
 This means that if you want to see the results of a new decision sooner, you
-should have a less aggressive buffering goal.  See the tutorial on [buffering
-configuration][buffering] and the docs for the
-[`.streaming.bufferingGoal`][StreamingConfiguration] configuration.
+should have a less aggressive buffering goal.  See the tutorial on {@link 
+https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html|
+buffering configuration} and the docs for the {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration
+|`.streaming.bufferingGoal`} configuration.
 
 Another factor is the segment size.  It may take up to 2 segments before Shaka
 Player has enough information to form a bandwidth estimate and make a decision.
 If your content uses 10-second segments, this means we may buffer 20 seconds
 of low quality video before we make a decision.  If it is too late to change
 the segment size in your content library, you may want to adjust the "default"
-bandwidth estimate used by Shaka Player to select the first segments.  Use the
-[`.abr.defaultBandwidthEstimate`][AbrConfiguration] configuration to control
-these initial decisions.
+bandwidth estimate used by Shaka Player to select the first segments. Use the
+{@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AbrConfiguration
+|`.abr.defaultBandwidthEstimate`} configuration to control these initial 
+decisions.
 
 <hr>
 
@@ -155,7 +170,9 @@ shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
 contain said captions.  Edge and Chromecast, however, have native TS support and
 thus are not required to transmux.
 In order to force those platforms to transmux, set the
-[`.streaming.forceTransmuxTS`][StreamingConfiguration] configuration to true.
+{@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration
+|`.streaming.forceTransmuxTS`} configuration to true.
 
 <hr>
 
@@ -180,8 +197,10 @@ For most content, this warning can be safely ignored (see
 <https://crbug.com/720013>).  If your content requires a specific robustness
 level, it is suggested to set it in the player configuration to ensure playback
 works: `.drm.advanced.<key_system>.audioRobustness` and
-`.drm.advanced.<key_system>.videoRobustness` (see
-[docs][AdvancedDrmConfiguration]).
+`.drm.advanced.<key_system>.videoRobustness` (see 
+{@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AdvancedDrmConfiguration
+|docs}).
 
 <hr>
 
@@ -234,9 +253,12 @@ guesses might not always be accurate.  If an HLS manifest has no codec
 information provided, we default to guessing that the video codec is
 `avc1.42E01E` and the audio codec is `mp4a.40.2`, which can cause problems if
 the stream is actually video-only or audio-only.  In this case, you can enable
-the [`.manifest.disableVideo`][ManifestConfiguration] or
-[`.manifest.disableAudio`][ManifestConfiguration] configurations to signal that
-your content does not have a video or audio stream.
+the {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.ManifestConfiguration
+|`.manifest.disableVideo`} or {@link 
+https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.ManifestConfiguration
+|`.manifest.disableAudio`} configurations to signal that your content does not 
+have a video or audio stream.
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
@@ -244,17 +266,8 @@ your content does not have a video or audio stream.
 [887]: https://github.com/google/shaka-player/issues/887
 [999]: https://github.com/google/shaka-player/issues/999
 [1667]: https://github.com/google/shaka-player/issues/1667
-[AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AbrConfiguration
-[AdvancedDrmConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AdvancedDrmConfiguration
 [BigInteger.js]: https://github.com/peterolson/BigInteger.js
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-[DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration
 [Shaka Player Embedded]: https://github.com/google/shaka-player-embedded
-[StreamingConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration
-[auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
-[buffering]: https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html
-[drm_tutorial]: https://shaka-player-demo.appspot.com/docs/api/tutorial-drm-config.html
 [eme_https]: https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
-[wrapping]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
 [including mux.js]: https://github.com/google/shaka-player/blob/967f3399/demo/index.html#L39
-[ManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.ManifestConfiguration
