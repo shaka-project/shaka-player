@@ -54,10 +54,11 @@ shaka.extern.AbrManager = class {
 
   /**
    * Chooses one variant to switch to.  Called by the Player.
+   * @param {number} _trackheight
    * @return {shaka.extern.Variant}
    * @exportDoc
    */
-  chooseVariant() {}
+  chooseVariant(_trackheight) {}
 
   /**
    * Enables automatic Variant choices from the last ones passed to setVariants.
