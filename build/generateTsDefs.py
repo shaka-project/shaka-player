@@ -48,8 +48,11 @@ def GenerateTsDefs(inputs, output):
   # and usable directly in TypeScript projects.
   contents = shakaBuildHelpers.execute_get_output(command)
 
-  # Remove the prefix clutz puts on all namespaces.
-  contents = contents.replace(b'\xe0\xb2\xa0_\xe0\xb2\xa0.clutz.', b'')
+  # Remove the prefix clutz puts on all namespaces
+  contents = contents.replace(b'\xe0\xb2\xa0_\xe0\xb2\xa0.clutz.', b'') # Linux
+  contents = contents.replace(b'\xe0\xb2\xa0_\xe0\xb2\xa0.clutz ', b'shakaExterns ') # Linux
+  contents = contents.replace(b'?_?.clutz.', b'') # Windows
+  contents = contents.replace(b'?_?.clutz ', b'shakaExterns ') # Windows
   # Replace "GlobalObject" (from Clutz) with TypeScript-native "object".
   contents = re.sub(br'\bGlobalObject\b', b'object', contents)
   # Remove "Global" from Clutz's Global{Date,Element,Event,EventTarget} and use
@@ -92,6 +95,12 @@ def GenerateTsDefs(inputs, output):
       sections)
   contents = b'\n'.join(sections) + b'\n'
 
+  moduleDeclaration = b"""
+declare module \'shaka-player\' {
+  export = shaka;
+}
+"""
+
   license_header_path = os.path.join(
       shakaBuildHelpers.get_source_base(), 'build/license-header')
 
@@ -100,6 +109,7 @@ def GenerateTsDefs(inputs, output):
 
   with open(output, 'wb') as f:
     f.write(license_header)
+    f.write(moduleDeclaration)
     f.write(b'\n')
     f.write(contents)
 

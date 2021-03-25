@@ -357,6 +357,16 @@ def update_node_modules():
   open(_node_modules_last_update_path(), 'wb').close()
   return True
 
+def test_typescript():
+  """Tests the inclusion of shaka-player into a Typescript project."""
+  base = cygwin_safe_path(get_source_base())
+  cmd = 'npm.cmd' if is_windows() else 'npm'
+  try:
+    with InDir(base):
+      execute_get_output([cmd, 'run', 'testTypescript']).decode('utf8')
+      return True
+  except subprocess.CalledProcessError:
+    return False
 
 def run_main(main):
   """Executes the given function with the current command-line arguments.

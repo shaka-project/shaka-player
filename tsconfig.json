@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    /* Basic Options */
+    "target": "es2015",
+    "module": "es2015",
+    "skipLibCheck": true,
+    "noEmit": true,
+
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "shaka-player": ["dist/shaka-player.compiled"] // this mapping is relative to "baseUrl"
+    }
+  },
+  "include": ["test/typescript.ts"]
+}

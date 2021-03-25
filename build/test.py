@@ -413,6 +413,11 @@ class Launcher:
       logging.error('Failed to update node modules')
       return 1
 
+    if not shakaBuildHelpers.test_typescript():
+      logging.error('Failed to include shaka-player from Typescript!')
+      logging.error('npm run testTypescript to get error details.')
+      return 1
+
     karma = shakaBuildHelpers.get_node_binary('karma')
     cmd = ['xvfb-run', '--auto-servernum'] if self.parsed_args.use_xvfb else []
     cmd += karma + ['start']
