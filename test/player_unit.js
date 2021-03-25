@@ -1559,6 +1559,22 @@ describe('Player', () => {
       expect(getActiveVariantTrack().audioRoles).toEqual([]);
     });
 
+    // https://github.com/google/shaka-player/issues/3262
+    it('selectAudioLanguage() doesn\'t change resolution', () => {
+      player.configure('abr.enabled', false);
+      abrManager.chooseIndex = 1;
+      const lowResEn =
+          variantTracks.filter((t) => t.language == 'en' && t.height == 200)[0];
+      player.selectVariantTrack(lowResEn);
+
+      // Switching to 'es' should keep the low-res stream and not choose the
+      // high-res version.
+      player.selectAudioLanguage('es');
+      const lowResEs =
+          variantTracks.filter((t) => t.language == 'es' && t.height == 200)[0];
+      expect(getActiveVariantTrack().id).toBe(lowResEs.id);
+    });
+
     it('selectTextLanguage() does not change selected variant track', () => {
       // This came up in a custom application that allows to select
       // from all tracks regardless of selected language.
