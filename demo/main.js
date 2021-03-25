@@ -377,7 +377,7 @@ shakaDemo.Main = class {
     this.controls_.addEventListener('caststatuschanged', (event) => {
       this.onCastStatusChange_(event['newStatus']);
     });
-    this.controls_.addEventListener('playerunloaded', () => {
+    this.controls_.addEventListener('playerunloading', () => {
       this.unload();
     });
 

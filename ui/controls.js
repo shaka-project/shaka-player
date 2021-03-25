@@ -580,7 +580,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   unload() {
     this.player_.unload();
-    this.dispatchEvent(new shaka.util.FakeEvent('playerunloaded'));
+    this.dispatchEvent(new shaka.util.FakeEvent('playerunloading'));
   }
 
   /** @export */
@@ -1546,10 +1546,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
  */
 
 /**
- * @event shaka.ui.Controls#PlayerUnloaded
- * @description Fired after the player unloads
+ * @event shaka.ui.Controls#PlayerUnloading
+ * @description Fired when the player begins to unload
  * @property {string} type
- *   'playerunloaded'
+ *   'playerunloading'
  * @exportDoc
  */
 
