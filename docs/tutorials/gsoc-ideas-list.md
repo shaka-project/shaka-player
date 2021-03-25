@@ -73,7 +73,6 @@ layer for the applications. It is an alternate bundle from the base Shaka Player
 [roadmap]:https://github.com/google/shaka-player/blob/master/roadmap.md
 [Github]:https://github.com/google/shaka-player
 [demo]:https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled
-[tutorial]:https://nightly-dot-shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html
 [mailing list]:https://groups.google.com/g/shaka-player-gsoc
 [Slack chanel]:https://app.slack.com/client/T0XKDDFM0/C01QRAFHLQK
 [mentor]:mailto:michellezhuo@google.com
