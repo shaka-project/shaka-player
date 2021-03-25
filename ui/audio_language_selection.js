@@ -87,6 +87,8 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
    */
   onAudioTrackSelected_(track) {
     this.player.selectAudioLanguage(track.language, track.roles[0]);
+    const clearBuffer = this.controls.getConfig().clearBufferOnQualityChange;
+    this.player.selectVariantTrack(track, clearBuffer);
   }
 
 
