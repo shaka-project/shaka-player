@@ -7,8 +7,9 @@ bad content.  But now in v2, we don't.
 
 This requires setting up clock sync for live streams.  This can be done by
 adding a `<UTCTiming>` element to the manifest or by setting the
-{@link shaka.extern.html.DashManifestConfiguration|`.manifest.dash.clockSyncUri`}
-configuration. See [#386(comment)][386] for more info.
+{@link shaka.extern.html.DashManifestConfiguration|
+`.manifest.dash.clockSyncUri`} configuration. See [#386(comment)][386] 
+for more info.
 
 We also have issues with "drifting" DASH streams.  If your encoder experiences
 drift, you may need to address that with the encoder.  We have plans to be
@@ -128,7 +129,7 @@ Player has enough information to form a bandwidth estimate and make a decision.
 If your content uses 10-second segments, this means we may buffer 20 seconds
 of low quality video before we make a decision.  If it is too late to change
 the segment size in your content library, you may want to adjust the "default"
-bandwidth estimate used by Shaka Player to select the first segments. Use the
+bandwidth estimate used by Shaka Player to select the first segments.  Use the
 {@link shaka.extern.AbrConfiguration|`.abr.defaultBandwidthEstimate`} 
 configuration to control these initial decisions.
 
