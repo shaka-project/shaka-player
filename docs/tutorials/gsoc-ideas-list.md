@@ -39,9 +39,8 @@ These projects are intended to be good starting projects for new Shaka Player
 contributors, to complete relatively independently in a few weeks. Familiarity 
 with Javascript or Python will be helpful, but not required.
 
-To start, checkout our [demo][] and {@link 
-https://nightly-dot-shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html
-|tutorial} page, and [contributing guide][].
+To start, checkout our [demo][] and [tutorial][] page, and 
+[contributing guide][].
 
 If you have any questions, you can discuss with us via the [mailing list][] 
 or with the GSoC [mentor][].
@@ -73,6 +72,7 @@ layer for the applications. It is an alternate bundle from the base Shaka Player
 [roadmap]:https://github.com/google/shaka-player/blob/master/roadmap.md
 [Github]:https://github.com/google/shaka-player
 [demo]:https://shaka-player-demo.appspot.com/demo/#audiolang=en-US;textlang=en-US;bufferingGoal=30;uilang=en-US;panel=HOME;build=uncompiled
+[tutorial]:https://nightly-dot-shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html
 [mailing list]:https://groups.google.com/g/shaka-player-gsoc
 [Slack chanel]:https://app.slack.com/client/T0XKDDFM0/C01QRAFHLQK
 [mentor]:mailto:michellezhuo@google.com
