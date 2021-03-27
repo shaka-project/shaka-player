@@ -35,6 +35,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     this.button.classList.add('shaka-resolution-button');
     this.menu.classList.add('shaka-resolutions');
+    this.isTriggeredByResolution = false;
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
@@ -49,6 +50,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     this.eventManager.listen(this.player, 'variantchanged', () => {
       this.updateResolutionSelection_();
+      this.onLanguageUpdated_();
     });
 
     this.eventManager.listen(this.player, 'trackschanged', () => {
@@ -116,6 +118,18 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
         this.menu, 'shaka-back-to-overflow-button');
 
+    // save the previous resolution value if the varient change
+    // is not triggered by resolution if a previous resolution
+    // exists
+    if (!this.isTriggeredByResolution &&
+        shaka.ui.Utils.getFirstDescendantWithClassName(
+            this.menu, 'shaka-chosen-item')) {
+      /** @type {number} */
+      this.previousResolution = parseInt(
+          shaka.ui.Utils.getFirstDescendantWithClassName(
+              this.menu, 'shaka-chosen-item').textContent, 10);
+    }
+
     // 2. Remove everything
     shaka.util.Dom.removeAllChildren(this.menu);
 
@@ -129,13 +143,28 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       const button = shaka.util.Dom.createButton();
       button.classList.add('explicit-resolution');
       this.eventManager.listen(button, 'click',
-          () => this.onTrackSelected_(track));
+          () => {
+            this.onTrackSelected_(track);
+            this.isTriggeredByResolution = true;
+          });
 
       const span = shaka.util.Dom.createHTMLElement('span');
       span.textContent = track.height + 'p';
       button.appendChild(span);
 
-      if (!abrEnabled && track == selectedTrack) {
+      if (!abrEnabled && !this.isTriggeredByResolution) {
+        // if the varient is triggered by language use previous
+        // resolution to set the tick in UI
+        // If abr is disabled, mark the selected track's resolution.
+        if (track.height == this.previousResolution) {
+          button.setAttribute('aria-selected', 'true');
+          button.appendChild(shaka.ui.Utils.checkmarkIcon());
+          span.classList.add('shaka-chosen-item');
+          this.currentSelection.textContent = span.textContent;
+        }
+      }
+      if (!abrEnabled && track == selectedTrack
+        && this.isTriggeredByResolution) {
         // If abr is disabled, mark the selected track's resolution.
         button.setAttribute('aria-selected', 'true');
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
@@ -145,6 +174,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       this.menu.appendChild(button);
     }
 
+    this.isTriggeredByResolution =false;
     // Add the Auto button
     const autoButton = shaka.util.Dom.createButton();
     autoButton.classList.add('shaka-enable-abr-button');
@@ -189,6 +219,29 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     this.player.configure(config);
     const clearBuffer = this.controls.getConfig().clearBufferOnQualityChange;
     this.player.selectVariantTrack(track, clearBuffer);
+  }
+
+  /**
+   * @private
+   */
+  onLanguageUpdated_() {
+    // update player track if varient is triggered by
+    // language change.
+    /** @type {!Array.<shaka.extern.Track>} */
+    const tracks = this.player.getVariantTracks();
+    const languageTrack = tracks.find((track) => track.active);
+    const trackLanguage_ = languageTrack.language;
+    const trackHeight = parseInt(
+        shaka.ui.Utils.getFirstDescendantWithClassName(
+            this.menu, 'shaka-chosen-item').textContent, 10);
+    if (trackHeight) {
+      const activeTrack =
+      tracks.find((track) =>
+        track.language == trackLanguage_ && track.height == trackHeight,
+      );
+      const clearBuffer = this.controls.getConfig().clearBufferOnQualityChange;
+      this.player.selectVariantTrack(activeTrack, clearBuffer);
+    }
   }
 
 
