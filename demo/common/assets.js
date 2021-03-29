@@ -875,22 +875,40 @@ shakaAssets.testAssets = [
 
   // MetaCDN assets {{{
   new ShakaDemoAssetInfo(
+      /* name= */ 'Car Ride (DASH, VOD, 180 Degrees)',
+      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/.png?scale=300:210',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/Feature.DASH/.mpd',
+      /* source= */ shakaAssets.Source.METACDN)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VOD),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Car Ride (HLS, VOD, 180 Degrees)',
-      /* iconUri= */ 'TODO',
-      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/Feature.HLS?format=.m3u8',
+      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/.png?scale=300:210',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/Feature.HLS/.m3u8',
       /* source= */ shakaAssets.Source.METACDN)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.VOD),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Car Ride (DASH, VOD, 180 Degrees)',
-      /* iconUri= */ 'TODO',
-      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/Feature.DASH?format=.mpd',
+      /* name= */ 'Queensland, Australia Landscape (DASH)',
+      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/.png?scale=300:210',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/Feature.DASH/.mpd',
       /* source= */ shakaAssets.Source.METACDN)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VOD),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Queensland, Australia Landscape (HLS)',
+      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/.png?scale=300:210',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/Feature.HLS/.m3u8',
+      /* source= */ shakaAssets.Source.METACDN)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.VOD),
   // End MetaCDN assets }}}
 
