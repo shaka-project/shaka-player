@@ -536,9 +536,14 @@ describe('StreamingEngine', () => {
 
     it('won\'t jump large gaps with preventDefault()', function(done) {
       config.jumpLargeGaps = true;
+      let seekCount = 0;
       setupGappyContent(/* gapAtStart */ 0, /* dropSegment */ true)
           .then(() => {
             onStartupComplete.and.callFake(() => {
+              eventManager.listen(video, 'seeking', () => {
+                seekCount++;
+              });
+
               video.currentTime = 8;
               video.play();
             });
@@ -546,9 +551,10 @@ describe('StreamingEngine', () => {
             onEvent.and.callFake(function(event) {
               event.preventDefault();
               shaka.test.Util.delay(5).then(() => {
-                // IE/Edge somehow plays inside the gap.  Just make sure we
-                // don't jump the gap.
-                expect(video.currentTime).toBeLessThan(20);
+                // IE/Edge somehow plays _into_ the gap, and Xbox One plays
+                // _through_ the gap.  Just make sure _we_ don't jump the gap by
+                // seeking.  One seek is required to start playback at time 8.
+                expect(seekCount).toBe(1);
                 done();
               })
               .catch(done.fail);
