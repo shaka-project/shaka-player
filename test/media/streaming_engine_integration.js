@@ -523,13 +523,20 @@ describe('StreamingEngine', () => {
       // readyState is 0.
       await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
 
+      let seekCount = 0;
+      eventManager.listen(video, 'seeking', () => {
+        seekCount++;
+      });
+
       video.currentTime = 8;
       video.play();
 
       await shaka.test.Util.delay(5);
-      // IE/Edge somehow plays inside the gap.  Just make sure we
-      // don't jump the gap.
-      expect(video.currentTime).toBeLessThan(20);
+
+      // IE/Edge somehow plays _into_ the gap, and Xbox One plays _through_ the
+      // gap.  Just make sure _we_ don't jump the gap by seeking.  One seek is
+      // required to start playback at time 8.
+      expect(seekCount).toBe(1);
     });
 
     /**
