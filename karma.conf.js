@@ -70,6 +70,7 @@ module.exports = (config) => {
 
     plugins: [
       'karma-*',  // default plugins
+      '@*/karma-*', // default scoped plugins
 
       // An inline plugin which supplies the webdriver-screenshot middleware.
       {
