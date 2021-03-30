@@ -69,7 +69,8 @@ module.exports = function(config) {
     ],
 
     plugins: [
-      'karma-*',  // default
+      'karma-*',  // default plugins
+      '@*/karma-*', // default scoped plugins
     ],
 
     // list of files / patterns to load in the browser
