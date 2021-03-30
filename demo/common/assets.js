@@ -798,6 +798,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF THUMBNAILS - Single adaptation set, 4 tiles at 10x1, each thumb 205x115',
@@ -807,6 +808,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF THUMBNAILS - Single adaptation set, 1 tile at 10x20, each thumb 102x58',
@@ -816,6 +818,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF THUMBNAILS - Two adaptation sets with different thumb resolutions',
@@ -825,6 +828,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.ULTRA_HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF THUMBNAILS - Live stream, Single adaptation set, 1x1 tiles (livesim)',
