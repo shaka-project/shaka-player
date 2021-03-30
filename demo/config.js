@@ -280,6 +280,11 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.FUZZ_FACTOR, prefix + 'fuzzFactor',
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.TIMEOUT, prefix + 'timeout',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.STALL_TIMEOUT, prefix + 'stallTimeout',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.CONNECTION_TIMEOUT,
+            prefix + 'connectionTimeout',
             /* canBeDecimal= */ true);
   }
 
