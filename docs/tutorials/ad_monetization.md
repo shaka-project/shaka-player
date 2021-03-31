@@ -198,7 +198,9 @@ The server side IMA SDK allows limited ads to be served when the user does not
 give or denies consent to cookies. To allow this, set the `ltd` parameter using
 `StreamRequest.adTagParameters` as described in the [IMA limited ads guide][].
 To set up cookie-less manifest and segment requests, use an appropriate
-`requestFilter`.
+`requestFilter`. Please note that `request.withCredentials` flag is `false` by
+default, so you should only need to set this if you've enabled it in other parts of
+your code.
 
 ```js
   player.getNetworkingEngine().registerRequestFilter(function(type, request) {
