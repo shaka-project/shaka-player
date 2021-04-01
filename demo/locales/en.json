@@ -62,6 +62,7 @@
   "DEMO_DRM_SECTION_HEADER": "DRM",
   "DEMO_DRM_SYSTEM": "Custom DRM System",
   "DEMO_DRM_TAB": "Drm",
+  "DEMO_DRM_SESSION_TYPE": "Session Type",
   "DEMO_DURATION_BACKOFF": "Duration Backoff",
   "DEMO_EDIT_CUSTOM": "Edit",
   "DEMO_ENABLED": "Enabled",

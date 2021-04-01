@@ -111,6 +111,7 @@ shaka.extern.InitDataOverride;
  *   audioRobustness: string,
  *   videoRobustness: string,
  *   serverCertificate: Uint8Array,
+ *   sessionType: string,
  *   initData: Array.<!shaka.extern.InitDataOverride>,
  *   keyIds: Set.<string>
  * }}
@@ -132,6 +133,9 @@ shaka.extern.InitDataOverride;
  *   <i>Defaults to false.  Can be filled in by advanced DRM config.</i> <br>
  *   True if the application requires the key system to support persistent
  *   state, e.g., for persistent license storage.
+ * @property {string} sessionType
+ *   <i>Defaults to 'temporary' if Shaka wasn't initiated for storage.
+ *   Can be filled in by advanced DRM config sessionType parameter.</i> <br>
  * @property {string} audioRobustness
  *   <i>Defaults to '', e.g., no specific robustness required.  Can be filled in
  *   by advanced DRM config.</i> <br>

@@ -133,16 +133,9 @@ shakaDemo.Config = class {
             /* canBeZero= */ false,
             /* canBeUnset= */ true);
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
-    const robustnessSuggestions = [
-      'SW_SECURE_CRYPTO',
-      'SW_SECURE_DECODE',
-      'HW_SECURE_CRYPTO',
-      'HW_SECURE_DECODE',
-      'HW_SECURE_ALL',
-    ];
-    const addRobustnessField = (name, valueName) => {
-      // All robustness fields of a given type are set at once.
-      this.addDatalistInput_(name, robustnessSuggestions, (input) => {
+    const addDRMAdvancedField = (name, valueName, suggestions) => {
+      // All advanced fields of a given type are set at once.
+      this.addDatalistInput_(name, suggestions, (input) => {
         // Add in any common drmSystem not currently in advanced.
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           if (!(drmSystem in advanced)) {
@@ -158,12 +151,37 @@ shakaDemo.Config = class {
       });
       const keySystem = Object.keys(advanced)[0];
       if (keySystem) {
-        const currentRobustness = advanced[keySystem][valueName];
-        this.latestInput_.input().value = currentRobustness;
+        const currentValue = advanced[keySystem][valueName];
+        this.latestInput_.input().value = currentValue;
       }
     };
-    addRobustnessField(MessageIds.VIDEO_ROBUSTNESS, 'videoRobustness');
-    addRobustnessField(MessageIds.AUDIO_ROBUSTNESS, 'audioRobustness');
+
+    const robustnessSuggestions = [
+      'SW_SECURE_CRYPTO',
+      'SW_SECURE_DECODE',
+      'HW_SECURE_CRYPTO',
+      'HW_SECURE_DECODE',
+      'HW_SECURE_ALL',
+      '150',
+      '2000',
+      '3000',
+    ];
+
+    const sessionTypeSuggestions = ['temporary', 'persistent-license'];
+
+    addDRMAdvancedField(
+        MessageIds.VIDEO_ROBUSTNESS,
+        'videoRobustness',
+        robustnessSuggestions);
+    addDRMAdvancedField(
+        MessageIds.AUDIO_ROBUSTNESS,
+        'audioRobustness',
+        robustnessSuggestions);
+    addDRMAdvancedField(
+        MessageIds.DRM_SESSION_TYPE,
+        'sessionType',
+        sessionTypeSuggestions);
+
     this.addRetrySection_('drm', MessageIds.DRM_RETRY_SECTION_HEADER);
   }
 

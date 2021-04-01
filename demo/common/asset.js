@@ -357,13 +357,14 @@ const ShakaDemoAssetInfo = class {
    */
   getConfiguration() {
     const config = /** @type {shaka.extern.PlayerConfiguration} */(
-      {drm: {}, manifest: {dash: {}}});
+      {drm: {advanced: {}}, manifest: {dash: {}}});
     if (this.licenseServers.size) {
       config.drm.servers = {};
       this.licenseServers.forEach((value, key) => {
         config.drm.servers[key] = value;
       });
     }
+
     if (this.clearKeys.size) {
       config.drm.clearKeys = {};
       this.clearKeys.forEach((value, key) => {
