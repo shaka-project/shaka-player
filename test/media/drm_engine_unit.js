@@ -18,6 +18,7 @@ goog.require('shaka.util.BufferUtils');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.Platform');
 goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.Platform');
 goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.StringUtils');
 goog.require('shaka.util.Uint8ArrayUtils');
@@ -421,6 +422,7 @@ describe('DrmEngine', () => {
             distinctiveIdentifier: 'optional',
             persistentState: 'optional',
             sessionTypes: ['temporary'],
+            initDataTypes: ['cenc'],
           })]);
       expect(requestMediaKeySystemAccessSpy)
           .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
@@ -431,6 +433,7 @@ describe('DrmEngine', () => {
             distinctiveIdentifier: 'optional',
             persistentState: 'optional',
             sessionTypes: ['temporary'],
+            initDataTypes: ['cenc'],
           })]);
     });
 
@@ -449,6 +452,7 @@ describe('DrmEngine', () => {
           distinctiveIdentifier: 'optional',
           persistentState: 'required',
           sessionTypes: ['persistent-license'],
+          initDataTypes: ['cenc'],
         }),
       ]);
       expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith('drm.def', [
@@ -456,6 +460,7 @@ describe('DrmEngine', () => {
           distinctiveIdentifier: 'optional',
           persistentState: 'required',
           sessionTypes: ['persistent-license'],
+          initDataTypes: ['cenc'],
         }),
       ]);
     });
@@ -541,6 +546,7 @@ describe('DrmEngine', () => {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: null,
+        sessionType: 'persistent-license',
         individualizationServer: '',
         distinctiveIdentifierRequired: true,
         persistentStateRequired: true,
@@ -564,6 +570,8 @@ describe('DrmEngine', () => {
             })],
             distinctiveIdentifier: 'required',
             persistentState: 'required',
+            sessionTypes: ['persistent-license'],
+            initDataTypes: ['cenc'],
           })]);
     });
 
@@ -596,6 +604,7 @@ describe('DrmEngine', () => {
         audioRobustness: 'bad',
         videoRobustness: 'so_bad_it_hurts',
         serverCertificate: null,
+        sessionType: '',
         individualizationServer: '',
         distinctiveIdentifierRequired: false,
         persistentStateRequired: false,
@@ -619,6 +628,29 @@ describe('DrmEngine', () => {
             })],
             distinctiveIdentifier: 'required',
             persistentState: 'required',
+            initDataTypes: ['cenc'],
+          })]);
+    });
+
+    it('sets unique initDataTypes if specified from the initData', async () => {
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initDataType: 'very_nice', initData: new Uint8Array(5), keyId: null},
+          {initDataType: 'very_nice', initData: new Uint8Array(5), keyId: null},
+        ];
+      });
+
+      drmEngine.configure(config);
+
+      const variants = manifest.variants;
+
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+
+      expect(drmEngine.initialized()).toBe(true);
+      expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
+      expect(requestMediaKeySystemAccessSpy)
+          .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
+            initDataTypes: ['very_nice'],
           })]);
     });
 
@@ -1489,8 +1521,41 @@ describe('DrmEngine', () => {
       mockVideo.setMediaKeys.calls.reset();
       await drmEngine.destroy();
       expect(session1.close).toHaveBeenCalled();
+      expect(session1.remove).not.toHaveBeenCalled();
       expect(session2.close).toHaveBeenCalled();
+      expect(session2.remove).not.toHaveBeenCalled();
       expect(mockVideo.setMediaKeys).toHaveBeenCalledWith(null);
+    });
+
+    it('tears down & removes active persistent sessions', async () => {
+      config.advanced['drm.abc'] = createAdvancedConfig(null);
+      config.advanced['drm.abc'].sessionType = 'persistent-license';
+
+      drmEngine.configure(config);
+
+      await initAndAttach();
+      const initData1 = new Uint8Array(1);
+      const initData2 = new Uint8Array(2);
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData1, keyId: null});
+      mockVideo.on['encrypted'](
+          {initDataType: 'webm', initData: initData2, keyId: null});
+
+      const message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
+      session2.on['message']({target: session2, message: message});
+      session2.update.and.returnValue(Promise.resolve());
+
+      await shaka.test.Util.shortDelay();
+      mockVideo.setMediaKeys.calls.reset();
+      await drmEngine.destroy();
+
+      expect(session1.close).not.toHaveBeenCalled();
+      expect(session1.remove).toHaveBeenCalled();
+
+      expect(session2.close).not.toHaveBeenCalled();
+      expect(session2.remove).toHaveBeenCalled();
     });
 
     it('swallows errors when closing sessions', async () => {
@@ -1877,6 +1942,7 @@ describe('DrmEngine', () => {
         videoRobustness: 'really_really_ridiculously_good',
         distinctiveIdentifierRequired: true,
         serverCertificate: null,
+        sessionType: '',
         individualizationServer: '',
         persistentStateRequired: true,
       };
@@ -1894,6 +1960,7 @@ describe('DrmEngine', () => {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
+        sessionType: 'temporary',
         initData: [],
         keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       });
@@ -2248,6 +2315,7 @@ describe('DrmEngine', () => {
       persistentStateRequired: false,
       serverCertificate: serverCert,
       individualizationServer: '',
+      sessionType: '',
       videoRobustness: '',
     };
   }

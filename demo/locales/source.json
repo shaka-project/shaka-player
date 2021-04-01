@@ -243,6 +243,10 @@
     "description": "The header for a section of configuration values.",
     "message": "[JARGON:DRM]"
   },
+  "DEMO_DRM_SESSION_TYPE": {
+    "description": "The name of a configuration value.",
+    "message": "Session Type"
+  },
   "DEMO_DRM_SYSTEM": {
     "description": "The label on a field that allows users to provide a Digital Rights Management (DRM) system identifier for a custom asset.",
     "message": "Custom [JARGON:DRM] System"

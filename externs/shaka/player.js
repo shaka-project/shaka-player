@@ -516,7 +516,8 @@ shaka.extern.EmsgInfo;
  *   videoRobustness: string,
  *   audioRobustness: string,
  *   serverCertificate: Uint8Array,
- *   individualizationServer: string
+ *   individualizationServer: string,
+ *   sessionType: string
  * }}
  *
  * @property {boolean} distinctiveIdentifierRequired
@@ -547,6 +548,10 @@ shaka.extern.EmsgInfo;
  * @property {string} individualizationServer
  *   The server that handles an <code>'individualiation-request'</code>.  If the
  *   server isn't given, it will default to the license server.
+ * @property {string} sessionType
+ *   <i>Defaults to <code>'temporary'</code> for streaming.</i> <br>
+ *   The MediaKey session type to create streaming licenses with.  This doesn't
+ *   affect offline storage.
  *
  * @exportDoc
  */

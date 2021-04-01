@@ -145,11 +145,11 @@ playback.  Passing in a higher security level than can be supported will cause
 default is the empty string, which is the lowest security level supported by the
 key system.
 
-Each key system has their own values for robustness.  The values for Widevine
-are well-known (see the [Chromium sources][]) and listed below, but
-values for other key systems are not known to us at this time.
+Each key system has their own values for robustness.
 
-[Chromium sources]: https://cs.chromium.org/chromium/src/components/cdm/renderer/widevine_key_system_properties.h?q=SW_SECURE_CRYPTO&l=22
+##### Widevine
+
+Chromium sources: https://cs.chromium.org/chromium/src/components/cdm/renderer/widevine_key_system_properties.h?q=SW_SECURE_CRYPTO&l=22
 
 - `SW_SECURE_CRYPTO`
 - `SW_SECURE_DECODE`
@@ -157,6 +157,21 @@ values for other key systems are not known to us at this time.
 - `HW_SECURE_DECODE`
 - `HW_SECURE_ALL`
 
+##### PlayReady
+
+Microsoft Documentation: https://docs.microsoft.com/en-us/playready/overview/security-level
+
+- `3000`
+- `2000`
+
+`com.microsoft.playready` key system ignores given robustness and stays at a
+`2000` decryption level.
+
+NB: Audio Hardware DRM is not supported (PlayReady limitation)
+
+##### Other key-systems
+
+Values for other key systems are not known to us at this time.
 
 #### Continue the Tutorials
 
