@@ -62,11 +62,7 @@ describe('SimpleLLAbrManager', () => {
 
     variants = manifest.variants;
 
-    abrManager = new shaka.abr.SimpleLLAbrManager({
-      getBufferLevel: () => { return 0; },
-      getPresentationLatency: () => { return []; },
-      getServiceDescription: () => { return {}; },
-    });
+    abrManager = new shaka.abr.SimpleLLAbrManager();
     abrManager.init(shaka.test.Util.spyFunc(switchCallback));
     abrManager.configure(config);
     abrManager.setVariants(variants);
