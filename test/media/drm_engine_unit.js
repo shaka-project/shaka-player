@@ -1915,6 +1915,19 @@ describe('DrmEngine', () => {
     });
   });  // describe('destroy')
 
+  describe('isPlayReadyKeySystem', () => {
+    it('should detect the given keySystem as a PlayReady one', () => {
+      expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.microsoft.playready')).toBe(true);
+      expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.microsoft.playready.anything')).toBe(true);
+      expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.chromecast.playready')).toBe(true);
+    })
+
+    it('should not detect a PlayReady keySystem', () => {
+      expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.widevine.alpha')).toBe(false);
+      expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.abc.playready')).toBe(false);
+    })
+  });
+
   describe('getDrmInfo', () => {
     it('includes correct info', async () => {
       // Leave only one drmInfo
