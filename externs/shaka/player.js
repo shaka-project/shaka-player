@@ -674,7 +674,7 @@ shaka.extern.DrmConfiguration;
  *   <code>false</code> if not provided.
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
- *   mapping handled by Shaka
+ *   mapping handled by Shaka.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
