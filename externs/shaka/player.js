@@ -625,7 +625,7 @@ shaka.extern.DrmConfiguration;
  *   ignoreSuggestedPresentationDelay: boolean,
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
- *   keySystems: !Object.<string, string>
+ *   keySystemsByURI: !Object.<string, string>
  * }}
  *
  * @property {string} clockSyncUri
@@ -672,7 +672,7 @@ shaka.extern.DrmConfiguration;
  *   If true will cause DASH parser to ignore
  *   <code>maxSegmentDuration</code> from manifest. Defaults to
  *   <code>false</code> if not provided.
- * @property {Object.<string, string>} keySystems
+ * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka
  * @exportDoc

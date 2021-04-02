@@ -99,7 +99,7 @@ describe('Demo', () => {
           .add('preferredTextRole')
           .add('playRangeStart')
           .add('playRangeEnd')
-          .add('manifest.dash.keySystems');
+          .add('manifest.dash.keySystemsByURI');
 
       /**
        * @param {!Object} section
