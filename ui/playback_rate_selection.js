@@ -124,6 +124,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
 
       this.eventManager.listen(button, 'click', () => {
         this.video.playbackRate = this.playbackRates_.get(rateStr);
+        this.video.defaultPlaybackRate = this.playbackRates_.get(rateStr);
       });
 
       this.menu.appendChild(button);
