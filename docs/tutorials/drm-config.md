@@ -56,8 +56,22 @@ particular key system at all, but instead state that any CENC system will do:
 ```
 
 If this is the only `<ContentProtection>` element in the manifest, Shaka will
-try all key systems it knows.  (Based on keySystems in
+try all key systems it knows. (Based on keySystems in
 {@linksource shaka.extern.DashManifestConfiguration}.)
+
+Through `player.configure()`, you can change the dash key systems mapping per
+UUID:
+```js
+player.configure({
+  dash: {
+    keySystems: {
+      'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95': 'com.microsoft.playready.recommendation',
+      'urn:uuid:79f0049a-4098-8642-ab92-e65be0885f95': 'com.microsoft.playready.recommendation',
+    }
+  }
+});
+```
+
 If the browser supports it and you configured a license server URL for it, we'll
 use it.
 
@@ -163,6 +177,7 @@ Microsoft Documentation: https://docs.microsoft.com/en-us/playready/overview/sec
 
 - `3000`
 - `2000`
+- `150`
 
 `com.microsoft.playready` key system ignores given robustness and stays at a
 `2000` decryption level.
