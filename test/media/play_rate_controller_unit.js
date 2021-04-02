@@ -20,6 +20,8 @@ describe('PlayRateController', () => {
   /** @type {!jasmine.Spy} */
   let getPlayRateSpy;
   /** @type {!jasmine.Spy} */
+  let getDefaultPlayRateSpy;
+  /** @type {!jasmine.Spy} */
   let setPlayRateSpy;
   /** @type {!jasmine.Spy} */
   let movePlayheadSpy;
@@ -32,6 +34,7 @@ describe('PlayRateController', () => {
 
   beforeEach(() => {
     getPlayRateSpy = jasmine.createSpy('getPlaybackRate');
+    getDefaultPlayRateSpy = jasmine.createSpy('getDefaultPlaybackRate');
     setPlayRateSpy = jasmine.createSpy('setPlaybackRate');
     movePlayheadSpy = jasmine.createSpy('movePlayhead');
 
@@ -42,6 +45,7 @@ describe('PlayRateController', () => {
 
     const harness = {
       getRate: shaka.test.Util.spyFunc(getPlayRateSpy),
+      getDefaultRate: shaka.test.Util.spyFunc(getDefaultPlayRateSpy),
       setRate: shaka.test.Util.spyFunc(setPlayRateSpy),
       movePlayhead: shaka.test.Util.spyFunc(movePlayheadSpy),
     };
