@@ -1916,13 +1916,13 @@ describe('DrmEngine', () => {
   });  // describe('destroy')
 
   describe('isPlayReadyKeySystem', () => {
-    it('should detect the given keySystem as a PlayReady one', () => {
+    it('should return true for MS & Chromecast PlayReady', () => {
       expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.microsoft.playready')).toBe(true);
       expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.microsoft.playready.anything')).toBe(true);
       expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.chromecast.playready')).toBe(true);
     })
 
-    it('should not detect a PlayReady keySystem', () => {
+    it('should return false for non-PlayReady key systems', () => {
       expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.widevine.alpha')).toBe(false);
       expect(shaka.media.DrmEngine.isPlayReadyKeySystem('com.abc.playready')).toBe(false);
     })
