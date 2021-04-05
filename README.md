@@ -32,8 +32,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Firefox¹   |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -      | -   |
 |Edge¹      |**Y**     | -       | -       | -       | -        | -      | -   |
 |Edge Chromium|**Y**     |**Y**    |**Y**     |untested⁵|**Native**| -      | -   |
-|IE ≤ 10    | N        | -       | -       | -       | -        | -      | -   |
-|IE 11      |**Y** ⁴   | -       | -       | -       | -        | -      | -   |
+|IE         | N        | -       | -       | -       | -        | -      | -   |
 |Safari¹    | -        |**Y**    | -       | -       |**iPadOS 13<br>Native**| - | - |
 |Opera¹     |untested⁵ |untested⁵|untested⁵|untested⁵|**Native**| -      | -   |
 |Chromecast²| -        | -       | -       | -       | -        | -      |**Y**|
@@ -48,10 +47,6 @@ NOTES:
    can be implemented with Shaka Player.
  - ³: Tizen 2017 model is actively tested and supported by the Shaka Player
    team. Tizen 2016 model is community-supported and untested by us.
- - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11
-   can play clear content on Windows 8.0. IE 11 does not support adaptive
-   playback on Windows 7 and under.  (IE support will stop in v3.1:
-   https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.
  - ⁶: These are expected to work, but are community-supported and untested by
@@ -144,7 +139,6 @@ HLS features **not** supported:
 |Firefox²  |**Y**     | -       | -       |**Y**     |
 |Edge³     | -        |**Y**    | -       | -        |
 |Edge Chromium|**Y**     |**Y**    | -       |**Y**     |
-|IE 11⁴    | -        |**Y**    | -       | -        |
 |Safari    | -        | -       |**Y**    | -        |
 |Opera     |untested⁵ | -       | -       |untested⁵ |
 |Chromecast|**Y**     |**Y**    | -       |untested⁵ |
@@ -161,9 +155,6 @@ NOTES:
  - ²: DRM must be enabled by the user.  The first time a Firefox user visits a
    site with encrypted media, the user will be prompted to enable DRM.
  - ³: PlayReady in Edge does not seem to work on a VM or over Remote Desktop.
- - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only.  (IE
-   support will stop in v3.1:
-   https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.
  - ⁶: ClearKey is a useful tool for debugging, and does not provide actual
