@@ -968,7 +968,7 @@ describe('Playhead', () => {
             // We don't want to run tick() for 1 second because it will trigger
             // the stall-detection, which will move the playhead; on the other
             // hand, we don't want to be 0.5 seconds from the gap because on
-            // IE/Edge/Tizen, gap jumping will treat that as in the gap.
+            // Edge/Tizen, gap jumping will treat that as in the gap.
             // See shaka.media.TimeRangesUtils.getGapIndex.
 
             video.currentTime = time;

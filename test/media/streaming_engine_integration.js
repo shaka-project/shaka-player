@@ -512,7 +512,7 @@ describe('StreamingEngine', () => {
 
       await shaka.test.Util.delay(5);
 
-      // IE/Edge somehow plays _into_ the gap, and Xbox One plays _through_ the
+      // Edge somehow plays _into_ the gap, and Xbox One plays _through_ the
       // gap.  Just make sure _we_ don't jump the gap by seeking.  One seek is
       // required to start playback at time 8.
       expect(seekCount).toBe(1);
