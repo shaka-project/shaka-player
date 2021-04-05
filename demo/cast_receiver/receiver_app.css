@@ -23,6 +23,7 @@ body {
   font-weight: 300;
   background-color: black;
   color: white;
+  filter:  invert(1);
 }
 
 #videoContainer {
