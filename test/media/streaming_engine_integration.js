@@ -376,10 +376,6 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
 
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
-      await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
-
       // Seek outside the availability window right away. The playhead
       // should adjust the video's current time.
       video.currentTime = segmentAvailability.end + 120;
@@ -400,10 +396,6 @@ describe('StreamingEngine', () => {
       // Let's go!
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
-
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
-      await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
 
       // Seek outside the availability window right away. The playhead
       // should adjust the video's current time.
@@ -472,10 +464,6 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
 
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
-      await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
-
       video.currentTime = 8;
       video.play();
 
@@ -492,10 +480,6 @@ describe('StreamingEngine', () => {
       // Let's go!
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
-
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
-      await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
 
       video.currentTime = 8;
       video.play();
@@ -517,10 +501,6 @@ describe('StreamingEngine', () => {
       // Let's go!
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
-
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
-      await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
 
       let seekCount = 0;
       eventManager.listen(video, 'seeking', () => {
