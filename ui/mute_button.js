@@ -84,7 +84,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
           this.updateIcon_();
         });
 
-    // Initialize volume display and label.
+    // Initialize muted display and label.
     this.updateAriaLabel_();
     this.updateIcon_();
   }
