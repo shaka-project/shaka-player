@@ -502,6 +502,10 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
 
+      // Some browsers are sensitive and throws InvalidStateError when you seek
+      // while readyState is 0.
+      await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
+
       let seekCount = 0;
       eventManager.listen(video, 'seeking', () => {
         seekCount++;
