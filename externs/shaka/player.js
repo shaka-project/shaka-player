@@ -981,6 +981,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredVariantRole: string,
  *   preferredTextRole: string,
  *   preferredAudioChannelCount: number,
+ *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
@@ -1016,6 +1017,9 @@ shaka.extern.OfflineConfiguration;
  *   The preferred role to use for text tracks.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ * @property {!Array.<string>} preferredDecodingAttributes
+ *   The list of preferred attributes of decodingInfo, in the order of their
+ *   priorities.
  * @property {boolean} preferForcedSubs
  *   If true, a forced text track is preferred.  Defaults to false.
  *   If the content has no forced captions and the value is true,
