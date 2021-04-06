@@ -707,7 +707,7 @@ describe('StreamUtils', () => {
         addVariant2160Vp9(manifest);
       });
 
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2);
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2, []);
 
       expect(manifest.variants.length).toBe(2);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
@@ -720,10 +720,51 @@ describe('StreamUtils', () => {
         addVariant1080Vp9(manifest);
       });
 
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2);
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2, []);
 
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
+    });
+
+    it('chooses variants by decoding attributes', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.bandwidth = 4058558;
+          variant.addVideo(1, (stream) => {
+            stream.mime('video', 'notsmooth');
+          });
+        });
+        manifest.addVariant(1, (variant) => {
+          variant.bandwidth = 4781002;
+          variant.addVideo(2, (stream) => {
+            stream.mime('video', 'smooth');
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addVideo(4, (stream) => {
+            variant.bandwidth = 5058558;
+            stream.mime('video', 'smooth-2');
+          });
+        });
+      });
+      navigator.mediaCapabilities.decodingInfo =
+          shaka.test.Util.spyFunc(decodingInfoSpy);
+      decodingInfoSpy.and.callFake((config) => {
+        const res = config.video.contentType.includes('notsmooth') ?
+           {supported: true, smooth: false} :
+           {supported: true, smooth: true};
+        return Promise.resolve(res);
+      });
+
+      await StreamUtils.getDecodingInfosForVariants(manifest.variants,
+          /* usePersistentLicenses= */false);
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2,
+          [shaka.util.StreamUtils.DecodingAttributes.SMOOTH]);
+      // 2 video codecs are smooth. Choose the one with the lowest bandwidth.
+      expect(manifest.variants.length).toBe(1);
+      expect(manifest.variants[0].id).toBe(1);
+      expect(manifest.variants[0].video.id).toBe(2);
     });
   });
 });
