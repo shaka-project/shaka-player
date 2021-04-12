@@ -23,6 +23,7 @@
 
 .shaka-server-side-ad-container {
   .fill-container();
+  .shrinkable();
 
   &:not([ad-active="true"]) {
     pointer-events: none;
@@ -31,9 +32,7 @@
 
 .shaka-client-side-ad-container {
   .absolute-position();
-}
 
-.shaka-controls-container {
   /* IMA SDK adds their own ad UI into an iframe element.
    * Adjust its position to fit in with our UI, when
    * Shaka UI is enabled. */
@@ -41,8 +40,7 @@
     .shaka-video-container[shaka-controls="true"] & {
       /* This moves the iframe up a little bit, so it
        * doesn't operlap with our controls. */
-      height: 92%;
-      z-index: 1;
+      height: 90%;
     }
   }
 }
