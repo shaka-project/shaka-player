@@ -1611,6 +1611,44 @@ describe('HlsParser', function() {
     await testHlsParser(master, media, manifest);
   });
 
+  it('if unable to guess mime type', async function() {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
+      'audio\n',
+      '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video"',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.test',
+    ].join('');
+
+    const manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
+                  .anyInitSegment()
+                  .mime('video/mp4', 'avc1')
+                .addPartialStream(ContentType.AUDIO)
+                  .anyInitSegment()
+                  .mime('audio/mp4', 'mp4a')
+            .build();
+
+    fakeNetEngine.setHeaders(
+        'test:/main.test', {
+          'content-type': '',
+        });
+
+    await testHlsParser(master, media, manifest);
+  });
+
   describe('Errors out', function() {
     const Code = shaka.util.Error.Code;
 
@@ -1660,32 +1698,6 @@ describe('HlsParser', function() {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
-
-      verifyError(master, media, error, done);
-    });
-
-    it('if unable to guess mime type', function(done) {
-      const master = [
-        '#EXTM3U\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
-        'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
-        'audio\n',
-        '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video"',
-      ].join('');
-
-      const media = [
-        '#EXTM3U\n',
-        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
-        '#EXT-X-PLAYLIST-TYPE:VOD\n',
-        '#EXTINF:5,\n',
-        '#EXT-X-BYTERANGE:121090@616\n',
-        'main.exe',
-      ].join('');
-
-      const error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          Code.HLS_COULD_NOT_GUESS_MIME_TYPE, 'exe');
 
       verifyError(master, media, error, done);
     });
