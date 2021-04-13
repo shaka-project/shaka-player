@@ -1762,6 +1762,9 @@ describe('DashParser Manifest', () => {
     const presentationTimeline = manifest.presentationTimeline;
     const presentationDelay = presentationTimeline.getDelay();
     expect(presentationDelay).toBe(1.5*manifest.minBufferTime);
+    const updateIntervalSeconds =
+        presentationTimeline.getUpdateIntervalSeconds();
+    expect(updateIntervalSeconds).toBe(1);
   });
 
   it('Honors the ignoreEmptyAdaptationSet config', async () => {

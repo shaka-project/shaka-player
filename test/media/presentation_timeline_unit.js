@@ -52,9 +52,11 @@ describe('PresentationTimeline', () => {
       maxSegmentDuration,
       clockOffset,
       presentationDelay,
-      autoCorrectDrift = true) {
+      autoCorrectDrift = true,
+      updateIntervalSeconds = undefined) {
     const timeline = new shaka.media.PresentationTimeline(
-        presentationStartTime, presentationDelay, autoCorrectDrift);
+        presentationStartTime, presentationDelay, autoCorrectDrift,
+        updateIntervalSeconds);
     timeline.setStatic(isStatic);
     timeline.setDuration(duration || Infinity);
     timeline.setSegmentAvailabilityDuration(segmentAvailabilityDuration);
@@ -404,6 +406,26 @@ describe('PresentationTimeline', () => {
       setElapsed(37);
       expect(timeline1.getSeekRangeEnd()).toBe(20);
       expect(timeline2.getSeekRangeEnd()).toBe(20);
+    });
+  });
+
+  describe('updateIntervalSeconds', () => {
+    it('defaults to 1', () => {
+      const timeline = makePresentationTimeline(
+          /* static= */ true, /* duration= */ 60, /* start= */ null,
+          /* availability= */ Infinity, /* max= */ 10,
+          /* clock= */ 0, /* presentation= */ 0);
+      expect(timeline.getUpdateIntervalSeconds()).toBe(1);
+    });
+
+    it('can be set lower than 1', () => {
+      const timeline = makePresentationTimeline(
+          /* static= */ true, /* duration= */ 60, /* start= */ null,
+          /* availability= */ Infinity, /* max= */ 10,
+          /* clock= */ 0, /* presentation= */ 0,
+          /* autoCorrectDrift= */ undefined,
+          /* updateIntervalSeconds= */ 0.5);
+      expect(timeline.getUpdateIntervalSeconds()).toBe(0.5);
     });
   });
 });

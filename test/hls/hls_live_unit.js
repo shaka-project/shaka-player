@@ -507,6 +507,8 @@ describe('HlsParser live', () => {
               .setResponseValue('test:/main.mp4', segmentData);
           const manifest = await parser.start('test:/master', playerInterface);
           expect(manifest.presentationTimeline.getDelay()).toBe(15);
+          expect(manifest.presentationTimeline.getUpdateIntervalSeconds())
+              .toBe(1);
         });
 
     it('sets presentation delay for low latency mode', async () => {
