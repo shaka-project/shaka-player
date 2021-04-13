@@ -1935,6 +1935,44 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('if unable to guess mime type through Header Request', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,VIDEO="vid"\n',
+      'audio\n',
+      '#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="vid",URI="video"',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.test',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.mime('video/mp4', 'avc1');
+        });
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mp4', 'mp4a');
+        });
+      });
+    });
+
+    fakeNetEngine.setHeaders(
+        'test:/main.test', {
+          'content-type': '',
+        });
+
+    await testHlsParser(master, media, manifest);
+  });
+
   describe('Errors out', () => {
     const Code = shaka.util.Error.Code;
 
