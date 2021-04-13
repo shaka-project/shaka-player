@@ -1935,7 +1935,7 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
-  it('if unable to guess mime type through Header Request', async () => {
+  it('falls back to mp4 if HEAD request fails', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
