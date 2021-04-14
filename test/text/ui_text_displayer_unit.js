@@ -100,7 +100,10 @@ describe('UITextDisplayer', () => {
           'font-weight': 400,
           'line-height': 2,
           'text-align': 'center',
-          'writing-mode': 'horizontal-tb',
+          // TODO: Old versions of Tizen and WebOS only supports the webkit
+          // prefixed version. Until we support the prefixed version, this
+          // has to be maintained. https://caniuse.com/css-writing-mode
+          // 'writing-mode': 'horizontal-tb',
         }));
   });
 
@@ -137,7 +140,10 @@ describe('UITextDisplayer', () => {
           'font-style': 'normal',
           'font-weight': 400,
           'text-align': 'center',
-          'writing-mode': 'horizontal-tb',
+          // TODO: Old versions of Tizen and WebOS only supports the webkit
+          // prefixed version. Until we support the prefixed version, this
+          // has to be maintained. https://caniuse.com/css-writing-mode
+          // 'writing-mode': 'horizontal-tb',
         }));
   });
 
