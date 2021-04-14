@@ -21,15 +21,6 @@
   }
 }
 
-.shaka-server-side-ad-container {
-  .fill-container();
-  .shrinkable();
-
-  &:not([ad-active="true"]) {
-    pointer-events: none;
-  }
-}
-
 .shaka-client-side-ad-container, .shaka-server-side-ad-container {
   .absolute-position();
 
@@ -42,6 +33,15 @@
        * doesn't operlap with our controls. */
       height: 90%;
     }
+  }
+}
+
+.shaka-server-side-ad-container {
+  .fill-container();
+  .shrinkable();
+
+  &:not([ad-active="true"]) {
+    pointer-events: none;
   }
 }
 
