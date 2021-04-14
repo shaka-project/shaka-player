@@ -114,12 +114,14 @@ DASH features **not** supported:
 
 HLS features supported:
  - VOD, Live, and Event types
- - Encrypted content with PlayReady and Widevine
+ - Low-latency streaming with partial segments, preload hints, and delta updates
+ - Discontinuity
  - ISO-BMFF / MP4 / CMAF support
  - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.7.0+, must be
    separately included)
  - WebVTT and TTML
  - CEA-608/708 captions
+ - Encrypted content with PlayReady and Widevine
  - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
 
 HLS features **not** supported:
@@ -127,6 +129,7 @@ HLS features **not** supported:
  - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
  - Raw AAC, MP3, etc (without an MP4 container):
    https://github.com/google/shaka-player/issues/2337
+ - Low-latency streaming with blocking playlist reload
 
 [mux.js]: https://github.com/videojs/mux.js/releases
 

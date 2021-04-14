@@ -666,12 +666,6 @@ shaka.test.TestScheme.ManifestParser = class {
 
     playerInterface.makeTextStreamsForClosedCaptions(manifest);
 
-    // Invoke filtering interfaces similar to how a real parser would.
-    // This makes sure the filtering functions are covered implicitly by
-    // tests. This covers regression
-    // https://github.com/google/shaka-player/issues/988
-    playerInterface.filter(manifest);
-
     return Promise.resolve(manifest);
   }
 
