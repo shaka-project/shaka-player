@@ -907,6 +907,56 @@ describe('HlsParser live', () => {
             partialEndByte);  // partial segment request
       });
 
+      it('request playlist delta updates to skip segments', async () => {
+        const mediaWithDeltaUpdates = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:LIVE\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-SERVER-CONTROL:CAN-SKIP-UNTIL=60.0\n',
+          '#EXTINF:2,\n',
+          'main.mp4\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+        ].join('');
+
+        const mediaWithSkippedSegments = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-SERVER-CONTROL:CAN-SKIP-UNTIL=60.0\n',
+          '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+          '#EXTINF:2,\n',
+          'main3.mp4\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', mediaWithDeltaUpdates)
+            .setResponseText('test:/video?_HLS_skip=YES',
+                mediaWithSkippedSegments)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData)
+            .setResponseValue('test:/main2.mp4', segmentData)
+            .setResponseValue('test:/main3.mp4', segmentData);
+
+        playerInterface.isLowLatencyMode = () => true;
+        await parser.start('test:/master', playerInterface);
+        // Replace the entries with the updated values.
+
+        fakeNetEngine.request.calls.reset();
+        await delayForUpdatePeriod();
+
+        fakeNetEngine.expectRequest(
+            'test:/video?_HLS_skip=YES',
+            shaka.net.NetworkingEngine.RequestType.MANIFEST);
+      });
+
+
       it('skips older segments', async () => {
         const mediaWithSkippedSegments = [
           '#EXTM3U\n',
@@ -935,7 +985,7 @@ describe('HlsParser live', () => {
       it('skips older segments with discontinuity', async () => {
         const mediaWithDiscontinuity2 = [
           '#EXTM3U\n',
-          '#EXT-X-PLAYLIST-TYPE:EVENT\n',
+          '#EXT-X-PLAYLIST-TYPE:LIVE\n',
           '#EXT-X-TARGETDURATION:5\n',
           '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
           '#EXT-X-DISCONTINUITY-SEQUENCE:30\n',
