@@ -900,12 +900,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onPlayStateChange_();
     });
 
-    // Since videos go into a paused state at the end, Chrome and Edge both fire
-    // the 'pause' event when a video ends.  IE 11 only fires the 'ended' event.
-    this.eventManager_.listen(this.video_, 'ended', () => {
-      this.onPlayStateChange_();
-    });
-
     this.eventManager_.listen(this.videoContainer_, 'mousemove', (e) => {
       this.onMouseMove_(e);
     });
@@ -1178,13 +1172,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onPlayStateChange_() {
-    // On IE 11, a video may end without going into a paused state.  To correct
-    // both the UI state and the state of the video tag itself, we explicitly
-    // pause the video if that happens.
-    if (this.video_.ended && !this.video_.paused) {
-      this.video_.pause();
-    }
-
     this.computeOpacity();
   }
 
