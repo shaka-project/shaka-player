@@ -14,7 +14,7 @@ Some guidelines to avoid non-readable patterns are to:
 ### Avoid Function Apply
 
 Using the `apply` functionality of any function
-(e.g.`Array.prototype.push.appy`) has been deemed non-readable.
+(e.g.`Array.prototype.push.apply`) has been deemed non-readable.
 
 
 ## Non-Functional Changes
