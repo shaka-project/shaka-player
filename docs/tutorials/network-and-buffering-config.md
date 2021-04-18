@@ -3,7 +3,7 @@
 #### Networking Configuration
 
 Shaka Player has separate network retry settings for each of the different
-types of requests: manifest, license, and segment requests. For example: you
+types of requests: manifest, license, and segment requests. For example, you
 may want a failed license request to be retried differently from a failed
 segment request.
 
@@ -102,8 +102,8 @@ impose several restrictions on the content that a webpage has access to.
 
 One restriction is [CORS][] (Cross-Origin Resource Sharing).  This requires
 network requests to be made to the same origin, or for the server to explicitly
-give access.  An "origin" refers to the domain name (e.g. `api.example.com`),
-the scheme (e.g. `https:`), and the port (e.g. 80).  If you host your assets on
+give access.  An "origin" refers to the domain name (e.g., `api.example.com`),
+the scheme (e.g., `https:`), and the port (e.g., 80).  If you host your assets on
 a different origin than your web app, then you'll need to set CORS headers on
 the asset server to ensure we have access.  For some content, this will also
 require allowing the `Range` header by sending the CORS header
@@ -112,9 +112,9 @@ require allowing the `Range` header by sending the CORS header
 Another restriction is called mixed-content.  If your webpage is accessed using
 `https:`, then all resources that are loaded also need to be loaded using
 `https:`.  This means that the manifest and all the media segments need to be
-loaded using `https:`.  This is most easily done by either having all the
+loaded using `https:`.  This can be most easily done by either having all the
 URLs in your manifests always use `https:`, or by having it not include the
-scheme (e.g. `//example.com/file.mp4`).
+scheme (e.g., `//example.com/file.mp4`).
 
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
 
