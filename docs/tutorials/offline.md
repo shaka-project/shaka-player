@@ -293,8 +293,10 @@ following code:
   // download progress and override the track selection callback.
   window.storage = new shaka.offline.Storage(player);
   window.storage.configure({
-    progressCallback: setDownloadProgress,
-    trackSelectionCallback: selectTracks
+    offline: {
+      progressCallback: setDownloadProgress,
+      trackSelectionCallback: selectTracks
+    }
   });
 ```
 
@@ -507,8 +509,10 @@ function initStorage(player) {
   // download progress and override the track selection callback.
   window.storage = new shaka.offline.Storage(player);
   window.storage.configure({
-    progressCallback: setDownloadProgress,
-    trackSelectionCallback: selectTracks
+    offline: {
+      progressCallback: setDownloadProgress,
+      trackSelectionCallback: selectTracks
+    }
   });
 }
 
