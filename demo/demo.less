@@ -32,6 +32,10 @@
 .mdl-button .material-icons {
   line-height: 36px;
 }
+//icon is not at the center. this fixes it.
+.mdl-button .material-icons-round {
+  padding-top: 3px;
+}
 
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
  * class with the same name, which can be used in the application directly. */
@@ -381,6 +385,10 @@ html, body {
 
   /* Match the padding of the buttons next to the logo. */
   padding: 0 16px;
+}
+
+.app-header .mdl-layout__drawer-button .material-icons:hover {
+  transform: rotate(20deg);
 }
 
 footer li {
