@@ -45,12 +45,6 @@
 
 /* This is the path element, which draws a circle. */
 .shaka-spinner-path {
-  /* Fall back for IE 11, where the stroke properties cannot be animated,
-   * but the spinner still rotates. */
-  stroke: #202124;
-  stroke-dasharray: 20, 200;
-  stroke-dashoffset: 0;
-
   /* Animate the stroke of this circular path. */
   animation: dash 1.5s ease-in-out infinite;
 

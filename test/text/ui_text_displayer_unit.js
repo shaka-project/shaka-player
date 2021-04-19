@@ -100,10 +100,9 @@ describe('UITextDisplayer', () => {
           'font-weight': 400,
           'line-height': 2,
           'text-align': 'center',
-          // TODO: We're not testing writing-mode since IE 11 only supports
-          // deprecated writing-mode values partially. Add it back once we end
-          // support for IE 11.
-          // https://github.com/google/shaka-player/issues/2339
+          // TODO: Old versions of Tizen and WebOS only supports the webkit
+          // prefixed version. Until we support the prefixed version, this
+          // has to be maintained. https://caniuse.com/css-writing-mode
           // 'writing-mode': 'horizontal-tb',
         }));
   });
@@ -141,10 +140,9 @@ describe('UITextDisplayer', () => {
           'font-style': 'normal',
           'font-weight': 400,
           'text-align': 'center',
-          // TODO: We're not testing writing-mode since IE 11 only supports
-          // deprecated writing-mode values partially. Add it back once we end
-          // support for IE 11.
-          // https://github.com/google/shaka-player/issues/2339
+          // TODO: Old versions of Tizen and WebOS only supports the webkit
+          // prefixed version. Until we support the prefixed version, this
+          // has to be maintained. https://caniuse.com/css-writing-mode
           // 'writing-mode': 'horizontal-tb',
         }));
   });

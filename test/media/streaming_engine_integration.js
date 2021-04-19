@@ -376,8 +376,6 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
 
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
       await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
 
       // Seek outside the availability window right away. The playhead
@@ -401,8 +399,6 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
 
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
       await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
 
       // Seek outside the availability window right away. The playhead
@@ -472,8 +468,6 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
 
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
       await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
 
       video.currentTime = 8;
@@ -493,8 +487,6 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
 
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
       await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
 
       video.currentTime = 8;
@@ -518,8 +510,6 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
 
-      // IE is sensitive and throws InvalidStateError when you seek while
-      // readyState is 0.
       await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
 
       let seekCount = 0;
@@ -532,7 +522,7 @@ describe('StreamingEngine', () => {
 
       await shaka.test.Util.delay(5);
 
-      // IE/Edge somehow plays _into_ the gap, and Xbox One plays _through_ the
+      // Edge somehow plays _into_ the gap, and Xbox One plays _through_ the
       // gap.  Just make sure _we_ don't jump the gap by seeking.  One seek is
       // required to start playback at time 8.
       expect(seekCount).toBe(1);
