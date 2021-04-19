@@ -90,22 +90,27 @@ describe('UITextDisplayer', () => {
         videoContainer.querySelector('.shaka-text-container');
     const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
-    expect(cssObj).toEqual(
-        jasmine.objectContaining({
-          'color': 'green',
-          'background-color': 'black',
-          'direction': 'ltr',
-          'font-size': '10px',
-          'font-style': 'normal',
-          'font-weight': 400,
-          'line-height': 2,
-          'text-align': 'center',
-          // TODO: We're not testing writing-mode since IE 11 only supports
-          // deprecated writing-mode values partially. Add it back once we end
-          // support for IE 11.
-          // https://github.com/google/shaka-player/issues/2339
-          // 'writing-mode': 'horizontal-tb',
-        }));
+
+    const expectCssObj = {
+      'color': 'green',
+      'background-color': 'black',
+      'direction': 'ltr',
+      'font-size': '10px',
+      'font-style': 'normal',
+      'font-weight': 400,
+      'line-height': 2,
+      'text-align': 'center',
+    };
+
+    // Old versions of Tizen and WebOS only supports the webkit prefixed
+    // version. https://caniuse.com/css-writing-mode
+    if ('writingMode' in document.documentElement.style) {
+      expectCssObj['writing-mode'] = 'horizontal-tb';
+    } else if ('webkitWritingMode' in document.documentElement.style) {
+      expectCssObj['-webkit-writing-mode'] = 'horizontal-tb';
+    }
+
+    expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
   });
 
   it('correctly displays styles for nested cues', async () => {
@@ -133,20 +138,24 @@ describe('UITextDisplayer', () => {
         videoContainer.querySelector('.shaka-text-container');
     const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
-    expect(cssObj).toEqual(
-        jasmine.objectContaining({
-          'color': 'green',
-          'background-color': 'black',
-          'font-size': '10px',
-          'font-style': 'normal',
-          'font-weight': 400,
-          'text-align': 'center',
-          // TODO: We're not testing writing-mode since IE 11 only supports
-          // deprecated writing-mode values partially. Add it back once we end
-          // support for IE 11.
-          // https://github.com/google/shaka-player/issues/2339
-          // 'writing-mode': 'horizontal-tb',
-        }));
+
+    const expectCssObj = {
+      'color': 'green',
+      'background-color': 'black',
+      'font-size': '10px',
+      'font-style': 'normal',
+      'font-weight': 400,
+      'text-align': 'center',
+    };
+    // Old versions of Tizen and WebOS only supports the webkit prefixed
+    // version. https://caniuse.com/css-writing-mode
+    if ('writingMode' in document.documentElement.style) {
+      expectCssObj['writing-mode'] = 'horizontal-tb';
+    } else if ('webkitWritingMode' in document.documentElement.style) {
+      expectCssObj['-webkit-writing-mode'] = 'horizontal-tb';
+    }
+
+    expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
   });
 
   it('correctly displays styles for cellResolution units', async () => {
