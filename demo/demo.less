@@ -98,6 +98,14 @@ html, body {
   transition: 0.2s ease-in-out;
 }
 
+.mdl-button--fab, .mdl-button--icon {
+  /* By default, MDL icon buttons may end up vertically off-center.  This aligns
+   * them to the center both vertically and horizontally. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .mdl-button--fab:hover {
   filter: drop-shadow(0 2px 8px #333);
 }
@@ -382,6 +390,16 @@ html, body {
 
   /* Match the padding of the buttons next to the logo. */
   padding: 0 16px;
+}
+
+.app-header .mdl-layout__drawer-button .material-icons {
+  &:hover {
+    /* Spin the gear icon in the settings menu when hovered. */
+    transform: rotate(90deg);
+  }
+
+  /* Animate the spin. */
+  transition: transform 0.3s ease-in-out;
 }
 
 footer li {
