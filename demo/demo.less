@@ -32,9 +32,13 @@
 .mdl-button .material-icons {
   line-height: 36px;
 }
-//icon is not at the center. this fixes it.
-.mdl-button .material-icons-round {
-  padding-top: 3px;
+
+.mdl-button--icon {
+  /* By default, MDL icon buttons may end up vertically off-center.  This aligns
+   * them to the center both vertically and horizontally. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
@@ -95,6 +99,15 @@ html, body {
 .mdl-button--fab {
   filter: drop-shadow(0 2px 5px #333);
   transition: 0.2s ease-in-out;
+}
+
+.mdl-button--fab,
+.mdl-button--icon {
+  /* By default, MDL icon buttons may end up vertically off-center.  This aligns
+   * them to the center both vertically and horizontally. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mdl-button--fab:hover {
@@ -387,8 +400,14 @@ html, body {
   padding: 0 16px;
 }
 
-.app-header .mdl-layout__drawer-button .material-icons:hover {
-  transform: rotate(20deg);
+.app-header .mdl-layout__drawer-button .material-icons {
+  &:hover {
+    /* Spin the gear icon in the settings menu when hovered. */
+    transform: rotate(90deg);
+  }
+
+  /* Animate the spin. */
+  transition: transform 0.3s ease-in-out;
 }
 
 footer li {
