@@ -183,8 +183,8 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       // element itself.
       videoContainer = video;
 
-      // On Firefox, Safari, IE11, and legacy Edge, the video must be played a
-      // little _after_ appending cues in order to consistently show subtitles
+      // On Firefox, Safari, and legacy Edge, the video must be played a little
+      // _after_ appending cues in order to consistently show subtitles
       // natively on the video element.
       beforeScreenshot = async (time) => {
         // Seek to the beginning so that we can reasonably wait for movement

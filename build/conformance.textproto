@@ -204,21 +204,13 @@ requirement: {
 }
 
 
-# Disallow Input.valueAsNumber.
-requirement: {
-  type: BANNED_PROPERTY
-  value: 'HTMLInputElement.prototype.valueAsNumber'
-  error_message: '"Input.valueAsNumber" is not supported on IE11'
-}
-
-
 # Disallow DOMRect.x and y.
 requirement: {
   type: BANNED_PROPERTY
   value: 'DOMRect.prototype.x'
   value: 'DOMRect.prototype.y'
-  error_message: 'DOMRect "x" and "y" are not supported on IE11 and legacy '
-                 'Edge; use "left" and "top" instead.'
+  error_message: 'DOMRect "x" and "y" are not supported on legacy Edge; '
+                 'use "left" and "top" instead.'
   # The built-in set and map polyfills trigger this ban somehow.
   whitelist_regexp: 'synthetic:es6/'
 }
@@ -238,14 +230,6 @@ requirement: {
   value: 'fit'
   error_message: 'Using "fit" is not allowed'
   whitelist_regexp: 'test/player_external.js'
-}
-
-
-# Disallow classList toggle.
-requirement: {
-  type: BANNED_PROPERTY_CALL
-  value: 'DOMTokenList.prototype.toggle'
-  error_message: 'classList toggle is not supported in IE11'
 }
 
 
@@ -312,61 +296,12 @@ requirement: {
 }
 
 
-# Disallow the Event constructor, since Event is not constructable on IE.
-requirement: {
-  type: BANNED_CODE_PATTERN
-  value: '/** @param {*} name */ '
-         'function template(name) { new Event(name); }'
-  error_message: 'Event is not constructable on IE.  Instead, use '
-                 'document.createEvent(\'CustomEvent\') to create an event and '
-                 'event.initCustomEvent(\'my-event-type\') to initialize it.'
-  whitelist_regexp: 'lib/polyfill/patchedmediakeys_apple.js'
-  whitelist_regexp: 'lib/polyfill/pip_webkit.js'
-}
-
-
 # Disallow ES6 methods.
 requirement: {
   type: BANNED_PROPERTY
   value: 'ArrayBuffer.prototype.slice'
   error_message: 'ArrayBuffer.slice is not allowed because it '
                  'is not supported on Tizen 2016'
-}
-requirement: {
-  type: BANNED_PROPERTY
-  value: 'TypedArray.prototype.slice'
-  error_message: 'TypedArray.slice is not allowed because it '
-                 'is not supported on IE11'
-  whitelist_regexp: 'lib/polyfill/patchedmediakeys_apple.js'
-}
-requirement: {
-  type: BANNED_NAME
-  value: 'ArrayBuffer.isView'
-  error_message: 'ES6 ArrayBuffer methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_NAME
-  value: 'Int8Array.of'
-  value: 'Int8Array.from'
-  value: 'Uint8Array.of'
-  value: 'Uint8Array.from'
-  value: 'Uint8ClampedArray.of'
-  value: 'Uint8ClampedArray.from'
-  value: 'Int16Array.of'
-  value: 'Int16Array.from'
-  value: 'Uint16Array.of'
-  value: 'Uint16Array.from'
-  value: 'Int32Array.of'
-  value: 'Int32Array.from'
-  value: 'Uint32Array.of'
-  value: 'Uint32Array.from'
-  value: 'Float32Array.of'
-  value: 'Float32Array.from'
-  value: 'Float64Array.of'
-  value: 'Float64Array.from'
-  error_message: 'ES6 TypedArray methods are not allowed '
-                 'because they are not supported in IE11'
 }
 
 # Disallow the general use of fetch, which is not available on all supported

@@ -745,8 +745,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     const svg =
       /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
-    // NOTE: SVG elements do not have a classList on IE, so use setAttribute.
-    svg.setAttribute('class', 'shaka-spinner-svg');
+    svg.classList.add('shaka-spinner-svg');
     svg.setAttribute('viewBox', '0 0 30 30');
     spinner.appendChild(svg);
 
@@ -755,7 +754,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // "Scalable." The radius of 14.5 is so that the edges of the 1-px-wide
     // stroke will touch the edges of the viewBox.
     const spinnerCircle = document.createElementNS(xmlns, 'circle');
-    spinnerCircle.setAttribute('class', 'shaka-spinner-path');
+    spinnerCircle.classList.add('shaka-spinner-path');
     spinnerCircle.setAttribute('cx', '15');
     spinnerCircle.setAttribute('cy', '15');
     spinnerCircle.setAttribute('r', '14.5');
@@ -1061,7 +1060,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onMouseStill_() {
-    // Hide the cursor.  (NOTE: not supported on IE)
+    // Hide the cursor.
     this.videoContainer_.style.cursor = 'none';
     this.recentMouseMovement_ = false;
     this.computeOpacity();
