@@ -993,7 +993,7 @@ function testDrmEngine(useMediaCapabilities) {
       config.advanced['drm.abc'].serverCertificateUri = serverCertificateUri;
 
       const operation = shaka.util.AbortableOperation.completed({
-        data: new Uint8Array(1).buffer,
+        data: shaka.util.BufferUtils.toArrayBuffer(new Uint8Array(1)),
       });
       fakeNetEngine.request.and.returnValue(operation);
 
