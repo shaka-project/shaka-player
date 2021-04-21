@@ -1004,14 +1004,15 @@ function testDrmEngine(useMediaCapabilities) {
           useMediaCapabilities);
 
       expect(fakeNetEngine.request).toHaveBeenCalledWith(
-        shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE,
-        jasmine.objectContaining({
-          uris: [serverCertificateUri],
-          method: 'GET',
-        }));
+          shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE,
+          jasmine.objectContaining({
+            uris: [serverCertificateUri],
+            method: 'GET',
+          }));
 
       // Should be set merely after init, without waiting for attach.
-      expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(new Uint8Array(1));
+      expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(
+          new Uint8Array(1));
     });
 
     it('fetches server certificate from uri and triggers error', async () => {
@@ -1024,10 +1025,10 @@ function testDrmEngine(useMediaCapabilities) {
 
       // Simulate a permission error from the web server.
       const netError = new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
-        shaka.util.Error.Category.NETWORK,
-        shaka.util.Error.Code.BAD_HTTP_STATUS,
-        serverCertificateUri, 403);
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS,
+          serverCertificateUri, 403);
       const operation = shaka.util.AbortableOperation.failed(netError);
       fakeNetEngine.request.and.returnValue(operation);
 
@@ -1038,11 +1039,11 @@ function testDrmEngine(useMediaCapabilities) {
           useMediaCapabilities);
 
       expect(fakeNetEngine.request).toHaveBeenCalledWith(
-        shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE,
-        jasmine.objectContaining({
-          uris: [serverCertificateUri],
-          method: 'GET',
-        }));
+          shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE,
+          jasmine.objectContaining({
+            uris: [serverCertificateUri],
+            method: 'GET',
+          }));
 
       expect(onErrorSpy).toHaveBeenCalled();
 
@@ -1055,7 +1056,7 @@ function testDrmEngine(useMediaCapabilities) {
           netError));
 
       // Should be set merely after init, without waiting for attach.
-      expect(mockMediaKeys.setServerCertificate).not.toHaveBeenCalled()
+      expect(mockMediaKeys.setServerCertificate).not.toHaveBeenCalled();
     });
 
     it('prefers server certificate from DrmInfo', async () => {
