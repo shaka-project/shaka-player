@@ -45,8 +45,12 @@
 
 /* This is the path element, which draws a circle. */
 .shaka-spinner-path {
+  stroke: #202124;
+  stroke-dasharray: 20, 200;
+  stroke-dashoffset: 0;
+
   /* Animate the stroke of this circular path. */
-  animation: dash 1.5s ease-in-out infinite;
+  animation: dash 1s ease-in-out infinite;
 
   /* Round the line on the ends. */
   stroke-linecap: round;
