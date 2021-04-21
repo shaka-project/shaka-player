@@ -697,6 +697,7 @@ function testDrmEngine(useMediaCapabilities) {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: null,
+        serverCertificateUri: '',
         sessionType: 'persistent-license',
         individualizationServer: '',
         distinctiveIdentifierRequired: true,
@@ -775,6 +776,7 @@ function testDrmEngine(useMediaCapabilities) {
         audioRobustness: 'bad',
         videoRobustness: 'so_bad_it_hurts',
         serverCertificate: null,
+        serverCertificateUri: '',
         sessionType: '',
         individualizationServer: '',
         distinctiveIdentifierRequired: false,
@@ -972,14 +974,88 @@ function testDrmEngine(useMediaCapabilities) {
     it('sets server certificate if present in config', async () => {
       const cert = new Uint8Array(1);
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
+      config.advanced['drm.abc'].serverCertificateUri = 'https://drm-service.com/certificate';
       drmEngine.configure(config);
 
       const variants = manifest.variants;
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
           useMediaCapabilities);
 
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
       // Should be set merely after init, without waiting for attach.
       expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(cert);
+    });
+
+    it('fetches and sets server certificate from uri', async () => {
+      const cert = new Uint8Array(0);
+      const serverCertificateUri = 'https://drm-service.com/certificate';
+      config.advanced['drm.abc'] = createAdvancedConfig(cert);
+      config.advanced['drm.abc'].serverCertificateUri = serverCertificateUri;
+
+      const operation = shaka.util.AbortableOperation.completed({
+        data: new Uint8Array(1).buffer,
+      });
+      fakeNetEngine.request.and.returnValue(operation);
+
+      drmEngine.configure(config);
+
+      const variants = manifest.variants;
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
+          useMediaCapabilities);
+
+      expect(fakeNetEngine.request).toHaveBeenCalledWith(
+        shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE,
+        jasmine.objectContaining({
+          uris: [serverCertificateUri],
+          method: 'GET',
+        }));
+
+      // Should be set merely after init, without waiting for attach.
+      expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(new Uint8Array(1));
+    });
+
+    it('fetches server certificate from uri and triggers error', async () => {
+      onErrorSpy.and.stub();
+
+      const cert = new Uint8Array(0);
+      const serverCertificateUri = 'https://drm-service.com/certificate';
+      config.advanced['drm.abc'] = createAdvancedConfig(cert);
+      config.advanced['drm.abc'].serverCertificateUri = serverCertificateUri;
+
+      // Simulate a permission error from the web server.
+      const netError = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.BAD_HTTP_STATUS,
+        serverCertificateUri, 403);
+      const operation = shaka.util.AbortableOperation.failed(netError);
+      fakeNetEngine.request.and.returnValue(operation);
+
+      drmEngine.configure(config);
+
+      const variants = manifest.variants;
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
+          useMediaCapabilities);
+
+      expect(fakeNetEngine.request).toHaveBeenCalledWith(
+        shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE,
+        jasmine.objectContaining({
+          uris: [serverCertificateUri],
+          method: 'GET',
+        }));
+
+      expect(onErrorSpy).toHaveBeenCalled();
+
+      const error = onErrorSpy.calls.argsFor(0)[0];
+
+      shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.SERVER_CERTIFICATE_REQUEST_FAILED,
+          netError));
+
+      // Should be set merely after init, without waiting for attach.
+      expect(mockMediaKeys.setServerCertificate).not.toHaveBeenCalled()
     });
 
     it('prefers server certificate from DrmInfo', async () => {
@@ -2191,6 +2267,7 @@ function testDrmEngine(useMediaCapabilities) {
         videoRobustness: 'really_really_ridiculously_good',
         distinctiveIdentifierRequired: true,
         serverCertificate: null,
+        serverCertificateUri: '',
         sessionType: '',
         individualizationServer: '',
         persistentStateRequired: true,
@@ -2210,6 +2287,7 @@ function testDrmEngine(useMediaCapabilities) {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
+        serverCertificateUri: '',
         sessionType: 'temporary',
         initData: [],
         keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
@@ -2227,6 +2305,7 @@ function testDrmEngine(useMediaCapabilities) {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: undefined,
+        serverCertificateUri: '',
         initData: [],
         keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       };
@@ -2247,6 +2326,7 @@ function testDrmEngine(useMediaCapabilities) {
         persistentStateRequired: true,
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: serverCert,
+        serverCertificateUri: '',
         initData: ['blah'],
         keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
       };
@@ -2257,6 +2337,7 @@ function testDrmEngine(useMediaCapabilities) {
         persistentStateRequired: false,
         audioRobustness: 'good',
         serverCertificate: undefined,
+        serverCertificateUri: '',
         initData: ['init data'],
         keyIds: new Set(['eadbeefdeadbeefdeadbeefdeadbeefd']),
       };
@@ -2268,6 +2349,7 @@ function testDrmEngine(useMediaCapabilities) {
         audioRobustness: 'good',
         videoRobustness: 'really_really_ridiculously_good',
         serverCertificate: serverCert,
+        serverCertificateUri: '',
         initData: ['blah', 'init data'],
         keyIds: new Set([
           'deadbeefdeadbeefdeadbeefdeadbeef',
@@ -2575,6 +2657,7 @@ function testDrmEngine(useMediaCapabilities) {
       distinctiveIdentifierRequired: false,
       persistentStateRequired: false,
       serverCertificate: serverCert,
+      serverCertificateUri: '',
       individualizationServer: '',
       sessionType: '',
       videoRobustness: '',
