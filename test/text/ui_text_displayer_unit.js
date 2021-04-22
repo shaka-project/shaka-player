@@ -96,11 +96,15 @@ describe('UITextDisplayer', () => {
       'text-align': 'center',
     };
 
-    // Old versions of Tizen and WebOS only supports the webkit prefixed
-    // version. https://caniuse.com/css-writing-mode
-    if ('writingMode' in document.documentElement.style) {
+    // Either the prefixed or unprefixed version may be present.  We will accept
+    // either.  Detecting which property the platform has may not work, because
+    // Tizen 3, for example, has a writingMode property, but it is
+    // non-functional.  Instead of checking for which properties are on the
+    // platform's style interface, check which properties are in the cssObj.
+    // We expect one or the other to work on all supported platforms.
+    if ('writing-mode' in cssObj) {
       expectCssObj['writing-mode'] = 'horizontal-tb';
-    } else if ('webkitWritingMode' in document.documentElement.style) {
+    } else {
       expectCssObj['-webkit-writing-mode'] = 'horizontal-tb';
     }
 
@@ -141,11 +145,16 @@ describe('UITextDisplayer', () => {
       'font-weight': 400,
       'text-align': 'center',
     };
-    // Old versions of Tizen and WebOS only supports the webkit prefixed
-    // version. https://caniuse.com/css-writing-mode
-    if ('writingMode' in document.documentElement.style) {
+
+    // Either the prefixed or unprefixed version may be present.  We will accept
+    // either.  Detecting which property the platform has may not work, because
+    // Tizen 3, for example, has a writingMode property, but it is
+    // non-functional.  Instead of checking for which properties are on the
+    // platform's style interface, check which properties are in the cssObj.
+    // We expect one or the other to work on all supported platforms.
+    if ('writing-mode' in cssObj) {
       expectCssObj['writing-mode'] = 'horizontal-tb';
-    } else if ('webkitWritingMode' in document.documentElement.style) {
+    } else {
       expectCssObj['-webkit-writing-mode'] = 'horizontal-tb';
     }
 

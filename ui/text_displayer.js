@@ -402,12 +402,19 @@ shaka.ui.TextDisplayer = class {
 
     captionsStyle.textAlign = cue.textAlign;
     captionsStyle.textDecoration = cue.textDecoration.join(' ');
+    captionsStyle.writingMode = cue.writingMode;
 
-    // Prefixed version required for old versions of Chromium, eg: Tizen, WebOS
+    // Old versions of Chromium, which may be found in certain versions of Tizen
+    // and WebOS, may require the prefixed version: webkitWritingMode.
     // https://caniuse.com/css-writing-mode
-    if ('writingMode' in document.documentElement.style) {
-      captionsStyle.writingMode = cue.writingMode;
-    } else if ('webkitWritingMode' in document.documentElement.style) {
+    // However, testing shows that Tizen 3, at least, has a 'writingMode'
+    // property, but the setter for it does nothing.  Therefore we need to
+    // detect that and fall back to the prefixed version in this case, too.
+    if (!('writingMode' in document.documentElement.style) ||
+        captionsStyle.writingMode != cue.writingMode) {
+      // Note that here we do not bother to check for webkitWritingMode support
+      // explicitly.  We try the unprefixed version, then fall back to the
+      // prefixed version unconditionally.
       captionsStyle.webkitWritingMode = cue.writingMode;
     }
 
