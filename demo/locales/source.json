@@ -347,6 +347,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures"
   },
+  "DEMO_IGNORE_HLS_IMAGE_FAILURES": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore [PROPER_NAME:HLS] Image Stream Failures"
+  },
   "DEMO_IMA_ASSET_KEY": {
     "description": "The label on a field that allows users to provide an asset key for a custom asset.",
     "message": "Asset key (for LIVE DAI Content)"

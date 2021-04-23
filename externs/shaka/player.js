@@ -683,11 +683,15 @@ shaka.extern.DashManifestConfiguration;
 /**
  * @typedef {{
  *   ignoreTextStreamFailures: boolean,
+ *   ignoreImageStreamFailures: boolean,
  *   useFullSegmentsForStartTime: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
  *   If <code>true</code>, ignore any errors in a text stream and filter out
+ *   those streams.
+ * @property {boolean} ignoreImageStreamFailures
+ *   If <code>true</code>, ignore any errors in a image stream and filter out
  *   those streams.
  * @property {boolean} useFullSegmentsForStartTime
  *   If <code>true</code>, force HlsParser to use a full segment request for
