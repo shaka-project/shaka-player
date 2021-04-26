@@ -633,6 +633,21 @@ describe('StreamUtils', () => {
           /* useMediaCapabilities= */ true);
       expect(manifest.variants.length).toBe(1);
     });
+
+    it('supports VP9 codec', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/webm', 'vp9');
+          });
+        });
+      });
+
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          /* useMediaCapabilities= */ true);
+      expect(manifest.variants.length).toBe(1);
+    });
   });
 
   describe('chooseCodecsAndFilterManifest', () => {
