@@ -1274,7 +1274,7 @@ describe('HlsParser', () => {
     expect(actual.variants[0].video).toBeTruthy();
   });
 
-  it('Disable audio does not create audio streams', async () => {
+  it('parse image streams', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
@@ -1284,6 +1284,8 @@ describe('HlsParser', () => {
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
       'video\n',
+      '#EXT-X-IMAGE-STREAM-INF:RESOLUTION=240×135,CODECS="jpeg",',
+      'URI="image"\n',
     ].join('');
 
     const video = [
@@ -1316,11 +1318,95 @@ describe('HlsParser', () => {
       'main.vtt',
     ].join('');
 
+    const image = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+    ].join('');
+
     fakeNetEngine
         .setResponseText('test:/master', master)
         .setResponseText('test:/audio', audio)
         .setResponseText('test:/video', video)
         .setResponseText('test:/text', text)
+        .setResponseText('test:/image', image)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+
+    expect(actual.imageStreams.length).toBe(1);
+    expect(actual.textStreams.length).toBe(1);
+    expect(actual.variants.length).toBe(1);
+  });
+
+  it('Disable audio does not create audio streams', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+      '#EXT-X-IMAGE-STREAM-INF:RESOLUTION=240×135,CODECS="jpeg",',
+      'URI="image"\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const text = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.vtt',
+    ].join('');
+
+    const image = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseText('test:/text', text)
+        .setResponseText('test:/image', image)
         .setResponseText('test:/main.vtt', vttText)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
@@ -1345,6 +1431,8 @@ describe('HlsParser', () => {
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
       'video\n',
+      '#EXT-X-IMAGE-STREAM-INF:RESOLUTION=240×135,CODECS="jpeg",',
+      'URI="image"\n',
     ].join('');
 
     const video = [
@@ -1377,11 +1465,23 @@ describe('HlsParser', () => {
       'main.vtt',
     ].join('');
 
+    const image = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+    ].join('');
+
     fakeNetEngine
         .setResponseText('test:/master', master)
         .setResponseText('test:/audio', audio)
         .setResponseText('test:/video', video)
         .setResponseText('test:/text', text)
+        .setResponseText('test:/image', image)
         .setResponseText('test:/main.vtt', vttText)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
@@ -1406,6 +1506,8 @@ describe('HlsParser', () => {
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
       'video\n',
+      '#EXT-X-IMAGE-STREAM-INF:RESOLUTION=240×135,CODECS="jpeg",',
+      'URI="image"\n',
     ].join('');
 
     const video = [
@@ -1438,11 +1540,23 @@ describe('HlsParser', () => {
       'main.vtt',
     ].join('');
 
+    const image = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+    ].join('');
+
     fakeNetEngine
         .setResponseText('test:/master', master)
         .setResponseText('test:/audio', audio)
         .setResponseText('test:/video', video)
         .setResponseText('test:/text', text)
+        .setResponseText('test:/image', image)
         .setResponseText('test:/main.vtt', vttText)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData);
@@ -1453,6 +1567,80 @@ describe('HlsParser', () => {
 
     const actual = await parser.start('test:/master', playerInterface);
     const stream = actual.textStreams[0];
+    expect(stream).toBeUndefined();
+  });
+
+  it('Disable thumbnails does not create image streams', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="text"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+      '#EXT-X-IMAGE-STREAM-INF:RESOLUTION=240×135,CODECS="jpeg",',
+      'URI="image"\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const text = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.vtt',
+    ].join('');
+
+    const image = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+      '#EXTINF:5,\n',
+      'image.jpg\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseText('test:/text', text)
+        .setResponseText('test:/image', image)
+        .setResponseText('test:/main.vtt', vttText)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.disableThumbnails = true;
+    parser.configure(config);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    const stream = actual.imageStreams[0];
     expect(stream).toBeUndefined();
   });
 
