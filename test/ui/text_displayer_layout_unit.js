@@ -15,11 +15,11 @@ goog.require('shaka.text.UITextDisplayer');
 goog.require('shaka.ui.Overlay');
 goog.require('shaka.util.EventManager');
 
-const Util = shaka.test.Util;
-
 // TODO: Move this suite to the text/ folder where it belongs
-filterDescribe('TextDisplayer layout', Util.supportsScreenshots, () => {
+const supportsScreenshots = () => shaka.test.Util.supportsScreenshots();
+filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
   const UiUtils = shaka.test.UiUtils;
+  const Util = shaka.test.Util;
 
   /** @type {!shaka.extern.TextDisplayer} */
   let textDisplayer;
