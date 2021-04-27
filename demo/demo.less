@@ -316,13 +316,34 @@ html, body {
 .asset-card .mdl-card__title {
   /* The maximum width of the title should be narrower than the width of the
    * card itself, so that the title doesn't overlap with the store button. */
-  max-width: 260px;
+  max-width: 300px;
+  height: 130px;
   margin: auto;
+}
+
+.mdl-card-wide {
+  /* assignes particular dimensions for the card so
+  that all the card have same alignment. */
+  height: 420px;
+  width: 350px;
+}
+
+.mdl-card__supporting-text {
+  /* hides description of card from home page
+  as i think we should create an icon for that. */
+  display: none;
 }
 
 .asset-card div {
   /* Override the default value of "stretch" for mdl cards. */
   justify-content: center;
+}
+
+.mdl-card-wide picture + div {
+  /* does not matter whether card(.mdl-card-wide).
+  have icons or not it provides place for that. */
+  width: 350px;
+  height: 25px;
 }
 
 .asset-card img {
