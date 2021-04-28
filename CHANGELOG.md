@@ -1,3 +1,53 @@
+## 2.5.22 (2021-04-28)
+
+Bugfixes:
+  - Assume MP4 in HLS if MIME type can't be deduced
+    - https://github.com/google/shaka-player/issues/3142
+    - https://github.com/google/shaka-player/pull/3325
+  - Fix resolution changes with lang change
+    - https://github.com/google/shaka-player/issues/3262
+    - https://github.com/google/shaka-player/issues/3288
+  - Resume previous playback speed after pause
+    - https://github.com/google/shaka-player/issues/3261
+  - Fix updating of the mute icon
+    - https://github.com/google/shaka-player/pull/3307
+  - Fix text writing-mode support in old versions of Tizen and WebOS
+    - https://github.com/google/shaka-player/pull/3330
+  - Show replay icon instead of play when video ends
+    - https://github.com/google/shaka-player/issues/3247
+    - https://github.com/google/shaka-player/pull/3253
+  - Fix cross-browser focus outline
+    - https://github.com/google/shaka-player/issues/2863
+  - Fix rapid keyboard-based seeking
+    - https://github.com/google/shaka-player/issues/3234
+    - https://github.com/google/shaka-player/pull/3259
+  - Fix holding keyboard controls
+    - https://github.com/google/shaka-player/pull/3267
+  - Fix stylelint on Windows
+    - https://github.com/google/shaka-player/issues/2985
+    - https://github.com/google/shaka-player/pull/3214
+  - Display cursors as pointers on overflow menu buttons
+    - https://github.com/google/shaka-player/pull/3218
+
+Demo App:
+  - Fix centering of icons, add hover effect on settings
+    - https://github.com/google/shaka-player/pull/3352
+
+Docs:
+  - Update event docs and event links
+  - Add the UI Theme Gallery link to the docs
+    - https://github.com/google/shaka-player/issues/3246
+  - Fixed various grammatical errors and typos
+    - https://github.com/google/shaka-player/pull/3342
+    - https://github.com/google/shaka-player/pull/3340
+
+Misc:
+  - Allow testing with Chromium-based Edge in Karma
+    - https://github.com/google/shaka-player/pull/3265
+  - Official Xbox One support
+    - https://github.com/google/shaka-player/issues/1705
+
+
 ## 2.5.21 (2021-03-12)
 
 Bugfixes:
