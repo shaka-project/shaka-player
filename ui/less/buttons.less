@@ -110,3 +110,94 @@
     outline: none;
   }
 }
+
+/* this button is placed on the video container and forwards the 
+ * video on more than one tap. It covers almost 40% of right 
+ * side of video container and stays hidden until clicked. */
+.shaka-fast-foward-onVideoContainer{
+  height: 100%;
+  width:40%;
+  .shrinkable();
+
+  /* Keep the fast forward button to the right of this container. */
+  position: absolute;
+  top:0;
+  right: 0;
+  left:60%;
+  bottom:0;
+
+  /* keep all the elements inside fast forward div in center and in row*/
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items:center;
+  border-radius: 40% 0  0 40%;
+
+  /* To be properly positioned, this should have no margin.*/
+  margin: 0;
+
+  /* No border. */
+  border: none;
+
+  /* setting text color to white */
+  color: rgb(255, 255, 255);
+
+  /* setting background color to black so white text can be
+   * seen clearly */
+  background-color: rgba(0, 0, 0, 0.3);
+
+
+  cursor: default;
+  font-size: 20px;
+
+  /* hidding the container by setting opacity*/
+  opacity: 0;
+
+
+  z-index: 1;
+}
+
+/* this button is placed on the video container and rewinds the 
+ * video on more than one tap. It covers almost 40% of left 
+ * side of video container and stays hidden until clicked. */
+ .shaka-rewind-onVideoContainer{
+  height: 100%;
+  width:40%;
+  .shrinkable();
+  .absolute-position();
+
+  /* keep all the elements inside rewind div in center and in row*/
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items:center;
+  border-radius: 0 40% 40% 0;
+
+  /* To be properly positioned, this should have no margin.*/
+  margin: 0;
+
+  /* No border. */
+  border: none;
+
+  /* setting text color to white */
+  color: rgb(255, 255, 255);
+
+  /* setting background color to black so white text can be
+   * seen clearly */
+  background-color: rgba(0, 0, 0, 0.3);
+
+
+  cursor: default;
+  font-size: 20px;
+
+  /* hidding the container by setting opacity*/
+  opacity: 0;
+
+
+  z-index: 1;
+}
+
+.shaka-forward-rewind-onVideoContainer-icon{
+  font-family: 'Material Icons Round';
+  font-size: 34px;
+}
