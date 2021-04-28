@@ -120,9 +120,8 @@
   top:0;
   right: 0;
   left:60%;
-  bottom:0;
 
-  /* keep all the elements inside fast forward div in center and in row*/
+  /* keep all the elements inside fast forward div in center and in a row*/
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -140,7 +139,7 @@
 
   /* setting background color to black so white text can be
    * seen clearly */
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.5);
 
 
   cursor: default;
@@ -149,8 +148,13 @@
   /* hidding the container by setting opacity*/
   opacity: 0;
 
-
-  z-index: 1;
+  /* make the text inside this button unselectable */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* this button is placed on the video container and rewinds the 
@@ -160,6 +164,7 @@
   height: 100%;
   width:40%;
   .shrinkable();
+  /* keep the rewind button to the left */
   .absolute-position();
 
   /* keep all the elements inside rewind div in center and in row*/
@@ -180,8 +185,7 @@
 
   /* setting background color to black so white text can be
    * seen clearly */
-  background-color: rgba(0, 0, 0, 0.3);
-
+  background-color: rgba(0, 0, 0, 0.5);
 
   cursor: default;
   font-size: 20px;
@@ -189,10 +193,17 @@
   /* hidding the container by setting opacity*/
   opacity: 0;
 
-
-  z-index: 1;
+  /* make the text inside this button unselectable */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
+/* This class is instead of material-icon-round
+ * because the font-size of 24 doesn't look good*/
 .shaka-forward-rewind-onVideoContainer-icon{
   font-family: 'Material Icons Round';
   font-size: 34px;

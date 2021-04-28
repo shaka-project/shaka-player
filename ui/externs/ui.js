@@ -71,6 +71,8 @@ shaka.extern.UIVolumeBarColors;
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
  *   customContextMenu: boolean,
+ *   fastForwardOnTaps: boolean,
+ *   rewindOnTaps: boolean,
  *   castReceiverAppId: string,
  *   castAndroidReceiverCompatible: boolean,
  *   clearBufferOnQualityChange: boolean,
