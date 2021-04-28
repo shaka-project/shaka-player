@@ -189,6 +189,8 @@ shaka.ui.Overlay = class {
       ],
       addSeekBar: true,
       addBigPlayButton: false,
+      fastForwardOnTaps: true,
+      rewindOnTaps: true,
       castReceiverAppId: '',
       clearBufferOnQualityChange: true,
       showUnbufferedStart: false,

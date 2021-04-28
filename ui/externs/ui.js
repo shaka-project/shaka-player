@@ -65,6 +65,8 @@ shaka.extern.UIVolumeBarColors;
  *   overflowMenuButtons: !Array.<string>,
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
+ *   fastForwardOnTaps: boolean,
+ *   rewindOnTaps: boolean,
  *   castReceiverAppId: string,
  *   clearBufferOnQualityChange: boolean,
  *   showUnbufferedStart: boolean,
