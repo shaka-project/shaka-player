@@ -1,3 +1,123 @@
+## 3.1.0 (2021-04-29)
+
+New Features:
+  - Ads APIs are now STABLE (no longer BETA)
+  - MediaCapabilities support (BETA)
+    - https://github.com/google/shaka-player/issues/1391
+  - Remove support for IE11
+    - https://github.com/google/shaka-player/issues/2339
+  - Low-latency HLS (LL-HLS) and DASH (LL-DASH) support
+    - https://github.com/google/shaka-player/issues/1525
+  - Make DASH keySystems configurable
+    - https://github.com/google/shaka-player/pull/3276
+  - Make DRM sessionType configurable in advanced DRM config
+    - https://github.com/google/shaka-player/pull/3301
+  - Add Loop, PIP, Cast, AirPlay buttons to control panel
+    - https://github.com/google/shaka-player/issues/2676
+    - https://github.com/google/shaka-player/pull/3255
+  - Network stall detection
+    - https://github.com/google/shaka-player/pull/3227
+  - Store thumbnails for offline playback
+    - https://github.com/google/shaka-player/pull/3280
+  - Extract HDR metadata from DASH manifests
+    - https://github.com/google/shaka-player/pull/3226
+  - Make gap detection threshold configurable
+    - https://github.com/google/shaka-player/pull/3166
+  - Support WebVTT default text color and default text background color
+    - https://github.com/google/shaka-player/issues/3182
+    - https://github.com/google/shaka-player/pull/3182
+  - Add support for thumbnail tracks
+    - https://github.com/google/shaka-player/pull/3145
+  - Add getKeyStatuses to Player
+  - Parse spatial audio from manifest
+    - https://github.com/google/shaka-player/pull/3148
+  - Add support for WebVTT style blocks
+    - https://github.com/google/shaka-player/pull/3071
+  - Add SubViewer (SBV) support
+    - https://github.com/google/shaka-player/pull/3063
+    - https://github.com/google/shaka-player/pull/3266
+  - Add SubStation Alpha (SSA) support
+    - https://github.com/google/shaka-player/pull/3060
+  - Add downloadSizeCallback before storing offline
+    - https://github.com/google/shaka-player/issues/3049
+    - https://github.com/google/shaka-player/pull/3049
+  - Extract HDR metadata from HLS manifests
+    - https://github.com/google/shaka-player/issues/3116
+    - https://github.com/google/shaka-player/pull/3116
+  - add ignoreMaxSegmentDuration config for DASH manifest
+    - https://github.com/google/shaka-player/pull/3115
+  - Add navigator.storage.estimate polyfill
+    - https://github.com/google/shaka-player/issues/2900
+    - https://github.com/google/shaka-player/pull/3050
+  - Prefer unprefixed EME for Safari
+    - https://github.com/google/shaka-player/pull/3021
+  - Add config to prefer native HLS playback
+    - https://github.com/google/shaka-player/issues/3077
+  - Add LyRiCs (LRC) support
+    - https://github.com/google/shaka-player/pull/3036
+  - Add support for SMPTE namespace 2013
+    - https://github.com/google/shaka-player/issues/3061
+    - https://github.com/google/shaka-player/pull/3062
+  - Add support for mpegB:cicp:ChannelConfiguration
+    - https://github.com/google/shaka-player/pull/3057
+  - Config to prefer forced subtitles
+    - https://github.com/google/shaka-player/pull/3022
+  - Change default network request timeout
+    - https://github.com/google/shaka-player/pull/3024
+  - Optionally force HTTPS content URIs
+    - https://github.com/google/shaka-player/pull/3025
+  - Add parameter to probeSupport to skip DRM tests
+    - https://github.com/google/shaka-player/pull/3047
+  - Add autoLowLatencyMode config
+    - https://github.com/google/shaka-player/issues/1525
+    - https://github.com/google/shaka-player/pull/2861
+  - Allow apps to register a custom seek bar UI implementation
+    - https://github.com/google/shaka-player/issues/2924
+    - https://github.com/google/shaka-player/pull/2966
+  - Parse forced subtitles from manifest
+    - https://github.com/google/shaka-player/issues/2122
+    - https://github.com/google/shaka-player/issues/2916
+    - https://github.com/google/shaka-player/pull/2938
+  - Add addTextTrackAsync
+    - https://github.com/google/shaka-player/pull/2932
+  - Allow showing track labels in UI
+    - https://github.com/google/shaka-player/issues/2927
+  - Allow switching between mono and stereo tracks
+    - https://github.com/google/shaka-player/pull/2911
+  - Add support to side-load subtitles in src mode
+    - https://github.com/google/shaka-player/pull/2874
+  - Add SubRip (SRT) subtitle support
+    - https://github.com/google/shaka-player/pull/2872
+  - CEA-708 Decoder
+    - https://github.com/google/shaka-player/pull/2807
+  - Added completionPercent to playback stats
+  - Render bold/italics/underline on SimpleTextDisplayer
+    - https://github.com/google/shaka-player/pull/2779
+  - Adds VTT tag rendering for bold, italic, and underline
+    - https://github.com/google/shaka-player/issues/2348
+    - https://github.com/google/shaka-player/pull/2776
+  - CEA-608 Decoder
+    - https://github.com/google/shaka-player/issues/2648
+    - https://github.com/google/shaka-player/pull/2731
+    - https://github.com/google/shaka-player/pull/2649
+    - https://github.com/google/shaka-player/pull/2660
+  - Add dependencies module to allow custom dependency injection
+    - https://github.com/google/shaka-player/issues/2562
+    - https://github.com/google/shaka-player/pull/2683
+  - Add HLS PlayReady support
+    - https://github.com/google/shaka-player/pull/2719
+  - Add AirPlay button to overflow menu
+    - https://github.com/google/shaka-player/pull/2701
+  - Use Network Information API to react to network changes
+    - https://github.com/google/shaka-player/pull/2663
+  - Added polyfill for screen.orientation
+  - Add support for EXT-X-SESSION-DATA in HLS
+    - https://github.com/google/shaka-player/pull/2642
+  - Add forceLandscapeOnFullscreen UI config
+    - https://github.com/google/shaka-player/issues/883
+    - https://github.com/google/shaka-player/issues/2653
+
+
 ## 3.0.11 (2021-04-28)
 
 Bugfixes:
