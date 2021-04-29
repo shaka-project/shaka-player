@@ -160,9 +160,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      *
      * @private {shaka.util.Timer}
      */
-    this.hideFastForwardButtonOnVideoContainerTimer_ = new shaka.util.Timer(() => {
-      this.HideFastForwardButtonOnVideoContainer();
-    });
+    this.hideFastForwardButtonOnVideoContainerTimer_ = new shaka.util.Timer(
+        () => {
+          this.hideFastForwardButtonOnVideoContainer();
+        });
 
     /**
      * This timer will be used to hide rewind button on video Container.
@@ -170,15 +171,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      *
      * @private {shaka.util.Timer}
      */
-     this.hideRewindButtonOnVideoContainerTimer_ = new shaka.util.Timer(() => {
-      this.HideRewindButtonOnVideoContainer();
+    this.hideRewindButtonOnVideoContainerTimer_ = new shaka.util.Timer(() => {
+      this.hideRewindButtonOnVideoContainer();
     });
 
     /** @private {?number} */
     this.lastTouchEventTime_ = null;
 
     /** @private {?number} */
-    this.lastTouchEventTimeSet_ = 0;
+    this.lastTouchEventTimeSet_ = null;
 
     /** @private {?boolean} */
     this.triggeredTouchValid_ = false;
@@ -683,7 +684,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (this.config_.rewindOnTaps) {
       this.addRewindButtonOnVideoContainer_();
-    }   
+    }
 
     this.addDaiAdContainer_();
 
@@ -801,7 +802,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * Add fast-forward button on video container
-   * for moving video 5s ahead when the video is 
+   * for moving video 5s ahead when the video is
    * tapped more than once, video seeks ahead 5s
    * for every extra tap.
    * @private
@@ -813,17 +814,18 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         'shaka-fast-foward-onVideoContainer');
     this.controlsContainer_.appendChild(this.fastforwardContainer_);
 
-    this.eventManager_.listen(this.fastforwardContainer_, 'touchstart',(event) => {
-      //prevent the default changes that browser triggers
-      event.preventDefault();
-      // incase any settings menu are open this assigns the first touch
-      // to close the menu.
-      if (this.anySettingsMenusAreOpen()) {
-        this.hideSettingsMenusTimer_.tickNow();
-      } else{
-        this.onFastForwardButtonClick_();
-      }
-    });
+    this.eventManager_.listen(
+        this.fastforwardContainer_, 'touchstart', (event) => {
+          // prevent the default changes that browser triggers
+          event.preventDefault();
+          // incase any settings menu are open this assigns the first touch
+          // to close the menu.
+          if (this.anySettingsMenusAreOpen()) {
+            this.hideSettingsMenusTimer_.tickNow();
+          } else {
+            this.onFastForwardButtonClick_();
+          }
+        });
 
     /** @private {!HTMLElement} */
     this.fastForwardValue_ = shaka.util.Dom.createHTMLElement('span');
@@ -840,26 +842,26 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * Add Rewind button on video container
-   * for moving video 5s behind when the video is 
+   * for moving video 5s behind when the video is
    * tapped more than once, video seeks behind 5s
    * for every extra tap.
    * @private
    */
-   addRewindButtonOnVideoContainer_() {
+  addRewindButtonOnVideoContainer_() {
     /** @private {!HTMLElement} */
     this.rewindContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.rewindContainer_.classList.add(
         'shaka-rewind-onVideoContainer');
     this.controlsContainer_.appendChild(this.rewindContainer_);
 
-    this.eventManager_.listen(this.rewindContainer_, 'touchstart',(event) => {
-      //prevent the default changes that browser triggers
+    this.eventManager_.listen(this.rewindContainer_, 'touchstart', (event) => {
+      // prevent the default changes that browser triggers
       event.preventDefault();
       // incase any settings menu are open this assigns the first touch
       // to close the menu.
       if (this.anySettingsMenusAreOpen()) {
         this.hideSettingsMenusTimer_.tickNow();
-      } else{
+      } else {
         this.onRewindButtonClick_();
       }
     });
@@ -1181,86 +1183,80 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * This callback is for detecting a double tap or more continuos
-   * taps and seeking the video forward as per the number of taps 
+   * taps and seeking the video forward as per the number of taps
    * @private
    */
-  onFastForwardButtonClick_(){
+  onFastForwardButtonClick_() {
     // this stores the time for first touch and makes touch valid for
-    // next 1s so incase the touch event is triggered again within 1s 
-    // this if condition fails and the video seeking happens. 
+    // next 1s so incase the touch event is triggered again within 1s
+    // this if condition fails and the video seeking happens.
     if (!this.triggeredTouchValid_) {
       this.triggeredTouchValid_ = true;
       this.lastTouchEventTimeSet_ = Date.now();
       this.hideFastForwardButtonOnVideoContainerTimer_.tickAfter(1);
-    }
-    else if (this.lastTouchEventTimeSet_+1000 > Date.now()) {
+    } else if (this.lastTouchEventTimeSet_+1000 > Date.now()) {
       // stops hidding of fast-forward button incase the timmer is active
       // bbecause of previous touch event.
       this.hideFastForwardButtonOnVideoContainerTimer_.stop();
       this.lastTouchEventTimeSet_ = Date.now();
-      this.fastForwardValue_.textContent = 
-        (parseInt(this.fastForwardValue_.textContent) + 5).toString() + 's';
-      this.fastforwardContainer_.style.opacity = '1'; 
+      this.fastForwardValue_.textContent =
+        (parseInt(this.fastForwardValue_.textContent, 10) + 5).toString() + 's';
+      this.fastforwardContainer_.style.opacity = '1';
       this.hideFastForwardButtonOnVideoContainerTimer_.tickAfter(1);
     }
-   }
+  }
+
   /**
-   * called when the fast forward button needs to be hidden 
-   *@private
+   * called when the fast forward button needs to be hidden
    */
-  HideFastForwardButtonOnVideoContainer(){
+  hideFastForwardButtonOnVideoContainer() {
     // prevent adding seek value if its a single tap.
-    if (parseInt(this.fastForwardValue_.textContent) != 0) {
+    if (parseInt(this.fastForwardValue_.textContent, 10) != 0) {
       this.seek_(this.seekBar_.getValue() + parseInt(
-          this.fastForwardValue_.textContent));
+          this.fastForwardValue_.textContent, 10));
     }
     this.fastforwardContainer_.style.opacity = '0';
     this.triggeredTouchValid_ = false;
     this.fastForwardValue_.textContent = '0s';
-
   }
 
   /**
    * This callback is for detecting a double tap or more continuos
-   * taps and seeking the video forward as per the number of taps 
+   * taps and seeking the video forward as per the number of taps
    * @private
    */
-   onRewindButtonClick_(){
-     // this stores the time for first touch and makes touch valid for
-    // next 1s so incase the touch event is triggered again within 1s 
-    // this if condition fails and the video seeking happens. 
+  onRewindButtonClick_() {
+    // this stores the time for first touch and makes touch valid for
+    // next 1s so incase the touch event is triggered again within 1s
+    // this if condition fails and the video seeking happens.
     if (!this.triggeredTouchValid_) {
       this.triggeredTouchValid_ = true;
       this.lastTouchEventTimeSet_ = Date.now();
       this.hideRewindButtonOnVideoContainerTimer_.tickAfter(1);
-    }
-    else if (this.lastTouchEventTimeSet_+1000 > Date.now()) {
+    } else if (this.lastTouchEventTimeSet_+1000 > Date.now()) {
       // stops hidding of fast-forward button incase the timmer is active
       // bbecause of previous touch event.
       this.hideRewindButtonOnVideoContainerTimer_.stop();
       this.lastTouchEventTimeSet_ = Date.now();
-      this.rewindValue_.textContent = 
-        (parseInt(this.rewindValue_.textContent) - 5).toString() + 's';
-      this.rewindContainer_.style.opacity = '1'; 
+      this.rewindValue_.textContent =
+        (parseInt(this.rewindValue_.textContent, 10) - 5).toString() + 's';
+      this.rewindContainer_.style.opacity = '1';
       this.hideRewindButtonOnVideoContainerTimer_.tickAfter(1);
     }
-    
-   }
+  }
 
   /**
-   * called when the rewind button needs to be hidden 
-   *@private
+   * called when the rewind button needs to be hidden
    */
-  HideRewindButtonOnVideoContainer(){
+  hideRewindButtonOnVideoContainer() {
     // prevent adding seek value if its a single tap.
-    if (parseInt(this.rewindValue_.textContent) != 0) {
+    if (parseInt(this.rewindValue_.textContent, 10) != 0) {
       this.seek_(this.seekBar_.getValue() + parseInt(
-          this.rewindValue_.textContent));
+          this.rewindValue_.textContent, 10));
     }
     this.rewindContainer_.style.opacity = '0';
     this.triggeredTouchValid_ = false;
     this.rewindValue_.textContent = '0s';
-
   }
 
   /**

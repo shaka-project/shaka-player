@@ -89,6 +89,14 @@ shaka.extern.UIVolumeBarColors;
  * @property {boolean} addBigPlayButton
  *   Whether or not a big play button in the center of the video
  *   should be part of the UI.
+ * @property {boolean} fastForwardOnTaps
+ *   Whether or not a fast-forward button that seeks video 5s
+ *   ahead on tap present to the right of the video
+ *   should be a part of the UI.
+ * @property {boolean} rewindOnTaps
+ *   Whether or not a Rewind button that seeks video 5s
+ *   behind on tap present to the left of the video
+ *   should be a part of the UI.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
  * @property {boolean} clearBufferOnQualityChange
