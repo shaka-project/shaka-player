@@ -2169,7 +2169,7 @@ function testDrmEngine(useMediaCapabilities) {
       expect(shaka.media.DrmEngine.isFairPlayKeySystem(
           'com.apple.fps')).toBe(true);
       expect(shaka.media.DrmEngine.isFairPlayKeySystem(
-          'com.apple.fps.1_0g')).toBe(true);
+          'com.apple.fps.1_0')).toBe(true);
       expect(shaka.media.DrmEngine.isFairPlayKeySystem(
           'com.apple.fps.2_0')).toBe(true);
       expect(shaka.media.DrmEngine.isFairPlayKeySystem(
