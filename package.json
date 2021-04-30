@@ -12,7 +12,7 @@
   ],
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
-  },  
+  },
   "devDependencies": {
     "@chiragrupani/karma-chromium-edge-launcher": "^2.1.0",
     "@teppeis/clutz": "^1.0.29-4c95e12.v20190929",
