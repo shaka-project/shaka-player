@@ -547,9 +547,9 @@ shaka.extern.EmsgInfo;
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
  * @property {string} serverCertificateUri
- *   <i>Defaults to '', e.g., server certificate will be requested from the
- *   given URI if serverCertificate is NOT provided. Can be filled in by
- *   advanced DRM config.</i>
+ *   <i>Defaults to <code>''</code>.</i><br>
+ *   If given, will make a request to the given URI to get the server
+ *   certificate. This is ignored if <code>serverCertificate</code> is set.
  * @property {string} individualizationServer
  *   The server that handles an <code>'individualiation-request'</code>.  If the
  *   server isn't given, it will default to the license server.

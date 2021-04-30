@@ -992,10 +992,9 @@ function testDrmEngine(useMediaCapabilities) {
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
       config.advanced['drm.abc'].serverCertificateUri = serverCertificateUri;
 
-      const operation = shaka.util.AbortableOperation.completed({
-        data: shaka.util.BufferUtils.toArrayBuffer(new Uint8Array(1)),
-      });
-      fakeNetEngine.request.and.returnValue(operation);
+      fakeNetEngine.setResponseValue(
+          serverCertificateUri,
+          shaka.util.BufferUtils.toArrayBuffer(new Uint8Array(1)));
 
       drmEngine.configure(config);
 
@@ -1003,12 +1002,9 @@ function testDrmEngine(useMediaCapabilities) {
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
           useMediaCapabilities);
 
-      expect(fakeNetEngine.request).toHaveBeenCalledWith(
-          shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE,
-          jasmine.objectContaining({
-            uris: [serverCertificateUri],
-            method: 'GET',
-          }));
+      fakeNetEngine.expectRequest(
+          serverCertificateUri,
+          shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE);
 
       // Should be set merely after init, without waiting for attach.
       expect(mockMediaKeys.setServerCertificate).toHaveBeenCalledWith(
@@ -1016,8 +1012,6 @@ function testDrmEngine(useMediaCapabilities) {
     });
 
     it('fetches server certificate from uri and triggers error', async () => {
-      onErrorSpy.and.stub();
-
       const cert = new Uint8Array(0);
       const serverCertificateUri = 'https://drm-service.com/certificate';
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
@@ -1034,9 +1028,13 @@ function testDrmEngine(useMediaCapabilities) {
 
       drmEngine.configure(config);
 
-      const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.SERVER_CERTIFICATE_REQUEST_FAILED,
+          netError));
+
+      await expectAsync(initAndAttach()).toBeRejectedWith(expected);
 
       expect(fakeNetEngine.request).toHaveBeenCalledWith(
           shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE,
@@ -1044,16 +1042,6 @@ function testDrmEngine(useMediaCapabilities) {
             uris: [serverCertificateUri],
             method: 'GET',
           }));
-
-      expect(onErrorSpy).toHaveBeenCalled();
-
-      const error = onErrorSpy.calls.argsFor(0)[0];
-
-      shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.SERVER_CERTIFICATE_REQUEST_FAILED,
-          netError));
 
       // Should be set merely after init, without waiting for attach.
       expect(mockMediaKeys.setServerCertificate).not.toHaveBeenCalled();
