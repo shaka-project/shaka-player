@@ -633,6 +633,25 @@ describe('StreamUtils', () => {
           /* useMediaCapabilities= */ true);
       expect(manifest.variants.length).toBe(1);
     });
+
+    it('supports VP9 codec', async () => {
+      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+        pending('Codec VP9 is not supported by the platform.');
+      }
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/webm', 'vp9');
+          });
+        });
+      });
+
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          /* useMediaCapabilities= */ true);
+
+      expect(manifest.variants.length).toBe(1);
+    });
   });
 
   describe('chooseCodecsAndFilterManifest', () => {

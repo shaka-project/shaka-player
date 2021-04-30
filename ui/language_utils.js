@@ -31,13 +31,9 @@ shaka.ui.LanguageUtils = class {
       currentSelectionElement, localization, trackLabelFormat) {
     // TODO: Do the benefits of having this common code in a method still
     // outweigh the complexity of the parameter list?
-
-    // Using array.filter(f)[0] as an alternative to array.find(f) which is
-    // not supported in IE11.
-    const activeTracks = tracks.filter((track) => {
+    const selectedTrack = tracks.find((track) => {
       return track.active == true;
     });
-    const selectedTrack = activeTracks[0];
 
     // Remove old tracks
     // 1. Save the back to menu button
