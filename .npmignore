@@ -6,3 +6,10 @@
 docs/api/
 coverage/
 test/test/assets/screenshots/
+build/
+demo/
+externs/
+lib/
+test/
+third_party/
+ui/
