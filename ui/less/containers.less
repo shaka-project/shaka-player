@@ -277,3 +277,24 @@
   on a black background. */
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
 }
+
+.shaka-hidden-fast-forward-container {
+  height: 100%;
+  width: 40%;
+  .shrinkable();
+
+  /* Keep the fast forward button to the right of this container. */
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 60%;
+}
+
+.shaka-hidden-rewind-container {
+  height: 100%;
+  width: 40%;
+  .shrinkable();
+
+  /* keep the rewind button to the left */
+  .absolute-position();
+}

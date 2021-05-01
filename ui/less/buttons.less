@@ -111,19 +111,14 @@
   }
 }
 
-/* this button is placed on the video container and forwards the
+/* this button is placed on the Controls container and forwards the
  * video on more than one tap. It covers almost 40% of right
  * side of video container and stays hidden until clicked. */
-.shaka-fast-foward-onVideoContainer {
+.shaka-fast-foward-onControlsContainer {
   height: 100%;
-  width: 40%;
+  width: 100%;
   .shrinkable();
-
-  /* Keep the fast forward button to the right of this container. */
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 60%;
+  .absolute-position();
 
   /* keep all the elements inside fast forward div in center and in a row */
   display: flex;
@@ -163,12 +158,10 @@
 /* this button is placed on the video container and rewinds the
  * video on more than one tap. It covers almost 40% of left
  * side of video container and stays hidden until clicked. */
-.shaka-rewind-onVideoContainer {
+.shaka-rewind-onControlsContainer {
   height: 100%;
-  width: 40%;
+  width: 100%;
   .shrinkable();
-
-  /* keep the rewind button to the left */
   .absolute-position();
 
   /* keep all the elements inside rewind div in center and in row */
@@ -208,7 +201,7 @@
 
 /* This class is instead of material-icon-round
  * because the font-size of 24 doesn't look good */
-.shaka-forward-rewind-onVideoContainer-icon {
+.shaka-forward-rewind-onControlsContainer-icon {
   font-family: 'Material Icons Round';
   font-size: 34px;
 }

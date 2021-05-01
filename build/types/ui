@@ -35,3 +35,5 @@
 +../../ui/ui.js
 +../../ui/ui_utils.js
 +../../ui/volume_bar.js
++../../ui/hidden_rewind_button.js
++../../ui/hidden_fast_forward_button.js
