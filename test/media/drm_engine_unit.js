@@ -1037,8 +1037,8 @@ function testDrmEngine(useMediaCapabilities) {
       await expectAsync(initAndAttach()).toBeRejectedWith(expected);
 
       fakeNetEngine.expectRequest(
-        serverCertificateUri,
-        shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE);
+          serverCertificateUri,
+          shaka.net.NetworkingEngine.RequestType.SERVER_CERTIFICATE);
 
       // Should be set merely after init, without waiting for attach.
       expect(mockMediaKeys.setServerCertificate).not.toHaveBeenCalled();
