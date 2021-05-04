@@ -108,6 +108,31 @@ describe('TtmlTextParser', () => {
         jasmine.any(String));
   });
 
+  it('supports xml:space overriding default at span level', () => {
+    const ttBody = '\n' +
+        '  <body><div>\n' +
+        '    <p begin="01:02.03" end="01:02.05">\n' +
+        '      <span xml:space="preserve"> A    B   C  </span>\n' +
+        '    </p>\n' +
+        '  </div></body>\n';
+
+    // When xml:space="preserve", take them into account.
+    verifyHelper(
+        [
+          {
+            startTime: 62.03,
+            endTime: 62.05,
+            nestedCues: [{
+              payload: ' A    B   C  ',
+              startTime: 62.03,
+              endTime: 62.05,
+            }],
+          },
+        ],
+        '<tt>' + ttBody + '</tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('rejects invalid ttml', () => {
     errorHelper(shaka.util.Error.Code.INVALID_XML, '<test></test>', anyString);
   });
@@ -565,7 +590,7 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
-  it('supports region settings in pixels', () => {
+  it('supports region settings in pixels (origin)', () => {
     verifyHelper(
         [
           {
@@ -595,7 +620,9 @@ describe('TtmlTextParser', () => {
         '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
         '</div></body></tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
 
+  it('supports region settings in pixels (extent)', () => {
     verifyHelper(
         [
           {
@@ -619,7 +646,136 @@ describe('TtmlTextParser', () => {
         ],
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<layout>' +
-        '<region xml:id="subtitleArea" tts:extent="50px 16px" ' +
+        '<region xml:id="subtitleArea" tts:extent="50px 16px"/>' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports region settings in pixels: origin (with global extent)', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 10,
+              viewportAnchorY: 10,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 100,
+              height: 100,
+              heightUnits: CueRegion.units.PERCENTAGE,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.NONE,
+            },
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" tts:extent="1920px 1080px">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="192px 108px"/>' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports region settings in pixels: extent (with global extent)', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 0,
+              viewportAnchorY: 0,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 30,
+              height: 30,
+              heightUnits: CueRegion.units.PERCENTAGE,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.NONE,
+            },
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" tts:extent="1920px 1080px">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:extent="576px 324px" ' +
+        'tts:writingMode="lrtb" />' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports region settings in percentage (origin)', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 50,
+              viewportAnchorY: 16,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 100,
+              height: 100,
+              heightUnits: CueRegion.units.PERCENTAGE,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.NONE,
+            },
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" tts:extent="1920px 1080px">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:origin="50% 16%"/>' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports region settings in percentage (extent)', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            region: {
+              id: 'subtitleArea',
+              viewportAnchorX: 0,
+              viewportAnchorY: 0,
+              regionAnchorX: 0,
+              regionAnchorY: 0,
+              width: 50,
+              height: 16,
+              heightUnits: CueRegion.units.PERCENTAGE,
+              widthUnits: CueRegion.units.PERCENTAGE,
+              viewportAnchorUnits: CueRegion.units.PERCENTAGE,
+              scroll: CueRegion.scrollMode.NONE,
+            },
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling" tts:extent="1920px 1080px">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" tts:extent="50% 16%" ' +
         'tts:writingMode="lrtb" />' +
         '</layout>' +
         '<body region="subtitleArea"><div>' +
@@ -899,12 +1055,35 @@ describe('TtmlTextParser', () => {
         'xmlns:ttm="http://www.w3.org/ns/ttml#metadata" ' +
         'xmlns:smpte="http://www.smpte-ra.org/schemas/2052-1/2010/smpte-tt">' +
         '<metadata>' +
-        '<smpte:image imagetype="PNG" encoding="Base64" xml:id="img_0">' +
+        '<smpte:image imageType="PNG" encoding="Base64" xml:id="img_0">' +
         'base64EncodedImage</smpte:image>' +
         '</metadata>' +
         '<body><div smpte:backgroundImage="#img_0">' +
         '<p begin="01:02.05" end="01:02:03.200"></p>' +
         '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports smpte:backgroundImage attribute in div element', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 62.05,
+            payload: '',
+            backgroundImage: 'data:image/png;base64,base64EncodedImage',
+          },
+        ],
+        '<tt ' +
+        'xmlns:ttm="http://www.w3.org/ns/ttml#metadata" ' +
+        'xmlns:smpte="http://www.smpte-ra.org/schemas/2052-1/2010/smpte-tt">' +
+        '<metadata>' +
+        '<smpte:image imageType="PNG" encoding="Base64" xml:id="img_0">' +
+        'base64EncodedImage</smpte:image>' +
+        '</metadata>' +
+        '<body><div begin="00:00.00" end="01:02.05" '+
+        'smpte:backgroundImage="#img_0"></div>' +
+        '</body></tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
@@ -922,7 +1101,7 @@ describe('TtmlTextParser', () => {
         'xmlns:ttm="http://www.w3.org/ns/ttml#metadata" ' +
         'xmlns:smpte="http://www.smpte-ra.org/schemas/2052-1/2013/smpte-tt">' +
         '<metadata>' +
-        '<smpte:image imagetype="PNG" encoding="Base64" xml:id="img_0">' +
+        '<smpte:image imageType="PNG" encoding="Base64" xml:id="img_0">' +
         'base64EncodedImage</smpte:image>' +
         '</metadata>' +
         '<body><div>' +

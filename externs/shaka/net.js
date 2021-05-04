@@ -16,7 +16,9 @@
  *   baseDelay: number,
  *   backoffFactor: number,
  *   fuzzFactor: number,
- *   timeout: number
+ *   timeout: number,
+ *   stallTimeout: number,
+ *   connectionTimeout: number
  * }}
  *
  * @description
@@ -34,6 +36,12 @@
  * @property {number} timeout
  *   The request timeout, in milliseconds.  Zero means "unlimited".
  *   <i>Defaults to 30000 milliseconds.</i>
+ * @property {number} stallTimeout
+ *   The request stall timeout, in milliseconds.  Zero means "unlimited".
+ *   <i>Defaults to 5000 milliseconds.</i>
+ * @property {number} connectionTimeout
+ *   The request connection timeout, in milliseconds.  Zero means "unlimited".
+ *   <i>Defaults to 10000 milliseconds.</i>
  *
  * @tutorial network-and-buffering-config
  *

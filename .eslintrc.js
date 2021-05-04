@@ -84,7 +84,9 @@ module.exports = {
     'no-empty': ['error', {'allowEmptyCatch': true}],
     'no-misleading-character-class': 'error',
     'no-template-curly-in-string': 'error',
-    'require-atomic-updates': 'error',
+    // TODO: Try to re-enable this if possible.  Right now, it produces way too
+    // many false-positives with eslint 7.  It worked well enough in eslint 5.
+    // 'require-atomic-updates': 'error',
     // }}}
 
     // "Best practices" rules: {{{
@@ -149,7 +151,7 @@ module.exports = {
     'array-bracket-newline': ['error', 'consistent'],
     'block-spacing': ['error', 'always'],
     'brace-style': ['error', '1tbs', {'allowSingleLine': true}],
-    'id-blacklist': ['error', 'async'],
+    'id-denylist': ['error', 'async'],
     'lines-between-class-members': 'error',
     'max-statements-per-line': ['error', {'max': 1}],
     'new-parens': 'error',
@@ -290,6 +292,17 @@ module.exports = {
         'demo/load.js',
         'externs/**/*.js',
         'test/**/*.js',
+      ],
+    },
+    {
+      'rules': {
+        // Externs naturally redeclare things eslint knows about.
+        'no-redeclare': 'off',
+      },
+      'files': [
+        'ui/externs/*.js',
+        'externs/**/*.js',
+        'test/test/externs/*.js',
       ],
     },
   ],

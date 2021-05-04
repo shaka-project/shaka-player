@@ -9,7 +9,7 @@ goog.provide('shaka.ui.AirPlayButton');
 
 goog.require('goog.asserts');
 goog.require('shaka.Player');
-goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -46,6 +46,7 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('shaka-overflow-menu-only');
     this.airplayNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     label.appendChild(this.airplayNameSpan_);
 
@@ -123,9 +124,9 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
 
     // Aria-pressed set to true when casting, set to false otherwise.
     if (isCasting) {
-      this.airplayButton_.setAttribute('aria-pressed', 'true');
+      this.airplayButton_.ariaPressed = 'true';
     } else {
-      this.airplayButton_.setAttribute('aria-pressed', 'false');
+      this.airplayButton_.ariaPressed = 'false';
     }
   }
 
@@ -136,8 +137,7 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.airplayButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.AIRPLAY));
+    this.airplayButton_.ariaLabel = this.localization.resolve(LocIds.AIRPLAY);
     this.airplayNameSpan_.textContent =
         this.localization.resolve(LocIds.AIRPLAY);
   }
@@ -156,4 +156,7 @@ shaka.ui.AirPlayButton.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'airplay', new shaka.ui.AirPlayButton.Factory());
+
+shaka.ui.Controls.registerElement(
     'airplay', new shaka.ui.AirPlayButton.Factory());

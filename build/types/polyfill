@@ -3,10 +3,9 @@
 +../../node_modules/eme-encryption-scheme-polyfill/index.js
 +../../lib/polyfill/encryption_scheme.js
 +../../lib/polyfill/fullscreen.js
-+../../lib/polyfill/input_event.js
-+../../lib/polyfill/languages.js
 +../../lib/polyfill/mathround.js
 +../../lib/polyfill/mediasource.js
++../../lib/polyfill/media_capabilities.js
 +../../lib/polyfill/orientation.js
 +../../lib/polyfill/patchedmediakeys_apple.js
 +../../lib/polyfill/patchedmediakeys_ms.js

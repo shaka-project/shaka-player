@@ -84,7 +84,7 @@ describe('Player Src Equals', () => {
     const startTime = 5;
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, startTime);
 
-    // For some reason, the delta on IE & Edge can be 0.1 for this content and
+    // For some reason, the delta on Edge can be 0.1 for this content and
     // this start time.  It may be rounded to a key frame or something.
     const delta = Math.abs(video.currentTime - startTime);
     expect(delta).toBeLessThan(0.2);

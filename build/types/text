@@ -3,6 +3,9 @@
 +../../lib/text/lrc_text_parser.js
 +../../lib/text/mp4_ttml_parser.js
 +../../lib/text/mp4_vtt_parser.js
++../../lib/text/sbv_text_parser.js
 +../../lib/text/srt_text_parser.js
++../../lib/text/ssa_text_parser.js
 +../../lib/text/ttml_text_parser.js
 +../../lib/text/vtt_text_parser.js
++../../lib/text/web_vtt_generator.js

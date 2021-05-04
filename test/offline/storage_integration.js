@@ -147,7 +147,15 @@ filterDescribe('Storage', storageSupport, () => {
     }
   });
 
-  filterDescribe('persistent license', drmStorageSupport, () => {
+  for (const useMediaCapabilities of [true, false]) {
+    const isEnabled = useMediaCapabilities ? 'enabled' : 'disabled';
+    filterDescribe('persistent license with MediaCapabilities ' + isEnabled,
+        drmStorageSupport, () => {
+          testPersistentLicense(useMediaCapabilities);
+        });
+  }
+
+  function testPersistentLicense(useMediaCapabilities) {
     /** @type {!shaka.Player} */
     let player;
     /** @type {!shaka.offline.Storage} */
@@ -158,6 +166,7 @@ filterDescribe('Storage', storageSupport, () => {
       // networking engine.  This allows us to use Player.configure in these
       // tests.
       player = new shaka.Player();
+      player.configure({'useMediaCapabilities': useMediaCapabilities});
       storage = new shaka.offline.Storage(player);
     });
 
@@ -192,7 +201,7 @@ filterDescribe('Storage', storageSupport, () => {
       expect(manifest.offlineSessionIds.length).toBeTruthy();
 
       // PART 2 - Check that the licences are stored.
-      await withDrm(player, manifest, (drm) => {
+      await withDrm(player, manifest, useMediaCapabilities, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const foundSession = await loadOfflineSession(drm, session);
           expect(foundSession).toBeTruthy();
@@ -204,7 +213,7 @@ filterDescribe('Storage', storageSupport, () => {
       await storage.remove(uri.toString());
 
       // PART 4 - Check that the licenses were removed.
-      const p = withDrm(player, manifest, (drm) => {
+      const p = withDrm(player, manifest, useMediaCapabilities, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const notFoundSession = await loadOfflineSession(drm, session);
           expect(notFoundSession).toBeFalsy();
@@ -248,7 +257,7 @@ filterDescribe('Storage', storageSupport, () => {
       const storedContents = await storage.list();
       expect(storedContents).toEqual([]);
 
-      await withDrm(player, manifest, (drm) => {
+      await withDrm(player, manifest, useMediaCapabilities, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const foundSession = await loadOfflineSession(drm, session);
           expect(foundSession).toBeTruthy();
@@ -261,7 +270,7 @@ filterDescribe('Storage', storageSupport, () => {
       expect(didRemoveAll).toBe(true);
 
       // PART 6 - Check that the licenses were removed.
-      const p = withDrm(player, manifest, (drm) => {
+      const p = withDrm(player, manifest, useMediaCapabilities, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const notFoundSession = await loadOfflineSession(drm, session);
           expect(notFoundSession).toBeFalsy();
@@ -273,7 +282,7 @@ filterDescribe('Storage', storageSupport, () => {
           shaka.util.Error.Code.OFFLINE_SESSION_REMOVED));
       await expectAsync(p).toBeRejectedWith(expected);
     });
-  });
+  }
 
   describe('default track selection callback', () => {
     const PlayerConfiguration = shaka.util.PlayerConfiguration;
@@ -1273,6 +1282,44 @@ filterDescribe('Storage', storageSupport, () => {
     });
   });
 
+  describe('deduplication', () => {
+    const testSchemeMimeType = 'application/x-test-manifest';
+    const manifestUri = 'test:sintel';
+
+    // Regression test for https://github.com/google/shaka-player/issues/2781
+    it('does not cache failures or cancellations', async () => {
+      /** @type {shaka.offline.Storage} */
+      const storage = new shaka.offline.Storage();
+
+      try {
+        storage.getNetworkingEngine().registerRequestFilter(
+            (type, request) => {
+              if (type == shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+                throw new Error('Break download!');
+              }
+            });
+
+        const firstOperation = storage.store(
+            manifestUri, noMetadata, testSchemeMimeType);
+        // We killed the operation with a network failure, so this should be
+        // rejected.
+        await expectAsync(firstOperation.promise).toBeRejected();
+
+        // Clear the filter that caused the error.
+        storage.getNetworkingEngine().clearAllRequestFilters();
+
+        // Now we can try again, and it should be able to succeed, even though
+        // some downloads for the same URIs failed in the first attempt.  In
+        // #2781, this would fail because the network failure was cached.
+        const secondOperation = storage.store(
+            manifestUri, noMetadata, testSchemeMimeType);
+        await expectAsync(secondOperation.promise).toBeResolved();
+      } finally {
+        await storage.destroy();
+      }
+    });
+  });
+
   /**
    * @param {number} id
    * @param {number} height
@@ -1295,6 +1342,7 @@ filterDescribe('Storage', storageSupport, () => {
       height: height,
       frameRate: 30,
       pixelAspectRatio: '59:54',
+      hdr: null,
       mimeType: 'video/mp4,audio/mp4',
       codecs: 'mp4,mp4',
       audioCodec: 'mp4',
@@ -1307,11 +1355,14 @@ filterDescribe('Storage', storageSupport, () => {
       audioId: audioId,
       channelsCount: 2,
       audioSamplingRate: 48000,
+      spatialAudio: false,
+      tilesLayout: null,
       audioBandwidth: bandwidth * 0.33,
       videoBandwidth: bandwidth * 0.67,
       originalVideoId: videoId.toString(),
       originalAudioId: audioId.toString(),
       originalTextId: null,
+      originalImageId: null,
     };
   }
 
@@ -1333,6 +1384,7 @@ filterDescribe('Storage', storageSupport, () => {
       height: null,
       frameRate: null,
       pixelAspectRatio: null,
+      hdr: null,
       mimeType: 'text/vtt',
       codecs: 'vtt',
       audioCodec: null,
@@ -1345,11 +1397,14 @@ filterDescribe('Storage', storageSupport, () => {
       audioId: null,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
+      tilesLayout: null,
       audioBandwidth: null,
       videoBandwidth: null,
       originalVideoId: null,
       originalAudioId: null,
       originalTextId: id.toString(),
+      originalImageId: null,
     };
   }
 
@@ -1541,7 +1596,9 @@ filterDescribe('Storage', storageSupport, () => {
       distinctiveIdentifierRequired: false,
       initData: null,
       keyIds: null,
+      sessionType: 'temporary',
       serverCertificate: null,
+      serverCertificateUri: '',
       audioRobustness: 'HARDY',
       videoRobustness: 'OTHER',
     };
@@ -1625,10 +1682,11 @@ filterDescribe('Storage', storageSupport, () => {
   /**
    * @param {!shaka.Player} player
    * @param {shaka.extern.Manifest} manifest
+   * @param {boolean} useMediaCapabilities
    * @param {function(!shaka.media.DrmEngine):Promise} action
    * @return {!Promise}
    */
-  async function withDrm(player, manifest, action) {
+  async function withDrm(player, manifest, useMediaCapabilities, action) {
     const net = player.getNetworkingEngine();
     goog.asserts.assert(net, 'Player should have a net engine right now');
 
@@ -1646,7 +1704,8 @@ filterDescribe('Storage', storageSupport, () => {
     try {
       drm.configure(player.getConfiguration().drm);
       const variants = manifest.variants;
-      await drm.initForStorage(variants, /* usePersistentLicenses= */ true);
+      await drm.initForStorage(variants, /* usePersistentLicenses= */ true,
+          useMediaCapabilities);
       await action(drm);
     } finally {
       await drm.destroy();

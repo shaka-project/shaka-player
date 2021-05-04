@@ -60,6 +60,28 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(ref).toBe(actual2);
     });
 
+    it('works with two references if time == first end time', () => {
+      const actual1 = makeReference(uri(10), 10, 20.12);
+      const actual2 = makeReference(uri(20), 20.13, 30);
+      const index = new shaka.media.SegmentIndex([actual1, actual2]);
+
+      const pos = index.find(20.12);
+      goog.asserts.assert(pos != null, 'Null position!');
+      const ref = index.get(pos);
+      expect(ref).toBe(actual1);
+    });
+
+    it('works with time is between first endTime and second startTime', () => {
+      const actual1 = makeReference(uri(10), 10, 20.12111);
+      const actual2 = makeReference(uri(20), 20.12113, 30);
+      const index = new shaka.media.SegmentIndex([actual1, actual2]);
+
+      const pos = index.find(20.12112);
+      goog.asserts.assert(pos != null, 'Null position!');
+      const ref = index.get(pos);
+      expect(ref).toBe(actual1);
+    });
+
     it('returns the first segment if time < first start time', () => {
       const actual = makeReference(uri(10), 10, 20);
       const index = new shaka.media.SegmentIndex([actual]);
@@ -83,15 +105,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const index = new shaka.media.SegmentIndex([actual]);
 
       const pos = index.find(21);
-      expect(pos).toBeNull();
-    });
-
-    it('returns null if time is within a gap', () => {
-      const actual1 = makeReference(uri(10), 10, 20);
-      const actual2 = makeReference(uri(25), 25, 30);
-      const index = new shaka.media.SegmentIndex([actual1, actual2]);
-
-      const pos = index.find(23);
       expect(pos).toBeNull();
     });
   });
@@ -452,6 +465,31 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       index1.merge(refs2);
       expect(index1.references.length).toBe(1);
       expect(index1.references).toEqual(refs2);
+    });
+  });
+
+  describe('mergeAndEvict', () => {
+    it('discards segments that end before the availabilityWindowStart', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references1 = [
+        // Assuming ref(0, 10) has been already evicted
+        makeReference(uri(10), 10, 20),
+      ];
+      const index1 = new shaka.media.SegmentIndex(references1);
+
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references2 = [
+        makeReference(uri(0), 0, 10),
+        makeReference(uri(10), 10, 20),
+        makeReference(uri(20), 20, 30),
+      ];
+
+      // The first reference ends before the availabilityWindowStart, so it
+      // should be discarded.
+      index1.mergeAndEvict(references2, 19);
+      expect(index1.references.length).toBe(2);
+      expect(index1.references[0]).toEqual(references2[1]);
+      expect(index1.references[1]).toEqual(references2[2]);
     });
   });
 

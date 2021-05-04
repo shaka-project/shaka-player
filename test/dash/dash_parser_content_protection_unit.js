@@ -287,14 +287,13 @@ describe('DashParser ContentProtection', () => {
       '</ContentProtection>',
     ], []);
 
+    const initData = buildInitData(
+        ['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'], // PSSHs
+        ['deadbeeffeedbaadf00d000008675309']); // key ID for init data
     const expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
           ['deadbeeffeedbaadf00d000008675309'], // key ID
-          buildInitData(
-              ['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'], // PSSHs
-              ['deadbeeffeedbaadf00d000008675309'] // key ID for init data
-          )
-      ),
+          initData),
     ]);
     await testDashParser(source, expected);
   });
@@ -344,12 +343,10 @@ describe('DashParser ContentProtection', () => {
     const expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
           [], // key IDs
-          buildInitData(['ZmFrZSBXaWRldmluZSBQU1NI'])
-      ),
+          buildInitData(['ZmFrZSBXaWRldmluZSBQU1NI'])),
       buildDrmInfo('com.microsoft.playready',
           [], // key IDs
-          buildInitData(['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'])
-      ),
+          buildInitData(['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'])),
     ]);
     await testDashParser(source, expected);
   });
@@ -367,8 +364,7 @@ describe('DashParser ContentProtection', () => {
           [], // key IDs
           buildInitData([
             'AAAAKXBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAAAlQbGF5cmVhZHk=',
-          ])
-      ),
+          ])),
     ]);
     await testDashParser(source, expected);
   });
@@ -385,8 +381,7 @@ describe('DashParser ContentProtection', () => {
     const expected = buildExpectedManifest([
       buildDrmInfo('com.microsoft.playready',
           [], // key IDs
-          buildInitData(['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'])
-      ),
+          buildInitData(['bm8gaHVtYW4gY2FuIHJlYWQgYmFzZTY0IGRpcmVjdGx5'])),
     ]);
     await testDashParser(source, expected);
   });
@@ -433,8 +428,7 @@ describe('DashParser ContentProtection', () => {
     ]);
     const expected = buildExpectedManifest(
         /** @type {!Array.<shaka.extern.DrmInfo>} */(drmInfos),
-        [],  // key IDs
-    );
+        []);  // key IDs
     await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });
 
@@ -484,12 +478,10 @@ describe('DashParser ContentProtection', () => {
     const expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
           [], // key IDs
-          buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])
-      ),
+          buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])),
       buildDrmInfo('com.microsoft.playready',
           [], // key IDs
-          buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])
-      ),
+          buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])),
     ]);
     await testDashParser(source, expected);
   });
@@ -514,13 +506,10 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.widevine.alpha',
           [], // key IDs
           buildInitData(
-              ['VGltZSBpcyBhbiBpbGx1c2lvbi4gTHVuY2h0aW1lIGRvdWJseSBzby4='],
-          )
-      ),
+              ['VGltZSBpcyBhbiBpbGx1c2lvbi4gTHVuY2h0aW1lIGRvdWJseSBzby4='])),
       buildDrmInfo('com.microsoft.playready',
           [], // key IDs
-          buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs']),
-      ),
+          buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])),
     ]);
     await testDashParser(source, expected);
   });
@@ -708,8 +697,7 @@ describe('DashParser ContentProtection', () => {
     const expected = buildExpectedManifest([
       buildDrmInfo('com.widevine.alpha',
           [], // key IDs
-          buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])
-      ),
+          buildInitData(['b25lIGhlYWRlciB0byBydWxlIHRoZW0gYWxs'])),
     ]);
     await testDashParser(source, expected);
   });

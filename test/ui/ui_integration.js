@@ -317,8 +317,7 @@ describe('UI', () => {
       languagesToButtons = mapChoicesToButtons(
           /* allButtons= */ languageButtons,
           /* choices= */ langsFromContent,
-          /* modifier= */ getNativeName
-      );
+          /* modifier= */ getNativeName);
 
       const button = languagesToButtons.get(newLanguage);
       const isChosen = button.querySelector('.shaka-chosen-item');

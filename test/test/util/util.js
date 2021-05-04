@@ -245,8 +245,10 @@ shaka.test.Util = class {
       // Make shallow copies of each, without their getUris fields.
       const trimmedFirst = Object.assign({}, /** @type {Object} */(firstRef));
       delete trimmedFirst['getUris'];
+      delete trimmedFirst['getUrisInner'];
       const trimmedSecond = Object.assign({}, /** @type {Object} */(secondRef));
       delete trimmedSecond['getUris'];
+      delete trimmedSecond['getUrisInner'];
 
       // Compare those using Jasmine's utility, which will compare the fields of
       // an object and the items of an array.
@@ -375,8 +377,9 @@ shaka.test.Util = class {
    */
   static async supportsScreenshots() {
     // We need our own ID for Karma to look up the WebDriver connection.
+    // For manually-connected browsers, this ID may not exist.  In those cases,
+    // this method is expected to return false.
     const parentUrlParams = window.parent.location.search;
-    goog.asserts.assert(parentUrlParams.includes('id='), 'No ID in URL!');
 
     const buffer = await shaka.test.Util.fetch(
         '/screenshot/isSupported' + parentUrlParams);
@@ -408,6 +411,8 @@ shaka.test.Util = class {
     await this.delay(0.1);
 
     // We need our own ID for Karma to look up the WebDriver connection.
+    // By this point, we should have passed supportsScreenshots(), so the ID
+    // should definitely be there.
     const parentUrlParams = window.parent.location.search;
     goog.asserts.assert(parentUrlParams.includes('id='), 'No ID in URL!');
 

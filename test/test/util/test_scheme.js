@@ -635,11 +635,49 @@ beforeAll(async () => {
   await shaka.test.TestScheme.createManifests(shaka, '');
 });
 
+/**
+ * Because our MediaCapabilities integration adds decoding info to each variant,
+ * we need to be careful to reset this info on variants that are cached and
+ * persist between tests and between manifest parser instances.  This ensures
+ * that these unusual test variants will not have persistent decoding infos from
+ * MediaCapabilities.
+ *
+ * For encrypted content, the decoding info contains negotiated EME information
+ * which varies based on the chosen key system and whether the content will be
+ * streamed or stored offline.  If one test loads the content for streaming,
+ * then another test loads the same content for offline storage, the second test
+ * would encounter the cached decoding info from the first test, and the
+ * negotatied key system would not be set up for the correct session types.
+ * This would lead to a test failure.  This sort of failure would not be seen in
+ * real playback (since no supported manifest parser would ever cache variants).
+ *
+ * By resetting variant.decodingInfos when the fake manifest parser is stopped,
+ * we ensure that each test gets a clean slate (as would happen with a real
+ * parser), and the correct decodingInfos show up for each part of each test
+ * case.
+ *
+ * @param {?shaka.extern.Manifest} manifest
+ */
+function resetDecodingInfos(manifest) {
+  if (!manifest) {
+    return;
+  }
+
+  for (const variant of manifest.variants) {
+    variant.decodingInfos = [];
+  }
+}
+
 
 /**
  * @implements {shaka.extern.ManifestParser}
  */
 shaka.test.TestScheme.ManifestParser = class {
+  constructor() {
+    /** @private {?shaka.extern.Manifest} */
+    this.manifest_ = null;
+  }
+
   /** @override */
   configure(config) {}
 
@@ -663,20 +701,17 @@ shaka.test.TestScheme.ManifestParser = class {
     if (!manifest) {
       throw new Error('Unknown manifest!');
     }
+    this.manifest_ = manifest;
 
     playerInterface.makeTextStreamsForClosedCaptions(manifest);
-
-    // Invoke filtering interfaces similar to how a real parser would.
-    // This makes sure the filtering functions are covered implicitly by
-    // tests. This covers regression
-    // https://github.com/google/shaka-player/issues/988
-    playerInterface.filter(manifest);
 
     return Promise.resolve(manifest);
   }
 
   /** @override */
   stop() {
+    resetDecodingInfos(this.manifest_);
+    this.manifest_ = null;
     return Promise.resolve();
   }
 
