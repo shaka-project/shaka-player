@@ -125,7 +125,8 @@ shakaDemo.InputContainer = class {
         }
       });
     } else {
-      this.header_ = document.createElement('h3');
+      this.header_ = document.createElement('div');
+      this.header_.classList.add('input-header');
     }
     this.header_.textContent = headerText;
     parentDiv.appendChild(this.header_);
