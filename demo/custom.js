@@ -10,6 +10,7 @@ goog.provide('shakaDemo.Custom');
 
 goog.require('ShakaDemoAssetInfo');
 goog.require('shakaDemo.AssetCard');
+goog.require('shakaDemo.Input');
 goog.require('shakaDemo.InputContainer');
 goog.require('shakaDemo.Main');
 goog.require('shakaDemo.MessageIds');
@@ -104,12 +105,14 @@ shakaDemo.Custom = class {
    * @param {!shakaDemo.InputContainer} container
    * @param {string} name
    * @param {function(!HTMLInputElement, !Element)} setup
-   * @param {function(!Element)} onChange
+   * @param {function(!Element, !shakaDemo.Input)} onChange
+   * @param {boolean=} isTextArea
    * @private
    */
-  makeField_(container, name, setup, onChange) {
+  makeField_(container, name, setup, onChange, isTextArea) {
     container.addRow(/* labelString= */ null, /* tooltipString= */ null);
-    const input = new shakaDemo.TextInput(container, name, onChange);
+    const input =
+        new shakaDemo.TextInput(container, name, onChange, isTextArea);
     input.extra().textContent = name;
     setup(input.input(), input.container());
   }
@@ -426,6 +429,63 @@ shakaDemo.Custom = class {
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
    * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsExtra_(assetInProgress, inputsToCheck) {
+    const extraConfigDiv = document.createElement('div');
+    const containerStyle = shakaDemo.InputContainer.Style.FLEX;
+    const container = new shakaDemo.InputContainer(
+        extraConfigDiv, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
+    container.getClassList().add('wide-input');
+    container.setDefaultRowClass('wide-input');
+
+    const extraSetup = (input, container) => {
+      input.setAttribute('rows', 10);
+
+      if (assetInProgress.extraConfig) {
+        // Pretty-print the extra config.
+        input.value = JSON.stringify(
+            assetInProgress.extraConfig,
+            /* replacer= */ null, /* spacing= */ 2);
+      }
+
+      inputsToCheck.push(input);
+
+      // Make an error that shows up if you did not provide valid JSON.
+      const error = document.createElement('span');
+      error.classList.add('mdl-textfield__error');
+      error.textContent = shakaDemoMain.getLocalizedString(
+          shakaDemo.MessageIds.INVALID_JSON_CONFIG_ERROR);
+
+      container.appendChild(error);
+    };
+    const extraOnChange = (inputElement, inputWrapper) => {
+      try {
+        if (!inputElement.value) {
+          assetInProgress.extraConfig = null;
+        } else {
+          const config = /** @type {!Object} */(JSON.parse(inputElement.value));
+          assetInProgress.extraConfig = config;
+        }
+        inputWrapper.setValid(true);
+      } catch (exception) {
+        inputWrapper.setValid(false);
+      }
+    };
+    const extraConfigLabel = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.EXTRA_SHAKA_PLAYER_CONFIG);
+    this.makeField_(
+        container, extraConfigLabel, extraSetup, extraOnChange,
+        /* isTextArea= */ true);
+
+    return extraConfigDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
    * @param {!Element} iconDiv
    * @return {!Element} div
    * @private
@@ -528,6 +588,22 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, iconURLName, iconSetup, iconOnChange);
 
+    // Make the MIME type field.
+    const mimeTypeSetup = (input, container) => {
+      if (assetInProgress.mimeType) {
+        input.value = assetInProgress.mimeType;
+      }
+    };
+
+    const mimeTypeOnChange = (input) => {
+      assetInProgress.mimeType = input.value || null;
+    };
+
+    const mimeTypeName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.MIME_TYPE);
+    this.makeField_(
+        container, mimeTypeName, mimeTypeSetup, mimeTypeOnChange);
+
     return mainDiv;
   }
 
@@ -598,6 +674,8 @@ shakaDemo.Custom = class {
         assetInProgress, inputsToCheck);
     const adsDiv = this.makeAssetDialogContentsAds_(
         assetInProgress, inputsToCheck);
+    const extraConfigDiv = this.makeAssetDialogContentsExtra_(
+        assetInProgress, inputsToCheck);
     const finishDiv = this.makeAssetDialogContentsFinish_(
         assetInProgress, inputsToCheck);
 
@@ -635,6 +713,8 @@ shakaDemo.Custom = class {
         shakaDemo.MessageIds.HEADERS_TAB, headersDiv, /* startOn= */ false);
     addTabButton(
         shakaDemo.MessageIds.ADS_TAB, adsDiv, /* startOn= */ false);
+    addTabButton(
+        shakaDemo.MessageIds.EXTRA_TAB, extraConfigDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
     this.dialog_.appendChild(tabDiv);
@@ -642,6 +722,7 @@ shakaDemo.Custom = class {
     this.dialog_.appendChild(drmDiv);
     this.dialog_.appendChild(headersDiv);
     this.dialog_.appendChild(adsDiv);
+    this.dialog_.appendChild(extraConfigDiv);
     this.dialog_.appendChild(finishDiv);
     this.dialog_.appendChild(iconDiv);
 

@@ -75,6 +75,8 @@ const ShakaDemoAssetInfo = class {
     this.imaAssetKey = null;
     /** @type {?string} */
     this.imaContentSrcId = null;
+    /** @type {?string} */
+    this.mimeType = null;
 
 
     // Offline storage values.
@@ -165,6 +167,15 @@ const ShakaDemoAssetInfo = class {
    */
   setExtraConfig(extraConfig) {
     this.extraConfig = extraConfig;
+    return this;
+  }
+
+  /**
+   * @param {string} mimeType
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setMimeType(mimeType) {
+    this.mimeType = mimeType;
     return this;
   }
 
