@@ -1598,6 +1598,7 @@ filterDescribe('Storage', storageSupport, () => {
       keyIds: null,
       sessionType: 'temporary',
       serverCertificate: null,
+      serverCertificateUri: '',
       audioRobustness: 'HARDY',
       videoRobustness: 'OTHER',
     };

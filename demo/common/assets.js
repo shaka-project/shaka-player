@@ -30,6 +30,7 @@ shakaAssets.Source = {
   UNIFIED_STREAMING: shakaDemo.MessageIds.UNIFIED_STREAMING,
   DASH_IF: shakaDemo.MessageIds.DASH_IF,
   BITCODIN: shakaDemo.MessageIds.BITCODIN,
+  METACDN: shakaDemo.MessageIds.METACDN,
   NIMBLE_STREAMER: shakaDemo.MessageIds.NIMBLE_STREAMER,
   AZURE_MEDIA_SERVICES: shakaDemo.MessageIds.AZURE_MEDIA_SERVICES,
   GPAC: shakaDemo.MessageIds.GPAC,
@@ -369,7 +370,16 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
-      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth')
+      .setExtraConfig({
+        drm: {
+          advanced: {
+            'com.widevine.alpha': {
+              serverCertificateUri: 'https://cwip-shaka-proxy.appspot.com/service-cert',
+            },
+          },
+        },
+      }),
   new ShakaDemoAssetInfo(
       /* name= */ 'Sintel 4k (multicodec, Widevine, ads)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
@@ -875,6 +885,45 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.OFFLINE),
   // End bitcodin assets }}}
+
+  // MetaCDN assets {{{
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Car Ride (DASH, VOD, 180 Degrees)',
+      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/.png?scale=300:210',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/Feature.DASH/.mpd',
+      /* source= */ shakaAssets.Source.METACDN)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VOD),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Car Ride (HLS, VOD, 180 Degrees)',
+      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/.png?scale=300:210',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/balmain_360/Feature.HLS/.m3u8',
+      /* source= */ shakaAssets.Source.METACDN)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.VOD),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Queensland, Australia Landscape (DASH)',
+      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/.png?scale=300:210',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/Feature.DASH/.mpd',
+      /* source= */ shakaAssets.Source.METACDN)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.VOD),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Queensland, Australia Landscape (HLS)',
+      /* iconUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/.png?scale=300:210',
+      /* manifestUri= */ 'https://lab.streamshark.io:10433/streams/sharkahouse/Feature.HLS/.m3u8',
+      /* source= */ shakaAssets.Source.METACDN)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.VOD),
+  // End MetaCDN assets }}}
 
   // Nimble Streamer assets {{{
   // Src: https://wmspanel.com/nimble/demo

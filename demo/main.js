@@ -1728,6 +1728,7 @@ shakaDemo.Main = class {
       audioRobustness: '',
       sessionType: '',
       serverCertificate: new Uint8Array(0),
+      serverCertificateUri: '',
       individualizationServer: '',
     };
   }

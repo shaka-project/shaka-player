@@ -516,6 +516,7 @@ shaka.extern.EmsgInfo;
  *   videoRobustness: string,
  *   audioRobustness: string,
  *   serverCertificate: Uint8Array,
+ *   serverCertificateUri: string,
  *   individualizationServer: string,
  *   sessionType: string
  * }}
@@ -545,6 +546,10 @@ shaka.extern.EmsgInfo;
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
+ * @property {string} serverCertificateUri
+ *   <i>Defaults to <code>''</code>.</i><br>
+ *   If given, will make a request to the given URI to get the server
+ *   certificate. This is ignored if <code>serverCertificate</code> is set.
  * @property {string} individualizationServer
  *   The server that handles an <code>'individualiation-request'</code>.  If the
  *   server isn't given, it will default to the license server.
@@ -569,7 +574,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
  *         undefined),
  *   logLicenseExchange: boolean,
- *   updateExpirationTime: number
+ *   updateExpirationTime: number,
+ *   preferredKeySystems: !Array.<string>
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -607,6 +613,9 @@ shaka.extern.AdvancedDrmConfiguration;
  * @property {number} updateExpirationTime
  *   <i>Defaults to 1.</i> <br>
  *   The frequency in seconds with which to check the expiration of a session.
+ * @property {!Array.<string>} preferredKeySystems
+ *   <i>Defaults to an empty array. </i> <br>
+ *   Specifies the priorties of available DRM key systems.
  *
  * @exportDoc
  */
