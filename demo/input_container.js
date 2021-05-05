@@ -40,6 +40,9 @@ shakaDemo.InputContainer = class {
     /** @private {?Element} */
     this.latestRow_;
 
+    /** @private {?string} */
+    this.defaultRowClass_ = null;
+
     /** @type {?Element} */
     this.latestElementContainer;
 
@@ -148,12 +151,31 @@ shakaDemo.InputContainer = class {
   }
 
   /**
+   * Set the default row class for future calls to addRow().
+   *
+   * @param {?string} rowClass
+   */
+  setDefaultRowClass(rowClass) {
+    this.defaultRowClass_ = rowClass;
+  }
+
+  /**
+   * Return the CSS class list for the container.
+   *
+   * @return {!DOMTokenList}
+   */
+  getClassList() {
+    return this.table_.classList;
+  }
+
+  /**
    * Makes a row, for storing an input.
    * @param {?shakaDemo.MessageIds} labelString
    * @param {?shakaDemo.MessageIds} tooltipString
    * @param {string=} rowClass
    */
   addRow(labelString, tooltipString, rowClass) {
+    rowClass = rowClass || this.defaultRowClass_ || '';
     this.latestRow_ = document.createElement('div');
     if (rowClass) {
       this.latestRow_.classList.add(rowClass);
