@@ -11,6 +11,7 @@ goog.require('shaka.util.Error');
 describe('Mp4CeaParser', () => {
   const ceaInitSegmentUri = '/base/test/test/assets/cea-init.mp4';
   const ceaSegmentUri = '/base/test/test/assets/cea-segment.mp4';
+  const Util = shaka.test.Util;
 
   /** @type {!ArrayBuffer} */
   let ceaInitSegment;

@@ -331,17 +331,13 @@ shaka.ui.Overlay = class {
    * @private
    */
   static dispatchLoadedEvent_(eventName, reasonCode) {
-    // "Event" is not constructable on IE, so we use this CustomEvent pattern.
-    const uiLoadedEvent = /** @type {!CustomEvent} */(
-      document.createEvent('CustomEvent'));
     let detail = null;
     if (reasonCode != undefined) {
       detail = {
         'reasonCode': reasonCode,
       };
     }
-    uiLoadedEvent.initCustomEvent(eventName, false, false, detail);
-
+    const uiLoadedEvent = new CustomEvent(eventName, detail);
     document.dispatchEvent(uiLoadedEvent);
   }
 
