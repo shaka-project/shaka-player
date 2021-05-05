@@ -337,7 +337,7 @@ shaka.ui.Overlay = class {
         'reasonCode': reasonCode,
       };
     }
-    const uiLoadedEvent = new CustomEvent(eventName, detail);
+    const uiLoadedEvent = new CustomEvent(eventName, {detail});
     document.dispatchEvent(uiLoadedEvent);
   }
 
