@@ -1308,6 +1308,8 @@ describe('HlsParser', () => {
       'main.mp4\n',
       '#EXTINF:5,\n',
       'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
     ].join('');
 
     const text = [
@@ -1324,6 +1326,7 @@ describe('HlsParser', () => {
       '#EXTINF:5,\n',
       'image.jpg\n',
       '#EXTINF:5,\n',
+      '#EXT-X-TILES:RESOLUTION=640x360,LAYOUT=5x2,DURATION=6.006\n',
       'image.jpg\n',
       '#EXTINF:5,\n',
       'image.jpg\n',
@@ -1344,6 +1347,28 @@ describe('HlsParser', () => {
     expect(actual.imageStreams.length).toBe(1);
     expect(actual.textStreams.length).toBe(1);
     expect(actual.variants.length).toBe(1);
+
+    const thumbnails = actual.imageStreams[0];
+
+    await thumbnails.createSegmentIndex();
+    goog.asserts.assert(thumbnails.segmentIndex != null, 'Null segmentIndex!');
+
+    const firstThumbnailReference = thumbnails.segmentIndex.get(0);
+    const secondThumbnailReference = thumbnails.segmentIndex.get(1);
+    const thirdThumbnailReference = thumbnails.segmentIndex.get(2);
+
+    expect(firstThumbnailReference).not.toBe(null);
+    expect(secondThumbnailReference).not.toBe(null);
+    expect(thirdThumbnailReference).not.toBe(null);
+    if (firstThumbnailReference) {
+      expect(firstThumbnailReference.getTilesLayout()).toBe('1x1');
+    }
+    if (secondThumbnailReference) {
+      expect(secondThumbnailReference.getTilesLayout()).toBe('5x2');
+    }
+    if (thirdThumbnailReference) {
+      expect(thirdThumbnailReference.getTilesLayout()).toBe('1x1');
+    }
   });
 
   it('Disable audio does not create audio streams', async () => {
