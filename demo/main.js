@@ -1739,7 +1739,7 @@ shakaDemo.Main = class {
 shakaDemo.Main.commonDrmSystems = [
   'com.widevine.alpha',
   'com.microsoft.playready',
-  'com.apple.fps.1_0',
+  'com.apple.fps',
   'com.adobe.primetime',
   'org.w3.clearkey',
 ];
