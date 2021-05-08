@@ -95,7 +95,7 @@ debug_closure_opts = [
 debug_closure_defines = [
     '-D', 'goog.DEBUG=true',
     '-D', 'goog.asserts.ENABLE_ASSERTS=true',
-    '-D', 'shaka.log.MAX_LOG_LEVEL=4',  # shaka.log.Level.DEBUG
+    '-D', 'shaka.log.MAX_LOG_LEVEL=6',  # shaka.log.Level.DEBUG, modified by sridhar
     '-D', 'shaka.Player.version="%s-debug"' % shaka_version,
 ]
 

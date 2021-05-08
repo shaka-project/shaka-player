@@ -924,6 +924,21 @@ shaka.extern.StreamingConfiguration;
  */
 shaka.extern.AbrConfiguration;
 
+// Modified by sridhar - Start
+/**
+ * @typedef {{
+ *   usePersistentLicenses: boolean,
+ *   offlineSessionIds: Array.<number>
+ * }}
+ *
+ * @property {boolean} usePersistentLicenses
+ *   If true, persistent licenses enabled.
+ * @property {Array.<number>} offlineSessionIds
+ *   Offline persistent session IDs
+ * @exportDoc
+ */
+shaka.extern.learnystCustomCfg;
+// Modified by sridhar - End
 
 /**
  * @typedef {{
@@ -958,7 +973,7 @@ shaka.extern.AbrConfiguration;
  */
 shaka.extern.OfflineConfiguration;
 
-
+// Modified by sridhar - start
 /**
  * @typedef {{
  *   drm: shaka.extern.DrmConfiguration,
@@ -966,6 +981,7 @@ shaka.extern.OfflineConfiguration;
  *   streaming: shaka.extern.StreamingConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
+ *   learnystCustomCfg: shaka.extern.learnystCustomCfg,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
@@ -990,6 +1006,8 @@ shaka.extern.OfflineConfiguration;
  *   A factory to construct an abr manager.
  * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.
+ * @property {shaka.extern.learnystCustomCfg} abr
+ *   Custom configuration and settings.
  * @property {shaka.extern.OfflineConfiguration} offline
  *   Offline configuration and settings.
  * @property {string} preferredAudioLanguage
@@ -1033,7 +1051,7 @@ shaka.extern.OfflineConfiguration;
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;
-
+// Modified by sridhar - end
 
 /**
  * @typedef {{

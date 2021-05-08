@@ -1650,7 +1650,8 @@ filterDescribe('Storage', storageSupport, () => {
    * @suppress {accessControls}
    */
   function loadOfflineSession(drmEngine, sessionName) {
-    return drmEngine.loadOfflineSession_(sessionName);
+    // Modified by sridhar
+    return drmEngine.loadOfflineSession_(sessionName, null);
   }
 
   /**
