@@ -523,29 +523,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * Checking the efficiency of a video
-   * @return {?number}
-   * @export
-   */
-  getBufferFillPercentage() {
-    const bufferedLength_ = this.video_.buffered.length;
-    const bufferedEnd_ =
-        bufferedLength_ ? this.video_.buffered.end(bufferedLength_ - 1) : 0;
-    const bufferingGoal_ = this.video_.currentTime +
-        Math.min(this.player_.getConfiguration().streaming.bufferingGoal,
-            (this.player_.seekRange().end - this.video_.currentTime));
-
-    if (bufferedEnd_ >= bufferingGoal_) {
-      return 100;
-    } else if (bufferedEnd_ < bufferingGoal_) {
-      return ((bufferedEnd_/bufferingGoal_)*100);
-    } else if (bufferedEnd_ <= this.video_.currentTime) {
-      return 0;
-    }
-    return 0;
-  }
-
-  /**
    * @param {?number} time
    * @export
    */
