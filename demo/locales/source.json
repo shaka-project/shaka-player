@@ -755,6 +755,10 @@
     "description": "The name of a configuration value.",
     "message": "Preferred Text Language"
   },
+  "DEMO_TEXT_ROLE": {
+    "description": "The name of a configuration value.",
+    "message": "Preferred Text Role"
+  },
   "DEMO_THUMBNAILS": {
     "description": "Text that describes an asset that has a thumbnail stream.",
     "message": "Thumbnails"
