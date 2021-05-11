@@ -168,6 +168,7 @@
   "DEMO_SURROUND_SEARCH": "Filters for assets with at least one surround sound audio track.",
   "DEMO_SWITCH_INTERVAL": "Switch Interval",
   "DEMO_TEXT_LANGUAGE": "Preferred Text Language",
+  "DEMO_TEXT_ROLE": "Preferred Text Role",
   "DEMO_TIMEOUT": "Timeout Factor",
   "DEMO_TRICK_MODE": "Special trick mode track",
   "DEMO_TRICK_MODE_SEARCH": "Filters for assets that have special video tracks to be used in trick mode playback (aka fast-forward).",
