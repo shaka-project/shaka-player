@@ -295,8 +295,8 @@ def check_tests(args):
   # Ignore missing goog.require since we assume the whole library is
   # already included.
   closure_opts += [
-      '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
-      '--checks-only', '-O', 'SIMPLE'
+      '--jscomp_off=missingRequire',
+      '--checks-only', '-O', 'SIMPLE',
   ]
 
   # Set up a build with the build name of "dummy".  With output_compiled_bundle

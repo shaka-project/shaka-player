@@ -74,7 +74,7 @@ def compile_demo(force, is_debug):
   closure_opts += [
       # Ignore missing goog.require since we assume the whole library is
       # already included.
-      '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+      '--jscomp_off=missingRequire',
       '-D', 'COMPILED=true',
   ]
 
@@ -125,7 +125,7 @@ def compile_receiver(force, is_debug):
   closure_opts += [
       # Ignore missing goog.require since we assume the whole library is
       # already included.
-      '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+      '--jscomp_off=missingRequire',
       '-D', 'COMPILED=true',
   ]
 
