@@ -58,15 +58,6 @@ requirement {
 }
 
 
-# Ban the use of @expose annotations.
-requirement {
-  type: CUSTOM
-  java_class: 'com.google.javascript.jscomp.ConformanceRules$BanExpose'
-  error_message: '@expose is not allowed; please use externs instead. '
-                 'See docs/design/export.md for details.'
-}
-
-
 # Reject unresolved types.
 requirement {
   type: CUSTOM
