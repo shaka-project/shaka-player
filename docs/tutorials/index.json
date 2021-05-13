@@ -1,6 +1,7 @@
 [
   { "welcome": { "title": "Welcome to Shaka Player" } },
   { "basic-usage": { "title": "Basic Usage" } },
+  { "blob-url": { "title": "Blob URL" } },
   { "debugging": { "title": "Debugging" } },
   { "config": { "title": "Configuration" } },
   { "network-and-buffering-config": { "title": "Network and Buffering Configuration" } },
