@@ -663,6 +663,7 @@ describe('StreamUtils', () => {
         variant.bandwidth = 5058558;
         variant.addAudio(1, (stream) => {
           stream.bandwidth = 129998;
+          stream.codecs = 'opus';
         });
         variant.addVideo(2, (stream) => {
           stream.bandwidth = 4928560;
@@ -677,6 +678,7 @@ describe('StreamUtils', () => {
         variant.bandwidth = 4911000;
         variant.addAudio(4, (stream) => {
           stream.bandwidth = 129998;
+          stream.codecs = 'vorbis';
         });
         variant.addVideo(5, (stream) => {
           stream.bandwidth = 4781002;
@@ -691,6 +693,7 @@ describe('StreamUtils', () => {
         variant.bandwidth = 10850316;
         variant.addAudio(7, (stream) => {
           stream.bandwidth = 129998;
+          stream.codecs = 'opus';
         });
         variant.addVideo(8, (stream) => {
           stream.bandwidth = 10784324;
@@ -700,6 +703,62 @@ describe('StreamUtils', () => {
       });
     };
 
+    it('chooses preferred audio and video codecs', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        addVariant1080Avc1(manifest);
+        addVariant1080Vp9(manifest);
+        addVariant2160Vp9(manifest);
+      });
+      const variants =
+          shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
+              /* preferredVideoCodecs= */[vp09Codecs],
+              /* preferredAudioCodecs= */['opus']);
+
+      expect(variants.length).toBe(1);
+      expect(variants[0].video.codecs).toBe(vp09Codecs);
+      expect(variants[0].audio.codecs).toBe('opus');
+    });
+
+    it('chooses preferred video codecs', () => {
+      // If no preferred audio codecs is specified or can be found, choose the
+      // variants with preferred video codecs.
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        addVariant1080Avc1(manifest);
+        addVariant1080Vp9(manifest);
+        addVariant2160Vp9(manifest);
+      });
+      const variants =
+          shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
+              /* preferredVideoCodecs= */[vp09Codecs],
+              /* preferredAudioCodecs= */[]);
+
+      expect(variants.length).toBe(2);
+      expect(variants[0].video.codecs).toBe(vp09Codecs);
+      expect(variants[0].audio.codecs).toBe('vorbis');
+      expect(variants[1].video.codecs).toBe(vp09Codecs);
+      expect(variants[1].audio.codecs).toBe('opus');
+    });
+
+    it('chooses preferred audio codecs', () => {
+      // If no preferred video codecs is specified or can be found, choose the
+      // variants with preferred audio codecs.
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        addVariant1080Avc1(manifest);
+        addVariant1080Vp9(manifest);
+        addVariant2160Vp9(manifest);
+      });
+      const variants =
+          shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
+              /* preferredVideoCodecs= */['foo'],
+              /* preferredAudioCodecs= */['opus']);
+
+      expect(variants.length).toBe(2);
+      expect(variants[0].video.codecs).toBe(avc1Codecs);
+      expect(variants[0].audio.codecs).toBe('opus');
+      expect(variants[1].video.codecs).toBe(vp09Codecs);
+      expect(variants[1].audio.codecs).toBe('opus');
+    });
+
     it('chooses variants with different sizes (density) by codecs', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         addVariant1080Avc1(manifest);
@@ -707,11 +766,14 @@ describe('StreamUtils', () => {
         addVariant2160Vp9(manifest);
       });
 
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2, []);
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredAudioChannelCount= */2,
+          /* preferredDecodingAttributes= */[]);
 
-      expect(manifest.variants.length).toBe(2);
+      expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
-      expect(manifest.variants[1].video.codecs).toBe(vp09Codecs);
     });
 
     it('chooses variants with same sizes (density) by codecs', () => {
@@ -720,7 +782,11 @@ describe('StreamUtils', () => {
         addVariant1080Vp9(manifest);
       });
 
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2, []);
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredAudioChannelCount= */2,
+          /* preferredDecodingAttributes= */[]);
 
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
@@ -759,7 +825,11 @@ describe('StreamUtils', () => {
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
           /* usePersistentLicenses= */false);
 
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest, 2,
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredAudioChannelCount= */2,
+          /* preferredDecodingAttributes= */
           [shaka.util.StreamUtils.DecodingAttributes.SMOOTH]);
       // 2 video codecs are smooth. Choose the one with the lowest bandwidth.
       expect(manifest.variants.length).toBe(1);
