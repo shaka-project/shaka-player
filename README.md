@@ -266,5 +266,8 @@ Shaka + Nuxt.js integration:
 Shaka + video.js integration:
 - https://github.com/davidjamesherzog/videojs-shaka
 
+Shaka + Angular integration:
+- https://github.com/PatrickKalkman/shaka-player-angular
+
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!
