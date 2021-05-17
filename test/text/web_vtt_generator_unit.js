@@ -14,6 +14,8 @@ describe('WebVttGenerator', () => {
 
   it('convert cues to WebVTT', () => {
     const shakaCue1 = new shaka.text.Cue(20, 40, 'Test');
+    shakaCue1.textAlign = shaka.text.Cue.textAlign.LEFT;
+    shakaCue1.writingMode = shaka.text.Cue.writingMode.VERTICAL_LEFT_TO_RIGHT;
     const shakaCue2 = new shaka.text.Cue(40, 50, 'Test2');
 
     verifyHelper(
@@ -22,9 +24,9 @@ describe('WebVttGenerator', () => {
           shakaCue2,
         ],
         'WEBVTT\n\n' +
-        '00:00:20.000 --> 00:00:40.000\n' +
+        '00:00:20.000 --> 00:00:40.000 align:left vertical:lr\n' +
         'Test\n\n' +
-        '00:00:40.000 --> 00:00:50.000\n' +
+        '00:00:40.000 --> 00:00:50.000 align:middle\n' +
         'Test2\n\n');
   });
 
@@ -52,7 +54,7 @@ describe('WebVttGenerator', () => {
     verifyHelper(
         [shakaCue],
         'WEBVTT\n\n' +
-        '00:00:10.000 --> 00:00:20.000\n' +
+        '00:00:10.000 --> 00:00:20.000 align:middle\n' +
         '<i><u>Test1</u></i><b><i>Test2</i></b>Test3<u>Test4</u>\n\n');
   });
 
