@@ -19,6 +19,8 @@
 goog.provide('shaka.ui.TextDisplayer');
 
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.EventManager');
+goog.require('shaka.util.Timer');
 
 
 /**
@@ -75,6 +77,13 @@ shaka.ui.TextDisplayer = class {
 
     /** private {Map.<!shaka.extern.Cue, !HTMLElement>} */
     this.currentCuesMap_ = new Map();
+
+    /** @private {shaka.util.EventManager} */
+    this.eventManager_ = new shaka.util.EventManager();
+
+    this.eventManager_.listen(document, 'fullscreenchange', () => {
+      this.updateCaptions_(/* forceUpdate= */ true);
+    });
   }
 
 
@@ -117,6 +126,12 @@ shaka.ui.TextDisplayer = class {
     }
 
     this.currentCuesMap_.clear();
+
+    // Tear-down the event manager to ensure messages stop moving around.
+    if (this.eventManager_) {
+      this.eventManager_.release();
+      this.eventManager_ = null;
+    }
   }
 
 
@@ -157,9 +172,10 @@ shaka.ui.TextDisplayer = class {
 
   /**
    * Display the current captions.
+   * @param {boolean=} forceUpdate
    * @private
    */
-  updateCaptions_() {
+  updateCaptions_(forceUpdate = true) {
     const currentTime = this.video_.currentTime;
 
     // Return true if the cue should be displayed at the current time point.
@@ -171,7 +187,7 @@ shaka.ui.TextDisplayer = class {
     // For each cue in the current cues map, if the cue's end time has passed,
     // remove the entry from the map, and remove the captions from the page.
     for (const cue of this.currentCuesMap_.keys()) {
-      if (!shouldCueBeDisplayed(cue)) {
+      if (!shouldCueBeDisplayed(cue) || forceUpdate) {
         const captions = this.currentCuesMap_.get(cue);
         this.textContainer_.removeChild(captions);
         this.currentCuesMap_.delete(cue);
