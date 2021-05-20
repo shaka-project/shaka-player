@@ -601,8 +601,7 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          /* useMediaCapabilities= */ true);
+          fakeDrmEngine, /* currentVariant= */ null, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -629,8 +628,7 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          /* useMediaCapabilities= */ true);
+          fakeDrmEngine, /* currentVariant= */ null, manifest);
       expect(manifest.variants.length).toBe(1);
     });
 
@@ -647,8 +645,7 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest,
-          /* useMediaCapabilities= */ true);
+          fakeDrmEngine, /* currentVariant= */ null, manifest);
 
       expect(manifest.variants.length).toBe(1);
     });
