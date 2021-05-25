@@ -708,7 +708,7 @@ describe('StreamUtils', () => {
       });
       const variants =
           shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
-              /* preferredVideoCodecs= */[vp09Codecs],
+              /* preferredVideoCodecs= */['vp09'],
               /* preferredAudioCodecs= */['opus']);
 
       expect(variants.length).toBe(1);
@@ -726,7 +726,7 @@ describe('StreamUtils', () => {
       });
       const variants =
           shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
-              /* preferredVideoCodecs= */[vp09Codecs],
+              /* preferredVideoCodecs= */['vp09'],
               /* preferredAudioCodecs= */[]);
 
       expect(variants.length).toBe(2);
