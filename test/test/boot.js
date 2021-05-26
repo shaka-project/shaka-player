@@ -298,6 +298,23 @@ function configureJasmineEnvironment() {
   } else {
     jasmine.getEnv().randomizeTests(false);
   }
+
+  // In this branch, specifically in our UITextDisplayer tests, ResizeObserver
+  // reports errors to the global error handler.  These can be safely ignored.
+  // If we don't filter them out, though, Jasmine interprets them as test
+  // failures.  The filter must be installed in a beforeAll because Jasmine only
+  // installs its own handler right before execution begins.
+  beforeAll(() => {
+    const originalOnError = window.onerror || function() {};
+    window.onerror = (e) => {
+      if (e.message.includes('ResizeObserver')) {
+        // Ignore.
+        return;
+      }
+
+      return originalOnError(e);
+    };
+  });
 }
 
 // Executed before test utilities and tests are loaded, but after Shaka Player

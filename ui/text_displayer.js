@@ -84,6 +84,15 @@ shaka.ui.TextDisplayer = class {
     this.eventManager_.listen(document, 'fullscreenchange', () => {
       this.updateCaptions_(/* forceUpdate= */ true);
     });
+
+    /** @private {ResizeObserver} */
+    this.resizeObserver_ = null;
+    if ('ResizeObserver' in window) {
+      this.resizeObserver_ = new ResizeObserver(() => {
+        this.updateCaptions_(/* forceUpdate= */ true);
+      });
+      this.resizeObserver_.observe(this.textContainer_);
+    }
   }
 
 
@@ -131,6 +140,11 @@ shaka.ui.TextDisplayer = class {
     if (this.eventManager_) {
       this.eventManager_.release();
       this.eventManager_ = null;
+    }
+
+    if (this.resizeObserver_) {
+      this.resizeObserver_.disconnect();
+      this.resizeObserver_ = null;
     }
   }
 
