@@ -189,7 +189,7 @@ shaka.ui.TextDisplayer = class {
    * @param {boolean=} forceUpdate
    * @private
    */
-  updateCaptions_(forceUpdate = true) {
+  updateCaptions_(forceUpdate = false) {
     const currentTime = this.video_.currentTime;
 
     // Return true if the cue should be displayed at the current time point.
