@@ -174,16 +174,7 @@ describe('DrmEngine', () => {
     return support['com.widevine.alpha'] || support['com.microsoft.playready'];
   }
 
-  for (const useMediaCapabilities of [true, false]) {
-    const isEnabled = useMediaCapabilities ? 'enabled' : 'disabled';
-    filterDescribe('basic flow with MediaCapabilities ' + isEnabled,
-        checkSupport, () => {
-          testBasicFlow(useMediaCapabilities);
-        });
-  }
-
-
-  function testBasicFlow(useMediaCapabilities) {
+  describe('basic flow', () => {
     drmIt('gets a license and can play encrypted segments', async () => {
       // The error callback should not be invoked.
       onErrorSpy.and.callFake(fail);
@@ -226,8 +217,7 @@ describe('DrmEngine', () => {
 
       const variants = manifest.variants;
 
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       await drmEngine.attach(video);
       await mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, videoInitSegment, null, null,
@@ -283,5 +273,5 @@ describe('DrmEngine', () => {
       expect(video.readyState).toBeGreaterThan(1);
       expect(video.currentTime).toBeGreaterThan(0);
     });
-  }  // describe('basic flow')
+  });  // describe('basic flow')
 });

@@ -147,15 +147,7 @@ filterDescribe('Storage', storageSupport, () => {
     }
   });
 
-  for (const useMediaCapabilities of [true, false]) {
-    const isEnabled = useMediaCapabilities ? 'enabled' : 'disabled';
-    filterDescribe('persistent license with MediaCapabilities ' + isEnabled,
-        drmStorageSupport, () => {
-          testPersistentLicense(useMediaCapabilities);
-        });
-  }
-
-  function testPersistentLicense(useMediaCapabilities) {
+  filterDescribe('persistent license', drmStorageSupport, () => {
     /** @type {!shaka.Player} */
     let player;
     /** @type {!shaka.offline.Storage} */
@@ -166,7 +158,6 @@ filterDescribe('Storage', storageSupport, () => {
       // networking engine.  This allows us to use Player.configure in these
       // tests.
       player = new shaka.Player();
-      player.configure({'useMediaCapabilities': useMediaCapabilities});
       storage = new shaka.offline.Storage(player);
     });
 
@@ -201,7 +192,7 @@ filterDescribe('Storage', storageSupport, () => {
       expect(manifest.offlineSessionIds.length).toBeTruthy();
 
       // PART 2 - Check that the licences are stored.
-      await withDrm(player, manifest, useMediaCapabilities, (drm) => {
+      await withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const foundSession = await loadOfflineSession(drm, session);
           expect(foundSession).toBeTruthy();
@@ -213,7 +204,7 @@ filterDescribe('Storage', storageSupport, () => {
       await storage.remove(uri.toString());
 
       // PART 4 - Check that the licenses were removed.
-      const p = withDrm(player, manifest, useMediaCapabilities, (drm) => {
+      const p = withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const notFoundSession = await loadOfflineSession(drm, session);
           expect(notFoundSession).toBeFalsy();
@@ -257,7 +248,7 @@ filterDescribe('Storage', storageSupport, () => {
       const storedContents = await storage.list();
       expect(storedContents).toEqual([]);
 
-      await withDrm(player, manifest, useMediaCapabilities, (drm) => {
+      await withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const foundSession = await loadOfflineSession(drm, session);
           expect(foundSession).toBeTruthy();
@@ -270,7 +261,7 @@ filterDescribe('Storage', storageSupport, () => {
       expect(didRemoveAll).toBe(true);
 
       // PART 6 - Check that the licenses were removed.
-      const p = withDrm(player, manifest, useMediaCapabilities, (drm) => {
+      const p = withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const notFoundSession = await loadOfflineSession(drm, session);
           expect(notFoundSession).toBeFalsy();
@@ -282,7 +273,7 @@ filterDescribe('Storage', storageSupport, () => {
           shaka.util.Error.Code.OFFLINE_SESSION_REMOVED));
       await expectAsync(p).toBeRejectedWith(expected);
     });
-  }
+  });
 
   describe('default track selection callback', () => {
     const PlayerConfiguration = shaka.util.PlayerConfiguration;
@@ -1682,11 +1673,10 @@ filterDescribe('Storage', storageSupport, () => {
   /**
    * @param {!shaka.Player} player
    * @param {shaka.extern.Manifest} manifest
-   * @param {boolean} useMediaCapabilities
    * @param {function(!shaka.media.DrmEngine):Promise} action
    * @return {!Promise}
    */
-  async function withDrm(player, manifest, useMediaCapabilities, action) {
+  async function withDrm(player, manifest, action) {
     const net = player.getNetworkingEngine();
     goog.asserts.assert(net, 'Player should have a net engine right now');
 
@@ -1704,8 +1694,7 @@ filterDescribe('Storage', storageSupport, () => {
     try {
       drm.configure(player.getConfiguration().drm);
       const variants = manifest.variants;
-      await drm.initForStorage(variants, /* usePersistentLicenses= */ true,
-          useMediaCapabilities);
+      await drm.initForStorage(variants, /* usePersistentLicenses= */ true);
       await action(drm);
     } finally {
       await drm.destroy();

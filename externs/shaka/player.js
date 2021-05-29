@@ -980,13 +980,15 @@ shaka.extern.OfflineConfiguration;
  *   preferredTextLanguage: string,
  *   preferredVariantRole: string,
  *   preferredTextRole: string,
+ *   preferredVideoCodecs: !Array.<string>,
+ *   preferredAudioCodecs: !Array.<string>,
  *   preferredAudioChannelCount: number,
+ *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
- *   textDisplayFactory: shaka.extern.TextDisplayer.Factory,
- *   useMediaCapabilities: boolean
+ *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
  * @property {shaka.extern.DrmConfiguration} drm
@@ -1014,8 +1016,15 @@ shaka.extern.OfflineConfiguration;
  *   The preferred role to use for variants.
  * @property {string} preferredTextRole
  *   The preferred role to use for text tracks.
+ * @property {!Array.<string>} preferredVideoCodecs
+ *   The list of preferred video codecs, in order of highest to lowest priority.
+ * @property {!Array.<string>} preferredAudioCodecs
+ *   The list of preferred audio codecs, in order of highest to lowest priority.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ * @property {!Array.<string>} preferredDecodingAttributes
+ *   The list of preferred attributes of decodingInfo, in the order of their
+ *   priorities.
  * @property {boolean} preferForcedSubs
  *   If true, a forced text track is preferred.  Defaults to false.
  *   If the content has no forced captions and the value is true,
@@ -1035,10 +1044,6 @@ shaka.extern.OfflineConfiguration;
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
  *   A factory to construct a text displayer. Note that, if this is changed
  *   during playback, it will cause the text tracks to be reloaded.
- * @property {boolean} useMediaCapabilities
- *   If true, use MediaCapabilities.decodingInfo() to filter the manifest, and
- *   get MediaKeys information for encrypted content. Default to false.
- *   Shaka Player's integration with MediaCapabilities is now in BETA.
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;

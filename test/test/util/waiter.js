@@ -132,10 +132,43 @@ shaka.test.Waiter = class {
    * @return {!Promise}
    */
   waitForEnd(mediaElement) {
-    if (mediaElement.ended) {
+    // Sometimes, the ended flag is not set, or the event does not fire,
+    // (I'm looking at **you**, Safari), so also check if we've reached the
+    // duration.
+    if (mediaElement.ended ||
+        mediaElement.currentTime >= mediaElement.duration) {
       return Promise.resolve();
     }
-    return this.waitForEvent(mediaElement, 'ended');
+
+    // The name of what we're waiting for.
+    const goalName = 'end of media';
+
+    // Cleanup on timeout.
+    const cleanup = () => {
+      this.eventManager_.unlisten(mediaElement, 'timeupdate');
+      this.eventManager_.unlisten(mediaElement, 'ended');
+    };
+
+    // The conditions for success.  Don't rely on either time, or the ended
+    // flag, or the ended event, specifically.  Any of these is sufficient.
+    // This flexibility cuts down on test flake on Safari (currently 14) in
+    // particular, where the flag might be set, but the ended event did not
+    // fire.
+    const p = new Promise((resolve) => {
+      this.eventManager_.listen(mediaElement, 'timeupdate', () => {
+        if (mediaElement.currentTime >= mediaElement.duration ||
+            mediaElement.ended) {
+          cleanup();
+          resolve();
+        }
+      });
+      this.eventManager_.listen(mediaElement, 'ended', () => {
+        cleanup();
+        resolve();
+      });
+    });
+
+    return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
   }
 
   /**
@@ -256,6 +289,7 @@ shaka.test.Waiter = class {
         'ready state', mediaElement.readyState,
         'playback rate', mediaElement.playbackRate,
         'paused', mediaElement.paused,
+        'ended', mediaElement.ended,
         'buffered', buffered);
   }
 };

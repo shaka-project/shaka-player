@@ -1986,6 +1986,24 @@ describe('Player', () => {
         expect(variantChanged).not.toHaveBeenCalled();
       });
     });
+
+    it('chooses the configured text language and role at start', async () => {
+      player.configure({
+        preferredTextLanguage: 'en',
+        preferredTextRole: 'commentary',
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      // Text was turned on during startup.
+      expect(player.isTextTrackVisible()).toBe(true);
+
+      expect(getActiveTextTrack()).toEqual(jasmine.objectContaining({
+        id: 52,
+        language: 'en',
+        roles: ['commentary'],
+      }));
+    });
   });  // describe('tracks')
 
   describe('languages', () => {
@@ -2789,16 +2807,7 @@ describe('Player', () => {
           expect(tracks[0].id).toBe(4);
         });
 
-
-    for (const useMediaCapabilities of [true, false]) {
-      const isEnabled = useMediaCapabilities ? 'enabled' : 'disabled';
-      it('removes if key system does not support codec with ' +
-          'MediaCapabilities ' + isEnabled, async () => {
-        await testWithUnsupportedCodec(useMediaCapabilities);
-      });
-    }
-
-    async function testWithUnsupportedCodec(useMediaCapabilities) {
+    it('removes if key system does not support codec', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
@@ -2816,35 +2825,22 @@ describe('Player', () => {
         });
       });
 
-      if (useMediaCapabilities) {
-        navigator.mediaCapabilities.decodingInfo = async (config) => {
-          await Promise.resolve();
-          const videoType = config['video'] ? config['video'].contentType : '';
-          if (videoType.includes('video') &&
+      navigator.mediaCapabilities.decodingInfo = async (config) => {
+        await Promise.resolve();
+        const videoType = config['video'] ? config['video'].contentType : '';
+        if (videoType.includes('video') &&
               videoType.includes('unsupported')) {
-            return {supported: false};
-          } else {
-            return {supported: true};
-          }
-        };
-      } else {
-        // We must be careful that our video/unsupported was not filtered out
-        // because of MSE support.  We are specifically testing EME-based
-        // filtering of codecs.
-        expect(MediaSource.isTypeSupported('video/unsupported')).toBe(true);
-        // Make sure that drm engine will reject the variant with an unsupported
-        // video mime type.
-        drmEngine.supportsVariant.and.callFake((variant) => {
-          return variant.video.codecs != 'unsupported';
-        });
-      }
+          return {supported: false};
+        } else {
+          return {supported: true};
+        }
+      };
 
-      player.configure({useMediaCapabilities: useMediaCapabilities});
       await player.load(fakeManifestUri, 0, fakeMimeType);
       const tracks = player.getVariantTracks();
       expect(tracks.length).toBe(1);
       expect(tracks[0].id).toBe(1);
-    }
+    });
 
     it('removes based on bandwidth', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
