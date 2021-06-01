@@ -685,7 +685,7 @@ shaka.ui.Controls.prototype.addControlsContainer_ = function() {
   });
 
   this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
-    if (this.config_.doubleClickForFullscreen) {
+    if (this.config_.doubleClickForFullscreen && document.fullscreenEnabled) {
       this.toggleFullScreen();
     }
   });
