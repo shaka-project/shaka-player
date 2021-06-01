@@ -673,7 +673,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
-      if (this.config_.doubleClickForFullscreen) {
+      if (this.config_.doubleClickForFullscreen && document.fullscreenEnabled) {
         this.toggleFullScreen();
       }
     });
