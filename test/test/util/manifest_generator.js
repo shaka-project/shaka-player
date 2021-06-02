@@ -407,6 +407,8 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     this.keyIds = new Set();
     /** @type {string} */
     this.sessionType = '';
+    /** @type {string} */
+    this.serverCertificateUri = '';
 
     /** @type {shaka.extern.DrmInfo} */
     const foo = this;

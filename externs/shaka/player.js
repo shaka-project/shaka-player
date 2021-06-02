@@ -516,6 +516,7 @@ shaka.extern.EmsgInfo;
  *   videoRobustness: string,
  *   audioRobustness: string,
  *   serverCertificate: Uint8Array,
+ *   serverCertificateUri: string,
  *   individualizationServer: string,
  *   sessionType: string
  * }}
@@ -545,6 +546,10 @@ shaka.extern.EmsgInfo;
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
+ * @property {string} serverCertificateUri
+ *   <i>Defaults to <code>''</code>.</i><br>
+ *   If given, will make a request to the given URI to get the server
+ *   certificate. This is ignored if <code>serverCertificate</code> is set.
  * @property {string} individualizationServer
  *   The server that handles an <code>'individualiation-request'</code>.  If the
  *   server isn't given, it will default to the license server.
@@ -569,7 +574,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
  *         undefined),
  *   logLicenseExchange: boolean,
- *   updateExpirationTime: number
+ *   updateExpirationTime: number,
+ *   preferredKeySystems: !Array.<string>
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -607,6 +613,9 @@ shaka.extern.AdvancedDrmConfiguration;
  * @property {number} updateExpirationTime
  *   <i>Defaults to 1.</i> <br>
  *   The frequency in seconds with which to check the expiration of a session.
+ * @property {!Array.<string>} preferredKeySystems
+ *   <i>Defaults to an empty array. </i> <br>
+ *   Specifies the priorties of available DRM key systems.
  *
  * @exportDoc
  */
@@ -975,13 +984,15 @@ shaka.extern.OfflineConfiguration;
  *   preferredTextLanguage: string,
  *   preferredVariantRole: string,
  *   preferredTextRole: string,
+ *   preferredVideoCodecs: !Array.<string>,
+ *   preferredAudioCodecs: !Array.<string>,
  *   preferredAudioChannelCount: number,
+ *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
- *   textDisplayFactory: shaka.extern.TextDisplayer.Factory,
- *   useMediaCapabilities: boolean
+ *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
  * @property {shaka.extern.DrmConfiguration} drm
@@ -1009,8 +1020,15 @@ shaka.extern.OfflineConfiguration;
  *   The preferred role to use for variants.
  * @property {string} preferredTextRole
  *   The preferred role to use for text tracks.
+ * @property {!Array.<string>} preferredVideoCodecs
+ *   The list of preferred video codecs, in order of highest to lowest priority.
+ * @property {!Array.<string>} preferredAudioCodecs
+ *   The list of preferred audio codecs, in order of highest to lowest priority.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ * @property {!Array.<string>} preferredDecodingAttributes
+ *   The list of preferred attributes of decodingInfo, in the order of their
+ *   priorities.
  * @property {boolean} preferForcedSubs
  *   If true, a forced text track is preferred.  Defaults to false.
  *   If the content has no forced captions and the value is true,
@@ -1030,10 +1048,6 @@ shaka.extern.OfflineConfiguration;
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
  *   A factory to construct a text displayer. Note that, if this is changed
  *   during playback, it will cause the text tracks to be reloaded.
- * @property {boolean} useMediaCapabilities
- *   If true, use MediaCapabilities.decodingInfo() to filter the manifest, and
- *   get MediaKeys information for encrypted content. Default to false.
- *   Shaka Player's integration with MediaCapabilities is now in BETA.
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;

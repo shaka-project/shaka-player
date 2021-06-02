@@ -359,9 +359,7 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.FORCE_HTTPS,
             'streaming.forceHTTPS')
         .addBoolInput_(MessageIds.PREFER_NATIVE_HLS,
-            'streaming.preferNativeHls')
-        .addBoolInput_(MessageIds.USE_MEDIA_CAPABILITIES,
-            'useMediaCapabilities');
+            'streaming.preferNativeHls');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
@@ -397,7 +395,8 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
     this.addSection_(MessageIds.LANGUAGE_SECTION_HEADER, docLink)
         .addTextInput_(MessageIds.AUDIO_LANGUAGE, 'preferredAudioLanguage')
-        .addTextInput_(MessageIds.TEXT_LANGUAGE, 'preferredTextLanguage');
+        .addTextInput_(MessageIds.TEXT_LANGUAGE, 'preferredTextLanguage')
+        .addTextInput_(MessageIds.TEXT_ROLE, 'preferredTextRole');
     const onChange = (input) => {
       shakaDemoMain.setUILocale(input.value);
       shakaDemoMain.remakeHash();

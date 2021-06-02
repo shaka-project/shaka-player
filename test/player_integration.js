@@ -36,6 +36,8 @@ describe('Player', () => {
   /** @type {shaka.test.Waiter} */
   let waiter;
 
+  const Util = shaka.test.Util;
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);

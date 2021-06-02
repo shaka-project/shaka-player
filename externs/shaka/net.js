@@ -60,7 +60,7 @@ shaka.extern.RetryParameters;
  *   retryParameters: !shaka.extern.RetryParameters,
  *   licenseRequestType: ?string,
  *   sessionId: ?string,
- *   streamDataCallback: ?function(BufferSource)
+ *   streamDataCallback: ?function(BufferSource):!Promise
  * }}
  *
  * @description
@@ -90,7 +90,7 @@ shaka.extern.RetryParameters;
  * @property {?string} sessionId
  *   If this is a LICENSE request, this field contains the session ID of the
  *   EME session that made the request.
- * @property {?function(BufferSource)} streamDataCallback
+ * @property {?function(BufferSource):!Promise} streamDataCallback
  *   A callback function to handle the chunked data of the ReadableStream.
  * @exportDoc
  */

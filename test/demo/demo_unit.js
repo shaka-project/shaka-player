@@ -96,7 +96,6 @@ describe('Demo', () => {
       const configPrimitives = new Set(['number', 'string', 'boolean']);
       const exceptions = new Set()
           .add('preferredVariantRole')
-          .add('preferredTextRole')
           .add('playRangeStart')
           .add('playRangeEnd')
           .add('manifest.dash.keySystemsByURI');

@@ -94,10 +94,7 @@ describe('CastUtils', () => {
     });
 
     it('transfers real Events', () => {
-      // new Event() is not usable on IE11:
-      const event =
-      /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
-      event.initCustomEvent('myEventType', false, false, null);
+      const event = new CustomEvent('myEventType');
 
       // Properties that can definitely be transferred.
       const nativeProperties = [

@@ -101,8 +101,8 @@ describe('SimpleTextDisplayer', () => {
           ]);
 
       // Next we test the behavior with a VTTCue which is seen as a cheap
-      // polyfill (in which prototype.line does not exist).  This simulates IE
-      // and legacy Edge.
+      // polyfill (in which prototype.line does not exist).  This simulates
+      // legacy Edge.
       // eslint-disable-next-line no-restricted-syntax
       delete window.VTTCue.prototype['line'];
       displayer.remove(0, Infinity);  // Clear the cues from above.

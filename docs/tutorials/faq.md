@@ -1,5 +1,12 @@
 # Frequently Asked Questions
 
+**Q:** Does Shaka Player support IE11?
+
+**A:** Shaka Player no longer supports IE11 beyond v3.1. If you need Shaka
+Player with IE support, checkout v3.0.x and previous versions.
+
+<hr>
+
 **Q:** My live stream is buffering forever or doesn't play.
 
 **A:** Check your time-sync.  In v1 we would adjust automatically to account for

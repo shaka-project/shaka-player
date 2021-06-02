@@ -15,11 +15,11 @@ goog.require('shaka.text.UITextDisplayer');
 goog.require('shaka.ui.Overlay');
 goog.require('shaka.util.EventManager');
 
-const Util = shaka.test.Util;
-
 // TODO: Move this suite to the text/ folder where it belongs
-filterDescribe('TextDisplayer layout', Util.supportsScreenshots, () => {
+const supportsScreenshots = () => shaka.test.Util.supportsScreenshots();
+filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
   const UiUtils = shaka.test.UiUtils;
+  const Util = shaka.test.Util;
 
   /** @type {!shaka.extern.TextDisplayer} */
   let textDisplayer;
@@ -183,8 +183,8 @@ filterDescribe('TextDisplayer layout', Util.supportsScreenshots, () => {
       // element itself.
       videoContainer = video;
 
-      // On Firefox, Safari, IE11, and legacy Edge, the video must be played a
-      // little _after_ appending cues in order to consistently show subtitles
+      // On Firefox, Safari, and legacy Edge, the video must be played a little
+      // _after_ appending cues in order to consistently show subtitles
       // natively on the video element.
       beforeScreenshot = async (time) => {
         // Seek to the beginning so that we can reasonably wait for movement
