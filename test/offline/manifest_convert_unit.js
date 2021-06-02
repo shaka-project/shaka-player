@@ -317,6 +317,7 @@ describe('ManifestConverter', () => {
       appendWindowStart: 0,
       appendWindowEnd: Infinity,
       timestampOffset: 0,
+      tilesLayout: '',
     };
 
     return segment;
