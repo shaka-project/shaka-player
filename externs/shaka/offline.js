@@ -194,6 +194,7 @@ shaka.extern.StreamDB;
  *   appendWindowStart: number,
  *   appendWindowEnd: number,
  *   timestampOffset: number,
+ *   tilesLayout: ?string,
  *   dataKey: number
  * }}
  *
@@ -210,6 +211,10 @@ shaka.extern.StreamDB;
  * @property {number} timestampOffset
  *   An offset which MediaSource will add to the segment's media timestamps
  *   during ingestion, to align to the presentation timeline.
+ * @property {?string} tilesLayout
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the
+ *   arrangement of Images in a Grid. The minimum valid LAYOUT is '1x1'.
  * @property {number} dataKey
  *   The key to the data in storage.
  */

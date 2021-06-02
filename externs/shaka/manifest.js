@@ -333,7 +333,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   The Stream's label, unique text that should describe the audio/text track.
  * @property {string} type
  *   <i>Required.</i> <br>
- *   Content type (e.g. 'video', 'audio' or 'text')
+ *   Content type (e.g. 'video', 'audio' or 'text', 'image')
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
  *   True indicates that the player should use this Stream over others if user
