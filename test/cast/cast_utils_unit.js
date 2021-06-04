@@ -27,6 +27,7 @@ describe('CastUtils', () => {
       'getAdManager',  // Handled specially
       'getSharedConfiguration',  // Handled specially
       'getNetworkingEngine',  // Handled specially
+      'getDrmEngine',  // Handled specially
       'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
