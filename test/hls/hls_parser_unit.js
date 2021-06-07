@@ -204,6 +204,43 @@ describe('HlsParser', function() {
         .catch(fail).then(done);
   });
 
+  it('prioritize AVERAGE-BANDWIDTH to BANDWIDTH', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60,',
+      'AVERAGE-BANDWIDTH=100\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = new shaka.test.ManifestGenerator()
+            .anyTimeline()
+            .addPeriod(0)
+              .addPartialVariant()
+                .addPartialStream(ContentType.VIDEO)
+                  .bandwidth(100)
+                  .mime('video/mp4', 'avc1')
+          .build();
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
+  });
+
   it('ignores duplicate CODECS', async function() {
     let master = [
       '#EXTM3U\n',
