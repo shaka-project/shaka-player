@@ -226,8 +226,8 @@ describe('HlsParser', function() {
             .anyTimeline()
             .addPeriod(0)
               .addPartialVariant()
+                .bandwidth(100)
                 .addPartialStream(ContentType.VIDEO)
-                  .bandwidth(100)
                   .mime('video/mp4', 'avc1')
           .build();
 

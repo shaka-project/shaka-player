@@ -87,6 +87,7 @@ describe('Demo', () => {
       const exceptions = new Set()
           .add('drm.fairPlayTransform')
           .add('preferredVariantRole')
+          .add('preferredTextRole')
           .add('playRangeStart')
           .add('playRangeEnd');
 
