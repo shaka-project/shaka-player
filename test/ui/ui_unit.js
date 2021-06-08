@@ -183,6 +183,10 @@ describe('UI', function() {
     });
 
     it('goes into fullscreen on double click', async () => {
+      if (!document.fullscreenEnabled) {
+        pending('This test requires fullscreen support, which is unavailable.');
+      }
+
       const config = {
         controlPanelElements: [
           'overflow_menu',
