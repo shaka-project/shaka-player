@@ -2743,7 +2743,7 @@ describe('Player', function() {
                 .addVariant(0)
                   .addVideo(1).size(5, 5)
                 .addVariant(1)
-                  .addVideo(2).size(200, 1500)
+                  .addVideo(2).size(200, 1024)
                 .addVariant(2)
                   .addVideo(3).size(190, 190)
               .build();
