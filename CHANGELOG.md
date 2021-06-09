@@ -1,3 +1,109 @@
+## 3.1.1 (2021-06-17)
+
+Bugfixes:
+  - Fix buffering due to re-fetch in multi-period DASH
+    - https://github.com/google/shaka-player/pull/3419
+    - https://github.com/google/shaka-player/issues/3354
+  - Prioritize AVERAGE-BANDWIDTH over BANDWIDTH in HLS
+    - https://github.com/google/shaka-player/pull/3428
+  - Fix EC-3 box support in DRM workaround on smart TVs
+    - https://github.com/google/shaka-player/pull/3427
+  - Fix exception in UI on devices that do not support fullscreen
+    - https://github.com/google/shaka-player/issues/3441
+  - Fix caption positioning and sizing when the container resizes
+    - https://github.com/google/shaka-player/pull/3426
+    - https://github.com/google/shaka-player/pull/3425
+    - https://github.com/google/shaka-player/pull/3414
+  - Fix exceptions thrown in content with trick-mode tracks
+    - https://github.com/google/shaka-player/issues/3423
+  - Filter unsupported H.264 streams in Xbox
+    - https://github.com/google/shaka-player/pull/3411
+  - Fix out-of-bounds exception in LL-DASH
+    - https://github.com/google/shaka-player/issues/3402
+    - https://github.com/google/shaka-player/pull/3403
+  - Fix failures and gaps in LL-DASH
+    - https://github.com/google/shaka-player/issues/3404
+    - https://github.com/google/shaka-player/pull/3405
+  - Allow muxjs to be loaded after Shaka
+    - https://github.com/google/shaka-player/issues/3407
+  - Choose the configured preferred text role at start
+    - https://github.com/google/shaka-player/pull/3399
+  - Fix STORAGE_LIMIT_REACHED error masked by DOWNLOAD_SIZE_CALLBACK_ERROR
+    - https://github.com/google/shaka-player/pull/3396
+  - Fix "details" field in shaka-ui-load-failed event
+    - https://github.com/google/shaka-player/issues/3388
+  - Ignore network changes if ABR is disabled
+    - https://github.com/google/shaka-player/pull/3387
+  - Fix ClearKey+WebM+src= playback failure
+    - https://github.com/google/shaka-player/issues/3366
+
+Docs:
+  - Document disabling Range header requests in HLS
+    - https://github.com/google/shaka-player/pull/3442
+  - Add Angular integration link
+    - https://github.com/google/shaka-player/pull/3409
+
+Demo App:
+  - Add MIME type and extra config to custom assets
+
+
+## 3.0.12 (2021-06-17)
+
+Bugfixes:
+  - Fix buffering due to re-fetch in multi-period DASH
+    - https://github.com/google/shaka-player/pull/3419
+    - https://github.com/google/shaka-player/issues/3354
+  - Prioritize AVERAGE-BANDWIDTH over BANDWIDTH in HLS
+    - https://github.com/google/shaka-player/pull/3428
+  - Fix EC-3 box support in DRM workaround on smart TVs
+    - https://github.com/google/shaka-player/pull/3427
+  - Fix exception in UI on devices that do not support fullscreen
+    - https://github.com/google/shaka-player/issues/3441
+  - Fix caption positioning and sizing when the container resizes
+    - https://github.com/google/shaka-player/pull/3426
+    - https://github.com/google/shaka-player/pull/3425
+    - https://github.com/google/shaka-player/pull/3414
+  - Fix exceptions thrown in content with trick-mode tracks
+    - https://github.com/google/shaka-player/issues/3423
+  - Filter unsupported H.264 streams in Xbox
+    - https://github.com/google/shaka-player/pull/3411
+  - Choose the configured preferred text role at start
+    - https://github.com/google/shaka-player/pull/3399
+  - Fix ClearKey+WebM+src= playback failure
+    - https://github.com/google/shaka-player/issues/3366
+  - Fix double-display of embedded and non-embedded captions
+    - https://github.com/google/shaka-player/issues/3199
+
+Docs:
+  - Document disabling Range header requests in HLS
+    - https://github.com/google/shaka-player/pull/3442
+  - Add Angular integration link
+    - https://github.com/google/shaka-player/pull/3409
+
+
+## 2.5.23 (2021-06-17)
+
+Bugfixes:
+  - Prioritize AVERAGE-BANDWIDTH over BANDWIDTH in HLS
+    - https://github.com/google/shaka-player/pull/3428
+  - Fix exception in UI on devices that do not support fullscreen
+    - https://github.com/google/shaka-player/issues/3441
+  - Fix caption positioning and sizing when the container resizes
+    - https://github.com/google/shaka-player/pull/3426
+    - https://github.com/google/shaka-player/pull/3425
+    - https://github.com/google/shaka-player/pull/3414
+  - Filter unsupported H.264 streams in Xbox
+    - https://github.com/google/shaka-player/pull/3411
+  - Choose the configured preferred text role at start
+    - https://github.com/google/shaka-player/pull/3399
+  - Fix ClearKey+WebM+src= playback failure
+    - https://github.com/google/shaka-player/issues/3366
+
+Docs:
+  - Add Angular integration link
+    - https://github.com/google/shaka-player/pull/3409
+
+
 ## 3.1.0 (2021-04-29)
 
 New Features:
