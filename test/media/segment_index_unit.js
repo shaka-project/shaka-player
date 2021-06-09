@@ -329,12 +329,40 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         makeReference(uri(20), 20, 30),
       ];
 
-      // The first reference ends before the availabilityWindowStart, so it
-      // should be discarded.
-      index1.mergeAndEvict(references2, 19);
+      // The first two references end before the availabilityWindowStart, so
+      // they should be discarded.
+      index1.mergeAndEvict(references2, 21);
+      expect(index1.references.length).toBe(1);
+      expect(index1.references[0]).toEqual(references2[2]);
+    });
+
+    it('discards segments that end before the first old segment', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references1 = [
+        // Assuming ref(0, 10) has been already evicted
+        makeReference(uri(10), 10, 20),
+      ];
+      const index1 = new shaka.media.SegmentIndex(references1);
+      const position1 = index1.find(10);
+
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references2 = [
+        makeReference(uri(0), 0, 10),
+        makeReference(uri(10), 10, 20),
+        makeReference(uri(20), 20, 30),
+      ];
+
+      // The new first reference ends before the first old reference starts, so
+      // it should be discarded.  We will never grow the list at the beginning.
+      index1.mergeAndEvict(references2, 0);
       expect(index1.references.length).toBe(2);
       expect(index1.references[0]).toEqual(references2[1]);
       expect(index1.references[1]).toEqual(references2[2]);
+
+      // The positions should be the same, as well.
+      expect(index1.find(10)).toBe(position1);
+      goog.asserts.assert(position1 != null, 'Position should not be null!');
+      expect(index1.get(position1)).toBe(references2[1]);
     });
   });
 
