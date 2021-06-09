@@ -407,9 +407,15 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
 
   describe('SegmentIterator', () => {
     const inputRefs = [
-      makeReference(uri(0), 0, 10),
-      makeReference(uri(1), 10, 20),
-      makeReference(uri(2), 20, 30),
+      makeReference(uri(0.10), 0, 10),
+      makeReference(uri(10.20), 10, 20),
+      makeReference(uri(20.30), 20, 30),
+    ];
+
+    const additionalRefs = [
+      makeReference(uri(30.40), 30, 40),
+      makeReference(uri(40.50), 40, 50),
+      makeReference(uri(50.60), 50, 60),
     ];
 
     it('works with Array.from', () => {
@@ -431,6 +437,45 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const index = new shaka.media.SegmentIndex(inputRefs);
       index.evict(15);  // Drop the first ref.
       expect(Array.from(index)).toEqual(inputRefs.slice(1));
+    });
+
+    it('resumes iteration after new references are added', () => {
+      const refs = inputRefs.slice();
+      const index = new shaka.media.SegmentIndex(refs);
+
+      // This simulates the pattern of calls in StreamingEngine when we buffer
+      // to the edge of a live stream.
+      const iterator = index[Symbol.iterator]();
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[0]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[1]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[2]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(null);
+      // After we reach the end of the iteration, we should still get null back
+      // on subsequent requests.
+      expect(iterator.current()).toBe(null);
+      expect(iterator.current()).toBe(null);
+
+      // Although we have reached the end, we should still be able to add new
+      // references and iterate to them without starting over the iteration.
+      refs.push(...additionalRefs);
+
+      expect(iterator.current()).toBe(additionalRefs[0]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(additionalRefs[1]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(additionalRefs[2]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(null);
     });
 
     describe('seek', () => {
