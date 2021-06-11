@@ -50,11 +50,13 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     /** @protected {!HTMLElement}*/
     this.icon = shaka.util.Dom.createHTMLElement('i');
     this.icon.classList.add('material-icons-round');
+    this.icon.classList.add('shaka-overflow-button');
     this.icon.textContent = iconText;
     this.button.appendChild(this.icon);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('shaka-overflow-menu-only');
 
     /** @protected {!HTMLElement}*/
     this.nameSpan = shaka.util.Dom.createHTMLElement('span');
@@ -83,10 +85,13 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
     this.backButton = shaka.util.Dom.createButton();
     this.backButton.classList.add('shaka-back-to-overflow-button');
     this.menu.appendChild(this.backButton);
+    this.eventManager.listen(this.backButton, 'click', () => {
+      this.controls.hideSettingsMenus();
+    });
 
     const backIcon = shaka.util.Dom.createHTMLElement('i');
     backIcon.classList.add('material-icons-round');
-    backIcon.textContent = shaka.ui.Enums.MaterialDesignIcons.BACK;
+    backIcon.textContent = shaka.ui.Enums.MaterialDesignIcons.CLOSE;
     this.backButton.appendChild(backIcon);
 
     /** @protected {!HTMLElement}*/
@@ -100,8 +105,12 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
 
   /** @private */
   onButtonClick_() {
-    this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
-    shaka.ui.Utils.setDisplay(this.menu, true);
-    shaka.ui.Utils.focusOnTheChosenItem(this.menu);
+    if (this.menu.classList.contains('shaka-hidden')) {
+      this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
+      shaka.ui.Utils.setDisplay(this.menu, true);
+      shaka.ui.Utils.focusOnTheChosenItem(this.menu);
+    } else {
+      shaka.ui.Utils.setDisplay(this.menu, false);
+    }
   }
 };

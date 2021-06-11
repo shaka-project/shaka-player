@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.AudioLanguageSelection');
 
 goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
@@ -120,4 +121,7 @@ shaka.ui.AudioLanguageSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'language', new shaka.ui.AudioLanguageSelection.Factory());
+
+shaka.ui.Controls.registerElement(
     'language', new shaka.ui.AudioLanguageSelection.Factory());

@@ -40,7 +40,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {HTMLElement} */
     this.controlsContainer_ = this.controls.getControlsContainer();
 
-    /** @private {!Array.<shaka.extern.IUIElement>} */
+    /**
+     * @private
+     * {!Array.<shaka.extern.IUIElement|shaka.extern.IUISettingsMenu>} */
     this.children_ = [];
 
     this.addOverflowMenuButton_();
@@ -50,26 +52,37 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.createChildren_();
 
 
-    const backToOverflowMenuButtons =
-        this.controls.getVideoContainer().getElementsByClassName(
-            'shaka-back-to-overflow-button');
+    // Initially, some child buttons inside the overflow menu are created
+    // with a "Close" option.
+    // When inside of the overflow menu, that option must be replaced to
+    // a "Back" arrow that returns the user to the main overflow menu.
+    for (const menu of this.children_) {
+      // Some buttons (like "Loop"), are only toggled on click, without
+      // the need of opening submenus, thus they do not have a backButton
+      // and we must ignore them.
+      const backOrClose = menu.backButton;
 
-    for (const button of backToOverflowMenuButtons) {
-      this.eventManager.listen(button, 'click', () => {
-        // Hide the submenus, display the overflow menu
-        this.controls.hideSettingsMenus();
-        shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
+      if (backOrClose) {
+        // "Close" icon is replaced with a "Back" icon.
+        backOrClose.firstChild.textContent =
+            shaka.ui.Enums.MaterialDesignIcons.BACK;
 
-        // If there are back to overflow menu buttons, there must be
-        // overflow menu buttons, but oh well
-        if (this.overflowMenu_.childNodes.length) {
-          /** @type {!HTMLElement} */ (this.overflowMenu_.childNodes[0])
-              .focus();
-        }
+        // When created, the "Close" functionality hides the submenu.
+        // An additional listener must be added to also reopen the
+        // initial overflow menu when clicking "Back".
+        this.eventManager.listen(backOrClose, 'click', () => {
+          shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
 
-        // Make sure controls are displayed
-        this.controls.computeOpacity();
-      });
+          // If there are back to overflow menu buttons, there must be
+          // overflow menu buttons, but oh well
+          if (this.overflowMenu_.childNodes.length) {
+            /** @type {!HTMLElement} */ (this.overflowMenu_.childNodes[0])
+                .focus();
+          }
+          // Make sure controls are displayed
+          this.controls.computeOpacity();
+        });
+      }
     }
 
     this.eventManager.listen(

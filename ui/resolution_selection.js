@@ -9,6 +9,7 @@ goog.provide('shaka.ui.ResolutionSelection');
 
 goog.require('goog.asserts');
 goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -229,4 +230,7 @@ shaka.ui.ResolutionSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'quality', new shaka.ui.ResolutionSelection.Factory());
+
+shaka.ui.Controls.registerElement(
     'quality', new shaka.ui.ResolutionSelection.Factory());

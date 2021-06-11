@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.TextSelection');
 
 goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
@@ -108,12 +109,12 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   onCaptionStateChange_() {
     if (this.player.isTextTrackVisible()) {
-      this.icon.classList.add('shaka-captions-on');
-      this.icon.classList.remove('shaka-captions-off');
+      this.icon.textContent =
+          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS_OFF;
       this.button.setAttribute('aria-pressed', 'true');
     } else {
-      this.icon.classList.add('shaka-captions-off');
-      this.icon.classList.remove('shaka-captions-on');
+      this.icon.textContent =
+          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS;
       this.button.setAttribute('aria-pressed', 'false');
     }
 
@@ -218,4 +219,7 @@ shaka.ui.TextSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'captions', new shaka.ui.TextSelection.Factory());
+
+shaka.ui.Controls.registerElement(
     'captions', new shaka.ui.TextSelection.Factory());

@@ -67,6 +67,10 @@ The following elements can be added to the UI bar using this configuration value
   supports AirPlay.
 * cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
+* quality: adds a button that controls enabling/disabling of abr and video resolution selection.
+* language: adds a button that controls audio language selection.
+* playback_rate: adds a button that controls the playback rate selection.
+* captions: adds a button that controls the current text track selection (including turning it off).
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Similarly, the 'overflowMenuButtons' configuration option can be used to control
