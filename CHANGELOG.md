@@ -1,3 +1,26 @@
+## 2.5.23 (2021-06-17)
+
+Bugfixes:
+  - Prioritize AVERAGE-BANDWIDTH over BANDWIDTH in HLS
+    - https://github.com/google/shaka-player/pull/3428
+  - Fix exception in UI on devices that do not support fullscreen
+    - https://github.com/google/shaka-player/issues/3441
+  - Fix caption positioning and sizing when the container resizes
+    - https://github.com/google/shaka-player/pull/3426
+    - https://github.com/google/shaka-player/pull/3425
+    - https://github.com/google/shaka-player/pull/3414
+  - Filter unsupported H.264 streams in Xbox
+    - https://github.com/google/shaka-player/pull/3411
+  - Choose the configured preferred text role at start
+    - https://github.com/google/shaka-player/pull/3399
+  - Fix ClearKey+WebM+src= playback failure
+    - https://github.com/google/shaka-player/issues/3366
+
+Docs:
+  - Add Angular integration link
+    - https://github.com/google/shaka-player/pull/3409
+
+
 ## 2.5.22 (2021-04-28)
 
 Bugfixes:
