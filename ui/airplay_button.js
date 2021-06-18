@@ -44,6 +44,11 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
     this.airplayIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.AIRPLAY;
     this.airplayButton_.appendChild(this.airplayIcon_);
 
+    // Don't show the button if AirPlay is not supported.
+    if (!window.WebKitPlaybackTargetAvailabilityEvent) {
+      this.airplayButton_.classList.add('shaka-hidden');
+    }
+
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
