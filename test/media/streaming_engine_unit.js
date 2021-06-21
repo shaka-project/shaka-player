@@ -835,7 +835,7 @@ describe('StreamingEngine', () => {
     // This would let some media types buffer faster than others if unchecked.
     netEngineDelays.text = 0.1;
     netEngineDelays.audio = 1.0;
-    netEngineDelays.video = 10.0;
+    netEngineDelays.video = 5.0; // Need init segment and media segment
 
     mediaSourceEngine.appendBuffer.and.callFake((type, data, start, end) => {
       // Call to the underlying implementation.
@@ -2170,13 +2170,13 @@ describe('StreamingEngine', () => {
               .bind(mediaSourceEngine);
 
       mediaSourceEngine.remove.and.callFake((type, start, end) => {
-        expect(presentationTimeInSeconds).toBe(20);
+        expect(presentationTimeInSeconds).toBeGreaterThanOrEqual(20);
         expect(start).toBe(0);
         expect(end).toBe(10);
 
         if (mediaSourceEngine.remove.calls.count() == 3) {
           mediaSourceEngine.remove.and.callFake((type, start, end) => {
-            expect(presentationTimeInSeconds).toBe(30);
+            expect(presentationTimeInSeconds).toBeGreaterThanOrEqual(30);
             expect(start).toBe(10);
             expect(end).toBe(20);
             return originalRemove(type, start, end);
