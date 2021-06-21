@@ -162,11 +162,13 @@ shaka.test.StreamingEngineUtil = class {
    *   type of segment.
    * @param {!Object.<string, !Array.<number>>} initSegmentRanges The byte
    *   ranges for each type of init segment.
+   * @param {!Object.<string,number>=} timestampOffsets The timestamp offset
+   *  for each type of segment
    * @return {shaka.extern.Manifest}
    */
   static createManifest(
       presentationTimeline, periodStartTimes, presentationDuration,
-      segmentDurations, initSegmentRanges) {
+      segmentDurations, initSegmentRanges, timestampOffsets) {
     const Util = shaka.test.Util;
 
     /**
@@ -263,6 +265,7 @@ shaka.test.StreamingEngineUtil = class {
       const d = segmentDurations[type];
       const getUris = () => [periodIndex + '_' + type + '_' + position];
       const periodStart = periodStartTimes[periodIndex];
+      const timestampOffset = (timestampOffsets && timestampOffsets[type]) || 0;
       const appendWindowStart = periodStartTimes[periodIndex];
       const appendWindowEnd = periodIndex == periodStartTimes.length - 1?
           presentationDuration : periodStartTimes[periodIndex + 1];
@@ -274,7 +277,7 @@ shaka.test.StreamingEngineUtil = class {
           /* startByte= */ 0,
           /* endByte= */ null,
           initSegmentReference,
-          /* timestampOffset= */ 0,
+          timestampOffset,
           appendWindowStart,
           appendWindowEnd);
     };
@@ -286,6 +289,7 @@ shaka.test.StreamingEngineUtil = class {
       offlineSessionIds: [],
       variants: [],
       textStreams: [],
+      imageStreams: [],
     };
 
     /** @type {shaka.extern.Variant} */
@@ -298,6 +302,7 @@ shaka.test.StreamingEngineUtil = class {
       id: 0,
       language: 'und',
       primary: false,
+      decodingInfos: [],
     };
 
     if ('video' in segmentDurations) {
@@ -409,6 +414,7 @@ shaka.test.StreamingEngineUtil = class {
       primary: false,
       roles: [],
       forced: false,
+      spatialAudio: false,
     };
   }
 
@@ -445,6 +451,7 @@ shaka.test.StreamingEngineUtil = class {
       primary: false,
       roles: [],
       forced: false,
+      spatialAudio: false,
     };
   }
 
@@ -479,6 +486,7 @@ shaka.test.StreamingEngineUtil = class {
       primary: false,
       roles: [],
       forced: false,
+      spatialAudio: false,
     };
   }
 };

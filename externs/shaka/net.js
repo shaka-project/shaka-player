@@ -16,7 +16,9 @@
  *   baseDelay: number,
  *   backoffFactor: number,
  *   fuzzFactor: number,
- *   timeout: number
+ *   timeout: number,
+ *   stallTimeout: number,
+ *   connectionTimeout: number
  * }}
  *
  * @description
@@ -34,6 +36,12 @@
  * @property {number} timeout
  *   The request timeout, in milliseconds.  Zero means "unlimited".
  *   <i>Defaults to 30000 milliseconds.</i>
+ * @property {number} stallTimeout
+ *   The request stall timeout, in milliseconds.  Zero means "unlimited".
+ *   <i>Defaults to 5000 milliseconds.</i>
+ * @property {number} connectionTimeout
+ *   The request connection timeout, in milliseconds.  Zero means "unlimited".
+ *   <i>Defaults to 10000 milliseconds.</i>
  *
  * @tutorial network-and-buffering-config
  *
@@ -52,7 +60,7 @@ shaka.extern.RetryParameters;
  *   retryParameters: !shaka.extern.RetryParameters,
  *   licenseRequestType: ?string,
  *   sessionId: ?string,
- *   streamDataCallback: ?function(BufferSource)
+ *   streamDataCallback: ?function(BufferSource):!Promise
  * }}
  *
  * @description
@@ -82,7 +90,7 @@ shaka.extern.RetryParameters;
  * @property {?string} sessionId
  *   If this is a LICENSE request, this field contains the session ID of the
  *   EME session that made the request.
- * @property {?function(BufferSource)} streamDataCallback
+ * @property {?function(BufferSource):!Promise} streamDataCallback
  *   A callback function to handle the chunked data of the ReadableStream.
  * @exportDoc
  */

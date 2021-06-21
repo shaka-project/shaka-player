@@ -219,18 +219,21 @@ shaka.extern.BufferedInfo;
  *   audioId: ?number,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
+ *   tilesLayout: ?string,
  *   audioBandwidth: ?number,
  *   videoBandwidth: ?number,
+ *   spatialAudio: boolean,
  *   originalVideoId: ?string,
  *   originalAudioId: ?string,
- *   originalTextId: ?string
+ *   originalTextId: ?string,
+ *   originalImageId: ?string
  * }}
  *
  * @description
  * An object describing a media track.  This object should be treated as
  * read-only as changing any values does not have any effect.  This is the
  * public view of an audio/video paring (variant type) or text track (text
- * type).
+ * type) or image track (image type).
  *
  * @property {number} id
  *   The unique ID of the track.
@@ -239,7 +242,8 @@ shaka.extern.BufferedInfo;
  *   visible/audible in the buffer).
  *
  * @property {string} type
- *   The type of track, either <code>'variant'</code> or <code>'text'</code>.
+ *   The type of track, either <code>'variant'</code> or <code>'text'</code>
+ *   or <code>'image'</code>.
  * @property {number} bandwidth
  *   The bandwidth required to play the track, in bits/sec.
  *
@@ -293,6 +297,13 @@ shaka.extern.BufferedInfo;
  *   The count of the audio track channels.
  * @property {?number} audioSamplingRate
  *   Specifies the maximum sampling rate of the content.
+ * @property {?string} tilesLayout
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the arrangement
+ *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {boolean} spatialAudio
+ *   True indicates that the content has spatial audio.
+ *   This flag is based on signals from the manifest.
  * @property {?number} audioBandwidth
  *   (only for variant tracks) The audio stream's bandwidth if known.
  * @property {?number} videoBandwidth
@@ -305,6 +316,9 @@ shaka.extern.BufferedInfo;
  *   any, as it appeared in the original manifest.
  * @property {?string} originalTextId
  *   (text tracks only) The original ID of the text track, if any, as it
+ *   appeared in the original manifest.
+ * @property {?string} originalImageId
+ *   (image tracks only) The original ID of the image track, if any, as it
  *   appeared in the original manifest.
  * @exportDoc
  */
@@ -502,7 +516,9 @@ shaka.extern.EmsgInfo;
  *   videoRobustness: string,
  *   audioRobustness: string,
  *   serverCertificate: Uint8Array,
- *   individualizationServer: string
+ *   serverCertificateUri: string,
+ *   individualizationServer: string,
+ *   sessionType: string
  * }}
  *
  * @property {boolean} distinctiveIdentifierRequired
@@ -530,9 +546,17 @@ shaka.extern.EmsgInfo;
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
+ * @property {string} serverCertificateUri
+ *   <i>Defaults to <code>''</code>.</i><br>
+ *   If given, will make a request to the given URI to get the server
+ *   certificate. This is ignored if <code>serverCertificate</code> is set.
  * @property {string} individualizationServer
  *   The server that handles an <code>'individualiation-request'</code>.  If the
  *   server isn't given, it will default to the license server.
+ * @property {string} sessionType
+ *   <i>Defaults to <code>'temporary'</code> for streaming.</i> <br>
+ *   The MediaKey session type to create streaming licenses with.  This doesn't
+ *   affect offline storage.
  *
  * @exportDoc
  */
@@ -550,7 +574,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
  *         undefined),
  *   logLicenseExchange: boolean,
- *   updateExpirationTime: number
+ *   updateExpirationTime: number,
+ *   preferredKeySystems: !Array.<string>
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -588,6 +613,9 @@ shaka.extern.AdvancedDrmConfiguration;
  * @property {number} updateExpirationTime
  *   <i>Defaults to 1.</i> <br>
  *   The frequency in seconds with which to check the expiration of a session.
+ * @property {!Array.<string>} preferredKeySystems
+ *   <i>Defaults to an empty array. </i> <br>
+ *   Specifies the priorties of available DRM key systems.
  *
  * @exportDoc
  */
@@ -598,13 +626,15 @@ shaka.extern.DrmConfiguration;
  * @typedef {{
  *   clockSyncUri: string,
  *   ignoreDrmInfo: boolean,
+ *   disableXlinkProcessing: boolean,
  *   xlinkFailGracefully: boolean,
  *   ignoreMinBufferTime: boolean,
  *   autoCorrectDrift: boolean,
  *   initialSegmentLimit: number,
  *   ignoreSuggestedPresentationDelay: boolean,
  *   ignoreEmptyAdaptationSet: boolean,
- *   ignoreMaxSegmentDuration: boolean
+ *   ignoreMaxSegmentDuration: boolean,
+ *   keySystemsByURI: !Object.<string, string>
  * }}
  *
  * @property {string} clockSyncUri
@@ -615,6 +645,9 @@ shaka.extern.DrmConfiguration;
  *   If true will cause DASH parser to ignore DRM information specified
  *   by the manifest and treat it as if it signaled no particular key
  *   system and contained no init data. Defaults to false if not provided.
+ * @property {boolean} disableXlinkProcessing
+ *   If true, xlink-related processing will be disabled. Defaults to
+ *   <code>false</code> if not provided.
  * @property {boolean} xlinkFailGracefully
  *   If true, xlink-related errors will result in a fallback to the tag's
  *   existing contents. If false, xlink-related errors will be propagated
@@ -648,6 +681,9 @@ shaka.extern.DrmConfiguration;
  *   If true will cause DASH parser to ignore
  *   <code>maxSegmentDuration</code> from manifest. Defaults to
  *   <code>false</code> if not provided.
+ * @property {Object.<string, string>} keySystemsByURI
+ *   A map of scheme URI to key system name. Defaults to default key systems
+ *   mapping handled by Shaka.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -656,11 +692,15 @@ shaka.extern.DashManifestConfiguration;
 /**
  * @typedef {{
  *   ignoreTextStreamFailures: boolean,
+ *   ignoreImageStreamFailures: boolean,
  *   useFullSegmentsForStartTime: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
  *   If <code>true</code>, ignore any errors in a text stream and filter out
+ *   those streams.
+ * @property {boolean} ignoreImageStreamFailures
+ *   If <code>true</code>, ignore any errors in a image stream and filter out
  *   those streams.
  * @property {boolean} useFullSegmentsForStartTime
  *   If <code>true</code>, force HlsParser to use a full segment request for
@@ -677,6 +717,7 @@ shaka.extern.HlsManifestConfiguration;
  *   disableAudio: boolean,
  *   disableVideo: boolean,
  *   disableText: boolean,
+ *   disableThumbnails: boolean,
  *   defaultPresentationDelay: number,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
@@ -697,6 +738,9 @@ shaka.extern.HlsManifestConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} disableText
  *   If <code>true</code>, the text tracks are ignored.
+ *   Defaults to <code>false</code>.
+ * @property {boolean} disableThumbnails
+ *   If <code>true</code>, the image tracks are ignored.
  *   Defaults to <code>false</code>.
  * @property {number} defaultPresentationDelay
  *   A default <code>presentationDelay</code> value.
@@ -726,6 +770,7 @@ shaka.extern.ManifestConfiguration;
  *   ignoreTextStreamFailures: boolean,
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
+ *   gapDetectionThreshold: number,
  *   smallGapLimit: number,
  *   jumpLargeGaps: boolean,
  *   durationBackoff: number,
@@ -777,6 +822,10 @@ shaka.extern.ManifestConfiguration;
  *   of a segment. This affects both explicit start times and calculated start
  *   time for live streams. This can put us further from the live edge. Defaults
  *   to <code>false</code>.
+ * @property {number} gapDetectionThreshold
+ *   TThe maximum distance (in seconds) before a gap when we'll automatically
+ *   jump. This value  defaults to <code>0.1</code>, except in Edge Legacy, IE,
+ *   Tizen, Chromecast that value defaults value is <code>0.5</code>
  * @property {number} smallGapLimit
  *   The limit (in seconds) for a gap in the media to be considered "small".
  *   Small gaps are jumped automatically without events.  Large gaps result
@@ -935,7 +984,10 @@ shaka.extern.OfflineConfiguration;
  *   preferredTextLanguage: string,
  *   preferredVariantRole: string,
  *   preferredTextRole: string,
+ *   preferredVideoCodecs: !Array.<string>,
+ *   preferredAudioCodecs: !Array.<string>,
  *   preferredAudioChannelCount: number,
+ *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
@@ -968,8 +1020,15 @@ shaka.extern.OfflineConfiguration;
  *   The preferred role to use for variants.
  * @property {string} preferredTextRole
  *   The preferred role to use for text tracks.
+ * @property {!Array.<string>} preferredVideoCodecs
+ *   The list of preferred video codecs, in order of highest to lowest priority.
+ * @property {!Array.<string>} preferredAudioCodecs
+ *   The list of preferred audio codecs, in order of highest to lowest priority.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ * @property {!Array.<string>} preferredDecodingAttributes
+ *   The list of preferred attributes of decodingInfo, in the order of their
+ *   priorities.
  * @property {boolean} preferForcedSubs
  *   If true, a forced text track is preferred.  Defaults to false.
  *   If the content has no forced captions and the value is true,
@@ -1011,6 +1070,31 @@ shaka.extern.PlayerConfiguration;
  * @exportDoc
  */
 shaka.extern.LanguageRole;
+
+
+/**
+ * @typedef {{
+ *   height: number,
+ *   positionX: number,
+ *   positionY: number,
+ *   uris: !Array.<string>,
+ *   width: number
+ * }}
+ *
+ * @property {number} height
+ *    The thumbnail height in px.
+ * @property {number} positionX
+ *    The thumbnail left position in px.
+ * @property {number} positionY
+ *    The thumbnail top position in px.
+ * @property {!Array.<string>} uris
+ *   An array of URIs to attempt.  They will be tried in the order they are
+ *   given.
+ * @property {number} width
+ *    The thumbnail width in px.
+ * @exportDoc
+ */
+shaka.extern.Thumbnail;
 
 
 /**

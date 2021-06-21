@@ -10,6 +10,7 @@ goog.provide('shakaDemo.Custom');
 
 goog.require('ShakaDemoAssetInfo');
 goog.require('shakaDemo.AssetCard');
+goog.require('shakaDemo.Input');
 goog.require('shakaDemo.InputContainer');
 goog.require('shakaDemo.Main');
 goog.require('shakaDemo.MessageIds');
@@ -45,6 +46,9 @@ shakaDemo.Custom = class {
 
     /** @private {!Set.<!ShakaDemoAssetInfo>} */
     this.assets_ = this.loadAssetInfos_();
+
+    /** @private {!HTMLInputElement} */
+    this.manifestField_;
 
     /** @private {!Array.<!shakaDemo.AssetCard>} */
     this.assetCards_ = [];
@@ -101,12 +105,14 @@ shakaDemo.Custom = class {
    * @param {!shakaDemo.InputContainer} container
    * @param {string} name
    * @param {function(!HTMLInputElement, !Element)} setup
-   * @param {function(!Element)} onChange
+   * @param {function(!Element, !shakaDemo.Input)} onChange
+   * @param {boolean=} isTextArea
    * @private
    */
-  makeField_(container, name, setup, onChange) {
+  makeField_(container, name, setup, onChange, isTextArea) {
     container.addRow(/* labelString= */ null, /* tooltipString= */ null);
-    const input = new shakaDemo.TextInput(container, name, onChange);
+    const input =
+        new shakaDemo.TextInput(container, name, onChange, isTextArea);
     input.extra().textContent = name;
     setup(input.input(), input.container());
   }
@@ -238,17 +244,18 @@ shakaDemo.Custom = class {
     return headersDiv;
   }
 
+
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
    * @param {!Array.<!HTMLInputElement>} inputsToCheck
    * @return {!Element} div
    * @private
    */
-  makeAssetDialogContentsMisc_(assetInProgress, inputsToCheck) {
-    const miscDiv = document.createElement('div');
+  makeAssetDialogContentsAds_(assetInProgress, inputsToCheck) {
+    const adsDiv = document.createElement('div');
     const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
     const container = new shakaDemo.InputContainer(
-        miscDiv, /* headerText= */ null, containerStyle,
+        adsDiv, /* headerText= */ null, containerStyle,
         /* docLink= */ null);
 
     // Make the ad tag URL field.
@@ -265,7 +272,64 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, adTagURLName, adTagSetup, adTagOnChange);
 
-    return miscDiv;
+    // Make the content source id field.
+    const contentSrcIdSetup = (input, container) => {
+      if (assetInProgress.imaContentSrcId) {
+        input.value = assetInProgress.imaContentSrcId;
+      }
+
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const contentSrcIdOnChange = (input) => {
+      assetInProgress.imaContentSrcId = input.value;
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const contentSrcIdName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_CONTENT_SRC_ID);
+    this.makeField_(
+        container, contentSrcIdName, contentSrcIdSetup, contentSrcIdOnChange);
+
+    // Make the video id field.
+    const videoIdSetup = (input, container) => {
+      if (assetInProgress.imaVideoId) {
+        input.value = assetInProgress.imaVideoId;
+      }
+
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const videoIdOnChange = (input) => {
+      assetInProgress.imaVideoId = input.value;
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const videoIdName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_VIDEO_ID);
+    this.makeField_(
+        container, videoIdName, videoIdSetup, videoIdOnChange);
+
+    // Make the asset key field.
+    const assetKeySetup = (input, container) => {
+      if (assetInProgress.imaAssetKey) {
+        input.value = assetInProgress.imaAssetKey;
+      }
+
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const assetKeyChange = (input) => {
+      assetInProgress.imaAssetKey = input.value;
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const assetKeyName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_ASSET_KEY);
+    this.makeField_(
+        container, assetKeyName, assetKeySetup, assetKeyChange);
+
+    return adsDiv;
   }
 
   /**
@@ -365,6 +429,63 @@ shakaDemo.Custom = class {
   /**
    * @param {!ShakaDemoAssetInfo} assetInProgress
    * @param {!Array.<!HTMLInputElement>} inputsToCheck
+   * @return {!Element} div
+   * @private
+   */
+  makeAssetDialogContentsExtra_(assetInProgress, inputsToCheck) {
+    const extraConfigDiv = document.createElement('div');
+    const containerStyle = shakaDemo.InputContainer.Style.FLEX;
+    const container = new shakaDemo.InputContainer(
+        extraConfigDiv, /* headerText= */ null, containerStyle,
+        /* docLink= */ null);
+    container.getClassList().add('wide-input');
+    container.setDefaultRowClass('wide-input');
+
+    const extraSetup = (input, container) => {
+      input.setAttribute('rows', 10);
+
+      if (assetInProgress.extraConfig) {
+        // Pretty-print the extra config.
+        input.value = JSON.stringify(
+            assetInProgress.extraConfig,
+            /* replacer= */ null, /* spacing= */ 2);
+      }
+
+      inputsToCheck.push(input);
+
+      // Make an error that shows up if you did not provide valid JSON.
+      const error = document.createElement('span');
+      error.classList.add('mdl-textfield__error');
+      error.textContent = shakaDemoMain.getLocalizedString(
+          shakaDemo.MessageIds.INVALID_JSON_CONFIG_ERROR);
+
+      container.appendChild(error);
+    };
+    const extraOnChange = (inputElement, inputWrapper) => {
+      try {
+        if (!inputElement.value) {
+          assetInProgress.extraConfig = null;
+        } else {
+          const config = /** @type {!Object} */(JSON.parse(inputElement.value));
+          assetInProgress.extraConfig = config;
+        }
+        inputWrapper.setValid(true);
+      } catch (exception) {
+        inputWrapper.setValid(false);
+      }
+    };
+    const extraConfigLabel = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.EXTRA_SHAKA_PLAYER_CONFIG);
+    this.makeField_(
+        container, extraConfigLabel, extraSetup, extraOnChange,
+        /* isTextArea= */ true);
+
+    return extraConfigDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @param {!Array.<!HTMLInputElement>} inputsToCheck
    * @param {!Element} iconDiv
    * @return {!Element} div
    * @private
@@ -389,8 +510,9 @@ shakaDemo.Custom = class {
       container.appendChild(error);
 
       // Add a regex that will detect empty strings.
-      input.required = true;
+      input.required = this.checkManifestRequired_(assetInProgress);
       input.pattern = '^(?!([\r\n\t\f\v ]+)$).*$';
+      this.manifestField_ = input;
     };
     const manifestOnChange = (input) => {
       assetInProgress.manifestUri = input.value;
@@ -466,7 +588,35 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, iconURLName, iconSetup, iconOnChange);
 
+    // Make the MIME type field.
+    const mimeTypeSetup = (input, container) => {
+      if (assetInProgress.mimeType) {
+        input.value = assetInProgress.mimeType;
+      }
+    };
+
+    const mimeTypeOnChange = (input) => {
+      assetInProgress.mimeType = input.value || null;
+    };
+
+    const mimeTypeName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.MIME_TYPE);
+    this.makeField_(
+        container, mimeTypeName, mimeTypeSetup, mimeTypeOnChange);
+
     return mainDiv;
+  }
+
+  /**
+   * @param {!ShakaDemoAssetInfo} assetInProgress
+   * @private
+   */
+  checkManifestRequired_(assetInProgress) {
+    // The manifest field is required unless we're getting the manifest
+    // from the Google Ad Manager using IMA ids.
+    const isDaiAdManifest = (assetInProgress.imaContentSrcId &&
+        assetInProgress.imaVideoId) || assetInProgress.imaAssetKey != null;
+    return !isDaiAdManifest;
   }
 
   /**
@@ -522,7 +672,9 @@ shakaDemo.Custom = class {
         assetInProgress, inputsToCheck);
     const headersDiv = this.makeAssetDialogContentsHeaders_(
         assetInProgress, inputsToCheck);
-    const miscDiv = this.makeAssetDialogContentsMisc_(
+    const adsDiv = this.makeAssetDialogContentsAds_(
+        assetInProgress, inputsToCheck);
+    const extraConfigDiv = this.makeAssetDialogContentsExtra_(
         assetInProgress, inputsToCheck);
     const finishDiv = this.makeAssetDialogContentsFinish_(
         assetInProgress, inputsToCheck);
@@ -560,14 +712,17 @@ shakaDemo.Custom = class {
     addTabButton(
         shakaDemo.MessageIds.HEADERS_TAB, headersDiv, /* startOn= */ false);
     addTabButton(
-        shakaDemo.MessageIds.MISC_TAB, miscDiv, /* startOn= */ false);
+        shakaDemo.MessageIds.ADS_TAB, adsDiv, /* startOn= */ false);
+    addTabButton(
+        shakaDemo.MessageIds.EXTRA_TAB, extraConfigDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
     this.dialog_.appendChild(tabDiv);
     this.dialog_.appendChild(mainDiv);
     this.dialog_.appendChild(drmDiv);
     this.dialog_.appendChild(headersDiv);
-    this.dialog_.appendChild(miscDiv);
+    this.dialog_.appendChild(adsDiv);
+    this.dialog_.appendChild(extraConfigDiv);
     this.dialog_.appendChild(finishDiv);
     this.dialog_.appendChild(iconDiv);
 

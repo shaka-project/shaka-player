@@ -60,6 +60,28 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(ref).toBe(actual2);
     });
 
+    it('works with two references if time == first end time', () => {
+      const actual1 = makeReference(uri(10), 10, 20.12);
+      const actual2 = makeReference(uri(20), 20.13, 30);
+      const index = new shaka.media.SegmentIndex([actual1, actual2]);
+
+      const pos = index.find(20.12);
+      goog.asserts.assert(pos != null, 'Null position!');
+      const ref = index.get(pos);
+      expect(ref).toBe(actual1);
+    });
+
+    it('works with time is between first endTime and second startTime', () => {
+      const actual1 = makeReference(uri(10), 10, 20.12111);
+      const actual2 = makeReference(uri(20), 20.12113, 30);
+      const index = new shaka.media.SegmentIndex([actual1, actual2]);
+
+      const pos = index.find(20.12112);
+      goog.asserts.assert(pos != null, 'Null position!');
+      const ref = index.get(pos);
+      expect(ref).toBe(actual1);
+    });
+
     it('returns the first segment if time < first start time', () => {
       const actual = makeReference(uri(10), 10, 20);
       const index = new shaka.media.SegmentIndex([actual]);
@@ -83,15 +105,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const index = new shaka.media.SegmentIndex([actual]);
 
       const pos = index.find(21);
-      expect(pos).toBeNull();
-    });
-
-    it('returns null if time is within a gap', () => {
-      const actual1 = makeReference(uri(10), 10, 20);
-      const actual2 = makeReference(uri(25), 25, 30);
-      const index = new shaka.media.SegmentIndex([actual1, actual2]);
-
-      const pos = index.find(23);
       expect(pos).toBeNull();
     });
   });
@@ -455,6 +468,59 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
     });
   });
 
+  describe('mergeAndEvict', () => {
+    it('discards segments that end before the availabilityWindowStart', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references1 = [
+        // Assuming ref(0, 10) has been already evicted
+        makeReference(uri(10), 10, 20),
+      ];
+      const index1 = new shaka.media.SegmentIndex(references1);
+
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references2 = [
+        makeReference(uri(0), 0, 10),
+        makeReference(uri(10), 10, 20),
+        makeReference(uri(20), 20, 30),
+      ];
+
+      // The first two references end before the availabilityWindowStart, so
+      // they should be discarded.
+      index1.mergeAndEvict(references2, 21);
+      expect(index1.references.length).toBe(1);
+      expect(index1.references[0]).toEqual(references2[2]);
+    });
+
+    it('discards segments that end before the first old segment', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references1 = [
+        // Assuming ref(0, 10) has been already evicted
+        makeReference(uri(10), 10, 20),
+      ];
+      const index1 = new shaka.media.SegmentIndex(references1);
+      const position1 = index1.find(10);
+
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references2 = [
+        makeReference(uri(0), 0, 10),
+        makeReference(uri(10), 10, 20),
+        makeReference(uri(20), 20, 30),
+      ];
+
+      // The new first reference ends before the first old reference starts, so
+      // it should be discarded.  We will never grow the list at the beginning.
+      index1.mergeAndEvict(references2, 0);
+      expect(index1.references.length).toBe(2);
+      expect(index1.references[0]).toEqual(references2[1]);
+      expect(index1.references[1]).toEqual(references2[2]);
+
+      // The positions should be the same, as well.
+      expect(index1.find(10)).toBe(position1);
+      goog.asserts.assert(position1 != null, 'Position should not be null!');
+      expect(index1.get(position1)).toBe(references2[1]);
+    });
+  });
+
   describe('evict', () => {
     /** @type {!shaka.media.SegmentIndex} */
     let index1;
@@ -529,6 +595,12 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       makeReference(uri(20.30), 20, 30),
     ];
 
+    const additionalRefs = [
+      makeReference(uri(30.40), 30, 40),
+      makeReference(uri(40.50), 40, 50),
+      makeReference(uri(50.60), 50, 60),
+    ];
+
     const partialRefs1 = [
       makeReference(uri(10.15), 10, 15),
       makeReference(uri(15.20), 15, 20),
@@ -586,6 +658,45 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       const index = new shaka.media.SegmentIndex(inputRefs);
       index.evict(15);  // Drop the first ref.
       expect(Array.from(index)).toEqual(inputRefs.slice(1));
+    });
+
+    it('resumes iteration after new references are added', () => {
+      const refs = inputRefs.slice();
+      const index = new shaka.media.SegmentIndex(refs);
+
+      // This simulates the pattern of calls in StreamingEngine when we buffer
+      // to the edge of a live stream.
+      const iterator = index[Symbol.iterator]();
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[0]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[1]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(inputRefs[2]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(null);
+      // After we reach the end of the iteration, we should still get null back
+      // on subsequent requests.
+      expect(iterator.current()).toBe(null);
+      expect(iterator.current()).toBe(null);
+
+      // Although we have reached the end, we should still be able to add new
+      // references and iterate to them without starting over the iteration.
+      refs.push(...additionalRefs);
+
+      expect(iterator.current()).toBe(additionalRefs[0]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(additionalRefs[1]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(additionalRefs[2]);
+
+      iterator.next();
+      expect(iterator.current()).toBe(null);
     });
 
     describe('seek', () => {

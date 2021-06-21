@@ -262,90 +262,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * @event shaka.ui.Controls.CastStatusChangedEvent
-   * @description Fired upon receiving a 'caststatuschanged' event from
-   *    the cast proxy.
-   * @property {string} type
-   *   'caststatuschanged'
-   * @property {boolean} newStatus
-   *  The new status of the application. True for 'is casting' and
-   *  false otherwise.
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.ui.Controls.SubMenuOpenEvent
-   * @description Fired when one of the overflow submenus is opened
-   *    (e. g. language/resolution/subtitle selection).
-   * @property {string} type
-   *   'submenuopen'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.ui.Controls.CaptionSelectionUpdatedEvent
-   * @description Fired when the captions/subtitles menu has finished updating.
-   * @property {string} type
-   *   'captionselectionupdated'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.ui.Controls.ResolutionSelectionUpdatedEvent
-   * @description Fired when the resolution menu has finished updating.
-   * @property {string} type
-   *   'resolutionselectionupdated'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.ui.Controls.LanguageSelectionUpdatedEvent
-   * @description Fired when the audio language menu has finished updating.
-   * @property {string} type
-   *   'languageselectionupdated'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.ui.Controls.ErrorEvent
-   * @description Fired when something went wrong with the controls.
-   * @property {string} type
-   *   'error'
-   * @property {!shaka.util.Error} detail
-   *   An object which contains details on the error.  The error's 'category'
-   *   and 'code' properties will identify the specific error that occurred.
-   *   In an uncompiled build, you can also use the 'message' and 'stack'
-   *   properties to debug.
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.ui.Controls.TimeAndSeekRangeUpdatedEvent
-   * @description Fired when the time and seek range elements have finished
-   *    updating.
-   * @property {string} type
-   *   'timeandseekrangeupdated'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.ui.Controls.UIUpdatedEvent
-   * @description Fired after a call to ui.configure() once the UI has finished
-   *    updating.
-   * @property {string} type
-   *   'uiupdated'
-   * @exportDoc
-   */
-
-
-  /**
    * @param {string} name
    * @param {!shaka.extern.IUIElement.Factory} factory
    * @export
@@ -663,12 +579,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @export */
   showAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
+    shaka.ui.Utils.setDisplay(this.clientAdContainer_, true);
     this.controlsContainer_.setAttribute('ad-active', 'true');
   }
 
   /** @export */
   hideAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
+    shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
     this.controlsContainer_.removeAttribute('ad-active');
   }
 
@@ -769,7 +687,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
-      if (this.config_.doubleClickForFullscreen) {
+      if (this.config_.doubleClickForFullscreen && document.fullscreenEnabled) {
         this.toggleFullScreen();
       }
     });
@@ -827,8 +745,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     const svg =
       /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
-    // NOTE: SVG elements do not have a classList on IE, so use setAttribute.
-    svg.setAttribute('class', 'shaka-spinner-svg');
+    svg.classList.add('shaka-spinner-svg');
     svg.setAttribute('viewBox', '0 0 30 30');
     spinner.appendChild(svg);
 
@@ -837,7 +754,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // "Scalable." The radius of 14.5 is so that the edges of the 1-px-wide
     // stroke will touch the edges of the viewBox.
     const spinnerCircle = document.createElementNS(xmlns, 'circle');
-    spinnerCircle.setAttribute('class', 'shaka-spinner-path');
+    spinnerCircle.classList.add('shaka-spinner-path');
     spinnerCircle.setAttribute('cx', '15');
     spinnerCircle.setAttribute('cy', '15');
     spinnerCircle.setAttribute('r', '14.5');
@@ -947,6 +864,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
+    shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
     this.videoContainer_.appendChild(this.clientAdContainer_);
   }
 
@@ -967,7 +885,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Listen for key down events to detect tab and enable outline
     // for focused elements.
     this.eventManager_.listen(window, 'keydown', (e) => {
-      this.onKeyDown_(/** @type {!KeyboardEvent} */(e));
+      this.onWindowKeyDown_(/** @type {!KeyboardEvent} */(e));
     });
 
     // Listen for click events to dismiss the settings menus.
@@ -978,12 +896,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.video_, 'pause', () => {
-      this.onPlayStateChange_();
-    });
-
-    // Since videos go into a paused state at the end, Chrome and Edge both fire
-    // the 'pause' event when a video ends.  IE 11 only fires the 'ended' event.
-    this.eventManager_.listen(this.video_, 'ended', () => {
       this.onPlayStateChange_();
     });
 
@@ -1007,8 +919,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onCastStatusChange_();
     });
 
+    this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
+      this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+    });
+
     this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
-      this.onKeyUp_(/** @type {!KeyboardEvent} */(e));
+      this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
     });
 
     this.eventManager_.listen(
@@ -1144,7 +1060,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onMouseStill_() {
-    // Hide the cursor.  (NOTE: not supported on IE)
+    // Hide the cursor.
     this.videoContainer_.style.cursor = 'none';
     this.recentMouseMovement_ = false;
     this.computeOpacity();
@@ -1255,13 +1171,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onPlayStateChange_() {
-    // On IE 11, a video may end without going into a paused state.  To correct
-    // both the UI state and the state of the video tag itself, we explicitly
-    // pause the video if that happens.
-    if (this.video_.ended && !this.video_.paused) {
-      this.video_.pause();
-    }
-
     this.computeOpacity();
   }
 
@@ -1270,7 +1179,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @param {!KeyboardEvent} event
    * @private
    */
-  onKeyUp_(event) {
+  onControlsKeyDown_(event) {
     const activeElement = document.activeElement;
     const isVolumeBar = activeElement && activeElement.classList ?
         activeElement.classList.contains('shaka-volume-bar') : false;
@@ -1281,9 +1190,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(event);
     }
 
-    // When the key is released, remove it from the pressed keys set.
-    this.pressedKeys_.delete(event.key);
-
     if (!this.config_.enableKeyboardPlaybackControls) {
       return;
     }
@@ -1292,24 +1198,30 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       case 'ArrowLeft':
         // If it's not focused on the volume bar, move the seek time backward
         // for 5 sec. Otherwise, the volume will be adjusted automatically.
-        if (!isVolumeBar) {
-          this.seek_(this.video_.currentTime - 5, event);
+        if (this.seekBar_ && !isVolumeBar) {
+          event.preventDefault();
+          this.seek_(this.seekBar_.getValue() - 5);
         }
         break;
       case 'ArrowRight':
         // If it's not focused on the volume bar, move the seek time forward
         // for 5 sec. Otherwise, the volume will be adjusted automatically.
-        if (!isVolumeBar) {
-          this.seek_(this.video_.currentTime + 5, event);
+        if (this.seekBar_ && !isVolumeBar) {
+          event.preventDefault();
+          this.seek_(this.seekBar_.getValue() + 5);
         }
         break;
       // Jump to the beginning of the video's seek range.
       case 'Home':
-        this.seek_(this.player_.seekRange().start, event);
+        if (this.seekBar_) {
+          this.seek_(this.player_.seekRange().start);
+        }
         break;
       // Jump to the end of the video's seek range.
       case 'End':
-        this.seek_(this.player_.seekRange().end, event);
+        if (this.seekBar_) {
+          this.seek_(this.player_.seekRange().end);
+        }
         break;
       // Pause or play by pressing space on the seek bar.
       case ' ':
@@ -1318,6 +1230,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         break;
     }
+  }
+
+  /**
+   * Support controls with keyboard inputs.
+   * @param {!KeyboardEvent} event
+   * @private
+   */
+  onControlsKeyUp_(event) {
+    // When the key is released, remove it from the pressed keys set.
+    this.pressedKeys_.delete(event.key);
   }
 
   /**
@@ -1349,12 +1271,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * Update the video's current time based on the keyboard operations.
+   *
    * @param {number} currentTime
-   * @param {!Event} event
    * @private
    */
-  seek_(currentTime, event) {
-    this.video_.currentTime = currentTime;
+  seek_(currentTime) {
+    goog.asserts.assert(
+        this.seekBar_, 'Caller of seek_ must check for seekBar_ first!');
+
+    this.seekBar_.changeTo(currentTime);
+
     if (this.isOpaque()) {
       // Only update the time and seek range if it's visible.
       this.updateTimeAndSeekRange_();
@@ -1394,7 +1320,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @param {!KeyboardEvent} event
    * @private
    */
-  onKeyDown_(event) {
+  onWindowKeyDown_(event) {
     // Add the key to the pressed keys set when it's pressed.
     this.pressedKeys_.add(event.key);
 
@@ -1426,14 +1352,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * menu (pressing Tab key to go forward, or pressing Shift + Tab keys to go
    * backward), make sure it's focused only on the elements of the overflow
    * panel.
-   * This is called by onKeyDown_() function, when there's a settings overflow
-   * menu open, and the Tab key / Shift+Tab keys are pressed.
+   *
+   * This is called by onWindowKeyDown_() function, when there's a settings
+   * overflow menu open, and the Tab key / Shift+Tab keys are pressed.
+   *
    * @param {!Event} event
    * @private
    */
   keepFocusInMenu_(event) {
     const openSettingsMenus = this.menus_.filter(
         (menu) => !menu.classList.contains('shaka-hidden'));
+    if (!openSettingsMenus.length) {
+      // For example, this occurs when you hit escape to close the menu.
+      return;
+    }
+
     const settingsMenu = openSettingsMenus[0];
     if (settingsMenu.childNodes.length) {
       // Get the first and the last displaying child element from the overflow
@@ -1502,6 +1435,90 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     return localization;
   }
 };
+
+
+/**
+ * @event shaka.ui.Controls#CastStatusChangedEvent
+ * @description Fired upon receiving a 'caststatuschanged' event from
+ *    the cast proxy.
+ * @property {string} type
+ *   'caststatuschanged'
+ * @property {boolean} newStatus
+ *  The new status of the application. True for 'is casting' and
+ *  false otherwise.
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#SubMenuOpenEvent
+ * @description Fired when one of the overflow submenus is opened
+ *    (e. g. language/resolution/subtitle selection).
+ * @property {string} type
+ *   'submenuopen'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#CaptionSelectionUpdatedEvent
+ * @description Fired when the captions/subtitles menu has finished updating.
+ * @property {string} type
+ *   'captionselectionupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#ResolutionSelectionUpdatedEvent
+ * @description Fired when the resolution menu has finished updating.
+ * @property {string} type
+ *   'resolutionselectionupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#LanguageSelectionUpdatedEvent
+ * @description Fired when the audio language menu has finished updating.
+ * @property {string} type
+ *   'languageselectionupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#ErrorEvent
+ * @description Fired when something went wrong with the controls.
+ * @property {string} type
+ *   'error'
+ * @property {!shaka.util.Error} detail
+ *   An object which contains details on the error.  The error's 'category'
+ *   and 'code' properties will identify the specific error that occurred.
+ *   In an uncompiled build, you can also use the 'message' and 'stack'
+ *   properties to debug.
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#TimeAndSeekRangeUpdatedEvent
+ * @description Fired when the time and seek range elements have finished
+ *    updating.
+ * @property {string} type
+ *   'timeandseekrangeupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#UIUpdatedEvent
+ * @description Fired after a call to ui.configure() once the UI has finished
+ *    updating.
+ * @property {string} type
+ *   'uiupdated'
+ * @exportDoc
+ */
 
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();

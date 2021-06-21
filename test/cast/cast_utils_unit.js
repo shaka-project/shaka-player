@@ -27,6 +27,7 @@ describe('CastUtils', () => {
       'getAdManager',  // Handled specially
       'getSharedConfiguration',  // Handled specially
       'getNetworkingEngine',  // Handled specially
+      'getDrmEngine',  // Handled specially
       'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
@@ -44,13 +45,9 @@ describe('CastUtils', () => {
     ];
 
     const castMembers = CastUtils.PlayerVoidMethods
-        .concat(CastUtils.PlayerPromiseMethods);
-    for (const name in CastUtils.PlayerGetterMethods) {
-      castMembers.push(name);
-    }
-    for (const name in CastUtils.PlayerGetterMethodsThatRequireLive) {
-      castMembers.push(name);
-    }
+        .concat(CastUtils.PlayerPromiseMethods)
+        .concat(Object.keys(CastUtils.PlayerGetterMethods))
+        .concat(Object.keys(CastUtils.PlayerGetterMethodsThatRequireLive));
     // eslint-disable-next-line no-restricted-syntax
     const allPlayerMembers = Object.getOwnPropertyNames(shaka.Player.prototype);
     expect(
@@ -98,10 +95,7 @@ describe('CastUtils', () => {
     });
 
     it('transfers real Events', () => {
-      // new Event() is not usable on IE11:
-      const event =
-      /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
-      event.initCustomEvent('myEventType', false, false, null);
+      const event = new CustomEvent('myEventType');
 
       // Properties that can definitely be transferred.
       const nativeProperties = [

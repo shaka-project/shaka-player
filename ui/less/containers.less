@@ -170,6 +170,11 @@
   }
 }
 
+/* Buttons hide certain items if they are found inside the control panel */
+.shaka-controls-button-panel .shaka-overflow-menu-only {
+  display: none;
+}
+
 /* The container for the giant play button.  Sits above (Y axis) the
  * other video controls and seek bar, in the middle of the video frame, on top
  * of (Z axis) the video. */
@@ -221,7 +226,7 @@
   transition-delay: 500ms;
 
   /* These are defaults which are overridden by JS or cue styles. */
-  div {
+  span {
     font-size: 20px;
     line-height: 1.4;  // relative to font size.
     background-color: rgba(0, 0, 0, 0.8);

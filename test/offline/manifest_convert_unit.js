@@ -101,6 +101,8 @@ describe('ManifestConverter', () => {
           audioRobustness: 'very',
           videoRobustness: 'kinda_sorta',
           serverCertificate: new Uint8Array([1, 2, 3]),
+          serverCertificateUri: '',
+          sessionType: '',
           initData: [{
             initData: new Uint8Array([4, 5, 6]),
             initDataType: 'cenc',
@@ -292,6 +294,7 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
     };
 
@@ -314,6 +317,7 @@ describe('ManifestConverter', () => {
       appendWindowStart: 0,
       appendWindowEnd: Infinity,
       timestampOffset: 0,
+      tilesLayout: '',
     };
 
     return segment;
@@ -362,7 +366,9 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -409,7 +415,9 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -455,7 +463,9 @@ describe('ManifestConverter', () => {
       forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -498,7 +508,9 @@ describe('ManifestConverter', () => {
       forced: streamDb.forced,
       channelsCount: streamDb.channelsCount,
       audioSamplingRate: streamDb.audioSamplingRate,
+      spatialAudio: streamDb.spatialAudio,
       closedCaptions: streamDb.closedCaptions,
+      tilesLayout: streamDb.tilesLayout,
     };
 
     expect(stream).toEqual(expectedStream);

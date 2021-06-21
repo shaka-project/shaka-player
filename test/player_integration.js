@@ -36,6 +36,8 @@ describe('Player', () => {
   /** @type {shaka.test.Waiter} */
   let waiter;
 
+  const Util = shaka.test.Util;
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -756,7 +758,7 @@ describe('Player', () => {
       // buffering goal so we append another segment.
       player.configure('streaming.bufferingGoal', 40);
       await waitUntilBuffered(40);
-      expect(getBufferedBehind()).toBeLessThan(10);
+      expect(getBufferedBehind()).toBeLessThanOrEqual(10);
     });
 
     function getBufferedAhead() {

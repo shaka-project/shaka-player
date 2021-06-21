@@ -34,6 +34,7 @@ describe('Player', () => {
   const originalLogWarn = shaka.log.warning;
   const originalLogAlwaysWarn = shaka.log.alwaysWarn;
   const originalIsTypeSupported = window.MediaSource.isTypeSupported;
+  const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
 
   const fakeManifestUri = 'fake-manifest-uri';
   const fakeMimeType = 'application/test';
@@ -85,6 +86,22 @@ describe('Player', () => {
     window.MediaSource.isTypeSupported = (mimeType) => {
       const type = mimeType.split('/')[0];
       return type == 'video' || type == 'audio';
+    };
+
+    // Since this is not an integration test, we don't want MediaCapabilities to
+    // fail assertions based on browser support for types.  Pretend that all
+    // video and audio types are supported.
+    navigator.mediaCapabilities.decodingInfo = async (config) => {
+      await Promise.resolve();
+      const videoType = config['video'] ?
+          config['video'].contentType.split('/')[0] : null;
+      const audioType = config['audio'] ?
+          config['audio'].contentType.split('/')[0] : null;
+      if (videoType == 'video' || audioType == 'audio') {
+        return {supported: true};
+      } else {
+        return {supported: false};
+      }
     };
 
     // Many tests assume the existence of a manifest, so create a basic one.
@@ -158,6 +175,7 @@ describe('Player', () => {
       shaka.log.alwaysWarn = originalLogAlwaysWarn;
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
       shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
+      navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
     }
   });
 
@@ -683,6 +701,28 @@ describe('Player', () => {
       expect(seekRange.end).toBe(10);
     });
 
+    it('configures play and seek range after playback starts', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1);
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const seekRange = player.seekRange();
+      expect(seekRange.start).toBe(0);
+      expect(seekRange.end).toBe(Infinity);
+
+      // Change the configuration after the playback starts.
+      player.configure({playRangeStart: 5, playRangeEnd: 10});
+      const seekRange2 = player.seekRange();
+      expect(seekRange2.start).toBe(5);
+      expect(seekRange2.end).toBe(10);
+    });
+
     it('does not switch for plain configuration changes', async () => {
       await player.load(fakeManifestUri, 0, fakeMimeType);
       streamingEngine.switchVariant.calls.reset();
@@ -927,6 +967,8 @@ describe('Player', () => {
     let variantTracks;
     /** @type {!Array.<shaka.extern.Track>} */
     let textTracks;
+    /** @type {!Array.<shaka.extern.Track>} */
+    let imageTracks;
 
     beforeEach(async () => {
       // A manifest we can use to test track expectations.
@@ -1044,6 +1086,16 @@ describe('Player', () => {
           stream.kind = 'caption';
           stream.roles = ['commentary'];
         });
+
+        // Image tracks
+        manifest.addImageStream(53, (stream) => {
+          stream.originalId = 'thumbnail';
+          stream.width = 100;
+          stream.height = 200;
+          stream.bandwidth = 10;
+          stream.mimeType = 'image/jpeg';
+          stream.tilesLayout = '1x1';
+        });
       });
 
       variantTracks = [
@@ -1072,11 +1124,14 @@ describe('Player', () => {
           audioId: 3,
           channelsCount: 6,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 300,
           videoBandwidth: 1000,
           originalAudioId: 'audio-en-6c',
           originalVideoId: 'video-1kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 101,
@@ -1103,11 +1158,14 @@ describe('Player', () => {
           audioId: 3,
           channelsCount: 6,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 300,
           videoBandwidth: 2000,
           originalAudioId: 'audio-en-6c',
           originalVideoId: 'video-2kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 102,
@@ -1134,11 +1192,14 @@ describe('Player', () => {
           audioId: 4,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-en-2c',
           originalVideoId: 'video-1kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 103,
@@ -1165,11 +1226,14 @@ describe('Player', () => {
           audioId: 4,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-en-2c',
           originalVideoId: 'video-2kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 104,
@@ -1196,11 +1260,14 @@ describe('Player', () => {
           audioId: 5,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-commentary',
           originalVideoId: 'video-1kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 105,
@@ -1227,11 +1294,14 @@ describe('Player', () => {
           audioId: 5,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-commentary',
           originalVideoId: 'video-2kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 106,
@@ -1258,11 +1328,14 @@ describe('Player', () => {
           audioId: 6,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 1000,
           originalAudioId: 'audio-es',
           originalVideoId: 'video-1kbps',
           originalTextId: null,
+          originalImageId: null,
         },
         {
           id: 107,
@@ -1289,11 +1362,14 @@ describe('Player', () => {
           audioId: 6,
           channelsCount: 2,
           audioSamplingRate: 48000,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: 100,
           videoBandwidth: 2000,
           originalAudioId: 'audio-es',
           originalVideoId: 'video-2kbps',
           originalTextId: null,
+          originalImageId: null,
         },
       ];
 
@@ -1315,6 +1391,8 @@ describe('Player', () => {
           forced: false,
           channelsCount: null,
           audioSamplingRate: null,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1328,6 +1406,7 @@ describe('Player', () => {
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: 'text-es',
+          originalImageId: null,
         },
         {
           id: 51,
@@ -1346,6 +1425,8 @@ describe('Player', () => {
           forced: false,
           channelsCount: null,
           audioSamplingRate: null,
+          spatialAudio: false,
+          tilesLayout: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1359,6 +1440,7 @@ describe('Player', () => {
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: 'text-en',
+          originalImageId: null,
         },
         {
           id: 52,
@@ -1376,7 +1458,9 @@ describe('Player', () => {
           audioRoles: null,
           forced: false,
           channelsCount: null,
+          spatialAudio: false,
           audioSamplingRate: null,
+          tilesLayout: null,
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 0,
@@ -1390,6 +1474,44 @@ describe('Player', () => {
           originalAudioId: null,
           originalVideoId: null,
           originalTextId: 'text-commentary',
+          originalImageId: null,
+        },
+      ];
+
+      imageTracks = [
+        {
+          id: 53,
+          active: false,
+          type: ContentType.IMAGE,
+          language: '',
+          label: null,
+          kind: null,
+          mimeType: 'image/jpeg',
+          codecs: null,
+          audioCodec: null,
+          videoCodec: null,
+          primary: false,
+          roles: [],
+          audioRoles: null,
+          forced: false,
+          channelsCount: null,
+          audioSamplingRate: null,
+          spatialAudio: false,
+          tilesLayout: '1x1',
+          audioBandwidth: null,
+          videoBandwidth: null,
+          bandwidth: 10,
+          width: 100,
+          height: 200,
+          frameRate: null,
+          pixelAspectRatio: null,
+          hdr: null,
+          videoId: null,
+          audioId: null,
+          originalAudioId: null,
+          originalVideoId: null,
+          originalTextId: null,
+          originalImageId: 'thumbnail',
         },
       ];
 
@@ -1411,6 +1533,7 @@ describe('Player', () => {
     it('returns the correct tracks', () => {
       expect(player.getVariantTracks()).toEqual(variantTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
+      expect(player.getImageTracks()).toEqual(imageTracks);
     });
 
     it('returns empty arrays before tracks can be determined', async () => {
@@ -1420,6 +1543,7 @@ describe('Player', () => {
         // The player does not yet have a manifest.
         expect(player.getVariantTracks()).toEqual([]);
         expect(player.getTextTracks()).toEqual([]);
+        expect(player.getImageTracks()).toEqual([]);
 
         parser.playerInterface = playerInterface;
         return Promise.resolve(manifest);
@@ -1429,6 +1553,7 @@ describe('Player', () => {
 
       expect(player.getVariantTracks()).toEqual(variantTracks);
       expect(player.getTextTracks()).toEqual(textTracks);
+      expect(player.getImageTracks()).toEqual(imageTracks);
     });
 
     it('doesn\'t disable AbrManager if switching variants', () => {
@@ -1600,6 +1725,22 @@ describe('Player', () => {
       // roles.
       player.selectAudioLanguage('en');
       expect(getActiveVariantTrack().audioRoles).toEqual([]);
+    });
+
+    // https://github.com/google/shaka-player/issues/3262
+    it('selectAudioLanguage() doesn\'t change resolution', () => {
+      player.configure('abr.enabled', false);
+      abrManager.chooseIndex = 1;
+      const lowResEn =
+          variantTracks.filter((t) => t.language == 'en' && t.height == 200)[0];
+      player.selectVariantTrack(lowResEn);
+
+      // Switching to 'es' should keep the low-res stream and not choose the
+      // high-res version.
+      player.selectAudioLanguage('es');
+      const lowResEs =
+          variantTracks.filter((t) => t.language == 'es' && t.height == 200)[0];
+      expect(getActiveVariantTrack().id).toBe(lowResEs.id);
     });
 
     it('selectTextLanguage() does not change selected variant track', () => {
@@ -1844,6 +1985,24 @@ describe('Player', () => {
         await shaka.test.Util.shortDelay();
         expect(variantChanged).not.toHaveBeenCalled();
       });
+    });
+
+    it('chooses the configured text language and role at start', async () => {
+      player.configure({
+        preferredTextLanguage: 'en',
+        preferredTextRole: 'commentary',
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      // Text was turned on during startup.
+      expect(player.isTextTrackVisible()).toBe(true);
+
+      expect(getActiveTextTrack()).toEqual(jasmine.objectContaining({
+        id: 52,
+        language: 'en',
+        roles: ['commentary'],
+      }));
     });
   });  // describe('tracks')
 
@@ -2302,6 +2461,11 @@ describe('Player', () => {
     it('throws CONTENT_UNSUPPORTED_BY_BROWSER', async () => {
       window.MediaSource.isTypeSupported = (mimeType) => false;
 
+      navigator.mediaCapabilities.decodingInfo = async (config) => {
+        await Promise.resolve();
+        return {supported: false};
+      };
+
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(0);
@@ -2648,7 +2812,8 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.encrypted = true;
-            stream.mimeType = 'video/unsupported';
+            stream.mimeType = 'video';
+            stream.codecs = 'unsupported';
             stream.addDrmInfo('foo.bar');
           });
         });
@@ -2660,16 +2825,16 @@ describe('Player', () => {
         });
       });
 
-      // We must be careful that our video/unsupported was not filtered out
-      // because of MSE support.  We are specifically testing EME-based
-      // filtering of codecs.
-      expect(MediaSource.isTypeSupported('video/unsupported')).toBe(true);
-
-      // Make sure that drm engine will reject the variant with an unsupported
-      // video mime type.
-      drmEngine.supportsVariant.and.callFake((variant) => {
-        return variant.video.mimeType != 'video/unsupported';
-      });
+      navigator.mediaCapabilities.decodingInfo = async (config) => {
+        await Promise.resolve();
+        const videoType = config['video'] ? config['video'].contentType : '';
+        if (videoType.includes('video') &&
+              videoType.includes('unsupported')) {
+          return {supported: false};
+        } else {
+          return {supported: true};
+        }
+      };
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
       const tracks = player.getVariantTracks();
@@ -2771,7 +2936,7 @@ describe('Player', () => {
 
         manifest.addVariant(1, (variant) => {
           variant.addVideo(2, (stream) => {
-            stream.size(200, 1500);
+            stream.size(200, 1024);
           });
         });
 

@@ -31,15 +31,14 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Chrome¹    |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Y**   | -   |
 |Firefox¹   |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -      | -   |
 |Edge¹      |**Y**     | -       | -       | -       | -        | -      | -   |
-|Edge Chromium|**Y**     |**Y**    | -       |untested⁵|**Native**| -      | -   |
-|IE ≤ 10    | N        | -       | -       | -       | -        | -      | -   |
-|IE 11      |**Y** ⁴   | -       | -       | -       | -        | -      | -   |
+|Edge Chromium|**Y**     |**Y**    |**Y**     |untested⁵|**Native**| -      | -   |
+|IE         | N        | -       | -       | -       | -        | -      | -   |
 |Safari¹    | -        |**Y**    | -       | -       |**iPadOS 13<br>Native**| - | - |
 |Opera¹     |untested⁵ |untested⁵|untested⁵|untested⁵|**Native**| -      | -   |
 |Chromecast²| -        | -       | -       | -       | -        | -      |**Y**|
 |Tizen TV³  | -        | -       | -       | -       | -        | -      |**Y**|
 |WebOS⁶     | -        | -       | -       | -       | -        | -      |**Y**|
-|Xbox One⁶  | -        | -       | -       | -       | -        | -      |**Y**|
+|Xbox One   | -        | -       | -       | -       | -        | -      |**Y**|
 
 NOTES:
  - ¹: On macOS, only Safari 12+ is supported.  On iOS, only iOS 12+ is
@@ -48,16 +47,12 @@ NOTES:
    can be implemented with Shaka Player.
  - ³: Tizen 2017 model is actively tested and supported by the Shaka Player
    team. Tizen 2016 model is community-supported and untested by us.
- - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only. IE 11
-   can play clear content on Windows 8.0. IE 11 does not support adaptive
-   playback on Windows 7 and under.  (IE support will stop in v3.1:
-   https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.
- - ⁶: These are expected to work, WebOS and Xbox One are community supported
-   and untested by us. (Official support for LG WebOS TV:
-   https://github.com/google/shaka-player/issues/1330, Official support for
-   Xbox One: https://github.com/google/shaka-player/issues/1705)
+ - ⁶: These are expected to work, but are community-supported and untested by
+   us.
+     - Official support for LG WebOS TV:
+       https://github.com/google/shaka-player/issues/1330
 
 We support iOS 12+ through Apple's native HLS player.  We provide the same
 top-level API, but we just set the video's `src` element to the manifest/media.
@@ -119,12 +114,14 @@ DASH features **not** supported:
 
 HLS features supported:
  - VOD, Live, and Event types
- - Encrypted content with PlayReady and Widevine
+ - Low-latency streaming with partial segments, preload hints, and delta updates
+ - Discontinuity
  - ISO-BMFF / MP4 / CMAF support
  - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.7.0+, must be
    separately included)
  - WebVTT and TTML
  - CEA-608/708 captions
+ - Encrypted content with PlayReady and Widevine
  - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
 
 HLS features **not** supported:
@@ -132,6 +129,7 @@ HLS features **not** supported:
  - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
  - Raw AAC, MP3, etc (without an MP4 container):
    https://github.com/google/shaka-player/issues/2337
+ - Low-latency streaming with blocking playlist reload
 
 [mux.js]: https://github.com/videojs/mux.js/releases
 
@@ -144,13 +142,12 @@ HLS features **not** supported:
 |Firefox²  |**Y**     | -       | -       |**Y**     |
 |Edge³     | -        |**Y**    | -       | -        |
 |Edge Chromium|**Y**     |**Y**    | -       |**Y**     |
-|IE 11⁴    | -        |**Y**    | -       | -        |
 |Safari    | -        | -       |**Y**    | -        |
 |Opera     |untested⁵ | -       | -       |untested⁵ |
 |Chromecast|**Y**     |**Y**    | -       |untested⁵ |
 |Tizen TV  |**Y**     |**Y**    | -       |untested⁵ |
 |WebOS⁷    |untested⁷ |untested⁷| -       |untested⁷ |
-|Xbox One⁷ | -        |untested⁷| -       | -        |
+|Xbox One  | -        |**Y**    | -       | -        |
 
 Other DRM systems should work out of the box if they are interoperable and
 compliant to the EME spec.
@@ -161,15 +158,12 @@ NOTES:
  - ²: DRM must be enabled by the user.  The first time a Firefox user visits a
    site with encrypted media, the user will be prompted to enable DRM.
  - ³: PlayReady in Edge does not seem to work on a VM or over Remote Desktop.
- - ⁴: IE 11 offers PlayReady support on Windows 8.1 and Windows 10 only.  (IE
-   support will stop in v3.1:
-   https://github.com/google/shaka-player/issues/2339)
  - ⁵: These are expected to work, but are not actively tested by the Shaka
    Player team.
  - ⁶: ClearKey is a useful tool for debugging, and does not provide actual
    content security.
- - ⁷: These are expected to work, WebOS and Xbox One are community supported
-   and untested by us.
+ - ⁷: These are expected to work, but are community-supported and untested by
+   us.
 
 |Manifest  |Widevine  |PlayReady|FairPlay |ClearKey  |
 |:--------:|:--------:|:-------:|:-------:|:--------:|
@@ -213,6 +207,8 @@ Shaka Player supports:
     - UTF-8 encoding only
   - SubStation Alpha (SSA, ASS)
     - UTF-8 encoding only
+  - SubViewer (SBV)
+    - UTF-8 encoding only
 
 Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
@@ -253,7 +249,7 @@ for more information on the process we would like contributors to follow.
 
 The Shaka team doesn't have the bandwidth and experience to provide guidance and
 support for integrating Shaka Player with specific frameworks, but some of our
-users have sucessfully done so and created tutorials to help other beginners.
+users have successfully done so and created tutorials to help other beginners.
 
 Shaka + ReactJS integrations:
 - https://github.com/matvp91/shaka-player-react
@@ -261,6 +257,18 @@ Shaka + ReactJS integrations:
 
 Shaka + Next.js integration:
 - https://github.com/amit08255/shaka-player-react-with-ui-config/tree/master/nextjs-shaka-player
+
+Shaka + Vue.js integrations:
+- https://github.com/davidjamesherzog/shaka-player-vuejs
+
+Shaka + Nuxt.js integration:
+- https://github.com/davidjamesherzog/shaka-player-nuxtjs
+
+Shaka + video.js integration:
+- https://github.com/davidjamesherzog/videojs-shaka
+
+Shaka + Angular integration:
+- https://github.com/PatrickKalkman/shaka-player-angular
 
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!

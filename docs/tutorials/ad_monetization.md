@@ -144,6 +144,74 @@ See: [google.ima.dai.api.LiveStreamRequest][] for details on the request object.
 
 If you are using Shaka's UI library, we will automatically hook up our ad UI.
 
+#### Listening To Ad Events
+We unify Server Side and Client Side ad events into our own Shaka ad events and
+objects. which your application can listen to and interact with.
+Check out the {@link shaka.ads.AdManager#event:AdBreakReadyEvent|full list of 
+ad events} for details.
+
+Let's register a simple listener to Shaka's AD_STARTED event. It will log the
+start of the ad in the console.
+
+```js
+adManager.addEventListener(shaka.ads.AdManager.AD_STARTED, () => {
+  console.log('An ad has started');
+});
+```
+
+Every shaka ad event contains an original SDK event and an ad object if those
+are available. Most apps are unlikely to need them, but if you have a use case
+that requires access to those, here is how to get them:
+
+```js
+// Note that unlike in the previous example, we are capturing the AD_STARTED
+// event object here (the "e" parameter of the lambda function) so we can access
+// its properties.
+adManager.addEventListener(shaka.ads.AdManager.AD_STARTED, (e) => {
+  const sdkAdObject = e['sdkAdObject'];
+  const originalEvent = e['originalEvent'];
+});
+```
+
+#### Accommodating IMA Power Users
+If you have an existing IMA integration you want to plug into Shaka, or you want
+to use more intricate SDK capabilities not exposed through our API, we provide a
+way to do that.
+Listen to the {@link shaka.ads.AdManager#event:ImaAdManagerLoadedEvent} for
+Client Side or the {@link shaka.ads.AdManager#event:ImaStreamManagerLoadedEvent}
+for Server Side to get the IMA [AdManager][] or [StreamManager][] objects.
+
+```js
+adManager.addEventListener(shaka.ads.AdManager.IMA_AD_MANAGER_LOADED, (e) => {
+  const imaAdManager = e['imaAdManager'];
+});
+
+adManager.addEventListener(shaka.ads.AdManager.IMA_STREAM_MANAGER_LOADED, (e) => {
+  const imaStreamManager = e['imaStreamManager'];
+});
+```
+[AdManager]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/reference/js/google.ima.AdsManager
+[StreamManager]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/dai/reference/js/StreamManager
+
+#### Disabling Cookies For Serving Limited Ads
+The server side IMA SDK allows limited ads to be served when the user does not
+give or denies consent to cookies. To allow this, set the `ltd` parameter using
+`StreamRequest.adTagParameters` as described in the [IMA limited ads guide][].
+To set up cookie-less manifest and segment requests, use an appropriate
+`requestFilter`. Please note that `request.withCredentials` flag is `false` by
+default, so you should only need to set this if you've enabled it in other parts of
+your code.
+
+```js
+  player.getNetworkingEngine().registerRequestFilter(function(type, request) {
+    if (type == shaka.net.NetworkingEngine.RequestType.MANIFEST ||
+        type == shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+      request.withCredentials = false;
+    }
+  });
+```
+[IMA limited ads guide]: https://developers.devsite.corp.google.com/interactive-media-ads/docs/sdks/html5/dai/limited-ads
+
 #### Custom Ad Manager Implementations
 Our architecture supports custom ad manager implementations. Every ad manager
 should implement the {@linksource shaka.extern.IAdManager} interface. To make
