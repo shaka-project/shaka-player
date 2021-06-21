@@ -17,7 +17,7 @@ describe('Cea608Memory', () => {
   /** @type {!shaka.cea.Cea608Memory} */
   let memory;
 
-  /** @type {!string} */
+  /** @type {string} */
   const stream = 'CC1';
 
   beforeEach(() => {

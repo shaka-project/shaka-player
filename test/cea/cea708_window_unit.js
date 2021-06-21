@@ -15,22 +15,22 @@ describe('Cea708Window', () => {
   /** @type {!shaka.cea.Cea708Window} */
   let window;
 
-  /** @type {!number} */
+  /** @type {number} */
   const serviceNumber = 1; // We will arbitrarily pick service 1 for all tests.
 
-  /** @type {!string} */
+  /** @type {string} */
   const stream = `svc${serviceNumber}`;
 
-  /** @type {!number} */
+  /** @type {number} */
   const rowCount = 10;
 
-  /** @type {!number} */
+  /** @type {number} */
   const colCount = 32;
 
-  /** @type {!number} */
+  /** @type {number} */
   const startTime = 1;
 
-  /** @type {!number} */
+  /** @type {number} */
   const endTime = 2;
 
   beforeEach(() => {

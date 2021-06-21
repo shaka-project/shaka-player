@@ -36,7 +36,7 @@ describe('DashParser Manifest', () => {
   /** @type {!ArrayBuffer} */
   let mp4Index;
 
-  /** @type {!string} */
+  /** @type {string} */
   const thumbnailScheme = 'http://dashif.org/guidelines/thumbnail_tile';
 
   beforeAll(async () => {
