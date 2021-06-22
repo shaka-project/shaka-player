@@ -634,7 +634,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreSuggestedPresentationDelay: boolean,
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
- *   keySystemsByURI: !Object.<string, string>
+ *   keySystemsByURI: !Object.<string, string>,
+ *   manifestPreprocessor: function(!Element)
  * }}
  *
  * @property {string} clockSyncUri
@@ -684,6 +685,10 @@ shaka.extern.DrmConfiguration;
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
+ * @property {function(!Element)} manifestPreprocessor
+ *   Called immediately after the DASH manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
