@@ -1095,3 +1095,21 @@ shaka.extern.LanguageRole;
  * @exportDoc
  */
 shaka.extern.Thumbnail;
+
+
+/**
+ * @typedef {{
+ *   title: string,
+ *   startTime: number,
+ *   endTime: number
+ * }}
+ *
+ * @property {string} title
+ *    The title of the chapter.
+ * @property {number} startTime
+ *    The time that describes the beginning of the range of the chapter.
+ * @property {number} endTime
+ *    The time that describes the end of the range of chapter.
+ * @exportDoc
+ */
+shaka.extern.Chapter;

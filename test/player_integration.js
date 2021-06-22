@@ -921,4 +921,56 @@ describe('Player', () => {
       }
     });
   });  // describe('unloading')
+
+  describe('chapters', () => {
+    it('add external chapters in vtt format', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      const locationUri = new goog.Uri(location.href);
+      const partialUri = new goog.Uri('/base/test/test/assets/chapters.vtt');
+      const absoluteUri = locationUri.resolve(partialUri);
+      await player.addChaptersTrack(absoluteUri.toString(), 'en');
+
+      await shaka.test.Util.delay(1.5);
+
+      const chapters = player.getChapters('en');
+      expect(chapters.length).toBe(3);
+      const chapter1 = chapters[0];
+      expect(chapter1.title).toBe('Chapter 1');
+      expect(chapter1.startTime).toBe(0);
+      expect(chapter1.endTime).toBe(5);
+      const chapter2 = chapters[1];
+      expect(chapter2.title).toBe('Chapter 2');
+      expect(chapter2.startTime).toBe(5);
+      expect(chapter2.endTime).toBe(30);
+      const chapter3 = chapters[2];
+      expect(chapter3.title).toBe('Chapter 3');
+      expect(chapter3.startTime).toBe(30);
+      expect(chapter3.endTime).toBe(61.349);
+    });
+
+    it('add external chapters in srt format', async () => {
+      await player.load('test:sintel_no_text_compiled');
+      const locationUri = new goog.Uri(location.href);
+      const partialUri = new goog.Uri('/base/test/test/assets/chapters.srt');
+      const absoluteUri = locationUri.resolve(partialUri);
+      await player.addChaptersTrack(absoluteUri.toString(), 'en');
+
+      await shaka.test.Util.delay(1.5);
+
+      const chapters = player.getChapters('en');
+      expect(chapters.length).toBe(3);
+      const chapter1 = chapters[0];
+      expect(chapter1.title).toBe('Chapter 1');
+      expect(chapter1.startTime).toBe(0);
+      expect(chapter1.endTime).toBe(5);
+      const chapter2 = chapters[1];
+      expect(chapter2.title).toBe('Chapter 2');
+      expect(chapter2.startTime).toBe(5);
+      expect(chapter2.endTime).toBe(30);
+      const chapter3 = chapters[2];
+      expect(chapter3.title).toBe('Chapter 3');
+      expect(chapter3.startTime).toBe(30);
+      expect(chapter3.endTime).toBe(61.349);
+    });
+  });  // describe('chapters')
 });
