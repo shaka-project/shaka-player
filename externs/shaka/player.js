@@ -1099,13 +1099,13 @@ shaka.extern.Thumbnail;
 
 /**
  * @typedef {{
- *   payload: string,
+ *   title: string,
  *   startTime: number,
  *   endTime: number
  * }}
  *
- * @property {string} payload
- *    The text payload of the chapter.
+ * @property {string} title
+ *    The title of the chapter.
  * @property {number} startTime
  *    The time that describes the beginning of the range of the chapter.
  * @property {number} endTime
