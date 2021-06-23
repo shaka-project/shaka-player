@@ -19,6 +19,7 @@ goog.require('shaka.test.Waiter');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.Functional');
 goog.require('shaka.util.Iterables');
+// goog.require('shaka.util.Platform');
 
 describe('Player', () => {
   /** @type {!jasmine.Spy} */
@@ -86,6 +87,31 @@ describe('Player', () => {
       await player.load('test:sintel_compiled');
     });
   });  // describe('attach')
+
+  describe('set mediaElement.currentTime in manifestparsed', () => {
+    it('does not get segments prior to mediaElement.currentTime', async () => {
+      // if (shaka.util.Platform.isApple()) {
+      //   pending('setting currentTime during load is not supported by apple');
+      // }
+      player.addEventListener('manifestparsed', () => {
+        player.getMediaElement().currentTime = 24;
+        expect(player.getMediaElement().currentTime).toBe(24);
+      });
+      let requestedFirstMediaSegment = false;
+      player.getNetworkingEngine().registerRequestFilter(
+          (type, request) => {
+            shaka.log.debug('requesting ' + request.uris[0] +
+                ' Range=' + request.headers['Range']);
+            if (request.headers['Range'] === 'bytes=558-326077') {
+              requestedFirstMediaSegment = true;
+            }
+          });
+      await player.load('https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd');
+      video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 25, 10);
+      expect(requestedFirstMediaSegment).toBe(false);
+    });
+  });
 
   describe('getStats', () => {
     it('gives stats about current stream', async () => {
