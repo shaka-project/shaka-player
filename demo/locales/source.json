@@ -839,6 +839,10 @@
     "description": "The name of a configuration value.",
     "message": "Update expiration time"
   },
+  "DEMO_UPDATE_INTERVAL_SECONDS": {
+    "description": "The name of a configuration value.",
+    "message": "Update interval seconds"
+  },
   "DEMO_UPLYNK": {
     "description": "Text that describes an asset that comes from the Verizon Digital Media Services asset library.",
     "message": "[PROPER_NAME:Verizon Digital Media Services]"

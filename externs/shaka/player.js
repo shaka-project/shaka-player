@@ -789,7 +789,8 @@ shaka.extern.ManifestConfiguration;
  *   lowLatencyMode: boolean,
  *   autoLowLatencyMode: boolean,
  *   forceHTTPS: boolean,
- *   preferNativeHls: boolean
+ *   preferNativeHls: boolean,
+ *   updateIntervalSeconds: number
  * }}
  *
  * @description
@@ -896,6 +897,8 @@ shaka.extern.ManifestConfiguration;
  *   If true, if the protocol is HTTP change it to HTTPs.
  * @property {boolean} preferNativeHls
  *   If true, prefer native HLS playback when possible, regardless of platform.
+ * @property {number} updateIntervalSeconds
+ *   The minimum number of seconds to see if the manifest has changes.
  *
  * @exportDoc
  */
