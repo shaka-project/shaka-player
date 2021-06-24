@@ -779,7 +779,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.eventManager_.listen(this.bottomControls_, 'click', (e) => {
       // We explicitly deny this measure when clicking on buttons that
       // open submenus in the control panel.
-      if (!(e.target['classList'].contains('shaka-overflow-button'))) {
+      if (!e.target['closest']('.shaka-overflow-button')) {
         this.hideSettingsMenus();
       }
     });

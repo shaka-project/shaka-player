@@ -412,14 +412,10 @@ describe('UI', () => {
     describe('control panel buttons with submenus', () => {
       /** @type {!HTMLElement} */
       let resolutionMenu;
-      /** @type {!string} */
-      let resolutionDisplay;
       /** @type {!Element} */
       let resolutionMenuButton;
       /** @type {!HTMLElement} */
       let languageMenu;
-      /** @type {!string} */
-      let languageDisplay;
       /** @type {!Element} */
       let languageMenuButton;
 
@@ -437,8 +433,6 @@ describe('UI', () => {
         videoContainer.getElementsByClassName('shaka-resolutions');
         expect(resolutionsMenus.length).toBe(1);
         resolutionMenu = /** @type {!HTMLElement} */ (resolutionsMenus[0]);
-        resolutionDisplay =
-        window.getComputedStyle(resolutionMenu, null).display;
 
         const resolutionMenuButtons =
         videoContainer.getElementsByClassName('shaka-resolution-button');
@@ -446,27 +440,25 @@ describe('UI', () => {
         resolutionMenuButton = resolutionMenuButtons[0];
 
         const languageMenus =
-        videoContainer.getElementsByClassName('shaka-resolutions');
+        videoContainer.getElementsByClassName('shaka-audio-languages');
         expect(languageMenus.length).toBe(1);
         languageMenu = /** @type {!HTMLElement} */ (languageMenus[0]);
-        languageDisplay = window.getComputedStyle(languageMenu, null).display;
 
         const languageMenuButtons =
-        videoContainer.getElementsByClassName('shaka-resolution-button');
+        videoContainer.getElementsByClassName('shaka-language-button');
         expect(languageMenuButtons.length).toBe(1);
         languageMenuButton = languageMenuButtons[0];
       });
 
       it('menus are initially hidden', () => {
-        expect(resolutionDisplay).toBe('none');
-        expect(languageDisplay).toBe('none');
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 
       it('a menu becomes visible if the button is clicked', () => {
         resolutionMenuButton.click();
 
-        resolutionDisplay = resolutionMenu.style.display;
-        expect(resolutionDisplay).not.toBe('none');
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(false);
       });
 
       it('a menu becomes hidden if the "close" button is clicked', () => {
@@ -479,16 +471,15 @@ describe('UI', () => {
         /** @type {!HTMLElement} */ (backToOverflowButtons[0]);
         backToOverflowButton.click();
 
-        expect(resolutionDisplay).toBe('none');
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
       });
 
       it('a menu becomes hidden if another one is opened', () => {
         resolutionMenuButton.click();
         languageMenuButton.click();
 
-        expect(resolutionDisplay).toBe('none');
-        languageDisplay = languageMenu.style.display;
-        expect(languageDisplay).not.toBe('none');
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(false);
       });
     });
 
