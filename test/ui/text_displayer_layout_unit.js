@@ -299,6 +299,21 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       await checkScreenshot(prefix, 'two-nested-cues');
     });
 
+    // Distinct from "newline" test above, which has a literal \n character in
+    // the text payload.  This uses a nested "lineBreak" cue, which is what you
+    // get with <br> in TTML.
+    it('nested cues with linebreak', async () => {
+      const cue = new shaka.text.Cue(0, 1, '');
+      cue.nestedCues = [
+        new shaka.text.Cue(0, 1, 'Captain\'s log,'),
+        shaka.text.Cue.lineBreak(0, 1),
+        new shaka.text.Cue(0, 1, 'stardate 41636.9'),
+      ];
+      textDisplayer.append([cue]);
+
+      await checkScreenshot(prefix, 'nested-cues-with-linebreak');
+    });
+
     // Regression test for #2157 and #2584
     it('region positioning', async () => {
       const nestedCue = new shaka.text.Cue(
@@ -314,6 +329,30 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       textDisplayer.append([cue]);
 
       await checkScreenshot(prefix, 'region-position');
+    });
+
+    // Regression test for #3379, in which the displayAlign was not respected,
+    // placing text at the top of the region instead of the bottom.
+    it('region with display alignment', async () => {
+      const cue = new shaka.text.Cue(0, 1, '');
+
+      cue.region.id = '1';
+      cue.region.viewportAnchorX = 10;
+      cue.region.viewportAnchorY = 10;
+      cue.region.width = 80;
+      cue.region.height = 80;
+
+      cue.positionAlign = shaka.text.Cue.positionAlign.CENTER;
+      cue.lineAlign = shaka.text.Cue.lineAlign.CENTER;
+      cue.displayAlign = shaka.text.Cue.displayAlign.AFTER;
+
+      cue.nestedCues = [
+        // For those who don't speak Unicode, \xbf is an upside down "?".
+        new shaka.text.Cue(0, 1, '\xbfBien?'),
+      ];
+      textDisplayer.append([cue]);
+
+      await checkScreenshot(prefix, 'region-with-display-alignment');
     });
 
     // Regression test for #2188
