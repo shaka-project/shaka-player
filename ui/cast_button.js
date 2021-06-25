@@ -42,7 +42,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.castButton_ = shaka.util.Dom.createButton();
     this.castButton_.classList.add('shaka-cast-button');
-    this.castButton_.setAttribute('aria-pressed', 'false');
+    this.castButton_.ariaPressed = 'false';
 
     /** @private {!HTMLElement} */
     this.castIcon_ = shaka.util.Dom.createHTMLElement('i');
@@ -126,9 +126,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     // Aria-pressed set to true when casting, set to false otherwise.
     if (canCast) {
       if (isCasting) {
-        this.castButton_.setAttribute('aria-pressed', 'true');
+        this.castButton_.ariaPressed = 'true';
       } else {
-        this.castButton_.setAttribute('aria-pressed', 'false');
+        this.castButton_.ariaPressed = 'false';
       }
     }
 

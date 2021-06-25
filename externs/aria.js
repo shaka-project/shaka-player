@@ -16,3 +16,9 @@ Element.prototype.ariaLabel;
 
 /** @type {string} */
 Element.prototype.ariaPressed;
+
+/** @type {string} */
+Element.prototype.ariaSelected;
+
+/** @type {string} */
+Element.prototype.ariaHidden;

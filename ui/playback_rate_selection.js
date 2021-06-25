@@ -105,7 +105,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     if (span) {
       const button = span.parentElement;
       button.appendChild(shaka.ui.Utils.checkmarkIcon());
-      button.setAttribute('aria-selected', 'true');
+      button.ariaSelected = 'true';
       span.classList.add('shaka-chosen-item');
     }
 
