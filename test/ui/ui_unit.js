@@ -611,6 +611,117 @@ describe('UI', () => {
         goog.asserts.assert(found, 'Unable to find resolution menu');
       }
     });
+
+    describe('statistics menu', () => {
+      /** @type {!HTMLElement} */
+      let statisticsMenuButton;
+      /** @type {!HTMLElement} */
+      let statisticsContainer;
+
+      beforeEach(() => {
+        const config = {
+          controlPanelElements: [
+            'statistics',
+          ],
+          statisticsList: [
+            'width',
+            'height',
+            'fakeStatistic',
+            'bufferingTime',
+          ],
+        };
+        const ui = UiUtils.createUIThroughAPI(videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
+
+        const statisticsMenuButtons =
+        videoContainer.getElementsByClassName('shaka-statistics-button');
+        expect(statisticsMenuButtons.length).toBe(1);
+        statisticsMenuButton = /** @type {!HTMLElement} */
+            (statisticsMenuButtons[0]);
+
+        const statisticsContainers =
+        videoContainer.getElementsByClassName('shaka-statistics-container');
+        expect(statisticsContainers.length).toBe(1);
+        statisticsContainer = /** @type {!HTMLElement} */
+            (statisticsContainers[0]);
+      });
+
+      it('container appears and disappears on toggle', () => {
+        expect(statisticsContainer.classList.contains('shaka-hidden'))
+            .toBe(true);
+
+        statisticsMenuButton.click();
+        expect(statisticsContainer.classList.contains('shaka-hidden'))
+            .toBe(false);
+
+        statisticsMenuButton.click();
+        expect(statisticsContainer.classList.contains('shaka-hidden'))
+            .toBe(true);
+      });
+
+      it('container is updated periodically', async () => {
+        function getStatsFromContainer() {
+          const nodes = statisticsContainer.childNodes;
+          width = nodes[0].textContent.replace('width: ', '');
+          height = nodes[2].textContent.replace('height: ', '');
+          bufferingTime = nodes[4].textContent.replace('bufferingTime: ', '');
+        }
+
+        /** @type {!string} */
+        let width;
+        /** @type {!string} */
+        let height;
+        /** @type {!string} */
+        let bufferingTime;
+        /** @type {!string} */
+        let lastBufferingTime;
+
+        const manifest =
+        shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(/* id= */ 0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.size(1920, 1080);
+            });
+          });
+        });
+
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        // Placeholder statistics are available before toggle
+        getStatsFromContainer();
+        expect(width).toBe('NaN');
+        expect(height).toBe('NaN');
+        expect(bufferingTime).toBe('NaN');
+
+        // Statistics are displayed on toggle
+        statisticsMenuButton.click();
+        await Util.delay(0.2);
+
+        getStatsFromContainer();
+        expect(width).toBe('1920.00');
+        expect(height).toBe('1080.00');
+        expect(bufferingTime).toBeGreaterThan(0.1);
+
+        // Statistics are updated over time
+        lastBufferingTime = bufferingTime;
+        await Util.delay(0.2);
+
+        getStatsFromContainer();
+        expect(bufferingTime).toBeGreaterThan(lastBufferingTime);
+
+        // Statistics stop updating when the container is hidden
+        statisticsMenuButton.click();
+        lastBufferingTime = bufferingTime;
+        await Util.delay(0.2);
+
+        getStatsFromContainer();
+        expect(bufferingTime).toBe(lastBufferingTime);
+      });
+    });
   });
 
 

@@ -67,6 +67,7 @@ The following elements can be added to the UI bar using this configuration value
   supports AirPlay.
 * cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
+* statistics: adds a button that displays statistics of the video.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Similarly, the 'overflowMenuButtons' configuration option can be used to control
@@ -84,6 +85,7 @@ The following buttons can be added to the overflow menu:
 * playback_rate: adds a button that controls the playback rate selection.
 * airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
   supports AirPlay.
+* statistics: adds a button that displays statistics of the video.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
@@ -103,6 +105,19 @@ customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
 
 UI layout can be reconfigured at any point after it's been created.
 Please note that custom layouts might need CSS adjustments to look good.
+
+#### Configuring Statistics
+
+The list of statistics that are displayed when toggling the statistics button can be customized by specifing a `statisticsList` on the configuration. By default, all of the following are activated.
+
+ ```js
+const config = {
+  'controlPanelElements': ['statistics',],
+  'statisticsList': ['bufferingTime', 'completionPercent', 'corruptedFrames','decodedFrames', 'drmTimeSeconds', 'droppedFrames', 'estimatedBandwidth', 'height', 'licenseTime', 'liveLatency', 'loadLatency', 'manifestTimeSeconds', 'maxSegmentDuration', 'pauseTime', 'playTime', 'streamBandwidth', 'width',],
+}
+ui.configure(config);
+```
+
 
 #### Changing seek bar progress colors
 The seek bar consists of three segments: past (already played part of the presentation),

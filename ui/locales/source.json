@@ -134,6 +134,10 @@
     "description": "Label for a button used to skip ahead to the live broadcast.",
     "message": "Skip ahead to live"
   },
+  "STATISTICS": {
+    "description": "Label for a button that displays statistics of the video.",
+    "message": "Statistics"
+  },
   "SUBTITLE_FORCED": {
     "description": "Label used to identify a subtitle track that is forced to be shown.",
     "message": "Forced"

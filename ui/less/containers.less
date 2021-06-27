@@ -192,6 +192,27 @@
   align-items: center;
 }
 
+.shaka-statistics-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  color: black;
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: rgba(0, 0, 0, 0.1) 0 0 20px 0;
+
+  max-height: 250px;
+  padding: 5px 10px;
+  border-radius: 2px;
+
+  position: absolute;
+  z-index: 2;
+  left: 15px;
+  top: 15px;
+
+  /* Fades out with the other controls. */
+  .show-when-controls-shown();
+}
+
 .shaka-scrim-container {
   margin: 0;
   .fill-container();
