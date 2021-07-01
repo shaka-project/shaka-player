@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.ResolutionSelection');
 
 goog.require('goog.asserts');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -198,10 +197,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.RESOLUTION));
-    this.backButton.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.RESOLUTION));
+    this.button.ariaLabel = this.localization.resolve(LocIds.RESOLUTION);
+    this.backButton.ariaLabel = this.localization.resolve(LocIds.RESOLUTION);
     this.backSpan.textContent =
         this.localization.resolve(LocIds.RESOLUTION);
     this.nameSpan.textContent =

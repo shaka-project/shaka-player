@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.CastButton');
 
 goog.require('shaka.cast.CastProxy');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -156,8 +155,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.castButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.CAST));
+    this.castButton_.ariaLabel = this.localization.resolve(LocIds.CAST);
     this.castNameSpan_.textContent =
         this.localization.resolve(LocIds.CAST);
 

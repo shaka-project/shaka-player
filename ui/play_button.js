@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.PlayButton');
 
 goog.require('shaka.ads.AdManager');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -101,8 +100,7 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     const LocIds = shaka.ui.Locales.Ids;
     const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
 
-    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(label));
+    this.button.ariaLabel = this.localization.resolve(label);
   }
 
   /**
