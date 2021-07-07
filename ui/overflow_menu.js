@@ -40,9 +40,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     /** @private {HTMLElement} */
     this.controlsContainer_ = this.controls.getControlsContainer();
 
-    /**
-     * @private
-     * {!Array.<shaka.extern.IUIElement|shaka.extern.IUISettingsMenu>} */
+    /** @private {!Array.<shaka.extern.IUIElement>} */
     this.children_ = [];
 
     this.addOverflowMenuButton_();
@@ -50,40 +48,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.addOverflowMenu_();
 
     this.createChildren_();
-
-
-    // Initially, some child buttons inside the overflow menu are created
-    // with a "Close" option.
-    // When inside of the overflow menu, that option must be replaced to
-    // a "Back" arrow that returns the user to the main overflow menu.
-    for (const menu of this.children_) {
-      // Some buttons (like "Loop"), are only toggled on click, without
-      // the need of opening submenus, thus they do not have a backButton
-      // and we must ignore them.
-      const backOrClose = menu.backButton;
-
-      if (backOrClose) {
-        // "Close" icon is replaced with a "Back" icon.
-        backOrClose.firstChild.textContent =
-            shaka.ui.Enums.MaterialDesignIcons.BACK;
-
-        // When created, the "Close" functionality hides the submenu.
-        // An additional listener must be added to also reopen the
-        // initial overflow menu when clicking "Back".
-        this.eventManager.listen(backOrClose, 'click', () => {
-          shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
-
-          // If there are back to overflow menu buttons, there must be
-          // overflow menu buttons, but oh well
-          if (this.overflowMenu_.childNodes.length) {
-            /** @type {!HTMLElement} */ (this.overflowMenu_.childNodes[0])
-                .focus();
-          }
-          // Make sure controls are displayed
-          this.controls.computeOpacity();
-        });
-      }
-    }
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
