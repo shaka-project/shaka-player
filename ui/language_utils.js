@@ -138,7 +138,7 @@ shaka.ui.LanguageUtils = class {
       if (updateChosen && (combinationName == selectedCombination)) {
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
-        button.setAttribute('aria-selected', 'true');
+        button.ariaSelected = 'true';
         currentSelectionElement.textContent = span.textContent;
       }
       langMenu.appendChild(button);
