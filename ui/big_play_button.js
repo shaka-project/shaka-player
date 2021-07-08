@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.BigPlayButton');
 
+goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.PlayButton');
 goog.requireType('shaka.ui.Controls');
 
