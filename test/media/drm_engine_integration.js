@@ -174,7 +174,7 @@ describe('DrmEngine', () => {
     return support['com.widevine.alpha'] || support['com.microsoft.playready'];
   }
 
-  describe('basic flow', () => {
+  filterDescribe('basic flow', checkSupport, () => {
     drmIt('gets a license and can play encrypted segments', async () => {
       // The error callback should not be invoked.
       onErrorSpy.and.callFake(fail);
