@@ -40,4 +40,13 @@ shaka.ui.BigPlayButton = class extends shaka.ui.PlayButton {
       this.button.setAttribute('icon', 'pause');
     }
   }
+
+
+  /** @override */
+  updateAriaLabel() {
+    const LocIds = shaka.ui.Locales.Ids;
+    const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
+
+    this.button.ariaLabel = this.localization.resolve(label);
+  }
 };
