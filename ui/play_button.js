@@ -8,9 +8,7 @@
 goog.provide('shaka.ui.PlayButton');
 
 goog.require('shaka.ads.AdManager');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Element');
-goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
 goog.requireType('shaka.ui.Controls');
@@ -96,14 +94,11 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     return this.controls.presentationIsPaused();
   }
 
-  /** @protected */
-  updateAriaLabel() {
-    const LocIds = shaka.ui.Locales.Ids;
-    const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
-
-    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(label));
-  }
+  /**
+   * Called when the button's aria label needs to change.
+   * To be overridden by subclasses.
+   */
+  updateAriaLabel() {}
 
   /**
    * Called when the button's icon needs to change.

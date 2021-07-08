@@ -9,6 +9,7 @@ goog.provide('shaka.ui.SmallPlayButton');
 
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.PlayButton');
 
 
@@ -40,6 +41,17 @@ shaka.ui.SmallPlayButton = class extends shaka.ui.PlayButton {
       this.button.textContent = Icons.REPLAY;
     } else {
       this.button.textContent = this.isPaused() ? Icons.PLAY : Icons.PAUSE;
+    }
+  }
+
+  /** @override */
+  updateAriaLabel() {
+    const LocIds = shaka.ui.Locales.Ids;
+    if (this.video.ended) {
+      this.button.ariaLabel = this.localization.resolve(LocIds.REPLAY);
+    } else {
+      const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
+      this.button.ariaLabel = this.localization.resolve(label);
     }
   }
 };

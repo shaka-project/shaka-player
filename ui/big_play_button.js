@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.BigPlayButton');
 
+goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.PlayButton');
 goog.requireType('shaka.ui.Controls');
 
@@ -39,5 +40,14 @@ shaka.ui.BigPlayButton = class extends shaka.ui.PlayButton {
     } else {
       this.button.setAttribute('icon', 'pause');
     }
+  }
+
+
+  /** @override */
+  updateAriaLabel() {
+    const LocIds = shaka.ui.Locales.Ids;
+    const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
+
+    this.button.ariaLabel = this.localization.resolve(label);
   }
 };
