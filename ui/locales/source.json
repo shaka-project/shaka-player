@@ -109,6 +109,10 @@
     "message": "Playback speed",
     "description": "Label for a button used to navigate to a submenu to choose the playback speed in the video player."
   },
+  "REPLAY": {
+    "description": "Label for a button used to replay the video in a video player.",
+    "message": "Replay"
+  },
   "RESOLUTION": {
     "description": "Label for a button used to open a submenu to choose a video resolution in the video player.",
     "meaning": "Visual quality",
