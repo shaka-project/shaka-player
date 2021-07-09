@@ -429,7 +429,6 @@ describe('PeriodCombiner', () => {
     expect(highBandwidth.video.originalId).toBe('480');
   });
 
-
   it('Filters out duplicate streams', async () => {
     // v1 and v3 are duplicates
     const v1 = makeVideoStream(1280);
@@ -544,6 +543,49 @@ describe('PeriodCombiner', () => {
     for (const id of textIds) {
       expect(id).not.toBe('t3');
     }
+  });
+
+  // Regression test for #3383, where we failed on multi-period content with
+  // multiple image streams per period.
+  it('Can handle multiple image streams', async () => {
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(1280),
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [
+          makeImageStream(240),
+          makeImageStream(480),
+        ],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(1280),
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [
+          makeImageStream(240),
+          makeImageStream(480),
+        ],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+
+    const imageStreams = combiner.getImageStreams();
+    expect(imageStreams.length).toBe(2);
+
+    const imageIds = imageStreams.map((i) => i.originalId);
+    expect(imageIds).toEqual([
+      '240,240',
+      '480,480',
+    ]);
   });
 
   it('Text track gaps', async () => {
@@ -1178,6 +1220,26 @@ describe('PeriodCombiner', () => {
         language);
     streamGenerator.primary = primary;
     streamGenerator.originalId = primary ? language + '*' : language;
+    return streamGenerator.build_();
+  }
+
+  /**
+   * @param {number} height
+   * @return {shaka.extern.Stream}
+   * @suppress {accessControls}
+   */
+  function makeImageStream(height) {
+    const width = height * 4 / 3;
+    const streamGenerator = new shaka.test.ManifestGenerator.Stream(
+        /* manifest= */ null,
+        /* isPartial= */ false,
+        /* id= */ nextId++,
+        /* type= */ shaka.util.ManifestParserUtils.ContentType.IMAGE,
+        /* lang= */ 'und');
+    streamGenerator.size(width, height);
+    streamGenerator.originalId = height.toString();
+    streamGenerator.mime('image/jpeg');
+    streamGenerator.tilesLayout = '1x1';
     return streamGenerator.build_();
   }
 
