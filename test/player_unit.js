@@ -10,6 +10,8 @@ goog.require('shaka.log');
 goog.require('shaka.media.BufferingObserver');
 goog.require('shaka.media.ManifestParser');
 goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.test.FakeAbrManager');
 goog.require('shaka.test.FakeDrmEngine');
 goog.require('shaka.test.FakeManifestParser');
@@ -3530,6 +3532,61 @@ describe('Player', () => {
           {language: 'en', role: 'caption', label: null},
           {language: 'en', role: 'subtitle', label: null},
         ]);
+      });
+    });
+
+    describe('getThumbnails', () => {
+      it('returns correct thumbnail position for supplied time', async () => {
+        const uris = () => ['thumbnail'];
+        const segment = new shaka.media.SegmentReference(
+            0, 60, uris, 0, null, null, 0, 0, Infinity, [],
+        );
+        const index = new shaka.media.SegmentIndex([segment]);
+
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1);
+          });
+          manifest.addImageStream(5, (stream) => {
+            stream.originalId = 'thumbnail';
+            stream.width = 200;
+            stream.height = 150;
+            stream.mimeType = 'image/jpeg';
+            stream.tilesLayout = '2x3';
+            stream.segmentIndex = index;
+          });
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        const thumbnail0 = await player.getThumbnails(5, 0);
+        const thumbnail1 = await player.getThumbnails(5, 11);
+        const thumbnail2 = await player.getThumbnails(5, 21);
+        const thumbnail5 = await player.getThumbnails(5, 51);
+        expect(thumbnail0).toEqual(jasmine.objectContaining({
+          positionX: 0,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnail1).toEqual(jasmine.objectContaining({
+          positionX: 100,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnail2).toEqual(jasmine.objectContaining({
+          positionX: 0,
+          positionY: 50,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnail5).toEqual(jasmine.objectContaining({
+          positionX: 100,
+          positionY: 100,
+          width: 100,
+          height: 50,
+        }));
       });
     });
   });
