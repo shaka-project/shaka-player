@@ -626,7 +626,7 @@ describe('PeriodCombiner', () => {
     ]);
   });
 
-  it('Text track gaps', async () => {
+  it('handles text track gaps', async () => {
     /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
     const periods = [
       {
@@ -689,6 +689,70 @@ describe('PeriodCombiner', () => {
     const english = textStreams.find((s) => s.language == 'en');
     expect(spanish.originalId).toBe(',,es');
     expect(english.originalId).toBe('en,,en');
+  });
+
+  it('handles image track gaps', async () => {
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStream('en'),
+        ],
+        textStreams: [],
+        imageStreams: [
+          makeImageStream(240),
+        ],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStream('en'),
+        ],
+        textStreams: [],
+        imageStreams: [
+          /* No image streams in this period */
+        ],
+      },
+      {
+        id: '3',
+        videoStreams: [
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStream('en'),
+        ],
+        textStreams: [],
+        imageStreams: [
+          makeImageStream(240),
+          makeImageStream(480),
+        ],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const imageStreams = combiner.getImageStreams();
+    expect(imageStreams).toEqual(jasmine.arrayWithExactContents([
+      jasmine.objectContaining({
+        height: 240,
+      }),
+      jasmine.objectContaining({
+        height: 480,
+      }),
+    ]));
+
+    // We can use the originalId field to see what each track is composed of.
+
+    const i240 = imageStreams.find((s) => s.height == 240);
+    const i480 = imageStreams.find((s) => s.height == 480);
+    expect(i240.originalId).toBe('240,,240');
+    expect(i480.originalId).toBe('240,,480');
   });
 
   it('Disjoint audio channels', async () => {
