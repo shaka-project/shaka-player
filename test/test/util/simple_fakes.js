@@ -90,13 +90,15 @@ shaka.test.FakeAbrManager = class {
 /** @extends {shaka.media.StreamingEngine} */
 shaka.test.FakeStreamingEngine = class {
   constructor() {
-    const resolve = () => Promise.resolve();
-
     let activeVariant = null;
     let activeText = null;
 
     /** @type {!jasmine.Spy} */
-    this.destroy = jasmine.createSpy('destroy').and.callFake(resolve);
+    this.destroy = jasmine.createSpy('destroy').and.callFake(() => {
+      activeVariant = null;
+      activeText = null;
+      return Promise.resolve();
+    });
 
     /** @type {!jasmine.Spy} */
     this.configure = jasmine.createSpy('configure');
