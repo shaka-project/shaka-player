@@ -39,6 +39,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en', /* channels= */ 2),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: 'ad',
@@ -49,6 +50,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en', /* channels= */ 2),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -117,6 +119,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en', /* channels= */ 2),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: 'main',
@@ -130,6 +133,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en', /* channels= */ 2),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -194,6 +198,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en'),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '2',
@@ -204,6 +209,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en'),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -242,6 +248,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en'),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '2',
@@ -252,6 +259,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en'),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -289,6 +297,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('fr', /* channels= */ 2, /* primary= */ false),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: 'ad',
@@ -299,6 +308,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en'),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: 'show2',
@@ -311,6 +321,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('fr', /* channels= */ 2, /* primary= */ true),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -361,6 +372,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('es'),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: 'show2',
@@ -371,6 +383,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en'),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -411,6 +424,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en'),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -495,6 +509,16 @@ describe('PeriodCombiner', () => {
     t3.originalId = 't3';
     t3.roles = ['role1'];
 
+    // i1 and i3 are duplicates.
+    const i1 = makeImageStream(240);
+    i1.originalId = 'i1';
+
+    const i2 = makeImageStream(480);
+    i2.originalId = 'i2';
+
+    const i3 = makeImageStream(240);
+    i3.originalId = 'i3';
+
     /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
     const periods = [
       {
@@ -515,6 +539,11 @@ describe('PeriodCombiner', () => {
           t1,
           t2,
           t3,
+        ],
+        imageStreams: [
+          i1,
+          i2,
+          i3,
         ],
       },
     ];
@@ -542,6 +571,15 @@ describe('PeriodCombiner', () => {
     const textIds = textStreams.map((t) => t.originalId);
     for (const id of textIds) {
       expect(id).not.toBe('t3');
+    }
+
+    const imageStreams = combiner.getImageStreams();
+    expect(imageStreams.length).toBe(2);
+
+    // i3 should've been filtered out
+    const imageIds = imageStreams.map((i) => i.originalId);
+    for (const id of imageIds) {
+      expect(id).not.toBe('i3');
     }
   });
 
@@ -602,6 +640,7 @@ describe('PeriodCombiner', () => {
         textStreams: [
           makeTextStream('en'),
         ],
+        imageStreams: [],
       },
       {
         id: '2',
@@ -614,6 +653,7 @@ describe('PeriodCombiner', () => {
         textStreams: [
           /* No text streams */
         ],
+        imageStreams: [],
       },
       {
         id: '3',
@@ -627,6 +667,7 @@ describe('PeriodCombiner', () => {
           makeTextStream('en'),
           makeTextStream('es'),
         ],
+        imageStreams: [],
       },
     ];
 
@@ -662,6 +703,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en', /* channels= */ 6),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '2',
@@ -672,6 +714,7 @@ describe('PeriodCombiner', () => {
           makeAudioStream('en', /* channels= */ 2),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -708,6 +751,7 @@ describe('PeriodCombiner', () => {
           makeAudioStreamWithSampleRate(48000),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '2',
@@ -718,6 +762,7 @@ describe('PeriodCombiner', () => {
           makeAudioStreamWithSampleRate(44100),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -754,6 +799,7 @@ describe('PeriodCombiner', () => {
           makeAudioStreamWithSampleRate(44100),
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '2',
@@ -764,6 +810,7 @@ describe('PeriodCombiner', () => {
           makeAudioStreamWithSampleRate(48000),
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -794,6 +841,7 @@ describe('PeriodCombiner', () => {
         ],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '2',
@@ -803,6 +851,7 @@ describe('PeriodCombiner', () => {
         ],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -847,6 +896,7 @@ describe('PeriodCombiner', () => {
           stream2,
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '1',
@@ -858,6 +908,7 @@ describe('PeriodCombiner', () => {
           stream4,
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -906,6 +957,7 @@ describe('PeriodCombiner', () => {
           stream2,
         ],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '2',
@@ -917,6 +969,7 @@ describe('PeriodCombiner', () => {
           stream4,
         ],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
@@ -1041,24 +1094,28 @@ describe('PeriodCombiner', () => {
         videoStreams: [v1, v2, v3, v4, v5],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '2',
         videoStreams: [v6, v7, v8, v9, v10],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '3',
         videoStreams: [v11, v12, v13, v14, v15],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '4',
         videoStreams: [v16, v17, v18, v19, v20],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '5',
@@ -1066,6 +1123,7 @@ describe('PeriodCombiner', () => {
         videoStreams: [v1, v2, v3, v4, v5],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '6',
@@ -1073,6 +1131,7 @@ describe('PeriodCombiner', () => {
         videoStreams: [v6, v7, v8, v9, v10],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '7',
@@ -1080,6 +1139,7 @@ describe('PeriodCombiner', () => {
         videoStreams: [v11, v12, v13, v14, v15],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
       {
         id: '8',
@@ -1087,6 +1147,7 @@ describe('PeriodCombiner', () => {
         videoStreams: [v16, v17, v18, v19, v20],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
       // Adding the 1st period again since it was the one that used to
       // cause trouble when repeated.
@@ -1096,6 +1157,7 @@ describe('PeriodCombiner', () => {
         videoStreams: [v1, v2, v3, v4, v5],
         audioStreams: [],
         textStreams: [],
+        imageStreams: [],
       },
     ];
 
