@@ -290,6 +290,25 @@ describe('PresentationTimeline', () => {
       // last segment time (50)
       expect(timeline.getSegmentAvailabilityEnd()).toBe(50);
     });
+
+    it('calculates time when there a transition of live to static', () => {
+      const timeline = makeLiveTimeline(/* availability= */ 20);
+
+      const ref1 = makeSegmentReference(0, 10);
+      const ref2 = makeSegmentReference(10, 20);
+      const ref3 = makeSegmentReference(20, 30);
+      const ref4 = makeSegmentReference(30, 40);
+      const ref5 = makeSegmentReference(40, 50);
+
+      setElapsed(50);
+      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
+
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(50);
+
+      timeline.setStatic(true);
+
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(50);
+    });
   });
 
   describe('getDuration', () => {
