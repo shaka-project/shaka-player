@@ -36,7 +36,7 @@ describe('DashParser Manifest', () => {
   /** @type {!ArrayBuffer} */
   let mp4Index;
 
-  /** @type {!string} */
+  /** @type {string} */
   const thumbnailScheme = 'http://dashif.org/guidelines/thumbnail_tile';
 
   beforeAll(async () => {
@@ -1788,6 +1788,48 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.presentationTimeline).toBeTruthy();
+  });
+
+  it('Invokes manifestPreprocessor in config', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="3" mimeType="audio/mp4">',
+      '      <Representation id="audio-en">',
+      '        <BaseURL>a-en.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet mimeType="text/vtt" lang="de">',
+      '      <Representation>',
+      '        <BaseURL>http://example.com/de.vtt</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.manifestPreprocessor = (mpd) => {
+      const selector = 'AdaptationSet[mimeType="text/vtt"';
+      const vttElements = mpd.querySelectorAll(selector);
+      for (const element of vttElements) {
+        element.parentNode.removeChild(element);
+      }
+    };
+    parser.configure(config);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const stream = manifest.textStreams[0];
+    expect(stream).toBeUndefined();
   });
 
   it('converts Accessibility element to "kind"', async () => {

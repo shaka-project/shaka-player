@@ -20,3 +20,6 @@ TextTrack.prototype.kind;
 
 /** @type {string} */
 TextTrack.prototype.label;
+
+/** @type {string} */
+TextTrack.prototype.language;

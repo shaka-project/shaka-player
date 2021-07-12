@@ -11,10 +11,10 @@ describe('DtvccPacketBuilder', () => {
   /** @type {!shaka.cea.DtvccPacketBuilder} */
   let dtvccPacketBuilder;
 
-  /** @type {!number} */
+  /** @type {number} */
   const DTVCC_PACKET_START = shaka.cea.DtvccPacketBuilder.DTVCC_PACKET_START;
 
-  /** @type {!number} */
+  /** @type {number} */
   const DTVCC_PACKET_DATA = shaka.cea.DtvccPacketBuilder.DTVCC_PACKET_DATA;
 
   beforeEach(() => {

@@ -88,7 +88,8 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('span');
+    const captions =
+        textContainer.querySelector('span:not(.shaka-text-wrapper)');
     const cssObj = parseCssText(captions.style.cssText);
 
     const expectCssObj = {
@@ -140,7 +141,8 @@ describe('UITextDisplayer', () => {
     // Verify styles applied to the nested cues.
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('span');
+    const captions =
+        textContainer.querySelector('span:not(.shaka-text-wrapper)');
     const cssObj = parseCssText(captions.style.cssText);
 
     const expectCssObj = {
@@ -193,7 +195,8 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('span');
+    const captions =
+        textContainer.querySelector('span:not(.shaka-text-wrapper)');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({
@@ -223,7 +226,8 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('span');
+    const captions =
+        textContainer.querySelector('span:not(.shaka-text-wrapper)');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({'font-size': expectedFontSize}));

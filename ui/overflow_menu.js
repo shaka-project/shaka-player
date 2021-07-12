@@ -10,7 +10,6 @@ goog.provide('shaka.ui.OverflowMenu');
 goog.require('goog.asserts');
 goog.require('shaka.ads.AdManager');
 goog.require('shaka.log');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -194,8 +193,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    */
   updateAriaLabel_() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.overflowMenuButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.MORE_SETTINGS));
+    this.overflowMenuButton_.ariaLabel =
+        this.localization.resolve(LocIds.MORE_SETTINGS);
   }
 };
 

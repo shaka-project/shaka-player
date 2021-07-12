@@ -634,7 +634,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreSuggestedPresentationDelay: boolean,
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
- *   keySystemsByURI: !Object.<string, string>
+ *   keySystemsByURI: !Object.<string, string>,
+ *   manifestPreprocessor: function(!Element)
  * }}
  *
  * @property {string} clockSyncUri
@@ -684,6 +685,10 @@ shaka.extern.DrmConfiguration;
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
+ * @property {function(!Element)} manifestPreprocessor
+ *   Called immediately after the DASH manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -784,7 +789,8 @@ shaka.extern.ManifestConfiguration;
  *   lowLatencyMode: boolean,
  *   autoLowLatencyMode: boolean,
  *   forceHTTPS: boolean,
- *   preferNativeHls: boolean
+ *   preferNativeHls: boolean,
+ *   updateIntervalSeconds: number
  * }}
  *
  * @description
@@ -891,6 +897,8 @@ shaka.extern.ManifestConfiguration;
  *   If true, if the protocol is HTTP change it to HTTPs.
  * @property {boolean} preferNativeHls
  *   If true, prefer native HLS playback when possible, regardless of platform.
+ * @property {number} updateIntervalSeconds
+ *   The minimum number of seconds to see if the manifest has changes.
  *
  * @exportDoc
  */
@@ -1095,3 +1103,21 @@ shaka.extern.LanguageRole;
  * @exportDoc
  */
 shaka.extern.Thumbnail;
+
+
+/**
+ * @typedef {{
+ *   title: string,
+ *   startTime: number,
+ *   endTime: number
+ * }}
+ *
+ * @property {string} title
+ *    The title of the chapter.
+ * @property {number} startTime
+ *    The time that describes the beginning of the range of the chapter.
+ * @property {number} endTime
+ *    The time that describes the end of the range of chapter.
+ * @exportDoc
+ */
+shaka.extern.Chapter;

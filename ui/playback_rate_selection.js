@@ -71,10 +71,8 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.backButton.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.BACK));
-    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.PLAYBACK_RATE));
+    this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
+    this.button.ariaLabel = this.localization.resolve(LocIds.PLAYBACK_RATE);
     this.nameSpan.textContent = this.localization.resolve(LocIds.PLAYBACK_RATE);
     this.backSpan.textContent = this.localization.resolve(LocIds.PLAYBACK_RATE);
   }
@@ -106,7 +104,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     if (span) {
       const button = span.parentElement;
       button.appendChild(shaka.ui.Utils.checkmarkIcon());
-      button.setAttribute('aria-selected', 'true');
+      button.ariaSelected = 'true';
       span.classList.add('shaka-chosen-item');
     }
 

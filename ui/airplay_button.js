@@ -36,13 +36,18 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.airplayButton_ = shaka.util.Dom.createButton();
     this.airplayButton_.classList.add('shaka-airplay-button');
-    this.airplayButton_.setAttribute('aria-pressed', 'false');
+    this.airplayButton_.ariaPressed = 'false';
 
     /** @private {!HTMLElement} */
     this.airplayIcon_ = shaka.util.Dom.createHTMLElement('i');
     this.airplayIcon_.classList.add('material-icons-round');
     this.airplayIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.AIRPLAY;
     this.airplayButton_.appendChild(this.airplayIcon_);
+
+    // Don't show the button if AirPlay is not supported.
+    if (!window.WebKitPlaybackTargetAvailabilityEvent) {
+      this.airplayButton_.classList.add('shaka-hidden');
+    }
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
