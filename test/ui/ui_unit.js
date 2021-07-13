@@ -704,7 +704,7 @@ describe('UI', () => {
         getStatsFromContainer();
         expect(width).toBe('1920.00');
         expect(height).toBe('1080.00');
-        expect(bufferingTime).toBeGreaterThan(0.1);
+        expect(bufferingTime).toBeGreaterThanOrEqual(0.1);
 
         // Statistics are updated over time
         lastBufferingTime = bufferingTime;
