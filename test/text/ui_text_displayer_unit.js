@@ -220,7 +220,8 @@ describe('UITextDisplayer', () => {
     // Verify styles applied to the nested cues.
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const intermediateSpan = textContainer.querySelector('span');
+    const intermediateSpan =
+        textContainer.querySelector('span:not(.shaka-text-wrapper)');
     const captions = intermediateSpan.querySelectorAll('span')[0];
     const cssObj = parseCssText(captions.style.cssText);
 
