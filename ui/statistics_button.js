@@ -7,7 +7,6 @@
 
 goog.provide('shaka.ui.StatisticsButton');
 
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -121,8 +120,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     this.nameSpan_.textContent =
         this.localization.resolve(LocIds.STATISTICS);
 
-    this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.STATISTICS));
+    this.button_.ariaLabel = this.localization.resolve(LocIds.STATISTICS);
 
     const labelText = this.container_.classList.contains('shaka-hidden') ?
         LocIds.OFF : LocIds.ON;
