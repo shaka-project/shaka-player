@@ -276,6 +276,7 @@ describe('DashParser Live', () => {
         ref.timestampOffset = pStart;
         ref.startTime += pStart;
         ref.endTime += pStart;
+        ref.trueEndTime += pStart;
       }
       /** @const {!Array.<!shaka.media.SegmentReference>} */
       const allRefs = period1Refs.concat(period2Refs);
