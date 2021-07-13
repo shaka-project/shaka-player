@@ -7,7 +7,6 @@
 
 goog.provide('shaka.ui.PlaybackRateSelection');
 
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');

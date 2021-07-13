@@ -7,7 +7,6 @@
 
 goog.provide('shaka.ui.AudioLanguageSelection');
 
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
