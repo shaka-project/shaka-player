@@ -88,8 +88,7 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions =
-        textContainer.querySelector('span:not(.shaka-text-wrapper)');
+    const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
 
     const expectCssObj = {
@@ -141,13 +140,91 @@ describe('UITextDisplayer', () => {
     // Verify styles applied to the nested cues.
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions =
-        textContainer.querySelector('span:not(.shaka-text-wrapper)');
+    const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
 
     const expectCssObj = {
       'color': 'green',
       'background-color': 'black',
+      'font-size': '10px',
+      'font-style': 'normal',
+      'font-weight': 400,
+      'text-align': 'center',
+    };
+
+    // Either the prefixed or unprefixed version may be present.  We will accept
+    // either.  Detecting which property the platform has may not work, because
+    // Tizen 3, for example, has a writingMode property, but it is
+    // non-functional.  Instead of checking for which properties are on the
+    // platform's style interface, check which properties are in the cssObj.
+    // We expect one or the other to work on all supported platforms.
+    if ('writing-mode' in cssObj) {
+      expectCssObj['writing-mode'] = 'horizontal-tb';
+    } else {
+      expectCssObj['-webkit-writing-mode'] = 'horizontal-tb';
+    }
+
+    expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
+  });
+
+  it('correct style for nested within nested cue with colour', async () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, '');
+    const nestedCue = new shaka.text.Cue(0, 100, '');
+    const doubleNestedCue1 = new shaka.text.Cue(0, 100, 'eng : 00:00:07.000');
+    const doubleNestedCue2 = new shaka.text.Cue(0, 100, '');
+    const doubleNestedCue3 = new shaka.text.Cue(0, 100, 'second line');
+
+    cue.nestedCues = [nestedCue];
+    nestedCue.nestedCues =
+        [doubleNestedCue1, doubleNestedCue2, doubleNestedCue3];
+
+    // The nested cue has color required to be cascaded down
+    nestedCue.color = 'yellow';
+    nestedCue.backgroundColor = 'blue';
+
+    doubleNestedCue1.textAlign = 'center';
+    doubleNestedCue1.writingMode =
+      shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
+    doubleNestedCue1.fontSize = '10px';
+    doubleNestedCue1.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
+    doubleNestedCue1.fontStyle = 'normal';
+    doubleNestedCue1.lineHeight = '2';
+    doubleNestedCue1.nestedCues = [];
+
+    doubleNestedCue2.textAlign = 'center';
+    doubleNestedCue2.writingMode =
+      shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
+    doubleNestedCue2.fontSize = '10px';
+    doubleNestedCue2.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
+    doubleNestedCue2.fontStyle = 'normal';
+    doubleNestedCue2.lineHeight = '2';
+    doubleNestedCue2.nestedCues = [];
+
+    doubleNestedCue3.textAlign = 'center';
+    doubleNestedCue3.writingMode =
+      shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
+    doubleNestedCue3.fontSize = '10px';
+    doubleNestedCue3.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
+    doubleNestedCue3.fontStyle = 'normal';
+    doubleNestedCue3.lineHeight = '2';
+    doubleNestedCue3.nestedCues = [];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    // Wait until updateCaptions_() gets called.
+    await shaka.test.Util.delay(0.5);
+
+    // Verify styles applied to the nested cues.
+    const textContainer =
+        videoContainer.querySelector('.shaka-text-container');
+    const intermediateSpan = textContainer.querySelector('span');
+    const captions = intermediateSpan.querySelectorAll('span')[0];
+    const cssObj = parseCssText(captions.style.cssText);
+
+    const expectCssObj = {
+      'color': 'yellow',
+      'background-color': 'blue',
       'font-size': '10px',
       'font-style': 'normal',
       'font-weight': 400,
@@ -195,8 +272,7 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions =
-        textContainer.querySelector('span:not(.shaka-text-wrapper)');
+    const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({
@@ -226,8 +302,7 @@ describe('UITextDisplayer', () => {
 
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
-    const captions =
-        textContainer.querySelector('span:not(.shaka-text-wrapper)');
+    const captions = textContainer.querySelector('span');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({'font-size': expectedFontSize}));
