@@ -1,3 +1,45 @@
+## 3.1.2 (2021-07-14)
+
+Bugfixes:
+  - Fix choosing tracks from streaming event
+    - https://github.com/google/shaka-player/issues/3448
+    - https://github.com/google/shaka-player/pull/3459
+  - Fix multiperiod without consistent thumbnails
+    - https://github.com/google/shaka-player/issues/3383
+  - Fix failure with multiple thumbnails per period
+    - https://github.com/google/shaka-player/issues/3383
+  - Update Play icon after seeking from end
+    - https://github.com/google/shaka-player/pull/3515
+  - Reset forced subs between loads
+  - Fix thumbnail position calculation
+    - https://github.com/google/shaka-player/issues/3511
+    - https://github.com/google/shaka-player/pull/3516
+  - Fix thumbnail duration, expose start time and duration
+    - https://github.com/google/shaka-player/pull/3517
+  - Fix enforcement of cue alignment styles
+    - https://github.com/google/shaka-player/issues/3379
+  - Fix DASH transition from dynamic to static
+    - https://github.com/google/shaka-player/pull/3497
+  - Fix ARIA label on replay button
+    - https://github.com/google/shaka-player/pull/3513
+  - Fix audio language switching while using AirPlay
+    - https://github.com/google/shaka-player/issues/3125
+    - https://github.com/google/shaka-player/pull/3472
+  - Show captions with rapid seek when ignoreTextStreamFailures is true
+    - https://github.com/google/shaka-player/pull/3476
+  - Fix clearing buffer when requested for already-selected variant
+    - https://github.com/google/shaka-player/pull/3477
+  - Fix hung playback on rapid seek
+    - https://github.com/google/shaka-player/pull/3479
+  - Don't show AirPlay button if unavailable
+    - https://github.com/google/shaka-player/issues/3471
+  - Fix bogus debug logs
+
+Docs:
+  - Update upgrade guides
+    - https://github.com/google/shaka-player/issues/3487
+
+
 ## 3.1.1 (2021-06-17)
 
 Bugfixes:
