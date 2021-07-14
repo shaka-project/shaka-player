@@ -195,7 +195,7 @@ describe('UITextDisplayer', () => {
     nestedCue2.lineHeight = '1.5';
     nestedCue2.textAlign = 'right';
     nestedCue2.writingMode =
-      shaka.text.Cue.writingMode.HORIZONTAL_BOTTOM_TO_TOP;
+      shaka.text.Cue.writingMode.VERTICAL_LEFT_TO_RIGHT;
 
     cue.nestedCues = [nestedCue1, nestedCue2];
 
@@ -207,8 +207,10 @@ describe('UITextDisplayer', () => {
     const textContainer =
         videoContainer.querySelector('.shaka-text-container');
     const captions =
-        textContainer.querySelector('span:not(.shaka-text-wrapper)');
-    const cssObj = parseCssText(captions.style.cssText);
+        textContainer.querySelectorAll('span:not(.shaka-text-wrapper)');
+
+    expect(captions.length).toBe(1);
+    const cssObj = parseCssText(captions[captions.length-1].style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({
           'color': 'green',
