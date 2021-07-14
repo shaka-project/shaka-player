@@ -183,7 +183,8 @@ describe('UITextDisplayer', () => {
     nestedCue1.fontStyle = 'normal';
     nestedCue1.lineHeight = '2';
     nestedCue1.textAlign = 'center';
-    nestedCue1.writingMode = shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
+    nestedCue1.writingMode =
+      shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
 
     nestedCue2.color = 'black';
     nestedCue2.backgroundColor = 'green';
@@ -193,7 +194,8 @@ describe('UITextDisplayer', () => {
     nestedCue2.fontStyle = 'normal';
     nestedCue2.lineHeight = '1.5';
     nestedCue2.textAlign = 'right';
-    nestedCue2.writingMode = shaka.text.Cue.writingMode.HORIZONTAL_BOTTOM_TO_TOP;
+    nestedCue2.writingMode =
+      shaka.text.Cue.writingMode.HORIZONTAL_BOTTOM_TO_TOP;
 
     cue.nestedCues = [nestedCue1, nestedCue2];
 
