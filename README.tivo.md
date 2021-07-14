@@ -7,7 +7,7 @@ How to upgrade the Shaka player version
 1. Clone the repo in your local environment: git clone git@github.com:tivocorp/shaka-player.git
 2. Extract the diff related to Shaka player only: git diff 8000eca^...d4dd319 > ~/shaka-player.diff
 3. Extract the diff for CI/CD system: git diff 9af98aba^..fe5460f7 > ~/shaka-player-build.diff
-4. Delete the whole contents of the shaka-player project
+4. Delete the whole contents of the shaka-player project except for README.tivo.md
 5. Copy the desired sources from the open-source shaka-player project to our local project
 6. Apply ~/shaka-player-build.diff and commit locally
 7. Apply ~/shaka-player.diff and commit locally
