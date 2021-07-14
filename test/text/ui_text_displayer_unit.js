@@ -169,6 +169,57 @@ describe('UITextDisplayer', () => {
     expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
   });
 
+  it('honours nested timing where parent has infinite end', async () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, Infinity, '');
+    const nestedCue1 = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+    const nestedCue2 = new shaka.text.Cue(3600, 3700, 'Captain\'s dog.');
+
+    nestedCue1.color = 'green';
+    nestedCue1.backgroundColor = 'black';
+    nestedCue1.direction = shaka.text.Cue.direction.HORIZONTAL_LEFT_TO_RIGHT;
+    nestedCue1.fontSize = '10px';
+    nestedCue1.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
+    nestedCue1.fontStyle = 'normal';
+    nestedCue1.lineHeight = '2';
+    nestedCue1.textAlign = 'center';
+    nestedCue1.writingMode = shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
+
+    nestedCue2.color = 'black';
+    nestedCue2.backgroundColor = 'green';
+    nestedCue2.direction = shaka.text.Cue.direction.HORIZONTAL_RIGHT_TO_LEFT;
+    nestedCue2.fontSize = '20px';
+    nestedCue2.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
+    nestedCue2.fontStyle = 'normal';
+    nestedCue2.lineHeight = '1.5';
+    nestedCue2.textAlign = 'right';
+    nestedCue2.writingMode = shaka.text.Cue.writingMode.HORIZONTAL_BOTTOM_TO_TOP;
+
+    cue.nestedCues = [nestedCue1, nestedCue2];
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    // Wait until updateCaptions_() gets called.
+    await shaka.test.Util.delay(0.5);
+
+    const textContainer =
+        videoContainer.querySelector('.shaka-text-container');
+    const captions =
+        textContainer.querySelector('span:not(.shaka-text-wrapper)');
+    const cssObj = parseCssText(captions.style.cssText);
+    expect(cssObj).toEqual(
+        jasmine.objectContaining({
+          'color': 'green',
+          'background-color': 'black',
+          'direction': 'ltr',
+          'font-size': '10px',
+          'font-style': 'normal',
+          'font-weight': 400,
+          'line-height': 2,
+          'text-align': 'center',
+        }));
+  });
+
   it('correctly displays styles for cellResolution units', async () => {
     /** @type {!shaka.text.Cue} */
     const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
