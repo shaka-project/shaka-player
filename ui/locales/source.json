@@ -113,6 +113,10 @@
     "message": "Playback speed",
     "description": "Label for a button used to navigate to a submenu to choose the playback speed in the video player."
   },
+  "REPLAY": {
+    "description": "Label for a button used to replay the video in a video player.",
+    "message": "Replay"
+  },
   "RESOLUTION": {
     "description": "Label for a button used to open a submenu to choose a video resolution in the video player.",
     "meaning": "Visual quality",
@@ -133,6 +137,10 @@
   "SKIP_TO_LIVE": {
     "description": "Label for a button used to skip ahead to the live broadcast.",
     "message": "Skip ahead to live"
+  },
+  "SUBTITLE_FORCED": {
+    "description": "Label used to identify a subtitle track that is forced to be shown.",
+    "message": "Forced"
   },
   "UNDETERMINED_LANGUAGE": {
     "description": "Label for a button used to select an audio track whose language is undetermined or unknown.",

@@ -6,6 +6,10 @@
 
 goog.provide('shaka.test.FakeMediaSourceEngine');
 
+goog.require('shaka.media.MediaSourceEngine');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.util.ManifestParserUtils');
+
 
 /**
  * @summary
@@ -48,7 +52,7 @@ shaka.test.FakeMediaSourceEngine = class {
       this.initSegments[type] = data.initSegments.map(() => false);
       this.segments[type] = data.segments.map(() => false);
 
-      this.timestampOffsets_[type] = 0;
+      this.timestampOffsets_[type] = data.timestampOffset || 0;
     }
 
     /** @type {!jasmine.Spy} */
@@ -119,6 +123,10 @@ shaka.test.FakeMediaSourceEngine = class {
 
     /** @type {!jasmine.Spy} */
     this.flush = jasmine.createSpy('flush').and.returnValue(Promise.resolve());
+
+    /** @type {!jasmine.Spy} */
+    this.clearSelectedClosedCaptionId =
+        jasmine.createSpy('clearSelectedClosedCaptionId');
 
     /** @type {!jasmine.Spy} */
     this.getTextDisplayer =
@@ -412,7 +420,8 @@ shaka.test.FakeMediaSourceEngine = class {
  *   initSegments: !Array.<!BufferSource>,
  *   segments: !Array.<!BufferSource>,
  *   segmentStartTimes: !Array.<number>,
- *   segmentDuration: number
+ *   segmentDuration: number,
+ *   timestampOffset: number,
  * }}
  *
  * @property {!Array.<!BufferSource>} initSegments
@@ -425,5 +434,8 @@ shaka.test.FakeMediaSourceEngine = class {
  *   baseMediaDecodeTime (or equivalent) values.
  * @property {number} segmentDuration
  *   The duration of each media segment.
+ * @property {number=} timestampOffset
+ *   The offset to the segment start times that is added to create
+ *   the media timeline.
  */
 shaka.test.FakeMediaSourceEngine.SegmentData;

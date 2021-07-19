@@ -10,7 +10,6 @@ goog.provide('shaka.ui.OverflowMenu');
 goog.require('goog.asserts');
 goog.require('shaka.ads.AdManager');
 goog.require('shaka.log');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -112,6 +111,11 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     });
 
     this.updateAriaLabel_();
+
+    if (this.ad) {
+      // There was already an ad.
+      shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
+    }
   }
 
   /** @override */
@@ -145,7 +149,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.overflowMenu_.classList.add('shaka-overflow-menu');
     this.overflowMenu_.classList.add('shaka-no-propagation');
     this.overflowMenu_.classList.add('shaka-show-controls-on-mouse-over');
-    this.overflowMenu_.classList.add('shaka-settings-menu');
     this.overflowMenu_.classList.add('shaka-hidden');
     this.controlsContainer_.appendChild(this.overflowMenu_);
   }
@@ -213,8 +216,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    */
   updateAriaLabel_() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.overflowMenuButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.MORE_SETTINGS));
+    this.overflowMenuButton_.ariaLabel =
+        this.localization.resolve(LocIds.MORE_SETTINGS);
   }
 };
 

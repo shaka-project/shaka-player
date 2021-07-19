@@ -5,8 +5,10 @@ just a few small guidelines you need to follow.
 
 1. File a bug at https://github.com/google/shaka-player/issues (if there isn't
    one already).  If your patch is going to be large, you should start a
-   discussion on the mailing list first to make sure it is in line with our
-   design.
+   discussion on GitHub first.
+
+   Leave a comment to let us know that you are working on a PR for the issue.
+   We'll assign the issue to you.
 
 2. For legal reasons, all contributors must sign a Contributor License
    Agreement, either for an individual or corporation, before a patch can be
@@ -27,12 +29,19 @@ just a few small guidelines you need to follow.
 
 6. Add or modify unit or integration tests for any new or modified
    functionality in your patch.  For bug fixes, try to write a regression test
-   that fails without your patch and passes with it.
+   that fails without your patch and passes with it. Our tests are written with
+   [Jasmine](https://jasmine.github.io/).
 
-7. Test all changes in both the compiler and linter with ./build/all.py.
+7. Test all changes in both the compiler and linter with:
+```sh
+   python build/all.py
+```
    Patches that do not compile or pass linter checks will not be accepted.
 
-8. Test all changes in the unit and integration tests with ./build/test.py.
+8. Test all changes in the unit and integration tests with:
+```sh
+   python build/test.py
+```
    Patches that do not pass unit and integration tests will not be accepted.
 
 9. Finally, push the commits to your fork and submit a [pull request][].

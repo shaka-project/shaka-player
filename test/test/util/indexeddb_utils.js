@@ -6,6 +6,11 @@
 
 goog.provide('shaka.test.IndexedDBUtils');
 
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Functional');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.PublicPromise');
+
 
 shaka.test.IndexedDBUtils = class {
   /**
@@ -13,7 +18,7 @@ shaka.test.IndexedDBUtils = class {
    * database. If a new database can't be connected to after 5 attempts,
    * the test will fail.
    *
-   * On IE/Edge, it is possible for the database to not be deleted when the
+   * On Edge, it is possible for the database to not be deleted when the
    * success callback is fired. This means that when we delete the database and
    * immediately create a new connection, we will connect to the old database.
    *

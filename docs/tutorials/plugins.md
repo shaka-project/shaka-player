@@ -108,6 +108,7 @@ python build/build.py +@complete -@polyfill
 python build/build.py +@complete -@polyfill -@text
 ```
 
+To see the complete list of categories, its in [`build/types/`](https://github.com/google/shaka-player/tree/master/build/types)
 
 #### Build Configs
 
@@ -158,7 +159,7 @@ group file.  For example:
 -@networking
 # Add my custom HTTP implementation
 +/path/to/my_http_plugin.js
-# Add an additional polyfill for some odd platform I'm targetting
+# Add an additional polyfill for some odd platform I'm targeting
 +/path/to/my_platform_polyfill.js
 ```
 

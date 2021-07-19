@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cea.Cea608Memory');
+goog.require('shaka.cea.CeaUtils');
+goog.require('shaka.test.CeaUtils');
+goog.require('shaka.text.Cue');
+
 describe('Cea608Memory', () => {
   const CeaUtils = shaka.test.CeaUtils;
 
@@ -12,7 +17,7 @@ describe('Cea608Memory', () => {
   /** @type {!shaka.cea.Cea608Memory} */
   let memory;
 
-  /** @type {!string} */
+  /** @type {string} */
   const stream = 'CC1';
 
   beforeEach(() => {

@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.test.Dash');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.ManifestParser');
+goog.require('shaka.util.Error');
+
 describe('DashParser SegmentList', () => {
   const Dash = shaka.test.Dash;
   const ManifestParser = shaka.test.ManifestParser;
@@ -300,6 +306,72 @@ describe('DashParser SegmentList', () => {
 
       await Dash.testSegmentIndex(source, references);
     });
+  });
+
+  // https://github.com/google/shaka-player/issues/3230
+  it('works with multi-Period with eviction', async () => {
+    const setFormat = [
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation>',
+      '        <SegmentList presentationTimeOffset="%s">',
+      '          <SegmentURL media="s1.mp4" />',
+      '          <SegmentURL media="s2.mp4" />',
+      '          <SegmentURL media="s3.mp4" />',
+      '          <SegmentURL media="s4.mp4" />',
+      '          <SegmentURL media="s5.mp4" />',
+      '          <SegmentTimeline>',
+      '            <S d="10" t="0" r="4" />',
+      '          </SegmentTimeline>',
+      '        </SegmentList>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+    ].join('\n');
+    const source = [
+      '<MPD mediaPresentationDuration="PT60S">',
+      `  <BaseURL>${baseUri}</BaseURL>`,
+      '  <Period duration="PT30S">',
+      `${sprintf(setFormat, [0])}`,
+      '  </Period>',
+      '  <Period duration="PT30S">',
+      `${sprintf(setFormat, [20])}`,
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    const networkingEngine = new shaka.test.FakeNetworkingEngine()
+        .setResponseText('dummy://foo', source);
+
+    const dashParser = shaka.test.Dash.makeDashParser();
+
+    const playerInterface = {
+      networkingEngine: networkingEngine,
+      filter: () => {},
+      makeTextStreamsForClosedCaptions: (manifest) => {},
+      onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
+      onEvent: fail,
+      onError: fail,
+      isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
+    };
+    const manifest = await dashParser.start('dummy://foo', playerInterface);
+    const stream = manifest.variants[0].video;
+    await stream.createSegmentIndex();
+    goog.asserts.assert(stream.segmentIndex, 'Expected index to be created');
+
+    // Don't use Dash.testSegmentIndex since it uses SegmentIndex.find, which
+    // doesn't reproduce this issue.  We want to use Array.from which uses the
+    // iterator.
+    const expected = [
+      ManifestParser.makeReference('s1.mp4', 0, 10, baseUri),
+      ManifestParser.makeReference('s2.mp4', 10, 20, baseUri),
+      ManifestParser.makeReference('s3.mp4', 20, 30, baseUri),
+
+      ManifestParser.makeReference('s3.mp4', 30, 40, baseUri),
+      ManifestParser.makeReference('s4.mp4', 40, 50, baseUri),
+      ManifestParser.makeReference('s5.mp4', 50, 60, baseUri),
+    ];
+    const actual = Array.from(stream.segmentIndex);
+    expect(actual).toEqual(expected);
   });
 });
 

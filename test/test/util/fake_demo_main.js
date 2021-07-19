@@ -6,6 +6,8 @@
 
 goog.provide('shaka.test.FakeDemoMain');
 
+goog.require('shaka.Player');
+
 
 /**
  * @summary

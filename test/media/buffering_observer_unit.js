@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.BufferingObserver');
+goog.require('shaka.util.Iterables');
+
 describe('BufferingObserver', () => {
   const BufferingObserver = shaka.media.BufferingObserver;
   const State = shaka.media.BufferingObserver.State;

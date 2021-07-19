@@ -4,6 +4,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.media.SegmentIndex');
+goog.require('shaka.offline.ManifestConverter');
+goog.require('shaka.offline.OfflineUri');
+goog.require('shaka.util.ManifestParserUtils');
+goog.requireType('shaka.media.SegmentReference');
+
 describe('ManifestConverter', () => {
   describe('createVariants', () => {
     const audioType = 'audio';
@@ -93,6 +101,8 @@ describe('ManifestConverter', () => {
           audioRobustness: 'very',
           videoRobustness: 'kinda_sorta',
           serverCertificate: new Uint8Array([1, 2, 3]),
+          serverCertificateUri: '',
+          sessionType: '',
           initData: [{
             initData: new Uint8Array([4, 5, 6]),
             initDataType: 'cenc',
@@ -281,8 +291,10 @@ describe('ManifestConverter', () => {
       segments: [],
       variantIds,
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
     };
 
@@ -305,6 +317,7 @@ describe('ManifestConverter', () => {
       appendWindowStart: 0,
       appendWindowEnd: Infinity,
       timestampOffset: 0,
+      tilesLayout: '',
     };
 
     return segment;
@@ -326,6 +339,7 @@ describe('ManifestConverter', () => {
       codecs: 'avc1.42c01e',
       frameRate: 22,
       pixelAspectRatio: '59:54',
+      hdr: undefined,
       kind: undefined,
       language: '',
       label: null,
@@ -349,9 +363,12 @@ describe('ManifestConverter', () => {
       ],
       variantIds,
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -371,6 +388,7 @@ describe('ManifestConverter', () => {
       codecs: 'mp4a.40.2',
       frameRate: undefined,
       pixelAspectRatio: undefined,
+      hdr: undefined,
       kind: undefined,
       language: 'en',
       label: null,
@@ -394,9 +412,12 @@ describe('ManifestConverter', () => {
       ],
       variantIds,
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -415,6 +436,7 @@ describe('ManifestConverter', () => {
       codecs: '',
       frameRate: undefined,
       pixelAspectRatio: undefined,
+      hdr: undefined,
       kind: undefined,
       language: 'en',
       label: null,
@@ -438,9 +460,12 @@ describe('ManifestConverter', () => {
       ],
       variantIds: [],
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -466,6 +491,7 @@ describe('ManifestConverter', () => {
       codecs: streamDb.codecs,
       frameRate: streamDb.frameRate,
       pixelAspectRatio: streamDb.pixelAspectRatio,
+      hdr: streamDb.hdr,
       width: streamDb.width || undefined,
       height: streamDb.height || undefined,
       kind: streamDb.kind,
@@ -479,9 +505,12 @@ describe('ManifestConverter', () => {
       trickModeVideo: null,
       emsgSchemeIdUris: null,
       roles: streamDb.roles,
+      forced: streamDb.forced,
       channelsCount: streamDb.channelsCount,
       audioSamplingRate: streamDb.audioSamplingRate,
+      spatialAudio: streamDb.spatialAudio,
       closedCaptions: streamDb.closedCaptions,
+      tilesLayout: streamDb.tilesLayout,
     };
 
     expect(stream).toEqual(expectedStream);

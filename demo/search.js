@@ -8,6 +8,13 @@
 goog.provide('shakaDemo.Search');
 
 
+goog.require('shakaDemo.AssetCard');
+goog.require('shakaDemo.BoolInput');
+goog.require('shakaDemo.InputContainer');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.SelectInput');
+goog.requireType('ShakaDemoAssetInfo');
+
 /** @type {?shakaDemo.Search} */
 let shakaDemoSearch;
 
@@ -391,6 +398,8 @@ shakaDemo.Search = class {
         shakaDemo.MessageIds.AD_SEARCH);
     this.makeBooleanInput_(specialContainer, Feature.AUDIO_ONLY, FEATURE,
         shakaDemo.MessageIds.AUDIO_ONLY_SEARCH);
+    this.makeBooleanInput_(specialContainer, Feature.THUMBNAILS, FEATURE,
+        shakaDemo.MessageIds.THUMBNAILS);
 
     container.appendChild(this.resultsDiv_);
   }

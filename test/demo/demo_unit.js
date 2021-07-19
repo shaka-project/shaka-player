@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.test.FakeDemoMain');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.StringUtils');
+goog.require('shakaDemo.MessageIds');
+
 describe('Demo', () => {
   beforeEach(() => {
     // Make mock versions of misc third-party libraries.
@@ -91,9 +96,9 @@ describe('Demo', () => {
       const configPrimitives = new Set(['number', 'string', 'boolean']);
       const exceptions = new Set()
           .add('preferredVariantRole')
-          .add('preferredTextRole')
           .add('playRangeStart')
-          .add('playRangeEnd');
+          .add('playRangeEnd')
+          .add('manifest.dash.keySystemsByURI');
 
       /**
        * @param {!Object} section
@@ -103,13 +108,14 @@ describe('Demo', () => {
         for (const key in section) {
           const name = (accumulatedName) ? (accumulatedName + '.' + key) : key;
           const value = section[key];
-          if (configPrimitives.has(typeof value)) {
-            if (!exceptions.has(name)) {
+
+          if (!exceptions.has(name)) {
+            if (configPrimitives.has(typeof value)) {
               checkValueNameFn(name);
+            } else {
+              // It's a sub-section.
+              check(value, name);
             }
-          } else {
-            // It's a sub-section.
-            check(value, name);
           }
         }
       };

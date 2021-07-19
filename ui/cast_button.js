@@ -8,7 +8,7 @@
 goog.provide('shaka.ui.CastButton');
 
 goog.require('shaka.cast.CastProxy');
-goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -41,7 +41,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.castButton_ = shaka.util.Dom.createButton();
     this.castButton_.classList.add('shaka-cast-button');
-    this.castButton_.setAttribute('aria-pressed', 'false');
+    this.castButton_.ariaPressed = 'false';
 
     /** @private {!HTMLElement} */
     this.castIcon_ = shaka.util.Dom.createHTMLElement('i');
@@ -51,6 +51,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('shaka-overflow-menu-only');
     this.castNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     label.appendChild(this.castNameSpan_);
 
@@ -124,9 +125,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     // Aria-pressed set to true when casting, set to false otherwise.
     if (canCast) {
       if (isCasting) {
-        this.castButton_.setAttribute('aria-pressed', 'true');
+        this.castButton_.ariaPressed = 'true';
       } else {
-        this.castButton_.setAttribute('aria-pressed', 'false');
+        this.castButton_.ariaPressed = 'false';
       }
     }
 
@@ -154,8 +155,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.castButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.CAST));
+    this.castButton_.ariaLabel = this.localization.resolve(LocIds.CAST);
     this.castNameSpan_.textContent =
         this.localization.resolve(LocIds.CAST);
 
@@ -178,4 +178,7 @@ shaka.ui.CastButton.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'cast', new shaka.ui.CastButton.Factory());
+
+shaka.ui.Controls.registerElement(
     'cast', new shaka.ui.CastButton.Factory());

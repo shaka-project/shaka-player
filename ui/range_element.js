@@ -9,6 +9,7 @@ goog.provide('shaka.ui.RangeElement');
 
 goog.require('shaka.ui.Element');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.Timer');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -22,7 +23,7 @@ goog.requireType('shaka.ui.Controls');
  * updated at the same time.  This can happen when seeking during playback or
  * when casting.
  *
- * @extends {shaka.ui.Element}
+ * @implements {shaka.extern.IUIRangeElement}
  * @export
  */
 shaka.ui.RangeElement = class extends shaka.ui.Element {
@@ -50,6 +51,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     /** @protected {!HTMLInputElement} */
     this.bar =
       /** @type {!HTMLInputElement} */ (document.createElement('input'));
+
+    /** @private {shaka.util.Timer} */
+    this.endFakeChangeTimer_ = new shaka.util.Timer(() => {
+      this.onChangeEnd();
+      this.isChanging_ = false;
+    });
 
     this.bar.classList.add('shaka-range-element');
     this.bar.classList.add(...barClassNames);
@@ -105,9 +112,19 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     });
   }
 
+  /** @override */
+  release() {
+    if (this.endFakeChangeTimer_) {
+      this.endFakeChangeTimer_.stop();
+      this.endFakeChangeTimer_ = null;
+    }
+
+    super.release();
+  }
+
   /**
-   * @param {number} min
-   * @param {number} max
+   * @override
+   * @export
    */
   setRange(min, max) {
     this.bar.min = min;
@@ -117,27 +134,68 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   /**
    * Called when user interaction begins.
    * To be overridden by subclasses.
+   * @override
+   * @export
    */
   onChangeStart() {}
 
   /**
    * Called when a new value is set by user interaction.
    * To be overridden by subclasses.
+   * @override
+   * @export
    */
   onChange() {}
 
   /**
    * Called when user interaction ends.
    * To be overridden by subclasses.
+   * @override
+   * @export
    */
   onChangeEnd() {}
 
-  /** @return {number} */
+  /**
+   * Called to implement keyboard-based changes, where this is no clear "end".
+   * This will simulate events like onChangeStart(), onChange(), and
+   * onChangeEnd() as appropriate.
+   *
+   * @override
+   * @export
+   */
+  changeTo(value) {
+    if (!this.isChanging_) {
+      this.isChanging_ = true;
+      this.onChangeStart();
+    }
+
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
+
+    if (value > max) {
+      this.bar.value = max;
+    } else if (value < min) {
+      this.bar.value = min;
+    } else {
+      this.bar.value = value;
+    }
+    this.onChange();
+
+    this.endFakeChangeTimer_.tickAfter(/* seconds= */ 0.5);
+  }
+
+  /**
+   * @override
+   * @export
+   */
   getValue() {
     return parseFloat(this.bar.value);
   }
 
-  /** @param {number} value */
+  /**
+   * @override
+   * @export
+   */
   setValue(value) {
     // The user interaction overrides any external values being pushed in.
     if (this.isChanging_) {

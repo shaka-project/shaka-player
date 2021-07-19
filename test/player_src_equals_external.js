@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.Player');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.util.EventManager');
+
 describe('Player Src Equals', () => {
   // This asset needs to be (1) long and (2) high bitrate so that we can
   // invoke unbuffered seeks.

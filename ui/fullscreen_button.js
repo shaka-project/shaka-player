@@ -7,7 +7,6 @@
 
 goog.provide('shaka.ui.FullscreenButton');
 
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -71,8 +70,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     const label = document.fullscreenElement ?
         LocIds.EXIT_FULL_SCREEN : LocIds.FULL_SCREEN;
 
-    this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(label));
+    this.button_.ariaLabel = this.localization.resolve(label);
   }
 
   /**

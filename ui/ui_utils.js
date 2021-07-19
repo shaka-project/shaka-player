@@ -18,8 +18,9 @@ shaka.ui.Utils = class {
    * @param {string} className
    * @return {!HTMLElement}
    */
-  // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
   static getFirstDescendantWithClassName(element, className) {
+    // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
+
     const descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
     goog.asserts.assert(descendant != null, 'Should not be null!');
 
@@ -69,7 +70,7 @@ shaka.ui.Utils = class {
     icon.classList.add('shaka-chosen-item');
     icon.textContent = shaka.ui.Enums.MaterialDesignIcons.CHECKMARK;
     // Screen reader should ignore icon text.
-    icon.setAttribute('aria-hidden', 'true');
+    icon.ariaHidden = 'true';
     return icon;
   }
 
@@ -85,12 +86,6 @@ shaka.ui.Utils = class {
     if (!element) {
       return;
     }
-
-    // You can't use setDisplay with SVG on IE, because classList isn't on SVG
-    // elements on that browser.  It's better to find out on Chrome through an
-    // assertion, rather than wait for a failed test pass later on IE.
-    goog.asserts.assert(!(element instanceof SVGElement),
-        'Do not use setDisplay with SVG elements!');
 
     if (display) {
       // Removing a non-existent class doesn't throw, so, even if

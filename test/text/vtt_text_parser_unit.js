@@ -4,10 +4,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.log');
+goog.require('shaka.test.Util');
+goog.require('shaka.text.Cue');
+goog.require('shaka.text.CueRegion');
+goog.require('shaka.text.VttTextParser');
+goog.require('shaka.util.BufferUtils');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.StringUtils');
+
 describe('VttTextParser', () => {
   const Cue = shaka.text.Cue;
   const CueRegion = shaka.text.CueRegion;
   const originalLogWarning = shaka.log.warning;
+  const anyString = jasmine.any(String);
 
   /** @type {!jasmine.Spy} */
   let logWarningSpy;
@@ -163,28 +173,36 @@ describe('VttTextParser', () => {
   it('rejects invalid time values', () => {
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00.020    --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n0:00.020  --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:00.20  --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:100.20 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:00.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:00:00:00.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n00:61.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
     errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
         'WEBVTT\n\n61:00.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        anyString);
   });
 
   it('supports vertical setting', () => {
@@ -560,14 +578,58 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 95550, segmentEnd: 95560});
   });
 
-  it('skips style blocks', () => {
+  it('supports global style blocks', () => {
     verifyHelper(
         [
-          {startTime: 20, endTime: 40, payload: 'Test'},
-          {startTime: 40, endTime: 50, payload: 'Test2'},
+          {
+            startTime: 20,
+            endTime: 40,
+            payload: 'Test',
+            color: 'cyan',
+            fontSize: '10px',
+          },
+          {
+            startTime: 40,
+            endTime: 50,
+            payload: 'Test2',
+            color: 'cyan',
+            fontSize: '10px',
+          },
         ],
         'WEBVTT\n\n' +
-        'STYLE\n::cue(.cyan) { color: cyan; }\n\n' +
+        'STYLE\n' +
+        '::cue {\n' +
+        'color: cyan;\n'+
+        'font-size: 10px;\n'+
+        '}\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        'Test2',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports global style blocks without blank lines', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20,
+            endTime: 40,
+            payload: 'Test',
+            color: 'cyan',
+            fontSize: '10px',
+          },
+          {
+            startTime: 40,
+            endTime: 50,
+            payload: 'Test2',
+            color: 'cyan',
+            fontSize: '10px',
+          },
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n' +
+        '::cue { color: cyan; font-size: 10px; }\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         'Test\n\n' +
         '00:00:40.000 --> 00:00:50.000\n' +
@@ -716,6 +778,196 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports specific style blocks', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20,
+            endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: 'Test',
+                color: 'cyan',
+                fontWeight: Cue.fontWeight.BOLD,
+              },
+            ],
+          },
+          {startTime: 40, endTime: 50, payload: 'Test2'},
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n::cue(b) { color: cyan; }\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '<b>Test</b>\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        'Test2',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports only two digits in the timestamp', () => {
+    verifyHelper(
+        [
+          {startTime: 20, endTime: 40, payload: 'Test'},
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.00 --> 00:00:40.00\n' +
+        'Test',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports class with default color', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20, endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: 'Test',
+                color: '#FF0',
+              },
+            ],
+          },
+          {
+            startTime: 40, endTime: 50,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 40,
+                endTime: 50,
+                payload: 'Test2',
+                color: '#0FF',
+                backgroundColor: '#00F',
+              },
+            ],
+          },
+          {
+            startTime: 50, endTime: 60,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 50,
+                endTime: 60,
+                payload: 'Test 3',
+                color: '#F0F',
+                backgroundColor: '#000',
+              },
+            ],
+          },
+          {
+            startTime: 60,
+            endTime: 70,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: 'First row',
+              },
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: 'Test4.1',
+                color: '#FF0',
+              },
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: '',
+                lineBreak: true,
+              },
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: 'Second row',
+              },
+              {
+                startTime: 60,
+                endTime: 70,
+                payload: 'Test4.2',
+                color: '#00F',
+              },
+            ],
+          },
+          {
+            startTime: 70,
+            endTime: 80,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 70,
+                endTime: 80,
+                payload: 'Test5.1',
+                color: '#F00',
+              },
+              {
+                startTime: 70,
+                endTime: 80,
+                payload: 'Test5.2',
+                color: '#0F0',
+              },
+            ],
+          },
+          {
+            startTime: 80,
+            endTime: 90,
+            payload: '<b><c.lime>Parse fail 1</b></c>',
+            nestedCues: [],
+          },
+          {
+            startTime: 90,
+            endTime: 100,
+            payload: '<c.lime><b>Parse fail 2</c></b>',
+            nestedCues: [],
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '<c.yellow>Test</c>\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        '<c.cyan.bg_blue>Test2</c>\n\n' +
+        '00:00:50.000 --> 00:01:00.000\n' +
+        '<c.yellow.bg_blue.magenta.bg_black>Test 3</c>\n\n' +
+        '00:01:00.000 --> 00:01:10.000\n' +
+        'First row<c.yellow>Test4.1</c>\nSecond row<c.blue>Test4.2</c>\n\n' +
+        '00:01:10.000 --> 00:01:20.000\n' +
+        '<c.red>Test5.1<c.lime>Test5.2</c></c>\n\n' +
+        '00:01:20.000 --> 00:01:30.000\n' +
+        '<b><c.lime>Parse fail 1</b></c>\n\n' +
+        '00:01:30.000 --> 00:01:40.000\n' +
+        '<c.lime><b>Parse fail 2</c></b>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('supports default color overriding', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10, endTime: 20,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: 'Example 1',
+                color: '#F00',
+                backgroundColor: '#FF0',
+                fontSize: '10px',
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n' +
+        '::cue(bg_blue) { font-size: 10px; background-color: #FF0 }\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        '<c.red.bg_blue>Example 1</c>\n\n',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
 
   /**
    * @param {!Array} cues
@@ -730,8 +982,7 @@ describe('VttTextParser', () => {
     const expected = cues.map((cue) => {
       if (cue.nestedCues) {
         cue.nestedCues = cue.nestedCues.map(
-            (nestedCue) => jasmine.objectContaining(nestedCue)
-        );
+            (nestedCue) => jasmine.objectContaining(nestedCue));
       }
       return jasmine.objectContaining(cue);
     });
@@ -742,11 +993,20 @@ describe('VttTextParser', () => {
    * @param {shaka.util.Error.Code} code
    * @param {string} text
    * @param {shaka.extern.TextParser.TimeContext} time
+   * @param {*=} errorData
    */
-  function errorHelper(code, text, time) {
-    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
-        code));
+  function errorHelper(code, text, time, errorData = undefined) {
+    let shakaError;
+    if (errorData) {
+      shakaError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
+          code, errorData);
+    } else {
+      shakaError = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.TEXT,
+          code);
+    }
+    const error = shaka.test.Util.jasmineError(shakaError);
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
     expect(() => new shaka.text.VttTextParser().parseMedia(data, time))

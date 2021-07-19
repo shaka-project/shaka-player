@@ -93,6 +93,15 @@ html, body {
   transition: 0.2s ease-in-out;
 }
 
+.mdl-button--fab,
+.mdl-button--icon {
+  /* By default, MDL icon buttons may end up vertically off-center.  This aligns
+   * them to the center both vertically and horizontally. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .mdl-button--fab:hover {
   filter: drop-shadow(0 2px 8px #333);
 }
@@ -364,7 +373,7 @@ html, body {
 
 .mdl-dialog {
   /* Override MDL dialog width, so that input elements don't overflow. */
-  width: 320px;
+  width: 420px;
 }
 
 .mdl-dialog img {
@@ -381,6 +390,16 @@ html, body {
 
   /* Match the padding of the buttons next to the logo. */
   padding: 0 16px;
+}
+
+.app-header .mdl-layout__drawer-button .material-icons {
+  &:hover {
+    /* Spin the gear icon in the settings menu when hovered. */
+    transform: rotate(90deg);
+  }
+
+  /* Animate the spin. */
+  transition: transform 0.3s ease-in-out;
 }
 
 footer li {
@@ -514,6 +533,8 @@ footer .mdl-mega-footer__link-list {
 
 /* Style the input containers. */
 .input-container-row {
+  /* When a row is preceded by its label, inline-block will ensure the label
+   * sits before the input row on the same line. */
   display: inline-block;
 }
 
@@ -540,4 +561,14 @@ footer .mdl-mega-footer__link-list {
    * animation is too fast to make out with the eye.
    * So give it a fixed maximum instead. */
   max-height: 1000px;
+}
+
+.input-header {
+  font-size: 125%;
+}
+
+.wide-input,
+.wide-input .input-container-row,
+.wide-input .mdl-textfield {
+  width: 100%;
 }

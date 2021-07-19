@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.LoopButton');
 
-goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -44,6 +44,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('shaka-overflow-menu-only');
     this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.nameSpan_.textContent = this.localization.resolve(LocIds.LOOP);
     label.appendChild(this.nameSpan_);
@@ -133,6 +134,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
    */
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
+    const Icons = shaka.ui.Enums.MaterialDesignIcons;
 
     this.nameSpan_.textContent =
         this.localization.resolve(LocIds.LOOP);
@@ -141,11 +143,14 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     this.currentState_.textContent = this.localization.resolve(labelText);
 
+    const icon = this.video.loop ? Icons.UNLOOP : Icons.LOOP;
+
+    this.icon_.textContent = icon;
+
     const ariaText = this.video.loop ?
         LocIds.EXIT_LOOP_MODE : LocIds.ENTER_LOOP_MODE;
 
-    this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(ariaText));
+    this.button_.ariaLabel = this.localization.resolve(ariaText);
   }
 };
 
@@ -162,4 +167,7 @@ shaka.ui.LoopButton.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'loop', new shaka.ui.LoopButton.Factory());
+
+shaka.ui.Controls.registerElement(
     'loop', new shaka.ui.LoopButton.Factory());

@@ -6,6 +6,9 @@
 
 goog.provide('shaka.test.ManifestParser');
 
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.SegmentReference');
+
 
 shaka.test.ManifestParser = class {
   /**
@@ -53,11 +56,12 @@ shaka.test.ManifestParser = class {
    * @param {?number=} endByte
    * @param {number=} timestampOffset
    * @param {!Array.<!shaka.media.SegmentReference>=} partialReferences
+   * @param {?string=} tilesLayout
    * @return {!shaka.media.SegmentReference}
    */
   static makeReference(uri, start, end, baseUri = '',
       startByte = 0, endByte = null, timestampOffset = 0,
-      partialReferences = []) {
+      partialReferences = [], tilesLayout = '') {
     const getUris = () => uri.length ? [baseUri + uri] : [];
 
     // If a test wants to verify these, they can be set explicitly after
@@ -81,6 +85,7 @@ shaka.test.ManifestParser = class {
         appendWindowStart,
         appendWindowEnd,
         partialReferences,
+        tilesLayout,
     );
   }
 };

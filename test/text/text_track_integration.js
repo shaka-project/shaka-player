@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.test.UiUtils');
+
 // This tests three assumptions we make about text tracks in Shaka Player:
 //   1. If a non-null value for cues is stored, it will always be the
 //      non-null value for cues when cues returns a non-null value.
@@ -46,8 +48,8 @@ describe('TextTrackIntegration', () => {
     trackCues = null;
   });
 
-  // There is a difference in behaviour with IE and Edge compared to everyone
-  // else. Edge and IE will always return a valid list of cues regardless of
+  // There is a difference in behaviour with  Edge compared to everyone
+  // else. Edge will always return a valid list of cues regardless of
   // what the mode is set to. Everyone else will return null for cues when
   // mode is set to "disabled".
   describe('cues', () => {

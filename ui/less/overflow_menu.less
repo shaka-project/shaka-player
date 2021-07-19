@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* A settings menu, which encompasses the top-level overflow menu and all
- * submenus.  These appear on top of all other controls (Z axis) when the
- * overflow button is clicked. */
+/* The overflow menu and all settings submenus.  These appear on top of all
+ * other controls (Z axis) when the overflow button is clicked. */
+.shaka-overflow-menu,
 .shaka-settings-menu {
   /* It's okay to add a vertical scroll if there are too many items, but
    * horizontal scrolling is not allowed. */
@@ -53,6 +53,14 @@
     /* When hovered, the button's background is highlighted. */
     &:hover {
       background: rgb(224, 224, 224);
+    }
+
+    /* The button is clickable, showing cursor pointer */
+    cursor: pointer;
+
+    /* The label inside button is also showing cursor pointer  */
+    label {
+      cursor: pointer;
     }
 
     .shaka-keyboard-navigation &:focus {
@@ -104,13 +112,8 @@
   color: rgba(0, 0, 0, 0.54);
 }
 
-/* These three submenus have somewhat different margins inside them.
- * TODO: This is all submenus, but not the top-level menu.  Is there a better
- * way to express this? */
-.shaka-resolutions,
-.shaka-audio-languages,
-.shaka-text-languages,
-.shaka-playback-rates {
+/* The submenus have somewhat different margins inside them. */
+.shaka-settings-menu {
   span {
     /* TODO(b/116651454): eliminate hard-coded offsets */
     margin-left: 54px;

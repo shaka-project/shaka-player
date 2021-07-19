@@ -4,6 +4,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.DrmEngine');
+goog.require('shaka.media.MediaSourceEngine');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.FakeClosedCaptionParser');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.test.ManifestGenerator');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.util.EventManager');
+goog.require('shaka.util.ManifestParserUtils');
+goog.require('shaka.util.Platform');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.PublicPromise');
+
 describe('DrmEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
@@ -148,6 +163,14 @@ describe('DrmEngine', () => {
   });
 
   function checkSupport() {
+    if (shaka.util.Platform.isXboxOne()) {
+      // Axinom won't issue a license for an Xbox One.  The error message from
+      // the license server says "Your DRM client's security level is 150, but
+      // the entitlement message requires 2000 or higher."
+      // TODO: Stop using Axinom's license server.  Use
+      // https://testweb.playready.microsoft.com/Server/ServiceQueryStringSyntax
+      return false;
+    }
     return support['com.widevine.alpha'] || support['com.microsoft.playready'];
   }
 
@@ -234,10 +257,10 @@ describe('DrmEngine', () => {
       }
 
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoSegment, null, null,
+          ContentType.VIDEO, videoSegment, 0, 10,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioSegment, null, null,
+          ContentType.AUDIO, audioSegment, 0, 10,
           /* hasClosedCaptions= */ false);
 
       expect(video.buffered.end(0)).toBeGreaterThan(0);

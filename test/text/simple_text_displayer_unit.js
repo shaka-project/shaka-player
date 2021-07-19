@@ -5,6 +5,12 @@
  */
 
 
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.text.Cue');
+goog.require('shaka.text.SimpleTextDisplayer');
+goog.require('shaka.util.Functional');
+goog.requireType('shaka.test.FakeTextTrack');
+
 describe('SimpleTextDisplayer', () => {
   const originalVTTCue = window.VTTCue;
   const Cue = shaka.text.Cue;
@@ -95,8 +101,8 @@ describe('SimpleTextDisplayer', () => {
           ]);
 
       // Next we test the behavior with a VTTCue which is seen as a cheap
-      // polyfill (in which prototype.line does not exist).  This simulates IE
-      // and legacy Edge.
+      // polyfill (in which prototype.line does not exist).  This simulates
+      // legacy Edge.
       // eslint-disable-next-line no-restricted-syntax
       delete window.VTTCue.prototype['line'];
       displayer.remove(0, Infinity);  // Clear the cues from above.
@@ -188,7 +194,7 @@ describe('SimpleTextDisplayer', () => {
 
       // Second cue is a linebreak cue.
       const nestedCue2 = new shaka.text.Cue(10, 20, '');
-      nestedCue2.spacer = true;
+      nestedCue2.lineBreak = true;
 
       const nestedCue3 = new shaka.text.Cue(10, 20, 'Test2');
 

@@ -4,6 +4,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.dash.DashParser');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.ManifestParser');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.StringUtils');
+goog.requireType('shaka.util.PublicPromise');
+
 describe('DashParser Live', () => {
   const Util = shaka.test.Util;
   const ManifestParser = shaka.test.ManifestParser;
@@ -32,6 +45,8 @@ describe('DashParser Live', () => {
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
     };
   });
 
@@ -108,7 +123,7 @@ describe('DashParser Live', () => {
       return new shaka.media.SegmentReference(
           ref.startTime,
           ref.endTime,
-          ref.getUris,
+          ref.getUrisInner,
           ref.startByte,
           ref.endByte,
           ref.initSegmentReference,
@@ -261,6 +276,7 @@ describe('DashParser Live', () => {
         ref.timestampOffset = pStart;
         ref.startTime += pStart;
         ref.endTime += pStart;
+        ref.trueEndTime += pStart;
       }
       /** @const {!Array.<!shaka.media.SegmentReference>} */
       const allRefs = period1Refs.concat(period2Refs);

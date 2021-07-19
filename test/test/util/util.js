@@ -7,41 +7,14 @@
 goog.provide('shaka.test.StatusPromise');
 goog.provide('shaka.test.Util');
 
-
-/**
- * A stand-in type for the "shaka" namespace.  Used when loading the compiled
- * library or when referencing it in ManifestGenerator or TestScheme.
- *
- * The new compiler has a "typeof" annotation for classes, but it warns of an
- * incomplete type when used on the entire library namespace.  So instead, we
- * use this type, which maps out parts of the compiled namespace used in
- * top-level integration tests.
- *
- * @typedef {{
- *   Player: typeof shaka.Player,
- *   media: {
- *     SegmentReference: typeof shaka.media.SegmentReference,
- *     InitSegmentReference: typeof shaka.media.InitSegmentReference,
- *     SegmentIndex: typeof shaka.media.SegmentIndex,
- *     PresentationTimeline: typeof shaka.media.PresentationTimeline
- *   },
- *   net: {
- *     NetworkingEngine: typeof shaka.net.NetworkingEngine
- *   },
- *   offline: {
- *     Storage: typeof shaka.offline.Storage
- *   },
- *   ui: {
- *     Overlay: typeof shaka.ui.Overlay,
- *     Controls: typeof shaka.ui.Controls,
- *     Element: typeof shaka.ui.Element
- *   },
- *   util: {
- *     StringUtils: typeof shaka.util.StringUtils
- *   }
- * }}
- */
-let shakaNamespaceType;
+goog.require('goog.asserts');
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.util.Functional');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.StringUtils');
+goog.require('shaka.util.XmlUtils');
+goog.requireType('shaka.util.Error');
 
 
 /**
@@ -192,6 +165,14 @@ shaka.test.Util = class {
     const prospectiveDiff = 'The difference was in ' +
         (actual.outerHTML || actual.textContent) + ' vs ' +
         (expected['outerHTML'] || expected.textContent) + ': ';
+    const getAttr = (obj, attr) => {
+      if (attr.namespaceURI) {
+        return shaka.util.XmlUtils.getAttributeNS(
+            obj, attr.namespaceURI, attr.localName);
+      } else {
+        return obj.getAttribute(attr.localName);
+      }
+    };
 
     if (!(actual instanceof Element) && !(expected instanceof Element)) {
       // Compare them as nodes.
@@ -209,16 +190,13 @@ shaka.test.Util = class {
       if (actual.attributes.length != expected.attributes.length) {
         return prospectiveDiff + 'Different attribute list length.';
       }
-      for (const i of shaka.util.Iterables.range(actual.attributes.length)) {
-        const aAttrib = actual.attributes[i].nodeName;
-        const aAttribVal = actual.getAttribute(aAttrib);
-        const eAttrib = expected.attributes[i].nodeName;
-        const eAttribVal = expected.getAttribute(eAttrib);
-        if (aAttrib != eAttrib || aAttribVal != eAttribVal) {
-          const diffNote =
-              aAttrib + '=' + aAttribVal + ' vs ' + eAttrib + '=' + eAttribVal;
-          return prospectiveDiff + 'Attribute #' + i +
-              ' was different (' + diffNote + ').';
+      for (const attr of Array.from(actual.attributes)) {
+        const valueA = getAttr(actual, attr);
+        const valueB = getAttr(expected, attr);
+        if (valueA != valueB) {
+          const name = (attr.prefix ? attr.prefix + ':' : '') + attr.localName;
+          return `${prospectiveDiff} Attribute ${name} was different ` +
+                 `(${valueA} vs ${valueB})`;
         }
       }
 
@@ -267,8 +245,10 @@ shaka.test.Util = class {
       // Make shallow copies of each, without their getUris fields.
       const trimmedFirst = Object.assign({}, /** @type {Object} */(firstRef));
       delete trimmedFirst['getUris'];
+      delete trimmedFirst['getUrisInner'];
       const trimmedSecond = Object.assign({}, /** @type {Object} */(secondRef));
       delete trimmedSecond['getUris'];
+      delete trimmedSecond['getUrisInner'];
 
       // Compare those using Jasmine's utility, which will compare the fields of
       // an object and the items of an array.
@@ -361,98 +341,6 @@ shaka.test.Util = class {
   }
 
   /**
-   * @param {boolean} loadUncompiled
-   * @return {!Promise.<shakaNamespaceType>}
-   */
-  static async loadShaka(loadUncompiled) {
-    /** @type {!shaka.util.PublicPromise} */
-    const loaded = new shaka.util.PublicPromise();
-    /** @type {shakaNamespaceType} */
-    let compiledShaka;
-
-    if (loadUncompiled) {
-      // For debugging purposes, use the uncompiled library.
-      compiledShaka = window['shaka'];
-      loaded.resolve();
-    } else {
-      // Load the compiled library as a module.
-      // All tests in this suite will use the compiled library.
-      require(['/base/dist/shaka-player.ui.js'], (shakaModule) => {
-        try {
-          compiledShaka = shakaModule;
-          compiledShaka.net.NetworkingEngine.registerScheme(
-              'test', shaka.test.TestScheme.plugin);
-          compiledShaka.media.ManifestParser.registerParserByMime(
-              'application/x-test-manifest',
-              shaka.test.TestScheme.ManifestParser.factory);
-
-          loaded.resolve();
-
-          // We need to catch thrown exceptions here to propertly report errors
-          // in the registration process above.
-          // eslint-disable-next-line no-restricted-syntax
-        } catch (error) {
-          loaded.reject('Failed to register with compiled player.');
-          shaka.log.error('Error registering with compiled player.', error);
-        }
-      }, (error) => {
-        loaded.reject('Failed to load compiled player.');
-        shaka.log.error('Error loading compiled player.', error);
-      });
-    }
-
-    await loaded;
-    return compiledShaka;
-  }
-
-
-  /**
-   * Wait for the video playhead to move forward by some meaningful delta.
-   * If this happens before |timeout| seconds pass, the Promise is resolved.
-   * Otherwise, the Promise is rejected.
-   *
-   * @param {!shaka.util.EventManager} eventManager
-   * @param {!HTMLMediaElement} target
-   * @param {number} timeout in seconds, after which the Promise fails
-   * @return {!Promise}
-   */
-  static waitForMovementOrFailOnTimeout(eventManager, target, timeout) {
-    const waiter = new shaka.test.Waiter(eventManager)
-        .timeoutAfter(timeout)
-        .failOnTimeout(true);
-    return waiter.waitForMovement(target);
-  }
-
-  /**
-   * @param {!shaka.util.EventManager} eventManager
-   * @param {!HTMLMediaElement} target
-   * @param {number} playheadTime The time to wait for.
-   * @param {number} timeout in seconds, after which the Promise fails
-   * @return {!Promise}
-   */
-  static waitUntilPlayheadReaches(eventManager, target, playheadTime, timeout) {
-    const waiter = new shaka.test.Waiter(eventManager)
-        .timeoutAfter(timeout)
-        .failOnTimeout(true);
-    return waiter.waitUntilPlayheadReaches(target, playheadTime);
-  }
-
-  /**
-   * Wait for the video to end or for |timeout| seconds to pass, whichever
-   * occurs first.  The Promise is resolved when either of these happens.
-   *
-   * @param {!shaka.util.EventManager} eventManager
-   * @param {!HTMLMediaElement} target
-   * @param {number} timeout in seconds, after which the Promise succeeds
-   * @return {!Promise}
-   */
-  static waitForEndOrTimeout(eventManager, target, timeout) {
-    const waiter = new shaka.test.Waiter(eventManager)
-        .failOnTimeout(false).timeoutAfter(timeout);
-    return waiter.waitForEnd(target);
-  }
-
-  /**
    * Waits for a particular font to be loaded.  Useful in screenshot tests to
    * make sure we have consistent results with regard to the web fonts we load
    * in the UI.
@@ -489,8 +377,9 @@ shaka.test.Util = class {
    */
   static async supportsScreenshots() {
     // We need our own ID for Karma to look up the WebDriver connection.
+    // For manually-connected browsers, this ID may not exist.  In those cases,
+    // this method is expected to return false.
     const parentUrlParams = window.parent.location.search;
-    goog.asserts.assert(parentUrlParams.includes('id='), 'No ID in URL!');
 
     const buffer = await shaka.test.Util.fetch(
         '/screenshot/isSupported' + parentUrlParams);
@@ -522,6 +411,8 @@ shaka.test.Util = class {
     await this.delay(0.1);
 
     // We need our own ID for Karma to look up the WebDriver connection.
+    // By this point, we should have passed supportsScreenshots(), so the ID
+    // should definitely be there.
     const parentUrlParams = window.parent.location.search;
     goog.asserts.assert(parentUrlParams.includes('id='), 'No ID in URL!');
 

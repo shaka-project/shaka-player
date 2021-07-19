@@ -170,6 +170,11 @@
   }
 }
 
+/* Buttons hide certain items if they are found inside the control panel */
+.shaka-controls-button-panel .shaka-overflow-menu-only {
+  display: none;
+}
+
 /* The container for the giant play button.  Sits above (Y axis) the
  * other video controls and seek bar, in the middle of the video frame, on top
  * of (Z axis) the video. */
@@ -201,6 +206,12 @@
 .shaka-text-container {
   .absolute-position();
 
+  /* Make sure the text container doesn't steal pointer events from another
+   * layer, such as the ad container.  There is nothing interactive in this
+   * layer, so this should be fine. */
+  pointer-events: none;
+
+  /* Place the text container on the bottom of the video container. */
   bottom: 0%;
   width: 100%;
   min-width: 48px;
@@ -215,11 +226,17 @@
   transition-delay: 500ms;
 
   /* These are defaults which are overridden by JS or cue styles. */
-  div {
+  span:not(.shaka-text-wrapper) {
+    display: inline;
     font-size: 20px;
     line-height: 1.4;  // relative to font size.
     background-color: rgba(0, 0, 0, 0.8);
     color: rgb(255, 255, 255);
+  }
+
+  span.shaka-text-wrapper {
+    display: inline;
+    background: none;
   }
 }
 

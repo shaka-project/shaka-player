@@ -4,6 +4,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.Player');
+goog.require('shaka.cast.CastReceiver');
+goog.require('shaka.cast.CastUtils');
+goog.require('shaka.log');
+goog.require('shaka.media.DrmEngine');
+goog.require('shaka.media.ManifestParser');
+goog.require('shaka.media.StreamingEngine');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.TestScheme');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.util.EventManager');
+goog.require('shaka.util.Functional');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.Platform');
+goog.require('shaka.util.PublicPromise');
+
 // The receiver is only meant to run on the Chromecast, so we have the
 // ability to use modern APIs there that may not be available on all of the
 // browsers our library supports.  Because of this, CastReceiver tests will
@@ -153,8 +169,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       const message = await waitForUpdateMessage();
       // Check that the update message is of a reasonable size. From previous
       // testing we found that the socket would silently reject data that got
-      // too big. 5KB is safely below the limit.
-      expect(message.length).toBeLessThan(5 * 1024);
+      // too big. 6KB is safely below the limit.
+      expect(message.length).toBeLessThan(6 * 1024);
     });
 
     drmIt('has reasonable average message size', async () => {

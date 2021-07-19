@@ -5,6 +5,13 @@
  */
 
 
+goog.require('shaka.media.MediaSourcePlayhead');
+goog.require('shaka.test.FakePresentationTimeline');
+goog.require('shaka.test.FakeVideo');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.PlayerConfiguration');
+goog.requireType('shaka.media.Playhead');
+
 /**
  * @typedef {{start: number, end: number}}
  *
@@ -141,6 +148,7 @@ describe('Playhead', () => {
     manifest = {
       variants: [],
       textStreams: [],
+      imageStreams: [],
       presentationTimeline: timeline,
       minBufferTime: 10,
       offlineSessionIds: [],
@@ -960,7 +968,7 @@ describe('Playhead', () => {
             // We don't want to run tick() for 1 second because it will trigger
             // the stall-detection, which will move the playhead; on the other
             // hand, we don't want to be 0.5 seconds from the gap because on
-            // IE/Edge/Tizen, gap jumping will treat that as in the gap.
+            // Edge/Tizen, gap jumping will treat that as in the gap.
             // See shaka.media.TimeRangesUtils.getGapIndex.
 
             video.currentTime = time;
@@ -1262,6 +1270,53 @@ describe('Playhead', () => {
 
       expect(seekCount).toBe(1);
       expect(currentTime).toBe(10);
+    });
+
+    it('doesn\'t gap jump if paused', () => {
+      const buffered = [{start: 10, end: 20}];
+      video.buffered = createFakeBuffered(buffered);
+      video.currentTime = 5;
+      video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
+      video.paused = true;
+
+      config.jumpLargeGaps = true;
+      playhead = new shaka.media.MediaSourcePlayhead(
+          video,
+          manifest,
+          config,
+          /* startTime= */ 5,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      playhead.notifyOfBufferingChange();
+      jasmine.clock().tick(500);
+
+      // There should NOT have been a gap jump.
+      expect(video.currentTime).toBe(5);
+    });
+
+    // Regression test for https://github.com/google/shaka-player/issues/2987
+    it('does gap jump if paused at 0', () => {
+      const buffered = [{start: 10, end: 20}];
+      video.buffered = createFakeBuffered(buffered);
+      video.currentTime = 0;
+      video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
+      video.paused = true;
+
+      config.jumpLargeGaps = true;
+      playhead = new shaka.media.MediaSourcePlayhead(
+          video,
+          manifest,
+          config,
+          /* startTime= */ 0,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      playhead.notifyOfBufferingChange();
+      jasmine.clock().tick(500);
+
+      // There SHOULD have been a gap jump.
+      expect(video.currentTime).toBe(10);
     });
 
     /**

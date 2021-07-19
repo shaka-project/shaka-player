@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.text.SrtTextParser');
+goog.require('shaka.util.BufferUtils');
+goog.require('shaka.util.StringUtils');
+
 describe('SrtTextParser', () => {
   it('supports no cues', () => {
     verifyHelper([],
@@ -77,8 +81,7 @@ describe('SrtTextParser', () => {
     const expected = cues.map((cue) => {
       if (cue.nestedCues) {
         cue.nestedCues = cue.nestedCues.map(
-            (nestedCue) => jasmine.objectContaining(nestedCue)
-        );
+            (nestedCue) => jasmine.objectContaining(nestedCue));
       }
       return jasmine.objectContaining(cue);
     });

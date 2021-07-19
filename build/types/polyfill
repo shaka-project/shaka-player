@@ -1,18 +1,19 @@
 # Polyfills used to emulate missing browsers features.
 
 +../../node_modules/eme-encryption-scheme-polyfill/index.js
++../../lib/polyfill/aria.js
 +../../lib/polyfill/encryption_scheme.js
 +../../lib/polyfill/fullscreen.js
-+../../lib/polyfill/input_event.js
-+../../lib/polyfill/languages.js
 +../../lib/polyfill/mathround.js
 +../../lib/polyfill/mediasource.js
++../../lib/polyfill/media_capabilities.js
 +../../lib/polyfill/orientation.js
 +../../lib/polyfill/patchedmediakeys_apple.js
 +../../lib/polyfill/patchedmediakeys_ms.js
 +../../lib/polyfill/patchedmediakeys_nop.js
 +../../lib/polyfill/patchedmediakeys_webkit.js
 +../../lib/polyfill/pip_webkit.js
++../../lib/polyfill/storage_estimate.js
 +../../lib/polyfill/video_play_promise.js
 +../../lib/polyfill/videoplaybackquality.js
 +../../lib/polyfill/vttcue.js

@@ -6,6 +6,8 @@
 
 goog.provide('shaka.test.OfflineUtils');
 
+goog.require('shaka.util.BufferUtils');
+
 
 shaka.test.OfflineUtils = class {
   /**
@@ -53,8 +55,10 @@ shaka.test.OfflineUtils = class {
       segments: [],
       variantIds: [],
       roles: [],
+      forced: false,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
       closedCaptions: null,
     };
   }

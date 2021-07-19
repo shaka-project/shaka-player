@@ -1,5 +1,12 @@
 # Frequently Asked Questions
 
+**Q:** Does Shaka Player support IE11?
+
+**A:** Shaka Player no longer supports IE11 beyond v3.1. If you need Shaka
+Player with IE support, checkout v3.0.x and previous versions.
+
+<hr>
+
 **Q:** My live stream is buffering forever or doesn't play.
 
 **A:** Check your time-sync.  In v1 we would adjust automatically to account for
@@ -7,8 +14,9 @@ bad content.  But now in v2, we don't.
 
 This requires setting up clock sync for live streams.  This can be done by
 adding a `<UTCTiming>` element to the manifest or by setting the
-[`.manifest.dash.clockSyncUri`][DashManifestConfiguration] configuration.
-See [#386(comment)][386] for more info.
+{@link shaka.extern.html.DashManifestConfiguration|
+`.manifest.dash.clockSyncUri`} configuration. See [#386(comment)][386] 
+for more info.
 
 We also have issues with "drifting" DASH streams.  If your encoder experiences
 drift, you may need to address that with the encoder.  We have plans to be
@@ -34,6 +42,17 @@ headers in the response.  Additionally, with some manifests, we will send a
 
 This can also happen with mixed-content restrictions.  If the site is using
 `https:`, then your manifest and segments must also.
+
+*Sending `Range` header at the start of HLS playback can be disabled using this config:*
+```
+player.configure({
+    manifest: {
+        hls: {
+            useFullSegmentsForStartTime: true,
+        },
+    },
+})
+```
 
 <hr>
 
@@ -93,7 +112,8 @@ you see JSON, you will need to [unwrap the response][wrapping].
 playback.  Since the browser handles playback, we don't get much information.
 
 If you want to disable native playback and use MediaSource playback instead,
-configure [`.streaming.useNativeHlsOnSafari`][StreamingConfiguration] to false.
+configure {@link shaka.extern.StreamingConfiguration|
+`.streaming.useNativeHlsOnSafari`} to false.
 
 <hr>
 
@@ -119,8 +139,8 @@ does not work consistently across browsers and created a bad experience.)
 
 This means that if you want to see the results of a new decision sooner, you
 should have a less aggressive buffering goal.  See the tutorial on [buffering
-configuration][buffering] and the docs for the
-[`.streaming.bufferingGoal`][StreamingConfiguration] configuration.
+configuration][buffering] and the docs for the {@link 
+shaka.extern.StreamingConfiguration|`.streaming.bufferingGoal`} configuration.
 
 Another factor is the segment size.  It may take up to 2 segments before Shaka
 Player has enough information to form a bandwidth estimate and make a decision.
@@ -128,8 +148,8 @@ If your content uses 10-second segments, this means we may buffer 20 seconds
 of low quality video before we make a decision.  If it is too late to change
 the segment size in your content library, you may want to adjust the "default"
 bandwidth estimate used by Shaka Player to select the first segments.  Use the
-[`.abr.defaultBandwidthEstimate`][AbrConfiguration] configuration to control
-these initial decisions.
+{@link shaka.extern.AbrConfiguration|`.abr.defaultBandwidthEstimate`} 
+configuration to control these initial decisions.
 
 <hr>
 
@@ -155,7 +175,8 @@ shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
 contain said captions.  Edge and Chromecast, however, have native TS support and
 thus are not required to transmux.
 In order to force those platforms to transmux, set the
-[`.streaming.forceTransmuxTS`][StreamingConfiguration] configuration to true.
+{@link shaka.extern.StreamingConfiguration|`.streaming.forceTransmuxTS`} 
+configuration to true.
 
 <hr>
 
@@ -180,8 +201,8 @@ For most content, this warning can be safely ignored (see
 <https://crbug.com/720013>).  If your content requires a specific robustness
 level, it is suggested to set it in the player configuration to ensure playback
 works: `.drm.advanced.<key_system>.audioRobustness` and
-`.drm.advanced.<key_system>.videoRobustness` (see
-[docs][AdvancedDrmConfiguration]).
+`.drm.advanced.<key_system>.videoRobustness` (see {@link 
+shaka.extern.AdvancedDrmConfiguration|docs}).
 
 <hr>
 
@@ -234,9 +255,10 @@ guesses might not always be accurate.  If an HLS manifest has no codec
 information provided, we default to guessing that the video codec is
 `avc1.42E01E` and the audio codec is `mp4a.40.2`, which can cause problems if
 the stream is actually video-only or audio-only.  In this case, you can enable
-the [`.manifest.disableVideo`][ManifestConfiguration] or
-[`.manifest.disableAudio`][ManifestConfiguration] configurations to signal that
-your content does not have a video or audio stream.
+the {@link shaka.extern.ManifestConfiguration|`.manifest.disableVideo`} or 
+{@link shaka.extern.ManifestConfiguration|`.manifest.disableAudio`} 
+configurations to signal that your content does not have a video or audio 
+stream.
 
 [386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
 [489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
@@ -244,17 +266,12 @@ your content does not have a video or audio stream.
 [887]: https://github.com/google/shaka-player/issues/887
 [999]: https://github.com/google/shaka-player/issues/999
 [1667]: https://github.com/google/shaka-player/issues/1667
-[AbrConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AbrConfiguration
-[AdvancedDrmConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.AdvancedDrmConfiguration
 [BigInteger.js]: https://github.com/peterolson/BigInteger.js
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-[DashManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.DashManifestConfiguration
 [Shaka Player Embedded]: https://github.com/google/shaka-player-embedded
-[StreamingConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.StreamingConfiguration
 [auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
 [buffering]: https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html
 [drm_tutorial]: https://shaka-player-demo.appspot.com/docs/api/tutorial-drm-config.html
 [eme_https]: https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
 [wrapping]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
 [including mux.js]: https://github.com/google/shaka-player/blob/967f3399/demo/index.html#L39
-[ManifestConfiguration]: https://shaka-player-demo.appspot.com/docs/api/shaka.extern.html#.ManifestConfiguration

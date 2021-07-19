@@ -4,6 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.test.Dash');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.ManifestParser');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.PlayerConfiguration');
+goog.requireType('shaka.dash.DashParser');
+
 describe('DashParser SegmentTemplate', () => {
   const Dash = shaka.test.Dash;
   const ManifestParser = shaka.test.ManifestParser;
@@ -43,6 +52,8 @@ describe('DashParser SegmentTemplate', () => {
       onEvent: fail,
       onError: fail,
       isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
     };
   });
 
@@ -116,9 +127,9 @@ describe('DashParser SegmentTemplate', () => {
       // The first segment is number 1 and position 0.
       // Although the segment is 60 seconds long, it is clipped to the period
       // duration of 30 seconds.
-      const references = [
-        ManifestParser.makeReference('s1.mp4', 0, 30, baseUri),
-      ];
+      const ref = ManifestParser.makeReference('s1.mp4', 0, 30, baseUri);
+      ref.trueEndTime = 60;
+      const references = [ref];
       await Dash.testSegmentIndex(source, references);
     });
 

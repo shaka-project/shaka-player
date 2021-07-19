@@ -7,7 +7,6 @@
 
 goog.provide('shaka.ui.PresentationTimeTracker');
 
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Locales');
@@ -108,8 +107,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   onTracksChanged_() {
     if (this.player.isLive()) {
       const ariaLabel = shaka.ui.Locales.Ids.SKIP_TO_LIVE;
-      this.currentTime_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-          this.localization.resolve(ariaLabel));
+      this.currentTime_.ariaLabel = this.localization.resolve(ariaLabel);
     }
   }
 };

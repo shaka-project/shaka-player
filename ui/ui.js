@@ -6,6 +6,8 @@
 
 
 goog.provide('shaka.ui.Overlay');
+goog.provide('shaka.ui.Overlay.FailReasonCode');
+goog.provide('shaka.ui.Overlay.TrackLabelFormat');
 
 goog.require('goog.asserts');
 goog.require('shaka.Player');
@@ -200,7 +202,7 @@ shaka.ui.Overlay = class {
         base: 'rgba(255, 255, 255, 0.54)',
         level: 'rgb(255, 255, 255)',
       },
-      trackLabelFormat: shaka.ui.TrackLabelFormat.LANGUAGE,
+      trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
       doubleClickForFullscreen: true,
       enableKeyboardPlaybackControls: true,
@@ -240,7 +242,7 @@ shaka.ui.Overlay = class {
       // After scanning the page for elements, fire a special "loaded" event for
       // when the load fails. This will allow the page to react to the failure.
       shaka.ui.Overlay.dispatchLoadedEvent_('shaka-ui-load-failed',
-          shaka.ui.FailReasonCode.NO_BROWSER_SUPPORT);
+          shaka.ui.Overlay.FailReasonCode.NO_BROWSER_SUPPORT);
       return;
     }
 
@@ -310,7 +312,7 @@ shaka.ui.Overlay = class {
           // Ad-block is a likely cause for this sort of failure.
           shaka.log.error('Error setting up Shaka Player', e);
           shaka.ui.Overlay.dispatchLoadedEvent_('shaka-ui-load-failed',
-              shaka.ui.FailReasonCode.PLAYER_FAILED_TO_LOAD);
+              shaka.ui.Overlay.FailReasonCode.PLAYER_FAILED_TO_LOAD);
           return;
         }
       }
@@ -325,21 +327,17 @@ shaka.ui.Overlay = class {
 
   /**
    * @param {string} eventName
-   * @param {shaka.ui.FailReasonCode=} reasonCode
+   * @param {shaka.ui.Overlay.FailReasonCode=} reasonCode
    * @private
    */
   static dispatchLoadedEvent_(eventName, reasonCode) {
-    // "Event" is not constructable on IE, so we use this CustomEvent pattern.
-    const uiLoadedEvent = /** @type {!CustomEvent} */(
-      document.createEvent('CustomEvent'));
     let detail = null;
     if (reasonCode != undefined) {
       detail = {
         'reasonCode': reasonCode,
       };
     }
-    uiLoadedEvent.initCustomEvent(eventName, false, false, detail);
-
+    const uiLoadedEvent = new CustomEvent(eventName, {detail});
     document.dispatchEvent(uiLoadedEvent);
   }
 
@@ -413,11 +411,20 @@ shaka.ui.Overlay = class {
  * @enum {number}
  * @export
  */
-shaka.ui.TrackLabelFormat = {
+shaka.ui.Overlay.TrackLabelFormat = {
   'LANGUAGE': 0,
   'ROLE': 1,
   'LANGUAGE_ROLE': 2,
+  'LABEL': 3,
 };
+
+/*
+ * "shaka.ui.TrackLabelFormat" is deprecated and will be removed in v4.
+ *
+ * @deprecated
+ * @enum {number}
+ */
+shaka.ui.TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
 
 /**
  * Describes the possible reasons that the UI might fail to load.
@@ -425,10 +432,20 @@ shaka.ui.TrackLabelFormat = {
  * @enum {number}
  * @export
  */
-shaka.ui.FailReasonCode = {
+shaka.ui.Overlay.FailReasonCode = {
   'NO_BROWSER_SUPPORT': 0,
   'PLAYER_FAILED_TO_LOAD': 1,
 };
+
+
+/**
+ * "shaka.ui.FailReasonCode" is deprecated and will be removed in v4.
+ *
+ * @deprecated
+ * @enum {number}
+ */
+shaka.ui.FailReasonCode = shaka.ui.Overlay.FailReasonCode;
+
 
 if (document.readyState == 'complete') {
   // Don't fire this event synchronously.  In a compiled bundle, the "shaka"
