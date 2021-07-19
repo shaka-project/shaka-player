@@ -11,13 +11,17 @@
     "description": "A tag that marks an asset as having one or more advertisements.",
     "message": "Ads"
   },
+  "DEMO_ADS_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Ads"
+  },
   "DEMO_AD_SEARCH": {
     "description": "A tooltip for an optional search term.",
     "message": "Filters for assets that have advertisements."
   },
   "DEMO_AD_TAG_URL": {
-    "message": "Ad Tag URL",
-    "description": "The label on a field that allows users to provide a Ad Tag URL for a custom asset."
+    "description": "The label on a field that allows users to provide a Ad Tag URL for a custom asset.",
+    "message": "Ad Tag URL"
   },
   "DEMO_ALL_CONTENT": {
     "description": "A link in the header, that switches to a page for browsing or searching through the entire content library.",
@@ -58,6 +62,10 @@
   "DEMO_AUTO_CORRECT_DASH_DRIFT": {
     "description": "The name of a configuration value.",
     "message": "Auto-Correct [PROPER_NAME:DASH] Drift"
+  },
+  "DEMO_AUTO_LOW_LATENCY": {
+    "description": "The name of a configuration value.",
+    "message": "Auto Low Latency Streaming"
   },
   "DEMO_AVAILABILITY_WINDOW_OVERRIDE": {
     "description": "The name of a configuration value.",
@@ -135,6 +143,10 @@
     "description": "A link in the footer, to the release build of the demo.",
     "message": "Compiled (Release)"
   },
+  "DEMO_CONNECTION_TIMEOUT": {
+    "description": "The name of a configuration value.",
+    "message": "Connection timeout"
+  },
   "DEMO_CONFIG": {
     "description": "A title on the configuration panel, labeling it as configuration.",
     "message": "[PROPER_NAME:Shaka Player] Demo Config"
@@ -203,9 +215,17 @@
     "description": "The name of a configuration value.",
     "message": "Disable Text"
   },
+  "DEMO_DISABLE_THUMBNAILS": {
+    "description": "The name of a configuration value.",
+    "message": "Disable Thumbnails"
+  },
   "DEMO_DISABLE_VIDEO": {
     "description": "The name of a configuration value.",
     "message": "Disable Video"
+  },
+  "DEMO_DISABLE_XLINK_PROCESSING": {
+    "description": "The name of a configuration value.",
+    "message": "Disable [JARGON:Xlink] processing"
   },
   "DEMO_DOCUMENTATION": {
     "description": "A link in the footer, to the Shaka Player documentation.",
@@ -222,6 +242,10 @@
   "DEMO_DRM_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "[JARGON:DRM]"
+  },
+  "DEMO_DRM_SESSION_TYPE": {
+    "description": "The name of a configuration value.",
+    "message": "Session Type"
   },
   "DEMO_DRM_SYSTEM": {
     "description": "The label on a field that allows users to provide a Digital Rights Management (DRM) system identifier for a custom asset.",
@@ -243,9 +267,21 @@
     "description": "The name of a configuration value.",
     "message": "Enabled"
   },
+  "DEMO_EXTRA_SHAKA_PLAYER_CONFIG": {
+    "description": "A label for a form field where extra Shaka Player configuration can be set",
+    "message": "Extra [PROPER_NAME:Shaka Player] configuration ([JARGON:JSON])"
+  },
+  "DEMO_EXTRA_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Extra Config"
+  },
   "DEMO_FAIRPLAY": {
     "description": "Text that describes an asset that is protected with the Fairplay Digital Rights Management system.",
     "message": "[PROPER_NAME:Fairplay] [JARGON:DRM]"
+  },
+  "DEMO_FORCE_HTTPS": {
+    "description": "The name of a configuration value.",
+    "message": "Force [JARGON:HTTPS]"
   },
   "DEMO_FORCE_TRANSMUX_TS": {
     "description": "The name of a configuration value.",
@@ -266,6 +302,10 @@
   "DEMO_FUZZ_FACTOR": {
     "description": "The name of a configuration value.",
     "message": "Fuzz Factor"
+  },
+  "DEMO_GAP_DETECTION_THRESHOLD": {
+    "description": "The name of a configuration value.",
+    "message": "Gap detection threshold"
   },
   "DEMO_GPAC": {
     "description": "Text that describes an asset that comes from the GPAC project asset library.",
@@ -303,17 +343,33 @@
     "description": "The name of a configuration value.",
     "message": "Ignore empty [PROPER_NAME:DASH] [JARGON:AdaptationSets]"
   },
+  "DEMO_IGNORE_DASH_MAX_SEGMENT_DURATION": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore [PROPER_NAME:DASH] [JARGON:maxSegmentDuration]"
+  },
   "DEMO_IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY": {
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:DASH] [JARGON:suggestedPresentationDelay]"
   },
-  "DEMO_IGNORE_DRM": {
-    "description": "The name of a configuration value.",
-    "message": "Ignore [JARGON:DRM] Info"
-  },
   "DEMO_IGNORE_HLS_TEXT_FAILURES": {
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures"
+  },
+  "DEMO_IGNORE_HLS_IMAGE_FAILURES": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore [PROPER_NAME:HLS] Image Stream Failures"
+  },
+  "DEMO_IMA_ASSET_KEY": {
+    "description": "The label on a field that allows users to provide an asset key for a custom asset.",
+    "message": "Asset key (for LIVE DAI Content)"
+  },
+  "DEMO_IMA_CONTENT_SRC_ID": {
+    "description": "The label on a field that allows users to provide a content source id for a custom asset.",
+    "message": "Asset key (for VOD DAI Content)"
+  },
+  "DEMO_IMA_VIDEO_ID": {
+    "description": "The label on a field that allows users to provide a video id for a custom asset.",
+    "message": "Video ID (for VOD DAI Content)"
   },
   "DEMO_USE_FULL_SEGMENTS_FOR_START_TIME": {
     "description": "The name of a configuration value.",
@@ -334,6 +390,10 @@
   "DEMO_INITIAL_SEGMENT_LIMIT": {
     "description": "The name of a configuration value.",
     "message": "Initial Segment Limit"
+  },
+  "DEMO_INVALID_JSON_CONFIG_ERROR": {
+    "description": "An error message for an invalid JSON configuration.",
+    "message": "Invalid JSON configuration"
   },
   "DEMO_IRT": {
     "description": "Text that describes an asset that comes from the Institut f\u00fcr Rundfunktechnik asset library.",
@@ -436,8 +496,8 @@
     "message": "Manifest URL"
   },
   "DEMO_MANIFEST_URL_ERROR": {
-    "description": "An error that is displayed if the user does not provide a manifest URL for a custom asset.",
-    "message": "Must have a manifest URL."
+    "description": "An error that is displayed if the user does not provide a manifest URL for a custom asset or identification fields in the Google Ad Manager system.",
+    "message": "Must have a manifest URL, or IMA DAI id fields."
   },
   "DEMO_MAX_ATTEMPTS": {
     "description": "The name of a configuration value.",
@@ -467,9 +527,17 @@
     "description": "The name of a configuration value.",
     "message": "Max Width"
   },
+  "DEMO_METACDN": {
+    "description": "Text that describes an asset that comes from the MetaCDN asset library.",
+    "message": "[PROPER_NAME:MetaCDN]"
+  },
   "DEMO_MICROSOFT": {
     "description": "Text that describes an asset that comes from the Microsoft.",
     "message": "[PROPER_NAME:Microsoft]"
+  },
+  "DEMO_MIME_TYPE": {
+    "description": "The label on a field that allows users to provide a MIME type for a custom asset.",
+    "message": "MIME Type"
   },
   "DEMO_MIN_BANDWIDTH": {
     "description": "The name of a configuration value.",
@@ -490,10 +558,6 @@
   "DEMO_MIN_WIDTH": {
     "description": "The name of a configuration value.",
     "message": "Min Width"
-  },
-  "DEMO_MISC_TAB": {
-    "description": "The header for a tab within the custom asset creation dialog.",
-    "message": "Misc"
   },
   "DEMO_MP2TS": {
     "description": "Text that describes an asset that uses the MPEG-2 TS container.",
@@ -571,6 +635,14 @@
     "description": "Text that describes an asset that is protected with the Playready Digital Rights Management system.",
     "message": "[PROPER_NAME:PlayReady] [JARGON:DRM]"
   },
+  "DEMO_PREFER_FORCED_SUBS": {
+    "description": "The name of a configuration value.",
+    "message": "Prefer Forced Subs"
+  },
+  "DEMO_PREFER_NATIVE_HLS": {
+    "description": "The name of a configuration value.",
+    "message": "Prefer native HLS playback when available"
+  },
   "DEMO_PROJECT_LINKS_HEADER": {
     "description": "A header for a section of the footer, that contains links to various project-related things.",
     "message": "PROJECT LINKS"
@@ -631,6 +703,10 @@
     "description": "The name of a configuration value.",
     "message": "Stall Threshold"
   },
+  "DEMO_STALL_TIMEOUT": {
+    "description": "The name of a configuration value.",
+    "message": "Stall timeout"
+  },
   "DEMO_START_AT_SEGMENT_BOUNDARY": {
     "description": "The name of a configuration value.",
     "message": "Start At Segment Boundary"
@@ -678,6 +754,14 @@
   "DEMO_TEXT_LANGUAGE": {
     "description": "The name of a configuration value.",
     "message": "Preferred Text Language"
+  },
+  "DEMO_TEXT_ROLE": {
+    "description": "The name of a configuration value.",
+    "message": "Preferred Text Role"
+  },
+  "DEMO_THUMBNAILS": {
+    "description": "Text that describes an asset that has a thumbnail stream.",
+    "message": "Thumbnails"
   },
   "DEMO_TIMEOUT": {
     "description": "The name of a configuration value.",
@@ -754,6 +838,10 @@
   "DEMO_UPDATE_EXPIRATION_TIME": {
     "description": "The name of a configuration value.",
     "message": "Update expiration time"
+  },
+  "DEMO_UPDATE_INTERVAL_SECONDS": {
+    "description": "The name of a configuration value.",
+    "message": "Update interval seconds"
   },
   "DEMO_UPLYNK": {
     "description": "Text that describes an asset that comes from the Verizon Digital Media Services asset library.",

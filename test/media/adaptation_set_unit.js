@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.media.AdaptationSet');
+
 describe('AdaptationSet', () => {
   describe('roles', () => {
     const mimeType = 'mime-type';
@@ -14,13 +16,13 @@ describe('AdaptationSet', () => {
       const variants = [
         makeVariant(
             1,  // variant id
-            makeStream(11, mimeType, audioCodecs, ['audio-role-1']),
-            makeStream(12, mimeType, videoCodecs, ['video-role-1'])),
+            makeStream(11, mimeType, audioCodecs, ['audio-role-1'], null),
+            makeStream(12, mimeType, videoCodecs, ['video-role-1'], null)),
 
         makeVariant(
             2,  // variant id
-            makeStream(21, mimeType, audioCodecs, ['audio-role-1']),
-            makeStream(22, mimeType, videoCodecs, ['video-role-1'])),
+            makeStream(21, mimeType, audioCodecs, ['audio-role-1'], null),
+            makeStream(22, mimeType, videoCodecs, ['video-role-1'], null)),
       ];
 
       const set = new shaka.media.AdaptationSet(variants[0]);
@@ -31,12 +33,12 @@ describe('AdaptationSet', () => {
       const variants = [
         makeVariant(
             1,  // variant id
-            makeStream(11, mimeType, audioCodecs, []),
-            makeStream(12, mimeType, videoCodecs, [])),
+            makeStream(11, mimeType, audioCodecs, [], null),
+            makeStream(12, mimeType, videoCodecs, [], null)),
         makeVariant(
             2,  // variant id
-            makeStream(21, mimeType, audioCodecs, []),
-            makeStream(22, mimeType, videoCodecs, [])),
+            makeStream(21, mimeType, audioCodecs, [], null),
+            makeStream(22, mimeType, videoCodecs, [], null)),
       ];
 
       const set = new shaka.media.AdaptationSet(variants[0]);
@@ -47,32 +49,32 @@ describe('AdaptationSet', () => {
       const variants = [
         makeVariant(
             1,  // variant id
-            makeStream(11, mimeType, audioCodecs, ['audio-role-1']),
-            makeStream(12, mimeType, videoCodecs, ['video-role-1'])),
+            makeStream(11, mimeType, audioCodecs, ['audio-role-1'], null),
+            makeStream(12, mimeType, videoCodecs, ['video-role-1'], null)),
 
         // Can't include this variant because the audio roles do not match.
         makeVariant(
             2,  // variant id
-            makeStream(21, mimeType, audioCodecs, ['audio-role-2']),
-            makeStream(22, mimeType, videoCodecs, ['video-role-1'])),
+            makeStream(21, mimeType, audioCodecs, ['audio-role-2'], null),
+            makeStream(22, mimeType, videoCodecs, ['video-role-1'], null)),
 
         // Can't include this variant because the video roles do not match.
         makeVariant(
             3,  // variant id
-            makeStream(31, mimeType, audioCodecs, ['audio-role-1']),
-            makeStream(32, mimeType, videoCodecs, ['video-role-2'])),
+            makeStream(31, mimeType, audioCodecs, ['audio-role-1'], null),
+            makeStream(32, mimeType, videoCodecs, ['video-role-2'], null)),
 
         // Can't include this variant because the audio role is missing.
         makeVariant(
             4,  // variant id
-            makeStream(41, mimeType, audioCodecs, []),
-            makeStream(42, mimeType, videoCodecs, ['video-role-1'])),
+            makeStream(41, mimeType, audioCodecs, [], null),
+            makeStream(42, mimeType, videoCodecs, ['video-role-1'], null)),
 
         // Can't include this variant because the video role is missing.
         makeVariant(
             5,  // variant id
-            makeStream(51, mimeType, audioCodecs, ['audio-role-1']),
-            makeStream(52, mimeType, videoCodecs, [])),
+            makeStream(51, mimeType, audioCodecs, ['audio-role-1'], null),
+            makeStream(52, mimeType, videoCodecs, [], null)),
       ];
 
       const set = new shaka.media.AdaptationSet(variants[0]);
@@ -87,15 +89,15 @@ describe('AdaptationSet', () => {
     const variants = [
       makeVariant(
           1,  // variant id
-          makeStream(10, 'a', ['a.35'], []),
-          makeStream(11, 'a', ['b.12'], [])),
+          makeStream(10, 'a', ['a.35'], [], null),
+          makeStream(11, 'a', ['b.12'], [], null)),
 
       // Can't include this variant because the audio stream has a different
       // mime type.
       makeVariant(
           2,  // variant id
-          makeStream(12, 'b', ['a.35'], []),
-          makeStream(13, 'a', ['b.12'], [])),
+          makeStream(12, 'b', ['a.35'], [], null),
+          makeStream(13, 'a', ['b.12'], [], null)),
     ];
 
     const set = new shaka.media.AdaptationSet(variants[0]);
@@ -107,24 +109,59 @@ describe('AdaptationSet', () => {
       makeVariant(
           1,  // variant id
           null, // no audio
-          makeStream(10, 'a', ['a.35', 'b.12'], [])),
+          makeStream(10, 'a', ['a.35', 'b.12'], [], null)),
 
       // Can't mix transmuxed and non-transmuxed streams.
       makeVariant(
           2,  // variant id
-          makeStream(11, 'a', ['a.35'], []),
-          makeStream(12, 'a', ['b.12'], [])),
+          makeStream(11, 'a', ['a.35'], [], null),
+          makeStream(12, 'a', ['b.12'], [], null)),
 
       // Can't mix transmuxed streams with different bases.
       makeVariant(
           3,  // variant id
           null, // no audio
-          makeStream(13, 'a', ['a.35', 'c.12'], [])),
+          makeStream(13, 'a', ['a.35', 'c.12'], [], null)),
     ];
 
     const set = new shaka.media.AdaptationSet(variants[0]);
     expect(set.canInclude(variants[1])).toBeFalsy();
     expect(set.canInclude(variants[2])).toBeFalsy();
+  });
+
+  it('accepts matching mono and stereo channelsCount', () => {
+    const variants = [
+      makeVariant(
+          1,  // variant id
+          makeStream(11, 'a', ['a.35'], [], 1),
+          makeStream(12, 'a', ['b.12'], [], 1)),
+      makeVariant(
+          2,  // variant id
+          makeStream(21, 'a', ['a.35'], [], 2),
+          makeStream(22, 'a', ['b.12'], [], 2)),
+    ];
+
+    const set = new shaka.media.AdaptationSet(variants[0]);
+    expect(set.canInclude(variants[1])).toBeTruthy();
+  });
+
+  it('rejects mono and surround channelsCount', () => {
+    const variants = [
+      makeVariant(
+          1,  // variant id
+          makeStream(11, 'a', ['a.35'], [], 1),
+          makeStream(12, 'a', ['b.12'], [], 1)),
+
+      // Can't include this variant because the audio stream has a surround
+      // channelsCount.
+      makeVariant(
+          2,  // variant id
+          makeStream(21, 'a', ['a.35'], [], 6),
+          makeStream(22, 'a', ['b.12'], [], 6)),
+    ];
+
+    const set = new shaka.media.AdaptationSet(variants[0]);
+    expect(set.canInclude(variants[1])).toBeFalsy();
   });
 
   /**
@@ -147,6 +184,7 @@ describe('AdaptationSet', () => {
       language: '',
       primary: false,
       video: video,
+      decodingInfos: [],
     };
   }
 
@@ -155,12 +193,14 @@ describe('AdaptationSet', () => {
    * @param {string} mimeType
    * @param {!Array.<string>} codecs
    * @param {!Array.<string>} roles
+   * @param {?number} channelsCount
    * @return {shaka.extern.Stream}
    */
-  function makeStream(id, mimeType, codecs, roles) {
+  function makeStream(id, mimeType, codecs, roles, channelsCount) {
     return {
       audioSamplingRate: null,
-      channelsCount: null,
+      channelsCount: channelsCount,
+      spatialAudio: false,
       closedCaptions: null,
       codecs: codecs.join(','),
       createSegmentIndex: () => Promise.resolve(),
@@ -176,6 +216,7 @@ describe('AdaptationSet', () => {
       originalId: String(id),
       primary: false,
       roles: roles,
+      forced: false,
       trickModeVideo: null,
       type: '',
     };

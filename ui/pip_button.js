@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.PipButton');
 
-goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -48,6 +48,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('shaka-overflow-menu-only');
     this.pipNameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.pipNameSpan_.textContent =
       this.localization.resolve(LocIds.PICTURE_IN_PICTURE);
@@ -140,8 +141,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
   onEnterPictureInPicture_() {
     const LocIds = shaka.ui.Locales.Ids;
     this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.EXIT_PIP;
-    this.pipButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE));
+    this.pipButton_.ariaLabel =
+        this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
         this.localization.resolve(LocIds.ON);
   }
@@ -151,8 +152,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
   onLeavePictureInPicture_() {
     const LocIds = shaka.ui.Locales.Ids;
     this.pipIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.PIP;
-    this.pipButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE));
+    this.pipButton_.ariaLabel =
+        this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE);
     this.currentPipState_.textContent =
         this.localization.resolve(LocIds.OFF);
   }
@@ -170,8 +171,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const ariaLabel = document.pictureInPictureElement ?
         LocIds.EXIT_PICTURE_IN_PICTURE :
         LocIds.ENTER_PICTURE_IN_PICTURE;
-    this.pipButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(ariaLabel));
+    this.pipButton_.ariaLabel = this.localization.resolve(ariaLabel);
 
     const currentPipState = document.pictureInPictureElement ?
         LocIds.ON : LocIds.OFF;
@@ -234,4 +234,7 @@ shaka.ui.PipButton.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'picture_in_picture', new shaka.ui.PipButton.Factory());
+
+shaka.ui.Controls.registerElement(
     'picture_in_picture', new shaka.ui.PipButton.Factory());

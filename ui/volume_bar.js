@@ -9,7 +9,6 @@ goog.provide('shaka.ui.VolumeBar');
 
 goog.require('goog.asserts');
 goog.require('shaka.ads.AdManager');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -60,6 +59,11 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
     // Initialize volume display and label.
     this.onPresentationVolumeChange_();
     this.updateAriaLabel_();
+
+    if (this.ad) {
+      // There was already an ad.
+      this.onChange();
+    }
   }
 
   /**
@@ -116,8 +120,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
 
   /** @private */
   updateAriaLabel_() {
-    this.bar.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(shaka.ui.Locales.Ids.VOLUME));
+    this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.VOLUME);
   }
 };
 

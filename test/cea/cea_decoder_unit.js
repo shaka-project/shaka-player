@@ -4,10 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cea.CeaDecoder');
+goog.require('shaka.cea.CeaUtils');
+goog.require('shaka.log');
+goog.require('shaka.test.CeaUtils');
+goog.require('shaka.text.Cue');
+
 describe('CeaDecoder', () => {
   const CeaUtils = shaka.test.CeaUtils;
 
-  /** @type {!string} */
+  /** @type {string} */
   const DEFAULT_BG_COLOR = shaka.cea.CeaUtils.DEFAULT_BG_COLOR;
 
   /**

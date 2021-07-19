@@ -4,6 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cea.Cea708Service');
+goog.require('shaka.cea.CeaUtils');
+goog.require('shaka.cea.DtvccPacket');
+goog.require('shaka.cea.DtvccPacketBuilder');
+goog.require('shaka.test.CeaUtils');
+goog.require('shaka.text.Cue');
+
 describe('Cea708Service', () => {
   const CeaUtils = shaka.test.CeaUtils;
 
@@ -12,39 +19,39 @@ describe('Cea708Service', () => {
 
   /**
    * Hide window (2 bytes), with a bitmap provided to indicate all windows.
-   * @type {!Array<!number>}
+   * @type {!Array<number>}
    */
   const hideWindow = [0x8a, 0xff];
 
   /**
    * Define window (7 bytes), defines window #0 to be a visible window
    * with 32 rows and 32 columns. (We specify 31 for each since decoder adds 1).
-   * @type {!Array<!number>}
+   * @type {!Array<number>}
    */
   const defineWindow = [
     0x98, 0x38, 0x00, 0x00, 0x1f, 0x1f, 0x00,
   ];
 
-  /** @type {!number} */
+  /** @type {number} */
   const startTime = 1;
 
-  /** @type {!number} */
+  /** @type {number} */
   const endTime = 2;
 
   /**
    * We arbitrarily pick service 1 for all of these tests.
-   * @type {!number}
+   * @type {number}
    */
   const serviceNumber = 1;
 
-  /** @type {!string} */
+  /** @type {string} */
   const stream = `svc${serviceNumber}`;
 
   /**
    * Takes in a array of bytes and a presentation timestamp (in seconds),
    * and converts it into a CEA-708 DTVCC Packet.
-   * @param {!Array<!number>} bytes
-   * @param {!number} pts
+   * @param {!Array<number>} bytes
+   * @param {number} pts
    */
   const createCea708PacketFromBytes = (bytes, pts) => {
     const cea708Bytes = bytes.map((code, i) => {

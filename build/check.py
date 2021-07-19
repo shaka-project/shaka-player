@@ -98,7 +98,7 @@ def check_css_lint(args):
   def get(*path_components):
     return shakaBuildHelpers.get_all_files(
         os.path.join(base, *path_components), match)
-  files = (get('ui') + get('demo'));
+  files = (get('ui') + get('demo'))
   config_path = os.path.join(base, '.csslintrc')
 
   linter = compiler.CssLinter(files, config_path)
@@ -295,8 +295,8 @@ def check_tests(args):
   # Ignore missing goog.require since we assume the whole library is
   # already included.
   closure_opts += [
-      '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
-      '--checks-only', '-O', 'SIMPLE'
+      '--jscomp_off=missingRequire',
+      '--checks-only', '-O', 'SIMPLE',
   ]
 
   # Set up a build with the build name of "dummy".  With output_compiled_bundle
@@ -331,6 +331,13 @@ def main(args):
       help='Run only the given checks (choices: %(choices)s).')
 
   parsed_args = parser.parse_args(args)
+
+  # Make the dist/ folder, ignore errors.
+  base = shakaBuildHelpers.get_source_base()
+  try:
+    os.mkdir(os.path.join(base, 'dist'))
+  except OSError:
+    pass
 
   # Update node modules if needed.
   if not shakaBuildHelpers.update_node_modules():

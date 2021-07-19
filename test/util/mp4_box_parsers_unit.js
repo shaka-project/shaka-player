@@ -4,6 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Mp4BoxParsers');
+goog.require('shaka.util.Mp4Parser');
+
 describe('Mp4BoxParsers', () => {
   const videoInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
   const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
@@ -140,7 +145,7 @@ describe('Mp4BoxParsers', () => {
     expect(tfdtParsed).toBe(true);
     expect(sampleCount).toBe(expectedSampleCount);
     expect(sampleData).toBeDefined();
-    expect(goog.isArray(sampleData)).toBe(true);
+    expect(Array.isArray(sampleData)).toBe(true);
     expect(defaultSampleDuration).toBe(expectedDefaultSampleDuration);
     expect(baseMediaDecodeTime).toBe(expectedBaseMediaDecodeTime);
   });

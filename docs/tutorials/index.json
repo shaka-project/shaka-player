@@ -22,8 +22,8 @@
   { "upgrade": {
       "title": "Upgrade Guide",
       "children": {
-        "upgrade-v2-4": { "title": "Upgrade Guide, v2.4 => v3.0" },
-        "upgrade-v2-5": { "title": "Upgrade Guide, v2.5 => v3.0" },
+        "upgrade-v2-5": { "title": "Upgrade Guide, v2.5 => v3" },
+        "upgrade-v3": { "title": "Upgrade Guide, v3" },
         "upgrade-manifest": { "title": "Shaka Player Manifest Upgrade Guide" }
       }
   } }

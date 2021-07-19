@@ -128,7 +128,7 @@ shaka.extern.Cue = class {
     /**
      * The text payload of the cue.  If nestedCues is non-empty, this should be
      * empty.  Top-level block containers should have no payload of their own.
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.payload;
@@ -234,14 +234,14 @@ shaka.extern.Cue = class {
 
     /**
      * Text color as a CSS color, e.g. "#FFFFFF" or "white".
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.color;
 
     /**
      * Text background color as a CSS color, e.g. "#FFFFFF" or "white".
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.backgroundColor;
@@ -257,14 +257,14 @@ shaka.extern.Cue = class {
 
     /**
      * The URL of the background image, e.g. "data:[mime type];base64,[data]".
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.backgroundImage;
 
     /**
      * The border around this cue as a CSS border.
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.border;
@@ -292,28 +292,28 @@ shaka.extern.Cue = class {
 
     /**
      * Text font family.
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.fontFamily;
 
     /**
      * Text letter spacing as a CSS letter-spacing value.
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.letterSpacing;
 
     /**
      * Text line padding as a CSS line-padding value.
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.linePadding;
 
     /**
      * Opacity of the cue element, from 0-1.
-     * @type {!number}
+     * @type {number}
      * @exportDoc
      */
     this.opacity;
@@ -335,7 +335,7 @@ shaka.extern.Cue = class {
 
     /**
      * Id of the cue.
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.id;
@@ -355,8 +355,18 @@ shaka.extern.Cue = class {
      * @type {boolean}
      * @exportDoc
      */
+    this.lineBreak;
+
+    /**
+     * @deprecated
+     * "spacer" is deprecated and will be removed in v4. Use "lineBreak"
+     * instead.
+     * Whether or not the cue only acts as a line break between two nested cues.
+     * Should only appear in nested cues.
+     * @type {boolean}
+     * @exportDoc
+     */
     this.spacer;
-    // TODO: Rename "spacer" to "lineBreak".
   }
 };
 

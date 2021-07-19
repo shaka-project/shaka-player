@@ -5,6 +5,11 @@
  */
 
 
+/**
+ * @fileoverview
+ * @suppress {missingRequire}
+ */
+
 goog.provide('ShakaDemoAssetInfo');
 
 goog.require('shakaDemo.MessageIds');
@@ -64,8 +69,15 @@ const ShakaDemoAssetInfo = class {
     this.extraConfig = null;
     /** @type {?string} */
     this.adTagUri = null;
-    /** @type {?shakaAssets.IMAIds} */
-    this.imaIds = null;
+    /** @type {?string} */
+    this.imaVideoId = null;
+    /** @type {?string} */
+    this.imaAssetKey = null;
+    /** @type {?string} */
+    this.imaContentSrcId = null;
+    /** @type {?string} */
+    this.mimeType = null;
+
 
     // Offline storage values.
     /** @type {?function()} */
@@ -159,6 +171,15 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @param {string} mimeType
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setMimeType(mimeType) {
+    this.mimeType = mimeType;
+    return this;
+  }
+
+  /**
    * @param {!shaka.extern.RequestFilter} requestFilter
    * @return {!ShakaDemoAssetInfo}
    */
@@ -197,12 +218,41 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {shakaAssets.IMAIds} imaIds
+   * @param {string} id
    * @return {!ShakaDemoAssetInfo}
    */
-  setIMAIds(imaIds) {
-    this.imaIds = imaIds;
-    this.addFeature(shakaAssets.Feature.ADS);
+  setIMAContentSourceId(id) {
+    this.imaContentSrcId = id;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} id
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setIMAVideoId(id) {
+    this.imaVideoId = id;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} key
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setIMAAssetKey(key) {
+    this.imaAssetKey = key;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
     return this;
   }
 
@@ -318,23 +368,26 @@ const ShakaDemoAssetInfo = class {
    */
   getConfiguration() {
     const config = /** @type {shaka.extern.PlayerConfiguration} */(
-      {drm: {}, manifest: {dash: {}}});
-    if (this.licenseServers.size) {
-      config.drm.servers = {};
-      this.licenseServers.forEach((value, key) => {
-        config.drm.servers[key] = value;
-      });
-    }
-    if (this.clearKeys.size) {
-      config.drm.clearKeys = {};
-      this.clearKeys.forEach((value, key) => {
-        config.drm.clearKeys[key] = value;
-      });
-    }
+      {drm: {advanced: {}}, manifest: {dash: {}}});
+
     if (this.extraConfig) {
       for (const key in this.extraConfig) {
         config[key] = this.extraConfig[key];
       }
+    }
+
+    if (this.licenseServers.size) {
+      config.drm.servers = config.drm.servers || {};
+      this.licenseServers.forEach((value, key) => {
+        config.drm.servers[key] = value;
+      });
+    }
+
+    if (this.clearKeys.size) {
+      config.drm.clearKeys = config.drm.clearKeys || {};
+      this.clearKeys.forEach((value, key) => {
+        config.drm.clearKeys[key] = value;
+      });
     }
     return config;
   }

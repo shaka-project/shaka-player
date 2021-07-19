@@ -5,6 +5,15 @@
  */
 
 
+goog.require('shaka.hls.Attribute');
+goog.require('shaka.hls.ManifestTextParser');
+goog.require('shaka.hls.PlaylistType');
+goog.require('shaka.hls.Segment');
+goog.require('shaka.hls.Tag');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.StringUtils');
+
 describe('ManifestTextParser', () => {
   /** @type {!shaka.hls.ManifestTextParser} */
   let parser;
@@ -314,15 +323,13 @@ describe('ManifestTextParser', () => {
               new shaka.hls.Tag(/* id= */ 0, 'EXT-X-MEDIA-SEQUENCE', [], '1'),
             ],
             segments: [
-              new shaka.hls.Segment('https://test/test.mp4',
-                  [
-                    new shaka.hls.Tag(
-                        /* id= */ 2,
-                        'EXTINF',
-                        [new shaka.hls.Attribute('pid', '180')],
-                        '5.99467'
-                    ),
-                  ]),
+              new shaka.hls.Segment('https://test/test.mp4', [
+                new shaka.hls.Tag(
+                    /* id= */ 2,
+                    'EXTINF',
+                    [new shaka.hls.Attribute('pid', '180')],
+                    '5.99467'),
+              ]),
             ],
           },
 

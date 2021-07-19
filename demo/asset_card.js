@@ -8,6 +8,11 @@
 goog.provide('shakaDemo.AssetCard');
 
 
+goog.require('goog.asserts');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.Tooltips');
+goog.requireType('ShakaDemoAssetInfo');
+
 /**
  * Creates and contains an MDL card that presents info about the given asset.
  * @final
@@ -101,11 +106,9 @@ shakaDemo.AssetCard = class {
     this.progressCircleSvg_.appendChild(this.progressCircleBack_);
     this.progressCircleSvg_.appendChild(this.progressCircleBar_);
     this.progressCircle_.appendChild(this.progressCircleSvg_);
-    // You can't use access the classList of an svg on IE, so set the class
-    // attribute instead.
-    this.progressCircleSvg_.setAttribute('class', 'progress-circle-svg');
-    this.progressCircleBack_.setAttribute('class', 'progress-circle-back');
-    this.progressCircleBar_.setAttribute('class', 'progress-circle-bar');
+    this.progressCircleSvg_.classList.add('progress-circle-svg');
+    this.progressCircleBack_.classList.add('progress-circle-back');
+    this.progressCircleBar_.classList.add('progress-circle-bar');
 
     parentDiv.appendChild(this.card_);
     // Remake buttons AFTER appending to parent div, so that any tooltips can

@@ -78,18 +78,15 @@ module.exports = {
     'no-shadow': 'off',
     // }}}
 
-    // Temporary Google style overrides while we get in compliance with the
-    // latest style guide {{{
-    'require-jsdoc': 'off',
-    // }}}
-
     // "Possible error" rules: {{{
     'no-async-promise-executor': 'error',
     'no-await-in-loop': 'error',
     'no-empty': ['error', {'allowEmptyCatch': true}],
     'no-misleading-character-class': 'error',
     'no-template-curly-in-string': 'error',
-    'require-atomic-updates': 'error',
+    // TODO: Try to re-enable this if possible.  Right now, it produces way too
+    // many false-positives with eslint 7.  It worked well enough in eslint 5.
+    // 'require-atomic-updates': 'error',
     // }}}
 
     // "Best practices" rules: {{{
@@ -154,7 +151,7 @@ module.exports = {
     'array-bracket-newline': ['error', 'consistent'],
     'block-spacing': ['error', 'always'],
     'brace-style': ['error', '1tbs', {'allowSingleLine': true}],
-    'id-blacklist': ['error', 'async'],
+    'id-denylist': ['error', 'async'],
     'lines-between-class-members': 'error',
     'max-statements-per-line': ['error', {'max': 1}],
     'new-parens': 'error',
@@ -177,6 +174,13 @@ module.exports = {
       // and the "!" is for the "/*!" of license headers which are passed
       // verbatim through the compiler.
       'markers': ['*', '!'],
+    }],
+    'require-jsdoc': ['error', {
+      'require': {
+        'FunctionDeclaration': true,
+        'MethodDefinition': true,
+        'ClassDeclaration': true,
+      },
     }],
     // }}}
 
@@ -272,12 +276,34 @@ module.exports = {
       ],
     },
     {
-      'files': ['externs/*', 'externs/shaka/*'],
       'rules': {
         // Disable rules on useless constructors so we can use ES6 classes in
         // externs.
         'no-useless-constructor': 'off',
       },
+      'files': ['externs/**/*.js'],
+    },
+    {
+      'rules': {
+        // JSDoc is not strictly required in externs, tests, and in load.js.
+        'require-jsdoc': 'off',
+      },
+      'files': [
+        'demo/load.js',
+        'externs/**/*.js',
+        'test/**/*.js',
+      ],
+    },
+    {
+      'rules': {
+        // Externs naturally redeclare things eslint knows about.
+        'no-redeclare': 'off',
+      },
+      'files': [
+        'ui/externs/*.js',
+        'externs/**/*.js',
+        'test/test/externs/*.js',
+      ],
     },
   ],
 };

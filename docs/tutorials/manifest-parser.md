@@ -199,9 +199,10 @@ const references = refs.map(function(r) {
 const index = new shaka.media.SegmentIndex(references);
 ```
 
-To merge updates, simply create a new array of segments and call `merge`.  Any
-existing segments will be updated and new segments will be added.  You can also
-call `evict` to remove old references to reduce the memory footprint.
+To merge updates and remove old references to reduce the memory footprint,
+simply create a new array of segments and call `mergeAndEvict`.  Any
+existing segments will be updated, new segments will be added, and old
+unavailable references will be removed.
 
 To expand the list of references on a timer, as is done for DASH's
 SegmentTemplate, call `index.updateEvery` with a callback that evicts old
@@ -218,6 +219,11 @@ index.updateEvery(updateIntervalSeconds, () => {
   return references;
 });
 ```
+
+If the callback returns null, the update timer for this index will be stopped.
+(NOTE: This method was introduced in v3.0.0, but the interpretation of the
+callback's return changed in v3.0.8 to fix a bug in our DASH SegmentTemplate
+support.  We apologize for any inconvenience.)
 
 
 ## Manifest Updates

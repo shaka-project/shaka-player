@@ -10,6 +10,7 @@ goog.provide('shaka.ui.LanguageUtils');
 goog.require('mozilla.LanguageMapping');
 goog.require('shaka.log');
 goog.require('shaka.ui.Locales');
+goog.require('shaka.ui.Overlay.TrackLabelFormat');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.LanguageUtils');
@@ -24,18 +25,15 @@ shaka.ui.LanguageUtils = class {
    * @param {boolean} updateChosen
    * @param {!HTMLElement} currentSelectionElement
    * @param {shaka.ui.Localization} localization
-   * @param {shaka.ui.TrackLabelFormat} trackLabelFormat
+   * @param {shaka.ui.Overlay.TrackLabelFormat} trackLabelFormat
    */
-  // TODO: Do the benefits of having this common code in a method still
-  // outweigh the complexity of the parameter list?
   static updateTracks(tracks, langMenu, onTrackSelected, updateChosen,
       currentSelectionElement, localization, trackLabelFormat) {
-    // Using array.filter(f)[0] as an alternative to array.find(f) which is
-    // not supported in IE11.
-    const activeTracks = tracks.filter((track) => {
+    // TODO: Do the benefits of having this common code in a method still
+    // outweigh the complexity of the parameter list?
+    const selectedTrack = tracks.find((track) => {
       return track.active == true;
     });
-    const selectedTrack = activeTracks[0];
 
     // Remove old tracks
     // 1. Save the back to menu button
@@ -78,6 +76,9 @@ shaka.ui.LanguageUtils = class {
 
     for (const track of tracks) {
       const language = track.language;
+      const forced = track.forced;
+      const LocIds = shaka.ui.Locales.Ids;
+      const forcedString = localization.resolve(LocIds.SUBTITLE_FORCED);
       const rolesString = getRolesString(track);
       const combinationName = getCombination(language, rolesString);
       if (combinationsMade.has(combinationName)) {
@@ -96,7 +97,12 @@ shaka.ui.LanguageUtils = class {
       span.textContent =
           shaka.ui.LanguageUtils.getLanguageName(language, localization);
       switch (trackLabelFormat) {
-        case shaka.ui.TrackLabelFormat.ROLE:
+        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE:
+          if (forced) {
+            span.textContent += ' (' + forcedString + ')';
+          }
+          break;
+        case shaka.ui.Overlay.TrackLabelFormat.ROLE:
           if (!rolesString) {
             // Fallback behavior. This probably shouldn't happen.
             shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
@@ -105,10 +111,26 @@ shaka.ui.LanguageUtils = class {
           } else {
             span.textContent = rolesString;
           }
+          if (forced) {
+            span.textContent += ' (' + forcedString + ')';
+          }
           break;
-        case shaka.ui.TrackLabelFormat.LANGUAGE_ROLE:
+        case shaka.ui.Overlay.TrackLabelFormat.LANGUAGE_ROLE:
           if (rolesString) {
             span.textContent += ': ' + rolesString;
+          }
+          if (forced) {
+            span.textContent += ' (' + forcedString + ')';
+          }
+          break;
+        case shaka.ui.Overlay.TrackLabelFormat.LABEL:
+          if (track.label) {
+            span.textContent = track.label;
+          } else {
+            // Fallback behavior. This probably shouldn't happen.
+            shaka.log.alwaysWarn('Track #' + track.id + ' does not have a ' +
+                'label, but the UI is configured to only show labels.');
+            span.textContent = '?';
           }
           break;
       }
@@ -116,7 +138,7 @@ shaka.ui.LanguageUtils = class {
       if (updateChosen && (combinationName == selectedCombination)) {
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
-        button.setAttribute('aria-selected', 'true');
+        button.ariaSelected = 'true';
         currentSelectionElement.textContent = span.textContent;
       }
       langMenu.appendChild(button);

@@ -74,7 +74,7 @@ def compile_demo(force, is_debug):
   closure_opts += [
       # Ignore missing goog.require since we assume the whole library is
       # already included.
-      '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+      '--jscomp_off=missingRequire',
       '-D', 'COMPILED=true',
   ]
 
@@ -125,7 +125,7 @@ def compile_receiver(force, is_debug):
   closure_opts += [
       # Ignore missing goog.require since we assume the whole library is
       # already included.
-      '--jscomp_off=missingRequire', '--jscomp_off=strictMissingRequire',
+      '--jscomp_off=missingRequire',
       '-D', 'COMPILED=true',
   ]
 
@@ -161,6 +161,14 @@ def main(args):
       action='store_true')
 
   parsed_args = parser.parse_args(args)
+
+  # Make the dist/ folder, ignore errors.
+  base = shakaBuildHelpers.get_source_base()
+  try:
+    os.mkdir(os.path.join(base, 'dist'))
+  except OSError:
+    pass
+
   force = parsed_args.force
 
   # Update node modules if needed.

@@ -8,9 +8,7 @@
 goog.provide('shaka.ui.PlayButton');
 
 goog.require('shaka.ads.AdManager');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Element');
-goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.util.Dom');
 goog.requireType('shaka.ui.Controls');
@@ -54,6 +52,11 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
       this.updateIcon();
     });
 
+    this.eventManager.listen(this.video, 'seeking', () => {
+      this.updateAriaLabel();
+      this.updateIcon();
+    });
+
     this.eventManager.listen(this.adManager, AdManager.AD_PAUSED, () => {
       this.updateAriaLabel();
       this.updateIcon();
@@ -76,6 +79,12 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
         this.controls.playPausePresentation();
       }
     });
+
+    if (this.ad) {
+      // There was already an ad.
+      this.updateAriaLabel();
+      this.updateIcon();
+    }
   }
 
   /**
@@ -90,14 +99,11 @@ shaka.ui.PlayButton = class extends shaka.ui.Element {
     return this.controls.presentationIsPaused();
   }
 
-  /** @protected */
-  updateAriaLabel() {
-    const LocIds = shaka.ui.Locales.Ids;
-    const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
-
-    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(label));
-  }
+  /**
+   * Called when the button's aria label needs to change.
+   * To be overridden by subclasses.
+   */
+  updateAriaLabel() {}
 
   /**
    * Called when the button's icon needs to change.

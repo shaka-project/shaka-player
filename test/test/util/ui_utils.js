@@ -7,6 +7,11 @@
 
 goog.provide('shaka.test.UiUtils');
 
+goog.require('shaka.Player');
+goog.require('shaka.test.Waiter');
+goog.require('shaka.ui.Overlay');
+goog.require('shaka.util.EventManager');
+
 
 shaka.test.UiUtils = class {
   /**
@@ -153,15 +158,7 @@ shaka.test.UiUtils = class {
    * @param {string} name
    */
   static simulateEvent(target, name) {
-    const type = {
-      'click': 'MouseEvent',
-      'dblclick': 'MouseEvent',
-    }[name] || 'CustomEvent';
-
-    // Note we can't use the MouseEvent constructor since it isn't supported on
-    // IE11.
-    const event = document.createEvent(type);
-    event.initEvent(name, true, true);
+    const event = new MouseEvent(name, {'bubbles': true, 'cancelable': true});
     target.dispatchEvent(event);
   }
 

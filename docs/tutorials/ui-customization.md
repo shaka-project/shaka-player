@@ -5,26 +5,26 @@
 
 Once the UI is created, you can pass in configuration options that change
 the look and functioning of the UI bar. For example, if you wanted to not have
-a seek bar, you could add the following line to the init() function from the UI
-basic usage tutorial, after creating the UI overlay:
+a seek bar, you could add the following line to the `init()` function from the
+UI basic usage tutorial, after creating the UI overlay:
 
 ```js
 const video = document.getElementById('video');
 const ui = video['ui'];
 const config = {
-  addSeekBar: false;
+  addSeekBar: false
 };
 ui.configure(config);
 ```
 
-Controls will fire a {@link shaka.ui.Controls.UIUpdatedEvent} event once the
+Controls will fire a {@link shaka.ui.Controls#event:UIUpdatedEvent} event once the
 config takes effect.
 See the docs for {@link shaka.extern.UIConfiguration} for more information.
 
 #### Customizing the number and order of controls
 
 For example, let's say that all you care about for your app is rewinding and
-fast-forwarding. You could add the following line to init(), right before
+fast-forwarding. You could add the following line to `init()`, right before
 creating the UI overlay. This will configure UI to ONLY provide these two buttons:
 
 ```js
@@ -60,6 +60,13 @@ The following elements can be added to the UI bar using this configuration value
 * fast_forward: adds a button that fast forwards the presentation on click; that is, it
   starts playing the presentation at an increased speed
 * spacer: adds a chunk of empty space between the adjacent elements.
+* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
+  that support it. Button is invisible on other browsers.
+* loop: adds a button that controls if the currently selected video is played in a loop.
+* airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
+  supports AirPlay.
+* cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
+  at least one Chromecast device on the same network available for casting.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Similarly, the 'overflowMenuButtons' configuration option can be used to control
@@ -91,7 +98,7 @@ ui.configure(config);
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
 
-The presense of the seek bar and the big play button in the center of the video element can be
+The presence of the seek bar and the big play button in the center of the video element can be
 customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
 
 UI layout can be reconfigured at any point after it's been created.
@@ -175,7 +182,7 @@ shaka.ui.Controls.registerElement(
 
 We have our button. Let's see how we can add it to the layout.
 Similar to specifying the order of shaka-provided controls, we'll need to
-add a line to the init() function in myapp.js
+add a line to the `init()` function in myapp.js
 
 ```js
 // This will add three buttons to the controls panel (in that order): shaka-provided
@@ -185,6 +192,14 @@ uiConfig['controlPanelElements'] = ['rewind', 'fast_forward', 'skip'];
 ```
 <!-- TODO: Create a doc on best a11y practices for custom buttons and link to the
   localization docs explaining how to take advantage of our localization system. -->
+
+####  Shaka Theme Gallery
+Check out the set of [pre-packaged Shaka UI themes][], created by [@lucksy][]!
+PR contributions to [the gallery repo][] are welcome.
+[@lucksy]: https://github.com/lucksy
+[pre-packaged Shaka UI themes]: https://lucksy.github.io/shaka-player-themes/
+[the gallery repo]: https://github.com/lucksy/shaka-player-themes
+
 
 #### Continue the Tutorials
 

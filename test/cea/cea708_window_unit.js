@@ -4,28 +4,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.cea.Cea708Window');
+goog.require('shaka.cea.CeaUtils');
+goog.require('shaka.test.CeaUtils');
+goog.require('shaka.text.Cue');
+
 describe('Cea708Window', () => {
   const CeaUtils = shaka.test.CeaUtils;
 
   /** @type {!shaka.cea.Cea708Window} */
   let window;
 
-  /** @type {!number} */
+  /** @type {number} */
   const serviceNumber = 1; // We will arbitrarily pick service 1 for all tests.
 
-  /** @type {!string} */
+  /** @type {string} */
   const stream = `svc${serviceNumber}`;
 
-  /** @type {!number} */
+  /** @type {number} */
   const rowCount = 10;
 
-  /** @type {!number} */
+  /** @type {number} */
   const colCount = 32;
 
-  /** @type {!number} */
+  /** @type {number} */
   const startTime = 1;
 
-  /** @type {!number} */
+  /** @type {number} */
   const endTime = 2;
 
   beforeEach(() => {

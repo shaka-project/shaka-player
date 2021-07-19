@@ -5,6 +5,7 @@
  */
 
 goog.require('goog.asserts');
+goog.require('ShakaDemoAssetInfo');
 
 
 /**
@@ -12,6 +13,7 @@ goog.require('goog.asserts');
  * @suppress {missingProvide}
  */
 class ShakaReceiverApp {
+  /** */
   constructor() {
     /** @private {HTMLVideoElement} */
     this.video_ = null;
