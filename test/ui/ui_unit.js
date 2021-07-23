@@ -409,6 +409,80 @@ describe('UI', () => {
       });
     });
 
+    describe('control panel buttons with submenus', () => {
+      /** @type {!HTMLElement} */
+      let resolutionMenu;
+      /** @type {!Element} */
+      let resolutionMenuButton;
+      /** @type {!HTMLElement} */
+      let languageMenu;
+      /** @type {!Element} */
+      let languageMenuButton;
+
+      beforeEach(() => {
+        const config = {
+          controlPanelElements: [
+            'quality',
+            'language',
+          ],
+        };
+        const ui = UiUtils.createUIThroughAPI(videoContainer, video, config);
+        player = ui.getControls().getLocalPlayer();
+
+        const resolutionsMenus =
+        videoContainer.getElementsByClassName('shaka-resolutions');
+        expect(resolutionsMenus.length).toBe(1);
+        resolutionMenu = /** @type {!HTMLElement} */ (resolutionsMenus[0]);
+
+        const resolutionMenuButtons =
+        videoContainer.getElementsByClassName('shaka-resolution-button');
+        expect(resolutionMenuButtons.length).toBe(1);
+        resolutionMenuButton = resolutionMenuButtons[0];
+
+        const languageMenus =
+        videoContainer.getElementsByClassName('shaka-audio-languages');
+        expect(languageMenus.length).toBe(1);
+        languageMenu = /** @type {!HTMLElement} */ (languageMenus[0]);
+
+        const languageMenuButtons =
+        videoContainer.getElementsByClassName('shaka-language-button');
+        expect(languageMenuButtons.length).toBe(1);
+        languageMenuButton = languageMenuButtons[0];
+      });
+
+      it('menus are initially hidden', () => {
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(true);
+      });
+
+      it('a menu becomes visible if the button is clicked', () => {
+        resolutionMenuButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+
+      it('a menu becomes hidden if the "close" button is clicked', () => {
+        resolutionMenuButton.click();
+
+        const backToOverflowButtons =
+        videoContainer.getElementsByClassName('shaka-back-to-overflow-button');
+        expect(backToOverflowButtons.length).toBe(2);
+        const backToOverflowButton =
+        /** @type {!HTMLElement} */ (backToOverflowButtons[0]);
+        backToOverflowButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+      });
+
+      it('a menu becomes hidden if another one is opened', () => {
+        resolutionMenuButton.click();
+        languageMenuButton.click();
+
+        expect(resolutionMenu.classList.contains('shaka-hidden')).toBe(true);
+        expect(languageMenu.classList.contains('shaka-hidden')).toBe(false);
+      });
+    });
+
     describe('resolutions menu', () => {
       /** @type {!HTMLElement} */
       let resolutionsMenu;

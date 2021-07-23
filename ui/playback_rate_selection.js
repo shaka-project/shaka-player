@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.PlaybackRateSelection');
 
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -142,4 +143,7 @@ shaka.ui.PlaybackRateSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'playback_rate', new shaka.ui.PlaybackRateSelection.Factory());
+
+shaka.ui.Controls.registerElement(
     'playback_rate', new shaka.ui.PlaybackRateSelection.Factory());
