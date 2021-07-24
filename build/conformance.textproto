@@ -163,14 +163,6 @@ requirement: {
 }
 
 
-# Disallow Element.children.
-requirement: {
-  type: BANNED_PROPERTY
-  value: 'Element.prototype.children'
-  error_message: 'Using "Element.children" is not allowed; '
-                 'use Node.childNodes instead'
-}
-
 requirement: {
   type: BANNED_PROPERTY
   value: 'DataView.prototype.buffer'
