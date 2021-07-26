@@ -63,6 +63,8 @@ shaka.extern.UIVolumeBarColors;
  * @typedef {{
  *   controlPanelElements: !Array.<string>,
  *   overflowMenuButtons: !Array.<string>,
+ *   contextMenuElements: !Array.<string>,
+ *   statisticsList: !Array.<string>,
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
  *   castReceiverAppId: string,
@@ -82,6 +84,10 @@ shaka.extern.UIVolumeBarColors;
  *   The ordered list of control panel elements of the UI.
  * @property {!Array.<string>} overflowMenuButtons
  *   The ordered list of the overflow menu buttons.
+ * @property {!Array.<string>} contextMenuElements
+ *   The ordered list of buttons in the context menu.
+ * @property {!Array.<string>} statisticsList
+ *   The ordered list of statistics present in the statistics container.
  * @property {boolean} addSeekBar
  *   Whether or not a seek bar should be part of the UI.
  * @property {boolean} addBigPlayButton

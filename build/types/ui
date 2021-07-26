@@ -9,6 +9,7 @@
 +../../ui/big_play_button.js
 +../../ui/airplay_button.js
 +../../ui/cast_button.js
++../../ui/context_menu.js
 +../../ui/controls.js
 +../../ui/constants.js
 +../../ui/enums.js
@@ -31,6 +32,7 @@
 +../../ui/small_play_button.js
 +../../ui/skip_ad_button.js
 +../../ui/spacer.js
++../../ui/statistics_button.js
 +../../ui/text_selection.js
 +../../ui/ui.js
 +../../ui/ui_utils.js

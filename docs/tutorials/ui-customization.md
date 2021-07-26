@@ -55,6 +55,7 @@ The following elements can be added to the UI bar using this configuration value
 * fullscreen: adds a button that toggles full screen mode on click.
 * overflow_menu: adds a button that opens an overflow menu with additional settings
   buttons. It's content is also configurable.
+* context_menu: adds a custom context menu on right-click.
 * rewind: adds a button that rewinds the presentation on click; that is, it starts playing
   the presentation backwards.
 * fast_forward: adds a button that fast forwards the presentation on click; that is, it
@@ -101,6 +102,33 @@ ui.configure(config);
 
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
+
+Additionally, the 'contextMenuElements' configuration option can be used to add elements to the custom right-click context menu. Currently only the statistics button is available:
+* Statistics: adds a button that displays statistics of the video.
+
+Example:
+```js
+const config = {
+  'controlPanelElements' : ['context_menu'],
+  'contextMenuElements' : ['statistics'],
+}
+ui.configure(config);
+```
+
+#### Configuring Statistics
+The list of statistics that are displayed when toggling the statistics button can be customized by specifying a `statisticsList` on the configuration. With the exception of `switchHistory` and `stateHistory`, all of the statistics from the {@link shaka.extern.Stats `Stats`} extern can be displayed.
+
+Example:
+```js
+// Add a context menu with the 'statistics' button that displays a container with
+// the current 'width', 'height', 'playTime', and 'bufferingTime' values.
+const config = {
+  'controlPanelElements' : ['context_menu'],
+  'contextMenuElements' : ['statistics'],
+  'statisticsList' : ['width', 'height', 'playTime', 'bufferingTime'],
+}
+ui.configure(config);
+```
 
 The presence of the seek bar and the big play button in the center of the video element can be
 customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
