@@ -197,6 +197,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   async destroy() {
+    if (document.pictureInPictureElement == this.localVideo_) {
+      await document.exitPictureInPicture();
+    }
+
     if (this.eventManager_) {
       this.eventManager_.release();
       this.eventManager_ = null;
