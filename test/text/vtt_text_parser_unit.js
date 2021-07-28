@@ -13,7 +13,7 @@ goog.require('shaka.util.BufferUtils');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.StringUtils');
 
-fdescribe('VttTextParser', () => {
+describe('VttTextParser', () => {
   const Cue = shaka.text.Cue;
   const CueRegion = shaka.text.CueRegion;
   const originalLogWarning = shaka.log.warning;
