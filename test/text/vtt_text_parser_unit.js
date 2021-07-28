@@ -13,7 +13,7 @@ goog.require('shaka.util.BufferUtils');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.StringUtils');
 
-describe('VttTextParser', () => {
+fdescribe('VttTextParser', () => {
   const Cue = shaka.text.Cue;
   const CueRegion = shaka.text.CueRegion;
   const originalLogWarning = shaka.log.warning;
@@ -924,6 +924,18 @@ describe('VttTextParser', () => {
             payload: '<c.lime><b>Parse fail 2</c></b>',
             nestedCues: [],
           },
+            {
+                startTime: 100,
+                endTime: 110,
+                payload: '<c.lime>forward slash 1/2 in text</c>',
+                nestedCues: [],
+            },
+            {
+                startTime: 110,
+                endTime: 120,
+                payload: '<c.lime>less or more < > in text</c>',
+                nestedCues: [],
+            },
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
@@ -939,7 +951,11 @@ describe('VttTextParser', () => {
         '00:01:20.000 --> 00:01:30.000\n' +
         '<b><c.lime>Parse fail 1</b></c>\n\n' +
         '00:01:30.000 --> 00:01:40.000\n' +
-        '<c.lime><b>Parse fail 2</c></b>',
+        '<c.lime><b>Parse fail 2</c></b>\n\n' +
+        '00:01:40.000 --> 00:01:50.000\n' +
+        '<c.lime>forward slash 1/2 in text</c>\n\n' +
+        '00:01:50.000 --> 00:02:00.000\n' +
+        '<c.lime>less or more < > in text</c>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
