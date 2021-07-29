@@ -212,6 +212,13 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
           this.parsedStatisticValue_(name);
     }
   }
+
+  /** @override */
+  release() {
+    this.timer_.stop();
+    this.timer_ = null;
+    super.release();
+  }
 };
 
 

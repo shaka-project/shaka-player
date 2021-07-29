@@ -694,9 +694,7 @@ describe('UI', () => {
 
       beforeEach(() => {
         const config = {
-          controlPanelElements: [
-            'context_menu',
-          ],
+          customContextMenu: true,
           contextMenuElements: [
             'fakeElement',
             'statistics',
@@ -745,9 +743,7 @@ describe('UI', () => {
 
       beforeEach(() => {
         const config = {
-          controlPanelElements: [
-            'context_menu',
-          ],
+          customContextMenu: true,
           contextMenuElements: [
             'statistics',
           ],

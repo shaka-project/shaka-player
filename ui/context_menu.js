@@ -9,10 +9,10 @@ goog.provide('shaka.ui.ContextMenu');
 
 goog.require('goog.asserts');
 goog.require('shaka.log');
-goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
@@ -104,22 +104,6 @@ shaka.ui.ContextMenu = class extends shaka.ui.Element {
     }
   }
 };
-
-
-/**
- * @implements {shaka.extern.IUIElement.Factory}
- * @final
- */
-shaka.ui.ContextMenu.Factory = class {
-  /** @override */
-  create(rootElement, controls) {
-    return new shaka.ui.ContextMenu(rootElement, controls);
-  }
-};
-
-shaka.ui.Controls.registerElement(
-    'context_menu', new shaka.ui.ContextMenu.Factory());
-
 
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ContextMenu.elementNamesToFactories_ = new Map();
