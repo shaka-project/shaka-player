@@ -924,18 +924,18 @@ describe('VttTextParser', () => {
             payload: '<c.lime><b>Parse fail 2</c></b>',
             nestedCues: [],
           },
-            {
-                startTime: 100,
-                endTime: 110,
-                payload: '<c.lime>forward slash 1/2 in text</c>',
-                nestedCues: [],
-            },
-            {
-                startTime: 110,
-                endTime: 120,
-                payload: '<c.lime>less or more < > in text</c>',
-                nestedCues: [],
-            },
+          {
+            startTime: 100,
+            endTime: 110,
+            payload: '<c.lime>forward slash 1/2 in text</c>',
+            nestedCues: [],
+          },
+          {
+            startTime: 110,
+            endTime: 120,
+            payload: '<c.lime>less or more < > in text</c>',
+            nestedCues: [],
+          },
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
