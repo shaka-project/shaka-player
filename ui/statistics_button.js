@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.StatisticsButton');
 
+goog.require('shaka.log');
 goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
@@ -69,10 +70,13 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     controlsContainer.appendChild(this.container_);
 
     /** @private {!Array} */
-    this.statisticsList_ = this.controls.getConfig().statisticsList;
+    this.statisticsList_ = [];
 
     /** @private {!Object.<string, number>} */
-    this.currentStats_ = [];
+    this.currentStats_ = this.player.getStats();
+
+    /** @private {!Object.<string, HTMLElement>} */
+    this.displayedElements_ = {};
 
     /** @private {!Object.<string, string>} */
     this.parseFrom_ = {
@@ -116,7 +120,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     this.updateLocalizedStrings_();
 
-    this.timer_.tickNow();
+    this.loadContainer_();
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
@@ -166,6 +170,11 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
   }
 
   /** @private */
+  parsedStatisticValue_(name) {
+    return this.parseTo_[this.parseFrom_[name]](name);
+  }
+
+  /** @private */
   generateComponent_(name) {
     const section = shaka.util.Dom.createHTMLElement('div');
 
@@ -174,21 +183,33 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     section.appendChild(label);
 
     const value = shaka.util.Dom.createHTMLElement('span');
-    value.textContent = this.parseTo_[this.parseFrom_[name]](name);
+    value.textContent = this.parsedStatisticValue_(name);
     section.appendChild(value);
+
+    this.displayedElements_[name] = value;
 
     return section;
   }
 
   /** @private */
-  onTimerTick_() {
-    this.currentStats_ = this.player.getStats();
-    this.container_.innerText = '';
-
-    for (const name of this.statisticsList_) {
+  loadContainer_() {
+    for (const name of this.controls.getConfig().statisticsList) {
       if (name in this.currentStats_) {
         this.container_.appendChild(this.generateComponent_(name));
+        this.statisticsList_.push(name);
+      } else {
+        shaka.log.alwaysWarn('Unrecognized statistic element:', name);
       }
+    }
+  }
+
+  /** @private */
+  onTimerTick_() {
+    this.currentStats_ = this.player.getStats();
+
+    for (const name of this.statisticsList_) {
+      this.displayedElements_[name].textContent =
+          this.parsedStatisticValue_(name);
     }
   }
 };
