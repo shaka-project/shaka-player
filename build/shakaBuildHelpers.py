@@ -32,6 +32,9 @@ import subprocess
 import sys
 import time
 
+import subprocessWindowsPatch
+
+
 # Python 3 no longer has a separate unicode type.  For type-checking done in
 # get_node_binary, create an alias to the str type.
 if sys.version_info[0] == 3:
@@ -212,8 +215,7 @@ def npm_version(is_dirty=False):
   """Gets the version of the library from NPM."""
   try:
     base = cygwin_safe_path(get_source_base())
-    cmd = 'npm.cmd' if is_windows() else 'npm'
-    cmd_line = [cmd, '--prefix', base, 'ls', 'shaka-player']
+    cmd_line = ['npm', '--prefix', base, 'ls', 'shaka-player']
     text = execute_get_output(cmd_line).decode('utf8')
   except subprocess.CalledProcessError as e:
     text = e.output.decode('utf8')
@@ -335,10 +337,9 @@ def update_node_modules():
     return True
 
   base = cygwin_safe_path(get_source_base())
-  cmd = 'npm.cmd' if is_windows() else 'npm'
 
   # Check the version of npm.
-  version = execute_get_output([cmd, '-v']).decode('utf8')
+  version = execute_get_output(['npm', '-v']).decode('utf8')
 
   if _parse_version(version) < _parse_version('5.0.0'):
     logging.error('npm version is too old, please upgrade.  e.g.:')
@@ -351,7 +352,7 @@ def update_node_modules():
   with InDir(base):
     # npm update seems to be the wrong thing in npm v5, so use install.
     # See google/shaka-player#854 for more details.
-    execute_get_output([cmd, 'install'])
+    execute_get_output(['npm', 'install'])
 
   # Update the timestamp of the file that tracks when we last updated.
   open(_node_modules_last_update_path(), 'wb').close()
