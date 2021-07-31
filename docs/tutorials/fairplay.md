@@ -76,3 +76,24 @@ player.getNetworkingEngine().registerResponseFilter((type, response) => {
   response.data = shaka.util.Uint8ArrayUtils.fromBase64(responseText).buffer;
 });
 ```
+
+## DRM Engine
+
+Some FairPlay support need to be detected in order to change source to HLS if FairPlay supported (AFAIK currently FairPlay is supported only within HLS and not publicly supported in DASH). You can query EME yourself, directly, and only query FairPlay, rather than the full list of key systems probed by `DrmEngine`. 
+
+```js
+async function isFairPlaySupported() {
+  config = {
+    initDataTypes: ['cenc', 'sinf', 'skd'],
+    videoCapabilities: [{contentType: 'video/mp4; codecs="avc1.42E01E"'}],
+  };
+  try {
+    await navigator.requestMediaKeySystemAccess('com.apple.fps', [config]);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+await isFairPlaySupported();
+```
