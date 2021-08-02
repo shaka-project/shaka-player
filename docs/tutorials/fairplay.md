@@ -79,7 +79,7 @@ player.getNetworkingEngine().registerResponseFilter((type, response) => {
 
 ## DRM Engine
 
-Some FairPlay support need to be detected in order to change source to HLS if FairPlay supported (AFAIK currently FairPlay is supported only within HLS and not publicly supported in DASH). You can query EME yourself, directly, and only query FairPlay, rather than the full list of key systems probed by `DrmEngine`. 
+Some FairPlay support needs to be detected in order to change source to HLS if FairPlay is supported (AFAIK currently FairPlay is supported only within HLS and not publicly supported in DASH). You can query EME yourself, directly, and only query FairPlay, rather than the full list of key systems probed by `DrmEngine`. 
 
 ```js
 async function isFairPlaySupported() {
