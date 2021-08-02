@@ -72,6 +72,9 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     /** @private {!Array} */
     this.statisticsList_ = [];
 
+    /** @private {!Array} */
+    this.skippedStats_ = ['stateHistory', 'switchHistory'];
+
     /** @private {!Object.<string, number>} */
     this.currentStats_ = this.player.getStats();
 
@@ -80,13 +83,22 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     /** @private {!Object.<string, string>} */
     this.parseFrom_ = {
-      'width': 'px', 'height': 'px', 'completionPercent': 'percent',
-      'bufferingTime': 'seconds', 'drmTimeSeconds': 'seconds',
-      'licenseTime': 'seconds', 'liveLatency': 'seconds',
-      'loadLatency': 'seconds', 'manifestTimeSeconds': 'seconds',
-      'estimatedBandwidth': 'bits', 'streamBandwidth': 'bits',
-      'maxSegmentDuration': 'time', 'pauseTime': 'time', 'playTime': 'time',
-      'corruptedFrames': 'frames', 'decodedFrames': 'frames',
+      'width': 'px',
+      'height': 'px',
+      'completionPercent': 'percent',
+      'bufferingTime': 'seconds',
+      'drmTimeSeconds': 'seconds',
+      'licenseTime': 'seconds',
+      'liveLatency': 'seconds',
+      'loadLatency': 'seconds',
+      'manifestTimeSeconds': 'seconds',
+      'estimatedBandwidth': 'bits',
+      'streamBandwidth': 'bits',
+      'maxSegmentDuration': 'time',
+      'pauseTime': 'time',
+      'playTime': 'time',
+      'corruptedFrames': 'frames',
+      'decodedFrames': 'frames',
       'droppedFrames': 'frames',
     };
 
@@ -170,7 +182,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
   }
 
   /** @private */
-  parsedStatisticValue_(name) {
+  parseStatisticValue_(name) {
     return this.parseTo_[this.parseFrom_[name]](name);
   }
 
@@ -183,7 +195,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     section.appendChild(label);
 
     const value = shaka.util.Dom.createHTMLElement('span');
-    value.textContent = this.parsedStatisticValue_(name);
+    value.textContent = this.parseStatisticValue_(name);
     section.appendChild(value);
 
     this.displayedElements_[name] = value;
@@ -194,7 +206,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
   /** @private */
   loadContainer_() {
     for (const name of this.controls.getConfig().statisticsList) {
-      if (name in this.currentStats_) {
+      if (name in this.currentStats_ && !this.skippedStats_.includes(name)) {
         this.container_.appendChild(this.generateComponent_(name));
         this.statisticsList_.push(name);
       } else {
@@ -209,7 +221,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     for (const name of this.statisticsList_) {
       this.displayedElements_[name].textContent =
-          this.parsedStatisticValue_(name);
+          this.parseStatisticValue_(name);
     }
   }
 
