@@ -29,7 +29,7 @@ shaka.ui.Spacer = class extends shaka.ui.Element {
     const div = shaka.util.Dom.createHTMLElement('div');
     div.classList.add('shaka-spacer');
     // Make screen readers ignore the spacer
-    div.setAttribute('aria-hidden', true);
+    div.ariaHidden = 'true';
     this.parent.appendChild(div);
   }
 };

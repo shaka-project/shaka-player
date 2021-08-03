@@ -7,7 +7,6 @@
 
 goog.provide('shaka.ui.RewindButton');
 
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -57,8 +56,8 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
    * @private
    */
   updateAriaLabel_() {
-    this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(shaka.ui.Locales.Ids.REWIND));
+    this.button_.ariaLabel =
+        this.localization.resolve(shaka.ui.Locales.Ids.REWIND);
   }
 
   /**

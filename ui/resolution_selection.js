@@ -8,7 +8,7 @@
 goog.provide('shaka.ui.ResolutionSelection');
 
 goog.require('goog.asserts');
-goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -137,7 +137,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
       if (!abrEnabled && track == selectedTrack) {
         // If abr is disabled, mark the selected track's resolution.
-        button.setAttribute('aria-selected', 'true');
+        button.ariaSelected = 'true';
         button.appendChild(shaka.ui.Utils.checkmarkIcon());
         span.classList.add('shaka-chosen-item');
         this.currentSelection.textContent = span.textContent;
@@ -163,7 +163,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
 
     // If abr is enabled reflect it by marking 'Auto' as selected.
     if (abrEnabled) {
-      autoButton.setAttribute('aria-selected', 'true');
+      autoButton.ariaSelected = 'true';
       autoButton.appendChild(shaka.ui.Utils.checkmarkIcon());
 
       this.abrOnSpan_.classList.add('shaka-chosen-item');
@@ -198,10 +198,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.RESOLUTION));
-    this.backButton.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.RESOLUTION));
+    this.button.ariaLabel = this.localization.resolve(LocIds.RESOLUTION);
+    this.backButton.ariaLabel = this.localization.resolve(LocIds.RESOLUTION);
     this.backSpan.textContent =
         this.localization.resolve(LocIds.RESOLUTION);
     this.nameSpan.textContent =
@@ -229,4 +227,7 @@ shaka.ui.ResolutionSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'quality', new shaka.ui.ResolutionSelection.Factory());
+
+shaka.ui.Controls.registerElement(
     'quality', new shaka.ui.ResolutionSelection.Factory());

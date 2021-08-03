@@ -10,7 +10,6 @@ goog.provide('shaka.ui.OverflowMenu');
 goog.require('goog.asserts');
 goog.require('shaka.ads.AdManager');
 goog.require('shaka.log');
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -48,29 +47,6 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
     this.addOverflowMenu_();
 
     this.createChildren_();
-
-
-    const backToOverflowMenuButtons =
-        this.controls.getVideoContainer().getElementsByClassName(
-            'shaka-back-to-overflow-button');
-
-    for (const button of backToOverflowMenuButtons) {
-      this.eventManager.listen(button, 'click', () => {
-        // Hide the submenus, display the overflow menu
-        this.controls.hideSettingsMenus();
-        shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
-
-        // If there are back to overflow menu buttons, there must be
-        // overflow menu buttons, but oh well
-        if (this.overflowMenu_.childNodes.length) {
-          /** @type {!HTMLElement} */ (this.overflowMenu_.childNodes[0])
-              .focus();
-        }
-
-        // Make sure controls are displayed
-        this.controls.computeOpacity();
-      });
-    }
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
@@ -217,8 +193,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
    */
   updateAriaLabel_() {
     const LocIds = shaka.ui.Locales.Ids;
-    this.overflowMenuButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.MORE_SETTINGS));
+    this.overflowMenuButton_.ariaLabel =
+        this.localization.resolve(LocIds.MORE_SETTINGS);
   }
 };
 

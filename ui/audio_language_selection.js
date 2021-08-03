@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.AudioLanguageSelection');
 
-goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
@@ -96,10 +96,8 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.backButton.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.BACK));
-    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.LANGUAGE));
+    this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
+    this.button.ariaLabel = this.localization.resolve(LocIds.LANGUAGE);
     this.nameSpan.textContent =
         this.localization.resolve(LocIds.LANGUAGE);
     this.backSpan.textContent =
@@ -120,4 +118,7 @@ shaka.ui.AudioLanguageSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'language', new shaka.ui.AudioLanguageSelection.Factory());
+
+shaka.ui.Controls.registerElement(
     'language', new shaka.ui.AudioLanguageSelection.Factory());

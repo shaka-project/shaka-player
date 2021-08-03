@@ -198,6 +198,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   async destroy() {
+    if (document.pictureInPictureElement == this.localVideo_) {
+      await document.exitPictureInPicture();
+    }
+
     if (this.eventManager_) {
       this.eventManager_.release();
       this.eventManager_ = null;
@@ -776,8 +780,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // on the page. The click event listener on window ensures that.
     // However, clicks on the bottom controls don't propagate to the container,
     // so we have to explicitly hide the menus onclick here.
-    this.eventManager_.listen(this.bottomControls_, 'click', () => {
-      this.hideSettingsMenus();
+    this.eventManager_.listen(this.bottomControls_, 'click', (e) => {
+      // We explicitly deny this measure when clicking on buttons that
+      // open submenus in the control panel.
+      if (!e.target['closest']('.shaka-overflow-button')) {
+        this.hideSettingsMenus();
+      }
     });
 
     this.addAdControls_();
@@ -890,6 +898,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
+
+    // Avoid having multiple submenus open at the same time.
+    this.eventManager_.listen(
+        this, 'submenuopen', () => {
+          this.hideSettingsMenus();
+        });
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();

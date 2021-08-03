@@ -127,9 +127,9 @@ describe('DashParser SegmentTemplate', () => {
       // The first segment is number 1 and position 0.
       // Although the segment is 60 seconds long, it is clipped to the period
       // duration of 30 seconds.
-      const references = [
-        ManifestParser.makeReference('s1.mp4', 0, 30, baseUri),
-      ];
+      const ref = ManifestParser.makeReference('s1.mp4', 0, 30, baseUri);
+      ref.trueEndTime = 60;
+      const references = [ref];
       await Dash.testSegmentIndex(source, references);
     });
 
