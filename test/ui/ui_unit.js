@@ -765,7 +765,7 @@ describe('UI', () => {
             (statisticsContainers[0]);
       });
 
-      it('container appears and disappears on toggle', () => {
+      it('appears and disappears on toggle', () => {
         expect(statisticsContainer.classList.contains('shaka-hidden'))
             .toBe(true);
 
@@ -778,7 +778,7 @@ describe('UI', () => {
             .toBe(true);
       });
 
-      it('container receives all the available statistics', () => {
+      it('displays all the available statistics', () => {
         const skippedStats = ['stateHistory', 'switchHistory'];
         const nodes = statisticsContainer.childNodes;
         let nodeIndex = 0;
@@ -797,7 +797,7 @@ describe('UI', () => {
           }
         }
       });
-      it('container is updated periodically', async () => {
+      it('is updated periodically', async () => {
         function getStatsFromContainer() {
           const nodes = statisticsContainer.childNodes;
           width = nodes[0].childNodes[1].textContent.replace(' (px)', '');

@@ -107,7 +107,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
           this.currentStats_[name], false) + ' (m)';
     };
 
-    /** @private {!Object.<string, function(string)>} */
+    /** @private {!Object.<string, function(string):string>} */
     this.parseFrom_ = {
       'width': parsePx,
       'height': parsePx,
