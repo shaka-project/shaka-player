@@ -192,6 +192,72 @@
   align-items: center;
 }
 
+.shaka-statistics-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  min-width: 300px;
+
+  color: white;
+  background-color: rgba(35, 35, 35, 0.9);
+
+  font-size: 14px;
+
+  padding: 5px 10px;
+  border-radius: 2px;
+
+  position: absolute;
+  z-index: 2;
+  left: 15px;
+  top: 15px;
+
+  /* Fades out with the other controls. */
+  .show-when-controls-shown();
+
+  div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  span {
+    color: rgb(150, 150, 150);
+  }
+}
+
+.shaka-context-menu {
+  background-color: rgba(35, 35, 35, 0.9);
+
+  border-radius: 2px;
+
+  position: absolute;
+  z-index: 3;
+
+  button {
+    padding: 5px 10px;
+
+    display: flex;
+    align-items: center;
+
+    color: white;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+
+    &:hover {
+      background-color: rgba(50, 50, 50, 0.9);
+    }
+  }
+
+  label {
+    padding: 0 20px;
+
+    align-items: flex-start;
+
+    color: white;
+    cursor: pointer;
+  }
+}
+
 .shaka-scrim-container {
   margin: 0;
   .fill-container();

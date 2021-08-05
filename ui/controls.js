@@ -16,6 +16,7 @@ goog.require('shaka.log');
 goog.require('shaka.ui.AdCounter');
 goog.require('shaka.ui.AdPosition');
 goog.require('shaka.ui.BigPlayButton');
+goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
@@ -321,6 +322,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (this.playButton_) {
       this.playButton_ = null;
+    }
+
+    if (this.contextMenu_) {
+      this.contextMenu_ = null;
     }
 
     if (this.controlsContainer_) {
@@ -651,6 +656,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addPlayButton_();
     }
 
+    if (this.config_.customContextMenu) {
+      this.addContextMenu_();
+    }
+
     if (!this.spinnerContainer_) {
       this.addBufferingSpinner_();
     }
@@ -707,6 +716,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.playButton_ =
         new shaka.ui.BigPlayButton(playButtonContainer, this);
     this.elements_.push(this.playButton_);
+  }
+
+  /** @private */
+  addContextMenu_() {
+    /** @private {shaka.ui.ContextMenu} */
+    this.contextMenu_ =
+        new shaka.ui.ContextMenu(this.controlsButtonPanel_, this);
+    this.elements_.push(this.contextMenu_);
   }
 
   /** @private */

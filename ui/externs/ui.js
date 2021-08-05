@@ -63,8 +63,11 @@ shaka.extern.UIVolumeBarColors;
  * @typedef {{
  *   controlPanelElements: !Array.<string>,
  *   overflowMenuButtons: !Array.<string>,
+ *   contextMenuElements: !Array.<string>,
+ *   statisticsList: !Array.<string>,
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
+ *   customContextMenu: boolean,
  *   castReceiverAppId: string,
  *   clearBufferOnQualityChange: boolean,
  *   showUnbufferedStart: boolean,
@@ -82,11 +85,17 @@ shaka.extern.UIVolumeBarColors;
  *   The ordered list of control panel elements of the UI.
  * @property {!Array.<string>} overflowMenuButtons
  *   The ordered list of the overflow menu buttons.
+ * @property {!Array.<string>} contextMenuElements
+ *   The ordered list of buttons in the context menu.
+ * @property {!Array.<string>} statisticsList
+ *   The ordered list of statistics present in the statistics container.
  * @property {boolean} addSeekBar
  *   Whether or not a seek bar should be part of the UI.
  * @property {boolean} addBigPlayButton
  *   Whether or not a big play button in the center of the video
  *   should be part of the UI.
+ * @property {boolean} customContextMenu
+ *   Whether or not a custom context menu replaces the default.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
  * @property {boolean} clearBufferOnQualityChange

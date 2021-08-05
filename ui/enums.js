@@ -42,4 +42,6 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'UNLOOP': 'repeat_on',
   'AIRPLAY': 'airplay',
   'REPLAY': 'replay',
+  'STATISTICS_ON': 'insert_chart_outlined',
+  'STATISTICS_OFF': 'insert_chart',
 };
