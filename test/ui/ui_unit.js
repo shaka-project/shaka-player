@@ -747,12 +747,7 @@ describe('UI', () => {
           contextMenuElements: [
             'statistics',
           ],
-          statisticsList: [
-            'width',
-            'height',
-            'fakeStatistic',
-            'bufferingTime',
-          ],
+          statisticsList: Object.keys(new shaka.util.Stats().getBlob()),
         };
         const ui = UiUtils.createUIThroughAPI(videoContainer, video, config);
         player = ui.getControls().getLocalPlayer();
@@ -783,13 +778,32 @@ describe('UI', () => {
             .toBe(true);
       });
 
+      it('container receives all the available statistics', () => {
+        const skippedStats = ['stateHistory', 'switchHistory'];
+        const nodes = statisticsContainer.childNodes;
+        let nodeIndex = 0;
+
+        for (const statistic in new shaka.util.Stats().getBlob()) {
+          if (!skippedStats.includes(statistic)) {
+            // Text content of label (without ':') is a valid statistic
+            const label = nodes[nodeIndex].childNodes[0].textContent;
+            expect(label.replace(':', '')).toBe(statistic);
+
+            // Value has been parsed and it is not the default 'NaN'
+            const value = nodes[nodeIndex].childNodes[1].textContent;
+            expect(value).not.toBe('NaN');
+
+            nodeIndex += 1;
+          }
+        }
+      });
       it('container is updated periodically', async () => {
         function getStatsFromContainer() {
           const nodes = statisticsContainer.childNodes;
           width = nodes[0].childNodes[1].textContent.replace(' (px)', '');
           height = nodes[1].childNodes[1].textContent.replace(' (px)', '');
           bufferingTime =
-              nodes[2].childNodes[1].textContent.replace(' (s)', '');
+              nodes[13].childNodes[1].textContent.replace(' (s)', '');
         }
 
         /** @type {!string} */

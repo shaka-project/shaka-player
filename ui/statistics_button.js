@@ -81,48 +81,51 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     /** @private {!Object.<string, HTMLElement>} */
     this.displayedElements_ = {};
 
-    /** @private {!Object.<string, string>} */
-    this.parseFrom_ = {
-      'width': 'px',
-      'height': 'px',
-      'completionPercent': 'percent',
-      'bufferingTime': 'seconds',
-      'drmTimeSeconds': 'seconds',
-      'licenseTime': 'seconds',
-      'liveLatency': 'seconds',
-      'loadLatency': 'seconds',
-      'manifestTimeSeconds': 'seconds',
-      'estimatedBandwidth': 'bits',
-      'streamBandwidth': 'bits',
-      'maxSegmentDuration': 'time',
-      'pauseTime': 'time',
-      'playTime': 'time',
-      'corruptedFrames': 'frames',
-      'decodedFrames': 'frames',
-      'droppedFrames': 'frames',
+
+    const parsePx = (name) => {
+      return this.currentStats_[name] + ' (px)';
     };
 
-    /** @private {!Object.<string, Function>} */
-    this.parseTo_ = {
-      'px': (name) => {
-        return this.currentStats_[name] + ' (px)';
-      },
-      'percent': (name) => {
-        return this.currentStats_[name] + ' (%)';
-      },
-      'frames': (name) => {
-        return this.currentStats_[name] + ' (frames)';
-      },
-      'seconds': (name) => {
-        return this.currentStats_[name].toFixed(2) + ' (s)';
-      },
-      'bits': (name) => {
-        return Math.round(this.currentStats_[name] / 1000) + ' (kbits/s)';
-      },
-      'time': (name) => {
-        return shaka.ui.Utils.buildTimeString(
-            this.currentStats_[name], false) + ' (m)';
-      },
+    const parsePercent = (name) => {
+      return this.currentStats_[name] + ' (%)';
+    };
+
+    const parseFrames = (name) => {
+      return this.currentStats_[name] + ' (frames)';
+    };
+
+    const parseSeconds = (name) => {
+      return this.currentStats_[name].toFixed(2) + ' (s)';
+    };
+
+    const parseBits = (name) => {
+      return Math.round(this.currentStats_[name] / 1000) + ' (kbits/s)';
+    };
+
+    const parseTime = (name) => {
+      return shaka.ui.Utils.buildTimeString(
+          this.currentStats_[name], false) + ' (m)';
+    };
+
+    /** @private {!Object.<string, function(string)>} */
+    this.parseFrom_ = {
+      'width': parsePx,
+      'height': parsePx,
+      'completionPercent': parsePercent,
+      'bufferingTime': parseSeconds,
+      'drmTimeSeconds': parseSeconds,
+      'licenseTime': parseSeconds,
+      'liveLatency': parseSeconds,
+      'loadLatency': parseSeconds,
+      'manifestTimeSeconds': parseSeconds,
+      'estimatedBandwidth': parseBits,
+      'streamBandwidth': parseBits,
+      'maxSegmentDuration': parseTime,
+      'pauseTime': parseTime,
+      'playTime': parseTime,
+      'corruptedFrames': parseFrames,
+      'decodedFrames': parseFrames,
+      'droppedFrames': parseFrames,
     };
 
     /** @private {shaka.util.Timer} */
@@ -182,11 +185,6 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
   }
 
   /** @private */
-  parseStatisticValue_(name) {
-    return this.parseTo_[this.parseFrom_[name]](name);
-  }
-
-  /** @private */
   generateComponent_(name) {
     const section = shaka.util.Dom.createHTMLElement('div');
 
@@ -195,7 +193,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
     section.appendChild(label);
 
     const value = shaka.util.Dom.createHTMLElement('span');
-    value.textContent = this.parseStatisticValue_(name);
+    value.textContent = this.parseFrom_[name](name);
     section.appendChild(value);
 
     this.displayedElements_[name] = value;
@@ -221,7 +219,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     for (const name of this.statisticsList_) {
       this.displayedElements_[name].textContent =
-          this.parseStatisticValue_(name);
+          this.parseFrom_[name](name);
     }
   }
 
