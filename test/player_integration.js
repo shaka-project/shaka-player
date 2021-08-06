@@ -87,10 +87,10 @@ describe('Player', () => {
     });
   });  // describe('attach')
 
-  describe('setStartTime() in manifestparsed event handler', () => {
+  describe('updateStartTime() in manifestparsed event handler', () => {
     it('does not get segments prior to startTime', async () => {
       player.addEventListener('manifestparsed', () => {
-        player.setStartTime(24);
+        player.updateStartTime(24);
       });
       const results = {
         requestedVideoSegment0: false,
