@@ -33,7 +33,8 @@ shaka.extern.OfflineSupport;
  *   size: number,
  *   expiration: number,
  *   tracks: !Array.<shaka.extern.Track>,
- *   appMetadata: Object
+ *   appMetadata: Object,
+ *   isIncomplete: boolean
  * }}
  *
  * @property {?string} offlineUri
@@ -53,6 +54,9 @@ shaka.extern.OfflineSupport;
  *   The tracks that are stored.
  * @property {Object} appMetadata
  *   The metadata passed to store().
+ * @property {boolean} isIncomplete
+ *   If true, the content is still downloading.  Manifests with this set cannot
+ *   be played yet.
  * @exportDoc
  */
 shaka.extern.StoredContent;
@@ -68,7 +72,8 @@ shaka.extern.StoredContent;
  *   streams: !Array.<shaka.extern.StreamDB>,
  *   sessionIds: !Array.<string>,
  *   drmInfo: ?shaka.extern.DrmInfo,
- *   appMetadata: Object
+ *   appMetadata: Object,
+ *   isIncomplete: (boolean|undefined)
  * }}
  *
  * @property {number} creationTime
@@ -91,6 +96,8 @@ shaka.extern.StoredContent;
  *   The DRM info used to initialize EME.
  * @property {Object} appMetadata
  *   A metadata object passed from the application.
+ * @property {(boolean|undefined)} isIncomplete
+ *   If true, the content is still downloading.
  */
 shaka.extern.ManifestDB;
 
@@ -195,6 +202,8 @@ shaka.extern.StreamDB;
  *   appendWindowEnd: number,
  *   timestampOffset: number,
  *   tilesLayout: ?string,
+ *   pendingSegmentRefId: (string|undefined),
+ *   pendingInitSegmentRefId: (string|undefined),
  *   dataKey: number
  * }}
  *
@@ -215,6 +224,17 @@ shaka.extern.StreamDB;
  *   The value is a grid-item-dimension consisting of two positive decimal
  *   integers in the format: column-x-row ('4x3'). It describes the
  *   arrangement of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {(string|undefined)} pendingSegmentRefId
+ *   Contains an id that identifies what the segment was, originally. Used to
+ *   coordinate where segments are stored, during the downloading process.
+ *   If this field is non-null, it's assumed that the segment is not fully
+ *   downloaded.
+ * @property {(string|undefined)} pendingInitSegmentRefId
+ *   Contains an id that identifies what the init segment was, originally.
+ *   Used to coordinate where init segments are stored, during the downloading
+ *   process.
+ *   If this field is non-null, it's assumed that the init segment is not fully
+ *   downloaded.
  * @property {number} dataKey
  *   The key to the data in storage.
  */
@@ -332,6 +352,15 @@ shaka.extern.StorageCell = class {
    * @return {!Promise<!Array.<number>>} keys
    */
   addManifests(manifests) {}
+
+  /**
+   * Updates the given manifest, stored at the given key.
+   *
+   * @param {number} key
+   * @param {!shaka.extern.ManifestDB} manifest
+   * @return {!Promise}
+   */
+  updateManifest(key, manifest) {}
 
   /**
    * Replace the expiration time of the manifest stored under |key| with

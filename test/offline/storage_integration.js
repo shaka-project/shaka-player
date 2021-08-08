@@ -1234,11 +1234,11 @@ filterDescribe('Storage', storageSupport, () => {
       goog.asserts.assert(
           content.offlineUri != null, 'URI should not be null!');
 
-      /**
-       * @type {!Array.<number>}
-       */
+      // We expect 5 progress events because there are 4 unique segments, plus
+      // the manifest.
+      /** @type {!Array.<number>}*/
       const progressSteps = [
-        0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0,
+        0.2, 0.4, 0.6, 0.8, 1,
       ];
 
       const progressCallback = (content, progress) => {
