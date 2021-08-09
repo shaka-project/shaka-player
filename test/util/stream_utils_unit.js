@@ -488,7 +488,7 @@ describe('StreamUtils', () => {
       });
 
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-          /* usePersistentLicenses= */false);
+          /* usePersistentLicenses= */false, /* srcEquals= */ false);
       expect(manifest.variants.length).toBeTruthy();
       expect(manifest.variants[0].decodingInfos.length).toBe(1);
       expect(manifest.variants[0].decodingInfos[0].supported).toBeTruthy();
@@ -517,7 +517,7 @@ describe('StreamUtils', () => {
       });
 
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-          /* usePersistentLicenses= */false);
+          /* usePersistentLicenses= */false, /* srcEquals= */ false);
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].decodingInfos.length).toBe(0);
     });
@@ -820,7 +820,7 @@ describe('StreamUtils', () => {
       });
 
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-          /* usePersistentLicenses= */false);
+          /* usePersistentLicenses= */false, /* srcEquals= */ false);
 
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
