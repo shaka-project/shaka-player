@@ -35,6 +35,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-loop-button');
+    this.button_.classList.add('shaka-tooltip');
 
     /** @private {!HTMLElement} */
     this.icon_ = shaka.util.Dom.createHTMLElement('i');

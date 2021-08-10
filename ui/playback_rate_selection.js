@@ -32,6 +32,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
 
     this.button.classList.add('shaka-playbackrate-button');
     this.menu.classList.add('shaka-playback-rates');
+    this.button.classList.add('shaka-tooltip-status');
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
@@ -110,6 +111,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     // Set the label to display the current playback rate in the overflow menu,
     // in the format of '1x', '1.5x', etc.
     this.currentSelection.textContent = rate + 'x';
+    this.button.setAttribute('shaka-status', rate + 'x');
   }
 
   /** @private */

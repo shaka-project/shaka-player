@@ -35,6 +35,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         controls, shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS);
 
     this.button.classList.add('shaka-caption-button');
+    this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-text-languages');
 
     if (this.player && this.player.isTextTrackVisible()) {
@@ -154,6 +155,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);
     }
+
+    this.button.setAttribute('shaka-status', this.currentSelection.textContent);
 
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 

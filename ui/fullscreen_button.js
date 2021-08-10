@@ -32,6 +32,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-fullscreen-button');
     this.button_.classList.add('material-icons-round');
+    this.button_.classList.add('shaka-tooltip');
 
     // Don't show the button if fullscreen is not supported
     if (!document.fullscreenEnabled) {
