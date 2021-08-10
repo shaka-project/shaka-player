@@ -87,6 +87,41 @@ describe('Player', () => {
     });
   });  // describe('attach')
 
+  describe('updateStartTime() in manifestparsed event handler', () => {
+    it('does not get segments prior to startTime', async () => {
+      player.addEventListener('manifestparsed', () => {
+        player.updateStartTime(24);
+      });
+      const results = {
+        requestedVideoSegment0: false,
+        requestedVideoSegment1: false,
+        requestedVideoSegment2: false,
+      };
+      const expected = {
+        requestedVideoSegment0: false,
+        requestedVideoSegment1: false,
+        requestedVideoSegment2: true,
+      };
+      player.getNetworkingEngine().registerRequestFilter(
+          (type, request) => {
+            if (request.uris[0] == 'test:sintel/video/0') {
+              results.requestedVideoSegment0 = true;
+            }
+            if (request.uris[0] == 'test:sintel/video/1') {
+              results.requestedVideoSegment1 = true;
+            }
+            if (request.uris[0] == 'test:sintel/video/2') {
+              results.requestedVideoSegment2 = true;
+            }
+          });
+      await player.load('test:sintel_compiled');
+      video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 25, 30);
+      expect(results).toEqual(expected);
+    });
+  });
+
+
   describe('getStats', () => {
     it('gives stats about current stream', async () => {
       // This is tested more in player_unit.js.  This is here to test the public
