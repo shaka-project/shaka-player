@@ -207,6 +207,8 @@ shaka.ui.Overlay = class {
         'completionPercent',
       ],
       contextMenuElements: [
+        'loop',
+        'picture_in_picture',
         'statistics',
       ],
       addSeekBar: true,

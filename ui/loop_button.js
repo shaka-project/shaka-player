@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.LoopButton');
 
+goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -170,4 +171,7 @@ shaka.ui.OverflowMenu.registerElement(
     'loop', new shaka.ui.LoopButton.Factory());
 
 shaka.ui.Controls.registerElement(
+    'loop', new shaka.ui.LoopButton.Factory());
+
+shaka.ui.ContextMenu.registerElement(
     'loop', new shaka.ui.LoopButton.Factory());
