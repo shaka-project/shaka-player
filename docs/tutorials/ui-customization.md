@@ -163,6 +163,17 @@ const config = {
 ui.configure(config);
 ```
 
+#### Configuring playback, fast forward and rewind rates
+The rate in which the player can play, fast forward and rewind content can be configured using the `playbackRates`, `fastForwardRates` and `rewindRates` options.
+ ```js
+const config = {
+  'controlPanelElements': ['playback_rate', 'fast_forward', 'rewind'],
+  'playbackRates': [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+  'fastForwardRates': [2, 4, 8, 1],
+  'rewindRates': [-1, -2, -4, -8],
+}
+ui.configure(config);
+```
 
 #### Creating custom elements and adding them to the UI
 It's possible to add custom application-specific buttons to the UI.
