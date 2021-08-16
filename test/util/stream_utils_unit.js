@@ -488,7 +488,23 @@ describe('StreamUtils', () => {
       });
 
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-          /* usePersistentLicenses= */false);
+          /* usePersistentLicenses= */false, /* srcEquals= */ false);
+      expect(manifest.variants.length).toBeTruthy();
+      expect(manifest.variants[0].decodingInfos.length).toBe(1);
+      expect(manifest.variants[0].decodingInfos[0].supported).toBeTruthy();
+    });
+
+    it('for srcEquals content', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/mp4', 'avc1.4d400d');
+          });
+        });
+      });
+
+      await StreamUtils.getDecodingInfosForVariants(manifest.variants,
+          /* usePersistentLicenses= */false, /* srcEquals= */ true);
       expect(manifest.variants.length).toBeTruthy();
       expect(manifest.variants[0].decodingInfos.length).toBe(1);
       expect(manifest.variants[0].decodingInfos[0].supported).toBeTruthy();
@@ -517,7 +533,7 @@ describe('StreamUtils', () => {
       });
 
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-          /* usePersistentLicenses= */false);
+          /* usePersistentLicenses= */false, /* srcEquals= */ false);
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].decodingInfos.length).toBe(0);
     });
