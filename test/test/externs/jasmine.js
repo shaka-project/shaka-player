@@ -1,18 +1,7 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
@@ -66,10 +55,24 @@ jasmine.Matchers = function() {};
 
 
 /**
+ * @constructor
+ * @struct
+ */
+jasmine.MatchersAsync = function() {};
+
+
+/**
  * @param {*} value
  * @return {!jasmine.Matchers}
  */
 var expect = function(value) {};
+
+
+/**
+ * @param {!Promise} value
+ * @return {!jasmine.MatchersAsync}
+ */
+var expectAsync = function(value) {};
 
 
 /** @param {string=} message */
@@ -80,8 +83,11 @@ var pending = function(message) {};
 jasmine.Matchers.prototype.not;
 
 
-/** @param {*} value */
-jasmine.Matchers.prototype.toBe = function(value) {};
+/**
+ * @param {*} value
+ * @param {string=} message
+ */
+jasmine.Matchers.prototype.toBe = function(value, message) {};
 
 
 /**
@@ -102,7 +108,15 @@ jasmine.Matchers.prototype.toBeGreaterThan = function(value) {};
 
 
 /** @param {*} value */
+jasmine.Matchers.prototype.toBeGreaterThanOrEqual = function(value) {};
+
+
+/** @param {*} value */
 jasmine.Matchers.prototype.toBeLessThan = function(value) {};
+
+
+/** @param {*} value */
+jasmine.Matchers.prototype.toBeLessThanOrEqual = function(value) {};
 
 
 jasmine.Matchers.prototype.toBeNaN = function() {};
@@ -141,12 +155,8 @@ jasmine.Matchers.prototype.toHaveBeenCalledTimes = function(times) {};
 jasmine.Matchers.prototype.toMatch = function(value) {};
 
 
-/** @param {*} value */
+/** @param {*=} value */
 jasmine.Matchers.prototype.toThrow = function(value) {};
-
-
-/** @param {*} value */
-jasmine.Matchers.prototype.toThrowError = function(value) {};
 
 
 /**
@@ -154,6 +164,55 @@ jasmine.Matchers.prototype.toThrowError = function(value) {};
  * @param {!Element} expected
  */
 jasmine.Matchers.prototype.toEqualElement = function(expected) {};
+
+/**
+ * A custom matcher for checking if a spy has been called once. This
+ * will reset the call count after each call.
+ */
+jasmine.Matchers.prototype.toHaveBeenCalledOnceMore = function() {};
+
+/**
+ * A customer matcher for checking if a spy has been called once and
+ * with specific arguments. This will reset the call count after each
+ * call.
+ *
+ * @param {!Array.<*>} args
+ */
+jasmine.Matchers.prototype.toHaveBeenCalledOnceMoreWith = function(args) {};
+
+/**
+ * @param {?} context
+ * @return {!jasmine.Matchers}
+ */
+jasmine.Matchers.prototype.withContext = function(context) {};
+
+
+/** @type {!jasmine.MatchersAsync} */
+jasmine.MatchersAsync.prototype.not;
+
+/** @return {!Promise} */
+jasmine.MatchersAsync.prototype.toBeRejected = function() {};
+
+/**
+ * @param {*} expected
+ * @return {!Promise}
+ */
+jasmine.MatchersAsync.prototype.toBeRejectedWith = function(expected) {};
+
+/** @return {!Promise} */
+jasmine.MatchersAsync.prototype.toBeResolved = function() {};
+
+/**
+ * @param {*} expected
+ * @return {!Promise}
+ */
+jasmine.MatchersAsync.prototype.toBeResolvedTo = function(expected) {};
+
+/**
+ * @param {?} context
+ * @return {!jasmine.MatchersAsync}
+ */
+jasmine.MatchersAsync.prototype.withContext = function(context) {};
 
 
 /**
@@ -165,7 +224,7 @@ jasmine.SpyStrategy = function() {};
 
 /**
  * @param {...*} varArgs
- * @return {*}
+ * @return {?}
  */
 jasmine.SpyStrategy.prototype.exec = function(varArgs) {};
 
@@ -213,15 +272,15 @@ jasmine.SpyStrategy.prototype.stub = function() {};
 jasmine.CallContext = function() {};
 
 
-/** @const {*} */
+/** @const {?} */
 jasmine.CallContext.prototype.object;
 
 
-/** @const {!Array.<*>} */
+/** @const {!Array.<?>} */
 jasmine.CallContext.prototype.args;
 
 
-/** @const {*} */
+/** @const {?} */
 jasmine.CallContext.prototype.returnValue;
 
 
@@ -242,12 +301,12 @@ jasmine.CallTracker.prototype.count = function() {};
 
 /**
  * @param {number} i
- * @return {!Array.<*>}
+ * @return {!Array.<?>}
  */
 jasmine.CallTracker.prototype.argsFor = function(i) {};
 
 
-/** @return {!Array.<!Array.<*>>} */
+/** @return {!Array.<!Array.<?>>} */
 jasmine.CallTracker.prototype.allArgs = function() {};
 
 
@@ -308,7 +367,7 @@ var spyOn = function(obj, name) {};
 
 /**
  * @param {Function} factory
- * @return {?}
+ * @return {!Object}
  */
 jasmine.any = function(factory) {};
 
@@ -317,9 +376,13 @@ jasmine.any = function(factory) {};
 jasmine.anything = function() {};
 
 
+/** @typedef {{ sample: ? }} */
+jasmine.ObjectContainingType;
+
+
 /**
  * @param {!Object} value
- * @return {!Object}
+ * @return {jasmine.ObjectContainingType}
  */
 jasmine.objectContaining = function(value) {};
 
@@ -332,11 +395,24 @@ jasmine.stringMatching = function(value) {};
 
 
 /**
- * @param {!Array.<T>} value
+ * Matches an Array containing all of the values specified, in any order.
+ *
+ * @param {!Array.<T>} values
  * @return {!Array.<T>}
  * @template T
  */
-jasmine.arrayContaining = function(value) {};
+jasmine.arrayContaining = function(values) {};
+
+
+/**
+ * Matches an Array with exactly the values specified, no more, no less, in any
+ * order.
+ *
+ * @param {!Array.<T>} values
+ * @return {!Array.<T>}
+ * @template T
+ */
+jasmine.arrayWithExactContents = function(values) {};
 
 
 /**
@@ -417,23 +493,20 @@ jasmine.Env = function() {};
 
 
 /**
- * @param {jasmine.Spec} spec
- * @return {boolean}
+ * @typedef {{
+ *   random: (boolean|undefined),
+ *   seed: (string|undefined),
+ *   specFilter: (function(jasmine.Spec):boolean|undefined)
+ * }}
  */
-jasmine.Env.prototype.specFilter = function(spec) {};
+jasmine.Configuration;
 
 
-/**
- * @param {boolean} random
- */
-jasmine.Env.prototype.randomizeTests = function(random) {};
+/** @param {jasmine.Configuration} config */
+jasmine.Env.prototype.configure = function(config) {};
 
 
-/**
- * @param {string} seed
- * @return {?string}
- */
-jasmine.Env.prototype.seed = function(seed) {};
+jasmine.Env.prototype.execute = function() {};
 
 
 /** @return {!jasmine.Env} */
@@ -584,3 +657,14 @@ jasmine.Ajax.RequestTracker.prototype.at = function(index) {};
 
 /** @const {!jasmine.Ajax.RequestTracker} */
 jasmine.Ajax.requests;
+
+/** @const */
+jasmine.matchersUtil = {};
+
+/**
+ * @param {*} first
+ * @param {*} second
+ * @param {*} customEqualityTesters
+ * @return {boolean}
+ */
+jasmine.matchersUtil.equals = function(first, second, customEqualityTesters) {};

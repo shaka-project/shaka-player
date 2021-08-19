@@ -25,17 +25,17 @@ All the scripts here use two environment variables:
 $ PRINT_ARGUMENTS=1 build.py
 git -C /path/to/shaka describe --tags --dirty
 Compiling the library...
-java -jar /path/to/shaka/third_party/closure/compiler.jar --language_in ...
+java -jar /path/to/shaka/node_modules/.../compiler.jar --language_in ...
 ```
 
 ## Configurable Build
 
 `build.py` is used to compile the library and can also be used to produce
 customized builds that contain only the features that your app requires.
-`build.py` accepts an optional argument `--name` which will set the name of
-the build, defaulting to `compiled`.  All other arguments are treated as
-commands describing what to include in the build.  If nothing is given, it
-will use `+@complete`.
+`build.py` accepts an optional argument `--name` which will set the name of the
+build, defaulting to `ui`.  All other arguments are treated as commands
+describing what to include in the build.  If nothing is given, it will use
+`+@complete`.
 
 A command is either an addition or a subtraction.  An addition is prefixed with
 a `+`; a subtraction with a `-`.  An addition will add the JavaScript file (or
@@ -90,8 +90,8 @@ directly:
 * `--runs` allows running the tests multiple times in succession. This parameter
   must be specified with a positive integer value, for example `--runs 5`.
 * `--use-xvfb` will launch the browsers in a virtual display (only on Linux).
-* `--specFilter` is used to filter a specific test or set of tests.  This
-  parameter is specified as a RegExp string `--specFilter="DataUriPlugin .*\d"`.
+* `--filter` is used to filter a specific test or set of tests.  This parameter
+  is specified as a RegExp string `--filter="DataUriPlugin .*\d"`.
 
 The `karma` argument `--browsers` will set the browsers used to run the tests
 (e.g. `--browsers Chrome,Firefox`).  If you don't pass any arguments, `test.py`
@@ -108,7 +108,7 @@ used internally to determine dependencies and to determine the size of the
 compiled library.
 
 Before running the script, you have to compile it first.  Then you need to pass
-either the name of the build (e.g. `compiled`) or the path to the `.map` file.
+either the name of the build (e.g. `ui`) or the path to the `.map` file.
 You will also need to pass some arguments to determine the output you want.
 You must pass exactly one of the following:
 

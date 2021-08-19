@@ -5,6 +5,7 @@
   "source": {
     "include": [
       "lib",
+      "ui",
       "externs/shaka"
     ]
   },
@@ -21,6 +22,9 @@
     }
   },
   "plugins": [ "docs/jsdoc-plugin" ],
+  "markdown": {
+    "idInHeadings": true
+  },
   "opts": {
     "pedantic": true,
     "private": true,

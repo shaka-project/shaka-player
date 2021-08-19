@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2016 Google Inc.  All Rights Reserved.
+# Copyright 2016 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,26 +19,36 @@
 This deletes the old documentation first.
 """
 
+import argparse
 import logging
 import os
-import shutil
-import sys
 
+import compiler
 import shakaBuildHelpers
 
 
-def build_docs(_):
+def main(args):
   """Builds the source code documentation."""
   logging.info('Building the docs...')
 
-  base = shakaBuildHelpers.get_source_base()
-  shutil.rmtree(os.path.join(base, 'docs', 'api'), ignore_errors=True)
-  os.chdir(base)
+  parser = argparse.ArgumentParser(
+      description=__doc__,
+      formatter_class=argparse.RawDescriptionHelpFormatter)
+  parser.add_argument(
+      '--force',
+      '-f',
+      help='Force the docs to be built, even if no files have changed.',
+      action='store_true')
 
-  jsdoc = shakaBuildHelpers.get_node_binary('jsdoc')
-  cmd_line = jsdoc + ['-c', 'docs/jsdoc.conf.json']
-  return shakaBuildHelpers.execute_get_code(cmd_line)
+  parsed_args = parser.parse_args(args)
+
+  base = shakaBuildHelpers.get_source_base()
+  config_path = os.path.join(base, 'docs', 'jsdoc.conf.json')
+  jsdoc = compiler.Jsdoc(config_path)
+  if not jsdoc.build(parsed_args.force):
+    return 1
+  return 0
 
 
 if __name__ == '__main__':
-  shakaBuildHelpers.run_main(build_docs)
+  shakaBuildHelpers.run_main(main)

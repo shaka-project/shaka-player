@@ -1,31 +1,29 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('HlsParser live', function() {
-  const Util = shaka.test.Util;
-  const ManifestParser = shaka.test.ManifestParser;
-  const toUTF8 = shaka.util.StringUtils.toUTF8;
+goog.require('goog.asserts');
+goog.require('shaka.hls.HlsParser');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.ManifestParser');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Functional');
+goog.require('shaka.util.Iterables');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.Uint8ArrayUtils');
+goog.requireType('shaka.util.PublicPromise');
 
-  const updateTime = 5;
+describe('HlsParser live', () => {
+  const ManifestParser = shaka.test.ManifestParser;
+
   const master = [
     '#EXTM3U\n',
     '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
     'RESOLUTION=960x540,FRAME-RATE=60\n',
-    'test:/video\n',
+    'video\n',
   ].join('');
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
@@ -36,22 +34,22 @@ describe('HlsParser live', function() {
   let playerInterface;
   /** @type {shaka.extern.ManifestConfiguration} */
   let config;
-  /** @type {ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let initSegmentData;
-  /** @type {ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let segmentData;
-  /** @type {ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
-  /** @type {ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let tsSegmentData;
-  /** @type {ArrayBuffer} */
+  /** @type {!Uint8Array} */
   let pastRolloverSegmentData;
   /** @type {number} */
   let rolloverOffset;
   /** @type {number} */
   let segmentDataStartTime;
 
-  beforeEach(function() {
+  beforeEach(() => {
     // TODO: use StreamGenerator?
     initSegmentData = new Uint8Array([
       0x00, 0x00, 0x00, 0x30, // size (48)
@@ -68,7 +66,7 @@ describe('HlsParser live', function() {
       0x00, 0x00, 0x00, 0x00, // creation time (0)
       0x00, 0x00, 0x00, 0x00, // modification time (0)
       0x00, 0x00, 0x03, 0xe8, // timescale (1000)
-    ]).buffer;
+    ]);
     segmentData = new Uint8Array([
       0x00, 0x00, 0x00, 0x24, // size (36)
       0x6D, 0x6F, 0x6F, 0x66, // type (moof)
@@ -79,7 +77,7 @@ describe('HlsParser live', function() {
       0x01, 0x00, 0x00, 0x00, // version and flags
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
       0x00, 0x00, 0x07, 0xd0,  // baseMediaDecodeTime last 4 bytes (2000)
-    ]).buffer;
+    ]);
     tsSegmentData = new Uint8Array([
       0x47, // TS sync byte (fixed value)
       0x41, 0x01, // not corrupt, payload follows, packet ID 257
@@ -91,7 +89,7 @@ describe('HlsParser live', function() {
       0x80, // PTS only, no DTS, other flags 0 (don't matter)
       0x05, // remaining PES header length == 5 (one timestamp)
       0x21, 0x00, 0x0b, 0x7e, 0x41, // PTS = 180000, encoded into 5 bytes
-    ]).buffer;
+    ]);
     // 180000 divided by TS timescale (90000) = segment starts at 2s.
     segmentDataStartTime = 2;
 
@@ -105,307 +103,307 @@ describe('HlsParser live', function() {
       0x01, 0x00, 0x00, 0x00, // version and flags
       0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes
       0x0b, 0x60, 0xbc, 0x28,  // baseMediaDecodeTime last 4 bytes (190889000)
-    ]).buffer;
+    ]);
 
     // The timestamp above would roll over twice, so this rollover offset should
     // be applied.
     rolloverOffset = (0x200000000 * 2) / 90000;
 
-    selfInitializingSegmentData = shaka.util.Uint8ArrayUtils.concat(
-      new Uint8Array(initSegmentData),
-      new Uint8Array(segmentData)).buffer;
+    selfInitializingSegmentData =
+        shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
-    let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
-    config = {
-      retryParameters: retry,
-      availabilityWindowOverride: NaN,
-      dash: {
-        customScheme: function(node) { return null; },
-        clockSyncUri: '',
-        ignoreDrmInfo: false,
-        xlinkFailGracefully: false,
-        defaultPresentationDelay: 10,
-      },
-    };
-
+    config = shaka.util.PlayerConfiguration.createDefault().manifest;
     playerInterface = {
-      filterNewPeriod: function() {},
-      filterAllPeriods: function() {},
+      filter: () => Promise.resolve(),
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       networkingEngine: fakeNetEngine,
       onError: fail,
       onEvent: fail,
       onTimelineRegionAdded: fail,
+      isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
     };
 
     parser = new shaka.hls.HlsParser();
     parser.configure(config);
   });
 
-  afterEach(function() {
+  afterEach(() => {
     // HLS parser stop is synchronous.
     parser.stop();
   });
 
   /**
-   * Simulate time to trigger a manifest update.
+   * Trigger a manifest update.
+   * @suppress {accessControls}
    */
-  function delayForUpdatePeriod() {
-    // Tick the virtual clock to trigger an update and resolve all Promises.
-    Util.fakeEventLoop(updateTime);
+  async function delayForUpdatePeriod() {
+    parser.updatePlaylistTimer_.tickNow();
+    await shaka.test.Util.shortDelay();  // Allow update to finish.
   }
 
-  function testUpdate(done, master, initialMedia, initialReferences,
-                      updatedMedia, updatedReferences) {
-    fakeNetEngine.setResponseMap({
-      'test:/master': toUTF8(master),
-      'test:/video': toUTF8(initialMedia),
-      'test:/video2': toUTF8(initialMedia),
-      'test:/audio': toUTF8(initialMedia),
-      'test:/init.mp4': initSegmentData,
-      'test:/main.mp4': segmentData,
-      'test:/selfInit.mp4': selfInitializingSegmentData,
-    });
-    parser.start('test:/master', playerInterface)
-      .then(function(manifest) {
-          let variants = manifest.periods[0].variants;
-          for (let i = 0; i < variants.length; i++) {
-            let video = variants[i].video;
-            let audio = variants[i].audio;
-            ManifestParser.verifySegmentIndex(video, initialReferences);
-            if (audio) {
-              ManifestParser.verifySegmentIndex(audio, initialReferences);
-            }
-          }
+  /**
+   * @param {string} master
+   * @param {string} initialMedia
+   * @param {!Array} initialReferences
+   * @param {string} updatedMedia
+   * @param {!Array} updatedReferences
+   */
+  async function testUpdate(
+      master, initialMedia, initialReferences, updatedMedia,
+      updatedReferences) {
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', initialMedia)
+        .setResponseText('test:/redirected/video', initialMedia)
+        .setResponseText('test:/video2', initialMedia)
+        .setResponseText('test:/audio', initialMedia)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData)
+        .setResponseValue('test:/main2.mp4', segmentData)
+        .setResponseValue('test:/main3.mp4', segmentData)
+        .setResponseValue('test:/main4.mp4', segmentData)
+        .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
-          fakeNetEngine.setResponseMapAsText({
-            'test:/master': master,
-            'test:/video': updatedMedia,
-            'test:/video2': updatedMedia,
-            'test:/audio': updatedMedia,
-          });
+    const manifest = await parser.start('test:/master', playerInterface);
 
-          delayForUpdatePeriod();
-          for (let i = 0; i < variants.length; i++) {
-            let video = variants[i].video;
-            let audio = variants[i].audio;
-            ManifestParser.verifySegmentIndex(video, updatedReferences);
-            if (audio) {
-              ManifestParser.verifySegmentIndex(audio, updatedReferences);
-            }
-          }
-        }).catch(fail).then(done);
-    PromiseMock.flush();
+    await Promise.all(manifest.variants.map(async (variant) => {
+      await variant.video.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(variant.video, initialReferences);
+      if (variant.audio) {
+        await variant.audio.createSegmentIndex();
+        ManifestParser.verifySegmentIndex(variant.audio, initialReferences);
+      }
+    }));
+
+    // Replace the entries with the updated values.
+    fakeNetEngine
+        .setResponseText('test:/video', updatedMedia)
+        .setResponseText('test:/redirected/video', updatedMedia)
+        .setResponseText('test:/video2', updatedMedia)
+        .setResponseText('test:/audio', updatedMedia)
+        .setResponseText('test:/video?_HLS_skip=YES', updatedMedia);
+
+    await delayForUpdatePeriod();
+    for (const variant of manifest.variants) {
+      ManifestParser.verifySegmentIndex(variant.video, updatedReferences);
+      if (variant.audio) {
+        ManifestParser.verifySegmentIndex(variant.audio, updatedReferences);
+      }
+    }
   }
 
-
-  describe('playlist type EVENT', function() {
+  describe('playlist type EVENT', () => {
     const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:EVENT\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n',
+      'main.mp4\n',
     ].join('');
 
     const mediaWithAdditionalSegment = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:EVENT\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n',
+      'main.mp4\n',
       '#EXTINF:2,\n',
-      'test:/main2.mp4\n',
+      'main2.mp4\n',
     ].join('');
 
-    it('treats already ended presentation like VOD', function(done) {
-      fakeNetEngine.setResponseMap({
-        'test:/master': toUTF8(master),
-        'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
-        'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': segmentData,
-      });
+    it('treats already ended presentation like VOD', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media + '#EXT-X-ENDLIST')
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
 
-      parser.start('test:/master', playerInterface)
-        .then(function(manifest) {
-            expect(manifest.presentationTimeline.isLive()).toBe(false);
-            expect(manifest.presentationTimeline.isInProgress()).toBe(false);
-          })
-        .catch(fail)
-        .then(done);
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.presentationTimeline.isLive()).toBe(false);
+      expect(manifest.presentationTimeline.isInProgress()).toBe(false);
     });
 
-    describe('update', function() {
-      beforeAll(function() {
-        jasmine.clock().install();
-        // This mock is required for fakeEventLoop.
-        PromiseMock.install();
+    describe('update', () => {
+      it('adds new segments when they appear', async () => {
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
+
+        await testUpdate(
+            master, media, [ref1], mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
-      afterAll(function() {
-        jasmine.clock().uninstall();
-        PromiseMock.uninstall();
-      });
-
-      it('adds new segments when they appear', function(done) {
-        let ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
-        let ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
-
-        testUpdate(done, master, media, [ref1],
-                   mediaWithAdditionalSegment, [ref1, ref2]);
-      });
-
-      it('updates all variants', function(done) {
+      it('updates all variants', async () => {
         const secondVariant = [
           '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
           'RESOLUTION=1200x940,FRAME-RATE=60\n',
-          'test:/video2',
+          'video2',
         ].join('');
 
-        let masterWithTwoVariants = master + secondVariant;
-        let ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
-        let ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+        const masterWithTwoVariants = master + secondVariant;
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
-        testUpdate(done, masterWithTwoVariants, media, [ref1],
-                   mediaWithAdditionalSegment, [ref1, ref2]);
+        await testUpdate(
+            masterWithTwoVariants, media, [ref1], mediaWithAdditionalSegment,
+            [ref1, ref2]);
       });
 
-      it('updates all streams', function(done) {
+      it('updates all streams', async () => {
+        const masterlist = [
+          '#EXTM3U\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",AUDIO="aud1",',
+          'RESOLUTION=960x540,FRAME-RATE=60\n',
+          'video\n',
+        ].join('');
         const audio = [
           '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
-          'URI="test:/audio"\n',
+          'URI="audio"\n',
         ].join('');
 
-        let masterWithAudio = master + audio;
-        let ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
-        let ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+        const masterWithAudio = masterlist + audio;
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
 
-        testUpdate(done, masterWithAudio, media, [ref1],
-                   mediaWithAdditionalSegment, [ref1, ref2]);
+        await testUpdate(
+            masterWithAudio, media, [ref1], mediaWithAdditionalSegment,
+            [ref1, ref2]);
       });
 
-      it('handles multiple updates', function(done) {
+      it('handles multiple updates', async () => {
         const newSegment1 = [
           '#EXTINF:2,\n',
-          'test:/main2.mp4\n',
+          'main2.mp4\n',
         ].join('');
 
         const newSegment2 = [
           '#EXTINF:2,\n',
-          'test:/main3.mp4\n',
+          'main3.mp4\n',
         ].join('');
 
-        let updatedMedia1 = media + newSegment1;
-        let updatedMedia2 = updatedMedia1 + newSegment2;
-        let ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
-        let ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
-        let ref3 = ManifestParser.makeReference('test:/main3.mp4',
-                                                2, 6, 8);
+        const updatedMedia1 = media + newSegment1;
+        const updatedMedia2 = updatedMedia1 + newSegment2;
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
+        const ref3 = ManifestParser.makeReference('test:/main3.mp4', 6, 8);
 
-        fakeNetEngine.setResponseMap({
-          'test:/master': toUTF8(master),
-          'test:/video': toUTF8(media),
-          'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData,
-        });
-        parser.start('test:/master', playerInterface)
-          .then(function(manifest) {
-              let video = manifest.periods[0].variants[0].video;
-              ManifestParser.verifySegmentIndex(video, [ref1]);
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
 
-              fakeNetEngine.setResponseMapAsText({
-                'test:/master': master,
-                'test:/video': updatedMedia1,
-              });
+        const manifest = await parser.start('test:/master', playerInterface);
 
-              delayForUpdatePeriod();
-              ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
+        const video = manifest.variants[0].video;
+        await video.createSegmentIndex();
+        ManifestParser.verifySegmentIndex(video, [ref1]);
 
-              fakeNetEngine.setResponseMapAsText({
-                'test:/master': master,
-                'test:/video': updatedMedia2,
-              });
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', updatedMedia1);
 
-              delayForUpdatePeriod();
-              ManifestParser.verifySegmentIndex(video, [ref1, ref2, ref3]);
-            }).catch(fail).then(done);
-        PromiseMock.flush();
+        await delayForUpdatePeriod();
+        ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', updatedMedia2);
+
+        await delayForUpdatePeriod();
+        ManifestParser.verifySegmentIndex(video, [ref1, ref2, ref3]);
       });
 
-      it('converts presentation to VOD when it is finished', function(done) {
-        fakeNetEngine.setResponseMap({
-          'test:/master': toUTF8(master),
-          'test:/video': toUTF8(media),
-          'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData,
-        });
+      it('converts presentation to VOD when it is finished', async () => {
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
 
-        parser.start('test:/master', playerInterface).then(function(manifest) {
-          expect(manifest.presentationTimeline.isLive()).toBe(true);
-          fakeNetEngine.setResponseMapAsText({
-            'test:/master': master,
-            'test:/video': mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n',
-          });
+        const manifest = await parser.start('test:/master', playerInterface);
 
-          delayForUpdatePeriod();
-          expect(manifest.presentationTimeline.isLive()).toBe(false);
-        }).catch(fail).then(done);
-        PromiseMock.flush();
+        expect(manifest.presentationTimeline.isLive()).toBe(true);
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video',
+                mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n');
+
+        await delayForUpdatePeriod();
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
       });
 
-      it('starts presentation as VOD when ENDLIST is present', function(done) {
-        fakeNetEngine.setResponseMap({
-          'test:/master': toUTF8(master),
-          'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
-          'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData,
-        });
+      it('starts presentation as VOD when ENDLIST is present', async () => {
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media + '#EXT-X-ENDLIST')
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
 
-        parser.start('test:/master', playerInterface).then(function(manifest) {
-          expect(manifest.presentationTimeline.isLive()).toBe(false);
-        }).catch(fail).then(done);
-        PromiseMock.flush();
+        const manifest = await parser.start('test:/master', playerInterface);
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+      });
+
+      it('does not throw when interrupted by stop', async () => {
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+
+        expect(manifest.presentationTimeline.isLive()).toBe(true);
+
+        // Block the next request so that update() is still happening when we
+        // call stop().
+        /** @type {!shaka.util.PublicPromise} */
+        const delay = fakeNetEngine.delayNextRequest();
+        // Trigger an update.
+        await delayForUpdatePeriod();
+        // Stop the parser mid-update, but don't wait for stop to complete.
+        const stopPromise = parser.stop();
+        // Unblock the request.
+        delay.resolve();
+        // Allow update to finish.
+        await shaka.test.Util.shortDelay();
+        // Wait for stop to complete.
+        await stopPromise;
       });
     });  // describe('update')
   });  // describe('playlist type EVENT')
 
-  describe('playlist type LIVE', function() {
+  describe('playlist type LIVE', () => {
     const media = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n',
+      'main.mp4\n',
     ].join('');
 
     const mediaWithoutSequenceNumber = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n',
+      'main.mp4\n',
     ].join('');
 
     const mediaWithByteRange = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXT-X-BYTERANGE:121090@616\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n',
+      'main.mp4\n',
     ].join('');
 
     const expectedStartByte = 616;
@@ -414,75 +412,145 @@ describe('HlsParser live', function() {
     const mediaWithAdditionalSegment = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
       '#EXTINF:2,\n',
-      'test:/main.mp4\n',
+      'main.mp4\n',
       '#EXTINF:2,\n',
-      'test:/main2.mp4\n',
+      'main2.mp4\n',
     ].join('');
 
     const mediaWithRemovedSegment = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:1\n',
       '#EXTINF:2,\n',
-      'test:/main2.mp4\n',
+      'main2.mp4\n',
     ].join('');
 
     let mediaWithManySegments = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
-      '#EXT-X-MAP:URI="test:/init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXT-X-MEDIA-SEQUENCE:0\n',
     ].join('');
-    for (let i = 0; i < 1000; ++i) {
+    for (const _ of shaka.util.Iterables.range(1000)) {
+      shaka.util.Functional.ignored(_);
       mediaWithManySegments += '#EXTINF:2,\n';
-      mediaWithManySegments += 'test:/main.mp4\n';
+      mediaWithManySegments += 'main.mp4\n';
     }
 
-    it('starts presentation as VOD when ENDLIST is present', function(done) {
-      fakeNetEngine.setResponseMap({
-        'test:/master': toUTF8(master),
-        'test:/video': toUTF8(media + '#EXT-X-ENDLIST'),
-        'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': segmentData,
-      });
+    const mediaWithDiscontinuity = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXT-X-DISCONTINUITY-SEQUENCE:30\n',
+      '#EXTINF:2,\n',
+      'main.mp4\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+    ].join('');
 
-      parser.start('test:/master', playerInterface).then(function(manifest) {
-        expect(manifest.presentationTimeline.isLive()).toBe(false);
-      }).catch(fail).then(done);
+    const mediaWithUpdatedDiscontinuitySegment = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:1\n',
+      '#EXT-X-DISCONTINUITY-SEQUENCE:31\n',
+      '#EXTINF:2,\n',
+      'main2.mp4\n',
+    ].join('');
+
+    it('starts presentation as VOD when ENDLIST is present', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media + '#EXT-X-ENDLIST')
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.presentationTimeline.isLive()).toBe(false);
     });
 
-    it('does not fail on a missing sequence number', function(done) {
-      fakeNetEngine.setResponseMap({
-        'test:/master': toUTF8(master),
-        'test:/video': toUTF8(mediaWithoutSequenceNumber),
-        'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': segmentData,
-      });
+    it('does not fail on a missing sequence number', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithoutSequenceNumber)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
 
-      parser.start('test:/master', playerInterface).catch(fail).then(done);
+      await parser.start('test:/master', playerInterface);
     });
 
-    describe('availabilityWindowOverride', function() {
-      async function testWindowOverride(expectedWindow) {
-        fakeNetEngine.setResponseMap({
-          'test:/master': toUTF8(master),
-          'test:/video': toUTF8(mediaWithManySegments),
-          'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData,
+    it('sets presentation delay as configured', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
+      config.defaultPresentationDelay = 10;
+      parser.configure(config);
+      const manifest = await parser.start('test:/master', playerInterface);
+      expect(manifest.presentationTimeline.getDelay()).toBe(
+          config.defaultPresentationDelay);
+    });
+
+    it('sets 3 times target duration as presentation delay if not configured',
+        async () => {
+          fakeNetEngine
+              .setResponseText('test:/master', master)
+              .setResponseText('test:/video', media)
+              .setResponseValue('test:/init.mp4', initSegmentData)
+              .setResponseValue('test:/main.mp4', segmentData);
+          const manifest = await parser.start('test:/master', playerInterface);
+          expect(manifest.presentationTimeline.getDelay()).toBe(15);
         });
 
-        let manifest = await parser.start('test:/master', playerInterface);
+    it('sets presentation delay for low latency mode', async () => {
+      const mediaWithLowLatency = [
+        '#EXTM3U\n',
+        '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,PART-HOLD-BACK=1.8\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PART-INF:PART-TARGET=0.5\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXTINF:2,\n',
+        'main.mp4\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithLowLatency)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
+
+      playerInterface.isLowLatencyMode = () => true;
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      // Presentation delay should be the value of 'PART-HOLD-BACK' if not
+      // configured.
+      expect(manifest.presentationTimeline.getDelay()).toBe(1.8);
+    });
+
+    describe('availabilityWindowOverride', () => {
+      async function testWindowOverride(expectedWindow) {
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', mediaWithManySegments)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
+
+        const manifest = await parser.start('test:/master', playerInterface);
         expect(manifest).toBeTruthy();
-        let timeline = manifest.presentationTimeline;
+        const timeline = manifest.presentationTimeline;
         expect(timeline).toBeTruthy();
 
         const start = timeline.getSegmentAvailabilityStart();
         const end = timeline.getSegmentAvailabilityEnd();
-        expect(end - start).toEqual(expectedWindow);
+        expect(end - start).toBeCloseTo(expectedWindow, 1);
       }
 
       it('does not affect seek range if unset', async () => {
@@ -491,30 +559,46 @@ describe('HlsParser live', function() {
       });
 
       it('overrides default seek range if set', async () => {
-        parser.configure({
-          retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-          availabilityWindowOverride: 240,
-          dash: {
-            customScheme: function(node) { return null; },
-            clockSyncUri: '',
-            ignoreDrmInfo: false,
-            xlinkFailGracefully: false,
-            defaultPresentationDelay: 10,
-          },
-        });
-
-        // 240 is the availabilityWindowOverride setting.
+        config.availabilityWindowOverride = 240;
+        parser.configure(config);
         await testWindowOverride(240);
       });
     });
 
-    it('offsets VTT text with rolled over TS timestamps', function(done) {
+    it('sets timestamp offset for segments with discontinuity', async () => {
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithDiscontinuity)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData)
+          .setResponseValue('test:/main2.mp4', segmentData);
+
+      const ref1 = ManifestParser.makeReference(
+          'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* timestampOffset= */ 0);
+
+      // Expect the timestamp offset to be set for the segment after the
+      // EXT-X-DISCONTINUITY tag.
+      const ref2 = ManifestParser.makeReference(
+          'test:/main2.mp4', segmentDataStartTime + 2, segmentDataStartTime + 4,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* timestampOffset= */ 2);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      const video = manifest.variants[0].video;
+      await video.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
+    });
+
+    it('offsets VTT text with rolled over TS timestamps', async () => {
       const masterWithVtt = [
         '#EXTM3U\n',
-        '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="test:/text"\n',
+        '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="text",',
+        'GROUP-ID="sub1"\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
-        'test:/video\n',
+        'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
+        'video\n',
       ].join('');
 
       const textPlaylist = [
@@ -522,7 +606,7 @@ describe('HlsParser live', function() {
         '#EXT-X-TARGETDURATION:5\n',
         '#EXT-X-MEDIA-SEQUENCE:0\n',
         '#EXTINF:2,\n',
-        'test:/main.vtt\n',
+        'main.vtt\n',
       ].join('');
 
       const vtt = [
@@ -532,286 +616,433 @@ describe('HlsParser live', function() {
         'Hello, world!\n',
       ].join('');
 
-      fakeNetEngine.setResponseMap({
-        'test:/master': toUTF8(masterWithVtt),
-        'test:/video': toUTF8(media),
-        'test:/text': toUTF8(textPlaylist),
-        'test:/init.mp4': initSegmentData,
-        'test:/main.mp4': pastRolloverSegmentData,
-        'test:/main.vtt': toUTF8(vtt),
-      });
+      fakeNetEngine
+          .setResponseText('test:/master', masterWithVtt)
+          .setResponseText('test:/video', media)
+          .setResponseText('test:/text', textPlaylist)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', pastRolloverSegmentData)
+          .setResponseText('test:/main.vtt', vtt);
 
-      parser.start('test:/master', playerInterface).then(function(manifest) {
-        let textStream = manifest.periods[0].textStreams[0];
-        let ref = textStream.getSegmentReference(0);
-        expect(ref).not.toBe(null);
-        expect(ref.startTime).not.toBeLessThan(rolloverOffset);
+      const manifest = await parser.start('test:/master', playerInterface);
+      const textStream = manifest.textStreams[0];
+      await textStream.createSegmentIndex();
+      goog.asserts.assert(textStream.segmentIndex, 'Null segmentIndex!');
 
-        let videoStream = manifest.periods[0].variants[0].video;
-        ref = videoStream.getSegmentReference(0);
-        expect(ref).not.toBe(null);
-        expect(ref.startTime).not.toBeLessThan(rolloverOffset);
-      }).catch(fail).then(done);
+      let ref = Array.from(textStream.segmentIndex)[0];
+      expect(ref).not.toBe(null);
+      expect(ref.startTime).not.toBeLessThan(rolloverOffset);
+
+      const videoStream = manifest.variants[0].video;
+      await videoStream.createSegmentIndex();
+      goog.asserts.assert(videoStream.segmentIndex, 'Null segmentIndex!');
+
+      ref = Array.from(videoStream.segmentIndex)[0];
+      expect(ref).not.toBe(null);
+      expect(ref.startTime).not.toBeLessThan(rolloverOffset);
     });
 
-    describe('update', function() {
-      beforeAll(function() {
-        jasmine.clock().install();
-        // This mock is required for fakeEventLoop.
-        PromiseMock.install();
+    it('parses streams with partial and preload hinted segments', async () => {
+      playerInterface.isLowLatencyMode = () => true;
+      const mediaWithPartialSegments = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        // ref includes partialRef, partialRef2
+        // partialRef
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=200@0\n',
+        // partialRef2
+        '#EXT-X-PART:DURATION=2,URI="partial2.mp4",BYTERANGE=230@200\n',
+        '#EXTINF:4,\n',
+        'main.mp4\n',
+        // ref2 includes partialRef3, preloadRef
+        // partialRef3
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0\n',
+        // preloadRef
+        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithPartialSegments)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData)
+          .setResponseValue('test:/partial.mp4', segmentData)
+          .setResponseValue('test:/partial2.mp4', segmentData);
+
+      const partialRef = ManifestParser.makeReference(
+          'test:/partial.mp4', segmentDataStartTime, segmentDataStartTime + 2,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 199);
+
+      const partialRef2 = ManifestParser.makeReference(
+          'test:/partial2.mp4', segmentDataStartTime + 2,
+          segmentDataStartTime + 4, /* baseUri= */ '', /* startByte= */ 200,
+          /* endByte= */ 429);
+
+      const partialRef3 = ManifestParser.makeReference(
+          'test:/partial.mp4', segmentDataStartTime + 4,
+          segmentDataStartTime + 6,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 209);
+
+      // A preload hinted partial segment doesn't have duration information,
+      // so its startTime and endTime are the same.
+      const preloadRef = ManifestParser.makeReference(
+          'test:/partial.mp4', segmentDataStartTime + 6,
+          segmentDataStartTime + 6,
+          /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ null);
+
+      const ref = ManifestParser.makeReference(
+          'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 4,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 429,
+          /* timestampOffset= */ 0, [partialRef, partialRef2]);
+
+      // ref2 is not fully published yet, so it doesn't have a segment uri.
+      const ref2 = ManifestParser.makeReference(
+          '', segmentDataStartTime + 4, segmentDataStartTime + 6,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* timestampOffset= */ 0, [partialRef3, preloadRef]);
+
+      const manifest = await parser.start('test:/master', playerInterface);
+      const video = manifest.variants[0].video;
+      await video.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(video, [ref, ref2]);
+    });
+
+    describe('update', () => {
+      it('adds new segments when they appear', async () => {
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
+
+        await testUpdate(
+            master, media, [ref1], mediaWithAdditionalSegment, [ref1, ref2]);
       });
 
-      afterAll(function() {
-        jasmine.clock().uninstall();
-        PromiseMock.uninstall();
+      it('evicts removed segments', async () => {
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
+
+        await testUpdate(
+            master, mediaWithAdditionalSegment, [ref1, ref2],
+            mediaWithRemovedSegment, [ref2]);
       });
 
-      it('adds new segments when they appear', function(done) {
-        let ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
-        let ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+      it('handles updates with redirects', async () => {
+        const oldRef1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
 
-        testUpdate(done, master, media, [ref1],
-                   mediaWithAdditionalSegment, [ref1, ref2]);
-      });
+        const newRef1 =
+            ManifestParser.makeReference('test:/redirected/main.mp4', 2, 4);
+        const newRef2 =
+            ManifestParser.makeReference('test:/redirected/main2.mp4', 4, 6);
 
-      it('evicts removed segments', function(done) {
-        let ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
-        let ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
+        let playlistFetchCount = 0;
 
-        testUpdate(done, master, mediaWithAdditionalSegment, [ref1, ref2],
-                   mediaWithRemovedSegment, [ref2]);
-      });
-
-      it('handles updates with redirects', function(done) {
-        let ref1 = ManifestParser.makeReference('test:/main.mp4',
-                                                0, 2, 4);
-        let ref2 = ManifestParser.makeReference('test:/main2.mp4',
-                                                1, 4, 6);
-
-        fakeNetEngine.setResponseFilter(function(type, response) {
-          // Simulate a redirect by changing the response URI
-          if (response.uri.indexOf('test:/redirected/') == 0) return;
-          response.uri = response.uri.replace('test:/', 'test:/redirected/');
+        fakeNetEngine.setResponseFilter((type, response) => {
+          // Simulate a redirect on the updated playlist by changing the
+          // response URI on the second playlist fetch.
+          if (response.uri == 'test:/video') {
+            playlistFetchCount++;
+            if (playlistFetchCount == 2) {
+              response.uri = 'test:/redirected/video';
+            }
+          }
         });
 
-        testUpdate(done, master, media, [ref1],
-                   mediaWithAdditionalSegment, [ref1, ref2]);
+        await testUpdate(
+            master, media, [oldRef1], mediaWithAdditionalSegment,
+            [newRef1, newRef2]);
       });
 
-      it('parses start time from mp4 segments', function(done) {
-        fakeNetEngine.setResponseMap({
-          'test:/master': toUTF8(master),
-          'test:/video': toUTF8(media),
-          'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData,
-        });
+      it('parses start time from mp4 segments', async () => {
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
 
-        let ref = ManifestParser.makeReference(
-            'test:/main.mp4', 0, segmentDataStartTime,
-            segmentDataStartTime + 2);
+        const expectedRef = ManifestParser.makeReference(
+            'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2);
+        // In live content, we do not set timestampOffset.
+        expectedRef.timestampOffset = 0;
 
-        parser.start('test:/master', playerInterface).then(function(manifest) {
-          let video = manifest.periods[0].variants[0].video;
-          ManifestParser.verifySegmentIndex(video, [ref]);
-
-          // In live content, we do not set presentationTimeOffset.
-          expect(video.presentationTimeOffset).toEqual(0);
-        }).catch(fail).then(done);
-        PromiseMock.flush();
+        const manifest = await parser.start('test:/master', playerInterface);
+        const video = manifest.variants[0].video;
+        await video.createSegmentIndex();
+        ManifestParser.verifySegmentIndex(video, [expectedRef]);
       });
 
-      it('gets start time on update without segment request', function(done) {
-        fakeNetEngine.setResponseMap({
-          'test:/master': toUTF8(master),
-          'test:/video': toUTF8(mediaWithAdditionalSegment),
-          'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData,
-        });
+      it('gets start time on update without segment request', async () => {
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', mediaWithAdditionalSegment)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
 
-        let ref1 = ManifestParser.makeReference(
-            'test:/main.mp4', 0, segmentDataStartTime,
-            segmentDataStartTime + 2);
+        const ref1 = ManifestParser.makeReference(
+            'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2);
 
-        let ref2 = ManifestParser.makeReference(
-            'test:/main2.mp4', 1, segmentDataStartTime + 2,
+        const ref2 = ManifestParser.makeReference(
+            'test:/main2.mp4', segmentDataStartTime + 2,
             segmentDataStartTime + 4);
 
-        parser.start('test:/master', playerInterface).then(function(manifest) {
-          let video = manifest.periods[0].variants[0].video;
-          ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
+        const manifest = await parser.start('test:/master', playerInterface);
+        const video = manifest.variants[0].video;
+        await video.createSegmentIndex();
+        ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
 
-          fakeNetEngine.setResponseMap({
-            'test:/master': toUTF8(master),
-            'test:/video': toUTF8(mediaWithRemovedSegment),
-            'test:/init.mp4': initSegmentData,
-            'test:/main.mp4': segmentData,
-            'test:/main2.mp4': segmentData,
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', mediaWithRemovedSegment)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData)
+            .setResponseValue('test:/main2.mp4', segmentData);
+
+        fakeNetEngine.request.calls.reset();
+        await delayForUpdatePeriod();
+
+        ManifestParser.verifySegmentIndex(video, [ref2]);
+
+        // Only one request was made, and it was for the playlist.
+        // No segment requests were needed to get the start time.
+        expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+        fakeNetEngine.expectRequest(
+            'test:/video',
+            shaka.net.NetworkingEngine.RequestType.MANIFEST);
+      });
+
+      it('reuses cached timestamp offset for segments with discontinuity',
+          async () => {
+            fakeNetEngine
+                .setResponseText('test:/master', master)
+                .setResponseText('test:/video', mediaWithDiscontinuity)
+                .setResponseValue('test:/init.mp4', initSegmentData)
+                .setResponseValue('test:/main.mp4', segmentData)
+                .setResponseValue('test:/main2.mp4', segmentData);
+
+            const ref1 = ManifestParser.makeReference('test:/main.mp4',
+                segmentDataStartTime, segmentDataStartTime + 2);
+
+            const ref2 = ManifestParser.makeReference('test:/main2.mp4',
+                segmentDataStartTime + 2, segmentDataStartTime + 4);
+
+            const manifest =
+                await parser.start('test:/master', playerInterface);
+
+            const video = manifest.variants[0].video;
+            await video.createSegmentIndex();
+            ManifestParser.verifySegmentIndex(video, [ref1, ref2]);
+
+            fakeNetEngine
+                .setResponseText('test:/master', master)
+                .setResponseText('test:/video',
+                    mediaWithUpdatedDiscontinuitySegment)
+                .setResponseValue('test:/init.mp4', initSegmentData)
+                .setResponseValue('test:/main2.mp4', segmentData);
+
+            fakeNetEngine.request.calls.reset();
+            await delayForUpdatePeriod();
+
+            ManifestParser.verifySegmentIndex(video, [ref2]);
+
+            // Only one request should be made, and it's for the playlist.
+            // Expect to use the cached timestamp offset for the main2.mp4
+            // segment, without fetching the start time again.
+            expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+            fakeNetEngine.expectRequest(
+                'test:/video',
+                shaka.net.NetworkingEngine.RequestType.MANIFEST);
+            fakeNetEngine.expectNoRequest(
+                'test:/main.mp4',
+                shaka.net.NetworkingEngine.RequestType.SEGMENT);
           });
 
-          fakeNetEngine.request.calls.reset();
-          delayForUpdatePeriod();
+      it('parses start time from ts segments', async () => {
+        const tsMediaPlaylist =
+            mediaWithRemovedSegment.replace(/\.mp4/g, '.ts');
 
-          ManifestParser.verifySegmentIndex(video, [ref2]);
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', tsMediaPlaylist)
+            .setResponseValue('test:/main2.ts', tsSegmentData);
 
-          // Only one request was made, and it was for the playlist.
-          // No segment requests were needed to get the start time.
-          expect(fakeNetEngine.request.calls.count()).toBe(1);
-          fakeNetEngine.expectRequest(
-              'test:/video',
-              shaka.net.NetworkingEngine.RequestType.MANIFEST);
-        }).catch(fail).then(done);
+        const expectedRef = ManifestParser.makeReference(
+            'test:/main2.ts', segmentDataStartTime, segmentDataStartTime + 2);
+        // In live content, we do not set timestampOffset.
+        expectedRef.timestampOffset = 0;
 
-        PromiseMock.flush();
+        const manifest = await parser.start('test:/master', playerInterface);
+        const video = manifest.variants[0].video;
+        await video.createSegmentIndex();
+        ManifestParser.verifySegmentIndex(video, [expectedRef]);
       });
 
-      it('parses start time from ts segments', function(done) {
-        let tsMediaPlaylist = mediaWithRemovedSegment.replace(/\.mp4/g, '.ts');
-
-        fakeNetEngine.setResponseMap({
-          'test:/master': toUTF8(master),
-          'test:/video': toUTF8(tsMediaPlaylist),
-          'test:/main2.ts': tsSegmentData,
-        });
-
-        let ref = ManifestParser.makeReference(
-            'test:/main2.ts', 1, segmentDataStartTime,
-            segmentDataStartTime + 2);
-
-        parser.start('test:/master', playerInterface).then(function(manifest) {
-          let video = manifest.periods[0].variants[0].video;
-          ManifestParser.verifySegmentIndex(video, [ref]);
-          // In live content, we do not set presentationTimeOffset.
-          expect(video.presentationTimeOffset).toEqual(0);
-        }).catch(fail).then(done);
-
-        PromiseMock.flush();
-      });
-
-      it('gets start time of segments with byte range', function(done) {
+      it('gets start time of segments with byte range', async () => {
         // Nit: this value is an implementation detail of the fix for #1106
-        let partialEndByte = expectedStartByte + 2048 - 1;
+        const partialEndByte = expectedStartByte + 2048 - 1;
 
-        fakeNetEngine.setResponseMap({
-          'test:/master': toUTF8(master),
-          'test:/video': toUTF8(mediaWithByteRange),
-          'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': segmentData,
-        });
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', mediaWithByteRange)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData);
 
-        let ref = ManifestParser.makeReference(
-            'test:/main.mp4' /* uri */,
-            0 /* position */,
-            segmentDataStartTime /* start */,
-            segmentDataStartTime + 2 /* end */,
-            '' /* baseUri */,
+        const expectedRef = ManifestParser.makeReference(
+            /* uri= */ 'test:/main.mp4',
+            /* start= */ segmentDataStartTime,
+            /* end= */ segmentDataStartTime + 2,
+            /* baseUri= */ '',
             expectedStartByte,
             expectedEndByte);  // Complete segment reference
 
-        parser.start('test:/master', playerInterface).then(function(manifest) {
-          let video = manifest.periods[0].variants[0].video;
-          ManifestParser.verifySegmentIndex(video, [ref]);
+        const manifest = await parser.start('test:/master', playerInterface);
+        const video = manifest.variants[0].video;
+        await video.createSegmentIndex();
+        ManifestParser.verifySegmentIndex(video, [expectedRef]);
 
-          // There should have been a range request for this segment to get the
-          // start time.
-          fakeNetEngine.expectRangeRequest(
-              'test:/main.mp4',
-              expectedStartByte,
-              partialEndByte);  // Partial segment request
-        }).catch(fail).then(done);
-
-        PromiseMock.flush();
+        // There should have been a range request for this segment to get the
+        // start time.
+        fakeNetEngine.expectRangeRequest(
+            'test:/main.mp4',
+            expectedStartByte,
+            partialEndByte);  // partial segment request
       });
 
-      it('handles rollover on update', function(done) {
-        const masterWithVtt = [
+      it('request playlist delta updates to skip segments', async () => {
+        const mediaWithDeltaUpdates = [
           '#EXTM3U\n',
-          '#EXT-X-MEDIA:TYPE=SUBTITLES,LANGUAGE="fra",URI="test:/text"\n',
-          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
-          'RESOLUTION=960x540,FRAME-RATE=60\n',
-          'test:/video\n',
-        ].join('');
-
-       const textPlaylist1 = [
-          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:LIVE\n',
           '#EXT-X-TARGETDURATION:5\n',
           '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-SERVER-CONTROL:CAN-SKIP-UNTIL=60.0\n',
           '#EXTINF:2,\n',
-          'test:/main1.vtt\n',
+          'main.mp4\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
         ].join('');
 
-        const textPlaylist2 = [
+        const mediaWithSkippedSegments = [
           '#EXTM3U\n',
           '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
           '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-SERVER-CONTROL:CAN-SKIP-UNTIL=60.0\n',
+          '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
           '#EXTINF:2,\n',
-          'test:/main1.vtt\n',
+          'main2.mp4\n',
           '#EXTINF:2,\n',
-          'test:/main2.vtt\n',
+          'main3.mp4\n',
         ].join('');
 
-        // ~0.7s from rollover
-        const vtt1 = [
-          'WEBVTT\n',
-          'X-TIMESTAMP-MAP=MPEGTS:8589870000,LOCAL:00:00:00.000\n',
-          '\n',
-          '00:00.000 --> 00:01.000\n',
-          'Hello, world!\n',
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', mediaWithDeltaUpdates)
+            .setResponseText('test:/video?_HLS_skip=YES',
+                mediaWithSkippedSegments)
+            .setResponseValue('test:/init.mp4', initSegmentData)
+            .setResponseValue('test:/main.mp4', segmentData)
+            .setResponseValue('test:/main2.mp4', segmentData)
+            .setResponseValue('test:/main3.mp4', segmentData);
+
+        playerInterface.isLowLatencyMode = () => true;
+        await parser.start('test:/master', playerInterface);
+        // Replace the entries with the updated values.
+
+        fakeNetEngine.request.calls.reset();
+        await delayForUpdatePeriod();
+
+        fakeNetEngine.expectRequest(
+            'test:/video?_HLS_skip=YES',
+            shaka.net.NetworkingEngine.RequestType.MANIFEST);
+      });
+
+
+      it('skips older segments', async () => {
+        const mediaWithSkippedSegments = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+          '#EXTINF:2,\n',
+          'main3.mp4\n',
         ].join('');
 
-        // ~1.3s after rollover
-        const vtt2 = [
-          'WEBVTT\n',
-          'X-TIMESTAMP-MAP=MPEGTS:115408,LOCAL:00:00:00.000\n',
-          '\n',
-          '00:00.000 --> 00:01.000\n',
-          'Hello, again!\n',
+        playerInterface.isLowLatencyMode = () => true;
+        const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
+        const ref2 = ManifestParser.makeReference('test:/main2.mp4', 4, 6);
+        const ref3 = ManifestParser.makeReference('test:/main3.mp4', 6, 8);
+        // With 'SKIPPED-SEGMENTS', ref1 is skipped from the playlist,
+        // and ref1 should be in the SegmentReferences list.
+        // ref3 should be appended to the SegmentReferences list.
+        await testUpdate(
+            master, mediaWithAdditionalSegment, [ref1, ref2],
+            mediaWithSkippedSegments, [ref1, ref2, ref3]);
+      });
+
+      it('skips older segments with discontinuity', async () => {
+        const mediaWithDiscontinuity2 = [
+          '#EXTM3U\n',
+          '#EXT-X-PLAYLIST-TYPE:LIVE\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-DISCONTINUITY-SEQUENCE:30\n',
+          '#EXTINF:2,\n',
+          'main.mp4\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:2,\n',
+          'main2.mp4\n',
+          '#EXTINF:2,\n',
+          'main3.mp4\n',
         ].join('');
 
-        fakeNetEngine.setResponseMap({
-          'test:/master': toUTF8(masterWithVtt),
-          'test:/video': toUTF8(media),
-          'test:/text': toUTF8(textPlaylist1),
-          'test:/init.mp4': initSegmentData,
-          'test:/main.mp4': pastRolloverSegmentData,
-          'test:/main1.vtt': toUTF8(vtt1),
-        });
+        const mediaWithSkippedSegments2 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXT-X-DISCONTINUITY-SEQUENCE:30\n',
+          '#EXT-X-SKIP:SKIPPED-SEGMENTS=2\n',
+          '#EXTINF:2,\n',
+          'main3.mp4\n',
+          '#EXTINF:2,\n',
+          'main4.mp4\n',
+        ].join('');
 
-        let baseTime = 95443 + rolloverOffset;
-        let ref1 = ManifestParser.makeReference('test:/main1.vtt',
-                                                /* position */ 0,
-                                                /* startTime */ baseTime,
-                                                /* endTime */ baseTime + 2);
-        let ref2 = ManifestParser.makeReference('test:/main2.vtt',
-                                                /* position */ 1,
-                                                /* startTime */ baseTime + 2,
-                                                /* endTime */ baseTime + 4);
+        playerInterface.isLowLatencyMode = () => true;
 
-        parser.start('test:/master', playerInterface).then(function(manifest) {
-          let text = manifest.periods[0].textStreams[0];
-          ManifestParser.verifySegmentIndex(text, [ref1]);
+        const ref1 = ManifestParser.makeReference(
+            'test:/main.mp4', segmentDataStartTime, segmentDataStartTime + 2,
+            /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+            /* timestampOffset= */ 0);
 
-          fakeNetEngine.setResponseMap({
-            'test:/master': toUTF8(masterWithVtt),
-            'test:/video': toUTF8(mediaWithAdditionalSegment),
-            'test:/text': toUTF8(textPlaylist2),
-            'test:/init.mp4': initSegmentData,
-            'test:/main.mp4': pastRolloverSegmentData,
-            'test:/main2.mp4': pastRolloverSegmentData,
-            'test:/main1.vtt': toUTF8(vtt1),
-            'test:/main2.vtt': toUTF8(vtt2),
-          });
+        // Expect the timestamp offset to be set for the segment after the
+        // EXT-X-DISCONTINUITY tag.
+        const ref2 = ManifestParser.makeReference(
+            'test:/main2.mp4', segmentDataStartTime + 2,
+            segmentDataStartTime + 4, /* baseUri= */ '', /* startByte= */ 0,
+            /* endByte= */ null, /* timestampOffset= */ 2);
 
-          fakeNetEngine.request.calls.reset();
-          delayForUpdatePeriod();
+        // Expect the timestamp offset to be set for the segment, with the
+        // EXT-X-DISCONTINUITY tag skipped in the playlist.
+        const ref3 = ManifestParser.makeReference(
+            'test:/main3.mp4', segmentDataStartTime + 4,
+            segmentDataStartTime + 6, /* baseUri= */ '', /* startByte= */ 0,
+            /* endByte= */ null, /* timestampOffset= */ 2);
 
-          ManifestParser.verifySegmentIndex(text, [ref1, ref2]);
-        }).catch(fail).then(done);
+        const ref4 = ManifestParser.makeReference(
+            'test:/main4.mp4', segmentDataStartTime + 6,
+            segmentDataStartTime + 8, /* baseUri= */ '', /* startByte= */ 0,
+            /* endByte= */ null, /* timestampOffset= */ 2);
 
-        PromiseMock.flush();
+        // With 'SKIPPED-SEGMENTS', ref1, ref2 are skipped from the playlist,
+        // and ref1,ref2 should be in the SegmentReferences list.
+        // ref3,ref4 should be appended to the SegmentReferences list.
+        await testUpdate(
+            master, mediaWithDiscontinuity2, [ref1, ref2, ref3],
+            mediaWithSkippedSegments2, [ref1, ref2, ref3, ref4]);
       });
     });  // describe('update')
   });  // describe('playlist type LIVE')

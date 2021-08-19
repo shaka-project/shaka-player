@@ -49,6 +49,7 @@ __Subtitle/caption displayers__
 __Networking plugins__
   - Selected by URI scheme (http, https, etc.)
   - Register with {@link shaka.net.NetworkingEngine.registerScheme}
+  - Returns an {@link shaka.util.AbortableOperation} object, to allow aborting
   - Default networking plugins:
     - HTTP(S) XHR: {@linksource shaka.net.HttpXHRPlugin}
     - HTTP(S) Fetch: {@linksource shaka.net.HttpFetchPlugin}
@@ -107,6 +108,7 @@ python build/build.py +@complete -@polyfill
 python build/build.py +@complete -@polyfill -@text
 ```
 
+To see the complete list of categories, its in [`build/types/`](https://github.com/google/shaka-player/tree/master/build/types)
 
 #### Build Configs
 
@@ -117,7 +119,9 @@ this is what `build/types/networking` looks like:
 
 ```sh
 # All standard networking scheme plugins.
-+../../lib/net/http_plugin.js
++../../lib/net/http_xhr_plugin.js
++../../lib/net/http_fetch_plugin.js
++../../lib/net/http_plugin_utils.js
 +../../lib/net/data_uri_plugin.js
 ```
 
@@ -155,7 +159,7 @@ group file.  For example:
 -@networking
 # Add my custom HTTP implementation
 +/path/to/my_http_plugin.js
-# Add an additional polyfill for some odd platform I'm targetting
+# Add an additional polyfill for some odd platform I'm targeting
 +/path/to/my_platform_polyfill.js
 ```
 
@@ -173,5 +177,5 @@ If you have a great plugin that you'd like to contribute back to the community,
 we'd love to hear from you.  You can get in touch via our [issue tracker][] to
 discuss it, and once it's ready, you can send a [pull request][] on github.
 
-[issue tracker]: https://github.com/google/shaka-player/issues/new
+[issue tracker]: https://github.com/google/shaka-player/issues/new/choose
 [pull request]: https://github.com/google/shaka-player/pull/new/master

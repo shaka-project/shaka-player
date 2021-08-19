@@ -1,161 +1,220 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('ManifestConverter', function() {
-  describe('createVariants', function() {
+goog.require('shaka.media.InitSegmentReference');
+goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.media.SegmentIndex');
+goog.require('shaka.offline.ManifestConverter');
+goog.require('shaka.offline.OfflineUri');
+goog.require('shaka.util.ManifestParserUtils');
+goog.requireType('shaka.media.SegmentReference');
+
+describe('ManifestConverter', () => {
+  describe('createVariants', () => {
     const audioType = 'audio';
     const videoType = 'video';
 
-    it('will create variants with variant ids', function() {
+    it('will create variants with variant ids', () => {
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let audios = [
+      const audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1]),
       ];
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let videos = [
+      const videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1]),
       ];
 
-      /** @type {!Array.<shaka.extern.Variant>} */
-      let variants = createConverter().createVariants(audios, videos);
+      const timeline = createTimeline();
 
-      expect(variants.length).toBe(2);
+      /** @type {!Map.<number, shaka.extern.Variant>} */
+      const variants = createConverter().createVariants(
+          audios, videos, timeline);
+      expect(variants.size).toBe(2);
 
-      expect(variants[0].audio.id).toBe(0);
-      expect(variants[0].video.id).toBe(2);
+      expect(variants.has(0)).toBeTruthy();
+      expect(variants.get(0).audio.id).toBe(0);
+      expect(variants.get(0).video.id).toBe(2);
 
-      expect(variants[1].audio.id).toBe(1);
-      expect(variants[1].video.id).toBe(3);
+      expect(variants.has(1)).toBeTruthy();
+      expect(variants.get(1).audio.id).toBe(1);
+      expect(variants.get(1).video.id).toBe(3);
     });
 
-    it('will create variants when there is only audio', function() {
+    it('will create variants when there is only audio', () => {
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let audios = [
+      const audios = [
         createStreamDB(0, audioType, [0]),
         createStreamDB(1, audioType, [1]),
       ];
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let videos = [];
+      const videos = [];
 
-      /** @type {!Array.<shaka.extern.Variant>} */
-      let variants = createConverter().createVariants(audios, videos);
+      const timeline = createTimeline();
 
-      expect(variants.length).toBe(2);
+      /** @type {!Map.<number, shaka.extern.Variant>} */
+      const variants = createConverter().createVariants(
+          audios, videos, timeline);
+      expect(variants.size).toBe(2);
     });
 
-    it('will create variants when there is only video', function() {
+    it('will create variants when there is only video', () => {
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let audios = [];
+      const audios = [];
       /** @type {!Array.<shaka.extern.StreamDB>} */
-      let videos = [
+      const videos = [
         createStreamDB(2, videoType, [0]),
         createStreamDB(3, videoType, [1]),
       ];
 
-      /** @type {!Array.<shaka.extern.Variant>} */
-      let variants = createConverter().createVariants(audios, videos);
+      const timeline = createTimeline();
 
-      expect(variants.length).toBe(2);
+      /** @type {!Map.<number, shaka.extern.Variant>} */
+      const variants = createConverter().createVariants(
+          audios, videos, timeline);
+      expect(variants.size).toBe(2);
     });
   }); // describe('createVariants')
 
-  describe('fromPeriodDB', function() {
-    it('will reconstruct Periods correctly', function() {
-      /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
-        startTime: 60,
-        streams: [createVideoStreamDB(1, [0]), createAudioStreamDB(2, [0])],
+  describe('fromManifestDB', () => {
+    it('will reconstruct Manifest correctly', () => {
+      /** @type {shaka.extern.ManifestDB} */
+      const manifestDb = {
+        originalManifestUri: 'http://example.com/foo',
+        duration: 60,
+        size: 1234,
+        expiration: Infinity,
+        streams: [
+          createVideoStreamDB(1, [0]),
+          createAudioStreamDB(2, [0]),
+        ],
+        sessionIds: [1, 2, 3, 4],
+        drmInfo: {
+          keySystem: 'com.foo.bar',
+          licenseServerUri: 'http://example.com/drm',
+          distinctiveIdentifierRequired: true,
+          persistentStateRequired: true,
+          audioRobustness: 'very',
+          videoRobustness: 'kinda_sorta',
+          serverCertificate: new Uint8Array([1, 2, 3]),
+          serverCertificateUri: '',
+          sessionType: '',
+          initData: [{
+            initData: new Uint8Array([4, 5, 6]),
+            initDataType: 'cenc',
+            keyId: 'abc',
+          }],
+          keyIds: new Set([
+            'abc',
+            'def',
+          ]),
+        },
+        appMetadata: null,
+        creationTime: 0,
       };
 
-      let timeline = createTimeline();
+      const manifest = createConverter().fromManifestDB(manifestDb);
+      expect(manifest.presentationTimeline.getDuration())
+          .toBe(manifestDb.duration);
+      expect(manifest.textStreams).toEqual([]);
+      expect(manifest.offlineSessionIds).toEqual(manifestDb.sessionIds);
+      expect(manifest.variants.length).toBe(1);
 
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
-      expect(period).toBeTruthy();
-      expect(period.startTime).toBe(periodDb.startTime);
-      expect(period.textStreams).toEqual([]);
-      expect(period.variants.length).toBe(1);
-
-      let variant = period.variants[0];
+      const variant = manifest.variants[0];
       expect(variant.id).toEqual(jasmine.any(Number));
-      expect(variant.language).toBe(periodDb.streams[1].language);
+      expect(variant.language).toBe(manifestDb.streams[1].language);
       expect(variant.primary).toBe(false);
       expect(variant.bandwidth).toEqual(jasmine.any(Number));
       expect(variant.allowedByApplication).toBe(true);
       expect(variant.allowedByKeySystem).toBe(true);
 
-      verifyStream(variant.video, periodDb.streams[0]);
-      verifyStream(variant.audio, periodDb.streams[1]);
+      verifyStream(variant.video, manifestDb.streams[0], manifestDb.drmInfo);
+      verifyStream(variant.audio, manifestDb.streams[1], manifestDb.drmInfo);
     });
 
-    it('supports video-only content', function() {
-      /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
-        startTime: 60,
-        streams: [createVideoStreamDB(1, [0]), createVideoStreamDB(2, [1])],
+    it('supports video-only content', () => {
+      /** @type {shaka.extern.ManifestDB} */
+      const manifestDb = {
+        originalManifestUri: 'http://example.com/foo',
+        duration: 60,
+        size: 1234,
+        expiration: Infinity,
+        sessionIds: [],
+        drmInfo: null,
+        appMetadata: null,
+        creationTime: 0,
+        streams: [
+          createVideoStreamDB(1, [0]),
+          createVideoStreamDB(2, [1]),
+        ],
       };
 
-      let timeline = createTimeline();
+      const manifest = createConverter().fromManifestDB(manifestDb);
+      expect(manifest.variants.length).toBe(2);
 
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
-      expect(period).toBeTruthy();
-      expect(period.variants.length).toBe(2);
-      expect(period.variants[0].audio).toBe(null);
-      expect(period.variants[0].video).toBeTruthy();
+      expect(manifest.variants[0].audio).toBe(null);
+      expect(manifest.variants[0].video).toBeTruthy();
+
+      expect(manifest.variants[1].audio).toBe(null);
+      expect(manifest.variants[1].video).toBeTruthy();
     });
 
-    it('supports audio-only content', function() {
-      /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
-        startTime: 60,
-        streams: [createAudioStreamDB(1, [0]), createAudioStreamDB(2, [1])],
+    it('supports audio-only content', () => {
+      /** @type {shaka.extern.ManifestDB} */
+      const manifestDb = {
+        originalManifestUri: 'http://example.com/foo',
+        duration: 60,
+        size: 1234,
+        expiration: Infinity,
+        sessionIds: [],
+        drmInfo: null,
+        appMetadata: null,
+        creationTime: 0,
+        streams: [
+          createAudioStreamDB(1, [0]),
+          createAudioStreamDB(2, [1]),
+        ],
       };
 
-      let timeline = createTimeline();
+      const manifest = createConverter().fromManifestDB(manifestDb);
+      expect(manifest.variants.length).toBe(2);
 
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
-      expect(period).toBeTruthy();
-      expect(period.variants.length).toBe(2);
-      expect(period.variants[0].audio).toBeTruthy();
-      expect(period.variants[0].video).toBe(null);
+      expect(manifest.variants[0].audio).toBeTruthy();
+      expect(manifest.variants[0].video).toBe(null);
+
+      expect(manifest.variants[1].audio).toBeTruthy();
+      expect(manifest.variants[1].video).toBe(null);
     });
 
-    it('supports text streams', function() {
-      /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
-        startTime: 60,
+    it('supports text streams', () => {
+      /** @type {shaka.extern.ManifestDB} */
+      const manifestDb = {
+        originalManifestUri: 'http://example.com/foo',
+        duration: 60,
+        size: 1234,
+        expiration: Infinity,
+        sessionIds: [],
+        drmInfo: null,
+        appMetadata: null,
+        creationTime: 0,
         streams: [
           createVideoStreamDB(1, [0]),
           createTextStreamDB(2),
         ],
       };
 
-      let timeline = createTimeline();
+      const manifest = createConverter().fromManifestDB(manifestDb);
+      expect(manifest.variants.length).toBe(1);
+      expect(manifest.textStreams.length).toBe(1);
 
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
-      expect(period).toBeTruthy();
-      expect(period.variants.length).toBe(1);
-      expect(period.textStreams.length).toBe(1);
-
-      verifyStream(period.textStreams[0], periodDb.streams[1]);
+      verifyStream(manifest.textStreams[0], manifestDb.streams[1]);
     });
 
-    it('combines Variants according to variantIds field', function() {
+    it('combines Variants according to variantIds field', () => {
       const audio1 = 0;
       const audio2 = 1;
       const video1 = 2;
@@ -165,9 +224,16 @@ describe('ManifestConverter', function() {
       const variant2 = 1;
       const variant3 = 2;
 
-      /** @type {shaka.extern.PeriodDB} */
-      let periodDb = {
-        startTime: 60,
+      /** @type {shaka.extern.ManifestDB} */
+      const manifestDb = {
+        originalManifestUri: 'http://example.com/foo',
+        duration: 60,
+        size: 1234,
+        expiration: Infinity,
+        sessionIds: [],
+        drmInfo: null,
+        appMetadata: null,
+        creationTime: 0,
         streams: [
           // Audio
           createAudioStreamDB(audio1, [variant2]),
@@ -179,22 +245,17 @@ describe('ManifestConverter', function() {
         ],
       };
 
-      let timeline = createTimeline();
-
-      /** @type {shaka.extern.Period} */
-      let period = createConverter().fromPeriodDB(periodDb, timeline);
-
-      expect(period).toBeTruthy();
-      expect(period.variants.length).toBe(3);
+      const manifest = createConverter().fromManifestDB(manifestDb);
+      expect(manifest.variants.length).toBe(3);
 
       // Variant 1
-      expect(findVariant(period.variants, audio2, video1)).toBeTruthy();
+      expect(findVariant(manifest.variants, audio2, video1)).toBeTruthy();
       // Variant 2
-      expect(findVariant(period.variants, audio1, video2)).toBeTruthy();
+      expect(findVariant(manifest.variants, audio1, video2)).toBeTruthy();
       // Variant 3
-      expect(findVariant(period.variants, audio2, video2)).toBeTruthy();
+      expect(findVariant(manifest.variants, audio2, video2)).toBeTruthy();
     });
-  }); // describe('fromPeriodDB')
+  }); // describe('fromManifestDB')
 
   /** @return {!shaka.offline.ManifestConverter} */
   function createConverter() {
@@ -209,27 +270,32 @@ describe('ManifestConverter', function() {
   /**
    * @param {number} id
    * @param {string} type
-   * @param {!Array.<number>} variants
+   * @param {!Array.<number>} variantIds
    * @return {shaka.extern.StreamDB}
    */
-  function createStreamDB(id, type, variants) {
+  function createStreamDB(id, type, variantIds) {
     /** @type {shaka.extern.StreamDB} */
-    let streamDB = {
-      id: id,
+    const streamDB = {
+      id,
+      originalId: id.toString(),
       primary: false,
-      presentationTimeOffset: 0,
-      contentType: type,
+      type,
       mimeType: '',
       codecs: '',
       language: '',
       label: null,
       width: null,
       height: null,
-      initSegmentKey: null,
       encrypted: false,
-      keyId: null,
+      keyIds: new Set(),
       segments: [],
-      variantIds: variants,
+      variantIds,
+      roles: [],
+      forced: false,
+      channelsCount: null,
+      audioSamplingRate: null,
+      spatialAudio: false,
+      closedCaptions: null,
     };
 
     return streamDB;
@@ -243,10 +309,15 @@ describe('ManifestConverter', function() {
    */
   function createSegmentDB(startTime, endTime, dataKey) {
     /** @type {shaka.extern.SegmentDB} */
-    let segment = {
-      startTime: startTime,
-      endTime: endTime,
-      dataKey: dataKey,
+    const segment = {
+      startTime,
+      endTime,
+      dataKey,
+      initSegmentKey: null,
+      appendWindowStart: 0,
+      appendWindowEnd: Infinity,
+      timestampOffset: 0,
+      tilesLayout: '',
     };
 
     return segment;
@@ -260,36 +331,44 @@ describe('ManifestConverter', function() {
   function createVideoStreamDB(id, variantIds) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
-      id: id,
+      id,
+      originalId: id.toString(),
       primary: false,
-      presentationTimeOffset: 25,
-      contentType: ContentType.VIDEO,
+      type: ContentType.VIDEO,
       mimeType: 'video/mp4',
       codecs: 'avc1.42c01e',
       frameRate: 22,
+      pixelAspectRatio: '59:54',
+      hdr: undefined,
       kind: undefined,
       language: '',
       label: null,
       width: 250,
       height: 100,
-      initSegmentKey: null,
       encrypted: true,
-      keyId: 'key1',
+      keyIds: new Set(['key1']),
       segments: [
         createSegmentDB(
-            /* start time */ 0,
-            /* end time */ 10,
-            /* data key */ 1),
+            /* startTime= */ 0,
+            /* endTime= */ 10,
+            /* dataKey= */ 1),
         createSegmentDB(
-            /* start time */ 10,
-            /* end time */ 20,
-            /* data key */ 2),
+            /* startTime= */ 10,
+            /* endTime= */ 20,
+            /* dataKey= */ 2),
         createSegmentDB(
-            /* start time */ 20,
-            /* end time */ 25,
-            /* data key */ 3),
+            /* startTime= */ 20,
+            /* endTime= */ 25,
+            /* dataKey= */ 3),
       ],
-      variantIds: variantIds,
+      variantIds,
+      roles: [],
+      forced: false,
+      channelsCount: null,
+      audioSamplingRate: null,
+      spatialAudio: false,
+      closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -301,36 +380,44 @@ describe('ManifestConverter', function() {
   function createAudioStreamDB(id, variantIds) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
-      id: id,
+      id,
+      originalId: id.toString(),
       primary: false,
-      presentationTimeOffset: 10,
-      contentType: ContentType.AUDIO,
+      type: ContentType.AUDIO,
       mimeType: 'audio/mp4',
       codecs: 'mp4a.40.2',
       frameRate: undefined,
+      pixelAspectRatio: undefined,
+      hdr: undefined,
       kind: undefined,
       language: 'en',
       label: null,
       width: null,
       height: null,
-      initSegmentKey: 0,
       encrypted: false,
-      keyId: null,
+      keyIds: new Set(),
       segments: [
         createSegmentDB(
-            /* start time */ 0,
-            /* end time */ 10,
-            /* data key */ 1),
+            /* startTime= */ 0,
+            /* endTime= */ 10,
+            /* dataKey= */ 1),
         createSegmentDB(
-            /* start time */ 10,
-            /* end time */ 20,
-            /* data key */ 2),
+            /* startTime= */ 10,
+            /* endTime= */ 20,
+            /* dataKey= */ 2),
         createSegmentDB(
-            /* start time */ 20,
-            /* end time */ 25,
-            /* data key */ 3),
+            /* startTime= */ 20,
+            /* endTime= */ 25,
+            /* dataKey= */ 3),
       ],
-      variantIds: variantIds,
+      variantIds,
+      roles: [],
+      forced: false,
+      channelsCount: null,
+      audioSamplingRate: null,
+      spatialAudio: false,
+      closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
@@ -341,96 +428,119 @@ describe('ManifestConverter', function() {
   function createTextStreamDB(id) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     return {
-      id: id,
+      id,
+      originalId: id.toString(),
       primary: false,
-      presentationTimeOffset: 10,
-      contentType: ContentType.TEXT,
+      type: ContentType.TEXT,
       mimeType: 'text/vtt',
       codecs: '',
       frameRate: undefined,
+      pixelAspectRatio: undefined,
+      hdr: undefined,
       kind: undefined,
       language: 'en',
       label: null,
       width: null,
       height: null,
-      initSegmentKey: 0,
       encrypted: false,
-      keyId: null,
+      keyIds: new Set(),
       segments: [
         createSegmentDB(
-            /* start time */ 0,
-            /* end time */ 10,
-            /* data key */ 1),
+            /* startTime= */ 0,
+            /* endTime= */ 10,
+            /* dataKey= */ 1),
         createSegmentDB(
-            /* start time */ 10,
-            /* end time */ 20,
-            /* data key */ 2),
+            /* startTime= */ 10,
+            /* endTime= */ 20,
+            /* dataKey= */ 2),
         createSegmentDB(
-            /* start time */ 20,
-            /* end time */ 25,
-            /* data key */ 3),
+            /* startTime= */ 20,
+            /* endTime= */ 25,
+            /* dataKey= */ 3),
       ],
-      variantIds: [5],
+      variantIds: [],
+      roles: [],
+      forced: false,
+      channelsCount: null,
+      audioSamplingRate: null,
+      spatialAudio: false,
+      closedCaptions: null,
+      tilesLayout: undefined,
     };
   }
 
   /**
    * @param {?shaka.extern.Stream} stream
    * @param {?shaka.extern.StreamDB} streamDb
+   * @param {(?shaka.extern.DrmInfo)=} drmInfo
    */
-  function verifyStream(stream, streamDb) {
+  function verifyStream(stream, streamDb, drmInfo = null) {
     if (!streamDb) {
       expect(stream).toBeFalsy();
       return;
     }
 
-    let expectedStream = {
+    const expectedDrmInfos = streamDb.encrypted ? [drmInfo] : [];
+
+    const expectedStream = {
       id: jasmine.any(Number),
+      originalId: jasmine.any(String),
       createSegmentIndex: jasmine.any(Function),
-      findSegmentPosition: jasmine.any(Function),
-      getSegmentReference: jasmine.any(Function),
-      initSegmentReference: streamDb.initSegmentKey != null ?
-          jasmine.any(shaka.media.InitSegmentReference) :
-          null,
-      presentationTimeOffset: streamDb.presentationTimeOffset,
+      segmentIndex: jasmine.any(shaka.media.SegmentIndex),
       mimeType: streamDb.mimeType,
       codecs: streamDb.codecs,
       frameRate: streamDb.frameRate,
+      pixelAspectRatio: streamDb.pixelAspectRatio,
+      hdr: streamDb.hdr,
       width: streamDb.width || undefined,
       height: streamDb.height || undefined,
       kind: streamDb.kind,
+      drmInfos: expectedDrmInfos,
       encrypted: streamDb.encrypted,
-      keyId: streamDb.keyId,
+      keyIds: streamDb.keyIds,
       language: streamDb.language,
       label: streamDb.label,
-      type: streamDb.contentType,
+      type: streamDb.type,
       primary: streamDb.primary,
       trickModeVideo: null,
-      containsEmsgBoxes: false,
-      roles: [],
-      channelsCount: null,
+      emsgSchemeIdUris: null,
+      roles: streamDb.roles,
+      forced: streamDb.forced,
+      channelsCount: streamDb.channelsCount,
+      audioSamplingRate: streamDb.audioSamplingRate,
+      spatialAudio: streamDb.spatialAudio,
+      closedCaptions: streamDb.closedCaptions,
+      tilesLayout: streamDb.tilesLayout,
     };
 
     expect(stream).toEqual(expectedStream);
 
     // Assume that we don't have to call createSegmentIndex.
 
-    streamDb.segments.forEach(function(segmentDb, i) {
-      let uri = shaka.offline.OfflineUri.segment(
+    const iterator = stream.segmentIndex[Symbol.iterator]();
+
+    streamDb.segments.forEach((segmentDb, i) => {
+      const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
 
-      expect(stream.findSegmentPosition(segmentDb.startTime)).toBe(i);
-      expect(stream.findSegmentPosition(segmentDb.endTime - 0.1)).toBe(i);
+      const initSegmentReference = segmentDb.initSegmentKey != null ?
+          jasmine.any(shaka.media.InitSegmentReference) :
+          null;
 
       /** @type {shaka.media.SegmentReference} */
-      let segment = stream.getSegmentReference(i);
-      expect(segment).toBeTruthy();
-      expect(segment.position).toBe(i);
+      const segment = iterator.seek(segmentDb.startTime);
+
+      /** @type {shaka.media.SegmentReference} */
+      const sameSegment = iterator.seek(segmentDb.endTime - 0.1);
+
+      expect(segment).toBe(sameSegment);
       expect(segment.startTime).toBe(segmentDb.startTime);
       expect(segment.endTime).toBe(segmentDb.endTime);
       expect(segment.startByte).toBe(0);
       expect(segment.endByte).toBe(null);
       expect(segment.getUris()).toEqual([uri.toString()]);
+      expect(segment.initSegmentReference).toEqual(initSegmentReference);
+      expect(segment.timestampOffset).toBe(segmentDb.timestampOffset);
     });
   }
 
@@ -441,25 +551,22 @@ describe('ManifestConverter', function() {
    * @return {?shaka.extern.Variant}
    */
   function findVariant(variants, audioId, videoId) {
-    /** @type {?shaka.extern.Variant} */
-    let found = null;
-
-    variants.forEach(function(variant) {
+    for (const variant of variants) {
       /** @type {?shaka.extern.Stream} */
-      let audio = variant.audio;
+      const audio = variant.audio;
       /** @type {?shaka.extern.Stream} */
-      let video = variant.video;
+      const video = variant.video;
 
       /** @type {boolean } */
-      let audioMatch = audio ? audioId == audio.id : audioId == null;
+      const audioMatch = audio ? audioId == audio.id : audioId == null;
       /** @type {boolean } */
-      let videoMatch = video ? videoId == video.id : videoId == null;
+      const videoMatch = video ? videoId == video.id : videoId == null;
 
       if (audioMatch && videoMatch) {
-        found = variant;
+        return variant;
       }
-    });
+    }
 
-    return found;
+    return null;
   }
 });

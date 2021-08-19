@@ -25,3 +25,8 @@
   alt="PresentationTimeline diagram"
   style="max-width: 100%">
 
+<img
+  src="../design/newdemo.gv.png"
+  alt="Demo page architecture"
+  style="max-width: 100%">
+

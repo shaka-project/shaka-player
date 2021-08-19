@@ -9,3 +9,5 @@
 ![Shaka offline diagram](offline.gv.png)
 
 ![PresentationTimeline diagram](timeline.svg)
+
+![Demo page architecture](newdemo.gv.png)

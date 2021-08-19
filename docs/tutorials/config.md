@@ -3,14 +3,14 @@
 The goal of this tutorial is to introduce Shaka's configuration system and the
 concepts on which it is built.  More detail can be found in the API docs.
 
-Shaka's Player object has a hierarchical configuration.  The overall player
+Shaka's `Player` object has a hierarchical configuration.  The overall player
 config contains sub-configs for various parts of the system, such as manifests,
 streaming, and DRM.
 
 To see the current config, you can use `player.getConfiguration()`.  If you run
 this without setting anything first, you get the default configuration.
 
-Player also has a `configure()` method that takes it's argument(s) in one of two
+`Player` also has a `configure()` method that takes it's argument(s) in one of two
 forms:
 
 1. A plain, anonymous object.  Any fields you leave out of the config object
@@ -78,6 +78,7 @@ player.getConfiguration();
        retryParameters: Object
        smallGapLimit: 0.5
        startAtSegmentBoundary: false
+       safeSeekOffset: 5
      textDisplayFactory: Function
 
 
@@ -116,6 +117,27 @@ player.configure({
 Some of these fields have immediate effects (such as networking settings and
 buffering settings) while some will not have any effect until the next call to
 `load()` (such as DRM settings, manifest settings, and language settings).
+
+
+#### Low latency streaming
+
+With `.streaming.lowLatencyMode` set to true,
+`.streaming.inaccurateManifestTolerance` is set to 0 by default, and
+`.streaming.rebufferingGoal` is set to 0.01 by default.
+
+To customize the values of inaccurateManifestTolerance and rebufferingGoal
+with low latency mode, you can set the fields in the same or subsequent
+call to configure().
+```js
+player.configure({
+  streaming: {
+    lowLatencyMode: true,
+    inaccurateManifestTolerance: 0,
+    rebufferingGoal: 0.01,
+  }
+});
+
+```
 
 
 #### Detailed API Docs

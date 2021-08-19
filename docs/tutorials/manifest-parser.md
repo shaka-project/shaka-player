@@ -20,17 +20,16 @@ MyManifestParser.prototype.configure = function(config) {
   this.config_ = config;
 };
 
-MyManifestParser.prototype.start = function(uri, playerInterface) {
-  var type = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-  var request = {
+MyManifestParser.prototype.start = async function(uri, playerInterface) {
+  const type = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+  const request = {
     uris: [uri],
     method: 'GET',
     retryParameters: this.config_.retryParameters
   };
-  return playerInterface.networkingEngine.request(type, request).promise
-      .then(function(response) {
-        return this.loadManifest_(response.data);
-      });
+  const response =
+      await playerInterface.networkingEngine.request(type, request).promise;
+  return this.loadManifest_(response.data);
 };
 
 MyManifestParser.prototype.stop = function() {
@@ -57,12 +56,12 @@ from the Player.
 
 This method is called to load the manifest.  This is called with a string URI
 that is passed to `load()` and a
-{@link shaka.extern.ManifestParser.PlayerInterface} object.  The interface object
-contains a number of fields that are used to interact with the Player.  This
-includes the `NetworkingEngine` instance to make network requests.  This also
-includes callback methods that allow the parser to raise Player events and
-filter Periods.  This method should return a Promise that will resolve with the
-parsed manifest.
+{@link shaka.extern.ManifestParser.PlayerInterface} object.  The interface
+object contains a number of fields that are used to interact with the Player.
+This includes the `NetworkingEngine` instance to make network requests.  This
+also includes callback methods that allow the parser to raise Player events and
+filter the variants.  This method should return a Promise that will resolve with
+the parsed manifest.
 
 #### stop
 
@@ -82,28 +81,18 @@ to a registry of manifest parsers.  When the Player gets a URI, it will
 determine which parser to use.  It will first try based on the file extension,
 then it will make a HEAD request to the URI to get back a MIME type.
 
-
-## Periods
-
-A Period represents a distinct set of streams that are played over a set time.
-Each Period is considered independent.  This allows you to combine multiple
-assets together seamlessly with little effort.
-
-All media times in the manifest are relative to the Period start time.  This
-means that you can insert the same content (unmodified) multiple times and we
-will adjust the times for you.
-
-**Note**: Because of browser requirements regarding MSE, we don't support
-changing MIME types or codecs after starting.  This means that all Periods must
-provide the same formats (MIME types and codecs).
+If you wish to unregister a parser, you can do so with
+{@link shaka.media.ManifestParser.unregisterParserByMime}.  Parsers registered
+by extension cannot be unregistered at this time.
 
 
 ## Variants and Streams
 
-A Period is composed of an array of Variants.  A Variant represents an
-audio+video pair.  The array holds all possible pairs the Player can choose
-from.  While playing, we will give these to the app (through `getVariantTracks`)
-and will switch between them (if ABR is enabled).
+The audio and video content of our Manifest structure is stored, on the highest
+level, in an array of Variants.  A Variant represents an audio+video pair.
+The array holds all possible pairs the Player can choose from.
+While playing, we will give these to the app (through `getVariantTracks`) and
+will switch between them (if ABR is enabled).
 
 A stream represents a collection of media data segments.  The segments are all
 the same type (audio/video/text) and all from the same version of the media
@@ -115,6 +104,20 @@ Multiple Variants can hold the same streams.  For example, both the 720p and the
 1080p variant can refer to the same audio stream.  In this case, both Variant
 objects must refer to the **same object**.  It is not enough to use the same
 stream ID; it must be the same object.
+
+
+## Periods
+
+While some manifest formats, such as MPEG-DASH, have the concept of a period,
+our internal manifest structure (as of Shaka Player v3.0) does not organize
+streams based on periods.  If you are writing a manifest parser for such a
+format, you will need to generate Variants yourself, combining together periods
+and their component streams as needed.  The resulting
+{@link shaka.extern.Stream} objects should each span the entire presentation.
+
+All media times in the manifest are relative to the presentation, *not* the
+Period.  This means that you must account for period start times in your segment
+references.  (This changed in Shaka Player v3.0.)
 
 
 ## PresentationTimeline
@@ -139,15 +142,20 @@ starts at 0 and ends at the duration of the media.
 
 ## Media Segments
 
-A Stream contains a number of segment references.  This is usually referred to
-as a segment index.  A segment reference contains important metadata about the
-segment: the start and end times, the URL, and optionally a byte range into
-that URL.  A segment reference is created using the
-{@link shaka.media.SegmentReference} constructor.
+A Stream contains a number of segment references contained in a segment index.
+A segment reference contains important metadata about the segment: the start
+and end times, the URL, and optionally a byte range into that URL.  A segment
+reference is created using the {@link shaka.media.SegmentReference} constructor.
 
-Rather than storing the references in an array, the manifest parser provides
-callbacks to get them.  This allows a manifest parser to turn abstract segment
-descriptions (such as DASH's `SegmentTemplate`) into concrete ones on demand.
+Rather than storing the references in a raw array, the manifest parser stores
+them in a {@link shaka.media.SegmentIndex} object.  This object is allowed to
+be null before createSegmentIndex() is called, and thus defer the translation of
+abstract segment descriptions (such as DASH's `SegmentTemplate`) into concrete
+ones until necessary.
+
+Media segment times are all in terms of the presentation timeline.  So if the
+content was originally multi-period, the period start time must be accounted for
+in the reference's `timestampOffset` field.
 
 First we ask for the index that corresponds with a start time.  Then on update,
 we increment the index and ask for segments in order. The value of the index
@@ -159,54 +167,63 @@ This is called first before any other method.  This allows an index to be
 fetched over the network, if needed.  This method should return a Promise that
 will resolve when the segment index is ready.  This is only ever called once.
 
-#### findSegmentPosition(time:number):(number|null)
+#### segmentIndex
 
-This is passed in a time (in seconds) relative to the start of this Period and
-should return the position of the segment that contains that time, or null
-if it is not found.
-
-*NB: This is independent of segment availability for live streams.*
-
-#### getSegmentReference(position:number):(shaka.media.SegmentReference|null)
-
-This is passed the position (number) of the segment and should return a
-`shaka.media.SegmentReference` that is at that index, or null if not found.
-
-*NB: This is independent of segment availability for live streams.*
-
-#### initSegmentReference
-
-This is *not* a function, but a {@link shaka.media.InitSegmentReference} that
-contains info about how to fetch the initialization segment.  This can be
-`null` if the stream is self-initializing.
+This is *not* a function, but a {@link shaka.media.SegmentIndex} tracking all
+available segments.
 
 
 ## shaka.media.SegmentIndex
 
 To help in handling segment references, there is a
-{@link shaka.media.SegmentIndex} type.  This is given an array of references,
-handles merging new segments, and has the required segment functions.  All you
-need to do is create an array of references and pass it to the constructor.  For
-updates, simply create a new array of segments and call `merge`.  Any existing
-segments will be updated and new segments will be added.  You can also call
-`evict` to remove old references to reduce the memory footprint.
+{@link shaka.media.SegmentIndex} type.  This is given an array of references.
+It handles merging new segments, and expanding the list of segments for live
+streams.
 
 ```js
-var references = refs.map(function(r, i) {
+const references = refs.map(function(r) {
   // Should return an array of possible URI choices; this is used for failover
   // in the event of network error.  This is a function to defer calculations.
-  var getUris = function() { return [r.uri]; };
+  const getUris = function() { return [r.uri]; };
 
-  return new shaka.media.SegmentReference(i, r.start, r.end, getUris, 0, null);
+  return new shaka.media.SegmentReference(
+      r.start, r.end, getUris,
+      /* startByte */ 0,
+      /* endByte */ null,
+      initSegmentReference,
+      /* timestampOffset */ 0,
+      /* appendWindowStart */ 0,
+      /* appendWindowEnd */ Infinity);
 });
 
-var index = new shaka.media.SegmentIndex(references);
-var streamFunctions = {
-  createSegmentIndex: function() { return Promise.resolve(); },
-  findSegmentPosition: index.find.bind(index),
-  getSegmentReference: index.get.bind(index)
-};
+const index = new shaka.media.SegmentIndex(references);
 ```
+
+To merge updates and remove old references to reduce the memory footprint,
+simply create a new array of segments and call `mergeAndEvict`.  Any
+existing segments will be updated, new segments will be added, and old
+unavailable references will be removed.
+
+To expand the list of references on a timer, as is done for DASH's
+SegmentTemplate, call `index.updateEvery` with a callback that evicts old
+references and returns an array of new references.
+
+```js
+index.updateEvery(updateIntervalSeconds, () => {
+  // Evict old references
+  index.evict(windowStartTime);
+
+  // Generate new references to append to the end of the index
+  const references = [];
+  // ...
+  return references;
+});
+```
+
+If the callback returns null, the update timer for this index will be stopped.
+(NOTE: This method was introduced in v3.0.0, but the interpretation of the
+callback's return changed in v3.0.8 to fix a bug in our DASH SegmentTemplate
+support.  We apologize for any inconvenience.)
 
 
 ## Manifest Updates
@@ -216,17 +233,15 @@ In order to support Live content, the manifest may need to be updated.  In the
 `setInterval`) to update the manifest.  Then it should re-parse the manifest
 periodically.  To add new segments to the streams, simply add them to the
 segment index.  Because the original manifest object is modified in-place,
-adding them to the index will allow the Player to use them. You *cannnot* add
-new Variants or text streams to an existing Period.
+adding them to the index will allow the Player to use them.
 
-To add a new Period, you must first call `filterNewPeriod`. This will filter out
-any streams that can't be played by the platform or those that are incompatible
-with the currently playing streams.  Then you can just add them to the manifest
-object.  Because the original manifest is modified in-place, the Player will
-immediately see the new Period.  You **MUST add to the `periods` array** (e.g
-using `array.push`); you *cannot* create a new array object.
-
-**NB: You cannot remove Periods.**
+After adding new content, you should call the `filter` method on the player
+interface.  This removes any streams that were added that are incompatible with
+the platform.  Keep in mind that this is an asynchronous method, and thus you
+will need to use it in conjunction with `.then()` or `await`.
+You should also call the `makeTextStreamsForClosedCaptions` method on the
+player interface, which is required for embedded captions (for example, CEA
+608) to work; it makes dummy text streams to represent these tracks.
 
 
 ## Full Manifest Parser Example
@@ -236,23 +251,13 @@ MyManifestParser.prototype.loadManifest_ = function(data) {
   // |data| is the response data from load(); but in this example, we ignore it.
 
   // The arguments are only used for live.
-  var timeline = new shaka.media.PresentationTimeline(null, 0);
+  const timeline = new shaka.media.PresentationTimeline(null, 0);
   timeline.setDuration(3600);  // seconds
 
   return {
     presentationTimeline: timeline,
     minBufferTime: 5,  // seconds
     offlineSessionIds: [],
-    periods: [
-      this.loadPeriod_(0),
-      this.loadPeriod_(1800)
-    ]
-  };
-};
-
-MyManifestParser.prototype.loadPeriod_ = function(start) {
-  return {
-    startTime: start,  // seconds, relative to presentation
     variants: [
       this.loadVariant_(true, true),
       this.loadVariant_(true, false)
@@ -274,54 +279,66 @@ MyManifestParser.prototype.loadVariant_ = function(hasVideo, hasAudio) {
     audio:     hasAudio ? this.loadStream_('audio') : null,
     video:     hasVideo ? this.loadStream_('video') : null,
     bandwidth: 8000,  // bits/sec, audio+video combined
-    drmInfos:  [],
     allowedByApplication: true,  // always initially true
     allowedByKeySystem:   true   // always initially true
   };
 };
 
 MyManifestParser.prototype.loadStream_ = function(type) {
-  var getUris = function() { return ['https://example.com/init']; };
-  var init = new shaka.media.InitSegmentReference(getUris, 0, null);
+  const getUris = function() { return ['https://example.com/init']; };
+  const initSegmentReference = new shaka.media.InitSegmentReference(getUris,
+      /* startByte= */ 0, /* endByte= */ null);
 
-  var index = new shaka.media.SegmentIndex([
-    // Times are in seconds, relative to the Period
-    this.loadReference_(0, 0, 10),
-    this.loadReference_(1, 10, 20),
-    this.loadReference_(2, 20, 30),
+  const index = new shaka.media.SegmentIndex([
+    // Times are in seconds, relative to the presentation
+    this.loadReference_(0, 0, 10, initSegmentReference),
+    this.loadReference_(1, 10, 20, initSegmentReference),
+    this.loadReference_(2, 20, 30, initSegmentReference),
   ]);
 
+  const id = this.curId_++;
   return {
-    id: this.curId_++,  // globally unique ID
+    id: id,  // globally unique ID
+    originalId: id, // original ID from manifest, if any
     createSegmentIndex:     function() { return Promise.resolve(); },
-    findSegmentPosition:    index.find.bind(index),
-    getSegmentReference:    index.get.bind(index),
-    initSegmentReference:   init,
-    presentationTimeOffset: 0,  // seconds
+    segmentIndex:           index,
     mimeType: type == 'video' ?
         'video/webm' : (type == 'audio' ? 'audio/webm' : 'text/vtt'),
     codecs:    type == 'video' ? 'vp9' : (type == 'audio' ? 'vorbis' : ''),
     frameRate: type == 'video' ? 24 : undefined,
+    pixelAspectRatio: type == 'video' ? 4 / 3 : undefined,
     bandwidth: 4000,  // bits/sec
     width:     type == 'video' ? 640 : undefined,
     height:    type == 'video' ? 480 : undefined,
     kind:      type == 'text' ? 'subtitles' : undefined,
     channelsCount: type == 'audio' ? 2 : undefined,
     encrypted: false,
-    keyId:     null,
+    drmInfos:  [],
+    keyIds:    new Set(),
     language:  'en',
     label:     'my_stream',
     type:      type,
     primary:   false,
     trickModeVideo: null,
-    containsEmsgBoxes: false,
+    emsgSchemeIdUris: null,
     roles:     []
+    channelsCount: type == 'audio' ? 6 : null,
+    audioSamplingRate: type == 'audio' ? 44100 : null,
+    closedCaptions: new Map(),
   };
 };
 
-MyManifestParser.prototype.loadReference_ = function(i, start, end) {
-  var getUris = function() { return ['https://example.com/ref_' + i]; };
-  return new shaka.media.SegmentReference(i, start, end, getUris, 0, null);
+MyManifestParser.prototype.loadReference_ =
+    function(position, start, end, initSegmentReference) {
+  const getUris = function() { return ['https://example.com/ref_' + position]; };
+  return new shaka.media.SegmentReference(
+      start, end, getUris,
+      /* startByte */ 0,
+      /* endByte */ null,
+      initSegmentReference,
+      /* timestampOffset */ 0,
+      /* appendWindowStart */ 0,
+      /* appendWindowEnd */ Infinity);
 };
 ```
 
@@ -329,17 +346,17 @@ MyManifestParser.prototype.loadReference_ = function(i, start, end) {
 ## Encrypted Content
 
 If your content is encrypted, there are a few changes to the manifest you need
-to do.  First, for each Variant that contains encrypted content, you need to set
-`variant.drmInfos` to an array of {@link shaka.extern.DrmInfo} objects.  All the
-fields (except the key-system name) can be set to the default and will be
-replaced by settings from the Player configuration.  If the `drmInfos` array
-is empty, the content is expected to be clear.
+to do.  First, for each Stream that contains encrypted content, you need to set
+`stream.encrypted` to true and put the key IDs that the stream is encrypted with
+in the `stream.keyIds` set.  Filling out the `keyIds` is technically optional,
+but it allows the player to choose streams more intelligently based on which
+keys are available.  If `keyIds` is not filled out, missing keys may cause
+playback to stall.
 
-In each stream that is encrypted, set `stream.encrypted` to `true` and
-optionally set `stream.keyId` to the key ID that the stream is encrypted with.
-The `keyId` field is optional, but it allows the player to choose streams more
-intelligently based on which keys are available.  If `keyId` is omitted, missing
-keys may cause playback to stall.
+You must also set `stream.drmInfos` to an array of {@link shaka.extern.DrmInfo}
+objects.  All the fields (except the key-system name) can be set to the default
+and will be replaced by settings from the Player configuration.  If the
+`drmInfos` array is empty, the content is expected to be clear.
 
 If you set `drmInfo.initData` to a non-empty array, we will use that to
 initialize EME.  We will override any encryption info in the media (e.g.

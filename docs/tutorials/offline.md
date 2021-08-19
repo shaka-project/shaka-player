@@ -10,9 +10,9 @@ support. After this tutorial you will know how to:
  - Play downloaded content.
  - Remove downloaded content.
 
-This tutorial assumes that you only need to download content one at a time.
-Concurrent downloads can be done with multiple instances of
-`shaka.offline.Storage`.
+The app in this tutorial is very simple and only downloads one thing at a time,
+to simplify the UI.  `shaka.offline.Storage` will allow you to perform multiple
+downloads at once.
 
 ## Offline API
 
@@ -101,8 +101,8 @@ function initApp() {
 
 function initPlayer() {
   // Create a Player instance.
-  var video = document.getElementById('video');
-  var player = new shaka.Player(video);
+  const video = document.getElementById('video');
+  const player = new shaka.Player(video);
 
   // Attach player and storage to the window to make it easy to access
   // in the JS console and so we can access it in other methods.
@@ -113,7 +113,7 @@ function initPlayer() {
 
   initStorage(player);
 
-  var downloadButton = document.getElementById('download-button');
+  const downloadButton = document.getElementById('download-button');
   downloadButton.onclick = onDownloadClick;
 
   // Update the content list to show what items we initially have
@@ -132,12 +132,16 @@ function onError(error) {
 }
 
 function selectTracks(tracks) {
-  // Store the highest bandwidth variant.
-  var found = tracks
+  // This example stores the highest bandwidth variant.
+  //
+  // Note that this is just an example of an arbitrary algorithm, and not a best
+  // practice for storing content offline.  Decide what your app needs, or keep
+  // the default (user-pref-matching audio, best SD video, all text).
+  const found = tracks
       .filter(function(track) { return track.type == 'variant'; })
-      .sort(function(a, b) { return a.bandwidth > b.bandwidth; })
+      .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
       .pop();
-  console.log('Offline Track: ' + found);
+  console.log('Offline Track bandwidth: ' + found.bandwidth);
   return [ found ];
 }
 
@@ -168,9 +172,9 @@ function downloadContent(manifestUri, title) {
  * complete.
  */
 function onDownloadClick() {
-  var downloadButton = document.getElementById('download-button');
-  var manifestUri = document.getElementById('asset-uri-input').value;
-  var title = document.getElementById('asset-title-input').value;
+  const downloadButton = document.getElementById('download-button');
+  const manifestUri = document.getElementById('asset-uri-input').value;
+  const title = document.getElementById('asset-title-input').value;
 
   // Disable the download button to prevent user from requesting
   // another download until this download is complete.
@@ -201,7 +205,7 @@ function onDownloadClick() {
  * user whether or not they have an internet connection.
  */
 function updateOnlineStatus() {
-  var signal = document.getElementById('online-signal');
+  const signal = document.getElementById('online-signal');
   if (navigator.onLine) {
     signal.innerHTML = 'ONLINE';
     signal.style.background = 'green';
@@ -216,7 +220,7 @@ function updateOnlineStatus() {
  * have made.
  */
 function setDownloadProgress(content, progress) {
-  var progressBar = document.getElementById('progress-bar');
+  const progressBar = document.getElementById('progress-bar');
   progressBar.value = progress * progressBar.max;
 }
 
@@ -225,17 +229,17 @@ function setDownloadProgress(content, progress) {
  * list of downloaded content.
  */
 function refreshContentList() {
-  var contentTable = document.getElementById('content-table');
+  const contentTable = document.getElementById('content-table');
 
   // Clear old rows from the table.
   while (contentTable.rows.length) {
     contentTable.deleteRow(0);
   }
 
-  var addRow = function(content) {
-    var append = -1;
+  const addRow = function(content) {
+    const append = -1;
 
-    var row = contentTable.insertRow(append);
+    const row = contentTable.insertRow(append);
     row.insertCell(append).innerHTML = content.offlineUri;
     Object.keys(content.appMetadata)
         .map(function(key) {
@@ -266,7 +270,7 @@ function refreshContentList() {
  * will need to do that.
  */
 function createButton(text, action) {
-  var button = document.createElement('button');
+  const button = document.createElement('button');
   button.innerHTML = text;
   button.onclick = action;
   return button;
@@ -289,8 +293,10 @@ following code:
   // download progress and override the track selection callback.
   window.storage = new shaka.offline.Storage(player);
   window.storage.configure({
-    progressCallback: setDownloadProgress,
-    trackSelectionCallback: selectTracks
+    offline: {
+      progressCallback: setDownloadProgress,
+      trackSelectionCallback: selectTracks
+    }
   });
 ```
 
@@ -314,7 +320,7 @@ code:
   // Construct a metadata object to be stored alongside the content.
   // This can hold any information the app wants to be stored with
   // the content.
-  var metadata = {
+  const metadata = {
     'title': title,
     'downloaded': new Date()
   };
@@ -327,7 +333,7 @@ the title of the content and the time we downloaded it, but the metadata can
 contain anything you want. The metadata is optional, so you can ignore it if
 you want.
 
-`storage.store` returns a Promise that resolves to a
+`storage.store` returns an IAbortableOperation that resolves to a
 `shaka.externs.StoredContent` instance (a summary of the stored content).
 
 At this point, the content is now stored offline and it's ready to be played.
@@ -453,8 +459,8 @@ function initApp() {
 
 function initPlayer() {
   // Create a Player instance.
-  var video = document.getElementById('video');
-  var player = new shaka.Player(video);
+  const video = document.getElementById('video');
+  const player = new shaka.Player(video);
 
   // Attach player and storage to the window to make it easy to access
   // in the JS console and so we can access it in other methods.
@@ -465,7 +471,7 @@ function initPlayer() {
 
   initStorage(player);
 
-  var downloadButton = document.getElementById('download-button');
+  const downloadButton = document.getElementById('download-button');
   downloadButton.onclick = onDownloadClick;
 
   // Update the content list to show what items we initially have
@@ -484,12 +490,16 @@ function onError(error) {
 }
 
 function selectTracks(tracks) {
-  // Store the highest bandwidth variant.
-  var found = tracks
+  // This example stores the highest bandwidth variant.
+  //
+  // Note that this is just an example of an arbitrary algorithm, and not a best
+  // practice for storing content offline.  Decide what your app needs, or keep
+  // the default (user-pref-matching audio, best SD video, all text).
+  const found = tracks
       .filter(function(track) { return track.type == 'variant'; })
-      .sort(function(a, b) { return a.bandwidth > b.bandwidth; })
+      .sort(function(a, b) { return a.bandwidth - b.bandwidth; })
       .pop();
-  console.log('Offline Track: ' + found);
+  console.log('Offline Track bandwidth: ' + found.bandwidth);
   return [ found ];
 }
 
@@ -499,8 +509,10 @@ function initStorage(player) {
   // download progress and override the track selection callback.
   window.storage = new shaka.offline.Storage(player);
   window.storage.configure({
-    progressCallback: setDownloadProgress,
-    trackSelectionCallback: selectTracks
+    offline: {
+      progressCallback: setDownloadProgress,
+      trackSelectionCallback: selectTracks
+    }
   });
 }
 
@@ -520,7 +532,7 @@ function downloadContent(manifestUri, title) {
   // Construct a metadata object to be stored along side the content.
   // This can hold any information the app wants to be stored with the
   // content.
-  var metadata = {
+  const metadata = {
     'title': title,
     'downloaded': Date()
   };
@@ -535,9 +547,9 @@ function downloadContent(manifestUri, title) {
  * complete.
  */
 function onDownloadClick() {
-  var downloadButton = document.getElementById('download-button');
-  var manifestUri = document.getElementById('asset-uri-input').value;
-  var title = document.getElementById('asset-title-input').value;
+  const downloadButton = document.getElementById('download-button');
+  const manifestUri = document.getElementById('asset-uri-input').value;
+  const title = document.getElementById('asset-title-input').value;
 
   // Disable the download button to prevent user from requesting
   // another download until this download is complete.
@@ -568,7 +580,7 @@ function onDownloadClick() {
  * user whether or not they have an internet connection.
  */
 function updateOnlineStatus() {
-  var signal = document.getElementById('online-signal');
+  const signal = document.getElementById('online-signal');
   if (navigator.onLine) {
     signal.innerHTML = 'ONLINE';
     signal.style.background = 'green';
@@ -583,7 +595,7 @@ function updateOnlineStatus() {
  * have made.
  */
 function setDownloadProgress(content, progress) {
-  var progressBar = document.getElementById('progress-bar');
+  const progressBar = document.getElementById('progress-bar');
   progressBar.value = progress * progressBar.max;
 }
 
@@ -592,17 +604,17 @@ function setDownloadProgress(content, progress) {
  * list of downloaded content.
  */
 function refreshContentList() {
-  var contentTable = document.getElementById('content-table');
+  const contentTable = document.getElementById('content-table');
 
   // Clear old rows from the table.
   while (contentTable.rows.length) {
     contentTable.deleteRow(0);
   }
 
-  var addRow = function(content) {
-    var append = -1;
+  const addRow = function(content) {
+    const append = -1;
 
-    var row = contentTable.insertRow(append);
+    const row = contentTable.insertRow(append);
     row.insertCell(append).innerHTML = content.offlineUri;
     Object.keys(content.appMetadata)
         .map(function(key) {
@@ -633,7 +645,7 @@ function refreshContentList() {
  * will need to do that.
  */
 function createButton(text, action) {
-  var button = document.createElement('button');
+  const button = document.createElement('button');
   button.innerHTML = text;
   button.onclick = action;
   return button;
@@ -645,8 +657,7 @@ document.addEventListener('DOMContentLoaded', initApp);
 ## Protected Content
 
 When storing protected content offline, there are some limitations based on
-browsers. Right now Chrome only supports persistent licenses on Android (M62+)
-and Chromebooks.
+browsers. Before Chrome v64, persistent licenses were only supported on Android (M62+) and Chromebooks. In Chrome v64 support was added for Windows and Mac as well.
 
 For other platforms, we offer the ability to disable the use of persistent
 licenses. If you choose to disable persistent licenses, you will get offline
@@ -661,7 +672,7 @@ storage, set:
 usePersistentLicense: false
 ```
 
-By default, shaka.offline.Storage stores persistent licenses. If you want this
+By default, `shaka.offline.Storage` stores persistent licenses. If you want this
 behaviour and you know you are on a supported platform, you can omit the
 setting or set it explicitly with:
 

@@ -1,19 +1,10 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
+
+goog.require('shaka.test.UiUtils');
 
 // This tests three assumptions we make about text tracks in Shaka Player:
 //   1. If a non-null value for cues is stored, it will always be the
@@ -22,7 +13,7 @@
 //      track's current mode.
 //   3. Regardless of mode, we can use removeCue to remove cues regardless
 //      of the track's current mode.
-describe('TextTrackIntegration', function() {
+describe('TextTrackIntegration', () => {
   /** @type {HTMLVideoElement} */
   let video;
 
@@ -32,11 +23,8 @@ describe('TextTrackIntegration', function() {
   /** @type {TextTrackCueList} */
   let trackCues;
 
-  beforeEach(function() {
-    video = /** @type {!HTMLVideoElement} */ (document.createElement('video'));
-    video.width = 600;
-    video.height = 400;
-    video.muted = true;
+  beforeEach(() => {
+    video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
 
     expect(video.textTracks).toBeTruthy();
@@ -53,29 +41,29 @@ describe('TextTrackIntegration', function() {
     trackCues = track.cues;
   });
 
-  afterEach(function() {
+  afterEach(() => {
     document.body.removeChild(video);
     video = null;
     track = null;
     trackCues = null;
   });
 
-  // There is a difference in behaviour with IE and Edge compared to everyone
-  // else. Edge and IE will always return a valid list of cues regardless of
+  // There is a difference in behaviour with  Edge compared to everyone
+  // else. Edge will always return a valid list of cues regardless of
   // what the mode is set to. Everyone else will return null for cues when
   // mode is set to "disabled".
-  describe('cues', function() {
-    it('is not null when mode is showing', function() {
+  describe('cues', () => {
+    it('is not null when mode is showing', () => {
       track.mode = 'showing';
       expect(track.cues).not.toBe(null);
     });
 
-    it('is not null when mode is hidden', function() {
+    it('is not null when mode is hidden', () => {
       track.mode = 'hidden';
       expect(track.cues).not.toBe(null);
     });
 
-    it('does not change references', function() {
+    it('does not change references', () => {
       // Flip to the mode from showing to hidden and back. The value
       // of cues should not change.
       track.mode = 'hidden';
@@ -91,13 +79,20 @@ describe('TextTrackIntegration', function() {
   });
 
 
-  describe('addCue', function() {
-    let cues = [
-      new VTTCue(0, 1000, 'Cue 1 message'),
-      new VTTCue(2000, 3000, 'Cue 2 message'),
-    ];
+  describe('addCue', () => {
+    /** @type {!Array.<!VTTCue>} */
+    let cues;
 
-    it('adds cues when showing', function() {
+    // Wait to construct cue objects, so we know the polyfill for VTTCue is
+    // loaded.
+    beforeEach(() => {
+      cues = [
+        new VTTCue(0, 1000, 'Cue 1 message'),
+        new VTTCue(2000, 3000, 'Cue 2 message'),
+      ];
+    });
+
+    it('adds cues when showing', () => {
       track.mode = 'showing';
 
       track.addCue(cues[0]);
@@ -108,7 +103,7 @@ describe('TextTrackIntegration', function() {
       expect(trackCues[1]).toBe(cues[1]);
     });
 
-    it('adds cues when hidden', function() {
+    it('adds cues when hidden', () => {
       track.mode = 'hidden';
 
       track.addCue(cues[0]);
@@ -119,7 +114,7 @@ describe('TextTrackIntegration', function() {
       expect(trackCues[1]).toBe(cues[1]);
     });
 
-    it('adds cues when disabled', function() {
+    it('adds cues when disabled', () => {
       track.mode = 'disabled';
 
       track.addCue(cues[0]);
@@ -131,13 +126,20 @@ describe('TextTrackIntegration', function() {
     });
   });
 
-  describe('removeCue', function() {
-    let cues = [
-      new VTTCue(0, 1000, 'Cue 1 message'),
-      new VTTCue(2000, 3000, 'Cue 2 message'),
-    ];
+  describe('removeCue', () => {
+    /** @type {!Array.<!VTTCue>} */
+    let cues;
 
-    it('removes cues when showing', function() {
+    // Wait to construct cue objects, so we know the polyfill for VTTCue is
+    // loaded.
+    beforeEach(() => {
+      cues = [
+        new VTTCue(0, 1000, 'Cue 1 message'),
+        new VTTCue(2000, 3000, 'Cue 2 message'),
+      ];
+    });
+
+    it('removes cues when showing', () => {
       track.mode = 'showing';
 
       track.addCue(cues[0]);
@@ -151,7 +153,7 @@ describe('TextTrackIntegration', function() {
       expect(trackCues.length).toBe(0);
     });
 
-    it('removes cues when hidden', function() {
+    it('removes cues when hidden', () => {
       track.mode = 'showing';
 
       track.addCue(cues[0]);
@@ -167,7 +169,7 @@ describe('TextTrackIntegration', function() {
       expect(trackCues.length).toBe(0);
     });
 
-    it('removes cues when disabled', function() {
+    it('removes cues when disabled', () => {
       track.mode = 'showing';
 
       track.addCue(cues[0]);

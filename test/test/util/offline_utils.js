@@ -1,111 +1,105 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 goog.provide('shaka.test.OfflineUtils');
 
-
-/**
- * @param {string} originalUri
- * @return {shaka.extern.ManifestDB}
- */
-shaka.test.OfflineUtils.createManifest = function(originalUri) {
-  return {
-    appMetadata: null,
-    drmInfo: null,
-    duration: 90,
-    expiration: Infinity,
-    originalManifestUri: originalUri,
-    periods: [],
-    sessionIds: [],
-    size: 1024,
-  };
-};
+goog.require('shaka.util.BufferUtils');
 
 
-/**
- * @param {number} id
- * @param {string} type
- * @return {shaka.extern.StreamDB}
- */
-shaka.test.OfflineUtils.createStream = function(id, type) {
-  return {
-    id: id,
-    primary: false,
-    presentationTimeOffset: 0,
-    contentType: type,
-    mimeType: '',
-    codecs: '',
-    frameRate: undefined,
-    kind: undefined,
-    language: '',
-    label: null,
-    width: null,
-    height: null,
-    initSegmentKey: null,
-    encrypted: false,
-    keyId: null,
-    segments: [],
-    variantIds: [],
-  };
-};
+shaka.test.OfflineUtils = class {
+  /**
+   * @param {string} originalUri
+   * @return {shaka.extern.ManifestDB}
+   */
+  static createManifest(originalUri) {
+    return {
+      creationTime: Date.now(),
+      appMetadata: null,
+      drmInfo: null,
+      duration: 90,
+      expiration: Infinity,
+      originalManifestUri: originalUri,
+      streams: [],
+      sessionIds: [],
+      size: 1024,
+    };
+  }
 
+  /**
+   * @param {number} id
+   * @param {string} type
+   * @return {shaka.extern.StreamDB}
+   */
+  static createStream(id, type) {
+    return {
+      id,
+      originalId: id.toString(),
+      primary: false,
+      presentationTimeOffset: 0,
+      type,
+      mimeType: '',
+      codecs: '',
+      frameRate: undefined,
+      pixelAspectRatio: undefined,
+      kind: undefined,
+      language: '',
+      label: null,
+      width: null,
+      height: null,
+      initSegmentKey: null,
+      encrypted: false,
+      keyIds: new Set(),
+      segments: [],
+      variantIds: [],
+      roles: [],
+      forced: false,
+      channelsCount: null,
+      audioSamplingRate: null,
+      spatialAudio: false,
+      closedCaptions: null,
+    };
+  }
 
-/**
- * @param {!Array.<number>} data
- * @return {shaka.extern.SegmentDataDB}
- */
-shaka.test.OfflineUtils.createSegmentData = function(data) {
-  /** @type {Uint8Array} */
-  let array = new Uint8Array(data);
+  /**
+   * @param {!Array.<number>} data
+   * @return {shaka.extern.SegmentDataDB}
+   */
+  static createSegmentData(data) {
+    return {
+      data: shaka.util.BufferUtils.toArrayBuffer(new Uint8Array(data)),
+    };
+  }
 
-  return {
-    data: array.buffer,
-  };
-};
+  /**
+   * @param {!Array.<shaka.extern.SegmentDataDB>} segments
+   * @param {shaka.extern.SegmentDataDB} expected
+   */
+  static expectSegmentsToContain(segments, expected) {
+    const actualData = segments.map((segment) => {
+      expect(segment.data).toBeTruthy();
+      return shaka.util.BufferUtils.toUint8(segment.data);
+    });
 
+    expect(expected.data).toBeTruthy();
+    const expectedData = shaka.util.BufferUtils.toUint8(expected.data);
 
-/**
- * @param {!Array.<shaka.extern.SegmentDataDB>} segments
- * @param {shaka.extern.SegmentDataDB} expected
- */
-shaka.test.OfflineUtils.expectSegmentsToContain = function(segments,
-                                                           expected) {
-  let actualData = segments.map(function(segment) {
-    expect(segment.data).toBeTruthy();
-    return new Uint8Array(segment.data);
-  });
+    expect(actualData).toContain(expectedData);
+  }
 
-  expect(expected.data).toBeTruthy();
-  let expectedData = new Uint8Array(expected.data);
+  /**
+   * @param {shaka.extern.SegmentDataDB} actual
+   * @param {shaka.extern.SegmentDataDB} expected
+   */
+  static expectSegmentToEqual(actual, expected) {
+    expect(actual.data).toBeTruthy();
+    expect(expected.data).toBeTruthy();
 
-  expect(actualData).toContain(expectedData);
-};
+    const actualData = shaka.util.BufferUtils.toUint8(actual.data);
+    const expectedData = shaka.util.BufferUtils.toUint8(expected.data);
 
-
-/**
- * @param {shaka.extern.SegmentDataDB} actual
- * @param {shaka.extern.SegmentDataDB} expected
- */
-shaka.test.OfflineUtils.expectSegmentToEqual = function(actual, expected) {
-  expect(actual.data).toBeTruthy();
-  expect(expected.data).toBeTruthy();
-
-  let actualData = new Uint8Array(actual.data);
-  let expectedData = new Uint8Array(expected.data);
-
-  expect(actualData).toEqual(expectedData);
+    expect(actualData).toEqual(expectedData);
+  }
 };

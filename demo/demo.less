@@ -1,0 +1,574 @@
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Import the MDL styles with the desired color scheme.
+@import (css, inline) "../node_modules/material-design-lite/dist/material.indigo-blue.min.css";
+@import (css, inline) "../node_modules/dialog-polyfill/dialog-polyfill.css";
+@import (css, inline) "../node_modules/awesomplete/awesomplete.css";
+@import (css, inline) "../node_modules/tippy.js/index.css";
+
+@accent-border-color: #8080ff;
+@error-color: #d84a38;
+@drawer-width: 550px;
+
+@mdl-footer-link-color: #9e9e9e;  /* copied from MDL stylesheet */
+@mdl-button-color: rgb(63,81,181);  /* copied from MDL stylesheet */
+
+@progress-circle-size: 45px;
+@progress-circle-thickness: 5px;
+
+/* This class name is used by MDL, but we use a slightly different font.  So
+ * here we override the font family for the MDL class.  Without this, the menu
+ * on the left side of the screen has no icon. */
+.material-icons {
+  font-family: 'Material Icons Round';
+}
+
+/* Conflicting styles between the icons font & the MDL buttons caused some
+ * icons not to be centered in their MDL button.  This fixes it. */
+.mdl-button .material-icons {
+  line-height: 36px;
+}
+
+/* This is a less mixin only, rather than a CSS class. MDL has an equivalent
+ * class with the same name, which can be used in the application directly. */
+.hidden() {
+  display: none;
+}
+
+.borderless {
+  outline: none;
+}
+
+/* Use the class name, which is more specific than just "main".  Otherwise, the
+ * MDL styles will be used instead. */
+main.mdl-layout__content {
+  /* Make the main container a flex container oriented as a column. */
+  display: flex;
+  flex-direction: column;
+}
+
+#contents {
+  /* Expand the contents section to take up any extra space on the page.  This
+   * pushes the footer to the bottom when the window is large, while still
+   * allowing the contents to scroll when the window is small.
+   */
+  flex-grow: 1;
+
+  /* Pad the outside of the contents. */
+  padding: 20px;
+  text-align: center;
+}
+
+.shaka-controls-button-panel > .close-button {
+  /* Move the button to the top-right. */
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  /* Give the button a round background, meant to look like the play button. */
+  border-radius: 50%;
+  width: 32px;
+  color: #000;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+html, body {
+  /* Ensure everything has a consistent font. */
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
+/* Change the default opacity of the ripple container, to get around an iOS bug.
+ * See: https://github.com/google/material-design-lite/issues/5281 */
+.mdl-ripple {
+  opacity: 0.001;
+}
+
+/* Give the FAB a drop shadow, that expands a little bit when moused over. */
+.mdl-button--fab {
+  filter: drop-shadow(0 2px 5px #333);
+  transition: 0.2s ease-in-out;
+}
+
+.mdl-button--fab,
+.mdl-button--icon {
+  /* By default, MDL icon buttons may end up vertically off-center.  This aligns
+   * them to the center both vertically and horizontally. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mdl-button--fab:hover {
+  filter: drop-shadow(0 2px 8px #333);
+}
+
+.input-container-label {
+  padding-right: 1em;
+}
+
+/* Remove vertical padding on MDL text fields, but only while they are in
+ * the hamburger menu. */
+.hamburger-menu .mdl-textfield {
+  padding: 0;
+  // The default width of 300px is a bit too wide for us.
+  width: 200px;
+}
+
+.hamburger-menu .mdl-textfield__label {
+  top: 4px;
+}
+
+.hamburger-menu .mdl-textfield__label:after {
+  bottom: 0;
+}
+
+.hamburger-menu .mdl-layout-title {
+  /* The line-height style in mdl-layout-title looks weird on narrow displays,
+   * so remove it in the hamburger menu. */
+  line-height: unset;
+}
+
+.hamburger-menu .input-container-label {
+  /* Give the labels for input rows a left margin. This keeps them from directly
+   * touching the left side of the screen, for improved readability. */
+  margin-left: 1em;
+}
+
+.hamburger-menu .mdl-button--raised {
+  /* Left-align the text content of the section header buttons. */
+  text-align: left;
+}
+
+/* Styles for error display. */
+#error-display {
+  background-color: @error-color;
+  margin: 0;
+  padding: 1em;
+  line-height: 2em;
+  text-align: center;
+}
+
+#error-display-link {
+  color: white;
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+
+  /* Some very long URLs can appear in the error text, and word wrapping is very
+   * helpful. */
+  overflow-wrap: anywhere;
+}
+
+.input-disabled {
+  pointer-events: none;
+}
+
+#error-display-close-button {
+  background-color: @error-color;
+  color: white;
+  position: relative;
+  padding: 0 0;
+  top: 0;
+  right: 1em;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Styles for asset cards. */
+.asset-card {
+  display: inline-block;
+  margin: 1em;
+}
+
+.asset-card-unsupported {
+  display: inline-block;
+  margin: 1em;
+  background-color: #ddd;
+}
+
+/* Asset icons. */
+.feature-icon {
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  display: inline-block;
+
+  /* features */
+  &[icon="high_definition"] {
+    background-image: data-uri('icons/custom_high_definition.svg');
+  }
+
+  &[icon="ultra_high_definition"] {
+    background-image: data-uri('icons/custom_ultra_high_definition.svg');
+  }
+
+  &[icon="subtitles"] {
+    background-image: data-uri('icons/baseline-subtitles-24px.svg');
+  }
+
+  &[icon="closed_caption"] {
+    background-image: data-uri('icons/baseline-closed_caption-24px.svg');
+  }
+
+  &[icon="live"] {
+    background-image: data-uri('icons/baseline-live_tv-24px.svg');
+  }
+
+  &[icon="trick_mode"] {
+    background-image: data-uri('icons/baseline-fast_forward-24px.svg');
+  }
+
+  &[icon="surround_sound"] {
+    background-image: data-uri('icons/baseline-surround_sound-24px.svg');
+  }
+
+  &[icon="multiple_languages"] {
+    background-image: data-uri('icons/baseline-language-24px.svg');
+  }
+
+  &[icon="ad"] {
+    background-image: data-uri('icons/custom_ad.svg');
+  }
+
+  &[icon="audio_only"] {
+    background-image: data-uri('icons/baseline-audiotrack-24px.svg');
+  }
+
+  /* key systems */
+  &[icon="widevine"] {
+    background-image: data-uri('icons/custom_widevine.svg');
+  }
+
+  &[icon="clear_key"] {
+    background-image: data-uri('icons/custom_clear_key.svg');
+  }
+
+  &[icon="playready"] {
+    background-image: data-uri('icons/custom_playready.svg');
+  }
+}
+
+@media screen and (max-width: 400px) {
+  /* On screens less than 400px, the 330px-wide cards need to shrink.
+   * This makes them shrink linearly below that threshold. */
+  .asset-card {
+    width: 82.5%;
+  }
+}
+
+.asset-card-corner-button {
+  /* Move the button to the top-right. */
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.progress-circle {
+  position: absolute;
+  top: 0;
+  right: 14px;
+  width: @progress-circle-size;
+  height: @progress-circle-size;
+
+  /* This should be unclickable, so that you can click the button beneath. */
+  pointer-events: none;
+}
+
+.progress-circle-svg {
+  /* In rotation, 0 degrees is the right side. That means that the progress
+   * circle "starts at" the right side. Normally, you expect the circle to
+   * "start at" the top, like a clock; this rotates the circle, so it behaves
+   * thusly. */
+  transform: rotate(-90deg);
+}
+
+.progress-circle-circle() {
+  /* Set the position and radius of the circle, so it is in the center of the
+   * svg's canvas. */
+  cx: @progress-circle-size / 2;
+  cy: @progress-circle-size / 2;
+  r: (@progress-circle-size - @progress-circle-thickness) / 2;
+  fill: none;
+  stroke-width: @progress-circle-thickness;
+}
+
+.progress-circle-bar {
+  .progress-circle-circle();
+
+  stroke: @mdl-button-color;
+  stroke-linecap: round;
+}
+
+.progress-circle-back {
+  .progress-circle-circle();
+
+  stroke: #eee;
+}
+
+.asset-card .mdl-card__title {
+  /* The maximum width of the title should be narrower than the width of the
+   * card itself, so that the title doesn't overlap with the store button. */
+  max-width: 260px;
+  margin: auto;
+}
+
+.asset-card div {
+  /* Override the default value of "stretch" for mdl cards. */
+  justify-content: center;
+}
+
+.asset-card img {
+  /* Icons are 300px by 210px (10:7 aspect ratio). */
+  width: 300px;
+
+  /* Constrain to space if necessary. */
+  max-width: 100%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.asset-card-unsupported img {
+  /* Set opacity to 50%, so the image is greyed out also. */
+  opacity: 0.5;
+}
+
+.asset-card.selected {
+  border-style: solid;
+  border-color: @accent-border-color;
+}
+
+/* Override some MDL styles to get the desired look and feel. */
+.app-header {
+  background-color: white;
+  color: black;
+}
+
+@media screen and (max-width: 780px) {
+  /* On smaller screens, the header should expand and the elements in it should
+   * wrap to remain accessible. */
+  #nav-button-container {
+    height: auto;
+    flex-wrap: wrap;
+  }
+
+  /* The spacer should be hidden in this mode, so that the version number is no
+   * longer being forced to the right. */
+  .app-header .mdl-layout-spacer {
+    .hidden();
+  }
+}
+
+.significant-right-padding {
+  padding-right: 5em;
+}
+
+.mdl-dialog {
+  /* Override MDL dialog width, so that input elements don't overflow. */
+  width: 420px;
+}
+
+.mdl-dialog img {
+  width: 300px;
+  max-width: 100%;
+}
+
+.app-header .mdl-layout__drawer-button {
+  color: black;
+}
+
+.app-header .logo {
+  max-height: 80%;
+
+  /* Match the padding of the buttons next to the logo. */
+  padding: 0 16px;
+}
+
+.app-header .mdl-layout__drawer-button .material-icons {
+  &:hover {
+    /* Spin the gear icon in the settings menu when hovered. */
+    transform: rotate(90deg);
+  }
+
+  /* Animate the spin. */
+  transition: transform 0.3s ease-in-out;
+}
+
+footer li {
+  list-style: square outside;
+}
+
+/* More specific selector than MDL's stylesheet uses. */
+footer .mdl-mega-footer__link-list {
+  a {
+    /* The default color was low-contrast on this dark background. */
+    color: lighten(@mdl-footer-link-color, 20%);
+  }
+
+  a[disabled] {
+    /* Making the disabled version even darker would be even worse in terms of
+     * contrast, so use a strikethrough style instead. */
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+}
+
+/* Style the container that contains the "add custom assets" button. */
+.add-button-container {
+  text-align: right;
+  margin: 1em;
+}
+
+.disabled-by-fail {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Style the hamburger menu (mdl drawer). */
+.hamburger-menu {
+  /* To properly change the width of an MDL drawer, you also have to change the
+   * transform applied to hide it. */
+  width: @drawer-width;
+  transform: translateX(-@drawer-width);
+
+  /* If the main app page is scrollable, we don't want see "under" the drawer.
+   * Making the position fixed means it won't move, no matter what.
+   * Within the drawer itself, the drawer content can still be scrolled. */
+  position: fixed;
+
+  /* Constrain to the window if necessary, so that it doesn't overflow small
+   * mobile screens. */
+  max-width: 100%;
+}
+
+/* When the drawer is open, MDL sets overflow: hidden on the main content
+ * in order to hide the scroll bar.
+ *
+ * This also causes most of the elements on screen to jump to the right,
+ * though, which is very visually distracting.  This overrides that style, to
+ * prevent that behavior.
+ *
+ * The class name mdl-layout__content is repeated twice to make the selector
+ * more specific than what MDL is using. */
+.mdl-layout__drawer.is-visible ~ .mdl-layout__content.mdl-layout__content {
+  overflow: auto;
+}
+
+/* The title contains the close button, so use flex to center it.
+ * Also use right-padding to keep it off the right edge. */
+#hamburger-menu-title {
+  display: flex;
+  align-items: center;
+  padding-right: 16px;
+}
+
+.mdl-layout__obfuscator.is-visible {
+  /* If the main app page is scrollable, we don't want see "under" the layout
+   * obfuscator (which grays out the app while the drawer is open).
+   * Making the position fixed means it won't move, no matter what. */
+  position: fixed;
+}
+
+/* Control the size of the video. */
+#video-bar {
+  /* The video bar fills the horizontal space, but its height depends on the
+   * contents. */
+  width: 100%;
+
+  /* Add a little bit of padding on top, to make the video not look cropped. */
+  padding-top: 1em;
+}
+
+/* This is an id rather than a class so that it will consistently be applied
+ * before UI CSS values on all platforms. */
+.video-container {
+  /* Fixed width, but height will expand based on video aspect ratio.
+   * Does not affect fullscreen size. */
+  width: 640px;
+  margin: auto;
+
+  /* Constrain to the window if necessary, so that it doesn't overflow small
+   * mobile screens. */
+  max-width: 100%;
+}
+
+#video-bar.no-input-sized {
+  /* Add some additional padding so that TV overscan doesn't cut off the version
+   * number or other information we might need. */
+  padding: 2.5em 2em;
+
+  /* Constrain the body to its size minus margin and padding, so that nested
+   * elements can constrain to the body. */
+  width: 100%;
+  width: calc(100% - 4em);
+  height: 100%;
+  height: calc(100% - 5em);
+}
+
+.video-container.no-input-sized {
+  width: 100%;
+  height: 100%;
+}
+
+#video {
+  /* Fill whatever space we're given, whether fullscreen or not. */
+  width: 100%;
+  height: 100%;
+  margin: auto;
+}
+
+/* Style the intermediate tooltip attach points, required for tooltips to be
+ * added to disabled buttons. */
+.tooltip-attach-point {
+  display: inline-block;
+}
+
+/* Style the input containers. */
+.input-container-row {
+  /* When a row is preceded by its label, inline-block will ensure the label
+   * sits before the input row on the same line. */
+  display: inline-block;
+}
+
+.input-container-style-flex {
+  display: inline-flex;
+  flex-wrap: wrap;
+}
+
+.input-container-style-vertical {
+  text-align: left;
+}
+
+.input-container-style-accordion {
+  text-align: left;
+  opacity: 0;
+  max-height: 0;
+  transition: 0.3s ease-in-out;
+}
+
+.input-container-style-accordion.show {
+  opacity: 1;
+
+  /* If the max-height is too high (e.g. set to 100%), the "sliding out"
+   * animation is too fast to make out with the eye.
+   * So give it a fixed maximum instead. */
+  max-height: 1000px;
+}
+
+.input-header {
+  font-size: 125%;
+}
+
+.wide-input,
+.wide-input .input-container-row,
+.wide-input .mdl-textfield {
+  width: 100%;
+}

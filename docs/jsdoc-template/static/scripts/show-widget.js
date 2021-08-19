@@ -1,18 +1,7 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
@@ -23,21 +12,20 @@
  */
 
 function onShowChange() {
-  var value = document.getElementById('show').value;
+  const value = document.getElementById('show').value;
   localStorage.setItem('show', value);
 
-
-  var setVisibilityByAccess = function(access, visible) {
-    var selector = '.access-' + access;
-    var list = document.querySelectorAll(selector);
+  const setVisibilityByAccess = (access, visible) => {
+    const selector = '.access-' + access;
+    const list = document.querySelectorAll(selector);
     // querySelectorAll returns an array-like object, not an array.
-    Array.prototype.forEach.call(list, function(element) {
+    for (const element of Array.from(list)) {
       if (visible) {
         element.classList.add('show');
       } else {
         element.classList.remove('show');
       }
-    });
+    }
   };
 
   if (value == 'exported') {
@@ -54,7 +42,7 @@ function onShowChange() {
 
 function initShowWidget() {
   // get the previous setting from storage and populate the form.
-  var storedSetting = localStorage.getItem('show');
+  const storedSetting = localStorage.getItem('show');
   document.getElementById('show').value = storedSetting;
 
   if (!document.getElementById('show').value) {

@@ -2,7 +2,7 @@
 var data = obj;
 var self = this;
 
-var accessClass = 'access-public';  // default
+let accessClass = 'access-public';  // default
 if (data.access) {
     accessClass = 'access-' + data.access;
 }
@@ -83,6 +83,18 @@ if (data.access) {
     <li><?js= self.linkto(f) ?></li>
 <?js }); ?></ul>
 <?js } ?>
+
+<?js if (data.modifies && modifies.length) {?>
+<h5>Modifies:</h5>
+<?js if (modifies.length > 1) { ?><ul><?js
+    modifies.forEach(function(m) { ?>
+        <li><?js= self.partial('modifies.tmpl', m) ?></li>
+    <?js });
+?></ul><?js } else {
+    modifies.forEach(function(m) { ?>
+        <?js= self.partial('modifies.tmpl', m) ?>
+    <?js });
+} } ?>
 
 <?js if (data.exceptions && exceptions.length) { ?>
 <h5>Throws:</h5>

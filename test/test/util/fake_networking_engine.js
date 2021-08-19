@@ -1,18 +1,7 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 goog.provide('shaka.test.FakeNetworkingEngine');
@@ -24,284 +13,339 @@ goog.provide('shaka.test.FakeNetworkingEngine');
  * A fake networking engine that returns constant data.  The request member
  * is a jasmine spy and can be used to check the actual calls that occurred.
  *
- * @param {Object.<string, !ArrayBuffer>=} responseMap A map from URI to
- *   the data to return.
- * @param {!ArrayBuffer=} defaultResponse The default value to return; if
- *   null, a jasmine expect will fail if a request is made that is not in
- *   |data|.
- * @param {Object.<string, !Object.<string, string>>=} headersMap
- *   A map from URI to the headers to return.
- *
- * @constructor
+ * @final
  * @struct
  * @extends {shaka.net.NetworkingEngine}
  */
-shaka.test.FakeNetworkingEngine = function(
-    responseMap, defaultResponse, headersMap) {
-  /** @private {!Object.<string, !ArrayBuffer>} */
-  this.responseMap_ = responseMap || {};
+shaka.test.FakeNetworkingEngine = class {
+  constructor() {
+    /**
+     * @private {!Map.<
+     *    string,
+     *    shaka.test.FakeNetworkingEngine.MockedResponse>} */
+    this.responseMap_ = new Map();
 
-  /** @private {!Object.<string, !Object.<string, string>>} */
-  this.headersMap_ = headersMap || {};
+    /** @private {!Map.<string, !Object.<string, string>>} */
+    this.headersMap_ = new Map();
 
-  /** @private {ArrayBuffer} */
-  this.defaultResponse_ = defaultResponse || null;
+    /** @private {?BufferSource} */
+    this.defaultResponse_ = null;
 
-  /** @private {?shaka.util.PublicPromise} */
-  this.delayNextRequestPromise_ = null;
-
-  /** @type {!jasmine.Spy} */
-  this.request =
-      jasmine.createSpy('request').and.callFake(this.requestImpl_.bind(this));
-
-  /** @type {!jasmine.Spy} */
-  this.registerResponseFilter =
-      jasmine.createSpy('registerResponseFilter')
-          .and.callFake(this.setResponseFilter.bind(this));
-
-  /** @type {!jasmine.Spy} */
-  this.unregisterResponseFilter =
-      jasmine.createSpy('unregisterResponseFilter')
-          .and.callFake(this.unregisterResponseFilterImpl_.bind(this));
-
-  /** @private {?shaka.extern.ResponseFilter} */
-  this.responseFilter_ = null;
-
-  // The prototype has already been applied; create spies for the
-  // methods but still call it by default.
-  spyOn(this, 'destroy').and.callThrough();
-};
-
-
-/** @override */
-shaka.test.FakeNetworkingEngine.prototype.destroy = function() {
-  return Promise.resolve();
-};
-
-
-/**
- * Expects that a request for the given segment has occurred.
- *
- * @param {!Object} requestSpy
- * @param {string} uri
- * @param {shaka.net.NetworkingEngine.RequestType} type
- */
-shaka.test.FakeNetworkingEngine.expectRequest = function(
-    requestSpy, uri, type) {
-  expect(requestSpy).toHaveBeenCalledWith(
-      type, jasmine.objectContaining({uris: [uri]}));
-};
-
-
-/**
- * Expects that no request for the given segment has occurred.
- *
- * @param {!Object} requestSpy
- * @param {string} uri
- * @param {shaka.net.NetworkingEngine.RequestType} type
- */
-shaka.test.FakeNetworkingEngine.expectNoRequest = function(
-    requestSpy, uri, type) {
-  expect(requestSpy).not.toHaveBeenCalledWith(
-      type, jasmine.objectContaining({uris: [uri]}));
-};
-
-
-/**
- * Expects that a range request for the given segment has occurred.
- *
- * @param {!Object} requestSpy
- * @param {string} uri
- * @param {number} startByte
- * @param {?number} endByte
- */
-shaka.test.FakeNetworkingEngine.expectRangeRequest = function(
-    requestSpy, uri, startByte, endByte) {
-  let range = 'bytes=' + startByte + '-';
-  if (endByte != null) range += endByte;
-
-  expect(requestSpy).toHaveBeenCalledWith(
-      shaka.net.NetworkingEngine.RequestType.SEGMENT,
-      jasmine.objectContaining({
-        uris: [uri],
-        headers: jasmine.objectContaining({'Range': range}),
-      }));
-};
-
-
-/**
- * @param {shaka.net.NetworkingEngine.RequestType} type
- * @param {shaka.extern.Request} request
- * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
- * @private
- */
-shaka.test.FakeNetworkingEngine.prototype.requestImpl_ = function(
-    type, request) {
-  expect(request).toBeTruthy();
-  expect(request.uris.length).toBe(1);
-
-  let headers = this.headersMap_[request.uris[0]] || {};
-  let result = this.responseMap_[request.uris[0]] || this.defaultResponse_;
-  if (!result && request.method != 'HEAD') {
-    // Give a more helpful error message to jasmine.
-    expect(request.uris[0]).toBe('in the response map');
-    let error = new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
-        shaka.util.Error.Category.NETWORK,
-        shaka.util.Error.Code.UNEXPECTED_TEST_REQUEST);
-    return shaka.util.AbortableOperation.failed(error);
-  }
-
-  /** @type {shaka.extern.Response} */
-  let response = {uri: request.uris[0], data: result, headers: headers};
-
-  if (this.responseFilter_) {
-    this.responseFilter_(type, response);
-  }
-
-  if (this.delayNextRequestPromise_) {
-    let delay = this.delayNextRequestPromise_;
+    /** @private {?shaka.util.PublicPromise} */
     this.delayNextRequestPromise_ = null;
-    return shaka.util.AbortableOperation.notAbortable(
-        delay.then(function() { return response; }));
-  } else {
-    return shaka.util.AbortableOperation.completed(response);
+
+    /** @type {!jasmine.Spy} */
+    this.request = jasmine.createSpy('request')
+        .and.callFake((type, request) => this.requestImpl_(type, request));
+
+    /** @type {!jasmine.Spy} */
+    this.registerResponseFilter =
+        jasmine.createSpy('registerResponseFilter')
+            .and.callFake((filter) => this.setResponseFilter(filter));
+
+    /** @type {!jasmine.Spy} */
+    this.unregisterResponseFilter =
+        jasmine.createSpy('unregisterResponseFilter').and.callFake(
+            (filter) => this.unregisterResponseFilterImpl_(filter));
+
+    /** @private {?shaka.extern.ResponseFilter} */
+    this.responseFilter_ = null;
+
+    /** @type {!jasmine.Spy} */
+    this.setForceHTTPS = jasmine.createSpy('setForceHTTPS').and.stub();
+
+    // The prototype has already been applied; create spies for the
+    // methods but still call it by default.
+    spyOn(this, 'destroy').and.callThrough();
+  }
+
+  /** @override */
+  destroy() {
+    return Promise.resolve();
+  }
+
+  /**
+   * @param {shaka.net.NetworkingEngine.RequestType} type
+   * @param {shaka.extern.Request} request
+   * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
+   * @private
+   */
+  requestImpl_(type, request) {
+    expect(request).toBeTruthy();
+    expect(request.uris.length).toBe(1);
+
+    const requestedUri = request.uris[0];
+
+    const headers = this.headersMap_.get(requestedUri) || {};
+
+    const defaultCallback = () => {
+      return Promise.resolve(this.defaultResponse_);
+    };
+
+    const responses = this.responseMap_;
+    const resultCallback = responses.get(requestedUri) || defaultCallback;
+
+    // Cache the delay for this request now so that it does not change if
+    // another request comes through.
+    const delay = this.delayNextRequestPromise_;
+    this.delayNextRequestPromise_ = null;
+
+    let isAborted = false;
+    const abortOp = () => {
+      isAborted = true;
+      return Promise.resolve();
+    };
+    const abortCheck = () => isAborted;
+
+    // Wrap all the async operations into one function so that we can pass it to
+    // abortable operation.
+    const asyncOp = async () => {
+      if (delay) {
+        await delay;
+      }
+
+      const result = await resultCallback(abortCheck);
+      if (isAborted) {
+        throw new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.OPERATION_ABORTED);
+      }
+
+      if (!result && request.method != 'HEAD') {
+        // Provide some more useful information.
+        shaka.log.error('Expected', requestedUri, 'to be in the response map');
+
+        throw new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.UNEXPECTED_TEST_REQUEST,
+            requestedUri);
+      }
+
+      /** @type {shaka.extern.Response} */
+      const response = {
+        uri: requestedUri,
+        originalUri: requestedUri,
+        data: result,
+        headers: headers,
+      };
+
+      // Modify the response using the response filter, this allows the app
+      // to modify the response before giving it to the player.
+      if (this.responseFilter_) {
+        this.responseFilter_(type, response);
+      }
+
+      return response;
+    };
+
+    return new shaka.util.AbortableOperation(asyncOp(), abortOp);
+  }
+
+  /**
+   * Useable by tests directly.  Library code will only call this via the Spy on
+   * registerResponseFilter.
+   *
+   * @param {shaka.extern.ResponseFilter} filter
+   */
+  setResponseFilter(filter) {
+    expect(filter).toEqual(jasmine.any(Function));
+    this.responseFilter_ = filter;
+  }
+
+  /**
+   * @param {shaka.extern.ResponseFilter} filter
+   * @private
+   */
+  unregisterResponseFilterImpl_(filter) {
+    expect(filter).toEqual(jasmine.any(Function));
+    this.responseFilter_ = null;
+  }
+
+  /**
+   * Delays the next response until the returned PublicPromise resolves.
+   * @return {!shaka.util.PublicPromise}
+   */
+  delayNextRequest() {
+    if (!this.delayNextRequestPromise_) {
+      this.delayNextRequestPromise_ = new shaka.util.PublicPromise();
+    }
+    return this.delayNextRequestPromise_;
+  }
+
+  /**
+   * Expects that a request for the given segment has occurred.
+   *
+   * @param {string} uri
+   * @param {shaka.net.NetworkingEngine.RequestType} type
+   */
+  expectRequest(uri, type) {
+    shaka.test.FakeNetworkingEngine.expectRequest(this.request, uri, type);
+  }
+
+  /**
+   * Expects that no request for the given segment has occurred.
+   *
+   * @param {string} uri
+   * @param {shaka.net.NetworkingEngine.RequestType} type
+   */
+  expectNoRequest(uri, type) {
+    shaka.test.FakeNetworkingEngine.expectNoRequest(this.request, uri, type);
+  }
+
+  /**
+   * Expects that a range request for the given segment has occurred.
+   *
+   * @param {string} uri
+   * @param {number} startByte
+   * @param {?number} endByte
+   */
+  expectRangeRequest(uri, startByte, endByte) {
+    shaka.test.FakeNetworkingEngine.expectRangeRequest(
+        this.request, uri, startByte, endByte);
+  }
+
+  /**
+   * Set a callback for when the given uri is called.
+   *
+   * @param {string} uri
+   * @param {shaka.test.FakeNetworkingEngine.MockedResponse} callback
+   * @return {!shaka.test.FakeNetworkingEngine}
+   */
+  setResponse(uri, callback) {
+    this.responseMap_.set(uri, callback);
+    return this;
+  }
+
+  /**
+   * Set a single value in the response map.
+   *
+   * @param {string} uri
+   * @param {BufferSource} value
+   * @return {!shaka.test.FakeNetworkingEngine}
+   */
+  setResponseValue(uri, value) {
+    return this.setResponse(uri, () => Promise.resolve(value));
+  }
+
+  /**
+   * Set a single value as text in the response map.
+   *
+   * @param {string} uri
+   * @param {string} value
+   * @return {!shaka.test.FakeNetworkingEngine}
+   */
+  setResponseText(uri, value) {
+    const utf8 = shaka.util.StringUtils.toUTF8(value);
+    return this.setResponseValue(uri, utf8);
+  }
+
+  /**
+   * Sets the headers for a specific uri.
+   *
+   * @param {string} uri
+   * @param {!Object.<string, string>} headers
+   * @return {!shaka.test.FakeNetworkingEngine}
+   */
+  setHeaders(uri, headers) {
+    // Copy the header over to a map and then back to an object. This makes
+    // a copy of the original header.
+    const map = shaka.util.MapUtils.asMap(headers);
+    this.headersMap_.set(uri, shaka.util.MapUtils.asObject(map));
+    return this;
+  }
+
+  /**
+   * Sets the default return value.
+   *
+   * @param {BufferSource} defaultResponse The default value to return.
+   * @return {!shaka.test.FakeNetworkingEngine}
+   */
+  setDefaultValue(defaultResponse) {
+    this.defaultResponse_ = defaultResponse;
+    return this;
+  }
+
+  /**
+   * Sets the default return value as text.
+   *
+   * @param {string} defaultText The default value to return.
+   * @return {!shaka.test.FakeNetworkingEngine}
+   */
+  setDefaultText(defaultText) {
+    this.defaultResponse_ = shaka.util.StringUtils.toUTF8(defaultText);
+    return this;
+  }
+
+  /**
+   * Sets the default return value to throw an error.
+   *
+   * @return {!shaka.test.FakeNetworkingEngine}
+   */
+  setDefaultAsError() {
+    this.defaultResponse_ = null;
+    return this;
+  }
+
+  /**
+   * Expects that a request for the given segment has occurred.
+   *
+   * @param {!Object} requestSpy
+   * @param {string} uri
+   * @param {shaka.net.NetworkingEngine.RequestType} type
+   */
+  static expectRequest(requestSpy, uri, type) {
+    expect(requestSpy).toHaveBeenCalledWith(
+        type, jasmine.objectContaining({uris: [uri]}));
+  }
+
+  /**
+   * Expects that no request for the given segment has occurred.
+   *
+   * @param {!Object} requestSpy
+   * @param {string} uri
+   * @param {shaka.net.NetworkingEngine.RequestType} type
+   */
+  static expectNoRequest(requestSpy, uri, type) {
+    expect(requestSpy).not.toHaveBeenCalledWith(
+        type, jasmine.objectContaining({uris: [uri]}));
+  }
+
+  /**
+   * Expects that a range request for the given segment has occurred.
+   *
+   * @param {!Object} requestSpy
+   * @param {string} uri
+   * @param {number} startByte
+   * @param {?number} endByte
+   */
+  static expectRangeRequest(requestSpy, uri, startByte, endByte) {
+    const headers = {};
+    if (startByte == 0 && endByte == null) {
+      // No header required.
+    } else {
+      let range = 'bytes=' + startByte + '-';
+      if (endByte != null) {
+        range += endByte;
+      }
+      headers['Range'] = range;
+    }
+
+    expect(requestSpy).toHaveBeenCalledWith(
+        shaka.net.NetworkingEngine.RequestType.SEGMENT,
+        jasmine.objectContaining({
+          uris: [uri],
+          headers: headers,
+        }));
   }
 };
 
 
 /**
- * Useable by tests directly.  Library code will only call this via the Spy on
- * registerResponseFilter.
- *
- * @param {shaka.extern.ResponseFilter} filter
+ * A callback that creates a response for a given URI.
+ * The callback passed in to this method, "abortCheck", returns whether or not
+ * the network request has been aborted, at time of call.
+ * @typedef {function(function():boolean):!Promise.<BufferSource>}
  */
-shaka.test.FakeNetworkingEngine.prototype.setResponseFilter = function(filter) {
-  expect(filter).toEqual(jasmine.any(Function));
-  this.responseFilter_ = filter;
-};
-
-
-/**
- * @param {shaka.extern.ResponseFilter} filter
- * @private
- */
-shaka.test.FakeNetworkingEngine.prototype.unregisterResponseFilterImpl_ =
-    function(filter) {
-  expect(filter).toEqual(jasmine.any(Function));
-  this.responseFilter_ = null;
-};
-
-
-/**
- * Delays the next response until the returned PublicPromise resolves.
- * @return {!shaka.util.PublicPromise}
- */
-shaka.test.FakeNetworkingEngine.prototype.delayNextRequest = function() {
-  if (!this.delayNextRequestPromise_) {
-    this.delayNextRequestPromise_ = new shaka.util.PublicPromise();
-  }
-  return this.delayNextRequestPromise_;
-};
-
-
-/**
- * Expects that a request for the given segment has occurred.
- *
- * @param {string} uri
- * @param {shaka.net.NetworkingEngine.RequestType} type
- */
-shaka.test.FakeNetworkingEngine.prototype.expectRequest = function(uri, type) {
-  shaka.test.FakeNetworkingEngine.expectRequest(this.request, uri, type);
-};
-
-
-/**
- * Expects that no request for the given segment has occurred.
- *
- * @param {string} uri
- * @param {shaka.net.NetworkingEngine.RequestType} type
- */
-shaka.test.FakeNetworkingEngine.prototype.expectNoRequest =
-    function(uri, type) {
-  shaka.test.FakeNetworkingEngine.expectNoRequest(this.request, uri, type);
-};
-
-
-/**
- * Expects that a range request for the given segment has occurred.
- *
- * @param {string} uri
- * @param {number} startByte
- * @param {?number} endByte
- */
-shaka.test.FakeNetworkingEngine.prototype.expectRangeRequest = function(
-    uri, startByte, endByte) {
-  shaka.test.FakeNetworkingEngine.expectRangeRequest(
-      this.request, uri, startByte, endByte);
-};
-
-
-/**
- * Sets the response map.
- *
- * @param {!Object.<string, !ArrayBuffer>} responseMap
- */
-shaka.test.FakeNetworkingEngine.prototype.setResponseMap = function(
-    responseMap) {
-  this.responseMap_ = responseMap;
-};
-
-
-/**
- * Sets the response map as text.
- *
- * @param {!Object.<string, string>} textMap
- */
-shaka.test.FakeNetworkingEngine.prototype.setResponseMapAsText = function(
-    textMap) {
-  this.responseMap_ = Object.keys(textMap).reduce(function(obj, key) {
-    let data = shaka.util.StringUtils.toUTF8(textMap[key]);
-    obj[key] = data;
-    return obj;
-  }, {});
-};
-
-
-/**
- * Sets the response map.
- *
- * @param {!Object.<string, !Object.<string, string>>} headersMap
- */
-shaka.test.FakeNetworkingEngine.prototype.setHeadersMap = function(
-    headersMap) {
-  this.headersMap_ = headersMap;
-};
-
-
-/**
- * Sets the default return value.
- *
- * @param {ArrayBuffer} defaultResponse The default value to return; or null to
- *   give an error for invalid URIs.
- */
-shaka.test.FakeNetworkingEngine.prototype.setDefaultValue = function(
-    defaultResponse) {
-  this.defaultResponse_ = defaultResponse;
-};
-
-
-/**
- * Sets the default return value as text.
- *
- * @param {?string} defaultText The default value to return; or null to give an
- *   error for invalid URIs.
- */
-shaka.test.FakeNetworkingEngine.prototype.setDefaultText = function(
-    defaultText) {
-  let data = null;
-  if (defaultText) {
-    data = shaka.util.StringUtils.toUTF8(defaultText);
-  }
-  this.defaultResponse_ = data;
-};
+shaka.test.FakeNetworkingEngine.MockedResponse;

@@ -1,3 +1,9 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 (function() {
   // This is "window" in browsers and "global" in nodejs.
   // See https://github.com/google/shaka-player/issues/1445
@@ -16,11 +22,16 @@
 
   // We provide "global" for use by Closure, and "window" for use by the Shaka
   // library itself.  Both point to "innerGlobal" above.
-  (function(window, global) {
+  // We also provide "module", which is always undefined, to prevent compiled-in
+  // code from doing its own exports that conflict with ours.
+  (function(window, global, module) {
 
 %output%
 
-  }).call(exportTo, innerGlobal, innerGlobal);
+  }).call(/* this= */ exportTo,
+          /* window= */ innerGlobal,
+          /* global= */ innerGlobal,
+          /* module= */ undefined);
 
   if (typeof exports != 'undefined') {
     // CommonJS module loader.  Use "exports" instead of "module.exports" to
@@ -28,7 +39,7 @@
     for (var k in exportTo.shaka) {
       exports[k] = exportTo.shaka[k];
     }
-  } else if (typeof define != 'undefined' && define.amd) {
+  } else if (typeof define == 'function' && define.amd) {
     // AMD module loader.
     define(function(){
       return exportTo.shaka;

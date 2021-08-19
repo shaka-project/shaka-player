@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc.
+# Copyright 2016 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ requirement: {
   error_message: 'Throwing non-Error types or Error itself is not allowed; '
                  'throw shaka.util.Error instead.'
   whitelist_regexp: 'test/'
+  whitelist_regexp: 'node_modules/'
 }
 requirement: {
   type: BANNED_CODE_PATTERN
@@ -32,6 +33,7 @@ requirement: {
   error_message: 'Throwing non-Error types or Error itself is not allowed; '
                  'throw shaka.util.Error instead.'
   whitelist_regexp: 'test/'
+  whitelist_regexp: 'node_modules/'
 }
 
 
@@ -52,15 +54,7 @@ requirement {
   # Until we can get this rule updated for ES6 static methods
   # (https://github.com/google/closure-compiler/issues/2880):
   whitelist_regexp: 'test/test/util/canned_idb.js'
-}
-
-
-# Ban the use of @expose annotations.
-requirement {
-  type: CUSTOM
-  java_class: 'com.google.javascript.jscomp.ConformanceRules$BanExpose'
-  error_message: '@expose is not allowed; please use externs instead. '
-                 'See docs/design/export.md for details.'
+  whitelist_regexp: 'test/assets/assets_integration.js'
 }
 
 
@@ -78,8 +72,8 @@ requirement {
   java_class: 'com.google.javascript.jscomp.ConformanceRules$BanGlobalVars'
   error_message: 'Global variables are not allowed!'
   whitelist_regexp: 'demo/'
-  whitelist_regexp: 'third_party/closure/'
   whitelist_regexp: 'test/'
+  whitelist_regexp: 'node_modules/'
 }
 
 
@@ -92,8 +86,49 @@ requirement: {
          'function template(b, n) { b = !n; }'
   error_message: 'Using "!" on nullable numbers in boolean assignment '
                  'is not allowed; use an explicit comparison instead.'
+  whitelist_regexp: 'node_modules/'
 }
 
+requirement: {
+  type: BANNED_CODE_PATTERN
+  value: '/** @param {*} a'
+         '    @param {(number|string|boolean|null|undefined)} x */'
+         'function template(a, x) { expect(a).toEqual(x); }'
+  value: '/** @param {*} a'
+         '    @param {(number|string|boolean|null|undefined)} x */'
+         'function template(a, x) { expect(a).not.toEqual(x); }'
+  error_message: 'Use expect.toBe for primitives'
+}
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Uint8Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Int8Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Uint8ClampedArray(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Unt16Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Int16Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Uint32Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Int32Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Float32Array(a) }'
+  value: '/** @param {BufferSource} a */'
+         'function template(a) { new Float64Array(a) }'
+  error_message: 'Use shaka.util.BufferUtils.view* instead.'
+  whitelist_regexp: 'lib/util/buffer_utils.js'
+}
+
+requirement: {
+  type: BANNED_CODE_PATTERN
+  value: 'function template () { new Date().getTime() }'
+  error_message: 'Use Date.now() instead.'
+}
 
 # Disallow console logging.
 requirement: {
@@ -106,8 +141,25 @@ requirement: {
   error_message: 'Using "console" is not allowed; '
                  'use shaka.log instead'
   whitelist_regexp: 'demo/'
-  whitelist_regexp: 'third_party/closure/'
+  whitelist_regexp: 'lib/debug/log.js'
   whitelist_regexp: 'test/test/boot.js'
+  whitelist_regexp: 'node_modules/'
+  whitelist_regexp: '[synthetic:es6/promise/promise]'
+}
+
+# Disallow querySelector and querySelectorAll since they aren't supported on
+# Shaka Player Embedded.
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: 'Element.prototype.querySelector'
+  value: 'Document.prototype.querySelector'
+  value: 'Element.prototype.querySelectorAll'
+  value: 'Document.prototype.querySelectorAll'
+  error_message: 'Use getElementsByTagName'
+  whitelist_regexp: 'demo/'
+  whitelist_regexp: 'ui/'
+  whitelist_regexp: 'test/'
+  whitelist_regexp: 'node_modules/'
 }
 
 
@@ -119,12 +171,39 @@ requirement: {
                  'use Node.childNodes instead'
 }
 
-
-# Disallow Input.valueAsNumber.
 requirement: {
   type: BANNED_PROPERTY
-  value: 'HTMLInputElement.prototype.valueAsNumber'
-  error_message: '"Input.valueAsNumber" is not supported on IE11'
+  value: 'DataView.prototype.buffer'
+  value: 'TypedArray.prototype.buffer'
+  error_message: 'Using "TypedArray.buffer" is not safe since it doesn\'t '
+                 'handle sub-arrays'
+  whitelist_regexp: 'lib/util/buffer_utils.js'
+  whitelist_regexp: 'lib/util/object_utils.js'
+  whitelist_regexp: 'test/util/buffer_utils_unit.js'
+}
+
+
+# Disallow Element.innerHTML and outerHTML.
+requirement: {
+  type: BANNED_PROPERTY
+  value: 'Element.prototype.innerHTML'
+  value: 'Element.prototype.outerHTML'
+  error_message: 'Using "Element.innerHTML" or "Element.outerHTML" is not '
+                 'allowed due to security concerns; use textContent, '
+                 'appendChild, or removeChild instead'
+  whitelist_regexp: 'test/test/util/util.js'
+}
+
+
+# Disallow DOMRect.x and y.
+requirement: {
+  type: BANNED_PROPERTY
+  value: 'DOMRect.prototype.x'
+  value: 'DOMRect.prototype.y'
+  error_message: 'DOMRect "x" and "y" are not supported on legacy Edge; '
+                 'use "left" and "top" instead.'
+  # The built-in set and map polyfills trigger this ban somehow.
+  whitelist_regexp: 'synthetic:es6/'
 }
 
 
@@ -141,15 +220,7 @@ requirement: {
   type: BANNED_NAME
   value: 'fit'
   error_message: 'Using "fit" is not allowed'
-  whitelist_regexp: 'test/player_integration.js'
-}
-
-
-# Disallow classList toggle.
-requirement: {
-  type: BANNED_PROPERTY_CALL
-  value: 'DOMTokenList.prototype.toggle'
-  error_message: 'classList toggle is not supported in IE11'
+  whitelist_regexp: 'test/player_external.js'
 }
 
 
@@ -157,114 +228,81 @@ requirement: {
 requirement: {
   type: BANNED_NAME
   value: 'window.setInterval'
-  error_message: 'Using "setInterval" is not allowed; '
-                 'use shaka.util.Timer.prototype.scheduleRepeated instead.'
+  error_message: 'setInterval has several drawbacks, most of '
+                 'all difficulty canceling and surprising behavior '
+                 'when the device goes to sleep. Please use '
+                 'shaka.util.Timer instead.'
   whitelist_regexp: 'demo/'
   whitelist_regexp: 'test/'
 }
 requirement: {
   type: BANNED_NAME
   value: 'setInterval'
-  error_message: 'Using "setInterval" is not allowed; '
-                 'use shaka.util.Timer.prototype.scheduleRepeated instead.'
+  error_message: 'setInterval has several drawbacks, most of '
+                 'all difficulty canceling and surprising behavior '
+                 'when the device goes to sleep. Please use '
+                 'shaka.util.Timer instead.'
+  whitelist_regexp: 'demo/'
+  whitelist_regexp: 'test/'
+}
+
+# Disallow setTimeout.
+requirement: {
+  type: BANNED_NAME
+  value: 'window.setTimeout'
+  error_message: 'setTimeout has several drawbacks, most of '
+                 'all difficulty canceling it. Please use '
+                 'shaka.util.Timer instead.'
+  whitelist_regexp: 'demo/'
+  whitelist_regexp: 'test/'
+  whitelist_regexp: 'lib/util/delayed_tick.js'
+}
+requirement: {
+  type: BANNED_NAME
+  value: 'setTimeout'
+  error_message: 'setTimeout has several drawbacks, most of '
+                 'all difficulty canceling it. Please use '
+                 'shaka.util.Timer instead.'
   whitelist_regexp: 'demo/'
   whitelist_regexp: 'test/'
 }
 
 
-# Disallow eval, except when testing for ES6 syntax in demo
+# Disallow eval, except when testing for modern JS syntax in demo
 requirement: {
   type: BANNED_NAME
   value: 'window.eval'
   error_message: 'Using "eval" is not allowed'
-  whitelist_regexp: 'demo/load.js'
-  whitelist_regexp: 'demo/main.js'
+  whitelist_regexp: 'demo/demo_utils.js'
+  whitelist_regexp: 'node_modules/google-closure-library/closure/goog/base.js'
+  whitelist_regexp: 'test/util/functional_unit.js'
 }
 requirement: {
   type: BANNED_NAME
   value: 'eval'
   error_message: 'Using "eval" is not allowed'
-  whitelist_regexp: 'demo/load.js'
-  whitelist_regexp: 'demo/main.js'
+  whitelist_regexp: 'demo/demo_utils.js'
+  whitelist_regexp: 'node_modules/google-closure-library/closure/goog/base.js'
+  whitelist_regexp: 'test/util/functional_unit.js'
 }
 
 
 # Disallow ES6 methods.
 requirement: {
   type: BANNED_PROPERTY
-  value: 'Array.prototype.entries'
-  value: 'Array.prototype.keys'
-  value: 'Array.prototype.values'
-  value: 'Array.prototype.find'
-  value: 'Array.prototype.findIndex'
-  value: 'Array.prototype.copyWithin'
-  value: 'Array.prototype.fill'
-  value: 'Array.prototype.includes'
-  error_message: 'ES6 Array methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_NAME
-  value: 'Array.from'
-  value: 'Array.of'
-  error_message: 'ES6 Array methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_PROPERTY
-  value: 'String.prototype.startsWith'
-  value: 'String.prototype.endsWith'
-  value: 'String.prototype.includes'
-  error_message: 'ES6 String methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_PROPERTY
   value: 'ArrayBuffer.prototype.slice'
   error_message: 'ArrayBuffer.slice is not allowed because it '
                  'is not supported on Tizen 2016'
 }
+
+# Disallow the general use of fetch, which is not available on all supported
+# platforms.
 requirement: {
-  type: BANNED_PROPERTY
-  value: 'TypedArray.prototype.slice'
-  error_message: 'TypedArray.slice is not allowed because it '
-                 'is not supported on IE11'
-}
-requirement: {
-  type: BANNED_NAME
-  value: 'ArrayBuffer.isView'
-  error_message: 'ES6 ArrayBuffer methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_NAME
-  value: 'Int8Array.of'
-  value: 'Int8Array.from'
-  value: 'Uint8Array.of'
-  value: 'Uint8Array.from'
-  value: 'Uint8ClampedArray.of'
-  value: 'Uint8ClampedArray.from'
-  value: 'Int16Array.of'
-  value: 'Int16Array.from'
-  value: 'Uint16Array.of'
-  value: 'Uint16Array.from'
-  value: 'Int32Array.of'
-  value: 'Int32Array.from'
-  value: 'Uint32Array.of'
-  value: 'Uint32Array.from'
-  value: 'Float32Array.of'
-  value: 'Float32Array.from'
-  value: 'Float64Array.of'
-  value: 'Float64Array.from'
-  error_message: 'ES6 TypedArray methods are not allowed '
-                 'because they are not supported in IE11'
-}
-requirement: {
-  type: BANNED_NAME
-  value: 'Map'
-  value: 'WeakMap'
-  value: 'Set'
-  value: 'WeakSet'
-  error_message: 'ES6 Maps and Sets are not allowed '
-                 'because they are not supported in IE11'
+  type: BANNED_NAME_CALL
+  value: 'fetch'
+  value: 'window.fetch'
+  error_message: 'Using "fetch" directly is not allowed; '
+                 'use shaka.test.Util.fetch or NetworkingEngine.request '
+                 'instead.'
+  whitelist_regexp: 'lib/net/http_fetch_plugin.js'
 }

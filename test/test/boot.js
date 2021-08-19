@@ -1,25 +1,25 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('goog.asserts');
+goog.require('shaka.Player');
+goog.require('shaka.log');
+goog.require('shaka.polyfill');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.Platform');
+
+// If ENABLE_DEBUG_LOADER is not set to false, goog.require() will try to load
+// extra sources on-the-fly using pre-computed pathes in deps.js, which is not
+// applicable for the tests.
+goog['ENABLE_DEBUG_LOADER'] = false;
 
 /**
  * Gets the value of an argument passed from karma.
  * @param {string} name
- * @return {?string|boolean}
+ * @return {?}
  */
 function getClientArg(name) {
   if (window.__karma__ && __karma__.config.args.length) {
@@ -29,11 +29,9 @@ function getClientArg(name) {
   }
 }
 
-
-// Executed before test utilities and tests are loaded, but after Shaka Player
-// is loaded in uncompiled mode.
-(function() {
-  let realAssert = console.assert.bind(console);
+function failTestsOnFailedAssertions() {
+  // eslint-disable-next-line no-restricted-syntax
+  const realAssert = console.assert.bind(console);
 
   /**
    * A version of assert() which hooks into jasmine and converts all failed
@@ -46,17 +44,44 @@ function getClientArg(name) {
     if (!condition) {
       message = message || 'Assertion failed.';
       console.error(message);
-      try {
-        throw new Error(message);
-      } catch (exception) {
-        fail(message);
-      }
+      fail(message);
     }
   }
   goog.asserts.assert = jasmineAssert;
   console.assert = /** @type {?} */(jasmineAssert);
+}
 
-  // As of Feb 2018, this is only implemented in Chrome.
+/**
+ * Patches a function on Element to fail an assertion if we use a namespaced
+ * name on it.  We should use the namespace-aware versions instead.
+ */
+function failTestsOnNamespacedElementOrAttributeNames() {
+  const patchElementNamespaceFunction = (name) => {
+    // eslint-disable-next-line no-restricted-syntax
+    const real = Element.prototype[name];
+    /** @this {Element} */
+    // eslint-disable-next-line no-restricted-syntax
+    Element.prototype[name] = function(arg) {
+      // Ignore xml: namespaces since it's builtin.
+      if (!arg.startsWith('xml:') && !arg.startsWith('xmlns:') &&
+          arg.includes(':')) {
+        fail('Use namespace-aware ' + name);
+      }
+      // eslint-disable-next-line no-restricted-syntax
+      return real.apply(this, arguments);
+    };
+  };
+
+  patchElementNamespaceFunction('getAttribute');
+  patchElementNamespaceFunction('hasAttribute');
+  patchElementNamespaceFunction('getElementsByTagName');
+}
+
+/**
+ * Listen for unhandled Promise rejections (which may occur after a test) and
+ * convert them into test failures.
+ */
+function failTestsOnUnhandledRejections() {
   // https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection
   window.addEventListener('unhandledrejection', (event) => {
     /** @type {?} */
@@ -70,161 +95,316 @@ function getClientArg(name) {
     }
     fail(message);
   });
+}
 
-  // Use a RegExp if --specFilter is set, else empty string will match all.
-  let specFilterRegExp = new RegExp(getClientArg('specFilter') || '');
+/**
+ * Scrollbars ruin our screenshots, in particular on Safari.  Disable all
+ * scrollbars in CSS to ensure consistent screenshots.
+ */
+function disableScrollbars() {
+  // In the past, we had applied fixed offsets to the width on Safari to account
+  // for scrollbars and correct the scaling factor, but this was a hack and
+  // inconsistent.  The best thing to do is completely disable scrollbars
+  // through CSS.  This ensures that neither the inner iframe nor the top-level
+  // window have scrollbars, which makes screenshots on Safari consistent across
+  // versions.
 
-  /**
-   * A filter over all Jasmine specs.
-   * @param {jasmine.Spec} spec
-   * @return {boolean}
-   */
-  function specFilter(spec) {
-    // If the browser is not supported, don't run the tests.
-    // If the user specified a RegExp, only run the matched tests.
-    // Running zero tests is considered an error so the test run will fail on
-    // unsupported browsers or if the filter doesn't match any specs.
-    return shaka.Player.isBrowserSupported() &&
-        specFilterRegExp.test(spec.getFullName());
+  // Disable scrolling on the inner document, the execution context.
+  const innerStyle = document.createElement('style');
+  innerStyle.innerText = '::-webkit-scrollbar { display: none; }\n';
+  innerStyle.innerText += 'body { overflow: hidden }\n';
+  document.head.appendChild(innerStyle);
+
+  try {
+    // Disable scrolling on the outer document, the host context.
+    const outerStyle = document.createElement('style');
+    outerStyle.innerText = innerStyle.innerText;
+    top.document.head.appendChild(outerStyle);
+
+    // eslint-disable-next-line no-restricted-syntax
+  } catch (error) {
+    // On some platforms (Chromecast, Tizen), we are prevented from accessing
+    // the host context, even though it should be in the same origin.  Ignore
+    // errors here, so that the rest of the critical boot sequence can complete.
   }
-  jasmine.getEnv().specFilter = specFilter;
+}
 
-  // The spec filter callback occurs before calls to beforeAll, so we need to
-  // install polyfills here to ensure that browser support is correctly
-  // detected.
-  shaka.polyfill.installAll();
+/**
+ * Work around issues with legacy Edge's Promise implementation.
+ */
+function workAroundLegacyEdgePromiseIssues() {
+  // Jasmine's clock mocks seem to interfere with legacy Edge's Promise
+  // implementation.  This is only the case if Promises are first used after
+  // installing the mock.  As long as a then() callback on a Promise has
+  // happened once beforehand, it seems to be OK.  I suspect Edge's Promise
+  // implementation is actually not in native code, but rather something like a
+  // polyfill that binds to timer calls the first time it needs to schedule
+  // something.
+  Promise.resolve().then(() => {});
+}
 
-  // Jasmine's clock mocks seem to interfere with Edge's Promise implementation.
-  // This is only the case if Promises are first used after installing the mock.
-  // As long as a then() callback on a Promise has happened once beforehand, it
-  // seems to be OK.  I suspect Edge's Promise implementation is actually not in
-  // native code, but rather something like a polyfill that binds to timer calls
-  // the first time it needs to schedule something.
-  Promise.resolve().then(function() {});
+/**
+ * Returns a Jasmine callback which shims the real callback and checks for
+ * a certain condition.  The test will only be run if the condition is true.
+ *
+ * @param {jasmine.Callback} callback  The test callback.
+ * @param {function():*} cond
+ * @param {?string} skipMessage  The message used when skipping a test; or
+ *   null to not use pending().  This should only be null for before/after
+ *   blocks.
+ * @return {jasmine.Callback}
+ */
+function filterShim(callback, cond, skipMessage) {
+  return async () => {
+    const val = await cond();
+    if (!val) {
+      if (skipMessage) {
+        pending(skipMessage);
+      }
+      return;
+    }
 
-  // Set the default timeout to 120s for all asynchronous tests.
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
+    if (callback.length) {
+      // If this has a done callback, wrap in a Promise so we can await it.
+      await new Promise((resolve) => callback(resolve));
+    } else {
+      // If this is an async test, this will wait for it to complete; if this
+      // is a synchronous test, await will do nothing.
+      await callback();
+    }
+  };
+}
 
-  let logLevel = getClientArg('logLevel');
+/**
+ * Run a test that uses a DRM license server.
+ *
+ * @param {string} name
+ * @param {jasmine.Callback} callback
+ */
+window.drmIt = (name, callback) => {
+  const shim = filterShim(
+      callback, () => getClientArg('drm'),
+      'Skipping tests that use a DRM license server.');
+  it(name, shim);
+};
+
+/**
+ * Run a test that has been quarantined.
+ *
+ * @param {string} name
+ * @param {jasmine.Callback} callback
+ */
+window.quarantinedIt = (name, callback) => {
+  const shim = filterShim(
+      callback, () => getClientArg('quarantined'),
+      'Skipping tests that are quarantined.');
+  it(name, shim);
+};
+
+/**
+ * Run contained tests when the condition is true.
+ *
+ * @param {string} describeName  The name of the describe() block.
+ * @param {function():*} cond A function for the condition; if this returns
+ *   a truthy value, the tests will run, falsy will skip the tests.
+ * @param {function()} describeBody The body of the describe() block.  This
+ *   function will call before/after/it functions to define tests.
+ */
+window.filterDescribe = (describeName, cond, describeBody) => {
+  describe(describeName, () => {
+    const old = {};
+    for (const methodName of ['fit', 'it']) {
+      old[methodName] = window[methodName];
+      window[methodName] = (testName, testBody, ...rest) => {
+        const shim = filterShim(
+            testBody, cond, 'Skipping test due to platform support');
+        return old[methodName](testName, shim, ...rest);
+      };
+    }
+    const otherNames = ['afterAll', 'afterEach', 'beforeAll', 'beforeEach'];
+    for (const methodName of otherNames) {
+      old[methodName] = window[methodName];
+      window[methodName] = (body, ...rest) => {
+        const shim = filterShim(body, cond, null);
+        return old[methodName](shim, ...rest);
+      };
+    }
+
+    describeBody();
+
+    for (const methodName in old) {
+      window[methodName] = old[methodName];
+    }
+  });
+};
+
+/**
+ * Unconditionally skip contained tests that would normally be run
+ * conditionally.  Used to temporarily disable tests that use filterDescribe.
+ * See filterDescribe above.
+ *
+ * @param {string} describeName
+ * @param {function():*} cond
+ * @param {function()} describeBody
+ */
+window.xfilterDescribe = (describeName, cond, describeBody) => {
+  const oldDescribe = window['describe'];
+  window['describe'] = window['xdescribe'];
+  filterDescribe(describeName, cond, describeBody);
+  window['describe'] = oldDescribe;
+};
+
+/**
+ * Load node modules used in testing and install them into window.
+ * @return {!Promise}
+ */
+function loadNodeModules() {
+  return new Promise((resolve) => {
+    // Configure AMD modules and their dependencies.
+    require.config({
+      baseUrl: '/base/node_modules',
+      packages: [
+        {
+          name: 'sprintf-js',
+          main: 'src/sprintf',
+        },
+        {
+          name: 'less',
+          main: 'dist/less',
+        },
+        {
+          name: 'fontfaceonload',
+          main: 'dist/fontfaceonload',
+        },
+      ],
+    });
+
+    // Load required AMD modules, then proceed with tests.
+    require(['sprintf-js', 'less', 'fontfaceonload'],
+        (sprintfJs, less, FontFaceOnload) => {
+          // These external interfaces are declared as "const" in the externs.
+          // Avoid "const"-ness complaints from the compiler by assigning these
+          // using bracket notation.
+          window['sprintf'] = sprintfJs.sprintf;
+          window['less'] = less;
+          window['FontFaceOnload'] = FontFaceOnload;
+
+          resolve();
+        });
+  });
+}
+
+/**
+ * Apply Jasmine settings and set up anything else needed by the testing
+ * environment.
+ */
+function configureJasmineEnvironment() {
+  const timeout = getClientArg('testTimeout');
+  if (timeout) {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = Number(timeout);
+  }
+
+  const logLevel = getClientArg('logLevel');
   if (logLevel) {
     shaka.log.setLevel(Number(logLevel));
   } else {
     shaka.log.setLevel(shaka.log.Level.INFO);
   }
 
-  // Set random and seed if specified.
-  if (getClientArg('random')) {
-    jasmine.getEnv().randomizeTests(true);
-
-    let seed = getClientArg('seed');
-    if (seed) {
-      jasmine.getEnv().seed(seed.toString());
-    }
-  }
-
-  /**
-   * Returns a Jasmine callback which shims the real callback and checks for
-   * a certain client arg.  The test will only be run if that argument is
-   * specified on the command-line.
-   *
-   * @param {jasmine.Callback} callback  The test callback.
-   * @param {string} clientArg  The command-line arg that must be present.
-   * @param {string} skipMessage  The message used when skipping a test.
-   * @return {jasmine.Callback}
-   */
-  function filterShim(callback, clientArg, skipMessage) {
-    return async function() {
-      if (!getClientArg(clientArg)) {
-        pending(skipMessage);
-        return;
-      }
-
-      if (callback.length) {
-        // If this has a done callback, wrap in a Promise so we can await it.
-        await new Promise((resolve) => callback(resolve));
-      } else {
-        // If this is an async test, this will wait for it to complete; if this
-        // is a synchronous test, await will do nothing.
-        await callback();
-      }
-    };
-  }
-
-  /**
-   * Run a test that uses external content.
-   *
-   * @param {string} name
-   * @param {jasmine.Callback} callback
-   */
-  window.externalIt = function(name, callback) {
-    it(name, filterShim(callback, 'external',
-        'Skipping tests that use external content.'));
-  };
-
-  /**
-   * Run a test that uses a DRM license server.
-   *
-   * @param {string} name
-   * @param {jasmine.Callback} callback
-   */
-  window.drmIt = function(name, callback) {
-    it(name, filterShim(callback, 'drm',
-        'Skipping tests that use a DRM license server.'));
-  };
-
-  /**
-   * Run a test that has been quarantined.
-   *
-   * @param {string} name
-   * @param {jasmine.Callback} callback
-   */
-  window.quarantinedIt = function(name, callback) {
-    it(name, filterShim(callback, 'quarantined',
-        'Skipping tests that are quarantined.'));
-  };
-
-  beforeAll((done) => {
-    // Configure AMD modules and their dependencies.
-    require.config({
-      baseUrl: '/base/node_modules',
-      packages: [
-        {
-          name: 'promise-mock',
-          main: 'lib/index',
-        },
-        {
-          name: 'promise-polyfill',  // Used by promise-mock.
-          main: 'lib/index',
-        },
-        {
-          name: 'sprintf-js',
-          main: 'src/sprintf',
-        },
-      ],
-    });
-
-    // Load required AMD modules, then proceed with tests.
-    require(['promise-mock', 'sprintf-js'], (PromiseMock, sprintfJs) => {
-      window.PromiseMock = PromiseMock;
-      window.sprintf = sprintfJs.sprintf;
-
-      // Patch a new convenience method into PromiseMock.
-      // See https://github.com/taylorhakes/promise-mock/issues/7
-      PromiseMock.flush = () => {
-        // Pass strict == false so it does not throw.
-        PromiseMock.runAll(false /* strict */);
-      };
-
-      done();
-    });
+  // Ensure node modules are loaded before any tests execute.
+  beforeAll(async () => {
+    await loadNodeModules();
   });
 
+  const originalSetTimeout = window.setTimeout;
   const delayTests = getClientArg('delayTests');
   if (delayTests) {
-    const originalSetTimeout = window.setTimeout;
-    afterEach((done) => {
-      console.log('DELAYING...');
+    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
+      console.log('Delaying test by ' + delayTests + ' seconds...');
       originalSetTimeout(done, delayTests * 1000);
     });
   }
-})();
+
+  // Work-around: allow the Tizen media pipeline to cool down.
+  // Without this, Tizen's pipeline seems to hang in subsequent tests.
+  // TODO: file a bug on Tizen
+  if (shaka.util.Platform.isTizen()) {
+    afterEach((done) => {  // eslint-disable-line no-restricted-syntax
+      originalSetTimeout(done, /* ms= */ 100);
+    });
+  }
+
+  // Code in karma-jasmine's adapter will malform test failures when the
+  // expectation message contains a stack trace, losing the failure message and
+  // mixing up the stack trace of the failure.  To avoid this, we modify
+  // shaka.util.Error not to create a stack trace.  This trace is not available
+  // in production, and there is never any need for it in the tests.
+  // Shimming shaka.util.Error proved too complicated because of a combination
+  // of compiler restrictions and ES6 language features, so this is by far the
+  // simpler answer.
+  shaka.util.Error.createStack = false;
+
+  // Shim Jasmine's execute function.  The karma-jasmine adapter will configure
+  // jasmine in a way that prevents us from setting our own specFilter config.
+  // There is no configuration that will stop karma-jasmine from doing this.
+  // So we hook into Jasmine's execute function (the last step of
+  // karma-jasmine's startup) to set our own config first.
+  // See also https://github.com/karma-runner/karma-jasmine/issues/273
+  /** @type {!jasmine.Env} */
+  const jasmineEnv = jasmine.getEnv();
+  // eslint-disable-next-line no-restricted-syntax
+  const originalJasmineExecute = jasmineEnv.execute.bind(jasmineEnv);
+  jasmineEnv.execute = () => {
+    // Use a RegExp if --filter is set, else empty string will match all.
+    const specFilterRegExp = new RegExp(getClientArg('filter') || '');
+    const isBrowserSupported = shaka.Player.isBrowserSupported();
+
+    /**
+     * A filter over all Jasmine specs.
+     * @param {jasmine.Spec} spec
+     * @return {boolean}
+     */
+    function specFilter(spec) {
+      // If the browser is not supported, don't run the tests.
+      // If the user specified a RegExp, only run the matched tests.
+      // Running zero tests is considered an error so the test run will fail on
+      // unsupported browsers or if the filter doesn't match any specs.
+      return isBrowserSupported && specFilterRegExp.test(spec.getFullName());
+    }
+
+    // Set jasmine config.
+    const jasmineConfig = {
+      specFilter,
+      random: !!getClientArg('random'),
+      seed: getClientArg('seed'),
+    };
+
+    jasmineEnv.configure(jasmineConfig);
+    originalJasmineExecute();
+  };
+}
+
+// Executed before test utilities and tests are loaded, but after Shaka Player
+// is loaded in uncompiled mode.
+try {
+  failTestsOnFailedAssertions();
+  failTestsOnNamespacedElementOrAttributeNames();
+  failTestsOnUnhandledRejections();
+  disableScrollbars();
+  workAroundLegacyEdgePromiseIssues();
+
+  // The spec filter callback occurs before calls to beforeAll, so we need to
+  // install polyfills here to ensure that browser support is correctly
+  // detected.
+  shaka.polyfill.installAll();
+
+  configureJasmineEnvironment();
+
+  // eslint-disable-next-line no-restricted-syntax
+} catch (error) {
+  // Throw this boot-sequence error in place of jasmine's execute method, to
+  // fail clearly and right away without running any tests.
+  jasmine.getEnv().execute = () => {
+    throw error;
+  };
+}

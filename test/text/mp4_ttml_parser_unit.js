@@ -1,21 +1,15 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('Mp4TtmlParser', function() {
+goog.require('shaka.test.Util');
+goog.require('shaka.text.Mp4TtmlParser');
+goog.require('shaka.util.BufferUtils');
+goog.require('shaka.util.Error');
+
+describe('Mp4TtmlParser', () => {
   const ttmlInitSegmentUri = '/base/test/test/assets/ttml-init.mp4';
   const ttmlSegmentUri = '/base/test/test/assets/ttml-segment.mp4';
   const ttmlSegmentMultipleMDATUri =
@@ -31,68 +25,156 @@ describe('Mp4TtmlParser', function() {
   /** @type {!Uint8Array} */
   let audioInitSegment;
 
-  beforeAll(function(done) {
-    Promise.all([
+  beforeAll(async () => {
+    const responses = await Promise.all([
       shaka.test.Util.fetch(ttmlInitSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentUri),
       shaka.test.Util.fetch(ttmlSegmentMultipleMDATUri),
       shaka.test.Util.fetch(audioInitSegmentUri),
-    ]).then(function(responses) {
-      ttmlInitSegment = new Uint8Array(responses[0]);
-      ttmlSegment = new Uint8Array(responses[1]);
-      ttmlSegmentMultipleMDAT = new Uint8Array(responses[2]);
-      audioInitSegment = new Uint8Array(responses[3]);
-    }).catch(fail).then(done);
+    ]);
+    ttmlInitSegment = shaka.util.BufferUtils.toUint8(responses[0]);
+    ttmlSegment = shaka.util.BufferUtils.toUint8(responses[1]);
+    ttmlSegmentMultipleMDAT = shaka.util.BufferUtils.toUint8(responses[2]);
+    audioInitSegment = shaka.util.BufferUtils.toUint8(responses[3]);
   });
 
-  it('parses init segment', function() {
+  it('parses init segment', () => {
     new shaka.text.Mp4TtmlParser().parseInit(ttmlInitSegment);
   });
 
-  it('parses media segment', function() {
-    let parser = new shaka.text.Mp4TtmlParser();
-    parser.parseInit(ttmlInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let ret = parser.parseMedia(ttmlSegment, time);
-    expect(ret.length).toBe(10);
-  });
 
-  it('handles media segments with multiple mdats', function() {
-    let parser = new shaka.text.Mp4TtmlParser();
+  it('handles media segments with multiple mdats', () => {
+    const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    let time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time);
     expect(ret.length).toBe(20);
   });
 
-  it('accounts for offset', function() {
-    let time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    let time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0};
+  it('accounts for offset', () => {
+    const time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0};
 
-    let parser = new shaka.text.Mp4TtmlParser();
+    const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
 
-    let ret1 = parser.parseMedia(ttmlSegment, time1);
+    const ret1 = parser.parseMedia(ttmlSegment, time1);
     expect(ret1.length).toBeGreaterThan(0);
 
-    let ret2 = parser.parseMedia(ttmlSegment, time2);
+    const ret2 = parser.parseMedia(ttmlSegment, time2);
     expect(ret2.length).toBeGreaterThan(0);
 
-    expect(ret2[0].startTime).toEqual(ret1[0].startTime + 7);
-    expect(ret2[0].endTime).toEqual(ret1[0].endTime + 7);
+    expect(ret2[0].startTime).toBe(ret1[0].startTime + 7);
+    expect(ret2[0].endTime).toBe(ret1[0].endTime + 7);
   });
 
-  it('rejects init segment with no ttml', function() {
-    let error = new shaka.util.Error(
+  it('rejects init segment with no ttml', () => {
+    const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,
         shaka.util.Error.Category.TEXT,
-        shaka.util.Error.Code.INVALID_MP4_TTML);
+        shaka.util.Error.Code.INVALID_MP4_TTML));
 
-    try {
-      new shaka.text.Mp4TtmlParser().parseInit(audioInitSegment);
-      fail('Mp4 file with no ttml supported');
-    } catch (e) {
-      shaka.test.Util.expectToEqualError(e, error);
-    }
+    expect(() => new shaka.text.Mp4TtmlParser().parseInit(audioInitSegment))
+        .toThrow(error);
   });
+
+  it('parses media segment', () => {
+    const cues = [
+      {
+        startTime: 23,
+        endTime: 24.5,
+        payload: 'You\'re a jerk, Thom.',
+      },
+      {
+        startTime: 25,
+        endTime: 27,
+        payload: 'Look Celia, we have to follow our passions;',
+      },
+      {
+        startTime: 27,
+        endTime: 30.5,
+        nestedCues: [{
+          payload: '...you have your robotics, and I',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'just want to be awesome in space.',
+        }],
+      },
+      {
+        startTime: 30.8,
+        endTime: 34,
+        nestedCues: [{
+          payload: 'Why don\'t you just admit that',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'you\'re freaked out by my robot hand?',
+        }],
+      },
+      {
+        startTime: 34.5,
+        endTime: 36,
+        payload: 'I\'m not freaked out by- it\'s...',
+      },
+      {
+        startTime: 37,
+        endTime: 38,
+        payload: '...alright! Fine!',
+      },
+      {
+        startTime: 38,
+        endTime: 41,
+        nestedCues: [{
+          payload: 'I\'m freaked out! I have nightmares',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'that I\'m being chased...',
+        }],
+      },
+      {
+        startTime: 41,
+        endTime: 42,
+        payload: '...by these giant robotic claws of death...',
+      },
+      {
+        startTime: 42.2,
+        endTime: 45,
+        nestedCues: [{
+          payload: '"Fourty years later"',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'Whatever, Thom. We\'re done.',
+        }],
+      },
+      {
+        startTime: 50,
+        endTime: 53.5,
+        payload: 'Robot\'s memory synced and locked!',
+      },
+    ];
+    const parser = new shaka.text.Mp4TtmlParser();
+    parser.parseInit(ttmlInitSegment);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const result = parser.parseMedia(ttmlSegment, time);
+    verifyHelper(cues, result);
+  });
+
+  function verifyHelper(/** !Array */ expected, /** !Array */ actual) {
+    const mapExpected = (cue) => {
+      if (cue.region) {
+        cue.region = jasmine.objectContaining(cue.region);
+      }
+
+      if (cue.nestedCues) {
+        cue.nestedCues = cue.nestedCues.map(mapExpected);
+      }
+
+      return jasmine.objectContaining(cue);
+    };
+
+    expect(actual).toEqual(expected.map(mapExpected));
+  }
 });

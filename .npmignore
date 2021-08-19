@@ -1,6 +1,8 @@
+!core
 .git
 .gitattributes
 .gitignore
 *.pyc
 docs/api/
 coverage/
+test/test/assets/screenshots/

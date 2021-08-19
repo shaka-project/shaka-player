@@ -9,7 +9,7 @@ and make a bad change.
 First, let's change `manifestUri` by removing the last letter.
 
 ```js
-var manifestUri =
+const manifestUri =
     'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mp';
 ```
 
@@ -138,7 +138,7 @@ Error code 1001 object shaka.util.Error  myapp.js:48
 ```
 
 So much more information!  We can now see that the failed HEAD request caused
-load() to fail.
+`load()` to fail.
 
 
 #### Advanced: Loading the uncompiled library
@@ -168,7 +168,7 @@ without rebuilding.
 ```html
   <head>
     <!-- Closure base: -->
-    <script src="third_party/closure/goog/base.js"></script>
+    <script src="node_modules/google-closure-library/closure/goog/base.js"></script>
     <!-- Deps file: -->
     <script src="dist/deps.js"></script>
     <!-- Shaka Player uncompiled library: -->

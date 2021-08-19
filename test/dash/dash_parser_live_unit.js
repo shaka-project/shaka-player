@@ -1,25 +1,26 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('DashParser Live', function() {
+goog.require('goog.asserts');
+goog.require('shaka.dash.DashParser');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.net.NetworkingEngine');
+goog.require('shaka.test.FakeNetworkingEngine');
+goog.require('shaka.test.ManifestParser');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.PlayerConfiguration');
+goog.require('shaka.util.StringUtils');
+goog.requireType('shaka.util.PublicPromise');
+
+describe('DashParser Live', () => {
   const Util = shaka.test.Util;
   const ManifestParser = shaka.test.ManifestParser;
 
-  const realTimeout = window.setTimeout;
   const oldNow = Date.now;
   const updateTime = 5;
   const originalUri = 'http://example.com/';
@@ -32,60 +33,47 @@ describe('DashParser Live', function() {
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
 
-  beforeEach(function() {
-    // First, fake the clock so we can control timers.
-    // This does not mock Date.now, which must be done separately.
-    jasmine.clock().install();
-    // This Promise mock is required for fakeEventLoop.
-    PromiseMock.install();
-
-    let retry = shaka.net.NetworkingEngine.defaultRetryParameters();
+  beforeEach(() => {
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
     parser = new shaka.dash.DashParser();
-    parser.configure({
-      retryParameters: retry,
-      availabilityWindowOverride: NaN,
-      dash: {
-        clockSyncUri: '',
-        customScheme: function(node) { return null; },
-        ignoreDrmInfo: false,
-        xlinkFailGracefully: false,
-        defaultPresentationDelay: 10,
-      },
-    });
+    parser.configure(shaka.util.PlayerConfiguration.createDefault().manifest);
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterNewPeriod: function() {},
-      filterAllPeriods: function() {},
+      filter: (manifest) => Promise.resolve(),
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
+      isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
     };
   });
 
-  afterEach(function() {
+  afterEach(() => {
     // Dash parser stop is synchronous.
     parser.stop();
-
-    // Uninstall the clock() first.  This also undoes mockDate(), and should be
-    // done afterEach, not afterAll.  Otherwise, we get conflicts when some
-    // tests use mockDate() and others directly overwrite Date.now.
-    jasmine.clock().uninstall();
-    // Replace Date.now with the browser built-in.  This must come AFTER we
-    // uninstall the clock() module, or else mockDate() doesn't get cleaned up
-    // correctly.
     Date.now = oldNow;
-    // Finally, uninstall the Promise mock.
-    PromiseMock.uninstall();
-    // TODO: Clean up this suite so that everyone uses mockDate().
   });
 
   /**
-   * Simulate time to trigger a manifest update.
+   * Trigger a manifest update.
+   * @suppress {accessControls}
    */
-  function delayForUpdatePeriod() {
-    // Tick the virtual clock to trigger an update and resolve all Promises.
-    Util.fakeEventLoop(updateTime);
+  async function updateManifest() {
+    if (parser.updateTimer_) {
+      parser.updateTimer_.tickNow();
+    }
+    await Util.shortDelay();  // Allow update to complete.
+  }
+
+  /**
+   * Gets a spy on the function that sets the update period.
+   * @return {!jasmine.Spy}
+   * @suppress {accessControls}
+   */
+  function updateTickSpy() {
+    return spyOn(parser.updateTimer_, 'tickAfter');
   }
 
   /**
@@ -97,11 +85,11 @@ describe('DashParser Live', function() {
    * @return {string}
    */
   function makeSimpleLiveManifestText(lines, updateTime, duration) {
-    let updateAttr = updateTime != null ?
+    const updateAttr = updateTime != null ?
         'minimumUpdatePeriod="PT' + updateTime + 'S"' : '';
-    let durationAttr = duration != undefined ?
+    const durationAttr = duration != undefined ?
         'duration="PT' + duration + 'S"' : '';
-    let template = [
+    const template = [
       '<MPD type="dynamic" %(updateAttr)s',
       '    availabilityStartTime="1970-01-01T00:00:00Z">',
       '  <Period id="1" %(durationAttr)s>',
@@ -114,13 +102,35 @@ describe('DashParser Live', function() {
       '  </Period>',
       '</MPD>',
     ].join('\n');
-    let text = sprintf(template, {
+    const text = sprintf(template, {
       updateAttr: updateAttr,
       durationAttr: durationAttr,
       contents: lines.join('\n'),
       updateTime: updateTime,
     });
     return text;
+  }
+
+  /**
+   * Make clones of a list of references so that they can be modified without
+   * affecting the originals.
+   *
+   * @param {!Array.<!shaka.media.SegmentReference>} references
+   * @return {!Array.<!shaka.media.SegmentReference>}
+   */
+  function cloneRefs(references) {
+    return references.map((ref) => {
+      return new shaka.media.SegmentReference(
+          ref.startTime,
+          ref.endTime,
+          ref.getUrisInner,
+          ref.startByte,
+          ref.endByte,
+          ref.initSegmentReference,
+          ref.timestampOffset,
+          ref.appendWindowStart,
+          ref.appendWindowEnd);
+    });
   }
 
   /**
@@ -138,7 +148,6 @@ describe('DashParser Live', function() {
     /**
      * Tests that an update will show the given references.
      *
-     * @param {function()} done
      * @param {!Array.<string>} firstLines The Representation contents for the
      *   first manifest.
      * @param {!Array.<!shaka.media.SegmentReference>} firstReferences The media
@@ -148,42 +157,36 @@ describe('DashParser Live', function() {
      * @param {!Array.<!shaka.media.SegmentReference>} secondReferences The
      *   media references for the updated manifest.
      */
-    function testBasicUpdate(
-        done, firstLines, firstReferences, secondLines, secondReferences) {
-      let firstManifest = makeSimpleLiveManifestText(firstLines, updateTime);
-      let secondManifest = makeSimpleLiveManifestText(secondLines, updateTime);
+    async function testBasicUpdate(
+        firstLines, firstReferences, secondLines, secondReferences) {
+      const firstManifest = makeSimpleLiveManifestText(firstLines, updateTime);
+      const secondManifest =
+          makeSimpleLiveManifestText(secondLines, updateTime);
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': firstManifest});
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            let stream = manifest.periods[0].variants[0].video;
-            ManifestParser.verifySegmentIndex(stream, firstReferences);
-            expect(manifest.periods.length).toBe(1);
+      fakeNetEngine.setResponseText('dummy://foo', firstManifest);
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(stream, firstReferences);
 
-            fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
-            delayForUpdatePeriod();
-            ManifestParser.verifySegmentIndex(stream, secondReferences);
-            // In https://github.com/google/shaka-player/issues/963, we
-            // duplicated periods during the first update.  This check covers
-            // this case.
-            expect(manifest.periods.length).toBe(1);
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      fakeNetEngine.setResponseText('dummy://foo', secondManifest);
+      await updateManifest();
+      ManifestParser.verifySegmentIndex(stream, secondReferences);
     }
 
-    it('basic support', function(done) {
-      testBasicUpdate(done, basicLines, basicRefs, updateLines, updateRefs);
+    it('basic support', async () => {
+      await testBasicUpdate(basicLines, basicRefs, updateLines, updateRefs);
     });
 
-    it('new manifests don\'t need to include old references', function(done) {
-      testBasicUpdate(
-          done, basicLines, basicRefs, partialUpdateLines, updateRefs);
+    it('new manifests don\'t need to include old references', async () => {
+      await testBasicUpdate(
+          basicLines, basicRefs, partialUpdateLines, updateRefs);
     });
 
-    it('evicts old references for single-period live stream', function(done) {
-      let template = [
+    it('evicts old references for single-period live stream', async () => {
+      const template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
-        '    timeShiftBufferDepth="PT1S"',
+        '    timeShiftBufferDepth="PT30S"',
         '    suggestedPresentationDelay="PT5S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1">',
@@ -196,36 +199,38 @@ describe('DashParser Live', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let text = sprintf(
+      const text = sprintf(
           template, {updateTime: updateTime, contents: basicLines.join('\n')});
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': text});
-      Date.now = function() { return 0; };
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(manifest).toBeTruthy();
-            let stream = manifest.periods[0].variants[0].video;
-            expect(stream).toBeTruthy();
+      fakeNetEngine.setResponseText('dummy://foo', text);
+      Date.now = () => 0;
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
-            expect(stream.findSegmentPosition).toBeTruthy();
-            expect(stream.findSegmentPosition(0)).toBe(1);
-            ManifestParser.verifySegmentIndex(stream, basicRefs);
+      expect(manifest).toBeTruthy();
+      const stream = manifest.variants[0].video;
+      expect(stream).toBeTruthy();
 
-            // 15 seconds for @timeShiftBufferDepth and the first segment
-            // duration.
-            Date.now = function() { return 2 * 15 * 1000; };
-            delayForUpdatePeriod();
-            // The first reference should have been evicted.
-            expect(stream.findSegmentPosition(0)).toBe(2);
-            ManifestParser.verifySegmentIndex(stream, basicRefs.slice(1));
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      await stream.createSegmentIndex();
+      expect(stream.segmentIndex).toBeTruthy();
+      const firstPosition = stream.segmentIndex.find(0);
+      ManifestParser.verifySegmentIndex(stream, basicRefs);
+
+      // The 30 second availability window is initially full in all cases
+      // (SegmentTemplate+Timeline, etc.)  The first segment is always 10
+      // seconds long in all of these cases.  So 11 seconds after the
+      // manifest was parsed, the first segment should have fallen out of
+      // the availability window.
+      Date.now = () => 11 * 1000;
+      await updateManifest();
+      // The first reference should have been evicted.
+      expect(stream.segmentIndex.find(0)).toBe(firstPosition + 1);
+      ManifestParser.verifySegmentIndex(stream, basicRefs.slice(1));
     });
 
-    it('evicts old references for multi-period live stream', function(done) {
-      let template = [
+    it('evicts old references for multi-period live stream', async () => {
+      const template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
-        '    timeShiftBufferDepth="PT1S"',
+        '    timeShiftBufferDepth="PT60S"',
         '    suggestedPresentationDelay="PT5S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1">',
@@ -248,43 +253,56 @@ describe('DashParser Live', function() {
       ].join('\n');
       // Set the period start to the sum of the durations of the references
       // in the previous period.
-      let durs = basicRefs.map(function(r) { return r.endTime - r.startTime; });
-      let pStart = durs.reduce(function(p, d) { return p + d; }, 0);
-      let args = {
+      const durs = basicRefs.map((r) => {
+        return r.endTime - r.startTime;
+      });
+      const pStart = durs.reduce((p, d) => p + d, 0);
+      const args = {
         updateTime: updateTime,
         pStart: pStart,
         contents: basicLines.join('\n'),
       };
-      let text = sprintf(template, args);
+      const text = sprintf(template, args);
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': text});
-      Date.now = function() { return 0; };
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            let stream1 = manifest.periods[0].variants[0].video;
-            let stream2 = manifest.periods[1].variants[0].video;
-            ManifestParser.verifySegmentIndex(stream1, basicRefs);
-            ManifestParser.verifySegmentIndex(stream2, basicRefs);
+      fakeNetEngine.setResponseText('dummy://foo', text);
+      Date.now = () => 0;
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
-            // 15 seconds for @timeShiftBufferDepth and the first segment
-            // duration.
-            Date.now = function() { return 2 * 15 * 1000; };
-            delayForUpdatePeriod();
-            // The first reference should have been evicted.
-            ManifestParser.verifySegmentIndex(stream1, basicRefs.slice(1));
-            ManifestParser.verifySegmentIndex(stream2, basicRefs);
+      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      const period1Refs = cloneRefs(basicRefs);
+      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      const period2Refs = cloneRefs(basicRefs);
+      for (const ref of period2Refs) {
+        ref.timestampOffset = pStart;
+        ref.startTime += pStart;
+        ref.endTime += pStart;
+        ref.trueEndTime += pStart;
+      }
+      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      const allRefs = period1Refs.concat(period2Refs);
 
-            // Same as above, but 1 period length later
-            Date.now = function() { return (2 * 15 + pStart) * 1000; };
-            delayForUpdatePeriod();
-            ManifestParser.verifySegmentIndex(stream1, []);
-            ManifestParser.verifySegmentIndex(stream2, basicRefs.slice(1));
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      const stream1 = manifest.variants[0].video;
+      await stream1.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(stream1, allRefs);
+
+      // The 60 second availability window is initially full in all cases
+      // (SegmentTemplate+Timeline, etc.)  The first segment is always 10
+      // seconds long in all of these cases.  So 11 seconds after the
+      // manifest was parsed, the first segment should have fallen out of
+      // the availability window.
+      Date.now = () => 11 * 1000;
+      await updateManifest();
+      // The first reference should have been evicted.
+      ManifestParser.verifySegmentIndex(stream1, allRefs.slice(1));
+
+      // Same as above, but 1 period length later
+      Date.now = () => (11 + pStart) * 1000;
+      await updateManifest();
+      ManifestParser.verifySegmentIndex(stream1, period2Refs.slice(1));
     });
 
-    it('sets infinite duration for single-period live streams', function(done) {
-      let template = [
+    it('sets infinite duration for single-period live streams', async () => {
+      const template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT1S"',
         '    suggestedPresentationDelay="PT5S"',
@@ -299,22 +317,19 @@ describe('DashParser Live', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let text = sprintf(
+      const text = sprintf(
           template, {updateTime: updateTime, contents: basicLines.join('\n')});
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': text});
-      Date.now = function() { return 0; };
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(manifest.periods.length).toBe(1);
-            let timeline = manifest.presentationTimeline;
-            expect(timeline.getDuration()).toBe(Infinity);
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      fakeNetEngine.setResponseText('dummy://foo', text);
+      Date.now = () => 0;
+      const manifest = await parser.start('dummy://foo', playerInterface);
+
+      const timeline = manifest.presentationTimeline;
+      expect(timeline.getDuration()).toBe(Infinity);
     });
 
-    it('sets infinite duration for multi-period live streams', function(done) {
-      let template = [
+    it('sets infinite duration for multi-period live streams', async () => {
+      const template = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT%(updateTime)dS"',
         '    timeShiftBufferDepth="PT1S"',
         '    suggestedPresentationDelay="PT5S"',
@@ -337,72 +352,98 @@ describe('DashParser Live', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let text = sprintf(
+      const text = sprintf(
           template, {updateTime: updateTime, contents: basicLines.join('\n')});
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': text});
-      Date.now = function() { return 0; };
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(manifest.periods.length).toBe(2);
-            expect(manifest.periods[1].startTime).toBe(60);
-            let timeline = manifest.presentationTimeline;
-            expect(timeline.getDuration()).toBe(Infinity);
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      fakeNetEngine.setResponseText('dummy://foo', text);
+      Date.now = () => 0;
+      const manifest = await parser.start('dummy://foo', playerInterface);
+
+      const timeline = manifest.presentationTimeline;
+      expect(timeline.getDuration()).toBe(Infinity);
     });
   }
 
-  it('can add Periods', function(done) {
-    let lines = [
-      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
-    ];
-    let template = [
+  it('can add Periods', async () => {
+    const template1 = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
       '    suggestedPresentationDelay="PT5S"',
       '    minimumUpdatePeriod="PT%(updateTime)dS">',
-      '  <Period id="4">',
+      '  <Period id="1">',
       '    <AdaptationSet mimeType="video/mp4">',
-      '      <Representation id="6" bandwidth="500">',
+      '      <Representation id="1" bandwidth="500">',
       '        <BaseURL>http://example.com</BaseURL>',
-      '%(contents)s',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" r="1" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>',
     ].join('\n');
-    let secondManifest =
-        sprintf(template, {updateTime: updateTime, contents: lines.join('\n')});
-    let firstManifest = makeSimpleLiveManifestText(lines, updateTime);
+    const template2 = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
+      '    minimumUpdatePeriod="PT%(updateTime)dS">',
+      '  <Period id="1" duration="PT10S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" r="4" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period id="2">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="2" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" r="1" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    const firstManifest = sprintf(template1, {updateTime: updateTime});
+    const secondManifest = sprintf(template2, {updateTime: updateTime});
 
-    let filterNewPeriod = jasmine.createSpy('filterNewPeriod');
-    playerInterface.filterNewPeriod = Util.spyFunc(filterNewPeriod);
+    fakeNetEngine.setResponseText('dummy://foo', firstManifest);
+    // First two segments should exist
+    Date.now = () => 5;
 
-    let filterAllPeriods = jasmine.createSpy('filterAllPeriods');
-    playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    const stream = variant.video;
+    await stream.createSegmentIndex();
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': firstManifest});
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest.periods.length).toBe(1);
-          // Should call filterAllPeriods for parsing the first manifest
-          expect(filterNewPeriod.calls.count()).toBe(0);
-          expect(filterAllPeriods.calls.count()).toBe(1);
+    // First two segments exist, but not the third.
+    expect(stream.segmentIndex.find(3)).not.toBe(null);
+    expect(stream.segmentIndex.find(5)).toBe(null);
 
-          fakeNetEngine.setResponseMapAsText({'dummy://foo': secondManifest});
-          delayForUpdatePeriod();
+    fakeNetEngine.setResponseText('dummy://foo', secondManifest);
+    // First period (10s) is complete, plus first two segments of next period
+    Date.now = () => 15;
 
-          // Should update the same manifest object.
-          expect(manifest.periods.length).toBe(2);
-          // Should call filterNewPeriod for parsing the new manifest
-          expect(filterAllPeriods.calls.count()).toBe(1);
-          expect(filterNewPeriod.calls.count()).toBe(1);
-        }).catch(fail).then(done);
-    PromiseMock.flush();
+    await updateManifest();
+
+    // The update should have affected the same variant object we captured
+    // before.  Now the entire first period should exist (0-10s), plus the next
+    // two segments (10-14s).
+    expect(stream.segmentIndex.find(9)).not.toBe(null);
+    expect(stream.segmentIndex.find(13)).not.toBe(null);
   });
 
-  it('uses redirect URL for manifest BaseURL', function(done) {
-    let template = [
+  it('uses redirect URL for manifest BaseURL and updates', async () => {
+    const template = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
       '    suggestedPresentationDelay="PT5S"',
       '    minimumUpdatePeriod="PT%(updateTime)dS">',
@@ -421,9 +462,9 @@ describe('DashParser Live', function() {
       '  </Period>',
       '</MPD>',
     ].join('\n');
-    let manifestText = sprintf(template, {updateTime: updateTime});
-    let manifestData = shaka.util.StringUtils.toUTF8(manifestText);
-    let redirectedUri = 'http://redirected.com/';
+    const manifestText = sprintf(template, {updateTime: updateTime});
+    const manifestData = shaka.util.StringUtils.toUTF8(manifestText);
+    const redirectedUri = 'http://redirected.com/';
 
     // The initial manifest request will be redirected.
     fakeNetEngine.request.and.returnValue(
@@ -432,181 +473,140 @@ describe('DashParser Live', function() {
           data: manifestData,
         }));
 
-    parser.start(originalUri, playerInterface)
-        .then(function(manifest) {
-          // The manifest request was made to the original URL.
-          expect(fakeNetEngine.request.calls.count()).toBe(1);
-          let netRequest = fakeNetEngine.request.calls.argsFor(0)[1];
-          expect(netRequest.uris).toEqual([originalUri]);
+    const manifest = await parser.start(originalUri, playerInterface);
 
-          // Since the manifest request was redirected, the segment refers to
-          // the redirected base.
-          let stream = manifest.periods[0].variants[0].video;
-          let segmentUri = stream.getSegmentReference(1).getUris()[0];
-          expect(segmentUri).toBe(redirectedUri + 's1.mp4');
-        }).catch(fail).then(done);
-    PromiseMock.flush();
+    // The manifest request was made to the original URL.
+    // But includes a redirect
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+    const netRequest = fakeNetEngine.request.calls.argsFor(0)[1];
+    expect(netRequest.uris).toEqual([redirectedUri, originalUri]);
+
+    // Since the manifest request was redirected, the segment refers to
+    // the redirected base.
+    const stream = manifest.variants[0].video;
+    await stream.createSegmentIndex();
+    goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+    const ref = Array.from(stream.segmentIndex)[0];
+    const segmentUri = ref.getUris()[0];
+    expect(segmentUri).toBe(redirectedUri + 's1.mp4');
   });
 
-  it('calls the error callback if an update fails', function(done) {
-    let lines = [
-      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
-    ];
-    let manifest = makeSimpleLiveManifestText(lines, updateTime);
-    let onError = jasmine.createSpy('onError');
-    playerInterface.onError = Util.spyFunc(onError);
-
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(fakeNetEngine.request.calls.count()).toBe(1);
-
-          let error = new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.NETWORK,
-              shaka.util.Error.Code.BAD_HTTP_STATUS);
-          let operation = shaka.util.AbortableOperation.failed(error);
-          fakeNetEngine.request.and.returnValue(operation);
-
-          delayForUpdatePeriod();
-          expect(onError.calls.count()).toBe(1);
-        }).catch(fail).then(done);
-    PromiseMock.flush();
-  });
-
-  it('uses @minimumUpdatePeriod', function(done) {
-    let lines = [
-      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
-    ];
-    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
-    let manifest = makeSimpleLiveManifestText(lines, updateTime);
-
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(fakeNetEngine.request.calls.count()).toBe(1);
-          expect(manifest).toBeTruthy();
-
-          let partialTime = updateTime * 1000 * 3 / 4;
-          let remainingTime = updateTime * 1000 - partialTime;
-          jasmine.clock().tick(partialTime);
-          PromiseMock.flush();
-
-          // Update period has not passed yet.
-          expect(fakeNetEngine.request.calls.count()).toBe(1);
-          jasmine.clock().tick(remainingTime);
-          PromiseMock.flush();
-
-          // Update period has passed.
-          expect(fakeNetEngine.request.calls.count()).toBe(2);
-        }).catch(fail).then(done);
-    PromiseMock.flush();
-  });
-
-  it('still updates when @minimumUpdatePeriod is zero', function(done) {
-    let lines = [
-      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
-    ];
-    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
-    let manifest = makeSimpleLiveManifestText(lines, /* updateTime */ 0);
-
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toBeTruthy();
-          fakeNetEngine.request.calls.reset();
-
-          let waitTimeMs = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'] * 1000;
-          jasmine.clock().tick(waitTimeMs);
-          PromiseMock.flush();
-
-          // Update period has passed.
-          expect(fakeNetEngine.request).toHaveBeenCalled();
-        }).catch(fail).then(done);
-    PromiseMock.flush();
-  });
-
-  it('does not update when @minimumUpdatePeriod is missing', function(done) {
-    let lines = [
-      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
-    ];
-    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
-    let manifest = makeSimpleLiveManifestText(lines, /* updateTime */ null);
-
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toBeTruthy();
-          fakeNetEngine.request.calls.reset();
-
-          let waitTimeMs = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'] * 1000;
-          jasmine.clock().tick(waitTimeMs * 2);
-          PromiseMock.flush();
-
-          // Even though we have waited longer than the minimum update period,
-          // the missing attribute means "do not update".  So no update should
-          // have happened.
-          expect(fakeNetEngine.request).not.toHaveBeenCalled();
-        }).catch(fail).then(done);
-    PromiseMock.flush();
-  });
-
-  it('delays subsequent updates when an update is slow', function(done) {
-    // For this test, we want Date.now() to follow the ticks of the fake clock.
-    jasmine.clock().mockDate();
-
+  it('calls the error callback if an update fails', async () => {
     const lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
+    const manifestText = makeSimpleLiveManifestText(lines, updateTime);
+    /** @type {!jasmine.Spy} */
+    const onError = jasmine.createSpy('onError');
+    playerInterface.onError = Util.spyFunc(onError);
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    await parser.start('dummy://foo', playerInterface);
+
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+
+    const error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.BAD_HTTP_STATUS);
+    const operation = shaka.util.AbortableOperation.failed(error);
+    fakeNetEngine.request.and.returnValue(operation);
+
+    await updateManifest();
+    expect(onError).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses @minimumUpdatePeriod', async () => {
+    const lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+    ];
+    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
+    const manifestText = makeSimpleLiveManifestText(lines, updateTime);
+
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
+    Date.now = () => 0;
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    await parser.start('dummy://foo', playerInterface);
+
+    expect(tickAfter).toHaveBeenCalledTimes(1);
+    const delay = tickAfter.calls.mostRecent().args[0];
+    expect(delay).toBe(updateTime);
+  });
+
+  it('still updates when @minimumUpdatePeriod is zero', async () => {
+    const lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+    ];
+    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
+    const manifestText = makeSimpleLiveManifestText(lines, /* updateTime= */ 0);
+
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
+    Date.now = () => 0;
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    await parser.start('dummy://foo', playerInterface);
+
+    const waitTime = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'];
+    expect(tickAfter).toHaveBeenCalledTimes(1);
+    const delay = tickAfter.calls.mostRecent().args[0];
+    expect(delay).toBe(waitTime);
+  });
+
+  it('does not update when @minimumUpdatePeriod is missing', async () => {
+    const lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+    ];
+    // updateTime parameter sets @minimumUpdatePeriod in the manifest.
+    const manifestText =
+        makeSimpleLiveManifestText(lines, /* updateTime= */ null);
+
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    await parser.start('dummy://foo', playerInterface);
+
+    expect(tickAfter).not.toHaveBeenCalled();
+  });
+
+  it('delays subsequent updates when an update is slow', async () => {
+    const lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
+    ];
+    const extraWaitTime = 15.0;
     const idealUpdateTime = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'];
     const manifestText = makeSimpleLiveManifestText(lines, idealUpdateTime);
 
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
-    parser.start('dummy://foo', playerInterface).then((manifest) => {
-      fakeNetEngine.request.calls.reset();
+    let now = 0;
+    Date.now = () => now;
+    /** @type {!jasmine.Spy} */
+    const tickAfter = updateTickSpy();
 
-      // Make the first update take a long time.
-      const delay = fakeNetEngine.delayNextRequest();
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {!shaka.util.PublicPromise} */
+    const delay = fakeNetEngine.delayNextRequest();
+    const p = parser.start('dummy://foo', playerInterface);
+    now += extraWaitTime * 1000;  // Make the update appear to take longer.
+    delay.resolve();
+    await p;
 
-      // Wait for the update to start.
-      jasmine.clock().tick(idealUpdateTime * 1000);
-      PromiseMock.flush();
-
-      // Update period has passed, so an update has been requested.
-      expect(fakeNetEngine.request).toHaveBeenCalled();
-      fakeNetEngine.request.calls.reset();
-
-      // Make the update take an extra 15 seconds, then end the delay.
-      const extraWaitTimeMs = 15.0;
-      jasmine.clock().tick(extraWaitTimeMs * 1000);
-      delay.resolve();
-      PromiseMock.flush();
-      // No new calls, since we are still working on the same one.
-      expect(fakeNetEngine.request).not.toHaveBeenCalled();
-      fakeNetEngine.request.calls.reset();
-
-      // From now on, the updates should be farther apart.
-      jasmine.clock().tick(idealUpdateTime * 1000);
-      PromiseMock.flush();
-      // The update should not have happened yet.
-      expect(fakeNetEngine.request).not.toHaveBeenCalled();
-      fakeNetEngine.request.calls.reset();
-
-      // After waiting the extra time, the update request should fire.
-      jasmine.clock().tick(extraWaitTimeMs * 1000);
-      PromiseMock.flush();
-      expect(fakeNetEngine.request).toHaveBeenCalled();
-    }).catch(fail).then(done);
-    PromiseMock.flush();
+    // Check the last update was scheduled close to how long the update took.
+    const realDelay = tickAfter.calls.mostRecent().args[0];
+    expect(realDelay).toBeCloseTo(extraWaitTime, 0);
   });
 
-  it('uses Mpd.Location', function(done) {
-    let manifestText = [
+  it('uses Mpd.Location', async () => {
+    const manifestText = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
       '    suggestedPresentationDelay="PT5S"',
       '    minimumUpdatePeriod="PT' + updateTime + 'S">',
       '  <Location>http://foobar</Location>',
       '  <Location>http://foobar2</Location>',
+      '  <Location>foobar3</Location>',
       '  <Period id="1" duration="PT10S">',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation id="3" bandwidth="500">',
@@ -616,32 +616,33 @@ describe('DashParser Live', function() {
       '  </Period>',
       '</MPD>',
     ].join('\n');
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifestText});
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
     const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(fakeNetEngine.request.calls.count()).toBe(1);
-          fakeNetEngine.expectRequest('dummy://foo', manifestRequest);
-          fakeNetEngine.request.calls.reset();
+    await parser.start('dummy://foo', playerInterface);
 
-          // Create a mock so we can verify it gives two URIs.
-          fakeNetEngine.request.and.callFake(function(type, request) {
-            expect(type).toBe(manifestRequest);
-            expect(request.uris).toEqual(['http://foobar', 'http://foobar2']);
-            let data = shaka.util.StringUtils.toUTF8(manifestText);
-            return shaka.util.AbortableOperation.completed(
-                {uri: request.uris[0], data: data, headers: {}});
-          });
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+    fakeNetEngine.expectRequest('dummy://foo', manifestRequest);
+    fakeNetEngine.request.calls.reset();
 
-          delayForUpdatePeriod();
-          expect(fakeNetEngine.request.calls.count()).toBe(1);
-        }).catch(fail).then(done);
-    PromiseMock.flush();
+    // Create a mock so we can verify it gives two URIs.
+    // The third location is a relative url, and should be resolved as an
+    // absolute url.
+    fakeNetEngine.request.and.callFake((type, request) => {
+      expect(type).toBe(manifestRequest);
+      expect(request.uris).toEqual(
+          ['http://foobar', 'http://foobar2', 'dummy://foo/foobar3']);
+      const data = shaka.util.StringUtils.toUTF8(manifestText);
+      return shaka.util.AbortableOperation.completed(
+          {uri: request.uris[0], data: data, headers: {}});
+    });
+
+    await updateManifest();
+    expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
   });
 
-  it('uses @suggestedPresentationDelay', function(done) {
-    let manifest = [
+  it('uses @suggestedPresentationDelay', async () => {
+    const manifestText = [
       '<MPD type="dynamic" suggestedPresentationDelay="PT60S"',
       '    minimumUpdatePeriod="PT5S"',
       '    timeShiftBufferDepth="PT2M"',
@@ -657,30 +658,67 @@ describe('DashParser Live', function() {
       '  </Period>',
       '</MPD>',
     ].join('\n');
-    fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
-    Date.now = function() { return 600000; /* 10 minutes */ };
-    parser.start('dummy://foo', playerInterface)
-        .then(function(manifest) {
-          expect(manifest).toBeTruthy();
-          let timeline = manifest.presentationTimeline;
-          expect(timeline).toBeTruthy();
+    Date.now = () => 600000; /* 10 minutes */
+    const manifest = await parser.start('dummy://foo', playerInterface);
 
-          //  We are 5 minutes into the presentation, with a
-          //  @timeShiftBufferDepth of 120 seconds and a @maxSegmentDuration of
-          //  10 seconds, the start will be 2:50.
-          expect(timeline.getSegmentAvailabilityStart()).toBe(170);
-          // Normally the end should be 4:50; but with a 60 second
-          // @suggestedPresentationDelay it will be 3:50 minutes.
-          expect(timeline.getSegmentAvailabilityEnd()).toBe(290);
-          expect(timeline.getSeekRangeEnd()).toBe(230);
-        }).catch(fail).then(done);
-    PromiseMock.flush();
+    expect(manifest).toBeTruthy();
+    const timeline = manifest.presentationTimeline;
+    expect(timeline).toBeTruthy();
+
+    //  We are 5 minutes into the presentation, with a
+    //  @timeShiftBufferDepth of 120 seconds and a @maxSegmentDuration of
+    //  10 seconds, the start will be 2:50.
+    expect(timeline.getSegmentAvailabilityStart()).toBe(170);
+    // Normally the end should be 4:50; but with a 60 second
+    // @suggestedPresentationDelay it will be 3:50 minutes.
+    expect(timeline.getSegmentAvailabilityEnd()).toBe(290);
+    expect(timeline.getSeekRangeEnd()).toBe(230);
   });
 
-  describe('availabilityWindowOverride', function() {
-    it('overrides @timeShiftBufferDepth', function(done) {
-      let manifest = [
+  it('parses availabilityTimeOffset', async () => {
+    const manifestText = [
+      '<MPD type="dynamic" suggestedPresentationDelay="PT0S"',
+      '    minimumUpdatePeriod="PT5S"',
+      '    timeShiftBufferDepth="PT2M"',
+      '    maxSegmentDuration="PT10S"',
+      '    availabilityStartTime="1970-01-01T00:05:00Z">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '         <BaseURL availabilityTimeOffset="6">http://example.com',
+      '         </BaseURL>',
+      '         <SegmentTemplate availabilityTimeOffset="6.00" ',
+      '          startNumber="1" media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    playerInterface.isLowLatencyMode = () => true;
+
+    Date.now = () => 600000; /* 10 minutes */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    expect(manifest).toBeTruthy();
+    const timeline = manifest.presentationTimeline;
+    expect(timeline).toBeTruthy();
+
+    //  We are 5 minutes into the presentation, with a @timeShiftBufferDepth of
+    //  120 seconds and a @maxSegmentDuration of 10 seconds, the start will be
+    //  2:50. With the availabilityTimeOffset of 6+6 seconds, it will be 3:02.
+    expect(timeline.getSegmentAvailabilityStart()).toBe(182);
+    // Normally the end should be 4:50; with the availabilityTimeOffset of
+    // 12 seconds, it will be 5:02.
+    expect(timeline.getSegmentAvailabilityEnd()).toBe(302);
+    expect(timeline.getSeekRangeEnd()).toBe(302);
+  });
+
+  describe('availabilityWindowOverride', () => {
+    it('overrides @timeShiftBufferDepth', async () => {
+      const manifestText = [
         '<MPD type="dynamic" suggestedPresentationDelay="PT60S"',
         '    minimumUpdatePeriod="PT5S"',
         '    timeShiftBufferDepth="PT2M"',
@@ -696,40 +734,30 @@ describe('DashParser Live', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+      fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
-      parser.configure({
-        retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
-        availabilityWindowOverride: 4 * 60,
-        dash: {
-          clockSyncUri: '',
-          customScheme: function(node) { return null; },
-          ignoreDrmInfo: false,
-          xlinkFailGracefully: false,
-          defaultPresentationDelay: 10,
-        },
-      });
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.availabilityWindowOverride = 4 * 60;
+      parser.configure(config);
 
-      Date.now = function() { return 600000; /* 10 minutes */ };
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(manifest).toBeTruthy();
-            let timeline = manifest.presentationTimeline;
-            expect(timeline).toBeTruthy();
+      Date.now = () => 600000; /* 10 minutes */
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
-            // The parser was configured to have a manifest availability window
-            // of 4 minutes.
-            let end = timeline.getSegmentAvailabilityEnd();
-            let start = timeline.getSegmentAvailabilityStart();
-            expect(end - start).toEqual(4 * 60);
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      expect(manifest).toBeTruthy();
+      const timeline = manifest.presentationTimeline;
+      expect(timeline).toBeTruthy();
+
+      // The parser was configured to have a manifest availability window
+      // of 4 minutes.
+      const end = timeline.getSegmentAvailabilityEnd();
+      const start = timeline.getSegmentAvailabilityStart();
+      expect(end - start).toBe(4 * 60);
     });
   });
 
-  describe('maxSegmentDuration', function() {
-    it('uses @maxSegmentDuration', function(done) {
-      let manifest = [
+  describe('maxSegmentDuration', () => {
+    it('uses @maxSegmentDuration', async () => {
+      const manifestText = [
         '<MPD type="dynamic" suggestedPresentationDelay="PT0S"',
         '    minimumUpdatePeriod="PT5S"',
         '    timeShiftBufferDepth="PT2M"',
@@ -745,22 +773,19 @@ describe('DashParser Live', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
+      fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
-      Date.now = function() { return 600000; /* 10 minutes */ };
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(manifest).toBeTruthy();
-            let timeline = manifest.presentationTimeline;
-            expect(timeline).toBeTruthy();
-            expect(timeline.getSegmentAvailabilityStart()).toBe(165);
-            expect(timeline.getSegmentAvailabilityEnd()).toBe(285);
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      Date.now = () => 600000; /* 10 minutes */
+      const manifest = await parser.start('dummy://foo', playerInterface);
+
+      expect(manifest).toBeTruthy();
+      const timeline = manifest.presentationTimeline;
+      expect(timeline).toBeTruthy();
+      expect(timeline.getMaxSegmentDuration()).toBe(15);
     });
 
-    it('derived from SegmentTemplate w/ SegmentTimeline', function(done) {
-      let lines = [
+    it('derived from SegmentTemplate w/ SegmentTimeline', async () => {
+      const lines = [
         '<SegmentTemplate media="s$Number$.mp4">',
         '  <SegmentTimeline>',
         '    <S t="0" d="7" />',
@@ -769,28 +794,28 @@ describe('DashParser Live', function() {
         '  </SegmentTimeline>',
         '</SegmentTemplate>',
       ];
-      testDerived(lines, done);
+      await testDerived(lines);
     });
 
-    it('derived from SegmentTemplate w/ @duration', function(done) {
-      let lines = [
+    it('derived from SegmentTemplate w/ @duration', async () => {
+      const lines = [
         '<SegmentTemplate media="s$Number$.mp4" duration="8" />',
       ];
-      testDerived(lines, done);
+      await testDerived(lines);
     });
 
-    it('derived from SegmentList', function(done) {
-      let lines = [
+    it('derived from SegmentList', async () => {
+      const lines = [
         '<SegmentList duration="8">',
         '  <SegmentURL media="s1.mp4" />',
         '  <SegmentURL media="s2.mp4" />',
         '</SegmentList>',
       ];
-      testDerived(lines, done);
+      await testDerived(lines);
     });
 
-    it('derived from SegmentList w/ SegmentTimeline', function(done) {
-      let lines = [
+    it('derived from SegmentList w/ SegmentTimeline', async () => {
+      const lines = [
         '<SegmentList duration="8">',
         '  <SegmentTimeline>',
         '    <S t="0" d="5" />',
@@ -801,11 +826,11 @@ describe('DashParser Live', function() {
         '  <SegmentURL media="s2.mp4" />',
         '</SegmentList>',
       ];
-      testDerived(lines, done);
+      await testDerived(lines);
     });
 
-    function testDerived(lines, done) {
-      let template = [
+    async function testDerived(lines) {
+      const template = [
         '<MPD type="dynamic" suggestedPresentationDelay="PT0S"',
         '    minimumUpdatePeriod="PT5S"',
         '    timeShiftBufferDepth="PT2M"',
@@ -820,32 +845,29 @@ describe('DashParser Live', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      let manifest = sprintf(template, {contents: lines.join('\n')});
+      const manifestText = sprintf(template, {contents: lines.join('\n')});
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-      Date.now = function() { return 600000; /* 10 minutes */ };
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(manifest).toBeTruthy();
-            let timeline = manifest.presentationTimeline;
-            expect(timeline).toBeTruthy();
+      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      Date.now = () => 600000; /* 10 minutes */
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
-            // NOTE: the largest segment is 8 seconds long in each test.
-            expect(timeline.getSegmentAvailabilityStart()).toBe(172);
-            expect(timeline.getSegmentAvailabilityEnd()).toBe(292);
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      expect(manifest).toBeTruthy();
+      const timeline = manifest.presentationTimeline;
+      expect(timeline).toBeTruthy();
+
+      // NOTE: the largest segment is 8 seconds long in each test.
+      expect(timeline.getMaxSegmentDuration()).toBe(8);
     }
-  });
+  });  // describe('maxSegmentDuration')
 
-  describe('stop', function() {
+  describe('stop', () => {
     const manifestRequestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
     const dateRequestType = shaka.net.NetworkingEngine.RequestType.TIMING;
     const manifestUri = 'dummy://foo';
     const dateUri = 'http://foo.bar/date';
 
-    beforeEach(function() {
-      let manifest = [
+    beforeEach(() => {
+      const manifest = [
         '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
         '    minimumUpdatePeriod="PT' + updateTime + 'S">',
         '  <UTCTiming schemeIdUri="urn:mpeg:dash:utc:http-xsdate:2014"',
@@ -863,105 +885,98 @@ describe('DashParser Live', function() {
         '  </Period>',
         '</MPD>',
       ].join('\n');
-      fakeNetEngine.setResponseMapAsText({
-        'http://foo.bar/date': '1970-01-01T00:00:30Z',
-        'dummy://foo': manifest,
-      });
+      fakeNetEngine
+          .setResponseText('http://foo.bar/date', '1970-01-01T00:00:30Z')
+          .setResponseText('dummy://foo', manifest);
     });
 
-    it('stops updates', function(done) {
-      parser.start(manifestUri, playerInterface)
-          .then(function(manifest) {
-            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
-            fakeNetEngine.request.calls.reset();
+    it('stops updates', async () => {
+      await parser.start(manifestUri, playerInterface);
 
-            parser.stop();
-            delayForUpdatePeriod();
-            expect(fakeNetEngine.request).not.toHaveBeenCalled();
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+      fakeNetEngine.request.calls.reset();
+
+      parser.stop();
+      await updateManifest();
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
     });
 
-    it('stops initial parsing', function(done) {
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(manifest).toBe(null);
-            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
-            fakeNetEngine.request.calls.reset();
-            delayForUpdatePeriod();
-            // An update should not occur.
-            expect(fakeNetEngine.request).not.toHaveBeenCalled();
-          }).catch(fail).then(done);
-
+    it('stops initial parsing', async () => {
+      const expectation =
+          expectAsync(parser.start('dummy://foo', playerInterface))
+              .toBeRejected();
       // start will only begin the network request, calling stop here will be
       // after the request has started but before any parsing has been done.
-      expect(fakeNetEngine.request.calls.count()).toBe(1);
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       parser.stop();
-      PromiseMock.flush();
+      await expectation;
+
+      fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+      fakeNetEngine.request.calls.reset();
+      await updateManifest();
+      // An update should not occur.
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
     });
 
-    it('interrupts manifest updates', function(done) {
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(manifest).toBeTruthy();
-            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
-            fakeNetEngine.request.calls.reset();
-            let delay = fakeNetEngine.delayNextRequest();
+    it('interrupts manifest updates', async () => {
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
-            delayForUpdatePeriod();
-            // The request was made but should not be resolved yet.
-            expect(fakeNetEngine.request.calls.count()).toBe(1);
-            fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
-            fakeNetEngine.request.calls.reset();
-            parser.stop();
-            delay.resolve();
-            PromiseMock.flush();
+      expect(manifest).toBeTruthy();
+      fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+      fakeNetEngine.request.calls.reset();
+      /** @type {!shaka.util.PublicPromise} */
+      const delay = fakeNetEngine.delayNextRequest();
 
-            // Wait for another update period.
-            delayForUpdatePeriod();
-            // A second update should not occur.
-            expect(fakeNetEngine.request).not.toHaveBeenCalled();
-          }).catch(fail).then(done);
-      PromiseMock.flush();
+      await updateManifest();
+      // The request was made but should not be resolved yet.
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+      fakeNetEngine.request.calls.reset();
+      parser.stop();
+      delay.resolve();
+
+      // Wait for another update period.
+      await updateManifest();
+      // A second update should not occur.
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
     });
 
-    it('interrupts UTCTiming requests', function(done) {
+    it('interrupts UTCTiming requests', async () => {
       /** @type {!shaka.util.PublicPromise} */
       let delay = fakeNetEngine.delayNextRequest();
+      const expectation =
+          expectAsync(parser.start('dummy://foo', playerInterface))
+              .toBeRejected();
 
-      Util.delay(0.2, realTimeout).then(function() {
-        // This is the initial manifest request.
-        expect(fakeNetEngine.request.calls.count()).toBe(1);
-        fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
-        fakeNetEngine.request.calls.reset();
-        // Resolve the manifest request and wait on the UTCTiming request.
-        delay.resolve();
-        delay = fakeNetEngine.delayNextRequest();
-        return Util.delay(0.2, realTimeout);
-      }).then(function() {
-        // This is the first UTCTiming request.
-        expect(fakeNetEngine.request.calls.count()).toBe(1);
-        fakeNetEngine.expectRequest(dateUri, dateRequestType);
-        fakeNetEngine.request.calls.reset();
-        // Interrupt the parser, then fail the request.
-        parser.stop();
-        delay.reject();
-        return Util.delay(0.1, realTimeout);
-      }).then(function() {
-        // Wait for another update period.
-        delayForUpdatePeriod();
+      await Util.shortDelay();
+      // This is the initial manifest request.
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest(manifestUri, manifestRequestType);
+      fakeNetEngine.request.calls.reset();
+      // Resolve the manifest request and wait on the UTCTiming request.
+      delay.resolve();
+      delay = fakeNetEngine.delayNextRequest();
+      await Util.shortDelay();
 
-        // No more updates should occur.
-        expect(fakeNetEngine.request).not.toHaveBeenCalled();
-      }).catch(fail).then(done);
+      // This is the first UTCTiming request.
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest(dateUri, dateRequestType);
+      fakeNetEngine.request.calls.reset();
+      // Interrupt the parser, then fail the request.
+      parser.stop();
+      delay.reject();
+      await expectation;
 
-      parser.start('dummy://foo', playerInterface).catch(fail);
-      PromiseMock.flush();
+      // Wait for another update period.
+      await updateManifest();
+
+      // No more updates should occur.
+      expect(fakeNetEngine.request).not.toHaveBeenCalled();
     });
   });
 
-  describe('SegmentTemplate w/ SegmentTimeline', function() {
-    let basicLines = [
+  describe('SegmentTemplate w/ SegmentTimeline', () => {
+    const basicLines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4">',
       '  <SegmentTimeline>',
       '    <S d="10" t="0" />',
@@ -970,12 +985,12 @@ describe('DashParser Live', function() {
       '  </SegmentTimeline>',
       '</SegmentTemplate>',
     ];
-    let basicRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
+    const basicRefs = [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
     ];
-    let updateLines = [
+    const updateLines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4">',
       '  <SegmentTimeline>',
       '    <S d="10" t="0" />',
@@ -985,13 +1000,13 @@ describe('DashParser Live', function() {
       '  </SegmentTimeline>',
       '</SegmentTemplate>',
     ];
-    let updateRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 30, 40, originalUri),
+    const updateRefs = [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 30, 40, originalUri),
     ];
-    let partialUpdateLines = [
+    const partialUpdateLines = [
       '<SegmentTemplate startNumber="3" media="s$Number$.mp4">',
       '  <SegmentTimeline>',
       '    <S d="15" t="15" />',
@@ -1004,8 +1019,8 @@ describe('DashParser Live', function() {
         basicLines, basicRefs, updateLines, updateRefs, partialUpdateLines);
   });
 
-  describe('SegmentList w/ SegmentTimeline', function() {
-    let basicLines = [
+  describe('SegmentList w/ SegmentTimeline', () => {
+    const basicLines = [
       '<SegmentList>',
       '  <SegmentURL media="s1.mp4" />',
       '  <SegmentURL media="s2.mp4" />',
@@ -1017,12 +1032,12 @@ describe('DashParser Live', function() {
       '  </SegmentTimeline>',
       '</SegmentList>',
     ];
-    let basicRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
+    const basicRefs = [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
     ];
-    let updateLines = [
+    const updateLines = [
       '<SegmentList>',
       '  <SegmentURL media="s1.mp4" />',
       '  <SegmentURL media="s2.mp4" />',
@@ -1036,13 +1051,13 @@ describe('DashParser Live', function() {
       '  </SegmentTimeline>',
       '</SegmentList>',
     ];
-    let updateRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 30, 40, originalUri),
+    const updateRefs = [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 30, 40, originalUri),
     ];
-    let partialUpdateLines = [
+    const partialUpdateLines = [
       '<SegmentList startNumber="3">',
       '  <SegmentURL media="s3.mp4" />',
       '  <SegmentURL media="s4.mp4" />',
@@ -1057,20 +1072,20 @@ describe('DashParser Live', function() {
         basicLines, basicRefs, updateLines, updateRefs, partialUpdateLines);
   });
 
-  describe('SegmentList w/ @duration', function() {
-    let basicLines = [
+  describe('SegmentList w/ @duration', () => {
+    const basicLines = [
       '<SegmentList duration="10">',
       '  <SegmentURL media="s1.mp4" />',
       '  <SegmentURL media="s2.mp4" />',
       '  <SegmentURL media="s3.mp4" />',
       '</SegmentList>',
     ];
-    let basicRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 20, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 20, 30, originalUri),
+    const basicRefs = [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 20, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 20, 30, originalUri),
     ];
-    let updateLines = [
+    const updateLines = [
       '<SegmentList duration="10">',
       '  <SegmentURL media="s1.mp4" />',
       '  <SegmentURL media="s2.mp4" />',
@@ -1078,13 +1093,13 @@ describe('DashParser Live', function() {
       '  <SegmentURL media="s4.mp4" />',
       '</SegmentList>',
     ];
-    let updateRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 20, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 20, 30, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 30, 40, originalUri),
+    const updateRefs = [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 20, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 20, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 30, 40, originalUri),
     ];
-    let partialUpdateLines = [
+    const partialUpdateLines = [
       '<SegmentList startNumber="3" duration="10">',
       '  <SegmentURL media="s3.mp4" />',
       '  <SegmentURL media="s4.mp4" />',
@@ -1095,30 +1110,40 @@ describe('DashParser Live', function() {
         basicLines, basicRefs, updateLines, updateRefs, partialUpdateLines);
   });
 
-  describe('SegmentTemplate w/ duration', function() {
-    let templateLines = [
+  describe('SegmentTemplate w/ duration', () => {
+    const templateLines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
 
-    it('produces sane references without assertions', function(done) {
-      let manifest = makeSimpleLiveManifestText(templateLines, updateTime);
+    it('produces sane references without assertions', async () => {
+      const manifestText =
+          makeSimpleLiveManifestText(templateLines, updateTime);
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': manifest});
-      parser.start('dummy://foo', playerInterface).then(function(manifest) {
-        expect(manifest.periods.length).toBe(1);
-        let stream = manifest.periods[0].variants[0].video;
+      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+      const manifest = await parser.start('dummy://foo', playerInterface);
 
-        // In https://github.com/google/shaka-player/issues/1204, this
-        // failed an assertion and returned endTime == 0.
-        let ref = stream.getSegmentReference(1);
-        expect(ref.endTime).toBeGreaterThan(0);
-      }).catch(fail).then(done);
-      PromiseMock.flush();
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
+
+      const liveEdge =
+          manifest.presentationTimeline.getSegmentAvailabilityEnd();
+
+      // In https://github.com/google/shaka-player/issues/1204, a get on the
+      // final segment failed an assertion and returned endTime == 0.
+      // Find the last segment by looking just before the live edge.  Looking
+      // right on the live edge creates test flake, and the segments are 2
+      // seconds in duration.
+      const idx = stream.segmentIndex.find(liveEdge - 0.5);
+      goog.asserts.assert(idx != null, 'Live edge not found!');
+
+      // This should not throw an assertion.
+      const ref = stream.segmentIndex.get(idx);
+      // The segment's endTime should definitely not be 0.
+      expect(ref.endTime).toBeGreaterThan(0);
     });
   });
 
-
-  describe('EventStream', function() {
+  describe('EventStream', () => {
     const originalManifest = [
       '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
       '    availabilityStartTime="1970-01-01T00:00:00Z">',
@@ -1130,7 +1155,8 @@ describe('DashParser Live', function() {
       '    </EventStream>',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation bandwidth="1">',
-      '        <SegmentBase indexRange="100-200" />',
+      '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+      '                         duration="2" />',
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -1140,42 +1166,38 @@ describe('DashParser Live', function() {
     /** @type {!jasmine.Spy} */
     let onTimelineRegionAddedSpy;
 
-    beforeEach(function() {
+    beforeEach(() => {
       onTimelineRegionAddedSpy = jasmine.createSpy('onTimelineRegionAdded');
       playerInterface.onTimelineRegionAdded =
           shaka.test.Util.spyFunc(onTimelineRegionAddedSpy);
     });
 
-    it('will parse EventStream nodes', function(done) {
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': originalManifest});
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
+    it('will parse EventStream nodes', async () => {
+      fakeNetEngine.setResponseText('dummy://foo', originalManifest);
+      await parser.start('dummy://foo', playerInterface);
 
-            expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith({
-              schemeIdUri: 'http://example.com',
-              value: 'foobar',
-              startTime: 10,
-              endTime: 60,
-              id: '',
-              eventElement: jasmine.any(Element),
-            });
-            expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith({
-              schemeIdUri: 'http://example.com',
-              value: 'foobar',
-              startTime: 13,
-              endTime: 23,
-              id: 'abc',
-              eventElement: jasmine.any(Element),
-            });
-          })
-          .catch(fail)
-          .then(done);
-      PromiseMock.flush();
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith({
+        schemeIdUri: 'http://example.com',
+        value: 'foobar',
+        startTime: 10,
+        endTime: 60,
+        id: '',
+        eventElement: jasmine.any(Element),
+      });
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith({
+        schemeIdUri: 'http://example.com',
+        value: 'foobar',
+        startTime: 13,
+        endTime: 23,
+        id: 'abc',
+        eventElement: jasmine.any(Element),
+      });
     });
 
-    it('will add timeline regions on manifest update', function(done) {
-      let newManifest = [
+    it('will add timeline regions on manifest update', async () => {
+      const newManifest = [
         '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
         '    availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1" duration="PT30S">',
@@ -1184,31 +1206,28 @@ describe('DashParser Live', function() {
         '    </EventStream>',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <Representation bandwidth="1">',
-        '        <SegmentBase indexRange="100-200" />',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': originalManifest});
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
-            onTimelineRegionAddedSpy.calls.reset();
+      fakeNetEngine.setResponseText('dummy://foo', originalManifest);
+      await parser.start('dummy://foo', playerInterface);
 
-            fakeNetEngine.setResponseMapAsText({'dummy://foo': newManifest});
-            delayForUpdatePeriod();
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
+      onTimelineRegionAddedSpy.calls.reset();
 
-            expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(1);
-          })
-          .catch(fail)
-          .then(done);
-      PromiseMock.flush();
+      fakeNetEngine.setResponseText('dummy://foo', newManifest);
+      await updateManifest();
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('will not let an event exceed the Period duration', function(done) {
-      let newManifest = [
+    it('will not let an event exceed the Period duration', async () => {
+      const newManifest = [
         '<MPD>',
         '  <Period id="1" duration="PT30S">',
         '    <EventStream schemeIdUri="http://example.com" timescale="1">',
@@ -1218,31 +1237,147 @@ describe('DashParser Live', function() {
         '    </EventStream>',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <Representation bandwidth="1">',
-        '        <SegmentBase indexRange="100-200" />',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
         '</MPD>',
       ].join('\n');
 
-      fakeNetEngine.setResponseMapAsText({'dummy://foo': newManifest});
-      parser.start('dummy://foo', playerInterface)
-          .then(function(manifest) {
-            expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(3);
-            expect(onTimelineRegionAddedSpy)
-                .toHaveBeenCalledWith(
-                    jasmine.objectContaining({startTime: 10, endTime: 25}));
-            expect(onTimelineRegionAddedSpy)
-                .toHaveBeenCalledWith(
-                    jasmine.objectContaining({startTime: 25, endTime: 30}));
-            expect(onTimelineRegionAddedSpy)
-                .toHaveBeenCalledWith(
-                    jasmine.objectContaining({startTime: 30, endTime: 30}));
-          })
-          .catch(fail)
-          .then(done);
-      PromiseMock.flush();
+      fakeNetEngine.setResponseText('dummy://foo', newManifest);
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(3);
+      expect(onTimelineRegionAddedSpy)
+          .toHaveBeenCalledWith(
+              jasmine.objectContaining({startTime: 10, endTime: 25}));
+      expect(onTimelineRegionAddedSpy)
+          .toHaveBeenCalledWith(
+              jasmine.objectContaining({startTime: 25, endTime: 30}));
+      expect(onTimelineRegionAddedSpy)
+          .toHaveBeenCalledWith(
+              jasmine.objectContaining({startTime: 30, endTime: 30}));
+    });
+
+    it('will parse multiple events at same offset', async () => {
+      const newManifest = [
+        '<MPD>',
+        '  <Period id="1" duration="PT30S">',
+        '    <EventStream schemeIdUri="http://example.com" timescale="1">',
+        '      <Event id="1" presentationTime="10" duration="15"/>',
+        '      <Event id="2" presentationTime="10" duration="15"/>',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', newManifest);
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(2);
+      expect(onTimelineRegionAddedSpy)
+          .toHaveBeenCalledWith(
+              jasmine.objectContaining({id: '1', startTime: 10, endTime: 25}));
+      expect(onTimelineRegionAddedSpy)
+          .toHaveBeenCalledWith(
+              jasmine.objectContaining({id: '2', startTime: 10, endTime: 25}));
     });
   });
-});
 
+  it('honors clockSyncUri for in-progress recordings', async () => {
+    const manifestText = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:05:00Z"',
+      '      mediaPresentationDuration="PT3600S">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    // Simulate a realistic clock sync URI.
+    fakeNetEngine.setResponseText('dummy://time', '');
+    fakeNetEngine.setHeaders('dummy://time', {
+      'date': (new Date()).toUTCString(),
+    });
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.dash.clockSyncUri = 'dummy://time';
+    parser.configure(config);
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    // Make sure we're testing what we think we're testing.
+    // This should be seen as in-progress.
+    expect(manifest.presentationTimeline.isInProgress()).toBe(true);
+
+    // Now make sure we made the time sync request.
+    const timingRequest = shaka.net.NetworkingEngine.RequestType.TIMING;
+    fakeNetEngine.expectRequest('dummy://time', timingRequest);
+  });
+
+  it('adds segments to in-progress recordings', async () => {
+    const manifestText = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '      mediaPresentationDuration="PT10S">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    // The presentation started just over 4 seconds ago.  There should be 2
+    // segments so far.
+    Date.now = () => 4.1 * 1000;
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    // Make sure we're testing what we think we're testing.
+    // This should be seen as in-progress.
+    expect(manifest.presentationTimeline.isInProgress()).toBe(true);
+
+    const stream = manifest.variants[0].video;
+    expect(stream).toBeTruthy();
+
+    await stream.createSegmentIndex();
+    expect(stream.segmentIndex).toBeTruthy();
+
+    // Check for the 2 initial segments we're expecting.
+    ManifestParser.verifySegmentIndex(stream, [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 4, originalUri),
+    ]);
+
+    // Just over 10 seconds after the presentation started, we should now have
+    // all 5 segments.  In order to trick the system into updating, we must both
+    // fake the current time and wait long enough for the timer to fire and
+    // update the references.
+    Date.now = () => 10.1 * 1000;
+    await shaka.test.Util.delay(2.1);  // A little longer than the segments are.
+
+    ManifestParser.verifySegmentIndex(stream, [
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 4, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 4, 6, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 6, 8, originalUri),
+      shaka.test.ManifestParser.makeReference('s5.mp4', 8, 10, originalUri),
+    ]);
+  });
+});

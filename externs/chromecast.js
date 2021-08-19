@@ -1,18 +1,7 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
@@ -38,37 +27,27 @@ cast.receiver = {};
 cast.receiver.system = {};
 
 
-/**
- * @constructor
- * @struct
- */
-cast.receiver.system.SystemVolumeData = function() {};
+cast.receiver.system.SystemVolumeData = class {
+  constructor() {
+    /** @type {number} */
+    this.level;
+
+    /** @type {boolean} */
+    this.muted;
+  }
+};
 
 
-/** @type {number} */
-cast.receiver.system.SystemVolumeData.prototype.level;
+cast.receiver.CastMessageBus = class {
+  /** @param {*} message */
+  broadcast(message) {}
 
-
-/** @type {boolean} */
-cast.receiver.system.SystemVolumeData.prototype.muted;
-
-
-/**
- * @constructor
- * @struct
- */
-cast.receiver.CastMessageBus = function() {};
-
-
-/** @param {*} message */
-cast.receiver.CastMessageBus.prototype.broadcast = function(message) {};
-
-
-/**
- * @param {string} senderId
- * @return {!cast.receiver.CastChannel}
- */
-cast.receiver.CastMessageBus.prototype.getCastChannel = function(senderId) {};
+  /**
+   * @param {string} senderId
+   * @return {!cast.receiver.CastChannel}
+   */
+  getCastChannel(senderId) {}
+};
 
 
 /** @type {Function} */
@@ -79,7 +58,7 @@ cast.receiver.CastMessageBus.prototype.onMessage;
  * @constructor
  * @struct
  */
-cast.receiver.CastMessageBus.Event = function() {};
+cast.receiver.CastMessageBus.Event = class {};
 
 
 /** @type {?} */
@@ -90,86 +69,77 @@ cast.receiver.CastMessageBus.Event.prototype.data;
 cast.receiver.CastMessageBus.Event.prototype.senderId;
 
 
-/**
- * @constructor
- * @struct
- */
-cast.receiver.CastChannel = function() {};
+cast.receiver.CastChannel = class {
+  /** @param {*} message */
+  send(message) {}
+};
 
 
-/** @param {*} message */
-cast.receiver.CastChannel.prototype.send = function(message) {};
+cast.receiver.CastReceiverManager = class {
+  constructor() {
+    /** @type {Function} */
+    this.onSenderConnected;
 
+    /** @type {Function} */
+    this.onSenderDisconnected;
 
-/**
- * @constructor
- * @struct
- */
-cast.receiver.CastReceiverManager = function() {};
+    /** @type {Function} */
+    this.onSystemVolumeChanged;
+  }
 
+  /** @return {cast.receiver.CastReceiverManager} */
+  static getInstance() {}
 
-/** @return {cast.receiver.CastReceiverManager} */
-cast.receiver.CastReceiverManager.getInstance = function() {};
+  /**
+   * @param {string} namespace
+   * @param {string=} messageType
+   * @return {cast.receiver.CastMessageBus}
+   */
+  getCastMessageBus(namespace, messageType) {}
 
+  /** @return {Array.<string>} */
+  getSenders() {}
 
-/**
- * @param {string} namespace
- * @param {string=} messageType
- * @return {cast.receiver.CastMessageBus}
- */
-cast.receiver.CastReceiverManager.prototype.getCastMessageBus = function(
-    namespace, messageType) {};
+  start() {}
 
+  stop() {}
 
-/** @return {Array.<string>} */
-cast.receiver.CastReceiverManager.prototype.getSenders = function() {};
+  /** @return {?cast.receiver.system.SystemVolumeData} */
+  getSystemVolume() {}
 
+  /** @param {number} level */
+  setSystemVolumeLevel(level) {}
 
-cast.receiver.CastReceiverManager.prototype.start = function() {};
+  /** @param {number} muted */
+  setSystemVolumeMuted(muted) {}
 
-
-cast.receiver.CastReceiverManager.prototype.stop = function() {};
-
-
-/** @return {?cast.receiver.system.SystemVolumeData} */
-cast.receiver.CastReceiverManager.prototype.getSystemVolume = function() {};
-
-
-/** @param {number} level */
-cast.receiver.CastReceiverManager.prototype.setSystemVolumeLevel =
-    function(level) {};
-
-
-/** @param {number} muted */
-cast.receiver.CastReceiverManager.prototype.setSystemVolumeMuted =
-    function(muted) {};
-
-
-/** @return {boolean} */
-cast.receiver.CastReceiverManager.prototype.isSystemReady = function() {};
-
-
-/** @type {Function} */
-cast.receiver.CastReceiverManager.prototype.onSenderConnected;
-
-
-/** @type {Function} */
-cast.receiver.CastReceiverManager.prototype.onSenderDisconnected;
-
-
-/** @type {Function} */
-cast.receiver.CastReceiverManager.prototype.onSystemVolumeChanged;
+  /** @return {boolean} */
+  isSystemReady() {}
+};
 
 
 /** @const */
-cast.__platform__;
+cast.receiver.media = {};
 
 
-/**
- * @param {string} type
- * @return {boolean}
- */
-cast.__platform__.canDisplayType = function(type) {};
+/** @enum {number} */
+cast.receiver.media.MetadataType = {
+  'GENERIC': 0,
+  'MOVIE': 1,
+  'TV_SHOW': 2,
+  'MUSIC_TRACK': 3,
+  'PHOTO': 4,
+};
+
+
+/** @const */
+cast.__platform__ = class {
+  /**
+   * @param {string} type
+   * @return {boolean}
+   */
+  static canDisplayType(type) {}
+};
 
 
 /** @const */
@@ -177,7 +147,21 @@ var chrome = {};
 
 
 /** @const */
-chrome.cast = {};
+chrome.cast = class {
+  /**
+   * @param {chrome.cast.ApiConfig} apiConfig
+   * @param {Function} successCallback
+   * @param {Function} errorCallback
+   */
+  static initialize(apiConfig, successCallback, errorCallback) {}
+
+  /**
+   * @param {Function} successCallback
+   * @param {Function} errorCallback
+   * @param {chrome.cast.SessionRequest=} sessionRequest
+   */
+  static requestSession(successCallback, errorCallback, sessionRequest) {}
+};
 
 
 /** @type {boolean} */
@@ -192,149 +176,100 @@ chrome.cast.SessionStatus = {};
 chrome.cast.SessionStatus.STOPPED;
 
 
-/**
- * @param {chrome.cast.ApiConfig} apiConfig
- * @param {Function} successCallback
- * @param {Function} errorCallback
- */
-chrome.cast.initialize = function(apiConfig, successCallback, errorCallback) {};
+chrome.cast.ApiConfig = class {
+  /**
+   * @param {chrome.cast.SessionRequest} sessionRequest
+   * @param {Function} sessionListener
+   * @param {Function} receiverListener
+   * @param {string=} autoJoinPolicy
+   * @param {string=} defaultActionPolicy
+   */
+  constructor(sessionRequest, sessionListener, receiverListener,
+      autoJoinPolicy, defaultActionPolicy) {}
+};
 
 
-/**
- * @param {Function} successCallback
- * @param {Function} errorCallback
- * @param {chrome.cast.SessionRequest=} sessionRequest
- */
-chrome.cast.requestSession = function(
-    successCallback, errorCallback, sessionRequest) {};
+chrome.cast.Error = class {
+  /**
+   * @param {string} code
+   * @param {string=} description
+   * @param {Object=} details
+   */
+  constructor(code, description, details) {
+    /** @type {string} */
+    this.code;
+
+    /** @type {?string} */
+    this.description;
+
+    /** @type {Object} */
+    this.details;
+  }
+};
 
 
-/**
- * @param {chrome.cast.SessionRequest} sessionRequest
- * @param {Function} sessionListener
- * @param {Function} receiverListener
- * @param {string=} autoJoinPolicy
- * @param {string=} defaultActionPolicy
- * @constructor
- * @struct
- */
-chrome.cast.ApiConfig = function(
-    sessionRequest,
-    sessionListener,
-    receiverListener,
-    autoJoinPolicy,
-    defaultActionPolicy) {};
-
-
-/**
- * @param {string} code
- * @param {string=} description
- * @param {Object=} details
- * @constructor
- * @struct
- */
-chrome.cast.Error = function(code, description, details) {};
-
-
-/** @type {string} */
-chrome.cast.Error.prototype.code;
-
-
-/** @type {?string} */
-chrome.cast.Error.prototype.description;
-
-
-/** @type {Object} */
-chrome.cast.Error.prototype.details;
-
-
-/**
- * @constructor
- * @struct
- */
-chrome.cast.Receiver = function() {};
+chrome.cast.Receiver = class {
+  constructor() {}
+};
 
 
 /** @const {string} */
 chrome.cast.Receiver.prototype.friendlyName;
 
 
-/**
- * @constructor
- * @struct
- */
-chrome.cast.Session = function() {};
+chrome.cast.Session = class {
+  constructor() {
+    /** @type {string} */
+    this.sessionId;
+
+    /** @type {string} */
+    this.status;
+
+    /** @type {chrome.cast.Receiver} */
+    this.receiver;
+  }
+
+  /**
+   * @param {string} namespace
+   * @param {Function} listener
+   */
+  addMessageListener(namespace, listener) {}
+
+  /**
+   * @param {string} namespace
+   * @param {Function} listener
+   */
+  removeMessageListener(namespace, listener) {}
+
+  /** @param {Function} listener */
+  addUpdateListener(listener) {}
+
+  /** @param {Function} listener */
+  removeUpdateListener(listener) {}
+
+  /**
+   * @param {Function} successCallback
+   * @param {Function} errorCallback
+   */
+  leave(successCallback, errorCallback) {}
+
+  /**
+   * @param {string} namespace
+   * @param {!Object|string} message
+   * @param {Function} successCallback
+   * @param {Function} errorCallback
+   */
+  sendMessage(namespace, message, successCallback, errorCallback) {}
+
+  /**
+   * @param {Function} successCallback
+   * @param {Function} errorCallback
+   */
+  stop(successCallback, errorCallback) {}
+};
 
 
-/** @type {string} */
-chrome.cast.Session.prototype.sessionId;
-
-
-/** @type {string} */
-chrome.cast.Session.prototype.status;
-
-
-/** @type {chrome.cast.Receiver} */
-chrome.cast.Session.prototype.receiver;
-
-
-/**
- * @param {string} namespace
- * @param {Function} listener
- */
-chrome.cast.Session.prototype.addMessageListener = function(
-    namespace, listener) {};
-
-
-/**
- * @param {string} namespace
- * @param {Function} listener
- */
-chrome.cast.Session.prototype.removeMessageListener = function(
-    namespace, listener) {};
-
-
-/**
- * @param {Function} listener
- */
-chrome.cast.Session.prototype.addUpdateListener = function(listener) {};
-
-
-/**
- * @param {Function} listener
- */
-chrome.cast.Session.prototype.removeUpdateListener = function(listener) {};
-
-
-/**
- * @param {Function} successCallback
- * @param {Function} errorCallback
- */
-chrome.cast.Session.prototype.leave = function(
-    successCallback, errorCallback) {};
-
-
-/**
- * @param {string} namespace
- * @param {!Object|string} message
- * @param {Function} successCallback
- * @param {Function} errorCallback
- */
-chrome.cast.Session.prototype.sendMessage = function(
-    namespace, message, successCallback, errorCallback) {};
-
-
-/**
- * @param {Function} successCallback
- * @param {Function} errorCallback
- */
-chrome.cast.Session.prototype.stop = function(
-    successCallback, errorCallback) {};
-
-
-/**
- * @param {string} appId
- * @constructor
- * @struct
- */
-chrome.cast.SessionRequest = function(appId) {};
+chrome.cast.SessionRequest = class {
+  /** @param {string} appId */
+  constructor(appId) {}
+};

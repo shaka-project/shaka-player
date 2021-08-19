@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2016 Google Inc.  All Rights Reserved.
+# Copyright 2016 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 """Checks that all the versions match."""
 
+from __future__ import print_function
+
 import logging
 import os
 import re
@@ -26,7 +28,7 @@ import shakaBuildHelpers
 def player_version():
   """Gets the version of the library from player.js."""
   path = os.path.join(shakaBuildHelpers.get_source_base(), 'lib', 'player.js')
-  with open(path, 'r') as f:
+  with shakaBuildHelpers.open_file(path, 'r') as f:
     match = re.search(r'shaka\.Player\.version = \'(.*)\'', f.read())
     return match.group(1) if match else ''
 
@@ -34,22 +36,22 @@ def player_version():
 def changelog_version():
   """Gets the version of the library from the CHANGELOG."""
   path = os.path.join(shakaBuildHelpers.get_source_base(), 'CHANGELOG.md')
-  with open(path, 'r') as f:
+  with shakaBuildHelpers.open_file(path, 'r') as f:
     match = re.search(r'## (.*) \(', f.read())
     return match.group(1) if match else ''
 
 
-def check_version(_):
+def main(_):
   """Checks that all the versions in the library match."""
   changelog = changelog_version()
   player = player_version()
   git = shakaBuildHelpers.git_version()
   npm = shakaBuildHelpers.npm_version()
 
-  print 'git version:', git
-  print 'npm version:', npm
-  print 'player version:', player
-  print 'changelog version:', changelog
+  print('git version: ' + git)
+  print('npm version: ' + npm)
+  print('player version: ' + player)
+  print('changelog version: ' + changelog)
 
   ret = 0
   if 'dirty' in git:
@@ -79,4 +81,4 @@ def check_version(_):
 
 
 if __name__ == '__main__':
-  shakaBuildHelpers.run_main(check_version)
+  shakaBuildHelpers.run_main(main)

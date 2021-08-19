@@ -1,23 +1,16 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('Pssh', function() {
-  let fromHex = shaka.util.Uint8ArrayUtils.fromHex;
-  let toHex = shaka.util.Uint8ArrayUtils.toHex;
+goog.require('shaka.test.Util');
+goog.require('shaka.util.Error');
+goog.require('shaka.util.Pssh');
+goog.require('shaka.util.Uint8ArrayUtils');
+
+describe('Pssh', () => {
+  const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 
   const WIDEVINE_SYSTEM_ID = 'edef8ba979d64acea3c827dcd51d21ed';
   const PLAYREADY_SYSTEM_ID = '9a04f07998404286ab92e65be0885f95';
@@ -73,115 +66,111 @@ describe('Pssh', function() {
   const TRUNCATED_GENERIC_PSSH =
       GENERIC_PSSH.substr(0, GENERIC_PSSH.length - 6);
 
-  it('parses a Widevine PSSH', function() {
-    let pssh = new shaka.util.Pssh(fromHex(WIDEVINE_PSSH));
+  it('parses a Widevine PSSH', () => {
+    const pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(WIDEVINE_PSSH));
     expect(pssh.systemIds.length).toBe(1);
     expect(pssh.systemIds[0]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(0);
   });
 
-  it('parses a PlayReady PSSH', function() {
-    let pssh = new shaka.util.Pssh(fromHex(PLAYREADY_PSSH));
+  it('parses a PlayReady PSSH', () => {
+    const pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(PLAYREADY_PSSH));
     expect(pssh.systemIds.length).toBe(1);
     expect(pssh.systemIds[0]).toBe(PLAYREADY_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(0);
   });
 
-  it('parses a generic CENC PSSH', function() {
-    let pssh = new shaka.util.Pssh(fromHex(GENERIC_PSSH));
+  it('parses a generic CENC PSSH', () => {
+    const pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(GENERIC_PSSH));
     expect(pssh.systemIds.length).toBe(1);
     expect(pssh.systemIds[0]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
   });
 
-  it('throws on a truncated PSSH', function() {
-    let psshs = [
-      fromHex(TRUNCATED_WIDEVINE_PSSH),
-      fromHex(TRUNCATED_PLAYREADY_PSSH),
-      fromHex(TRUNCATED_GENERIC_PSSH),
-      fromHex(WIDEVINE_PSSH + TRUNCATED_PLAYREADY_PSSH),
-      fromHex(WIDEVINE_PSSH + TRUNCATED_GENERIC_PSSH),
-      fromHex(PLAYREADY_PSSH + TRUNCATED_WIDEVINE_PSSH),
-      fromHex(PLAYREADY_PSSH + TRUNCATED_GENERIC_PSSH),
-      fromHex(GENERIC_PSSH + TRUNCATED_WIDEVINE_PSSH),
-      fromHex(GENERIC_PSSH + TRUNCATED_PLAYREADY_PSSH),
+  it('throws on a truncated PSSH', () => {
+    const psshs = [
+      Uint8ArrayUtils.fromHex(TRUNCATED_WIDEVINE_PSSH),
+      Uint8ArrayUtils.fromHex(TRUNCATED_PLAYREADY_PSSH),
+      Uint8ArrayUtils.fromHex(TRUNCATED_GENERIC_PSSH),
+      Uint8ArrayUtils.fromHex(WIDEVINE_PSSH + TRUNCATED_PLAYREADY_PSSH),
+      Uint8ArrayUtils.fromHex(WIDEVINE_PSSH + TRUNCATED_GENERIC_PSSH),
+      Uint8ArrayUtils.fromHex(PLAYREADY_PSSH + TRUNCATED_WIDEVINE_PSSH),
+      Uint8ArrayUtils.fromHex(PLAYREADY_PSSH + TRUNCATED_GENERIC_PSSH),
+      Uint8ArrayUtils.fromHex(GENERIC_PSSH + TRUNCATED_WIDEVINE_PSSH),
+      Uint8ArrayUtils.fromHex(GENERIC_PSSH + TRUNCATED_PLAYREADY_PSSH),
     ];
 
-    for (let i = 0; i < psshs.length; ++i) {
-      try {
-        let pssh = new shaka.util.Pssh(psshs[i]);
-        expect(pssh).toBeTruthy();  // Closure: don't complain about unused vars
-        fail();
-      } catch (error) {
-        expect(error instanceof shaka.util.Error).toBe(true);
-        expect(error.code).toBe(
-            shaka.util.Error.Code.BUFFER_READ_OUT_OF_BOUNDS);
-      }
+    for (const pssh of psshs) {
+      const expected = shaka.test.Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.BUFFER_READ_OUT_OF_BOUNDS));
+      expect(() => new shaka.util.Pssh(pssh)).toThrow(expected);
     }
   });
 
-  it('parses concatenated PSSHs in any order', function() {
-    let pssh = new shaka.util.Pssh(fromHex(
+  it('parses concatenated PSSHs in any order', () => {
+    let pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         WIDEVINE_PSSH + PLAYREADY_PSSH));
     expect(pssh.systemIds.length).toBe(2);
     expect(pssh.systemIds[0]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(PLAYREADY_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(0);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         PLAYREADY_PSSH + WIDEVINE_PSSH));
     expect(pssh.systemIds[0]).toBe(PLAYREADY_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(0);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         WIDEVINE_PSSH + GENERIC_PSSH));
     expect(pssh.systemIds[0]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         GENERIC_PSSH + WIDEVINE_PSSH));
     expect(pssh.systemIds[0]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         WIDEVINE_PSSH + PLAYREADY_PSSH + GENERIC_PSSH));
     expect(pssh.systemIds[0]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(PLAYREADY_SYSTEM_ID);
     expect(pssh.systemIds[2]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         PLAYREADY_PSSH + WIDEVINE_PSSH + GENERIC_PSSH));
     expect(pssh.systemIds[0]).toBe(PLAYREADY_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.systemIds[2]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         WIDEVINE_PSSH + GENERIC_PSSH + PLAYREADY_PSSH));
     expect(pssh.systemIds[0]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.systemIds[2]).toBe(PLAYREADY_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         PLAYREADY_PSSH + GENERIC_PSSH + WIDEVINE_PSSH));
     expect(pssh.systemIds[0]).toBe(PLAYREADY_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.systemIds[2]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         GENERIC_PSSH + WIDEVINE_PSSH + PLAYREADY_PSSH));
     expect(pssh.systemIds[0]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.systemIds[2]).toBe(PLAYREADY_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         GENERIC_PSSH + PLAYREADY_PSSH + WIDEVINE_PSSH));
     expect(pssh.systemIds[0]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.systemIds[1]).toBe(PLAYREADY_SYSTEM_ID);
@@ -189,19 +178,19 @@ describe('Pssh', function() {
     expect(pssh.cencKeyIds.length).toBe(2);
   });
 
-  it('ignores non-PSSH boxes and continues parsing', function() {
-    let pssh = new shaka.util.Pssh(fromHex(
+  it('ignores non-PSSH boxes and continues parsing', () => {
+    let pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         OTHER_BOX + WIDEVINE_PSSH));
     expect(pssh.systemIds.length).toBe(1);
     expect(pssh.systemIds[0]).toBe(WIDEVINE_SYSTEM_ID);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         WIDEVINE_PSSH + OTHER_BOX));
     expect(pssh.systemIds.length).toBe(1);
     expect(pssh.systemIds[0]).toBe(WIDEVINE_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(0);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         PLAYREADY_PSSH + OTHER_BOX + WIDEVINE_PSSH));
     expect(pssh.systemIds.length).toBe(2);
     expect(pssh.systemIds[0]).toBe(PLAYREADY_SYSTEM_ID);
@@ -209,13 +198,14 @@ describe('Pssh', function() {
     expect(pssh.cencKeyIds.length).toBe(0);
   });
 
-  it('parses a zero-sized PSSH box', function() {
-    let pssh = new shaka.util.Pssh(fromHex(ZERO_SIZED_GENERIC_PSSH));
+  it('parses a zero-sized PSSH box', () => {
+    let pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
+        ZERO_SIZED_GENERIC_PSSH));
     expect(pssh.systemIds.length).toBe(1);
     expect(pssh.systemIds[0]).toBe(GENERIC_SYSTEM_ID);
     expect(pssh.cencKeyIds.length).toBe(2);
 
-    pssh = new shaka.util.Pssh(fromHex(
+    pssh = new shaka.util.Pssh(Uint8ArrayUtils.fromHex(
         WIDEVINE_PSSH + ZERO_SIZED_GENERIC_PSSH));
     expect(pssh.systemIds.length).toBe(2);
     expect(pssh.systemIds[0]).toBe(WIDEVINE_SYSTEM_ID);
@@ -223,32 +213,19 @@ describe('Pssh', function() {
     expect(pssh.cencKeyIds.length).toBe(2);
   });
 
-  it('extracts boundaries for concatenated boxes', function() {
-    let psshData = fromHex(
+  it('extracts boundaries for concatenated boxes', () => {
+    const psshData = Uint8ArrayUtils.fromHex(
         GENERIC_PSSH +
         WIDEVINE_PSSH +
         OTHER_BOX +
         PLAYREADY_PSSH);
 
-    let pssh = new shaka.util.Pssh(psshData);
+    const pssh = new shaka.util.Pssh(psshData);
 
-    expect(pssh.dataBoundaries.length).toBe(3);
-
-    let data1 = psshData.subarray(
-        pssh.dataBoundaries[0].start,
-        pssh.dataBoundaries[0].end + 1);
-
-    let data2 = psshData.subarray(
-        pssh.dataBoundaries[1].start,
-        pssh.dataBoundaries[1].end + 1);
-
-    let data3 = psshData.subarray(
-        pssh.dataBoundaries[2].start,
-        pssh.dataBoundaries[2].end + 1);
-
-    expect(toHex(data1)).toEqual(GENERIC_PSSH);
-    expect(toHex(data2)).toEqual(WIDEVINE_PSSH);
-    expect(toHex(data3)).toEqual(PLAYREADY_PSSH);
+    expect(pssh.data.length).toBe(3);
+    expect(Uint8ArrayUtils.toHex(pssh.data[0])).toBe(GENERIC_PSSH);
+    expect(Uint8ArrayUtils.toHex(pssh.data[1])).toBe(WIDEVINE_PSSH);
+    expect(Uint8ArrayUtils.toHex(pssh.data[2])).toBe(PLAYREADY_PSSH);
   });
 });
 

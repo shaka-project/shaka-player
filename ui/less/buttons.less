@@ -1,0 +1,112 @@
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* The main buttons in the UI controls. */
+
+@play-button-size-percentage: 15%;
+
+.disabled-button() {
+  /* Set the background and the color, otherwise it might be overwritten by
+   * the css styles in demo. */
+  background-color: transparent;
+  color: white;
+  cursor: default;
+}
+
+/* The giant play button, which sits inside .shaka-player-button-container. */
+.shaka-play-button {
+  /* Set width & height in a round-about way.  By using padding, we can keep
+   * a 1:1 aspect ratio and size the button relative to the container width.
+   *
+   * Since padding is applied equally to top, bottom, left, and right, only use
+   * half of the intended percentage for each.
+   *
+   * Based on tips from https://stackoverflow.com/a/12925343 */
+  box-sizing: border-box;
+  padding: @play-button-size-percentage / 2;
+  width: 0;
+  height: 0;
+
+  /* To be properly positioned in the center, this should have no margin.
+   * This might have been set for buttons generally by the app or user-agent. */
+  margin: 0;
+
+  /* This makes the button a circle. */
+  border-radius: 50%;
+
+  /* A small drop shadow below the button. */
+  box-shadow: rgba(0, 0, 0, 0.1) 0 0 20px 0;
+
+  /* No border. */
+  border: none;
+
+  /* The play arrow is a picture. It is treated a background image.
+   * The following settings ensure it shows only once and in the
+   * center of the button. */
+  background-size: 50%;
+  background-repeat: no-repeat;
+  background-position: center center;
+
+  /* A background color behind the play arrow. */
+  background-color: rgba(255, 255, 255, 0.9);
+
+  .show-when-controls-shown();
+
+  /* Actual icon images for the two states this could be in.
+   * These will be inlined as data URIs when compiled, and so do not need to be
+   * deployed separately from the compiled CSS.
+   * Note that these URIs should relative to ui/controls.less, not this file. */
+  &[icon="play"] {
+    background-image: data-uri('images/play_arrow.svg');
+  }
+
+  &[icon="pause"] {
+    background-image: data-uri('images/pause.svg');
+  }
+}
+
+/* This button contains the current time and duration of the video.
+ * It's only clickable when the content is live, and current time is behind live
+ * edge. Otherwise, the button is disabled.
+ */
+.shaka-current-time {
+  font-size: 14px;
+  color: rgb(255, 255, 255);
+
+  /* Make the time element the right size for the text, instead of defaulting
+   * to the same size as the rest of the controls. */
+  height: auto;
+  cursor: pointer;
+
+  &[disabled] {
+    .disabled-button();
+  }
+}
+
+/* Use a consistent outline focus style across browsers. */
+.shaka-controls-container {
+  button:focus, input:focus {
+    /* Most browsers will fall back to "Highlight" (system setting) color for
+     * the focus outline. */
+    outline: 1px solid Highlight;
+  }
+
+  /* Disable this Mozilla-specific focus ring, since we have an outline defined
+   * for focus. */
+  button:-moz-focus-inner, input:-moz-focus-outer {
+    outline: none;
+    border: 0;
+  }
+}
+
+/* Outline on focus is important for accessibility, but
+ * it doesn't look great. This removes the outline for
+ * mouse users while leaving it for keyboard users. */
+.shaka-controls-container:not(.shaka-keyboard-navigation) {
+  button:focus, input:focus {
+    outline: none;
+  }
+}

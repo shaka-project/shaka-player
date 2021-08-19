@@ -1,21 +1,16 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 goog.provide('shaka.test.CannedIDB');
+
+goog.require('shaka.log');
+goog.require('shaka.offline.indexeddb.DBOperation');
+goog.require('shaka.util.BufferUtils');
+goog.require('shaka.util.Uint8ArrayUtils');
+
 
 /**
  * A testing utility that can be used to dump and restore entire IndexedDB
@@ -25,7 +20,7 @@ goog.provide('shaka.test.CannedIDB');
  * @example
  *   shaka.test = shaka.test || {};
  *   s = document.createElement('script');
- *   s.src = '/shaka/test/test/util/canned_idb.js';
+ *   s.src = '../test/test/util/canned_idb.js';
  *   document.head.appendChild(s);
  *   dump = await shaka.test.CannedIDB.dumpJSON('shaka_offline_db', true);
  */
@@ -39,8 +34,9 @@ shaka.test.CannedIDB = class {
    *   database later in a call to restoreJSON().
    */
   static async dumpJSON(name, dummyArrayBuffers) {
-    const savedDatabase = await this.dump(name, dummyArrayBuffers);
-    const replacer = this.replacer_.bind(null, dummyArrayBuffers);
+    const savedDatabase = await this.dump(name);
+    const replacer =
+        (key, value) => this.replacer_(dummyArrayBuffers || false, key, value);
     return JSON.stringify(savedDatabase, replacer);
   }
 
@@ -83,7 +79,9 @@ shaka.test.CannedIDB = class {
    * @return {!Promise} Resolved when the operation is complete.
    */
   static async restoreJSON(name, savedDatabaseJson, wipeDatabase) {
-    const savedDatabase = JSON.parse(savedDatabaseJson, this.reviver_);
+    const savedDatabase =
+      /** @type {shaka.test.CannedIDB.SavedDatabase} */(JSON.parse(
+          savedDatabaseJson, this.reviver_));
     await this.restore(name, savedDatabase, wipeDatabase);
   }
 
@@ -135,7 +133,7 @@ shaka.test.CannedIDB = class {
       if (dummyArrayBuffers) {
         data = '';
       } else {
-        data = shaka.util.Uint8ArrayUtils.toBase64(new Uint8Array(value));
+        data = shaka.util.Uint8ArrayUtils.toBase64(value);
       }
       return {
         __type__: 'ArrayBuffer',
@@ -156,14 +154,15 @@ shaka.test.CannedIDB = class {
    */
   static reviver_(key, value) {
     if (value && value.__type__ == 'ArrayBuffer') {
-      return shaka.util.Uint8ArrayUtils.fromBase64(value.__value__).buffer;
+      return shaka.util.BufferUtils.toArrayBuffer(
+          shaka.util.Uint8ArrayUtils.fromBase64(value.__value__));
     }
     return value;
   }
 
   /**
    * @param {string} name The name of the database to open.
-   * @return {!Promise.<IDBDatabase>} Resolved when the named DB has been
+   * @return {!Promise.<!IDBDatabase>} Resolved when the named DB has been
    *   opened.
    * @private
    */
@@ -199,54 +198,37 @@ shaka.test.CannedIDB = class {
    *   savedDatabase.stores.
    * @private
    */
-  static dumpStore_(db, name, savedDatabase) {
-    return new Promise((resolve, reject) => {
-      const transactionType = 'readonly';
-      const transaction = db.transaction([name], transactionType);
-      const store = transaction.objectStore(name);
-      shaka.log.debug('Dumping store', name);
+  static async dumpStore_(db, name, savedDatabase) {
+    const transactionType = 'readonly';
+    const transaction = db.transaction([name], transactionType);
+    /** @type {!IDBObjectStore} */
+    const store = transaction.objectStore(name);
+    /** @type {!shaka.offline.indexeddb.DBOperation} */
+    const op = new shaka.offline.indexeddb.DBOperation(transaction, name);
+    shaka.log.debug('Dumping store', name);
 
-      /** @type {shaka.test.CannedIDB.SavedStore} */
-      const savedStore = {
-        parameters: {
-          keyPath: store.keyPath,
-          autoIncrement: store.autoIncrement,
-        },
-        data: [],
-      };
+    /** @type {shaka.test.CannedIDB.SavedStore} */
+    const savedStore = {
+      parameters: {
+        keyPath: store.keyPath,
+        autoIncrement: store.autoIncrement,
+      },
+      data: [],
+    };
 
-      const request = store.openCursor();
-
-      request.onsuccess = (event) => {
-        /** @type {IDBCursorWithValue} */
-        const cursor = event.target.result;
-        if (!cursor) {
-          // No more data.
-          return;
-        }
-
-        // Only store the key if there is no explicit keyPath for this store.
-        const data = {value: cursor.value};
-        if (!store.keyPath) {
-          data.key = cursor.key;
-        }
-        savedStore.data.push(data);
-
-        cursor.continue();
-      };
-
-      transaction.oncomplete = (event) => {
-        shaka.log.debug('Dumped', savedStore.data.length, 'entries from store',
-                        name);
-        savedDatabase.stores[name] = savedStore;
-        resolve();
-      };
-
-      transaction.onerror = (event) => {
-        reject(event.error);
-        event.preventDefault();
-      };
+    await op.forEachEntry((key, value) => {
+      // Only store the key if there is no explicit keyPath for this store.
+      const data = {value: value};
+      if (!store.keyPath) {
+        data.key = key;
+      }
+      savedStore.data.push(data);
     });
+
+    await op.promise();
+    shaka.log.debug('Dumped', savedStore.data.length, 'entries from store',
+        name);
+    savedDatabase.stores[name] = savedStore;
   }
 
   /**
@@ -285,7 +267,7 @@ shaka.test.CannedIDB = class {
 
       request.onupgradeneeded = (event) => {
         shaka.log.debug('DB upgrade from', event.oldVersion, 'to',
-                        savedDatabase.version);
+            savedDatabase.version);
         const transaction = event.target.transaction;
         const db = transaction.db;
 
@@ -299,8 +281,15 @@ shaka.test.CannedIDB = class {
           if (storeName in existingStoreMap) {
             shaka.log.debug('Ignoring existing store', storeName);
           } else {
-            shaka.log.debug('Creating store', storeName);
             const storeInfo = savedDatabase.stores[storeName];
+
+            // Legacy Edge can't handle a null keyPath, and throws errors if you
+            // specify that.  So delete it if it's null.
+            if (storeInfo.parameters.keyPath == null) {
+              delete storeInfo.parameters.keyPath;
+            }
+
+            shaka.log.debug('Creating store', storeName, storeInfo.parameters);
             db.createObjectStore(storeName, storeInfo.parameters);
           }
         }
@@ -342,15 +331,15 @@ shaka.test.CannedIDB = class {
         const storeInfo = savedDatabase.stores[storeName];
 
         shaka.log.debug('Populating store', storeName, 'with',
-                        storeInfo.data.length, 'entries');
-        storeInfo.data.forEach((item) => {
+            storeInfo.data.length, 'entries');
+        for (const item of storeInfo.data) {
           // If this store uses an explicit keyPath, we can't specify a key.
           if (storeInfo.parameters.keyPath) {
             store.add(item.value);
           } else {
             store.add(item.value, item.key);
           }
-        });
+        }
       }
 
       transaction.oncomplete = (event) => {

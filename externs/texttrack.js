@@ -1,47 +1,25 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
- * @fileoverview Externs for TextTrack and TextTrackCue which are
- * missing from the closure compiler.
+ * @fileoverview Externs for TextTrack which are missing from the Closure
+ * compiler.
  *
  * @externs
  */
 
 
 /** @type {string} */
+TextTrack.prototype.id;
+
+/** @type {string} */
+TextTrack.prototype.kind;
+
+/** @type {string} */
 TextTrack.prototype.label;
 
-
 /** @type {string} */
-TextTrackCue.prototype.positionAlign;
-
-
-/** @type {string} */
-TextTrackCue.prototype.lineAlign;
-
-
-/** @type {number|null|string} */
-TextTrackCue.prototype.line;
-
-
-/** @type {string} */
-TextTrackCue.prototype.vertical;
-
-
-/** @type {boolean} */
-TextTrackCue.prototype.snapToLines;
+TextTrack.prototype.language;

@@ -1,0 +1,107 @@
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* Ad controls. */
+.ad-text-shadow() {
+  /* Give white text a black shadow, so it's visible against a
+   * white background. */
+  text-shadow: 1px 1px 4px black;
+}
+
+.shaka-controls-container[ad-active="true"] {
+  /* While showing an ad, pass pointer events through to the ad container. */
+  pointer-events: none;
+
+  /* Except in the bottom controls, which should still be clickable. */
+  .shaka-bottom-controls {
+    pointer-events: auto;
+  }
+}
+
+.shaka-client-side-ad-container, .shaka-server-side-ad-container {
+  .absolute-position();
+
+  /* IMA SDK adds their own ad UI into an iframe element.
+   * Adjust its position to fit in with our UI, when
+   * Shaka UI is enabled. */
+  iframe {
+    .shaka-video-container[shaka-controls="true"] & {
+      /* This moves the iframe up a little bit, so it
+       * doesn't operlap with our controls. */
+      height: 90%;
+    }
+  }
+}
+
+.shaka-server-side-ad-container {
+  .fill-container();
+  .shrinkable();
+
+  &:not([ad-active="true"]) {
+    pointer-events: none;
+  }
+}
+
+.shaka-ad-controls {
+  .hide-when-shaka-controls-disabled();
+
+  display: flex;
+  flex-direction: row;
+  z-index: 1;
+
+  /* Add some room between the ad controls and the controls
+  button panel. */
+  padding-bottom: 1%;
+
+  button, div {
+    color: white;
+    font-size: initial;
+  }
+
+  div:not(.shaka-skip-ad-counter) {
+    .bottom-panels-elements-margin();
+  }
+}
+
+.shaka-ad-counter, .shaka-ad-position {
+  .bottom-align-children();
+  .ad-text-shadow();
+}
+
+.shaka-skip-ad-container {
+  /* Skip button is positioned at the very right edge of the
+   * video container unlike the rest of the bottom controls. */
+  position: relative;
+
+  /* This math is determining how far the button is from the right edge.
+   * Ad panel's parent is centered and @bottom-controls-width wide, so
+   * 100 - @bottom-controls-width = margins from both sides of the container.
+   * That divided by 2 is margin on one side, so we take that, and move the
+   * button from its normal position to the right by that percentage.
+   */
+  right: (100 - @bottom-controls-width) / 2 * -1;
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+}
+
+.shaka-skip-ad-button {
+  padding: 5px 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+
+  &:disabled {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  cursor: pointer;
+}
+
+.shaka-skip-ad-counter {
+  padding: 5px 5px;
+  background: rgba(0, 0, 0, 0.7);
+  margin: 0;
+}

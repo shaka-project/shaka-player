@@ -1,73 +1,74 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('CastUtils', function() {
+goog.require('shaka.Player');
+goog.require('shaka.cast.CastUtils');
+goog.require('shaka.media.MediaSourceEngine');
+goog.require('shaka.media.TimeRangesUtils');
+goog.require('shaka.test.FakeClosedCaptionParser');
+goog.require('shaka.test.FakeTextDisplayer');
+goog.require('shaka.test.UiUtils');
+goog.require('shaka.test.Util');
+goog.require('shaka.util.EventManager');
+goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.FakeEventTarget');
+goog.require('shaka.util.ManifestParserUtils');
+
+describe('CastUtils', () => {
   const CastUtils = shaka.cast.CastUtils;
   const FakeEvent = shaka.util.FakeEvent;
 
-  it('includes every Player member', function() {
-    let ignoredMembers = [
+  it('includes every Player member', () => {
+    const ignoredMembers = [
       'constructor',  // JavaScript added field
+      'getAdManager',  // Handled specially
+      'getSharedConfiguration',  // Handled specially
       'getNetworkingEngine',  // Handled specially
+      'getDrmEngine',  // Handled specially
       'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
+      'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
+      'getManifestParserFactory',  // Would not serialize.
+      'setVideoContainer',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
       'createNetworkingEngine',
       'createPlayhead',
-      'createPlayheadObserver',
-      'createMediaSource',
       'createMediaSourceEngine',
       'createStreamingEngine',
     ];
 
-    let castMembers = CastUtils.PlayerVoidMethods
-                          .concat(CastUtils.PlayerPromiseMethods);
-    for (let name in CastUtils.PlayerGetterMethods) {
-      castMembers.push(name);
-    }
-    for (let name in CastUtils.PlayerGetterMethodsThatRequireLive) {
-      castMembers.push(name);
-    }
-    let playerMembers = Object.keys(shaka.Player.prototype).filter(
-        function(name) {
-          // Private members end with _.
-          return ignoredMembers.indexOf(name) < 0 &&
-              name.substr(name.length - 1) != '_';
-        });
+    const castMembers = CastUtils.PlayerVoidMethods
+        .concat(CastUtils.PlayerPromiseMethods)
+        .concat(Object.keys(CastUtils.PlayerGetterMethods))
+        .concat(Object.keys(CastUtils.PlayerGetterMethodsThatRequireLive));
+    // eslint-disable-next-line no-restricted-syntax
+    const allPlayerMembers = Object.getOwnPropertyNames(shaka.Player.prototype);
+    expect(
+        ignoredMembers.filter((member) => !allPlayerMembers.includes(member)))
+        .toEqual([]);
+    const playerMembers = allPlayerMembers.filter((name) => {
+      // Private members end with _.
+      return !ignoredMembers.includes(name) && !name.endsWith('_');
+    });
 
     // To make debugging easier, don't check that they are equal; instead check
     // that neither has any extra entries.
-    let extraCastMembers = castMembers.filter(function(name) {
-      return playerMembers.indexOf(name) < 0;
-    });
-    let extraPlayerMembers = playerMembers.filter(function(name) {
-      return castMembers.indexOf(name) < 0;
-    });
-    expect(extraCastMembers).toEqual([]);
-    expect(extraPlayerMembers).toEqual([]);
+    expect(castMembers.filter((name) => !playerMembers.includes(name)))
+        .toEqual([]);
+    expect(playerMembers.filter((name) => !castMembers.includes(name)))
+        .toEqual([]);
   });
 
-  describe('serialize/deserialize', function() {
-    it('transfers infinite values and NaN', function() {
-      let orig = {
+  describe('serialize/deserialize', () => {
+    it('transfers infinite values and NaN', () => {
+      const orig = {
         'nan': NaN,
         'positive_infinity': Infinity,
         'negative_infinity': -Infinity,
@@ -78,108 +79,111 @@ describe('CastUtils', function() {
         'string': 'a string',
       };
 
-      let serialized = CastUtils.serialize(orig);
+      const serialized = CastUtils.serialize(orig);
       // The object is turned into a string.
       expect(typeof serialized).toBe('string');
 
       // The deserialized object matches the original.
-      let deserialized = CastUtils.deserialize(serialized);
-      for (let k in orig) {
-        expect(deserialized[k]).toEqual(orig[k]);
+      const deserialized = CastUtils.deserialize(serialized);
+      for (const k in orig) {
+        if (typeof orig[k] == 'number' && isNaN(orig[k])) {
+          expect(deserialized[k]).toBeNaN();
+        } else {
+          expect(deserialized[k]).toBe(orig[k]);
+        }
       }
     });
 
-    it('transfers real Events', function() {
-      // new Event() is not usable on IE11:
-      let event =
-          /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
-      event.initCustomEvent('myEventType', false, false, null);
+    it('transfers real Events', () => {
+      const event = new CustomEvent('myEventType');
 
       // Properties that can definitely be transferred.
-      let nativeProperties = [
+      const nativeProperties = [
         'bubbles',
         'type',
         'cancelable',
         'defaultPrevented',
       ];
-      let extraProperties = {
+      const extraProperties = {
         'key': 'value',
         'true': true,
         'one': 1,
       };
 
-      for (let k in extraProperties) {
+      for (const k in extraProperties) {
         event[k] = extraProperties[k];
       }
 
       // The event is turned into a string.
-      let serialized = CastUtils.serialize(event);
+      const serialized = CastUtils.serialize(event);
       expect(typeof serialized).toBe('string');
 
       // The string is turned back into an object.
-      let deserialized = CastUtils.deserialize(serialized);
+      const deserialized = CastUtils.deserialize(serialized);
       expect(typeof deserialized).toBe('object');
 
       // The object can be used to construct a FakeEvent.
-      let fakeEvent = new FakeEvent(deserialized['type'], deserialized);
+      const fakeEvent = new FakeEvent(deserialized['type'], deserialized);
 
       // The fake event has the same type and properties as the original.
-      nativeProperties.forEach(function(k) {
-        expect(fakeEvent[k]).toEqual(event[k]);
-      });
-      for (let k in extraProperties) {
-        expect(fakeEvent[k]).toEqual(event[k]);
+      const asObj = /** @type {!Object} */ (fakeEvent);
+      for (const k of nativeProperties) {
+        expect(asObj[k]).toBe(event[k]);
+      }
+      for (const k in extraProperties) {
+        expect(asObj[k]).toBe(event[k]);
       }
     });
 
-    it('transfers dispatched FakeEvents', function(done) {
-      let event = new FakeEvent('custom');
+    it('transfers dispatched FakeEvents', async () => {
+      /** @type {!FakeEvent} */
+      const event = new FakeEvent('custom');
 
       // Properties that can definitely be transferred.
-      let nativeProperties = [
+      const nativeProperties = [
         'bubbles',
         'type',
         'cancelable',
         'defaultPrevented',
       ];
-      let extraProperties = {
+      const extraProperties = {
         'key': 'value',
         'true': true,
         'one': 1,
       };
 
-      for (let k in extraProperties) {
-        event[k] = extraProperties[k];
+      const asObj = /** @type {!Object} */ (event);
+      for (const k in extraProperties) {
+        asObj[k] = extraProperties[k];
       }
 
-      let target = new shaka.util.FakeEventTarget();
-      target.addEventListener(event.type, function() {
-        try {
-          // The event is turned into a string.
-          let serialized = CastUtils.serialize(event);
-          expect(typeof serialized).toBe('string');
-
-          // The string is turned back into an object.
-          let deserialized = CastUtils.deserialize(serialized);
-          expect(typeof deserialized).toBe('object');
-
-          // The deserialized event has the same type and properties as the
-          // original.
-          nativeProperties.forEach(function(k) {
-            expect(deserialized[k]).toEqual(event[k]);
-          });
-          for (let k in extraProperties) {
-            expect(deserialized[k]).toEqual(event[k]);
-          }
-        } catch (exception) {
-          fail(exception);
-        }
-        done();
+      /** @type {!shaka.util.FakeEventTarget} */
+      const target = new shaka.util.FakeEventTarget();
+      const p = new Promise((resolve) => {
+        target.addEventListener(event.type, resolve);
       });
       target.dispatchEvent(event);
+      await p;
+
+      // The event is turned into a string.
+      const serialized = CastUtils.serialize(event);
+      expect(typeof serialized).toBe('string');
+
+      // The string is turned back into an object.
+      const deserialized = CastUtils.deserialize(serialized);
+      expect(typeof deserialized).toBe('object');
+
+      // The deserialized event has the same type and properties as the
+      // original.
+      for (const k of nativeProperties) {
+        expect(deserialized[k]).toBe(asObj[k]);
+      }
+      for (const k in extraProperties) {
+        expect(deserialized[k]).toBe(asObj[k]);
+      }
     });
 
-    describe('TimeRanges', function() {
+    describe('TimeRanges', () => {
       /** @type {!HTMLVideoElement} */
       let video;
       /** @type {!shaka.util.EventManager} */
@@ -187,21 +191,21 @@ describe('CastUtils', function() {
       /** @type {!shaka.media.MediaSourceEngine} */
       let mediaSourceEngine;
 
-      beforeAll(function() {
-        video =
-            /** @type {!HTMLVideoElement} */ (document.createElement('video'));
+      beforeAll(() => {
+        video = shaka.test.UiUtils.createVideoElement();
         document.body.appendChild(video);
       });
 
-      beforeEach(function(done) {
+      beforeEach(async () => {
         // The TimeRanges constructor cannot be used directly, so we load a clip
         // to get ranges to use.
-        let fakeVideoStream = {
+        const fakeVideoStream = {
           mimeType: 'video/mp4',
           codecs: 'avc1.42c01e',
         };
-        let initSegmentUrl = '/base/test/test/assets/sintel-video-init.mp4';
-        let videoSegmentUrl = '/base/test/test/assets/sintel-video-segment.mp4';
+        const initSegmentUrl = '/base/test/test/assets/sintel-video-init.mp4';
+        const videoSegmentUrl =
+            '/base/test/test/assets/sintel-video-segment.mp4';
 
         // Wait for the media source to be open.
         eventManager = new shaka.util.EventManager();
@@ -211,65 +215,96 @@ describe('CastUtils', function() {
           fail('Error code ' + (video.error ? video.error.code : 0));
         }
 
-        mediaSourceEngine = new shaka.media.MediaSourceEngine(video);
+        mediaSourceEngine = new shaka.media.MediaSourceEngine(
+            video,
+            new shaka.test.FakeClosedCaptionParser(),
+            new shaka.test.FakeTextDisplayer());
 
-        // Create empty object first and initialize the fields through
-        // [] to allow field names to be expressions.
-        let initObject = {};
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
-        initObject[ContentType.VIDEO] = fakeVideoStream;
+        const initObject = new Map();
+        initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-        mediaSourceEngine.init(initObject, false).then(function() {
-          return shaka.test.Util.fetch(initSegmentUrl);
-        }).then(function(data) {
-          return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
-                                                null, null);
-        }).then(function() {
-          return shaka.test.Util.fetch(videoSegmentUrl);
-        }).then(function(data) {
-          return mediaSourceEngine.appendBuffer(ContentType.VIDEO, data,
-                                                null, null);
-        }).catch(fail).then(done);
+        await mediaSourceEngine.init(initObject, false);
+        const data = await shaka.test.Util.fetch(initSegmentUrl);
+        await mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, data, null, null,
+            /* hasClosedCaptions= */ false);
+        const data2 = await shaka.test.Util.fetch(videoSegmentUrl);
+        await mediaSourceEngine.appendBuffer(
+            ContentType.VIDEO, data2, null, null,
+            /* hasClosedCaptions= */ false);
       });
 
-      afterEach(function(done) {
-        eventManager.destroy().then(function() {
-          if (mediaSourceEngine) {
-            return mediaSourceEngine.destroy();
-          }
-        }).then(function() {
-          video.removeAttribute('src');
-          video.load();
-          done();
-        });
+      afterEach(async () => {
+        eventManager.release();
+
+        if (mediaSourceEngine) {
+          await mediaSourceEngine.destroy();
+        }
+
+        // "unload" the video element.
+        video.removeAttribute('src');
+        video.load();
       });
 
-      afterAll(function() {
+      afterAll(() => {
         document.body.removeChild(video);
       });
 
-      quarantinedIt('deserialize into equivalent objects', function() {
-        let buffered = video.buffered;
+      it('deserialize into equivalent objects', () => {
+        const buffered = video.buffered;
 
         // The test is less interesting if the ranges are empty.
         expect(buffered.length).toBeGreaterThan(0);
 
         // The TimeRanges object is turned into a string.
-        let serialized = CastUtils.serialize(buffered);
+        const serialized = CastUtils.serialize(buffered);
         expect(typeof serialized).toBe('string');
 
         // Expect the deserialized version to look like the original.
-        let deserialized = CastUtils.deserialize(serialized);
-        expect(deserialized.length).toEqual(buffered.length);
+        const deserialized = CastUtils.deserialize(serialized);
+        expect(deserialized.length).toBe(buffered.length);
         expect(deserialized.start).toEqual(jasmine.any(Function));
         expect(deserialized.end).toEqual(jasmine.any(Function));
 
-        for (let i = 0; i < deserialized.length; ++i) {
-          // Not exact because of the possibility of rounding errors.
-          expect(deserialized.start(i)).toBeCloseTo(buffered.start(i));
-          expect(deserialized.end(i)).toBeCloseTo(buffered.end(i));
-        }
+        const TimeRangesUtils = shaka.media.TimeRangesUtils;
+        expect(TimeRangesUtils.getBufferedInfo(deserialized))
+            .toEqual(TimeRangesUtils.getBufferedInfo(buffered));
       });
+    });  // describe('TimeRanges')
+
+    it('transfers real Errors', () => {
+      let realError;
+      try {
+        // Cast undefined to "?" to convince the compiler to let us dereference
+        // it.
+        const foo = /** @type {?} */(undefined);
+
+        // Now this will generate a TypeError.
+        foo.bar = 'baz';
+
+        // We need to catch a real Error in this test, so we disable eslint on
+        // the next line.
+        // eslint-disable-next-line no-restricted-syntax
+      } catch (error) {
+        realError = error;
+      }
+
+      // The event is turned into a string.
+      const serialized = CastUtils.serialize(realError);
+      expect(typeof serialized).toBe('string');
+
+      // The string is turned back into an object.
+      const deserialized = CastUtils.deserialize(serialized);
+      expect(typeof deserialized).toBe('object');
+
+      // And that object should be an Error type.
+      expect(deserialized).toEqual(jasmine.any(Error));
+
+      // At least these basic properties should match.
+      expect(deserialized.type).toBe(realError.type);
+      expect(deserialized.message).toBe(realError.message);
+      expect(deserialized.stack).toBe(realError.stack);
     });
-  });
-});
+  });  // describe('serialize/deserialize')
+});  // describe('CastUtils')
