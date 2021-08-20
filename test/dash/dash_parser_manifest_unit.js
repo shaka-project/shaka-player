@@ -2251,9 +2251,11 @@ describe('DashParser Manifest', () => {
     }
 
     // Expect identical segments
-    expect(segments[0][0].startTime).toBe(5);
-    expect(segments[1][0].startTime).toBe(5);
     expect(segments[0].length).toBe(2);
     expect(segments[1].length).toBe(2);
+    expect(segments[0][0].startTime).toBe(5);
+    expect(segments[1][0].startTime).toBe(5);
+    expect(segments[0][1].startTime).toBe(15);
+    expect(segments[1][1].startTime).toBe(15);
   });
 });
