@@ -2150,4 +2150,110 @@ describe('DashParser Manifest', () => {
       expect(uri).not.toContain('/p2/');
     }
   });
+
+  it('parses ServiceConfiguration', async () => {
+    const manifestText = [
+      `<MPD type="dynamic"`,
+      '     availabilityStartTime="1970-01-01T00:00:00Z"',
+      '     timeShiftBufferDepth="PT60S"',
+      '     maxSegmentDuration="PT5S"',
+      '     suggestedPresentationDelay="PT0S">',
+      '  <ServiceDescription>',
+      '    <Scope schemeIdUri="1" value="scope1" />',
+      '    <Latency target="5000" max="7000" min="4000" />',
+      '    <PlaybackRate max="1.1" min="0.9" />',
+      '  </ServiceDescription>',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="2" mimeType="video/mp4">',
+      '      <SegmentTemplate media="$Number$.mp4" duration="1" />',
+      '      <Representation id="3" width="640" height="480">',
+      '        <BaseURL>http://example.com/p1/</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    await parser.start('dummy://foo', playerInterface);
+
+    const serviceDescription = parser.getServiceDescription();
+    expect(serviceDescription).toBeDefined();
+    expect(serviceDescription.scope.schemeIdUri).toBe('1');
+    expect(serviceDescription.scope.value).toBe('scope1');
+    expect(serviceDescription.latency.target).toBe(5000);
+    expect(serviceDescription.latency.max).toBe(7000);
+    expect(serviceDescription.latency.min).toBe(4000);
+    expect(serviceDescription.playbackRate.max).toBe(1.1);
+    expect(serviceDescription.playbackRate.min).toBe(0.9);
+  });
+
+  /**
+     * @param {!Array.<number>} periods Start time of multiple periods
+     * @return {string}
+     */
+  function buildManifestWithPeriodStartTime(periods) {
+    const mpdTemplate = [
+      `<MPD type="dynamic"`,
+      'availabilityStartTime="1970-01-01T00:00:00Z"',
+      'timeShiftBufferDepth="PT10H">',
+      '    %(periods)s',
+      '</MPD>',
+    ].join('\n');
+    const periodTemplate = (id, period, duration) => {
+      return [
+        `    <Period id="${id}" start="PT${period}S">`,
+        '        <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
+        '            <SegmentTemplate startNumber="1" media="l-$Number$.mp4">',
+        '                <SegmentTimeline>',
+        `                    <S t="0" d="${duration}" />`,
+        '                </SegmentTimeline>',
+        '            </SegmentTemplate>',
+        '            <Representation id="1"/>',
+        '        </AdaptationSet>',
+        '    </Period>',
+      ].join('\n');
+    };
+    const periodXmls = periods.map((period, i) => {
+      const duration = i+1 === periods.length ? 10 : periods[i+1] - period;
+      return periodTemplate(i+1, period, duration);
+    });
+    return sprintf(mpdTemplate, {
+      periods: periodXmls.join('\n'),
+    });
+  }
+
+  // Bug description: Inconsistent period start time in the manifests due
+  // to failover triggered in backend servers
+
+  // When one of the servers is down, the manifest will be served by other
+  // redundant servers. The period start time might become out of sync
+  // during the switch-over/recovery.
+
+  // Solution: Ignore old DASH periods that are older than the latest one.
+
+  it('skip periods that are earlier than max period start time', async () => {
+    const sources = [
+      buildManifestWithPeriodStartTime([5, 15]),
+      buildManifestWithPeriodStartTime([4, 15]), // simulate out-of-sync of -1s
+    ];
+    const segments = [];
+
+    for (const source of sources) {
+      fakeNetEngine.setResponseText('dummy://foo', source);
+      // eslint-disable-next-line no-await-in-loop
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      const video = manifest.variants[0].video;
+      // eslint-disable-next-line no-await-in-loop
+      await video.createSegmentIndex();
+      segments.push(Array.from(video.segmentIndex));
+    }
+
+    // Expect identical segments
+    expect(segments[0][0].startTime).toBe(5);
+    expect(segments[1][0].startTime).toBe(5);
+    expect(segments[0].length).toBe(2);
+    expect(segments[1].length).toBe(2);
+  });
 });
