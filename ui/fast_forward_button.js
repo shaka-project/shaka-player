@@ -75,6 +75,8 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     const trickPlayRate = this.player.getPlaybackRate();
     const newRateIndex = this.fastForwardRates_.indexOf(trickPlayRate) + 1;
 
+    // When the button is clicked, the next rate in this.fastForwardRates_ is
+    // selected. If no more rates are available, the first one is set.
     const newRate = (newRateIndex != this.fastForwardRates_.length) ?
         this.fastForwardRates_[newRateIndex] : this.fastForwardRates_[0];
     this.player.trickPlay(newRate);

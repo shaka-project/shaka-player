@@ -165,6 +165,11 @@ ui.configure(config);
 
 #### Configuring playback, fast forward and rewind rates
 The rate in which the player can play, fast forward and rewind content can be configured using the `playbackRates`, `fastForwardRates` and `rewindRates` options.
+
+* `playbackRates`: List of rates available in the `playback_rate` menu.
+* `fastForwardRates`: List of rates available to cycle through every time the `fast_forward` button is clicked.
+* `rewindRates`: List of rates available to cycle through every time the `rewind` button is clicked.
+
  ```js
 const config = {
   'controlPanelElements': ['playback_rate', 'fast_forward', 'rewind'],

@@ -75,6 +75,8 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
     const trickPlayRate = this.player.getPlaybackRate();
     const newRateIndex = this.rewindRates_.indexOf(trickPlayRate) + 1;
 
+    // When the button is clicked, the next rate in this.rewindRates_ is
+    // selected. If no more rates are available, the first one is set.
     const newRate = (newRateIndex != this.rewindRates_.length) ?
         this.rewindRates_[newRateIndex] : this.rewindRates_[0];
     this.player.trickPlay(newRate);
