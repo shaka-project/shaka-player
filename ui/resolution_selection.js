@@ -34,6 +34,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     super(parent, controls, shaka.ui.Enums.MaterialDesignIcons.RESOLUTION);
 
     this.button.classList.add('shaka-resolution-button');
+    this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-resolutions');
 
     this.eventManager.listen(
@@ -171,6 +172,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
     }
+
+    this.button.setAttribute('shaka-status', this.currentSelection.textContent);
 
     this.menu.appendChild(autoButton);
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);

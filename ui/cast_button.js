@@ -41,6 +41,7 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.castButton_ = shaka.util.Dom.createButton();
     this.castButton_.classList.add('shaka-cast-button');
+    this.castButton_.classList.add('shaka-tooltip');
     this.castButton_.ariaPressed = 'false';
 
     /** @private {!HTMLElement} */

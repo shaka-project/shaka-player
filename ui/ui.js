@@ -234,6 +234,7 @@ shaka.ui.Overlay = class {
       enableKeyboardPlaybackControls: true,
       enableFullscreenOnRotation: true,
       forceLandscapeOnFullscreen: true,
+      enableTooltips: false,
     };
 
     // Check AirPlay support

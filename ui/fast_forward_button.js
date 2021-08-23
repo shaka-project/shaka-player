@@ -32,6 +32,8 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('material-icons-round');
     this.button_.classList.add('shaka-fast-forward-button');
+    this.button_.classList.add('shaka-tooltip-status');
+    this.button_.setAttribute('shaka-status', '1x');
     this.button_.textContent =
       shaka.ui.Enums.MaterialDesignIcons.FAST_FORWARD;
     this.parent.appendChild(this.button_);
@@ -80,6 +82,8 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     const newRate = (newRateIndex != this.fastForwardRates_.length) ?
         this.fastForwardRates_[newRateIndex] : this.fastForwardRates_[0];
     this.player.trickPlay(newRate);
+
+    this.button_.setAttribute('shaka-status', newRate + 'x');
   }
 };
 

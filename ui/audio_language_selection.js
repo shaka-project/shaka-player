@@ -32,6 +32,7 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
     super(parent, controls, shaka.ui.Enums.MaterialDesignIcons.LANGUAGE);
 
     this.button.classList.add('shaka-language-button');
+    this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-audio-languages');
 
     this.eventManager.listen(
@@ -72,6 +73,8 @@ shaka.ui.AudioLanguageSelection = class extends shaka.ui.SettingsMenu {
 
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('languageselectionupdated'));
+
+    this.button.setAttribute('shaka-status', this.currentSelection.innerText);
   }
 
   /** @private */

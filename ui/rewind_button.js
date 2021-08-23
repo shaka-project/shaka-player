@@ -32,6 +32,9 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('material-icons-round');
     this.button_.classList.add('shaka-rewind-button');
+    this.button_.classList.add('shaka-tooltip-status');
+    this.button_.setAttribute('shaka-status',
+        this.localization.resolve(shaka.ui.Locales.Ids.OFF));
     this.button_.textContent =
       shaka.ui.Enums.MaterialDesignIcons.REWIND;
     this.parent.appendChild(this.button_);
@@ -80,6 +83,8 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
     const newRate = (newRateIndex != this.rewindRates_.length) ?
         this.rewindRates_[newRateIndex] : this.rewindRates_[0];
     this.player.trickPlay(newRate);
+
+    this.button_.setAttribute('shaka-status', newRate + 'x');
   }
 };
 

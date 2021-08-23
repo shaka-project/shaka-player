@@ -81,7 +81,8 @@ shaka.extern.UIVolumeBarColors;
  *   doubleClickForFullscreen: boolean,
  *   enableKeyboardPlaybackControls: boolean,
  *   enableFullscreenOnRotation: boolean,
- *   forceLandscapeOnFullscreen: boolean
+ *   forceLandscapeOnFullscreen: boolean,
+ *   enableTooltips: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -165,6 +166,10 @@ shaka.extern.UIVolumeBarColors;
  *   enters fullscreen.  Note that this behavior is based on an experimental
  *   browser API, and may not work on all platforms.
  *   Defaults to true.
+ * @property {boolean} enableTooltips
+ *   Whether or not buttons in the control panel display tooltips that contain
+ *   information about their function.
+ *   Defaults to false.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

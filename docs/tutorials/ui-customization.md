@@ -102,6 +102,18 @@ ui.configure(config);
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
 
+#### Adding tooltips to control panel buttons
+
+Tooltips can be enabled to display the function of every button in the control panel. Where applicable, they will also contain the current selection in parenthesis.
+
+Example:
+```js
+const config = {
+  'enableTooltips' : true
+}
+ui.configure(config);
+```
+
 #### Replacing the default context menu
 
 A custom context menu can be added through the `customContextMenu` boolean. Additionally, the `contextMenuElements` option can be used to add elements to it. Currently only the statistics button is available:
