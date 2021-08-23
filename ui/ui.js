@@ -209,6 +209,9 @@ shaka.ui.Overlay = class {
       contextMenuElements: [
         'statistics',
       ],
+      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      fastForwardRates: [2, 4, 8, 1],
+      rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
       addBigPlayButton: false,
       customContextMenu: false,

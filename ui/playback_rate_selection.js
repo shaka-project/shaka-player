@@ -48,15 +48,8 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     });
 
     /** @type {!Map.<string, number>} */
-    this.playbackRates_ = new Map([
-      ['0.5x', 0.5],
-      ['0.75x', 0.75],
-      ['1x', 1],
-      ['1.25x', 1.25],
-      ['1.5x', 1.5],
-      ['1.75x', 1.75],
-      ['2x', 2],
-    ]);
+    this.playbackRates_ = new Map(this.controls.getConfig().playbackRates
+        .map((rate) => [rate + 'x', rate]));
 
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();

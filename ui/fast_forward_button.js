@@ -37,6 +37,9 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
 
+    /** @private {!Array.<number>} */
+    this.fastForwardRates_ = this.controls.getConfig().fastForwardRates;
+
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
           this.updateAriaLabel_();
@@ -61,7 +64,7 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
   }
 
   /**
-   * Cycles trick play rate between 1, 2, 4, and 8.
+   * Cycles trick play rate between the selected fast forward rates.
    * @private
    */
   fastForward_() {
@@ -70,10 +73,12 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
     }
 
     const trickPlayRate = this.player.getPlaybackRate();
-    // Every time the button is clicked, the rate is multiplied by 2,
-    // unless the rate is at max (8), in which case it is dropped back to 1.
-    const newRate = (trickPlayRate < 0 || trickPlayRate > 4) ?
-        1 : trickPlayRate * 2;
+    const newRateIndex = this.fastForwardRates_.indexOf(trickPlayRate) + 1;
+
+    // When the button is clicked, the next rate in this.fastForwardRates_ is
+    // selected. If no more rates are available, the first one is set.
+    const newRate = (newRateIndex != this.fastForwardRates_.length) ?
+        this.fastForwardRates_[newRateIndex] : this.fastForwardRates_[0];
     this.player.trickPlay(newRate);
   }
 };
