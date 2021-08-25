@@ -2198,7 +2198,8 @@ describe('DashParser Manifest', () => {
   it('skip periods that are earlier than max period start time', async () => {
     const sources = [
       buildManifestWithPeriodStartTime([5, 15]),
-      buildManifestWithPeriodStartTime([4, 15]), // simulate out-of-sync of -1s
+      buildManifestWithPeriodStartTime([6, 15]), // simulate out-of-sync of -1s
+      buildManifestWithPeriodStartTime([4, 15]), // simulate out-of-sync of +1s
     ];
     const segments = [];
 
