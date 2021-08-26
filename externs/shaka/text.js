@@ -504,6 +504,11 @@ shaka.extern.TextDisplayer = class {
    * @exportDoc
    */
   setTextVisibility(on) {}
+
+  /**
+   * Force (re)render captions
+   */
+  updateCaptions() {}
 };
 
 
