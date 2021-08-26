@@ -8,20 +8,22 @@ CHANGELOG.md.
 The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
 
-Candidate features for future release cycles
- - HLS interstitial support
-   https://github.com/google/shaka-player/issues/3364
+Priority features up next:
  - Support containerless formats
    https://github.com/google/shaka-player/issues/2337
+ - Preload API
+   https://github.com/google/shaka-player/issues/880
+ - Codec-switching and order preference
+   https://github.com/google/shaka-player/issues/1528
+   https://github.com/google/shaka-player/issues/2179
+
+Candidate features for future release cycles:
+ - HLS interstitial support
+   https://github.com/google/shaka-player/issues/3364
  - Support ID3 tags in mp4
    https://github.com/google/shaka-player/issues/3351
  - MSE support for FairPlay
    https://github.com/google/shaka-player/issues/3346
- - Codec-switching and order preference
-   https://github.com/google/shaka-player/issues/1528
-   https://github.com/google/shaka-player/issues/2179
- - Preload API
-   https://github.com/google/shaka-player/issues/880
  - Smaller, more modular binary
  - Official TypeScript defs, generated from source
    https://github.com/google/shaka-player/issues/1030
@@ -29,7 +31,7 @@ Candidate features for future release cycles
    https://github.com/google/shaka-player/issues/3359
  - Integration with Google Video ML/Cloud AI
 
-v3.3 - 2021 Q3
+v3.3 - 2021 Q3 or Q4
  - Background fetch for offline storage
    https://github.com/google/shaka-player/issues/879
  - HLS performance improvements
