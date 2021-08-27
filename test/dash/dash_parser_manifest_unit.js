@@ -2155,7 +2155,7 @@ describe('DashParser Manifest', () => {
      * @param {!Array.<number>} periods Start time of multiple periods
      * @return {string}
      */
-  function buildManifestWithPeriodId(periods) {
+  function buildManifestWithPeriodStartTime(periods) {
     const mpdTemplate = [
       `<MPD type="dynamic"`,
       'availabilityStartTime="1970-01-01T00:00:00Z"',
@@ -2179,6 +2179,8 @@ describe('DashParser Manifest', () => {
     };
     const periodXmls = periods.map((period, i) => {
       const duration = i+1 === periods.length ? 10 : periods[i+1] - period;
+      // Period start time as ID here. If we use index then there will be
+      // periods with same period ID and different start time which are invalid.
       return periodTemplate(period, period, duration);
     });
     return sprintf(mpdTemplate, {
@@ -2195,9 +2197,9 @@ describe('DashParser Manifest', () => {
 
   it('skip periods that are earlier than max period start time', async () => {
     const sources = [
-      buildManifestWithPeriodId([5, 15]),
-      buildManifestWithPeriodId([6, 15]), // simulate out-of-sync of -1s
-      buildManifestWithPeriodId([4, 15]), // simulate out-of-sync of +1s
+      buildManifestWithPeriodStartTime([5, 15]),
+      buildManifestWithPeriodStartTime([6, 15]), // simulate out-of-sync of +1s
+      buildManifestWithPeriodStartTime([4, 15]), // simulate out-of-sync of -1s
     ];
     const segments = [];
 
