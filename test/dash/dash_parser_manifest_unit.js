@@ -2155,7 +2155,7 @@ describe('DashParser Manifest', () => {
      * @param {!Array.<number>} periods Start time of multiple periods
      * @return {string}
      */
-  function buildManifestWithPeriodStartTime(periods) {
+  function buildManifestWithPeriodId(periods) {
     const mpdTemplate = [
       `<MPD type="dynamic"`,
       'availabilityStartTime="1970-01-01T00:00:00Z"',
@@ -2179,7 +2179,7 @@ describe('DashParser Manifest', () => {
     };
     const periodXmls = periods.map((period, i) => {
       const duration = i+1 === periods.length ? 10 : periods[i+1] - period;
-      return periodTemplate(i+1, period, duration);
+      return periodTemplate(period, period, duration);
     });
     return sprintf(mpdTemplate, {
       periods: periodXmls.join('\n'),
@@ -2193,13 +2193,11 @@ describe('DashParser Manifest', () => {
   // redundant servers. The period start time might become out of sync
   // during the switch-over/recovery.
 
-  // Solution: Ignore old DASH periods that are older than the latest one.
-
   it('skip periods that are earlier than max period start time', async () => {
     const sources = [
-      buildManifestWithPeriodStartTime([5, 15]),
-      buildManifestWithPeriodStartTime([6, 15]), // simulate out-of-sync of -1s
-      buildManifestWithPeriodStartTime([4, 15]), // simulate out-of-sync of +1s
+      buildManifestWithPeriodId([5, 15]),
+      buildManifestWithPeriodId([6, 15]), // simulate out-of-sync of -1s
+      buildManifestWithPeriodId([4, 15]), // simulate out-of-sync of +1s
     ];
     const segments = [];
 
