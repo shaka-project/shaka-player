@@ -211,6 +211,9 @@ shaka.ui.Overlay = class {
         'picture_in_picture',
         'statistics',
       ],
+      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      fastForwardRates: [2, 4, 8, 1],
+      rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
       addBigPlayButton: false,
       customContextMenu: false,
@@ -233,6 +236,7 @@ shaka.ui.Overlay = class {
       enableKeyboardPlaybackControls: true,
       enableFullscreenOnRotation: true,
       forceLandscapeOnFullscreen: true,
+      enableTooltips: false,
     };
 
     // Check AirPlay support

@@ -34,4 +34,5 @@
     r'(?i)@returns': '@return',
     r'(?i)varint': 'variant',
     r'(?i)asynchronus': 'asynchronous',
+    r'(?i)deafult': 'default',
 }

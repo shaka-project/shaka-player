@@ -17,7 +17,7 @@ goog.require('shaka.test.Util');
  */
 shaka.test.FakeDrmEngine = class {
   constructor() {
-    /** @private {!Array.<number>} */
+    /** @private {!Array.<string>} */
     this.offlineSessions_ = [];
     /** @private {?shaka.extern.DrmInfo} */
     this.drmInfo_ = null;
@@ -44,6 +44,13 @@ shaka.test.FakeDrmEngine = class {
     // We use |callFake| to ensure that updated values of |this.drmInfo_| will
     // be returned.
     this.getDrmInfo.and.callFake(() => this.drmInfo_);
+
+    /** @type {!jasmine.Spy} */
+    this.newInitData = jasmine.createSpy('newInitData');
+    this.newInitData.and.callFake((initDataType, initData) => {
+      const num = 1 + this.offlineSessions_.length;
+      this.offlineSessions_.push('session-' + num);
+    });
 
     /** @type {!jasmine.Spy} */
     this.getExpiration = jasmine.createSpy('getExpiration');
@@ -90,7 +97,7 @@ shaka.test.FakeDrmEngine = class {
   }
 
   /**
-   * @param {!Array.<number>} sessions
+   * @param {!Array.<string>} sessions
    */
   setSessionIds(sessions) {
     // Copy the values to break the reference to the input value.

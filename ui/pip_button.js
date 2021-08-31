@@ -40,6 +40,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.pipButton_ = shaka.util.Dom.createButton();
     this.pipButton_.classList.add('shaka-pip-button');
+    this.pipButton_.classList.add('shaka-tooltip');
 
     /** @private {!HTMLElement} */
     this.pipIcon_ = shaka.util.Dom.createHTMLElement('i');

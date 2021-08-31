@@ -22,10 +22,12 @@ goog.require('shaka.test.ManifestGenerator');
 goog.require('shaka.test.TestScheme');
 goog.require('shaka.test.Util');
 goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.BufferUtils');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.PlayerConfiguration');
 goog.require('shaka.util.PublicPromise');
+goog.require('shaka.util.Uint8ArrayUtils');
 goog.requireType('shaka.media.SegmentReference');
 
 /** @return {boolean} */
@@ -58,12 +60,16 @@ filterDescribe('Storage', storageSupport, () => {
   const manifestWithNonZeroStartUri = 'fake:manifest-with-non-zero-start';
   const manifestWithLiveTimelineUri = 'fake:manifest-with-live-timeline';
   const manifestWithAlternateSegmentsUri = 'fake:manifest-with-alt-segments';
+  const manifestWithVideoInitSegmentsUri =
+      'fake:manifest-with-video-init-segments';
 
+  const initSegmentUri = 'fake:init-segment';
   const segment1Uri = 'fake:segment-1';
   const segment2Uri = 'fake:segment-2';
   const segment3Uri = 'fake:segment-3';
   const segment4Uri = 'fake:segment-4';
 
+  const alternateInitSegmentUri = 'fake:alt-init-segment';
   const alternateSegment1Uri = 'fake:alt-segment-1';
   const alternateSegment2Uri = 'fake:alt-segment-2';
   const alternateSegment3Uri = 'fake:alt-segment-3';
@@ -945,6 +951,46 @@ filterDescribe('Storage', storageSupport, () => {
       }
     });
 
+    it('can extract DRM info from segments', async () => {
+      const pssh1 =
+          '00000028' +                          // atom size
+          '70737368' +                          // atom type='pssh'
+          '00000000' +                          // v0, flags=0
+          'edef8ba979d64acea3c827dcd51d21ed' +  // system id (Widevine)
+          '00000008' +                          // data size
+          '0102030405060708';                   // data
+      const psshData1 = shaka.util.Uint8ArrayUtils.fromHex(pssh1);
+      const pssh2 =
+          '00000028' +                          // atom size
+          '70737368' +                          // atom type='pssh'
+          '00000000' +                          // v0, flags=0
+          'edef8ba979d64acea3c827dcd51d21ed' +  // system id (Widevine)
+          '00000008' +                          // data size
+          '1337420123456789';                   // data
+      const psshData2 = shaka.util.Uint8ArrayUtils.fromHex(pssh2);
+      netEngine.setResponseValue(initSegmentUri,
+          shaka.util.BufferUtils.toArrayBuffer(psshData1));
+      netEngine.setResponseValue(alternateInitSegmentUri,
+          shaka.util.BufferUtils.toArrayBuffer(psshData2));
+
+      const drm = new shaka.test.FakeDrmEngine();
+      const drmInfo = makeDrmInfo();
+      drmInfo.keySystem = 'com.widevine.alpha';
+      drm.setDrmInfo(drmInfo);
+      overrideDrmAndManifest(
+          storage,
+          drm,
+          makeManifestWithVideoInitSegments());
+
+      const stored = await storage.store(
+          manifestWithVideoInitSegmentsUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
+
+      // The manifest chooses the alternate stream, so expect only the alt init
+      // segment.
+      expect(drm.newInitData).toHaveBeenCalledWith('cenc', psshData2);
+    });
+
     it('can store multiple assets at once', async () => {
       // Block the network so that we won't finish the first store command.
       /** @type {!shaka.util.PublicPromise} */
@@ -1400,6 +1446,62 @@ filterDescribe('Storage', storageSupport, () => {
   }
 
   /** @return {shaka.extern.Manifest} */
+  function makeManifestWithVideoInitSegments() {
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.presentationTimeline.setDuration(20);
+
+      manifest.addVariant(0, (variant) => {
+        variant.bandwidth = kbps(13);
+        variant.addVideo(1, (stream) => {
+          stream.bandwidth = kbps(13);
+          stream.size(100, 200);
+        });
+      });
+      manifest.addVariant(2, (variant) => {
+        variant.bandwidth = kbps(20);
+        variant.addVideo(3, (stream) => {
+          stream.bandwidth = kbps(20);
+          stream.size(200, 400);
+        });
+      });
+    });
+
+    const stream = manifest.variants[0].video;
+    goog.asserts.assert(stream, 'The first stream should exist');
+    stream.encrypted = true;
+    const init = new shaka.media.InitSegmentReference(
+        () => [initSegmentUri], 0, null);
+    const refs = [
+      makeReference(segment1Uri, 0, 1),
+      makeReference(segment2Uri, 1, 2),
+      makeReference(segment3Uri, 2, 3),
+      makeReference(segment4Uri, 3, 4),
+    ];
+    for (const ref of refs) {
+      ref.initSegmentReference = init;
+    }
+    overrideSegmentIndex(stream, refs);
+
+    const streamAlt = manifest.variants[1].video;
+    goog.asserts.assert(streamAlt, 'The second stream should exist');
+    streamAlt.encrypted = true;
+    const initAlt = new shaka.media.InitSegmentReference(
+        () => [alternateInitSegmentUri], 0, null);
+    const refsAlt = [
+      makeReference(alternateSegment1Uri, 0, 1),
+      makeReference(alternateSegment2Uri, 1, 2),
+      makeReference(alternateSegment3Uri, 2, 3),
+      makeReference(alternateSegment4Uri, 3, 4),
+    ];
+    for (const ref of refsAlt) {
+      ref.initSegmentReference = initAlt;
+    }
+    overrideSegmentIndex(streamAlt, refsAlt);
+
+    return manifest;
+  }
+
+  /** @return {shaka.extern.Manifest} */
   function makeManifestWithPerStreamBandwidth() {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.presentationTimeline.setDuration(20);
@@ -1612,6 +1714,8 @@ filterDescribe('Storage', storageSupport, () => {
           makeManifestWithLiveTimeline();
       this.map_[manifestWithAlternateSegmentsUri] =
           makeManifestWithAlternateSegments();
+      this.map_[manifestWithVideoInitSegmentsUri] =
+          makeManifestWithVideoInitSegments();
     }
 
     /** @override */

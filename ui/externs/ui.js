@@ -65,6 +65,9 @@ shaka.extern.UIVolumeBarColors;
  *   overflowMenuButtons: !Array.<string>,
  *   contextMenuElements: !Array.<string>,
  *   statisticsList: !Array.<string>,
+ *   playbackRates: !Array.<number>,
+ *   fastForwardRates: !Array.<number>,
+ *   rewindRates: !Array.<number>,
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
  *   customContextMenu: boolean,
@@ -78,7 +81,8 @@ shaka.extern.UIVolumeBarColors;
  *   doubleClickForFullscreen: boolean,
  *   enableKeyboardPlaybackControls: boolean,
  *   enableFullscreenOnRotation: boolean,
- *   forceLandscapeOnFullscreen: boolean
+ *   forceLandscapeOnFullscreen: boolean,
+ *   enableTooltips: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -89,6 +93,12 @@ shaka.extern.UIVolumeBarColors;
  *   The ordered list of buttons in the context menu.
  * @property {!Array.<string>} statisticsList
  *   The ordered list of statistics present in the statistics container.
+ * @property {!Array.<number>} playbackRates
+ *   The ordered list of rates for playback selection.
+  * @property {!Array.<number>} fastForwardRates
+ *   The ordered list of rates for fast forward selection.
+ * @property {!Array.<number>} rewindRates
+ *   The ordered list of rates for rewind selection.
  * @property {boolean} addSeekBar
  *   Whether or not a seek bar should be part of the UI.
  * @property {boolean} addBigPlayButton
@@ -156,6 +166,10 @@ shaka.extern.UIVolumeBarColors;
  *   enters fullscreen.  Note that this behavior is based on an experimental
  *   browser API, and may not work on all platforms.
  *   Defaults to true.
+ * @property {boolean} enableTooltips
+ *   Whether or not buttons in the control panel display tooltips that contain
+ *   information about their function.
+ *   Defaults to false.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
