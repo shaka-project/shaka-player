@@ -149,4 +149,16 @@ describe('Mp4BoxParsers', () => {
     expect(defaultSampleDuration).toBe(expectedDefaultSampleDuration);
     expect(baseMediaDecodeTime).toBe(expectedBaseMediaDecodeTime);
   });
+
+  it('parses TKHD v1 box', () => {
+    const tkhdBox = new Uint8Array([
+      0x00, 0x00, 0x00, 0x00, 0xDC, 0xBF, 0x0F, 0xD7,
+      0x00, 0x00, 0x00, 0x00, 0xDC, 0xBF, 0x0F, 0xD7,
+      0x00, 0x00, 0x00, 0x01,
+    ]);
+    const reader = new shaka.util.DataViewReader(
+        tkhdBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+    const parsedTkhd = shaka.util.Mp4BoxParsers.parseTKHD(reader, 1);
+    expect(parsedTkhd.trackId).toBe(1);
+  });
 });

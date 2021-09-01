@@ -27,6 +27,23 @@ describe('Mp4CeaParser', () => {
     ceaSegment = responses[1];
   });
 
+  it('parses CEA-608 SEI data from MP4 H.264 stream', () => {
+    const seiProcessor = new shaka.cea.SeiProcessor();
+
+    const cea608Packet = new Uint8Array([
+      0x00, 0x09, 0x80, 0x00, 0xAF, 0xC8,
+      0x00, 0x00, 0x03, 0x00, 0x00, 0x40, // Emulation prevention byte
+      0x06, 0x01, 0xC4, 0x01, 0x04, 0x00,
+      0x3A, 0x81, 0x01, 0x80,
+    ]);
+
+    const naluData = seiProcessor.removeEmu(cea608Packet);
+    expect(naluData).toBeDefined();
+
+    // EPB should be removed by returning new array, not by shifting bytes
+    expect(naluData.length).toBe(21);
+  });
+
   it('parses cea data from mp4 stream', () => {
     const cea708Parser = new shaka.cea.Mp4CeaParser();
 
