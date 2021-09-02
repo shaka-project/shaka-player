@@ -238,6 +238,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   id: number,
  *   originalId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
+ *   closeSegmentIndex: (function()|undefined),
  *   segmentIndex: shaka.media.SegmentIndex,
  *   mimeType: string,
  *   codecs: string,
@@ -280,6 +281,9 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {shaka.extern.CreateSegmentIndexFunction} createSegmentIndex
  *   <i>Required.</i> <br>
  *   Creates the Stream's segmentIndex (asynchronously).
+ * @property {(function()|undefined)} closeSegmentIndex
+ *   <i>Optional.</i> <br>
+ *   Closes the Stream's segmentIndex.
  * @property {shaka.media.SegmentIndex} segmentIndex
  *   <i>Required.</i> <br>
  *   May be null until createSegmentIndex() is complete.
