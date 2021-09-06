@@ -150,15 +150,31 @@ describe('Mp4BoxParsers', () => {
     expect(baseMediaDecodeTime).toBe(expectedBaseMediaDecodeTime);
   });
 
+  /**
+   * Test on parsing an incomplete TKHD V1 box, since the parser doesn't
+   * parse the other fields
+   *
+   * Explanation on the Uint8Array:
+   * [
+   * <creation_time, 8 bytes>,
+   * <modification_time, 8 bytes>,
+   * <track_id, 4 bytes>
+   * ]
+   *
+   * Time is a 32B integer expressed in seconds since Jan 1, 1904, 0000 UTC
+   *
+   */
   it('parses TKHD v1 box', () => {
     const tkhdBox = new Uint8Array([
-      0x00, 0x00, 0x00, 0x00, 0xDC, 0xBF, 0x0F, 0xD7,
-      0x00, 0x00, 0x00, 0x00, 0xDC, 0xBF, 0x0F, 0xD7,
-      0x00, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x00, 0xDC, 0xBF, 0x0F, 0xD7, // Creation time
+      0x00, 0x00, 0x00, 0x00, 0xDC, 0xBF, 0x0F, 0xD7, // Modification time
+      0x00, 0x00, 0x00, 0x01, // Track ID
+      // Remaining fields are not processed in parseTKHD()
     ]);
     const reader = new shaka.util.DataViewReader(
         tkhdBox, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
-    const parsedTkhd = shaka.util.Mp4BoxParsers.parseTKHD(reader, 1);
+    const parsedTkhd = shaka.util.Mp4BoxParsers
+        .parseTKHD(reader, /* version= */ 1);
     expect(parsedTkhd.trackId).toBe(1);
   });
 });
