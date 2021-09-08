@@ -1,7 +1,7 @@
 {
   "name": "shaka-player",
   "description": "DASH/EME video player library",
-  "version": "3.2.0-pre",
+  "version": "3.3.0-pre",
   "homepage": "https://github.com/google/shaka-player",
   "author": "Google",
   "maintainers": [
@@ -28,8 +28,8 @@
     "esprima": "^4.0.1",
     "fastestsmallesttextencoderdecoder": "^1.0.22",
     "fontfaceonload": "^1.0.2",
-    "google-closure-compiler-java": "^20201006.0.0",
-    "google-closure-library": "^20200830.0.0",
+    "google-closure-compiler-java": "^20210505.0.0",
+    "google-closure-library": "^20210406.0.0",
     "htmlhint": "^0.11.0",
     "jasmine-ajax": "^4.0.0",
     "jimp": "^0.11.0",

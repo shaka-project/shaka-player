@@ -206,6 +206,8 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreMaxSegmentDuration')
         .addBoolInput_(MessageIds.IGNORE_HLS_TEXT_FAILURES,
             'manifest.hls.ignoreTextStreamFailures')
+        .addBoolInput_(MessageIds.IGNORE_HLS_IMAGE_FAILURES,
+            'manifest.hls.ignoreImageStreamFailures')
         .addBoolInput_(MessageIds.USE_FULL_SEGMENTS_FOR_START_TIME,
             'manifest.hls.useFullSegmentsForStartTime')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
@@ -358,8 +360,9 @@ shakaDemo.Config = class {
             'streaming.forceHTTPS')
         .addBoolInput_(MessageIds.PREFER_NATIVE_HLS,
             'streaming.preferNativeHls')
-        .addBoolInput_(MessageIds.USE_MEDIA_CAPABILITIES,
-            'useMediaCapabilities');
+        .addNumberInput_(MessageIds.UPDATE_INTERVAL_SECONDS,
+            'streaming.updateIntervalSeconds',
+            /* canBeDecimal= */ true);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
@@ -395,7 +398,8 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
     this.addSection_(MessageIds.LANGUAGE_SECTION_HEADER, docLink)
         .addTextInput_(MessageIds.AUDIO_LANGUAGE, 'preferredAudioLanguage')
-        .addTextInput_(MessageIds.TEXT_LANGUAGE, 'preferredTextLanguage');
+        .addTextInput_(MessageIds.TEXT_LANGUAGE, 'preferredTextLanguage')
+        .addTextInput_(MessageIds.TEXT_ROLE, 'preferredTextRole');
     const onChange = (input) => {
       shakaDemoMain.setUILocale(input.value);
       shakaDemoMain.remakeHash();

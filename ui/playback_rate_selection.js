@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.PlaybackRateSelection');
 
-goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -32,6 +32,7 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
 
     this.button.classList.add('shaka-playbackrate-button');
     this.menu.classList.add('shaka-playback-rates');
+    this.button.classList.add('shaka-tooltip-status');
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
@@ -48,15 +49,8 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     });
 
     /** @type {!Map.<string, number>} */
-    this.playbackRates_ = new Map([
-      ['0.5x', 0.5],
-      ['0.75x', 0.75],
-      ['1x', 1],
-      ['1.25x', 1.25],
-      ['1.5x', 1.5],
-      ['1.75x', 1.75],
-      ['2x', 2],
-    ]);
+    this.playbackRates_ = new Map(this.controls.getConfig().playbackRates
+        .map((rate) => [rate + 'x', rate]));
 
     // Set up all the strings in the user's preferred language.
     this.updateLocalizedStrings_();
@@ -70,10 +64,8 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.backButton.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.BACK));
-    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.PLAYBACK_RATE));
+    this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
+    this.button.ariaLabel = this.localization.resolve(LocIds.PLAYBACK_RATE);
     this.nameSpan.textContent = this.localization.resolve(LocIds.PLAYBACK_RATE);
     this.backSpan.textContent = this.localization.resolve(LocIds.PLAYBACK_RATE);
   }
@@ -105,13 +97,14 @@ shaka.ui.PlaybackRateSelection = class extends shaka.ui.SettingsMenu {
     if (span) {
       const button = span.parentElement;
       button.appendChild(shaka.ui.Utils.checkmarkIcon());
-      button.setAttribute('aria-selected', 'true');
+      button.ariaSelected = 'true';
       span.classList.add('shaka-chosen-item');
     }
 
     // Set the label to display the current playback rate in the overflow menu,
     // in the format of '1x', '1.5x', etc.
     this.currentSelection.textContent = rate + 'x';
+    this.button.setAttribute('shaka-status', rate + 'x');
   }
 
   /** @private */
@@ -145,4 +138,7 @@ shaka.ui.PlaybackRateSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'playback_rate', new shaka.ui.PlaybackRateSelection.Factory());
+
+shaka.ui.Controls.registerElement(
     'playback_rate', new shaka.ui.PlaybackRateSelection.Factory());

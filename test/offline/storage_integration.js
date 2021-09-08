@@ -22,10 +22,12 @@ goog.require('shaka.test.ManifestGenerator');
 goog.require('shaka.test.TestScheme');
 goog.require('shaka.test.Util');
 goog.require('shaka.util.AbortableOperation');
+goog.require('shaka.util.BufferUtils');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.PlayerConfiguration');
 goog.require('shaka.util.PublicPromise');
+goog.require('shaka.util.Uint8ArrayUtils');
 goog.requireType('shaka.media.SegmentReference');
 
 /** @return {boolean} */
@@ -58,12 +60,16 @@ filterDescribe('Storage', storageSupport, () => {
   const manifestWithNonZeroStartUri = 'fake:manifest-with-non-zero-start';
   const manifestWithLiveTimelineUri = 'fake:manifest-with-live-timeline';
   const manifestWithAlternateSegmentsUri = 'fake:manifest-with-alt-segments';
+  const manifestWithVideoInitSegmentsUri =
+      'fake:manifest-with-video-init-segments';
 
+  const initSegmentUri = 'fake:init-segment';
   const segment1Uri = 'fake:segment-1';
   const segment2Uri = 'fake:segment-2';
   const segment3Uri = 'fake:segment-3';
   const segment4Uri = 'fake:segment-4';
 
+  const alternateInitSegmentUri = 'fake:alt-init-segment';
   const alternateSegment1Uri = 'fake:alt-segment-1';
   const alternateSegment2Uri = 'fake:alt-segment-2';
   const alternateSegment3Uri = 'fake:alt-segment-3';
@@ -147,15 +153,7 @@ filterDescribe('Storage', storageSupport, () => {
     }
   });
 
-  for (const useMediaCapabilities of [true, false]) {
-    const isEnabled = useMediaCapabilities ? 'enabled' : 'disabled';
-    filterDescribe('persistent license with MediaCapabilities ' + isEnabled,
-        drmStorageSupport, () => {
-          testPersistentLicense(useMediaCapabilities);
-        });
-  }
-
-  function testPersistentLicense(useMediaCapabilities) {
+  filterDescribe('persistent license', drmStorageSupport, () => {
     /** @type {!shaka.Player} */
     let player;
     /** @type {!shaka.offline.Storage} */
@@ -166,7 +164,6 @@ filterDescribe('Storage', storageSupport, () => {
       // networking engine.  This allows us to use Player.configure in these
       // tests.
       player = new shaka.Player();
-      player.configure({'useMediaCapabilities': useMediaCapabilities});
       storage = new shaka.offline.Storage(player);
     });
 
@@ -201,7 +198,7 @@ filterDescribe('Storage', storageSupport, () => {
       expect(manifest.offlineSessionIds.length).toBeTruthy();
 
       // PART 2 - Check that the licences are stored.
-      await withDrm(player, manifest, useMediaCapabilities, (drm) => {
+      await withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const foundSession = await loadOfflineSession(drm, session);
           expect(foundSession).toBeTruthy();
@@ -213,7 +210,7 @@ filterDescribe('Storage', storageSupport, () => {
       await storage.remove(uri.toString());
 
       // PART 4 - Check that the licenses were removed.
-      const p = withDrm(player, manifest, useMediaCapabilities, (drm) => {
+      const p = withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const notFoundSession = await loadOfflineSession(drm, session);
           expect(notFoundSession).toBeFalsy();
@@ -257,7 +254,7 @@ filterDescribe('Storage', storageSupport, () => {
       const storedContents = await storage.list();
       expect(storedContents).toEqual([]);
 
-      await withDrm(player, manifest, useMediaCapabilities, (drm) => {
+      await withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const foundSession = await loadOfflineSession(drm, session);
           expect(foundSession).toBeTruthy();
@@ -270,7 +267,7 @@ filterDescribe('Storage', storageSupport, () => {
       expect(didRemoveAll).toBe(true);
 
       // PART 6 - Check that the licenses were removed.
-      const p = withDrm(player, manifest, useMediaCapabilities, (drm) => {
+      const p = withDrm(player, manifest, (drm) => {
         return Promise.all(manifest.offlineSessionIds.map(async (session) => {
           const notFoundSession = await loadOfflineSession(drm, session);
           expect(notFoundSession).toBeFalsy();
@@ -282,7 +279,7 @@ filterDescribe('Storage', storageSupport, () => {
           shaka.util.Error.Code.OFFLINE_SESSION_REMOVED));
       await expectAsync(p).toBeRejectedWith(expected);
     });
-  }
+  });
 
   describe('default track selection callback', () => {
     const PlayerConfiguration = shaka.util.PlayerConfiguration;
@@ -954,6 +951,46 @@ filterDescribe('Storage', storageSupport, () => {
       }
     });
 
+    it('can extract DRM info from segments', async () => {
+      const pssh1 =
+          '00000028' +                          // atom size
+          '70737368' +                          // atom type='pssh'
+          '00000000' +                          // v0, flags=0
+          'edef8ba979d64acea3c827dcd51d21ed' +  // system id (Widevine)
+          '00000008' +                          // data size
+          '0102030405060708';                   // data
+      const psshData1 = shaka.util.Uint8ArrayUtils.fromHex(pssh1);
+      const pssh2 =
+          '00000028' +                          // atom size
+          '70737368' +                          // atom type='pssh'
+          '00000000' +                          // v0, flags=0
+          'edef8ba979d64acea3c827dcd51d21ed' +  // system id (Widevine)
+          '00000008' +                          // data size
+          '1337420123456789';                   // data
+      const psshData2 = shaka.util.Uint8ArrayUtils.fromHex(pssh2);
+      netEngine.setResponseValue(initSegmentUri,
+          shaka.util.BufferUtils.toArrayBuffer(psshData1));
+      netEngine.setResponseValue(alternateInitSegmentUri,
+          shaka.util.BufferUtils.toArrayBuffer(psshData2));
+
+      const drm = new shaka.test.FakeDrmEngine();
+      const drmInfo = makeDrmInfo();
+      drmInfo.keySystem = 'com.widevine.alpha';
+      drm.setDrmInfo(drmInfo);
+      overrideDrmAndManifest(
+          storage,
+          drm,
+          makeManifestWithVideoInitSegments());
+
+      const stored = await storage.store(
+          manifestWithVideoInitSegmentsUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
+
+      // The manifest chooses the alternate stream, so expect only the alt init
+      // segment.
+      expect(drm.newInitData).toHaveBeenCalledWith('cenc', psshData2);
+    });
+
     it('can store multiple assets at once', async () => {
       // Block the network so that we won't finish the first store command.
       /** @type {!shaka.util.PublicPromise} */
@@ -1243,11 +1280,11 @@ filterDescribe('Storage', storageSupport, () => {
       goog.asserts.assert(
           content.offlineUri != null, 'URI should not be null!');
 
-      /**
-       * @type {!Array.<number>}
-       */
+      // We expect 5 progress events because there are 4 unique segments, plus
+      // the manifest.
+      /** @type {!Array.<number>}*/
       const progressSteps = [
-        0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0,
+        0.2, 0.4, 0.6, 0.8, 1,
       ];
 
       const progressCallback = (content, progress) => {
@@ -1406,6 +1443,62 @@ filterDescribe('Storage', storageSupport, () => {
       originalTextId: id.toString(),
       originalImageId: null,
     };
+  }
+
+  /** @return {shaka.extern.Manifest} */
+  function makeManifestWithVideoInitSegments() {
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.presentationTimeline.setDuration(20);
+
+      manifest.addVariant(0, (variant) => {
+        variant.bandwidth = kbps(13);
+        variant.addVideo(1, (stream) => {
+          stream.bandwidth = kbps(13);
+          stream.size(100, 200);
+        });
+      });
+      manifest.addVariant(2, (variant) => {
+        variant.bandwidth = kbps(20);
+        variant.addVideo(3, (stream) => {
+          stream.bandwidth = kbps(20);
+          stream.size(200, 400);
+        });
+      });
+    });
+
+    const stream = manifest.variants[0].video;
+    goog.asserts.assert(stream, 'The first stream should exist');
+    stream.encrypted = true;
+    const init = new shaka.media.InitSegmentReference(
+        () => [initSegmentUri], 0, null);
+    const refs = [
+      makeReference(segment1Uri, 0, 1),
+      makeReference(segment2Uri, 1, 2),
+      makeReference(segment3Uri, 2, 3),
+      makeReference(segment4Uri, 3, 4),
+    ];
+    for (const ref of refs) {
+      ref.initSegmentReference = init;
+    }
+    overrideSegmentIndex(stream, refs);
+
+    const streamAlt = manifest.variants[1].video;
+    goog.asserts.assert(streamAlt, 'The second stream should exist');
+    streamAlt.encrypted = true;
+    const initAlt = new shaka.media.InitSegmentReference(
+        () => [alternateInitSegmentUri], 0, null);
+    const refsAlt = [
+      makeReference(alternateSegment1Uri, 0, 1),
+      makeReference(alternateSegment2Uri, 1, 2),
+      makeReference(alternateSegment3Uri, 2, 3),
+      makeReference(alternateSegment4Uri, 3, 4),
+    ];
+    for (const ref of refsAlt) {
+      ref.initSegmentReference = initAlt;
+    }
+    overrideSegmentIndex(streamAlt, refsAlt);
+
+    return manifest;
   }
 
   /** @return {shaka.extern.Manifest} */
@@ -1621,6 +1714,8 @@ filterDescribe('Storage', storageSupport, () => {
           makeManifestWithLiveTimeline();
       this.map_[manifestWithAlternateSegmentsUri] =
           makeManifestWithAlternateSegments();
+      this.map_[manifestWithVideoInitSegmentsUri] =
+          makeManifestWithVideoInitSegments();
     }
 
     /** @override */
@@ -1682,11 +1777,10 @@ filterDescribe('Storage', storageSupport, () => {
   /**
    * @param {!shaka.Player} player
    * @param {shaka.extern.Manifest} manifest
-   * @param {boolean} useMediaCapabilities
    * @param {function(!shaka.media.DrmEngine):Promise} action
    * @return {!Promise}
    */
-  async function withDrm(player, manifest, useMediaCapabilities, action) {
+  async function withDrm(player, manifest, action) {
     const net = player.getNetworkingEngine();
     goog.asserts.assert(net, 'Player should have a net engine right now');
 
@@ -1704,8 +1798,7 @@ filterDescribe('Storage', storageSupport, () => {
     try {
       drm.configure(player.getConfiguration().drm);
       const variants = manifest.variants;
-      await drm.initForStorage(variants, /* usePersistentLicenses= */ true,
-          useMediaCapabilities);
+      await drm.initForStorage(variants, /* usePersistentLicenses= */ true);
       await action(drm);
     } finally {
       await drm.destroy();

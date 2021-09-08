@@ -634,7 +634,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreSuggestedPresentationDelay: boolean,
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
- *   keySystemsByURI: !Object.<string, string>
+ *   keySystemsByURI: !Object.<string, string>,
+ *   manifestPreprocessor: function(!Element)
  * }}
  *
  * @property {string} clockSyncUri
@@ -684,6 +685,10 @@ shaka.extern.DrmConfiguration;
  * @property {Object.<string, string>} keySystemsByURI
  *   A map of scheme URI to key system name. Defaults to default key systems
  *   mapping handled by Shaka.
+ * @property {function(!Element)} manifestPreprocessor
+ *   Called immediately after the DASH manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -692,11 +697,15 @@ shaka.extern.DashManifestConfiguration;
 /**
  * @typedef {{
  *   ignoreTextStreamFailures: boolean,
+ *   ignoreImageStreamFailures: boolean,
  *   useFullSegmentsForStartTime: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
  *   If <code>true</code>, ignore any errors in a text stream and filter out
+ *   those streams.
+ * @property {boolean} ignoreImageStreamFailures
+ *   If <code>true</code>, ignore any errors in a image stream and filter out
  *   those streams.
  * @property {boolean} useFullSegmentsForStartTime
  *   If <code>true</code>, force HlsParser to use a full segment request for
@@ -780,7 +789,8 @@ shaka.extern.ManifestConfiguration;
  *   lowLatencyMode: boolean,
  *   autoLowLatencyMode: boolean,
  *   forceHTTPS: boolean,
- *   preferNativeHls: boolean
+ *   preferNativeHls: boolean,
+ *   updateIntervalSeconds: number
  * }}
  *
  * @description
@@ -887,6 +897,8 @@ shaka.extern.ManifestConfiguration;
  *   If true, if the protocol is HTTP change it to HTTPs.
  * @property {boolean} preferNativeHls
  *   If true, prefer native HLS playback when possible, regardless of platform.
+ * @property {number} updateIntervalSeconds
+ *   The minimum number of seconds to see if the manifest has changes.
  *
  * @exportDoc
  */
@@ -980,13 +992,15 @@ shaka.extern.OfflineConfiguration;
  *   preferredTextLanguage: string,
  *   preferredVariantRole: string,
  *   preferredTextRole: string,
+ *   preferredVideoCodecs: !Array.<string>,
+ *   preferredAudioCodecs: !Array.<string>,
  *   preferredAudioChannelCount: number,
+ *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
  *   playRangeStart: number,
  *   playRangeEnd: number,
- *   textDisplayFactory: shaka.extern.TextDisplayer.Factory,
- *   useMediaCapabilities: boolean
+ *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
  * @property {shaka.extern.DrmConfiguration} drm
@@ -1014,8 +1028,15 @@ shaka.extern.OfflineConfiguration;
  *   The preferred role to use for variants.
  * @property {string} preferredTextRole
  *   The preferred role to use for text tracks.
+ * @property {!Array.<string>} preferredVideoCodecs
+ *   The list of preferred video codecs, in order of highest to lowest priority.
+ * @property {!Array.<string>} preferredAudioCodecs
+ *   The list of preferred audio codecs, in order of highest to lowest priority.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ * @property {!Array.<string>} preferredDecodingAttributes
+ *   The list of preferred attributes of decodingInfo, in the order of their
+ *   priorities.
  * @property {boolean} preferForcedSubs
  *   If true, a forced text track is preferred.  Defaults to false.
  *   If the content has no forced captions and the value is true,
@@ -1035,10 +1056,6 @@ shaka.extern.OfflineConfiguration;
  * @property {shaka.extern.TextDisplayer.Factory} textDisplayFactory
  *   A factory to construct a text displayer. Note that, if this is changed
  *   during playback, it will cause the text tracks to be reloaded.
- * @property {boolean} useMediaCapabilities
- *   If true, use MediaCapabilities.decodingInfo() to filter the manifest, and
- *   get MediaKeys information for encrypted content. Default to false.
- *   Shaka Player's integration with MediaCapabilities is now in BETA.
  * @exportDoc
  */
 shaka.extern.PlayerConfiguration;
@@ -1068,6 +1085,8 @@ shaka.extern.LanguageRole;
  *   height: number,
  *   positionX: number,
  *   positionY: number,
+ *   startTime: number,
+ *   duration: number,
  *   uris: !Array.<string>,
  *   width: number
  * }}
@@ -1078,6 +1097,10 @@ shaka.extern.LanguageRole;
  *    The thumbnail left position in px.
  * @property {number} positionY
  *    The thumbnail top position in px.
+ * @property {number} startTime
+ *    The start time of the thumbnail in the presentation timeline, in seconds.
+ * @property {number} duration
+ *    The duration of the thumbnail, in seconds.
  * @property {!Array.<string>} uris
  *   An array of URIs to attempt.  They will be tried in the order they are
  *   given.
@@ -1086,3 +1109,21 @@ shaka.extern.LanguageRole;
  * @exportDoc
  */
 shaka.extern.Thumbnail;
+
+
+/**
+ * @typedef {{
+ *   title: string,
+ *   startTime: number,
+ *   endTime: number
+ * }}
+ *
+ * @property {string} title
+ *    The title of the chapter.
+ * @property {number} startTime
+ *    The time that describes the beginning of the range of the chapter.
+ * @property {number} endTime
+ *    The time that describes the end of the range of chapter.
+ * @exportDoc
+ */
+shaka.extern.Chapter;

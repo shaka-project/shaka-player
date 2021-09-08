@@ -10,6 +10,8 @@ goog.require('shaka.log');
 goog.require('shaka.media.BufferingObserver');
 goog.require('shaka.media.ManifestParser');
 goog.require('shaka.media.PresentationTimeline');
+goog.require('shaka.media.SegmentReference');
+goog.require('shaka.media.SegmentIndex');
 goog.require('shaka.test.FakeAbrManager');
 goog.require('shaka.test.FakeDrmEngine');
 goog.require('shaka.test.FakeManifestParser');
@@ -1986,6 +1988,24 @@ describe('Player', () => {
         expect(variantChanged).not.toHaveBeenCalled();
       });
     });
+
+    it('chooses the configured text language and role at start', async () => {
+      player.configure({
+        preferredTextLanguage: 'en',
+        preferredTextRole: 'commentary',
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      // Text was turned on during startup.
+      expect(player.isTextTrackVisible()).toBe(true);
+
+      expect(getActiveTextTrack()).toEqual(jasmine.objectContaining({
+        id: 52,
+        language: 'en',
+        roles: ['commentary'],
+      }));
+    });
   });  // describe('tracks')
 
   describe('languages', () => {
@@ -2789,16 +2809,7 @@ describe('Player', () => {
           expect(tracks[0].id).toBe(4);
         });
 
-
-    for (const useMediaCapabilities of [true, false]) {
-      const isEnabled = useMediaCapabilities ? 'enabled' : 'disabled';
-      it('removes if key system does not support codec with ' +
-          'MediaCapabilities ' + isEnabled, async () => {
-        await testWithUnsupportedCodec(useMediaCapabilities);
-      });
-    }
-
-    async function testWithUnsupportedCodec(useMediaCapabilities) {
+    it('removes if key system does not support codec', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
@@ -2816,35 +2827,22 @@ describe('Player', () => {
         });
       });
 
-      if (useMediaCapabilities) {
-        navigator.mediaCapabilities.decodingInfo = async (config) => {
-          await Promise.resolve();
-          const videoType = config['video'] ? config['video'].contentType : '';
-          if (videoType.includes('video') &&
+      navigator.mediaCapabilities.decodingInfo = async (config) => {
+        await Promise.resolve();
+        const videoType = config['video'] ? config['video'].contentType : '';
+        if (videoType.includes('video') &&
               videoType.includes('unsupported')) {
-            return {supported: false};
-          } else {
-            return {supported: true};
-          }
-        };
-      } else {
-        // We must be careful that our video/unsupported was not filtered out
-        // because of MSE support.  We are specifically testing EME-based
-        // filtering of codecs.
-        expect(MediaSource.isTypeSupported('video/unsupported')).toBe(true);
-        // Make sure that drm engine will reject the variant with an unsupported
-        // video mime type.
-        drmEngine.supportsVariant.and.callFake((variant) => {
-          return variant.video.codecs != 'unsupported';
-        });
-      }
+          return {supported: false};
+        } else {
+          return {supported: true};
+        }
+      };
 
-      player.configure({useMediaCapabilities: useMediaCapabilities});
       await player.load(fakeManifestUri, 0, fakeMimeType);
       const tracks = player.getVariantTracks();
       expect(tracks.length).toBe(1);
       expect(tracks[0].id).toBe(1);
-    }
+    });
 
     it('removes based on bandwidth', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -2940,7 +2938,7 @@ describe('Player', () => {
 
         manifest.addVariant(1, (variant) => {
           variant.addVideo(2, (stream) => {
-            stream.size(200, 1500);
+            stream.size(200, 1024);
           });
         });
 
@@ -3512,6 +3510,105 @@ describe('Player', () => {
           {language: 'en', role: 'caption', label: null},
           {language: 'en', role: 'subtitle', label: null},
         ]);
+      });
+    });
+
+    describe('getThumbnails', () => {
+      it('returns correct thumbnail position for supplied time', async () => {
+        const uris = () => ['thumbnail'];
+        const ref = new shaka.media.SegmentReference(
+            0, 60, uris, 0, null, null, 0, 0, Infinity, [],
+        );
+        const index = new shaka.media.SegmentIndex([ref]);
+
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1);
+          });
+          manifest.addImageStream(5, (stream) => {
+            stream.originalId = 'thumbnail';
+            stream.width = 200;
+            stream.height = 150;
+            stream.mimeType = 'image/jpeg';
+            stream.tilesLayout = '2x3';
+            stream.segmentIndex = index;
+          });
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        const thumbnail0 = await player.getThumbnails(5, 0);
+        const thumbnail1 = await player.getThumbnails(5, 11);
+        const thumbnail2 = await player.getThumbnails(5, 21);
+        const thumbnail5 = await player.getThumbnails(5, 51);
+        expect(thumbnail0).toEqual(jasmine.objectContaining({
+          positionX: 0,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnail1).toEqual(jasmine.objectContaining({
+          positionX: 100,
+          positionY: 0,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnail2).toEqual(jasmine.objectContaining({
+          positionX: 0,
+          positionY: 50,
+          width: 100,
+          height: 50,
+        }));
+        expect(thumbnail5).toEqual(jasmine.objectContaining({
+          positionX: 100,
+          positionY: 100,
+          width: 100,
+          height: 50,
+        }));
+      });
+
+      it('returns correct duration for a partially-used segment', async () => {
+        const uris = () => ['thumbnail'];
+
+        const ref1 = new shaka.media.SegmentReference(
+            0, 60, uris, 0, null, null, 0, 0, Infinity);
+        const ref2 = new shaka.media.SegmentReference(
+            60, 90, uris, 0, null, null, 0, 0, Infinity);
+        ref2.trueEndTime = 120;
+
+        const index = new shaka.media.SegmentIndex([ref1, ref2]);
+
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1);
+          });
+          manifest.addImageStream(5, (stream) => {
+            stream.originalId = 'thumbnail';
+            stream.width = 200;
+            stream.height = 150;
+            stream.mimeType = 'image/jpeg';
+            stream.tilesLayout = '2x3';
+            stream.segmentIndex = index;
+          });
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        const thumbnail0 = await player.getThumbnails(5, 0);
+        expect(thumbnail0.startTime).toBe(0);
+        expect(thumbnail0.duration).toBe(10);
+
+        const thumbnail1 = await player.getThumbnails(5, 10);
+        expect(thumbnail1.startTime).toBe(10);
+        expect(thumbnail1.duration).toBe(10);
+
+        const thumbnail6 = await player.getThumbnails(5, 60);
+        expect(thumbnail6.startTime).toBe(60);
+        expect(thumbnail6.duration).toBe(10);
+
+        const thumbnail8 = await player.getThumbnails(5, 80);
+        expect(thumbnail8.startTime).toBe(80);
+        expect(thumbnail8.duration).toBe(10);
       });
     });
   });

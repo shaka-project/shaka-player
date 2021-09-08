@@ -372,8 +372,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
   /** @private */
   updateAriaLabel_() {
-    this.bar.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(shaka.ui.Locales.Ids.SEEK));
+    this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.SEEK);
   }
 };
 

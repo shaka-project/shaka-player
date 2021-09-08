@@ -7,7 +7,6 @@
 
 goog.provide('shaka.ui.LoopButton');
 
-goog.require('shaka.ui.Constants');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -36,6 +35,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-loop-button');
+    this.button_.classList.add('shaka-tooltip');
 
     /** @private {!HTMLElement} */
     this.icon_ = shaka.util.Dom.createHTMLElement('i');
@@ -151,8 +151,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     const ariaText = this.video.loop ?
         LocIds.EXIT_LOOP_MODE : LocIds.ENTER_LOOP_MODE;
 
-    this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(ariaText));
+    this.button_.ariaLabel = this.localization.resolve(ariaText);
   }
 };
 

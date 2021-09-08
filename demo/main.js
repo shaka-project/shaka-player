@@ -1256,7 +1256,11 @@ shakaDemo.Main = class {
       if (asset.imaAssetKey || (asset.imaContentSrcId && asset.imaVideoId)) {
         manifestUri = await this.getManifestUriFromAdManager_(asset);
       }
-      await this.player_.load(manifestUri);
+      await this.player_.load(
+          manifestUri,
+          /* startTime= */ null,
+          asset.mimeType || undefined);
+
       if (this.player_.isAudioOnly()) {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
@@ -1739,7 +1743,7 @@ shakaDemo.Main = class {
 shakaDemo.Main.commonDrmSystems = [
   'com.widevine.alpha',
   'com.microsoft.playready',
-  'com.apple.fps.1_0',
+  'com.apple.fps',
   'com.adobe.primetime',
   'org.w3.clearkey',
 ];

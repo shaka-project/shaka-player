@@ -267,6 +267,14 @@
     "description": "The name of a configuration value.",
     "message": "Enabled"
   },
+  "DEMO_EXTRA_SHAKA_PLAYER_CONFIG": {
+    "description": "A label for a form field where extra Shaka Player configuration can be set",
+    "message": "Extra [PROPER_NAME:Shaka Player] configuration ([JARGON:JSON])"
+  },
+  "DEMO_EXTRA_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "Extra Config"
+  },
   "DEMO_FAIRPLAY": {
     "description": "Text that describes an asset that is protected with the Fairplay Digital Rights Management system.",
     "message": "[PROPER_NAME:Fairplay] [JARGON:DRM]"
@@ -347,6 +355,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures"
   },
+  "DEMO_IGNORE_HLS_IMAGE_FAILURES": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore [PROPER_NAME:HLS] Image Stream Failures"
+  },
   "DEMO_IMA_ASSET_KEY": {
     "description": "The label on a field that allows users to provide an asset key for a custom asset.",
     "message": "Asset key (for LIVE DAI Content)"
@@ -378,6 +390,10 @@
   "DEMO_INITIAL_SEGMENT_LIMIT": {
     "description": "The name of a configuration value.",
     "message": "Initial Segment Limit"
+  },
+  "DEMO_INVALID_JSON_CONFIG_ERROR": {
+    "description": "An error message for an invalid JSON configuration.",
+    "message": "Invalid JSON configuration"
   },
   "DEMO_IRT": {
     "description": "Text that describes an asset that comes from the Institut f\u00fcr Rundfunktechnik asset library.",
@@ -511,10 +527,6 @@
     "description": "The name of a configuration value.",
     "message": "Max Width"
   },
-  "DEMO_USE_MEDIA_CAPABILITIES": {
-    "description": "The name of a configuration value.",
-    "message": "Use [JARGON:MediaCapabilities]"
-  },
   "DEMO_METACDN": {
     "description": "Text that describes an asset that comes from the MetaCDN asset library.",
     "message": "[PROPER_NAME:MetaCDN]"
@@ -522,6 +534,10 @@
   "DEMO_MICROSOFT": {
     "description": "Text that describes an asset that comes from the Microsoft.",
     "message": "[PROPER_NAME:Microsoft]"
+  },
+  "DEMO_MIME_TYPE": {
+    "description": "The label on a field that allows users to provide a MIME type for a custom asset.",
+    "message": "MIME Type"
   },
   "DEMO_MIN_BANDWIDTH": {
     "description": "The name of a configuration value.",
@@ -739,6 +755,10 @@
     "description": "The name of a configuration value.",
     "message": "Preferred Text Language"
   },
+  "DEMO_TEXT_ROLE": {
+    "description": "The name of a configuration value.",
+    "message": "Preferred Text Role"
+  },
   "DEMO_THUMBNAILS": {
     "description": "Text that describes an asset that has a thumbnail stream.",
     "message": "Thumbnails"
@@ -818,6 +838,10 @@
   "DEMO_UPDATE_EXPIRATION_TIME": {
     "description": "The name of a configuration value.",
     "message": "Update expiration time"
+  },
+  "DEMO_UPDATE_INTERVAL_SECONDS": {
+    "description": "The name of a configuration value.",
+    "message": "Update interval seconds"
   },
   "DEMO_UPLYNK": {
     "description": "Text that describes an asset that comes from the Verizon Digital Media Services asset library.",

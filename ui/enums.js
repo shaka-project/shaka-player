@@ -16,7 +16,9 @@ goog.provide('shaka.ui.Enums');
 shaka.ui.Enums.MaterialDesignIcons = {
   'FULLSCREEN': 'fullscreen',
   'EXIT_FULLSCREEN': 'fullscreen_exit',
+  'CLOSE': 'close',
   'CLOSED_CAPTIONS': 'closed_caption',
+  'CLOSED_CAPTIONS_OFF': 'closed_caption_disabled',
   'CHECKMARK': 'done',
   'LANGUAGE': 'language',
   'PIP': 'picture_in_picture_alt',
@@ -40,4 +42,6 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'UNLOOP': 'repeat_on',
   'AIRPLAY': 'airplay',
   'REPLAY': 'replay',
+  'STATISTICS_ON': 'insert_chart_outlined',
+  'STATISTICS_OFF': 'insert_chart',
 };

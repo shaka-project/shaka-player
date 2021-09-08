@@ -16,6 +16,7 @@ goog.require('shaka.log');
 goog.require('shaka.ui.AdCounter');
 goog.require('shaka.ui.AdPosition');
 goog.require('shaka.ui.BigPlayButton');
+goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
@@ -198,6 +199,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   async destroy() {
+    if (document.pictureInPictureElement == this.localVideo_) {
+      await document.exitPictureInPicture();
+    }
+
     if (this.eventManager_) {
       this.eventManager_.release();
       this.eventManager_ = null;
@@ -317,6 +322,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (this.playButton_) {
       this.playButton_ = null;
+    }
+
+    if (this.contextMenu_) {
+      this.contextMenu_ = null;
     }
 
     if (this.controlsContainer_) {
@@ -647,6 +656,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.addPlayButton_();
     }
 
+    if (this.config_.customContextMenu) {
+      this.addContextMenu_();
+    }
+
     if (!this.spinnerContainer_) {
       this.addBufferingSpinner_();
     }
@@ -687,7 +700,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
-      if (this.config_.doubleClickForFullscreen) {
+      if (this.config_.doubleClickForFullscreen && document.fullscreenEnabled) {
         this.toggleFullScreen();
       }
     });
@@ -703,6 +716,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.playButton_ =
         new shaka.ui.BigPlayButton(playButtonContainer, this);
     this.elements_.push(this.playButton_);
+  }
+
+  /** @private */
+  addContextMenu_() {
+    /** @private {shaka.ui.ContextMenu} */
+    this.contextMenu_ =
+        new shaka.ui.ContextMenu(this.controlsButtonPanel_, this);
+    this.elements_.push(this.contextMenu_);
   }
 
   /** @private */
@@ -776,8 +797,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // on the page. The click event listener on window ensures that.
     // However, clicks on the bottom controls don't propagate to the container,
     // so we have to explicitly hide the menus onclick here.
-    this.eventManager_.listen(this.bottomControls_, 'click', () => {
-      this.hideSettingsMenus();
+    this.eventManager_.listen(this.bottomControls_, 'click', (e) => {
+      // We explicitly deny this measure when clicking on buttons that
+      // open submenus in the control panel.
+      if (!e.target['closest']('.shaka-overflow-button')) {
+        this.hideSettingsMenus();
+      }
     });
 
     this.addAdControls_();
@@ -787,6 +812,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
     this.controlsButtonPanel_.classList.add(
         'shaka-show-controls-on-mouse-over');
+    if (this.config_.enableTooltips) {
+      this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
+    }
     this.bottomControls_.appendChild(this.controlsButtonPanel_);
 
     // Create the elements specified by controlPanelElements
@@ -890,6 +918,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for click events to dismiss the settings menus.
     this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
+
+    // Avoid having multiple submenus open at the same time.
+    this.eventManager_.listen(
+        this, 'submenuopen', () => {
+          this.hideSettingsMenus();
+        });
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();

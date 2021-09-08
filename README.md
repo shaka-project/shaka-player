@@ -60,10 +60,10 @@ So we are dependent on the browser supporting the manifests.
 
 ### Shaka Player Embedded (for native iOS)
 
-We have another project called [Shaka Player Embedded][] that offers the same
-features and similar APIs for native apps on iOS.  This project uses its own
+We have another project called [Shaka Player Embedded][] which offers the same
+features and similar APIs for native apps on iOS. This project uses its own
 media stack, which allows it to play content that would otherwise not be
-supported.  This supports both DASH and HLS manifests.
+supported. This supports both DASH and HLS manifests.
 
 [Shaka Player Embedded]: https://github.com/google/shaka-player-embedded
 
@@ -210,7 +210,7 @@ Shaka Player supports:
   - SubViewer (SBV)
     - UTF-8 encoding only
 
-Subtitles are rendered by the browser by default.  Applications can create a
+Subtitles are rendered by the browser by default. Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
 attributes.
 
@@ -266,6 +266,9 @@ Shaka + Nuxt.js integration:
 
 Shaka + video.js integration:
 - https://github.com/davidjamesherzog/videojs-shaka
+
+Shaka + Angular integration:
+- https://github.com/PatrickKalkman/shaka-player-angular
 
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!

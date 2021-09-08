@@ -70,7 +70,7 @@ shaka.ui.Utils = class {
     icon.classList.add('shaka-chosen-item');
     icon.textContent = shaka.ui.Enums.MaterialDesignIcons.CHECKMARK;
     // Screen reader should ignore icon text.
-    icon.setAttribute('aria-hidden', 'true');
+    icon.ariaHidden = 'true';
     return icon;
   }
 

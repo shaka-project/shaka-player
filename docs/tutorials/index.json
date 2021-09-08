@@ -18,12 +18,13 @@
   { "offline": { "title": "Offline Storage and Playback" } },
   { "fairplay": { "title": "FairPlay support" } },
   { "application-level-redirects": { "title": "Application-Level Redirects" } },
+  { "blob-url": { "title": "Blob URL" } },
   { "faq": { "title": "Frequently Asked Questions" } },
   { "upgrade": {
       "title": "Upgrade Guide",
       "children": {
-        "upgrade-v2-4": { "title": "Upgrade Guide, v2.4 => v3.0" },
-        "upgrade-v2-5": { "title": "Upgrade Guide, v2.5 => v3.0" },
+        "upgrade-v2-5": { "title": "Upgrade Guide, v2.5 => v3" },
+        "upgrade-v3": { "title": "Upgrade Guide, v3" },
         "upgrade-manifest": { "title": "Shaka Player Manifest Upgrade Guide" }
       }
   } }

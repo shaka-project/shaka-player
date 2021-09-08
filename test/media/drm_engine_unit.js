@@ -23,14 +23,8 @@ goog.require('shaka.util.PublicPromise');
 goog.require('shaka.util.StringUtils');
 goog.require('shaka.util.Uint8ArrayUtils');
 
-for (const useMediaCapabilities of [true, false]) {
-  const isEnabled = useMediaCapabilities ? 'enabled' : 'disabled';
-  describe('DrmEngine with MediaCapabilities ' + isEnabled, () => {
-    testDrmEngine(useMediaCapabilities);
-  });
-}
 
-function testDrmEngine(useMediaCapabilities) {
+describe('DrmEngine', () => {
   const Util = shaka.test.Util;
 
   const originalRequestMediaKeySystemAccess =
@@ -39,8 +33,6 @@ function testDrmEngine(useMediaCapabilities) {
   const originalBatchTime = shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME;
   const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
 
-  /** @type {!jasmine.Spy} */
-  let requestMediaKeySystemAccessSpy;
   /** @type {!jasmine.Spy} */
   let decodingInfoSpy;
   /** @type {!jasmine.Spy} */
@@ -83,10 +75,6 @@ function testDrmEngine(useMediaCapabilities) {
   });
 
   beforeEach(() => {
-    requestMediaKeySystemAccessSpy =
-        jasmine.createSpy('requestMediaKeySystemAccess');
-    navigator.requestMediaKeySystemAccess =
-        shaka.test.Util.spyFunc(requestMediaKeySystemAccessSpy);
     decodingInfoSpy = jasmine.createSpy('decodingInfo');
     navigator.mediaCapabilities.decodingInfo =
         shaka.test.Util.spyFunc(decodingInfoSpy);
@@ -121,7 +109,7 @@ function testDrmEngine(useMediaCapabilities) {
     logErrorSpy.and.callFake(fail);
 
     // By default, allow keysystem drm.abc
-    setRequestMediaKeySystemAccessSpy(['drm.abc']);
+    setDecodingInfoSpy(['drm.abc']);
 
     mockVideo = new shaka.test.FakeVideo();
 
@@ -192,98 +180,62 @@ function testDrmEngine(useMediaCapabilities) {
   describe('init', () => {
     it('stops on first available key system', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
-      setRequestMediaKeySystemAccessSpy(['drm.abc', 'drm.def']);
+      setDecodingInfoSpy(['drm.abc', 'drm.def']);
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.abc');
-
-      if (!useMediaCapabilities) {
-        // Only one call, since the first key system worked.
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
-      }
     });
 
     it('tries to get the key systems in the order they appear in', async () => {
       // Fail both key systems.
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
 
       const variants = manifest.variants;
       await expectAsync(drmEngine.initForPlayback(variants,
-          manifest.offlineSessionIds, useMediaCapabilities)).toBeRejected();
+          manifest.offlineSessionIds)).toBeRejected();
 
-      if (useMediaCapabilities) {
-        expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
-        expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
-          keySystemConfiguration: containing({keySystem: 'drm.abc'}),
-        }));
+      expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({keySystem: 'drm.abc'}),
+      }));
 
-        expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
-          keySystemConfiguration: containing({keySystem: 'drm.def'}),
-        }));
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
-        // These should be in the same order as the key systems appear in the
-        // manifest.
-        const calls = requestMediaKeySystemAccessSpy.calls;
-        expect(calls.argsFor(0)[0]).toBe('drm.abc');
-        expect(calls.argsFor(1)[0]).toBe('drm.def');
-      }
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({keySystem: 'drm.def'}),
+      }));
     });
 
     it('tries the second key system if the first fails', async () => {
       // Accept drm.def, but not drm.abc.
-      setRequestMediaKeySystemAccessSpy(['drm.def']);
+      setDecodingInfoSpy(['drm.def']);
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.def');
-
-      if (!useMediaCapabilities) {
-        // Both key systems were tried, since the first one failed.
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
-      }
     });
 
     it('chooses systems by configured preferredKeySystems', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
-      setRequestMediaKeySystemAccessSpy(['drm.abc', 'drm.def']);
+      setDecodingInfoSpy(['drm.abc', 'drm.def']);
       config.preferredKeySystems = ['drm.def'];
       drmEngine.configure(config);
       logErrorSpy.and.stub();
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
-      if (useMediaCapabilities) {
-        expect(variants[0].decodingInfos.length).toBe(2);
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-        // Although drm.def appears second in the manifest, it is queried first
-        // and also selected because it has a server configured.
-        const calls = requestMediaKeySystemAccessSpy.calls;
-        expect(calls.argsFor(0)[0]).toBe('drm.def');
-      }
+      expect(variants[0].decodingInfos.length).toBe(2);
       expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.def');
     });
 
     it('chooses systems with configured license servers', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
-      setRequestMediaKeySystemAccessSpy(['drm.abc', 'drm.def']);
+      setDecodingInfoSpy(['drm.abc', 'drm.def']);
 
       // Remove the server URI for drm.abc, which appears first in the manifest.
       delete config.servers['drm.abc'];
@@ -292,25 +244,16 @@ function testDrmEngine(useMediaCapabilities) {
       logErrorSpy.and.stub();
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
-      if (useMediaCapabilities) {
-        expect(variants[0].decodingInfos.length).toBe(2);
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-        // Although drm.def appears second in the manifest, it is queried first
-        // and also selected because it has a server configured.
-        const calls = requestMediaKeySystemAccessSpy.calls;
-        expect(calls.argsFor(0)[0]).toBe('drm.def');
-      }
+      expect(variants[0].decodingInfos.length).toBe(2);
       expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.def');
     });
 
     it('overrides manifest with configured license servers', async () => {
       // Accept both drm.abc and drm.def.  Only one can be chosen.
-      setRequestMediaKeySystemAccessSpy(['drm.abc', 'drm.def']);
+      setDecodingInfoSpy(['drm.abc', 'drm.def']);
 
       // Add manifest-supplied license servers for both.
       tweakDrmInfos((drmInfos) => {
@@ -337,18 +280,9 @@ function testDrmEngine(useMediaCapabilities) {
       logErrorSpy.and.stub();
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
-      if (useMediaCapabilities) {
-        expect(variants[0].decodingInfos.length).toBe(2);
-      } else {
-        // Although drm.def appears second in the manifest, it is queried first
-        // because it has a server configured.  The manifest-supplied server for
-        // drm.abc will not be used.
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-      }
-
+      expect(variants[0].decodingInfos.length).toBe(2);
       const selectedDrmInfo = drmEngine.getDrmInfo();
       expect(selectedDrmInfo).not.toBe(null);
       expect(selectedDrmInfo.keySystem).toBe('drm.def');
@@ -356,11 +290,10 @@ function testDrmEngine(useMediaCapabilities) {
     });
 
     it('detects content type capabilities of key system', async () => {
-      setRequestMediaKeySystemAccessSpy(['drm.abc']);
+      setDecodingInfoSpy(['drm.abc']);
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(drmEngine.willSupport('audio/webm')).toBeTruthy();
       expect(drmEngine.willSupport('video/mp4; codecs="fake"')).toBeTruthy();
@@ -376,7 +309,7 @@ function testDrmEngine(useMediaCapabilities) {
 
     it('fails to initialize if no key systems are available', async () => {
       // Accept no key systems.
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
 
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
@@ -384,21 +317,12 @@ function testDrmEngine(useMediaCapabilities) {
           shaka.util.Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE));
       const variants = manifest.variants;
       await expectAsync(
-          drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities)).toBeRejectedWith(expected);
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .toBeRejectedWith(expected);
 
       expect(drmEngine.initialized()).toBe(false);
 
-      if (useMediaCapabilities) {
-        expect(variants[0].decodingInfos.length).toBe(2);
-      } else {
-        // Both key systems were tried, since the first one failed.
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.def', jasmine.any(Object));
-      }
+      expect(variants[0].decodingInfos.length).toBe(2);
     });
 
     it('does not error for unencrypted assets with no EME', async () => {
@@ -414,13 +338,13 @@ function testDrmEngine(useMediaCapabilities) {
       });
 
       // Accept no key systems, simulating a lack of EME.
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
 
       const variants = manifest.variants;
       // All that matters here is that we don't throw.
       await expectAsync(
-          drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities)).not.toBeRejected();
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .not.toBeRejected();
     });
 
     it('fails to initialize if no key systems are recognized', async () => {
@@ -437,18 +361,13 @@ function testDrmEngine(useMediaCapabilities) {
           shaka.util.Error.Code.NO_RECOGNIZED_KEY_SYSTEMS));
       const variants = manifest.variants;
       await expectAsync(
-          drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities)).toBeRejectedWith(expected);
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .toBeRejectedWith(expected);
 
       expect(drmEngine.initialized()).toBe(false);
 
-      if (useMediaCapabilities) {
-        expect(variants[0].decodingInfos.length).toBe(1);
-        expect(variants[0].decodingInfos[0].keySystemAccess).toBeFalsy();
-      } else {
-        // No key systems were tried, since the dummy placeholder was detected.
-        expect(requestMediaKeySystemAccessSpy).not.toHaveBeenCalled();
-      }
+      expect(variants[0].decodingInfos.length).toBe(1);
+      expect(variants[0].decodingInfos[0].keySystemAccess).toBeFalsy();
     });
 
     it('fails to initialize if the CDM cannot be created', async () => {
@@ -462,146 +381,95 @@ function testDrmEngine(useMediaCapabilities) {
           'whoops!'));
       const variants = manifest.variants;
       await expectAsync(
-          drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities)).toBeRejectedWith(expected);
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .toBeRejectedWith(expected);
 
       expect(drmEngine.initialized()).toBe(false);
-
-      if (useMediaCapabilities) {
-        expect(variants[0].decodingInfos.length).toBe(2);
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', jasmine.any(Object));
-      }
+      expect(variants[0].decodingInfos.length).toBe(2);
     });
 
     it('queries audio/video capabilities', async () => {
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
 
       const variants = manifest.variants;
       await expectAsync(
-          drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities)).toBeRejected();
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
 
-      if (useMediaCapabilities) {
-        const decodingConfig1 = containing({
-          video: containing({
-            contentType: 'video/foo; codecs="vbar"',
-          }),
-          audio: containing({
-            contentType: 'audio/foo; codecs="abar"',
-          }),
-          keySystemConfiguration: containing({
-            keySystem: 'drm.abc',
-            persistentState: 'optional',
-            distinctiveIdentifier: 'optional',
-            sessionTypes: ['temporary'],
-            initDataType: 'cenc',
-          }),
-        });
+      const decodingConfig1 = containing({
+        video: containing({
+          contentType: 'video/foo; codecs="vbar"',
+        }),
+        audio: containing({
+          contentType: 'audio/foo; codecs="abar"',
+        }),
+        keySystemConfiguration: containing({
+          keySystem: 'drm.abc',
+          persistentState: 'optional',
+          distinctiveIdentifier: 'optional',
+          sessionTypes: ['temporary'],
+          initDataType: 'cenc',
+        }),
+      });
 
-        const decodingConfig2 = containing({
-          video: containing({
-            contentType: 'video/foo; codecs="vbar"',
-          }),
-          audio: containing({
-            contentType: 'audio/foo; codecs="abar"',
-          }),
-          keySystemConfiguration: containing({
-            keySystem: 'drm.def',
-            persistentState: 'optional',
-            distinctiveIdentifier: 'optional',
-            sessionTypes: ['temporary'],
-            initDataType: 'cenc',
-          }),
-        });
-        expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
-        expect(decodingInfoSpy).toHaveBeenCalledWith(decodingConfig1);
-        expect(decodingInfoSpy).toHaveBeenCalledWith(decodingConfig2);
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
-              // audioCapabilities not present.
-              videoCapabilities: [jasmine.objectContaining({
-                contentType: 'video/foo; codecs="vbar"',
-              })],
-              distinctiveIdentifier: 'optional',
-              persistentState: 'optional',
-              sessionTypes: ['temporary'],
-            })]);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
-              audioCapabilities: [jasmine.objectContaining({
-                contentType: 'audio/foo; codecs="abar"',
-              })],
-              // videoCapabilities not present.
-              distinctiveIdentifier: 'optional',
-              persistentState: 'optional',
-              sessionTypes: ['temporary'],
-            })]);
-      }
+      const decodingConfig2 = containing({
+        video: containing({
+          contentType: 'video/foo; codecs="vbar"',
+        }),
+        audio: containing({
+          contentType: 'audio/foo; codecs="abar"',
+        }),
+        keySystemConfiguration: containing({
+          keySystem: 'drm.def',
+          persistentState: 'optional',
+          distinctiveIdentifier: 'optional',
+          sessionTypes: ['temporary'],
+          initDataType: 'cenc',
+        }),
+      });
+      expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
+      expect(decodingInfoSpy).toHaveBeenCalledWith(decodingConfig1);
+      expect(decodingInfoSpy).toHaveBeenCalledWith(decodingConfig2);
     });
 
     it('asks for persistent state and license for offline', async () => {
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
 
       const variants = manifest.variants;
       await expectAsync(
-          drmEngine.initForStorage(variants, /* usePersistentLicense= */ true,
-              useMediaCapabilities)).toBeRejected();
+          drmEngine.initForStorage(variants, /* usePersistentLicense= */ true))
+          .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
 
-      if (useMediaCapabilities) {
-        expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
-        expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
-          keySystemConfiguration: containing({
-            keySystem: 'drm.abc',
-            distinctiveIdentifier: 'optional',
-            persistentState: 'required',
-            sessionTypes: ['persistent-license'],
-            initDataType: 'cenc',
-          }),
+      expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({
+          keySystem: 'drm.abc',
+          distinctiveIdentifier: 'optional',
+          persistentState: 'required',
+          sessionTypes: ['persistent-license'],
+          initDataType: 'cenc',
         }),
-        );
+      }),
+      );
 
-        expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
-          keySystemConfiguration: containing({
-            keySystem: 'drm.def',
-            distinctiveIdentifier: 'optional',
-            persistentState: 'required',
-            sessionTypes: ['persistent-license'],
-            initDataType: 'cenc',
-          }),
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({
+          keySystem: 'drm.def',
+          distinctiveIdentifier: 'optional',
+          persistentState: 'required',
+          sessionTypes: ['persistent-license'],
+          initDataType: 'cenc',
         }),
-        );
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith('drm.abc', [
-          jasmine.objectContaining({
-            distinctiveIdentifier: 'optional',
-            persistentState: 'required',
-            sessionTypes: ['persistent-license'],
-            initDataTypes: ['cenc'],
-          }),
-        ]);
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith('drm.def', [
-          jasmine.objectContaining({
-            distinctiveIdentifier: 'optional',
-            persistentState: 'required',
-            sessionTypes: ['persistent-license'],
-            initDataTypes: ['cenc'],
-          }),
-        ]);
-      }
+      }),
+      );
     });
 
     it('honors distinctive identifier and persistent state', async () => {
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
       tweakDrmInfos((drmInfos) => {
         drmInfos[0].distinctiveIdentifierRequired = true;
         drmInfos[1].persistentStateRequired = true;
@@ -609,52 +477,36 @@ function testDrmEngine(useMediaCapabilities) {
 
       const variants = manifest.variants;
       await expectAsync(
-          drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities)).toBeRejected();
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
 
-      if (useMediaCapabilities) {
-        expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
-        expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
-          keySystemConfiguration: containing({
-            keySystem: 'drm.abc',
-            distinctiveIdentifier: 'required',
-            persistentState: 'optional',
-            sessionTypes: ['temporary'],
-          }),
+      expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({
+          keySystem: 'drm.abc',
+          distinctiveIdentifier: 'required',
+          persistentState: 'optional',
+          sessionTypes: ['temporary'],
         }),
-        );
+      }),
+      );
 
-        expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
-          keySystemConfiguration: containing({
-            keySystem: 'drm.def',
-            distinctiveIdentifier: 'optional',
-            persistentState: 'required',
-            sessionTypes: ['temporary'],
-          }),
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({
+          keySystem: 'drm.def',
+          distinctiveIdentifier: 'optional',
+          persistentState: 'required',
+          sessionTypes: ['temporary'],
         }),
-        );
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(2);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
-              distinctiveIdentifier: 'required',
-              persistentState: 'optional',
-              sessionTypes: ['temporary'],
-            })]);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.def', [jasmine.objectContaining({
-              distinctiveIdentifier: 'optional',
-              persistentState: 'required',
-              sessionTypes: ['temporary'],
-            })]);
-      }
+      }),
+      );
     });
 
     it('makes no queries for key systems with clear content if no key config',
         async () => {
-          setRequestMediaKeySystemAccessSpy([]);
+          setDecodingInfoSpy([]);
           manifest.variants[0].video.drmInfos = [];
           manifest.variants[0].audio.drmInfos = [];
           config.servers = {};
@@ -662,24 +514,18 @@ function testDrmEngine(useMediaCapabilities) {
 
           drmEngine.configure(config);
           const variants = manifest.variants;
-          await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities);
+          await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
-          if (useMediaCapabilities) {
-            // Gets decodingInfo for clear content with no keySystemAccess.
-            expect(variants[0].decodingInfos.length).toBe(1);
-            expect(variants[0].decodingInfos[0].keySystemAccess).toBeFalsy();
-          } else {
-            // Makes no queries for clear content.
-            expect(requestMediaKeySystemAccessSpy).not.toHaveBeenCalled();
-          }
+          // Gets decodingInfo for clear content with no keySystemAccess.
+          expect(variants[0].decodingInfos.length).toBe(1);
+          expect(variants[0].decodingInfos[0].keySystemAccess).toBeFalsy();
           expect(
               shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo())).toBe('');
           expect(drmEngine.initialized()).toBe(true);
         });
 
     it('makes queries for clear content if key is configured', async () => {
-      setRequestMediaKeySystemAccessSpy(['drm.abc']);
+      setDecodingInfoSpy(['drm.abc']);
       manifest.variants[0].video.drmInfos = [];
       manifest.variants[0].audio.drmInfos = [];
       config.servers = {
@@ -688,16 +534,11 @@ function testDrmEngine(useMediaCapabilities) {
 
       drmEngine.configure(config);
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.abc');
-      if (useMediaCapabilities) {
-        expect(variants[0].decodingInfos.length).toBe(1);
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-      }
+      expect(variants[0].decodingInfos.length).toBe(1);
     });
 
     it('uses advanced config to fill in DrmInfo', async () => {
@@ -715,7 +556,7 @@ function testDrmEngine(useMediaCapabilities) {
         });
       });
 
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
 
       config.advanced['drm.abc'] = {
         audioRobustness: 'good',
@@ -731,44 +572,26 @@ function testDrmEngine(useMediaCapabilities) {
 
       const variants = manifest.variants;
       await expectAsync(
-          drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities)).toBeRejected();
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
-
-      if (useMediaCapabilities) {
-        expect(decodingInfoSpy).toHaveBeenCalledTimes(1);
-        expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
-          keySystemConfiguration: containing({
-            keySystem: 'drm.abc',
-            distinctiveIdentifier: 'required',
-            persistentState: 'required',
-            sessionTypes: ['persistent-license'],
-            initDataType: 'cenc',
-            audio: containing({
-              robustness: 'good',
-            }),
-            video: containing({
-              robustness: 'really_really_ridiculously_good',
-            }),
+      expect(decodingInfoSpy).toHaveBeenCalledTimes(1);
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({
+          keySystem: 'drm.abc',
+          distinctiveIdentifier: 'required',
+          persistentState: 'required',
+          sessionTypes: ['persistent-license'],
+          initDataType: 'cenc',
+          audio: containing({
+            robustness: 'good',
           }),
-        }));
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
-              audioCapabilities: [jasmine.objectContaining({
-                robustness: 'good',
-              })],
-              videoCapabilities: [jasmine.objectContaining({
-                robustness: 'really_really_ridiculously_good',
-              })],
-              distinctiveIdentifier: 'required',
-              persistentState: 'required',
-              sessionTypes: ['persistent-license'],
-              initDataTypes: ['cenc'],
-            })]);
-      }
+          video: containing({
+            robustness: 'really_really_ridiculously_good',
+          }),
+        }),
+      }));
     });
 
     it('prefers advanced config from manifest if present', async () => {
@@ -786,7 +609,7 @@ function testDrmEngine(useMediaCapabilities) {
         });
       });
 
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
 
       // DrmInfo directly sets advanced settings.
       tweakDrmInfos((drmInfos) => {
@@ -810,42 +633,26 @@ function testDrmEngine(useMediaCapabilities) {
 
       const variants = manifest.variants;
       await expectAsync(
-          drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities)).toBeRejected();
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .toBeRejected();
 
       expect(drmEngine.initialized()).toBe(false);
 
-      if (useMediaCapabilities) {
-        expect(decodingInfoSpy).toHaveBeenCalledTimes(1);
-        expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
-          keySystemConfiguration: containing({
-            keySystem: 'drm.abc',
-            audio: containing({
-              robustness: 'good',
-            }),
-            video: containing({
-              robustness: 'really_really_ridiculously_good',
-            }),
-            distinctiveIdentifier: 'required',
-            persistentState: 'required',
-            initDataType: 'cenc',
+      expect(decodingInfoSpy).toHaveBeenCalledTimes(1);
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({
+          keySystem: 'drm.abc',
+          audio: containing({
+            robustness: 'good',
           }),
-        }));
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
-              audioCapabilities: [jasmine.objectContaining({
-                robustness: 'good',
-              })],
-              videoCapabilities: [jasmine.objectContaining({
-                robustness: 'really_really_ridiculously_good',
-              })],
-              distinctiveIdentifier: 'required',
-              persistentState: 'required',
-              initDataTypes: ['cenc'],
-            })]);
-      }
+          video: containing({
+            robustness: 'really_really_ridiculously_good',
+          }),
+          distinctiveIdentifier: 'required',
+          persistentState: 'required',
+          initDataType: 'cenc',
+        }),
+      }));
     });
 
     it('sets unique initDataTypes if specified from the initData', async () => {
@@ -860,30 +667,21 @@ function testDrmEngine(useMediaCapabilities) {
 
       const variants = manifest.variants;
 
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
       expect(drmEngine.initialized()).toBe(true);
-      if (useMediaCapabilities) {
-        expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
-        expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
-          keySystemConfiguration: containing({
-            keySystem: 'drm.abc',
-            initDataType: 'very_nice',
-          }),
+      expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({
+          keySystem: 'drm.abc',
+          initDataType: 'very_nice',
         }),
-        );
-      } else {
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-        expect(requestMediaKeySystemAccessSpy)
-            .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
-              initDataTypes: ['very_nice'],
-            })]);
-      }
+      }),
+      );
     });
 
     it('fails if license server is not configured', async () => {
-      setRequestMediaKeySystemAccessSpy(['drm.abc']);
+      setDecodingInfoSpy(['drm.abc']);
 
       config.servers = {};
       drmEngine.configure(config);
@@ -895,8 +693,8 @@ function testDrmEngine(useMediaCapabilities) {
           'drm.abc'));
       const variants = manifest.variants;
       await expectAsync(
-          drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-              useMediaCapabilities)).toBeRejectedWith(expected);
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .toBeRejectedWith(expected);
     });
 
     it('maps TS MIME types through the transmuxer', async () => {
@@ -922,38 +720,26 @@ function testDrmEngine(useMediaCapabilities) {
           };
         });
 
-        setRequestMediaKeySystemAccessSpy(['drm.abc']);
+        setDecodingInfoSpy(['drm.abc']);
 
         const variants = manifest.variants;
         variants[0].video.mimeType = 'video/mp2t';
         variants[0].audio.mimeType = 'video/mp2t';
 
-        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-            useMediaCapabilities);
+        await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
         expect(drmEngine.initialized()).toBe(true);
 
-        if (useMediaCapabilities) {
-          const decodingConfig = containing({
-            video: containing({
-              contentType: 'video/mp4; codecs="vbar"',
-            }),
-            audio: containing({
-              contentType: 'audio/mp4; codecs="abar"',
-            }),
-          });
-          expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
-          expect(decodingInfoSpy).toHaveBeenCalledWith(decodingConfig);
-        } else {
-          expect(requestMediaKeySystemAccessSpy)
-              .toHaveBeenCalledWith('drm.abc', [jasmine.objectContaining({
-                audioCapabilities: [jasmine.objectContaining({
-                  contentType: 'audio/mp4; codecs="abar"',
-                })],
-                videoCapabilities: [jasmine.objectContaining({
-                  contentType: 'video/mp4; codecs="vbar"',
-                })],
-              })]);
-        }
+        const decodingConfig = containing({
+          video: containing({
+            contentType: 'video/mp4; codecs="vbar"',
+          }),
+          audio: containing({
+            contentType: 'audio/mp4; codecs="abar"',
+          }),
+        });
+        expect(decodingInfoSpy).toHaveBeenCalledTimes(2);
+        expect(decodingInfoSpy).toHaveBeenCalledWith(decodingConfig);
+
         expect(drmEngine.supportsVariant(variants[0])).toBeTruthy();
       } finally {
         // Restore the mock.
@@ -980,7 +766,7 @@ function testDrmEngine(useMediaCapabilities) {
     });
 
     it('does nothing for unencrypted content', async () => {
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
       manifest.variants[0].video.drmInfos = [];
       manifest.variants[0].audio.drmInfos = [];
       config.servers = {};
@@ -998,12 +784,12 @@ function testDrmEngine(useMediaCapabilities) {
     it('sets server certificate if present in config', async () => {
       const cert = new Uint8Array(1);
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
-      config.advanced['drm.abc'].serverCertificateUri = 'https://drm-service.com/certificate';
+      config.advanced['drm.abc'].serverCertificateUri =
+          'https://drm-service.com/certificate';
       drmEngine.configure(config);
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
       expect(fakeNetEngine.request).not.toHaveBeenCalled();
       // Should be set merely after init, without waiting for attach.
@@ -1023,8 +809,7 @@ function testDrmEngine(useMediaCapabilities) {
       drmEngine.configure(config);
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
       fakeNetEngine.expectRequest(
           serverCertificateUri,
@@ -1151,7 +936,7 @@ function testDrmEngine(useMediaCapabilities) {
       });
 
       await drmEngine.initForPlayback(
-          manifest.variants, manifest.offlineSessionIds, useMediaCapabilities);
+          manifest.variants, manifest.offlineSessionIds);
       drmEngine.newInitData('cenc', initData);
       await drmEngine.attach(mockVideo);
 
@@ -1164,7 +949,7 @@ function testDrmEngine(useMediaCapabilities) {
         drmInfos[0].keySystem = 'com.fake.NOT.clearkey';
       });
 
-      setRequestMediaKeySystemAccessSpy(['org.w3.clearkey']);
+      setDecodingInfoSpy(['org.w3.clearkey']);
 
       // Configure clear keys (map of hex key IDs to keys)
       config.clearKeys = {
@@ -1210,7 +995,7 @@ function testDrmEngine(useMediaCapabilities) {
       // Make it so that clear key setup fails by pretending we don't have it.
       // In reality, it was failing because of missing codec info, but any
       // failure should do for testing purposes.
-      setRequestMediaKeySystemAccessSpy([]);
+      setDecodingInfoSpy([]);
 
       // Configure clear keys (map of hex key IDs to keys)
       config.clearKeys = {
@@ -1225,8 +1010,8 @@ function testDrmEngine(useMediaCapabilities) {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.DRM,
           shaka.util.Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE));
-      await expectAsync(drmEngine.initForPlayback(variants, [],
-          useMediaCapabilities)).toBeRejectedWith(expected);
+      await expectAsync(drmEngine.initForPlayback(variants, []))
+          .toBeRejectedWith(expected);
     });
 
     it('fails with an error if setMediaKeys fails', async () => {
@@ -1721,7 +1506,7 @@ function testDrmEngine(useMediaCapabilities) {
       tweakDrmInfos((drmInfos) => {
         drmInfos[0].keySystem = 'com.fake.NOT.clearkey';
       });
-      setRequestMediaKeySystemAccessSpy(['org.w3.clearkey']);
+      setDecodingInfoSpy(['org.w3.clearkey']);
 
       // Configure clear keys (map of hex key IDs to keys)
       config.clearKeys = {
@@ -1905,32 +1690,19 @@ function testDrmEngine(useMediaCapabilities) {
       // Hold the MediaKeys query.
       /** @type {!shaka.util.PublicPromise} */
       const p = new shaka.util.PublicPromise();
-      requestMediaKeySystemAccessSpy.and.returnValue(p);
       decodingInfoSpy.and.returnValue(p);
 
       const variants = manifest.variants;
       const init = drmEngine.initForPlayback(
-          variants, manifest.offlineSessionIds, useMediaCapabilities);
+          variants, manifest.offlineSessionIds);
 
       // This flow should still return "success" when DrmEngine is destroyed.
       await shaka.test.Util.shortDelay();
 
-      if (useMediaCapabilities) {
-        expect(variants[0].decodingInfos.length).toBe(0);
-        await drmEngine.destroy();
-        p.reject(new Error(''));  // Fail drm.abc.
-        await expectAsync(init).toBeRejected();
-      } else {
-        // The first query has been made, which we are blocking.
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
-            'drm.abc', jasmine.any(Array));
-        await drmEngine.destroy();
-        p.reject(new Error(''));  // Fail drm.abc.
-        await expectAsync(init).toBeRejected();
-        // A second query was not made.
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-      }
+      expect(variants[0].decodingInfos.length).toBe(0);
+      await drmEngine.destroy();
+      p.reject(new Error(''));  // Fail drm.abc.
+      await expectAsync(init).toBeRejected();
       expect(drmEngine.initialized()).toBe(false);
     });
 
@@ -1938,23 +1710,14 @@ function testDrmEngine(useMediaCapabilities) {
       // Hold the MediaKeys query:
       /** @type {!shaka.util.PublicPromise} */
       const p = new shaka.util.PublicPromise();
-      requestMediaKeySystemAccessSpy.and.returnValue(p);
       decodingInfoSpy.and.returnValue(p);
 
       const variants = manifest.variants;
       const init = drmEngine.initForPlayback(
-          variants, manifest.offlineSessionIds, useMediaCapabilities);
+          variants, manifest.offlineSessionIds);
 
       await shaka.test.Util.shortDelay();
-
-      if (useMediaCapabilities) {
-        expect(variants[0].decodingInfos.length).toBe(0);
-      } else {
-        // The first query has been made, which we are blocking.
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledTimes(1);
-        expect(requestMediaKeySystemAccessSpy).toHaveBeenCalledWith(
-            'drm.abc', jasmine.any(Array));
-      }
+      expect(variants[0].decodingInfos.length).toBe(0);
       await drmEngine.destroy();
       p.resolve();  // Success for drm.abc.
       await expectAsync(init).toBeRejected();
@@ -1971,7 +1734,7 @@ function testDrmEngine(useMediaCapabilities) {
 
       const variants = manifest.variants;
       const init = drmEngine.initForPlayback(
-          variants, manifest.offlineSessionIds, useMediaCapabilities);
+          variants, manifest.offlineSessionIds);
 
       await shaka.test.Util.shortDelay();
       // We are blocked on createMediaKeys:
@@ -2250,6 +2013,26 @@ function testDrmEngine(useMediaCapabilities) {
     });
   });
 
+  describe('isFairPlayKeySystem', () => {
+    it('should return true for FairPlay', () => {
+      expect(shaka.media.DrmEngine.isFairPlayKeySystem(
+          'com.apple.fps')).toBe(true);
+      expect(shaka.media.DrmEngine.isFairPlayKeySystem(
+          'com.apple.fps.1_0')).toBe(true);
+      expect(shaka.media.DrmEngine.isFairPlayKeySystem(
+          'com.apple.fps.2_0')).toBe(true);
+      expect(shaka.media.DrmEngine.isFairPlayKeySystem(
+          'com.apple.fps.3_0')).toBe(true);
+    });
+
+    it('should return false for non-FairPlay key systems', () => {
+      expect(shaka.media.DrmEngine.isFairPlayKeySystem(
+          'com.widevine.alpha')).toBe(false);
+      expect(shaka.media.DrmEngine.isFairPlayKeySystem(
+          'com.abc.playready')).toBe(false);
+    });
+  });
+
   describe('getDrmInfo', () => {
     it('includes correct info', async () => {
       // Leave only one drmInfo
@@ -2265,7 +2048,7 @@ function testDrmEngine(useMediaCapabilities) {
           });
         });
       });
-      setRequestMediaKeySystemAccessSpy(['drm.abc']);
+      setDecodingInfoSpy(['drm.abc']);
 
       // Key IDs in manifest
       tweakDrmInfos((drmInfos) => {
@@ -2285,8 +2068,7 @@ function testDrmEngine(useMediaCapabilities) {
       drmEngine.configure(config);
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       expect(drmEngine.initialized()).toBe(true);
       const drmInfo = drmEngine.getDrmInfo();
       expect(drmInfo).toEqual({
@@ -2463,8 +2245,7 @@ function testDrmEngine(useMediaCapabilities) {
       });
 
       const variants = manifest.variants;
-      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-          useMediaCapabilities);
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
     });
 
     it('waits until update() is complete', async () => {
@@ -2557,23 +2338,8 @@ function testDrmEngine(useMediaCapabilities) {
 
   async function initAndAttach() {
     const variants = manifest.variants;
-    await drmEngine.initForPlayback(variants, manifest.offlineSessionIds,
-        useMediaCapabilities);
+    await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
     await drmEngine.attach(mockVideo);
-  }
-
-  function setRequestMediaKeySystemAccessSpy(acceptableKeySystems) {
-    // TODO: Setting both the requestMediaKeySystemAccessSpy and decodingInfoSpy
-    // as a temporary solution. Only decodingInfoSpy is needed once we use
-    // decodingInfo API to get mediaKeySystemAccess.
-    setDecodingInfoSpy(acceptableKeySystems);
-    requestMediaKeySystemAccessSpy.and.callFake((keySystem) => {
-      if (!acceptableKeySystems.includes(keySystem)) {
-        return Promise.reject(new Error(''));
-      }
-      mockMediaKeySystemAccess.keySystem = keySystem;
-      return Promise.resolve(mockMediaKeySystemAccess);
-    });
   }
 
   function setDecodingInfoSpy(acceptableKeySystems) {
@@ -2693,4 +2459,4 @@ function testDrmEngine(useMediaCapabilities) {
       callback(manifest.variants[0].audio.drmInfos);
     }
   }
-}
+});

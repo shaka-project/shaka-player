@@ -67,6 +67,10 @@ The following elements can be added to the UI bar using this configuration value
   supports AirPlay.
 * cast: adds a button that opens a Chromecast dialog. The button is visible only if there is
   at least one Chromecast device on the same network available for casting.
+* quality: adds a button that controls enabling/disabling of abr and video resolution selection.
+* language: adds a button that controls audio language selection.
+* playback_rate: adds a button that controls the playback rate selection.
+* captions: adds a button that controls the current text track selection (including turning it off).
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Similarly, the 'overflowMenuButtons' configuration option can be used to control
@@ -97,6 +101,47 @@ ui.configure(config);
 
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
+
+#### Adding tooltips to control panel buttons
+
+Tooltips can be enabled to display the function of every button in the control panel. Where applicable, they will also contain the current selection in parenthesis.
+
+Example:
+```js
+const config = {
+  'enableTooltips' : true
+}
+ui.configure(config);
+```
+
+#### Replacing the default context menu
+
+A custom context menu can be added through the `customContextMenu` boolean. Additionally, the `contextMenuElements` option can be used to add elements to it. Currently only the statistics button is available:
+* Statistics: adds a button that displays statistics of the video.
+
+Example:
+```js
+const config = {
+  'customContextMenu' : true,
+  'contextMenuElements' : ['statistics'],
+}
+ui.configure(config);
+```
+
+#### Configuring Statistics
+The list of statistics that are displayed when toggling the statistics button can be customized by specifying a `statisticsList` on the configuration. With the exception of `switchHistory` and `stateHistory`, all of the statistics from the {@link shaka.extern.Stats `Stats`} extern can be displayed.
+
+Example:
+```js
+// Add a context menu with the 'statistics' button that displays a container with
+// the current 'width', 'height', 'playTime', and 'bufferingTime' values.
+const config = {
+  'customContextMenu' : true,
+  'contextMenuElements' : ['statistics'],
+  'statisticsList' : ['width', 'height', 'playTime', 'bufferingTime'],
+}
+ui.configure(config);
+```
 
 The presence of the seek bar and the big play button in the center of the video element can be
 customized with `addSeekBar` and `addBigPlayButton` booleans in the config.
@@ -130,6 +175,22 @@ const config = {
 ui.configure(config);
 ```
 
+#### Configuring playback, fast forward and rewind rates
+The rate in which the player can play, fast forward and rewind content can be configured using the `playbackRates`, `fastForwardRates` and `rewindRates` options.
+
+* `playbackRates`: List of rates available in the `playback_rate` menu.
+* `fastForwardRates`: List of rates available to cycle through every time the `fast_forward` button is clicked.
+* `rewindRates`: List of rates available to cycle through every time the `rewind` button is clicked.
+
+ ```js
+const config = {
+  'controlPanelElements': ['playback_rate', 'fast_forward', 'rewind'],
+  'playbackRates': [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+  'fastForwardRates': [2, 4, 8, 1],
+  'rewindRates': [-1, -2, -4, -8],
+}
+ui.configure(config);
+```
 
 #### Creating custom elements and adding them to the UI
 It's possible to add custom application-specific buttons to the UI.

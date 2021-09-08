@@ -60,7 +60,7 @@ shaka.extern.RetryParameters;
  *   retryParameters: !shaka.extern.RetryParameters,
  *   licenseRequestType: ?string,
  *   sessionId: ?string,
- *   streamDataCallback: ?function(BufferSource)
+ *   streamDataCallback: ?function(BufferSource):!Promise
  * }}
  *
  * @description
@@ -90,7 +90,7 @@ shaka.extern.RetryParameters;
  * @property {?string} sessionId
  *   If this is a LICENSE request, this field contains the session ID of the
  *   EME session that made the request.
- * @property {?function(BufferSource)} streamDataCallback
+ * @property {?function(BufferSource):!Promise} streamDataCallback
  *   A callback function to handle the chunked data of the ReadableStream.
  * @exportDoc
  */
@@ -139,15 +139,17 @@ shaka.extern.Response;
  * @typedef {!function(string,
  *                     shaka.extern.Request,
  *                     shaka.net.NetworkingEngine.RequestType,
- *                     shaka.extern.ProgressUpdated):
+ *                     shaka.extern.ProgressUpdated,
+ *                     shaka.extern.HeadersReceived):
  *     !shaka.extern.IAbortableOperation.<shaka.extern.Response>}
  * @description
  * Defines a plugin that handles a specific scheme.
  *
  * The functions accepts four parameters, uri string, request, request type,
- * and a progressUpdated function.  The progressUpdated function can be ignored
- * by plugins that do not have this information, but it will always be provided
- * by NetworkingEngine.
+ * a progressUpdated function, and a headersReceived function.  The
+ * progressUpdated and headersReceived functions can be ignored by plugins that
+ * do not have this information, but it will always be provided by
+ * NetworkingEngine.
  *
  * @exportDoc
  */
@@ -169,6 +171,17 @@ shaka.extern.SchemePlugin;
  * @exportDoc
  */
 shaka.extern.ProgressUpdated;
+
+
+/**
+ * @typedef {function(!Object.<string, string>)}
+ *
+ * @description
+ * A callback function to handle headers received events through networking
+ * engine in player.
+ * The first argument is the headers object of the response.
+ */
+shaka.extern.HeadersReceived;
 
 
 /**

@@ -16,9 +16,9 @@ goog.require('shaka.text.Cue');
 shaka.test.CeaUtils = class {
   /**
    * Returns a cue with no underline/italics, and default colors
-   * @param {!number} startTime
-   * @param {!number} endTime
-   * @param {!string} payload
+   * @param {number} startTime
+   * @param {number} endTime
+   * @param {string} payload
    */
   static createDefaultCue(startTime, endTime, payload) {
     const cue = new shaka.text.Cue(startTime, endTime, payload);
@@ -29,13 +29,13 @@ shaka.test.CeaUtils = class {
 
   /**
    * Returns a cue with custom underline, italics, color, background color.
-   * @param {!number} startTime
-   * @param {!number} endTime
-   * @param {!string} payload
-   * @param {!boolean} underline
-   * @param {!boolean} italics
-   * @param {!string} textColor
-   * @param {!string} backgroundColor
+   * @param {number} startTime
+   * @param {number} endTime
+   * @param {string} payload
+   * @param {boolean} underline
+   * @param {boolean} italics
+   * @param {string} textColor
+   * @param {string} backgroundColor
    * @return {!shaka.text.Cue}
    */
   static createStyledCue(startTime, endTime, payload, underline,
@@ -54,8 +54,8 @@ shaka.test.CeaUtils = class {
 
   /**
    * Returns a cue that corresponds to a linebreak.
-   * @param {!number} startTime
-   * @param {!number} endTime
+   * @param {number} startTime
+   * @param {number} endTime
    * @return {!shaka.text.Cue}
    */
   static createLineBreakCue(startTime, endTime) {

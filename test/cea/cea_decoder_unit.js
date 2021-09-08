@@ -13,7 +13,7 @@ goog.require('shaka.text.Cue');
 describe('CeaDecoder', () => {
   const CeaUtils = shaka.test.CeaUtils;
 
-  /** @type {!string} */
+  /** @type {string} */
   const DEFAULT_BG_COLOR = shaka.cea.CeaUtils.DEFAULT_BG_COLOR;
 
   /**

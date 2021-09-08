@@ -187,8 +187,34 @@ shaka.ui.Overlay = class {
         'cast',
         'playback_rate',
       ],
+      statisticsList: [
+        'width',
+        'height',
+        'corruptedFrames',
+        'decodedFrames',
+        'droppedFrames',
+        'drmTimeSeconds',
+        'licenseTime',
+        'liveLatency',
+        'loadLatency',
+        'bufferingTime',
+        'manifestTimeSeconds',
+        'estimatedBandwidth',
+        'streamBandwidth',
+        'maxSegmentDuration',
+        'pauseTime',
+        'playTime',
+        'completionPercent',
+      ],
+      contextMenuElements: [
+        'statistics',
+      ],
+      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      fastForwardRates: [2, 4, 8, 1],
+      rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
       addBigPlayButton: false,
+      customContextMenu: false,
       castReceiverAppId: '',
       clearBufferOnQualityChange: true,
       showUnbufferedStart: false,
@@ -208,6 +234,7 @@ shaka.ui.Overlay = class {
       enableKeyboardPlaybackControls: true,
       enableFullscreenOnRotation: true,
       forceLandscapeOnFullscreen: true,
+      enableTooltips: false,
     };
 
     // Check AirPlay support
@@ -337,7 +364,7 @@ shaka.ui.Overlay = class {
         'reasonCode': reasonCode,
       };
     }
-    const uiLoadedEvent = new CustomEvent(eventName, detail);
+    const uiLoadedEvent = new CustomEvent(eventName, {detail});
     document.dispatchEvent(uiLoadedEvent);
   }
 
