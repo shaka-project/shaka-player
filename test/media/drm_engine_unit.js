@@ -2087,6 +2087,19 @@ describe('DrmEngine', () => {
       await expectAsync(drmEngine.removeSession('abc'))
           .toBeRejectedWith(expected);
     });
+
+    // Regression test for #3534
+    it('does not remove the same session again on destroy', async () => {
+      updatePromise.resolve();
+      expect(session1.remove).not.toHaveBeenCalled();
+      await drmEngine.removeSession('abc');
+      expect(session1.remove).toHaveBeenCalled();
+      session1.remove.calls.reset();
+      await drmEngine.destroy();
+      // The session should only be removed ONCE. If it's double-removed, it
+      // will make a (non-fatal) DOMException.
+      expect(session1.remove).not.toHaveBeenCalled();
+    });
   });
 
   describe('expiration', () => {
