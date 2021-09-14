@@ -2,7 +2,6 @@
 *~
 node_modules
 package-lock.json
-dist/
 docs/api/
 coverage/
 .DS_Store
