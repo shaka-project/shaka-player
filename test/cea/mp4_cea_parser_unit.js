@@ -27,6 +27,32 @@ describe('Mp4CeaParser', () => {
     ceaSegment = responses[1];
   });
 
+  /**
+   * Test only the functionality of removing EPB
+   * Expect removeEmu() to return the NALU with correct length
+   *
+   * Chromium VDA has a strict standard on NALU length
+   * It will complain about conformance if the array is malformed
+   *
+   * If EPB is removed by shifting bytes, it will return the original NALU
+   * length, which will fail this test
+   *
+   * Note that the CEA-608 packet in this test is incomplete
+   */
+  it('parses CEA-608 SEI data from MP4 H.264 stream', () => {
+    const seiProcessor = new shaka.cea.SeiProcessor();
+
+    const cea608Packet = new Uint8Array([
+      0x00, 0x00, 0x03, // Emulation prevention byte
+    ]);
+
+    const naluData = seiProcessor.removeEmu(cea608Packet);
+    expect(naluData).toBeDefined();
+
+    // EPB should be removed by returning new array, not by shifting bytes
+    expect(naluData.length).toBe(2);
+  });
+
   it('parses cea data from mp4 stream', () => {
     const cea708Parser = new shaka.cea.Mp4CeaParser();
 

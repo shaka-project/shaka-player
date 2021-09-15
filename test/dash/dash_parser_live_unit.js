@@ -364,7 +364,7 @@ describe('DashParser Live', () => {
     });
   }
 
-  it('can add Periods', async () => {
+  it('can add Periods with SegmentTemplate', async () => {
     const template1 = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
       '    suggestedPresentationDelay="PT5S"',
@@ -440,6 +440,104 @@ describe('DashParser Live', () => {
     // two segments (10-14s).
     expect(stream.segmentIndex.find(9)).not.toBe(null);
     expect(stream.segmentIndex.find(13)).not.toBe(null);
+
+    stream.closeSegmentIndex();
+    await stream.createSegmentIndex();
+
+    expect(stream.segmentIndex.find(9)).not.toBe(null);
+    expect(stream.segmentIndex.find(13)).not.toBe(null);
+  });
+
+  it('can add Periods with SegmentList', async () => {
+    const list1 = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
+      '    minimumUpdatePeriod="PT%(updateTime)dS">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentList>',
+      '          <SegmentURL media="s1.mp4" />',
+      '          <SegmentURL media="s2.mp4" />',
+      '          <SegmentURL media="s3.mp4" />',
+      '          <SegmentTimeline>',
+      '            <S d="10" t="0" r="2"/>',
+      '          </SegmentTimeline>',
+      '        </SegmentList>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    const list2 = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
+      '    minimumUpdatePeriod="PT%(updateTime)dS">',
+      '  <Period id="1" duration="PT40S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentList>',
+      '          <SegmentURL media="s1.mp4" />',
+      '          <SegmentURL media="s2.mp4" />',
+      '          <SegmentURL media="s3.mp4" />',
+      '          <SegmentURL media="s4.mp4" />',
+      '          <SegmentTimeline>',
+      '            <S d="10" t="0" r="3"/>',
+      '          </SegmentTimeline>',
+      '        </SegmentList>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period id="2">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="2" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentList>',
+      '          <SegmentURL media="s1.mp4" />',
+      '          <SegmentURL media="s2.mp4" />',
+      '          <SegmentTimeline>',
+      '            <S d="10" t="0" r="1"/>',
+      '          </SegmentTimeline>',
+      '        </SegmentList>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    const firstManifest = sprintf(list1, {updateTime: updateTime});
+    const secondManifest = sprintf(list2, {updateTime: updateTime});
+
+    fakeNetEngine.setResponseText('dummy://foo', firstManifest);
+    // First three segments should exist.
+    Date.now = () => 5;
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    const stream = variant.video;
+    await stream.createSegmentIndex();
+
+    // First three segments exist, but not the fourth.
+    expect(stream.segmentIndex.find(25)).not.toBe(null);
+    expect(stream.segmentIndex.find(45)).toBe(null);
+
+    fakeNetEngine.setResponseText('dummy://foo', secondManifest);
+    Date.now = () => 25;
+
+    await updateManifest();
+
+    // The update should have affected the same variant object we captured
+    // before.  Now the entire first period should exist (0-40s), plus the next
+    // two segments of the second period(40-60s).
+    expect(stream.segmentIndex.find(25)).not.toBe(null);
+    expect(stream.segmentIndex.find(45)).not.toBe(null);
+
+    stream.closeSegmentIndex();
+    await stream.createSegmentIndex();
+
+    expect(stream.segmentIndex.find(25)).not.toBe(null);
+    expect(stream.segmentIndex.find(45)).not.toBe(null);
   });
 
   it('uses redirect URL for manifest BaseURL and updates', async () => {
