@@ -118,9 +118,9 @@ shaka.extern.Request;
  *   The original URI passed to the browser for networking. This is before any
  *   redirects, but after request filters are executed.
  * @property {BufferSource} data
- *   The response HTTP status code.
-  * @property {number} status
  *   The body of the response.
+  * @property {number} status
+ *   The response HTTP status code.
  * @property {!Object.<string, string>} headers
  *   A map of response headers, if supported by the underlying protocol.
  *   All keys should be lowercased.
