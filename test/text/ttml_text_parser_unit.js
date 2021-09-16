@@ -1211,6 +1211,8 @@ describe('TtmlTextParser', () => {
             fontStyle: Cue.fontStyle.ITALIC,
             lineHeight: '20px',
             fontSize: '10em',
+            textStrokeColor: 'blue',
+            textStrokeWidth: '3px',
           },
           {
             startTime: 2,
@@ -1222,6 +1224,7 @@ describe('TtmlTextParser', () => {
         '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
         '<styling>' +
         '<style xml:id="s1" tts:color="red" ' +
+        'tts:textOutline="blue 3px" ' +
         'tts:backgroundColor="blue" ' +
         'tts:fontWeight="bold" ' +
         'tts:fontFamily="Times New Roman" ' +
@@ -1236,6 +1239,50 @@ describe('TtmlTextParser', () => {
         '<body region="subtitleArea"><div>' +
         '<p begin="00:01.00" end="00:02.00" style="s1">Test</p>' +
         '<p begin="00:02.00" end="00:04.00" style="s2">Test 2</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('uses text color if tts:textOutline does not specify color', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 1,
+            endTime: 2,
+            payload: 'Test',
+            color: 'red',
+            textStrokeColor: 'red',
+            textStrokeWidth: '3px',
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:color="red" ' +
+        'tts:textOutline="3px" />' +
+        '</styling>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="00:01.00" end="00:02.00" style="s1">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('does not add an outline if tts:textOutline only contains color', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 1,
+            endTime: 2,
+            payload: 'Test',
+            color: 'red',
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:color="red" ' +
+        'tts:textOutline="blue" />' +
+        '</styling>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="00:01.00" end="00:02.00" style="s1">Test</p>' +
         '</div></body></tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });

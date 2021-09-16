@@ -238,6 +238,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   id: number,
  *   originalId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
+ *   closeSegmentIndex: (function()|undefined),
  *   segmentIndex: shaka.media.SegmentIndex,
  *   mimeType: string,
  *   codecs: string,
@@ -263,7 +264,10 @@ shaka.extern.CreateSegmentIndexFunction;
  *   audioSamplingRate: ?number,
  *   spatialAudio: boolean,
  *   closedCaptions: Map.<string, string>,
- *   tilesLayout: (string|undefined)
+ *   tilesLayout: (string|undefined),
+ *   matchedStreams:
+ *      (!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
+ *      undefined)
  * }}
  *
  * @description
@@ -280,6 +284,9 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {shaka.extern.CreateSegmentIndexFunction} createSegmentIndex
  *   <i>Required.</i> <br>
  *   Creates the Stream's segmentIndex (asynchronously).
+ * @property {(function()|undefined)} closeSegmentIndex
+ *   <i>Optional.</i> <br>
+ *   Closes the Stream's segmentIndex.
  * @property {shaka.media.SegmentIndex} segmentIndex
  *   <i>Required.</i> <br>
  *   May be null until createSegmentIndex() is complete.
@@ -370,6 +377,10 @@ shaka.extern.CreateSegmentIndexFunction;
  *   The value is a grid-item-dimension consisting of two positive decimal
  *   integers in the format: column-x-row ('4x3'). It describes the arrangement
  *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {(!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
+ *   undefined)} matchedStreams
+ *   The streams in all periods which match the stream. Used for Dash.
+ *
  * @exportDoc
  */
 shaka.extern.Stream;

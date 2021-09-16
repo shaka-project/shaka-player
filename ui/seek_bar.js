@@ -15,7 +15,6 @@ goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
-goog.requireType('shaka.ads.CuePoint');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -83,7 +82,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
      */
     this.wasPlaying_ = false;
 
-    /** @private {!Array.<!shaka.ads.CuePoint>} */
+    /** @private {!Array.<!shaka.extern.AdCuePoint>} */
     this.adCuePoints_ = [];
 
     this.eventManager.listen(this.localization,
