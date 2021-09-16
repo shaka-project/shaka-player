@@ -101,7 +101,7 @@ shaka.extern.Request;
  * @typedef {{
  *   uri: string,
  *   data: BufferSource,
- *   status: (number|undefined)
+ *   status: (number|undefined),
  *   headers: !Object.<string, string>,
  *   timeMs: (number|undefined),
  *   fromCache: (boolean|undefined)
