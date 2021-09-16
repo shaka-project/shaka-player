@@ -49,7 +49,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
-      if (this.ad) {
+      if (this.ad && this.ad.isLinear()) {
         this.ad.setMuted(!this.ad.isMuted());
       } else {
         this.video.muted = !this.video.muted;

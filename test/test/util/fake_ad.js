@@ -157,6 +157,13 @@ shaka.test.FakeAd = class {
   /**
    * @override
    */
+  isLinear() {
+    return true;
+  }
+
+  /**
+   * @override
+   */
   resize(width, height) {
     // No op
   }

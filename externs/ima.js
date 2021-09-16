@@ -160,6 +160,9 @@ google.ima.Ad = class {
 
   /** @return {string} */
   getAdvertiserName() {}
+
+  /** @return {boolean} */
+  isLinear() {}
 };
 
 
