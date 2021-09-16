@@ -101,6 +101,7 @@ shaka.extern.Request;
  * @typedef {{
  *   uri: string,
  *   data: BufferSource,
+ *   status: (number|undefined)
  *   headers: !Object.<string, string>,
  *   timeMs: (number|undefined),
  *   fromCache: (boolean|undefined)
@@ -119,7 +120,7 @@ shaka.extern.Request;
  *   redirects, but after request filters are executed.
  * @property {BufferSource} data
  *   The body of the response.
-  * @property {number} status
+ * @property {(number|undefined)} status
  *   The response HTTP status code.
  * @property {!Object.<string, string>} headers
  *   A map of response headers, if supported by the underlying protocol.
