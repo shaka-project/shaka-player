@@ -1024,6 +1024,7 @@ shaka.extern.OfflineConfiguration;
  *   streaming: shaka.extern.StreamingConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
+ *   cmcd: shaka.extern.CmcdConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
