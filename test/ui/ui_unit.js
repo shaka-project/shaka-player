@@ -658,6 +658,33 @@ describe('UI', () => {
         expect(getResolutions()).toEqual(['540p']);
       });
 
+      it('displays audio quality based on current stream', async () => {
+        const manifest =
+          shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(0, (variant) => {
+              variant.addAudio(0);
+              variant.bandwidth = 100000;
+            });
+            manifest.addVariant(1, (variant) => {
+              variant.addAudio(1);
+              variant.bandwidth = 200000;
+            });
+          });
+
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        const qualityButtons = videoContainer.querySelectorAll(
+            'button.explicit-resolution > span');
+        const qualityOptions =
+            Array.from(qualityButtons).map((btn) => btn.innerText);
+
+        expect(qualityOptions).toEqual(['200 kbits/s', '100 kbits/s']);
+      });
+      
       /**
        * Use internals to update the resolution menu.  Our fake manifest can
        * cause problems with startup where the Player will get stuck using

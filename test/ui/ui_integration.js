@@ -470,22 +470,6 @@ describe('UI', () => {
       expect(isChosen).not.toBe(null);
     });
 
-    it('restores the resolutions menu after audio-only playback', async () => {
-      /** @type {HTMLElement} */
-      const resolutionButton = shaka.util.Dom.getElementByClassName(
-          'shaka-resolution-button', videoContainer);
-
-      // Load an audio-only clip.  The menu should be hidden.
-      await player.load('test:sintel_audio_only_compiled');
-      expect(player.isAudioOnly()).toBe(true);
-      expect(resolutionButton.classList.contains('shaka-hidden')).toBe(true);
-
-      // Load an audio-video clip.  The menu should be visible again.
-      await player.load('test:sintel_multi_lingual_multi_res_compiled');
-      expect(player.isAudioOnly()).toBe(false);
-      expect(resolutionButton.classList.contains('shaka-hidden')).toBe(false);
-    });
-
     /**
      * @return {Element}
      */
