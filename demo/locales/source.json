@@ -227,6 +227,10 @@
     "description": "The name of a configuration value.",
     "message": "Disable [JARGON:Xlink] processing"
   },
+  "DEMO_DISPATCH_ALL_EMSG_BOXES": {
+    "description": "The name of a configuration value.",
+    "message": "Dispatch all [JARGON:emsg] boxes"
+  },
   "DEMO_DOCUMENTATION": {
     "description": "A link in the footer, to the Shaka Player documentation.",
     "message": "Documentation"

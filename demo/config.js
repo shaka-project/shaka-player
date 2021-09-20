@@ -362,7 +362,9 @@ shakaDemo.Config = class {
             'streaming.preferNativeHls')
         .addNumberInput_(MessageIds.UPDATE_INTERVAL_SECONDS,
             'streaming.updateIntervalSeconds',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_(MessageIds.DISPATCH_ALL_EMSG_BOXES,
+            'streaming.dispatchAllEmsgBoxes');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
