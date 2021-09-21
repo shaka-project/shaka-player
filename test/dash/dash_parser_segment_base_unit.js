@@ -35,7 +35,7 @@ describe('DashParser SegmentBase', () => {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      modifyRequest: (request) => {},
+      modifyRequest: (request, manifest) => {},
       filter: (manifest) => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.

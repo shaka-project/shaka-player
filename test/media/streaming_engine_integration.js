@@ -59,8 +59,6 @@ describe('StreamingEngine', () => {
   let mediaSourceEngine;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
-  /** @type {!shaka.cmcd.CmcdManager} */
-  let cmcdManager;
 
   /** @type {shaka.extern.Variant} */
   let variant;
@@ -263,7 +261,7 @@ describe('StreamingEngine', () => {
 
   function createStreamingEngine() {
     const playerInterface = {
-      cmcdManager: cmcdManager,
+      modifyRequest: (request, segment) => {},
       getPresentationTime: () => playhead.getTime(),
       getBandwidthEstimate: () => 1e6,
       mediaSourceEngine: mediaSourceEngine,
