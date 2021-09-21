@@ -344,7 +344,7 @@ describe('DashParser SegmentList', () => {
 
     const playerInterface = {
       networkingEngine: networkingEngine,
-      modifyRequest: (request) => {},
+      modifyRequest: (request, manifest) => {},
       filter: () => {},
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
