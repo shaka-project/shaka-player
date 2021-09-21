@@ -67,6 +67,8 @@ describe('StreamingEngine', () => {
   let segmentAvailability;
   /** @type {!shaka.test.FakePresentationTimeline} */
   let timeline;
+  /** @type {!shaka.util.CmcdManager} */
+  let cmcdManager;
 
   /** @type {?shaka.extern.Stream} */
   let audioStream;
@@ -451,6 +453,7 @@ describe('StreamingEngine', () => {
         presentationTimeInSeconds != undefined,
         'All tests should have defined an initial presentation time by now!');
     const playerInterface = {
+      cmcdManager: cmcdManager,
       getPresentationTime: () => presentationTimeInSeconds,
       getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
       mediaSourceEngine: mediaSourceEngine,
