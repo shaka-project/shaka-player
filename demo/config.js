@@ -96,6 +96,7 @@ shakaDemo.Config = class {
     this.addManifestSection_();
     this.addRetrictionsSection_('',
         shakaDemo.MessageIds.RESTRICTIONS_SECTION_HEADER);
+    this.addCmcdSection_();
   }
 
   /**
@@ -262,6 +263,17 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true);
     this.addRetrictionsSection_('abr',
         MessageIds.ADAPTATION_RESTRICTIONS_SECTION_HEADER);
+  }
+
+  /** @private */
+  addCmcdSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.CmcdConfiguration');
+    this.addSection_(MessageIds.CMCD_SECTION_HEADER, docLink)
+      .addBoolInput_(MessageIds.ENABLED, 'cmcd.enabled')
+      .addTextInput_(MessageIds.SESSION_ID, 'cmcd.sessionId')
+      .addTextInput_(MessageIds.CONTENT_ID, 'cmcd.contentId')
+      .addBoolInput_(MessageIds.USE_HEADERS, 'cmcd.useHeaders')
   }
 
   /**

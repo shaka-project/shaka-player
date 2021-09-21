@@ -135,6 +135,10 @@
     "description": "The name of a configuration value.",
     "message": "Clock Sync URI"
   },
+  "DEMO_CMCD_SECTION_HEADER": {
+    "description": "The header for a section of configuration values.",
+    "message": "[JARGON:CMCD]"
+  },
   "DEMO_COMPILED_DEBUG": {
     "description": "A link in the footer, to the debug build of the demo.",
     "message": "Compiled (Debug)"
@@ -154,6 +158,10 @@
   "DEMO_CONTAINER_SEARCH": {
     "description": "A header on a search field that filters by container type.",
     "message": "Container"
+  },
+  "DEMO_CONTENT_ID": {
+    "description": "The name of a configuration value.",
+    "message": "Content ID"
   },
   "DEMO_CUSTOM": {
     "description": "Text that describes an asset that was defined by the user.",
@@ -687,6 +695,10 @@
     "description": "A button to save a custom asset.",
     "message": "Save"
   },
+  "DEMO_SESSION_ID": {
+    "description": "The name of a configuration value.",
+    "message": "Session ID"
+  },
   "DEMO_SHAKA": {
     "description": "Text that describes an asset that comes from the Shaka Player asset library.",
     "message": "[PROPER_NAME:Shaka]"
@@ -854,6 +866,10 @@
   "DEMO_UPLYNK": {
     "description": "Text that describes an asset that comes from the Verizon Digital Media Services asset library.",
     "message": "[PROPER_NAME:Verizon Digital Media Services]"
+  },
+  "DEMO_USE_HEADERS": {
+    "description": "The name of a configuration value.",
+    "message": "Use Headers"
   },
   "DEMO_USE_NATIVE_HLS_SAFARI": {
     "description": "The name of a configuration value.",
