@@ -49,6 +49,7 @@ describe('DashParser Manifest', () => {
     onEventSpy = jasmine.createSpy('onEvent');
     playerInterface = {
       networkingEngine: fakeNetEngine,
+      modifyRequest: (request) => {},
       filter: (manifest) => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
