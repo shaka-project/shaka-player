@@ -46,6 +46,7 @@ describe('DashParser SegmentTemplate', () => {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
+      modifyRequest: (request) => { },
       filter: (manifest) => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
@@ -585,4 +586,3 @@ describe('DashParser SegmentTemplate', () => {
     });
   });
 });
-

@@ -67,7 +67,7 @@ describe('StreamingEngine', () => {
   let segmentAvailability;
   /** @type {!shaka.test.FakePresentationTimeline} */
   let timeline;
-  /** @type {!shaka.util.CmcdManager} */
+  /** @type {!shaka.cmcd.CmcdManager} */
   let cmcdManager;
 
   /** @type {?shaka.extern.Stream} */

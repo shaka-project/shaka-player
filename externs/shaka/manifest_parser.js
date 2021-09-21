@@ -100,7 +100,7 @@ shaka.extern.ManifestParser = class {
 /**
  * @typedef {{
  *   networkingEngine: !shaka.net.NetworkingEngine,
- *   cmcdManager: !shaka.cmcd.CmcdManager,
+ *   modifyRequest: function(!shaka.extern.Request),
  *   filter: function(shaka.extern.Manifest):!Promise,
  *   makeTextStreamsForClosedCaptions: function(shaka.extern.Manifest),
  *   onTimelineRegionAdded: function(shaka.extern.TimelineRegionInfo),
@@ -119,8 +119,8 @@ shaka.extern.ManifestParser = class {
  *
  * @property {!shaka.net.NetworkingEngine} networkingEngine
  *   The networking engine to use for network requests.
- * @property {!shaka.cmcd.CmcdManager} cmcdManager
- *   The CMCD manager
+ * @property {function(!shaka.extern.Request)} modifyRequest
+ *   The request modifier
  * @property {function(shaka.extern.Manifest):!Promise} filter
  *   Should be called when new variants or text streams are added to the
  *   Manifest.  Note that this operation is asynchronous.

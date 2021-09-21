@@ -59,7 +59,7 @@ describe('StreamingEngine', () => {
   let mediaSourceEngine;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
-  /** @type {!shaka.util.CmcdManager} */
+  /** @type {!shaka.cmcd.CmcdManager} */
   let cmcdManager;
 
   /** @type {shaka.extern.Variant} */
