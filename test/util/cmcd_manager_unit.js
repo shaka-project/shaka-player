@@ -4,32 +4,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.cmcd.CmcdManager');
+goog.require('shaka.util.CmcdManager');
 goog.require('shaka.util.ObjectUtils');
 
 describe('CmcdManager', () => {
-  const CmcdManager = shaka.cmcd.CmcdManager;
+  const CmcdManager = shaka.util.CmcdManager;
   const data = {
-    sid: 'c936730c-031e-4a73-976f-92bc34039c60',
-    cid: 'xyz',
-    su: false,
-    nor: '../testing/3.m4v',
-    nrr: '0-99',
-    d: 6066.66,
-    mtp: 10049,
-    bs: true,
-    br: 52317,
-    v: 1,
-    pr: 1,
+    'sid': 'c936730c-031e-4a73-976f-92bc34039c60',
+    'cid': 'xyz',
+    'su': false,
+    'nor': '../testing/3.m4v',
+    'nrr': '0-99',
+    'd': 6066.66,
+    'mtp': 10049,
+    'bs': true,
+    'br': 52317,
+    'v': 1,
+    'pr': 1,
     'com.test-hello': 'world',
     'com.test-testing': 1234,
     'com.test-exists': true,
     'com.test-notExists': false,
     'com.test-token': Symbol('s'),
   };
-  
+
   describe('UUID generation', () => {
-    const regex = 
+    const regex =
       /^[A-F\d]{8}-[A-F\d]{4}-4[A-F\d]{3}-[89AB][A-F\d]{3}-[A-F\d]{12}$/i;
     const id = CmcdManager.uuid();
 
@@ -68,7 +68,7 @@ describe('CmcdManager', () => {
     });
 
     it('ignores empty shards', () => {
-      expect(CmcdManager.toHeaders({ br: 200 })).toEqual({
+      expect(CmcdManager.toHeaders({br: 200})).toEqual({
         'CMCD-Object': 'br=200',
       });
     });
@@ -82,16 +82,16 @@ describe('CmcdManager', () => {
       getPlaybackRate: () => 1,
       getBandwidthEstimate: () => 10000000,
       getVariantTracks: () => [
-        { bandwidth: 50000 },
-        { bandwidth: 5000000 },
+        {bandwidth: 50000},
+        {bandwidth: 5000000},
       ],
       getBufferedInfo: () => ({
-        video: [{ start: 0, end: 30 }],
+        video: [{start: 0, end: 30}],
       }),
     };
 
     const cmcdManager = new CmcdManager(playerInterface);
-    
+
     const config = {
       enabled: false,
       sessionId: '2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3',
@@ -109,7 +109,7 @@ describe('CmcdManager', () => {
         testing: '1234',
       },
       allowCrossSiteCredentials: false,
-      retryParameters: {},
+      retryParameters: /** @type {shaka.extern.RetryParameters} */({}),
       licenseRequestType: null,
       sessionId: null,
       streamDataCallback: null,
@@ -117,17 +117,17 @@ describe('CmcdManager', () => {
 
     const manifestInfo = {
       format: 'dash',
-    }
+    };
 
     const segmentInfo = {
       init: false,
-      stream: {
+      stream: /** @type {shaka.extern.Stream} */({
         type: 'video',
         bandwidth: 5234167,
         mimeType: 'application/mp4',
-      },
+      }),
       duration: 3.33,
-    }
+    };
 
     it('does not modify requests when disabled', () => {
       const r = ObjectUtils.cloneObject(request);
@@ -144,7 +144,7 @@ describe('CmcdManager', () => {
         config.enabled = true;
         cmcdManager.configure(config);
       });
-      
+
       it('modifies manifest request uris', () => {
         const r = ObjectUtils.cloneObject(request);
         cmcdManager.applyManifestData(r, manifestInfo);
@@ -162,7 +162,7 @@ describe('CmcdManager', () => {
           'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Cst%3Dv%2C' +
           'tb%3D5000';
         expect(r.uris[0]).toBe(uri);
-      })
+      });
     });
 
     describe('header mode', () => {
@@ -190,7 +190,7 @@ describe('CmcdManager', () => {
           'testing': '1234',
           'CMCD-Object': 'br=5234,d=3330,ot=v,tb=5000',
           'CMCD-Request': 'bl=30000,mtp=10000',
-          'CMCD-Session': 'cid="testing",sf=d,' + 
+          'CMCD-Session': 'cid="testing",sf=d,' +
                           'sid="2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3",st=v',
         });
       });
