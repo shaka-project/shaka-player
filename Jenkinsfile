@@ -53,7 +53,7 @@ pipeline {
             steps {
                 sh 'HOME=${HOME}'
                 sh 'docker build --no-cache -t shaka-builder-a24bb4cd - < Dockerfile'
-                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls -ll --force'
+                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls --force'
             }
         }
 
