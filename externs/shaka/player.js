@@ -961,16 +961,16 @@ shaka.extern.AbrConfiguration;
  *   sessionId: string,
  *   contentId: string
  * }}
- * 
+ *
  * @description
  *   Common Media Client Data (CMCD) configuration.
  *
  * @property {boolean} enabled
- *   If <code>true</code>, enable CMCD data to be sent with media requests.  Defaults to
- *   <code>false</code>.
+ *   If <code>true</code>, enable CMCD data to be sent with media requests.
+ *   Defaults to <code>false</code>.
  * @property {boolean} useHeaders
- *   If <code>true</code>, send CMCD data using the header transmission mode instead of
- *   query args.  Defaults to <code>true</code>.
+ *   If <code>true</code>, send CMCD data using the header transmission mode
+ *   instead of query args.  Defaults to <code>true</code>.
  * @property {string} sessionId
  *   A GUID identifying the current playback session. A playback session
  *   typically ties together segments belonging to a single media asset.

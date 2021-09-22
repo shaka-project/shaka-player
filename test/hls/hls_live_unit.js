@@ -116,7 +116,7 @@ describe('HlsParser live', () => {
 
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     playerInterface = {
-      modifyRequest: (request, manifest) => { },
+      modifyRequest: (request, manifestInfo) => {},
       filter: () => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       networkingEngine: fakeNetEngine,

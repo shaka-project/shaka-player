@@ -261,7 +261,7 @@ describe('StreamingEngine', () => {
 
   function createStreamingEngine() {
     const playerInterface = {
-      modifyRequest: (request, segment) => {},
+      modifyRequest: (request, segmentInfo) => {},
       getPresentationTime: () => playhead.getTime(),
       getBandwidthEstimate: () => 1e6,
       mediaSourceEngine: mediaSourceEngine,
