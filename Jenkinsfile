@@ -52,10 +52,9 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'HOME=${HOME}'
-                sh 'ls -ll ${HOME}'
                 sh 'ls -ll ${PWD}'
                 sh 'docker build --no-cache -t shaka-builder-a24bb4cd - < Dockerfile'
-                sh 'docker run --rm -v"${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ./build/all.py --force'
+                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ./build/all.py --force'
             }
         }
 
