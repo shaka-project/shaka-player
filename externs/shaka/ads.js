@@ -64,6 +64,8 @@ shaka.extern.IAdManager = class extends EventTarget {
    */
   setLocale(locale) {}
 
+  release() {}
+
   onAssetUnload() {}
 
   /**
