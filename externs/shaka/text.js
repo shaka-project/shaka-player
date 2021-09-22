@@ -298,6 +298,20 @@ shaka.extern.Cue = class {
     this.fontFamily;
 
     /**
+     * Text stroke color as a CSS color, e.g. "#FFFFFF" or "white".
+     * @type {string}
+     * @exportDoc
+     */
+    this.textStrokeColor;
+
+    /**
+     * Text stroke width as a CSS stroke-width value.
+     * @type {string}
+     * @exportDoc
+     */
+    this.textStrokeWidth;
+
+    /**
      * Text letter spacing as a CSS letter-spacing value.
      * @type {string}
      * @exportDoc
