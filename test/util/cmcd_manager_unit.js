@@ -61,7 +61,9 @@ describe('CmcdManager', () => {
       const header = CmcdManager.toHeaders(data);
       expect(header).toEqual({
         'CMCD-Object': 'br=52317,d=6067',
-        'CMCD-Request': 'mtp=10000,nor="..%2Ftesting%2F3.m4v",nrr="0-99"',
+        'CMCD-Request': 'com.test-exists,com.test-hello="world",' +
+                        'com.test-testing=1234,com.test-token=s,mtp=10000,' +
+                        'nor="..%2Ftesting%2F3.m4v",nrr="0-99"',
         'CMCD-Session': 'cid="xyz",sid="c936730c-031e-4a73-976f-92bc34039c60"',
         'CMCD-Status': 'bs',
       });
