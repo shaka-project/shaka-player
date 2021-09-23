@@ -52,7 +52,7 @@ pipeline {
                 sh 'HOME=${HOME}'
                 sh 'docker build -t shaka-builder-a24bb4cd - < Dockerfile'
                 sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd'
-                sh 'docker exec -w="${PWD}" shaka-builder-a24bb4cd:latest ls -lsa'
+                sh 'docker exec -ti my_container ls -lsa'
             }
         }
 
