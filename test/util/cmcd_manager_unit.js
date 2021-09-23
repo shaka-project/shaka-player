@@ -152,7 +152,7 @@ describe('CmcdManager', () => {
         cmcdManager.applyManifestData(r, manifestInfo);
         const uri = 'https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2C' +
           'mtp%3D10000%2Cot%3Dm%2Csf%3Dd%2C' +
-          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Ctb%3D5000';
+          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu%2Ctb%3D5000';
         expect(r.uris[0]).toBe(uri);
       });
 
@@ -161,7 +161,7 @@ describe('CmcdManager', () => {
         cmcdManager.applySegmentData(r, segmentInfo);
         const uri = 'https://test.com/test.mpd?CMCD=bl%3D30000%2Cbr%3D5234%2Ccid%3D%22' +
           'testing%22%2Cd%3D3330%2Cmtp%3D10000%2Cot%3Dv%2Csf%3Dd%2C' +
-          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Cst%3Dv%2C' +
+          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Cst%3Dv%2Csu%2C' +
           'tb%3D5000';
         expect(r.uris[0]).toBe(uri);
       });
@@ -179,7 +179,7 @@ describe('CmcdManager', () => {
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'ot=m,tb=5000',
-          'CMCD-Request': 'mtp=10000',
+          'CMCD-Request': 'mtp=10000,su',
           'CMCD-Session': 'cid="testing",sf=d,' +
                           'sid="2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3"',
         });
@@ -191,10 +191,42 @@ describe('CmcdManager', () => {
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'br=5234,d=3330,ot=v,tb=5000',
-          'CMCD-Request': 'bl=30000,mtp=10000',
+          'CMCD-Request': 'bl=30000,mtp=10000,su',
           'CMCD-Session': 'cid="testing",sf=d,' +
                           'sid="2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3",st=v',
         });
+      });
+    });
+
+    describe('adheres to the spec', () => {
+      beforeAll(() => {
+        cmcdManager.setBuffering(false);
+        cmcdManager.setBuffering(true);
+      });
+
+      it('sends bs only once', () => {
+        let r = ObjectUtils.cloneObject(request);
+        cmcdManager.applySegmentData(r, segmentInfo);
+        expect(r.headers['CMCD-Status']).toContain('bs');
+
+        r = ObjectUtils.cloneObject(request);
+        cmcdManager.applySegmentData(r, segmentInfo);
+        expect(r.headers['CMCD-Status']).not.toContain('bs');
+      });
+
+      it('sends su until buffering is complete', () => {
+        let r = ObjectUtils.cloneObject(request);
+        cmcdManager.applySegmentData(r, segmentInfo);
+        expect(r.headers['CMCD-Request']).toContain(',su');
+
+        r = ObjectUtils.cloneObject(request);
+        cmcdManager.applySegmentData(r, segmentInfo);
+        expect(r.headers['CMCD-Request']).toContain(',su');
+
+        cmcdManager.setBuffering(false);
+        r = ObjectUtils.cloneObject(request);
+        cmcdManager.applySegmentData(r, segmentInfo);
+        expect(r.headers['CMCD-Request']).not.toContain(',su');
       });
     });
   });
