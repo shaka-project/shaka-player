@@ -9,6 +9,8 @@ goog.require('shaka.util.ObjectUtils');
 
 describe('CmcdManager', () => {
   const CmcdManager = shaka.util.CmcdManager;
+  const uuidRegex =
+    '[A-F\\d]{8}-[A-F\\d]{4}-4[A-F\\d]{3}-[89AB][A-F\\d]{3}-[A-F\\d]{12}';
   const data = {
     'sid': 'c936730c-031e-4a73-976f-92bc34039c60',
     'cid': 'xyz',
@@ -29,8 +31,7 @@ describe('CmcdManager', () => {
   };
 
   describe('UUID generation', () => {
-    const regex =
-      /^[A-F\d]{8}-[A-F\d]{4}-4[A-F\d]{3}-[89AB][A-F\d]{3}-[A-F\d]{12}$/i;
+    const regex = new RegExp(`^${uuidRegex}$`, 'i');
     const id = CmcdManager.uuid();
 
     it('is formatted correctly', () => {
@@ -94,9 +95,10 @@ describe('CmcdManager', () => {
 
     const cmcdManager = new CmcdManager(playerInterface);
 
+    const sid = '2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3';
     const config = {
       enabled: false,
-      sessionId: '2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3',
+      sessionId: '',
       contentId: 'testing',
       useHeaders: false,
     };
@@ -131,19 +133,32 @@ describe('CmcdManager', () => {
       duration: 3.33,
     };
 
-    it('does not modify requests when disabled', () => {
-      const r = ObjectUtils.cloneObject(request);
+    describe('configuration', () => {
+      it('does not modify requests when disabled', () => {
+        const r = ObjectUtils.cloneObject(request);
 
-      cmcdManager.applyManifestData(r, manifestInfo);
-      expect(r.uris[0]).toBe(request.uris[0]);
+        cmcdManager.applyManifestData(r, manifestInfo);
+        expect(r.uris[0]).toBe(request.uris[0]);
 
-      cmcdManager.applySegmentData(r, segmentInfo);
-      expect(r.uris[0]).toBe(request.uris[0]);
+        cmcdManager.applySegmentData(r, segmentInfo);
+        expect(r.uris[0]).toBe(request.uris[0]);
+      });
+
+      it('generates a session id if not provided', () => {
+        config.enabled = true;
+        cmcdManager.configure(config);
+
+        const r = ObjectUtils.cloneObject(request);
+
+        cmcdManager.applyManifestData(r, manifestInfo);
+        const regex = new RegExp(`sid%3D%22${uuidRegex}%22`, 'i');
+        expect(regex.test(r.uris[0])).toBe(true);
+      });
     });
 
     describe('query mode', () => {
       beforeAll(() => {
-        config.enabled = true;
+        config.sessionId = sid;
         cmcdManager.configure(config);
       });
 
@@ -162,6 +177,16 @@ describe('CmcdManager', () => {
         const uri = 'https://test.com/test.mpd?CMCD=bl%3D30000%2Cbr%3D5234%2Ccid%3D%22' +
           'testing%22%2Cd%3D3330%2Cmtp%3D10000%2Cot%3Dv%2Csf%3Dd%2C' +
           'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Cst%3Dv%2Csu%2C' +
+          'tb%3D5000';
+        expect(r.uris[0]).toBe(uri);
+      });
+
+      it('modifies text request uris', () => {
+        const r = ObjectUtils.cloneObject(request);
+        cmcdManager.applyTextData(r);
+        const uri = 'https://test.com/test.mpd?CMCD=cid%3D%22' +
+          'testing%22%2Cmtp%3D10000%2Cot%3Dc%2Csf%3Dd%2C' +
+          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu%2C' +
           'tb%3D5000';
         expect(r.uris[0]).toBe(uri);
       });
@@ -195,6 +220,34 @@ describe('CmcdManager', () => {
           'CMCD-Session': 'cid="testing",sf=d,' +
                           'sid="2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3",st=v',
         });
+      });
+    });
+
+    describe('src= mode', () => {
+      it('modifies media stream uris', () => {
+        const r = cmcdManager
+            .appendSrcData('https://test.com/test.mp4', 'video/mp4');
+        const uri = 'https://test.com/test.mp4?CMCD=cid%3D%22testing%22%2C' +
+                    'mtp%3D10000%2Cot%3Dav%2Csf%3Dd%2C' +
+                    'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu';
+        expect(r).toBe(uri);
+      });
+
+      it('modifies manifest stream uris', () => {
+        const r = cmcdManager
+            .appendSrcData('https://test.com/test.m3u8', 'application/x-mpegurl');
+        const uri = 'https://test.com/test.m3u8?CMCD=cid%3D%22testing%22%2C' +
+                    'mtp%3D10000%2Cot%3Dm%2Csf%3Dd%2C' +
+                    'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu';
+        expect(r).toBe(uri);
+      });
+
+      it('modifies text track uris', () => {
+        const r = cmcdManager.appendTextTrackData('https://test.com/test.vtt');
+        const uri = 'https://test.com/test.vtt?CMCD=cid%3D%22testing%22%2C' +
+                    'mtp%3D10000%2Cot%3Dc%2Csf%3Dd%2C' +
+                    'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu';
+        expect(r).toBe(uri);
       });
     });
 
