@@ -20,7 +20,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-            
+                slackSend( channel: "#http-rpmcache-admin", sendAsText: true,
+                    message: ":arrow_forward: '${env.JOB_NAME}' <${env.BUILD_URL}/console|#${env.BUILD_NUMBER}>")
+                
                 script {
                     vars = checkout scm
                     branch = vars.GIT_BRANCH
@@ -52,7 +54,7 @@ pipeline {
                 sh 'HOME=${HOME}'
                 sh 'docker build -t shaka-builder-a24bb4cd - < Dockerfile'
                 sh 'ls -ll ${PWD}'
-                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls -l ${PWD}'
+                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ./build/all.py --force'
             }
         }
 
@@ -71,6 +73,13 @@ export GITHUB_TOKEN=$(p4 print -q //d-alviso/swproduction/mainline/scripts/githu
 ./hub/bin/hub release create -m "Inception ${TS}" -a dist.tgz v3.0.1-alpha.tivo.${TS}
 '''
             }
+        }
+    }
+    
+    post {
+        always {
+            slackSend( channel: "#http-rpmcache-admin", sendAsText: true,
+                message: "${currentBuild.result == 'SUCCESS' ? ':ok:' : ':x:'} '${env.JOB_NAME}' <${env.BUILD_URL}/console|#${env.BUILD_NUMBER}> ${currentBuild.result}")
         }
     }
 }
