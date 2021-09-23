@@ -970,7 +970,7 @@ shaka.extern.AbrConfiguration;
  *   Defaults to <code>false</code>.
  * @property {boolean} useHeaders
  *   If <code>true</code>, send CMCD data using the header transmission mode
- *   instead of query args.  Defaults to <code>true</code>.
+ *   instead of query args.  Defaults to <code>false</code>.
  * @property {string} sessionId
  *   A GUID identifying the current playback session. A playback session
  *   typically ties together segments belonging to a single media asset.
