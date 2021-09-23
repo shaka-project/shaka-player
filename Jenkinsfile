@@ -51,7 +51,7 @@ pipeline {
             steps {
                 sh 'HOME=${HOME}'
                 sh 'docker build -t shaka-builder-a24bb4cd - < Dockerfile'
-                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls -l $HOME'
+                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls -l /var/jenkins_home/workspace/shaka-player_master'
             }
         }
 
