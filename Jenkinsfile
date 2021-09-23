@@ -54,7 +54,8 @@ pipeline {
                 sh 'HOME=${HOME}'
                 sh 'docker build -t shaka-builder-a24bb4cd - < Dockerfile'
                 sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd pwd'
-                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls -al /var'
+                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls -al /var/jenkins_home'
+                sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls -al /var/jenkins_home/workspace/shaka-player_master'
                 sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ls -al build'
                 sh 'docker run --rm -v "${PWD}":"${PWD}" -w="${PWD}" -u="$(id -u):$(id -g)" -eHOME=${PWD} shaka-builder-a24bb4cd ./build/all.py --force'
             }
