@@ -13,7 +13,7 @@ deployment_credentials_env = [
 ];
 
 pipeline {
-    node('docker')
+    agent any
     options {
         skipDefaultCheckout true
     }
@@ -50,6 +50,7 @@ pipeline {
         }
 
         stage('Build') {
+            node('docker')
             steps {
                 sh 'HOME=${HOME}'
                 sh 'docker build -t shaka-builder-a24bb4cd - < Dockerfile'
