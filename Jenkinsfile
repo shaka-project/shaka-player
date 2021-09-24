@@ -13,7 +13,7 @@ deployment_credentials_env = [
 ];
 
 pipeline {
-    agent any
+    node('docker')
     options {
         skipDefaultCheckout true
     }
