@@ -63,9 +63,9 @@ pipeline {
 
         stage('Publish') {
             steps {
-                def packageJSON = readJSON file: 'package.json'
-                def packageJSONVersion = packageJSON.version
-                echo packageJSONVersion
+                packageJSON = readJSON file: 'package.json'
+                packageJSONVersion = packageJSON.version
+                echo "${packageJSONVersion}"
                 sh '''
 wget -O hub.tgz  --progress=dot:mega https://github.com/github/hub/releases/download/v2.14.2/hub-linux-amd64-2.14.2.tgz
 rm -rf hub || true; mkdir hub
