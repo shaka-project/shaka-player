@@ -63,9 +63,6 @@ pipeline {
 
         stage('Publish') {
             steps {
-                packageJSON = readJSON file: 'package.json'
-                packageJSONVersion = packageJSON.version
-                echo "${packageJSONVersion}"
                 sh '''
 wget -O hub.tgz  --progress=dot:mega https://github.com/github/hub/releases/download/v2.14.2/hub-linux-amd64-2.14.2.tgz
 rm -rf hub || true; mkdir hub
@@ -76,7 +73,7 @@ tar -cvzf dist.tgz dist/
 
 export GITHUB_TOKEN=$(p4 print -q //d-alviso/swproduction/mainline/scripts/github-get | grep 'export GITHUB_AUTOMATION_TOKEN=' | cut -f2 -d=)
 
-./hub/bin/hub release create -m "Inception ${TS}" -a dist.tgz v${packageJSONVersion}-alpha.tivo.${TS}
+./hub/bin/hub release create -m "Inception ${TS}" -a dist.tgz v3.2.0-alpha.tivo.${TS}
 '''
             }
         }
