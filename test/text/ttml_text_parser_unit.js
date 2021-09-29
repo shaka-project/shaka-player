@@ -295,6 +295,52 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('inherits timing information of nested cues if unprovided', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            nestedCues: [
+              {startTime: 62.05, endTime: 3723.2, payload: 'Test'},
+            ],
+          },
+        ],
+        '<tt><body>' +
+        '<div><div begin="01:02.05" end="01:02:03.200">Test</div></div>' +
+        '</body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  it('does not discard cues with image subcues', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            nestedCues: [
+              {
+                startTime: 62.05,
+                endTime: 3723.2,
+                payload: '',
+                backgroundImage: 'data:image/png;base64,base64EncodedImage',
+              },
+            ],
+          },
+        ],
+        '<tt ' +
+        'xmlns:ttm="http://www.w3.org/ns/ttml#metadata" ' +
+        'xmlns:smpte="http://www.smpte-ra.org/schemas/2052-1/2010/smpte-tt">' +
+        '<metadata>' +
+        '<smpte:image imageType="PNG" encoding="Base64" xml:id="img_0">' +
+        'base64EncodedImage</smpte:image>' +
+        '</metadata><body>' +
+        '<div><div begin="01:02.05" end="01:02:03.200" ' +
+        'smpte:backgroundImage="#img_0"></div></div>' +
+        '</body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('supports colon formatted time', () => {
     verifyHelper(
         [
