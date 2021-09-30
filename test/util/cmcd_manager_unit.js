@@ -30,19 +30,6 @@ describe('CmcdManager', () => {
     'com.test-token': Symbol('s'),
   };
 
-  describe('UUID generation', () => {
-    const regex = new RegExp(`^${uuidRegex}$`, 'i');
-    const id = CmcdManager.uuid();
-
-    it('is formatted correctly', () => {
-      expect(regex.test(id)).toBe(true);
-    });
-
-    it('produces unique results', () => {
-      expect(CmcdManager.uuid() == id).toBe(false);
-    });
-  });
-
   describe('Query serialization', () => {
     it('produces correctly serialized data', () => {
       const query = CmcdManager.toQuery(data);
