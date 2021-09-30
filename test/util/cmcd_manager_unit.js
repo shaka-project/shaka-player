@@ -98,7 +98,7 @@ describe('CmcdManager', () => {
       contentId: 'testing',
       useHeaders: false,
     };
-    
+
     cmcdManager.configure(config);
 
     const request = {
@@ -135,9 +135,6 @@ describe('CmcdManager', () => {
       }),
     };
 
-    'https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2Cmtp%3D10000%2Cot%3Dm%2Csf%3Dd%2Csid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu'
-    'https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2Cmtp%3D10000%2Cot%3Dm%2Csf%3Dd%2Csid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu%2C'
-    
     describe('configuration', () => {
       it('does not modify requests when disabled', () => {
         const r = ObjectUtils.cloneObject(request);
