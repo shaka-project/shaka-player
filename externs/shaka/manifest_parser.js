@@ -99,19 +99,10 @@ shaka.extern.ManifestParser = class {
 
 /**
  * @typedef {{
- *   format: !string
- * }}
- *
- * @property {!string} format
- *   The manifest format, i.e. dash, hls, smooth
- */
-shaka.extern.ManifestInfo;
-
-
-/**
- * @typedef {{
  *   networkingEngine: !shaka.net.NetworkingEngine,
- *   modifyRequest: function(!shaka.extern.Request, shaka.extern.ManifestInfo),
+ *   modifyManifestRequest: function(!shaka.extern.Request, string),
+ *   modifySegmentRequest: function(!shaka.extern.Request, string, boolean,
+ *      number, string, string, (number|undefined)),
  *   filter: function(shaka.extern.Manifest):!Promise,
  *   makeTextStreamsForClosedCaptions: function(shaka.extern.Manifest),
  *   onTimelineRegionAdded: function(shaka.extern.TimelineRegionInfo),
@@ -130,9 +121,11 @@ shaka.extern.ManifestInfo;
  *
  * @property {!shaka.net.NetworkingEngine} networkingEngine
  *   The networking engine to use for network requests.
- * @property {function(!shaka.extern.Request, shaka.extern.ManifestInfo)}
- *   modifyRequest
- *   The request modifier
+ * @property {function(!shaka.extern.Request, string)} modifyManifestRequest
+ *   Modify a manifest request
+ * @property {function(!shaka.extern.Request, string, boolean, number, string,
+ *   string, (number|undefined))} modifySegmentRequest
+ *   Modify a segment request
  * @property {function(shaka.extern.Manifest):!Promise} filter
  *   Should be called when new variants or text streams are added to the
  *   Manifest.  Note that this operation is asynchronous.

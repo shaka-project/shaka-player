@@ -94,7 +94,9 @@ describe('HlsParser', () => {
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     onEventSpy = jasmine.createSpy('onEvent');
     playerInterface = {
-      modifyRequest: (request, manifestInfo) => {},
+      modifyManifestRequest: (request, format) => {},
+      modifySegmentRequest: (request, type, init, duration, mimeType, codecs,
+          bandwidth) => {},
       filter: () => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       networkingEngine: fakeNetEngine,
