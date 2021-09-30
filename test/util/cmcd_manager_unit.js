@@ -84,12 +84,8 @@ describe('CmcdManager', () => {
       isLive: () => false,
       getPlaybackRate: () => 1,
       getBandwidthEstimate: () => 10000000,
-      getVariantTracks: () => [
-        {bandwidth: 50000},
-        {bandwidth: 5000000},
-      ],
       getBufferedInfo: () => ({
-        video: [{start: 0, end: 30}],
+        video: [{start: 0, end: 31.234}],
       }),
     };
 
@@ -102,7 +98,7 @@ describe('CmcdManager', () => {
       contentId: 'testing',
       useHeaders: false,
     };
-
+    
     cmcdManager.configure(config);
 
     const request = {
@@ -131,8 +127,17 @@ describe('CmcdManager', () => {
         mimeType: 'application/mp4',
       }),
       duration: 3.33,
+      manifest: /** @type {shaka.extern.Manifest} */({
+        variants: [
+          {video: {bandwidth: 50000}},
+          {video: {bandwidth: 5000000}},
+        ],
+      }),
     };
 
+    'https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2Cmtp%3D10000%2Cot%3Dm%2Csf%3Dd%2Csid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu'
+    'https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2Cmtp%3D10000%2Cot%3Dm%2Csf%3Dd%2Csid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu%2C'
+    
     describe('configuration', () => {
       it('does not modify requests when disabled', () => {
         const r = ObjectUtils.cloneObject(request);
@@ -167,14 +172,14 @@ describe('CmcdManager', () => {
         cmcdManager.applyManifestData(r, manifestInfo);
         const uri = 'https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2C' +
           'mtp%3D10000%2Cot%3Dm%2Csf%3Dd%2C' +
-          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu%2Ctb%3D5000';
+          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu';
         expect(r.uris[0]).toBe(uri);
       });
 
       it('modifies segment request uris', () => {
         const r = ObjectUtils.cloneObject(request);
         cmcdManager.applySegmentData(r, segmentInfo);
-        const uri = 'https://test.com/test.mpd?CMCD=bl%3D30000%2Cbr%3D5234%2Ccid%3D%22' +
+        const uri = 'https://test.com/test.mpd?CMCD=bl%3D31200%2Cbr%3D5234%2Ccid%3D%22' +
           'testing%22%2Cd%3D3330%2Cmtp%3D10000%2Cot%3Dv%2Csf%3Dd%2C' +
           'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Cst%3Dv%2Csu%2C' +
           'tb%3D5000';
@@ -186,8 +191,7 @@ describe('CmcdManager', () => {
         cmcdManager.applyTextData(r);
         const uri = 'https://test.com/test.mpd?CMCD=cid%3D%22' +
           'testing%22%2Cmtp%3D10000%2Cot%3Dc%2Csf%3Dd%2C' +
-          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu%2C' +
-          'tb%3D5000';
+          'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu';
         expect(r.uris[0]).toBe(uri);
       });
     });
@@ -203,7 +207,7 @@ describe('CmcdManager', () => {
         cmcdManager.applyManifestData(r, manifestInfo);
         expect(r.headers).toEqual({
           'testing': '1234',
-          'CMCD-Object': 'ot=m,tb=5000',
+          'CMCD-Object': 'ot=m',
           'CMCD-Request': 'mtp=10000,su',
           'CMCD-Session': 'cid="testing",sf=d,' +
                           'sid="2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3"',
@@ -216,7 +220,7 @@ describe('CmcdManager', () => {
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'br=5234,d=3330,ot=v,tb=5000',
-          'CMCD-Request': 'bl=30000,mtp=10000,su',
+          'CMCD-Request': 'bl=31200,mtp=10000,su',
           'CMCD-Session': 'cid="testing",sf=d,' +
                           'sid="2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3",st=v',
         });
