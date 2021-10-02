@@ -320,4 +320,67 @@ describe('UITextDisplayer', () => {
     // duplicates.
     expect(captions.length).toBe(3);
   });
+
+  it('hides and shows nested cues at appropriate times', async () => {
+    const parentCue1 = new shaka.text.Cue(0, 100, '');
+    const cue1 = new shaka.text.Cue(0, 50, 'One');
+    parentCue1.nestedCues.push(cue1);
+    const cue2 = new shaka.text.Cue(25, 75, 'Two');
+    parentCue1.nestedCues.push(cue2);
+    const cue3 = new shaka.text.Cue(50, 100, 'Three');
+    parentCue1.nestedCues.push(cue3);
+
+    const parentCue2 = new shaka.text.Cue(90, 190, '');
+    const cue4 = new shaka.text.Cue(90, 130, 'Four');
+    parentCue2.nestedCues.push(cue4);
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([parentCue1, parentCue2]);
+
+    video.currentTime = 10;
+    await shaka.test.Util.delay(0.5);
+    /** @type {Element} */
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    let parentCueElements = textContainer.querySelectorAll('div');
+
+    expect(parentCueElements.length).toBe(1);
+    expect(parentCueElements[0].textContent).toBe('One');
+
+    video.currentTime = 35;
+    await shaka.test.Util.delay(0.5);
+    parentCueElements = textContainer.querySelectorAll('div');
+    expect(parentCueElements.length).toBe(1);
+    expect(parentCueElements[0].textContent).toBe('OneTwo');
+
+    video.currentTime = 60;
+    await shaka.test.Util.delay(0.5);
+    parentCueElements = textContainer.querySelectorAll('div');
+    expect(parentCueElements.length).toBe(1);
+    expect(parentCueElements[0].textContent).toBe('TwoThree');
+
+    video.currentTime = 85;
+    await shaka.test.Util.delay(0.5);
+    parentCueElements = textContainer.querySelectorAll('div');
+    expect(parentCueElements.length).toBe(1);
+    expect(parentCueElements[0].textContent).toBe('Three');
+
+    video.currentTime = 95;
+    await shaka.test.Util.delay(0.5);
+    parentCueElements = textContainer.querySelectorAll('div');
+    expect(parentCueElements.length).toBe(2);
+    expect(parentCueElements[0].textContent).toBe('Three');
+    expect(parentCueElements[1].textContent).toBe('Four');
+
+    video.currentTime = 105;
+    await shaka.test.Util.delay(0.5);
+    parentCueElements = textContainer.querySelectorAll('div');
+    expect(parentCueElements.length).toBe(1);
+    expect(parentCueElements[0].textContent).toBe('Four');
+
+    video.currentTime = 150;
+    await shaka.test.Util.delay(0.5);
+    parentCueElements = textContainer.querySelectorAll('div');
+    expect(parentCueElements.length).toBe(1);
+    expect(parentCueElements[0].textContent).toBe('');
+  });
 });
