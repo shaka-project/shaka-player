@@ -975,7 +975,8 @@ shaka.extern.AbrConfiguration;
  *   A GUID identifying the current playback session. A playback session
  *   typically ties together segments belonging to a single media asset.
  *   Maximum length is 64 characters. It is RECOMMENDED to conform to the UUID
- *   specification.
+ *   specification. By default the sessionId is automatically generated on each 
+ *   <code>load()</code> call.
  * @property {string} contentId
  *   A unique string identifying the current content. Maximum length is 64
  *   characters. This value is consistent across multiple different sessions and
