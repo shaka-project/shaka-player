@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.UiUtils');
 goog.require('shaka.test.Util');
 goog.require('shaka.text.Cue');
 goog.require('shaka.text.UITextDisplayer');
@@ -51,8 +50,7 @@ describe('UITextDisplayer', () => {
       /** @type {!HTMLElement} */ (document.createElement('div'));
     videoContainer.style.height = `${videoContainerHeight}px`;
     document.body.appendChild(videoContainer);
-    video = shaka.test.UiUtils.createVideoElement();
-    videoContainer.appendChild(video);
+    video = new shaka.test.FakeVideo();
   });
 
   beforeEach(() => {
