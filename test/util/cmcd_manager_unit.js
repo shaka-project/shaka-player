@@ -108,7 +108,7 @@ describe('CmcdManager', () => {
       streamDataCallback: null,
     };
 
-    const manifestInfo = 'dash';
+    const format = shaka.util.CmcdManager.StreamingFormat.DASH;
 
     const segmentInfo = [
       'video',
@@ -123,7 +123,7 @@ describe('CmcdManager', () => {
       it('does not modify requests when disabled', () => {
         const r = ObjectUtils.cloneObject(request);
 
-        cmcdManager.applyManifestData(r, manifestInfo);
+        cmcdManager.applyManifestData(r, format);
         expect(r.uris[0]).toBe(request.uris[0]);
 
         cmcdManager.applySegmentData(r, ...segmentInfo);
@@ -136,7 +136,7 @@ describe('CmcdManager', () => {
 
         const r = ObjectUtils.cloneObject(request);
 
-        cmcdManager.applyManifestData(r, manifestInfo);
+        cmcdManager.applyManifestData(r, format);
         const regex = new RegExp(`sid%3D%22${uuidRegex}%22`, 'i');
         expect(regex.test(r.uris[0])).toBe(true);
       });
@@ -150,7 +150,7 @@ describe('CmcdManager', () => {
 
       it('modifies manifest request uris', () => {
         const r = ObjectUtils.cloneObject(request);
-        cmcdManager.applyManifestData(r, manifestInfo);
+        cmcdManager.applyManifestData(r, format);
         const uri = 'https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2C' +
           'mtp%3D10000%2Cot%3Dm%2Csf%3Dd%2C' +
           'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu';
@@ -185,7 +185,7 @@ describe('CmcdManager', () => {
 
       it('modifies manifest request headers', () => {
         const r = ObjectUtils.cloneObject(request);
-        cmcdManager.applyManifestData(r, manifestInfo);
+        cmcdManager.applyManifestData(r, format);
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'ot=m',
