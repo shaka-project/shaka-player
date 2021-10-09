@@ -82,8 +82,6 @@ describe('CmcdManager', () => {
       getPlaybackRate: () => 1,
     };
 
-    const cmcdManager = new CmcdManager(playerInterface);
-
     const sid = '2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3';
     const config = {
       enabled: false,
@@ -92,7 +90,8 @@ describe('CmcdManager', () => {
       useHeaders: false,
     };
 
-    cmcdManager.configure(config);
+    /** @type shaka.util.CmcdManager */
+    let cmcdManager = new CmcdManager(playerInterface, config);
 
     const request = {
       uris: ['https://test.com/test.mpd'],
@@ -132,7 +131,7 @@ describe('CmcdManager', () => {
 
       it('generates a session id if not provided', () => {
         config.enabled = true;
-        cmcdManager.configure(config);
+        cmcdManager = new CmcdManager(playerInterface, config);
 
         const r = ObjectUtils.cloneObject(request);
 
@@ -145,7 +144,7 @@ describe('CmcdManager', () => {
     describe('query mode', () => {
       beforeAll(() => {
         config.sessionId = sid;
-        cmcdManager.configure(config);
+        cmcdManager = new CmcdManager(playerInterface, config);
       });
 
       it('modifies manifest request uris', () => {
@@ -180,7 +179,7 @@ describe('CmcdManager', () => {
     describe('header mode', () => {
       beforeAll(() => {
         config.useHeaders = true;
-        cmcdManager.configure(config);
+        cmcdManager = new CmcdManager(playerInterface, config);
       });
 
       it('modifies manifest request headers', () => {
