@@ -451,8 +451,7 @@ describe('StreamingEngine', () => {
         presentationTimeInSeconds != undefined,
         'All tests should have defined an initial presentation time by now!');
     const playerInterface = {
-      modifySegmentRequest: (request, type, init, duration, mimeType, codecs,
-          bandwidth) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
       getPresentationTime: () => presentationTimeInSeconds,
       getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
       mediaSourceEngine: mediaSourceEngine,

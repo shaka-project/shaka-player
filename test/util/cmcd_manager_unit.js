@@ -107,25 +107,27 @@ describe('CmcdManager', () => {
       streamDataCallback: null,
     };
 
-    const format = shaka.util.CmcdManager.StreamingFormat.DASH;
+    const manifestInfo = {
+      format: shaka.util.CmcdManager.StreamingFormat.DASH,
+    };
 
-    const segmentInfo = [
-      'video',
-      false,
-      3.33,
-      'application/mp4',
-      'avc1.42001e',
-      5234167,
-    ];
+    const segmentInfo = {
+      type: 'video',
+      init: false,
+      duration: 3.33,
+      mimeType: 'application/mp4',
+      codecs: 'avc1.42001e',
+      bandwidth: 5234167,
+    };
 
     describe('configuration', () => {
       it('does not modify requests when disabled', () => {
         const r = ObjectUtils.cloneObject(request);
 
-        cmcdManager.applyManifestData(r, format);
+        cmcdManager.applyManifestData(r, manifestInfo);
         expect(r.uris[0]).toBe(request.uris[0]);
 
-        cmcdManager.applySegmentData(r, ...segmentInfo);
+        cmcdManager.applySegmentData(r, segmentInfo);
         expect(r.uris[0]).toBe(request.uris[0]);
       });
 
@@ -135,7 +137,7 @@ describe('CmcdManager', () => {
 
         const r = ObjectUtils.cloneObject(request);
 
-        cmcdManager.applyManifestData(r, format);
+        cmcdManager.applyManifestData(r, manifestInfo);
         const regex = new RegExp(`sid%3D%22${uuidRegex}%22`, 'i');
         expect(regex.test(r.uris[0])).toBe(true);
       });
@@ -149,7 +151,7 @@ describe('CmcdManager', () => {
 
       it('modifies manifest request uris', () => {
         const r = ObjectUtils.cloneObject(request);
-        cmcdManager.applyManifestData(r, format);
+        cmcdManager.applyManifestData(r, manifestInfo);
         const uri = 'https://test.com/test.mpd?CMCD=cid%3D%22testing%22%2C' +
           'mtp%3D10000%2Cot%3Dm%2Csf%3Dd%2C' +
           'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Csu';
@@ -158,7 +160,7 @@ describe('CmcdManager', () => {
 
       it('modifies segment request uris', () => {
         const r = ObjectUtils.cloneObject(request);
-        cmcdManager.applySegmentData(r, ...segmentInfo);
+        cmcdManager.applySegmentData(r, segmentInfo);
         const uri = 'https://test.com/test.mpd?CMCD=bl%3D31200%2Cbr%3D5234%2Ccid%3D%22' +
           'testing%22%2Cd%3D3330%2Cmtp%3D10000%2Cot%3Dv%2Csf%3Dd%2C' +
           'sid%3D%222ed2d1cd-970b-48f2-bfb3-50a79e87cfa3%22%2Cst%3Dv%2Csu%2C' +
@@ -184,7 +186,7 @@ describe('CmcdManager', () => {
 
       it('modifies manifest request headers', () => {
         const r = ObjectUtils.cloneObject(request);
-        cmcdManager.applyManifestData(r, format);
+        cmcdManager.applyManifestData(r, manifestInfo);
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'ot=m',
@@ -196,7 +198,7 @@ describe('CmcdManager', () => {
 
       it('modifies segment request headers', () => {
         const r = ObjectUtils.cloneObject(request);
-        cmcdManager.applySegmentData(r, ...segmentInfo);
+        cmcdManager.applySegmentData(r, segmentInfo);
         expect(r.headers).toEqual({
           'testing': '1234',
           'CMCD-Object': 'br=5234,d=3330,ot=v,tb=5000',
@@ -243,26 +245,26 @@ describe('CmcdManager', () => {
 
       it('sends bs only once', () => {
         let r = ObjectUtils.cloneObject(request);
-        cmcdManager.applySegmentData(r, ...segmentInfo);
+        cmcdManager.applySegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Status']).toContain('bs');
 
         r = ObjectUtils.cloneObject(request);
-        cmcdManager.applySegmentData(r, ...segmentInfo);
+        cmcdManager.applySegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Status']).not.toContain('bs');
       });
 
       it('sends su until buffering is complete', () => {
         let r = ObjectUtils.cloneObject(request);
-        cmcdManager.applySegmentData(r, ...segmentInfo);
+        cmcdManager.applySegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Request']).toContain(',su');
 
         r = ObjectUtils.cloneObject(request);
-        cmcdManager.applySegmentData(r, ...segmentInfo);
+        cmcdManager.applySegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Request']).toContain(',su');
 
         cmcdManager.setBuffering(false);
         r = ObjectUtils.cloneObject(request);
-        cmcdManager.applySegmentData(r, ...segmentInfo);
+        cmcdManager.applySegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Request']).not.toContain(',su');
       });
     });
