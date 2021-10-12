@@ -1296,12 +1296,13 @@ describe('Playhead', () => {
     });
 
     // Regression test for https://github.com/google/shaka-player/issues/2987
-    it('does gap jump if paused at 0', () => {
+    it('does gap jump if paused at 0 and has autoplay', () => {
       const buffered = [{start: 10, end: 20}];
       video.buffered = createFakeBuffered(buffered);
       video.currentTime = 0;
       video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
       video.paused = true;
+      video.autoplay = true;
 
       config.jumpLargeGaps = true;
       playhead = new shaka.media.MediaSourcePlayhead(
@@ -1317,6 +1318,31 @@ describe('Playhead', () => {
 
       // There SHOULD have been a gap jump.
       expect(video.currentTime).toBe(10);
+    });
+
+    // Regression test for https://github.com/google/shaka-player/issues/3451
+    it('doesn\'t gap jump if paused at 0 and hasn\'t autoplay', () => {
+      const buffered = [{start: 10, end: 20}];
+      video.buffered = createFakeBuffered(buffered);
+      video.currentTime = 0;
+      video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
+      video.paused = true;
+      video.autoplay = false;
+
+      config.jumpLargeGaps = true;
+      playhead = new shaka.media.MediaSourcePlayhead(
+          video,
+          manifest,
+          config,
+          /* startTime= */ 0,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
+
+      playhead.notifyOfBufferingChange();
+      jasmine.clock().tick(500);
+
+      // There should NOT have been a gap jump.
+      expect(video.currentTime).toBe(0);
     });
 
     /**
