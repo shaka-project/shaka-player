@@ -58,6 +58,7 @@
   "DEMO_DISABLE_THUMBNAILS": "Disable Thumbnails",
   "DEMO_DISABLE_VIDEO": "Disable Video",
   "DEMO_DISABLE_XLINK_PROCESSING": "Disable Xlink processing",
+  "DEMO_DISPATCH_ALL_EMSG_BOXES": "Dispatch all emsg boxes",
   "DEMO_DOCUMENTATION": "Documentation",
   "DEMO_DRM_RETRY_SECTION_HEADER": "DRM Retry Parameters",
   "DEMO_DRM_SEARCH": "DRM",
