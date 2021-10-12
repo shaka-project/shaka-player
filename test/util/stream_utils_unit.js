@@ -16,14 +16,14 @@ describe('StreamUtils', () => {
   /** @type {!jasmine.Spy} */
   let decodingInfoSpy;
 
-  const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
+  const originalDecodingInfo = window.shakaMediaCapabilities.decodingInfo;
 
   beforeEach(() => {
     decodingInfoSpy = jasmine.createSpy('decodingInfo');
   });
 
   afterEach(() => {
-    navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
+    window.shakaMediaCapabilities.decodingInfo = originalDecodingInfo;
   });
 
   describe('filterStreamsByLanguageAndRole', () => {
@@ -511,7 +511,7 @@ describe('StreamUtils', () => {
     });
 
     it('handles decodingInfo exception', async () => {
-      navigator.mediaCapabilities.decodingInfo =
+      window.shakaMediaCapabilities.decodingInfo =
           shaka.test.Util.spyFunc(decodingInfoSpy);
       // If decodingInfo() fails, setDecodingInfo should finish without throwing
       // an exception, and the variant should have no decodingInfo result.
