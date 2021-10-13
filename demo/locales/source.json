@@ -183,9 +183,17 @@
     "description": "Text that describes an asset that comes from the Dash Industry Forum asset library.",
     "message": "[PROPER_NAME:DASH-IF]"
   },
+  "DEMO_DEFAULT_AUDIO_CODEC": {
+    "description": "The name of a configuration value.",
+    "message": "Default Audio Codec"
+  },
   "DEMO_DEFAULT_PRESENTATION_DELAY": {
     "description": "The name of a configuration value.",
     "message": "Default Presentation Delay"
+  },
+  "DEMO_DEFAULT_VIDEO_CODEC": {
+    "description": "The name of a configuration value.",
+    "message": "Default Video Codec"
   },
   "DEMO_DELAY_LICENSE": {
     "description": "The name of a configuration value.",
@@ -226,6 +234,10 @@
   "DEMO_DISABLE_XLINK_PROCESSING": {
     "description": "The name of a configuration value.",
     "message": "Disable [JARGON:Xlink] processing"
+  },
+  "DEMO_DISPATCH_ALL_EMSG_BOXES": {
+    "description": "The name of a configuration value.",
+    "message": "Dispatch all [JARGON:emsg] boxes"
   },
   "DEMO_DOCUMENTATION": {
     "description": "A link in the footer, to the Shaka Player documentation.",

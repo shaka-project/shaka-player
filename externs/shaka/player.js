@@ -698,7 +698,9 @@ shaka.extern.DashManifestConfiguration;
  * @typedef {{
  *   ignoreTextStreamFailures: boolean,
  *   ignoreImageStreamFailures: boolean,
- *   useFullSegmentsForStartTime: boolean
+ *   useFullSegmentsForStartTime: boolean,
+ *   defaultAudioCodec: string,
+ *   defaultVideoCodec: string
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -710,6 +712,12 @@ shaka.extern.DashManifestConfiguration;
  * @property {boolean} useFullSegmentsForStartTime
  *   If <code>true</code>, force HlsParser to use a full segment request for
  *   determining start time in case the server does not support partial requests
+ * @property {string} defaultAudioCodec
+ *   The default audio codec if it is not specified in the HLS playlist.
+ *   <i>Defaults to <code>'mp4a.40.2'</code>.</i>
+ * @property {string} defaultVideoCodec
+ *   The default video codec if it is not specified in the HLS playlist.
+ *   <i>Defaults to <code>'avc1.42E01E'</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -790,7 +798,8 @@ shaka.extern.ManifestConfiguration;
  *   autoLowLatencyMode: boolean,
  *   forceHTTPS: boolean,
  *   preferNativeHls: boolean,
- *   updateIntervalSeconds: number
+ *   updateIntervalSeconds: number,
+ *   dispatchAllEmsgBoxes: boolean
  * }}
  *
  * @description
@@ -899,6 +908,8 @@ shaka.extern.ManifestConfiguration;
  *   If true, prefer native HLS playback when possible, regardless of platform.
  * @property {number} updateIntervalSeconds
  *   The minimum number of seconds to see if the manifest has changes.
+ * @property {boolean} dispatchAllEmsgBoxes
+ *   If true, all emsg boxes are parsed and dispatched.
  *
  * @exportDoc
  */

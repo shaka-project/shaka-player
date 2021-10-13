@@ -210,6 +210,10 @@ shakaDemo.Config = class {
             'manifest.hls.ignoreImageStreamFailures')
         .addBoolInput_(MessageIds.USE_FULL_SEGMENTS_FOR_START_TIME,
             'manifest.hls.useFullSegmentsForStartTime')
+        .addTextInput_(MessageIds.DEFAULT_AUDIO_CODEC,
+            'manifest.hls.defaultAudioCodec')
+        .addTextInput_(MessageIds.DEFAULT_VIDEO_CODEC,
+            'manifest.hls.defaultVideoCodec')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
@@ -362,7 +366,9 @@ shakaDemo.Config = class {
             'streaming.preferNativeHls')
         .addNumberInput_(MessageIds.UPDATE_INTERVAL_SECONDS,
             'streaming.updateIntervalSeconds',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_(MessageIds.DISPATCH_ALL_EMSG_BOXES,
+            'streaming.dispatchAllEmsgBoxes');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,

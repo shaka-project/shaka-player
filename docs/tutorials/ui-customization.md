@@ -88,6 +88,7 @@ The following buttons can be added to the overflow menu:
 * playback_rate: adds a button that controls the playback rate selection.
 * airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
   supports AirPlay.
+* Statistics: adds a button that displays statistics of the video.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
@@ -116,8 +117,12 @@ ui.configure(config);
 
 #### Replacing the default context menu
 
-A custom context menu can be added through the `customContextMenu` boolean. Additionally, the `contextMenuElements` option can be used to add elements to it. Currently only the statistics button is available:
+A custom context menu can be added through the `customContextMenu` boolean. Additionally, the `contextMenuElements` option can be used to add elements to it.
+The following buttons can be added to the context menu:
 * Statistics: adds a button that displays statistics of the video.
+* loop: adds a button that controls if the currently selected video is played in a loop.
+* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
+  that support it. Button is invisible on other browsers.
 
 Example:
 ```js
