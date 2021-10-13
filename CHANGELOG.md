@@ -1,3 +1,65 @@
+## 3.1.3 (2021-10-13)
+
+Bugfixes:
+  - Work around override of MediaCapabilities polyfill in Apple browsers
+    - https://github.com/google/shaka-player/issues/3530
+    - https://github.com/google/shaka-player/pull/3668
+  - Add support to file type in MediaCapabilities implementation
+    - https://github.com/google/shaka-player/pull/3570
+  - Fix video poster when autoplay is disabled
+    - https://github.com/google/shaka-player/pull/3645
+  - Fix tracking of active variant track in live streams
+  - Fixes updating of nested cues
+    - https://github.com/google/shaka-player/issues/3524
+    - https://github.com/google/shaka-player/issues/3643
+  - Fix ttml erroneously dismissing cues
+    - https://github.com/google/shaka-player/issues/3643
+  - Fix control panel alignment in UI
+    - https://github.com/google/shaka-player/pull/3650
+  - Export missing polyfill install methods
+    - https://github.com/google/shaka-player/pull/3660
+  - Dispose of ad manager on player detach
+    - https://github.com/google/shaka-player/pull/3665
+  - Add ResizeObserver to CS ad manager
+    - https://github.com/google/shaka-player/pull/3652
+  - Avoid seeking on src when start time is 0
+    - https://github.com/google/shaka-player/issues/3518
+    - https://github.com/google/shaka-player/pull/3644
+  - Tolerate misaligned TS files
+    - https://github.com/google/shaka-player/issues/3580
+  - Fix stopping of Server Side Ad manager
+    - https://github.com/google/shaka-player/pull/3611
+  - Fix DRM workaround for Tizen and Xbox with ac-3 boxes
+    - https://github.com/google/shaka-player/issues/3589
+    - https://github.com/google/shaka-player/pull/3631
+  - Fix DRM workaround for Tizen and Xbox with avc3 boxes
+    - https://github.com/google/shaka-player/pull/3625
+  - Fix `BUFFER_READ_OUT_OF_BOUNDS` error when CEA caption packets are empty
+    - https://github.com/google/shaka-player/issues/3608
+    - https://github.com/google/shaka-player/pull/3609
+  - Fix error when un-storing DRM asset
+    - https://github.com/google/shaka-player/issues/3534
+  - Fix CC parsing of EPB and v1 TKHD boxes
+    - https://github.com/google/shaka-player/issues/3502
+    - https://github.com/google/shaka-player/pull/3610
+  - Always polyfill MediaCapabilities for Apple browsers
+    - https://github.com/google/shaka-player/pull/3588
+  - Add Support to iOS 12 in MediaCapabilities polyfill
+    - https://github.com/google/shaka-player/pull/3573
+  - Display captions with forward slashes
+    - https://github.com/google/shaka-player/issues/3555
+    - https://github.com/google/shaka-player/pull/3556
+  - Add support to file type in MediaCapabilities polyfill
+    - https://github.com/google/shaka-player/pull/3569
+  - Use "undetermined" for missing CC language
+  - Exit PiP when destroying UI
+    - https://github.com/google/shaka-player/issues/3553
+
+Docs:
+  - Add FAQ entry for common Vue problem
+    - https://github.com/google/shaka-player/issues/3155
+
+
 ## 3.1.2 (2021-07-14)
 
 Bugfixes:
