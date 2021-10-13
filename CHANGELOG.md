@@ -1,3 +1,39 @@
+## 3.0.14 (2021-10-13)
+
+Bugfixes:
+  - Fix video poster when autoplay is disabled
+    - https://github.com/google/shaka-player/pull/3645
+  - Fix tracking of active variant track in live streams
+  - Fix control panel alignment in UI
+    - https://github.com/google/shaka-player/pull/3650
+  - Export missing polyfill install methods
+    - https://github.com/google/shaka-player/pull/3660
+  - Dispose of ad manager on player detach
+    - https://github.com/google/shaka-player/pull/3665
+  - Add ResizeObserver to CS ad manager
+    - https://github.com/google/shaka-player/pull/3652
+  - Avoid seeking on src when start time is 0
+    - https://github.com/google/shaka-player/issues/3518
+    - https://github.com/google/shaka-player/pull/3644
+  - Tolerate misaligned TS files
+    - https://github.com/google/shaka-player/issues/3580
+  - Fix stopping of Server Side Ad manager
+    - https://github.com/google/shaka-player/pull/3611
+  - Fix DRM workaround for Tizen and Xbox with ac-3 boxes
+    - https://github.com/google/shaka-player/issues/3589
+    - https://github.com/google/shaka-player/pull/3631
+  - Fix DRM workaround for Tizen and Xbox with avc3 boxes
+    - https://github.com/google/shaka-player/pull/3625
+  - Fix error when un-storing DRM asset
+    - https://github.com/google/shaka-player/issues/3534
+  - Exit PiP when destroying UI
+    - https://github.com/google/shaka-player/issues/3553
+
+Docs:
+  - Add FAQ entry for common Vue problem
+    - https://github.com/google/shaka-player/issues/3155
+
+
 ## 3.0.13 (2021-07-14)
 
 Bugfixes:
