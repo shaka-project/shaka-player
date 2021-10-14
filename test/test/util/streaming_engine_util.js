@@ -259,7 +259,7 @@ shaka.test.StreamingEngineUtil = class {
       let initSegmentReference = null;
       if (initRange) {
         initSegmentReference = new shaka.media.InitSegmentReference(
-            () => [initSegmentUri], initRange[0], initRange[1]);
+            () => [initSegmentUri], initRange[0], initRange[1], null);
       }
 
       const d = segmentDurations[type];

@@ -460,6 +460,7 @@ describe('StreamingEngine', () => {
       onEvent: Util.spyFunc(onEvent),
       onManifestUpdate: Util.spyFunc(onManifestUpdate),
       onSegmentAppended: Util.spyFunc(onSegmentAppended),
+      onInitSegmentAppended: () => {},
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
@@ -2969,7 +2970,8 @@ describe('StreamingEngine', () => {
 
     it('doesn\'t abort if init segment is too large', async () => {
       const initSegmentReference =
-          new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 500);
+          new shaka.media.InitSegmentReference(
+              () => ['init-11.mp4'], 0, 500, null);
       await newVariant.video.createSegmentIndex();
       overrideInitSegment(newVariant.video, initSegmentReference);
 
@@ -2982,7 +2984,8 @@ describe('StreamingEngine', () => {
 
     it('still aborts with small init segment', async () => {
       const initSegmentReference =
-          new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 5);
+          new shaka.media.InitSegmentReference(
+              () => ['init-11.mp4'], 0, 5, null);
       await newVariant.video.createSegmentIndex();
       overrideInitSegment(newVariant.video, initSegmentReference);
 
@@ -2996,7 +2999,8 @@ describe('StreamingEngine', () => {
     it('aborts if we can finish the new one on time', async () => {
       // Very large init segment
       const initSegmentReference =
-          new shaka.media.InitSegmentReference(() => ['init-11.mp4'], 0, 5e6);
+          new shaka.media.InitSegmentReference(
+              () => ['init-11.mp4'], 0, 5e6, null);
       await newVariant.video.createSegmentIndex();
       overrideInitSegment(newVariant.video, initSegmentReference);
 

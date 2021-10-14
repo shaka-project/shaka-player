@@ -468,6 +468,45 @@ shaka.extern.ID3Metadata;
  */
 shaka.extern.TimelineRegionInfo;
 
+/**
+ * @typedef {{
+ *   bandwidth: number,
+ *   audioSamplingRate: ?number,
+ *   codecs: string,
+ *   contentType: string,
+ *   frameRate: ?number,
+ *   height: ?number,
+ *   mimeType: ?string,
+ *   numChannels: ?number,
+ *   pixelAspectRatio: ?string,
+ *   width: ?number
+ * }}
+ *
+ * @description
+ * Contains information about the quality of an audio or video media stream.
+ *
+ * @property {?number} width
+ *   The inherited width value.
+ * @property {?number} height
+ *   The inherited height value.
+ * @property {string} contentType
+ *   The inherited media type.
+ * @property {string} mimeType
+ *   The inherited MIME type value.
+ * @property {string} codecs
+ *   The inherited codecs value.
+ * @property {?number} frameRate
+ *   The inherited framerate value.
+ * @property {?string} pixelAspectRatio
+ *   The inherited pixel aspect ratio value.
+ * @property {?number} numChannels
+ *   The number of audio channels, or null if unknown.
+ * @property {?number} audioSamplingRate
+ *   Specifies the maximum sampling rate of the content, or null if unknown.
+ * @exportDoc
+ */
+shaka.extern.MediaQualityInfo;
+
 
 /**
  * @typedef {{

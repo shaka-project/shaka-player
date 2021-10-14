@@ -12,7 +12,8 @@ describe('SegmentReference', () => {
     const initSegmentReference = new shaka.media.InitSegmentReference(
         /* getUris= */ () => ['a', 'b'],
         /* startByte= */ 0,
-        /* endBytes= */ null);
+        /* endBytes= */ null,
+        null);
 
     const reference = new shaka.media.SegmentReference(
         /* startTime= */ 2,
@@ -42,7 +43,8 @@ describe('InitSegmentReference', () => {
     const reference = new shaka.media.InitSegmentReference(
         /* getUris= */ () => ['x', 'y'],
         /* startByte= */ 4,
-        /* endByte= */ 5);
+        /* endByte= */ 5,
+        null);
 
     expect(reference.getUris()).toEqual(['x', 'y']);
     expect(reference.getStartByte()).toBe(4);

@@ -661,7 +661,7 @@ shaka.test.ManifestGenerator.Stream = class {
     const getUris = () => uris;
     this.initSegmentReference_ =
         new this.manifest_.shaka_.media.InitSegmentReference(
-            getUris, startByte, endByte);
+            getUris, startByte, endByte, null);
   }
 
   /**
