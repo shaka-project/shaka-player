@@ -1954,6 +1954,49 @@ describe('DrmEngine', () => {
           [drmInfoAudio]);
       expect(returned).toEqual([drmInfoDesired]);
     });
+
+    it('dedupes the merged init data based on keyId matching', () => {
+      const serverCert = new Uint8Array(0);
+      const drmInfoVideo = {
+        keySystem: 'drm.abc',
+        licenseServerUri: 'http://abc.drm/license',
+        distinctiveIdentifierRequired: false,
+        persistentStateRequired: true,
+        videoRobustness: 'really_really_ridiculously_good',
+        serverCertificate: serverCert,
+        serverCertificateUri: '',
+        initData: [{keyId: 'v-init'}],
+        keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
+      };
+      const drmInfoAudio = {
+        keySystem: 'drm.abc',
+        licenseServerUri: undefined,
+        distinctiveIdentifierRequired: true,
+        persistentStateRequired: false,
+        audioRobustness: 'good',
+        serverCertificate: undefined,
+        serverCertificateUri: '',
+        initData: [{keyId: 'v-init'}, {keyId: 'a-init'}],
+        keyIds: new Set(['eadbeefdeadbeefdeadbeefdeadbeefd']),
+      };
+      const drmInfoDesired = {
+        keySystem: 'drm.abc',
+        licenseServerUri: 'http://abc.drm/license',
+        distinctiveIdentifierRequired: true,
+        persistentStateRequired: true,
+        audioRobustness: 'good',
+        videoRobustness: 'really_really_ridiculously_good',
+        serverCertificate: serverCert,
+        initData: [{keyId: 'v-init'}, {keyId: 'a-init'}],
+        keyIds: new Set([
+          'deadbeefdeadbeefdeadbeefdeadbeef',
+          'eadbeefdeadbeefdeadbeefdeadbeefd',
+        ]),
+      };
+      const returned = shaka.media.DrmEngine.getCommonDrmInfos([drmInfoVideo],
+          [drmInfoAudio]);
+      expect(returned).toEqual([drmInfoDesired]);
+    });
   }); // describe('getCommonDrmInfos')
 
   describe('configure', () => {
