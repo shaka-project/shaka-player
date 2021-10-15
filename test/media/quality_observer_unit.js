@@ -1,0 +1,139 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+goog.require('shaka.media.QualityObserver');
+goog.require('shaka.test.Util');
+
+
+describe('QualityObserver', () => {
+  /** @type {!shaka.media.QualityObserver} */
+  let observer;
+
+  /** @type {!jasmine.Spy} */
+  let onQualityChange;
+
+  const createQualityInfo = (contentType, bandwidth) => {
+    return {
+      bandwidth: bandwidth,
+      audioSamplingRate: 444000,
+      codecs: 'my codec',
+      contentType: contentType,
+      frameRate: 30,
+      height: 720,
+      mimeType: 'mime type',
+      numChannels: 2,
+      pixelAspectRatio: '1:1',
+      width: 1280,
+    };
+  };
+  let emptyBuffer = true;
+  let bufferStart = 0;
+  let bufferEnd = 0;
+
+  const quality1 = createQualityInfo('video', 1);
+  const quality2 = createQualityInfo('video', 2);
+
+  const getBufferedInfo = () => {
+    if (emptyBuffer) {
+      return {
+        video: [],
+      };
+    }
+    return {
+      video: [{start: bufferStart, end: bufferEnd}],
+    };
+  };
+
+  beforeEach(() => {
+    onQualityChange = jasmine.createSpy('onQualityChange');
+    observer = new shaka.media.QualityObserver(getBufferedInfo);
+    observer.setListeners(shaka.test.Util.spyFunc(onQualityChange));
+    emptyBuffer = true;
+    bufferStart = 0;
+    bufferEnd = 0;
+  });
+
+  it('does not call onQualityChange when there are no quality changes', () => {
+    observer.poll(10, false);
+    expect(onQualityChange).not.toHaveBeenCalled();
+  });
+
+  it('calls onQualityChange when position is after 1st quality change', () => {
+    observer.addMediaQualityChange(quality1, 10);
+    emptyBuffer = false;
+    bufferStart = 10;
+    bufferEnd = 20;
+    observer.poll(10, false);
+    expect(onQualityChange).toHaveBeenCalledWith(quality1);
+  });
+
+  it('does not call onQualityChange when pos advances with no change', () => {
+    observer.addMediaQualityChange(quality1, 10);
+    emptyBuffer = false;
+    bufferStart = 10;
+    bufferEnd = 20;
+    observer.poll(10, false);
+    expect(onQualityChange).toHaveBeenCalledWith(quality1);
+    observer.poll(11, false);
+    expect(onQualityChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call onQualityChange on seek to unbuffered position', () => {
+    observer.addMediaQualityChange(quality1, 10);
+    emptyBuffer = false;
+    bufferStart = 10;
+    bufferEnd = 20;
+    observer.poll(15, false);
+    expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality1]);
+    observer.addMediaQualityChange(quality2, 20);
+    observer.poll(25, true);
+    expect(onQualityChange).not.toHaveBeenCalledOnceMore();
+    bufferEnd = 30;
+    observer.poll(26, false);
+    expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2]);
+  });
+
+  it('calls onQualityChange when position advances over 2nd quality change',
+      () => {
+        observer.addMediaQualityChange(quality1, 10);
+        emptyBuffer = false;
+        bufferStart = 10;
+        bufferEnd = 20;
+        observer.poll(10, false);
+        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality1]);
+        observer.addMediaQualityChange(quality2, 20);
+        bufferStart = 10;
+        bufferEnd = 30;
+        observer.poll(20, false);
+        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2]);
+      });
+
+  it('calls onQualityChange when position moves back over a quality chanage',
+      () => {
+        observer.addMediaQualityChange(quality1, 10);
+        emptyBuffer = false;
+        bufferStart = 10;
+        bufferEnd = 20;
+        observer.addMediaQualityChange(quality2, 20);
+        bufferStart = 10;
+        bufferEnd = 30;
+        observer.poll(25, false);
+        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2]);
+        observer.poll(15, false);
+        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality1]);
+      });
+
+  it('uses last applied quality when there are two at the same position',
+      () => {
+        observer.addMediaQualityChange(quality1, 10);
+        observer.addMediaQualityChange(quality2, 10);
+        emptyBuffer = false;
+        bufferStart = 10;
+        bufferEnd = 20;
+        observer.poll(15, false);
+        expect(onQualityChange).toHaveBeenCalledWith(quality2);
+      });
+});
