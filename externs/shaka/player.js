@@ -470,8 +470,8 @@ shaka.extern.TimelineRegionInfo;
 
 /**
  * @typedef {{
- *   bandwidth: number,
  *   audioSamplingRate: ?number,
+ *   bandwidth: number,
  *   codecs: string,
  *   contentType: string,
  *   frameRate: ?number,
@@ -485,24 +485,26 @@ shaka.extern.TimelineRegionInfo;
  * @description
  * Contains information about the quality of an audio or video media stream.
  *
- * @property {?number} width
- *   The inherited width value.
- * @property {?number} height
- *   The inherited height value.
- * @property {string} contentType
- *   The inherited media type.
- * @property {string} mimeType
- *   The inherited MIME type value.
+ * @property {?number} audioSamplingRate
+ *   The audio sampling rate.
+ * @property {number} bandwidth
+ *   The bandwidth in bits per second.
  * @property {string} codecs
- *   The inherited codecs value.
+ *   The codecs value
+ * @property {string} contentType
+ *   The type of content, which may be "video" or "audio".
  * @property {?number} frameRate
- *   The inherited framerate value.
- * @property {?string} pixelAspectRatio
- *   The inherited pixel aspect ratio value.
+ *   The video frame rate.
+ * @property {?number} height
+ *   The video height in pixels.
+ * @property {string} mimeType
+ *   The MIME type.
  * @property {?number} numChannels
  *   The number of audio channels, or null if unknown.
- * @property {?number} audioSamplingRate
- *   Specifies the maximum sampling rate of the content, or null if unknown.
+ * @property {?string} pixelAspectRatio
+ *   The pixel aspect ratio value; e.g "1:1".
+ * @property {?number} width
+ *   The video width in pixels.
  * @exportDoc
  */
 shaka.extern.MediaQualityInfo;

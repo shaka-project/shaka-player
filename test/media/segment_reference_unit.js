@@ -12,8 +12,7 @@ describe('SegmentReference', () => {
     const initSegmentReference = new shaka.media.InitSegmentReference(
         /* getUris= */ () => ['a', 'b'],
         /* startByte= */ 0,
-        /* endBytes= */ null,
-        null);
+        /* endBytes= */ null);
 
     const reference = new shaka.media.SegmentReference(
         /* startTime= */ 2,
@@ -39,15 +38,29 @@ describe('SegmentReference', () => {
 });
 
 describe('InitSegmentReference', () => {
+  const mediaQuality = {
+    bandwidth: 1,
+    audioSamplingRate: 444000,
+    codecs: 'my codec',
+    contentType: 'video',
+    frameRate: 30,
+    height: 720,
+    mimeType: 'mime type',
+    numChannels: 2,
+    pixelAspectRatio: '1:1',
+    width: 1280,
+  };
+
   it('returns in getters values from constructor parameters', () => {
     const reference = new shaka.media.InitSegmentReference(
         /* getUris= */ () => ['x', 'y'],
         /* startByte= */ 4,
         /* endByte= */ 5,
-        null);
+        mediaQuality);
 
     expect(reference.getUris()).toEqual(['x', 'y']);
     expect(reference.getStartByte()).toBe(4);
     expect(reference.getEndByte()).toBe(5);
+    expect(reference.getMediaQuality()).toBe(mediaQuality);
   });
 });

@@ -1470,7 +1470,7 @@ filterDescribe('Storage', storageSupport, () => {
     goog.asserts.assert(stream, 'The first stream should exist');
     stream.encrypted = true;
     const init = new shaka.media.InitSegmentReference(
-        () => [initSegmentUri], 0, null, null);
+        () => [initSegmentUri], 0, null);
     const refs = [
       makeReference(segment1Uri, 0, 1),
       makeReference(segment2Uri, 1, 2),
@@ -1486,7 +1486,7 @@ filterDescribe('Storage', storageSupport, () => {
     goog.asserts.assert(streamAlt, 'The second stream should exist');
     streamAlt.encrypted = true;
     const initAlt = new shaka.media.InitSegmentReference(
-        () => [alternateInitSegmentUri], 0, null, null);
+        () => [alternateInitSegmentUri], 0, null);
     const refsAlt = [
       makeReference(alternateSegment1Uri, 0, 1),
       makeReference(alternateSegment2Uri, 1, 2),
