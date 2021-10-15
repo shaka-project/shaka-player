@@ -622,7 +622,7 @@ describe('StreamingEngine', () => {
         const getUris = () => {
           return ['0_' + type + '_init'];
         };
-        return new shaka.media.InitSegmentReference(getUris, 0, null, null);
+        return new shaka.media.InitSegmentReference(getUris, 0, null);
       }
 
       const videoInit = createInit('video');
