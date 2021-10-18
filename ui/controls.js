@@ -894,6 +894,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
     shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
+    this.eventManager_.listen(this.clientAdContainer_, 'click', () => {
+      this.onContainerClick_();
+    });
     this.videoContainer_.appendChild(this.clientAdContainer_);
   }
 
