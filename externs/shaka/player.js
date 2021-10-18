@@ -798,7 +798,8 @@ shaka.extern.ManifestConfiguration;
  *   autoLowLatencyMode: boolean,
  *   forceHTTPS: boolean,
  *   preferNativeHls: boolean,
- *   updateIntervalSeconds: number
+ *   updateIntervalSeconds: number,
+ *   dispatchAllEmsgBoxes: boolean
  * }}
  *
  * @description
@@ -907,6 +908,8 @@ shaka.extern.ManifestConfiguration;
  *   If true, prefer native HLS playback when possible, regardless of platform.
  * @property {number} updateIntervalSeconds
  *   The minimum number of seconds to see if the manifest has changes.
+ * @property {boolean} dispatchAllEmsgBoxes
+ *   If true, all emsg boxes are parsed and dispatched.
  *
  * @exportDoc
  */

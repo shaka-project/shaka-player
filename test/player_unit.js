@@ -36,7 +36,7 @@ describe('Player', () => {
   const originalLogWarn = shaka.log.warning;
   const originalLogAlwaysWarn = shaka.log.alwaysWarn;
   const originalIsTypeSupported = window.MediaSource.isTypeSupported;
-  const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
+  const originalDecodingInfo = window.shakaMediaCapabilities.decodingInfo;
 
   const fakeManifestUri = 'fake-manifest-uri';
   const fakeMimeType = 'application/test';
@@ -93,7 +93,7 @@ describe('Player', () => {
     // Since this is not an integration test, we don't want MediaCapabilities to
     // fail assertions based on browser support for types.  Pretend that all
     // video and audio types are supported.
-    navigator.mediaCapabilities.decodingInfo = async (config) => {
+    window.shakaMediaCapabilities.decodingInfo = async (config) => {
       await Promise.resolve();
       const videoType = config['video'] ?
           config['video'].contentType.split('/')[0] : null;
@@ -177,7 +177,7 @@ describe('Player', () => {
       shaka.log.alwaysWarn = originalLogAlwaysWarn;
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
       shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
-      navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
+      window.shakaMediaCapabilities.decodingInfo = originalDecodingInfo;
     }
   });
 
@@ -2463,7 +2463,7 @@ describe('Player', () => {
     it('throws CONTENT_UNSUPPORTED_BY_BROWSER', async () => {
       window.MediaSource.isTypeSupported = (mimeType) => false;
 
-      navigator.mediaCapabilities.decodingInfo = async (config) => {
+      window.shakaMediaCapabilities.decodingInfo = async (config) => {
         await Promise.resolve();
         return {supported: false};
       };
@@ -2827,7 +2827,7 @@ describe('Player', () => {
         });
       });
 
-      navigator.mediaCapabilities.decodingInfo = async (config) => {
+      window.shakaMediaCapabilities.decodingInfo = async (config) => {
         await Promise.resolve();
         const videoType = config['video'] ? config['video'].contentType : '';
         if (videoType.includes('video') &&

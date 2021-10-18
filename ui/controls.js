@@ -740,7 +740,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.adPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.adPanel_.classList.add('shaka-ad-controls');
-    shaka.ui.Utils.setDisplay(this.adPanel_, this.ad_ != null);
+    const showAdPanel = this.ad_ != null && this.ad_.isLinear();
+    shaka.ui.Utils.setDisplay(this.adPanel_, showAdPanel);
     this.bottomControls_.appendChild(this.adPanel_);
 
     const adPosition = new shaka.ui.AdPosition(this.adPanel_, this);
@@ -884,7 +885,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * Adds a container for server side ad UI with IMA SDK.
+   * Adds a container for client side ad UI with IMA SDK.
    *
    * @private
    */
@@ -893,6 +894,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
     shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
+    this.eventManager_.listen(this.clientAdContainer_, 'click', () => {
+      this.onContainerClick_();
+    });
     this.videoContainer_.appendChild(this.clientAdContainer_);
   }
 
@@ -1131,7 +1135,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // recent mouse movement, we're in keyboard navigation, or one of a special
     // class of elements is hovered.
     if (adIsPaused ||
-        (!this.ad_ && videoIsPaused) ||
+        ((!this.ad_ || !this.ad_.isLinear()) && videoIsPaused) ||
         this.recentMouseMovement_ ||
         keyboardNavigationMode ||
         this.isHovered_()) {
@@ -1182,7 +1186,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onPlayPauseClick_() {
-    if (this.ad_) {
+    if (this.ad_ && this.ad_.isLinear()) {
       this.playPauseAd();
     } else {
       this.playPausePresentation();

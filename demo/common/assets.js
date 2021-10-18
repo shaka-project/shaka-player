@@ -58,6 +58,10 @@ shakaAssets.AdTag = {
     'single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&' +
     'unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%' +
     '3Dlinear&correlator=',
+  SINGLE_NON_LINEAR_AD: 'https://pubads.g.doubleclick.net/gampad/ads?' +
+    'sz=480x70&iu=/124319096/external/single_ad_samples&ciu_szs=300x250 ' +
+    '&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1' +
+    '&cust_params=deployment%3Ddevsite%26sample_ct%3Dnonlinear&correlator=',
   SINGLE_SKIPPABLE_AD: 'https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/' +
     '124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&' +
     'gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=' +
@@ -308,6 +312,20 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.SHAKA)
       .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
       .setAdTagUri(shakaAssets.AdTag.SINGLE_LINEAR_AD)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)
+      .addFeature(shakaAssets.Feature.SUBTITLES)
+      .addFeature(shakaAssets.Feature.SURROUND)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addLicenseServer('com.widevine.alpha', 'https://cwip-shaka-proxy.appspot.com/no_auth'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Angel One (HLS, MP4, multilingual, Widevine, single non-linear ad)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addKeySystem(shakaAssets.KeySystem.WIDEVINE)
+      .setAdTagUri(shakaAssets.AdTag.SINGLE_NON_LINEAR_AD)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.MULTIPLE_LANGUAGES)

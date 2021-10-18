@@ -60,7 +60,9 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 
     this.eventManager.listen(
         this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
-          shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
+          if (this.ad && this.ad.isLinear()) {
+            shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
+          }
         });
 
     this.eventManager.listen(
@@ -89,7 +91,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 
     this.updateAriaLabel_();
 
-    if (this.ad) {
+    if (this.ad && this.ad.isLinear()) {
       // There was already an ad.
       shaka.ui.Utils.setDisplay(this.overflowMenuButton_, false);
     }
