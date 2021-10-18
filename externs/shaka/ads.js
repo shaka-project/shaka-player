@@ -208,6 +208,11 @@ shaka.extern.IAd = class {
   setMuted(muted) {}
 
   /**
+   * @return {boolean}
+   */
+  isLinear() {}
+
+  /**
    * @param {number} width
    * @param {number} height
    */

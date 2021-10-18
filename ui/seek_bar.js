@@ -95,7 +95,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     this.eventManager.listen(
         this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
-          shaka.ui.Utils.setDisplay(this.container, false);
+          if (!this.shouldBeDisplayed_()) {
+            shaka.ui.Utils.setDisplay(this.container, false);
+          }
         });
 
     this.eventManager.listen(
@@ -366,7 +368,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       return false;
     }
 
-    return this.ad == null;
+    return this.ad == null || !this.ad.isLinear();
   }
 
   /** @private */
