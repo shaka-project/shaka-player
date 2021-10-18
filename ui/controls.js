@@ -885,7 +885,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * Adds a container for server side ad UI with IMA SDK.
+   * Adds a container for client side ad UI with IMA SDK.
    *
    * @private
    */
