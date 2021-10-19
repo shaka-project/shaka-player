@@ -291,6 +291,10 @@
     "description": "Text that describes an asset that is protected with the Fairplay Digital Rights Management system.",
     "message": "[PROPER_NAME:Fairplay] [JARGON:DRM]"
   },
+  "DEMO_FAST_HALF_LIFE": {
+    "description": "The name of a configuration value.",
+    "message": "Fast half life"
+  },
   "DEMO_FORCE_HTTPS": {
     "description": "The name of a configuration value.",
     "message": "Force [JARGON:HTTPS]"
@@ -555,6 +559,10 @@
     "description": "The name of a configuration value.",
     "message": "Min Bandwidth"
   },
+  "DEMO_MIN_BYTES": {
+    "description": "The name of a configuration value.",
+    "message": "Min Bytes"
+  },
   "DEMO_MIN_FRAMERATE": {
     "description": "The name of a configuration value.",
     "message": "Min Framerate"
@@ -566,6 +574,10 @@
   "DEMO_MIN_PIXELS": {
     "description": "The name of a configuration value.",
     "message": "Min Pixels"
+  },
+  "DEMO_MIN_TOTAL_BYTES": {
+    "description": "The name of a configuration value.",
+    "message": "Min total Bytes"
   },
   "DEMO_MIN_WIDTH": {
     "description": "The name of a configuration value.",
@@ -694,6 +706,10 @@
   "DEMO_SHAKA": {
     "description": "Text that describes an asset that comes from the Shaka Player asset library.",
     "message": "[PROPER_NAME:Shaka]"
+  },
+  "DEMO_SLOW_HALF_LIFE": {
+    "description": "The name of a configuration value.",
+    "message": "Slow half life"
   },
   "DEMO_SHAKA_CONTROLS": {
     "description": "The name of a configuration value.",
