@@ -261,11 +261,9 @@ shakaDemo.Config = class {
             'abr.switchInterval',
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.MIN_TOTAL_BYTES,
-            'abr.advanced.minTotalBytes',
-            /* canBeDecimal= */ true)
+            'abr.advanced.minTotalBytes')
         .addNumberInput_(MessageIds.MIN_BYTES,
-            'abr.advanced.minBytes',
-            /* canBeDecimal= */ true)
+            'abr.advanced.minBytes')
         .addNumberInput_(MessageIds.FAST_HALF_LIFE,
             'abr.advanced.fastHalfLife',
             /* canBeDecimal= */ true)
