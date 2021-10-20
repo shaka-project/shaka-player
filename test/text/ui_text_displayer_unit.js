@@ -84,20 +84,16 @@ describe('UITextDisplayer', () => {
     // Wait until updateCaptions_() gets called.
     await shaka.test.Util.delay(0.5);
 
-    const textContainer =
-        videoContainer.querySelector('.shaka-text-container');
-    const captions =
-        textContainer.querySelector('span:not(.shaka-text-wrapper)');
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('div');
     const cssObj = parseCssText(captions.style.cssText);
 
     const expectCssObj = {
       'color': 'green',
-      'background-color': 'black',
       'direction': 'ltr',
       'font-size': '10px',
       'font-style': 'normal',
       'font-weight': 400,
-      'line-height': 2,
       'text-align': 'center',
     };
 
@@ -114,6 +110,8 @@ describe('UITextDisplayer', () => {
     }
 
     expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
+    expect(parseCssText(textContainer.querySelector('span').style.cssText))
+        .toEqual(jasmine.objectContaining({'background-color': 'black'}));
   });
 
   it('correctly displays styles for nested cues', async () => {
@@ -137,15 +135,13 @@ describe('UITextDisplayer', () => {
     await shaka.test.Util.delay(0.5);
 
     // Verify styles applied to the nested cues.
-    const textContainer =
-        videoContainer.querySelector('.shaka-text-container');
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
     const captions =
         textContainer.querySelector('span:not(.shaka-text-wrapper)');
     const cssObj = parseCssText(captions.style.cssText);
 
     const expectCssObj = {
       'color': 'green',
-      'background-color': 'black',
       'font-size': '10px',
       'font-style': 'normal',
       'font-weight': 400,
@@ -165,6 +161,8 @@ describe('UITextDisplayer', () => {
     }
 
     expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
+    expect(parseCssText(captions.querySelector('span').style.cssText))
+        .toEqual(jasmine.objectContaining({'background-color': 'black'}));
   });
 
   it('correctly displays styles for cellResolution units', async () => {
@@ -191,10 +189,8 @@ describe('UITextDisplayer', () => {
     // style.
     const expectedLinePadding = '11.25px';
 
-    const textContainer =
-        videoContainer.querySelector('.shaka-text-container');
-    const captions =
-        textContainer.querySelector('span:not(.shaka-text-wrapper)');
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('div');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({
@@ -222,10 +218,8 @@ describe('UITextDisplayer', () => {
     // videoContainerHeight=450px and tts:fontSize="90%" on the default style.
     const expectedFontSize = '27px';
 
-    const textContainer =
-        videoContainer.querySelector('.shaka-text-container');
-    const captions =
-        textContainer.querySelector('span:not(.shaka-text-wrapper)');
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('div');
     const cssObj = parseCssText(captions.style.cssText);
     expect(cssObj).toEqual(
         jasmine.objectContaining({'font-size': expectedFontSize}));
