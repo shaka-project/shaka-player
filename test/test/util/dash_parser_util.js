@@ -46,6 +46,8 @@ shaka.test.Dash = class {
 
     const playerInterface = {
       networkingEngine: networkingEngine,
+      modifyManifestRequest: (request, manifestInfo) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
       filter: () => {},
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
@@ -78,6 +80,8 @@ shaka.test.Dash = class {
 
     const playerInterface = {
       networkingEngine: networkingEngine,
+      modifyManifestRequest: (request, manifestInfo) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
       filter: () => {},
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
