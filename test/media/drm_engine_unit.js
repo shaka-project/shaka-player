@@ -31,7 +31,7 @@ describe('DrmEngine', () => {
       navigator.requestMediaKeySystemAccess;
   const originalLogError = shaka.log.error;
   const originalBatchTime = shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME;
-  const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
+  const originalDecodingInfo = window.shakaMediaCapabilities.decodingInfo;
 
   /** @type {!jasmine.Spy} */
   let decodingInfoSpy;
@@ -76,7 +76,7 @@ describe('DrmEngine', () => {
 
   beforeEach(() => {
     decodingInfoSpy = jasmine.createSpy('decodingInfo');
-    navigator.mediaCapabilities.decodingInfo =
+    window.shakaMediaCapabilities.decodingInfo =
         shaka.test.Util.spyFunc(decodingInfoSpy);
 
     logErrorSpy = jasmine.createSpy('shaka.log.error');
@@ -153,7 +153,7 @@ describe('DrmEngine', () => {
 
     navigator.requestMediaKeySystemAccess =
         originalRequestMediaKeySystemAccess;
-    navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
+    window.shakaMediaCapabilities.decodingInfo = originalDecodingInfo;
     shaka.log.error = originalLogError;
   });
 
@@ -2143,6 +2143,50 @@ describe('DrmEngine', () => {
         serverCertificate: serverCert,
         serverCertificateUri: '',
         initData: ['blah', 'init data'],
+        keyIds: new Set([
+          'deadbeefdeadbeefdeadbeefdeadbeef',
+          'eadbeefdeadbeefdeadbeefdeadbeefd',
+        ]),
+      };
+      const returned = shaka.media.DrmEngine.getCommonDrmInfos([drmInfoVideo],
+          [drmInfoAudio]);
+      expect(returned).toEqual([drmInfoDesired]);
+    });
+
+    it('dedupes the merged init data based on keyId matching', () => {
+      const serverCert = new Uint8Array(0);
+      const drmInfoVideo = {
+        keySystem: 'drm.abc',
+        licenseServerUri: 'http://abc.drm/license',
+        distinctiveIdentifierRequired: false,
+        persistentStateRequired: true,
+        videoRobustness: 'really_really_ridiculously_good',
+        serverCertificate: serverCert,
+        serverCertificateUri: '',
+        initData: [{keyId: 'v-init'}],
+        keyIds: new Set(['deadbeefdeadbeefdeadbeefdeadbeef']),
+      };
+      const drmInfoAudio = {
+        keySystem: 'drm.abc',
+        licenseServerUri: undefined,
+        distinctiveIdentifierRequired: true,
+        persistentStateRequired: false,
+        audioRobustness: 'good',
+        serverCertificate: undefined,
+        serverCertificateUri: '',
+        initData: [{keyId: 'v-init'}, {keyId: 'a-init'}],
+        keyIds: new Set(['eadbeefdeadbeefdeadbeefdeadbeefd']),
+      };
+      const drmInfoDesired = {
+        keySystem: 'drm.abc',
+        licenseServerUri: 'http://abc.drm/license',
+        distinctiveIdentifierRequired: true,
+        persistentStateRequired: true,
+        audioRobustness: 'good',
+        videoRobustness: 'really_really_ridiculously_good',
+        serverCertificate: serverCert,
+        serverCertificateUri: '',
+        initData: [{keyId: 'v-init'}, {keyId: 'a-init'}],
         keyIds: new Set([
           'deadbeefdeadbeefdeadbeefdeadbeef',
           'eadbeefdeadbeefdeadbeefdeadbeefd',

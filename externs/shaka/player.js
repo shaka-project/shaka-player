@@ -798,7 +798,8 @@ shaka.extern.ManifestConfiguration;
  *   autoLowLatencyMode: boolean,
  *   forceHTTPS: boolean,
  *   preferNativeHls: boolean,
- *   updateIntervalSeconds: number
+ *   updateIntervalSeconds: number,
+ *   dispatchAllEmsgBoxes: boolean
  * }}
  *
  * @description
@@ -907,6 +908,8 @@ shaka.extern.ManifestConfiguration;
  *   If true, prefer native HLS playback when possible, regardless of platform.
  * @property {number} updateIntervalSeconds
  *   The minimum number of seconds to see if the manifest has changes.
+ * @property {boolean} dispatchAllEmsgBoxes
+ *   If true, all emsg boxes are parsed and dispatched.
  *
  * @exportDoc
  */
@@ -921,7 +924,8 @@ shaka.extern.StreamingConfiguration;
  *   restrictions: shaka.extern.Restrictions,
  *   switchInterval: number,
  *   bandwidthUpgradeTarget: number,
- *   bandwidthDowngradeTarget: number
+ *   bandwidthDowngradeTarget: number,
+ *   advanced: shaka.extern.AdvancedAbrConfiguration
  * }}
  *
  * @property {boolean} enabled
@@ -949,9 +953,41 @@ shaka.extern.StreamingConfiguration;
  * @property {number} bandwidthDowngradeTarget
  *   The largest fraction of the estimated bandwidth we should use. We should
  *   downgrade to avoid this.
+ * @property {shaka.extern.AdvancedAbrConfiguration} advanced
+ *   Advanced ABR configuration.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
+
+
+/**
+ * @typedef {{
+ *   minTotalBytes: number,
+ *   minBytes: number,
+ *   fastHalfLife: number,
+ *   slowHalfLife: number
+ * }}
+ *
+ * @property {number} minTotalBytes
+ *   Minimum number of bytes sampled before we trust the estimate.  If we have
+ *   not sampled much data, our estimate may not be accurate enough to trust.
+ * @property {number} minBytes
+ *   Minimum number of bytes, under which samples are discarded.  Our models
+ *   do not include latency information, so connection startup time (time to
+ *   first byte) is considered part of the download time.  Because of this, we
+ *   should ignore very small downloads which would cause our estimate to be
+ *   too low.
+ * @property {number} fastHalfLife
+ *   The quantity of prior samples (by weight) used when creating a new
+ *   estimate, in seconds.  Those prior samples make up half of the
+ *   new estimate.
+ * @property {number} slowHalfLife
+ *   The quantity of prior samples (by weight) used when creating a new
+ *   estimate, in seconds.  Those prior samples make up half of the
+ *   new estimate.
+ * @exportDoc
+ */
+shaka.extern.AdvancedAbrConfiguration;
 
 
 /**

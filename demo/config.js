@@ -260,6 +260,16 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.SWITCH_INTERVAL,
             'abr.switchInterval',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.MIN_TOTAL_BYTES,
+            'abr.advanced.minTotalBytes')
+        .addNumberInput_(MessageIds.MIN_BYTES,
+            'abr.advanced.minBytes')
+        .addNumberInput_(MessageIds.FAST_HALF_LIFE,
+            'abr.advanced.fastHalfLife',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.SLOW_HALF_LIFE,
+            'abr.advanced.slowHalfLife',
             /* canBeDecimal= */ true);
     this.addRetrictionsSection_('abr',
         MessageIds.ADAPTATION_RESTRICTIONS_SECTION_HEADER);
@@ -378,7 +388,9 @@ shakaDemo.Config = class {
             'streaming.preferNativeHls')
         .addNumberInput_(MessageIds.UPDATE_INTERVAL_SECONDS,
             'streaming.updateIntervalSeconds',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_(MessageIds.DISPATCH_ALL_EMSG_BOXES,
+            'streaming.dispatchAllEmsgBoxes');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
