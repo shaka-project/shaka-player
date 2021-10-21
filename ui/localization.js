@@ -130,28 +130,20 @@ shaka.ui.Localization = class {
         (locale) => !this.localizations_.has(locale));
 
     if (missing.length) {
-      /** @type {shaka.ui.Localization.UnknownLocalesEvent} */
-      const eMissing = {
-        'locales': missing,
-      };
-
       this.events_.dispatchEvent(new shaka.util.FakeEvent(
           Class.UNKNOWN_LOCALES,
-          eMissing));
+          (new Map()).set('locales', missing)));
     }
 
     const found = shaka.util.Iterables.filter(
         this.currentLocales_,
         (locale) => this.localizations_.has(locale));
 
-    /** @type {shaka.ui.Localization.LocaleChangedEvent} */
-    const eFound = {
-      'locales': found.length ? found : [this.fallbackLocale_],
-    };
-
+    const data = (new Map()).set(
+        'locales', found.length ? found : [this.fallbackLocale_]);
     this.events_.dispatchEvent(new shaka.util.FakeEvent(
         Class.LOCALE_CHANGED,
-        eFound));
+        data));
   }
 
   /**
@@ -253,14 +245,11 @@ shaka.ui.Localization = class {
     // number of locales. Since we don't know which ones we actually checked,
     // just tell them the preferred locale.
 
-    /** @type {shaka.ui.Localization.UnknownLocalizationEvent} */
-    const e = {
-      // Make a copy to avoid leaking references.
-      'locales': Array.from(this.currentLocales_),
-      'missing': id,
-    };
-
-    this.events_.dispatchEvent(new FakeEvent(Class.UNKNOWN_LOCALIZATION, e));
+    const data = new Map()
+        // Make a copy to avoid leaking references.
+        .set('locales', Array.from(this.currentLocales_))
+        .set('missing', id);
+    this.events_.dispatchEvent(new FakeEvent(Class.UNKNOWN_LOCALIZATION, data));
 
     return '';
   }
@@ -381,18 +370,16 @@ shaka.ui.Localization = class {
     }
 
     if (missing.size > 0) {
-      /** @type {shaka.ui.Localization.MissingLocalizationsEvent} */
-      const e = {
-        // Make a copy of the preferred locales to avoid leaking references.
-        'locales': Array.from(preferredLocales),
-        // Because most people like arrays more than sets, convert the set to
-        // an array.
-        'missing': Array.from(missing),
-      };
+      const data = new Map()
+          // Make a copy of the preferred locales to avoid leaking references.
+          .set('locales', Array.from(preferredLocales))
+          // Because more people like arrays more than sets, convert the set to
+          // an array.
+          .set('missing', Array.from(missing));
 
       this.events_.dispatchEvent(new shaka.util.FakeEvent(
           shaka.ui.Localization.MISSING_LOCALIZATIONS,
-          e));
+          data));
     }
   }
 
@@ -478,52 +465,42 @@ shaka.ui.Localization.LOCALE_CHANGED = 'locale-changed';
 shaka.ui.Localization.LOCALE_UPDATED = 'locale-updated';
 
 /**
- * @typedef {{
- *   'locales': !Array.<string>
- * }}
- *
+ * @event shaka.ui.Localization.UnknownLocalesEvent
+ * @property {string} type
+ *   'unknown-locales'
  * @property {!Array.<string>} locales
  *    The locales that the user wanted but could not be found.
  * @exportDoc
  */
-shaka.ui.Localization.UnknownLocalesEvent;
 
 /**
- * @typedef {{
- *   'locales': !Array.<string>,
- *   'missing': string
- * }}
- *
+ * @event shaka.ui.Localization.MissingLocalizationsEvent
+ * @property {string} type
+ *   'unknown-localization'
  * @property {!Array.<string>} locales
  *    The locales that the user wanted.
  * @property {string} missing
  *    The id of the unknown entry.
  * @exportDoc
  */
-shaka.ui.Localization.UnknownLocalizationEvent;
 
 /**
- * @typedef {{
- *   'locales': !Array.<string>,
- *   'missing': !Array.<string>
- * }}
- *
+ * @event shaka.ui.Localization.MissingLocalizationsEvent
+ * @property {string} type
+ *   'missing-localizations'
  * @property {string} locale
  *    The locale that the user wanted.
  * @property {!Array.<string>} missing
  *    The ids of the missing entries.
  * @exportDoc
  */
-shaka.ui.Localization.MissingLocalizationsEvent;
 
 /**
- * @typedef {{
- *   'locales': !Array.<string>
- * }}
- *
+ * @event shaka.ui.Localization.LocaleChangedEvent
+ * @property {string} type
+ *   'locale-changed'
  * @property {!Array.<string>} locales
  *    The new set of locales that user wanted,
  *    and that were successfully found.
  * @exportDoc
  */
-shaka.ui.Localization.LocaleChangedEvent;
