@@ -551,9 +551,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         await this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
       } catch (error) {
-        this.dispatchEvent(new shaka.util.FakeEvent('error', {
-          detail: error,
-        }));
+        this.dispatchEvent(new shaka.util.FakeEvent(
+            'error', (new Map()).set('detail', error)));
       }
     }
   }
@@ -1132,9 +1131,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   onCastStatusChange_() {
     const isCasting = this.castProxy_.isCasting();
-    this.dispatchEvent(new shaka.util.FakeEvent('caststatuschanged', {
-      newStatus: isCasting,
-    }));
+    this.dispatchEvent(new shaka.util.FakeEvent(
+        'caststatuschanged', (new Map()).set('newStatus', isCasting)));
 
     if (isCasting) {
       this.controlsContainer_.setAttribute('casting', 'true');

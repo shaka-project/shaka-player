@@ -129,9 +129,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
         await document.exitPictureInPicture();
       }
     } catch (error) {
-      this.controls.dispatchEvent(new shaka.util.FakeEvent('error', {
-        detail: error,
-      }));
+      this.controls.dispatchEvent(new shaka.util.FakeEvent(
+          'error', (new Map()).set('detail', error)));
     }
   }
 
