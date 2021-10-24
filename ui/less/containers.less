@@ -303,12 +303,15 @@
   transition-delay: 500ms;
 
   /* These are defaults which are overridden by JS or cue styles. */
+  span:not(.shaka-text-wrapper, .shaka-text-wrapper span) {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: rgb(255, 255, 255);
+  }
+
   span:not(.shaka-text-wrapper) {
     display: inline;
     font-size: 20px;
     line-height: 1.4;  // relative to font size.
-    background-color: rgba(0, 0, 0, 0.8);
-    color: rgb(255, 255, 255);
   }
 
   span.shaka-text-wrapper {
