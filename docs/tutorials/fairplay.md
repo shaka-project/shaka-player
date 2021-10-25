@@ -31,7 +31,7 @@ player.configure('drm.initDataTransform', (initData, initDataType) => {
 
   // 'initData' is a buffer containing an 'skd://' URL as a UTF-8 string.
   const skdUri = shaka.util.StringUtils.fromBytesAutoDetect(initData);
-  const contentId = getMyContentId(sdkUri);
+  const contentId = getMyContentId(skdUri);
   const cert = player.drmInfo().serverCertificate;
   return shaka.util.FairPlayUtils.initDataTransform(initData, contentId, cert);
 });
