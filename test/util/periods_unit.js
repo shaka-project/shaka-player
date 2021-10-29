@@ -446,44 +446,51 @@ describe('PeriodCombiner', () => {
   it('Filters out duplicate streams', async () => {
     // v1 and v3 are duplicates
     const v1 = makeVideoStream(1280);
+    v1.id = 1;
     v1.frameRate = 30000/1001;
-    v1.originalId = 'v1';
+    v1.originalId = 'video/1280';
     v1.bandwidth = 6200000;
 
     const v2 = makeVideoStream(1920);
+    v2.id = 2;
     v2.frameRate = 30000/1001;
-    v2.originalId = 'v2';
+    v2.originalId = 'video/1920';
     v2.bandwidth = 8000000;
 
     const v3 = makeVideoStream(1280);
+    v3.id = 3;
     v3.frameRate = 30000/1001;
-    v3.originalId = 'v3';
+    v3.originalId = 'video/1280';
     v3.bandwidth = 6200000;
 
     // a1 and a2 are duplicates.
     const a1 = makeAudioStream('en', /* channels= */ 2);
-    a1.originalId = 'a1';
+    a1.id = 1;
+    a1.originalId = 'audio/65106';
     a1.bandwidth = 65106;
     a1.roles = ['role1', 'role2'];
     a1.codecs = 'mp4a.40.2';
 
     const a2 = makeAudioStream('en', /* channels= */ 2);
-    a2.originalId = 'a2';
+    a2.id = 2;
+    a2.originalId = 'audio/65106';
     a2.bandwidth = 65106;
     a2.roles = ['role1', 'role2'];
     a2.codecs = 'mp4a.40.2';
 
     const a3 = makeAudioStream('en', /* channels= */ 2);
-    a3.originalId = 'a3';
+    a3.id = 3;
+    a3.originalId = 'audio/97065';
     a3.bandwidth = 97065;
     a3.roles = ['role1', 'role2'];
-    a2.codecs = 'mp4a.40.2';
+    a3.codecs = 'mp4a.40.2';
 
     // a4 has a different label from a3, and should not
     // be filtered out.
     const a4 = makeAudioStream('en', /* channels= */ 2);
-    a4.originalId = 'a4';
-    a4.bandwidth = 97065;
+    a4.id = 4;
+    a4.originalId = 'audio/65106';
+    a4.bandwidth = 65106;
     a4.roles = ['role1', 'role2'];
     a4.label = 'Surround';
     a4.codecs = 'mp4a.40.2';
@@ -491,33 +498,49 @@ describe('PeriodCombiner', () => {
     // a5 has a different codec from a3, and should not
     // be filtered out.
     const a5 = makeAudioStream('en', /* channels= */ 2);
-    a5.originalId = 'a5';
+    a5.id = 5;
+    a5.originalId = 'audio/97065';
     a5.bandwidth = 97065;
     a5.roles = ['role1', 'role2'];
     a5.codecs = 'ec-3';
 
     // t1 and t3 are duplicates.
     const t1 = makeTextStream('en');
-    t1.originalId = 't1';
+    t1.id = 1;
+    t1.originalId = 'text/en';
+    t1.language = 'en';
+    t1.mimeType = 'application/mp4';
+    t1.codecs = 'stpp';
     t1.roles = ['role1'];
 
     const t2 = makeTextStream('en');
-    t2.originalId = 't2';
+    t2.id = 2;
+    t2.originalId = 'text/en-us';
+    t2.language = 'en';
+    t2.mimeType = 'application/mp4';
+    t2.codecs = 'stpp';
     t2.roles = ['role1', 'role2'];
 
     const t3 = makeTextStream('en');
-    t3.originalId = 't3';
+    t3.id = 3;
+    t3.originalId = 'text/en';
+    t3.language = 'en';
+    t3.mimeType = 'application/mp4';
+    t3.codecs = 'stpp';
     t3.roles = ['role1'];
 
     // i1 and i3 are duplicates.
     const i1 = makeImageStream(240);
-    i1.originalId = 'i1';
+    i1.id = 1;
+    i1.originalId = 'image/240';
 
     const i2 = makeImageStream(480);
-    i2.originalId = 'i2';
+    i2.id = 2;
+    i2.originalId = 'image/480';
 
     const i3 = makeImageStream(240);
-    i3.originalId = 'i3';
+    i3.id = 3;
+    i3.originalId = 'image/240';
 
     /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
     const periods = [
@@ -553,33 +576,33 @@ describe('PeriodCombiner', () => {
     expect(variants.length).toBe(8);
 
     // v3 should've been filtered out
-    const videoIds = variants.map((v) => v.video.originalId);
+    const videoIds = variants.map((v) => v.video.id);
     for (const id of videoIds) {
-      expect(id).not.toBe('v3');
+      expect(id).not.toBe(3);
     }
 
     // a2 should've been filtered out
-    const audioIds = variants.map((v) => v.audio.originalId);
+    const audioIds = variants.map((v) => v.audio.id);
     for (const id of audioIds) {
-      expect(id).not.toBe('a2');
+      expect(id).not.toBe(2);
     }
 
     const textStreams = combiner.getTextStreams();
     expect(textStreams.length).toBe(2);
 
     // t3 should've been filtered out
-    const textIds = textStreams.map((t) => t.originalId);
+    const textIds = textStreams.map((t) => t.id);
     for (const id of textIds) {
-      expect(id).not.toBe('t3');
+      expect(id).not.toBe(3);
     }
 
     const imageStreams = combiner.getImageStreams();
     expect(imageStreams.length).toBe(2);
 
     // i3 should've been filtered out
-    const imageIds = imageStreams.map((i) => i.originalId);
+    const imageIds = imageStreams.map((i) => i.id);
     for (const id of imageIds) {
-      expect(id).not.toBe('i3');
+      expect(id).not.toBe(3);
     }
   });
 
