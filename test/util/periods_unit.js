@@ -515,7 +515,7 @@ describe('PeriodCombiner', () => {
 
     const t2 = makeTextStream('en');
     t2.id = 2;
-    t2.originalId = 'text/en-us';
+    t2.originalId = 'text/en';
     t2.language = 'en';
     t2.mimeType = 'application/mp4';
     t2.codecs = 'stpp';
@@ -528,6 +528,16 @@ describe('PeriodCombiner', () => {
     t3.mimeType = 'application/mp4';
     t3.codecs = 'stpp';
     t3.roles = ['role1'];
+
+    // t4 has a different original Id from t3, and should not
+    // be filtered out.
+    const t4 = makeAudioStream('en', /* channels= */ 2);
+    t4.id = 4;
+    t4.originalId = 'text/en-us';
+    t4.language = 'en';
+    t4.mimeType = 'application/mp4';
+    t4.codecs = 'stpp';
+    t4.roles = ['role1'];
 
     // i1 and i3 are duplicates.
     const i1 = makeImageStream(240);
@@ -562,6 +572,7 @@ describe('PeriodCombiner', () => {
           t1,
           t2,
           t3,
+          t4,
         ],
         imageStreams: [
           i1,
@@ -588,7 +599,7 @@ describe('PeriodCombiner', () => {
     }
 
     const textStreams = combiner.getTextStreams();
-    expect(textStreams.length).toBe(2);
+    expect(textStreams.length).toBe(3);
 
     // t3 should've been filtered out
     const textIds = textStreams.map((t) => t.id);
