@@ -58,6 +58,7 @@
 +../../lib/util/abortable_operation.js
 +../../lib/util/array_utils.js
 +../../lib/util/buffer_utils.js
++../../lib/util/cmcd_manager.js
 +../../lib/util/config_utils.js
 +../../lib/util/data_view_reader.js
 +../../lib/util/delayed_tick.js

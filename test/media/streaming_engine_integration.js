@@ -60,7 +60,6 @@ describe('StreamingEngine', () => {
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
 
-
   /** @type {shaka.extern.Variant} */
   let variant;
 
@@ -262,6 +261,7 @@ describe('StreamingEngine', () => {
 
   function createStreamingEngine() {
     const playerInterface = {
+      modifySegmentRequest: (request, segmentInfo) => {},
       getPresentationTime: () => playhead.getTime(),
       getBandwidthEstimate: () => 1e6,
       mediaSourceEngine: mediaSourceEngine,

@@ -344,6 +344,8 @@ describe('DashParser SegmentList', () => {
 
     const playerInterface = {
       networkingEngine: networkingEngine,
+      modifyManifestRequest: (request, manifestInfo) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
       filter: () => {},
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
@@ -374,4 +376,3 @@ describe('DashParser SegmentList', () => {
     expect(actual).toEqual(expected);
   });
 });
-

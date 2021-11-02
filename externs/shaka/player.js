@@ -924,7 +924,8 @@ shaka.extern.StreamingConfiguration;
  *   restrictions: shaka.extern.Restrictions,
  *   switchInterval: number,
  *   bandwidthUpgradeTarget: number,
- *   bandwidthDowngradeTarget: number
+ *   bandwidthDowngradeTarget: number,
+ *   advanced: shaka.extern.AdvancedAbrConfiguration
  * }}
  *
  * @property {boolean} enabled
@@ -941,7 +942,7 @@ shaka.extern.StreamingConfiguration;
  *   automatically, but will still appear in the track list and can still be
  *   selected via <code>selectVariantTrack()</code>.  If no tracks meet these
  *   restrictions, AbrManager should not fail, but choose a low-res or
- *   low-bandwidth variant instead.  It is the responsibiliy of AbrManager
+ *   low-bandwidth variant instead.  It is the responsibility of AbrManager
  *   implementations to follow these rules and implement this behavior.
  * @property {number} switchInterval
  *   The minimum amount of time that must pass between switches, in
@@ -952,9 +953,74 @@ shaka.extern.StreamingConfiguration;
  * @property {number} bandwidthDowngradeTarget
  *   The largest fraction of the estimated bandwidth we should use. We should
  *   downgrade to avoid this.
+ * @property {shaka.extern.AdvancedAbrConfiguration} advanced
+ *   Advanced ABR configuration.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
+
+
+/**
+ * @typedef {{
+ *   minTotalBytes: number,
+ *   minBytes: number,
+ *   fastHalfLife: number,
+ *   slowHalfLife: number
+ * }}
+ *
+ * @property {number} minTotalBytes
+ *   Minimum number of bytes sampled before we trust the estimate.  If we have
+ *   not sampled much data, our estimate may not be accurate enough to trust.
+ * @property {number} minBytes
+ *   Minimum number of bytes, under which samples are discarded.  Our models
+ *   do not include latency information, so connection startup time (time to
+ *   first byte) is considered part of the download time.  Because of this, we
+ *   should ignore very small downloads which would cause our estimate to be
+ *   too low.
+ * @property {number} fastHalfLife
+ *   The quantity of prior samples (by weight) used when creating a new
+ *   estimate, in seconds.  Those prior samples make up half of the
+ *   new estimate.
+ * @property {number} slowHalfLife
+ *   The quantity of prior samples (by weight) used when creating a new
+ *   estimate, in seconds.  Those prior samples make up half of the
+ *   new estimate.
+ * @exportDoc
+ */
+shaka.extern.AdvancedAbrConfiguration;
+
+
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   useHeaders: boolean,
+ *   sessionId: string,
+ *   contentId: string
+ * }}
+ *
+ * @description
+ *   Common Media Client Data (CMCD) configuration.
+ *
+ * @property {boolean} enabled
+ *   If <code>true</code>, enable CMCD data to be sent with media requests.
+ *   Defaults to <code>false</code>.
+ * @property {boolean} useHeaders
+ *   If <code>true</code>, send CMCD data using the header transmission mode
+ *   instead of query args.  Defaults to <code>false</code>.
+ * @property {string} sessionId
+ *   A GUID identifying the current playback session. A playback session
+ *   typically ties together segments belonging to a single media asset.
+ *   Maximum length is 64 characters. It is RECOMMENDED to conform to the UUID
+ *   specification. By default the sessionId is automatically generated on each
+ *   <code>load()</code> call.
+ * @property {string} contentId
+ *   A unique string identifying the current content. Maximum length is 64
+ *   characters. This value is consistent across multiple different sessions and
+ *   devices and is defined and updated at the discretion of the service
+ *   provider.
+ * @exportDoc
+ */
+shaka.extern.CmcdConfiguration;
 
 
 /**
@@ -998,6 +1064,7 @@ shaka.extern.OfflineConfiguration;
  *   streaming: shaka.extern.StreamingConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
+ *   cmcd: shaka.extern.CmcdConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
@@ -1024,6 +1091,8 @@ shaka.extern.OfflineConfiguration;
  *   A factory to construct an abr manager.
  * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.
+ * @property {shaka.extern.CmcdConfiguration} cmcd
+ *   CMCD configuration and settings. (Common Media Client Data)
  * @property {shaka.extern.OfflineConfiguration} offline
  *   Offline configuration and settings.
  * @property {string} preferredAudioLanguage

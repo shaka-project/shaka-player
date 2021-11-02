@@ -42,6 +42,8 @@ describe('DashParser ContentProtection', () => {
 
     const playerInterface = {
       networkingEngine: netEngine,
+      modifyManifestRequest: (request, manifestInfo) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
       filter: (manifest) => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
