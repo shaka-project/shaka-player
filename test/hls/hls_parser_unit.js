@@ -1307,6 +1307,8 @@ describe('HlsParser', () => {
     // stream.
     const timeline = actual.presentationTimeline;
     expect(timeline.getDuration()).toBe(10);
+    expect(timeline.getSeekRangeStart()).toBe(0);
+    expect(timeline.getSeekRangeEnd()).toBe(10);
 
     expect(actual.textStreams.length).toBe(1);
     expect(actual.variants.length).toBe(1);
