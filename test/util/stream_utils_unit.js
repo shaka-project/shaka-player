@@ -537,6 +537,41 @@ describe('StreamUtils', () => {
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].decodingInfos.length).toBe(0);
     });
+
+    it('includes transferFunction in config when hdr', async () => {
+      window.shakaMediaCapabilities.decodingInfo =
+          shaka.test.Util.spyFunc(decodingInfoSpy);
+
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(0, (stream) => {
+            stream.mime('video/mp4', 'avc1.640028');
+            stream.hdr = 'SDR';
+          });
+        });
+        manifest.addVariant(1, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/mp4', 'hvc1.2.4.L150.90');
+            stream.hdr = 'PQ';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addVideo(2, (stream) => {
+            stream.mime('video/mp4', 'hvc1.2.4.L153.B0');
+            stream.hdr = 'HLG';
+          });
+        });
+      });
+
+      await StreamUtils.getDecodingInfosForVariants(manifest.variants,
+          /* usePersistentLicenses= */ false, /* srcEquals= */ false);
+      expect(decodingInfoSpy.calls.argsFor(0)[0].video.transferFunction)
+          .toBe('srgb');
+      expect(decodingInfoSpy.calls.argsFor(1)[0].video.transferFunction)
+          .toBe('pq');
+      expect(decodingInfoSpy.calls.argsFor(2)[0].video.transferFunction)
+          .toBe('hlg');
+    });
   });
 
   describe('filterManifest', () => {
