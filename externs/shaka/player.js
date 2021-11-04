@@ -477,7 +477,7 @@ shaka.extern.TimelineRegionInfo;
  *   frameRate: ?number,
  *   height: ?number,
  *   mimeType: ?string,
- *   numChannels: ?number,
+ *   channelsCount: ?number,
  *   pixelAspectRatio: ?string,
  *   width: ?number
  * }}
@@ -486,11 +486,12 @@ shaka.extern.TimelineRegionInfo;
  * Contains information about the quality of an audio or video media stream.
  *
  * @property {?number} audioSamplingRate
- *   The audio sampling rate.
+ *   Specifies the maximum sampling rate of the content.
  * @property {number} bandwidth
  *   The bandwidth in bits per second.
  * @property {string} codecs
- *   The codecs value
+ *   The Stream's codecs, e.g., 'avc1.4d4015' or 'vp9', which must be
+ * compatible with the Stream's MIME type.
  * @property {string} contentType
  *   The type of content, which may be "video" or "audio".
  * @property {?number} frameRate
@@ -499,7 +500,7 @@ shaka.extern.TimelineRegionInfo;
  *   The video height in pixels.
  * @property {string} mimeType
  *   The MIME type.
- * @property {?number} numChannels
+ * @property {?number} channelsCount
  *   The number of audio channels, or null if unknown.
  * @property {?string} pixelAspectRatio
  *   The pixel aspect ratio value; e.g "1:1".

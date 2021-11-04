@@ -24,7 +24,7 @@ describe('QualityObserver', () => {
       frameRate: 30,
       height: 720,
       mimeType: 'mime type',
-      numChannels: 2,
+      channelsCount: 2,
       pixelAspectRatio: '1:1',
       width: 1280,
     };
