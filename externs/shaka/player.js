@@ -841,7 +841,8 @@ shaka.extern.ManifestConfiguration;
  *   forceHTTPS: boolean,
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
- *   dispatchAllEmsgBoxes: boolean
+ *   dispatchAllEmsgBoxes: boolean,
+ *   observeQualityChanges: boolean
  * }}
  *
  * @description
@@ -952,7 +953,9 @@ shaka.extern.ManifestConfiguration;
  *   The minimum number of seconds to see if the manifest has changes.
  * @property {boolean} dispatchAllEmsgBoxes
  *   If true, all emsg boxes are parsed and dispatched.
- *
+ * @property {boolean} observeQualityChanges
+ *   If true, monitor media quality changes and emit
+ *   <code.shaka.Player.MediaQualityChangedEvent</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

@@ -67,7 +67,7 @@ describe('QualityObserver', () => {
     bufferStart = 10;
     bufferEnd = 20;
     observer.poll(10, false);
-    expect(onQualityChange).toHaveBeenCalledWith(quality1);
+    expect(onQualityChange).toHaveBeenCalledWith(quality1, 10);
   });
 
   it('does not call onQualityChange when pos advances with no change', () => {
@@ -76,7 +76,7 @@ describe('QualityObserver', () => {
     bufferStart = 10;
     bufferEnd = 20;
     observer.poll(10, false);
-    expect(onQualityChange).toHaveBeenCalledWith(quality1);
+    expect(onQualityChange).toHaveBeenCalledWith(quality1, 10);
     observer.poll(11, false);
     expect(onQualityChange).toHaveBeenCalledTimes(1);
   });
@@ -87,13 +87,13 @@ describe('QualityObserver', () => {
     bufferStart = 10;
     bufferEnd = 20;
     observer.poll(15, false);
-    expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality1]);
+    expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality1, 15]);
     observer.addMediaQualityChange(quality2, 20);
     observer.poll(25, true);
     expect(onQualityChange).not.toHaveBeenCalledOnceMore();
     bufferEnd = 30;
     observer.poll(26, false);
-    expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2]);
+    expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2, 26]);
   });
 
   it('calls onQualityChange when position advances over 2nd quality change',
@@ -103,12 +103,12 @@ describe('QualityObserver', () => {
         bufferStart = 10;
         bufferEnd = 20;
         observer.poll(10, false);
-        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality1]);
+        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality1, 10]);
         observer.addMediaQualityChange(quality2, 20);
         bufferStart = 10;
         bufferEnd = 30;
         observer.poll(20, false);
-        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2]);
+        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2, 20]);
       });
 
   it('calls onQualityChange when position moves back over a quality chanage',
@@ -121,9 +121,9 @@ describe('QualityObserver', () => {
         bufferStart = 10;
         bufferEnd = 30;
         observer.poll(25, false);
-        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2]);
+        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality2, 25]);
         observer.poll(15, false);
-        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality1]);
+        expect(onQualityChange).toHaveBeenCalledOnceMoreWith([quality1, 15]);
       });
 
   it('uses last applied quality when there are two at the same position',
@@ -134,6 +134,6 @@ describe('QualityObserver', () => {
         bufferStart = 10;
         bufferEnd = 20;
         observer.poll(15, false);
-        expect(onQualityChange).toHaveBeenCalledWith(quality2);
+        expect(onQualityChange).toHaveBeenCalledWith(quality2, 15);
       });
 });

@@ -390,7 +390,9 @@ shakaDemo.Config = class {
             'streaming.updateIntervalSeconds',
             /* canBeDecimal= */ true)
         .addBoolInput_(MessageIds.DISPATCH_ALL_EMSG_BOXES,
-            'streaming.dispatchAllEmsgBoxes');
+            'streaming.dispatchAllEmsgBoxes')
+        .addBoolInput_(MessageIds.OBSERVE_QUALITY_CHANGES,
+            'streaming.observeQualityChanges');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
