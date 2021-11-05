@@ -687,6 +687,69 @@ describe('Player', () => {
     });
   });
 
+  describe('mediaQualityChanges', () => {
+    /** @type {!jasmine.Spy} */
+    let onQualityChange;
+    /** @type {!shaka.test.Waiter} */
+    let waiter;
+
+    const qualityChange1 = jasmine.objectContaining({
+      mediaQuality: jasmine.objectContaining({
+        bandwidth: 1,
+        codecs: 'mp4a.40.2',
+        contentType: 'audio',
+        mimeType: 'audio/mp4',
+      }),
+      type: 'mediaqualitychanged',
+      position: jasmine.any(Number),
+    });
+    const qualityChange2 = jasmine.objectContaining({
+      mediaQuality: jasmine.objectContaining({
+        bandwidth: 1,
+        codecs: 'avc1.42c01e',
+        contentType: 'video',
+        mimeType: 'video/mp4',
+      }),
+      type: 'mediaqualitychanged',
+      position: jasmine.any(Number),
+    });
+
+    beforeEach(() => {
+      onQualityChange = jasmine.createSpy('onQualityChange');
+      // const spyFunc = Util.spyFunc(onQualityChange);
+      player.addEventListener('mediaqualitychanged',
+          Util.spyFunc(onQualityChange));
+      waiter = new shaka.test.Waiter(eventManager)
+          .timeoutAfter(10)
+          .failOnTimeout(true);
+    });
+
+    it('emits audio/video quality changes at start when enabled', async () => {
+      player.configure('streaming.observeQualityChanges', true);
+
+      await player.load('test:sintel_compiled');
+      video.play();
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      expect(onQualityChange).toHaveBeenCalledTimes(2);
+      expect(onQualityChange).toHaveBeenCalledWith(qualityChange1);
+      expect(onQualityChange).toHaveBeenCalledWith(qualityChange2);
+    });
+    it('does not emit quality changes at start when disabled', async () => {
+      player.configure('streaming.observeQualityChanges', false);
+
+      await player.load('test:sintel_compiled');
+      video.play();
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      expect(onQualityChange).not.toHaveBeenCalled();
+    });
+  });
+
   describe('buffering', () => {
     const startBuffering = jasmine.objectContaining({buffering: true});
     const endBuffering = jasmine.objectContaining({buffering: false});
