@@ -517,7 +517,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.LIVE)
-      .setIMAAssetKey('_lDu24IaSYaYAMEfixipNQ'),
+      .setIMAAssetKey('PSzZMzAkSXCmlJOWDmRj8Q'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Tears of Steel (multicodec, surround + stereo)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
