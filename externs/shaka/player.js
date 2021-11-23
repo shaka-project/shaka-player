@@ -746,7 +746,6 @@ shaka.extern.DashManifestConfiguration;
  * @typedef {{
  *   ignoreTextStreamFailures: boolean,
  *   ignoreImageStreamFailures: boolean,
- *   useFullSegmentsForStartTime: boolean,
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string
  * }}
@@ -757,9 +756,6 @@ shaka.extern.DashManifestConfiguration;
  * @property {boolean} ignoreImageStreamFailures
  *   If <code>true</code>, ignore any errors in a image stream and filter out
  *   those streams.
- * @property {boolean} useFullSegmentsForStartTime
- *   If <code>true</code>, force HlsParser to use a full segment request for
- *   determining start time in case the server does not support partial requests
  * @property {string} defaultAudioCodec
  *   The default audio codec if it is not specified in the HLS playlist.
  *   <i>Defaults to <code>'mp4a.40.2'</code>.</i>

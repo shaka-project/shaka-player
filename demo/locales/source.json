@@ -395,10 +395,6 @@
     "description": "The label on a field that allows users to provide a video id for a custom asset.",
     "message": "Video ID (for VOD DAI Content)"
   },
-  "DEMO_USE_FULL_SEGMENTS_FOR_START_TIME": {
-    "description": "The name of a configuration value.",
-    "message": "Use Full Segments For Start Time"
-  },
   "DEMO_IGNORE_MIN_BUFFER_TIME": {
     "description": "The name of a configuration value.",
     "message": "Ignore Min Buffer Time"

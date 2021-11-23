@@ -73,7 +73,8 @@ shaka.extern.StoredContent;
  *   sessionIds: !Array.<string>,
  *   drmInfo: ?shaka.extern.DrmInfo,
  *   appMetadata: Object,
- *   isIncomplete: (boolean|undefined)
+ *   isIncomplete: (boolean|undefined),
+ *   sequenceMode: (boolean|undefined)
  * }}
  *
  * @property {number} creationTime
@@ -98,6 +99,9 @@ shaka.extern.StoredContent;
  *   A metadata object passed from the application.
  * @property {(boolean|undefined)} isIncomplete
  *   If true, the content is still downloading.
+ * @property {(boolean|undefined)} sequenceMode
+ *   If true, we will append the media segments using sequence mode; that is to
+ *   say, ignoring any timestamps inside the media files.
  */
 shaka.extern.ManifestDB;
 

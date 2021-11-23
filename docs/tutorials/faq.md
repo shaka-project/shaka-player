@@ -43,17 +43,6 @@ headers in the response.  Additionally, with some manifests, we will send a
 This can also happen with mixed-content restrictions.  If the site is using
 `https:`, then your manifest and segments must also.
 
-*Sending `Range` header at the start of HLS playback can be disabled using this config:*
-```
-player.configure({
-    manifest: {
-        hls: {
-            useFullSegmentsForStartTime: true,
-        },
-    },
-})
-```
-
 <hr>
 
 **Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code
