@@ -270,6 +270,21 @@ chrome.cast.Session = class {
 
 
 chrome.cast.SessionRequest = class {
-  /** @param {string} appId */
-  constructor(appId) {}
+  /**
+   * @param {string} appId
+   * @param {Array.<Object>} capabilities
+   * @param {number} timeout
+   * @param {boolean} androidReceiverCompatible
+   * @param {Object} credentialsData
+   */
+  constructor(appId, capabilities, timeout, androidReceiverCompatible,
+      credentialsData) {}
 };
+
+
+/** @const */
+chrome.cast.Timeout = {};
+
+
+/** @type {number} */
+chrome.cast.Timeout.requestSession;
