@@ -58,7 +58,8 @@ describe('CastSender', () => {
     sender = new CastSender(
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+        false);
   });
 
   afterEach(async () => {
@@ -128,7 +129,8 @@ describe('CastSender', () => {
       sender = new CastSender(
           fakeAppId, Util.spyFunc(onStatusChanged),
           Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+          false);
       sender.init();
       // You get an initial call to onStatusChanged when it initializes.
       expect(onStatusChanged).toHaveBeenCalledTimes(3);
@@ -262,7 +264,8 @@ describe('CastSender', () => {
     sender = new CastSender(
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+        false);
     sender.init();
 
     // The sender should automatically rejoin the session, without needing
@@ -294,7 +297,8 @@ describe('CastSender', () => {
     sender = new CastSender(
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+        false);
     sender.init();
 
     expect(sender.isCasting()).toBe(false);

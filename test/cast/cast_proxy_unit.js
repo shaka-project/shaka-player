@@ -19,6 +19,7 @@ describe('CastProxy', () => {
 
   const originalCastSender = shaka.cast.CastSender;
   const fakeAppId = 'fake app ID';
+  const fakeAndroidReceiverCompatible = false;
 
   let mockPlayer;
   let mockSender;
@@ -39,7 +40,8 @@ describe('CastProxy', () => {
     mockPlayer = createMockPlayer();
     mockSender = null;
 
-    proxy = new CastProxy(mockVideo, mockPlayer, fakeAppId);
+    proxy = new CastProxy(mockVideo, mockPlayer, fakeAppId,
+        fakeAndroidReceiverCompatible);
   });
 
   afterEach(async () => {

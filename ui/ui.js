@@ -396,16 +396,19 @@ shaka.ui.Overlay = class {
     // one we saw.
     if (container['dataset'] &&
         container['dataset']['shakaPlayerCastReceiverId']) {
-          castAppId = container['dataset']['shakaPlayerCastReceiverId'];
-          castAndroidReceiverCompatible = container['dataset']['shakaPlayerCastAndroidReceiverCompatible'];
+      castAppId = container['dataset']['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+        container['dataset']['shakaPlayerCastAndroidReceiverCompatible'];
     } else if (video['dataset'] &&
                video['dataset']['shakaPlayerCastReceiverId']) {
       castAppId = video['dataset']['shakaPlayerCastReceiverId'];
-      castAndroidReceiverCompatible = video['dataset']['shakaPlayerCastAndroidReceiverCompatible'];
+      castAndroidReceiverCompatible =
+        video['dataset']['shakaPlayerCastAndroidReceiverCompatible'];
     }
 
     if (castAppId.length) {
-      ui.configure({castReceiverAppId: castAppId, castAndroidReceiverCompatible: castAndroidReceiverCompatible});
+      ui.configure({castReceiverAppId: castAppId,
+        castAndroidReceiverCompatible: castAndroidReceiverCompatible});
     }
 
     if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
