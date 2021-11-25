@@ -174,6 +174,22 @@ call to the first one fails.
 NOTE: Please DO NOT specify both the `src` attribute on the `<video>` tag AND
 a `<source>` tag inside it.
 
+#### Enabling Android Receiver Apps
+
+If you'd like to take advantage of Android Receiver App support,
+you will need to provide a boolean flag to enable support for
+casting to an Android receiver app.
+
+```html
+    <div data-shaka-player-container style="max-width:40em"
+         data-shaka-player-cast-receiver-id="E7271BEC"
+         data-shaka-player-cast-android-receiver-compatible="true">
+      <!-- The manifest url in the src attribute will be automatically loaded -->
+      <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
+       src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
+    </div>
+```
+
 
 #### Programmatic UI setup.
 It is possible to set up the UI programmatically after the page loads.
@@ -200,6 +216,14 @@ const controls = ui.getControls();
 // your API calls will be routed to the remote playback session.
 const player = controls.getPlayer();
 const video = controls.getVideo();
+
+// Programatically configure the Chromecast Receiver App Id and Android 
+// Receiver Compatability.
+ui.configure({
+  // Set the castReceiverAppId
+  'castReceiverAppId': 'E7271BEC',
+  // Enable casting to native Android Apps (e.g. Android TV Apps)
+  'castAndroidReceiverCompatible': true,
 ```
 
 
