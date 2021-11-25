@@ -314,7 +314,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   configure(config) {
     this.config_ = config;
 
-    this.castProxy_.changeReceiverId(config.castReceiverAppId);
+    this.castProxy_.changeReceiverId(config.castReceiverAppId,
+        config.castAndroidReceiverCompatible);
 
     // Deconstruct the old layout if applicable
     if (this.seekBar_) {
