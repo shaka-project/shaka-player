@@ -72,6 +72,7 @@ shaka.extern.UIVolumeBarColors;
  *   addBigPlayButton: boolean,
  *   customContextMenu: boolean,
  *   castReceiverAppId: string,
+ *   castAndroidReceiverCompatible: boolean,
  *   clearBufferOnQualityChange: boolean,
  *   showUnbufferedStart: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
@@ -108,6 +109,8 @@ shaka.extern.UIVolumeBarColors;
  *   Whether or not a custom context menu replaces the default.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
+ * @property {boolean} castAndroidReceiverCompatible
+ *   Indicates if the app is compatible with an Android Cast Receiver.
  * @property {boolean} clearBufferOnQualityChange
  *   Only applicable if the resolution selection is part of the UI.
  *   Whether buffer should be cleared when changing resolution

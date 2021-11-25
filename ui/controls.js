@@ -54,7 +54,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.cast.CastProxy} */
     this.castProxy_ = new shaka.cast.CastProxy(
-        video, player, this.config_.castReceiverAppId);
+        video, player, this.config_.castReceiverAppId, this.config_.castAndroidReceiverCompatible);
 
     /** @private {boolean} */
     this.castAllowed_ = true;
