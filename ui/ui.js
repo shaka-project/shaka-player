@@ -398,12 +398,13 @@ shaka.ui.Overlay = class {
         container['dataset']['shakaPlayerCastReceiverId']) {
       castAppId = container['dataset']['shakaPlayerCastReceiverId'];
       castAndroidReceiverCompatible =
-        container['dataset']['shakaPlayerCastAndroidReceiverCompatible'];
+        container['dataset']['shakaPlayerCastAndroidReceiverCompatible']
+        === 'true';
     } else if (video['dataset'] &&
                video['dataset']['shakaPlayerCastReceiverId']) {
       castAppId = video['dataset']['shakaPlayerCastReceiverId'];
       castAndroidReceiverCompatible =
-        video['dataset']['shakaPlayerCastAndroidReceiverCompatible'];
+        video['dataset']['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
     }
 
     if (castAppId.length) {
