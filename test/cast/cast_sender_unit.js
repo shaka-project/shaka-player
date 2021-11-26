@@ -19,6 +19,7 @@ describe('CastSender', () => {
   const originalStatusDelay = shaka.cast.CastSender.STATUS_DELAY;
 
   const fakeAppId = 'asdf';
+  const fakeAndroidReceiverCompatible = false;
   const fakeInitState = {
     manifest: null,
     player: null,
@@ -59,7 +60,7 @@ describe('CastSender', () => {
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
         Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
-        false);
+        fakeAndroidReceiverCompatible);
   });
 
   afterEach(async () => {
@@ -94,7 +95,12 @@ describe('CastSender', () => {
       expect(sender.apiReady()).toBe(true);
       expect(sender.hasReceivers()).toBe(false);
       expect(onStatusChanged).toHaveBeenCalled();
-      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(fakeAppId);
+      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(
+          fakeAppId,
+          [],
+          null,
+          fakeAndroidReceiverCompatible,
+          null);
       expect(mockCastApi.initialize).toHaveBeenCalled();
     });
 
@@ -104,7 +110,12 @@ describe('CastSender', () => {
       expect(sender.apiReady()).toBe(true);
       expect(sender.hasReceivers()).toBe(false);
       expect(onStatusChanged).toHaveBeenCalled();
-      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(fakeAppId);
+      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(
+          fakeAppId,
+          [],
+          null,
+          fakeAndroidReceiverCompatible,
+          null);
       expect(mockCastApi.initialize).toHaveBeenCalled();
     });
   });
