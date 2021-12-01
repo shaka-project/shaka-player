@@ -313,6 +313,24 @@ describe('UITextDisplayer', () => {
     expect(captions.length).toBe(3);
   });
 
+  it('hides currently displayed cue when removed', async () => {
+    const cue = new shaka.text.Cue(0, 50, 'One');
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    video.currentTime = 10;
+    await shaka.test.Util.delay(0.5);
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+
+    let cueElements = textContainer.querySelectorAll('div');
+    expect(cueElements.length).toBe(1);
+    expect(cueElements[0].textContent).toBe('One');
+
+    textDisplayer.remove(0, 100);
+
+    cueElements = textContainer.querySelectorAll('div');
+    expect(cueElements.length).toBe(0);
+  });
+
   it('hides and shows nested cues at appropriate times', async () => {
     const parentCue1 = new shaka.text.Cue(0, 100, '');
     const cue1 = new shaka.text.Cue(0, 50, 'One');
