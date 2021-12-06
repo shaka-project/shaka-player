@@ -776,7 +776,7 @@ describe('HlsParser', () => {
       'RESOLUTION=960x540,FRAME-RATE=120,AUDIO="aud2"\n',
       'video2\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
-      'URI="audio"\n',
+      'DEFAULT=YES,URI="audio"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud2",LANGUAGE="fr",',
       'URI="audio2"\n',
     ].join('');
@@ -794,6 +794,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.bandwidth = 200;
+        variant.primary = true;
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
           stream.size(960, 540);
         });
@@ -803,6 +804,7 @@ describe('HlsParser', () => {
       });
       manifest.addPartialVariant((variant) => {
         variant.bandwidth = 300;
+        variant.primary = false;
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
           stream.size(960, 540);
         });
