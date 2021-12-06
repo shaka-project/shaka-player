@@ -97,6 +97,9 @@ describe('StreamingEngine', () => {
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
 
+  /** @type {function(function(), number)} */
+  let realSetTimeout;
+
   /**
    * Runs the fake event loop.
    * @param {function()=} callback An optional callback that is executed
@@ -116,6 +119,7 @@ describe('StreamingEngine', () => {
   }
 
   beforeAll(() => {
+    realSetTimeout = window.setTimeout;
     jasmine.clock().install();
     jasmine.clock().mockDate();
   });
@@ -1373,6 +1377,66 @@ describe('StreamingEngine', () => {
       onTick.and.callFake(() => {
         // Nothing should have been cleared.
         expect(mediaSourceEngine.clear).not.toHaveBeenCalled();
+        onTick.and.stub();
+      });
+
+      await runTest(Util.spyFunc(onTick));
+
+      // Verify buffers.
+      expect(mediaSourceEngine.initSegments).toEqual({
+        audio: [false, true],
+        video: [false, true],
+        text: [],
+      });
+      expect(mediaSourceEngine.segments).toEqual({
+        audio: [false, true, true, true],
+        video: [false, true, true, true],
+        text: [false, true, true, true],
+      });
+    });
+
+    it('into unbuffered regions when nothing is buffered ' +
+      'and mediaState is performing an update', async () => {
+      // Here we go!
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      // ensure init source buffer promise does not resolve before seeked()
+      // so mediaState remains in "performingUpdate" state
+      const initSourceBufferPromise = new shaka.util.PublicPromise();
+      mediaSourceEngine.setStreamProperties.and
+          .returnValue(initSourceBufferPromise);
+      await streamingEngine.start();
+      playing = true;
+
+      // tick to trigger mediaState updates
+      jasmine.clock().tick(1);
+      // give a chance for fetchAndAppend_ to be invoked
+      // by async onUpdate_ callback
+      await Util.shortDelay(realSetTimeout);
+
+      // Nothing is buffered yet.
+      expect(mediaSourceEngine.segments).toEqual({
+        audio: [false, false, false, false],
+        video: [false, false, false, false],
+        text: [false, false, false, false],
+      });
+
+      // Seek forward to an unbuffered region in the first Period.
+      presentationTimeInSeconds = 15;
+      streamingEngine.seeked();
+
+      // resolve initSourceBufferPromise after seeked(), waitingToClearBuffer
+      // should have been set, so this will now trigger the actual flush of
+      // the buffer
+      initSourceBufferPromise.resolve();
+      mediaSourceEngine.setStreamProperties.and
+          .returnValue(Promise.resolve());
+
+      // allow mediaState update to resolve
+      await Util.shortDelay(realSetTimeout);
+
+      onTick.and.callFake(() => {
+        expect(mediaSourceEngine.clear).toHaveBeenCalled();
         onTick.and.stub();
       });
 
