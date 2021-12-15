@@ -8,5 +8,6 @@ runs:
     - name: Lint
       shell: bash
       run: |
-        echo "Hi! I'm linting!"
-        echo $PWD
+        # TODO: echo markers?
+        cd src/
+        build/check.py
