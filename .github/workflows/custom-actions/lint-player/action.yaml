@@ -1,0 +1,12 @@
+name: Lint Shaka Player
+
+# TODO: description
+
+runs:
+  using: composite # TODO: what does this mean?
+  steps:
+    - name: Lint
+      shell: bash
+      run: |
+        echo "Hi! I'm linting!"
+        echo $PWD
