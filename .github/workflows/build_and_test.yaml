@@ -32,15 +32,13 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        # os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        os: ["macos-latest"]
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         # TODO: does this even need to be a matrix?
         include:
           - os: ubuntu-latest
             browsers: "ChromeHeadless FirefoxHeadless"
           - os: macos-latest
-            # browsers: "ChromeHeadless FirefoxHeadless Safari"
-            browsers: "Safari"
+            browsers: "ChromeHeadless FirefoxHeadless"
           - os: windows-latest
             browsers: "ChromeHeadless FirefoxHeadless EdgeHeadless"
 
