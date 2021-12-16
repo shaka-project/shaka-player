@@ -31,6 +31,8 @@ jobs:
     # obvious linter error.
     needs: lint
     strategy:
+      # TODO: do I want to disable fail-fast in the long term?
+      fail-fast: false
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         browser: ["ChromeHeadless", "FirefoxHeadless", "EdgeHeadless"]
