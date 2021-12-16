@@ -6,8 +6,8 @@ name: Test Shaka Player
 # TODO: use "--external" maybe?
 
 inputs:
-  browsers:
-    description: The list of browsers to run the test on.
+  browser:
+    description: The browser to run the test on.
     required: true
 
 runs:

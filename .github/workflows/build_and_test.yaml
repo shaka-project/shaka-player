@@ -59,4 +59,4 @@ jobs:
       - name: Test Player
         uses: ./src/.github/workflows/custom-actions/test-player
         with:
-          browsers: ${{ matrix.browser }}
+          browser: ${{ matrix.browser }}
