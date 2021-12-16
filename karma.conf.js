@@ -314,7 +314,8 @@ module.exports = (config) => {
     reporters.push('spec');
   } else {
     // Without logging, default to 'progress'.
-    reporters.push('progress');
+    // reporters.push('progress');
+    reporters.push('dots'); // TODO: trying out "dots"
   }
 
   if (settings.html_coverage_report) {
