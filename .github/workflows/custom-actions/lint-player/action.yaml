@@ -2,12 +2,15 @@ name: Lint Shaka Player
 
 # TODO: description
 
+# TODO: is this... really it? no need to manually wget dependencies?
+
 runs:
   using: composite # TODO: what does this mean?
   steps:
     - name: Lint
       shell: bash
       run: |
-        # TODO: echo markers?
         cd src/
+        echo "::group::Running check script"
         build/check.py
+        echo "::endgroup::"

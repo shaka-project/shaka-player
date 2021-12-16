@@ -1,0 +1,18 @@
+name: Build Shaka Player
+
+# TODO: description
+
+# TODO: use the input parameters
+
+# TODO: what build parameters should be applied?
+
+runs:
+  using: composite # TODO: what does this mean?
+  steps:
+    - name: Build
+      shell: bash
+      run: |
+        cd src/
+        echo "::group::Building Shaka Player"
+        build/build.py
+        echo "::endgroup::"

@@ -1,0 +1,22 @@
+name: Test Shaka Player
+
+# TODO: description
+
+# TODO: use "--random" maybe?
+# TODO: use "--external" maybe?
+
+inputs:
+  browsers:
+    description: The list of browsers to run the test on.
+    required: true
+
+runs:
+  using: composite # TODO: what does this mean?
+  steps:
+    - name: Test
+      shell: bash
+      run: |
+        cd src/
+        echo "::group::Running tests"
+        build/test.py --browsers ${{ inputs.browsers }} --drm
+        echo "::endgroup::"

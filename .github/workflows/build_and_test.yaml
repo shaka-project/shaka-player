@@ -22,5 +22,36 @@ jobs:
           # can tell which files have changed.
           fetch-depth: 2 # TODO: do I still need this?
 
+      # TODO: test this by adding a purposeful linter error
       - name: Lint
         uses: ./src/.github/workflows/custom-actions/lint-player
+
+  build_and_test:
+    # Don't waste time doing a full matrix of test runs when there was an
+    # obvious linter error.
+    needs: lint
+    strategy: # TODO: fill out and finish this matrix
+      matrix:
+        os: ["ubuntu-latest"]
+        # TODO: any other meaningful data? does this even need to be a matrix?
+        include:
+          - os: ubuntu-latest
+            browsers: "Chrome"
+
+    name: Build and test ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: src
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Build Player
+        uses: ./src/.github/workflows/custom-actions/build-player
+
+      - name: Test Player
+        uses: ./src/.github/workflows/custom-actions/test-player
+        with:
+          browsers: ${{ matrix.browsers }}
