@@ -653,15 +653,16 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {!Array.<string>} uris
    * @param {number} startByte
    * @param {?number} endByte
+   * @param {null|shaka.extern.MediaQualityInfo=} mediaQuality
    */
-  setInitSegmentReference(uris, startByte, endByte) {
+  setInitSegmentReference(uris, startByte, endByte, mediaQuality) {
     goog.asserts.assert(this.manifest_,
         'A top-level generated Manifest is required to use this method!');
 
     const getUris = () => uris;
     this.initSegmentReference_ =
         new this.manifest_.shaka_.media.InitSegmentReference(
-            getUris, startByte, endByte);
+            getUris, startByte, endByte, mediaQuality);
   }
 
   /**

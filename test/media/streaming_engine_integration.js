@@ -270,6 +270,7 @@ describe('StreamingEngine', () => {
       onEvent: Util.spyFunc(onEvent),
       onManifestUpdate: () => {},
       onSegmentAppended: () => playhead.notifyOfBufferingChange(),
+      onInitSegmentAppended: () => {},
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);

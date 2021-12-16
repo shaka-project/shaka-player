@@ -206,10 +206,23 @@ shaka.test.TestScheme = class {
      * @param {string} name
      */
     function addStreamInfo(stream, variant, data, contentType, name) {
+      const mediaQualityInfo = {
+        bandwidth: 1,
+        codecs: data[contentType].codecs || 'unknown',
+        contentType: contentType,
+        mimeType: data[contentType].mimeType,
+        audioSamplingRate: null,
+        frameRate: null,
+        height: null,
+        channelsCount: null,
+        pixelAspectRatio: null,
+        width: null,
+      };
       stream.mimeType = data[contentType].mimeType;
       stream.codecs = data[contentType].codecs;
       stream.setInitSegmentReference(
-          ['test:' + name + '/' + contentType + '/init'], 0, null);
+          ['test:' + name + '/' + contentType + '/init'], 0, null,
+          mediaQualityInfo);
       stream.useSegmentTemplate(
           'test:' + name + '/' + contentType + '/%d',
           data[contentType].segmentDuration);

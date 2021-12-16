@@ -141,7 +141,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
         cue.region.id = '1';
         // Position the cue *explicitly* at the bottom of the screen.
         cue.region.viewportAnchorX = 0;  // %
-        cue.region.viewportAnchorY = 100;  // %
+        cue.region.viewportAnchorY = 90;  // %
+        cue.region.width = 100;  // %
+        cue.region.height = 10;  // %
         textDisplayer.append([cue]);
 
         await checkScreenshot('ui', 'cue-with-controls');
@@ -312,6 +314,16 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       textDisplayer.append([cue]);
 
       await checkScreenshot(prefix, 'nested-cues-with-linebreak');
+    });
+
+    // Regression test for #3600
+    it('cue positioning', async () => {
+      const cue = new shaka.text.Cue(0, 1, 'Text');
+      cue.line = 10;
+      cue.lineInterpretation = shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      textDisplayer.append([cue]);
+
+      await checkScreenshot(prefix, 'cue-position');
     });
 
     // Regression test for #2157 and #2584
