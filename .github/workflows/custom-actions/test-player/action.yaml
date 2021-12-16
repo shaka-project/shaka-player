@@ -18,5 +18,5 @@ runs:
       run: |
         cd src/
         echo "::group::Running tests"
-        build/test.py --browsers ${{ inputs.browsers }} --drm
+        build/test.py --browsers ${{ inputs.browser }} --drm --reporter dots
         echo "::endgroup::"

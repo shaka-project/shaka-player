@@ -33,16 +33,14 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        # TODO: does this even need to be a matrix?
-        include:
+        browser: ["ChromeHeadless", "FirefoxHeadless", "EdgeHeadless"]
+        exclude:
           - os: ubuntu-latest
-            browsers: "ChromeHeadless FirefoxHeadless"
+            browser: EdgeHeadless
           - os: macos-latest
-            browsers: "ChromeHeadless FirefoxHeadless"
-          - os: windows-latest
-            browsers: "ChromeHeadless FirefoxHeadless EdgeHeadless"
+            browser: EdgeHeadless
 
-    name: Build and test ${{ matrix.os }}
+    name: Build and test ${{ matrix.os }} ${{ matrix.browser }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -59,4 +57,4 @@ jobs:
       - name: Test Player
         uses: ./src/.github/workflows/custom-actions/test-player
         with:
-          browsers: ${{ matrix.browsers }}
+          browsers: ${{ matrix.browser }}
