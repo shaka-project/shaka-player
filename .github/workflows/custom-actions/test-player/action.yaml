@@ -10,6 +10,10 @@ inputs:
     description: The browser to run the test on.
     required: true
 
+# TODO: try "--use-xvfb", to see if it fixes some of the linux failures
+# TODO: try non-headless chrome/firefox on mac? see if that makes everything
+# better?
+
 runs:
   using: composite # TODO: what does this mean?
   steps:
@@ -18,5 +22,6 @@ runs:
       run: |
         cd src/
         echo "::group::Running tests"
-        build/test.py --browsers ${{ inputs.browser }} --drm --reporter dots
+        build/test.py --browsers ${{ inputs.browser }} \
+            --use-xvfb --drm --reporter spec
         echo "::endgroup::"

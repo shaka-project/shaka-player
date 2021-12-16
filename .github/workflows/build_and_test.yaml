@@ -1,7 +1,7 @@
 name: Build and Test PR
 
 on:
-  # TODO: pull-request trigger
+  # TODO: pull-request trigger (and test it with a fake PR)
   workflow_dispatch: # Allows for manual triggering.
     inputs:
       ref:
