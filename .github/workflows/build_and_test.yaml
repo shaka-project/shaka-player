@@ -36,7 +36,7 @@ jobs:
         # TODO: any other meaningful data? does this even need to be a matrix?
         include:
           - os: ubuntu-latest
-            browsers: "Chrome"
+            browsers: "ChromeHeadless"
 
     name: Build and test ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -48,6 +48,7 @@ jobs:
           path: src
           ref: ${{ github.event.inputs.ref || github.ref }}
 
+        # TODO: Do I need this step? The tests build the player, right?
       - name: Build Player
         uses: ./src/.github/workflows/custom-actions/build-player
 
