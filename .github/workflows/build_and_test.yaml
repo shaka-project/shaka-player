@@ -42,6 +42,8 @@ jobs:
           - os: ubuntu-latest
             extra_flags: "--use-xvfb"
           - os: macos-latest
+            # The integration tests don't work so well in macOS, especially for
+            # Firefox (where they crash the browser), so disable them.
             extra_flags: "--quick"
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
@@ -56,10 +58,6 @@ jobs:
         with:
           path: src
           ref: ${{ github.event.inputs.ref || github.ref }}
-
-        # TODO: Do I need this step? The tests build the player, right?
-      - name: Build Player
-        uses: ./src/.github/workflows/custom-actions/build-player
 
       - name: Test Player
         uses: ./src/.github/workflows/custom-actions/test-player
