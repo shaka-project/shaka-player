@@ -13,9 +13,6 @@ inputs:
     description: Any extra flags to pass in to the test.
     required: false
 
-# TODO: try non-headless chrome/firefox on mac? see if that makes everything
-# better?
-
 runs:
   using: composite
   steps:

@@ -2,8 +2,6 @@ name: Lint Shaka Player
 
 description: A reusable action to lint and check Shaka Player.
 
-# TODO: test this with a purposeful linter error
-
 runs:
   using: composite
   steps:
