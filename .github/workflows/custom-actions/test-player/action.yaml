@@ -9,8 +9,10 @@ inputs:
   browser:
     description: The browser to run the test on.
     required: true
+  extra_flags:
+    description: Any extra flags to pass in to the test.
+    required: false
 
-# TODO: try "--use-xvfb", to see if it fixes some of the linux failures
 # TODO: try non-headless chrome/firefox on mac? see if that makes everything
 # better?
 
@@ -22,6 +24,6 @@ runs:
       run: |
         cd src/
         echo "::group::Running tests"
-        build/test.py --browsers ${{ inputs.browser }} \
-            --use-xvfb --drm --reporter spec
+        build/test.py --browsers ${{ inputs.browser }} --drm --reporter spec \
+            ${{ inputs.extra_flags }}
         echo "::endgroup::"

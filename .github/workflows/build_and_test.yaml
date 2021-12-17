@@ -31,8 +31,6 @@ jobs:
     # obvious linter error.
     needs: lint
     strategy:
-      # TODO: do I want to disable fail-fast in the long term?
-      fail-fast: false
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         browser: ["ChromeHeadless", "FirefoxHeadless", "EdgeHeadless"]
@@ -41,6 +39,12 @@ jobs:
             browser: EdgeHeadless
           - os: macos-latest
             browser: EdgeHeadless
+        include:
+          - os: ubuntu-latest
+            extra_flags: "--use-xvfb"
+      # Disable fail-fast so that one matrix-job failing doesn't make the other
+      # ones end early.
+      fail-fast: false
 
     name: Build and test ${{ matrix.os }} ${{ matrix.browser }}
     runs-on: ${{ matrix.os }}
@@ -60,3 +64,4 @@ jobs:
         uses: ./src/.github/workflows/custom-actions/test-player
         with:
           browser: ${{ matrix.browser }}
+          extra_flags: ${{ matrix.extra_flags }}
