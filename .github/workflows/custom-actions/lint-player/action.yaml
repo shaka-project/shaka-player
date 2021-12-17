@@ -1,11 +1,11 @@
 name: Lint Shaka Player
 
-# TODO: description
+description: A reusable action to lint and check Shaka Player.
 
-# TODO: is this... really it? no need to manually wget dependencies?
+# TODO: test this with a purposeful linter error
 
 runs:
-  using: composite # TODO: what does this mean?
+  using: composite
   steps:
     - name: Lint
       shell: bash

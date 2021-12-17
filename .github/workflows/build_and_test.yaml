@@ -1,7 +1,7 @@
 name: Build and Test PR
 
 on:
-  # TODO: pull-request trigger (and test it with a fake PR)
+  # TODO: add pull-request trigger (and test it with a fake PR)
   workflow_dispatch: # Allows for manual triggering.
     inputs:
       ref:
@@ -22,7 +22,6 @@ jobs:
           # can tell which files have changed.
           fetch-depth: 2 # TODO: do I still need this?
 
-      # TODO: test this by adding a purposeful linter error
       - name: Lint
         uses: ./src/.github/workflows/custom-actions/lint-player
 
@@ -42,6 +41,8 @@ jobs:
         include:
           - os: ubuntu-latest
             extra_flags: "--use-xvfb"
+          - os: macos-latest
+            extra_flags: "--quick"
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
       fail-fast: false

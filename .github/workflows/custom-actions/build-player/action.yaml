@@ -1,13 +1,9 @@
 name: Build Shaka Player
 
-# TODO: description
-
-# TODO: use the input parameters
-
-# TODO: what build parameters should be applied?
+description: A reusable action to build Shaka Player.
 
 runs:
-  using: composite # TODO: what does this mean?
+  using: composite
   steps:
     - name: Build
       shell: bash
