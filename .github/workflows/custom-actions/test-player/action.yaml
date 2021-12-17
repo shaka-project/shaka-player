@@ -15,6 +15,7 @@ inputs:
 
 # TODO: try non-headless chrome/firefox on mac? see if that makes everything
 # better?
+# TODO: I'm testing this out with "--drm" disabled
 
 runs:
   using: composite # TODO: what does this mean?
@@ -24,6 +25,6 @@ runs:
       run: |
         cd src/
         echo "::group::Running tests"
-        build/test.py --browsers ${{ inputs.browser }} --drm --reporter spec \
+        build/test.py --browsers ${{ inputs.browser }} --reporter spec \
             ${{ inputs.extra_flags }}
         echo "::endgroup::"
