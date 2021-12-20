@@ -171,8 +171,9 @@ NOTES:
 |HLS       |**Y**     |**Y**    |**Y** ¹  | -        |
 
 NOTES:
- - ¹: We support FairPlay through MSE/EME when available, and fallback to
- Apple's native HLS player with `com.apple.fps.1_0` keySystem otherwise.
+ - ¹: We support FairPlay through MSE/EME when available and when
+   `useNativeHlsOnSafari` is turned off. Otherwise, we are using
+   Apple's native HLS player.
 
 
 ## Media container and subtitle support

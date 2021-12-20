@@ -1,10 +1,6 @@
 # FairPlay Support
 
 We support FairPlay with EME on compatible environments or native `src=`.
-
-You should provide configuration for `com.apple.fps` and `com.apple.fps.1_0`
-if you want both EME and native support.
-
 Adding FairPlay support involves a bit more work than other key systems.
 
 ## Server certificate
@@ -28,7 +24,7 @@ player.configure('drm.advanced.com\\.apple\\.fps\\.serverCertificateUri',
 
 ## Content ID
 
-Note: This is specific for legacy `com.apple.fps.1_0` keySystem fallback
+Note: This is specific when legacy Apple Media Keys is used.
 
 Some FairPlay content use custom signaling for the content ID.  The content ID
 is used by the browser to generate the license request.  If you don't use the
