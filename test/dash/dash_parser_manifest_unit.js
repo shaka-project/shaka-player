@@ -1874,7 +1874,7 @@ describe('DashParser Manifest', () => {
       '      <Accessibility schemeIdUri="urn:mpeg:dash:role:2011" ',
       '          value="captions" />',
       '      <Accessibility schemeIdUri="urn:mpeg:dash:role:2011" ',
-      '          value="forced_subtitle" />',
+      '          value="forced-subtitle" />',
       '      <Accessibility schemeIdUri="foobar" value="bar" />',
       '      <Representation id="text-en" mimeType="text/webvtt">',
       '        <BaseURL>t-en.vtt</BaseURL>',
@@ -1894,7 +1894,7 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const textStream = manifest.textStreams[0];
-    expect(textStream.roles).toEqual(['captions', 'forced_subtitle']);
+    expect(textStream.roles).toEqual(['captions', 'forced-subtitle']);
     expect(textStream.forced).toBe(true);
   });
 
