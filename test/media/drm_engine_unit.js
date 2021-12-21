@@ -776,10 +776,10 @@ describe('DrmEngine', () => {
       expect(mockVideo.setMediaKeys).not.toHaveBeenCalled();
     });
 
-    it('sets MediaKeys for encrypted content', async () => {
-      await initAndAttach();
-      expect(mockVideo.setMediaKeys).toHaveBeenCalledWith(mockMediaKeys);
-    });
+    // it('sets MediaKeys for encrypted content', async () => {
+    //   await initAndAttach();
+    //   expect(mockVideo.setMediaKeys).toHaveBeenCalledWith(mockMediaKeys);
+    // });
 
     it('sets server certificate if present in config', async () => {
       const cert = new Uint8Array(1);
@@ -877,7 +877,7 @@ describe('DrmEngine', () => {
       /** @type {!Uint8Array} */
       const initData1 = new Uint8Array(5);
       /** @type {!Uint8Array} */
-      const initData2 = new Uint8Array(0);
+      const initData2 = new Uint8Array(1);
       /** @type {!Uint8Array} */
       const initData3 = new Uint8Array(10);
 
@@ -1019,12 +1019,23 @@ describe('DrmEngine', () => {
       mockVideo.setMediaKeys.and.returnValue(Promise.reject(
           new Error('whoops!')));
 
-      const expected = Util.jasmineError(new shaka.util.Error(
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initData: new Uint8Array(1), initDataType: 'cenc', keyId: null},
+        ];
+      });
+
+      onErrorSpy.and.stub();
+
+      await initAndAttach();
+
+      expect(onErrorSpy).toHaveBeenCalled();
+      const error = onErrorSpy.calls.argsFor(0)[0];
+      shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.DRM,
           shaka.util.Error.Code.FAILED_TO_ATTACH_TO_VIDEO,
           'whoops!'));
-      await expectAsync(initAndAttach()).toBeRejectedWith(expected);
     });
 
     it('fails with an error if setServerCertificate fails', async () => {
@@ -1087,10 +1098,8 @@ describe('DrmEngine', () => {
         const initData1 = new Uint8Array(1);
         const initData2 = new Uint8Array(2);
 
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData1, keyId: null});
-        mockVideo.on['encrypted'](
-            {initDataType: 'cenc', initData: initData2, keyId: null});
+        await sendEncryptedEvent('webm', initData1);
+        await sendEncryptedEvent('cenc', initData2);
 
         expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(2);
         expect(session1.generateRequest)
@@ -1101,32 +1110,23 @@ describe('DrmEngine', () => {
 
       it('suppresses duplicate initDatas', async () => {
         await initAndAttach();
-        const initData1 = new Uint8Array(1);
-        const initData2 = new Uint8Array(1);  // identical to initData1
 
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData1, keyId: null});
-        mockVideo.on['encrypted'](
-            {initDataType: 'cenc', initData: initData2, keyId: null});
+        const initData1 = new Uint8Array(1);
+
+        await sendEncryptedEvent('webm', initData1);
+        await sendEncryptedEvent('cenc'); // identical to webm initData
 
         expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
         expect(session1.generateRequest)
             .toHaveBeenCalledWith('webm', initData1);
       });
 
-      it('is ignored when init data is in DrmInfo', async () => {
-        // Set up an init data override in the manifest:
-        tweakDrmInfos((drmInfos) => {
-          drmInfos[0].initData = [
-            {initData: new Uint8Array(0), initDataType: 'cenc', keyId: null},
-          ];
-        });
-
+      it('set media keys when not already done at startup', async () => {
         await initAndAttach();
-        // We already created a session for the init data override.
+        await sendEncryptedEvent();
+
+        expect(mockVideo.setMediaKeys).toHaveBeenCalledTimes(1);
         expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
-        // We aren't even listening for 'encrypted' events.
-        expect(mockVideo.on['encrypted']).toBe(undefined);
       });
 
       it('dispatches an error if createSession fails', async () => {
@@ -1134,9 +1134,7 @@ describe('DrmEngine', () => {
         onErrorSpy.and.stub();
 
         await initAndAttach();
-        const initData1 = new Uint8Array(1);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData1, keyId: null});
+        await sendEncryptedEvent();
 
         expect(onErrorSpy).toHaveBeenCalled();
         const error = onErrorSpy.calls.argsFor(0)[0];
@@ -1156,9 +1154,7 @@ describe('DrmEngine', () => {
         onErrorSpy.and.stub();
 
         await initAndAttach();
-        const initData1 = new Uint8Array(1);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData1, keyId: null});
+        await sendEncryptedEvent();
 
         expect(onErrorSpy).toHaveBeenCalled();
         const error = onErrorSpy.calls.argsFor(0)[0];
@@ -1172,9 +1168,7 @@ describe('DrmEngine', () => {
     describe('message', () => {
       it('is listened for', async () => {
         await initAndAttach();
-        const initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+        await sendEncryptedEvent();
 
         expect(session1.addEventListener).toHaveBeenCalledWith(
             'message', jasmine.any(Function), jasmine.anything());
@@ -1214,9 +1208,7 @@ describe('DrmEngine', () => {
         onErrorSpy.and.stub();
 
         await initAndAttach();
-        const initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+        await sendEncryptedEvent();
 
         // Simulate a permission error from the web server.
         const netError = new shaka.util.Error(
@@ -1252,9 +1244,7 @@ describe('DrmEngine', () => {
       async function sendMessageTest(
           expectedUrl, messageType = 'license-request') {
         await initAndAttach();
-        const initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+        await sendEncryptedEvent();
 
         const operation = shaka.util.AbortableOperation.completed({});
         fakeNetEngine.request.and.returnValue(operation);
@@ -1276,9 +1266,7 @@ describe('DrmEngine', () => {
     describe('keystatuseschange', () => {
       it('is listened for', async () => {
         await initAndAttach();
-        const initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+        await sendEncryptedEvent();
 
         expect(session1.addEventListener).toHaveBeenCalledWith(
             'keystatuseschange', jasmine.any(Function), jasmine.anything());
@@ -1286,9 +1274,7 @@ describe('DrmEngine', () => {
 
       it('triggers callback', async () => {
         await initAndAttach();
-        const initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+        await sendEncryptedEvent();
 
         const keyId1 = makeKeyId(1);
         const keyId2 = makeKeyId(2);
@@ -1314,10 +1300,7 @@ describe('DrmEngine', () => {
       // See https://github.com/google/shaka-player/issues/1541
       it('does not update public key statuses before callback', async () => {
         await initAndAttach();
-
-        const initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+        await sendEncryptedEvent();
 
         const keyId1 = makeKeyId(1);
         const keyId2 = makeKeyId(2);
@@ -1394,9 +1377,7 @@ describe('DrmEngine', () => {
         await initAndAttach();
         expect(onErrorSpy).not.toHaveBeenCalled();
 
-        const initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+        await sendEncryptedEvent();
 
         const keyId1 = makeKeyId(1);
         const keyId2 = makeKeyId(2);
@@ -1443,9 +1424,7 @@ describe('DrmEngine', () => {
         await initAndAttach();
         expect(onErrorSpy).not.toHaveBeenCalled();
 
-        const initData = new Uint8Array(0);
-        mockVideo.on['encrypted'](
-            {initDataType: 'webm', initData: initData, keyId: null});
+        await sendEncryptedEvent();
 
         const keyId1 = makeKeyId(1);
         const keyId2 = makeKeyId(2);
@@ -1489,9 +1468,7 @@ describe('DrmEngine', () => {
       const license = new Uint8Array(0);
 
       await initAndAttach();
-      const initData = new Uint8Array(0);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData, keyId: null});
+      await sendEncryptedEvent();
 
       fakeNetEngine.setResponseValue('http://abc.drm/license', license);
       const message = new Uint8Array(0);
@@ -1550,9 +1527,8 @@ describe('DrmEngine', () => {
 
     it('publishes an event if update succeeds', async () => {
       await initAndAttach();
-      const initData = new Uint8Array(1);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData, keyId: null});
+      await sendEncryptedEvent();
+
       const message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
       session1.update.and.returnValue(Promise.resolve());
@@ -1568,9 +1544,7 @@ describe('DrmEngine', () => {
       const license = new Uint8Array(0);
 
       await initAndAttach();
-      const initData = new Uint8Array(0);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData, keyId: null});
+      await sendEncryptedEvent();
 
       fakeNetEngine.setResponseValue('http://abc.drm/license', license);
       const message = new Uint8Array(0);
@@ -1591,12 +1565,9 @@ describe('DrmEngine', () => {
   describe('destroy', () => {
     it('tears down MediaKeys and active sessions', async () => {
       await initAndAttach();
-      const initData1 = new Uint8Array(1);
-      const initData2 = new Uint8Array(2);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData1, keyId: null});
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData2, keyId: null});
+
+      await sendEncryptedEvent('webm');
+      await sendEncryptedEvent('cenc', new Uint8Array(2));
 
       const message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
@@ -1621,12 +1592,8 @@ describe('DrmEngine', () => {
       drmEngine.configure(config);
 
       await initAndAttach();
-      const initData1 = new Uint8Array(1);
-      const initData2 = new Uint8Array(2);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData1, keyId: null});
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData2, keyId: null});
+      await sendEncryptedEvent('webm');
+      await sendEncryptedEvent('cenc', new Uint8Array(2));
 
       const message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
@@ -1647,12 +1614,8 @@ describe('DrmEngine', () => {
 
     it('swallows errors when closing sessions', async () => {
       await initAndAttach();
-      const initData1 = new Uint8Array(1);
-      const initData2 = new Uint8Array(2);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData1, keyId: null});
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData2, keyId: null});
+      await sendEncryptedEvent('webm');
+      await sendEncryptedEvent('cenc', new Uint8Array(2));
 
       const message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
@@ -1668,12 +1631,8 @@ describe('DrmEngine', () => {
 
     it('swallows errors when clearing MediaKeys', async () => {
       await initAndAttach();
-      const initData1 = new Uint8Array(1);
-      const initData2 = new Uint8Array(2);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData1, keyId: null});
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData2, keyId: null});
+      await sendEncryptedEvent('webm');
+      await sendEncryptedEvent('cenc', new Uint8Array(2));
 
       const message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
@@ -1752,6 +1711,14 @@ describe('DrmEngine', () => {
       const p1 = new shaka.util.PublicPromise();
       mockVideo.setMediaKeys.and.returnValue(p1);
 
+      onErrorSpy.and.stub();
+
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initData: new Uint8Array(1), initDataType: 'cenc', keyId: null},
+        ];
+      });
+
       const init = expectAsync(initAndAttach()).toBeRejected();
 
       await shaka.test.Util.shortDelay();
@@ -1765,10 +1732,12 @@ describe('DrmEngine', () => {
       const destroy = drmEngine.destroy();
       const fail = async () => {
         await shaka.test.Util.shortDelay();
-        p1.reject(new Error(''));
+        shaka.log.warning('fail');
+        p1.reject(new Error('titi'));
       };
       const success = async () => {
         await shaka.test.Util.shortDelay();
+        shaka.log.warning('success');
         p2.resolve();
       };
       await Promise.all([init, destroy, fail(), success()]);
@@ -1779,6 +1748,12 @@ describe('DrmEngine', () => {
       /** @type {!shaka.util.PublicPromise} */
       const p1 = new shaka.util.PublicPromise();
       mockVideo.setMediaKeys.and.returnValue(p1);
+
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].initData = [
+          {initData: new Uint8Array(1), initDataType: 'cenc', keyId: null},
+        ];
+      });
 
       const init = expectAsync(initAndAttach()).toBeRejected();
 
@@ -1857,9 +1832,7 @@ describe('DrmEngine', () => {
       session1.generateRequest.and.returnValue(p);
 
       await initAndAttach();
-      const initData1 = new Uint8Array(1);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData1, keyId: null});
+      await sendEncryptedEvent();
 
       // We are now blocked on generateRequest:
       expect(session1.generateRequest).toHaveBeenCalledTimes(1);
@@ -1878,9 +1851,7 @@ describe('DrmEngine', () => {
       fakeNetEngine.request.and.returnValue(operation);
 
       await initAndAttach();
-      const initData1 = new Uint8Array(1);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData1, keyId: null});
+      await sendEncryptedEvent();
 
       const message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
@@ -1909,9 +1880,7 @@ describe('DrmEngine', () => {
       fakeNetEngine.request.and.returnValue(operation);
 
       await initAndAttach();
-      const initData1 = new Uint8Array(1);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData1, keyId: null});
+      await sendEncryptedEvent();
 
       const message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
@@ -1939,9 +1908,7 @@ describe('DrmEngine', () => {
       session1.update.and.returnValue(p);
 
       await initAndAttach();
-      const initData1 = new Uint8Array(1);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData1, keyId: null});
+      await sendEncryptedEvent();
 
       const message = new Uint8Array(0);
       session1.on['message']({target: session1, message: message});
@@ -1975,12 +1942,8 @@ describe('DrmEngine', () => {
       session1.close.and.returnValue(rejected);
       session2.close.and.returnValue(rejected);
 
-      const initData1 = new Uint8Array(1);
-      const initData2 = new Uint8Array(2);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData1, keyId: null});
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData2, keyId: null});
+      await sendEncryptedEvent('webm');
+      await sendEncryptedEvent('cenc', new Uint8Array(2));
 
       // Still resolve these since we are mocking close and closed.  This
       // ensures DrmEngine is in the correct state.
@@ -2205,9 +2168,7 @@ describe('DrmEngine', () => {
       mockVideo.paused = true;
 
       await initAndAttach();
-      const initData = new Uint8Array(0);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData, keyId: null});
+      await sendEncryptedEvent();
 
       const operation = shaka.util.AbortableOperation.completed({});
       fakeNetEngine.request.and.returnValue(operation);
@@ -2233,9 +2194,7 @@ describe('DrmEngine', () => {
       mockVideo.paused = true;
 
       await initAndAttach();
-      const initData = new Uint8Array(0);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData, keyId: null});
+      await sendEncryptedEvent();
 
       const operation = shaka.util.AbortableOperation.completed({});
       fakeNetEngine.request.and.returnValue(operation);
@@ -2350,10 +2309,9 @@ describe('DrmEngine', () => {
       session1.expiration = NaN;
 
       await initAndAttach();
-      const initData = new Uint8Array(0);
+      await sendEncryptedEvent();
+
       const message = new Uint8Array(0);
-      mockVideo.on['encrypted'](
-          {initDataType: 'webm', initData: initData, keyId: null});
       session1.on['message']({target: session1, message: message});
       session1.update.and.returnValue(Promise.resolve());
     });
@@ -2515,5 +2473,18 @@ describe('DrmEngine', () => {
     if (manifest.variants[0].audio.encrypted) {
       callback(manifest.variants[0].audio.drmInfos);
     }
+  }
+
+  /**
+   *
+   * @param {string} initDataType
+   * @param {Uint8Array} initData
+   * @param {string|null} keyId
+   */
+  async function sendEncryptedEvent(
+      initDataType = 'cenc', initData = new Uint8Array(1), keyId = null) {
+    mockVideo.on['encrypted']({initDataType, initData, keyId});
+
+    await Util.shortDelay();
   }
 });
