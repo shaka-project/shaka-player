@@ -776,11 +776,6 @@ describe('DrmEngine', () => {
       expect(mockVideo.setMediaKeys).not.toHaveBeenCalled();
     });
 
-    // it('sets MediaKeys for encrypted content', async () => {
-    //   await initAndAttach();
-    //   expect(mockVideo.setMediaKeys).toHaveBeenCalledWith(mockMediaKeys);
-    // });
-
     it('sets server certificate if present in config', async () => {
       const cert = new Uint8Array(1);
       config.advanced['drm.abc'] = createAdvancedConfig(cert);
