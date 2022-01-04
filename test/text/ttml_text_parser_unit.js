@@ -476,6 +476,15 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports comments in the body', () => {
+    verifyHelper(
+        [],
+        '<tt><body><div>' +
+        '<!-- text-based TTML -->' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('parses alignment from textAlign attribute of a region', () => {
     verifyHelper(
         [
