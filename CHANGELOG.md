@@ -1,3 +1,60 @@
+## 3.2.2 (2022-01-06)
+
+Bugfixes:
+  - Allow comments in the TTML parser
+    - https://github.com/google/shaka-player/issues/3766
+    - https://github.com/google/shaka-player/pull/3827
+  - Fix HDR signalling via essential or supplemental property
+    - https://github.com/google/shaka-player/issues/3726
+    - https://github.com/google/shaka-player/pull/3727
+  - Fix MediaCapabilities polyfill on Playstation 5
+    - https://github.com/google/shaka-player/issues/3582
+    - https://github.com/google/shaka-player/pull/3808
+  - Add DASH MIME type mapping for src= playback
+    - https://github.com/google/shaka-player/pull/3805
+  - Fix captions not working after a period transition on live DASH streams
+    - https://github.com/google/shaka-player/issues/3783
+    - https://github.com/google/shaka-player/pull/3801
+  - Fix timestamp offset of CEA-608 cues
+    - https://github.com/google/shaka-player/issues/3782
+  - Force caption update when removing cues
+  - Fixes parsing of HLS 'DEFAULT' attribute
+    - https://github.com/google/shaka-player/issues/3769
+    - https://github.com/google/shaka-player/pull/3771
+  - support stpp.ttml codec in Mp4TtmlParser
+    - https://github.com/google/shaka-player/pull/3754
+  - Fix Russian translation
+    - https://github.com/google/shaka-player/pull/3751
+  - Fix HLS VOD duration
+    - https://github.com/google/shaka-player/issues/3733
+  - Query HDR transfer function
+    - https://github.com/google/shaka-player/issues/3729
+    - https://github.com/google/shaka-player/pull/3730
+  - Fix styling of UI text cues
+    - https://github.com/google/shaka-player/issues/3521
+    - https://github.com/google/shaka-player/issues/3600
+    - https://github.com/google/shaka-player/issues/3713
+  - Fix seek range issues on transition from live to VOD
+    - https://github.com/google/shaka-player/issues/3675
+  - Enforce string-format of event data keys
+    - https://github.com/google/shaka-player/issues/3710
+  - Fix vp09 playback on webOS
+    - https://github.com/google/shaka-player/pull/3566
+  - Dedupe DRM init data
+    - https://github.com/google/shaka-player/pull/3695
+  - Failover in geo-redundant streams
+    - https://github.com/google/shaka-player/pull/3587
+  - Update Cast receiver ID for v3.2
+
+Demo App:
+  - Fix 'Tears of Steel (live, DASH, Server Side ads)'
+    - https://github.com/google/shaka-player/pull/3758
+
+Docs:
+  - Fix typo in Fairplay tutorial
+    - https://github.com/google/shaka-player/pull/3714
+
+
 ## 3.2.1 (2021-10-13)
 
 Bugfixes:
