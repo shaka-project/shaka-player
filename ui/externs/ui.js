@@ -79,6 +79,7 @@ shaka.extern.UIVolumeBarColors;
  *   trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
  *   fadeDelay: number,
  *   doubleClickForFullscreen: boolean,
+ *   singleClickForPlayAndPause: boolean,
  *   enableKeyboardPlaybackControls: boolean,
  *   enableFullscreenOnRotation: boolean,
  *   forceLandscapeOnFullscreen: boolean,
@@ -153,6 +154,9 @@ shaka.extern.UIVolumeBarColors;
  * @property {boolean} doubleClickForFullscreen
  *   Whether or not double-clicking on the UI should cause it to enter
  *   fullscreen.
+ *   Defaults to true.
+ * @property {boolean} singleClickForPlayAndPause
+ *   Whether or not clicking on the video should cause it to play or pause.
  *   Defaults to true.
  * @property {boolean} enableKeyboardPlaybackControls
  *   Whether or not playback controls via keyboard is enabled, such as seek

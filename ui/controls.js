@@ -1178,7 +1178,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (this.anySettingsMenusAreOpen()) {
       this.hideSettingsMenusTimer_.tickNow();
-    } else {
+    } else if (this.config_.singleClickForPlayAndPause) {
       this.onPlayPauseClick_();
     }
   }

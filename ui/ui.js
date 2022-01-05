@@ -233,6 +233,7 @@ shaka.ui.Overlay = class {
       trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
       doubleClickForFullscreen: true,
+      singleClickForPlayAndPause: true,
       enableKeyboardPlaybackControls: true,
       enableFullscreenOnRotation: true,
       forceLandscapeOnFullscreen: true,
