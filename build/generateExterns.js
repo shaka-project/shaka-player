@@ -818,7 +818,7 @@ function main(args) {
   // foo.bar.baz, foo and foo.bar will both need to be declared first.
   const namespaces = new Set();
   const namespaceDeclarations = [];
-  for (const name of names) {
+  for (const name of Array.from(names).sort()) {
     // Add the full name "foo.bar.baz" and its prototype ahead of time.  We
     // should never generate these as namespaces.
     namespaces.add(name);
