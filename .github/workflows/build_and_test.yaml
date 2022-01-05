@@ -55,7 +55,9 @@ jobs:
       - name: Update Firefox
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'FirefoxHeadless'
         shell: bash
-        run: sudo apt -y update && sudo apt -y upgrade
+        run: |
+          sudo apt -y update && sudo apt -y upgrade
+          sudo apt -y install ffmpeg
         # TODO: "sudo-apt update" and "sudo-apt upgrade" step for ubuntu
         # if the firefox version isn't latest
         # TODO: if that doesn't work, add a step to install a new version of
