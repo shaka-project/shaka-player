@@ -1,3 +1,42 @@
+## 3.0.15 (2022-01-06)
+
+Bugfixes:
+  - Allow comments in the TTML parser
+    - https://github.com/google/shaka-player/issues/3766
+    - https://github.com/google/shaka-player/pull/3827
+  - Add DASH MIME type mapping for src= playback
+    - https://github.com/google/shaka-player/pull/3805
+  - Fix captions not working after a period transition on live DASH streams
+    - https://github.com/google/shaka-player/issues/3783
+    - https://github.com/google/shaka-player/pull/3801
+  - Force caption update when removing cues
+  - Fixes parsing of HLS 'DEFAULT' attribute
+    - https://github.com/google/shaka-player/issues/3769
+    - https://github.com/google/shaka-player/pull/3771
+  - support stpp.ttml codec in Mp4TtmlParser
+    - https://github.com/google/shaka-player/pull/3754
+  - Fix Russian translation
+    - https://github.com/google/shaka-player/pull/3751
+  - Made HLS notify segments after fit
+    - https://github.com/google/shaka-player/issues/3733
+  - Fix seek range issues on transition from live to VOD
+    - https://github.com/google/shaka-player/issues/3675
+  - Enforce string-format of event data keys
+    - https://github.com/google/shaka-player/issues/3710
+  - Dedupe DRM init data
+    - https://github.com/google/shaka-player/pull/3695
+  - Failover in geo-redundant streams
+    - https://github.com/google/shaka-player/pull/3587
+
+Demo App:
+  - Fix 'Tears of Steel (live, DASH, Server Side ads)'
+    - https://github.com/google/shaka-player/pull/3758
+
+Docs:
+  - Fix typo in Fairplay tutorial
+    - https://github.com/google/shaka-player/pull/3714
+
+
 ## 3.0.14 (2021-10-13)
 
 Bugfixes:
