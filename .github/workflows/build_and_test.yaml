@@ -52,6 +52,20 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Update Firefox
+        if: matrix.os == 'ubuntu-latest'
+        if: matrix.browser == 'FirefoxHeadless'
+        shell: bash
+        run: sudo apt -y update && sudo apt -y upgrade
+        # TODO: "sudo-apt update" and "sudo-apt upgrade" step for ubuntu
+        # if the firefox version isn't latest
+        # TODO: if that doesn't work, add a step to install a new version of
+        # headless firefox, like a flat-pack or something
+        # TODO: the command:
+        #     sudo apt -y update && sudo apt -y upgrade
+        # maybe also:
+        #     sudo apt -y install ffmpeg
+
       - name: Checkout code
         uses: actions/checkout@v2
         with:
