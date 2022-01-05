@@ -53,8 +53,7 @@ jobs:
 
     steps:
       - name: Update Firefox
-        if: matrix.os == 'ubuntu-latest'
-        if: matrix.browser == 'FirefoxHeadless'
+        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'FirefoxHeadless'
         shell: bash
         run: sudo apt -y update && sudo apt -y upgrade
         # TODO: "sudo-apt update" and "sudo-apt upgrade" step for ubuntu
