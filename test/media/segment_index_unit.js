@@ -941,11 +941,28 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(Array.from(metaIndex)).toEqual(oldRefs);
 
       // Every 0.1 seconds, return the next new ref.
-      index1.updateEvery(0.1, () => {
-        return [newRefs.shift()];
+      const done = new Promise((resolve, reject) => {
+        index1.updateEvery(0.1, () => {
+          if (newRefs.length == 0) {
+            resolve();
+          }
+          return [newRefs.shift()];
+        });
       });
       // Wait long enough for all three new refs to be appended.
-      await shaka.test.Util.delay(0.5);
+      // Or for all of the new refs to be passed out.
+      await Promise.race([shaka.test.Util.delay(1), done]);
+
+      // TODO: hum...
+      // sometimes the meta index is missing the last entry?
+      // specifically, the entry at 80s-90s
+      // which is the last of the three refs in inputRefs2
+      // so for this to fail about half the time, but by exactly ONE
+      // that means that... the update period is wrong?
+      // it does append the first two reliably, it seems...
+      // does this mean that shaka.util.Timer does not work reliably?
+      // that's weird
+      // I wonder if making the delay longer would help... let's try that
 
       expect(Array.from(metaIndex)).toEqual(oldRefs.concat(inputRefs2));
     });
