@@ -52,20 +52,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Update Firefox
+      # Firefox on Ubuntu appears to not have the right things installed in
+      # whatever machines are used for GitHub actions, so make sure that ffmpeg
+      # is installed, so the codecs the tests assume work actually work.
+      - name: Install FFmpeg
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'FirefoxHeadless'
         shell: bash
-        run: |
-          sudo apt -y update && sudo apt -y upgrade
-          sudo apt -y install ffmpeg
-        # TODO: "sudo-apt update" and "sudo-apt upgrade" step for ubuntu
-        # if the firefox version isn't latest
-        # TODO: if that doesn't work, add a step to install a new version of
-        # headless firefox, like a flat-pack or something
-        # TODO: the command:
-        #     sudo apt -y update && sudo apt -y upgrade
-        # maybe also:
-        #     sudo apt -y install ffmpeg
+        run: sudo apt -y install ffmpeg
 
       - name: Checkout code
         uses: actions/checkout@v2
