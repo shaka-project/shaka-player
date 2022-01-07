@@ -29,29 +29,34 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         include:
+          # Linux. Run headless browsers here, using xvfb.
           - os: ubuntu-latest
-            # Use headless browsers on Linux.
-            browser:
-              - "ChromeHeadless"
-              - "FirefoxHeadless"
-              - "EdgeHeadless"
+            browser: FirefoxHeadless
             extra_flags: "--use-xvfb"
+          - os: ubuntu-latest
+            browser: ChromeHeadless
+            extra_flags: "--use-xvfb"
+
+          # macOS. Run with --quick for now, since the integration tests crash.
+          # TODO: Figure out the source of the crash and fix that instead.
           - os: macos-latest
-            browser:
-              - "Firefox"
-              - "Chrome"
-              - "Safari"
-            # The integration tests don't work so well in macOS, especially for
-            # Firefox (where they crash the browser), so disable them.
+            browser: Firefox
             extra_flags: "--quick"
-            # TODO: Fix this failure, instead.
+          - os: macos-latest
+            browser: Chrome
+            extra_flags: "--quick"
+          - os: macos-latest
+            browser: Safari
+            extra_flags: "--quick"
+
+          # Windows. No special configuration values needed.
           - os: windows-latest
-            browser:
-              - "Firefox"
-              - "Chrome"
-              - "Edge"
+            browser: Firefox
+          - os: windows-latest
+            browser: Chrome
+          - os: windows-latest
+            browser: Edge
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
       fail-fast: false
