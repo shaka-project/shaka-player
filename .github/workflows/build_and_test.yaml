@@ -30,20 +30,19 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        browser: ["ChromeHeadless", "FirefoxHeadless", "EdgeHeadless"]
-        exclude:
-          - os: ubuntu-latest
-            browser: EdgeHeadless
-          - os: macos-latest
-            browser: EdgeHeadless
         include:
           - os: ubuntu-latest
+            # Use headless browsers on Linux.
+            browser: ["ChromeHeadless", "FirefoxHeadless", "EdgeHeadless"]
             extra_flags: "--use-xvfb"
           - os: macos-latest
+            browser: ["Firefox", "Chrome", "Safari"]
             # The integration tests don't work so well in macOS, especially for
             # Firefox (where they crash the browser), so disable them.
             extra_flags: "--quick"
             # TODO: Fix this failure, instead.
+          - os: windows-latest
+            browser: ["Firefox", "Chrome", "Edge"]
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
       fail-fast: false
