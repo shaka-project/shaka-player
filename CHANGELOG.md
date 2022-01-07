@@ -1,3 +1,57 @@
+## 3.3.0 (2022-01-07)
+
+New Features:
+  - Adds singleClickForPlayAndPause config
+    - https://github.com/google/shaka-player/issues/3821
+  - Add media quality change events
+    - https://github.com/google/shaka-player/pull/3700
+  - Add Common Media Client Data (CMCD) logging support
+    - https://github.com/google/shaka-player/issues/3619
+    - https://github.com/google/shaka-player/pull/3662
+  - Adds advanced ABR config options
+    - https://github.com/google/shaka-player/issues/3422
+    - https://github.com/google/shaka-player/pull/3706
+  - Integrate with non-linear IMA CS ads
+    - https://github.com/google/shaka-player/pull/3639
+  - Add a config to dispatch all emsg boxes
+    - https://github.com/google/shaka-player/issues/3348
+    - https://github.com/google/shaka-player/pull/3653
+  - Added Loop and PIP to context menu, and Statistics to overflow menu
+    - https://github.com/google/shaka-player/pull/3578
+  - Export LanguageUtils
+    - https://github.com/google/shaka-player/issues/3692
+  - Add randomUUID polyfill
+    - https://github.com/google/shaka-player/pull/3669
+  - Export individual polyfill install methods
+    - https://github.com/google/shaka-player/pull/3660
+  - Make default HLS audio/video codecs configurable
+    - https://github.com/google/shaka-player/pull/3651
+  - Add response HTTP status to Networking engine responses
+    - https://github.com/google/shaka-player/issues/3640
+    - https://github.com/google/shaka-player/pull/3641
+  - Create segment index only when used
+  - Partially support tts:textOutline
+    - https://github.com/google/shaka-player/issues/3612
+  - Add tooltips to control panel buttons
+    - https://github.com/google/shaka-player/pull/3572
+  - Add configurable rates
+    - https://github.com/google/shaka-player/pull/3579
+  - Add blob-url support
+    - https://github.com/google/shaka-player/issues/1481
+    - https://github.com/google/shaka-player/pull/3583
+  - Add updateStartTime method to play
+    - https://github.com/google/shaka-player/pull/3491
+  - Add right-click context menu, statistics button
+    - https://github.com/google/shaka-player/issues/2607
+    - https://github.com/google/shaka-player/pull/3548
+  - Added events for download lifecycle
+    - https://github.com/google/shaka-player/issues/3533
+  - Add Quality, Language, Playback, Captions buttons to control panel
+    - https://github.com/google/shaka-player/pull/3465
+  - Add goToLive method
+    - https://github.com/google/shaka-player/pull/3527
+
+
 ## 3.2.2 (2022-01-06)
 
 Bugfixes:
