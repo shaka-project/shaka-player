@@ -10,6 +10,5 @@
     flags you want.
 
 ## Workflows
-  - On PR:
-    - 'build_and_test.yaml':
-      Lints the player, and builds and tests each combination of OS and browser.
+  - 'build_and_test.yaml':
+    Lints the player, and builds and tests each combination of OS and browser.
