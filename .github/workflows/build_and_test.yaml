@@ -17,13 +17,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          path: src
           ref: ${{ github.event.inputs.ref || github.ref }}
-          # This makes the merge base available for the C++ linter, so that it
-          # can tell which files have changed.
 
       - name: Lint
-        uses: ./src/.github/workflows/custom-actions/lint-player
+        shell: bash
+        run: build/check.py
 
   build_and_test:
     # Don't waste time doing a full matrix of test runs when there was an
@@ -45,6 +43,7 @@ jobs:
             # The integration tests don't work so well in macOS, especially for
             # Firefox (where they crash the browser), so disable them.
             extra_flags: "--quick"
+            # TODO: Fix this failure, instead.
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
       fail-fast: false
@@ -69,10 +68,12 @@ jobs:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
       - name: Build Player
-        uses: ./src/.github/workflows/custom-actions/build-player
+        shell: bash
+        run: build/build.py
 
       - name: Test Player
         uses: ./src/.github/workflows/custom-actions/test-player
-        with:
-          browser: ${{ matrix.browser }}
-          extra_flags: ${{ matrix.extra_flags }}
+        shell: bash
+        run: |
+          build/test.py --browsers ${{ matrix.browser }} --reporter spec --drm \
+            ${{ matrix.extra_flags }}

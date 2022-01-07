@@ -1,13 +1,4 @@
-# Github Actions CLI
-
-## Actions
-  - 'custom-actions/lint-player/':
-    Lints Shaka Player. 
-  - 'custom-actions/build-player/'
-    Builds Shaka Player.
-  - 'custom-actions/test-player/'
-    Tests Shaka Player. You can pass in the browser, as well as any arbitrary
-    flags you want.
+# Github Actions
 
 ## Workflows
   - 'build_and_test.yaml':
