@@ -1,7 +1,8 @@
 name: Build and Test PR
 
 on:
-  # TODO: add pull-request trigger (and test it with a fake PR)
+  pull_request: # Trigger for pull requests.
+    types: [opened, synchronize, reopened]
   workflow_dispatch: # Allows for manual triggering.
     inputs:
       ref:
@@ -53,8 +54,9 @@ jobs:
 
     steps:
       # Firefox on Ubuntu appears to not have the right things installed in
-      # whatever machines are used for GitHub actions, so make sure that ffmpeg
-      # is installed, so the codecs the tests assume work actually work.
+      # the environment used by GitHub actions, so make sure that ffmpeg is
+      # installed. Otherwise, the browser might not support some codecs that the
+      # tests assume will be supported.
       - name: Install FFmpeg
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'FirefoxHeadless'
         shell: bash

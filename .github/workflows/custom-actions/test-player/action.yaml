@@ -2,9 +2,6 @@ name: Test Shaka Player
 
 description: A reusable action to run tests on Shaka Player.
 
-# TODO: use "--random" maybe?
-# TODO: use "--external" maybe?
-
 inputs:
   browser:
     description: The browser to run the test on.
