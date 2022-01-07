@@ -68,10 +68,10 @@ jobs:
 
       - name: Build Player
         shell: bash
-        run: src/build/build.py
+        run: ../build/build.py
 
       - name: Test Player
         shell: bash
         run: |
-          src/build/test.py --browsers ${{ matrix.browser }} \
+          ../build/test.py --browsers ${{ matrix.browser }} \
             --reporter spec --drm ${{ matrix.extra_flags }}
