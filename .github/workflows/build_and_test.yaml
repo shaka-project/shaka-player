@@ -68,13 +68,10 @@ jobs:
 
       - name: Build Player
         shell: bash
+        run: build/all.py
+
+      - name: Test Player
+        shell: bash
         run: |
-          cd build/
-          ls
-      #     build/build.py
-      #
-      # - name: Test Player
-      #   shell: bash
-      #   run: |
-      #     build/test.py --browsers ${{ matrix.browser }} \
-      #       --reporter spec --drm ${{ matrix.extra_flags }}
+          build/test.py --browsers ${{ matrix.browser }} \
+            --reporter spec --drm ${{ matrix.extra_flags }}
