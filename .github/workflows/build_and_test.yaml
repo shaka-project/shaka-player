@@ -68,12 +68,10 @@ jobs:
 
       - name: Build Player
         shell: bash
-        run: |
-          pwd
-          # build/build.py
+        run: shaka-player/build/build.py
 
-      # - name: Test Player
-      #   shell: bash
-      #   run: |
-      #     build/test.py --browsers ${{ matrix.browser }} \
-      #       --reporter spec --drm ${{ matrix.extra_flags }}
+      - name: Test Player
+        shell: bash
+        run: |
+          shaka-player/build/test.py --browsers ${{ matrix.browser }} \
+            --reporter spec --drm ${{ matrix.extra_flags }}
