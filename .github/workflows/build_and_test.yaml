@@ -46,9 +46,6 @@ jobs:
           - os: macos-latest
             browser: Chrome
             extra_flags: "--quick"
-          - os: macos-latest
-            browser: Safari
-            extra_flags: "--quick"
 
           # Windows. No special configuration values needed.
           - os: windows-latest
