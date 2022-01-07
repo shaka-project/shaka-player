@@ -30,7 +30,7 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        browsers: ["Firefox", "Chrome"]
+        browser: ["Firefox", "Chrome"]
         include:
           # Run Linux with xvfb, so they're headless.
           - os: ubuntu-latest
