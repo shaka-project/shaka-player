@@ -21,7 +21,7 @@ jobs:
 
       - name: Lint
         shell: bash
-        run: build/check.py
+        run: src/build/check.py
 
   build_and_test:
     # Don't waste time doing a full matrix of test runs when there was an
@@ -64,15 +64,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          path: src
           ref: ${{ github.event.inputs.ref || github.ref }}
 
       - name: Build Player
         shell: bash
-        run: build/build.py
+        run: src/build/build.py
 
       - name: Test Player
         shell: bash
         run: |
-          build/test.py --browsers ${{ matrix.browser }} --reporter spec --drm \
-            ${{ matrix.extra_flags }}
+          src/build/test.py --browsers ${{ matrix.browser }} \
+            --reporter spec --drm ${{ matrix.extra_flags }}
