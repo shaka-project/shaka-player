@@ -72,7 +72,6 @@ jobs:
         run: build/build.py
 
       - name: Test Player
-        uses: ./src/.github/workflows/custom-actions/test-player
         shell: bash
         run: |
           build/test.py --browsers ${{ matrix.browser }} --reporter spec --drm \
