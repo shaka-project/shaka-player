@@ -21,7 +21,7 @@ jobs:
 
       - name: Lint
         shell: bash
-        run: src/build/check.py
+        run: build/check.py
 
   build_and_test:
     # Don't waste time doing a full matrix of test runs when there was an
