@@ -55,7 +55,7 @@ jobs:
       # installed. Otherwise, the browser might not support some codecs that the
       # tests assume will be supported.
       - name: Install FFmpeg
-        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'FirefoxHeadless'
+        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
         shell: bash
         run: sudo apt -y install ffmpeg
 
