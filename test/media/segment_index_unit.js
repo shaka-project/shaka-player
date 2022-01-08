@@ -941,11 +941,17 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(Array.from(metaIndex)).toEqual(oldRefs);
 
       // Every 0.1 seconds, return the next new ref.
-      index1.updateEvery(0.1, () => {
-        return [newRefs.shift()];
+      const done = new Promise((resolve, reject) => {
+        index1.updateEvery(0.1, () => {
+          if (newRefs.length == 0) {
+            resolve();
+          }
+          return [newRefs.shift()];
+        });
       });
       // Wait long enough for all three new refs to be appended.
-      await shaka.test.Util.delay(0.5);
+      // Or for all of the new refs to be passed out.
+      await Promise.race([shaka.test.Util.delay(1), done]);
 
       expect(Array.from(metaIndex)).toEqual(oldRefs.concat(inputRefs2));
     });
