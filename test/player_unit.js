@@ -1092,8 +1092,8 @@ describe('Player', () => {
         // Image tracks
         manifest.addImageStream(53, (stream) => {
           stream.originalId = 'thumbnail';
-          stream.width = 100;
-          stream.height = 200;
+          stream.width = 200;
+          stream.height = 400;
           stream.bandwidth = 10;
           stream.mimeType = 'image/jpeg';
           stream.tilesLayout = '1x1';
@@ -1503,8 +1503,8 @@ describe('Player', () => {
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 10,
-          width: 100,
-          height: 200,
+          width: 200,
+          height: 400,
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
@@ -3537,6 +3537,8 @@ describe('Player', () => {
 
         await player.load(fakeManifestUri, 0, fakeMimeType);
 
+        expect(player.getImageTracks()[0].width).toBe(100);
+        expect(player.getImageTracks()[0].height).toBe(50);
         const thumbnail0 = await player.getThumbnails(5, 0);
         const thumbnail1 = await player.getThumbnails(5, 11);
         const thumbnail2 = await player.getThumbnails(5, 21);
