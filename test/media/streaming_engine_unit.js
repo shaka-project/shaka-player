@@ -822,6 +822,53 @@ describe('StreamingEngine', () => {
         .toHaveBeenCalledWith('video', 0, lt20, gt40);
   });
 
+  // Regression test for https://github.com/google/shaka-player/issues/3717
+  it('applies fudge factors for the duration', async () => {
+    setupVod();
+
+    // In #3717, the duration was just barely large enough to encompass an
+    // additional segment, but that segment didn't exist, so playback never
+    // completed.  Here, we set the duration to just beyond the 3rd segment, and
+    // we make the 4th segment fail when requested.
+    const duration = 30.000000005;
+    timeline.getDuration.and.returnValue(duration);
+
+    const targetUri = '1_video_3';  // The URI of the 4th video segment.
+    failRequestsForTarget(netEngine, targetUri);
+
+    mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+    createStreamingEngine();
+
+    // Here we go!
+    streamingEngine.switchVariant(variant);
+    streamingEngine.switchTextStream(textStream);
+    await streamingEngine.start();
+    playing = true;
+    await runTest();
+
+    // The end of the stream should have been reached, and the 4th segment from
+    // each type should never have been requested.
+    expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
+
+    const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+    netEngine.expectRequest('0_audio_0', segmentType);
+    netEngine.expectRequest('0_video_0', segmentType);
+    netEngine.expectRequest('0_text_0', segmentType);
+
+    netEngine.expectRequest('0_audio_1', segmentType);
+    netEngine.expectRequest('0_video_1', segmentType);
+    netEngine.expectRequest('0_text_1', segmentType);
+
+    netEngine.expectRequest('1_audio_2', segmentType);
+    netEngine.expectRequest('1_video_2', segmentType);
+    netEngine.expectRequest('1_text_2', segmentType);
+
+    netEngine.expectNoRequest('1_audio_3', segmentType);
+    netEngine.expectNoRequest('1_video_3', segmentType);
+    netEngine.expectNoRequest('1_text_3', segmentType);
+  });
+
   it('does not buffer one media type ahead of another', async () => {
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -3386,6 +3433,40 @@ describe('StreamingEngine', () => {
   function slideSegmentAvailabilityWindow() {
     segmentAvailability.start++;
     segmentAvailability.end++;
+  }
+
+  /**
+   * @param {!shaka.test.FakeNetworkingEngine} netEngine A NetworkingEngine
+   *   look-alike.
+   * @param {string} targetUri
+   * @param {shaka.util.Error.Code=} errorCode
+   */
+  function failRequestsForTarget(
+      netEngine, targetUri, errorCode=shaka.util.Error.Code.BAD_HTTP_STATUS) {
+    // eslint-disable-next-line no-restricted-syntax
+    const originalNetEngineRequest = netEngine.request.bind(netEngine);
+
+    netEngine.request = jasmine.createSpy('request').and.callFake(
+        (requestType, request) => {
+          if (request.uris[0] == targetUri) {
+            const data = [targetUri];
+
+            if (errorCode == shaka.util.Error.Code.BAD_HTTP_STATUS) {
+              data.push(404);
+              data.push('');
+            }
+
+            // The compiler still sees the error code parameter as potentially
+            // undefined, even though we gave it a default value.
+            goog.asserts.assert(errorCode != undefined, 'Undefined error code');
+
+            return shaka.util.AbortableOperation.failed(new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.NETWORK,
+                errorCode, data));
+          }
+          return originalNetEngineRequest(requestType, request);
+        });
   }
 
   /**
