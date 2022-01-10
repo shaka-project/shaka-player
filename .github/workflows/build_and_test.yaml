@@ -35,10 +35,6 @@ jobs:
           # Run Linux with xvfb, so they're headless.
           - os: ubuntu-latest
             extra_flags: "--use-xvfb"
-          # Run macOS with --quick for now, since the integration tests crash.
-          # TODO: Figure out the source of the crash and fix that instead.
-          - os: macos-latest
-            extra_flags: "--quick"
           # Also test Edge on Windows.
           - os: windows-latest
             browser: Edge
