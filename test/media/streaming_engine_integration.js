@@ -287,7 +287,7 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
       video.play();
-      await waiter.timeoutAfter(90).waitForEnd(video);
+      await waiter.timeoutAfter(120).waitForEnd(video);
     });
 
     it('plays at high playback rates', async () => {
