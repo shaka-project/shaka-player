@@ -1,5 +1,15 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /**
- *  @externs
+ * @fileoverview Externs for CMCD data.
+ * @see https://github.com/google/shaka-player/issues/3619
+ * @see https://cdn.cta.tech/cta/media/media/resources/standards/pdfs/cta-5004-final.pdf
+ *
+ * @externs
  */
 
 /**
