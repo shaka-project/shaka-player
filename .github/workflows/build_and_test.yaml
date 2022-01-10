@@ -1,0 +1,75 @@
+name: Build and Test PR
+
+on:
+  pull_request: # Trigger for pull requests.
+    types: [opened, synchronize, reopened]
+  workflow_dispatch: # Allows for manual triggering.
+    inputs:
+      ref:
+        description: "The ref to build and test."
+        required: False
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Lint
+        shell: bash
+        run: build/check.py
+
+  build_and_test:
+    # Don't waste time doing a full matrix of test runs when there was an
+    # obvious linter error.
+    needs: lint
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        browser: ["Firefox", "Chrome"]
+        include:
+          # Run Linux with xvfb, so they're headless.
+          - os: ubuntu-latest
+            extra_flags: "--use-xvfb"
+          # Run macOS with --quick for now, since the integration tests crash.
+          # TODO: Figure out the source of the crash and fix that instead.
+          - os: macos-latest
+            extra_flags: "--quick"
+          # Also test Edge on Windows.
+          - os: windows-latest
+            browser: Edge
+      # Disable fail-fast so that one matrix-job failing doesn't make the other
+      # ones end early.
+      fail-fast: false
+
+    name: Build and test ${{ matrix.os }} ${{ matrix.browser }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # Firefox on Ubuntu appears to not have the right things installed in
+      # the environment used by GitHub actions, so make sure that ffmpeg is
+      # installed. Otherwise, the browser might not support some codecs that the
+      # tests assume will be supported.
+      - name: Install FFmpeg
+        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
+        shell: bash
+        run: sudo apt -y install ffmpeg
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Build Player
+        shell: bash
+        run: build/all.py
+
+      - name: Test Player
+        shell: bash
+        run: |
+          build/test.py --browsers ${{ matrix.browser }} \
+            --reporter spec --drm ${{ matrix.extra_flags }}

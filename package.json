@@ -1,7 +1,7 @@
 {
   "name": "shaka-player",
   "description": "DASH/EME video player library",
-  "version": "3.3.0-pre",
+  "version": "3.4.0-pre",
   "homepage": "https://github.com/google/shaka-player",
   "author": "Google",
   "maintainers": [
@@ -12,6 +12,7 @@
   ],
   "devDependencies": {
     "@chiragrupani/karma-chromium-edge-launcher": "^2.1.0",
+    "@onslip/karma-safari-launcher": "^1.0.1",
     "@teppeis/clutz": "^1.0.29-4c95e12.v20190929",
     "awesomplete": "^1.1.4",
     "babel-core": "^6.26.3",
@@ -44,7 +45,6 @@
     "karma-jasmine": "^3.3.1",
     "karma-jasmine-ajax": "^0.1.13",
     "karma-opera-launcher": "^1.0.0",
-    "karma-safari-launcher": "^1.0.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "0.0.32",
     "karma-webdriver-launcher": "^1.0.8",
