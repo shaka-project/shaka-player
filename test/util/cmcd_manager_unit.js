@@ -42,6 +42,14 @@ describe('CmcdManager', () => {
                      'sid%3D%22c936730c-031e-4a73-976f-92bc34039c60%22';
       expect(query).toBe(result);
     });
+
+    it('escapes reserve character in string values', () => {
+      const query = CmcdManager.toQuery({
+        'com.test-escape': 'Double "Quotes"',
+      });
+      const result = 'CMCD=com.test-escape%3D%22Double%20%5C%22Quotes%5C%22%22';
+      expect(query).toBe(result);
+    });
   });
 
   describe('Header serialization', () => {
