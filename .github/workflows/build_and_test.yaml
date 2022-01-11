@@ -20,8 +20,7 @@ jobs:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
       - name: Lint
-        shell: bash
-        run: build/check.py
+        run: python build/check.py
 
   build_and_test:
     # Don't waste time doing a full matrix of test runs when there was an
@@ -30,14 +29,18 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        browser: ["Firefox", "Chrome"]
+        browser: ["Chrome", "Firefox", "Edge", "Safari"]
+        exclude:
+          - os: ubuntu-latest
+            browser: Edge
+          - os: windows-latest
+            browser: Safari
+          - os: ubuntu-latest
+            browser: Safari
         include:
-          # Run Linux with xvfb, so they're headless.
+          # Run Linux browsers with xvfb, so they're in a headless X session.
           - os: ubuntu-latest
             extra_flags: "--use-xvfb"
-          # Also test Edge on Windows.
-          - os: windows-latest
-            browser: Edge
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
       fail-fast: false
@@ -52,7 +55,6 @@ jobs:
       # tests assume will be supported.
       - name: Install FFmpeg
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
-        shell: bash
         run: sudo apt -y install ffmpeg
 
       - name: Checkout code
@@ -61,11 +63,8 @@ jobs:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
       - name: Build Player
-        shell: bash
-        run: build/all.py
+        run: python build/all.py
 
       - name: Test Player
-        shell: bash
         run: |
-          build/test.py --browsers ${{ matrix.browser }} \
-            --reporter spec --drm ${{ matrix.extra_flags }}
+          python build/test.py --browsers ${{ matrix.browser }} --reporter spec --drm ${{ matrix.extra_flags }}
