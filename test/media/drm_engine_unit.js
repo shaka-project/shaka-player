@@ -37,7 +37,7 @@ function testDrmEngine(useMediaCapabilities) {
       navigator.requestMediaKeySystemAccess;
   const originalLogError = shaka.log.error;
   const originalBatchTime = shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME;
-  const originalDecodingInfo = window.shakaMediaCapabilities.decodingInfo;
+  const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
 
   /** @type {!jasmine.Spy} */
   let requestMediaKeySystemAccessSpy;
@@ -88,7 +88,7 @@ function testDrmEngine(useMediaCapabilities) {
     navigator.requestMediaKeySystemAccess =
         shaka.test.Util.spyFunc(requestMediaKeySystemAccessSpy);
     decodingInfoSpy = jasmine.createSpy('decodingInfo');
-    window.shakaMediaCapabilities.decodingInfo =
+    navigator.mediaCapabilities.decodingInfo =
         shaka.test.Util.spyFunc(decodingInfoSpy);
 
     logErrorSpy = jasmine.createSpy('shaka.log.error');
@@ -165,7 +165,7 @@ function testDrmEngine(useMediaCapabilities) {
 
     navigator.requestMediaKeySystemAccess =
         originalRequestMediaKeySystemAccess;
-    window.shakaMediaCapabilities.decodingInfo = originalDecodingInfo;
+    navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
     shaka.log.error = originalLogError;
   });
 
