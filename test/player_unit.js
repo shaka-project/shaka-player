@@ -36,7 +36,7 @@ describe('Player', () => {
   const originalLogWarn = shaka.log.warning;
   const originalLogAlwaysWarn = shaka.log.alwaysWarn;
   const originalIsTypeSupported = window.MediaSource.isTypeSupported;
-  const originalDecodingInfo = window.shakaMediaCapabilities.decodingInfo;
+  const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
 
   const fakeManifestUri = 'fake-manifest-uri';
   const fakeMimeType = 'application/test';
@@ -93,7 +93,7 @@ describe('Player', () => {
     // Since this is not an integration test, we don't want MediaCapabilities to
     // fail assertions based on browser support for types.  Pretend that all
     // video and audio types are supported.
-    window.shakaMediaCapabilities.decodingInfo = async (config) => {
+    navigator.mediaCapabilities.decodingInfo = async (config) => {
       await Promise.resolve();
       const videoType = config['video'] ?
           config['video'].contentType.split('/')[0] : null;
@@ -177,7 +177,7 @@ describe('Player', () => {
       shaka.log.alwaysWarn = originalLogAlwaysWarn;
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
       shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
-      window.shakaMediaCapabilities.decodingInfo = originalDecodingInfo;
+      navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
     }
   });
 
@@ -1092,8 +1092,8 @@ describe('Player', () => {
         // Image tracks
         manifest.addImageStream(53, (stream) => {
           stream.originalId = 'thumbnail';
-          stream.width = 100;
-          stream.height = 200;
+          stream.width = 200;
+          stream.height = 400;
           stream.bandwidth = 10;
           stream.mimeType = 'image/jpeg';
           stream.tilesLayout = '1x1';
@@ -1503,8 +1503,8 @@ describe('Player', () => {
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 10,
-          width: 100,
-          height: 200,
+          width: 200,
+          height: 400,
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
@@ -2463,7 +2463,7 @@ describe('Player', () => {
     it('throws CONTENT_UNSUPPORTED_BY_BROWSER', async () => {
       window.MediaSource.isTypeSupported = (mimeType) => false;
 
-      window.shakaMediaCapabilities.decodingInfo = async (config) => {
+      navigator.mediaCapabilities.decodingInfo = async (config) => {
         await Promise.resolve();
         return {supported: false};
       };
@@ -2827,7 +2827,7 @@ describe('Player', () => {
         });
       });
 
-      window.shakaMediaCapabilities.decodingInfo = async (config) => {
+      navigator.mediaCapabilities.decodingInfo = async (config) => {
         await Promise.resolve();
         const videoType = config['video'] ? config['video'].contentType : '';
         if (videoType.includes('video') &&
@@ -3537,6 +3537,8 @@ describe('Player', () => {
 
         await player.load(fakeManifestUri, 0, fakeMimeType);
 
+        expect(player.getImageTracks()[0].width).toBe(100);
+        expect(player.getImageTracks()[0].height).toBe(50);
         const thumbnail0 = await player.getThumbnails(5, 0);
         const thumbnail1 = await player.getThumbnails(5, 11);
         const thumbnail2 = await player.getThumbnails(5, 21);
