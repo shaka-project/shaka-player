@@ -1124,6 +1124,9 @@ shakaDemo.Main = class {
     if (document.fullscreenElement) {
       document.exitFullscreen();
     }
+    if (this.video_.webkitDisplayingFullscreen) {
+      this.video_.webkitExitFullscreen();
+    }
     if (document.pictureInPictureElement) {
       document.exitPictureInPicture();
     }
