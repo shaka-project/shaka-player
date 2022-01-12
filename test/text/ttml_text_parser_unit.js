@@ -1655,6 +1655,66 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  // Regression test for https://github.com/google/shaka-player/issues/3743
+  it('inherits styles from other styles on nestedCues', () => {
+    verifyHelper(
+        [
+          {
+            // p element
+            startTime: 0,
+            endTime: 60,
+            payload: '',
+            fontSize: '',
+            nestedCues: [
+              {
+                startTime: 0,
+                endTime: 60,
+                payload: 'A',
+                fontSize: '16px',
+              },
+              {
+                startTime: 0,
+                endTime: 60,
+                payload: '',
+                fontSize: '',
+              },
+              {
+                startTime: 0,
+                endTime: 60,
+                payload: 'B',
+                fontSize: '16px',
+              },
+            ],
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head>' +
+        '  <styling>' +
+        '   <style tts:backgroundColor="rgba(0,0,0,100)" ' +
+        '          tts:displayAlign="center" ' +
+        '          tts:extent="80% 10%" ' +
+        '          tts:fontFamily="proportionalSansSerif" ' +
+        '          tts:fontSize="16px" ' +
+        '          tts:origin="10% 85%" ' +
+        '          tts:textAlign="center" ' +
+        '          xml:id="backgroundStyle"/>' +
+        '   <style style="backgroundStyle" ' +
+        '          tts:backgroundColor="transparent" ' +
+        '          tts:color="white" ' +
+        '          xml:id="speakerStyle"/>' +
+        '  </styling>' +
+        '  <layout>' +
+        '    <region style="speakerStyle" tts:zIndex="1" xml:id="speaker"/>' +
+        '  </layout>' +
+        '</head>' +
+        '<body><div>' +
+        '  <p begin="00:00" end="01:00" region="speaker">' +
+        '    A<br/>B' +
+        '  </p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   /**
    * @param {!Array} cues
    * @param {string} text
