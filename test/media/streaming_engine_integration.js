@@ -419,8 +419,9 @@ describe('StreamingEngine', () => {
       //   3. Playhead seeks to force us back inside the window
       //   4. (maybe) seek if there is a gap at the period boundary
       //   5. (maybe) seek to flush a pipeline stall
+      //   6. (maybe) on slower platforms (e.g. GitHub actions)
       expect(seekCount).toBeGreaterThan(2);
-      expect(seekCount).toBeLessThan(6);
+      expect(seekCount).toBeLessThan(7);
     });
   });
 
