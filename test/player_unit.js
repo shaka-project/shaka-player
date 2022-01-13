@@ -3544,24 +3544,32 @@ describe('Player', () => {
         const thumbnail2 = await player.getThumbnails(5, 21);
         const thumbnail5 = await player.getThumbnails(5, 51);
         expect(thumbnail0).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
           positionX: 0,
           positionY: 0,
           width: 100,
           height: 50,
         }));
         expect(thumbnail1).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
           positionX: 100,
           positionY: 0,
           width: 100,
           height: 50,
         }));
         expect(thumbnail2).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
           positionX: 0,
           positionY: 50,
           width: 100,
           height: 50,
         }));
         expect(thumbnail5).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
           positionX: 100,
           positionY: 100,
           width: 100,
