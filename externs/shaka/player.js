@@ -1207,6 +1207,8 @@ shaka.extern.LanguageRole;
 
 /**
  * @typedef {{
+ *   imageHeight: number,
+ *   imageWidth: number,
  *   height: number,
  *   positionX: number,
  *   positionY: number,
@@ -1216,6 +1218,12 @@ shaka.extern.LanguageRole;
  *   width: number
  * }}
  *
+ * @property {number} imageHeight
+ *    The image height in px. The image height could be different to height if
+ *    the layout is different to 1x1.
+ * @property {number} imageWidth
+ *    The image width in px. The image width could be different to width if
+ *    the layout is different to 1x1.
  * @property {number} height
  *    The thumbnail height in px.
  * @property {number} positionX
