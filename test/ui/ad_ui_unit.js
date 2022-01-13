@@ -15,7 +15,17 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.util.EventManager');
 goog.requireType('shaka.ui.Localization');
 
-describe('Ad UI', () => {
+/** @return {boolean} */
+function skipIfNoLess() {
+  if (!(window['less'])) {
+    // Sometimes, in GitHub actions test runs, "less" is not loaded by now.
+    // In that case, just skip these tests.
+    return false;
+  }
+  return true;
+}
+
+filterDescribe('Ad UI', skipIfNoLess, () => {
   const UiUtils = shaka.test.UiUtils;
   /** @type {!HTMLLinkElement} */
   let cssLink;
@@ -27,7 +37,6 @@ describe('Ad UI', () => {
   let ad;
   /** @type {!shaka.test.FakeAdManager} */
   let adManager;
-
 
   beforeAll(async () => {
     // Add css file
