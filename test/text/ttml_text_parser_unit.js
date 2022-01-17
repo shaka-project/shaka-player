@@ -1227,6 +1227,33 @@ describe('TtmlTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('allows old-standard namespace', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 1,
+            endTime: 2,
+            payload: 'Test',
+            cellResolution: {
+              columns: 60,
+              rows: 20,
+            },
+            fontSize: '67%',
+          },
+        ],
+        '<tt ' +
+        'xmlns:ttp="http://www.w3.org/2006/10/ttaf1#parameter" ' +
+        'xmlns:tts="http://www.w3.org/2006/10/ttaf1#styling" ' +
+        'ttp:cellResolution="60 20">' +
+        '<styling>' +
+        '<style xml:id="s1" tts:fontSize="67%"/>' +
+        '</styling>' +
+        '<body><div>' +
+        '<p begin="00:01.00" end="00:02.00" style="s1">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
   it('parses cue alignment from textAlign attribute', () => {
     verifyHelper(
         [
