@@ -64,6 +64,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.eventManager.listen(this.player, 'texttrackvisibility', () => {
       this.onCaptionStateChange_();
+      this.updateTextLanguages_();
     });
 
     this.eventManager.listen(this.player, 'textchanged', () => {
