@@ -33,6 +33,8 @@ describe('HlsParser', () => {
   let segmentData;
   /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
+  /** @type {!Uint8Array} */
+  let aes128Key;
 
   afterEach(() => {
     shaka.log.alwaysWarn = originalAlwaysWarn;
@@ -74,6 +76,11 @@ describe('HlsParser', () => {
 
     selfInitializingSegmentData =
         shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
+
+    aes128Key = new Uint8Array([
+      0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+    ]);
 
     fakeNetEngine = new shaka.test.FakeNetworkingEngine();
 
@@ -2426,7 +2433,7 @@ describe('HlsParser', () => {
     expect(initSegments[1].getUris()[0]).toBe('test:/init2.mp4');
   });
 
-  it('drops variants encrypted with AES-128', async () => {
+  it('parses variants encrypted with AES-128', async () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
@@ -2435,10 +2442,15 @@ describe('HlsParser', () => {
       '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1,mp4a",',
       'RESOLUTION=960x540,FRAME-RATE=120,AUDIO="aud2"\n',
       'video2\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=120,AUDIO="aud3"\n',
+      'video3\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
       'URI="audio"\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud2",LANGUAGE="fr",',
       'URI="audio2"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud3",LANGUAGE="de",',
+      'URI="audio3"\n',
     ].join('');
 
     const media = [
@@ -2450,15 +2462,24 @@ describe('HlsParser', () => {
       'main.mp4',
     ].join('');
 
-    const mediaWithAesEncryption = [
+    const mediaWithMp4AesEncryption = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
       '#EXT-X-KEY:METHOD=AES-128,',
-      'URI="800k.key\n',
+      'URI="800k.key"\n',
       '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
       'main.mp4',
+    ].join('');
+
+    const mediaWithTSAesEncryption = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-KEY:METHOD=AES-128,',
+      'URI="800k.key"\n',
+      '#EXTINF:5,\n',
+      'main.ts',
     ].join('');
 
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -2472,6 +2493,15 @@ describe('HlsParser', () => {
           stream.language = 'en';
         });
       });
+      manifest.addPartialVariant((variant) => {
+        variant.bandwidth = 300;
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.size(960, 540);
+        });
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.language = 'de';
+        });
+      });
       manifest.sequenceMode = true;
     });
 
@@ -2479,12 +2509,15 @@ describe('HlsParser', () => {
         .setResponseText('test:/master', master)
         .setResponseText('test:/audio', media)
         .setResponseText('test:/audio2', media)
+        .setResponseText('test:/audio3', media)
         .setResponseText('test:/video', media)
-        .setResponseText('test:/video2', mediaWithAesEncryption)
+        .setResponseText('test:/video2', mediaWithMp4AesEncryption)
+        .setResponseText('test:/video3', mediaWithTSAesEncryption)
         .setResponseText('test:/main.vtt', vttText)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData)
         .setResponseValue('test:/main.test', segmentData)
+        .setResponseValue('test:/800k.key', aes128Key)
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
@@ -2668,7 +2701,9 @@ describe('HlsParser', () => {
           .setResponseText('test:/video', media)
           .setResponseValue('test:/main.exe', segmentData)
           .setResponseValue('test:/init.mp4', initSegmentData)
-          .setResponseValue('test:/main.mp4', segmentData);
+          .setResponseValue('test:/main.mp4', segmentData)
+          .setResponseValue('data:text/plain;base64,AAECAwQFBgcICQoLDA0ODw==',
+              aes128Key);
 
       await expectAsync(parser.start('test:/master', playerInterface))
           .toBeRejectedWith(Util.jasmineError(error));
@@ -2702,7 +2737,7 @@ describe('HlsParser', () => {
       await verifyError(master, media, error);
     });
 
-    it('if all variants are encrypted with AES-128', async () => {
+    it('if all variants are encrypted with AES-128 and used MP4', async () => {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
@@ -2715,7 +2750,7 @@ describe('HlsParser', () => {
         '#EXT-X-TARGETDURATION:6\n',
         '#EXT-X-PLAYLIST-TYPE:VOD\n',
         '#EXT-X-KEY:METHOD=AES-128,',
-        'URI="data:text/plain;base64\n',
+        'URI="data:text/plain;base64,AAECAwQFBgcICQoLDA0ODw=="\n',
         '#EXT-X-MAP:URI="init.mp4"\n',
         '#EXTINF:5,\n',
         '#EXT-X-BYTERANGE:121090@616\n',

@@ -239,6 +239,33 @@ shaka.extern.CreateSegmentIndexFunction;
 
 /**
  * @typedef {{
+ *   method: string,
+ *   cryptoKey: !webCrypto.CryptoKey,
+ *   iv: (!Uint8Array|undefined),
+ *   firstMediaSequenceNumber: number
+ * }}
+ *
+ * @description
+ * AES-128 key and iv info from the HLS manifest.
+ *
+ * @property {string} method
+ *   The key method defined in the HLS manifest.
+ * @property {!webCrypto.CryptoKey} cryptoKey
+ *   Web crypto key object of the AES-128 CBC key.
+ * @property {(!Uint8Array|undefined)} iv
+ *   The IV in the HLS manifest if defined. See HLS RFC 8216 Section 5.2 for
+ *   handling undefined IV.
+ * @property {number} firstMediaSequenceNumber
+ *   The starting Media Sequence Number of the playlist, used when IV is
+ *   undefined.
+ *
+ * @exportDoc
+ */
+shaka.extern.HlsAes128Key;
+
+
+/**
+ * @typedef {{
  *   id: number,
  *   originalId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
@@ -256,6 +283,7 @@ shaka.extern.CreateSegmentIndexFunction;
  *   encrypted: boolean,
  *   drmInfos: !Array.<shaka.extern.DrmInfo>,
  *   keyIds: !Set.<string>,
+ *   hlsAes128Key: (shaka.extern.HlsAes128Key|undefined),
  *   language: string,
  *   label: ?string,
  *   type: string,
@@ -336,6 +364,9 @@ shaka.extern.CreateSegmentIndexFunction;
  *   The stream's key IDs as lowercase hex strings. These key IDs identify the
  *   encryption keys that the browser (key system) can use to decrypt the
  *   stream.
+ * @property {(shaka.extern.HlsAes128Key|undefined)} hlsAes128Key
+ *   <i>Defaults to undefined (i.e., no HLS AES-128 encryption).</i> <br>
+ *   The HLS stream's AES-128-CBC full segment encryption key and iv.
  * @property {string} language
  *   The Stream's language, specified as a language code. <br>
  *   Audio stream's language must be identical to the language of the containing
