@@ -91,7 +91,7 @@ describe('SimpleAbrManager', () => {
     config.defaultBandwidthEstimate = 3e6;
     abrManager.configure(config);
     const chosen = abrManager.chooseVariant();
-    expect(chosen.id).toBe(104);
+    expect(chosen.id).toBe(103);
   });
 
   it('can handle empty variants', () => {
@@ -208,7 +208,7 @@ describe('SimpleAbrManager', () => {
     abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // Expect variants 4 to be chosen
-    const expectedVariant = variants[4];
+    const expectedVariant = variants[3];
 
     expect(switchCallback).toHaveBeenCalledWith(expectedVariant);
   });
