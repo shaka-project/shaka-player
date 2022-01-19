@@ -624,10 +624,19 @@ describe('StreamUtils', () => {
           stream.mimeType = 'image/png';
         });
         manifest.addImageStream(3, (stream) => {
-          stream.mimeType = 'image/jpeg';
+          stream.mimeType = 'image/jpg';
         });
         manifest.addImageStream(4, (stream) => {
+          stream.mimeType = 'image/jpeg';
+        });
+        manifest.addImageStream(5, (stream) => {
           stream.mimeType = 'image/bogus';
+        });
+        manifest.addImageStream(6, (stream) => {
+          stream.mimeType = 'image/avif';
+        });
+        manifest.addImageStream(7, (stream) => {
+          stream.mimeType = 'image/webp';
         });
       });
 
@@ -636,12 +645,19 @@ describe('StreamUtils', () => {
           fakeDrmEngine, noVariant, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
-      // The last two streams should be removed because their full MIME types
-      // are bogus.
-      expect(manifest.imageStreams.length).toBe(3);
-      expect(manifest.imageStreams[0].id).toBe(1);
-      expect(manifest.imageStreams[1].id).toBe(2);
-      expect(manifest.imageStreams[2].id).toBe(3);
+      // The first 4 streams should be there because they are always supported.
+      // The 5th stream should be removed because the MIME type is bogus.
+      // The 6th and 7th streams may be there, based on platform support.
+      expect(manifest.imageStreams).toContain(
+          jasmine.objectContaining({id: 1}));
+      expect(manifest.imageStreams).toContain(
+          jasmine.objectContaining({id: 2}));
+      expect(manifest.imageStreams).toContain(
+          jasmine.objectContaining({id: 3}));
+      expect(manifest.imageStreams).toContain(
+          jasmine.objectContaining({id: 4}));
+      expect(manifest.imageStreams).not.toContain(
+          jasmine.objectContaining({id: 5}));
     });
 
     it('filters transport streams', async () => {
