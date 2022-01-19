@@ -822,8 +822,7 @@ goog.Uri.QueryData.prototype.add = function(key, value) {
 
   if (!this.keyMap_.hasOwnProperty(key)) {
     this.add(key, value);
-  }
-  else {
+  } else {
     this.keyMap_[key] = [value];
   }
 
