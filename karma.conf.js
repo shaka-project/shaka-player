@@ -336,6 +336,10 @@ module.exports = (config) => {
 
   config.set({reporters: reporters});
 
+  if (reporters.includes('spec') && settings.spec_hide_passed) {
+    config.set({specReporter: {suppressPassed: true}});
+  }
+
   if (settings.random) {
     // If --seed was specified use that value, else generate a seed so that the
     // exact order can be reproduced if it catches an issue.

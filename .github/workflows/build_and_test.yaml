@@ -67,4 +67,4 @@ jobs:
 
       - name: Test Player
         run: |
-          python build/test.py --browsers ${{ matrix.browser }} --reporter spec --drm ${{ matrix.extra_flags }}
+          python build/test.py --browsers ${{ matrix.browser }} --reporters spec --spec-hide-passed --drm ${{ matrix.extra_flags }}
