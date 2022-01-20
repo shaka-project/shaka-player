@@ -230,6 +230,11 @@ class Launcher:
         const=2,
         nargs='?')
     running_commands.add_argument(
+        '--spec-hide-passed',
+        help='If provided, configure the spec reporter to hide passing tests.',
+        action='store_true',
+        default=False)
+    running_commands.add_argument(
         '--test-custom-asset',
         help='Run asset playback tests on a custom manifest URI.',
         type=str,
@@ -358,6 +363,7 @@ class Launcher:
       'single_run',
       'uncompiled',
       'delay_tests',
+      'spec_hide_passed',
       'test_custom_asset',
       'test_custom_license_server',
       'test_timeout',
