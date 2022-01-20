@@ -30,7 +30,7 @@ const ACTIONS_BOT = 'github-actions[bot]';
  * release version.
  *
  * @param {string} versionString
- * @return {!Array<number|string>}
+ * @return {Array<number|string>}
  */
 function parseVersion(versionString) {
   const matches = /^v?([0-9]+(?:\.[0-9]+)*)(?:-(.*))?$/.exec(versionString);
@@ -57,8 +57,8 @@ function parseVersion(versionString) {
  * The last item in a version array may be a string (a tag like "beta"), but
  * the rest are numbers.  See notes in parseVersion above for details on tags.
  *
- * @param {!Array<number|string>} a
- * @param {!Array<number|string>} b
+ * @param {Array<number|string>} a
+ * @param {Array<number|string>} b
  * @return {number}
  */
 function compareVersions(a, b) {
@@ -96,8 +96,8 @@ function compareVersions(a, b) {
  * Compare two Dates.  Can be used as a callback to Array.prototype.sort to
  * sort by Dates (ascending).
  *
- * @param {!Array<number|string>} a
- * @param {!Array<number|string>} b
+ * @param {Date} a
+ * @param {Date} b
  * @return {number}
  */
 function compareDates(a, b) {
@@ -142,24 +142,23 @@ class GitHubObject {
     this.id = obj.id;
     /** @type {number} */
     this.number = obj.number;
+    /** @type {Date} */
+    this.createdAt = null;
+    /** @type {number} */
+    this.ageInDays = NaN;
+    /** @type {Date} */
+    this.closedAt = null;
+    /** @type {number} */
+    this.closedDays = NaN;
 
-    if ('created_at' in obj) {
-      /** @type {Date} */
+    if (obj.created_at != null) {
       this.createdAt = new Date(obj.created_at);
-      /** @type {number} */
       this.ageInDays = dateToAgeInDays(this.createdAt);
     }
 
-    if ('closed_at' in obj) {
-      /** @type {Date} */
-      this.closedAt = null;
-      /** @type {number} */
-      this.closedDays = NaN;
-
-      if (obj.closed_at != null) {
-        this.closedAt = new Date(obj.closed_at);
-        this.closedDays = dateToAgeInDays(this.closedAt);
-      }
+    if (obj.closed_at != null) {
+      this.closedAt = new Date(obj.closed_at);
+      this.closedDays = dateToAgeInDays(this.closedAt);
     }
   }
 
@@ -189,7 +188,7 @@ class Milestone extends GitHubObject {
     super(obj);
     /** @type {string} */
     this.title = obj.title;
-    /** @type {!Array<number|string>} */
+    /** @type {Array<number|string>} */
     this.version = parseVersion(obj.title);
     /** @type {boolean} */
     this.closed = obj.state == 'closed';
