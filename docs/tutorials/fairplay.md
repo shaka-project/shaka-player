@@ -24,7 +24,7 @@ player.configure('drm.advanced.com\\.apple\\.fps\\.serverCertificateUri',
 
 ## Content ID
 
-Note: This is specific when legacy Apple Media Keys is used.
+Note: This only applies when legacy Apple Media Keys is used.
 
 Some FairPlay content use custom signaling for the content ID.  The content ID
 is used by the browser to generate the license request.  If you don't use the
