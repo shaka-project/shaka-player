@@ -59,34 +59,21 @@ class _HandleKeyValuePairs(argparse.Action):
     merged[key] = value
     setattr(namespace, self.dest, merged)
 
-class _KeyValidatorType():
-  '''Type to validate the key for a key-value pair against a given string.
+def _KeyValueValidator(argument):
+    '''To validate the option has a key value pair format.
 
-     When you forget to provide a correct key for a key-value pair argument,
-     it reminds you by throwing an error before executing any tests.
-  '''
+      When you forget to provide the option in key=value format,
+      it reminds you by throwing an error before executing any tests.
+    '''
 
-  def __init__(self, expected_key = None):
-    if expected_key is None:
-      raise ValueError('Please provide a key to the _KeyValidatorType constructor')
+    keyValuePair = [str for str in argument.split('=') if str != ''];
 
-    self._expected_key = expected_key
-
-  def __call__(self, argument):
-    if not isinstance(argument, str):
-      raise argparse.ArgumentTypeError('Expecting a string but received %s' % argument)
-    
-    key = argument.split('=')[0]
-
-    if key == self._expected_key:
+    if len(keyValuePair) == 2:
       return argument
     else:
       raise argparse.ArgumentTypeError(
-        'Received %s but expecting %s' % (key, self._expected_key)
+        'Received %s but expecting format of key=value' % argument
       ) 
-
-
-
 
 def _IntGreaterThanZero(x):
   i = int(x)
@@ -267,7 +254,7 @@ class Launcher:
         help='Configure license servers for the custom asset playback test. '
              'May be specified multiple times to configure multiple key '
              'systems.',
-        type=_KeyValidatorType('KEY_SYSTEM_ID'),
+        type=_KeyValueValidator,
         metavar='KEY_SYSTEM_ID=LICENSE_SERVER_URI',
         action=_HandleKeyValuePairs)
     running_commands.add_argument(
