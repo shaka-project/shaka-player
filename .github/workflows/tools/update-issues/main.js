@@ -11,6 +11,7 @@
 const core = require('@actions/core');
 const { Issue, Milestone } = require('./issues.js');
 
+const TYPE_ACCESSIBILITY = 'type: accessibility';
 const TYPE_BUG = 'type: bug';
 const TYPE_CI = 'type: CI';
 const TYPE_CODE_HEALTH = 'type: code health';
@@ -30,6 +31,7 @@ const FLAG_IGNORE = 'flag: bot ignore';
 // Issues of these types default to the next milestone.  See also
 // BACKLOG_PRIORITIES below, which can override the type.
 const LABELS_FOR_NEXT_MILESTONE = [
+  TYPE_ACCESSIBILITY,
   TYPE_BUG,
   TYPE_DOCS,
 ];
