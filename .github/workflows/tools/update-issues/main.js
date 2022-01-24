@@ -19,21 +19,34 @@ const TYPE_ENHANCEMENT = 'type: enhancement';
 const TYPE_PERFORMANCE = 'type: performance';
 const TYPE_QUESTION = 'type: question';
 
+const PRIORITY_P3 = 'priority: P3';
+const PRIORITY_P4 = 'priority: P4';
+
 const STATUS_ARCHIVED = 'status: archived';
 const STATUS_WAITING = 'status: waiting on response';
 
 const FLAG_IGNORE = 'flag: bot ignore';
 
+// Issues of these types default to the next milestone.  See also
+// BACKLOG_PRIORITIES below, which can override the type.
 const LABELS_FOR_NEXT_MILESTONE = [
   TYPE_BUG,
   TYPE_DOCS,
 ];
 
+// Issues of these types default to the backlog.
 const LABELS_FOR_BACKLOG = [
   TYPE_CI,
   TYPE_CODE_HEALTH,
   TYPE_ENHANCEMENT,
   TYPE_PERFORMANCE,
+];
+
+// An issue with one of these priorities will default to the backlog, even if
+// it has one of the types in LABELS_FOR_NEXT_MILESTONE.
+const BACKLOG_PRIORITIES = [
+  PRIORITY_P3,
+  PRIORITY_P4,
 ];
 
 const PING_QUESTION_TEXT =
@@ -91,7 +104,7 @@ async function reopenIssues(issue) {
 }
 
 async function manageWaitingIssues(issue) {
-  // Find all waiting issues.
+  // Filter for waiting issues.
   if (!issue.closed && issue.hasLabel(STATUS_WAITING)) {
     const labelAgeInDays = await issue.getLabelAgeInDays(STATUS_WAITING);
 
@@ -150,7 +163,13 @@ async function maintainMilestones(issue, nextMilestone, backlog) {
   if (!issue.closed) {
     if (issue.hasAnyLabel(LABELS_FOR_NEXT_MILESTONE)) {
       if (!issue.milestone) {
-        await issue.setMilestone(nextMilestone);
+        // Some (low) priority flags will indicate that an issue should go to
+        // the backlog, in spite of its type.
+        if (!issue.hasAnyLabel(BACKLOG_PRIORITIES)) {
+          await issue.setMilestone(backlog);
+        } else {
+          await issue.setMilestone(nextMilestone);
+        }
       }
     } else if (issue.hasAnyLabel(LABELS_FOR_BACKLOG)) {
       if (!issue.milestone) {
@@ -166,9 +185,9 @@ async function maintainMilestones(issue, nextMilestone, backlog) {
 
 
 const ALL_ISSUE_TASKS = [
+  reopenIssues,
   archiveOldIssues,
   unarchiveIssues,
-  reopenIssues,
   manageWaitingIssues,
   cleanUpIssueTags,
   pingQuestions,
