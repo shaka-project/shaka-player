@@ -1,9 +1,10 @@
 {
   "devDependencies": {
     "@actions/core": "^1.6.0",
-    "@actions/github": "^5.0.0"
+    "@actions/github": "^5.0.0",
+    "jasmine": "^4.0.2"
   },
   "scripts": {
-    "test": "true # FIXME - port internal test cases"
+    "test": "jasmine tests.js"
   }
 }
