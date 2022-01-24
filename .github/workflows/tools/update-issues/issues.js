@@ -93,24 +93,23 @@ function compareVersions(a, b) {
 }
 
 /**
- * Compare two Dates.  Can be used as a callback to Array.prototype.sort to
- * sort by Dates (ascending).
+ * Compare two Numbers.  Can be used as a callback to Array.prototype.sort to
+ * sort by number (ascending).
  *
- * @param {Date} a
- * @param {Date} b
+ * @param {Number} a
+ * @param {Number} b
  * @return {number}
  */
-function compareDates(a, b) {
-  // Sort nulls to the end.
-  if (!a && !b) {
+function compareNumbers(a, b) {
+  // Sort NaNs to the end.
+  if (isNaN(a) && isNaN(b)) {
     return 0;
-  } else if (!a) {
+  } else if (isNaN(a)) {
     return 1;
-  } else if (!b) {
+  } else if (isNaN(b)) {
     return -1;
   }
 
-  // Date objects can be compared like numbers.
   if (a < b) {
     return -1;
   } else if (a > b) {
@@ -142,23 +141,17 @@ class GitHubObject {
     this.id = obj.id;
     /** @type {number} */
     this.number = obj.number;
-    /** @type {Date} */
-    this.createdAt = null;
     /** @type {number} */
     this.ageInDays = NaN;
-    /** @type {Date} */
-    this.closedAt = null;
     /** @type {number} */
     this.closedDays = NaN;
 
     if (obj.created_at != null) {
-      this.createdAt = new Date(obj.created_at);
-      this.ageInDays = dateToAgeInDays(this.createdAt);
+      this.ageInDays = dateToAgeInDays(new Date(obj.created_at));
     }
 
     if (obj.closed_at != null) {
-      this.closedAt = new Date(obj.closed_at);
-      this.closedDays = dateToAgeInDays(this.closedAt);
+      this.closedDays = dateToAgeInDays(new Date(obj.closed_at));
     }
   }
 
@@ -254,7 +247,7 @@ class Comment extends GitHubObject {
    */
   static compare(a, b) {
     // Put most recent comments first.
-    return -1 * compareDates(a.createdAt, b.createdAt);
+    return compareNumbers(a.ageInDays, b.ageInDays);
   }
 }
 
@@ -292,7 +285,7 @@ class Event extends GitHubObject {
    */
   static compare(a, b) {
     // Put most recent events first.
-    return -1 * compareDates(a.createdAt, b.createdAt);
+    return compareNumbers(a.ageInDays, b.ageInDays);
   }
 }
 

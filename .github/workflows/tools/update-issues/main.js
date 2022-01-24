@@ -92,7 +92,7 @@ async function reopenIssues(issue) {
     for (const comment of issue.comments) {
       body = comment.body.toLowerCase();
       if (comment.author == issue.author &&
-          comment.createdAt >= issue.closedAt &&
+          comment.ageInDays <= issue.closedDays &&
           body.includes('@shaka-bot') &&
           (body.includes('reopen') || body.includes('re-open'))) {
         core.notice(`Found reopen request for issue #${issue.number}`);
