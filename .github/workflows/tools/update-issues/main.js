@@ -167,7 +167,7 @@ async function maintainMilestones(issue, nextMilestone, backlog) {
       if (!issue.milestone) {
         // Some (low) priority flags will indicate that an issue should go to
         // the backlog, in spite of its type.
-        if (!issue.hasAnyLabel(BACKLOG_PRIORITIES)) {
+        if (issue.hasAnyLabel(BACKLOG_PRIORITIES)) {
           await issue.setMilestone(backlog);
         } else {
           await issue.setMilestone(nextMilestone);
