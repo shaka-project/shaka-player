@@ -1,0 +1,26 @@
+name: Update Issues
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering.
+  schedule:
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
+
+permissions:
+  issues: write
+
+jobs:
+  update-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Update Issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd .github/workflows/tools/update-issues
+          npm install
+          node main.js
