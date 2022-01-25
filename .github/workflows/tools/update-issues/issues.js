@@ -303,6 +303,8 @@ class Issue extends GitHubObject {
     this.locked = obj.locked;
     /** @type {Milestone} */
     this.milestone = obj.milestone ? new Milestone(obj.milestone) : null;
+    /** @type {boolean} */
+    this.isPR = !!obj.pull_request;
   }
 
   /**
@@ -519,9 +521,11 @@ class Issue extends GitHubObject {
 
   /** @return {!Promise<!Array<!Issue>>} */
   static async getAll() {
-    return GitHubObject.getAll(octokit.rest.issues.listForRepo, Issue, {
-      state: 'all',
-    });
+    const all = await GitHubObject.getAll(
+        octokit.rest.issues.listForRepo, Issue, {
+          state: 'all',
+        });
+    return all.filter(issue => !issue.isPR);
   }
 }
 
