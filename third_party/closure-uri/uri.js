@@ -808,6 +808,27 @@ goog.Uri.QueryData.prototype.add = function(key, value) {
   return this;
 };
 
+/**
+ * Sets a key value pair and removes all other keys with the same value.
+ *
+ * @param {string} key Name.
+ * @param {string} value Value.
+ * @return {!goog.Uri.QueryData} Instance of this object.
+ */
+ goog.Uri.QueryData.prototype.set = function(key, value) {
+  this.ensureKeyMapInitialized_();
+  // Invalidate the cache.
+  this.encodedQuery_ = null;
+
+  if (!this.keyMap_.hasOwnProperty(key)) {
+    this.add(key, value);
+  } else {
+    this.keyMap_[key] = [value];
+  }
+
+  return this;
+};
+
 
 /**
  * @return {string} Encoded query string.
