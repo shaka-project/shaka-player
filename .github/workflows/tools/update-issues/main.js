@@ -12,14 +12,19 @@ const core = require('@actions/core');
 const { Issue, Milestone } = require('./issues.js');
 
 const TYPE_ACCESSIBILITY = 'type: accessibility';
+const TYPE_ANNOUNCEMENT = 'type: announcement';
 const TYPE_BUG = 'type: bug';
 const TYPE_CI = 'type: CI';
 const TYPE_CODE_HEALTH = 'type: code health';
 const TYPE_DOCS = 'type: docs';
 const TYPE_ENHANCEMENT = 'type: enhancement';
 const TYPE_PERFORMANCE = 'type: performance';
+const TYPE_PROCESS = 'type: process';
 const TYPE_QUESTION = 'type: question';
 
+const PRIORITY_P0 = 'priority: P0';
+const PRIORITY_P1 = 'priority: P1';
+const PRIORITY_P2 = 'priority: P2';
 const PRIORITY_P3 = 'priority: P3';
 const PRIORITY_P4 = 'priority: P4';
 
@@ -196,24 +201,9 @@ const ALL_ISSUE_TASKS = [
   maintainMilestones,
 ];
 
-async function main() {
-  const milestones = await Milestone.getAll();
-  const issues = await Issue.getAll();
+async function processIssues(issues, nextMilestone, backlog) {
+  let success = true;
 
-  const backlog = milestones.find(m => m.isBacklog());
-  if (!backlog) {
-    core.error('No backlog milestone found!');
-    process.exit(1);
-  }
-
-  milestones.sort(Milestone.compare);
-  const nextMilestone = milestones[0];
-  if (nextMilestone.version == null) {
-    core.error('No version milestone found!');
-    process.exit(1);
-  }
-
-  let failed = false;
   for (const issue of issues) {
     if (issue.hasLabel(FLAG_IGNORE)) {
       core.info(`Ignoring issue #${issue.number}`);
@@ -231,14 +221,59 @@ async function main() {
         core.error(
             `Failed to process issue #${issue.number} in task ${task.name}: ` +
             `${error}\n${error.stack}`);
-        failed = true;
+        success = false;
       }
     }
   }
 
-  if (failed) {
+  return success;
+}
+
+async function main() {
+  const milestones = await Milestone.getAll();
+  const issues = await Issue.getAll();
+
+  const backlog = milestones.find(m => m.isBacklog());
+  if (!backlog) {
+    core.error('No backlog milestone found!');
+    process.exit(1);
+  }
+
+  milestones.sort(Milestone.compare);
+  const nextMilestone = milestones[0];
+  if (nextMilestone.version == null) {
+    core.error('No version milestone found!');
+    process.exit(1);
+  }
+
+  const success = await processIssues(issues, nextMilestone, backlog);
+  if (!success) {
     process.exit(1);
   }
 }
 
-main();
+// If this file is the entrypoint, run main.  Otherwise, export certain pieces
+// to the tests.
+if (require.main == module) {
+  main();
+} else {
+  module.exports = {
+    processIssues,
+    TYPE_ACCESSIBILITY,
+    TYPE_ANNOUNCEMENT,
+    TYPE_BUG,
+    TYPE_CODE_HEALTH,
+    TYPE_DOCS,
+    TYPE_ENHANCEMENT,
+    TYPE_PROCESS,
+    TYPE_QUESTION,
+    PRIORITY_P0,
+    PRIORITY_P1,
+    PRIORITY_P2,
+    PRIORITY_P3,
+    PRIORITY_P4,
+    STATUS_ARCHIVED,
+    STATUS_WAITING,
+    FLAG_IGNORE,
+  };
+}
