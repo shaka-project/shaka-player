@@ -1827,8 +1827,8 @@ describe('TtmlTextParser', () => {
             // Styles from regionStyle should apply only to the nested cue.
             backgroundColor: '',
             color: '',
-            displayAlign: Cue.displayAlign.AFTER, // displayAlign default value.
-            textAlign: Cue.textAlign.START, // textAlign default value.
+            displayAlign: Cue.displayAlign.CENTER,
+            textAlign: Cue.textAlign.CENTER,
 
             nestedCues: [
               {
@@ -1853,7 +1853,7 @@ describe('TtmlTextParser', () => {
                 // Styles inherited from backgroundStyle via regionStyle via
                 // spanStyle
                 displayAlign: Cue.displayAlign.CENTER,
-                textAlign: Cue.textAlign.CENTER,
+                textAlign: Cue.textAlign.END,
               },
             ],
           },
@@ -1867,7 +1867,7 @@ describe('TtmlTextParser', () => {
         // spanStyle inherits attributes from regionStyle
         '    <style xml:id="pStyle" tts:fontSize="15px" />' +
         '    <style xml:id="spanStyle" style="regionStyle" ' +
-        '           tts:backgroundColor="white" />' +
+        '           tts:backgroundColor="white" tts:textAlign="end" />' +
         // regionStyle inherits attributes from backgroundStyle
         '    <style xml:id="regionStyle" style="backgroundStyle" ' +
         '           tts:backgroundColor="transparent" tts:color="blue" />' +
@@ -1884,6 +1884,39 @@ describe('TtmlTextParser', () => {
         '</div></body></tt>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0},
         {startTime: 0, endTime: 60});
+  });
+
+  it('inherits alignment from parent regions', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 0,
+            endTime: 60,
+            payload: '',
+            fontSize: '',
+            textAlign: Cue.textAlign.END,
+            displayAlign: Cue.displayAlign.CENTER,
+            nestedCues: [
+              {
+                startTime: 0,
+                endTime: 60,
+                payload: 'Hello!',
+                textAlign: Cue.textAlign.END,
+                displayAlign: Cue.displayAlign.CENTER,
+              },
+            ],
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head><layout>' +
+        '<region xml:id="r1" tts:textAlign="end" tts:displayAlign="center" />' +
+        '</layout></head>' +
+        '<body><div><p begin="00:00" end="01:00" region="r1">' +
+        '<span>Hello!</span>' +
+        '</p></div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        {startTime: 0, endTime: 60},
+    );
   });
 
   // Regression test for https://github.com/google/shaka-player/issues/3743
