@@ -934,7 +934,7 @@ shaka.extern.ManifestConfiguration;
  * @property {boolean} useNativeHlsOnSafari
  *   Desktop Safari has both MediaSource and their native HLS implementation.
  *   Depending on the application's needs, it may prefer one over the other.
- *   Warning when disabled: Where single-key HLS Fairplay streams work fine,
+ *   Warning when disabled: Where single-key DRM streams work fine,
  *   multi-keys streams is showing unexpected behaviours (stall, audio playing
  *   with video freezes, ...). Use with care.
  * @property {number} inaccurateManifestTolerance
