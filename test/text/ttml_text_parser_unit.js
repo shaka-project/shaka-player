@@ -1382,7 +1382,8 @@ describe('TtmlTextParser', () => {
         '<body><div>' +
         '<p begin="00:01.00" end="00:02.00" style="s1">Test</p>' +
         '</div></body></tt>',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0},
+        {startTime: 1, endTime: 2});
   });
 
   it('parses cue alignment from textAlign attribute', () => {
