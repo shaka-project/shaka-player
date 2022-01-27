@@ -39,6 +39,7 @@
   "DEMO_CONNECTION_TIMEOUT": "Connection timeout",
   "DEMO_CONFIG": "Shaka Player Demo Config",
   "DEMO_CONTAINER_SEARCH": "Container",
+  "DEMO_CONTAINERLESS": "Containerless",
   "DEMO_CONTENT_ID": "Content ID",
   "DEMO_CUSTOM": "Custom",
   "DEMO_CUSTOM_CONTENT": "CUSTOM CONTENT",

@@ -159,6 +159,10 @@
     "description": "A header on a search field that filters by container type.",
     "message": "Container"
   },
+  "DEMO_CONTAINERLESS": {
+    "description": "Text that describes an asset that has a stream with audio data not contained in a container.",
+    "message": "Containerless"
+  },
   "DEMO_CONTENT_ID": {
     "description": "The name of a configuration value.",
     "message": "Content ID"
