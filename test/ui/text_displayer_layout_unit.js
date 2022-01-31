@@ -196,6 +196,7 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
 
         // The video must be played a little now, after the cues were appended,
         // but before the screenshot.
+        video.playbackRate = 1;
         video.play();
         await waiter.failOnTimeout(false).timeoutAfter(5)
             .waitForMovement(video);
@@ -203,10 +204,13 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
 
         // Seek to a time when cues should be showing.
         video.currentTime = time;
+        // Get into a playing state, but without movement.
+        video.playbackRate = 0;
+        video.play();
 
         // Add a short delay to ensure that the system has caught up and that
         // native text displayers have been updated by the browser.
-        await Util.shortDelay();
+        await Util.delay(0.1);
       };
     });
 
