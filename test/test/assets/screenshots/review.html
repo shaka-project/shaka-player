@@ -145,7 +145,7 @@ function allScreenshots() {
     for (const screenshot of screenshots) {
       const fullName = prefix + '-' + screenshot;
 
-      if (!EXCLUDES.includes(fullName)) {
+      if (!excludes.includes(fullName)) {
         list.push(fullName);
       }
     }
