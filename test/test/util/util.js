@@ -452,8 +452,11 @@ shaka.test.Util = class {
 
     // If the minimum similarity is not met, you can review the new screenshot
     // and the diff image in the screenshots folder.  Look for images that end
-    // with "-new" and "-diff".  If cropping doesn't work right, you can view
-    // the full-page screenshot in the image that ends with "-full".
+    // with "-new" and "-diff".  (NOTE: The diff is a pixel-wise diff for human
+    // review, and is not produced with the same structural similarity
+    // algorithm used to detect changes in the test.)  If cropping doesn't work
+    // right, you can view the full-page screenshot in the image that ends with
+    // "-full".
     expect(similarity).withContext(name).not.toBeLessThan(minSimilarity);
   }
 };
