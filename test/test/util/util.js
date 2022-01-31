@@ -401,10 +401,10 @@ shaka.test.Util = class {
    *   within the bounds of the viewport.
    * @param {string} name An identifier for the screenshot.  Use alphanumeric
    *   plus dash and underscore only.
-   * @param {number} threshold A change threshold in pixels.
+   * @param {number} minSimilarity A minimum similarity score between 0 and 1.
    * @return {!Promise}
    */
-  static async checkScreenshot(element, name, threshold=0) {
+  static async checkScreenshot(element, name, minSimilarity=1) {
     // Make sure the DOM is up-to-date and layout has settled before continuing.
     // Without this delay, or with a shorter delay, we sometimes get missing
     // elements in our UITextDisplayer tests on some platforms.
@@ -448,13 +448,16 @@ shaka.test.Util = class {
     const buffer = await shaka.test.Util.fetch(
         '/screenshot/diff' + parentUrlParams + paramsString);
     const json = shaka.util.StringUtils.fromUTF8(buffer);
-    const pixelsChanged = /** @type {number} */(JSON.parse(json));
+    const similarity = /** @type {number} */(JSON.parse(json));
 
-    // If the change threshold is exceeded, you can review the new screenshot
+    // If the minimum similarity is not met, you can review the new screenshot
     // and the diff image in the screenshots folder.  Look for images that end
-    // with "-new" and "-diff".  If cropping doesn't work right, you can view
-    // the full-page screenshot in the image that ends with "-full".
-    expect(pixelsChanged).withContext(name).not.toBeGreaterThan(threshold);
+    // with "-new" and "-diff".  (NOTE: The diff is a pixel-wise diff for human
+    // review, and is not produced with the same structural similarity
+    // algorithm used to detect changes in the test.)  If cropping doesn't work
+    // right, you can view the full-page screenshot in the image that ends with
+    // "-full".
+    expect(similarity).withContext(name).not.toBeLessThan(minSimilarity);
   }
 };
 
