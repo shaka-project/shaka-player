@@ -62,6 +62,10 @@ const prefixes = [
   'ui',
 ];
 
+const excludes = [
+  'native-cue-with-controls',
+];
+
     </script>
     <style>
 
@@ -134,25 +138,46 @@ document.body.appendChild(h1);
 const h2 = document.createElement('h2');
 document.body.appendChild(h2);
 
-// Remove the '?' at the front of the search string.
-const name = location.search.substr(1);
-if (!name) {
-  // Present a simple menu of screenshots to review.
-  h1.textContent = 'Select a screenshot to review:';
+function allScreenshots() {
+  const list = [];
 
   for (const prefix of prefixes) {
     for (const screenshot of screenshots) {
-      const li = document.createElement('li');
-      document.body.appendChild(li);
+      const fullName = prefix + '-' + screenshot;
 
-      const a = document.createElement('a');
-      a.textContent = prefix + '-' + screenshot;
-      a.href = '?' + prefix + '-' + screenshot;
-      li.appendChild(a);
+      if (!excludes.includes(fullName)) {
+        list.push(fullName);
+      }
     }
   }
+
+  return list;
+}
+
+// Remove the '?' at the front of the search string.
+const query = location.search.substr(1);
+if (!query) {
+  // Present a simple menu of screenshots to review.
+  h1.textContent = 'Select a screenshot or platform to review:';
+
+  const appendToList = (text) => {
+    const li = document.createElement('li');
+    document.body.appendChild(li);
+
+    const a = document.createElement('a');
+    a.textContent = text;
+    a.href = '?' + text;
+    li.appendChild(a);
+  };
+
+  for (const screenshot of allScreenshots()) {
+    appendToList(screenshot);
+  }
+  for (const platform of platforms) {
+    appendToList(platform);
+  }
 } else {
-  h1.textContent = 'Screenshots: ' + name;
+  h1.textContent = 'Screenshots: ' + query;
   h2.textContent = 'Mouse over a screenshot and use "shift" to see the new ' +
       'version or "ctrl" to see changed areas in red.';
 
@@ -181,12 +206,12 @@ if (!name) {
   window.addEventListener('blur', focusHandler);
   window.addEventListener('focus', focusHandler);
 
-  for (const platform of platforms) {
+  const appendScreenshot = (labelText, platform, screenshot) => {
     const container = document.createElement('div');
     container.classList.add('container');
 
     const label = document.createElement('label');
-    label.textContent = platform;
+    label.textContent = labelText;
     container.appendChild(label);
 
     const images = document.createElement('div');
@@ -194,20 +219,32 @@ if (!name) {
     container.appendChild(images);
 
     const img = document.createElement('img');
-    img.src = platform + '/' + name + '.png';
+    img.src = platform + '/' + screenshot + '.png';
     images.appendChild(img);
 
     const newImage = document.createElement('img');
-    newImage.src = platform + '/' + name + '.png-new';
+    newImage.src = platform + '/' + screenshot + '.png-new';
     newImage.classList.add('new');
     images.appendChild(newImage);
 
     const diffImage = document.createElement('img');
-    diffImage.src = platform + '/' + name + '.png-diff';
+    diffImage.src = platform + '/' + screenshot + '.png-diff';
     diffImage.classList.add('diff');
     images.appendChild(diffImage);
 
     document.body.appendChild(container);
+  };
+
+  if (platforms.includes(query)) {
+    const platform = query;
+    for (const screenshot of allScreenshots()) {
+      appendScreenshot(/* label= */ screenshot, platform, screenshot);
+    }
+  } else {
+    const screenshot = query;
+    for (const platform of platforms) {
+      appendScreenshot(/* label= */ platform, platform, screenshot);
+    }
   }
 }
 
