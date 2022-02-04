@@ -3,6 +3,8 @@ name: Build and Test PR
 on:
   pull_request: # Trigger for pull requests.
     types: [opened, synchronize, reopened]
+    paths-ignore:
+      .github/workflows/tools/update-issues/**
   workflow_dispatch: # Allows for manual triggering.
     inputs:
       ref:
@@ -67,4 +69,4 @@ jobs:
 
       - name: Test Player
         run: |
-          python build/test.py --browsers ${{ matrix.browser }} --reporter spec --drm ${{ matrix.extra_flags }}
+          python build/test.py --browsers ${{ matrix.browser }} --reporters spec --spec-hide-passed --drm ${{ matrix.extra_flags }}

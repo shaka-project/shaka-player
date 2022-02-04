@@ -33,13 +33,11 @@ describe('CmcdManager', () => {
   describe('Query serialization', () => {
     it('produces correctly serialized data', () => {
       const query = CmcdManager.toQuery(data);
-      const result = 'CMCD=br%3D52317%2Cbs%2Ccid%3D%22xyz%22%2C' +
-                     'com.test-exists%2Ccom.test-hello%3D%22world%22%2C' +
-                     'com.test-testing%3D1234%2Ccom.test-token%3Ds%2C' +
-                     'd%3D6067%2Cmtp%3D10000%2C' +
-                     'nor%3D%22..%252Ftesting%252F3.m4v%22%2C' +
-                     'nrr%3D%220-99%22%2C' +
-                     'sid%3D%22c936730c-031e-4a73-976f-92bc34039c60%22';
+      const result = 'br=52317,bs,cid="xyz",com.test-exists,' +
+                     'com.test-hello="world",com.test-testing=1234,' +
+                     'com.test-token=s,d=6067,mtp=10000,' +
+                     'nor="..%2Ftesting%2F3.m4v",nrr="0-99",' +
+                     'sid="c936730c-031e-4a73-976f-92bc34039c60"';
       expect(query).toBe(result);
     });
 
@@ -47,7 +45,7 @@ describe('CmcdManager', () => {
       const query = CmcdManager.toQuery({
         'com.test-escape': 'Double "Quotes"',
       });
-      const result = 'CMCD=com.test-escape%3D%22Double%20%5C%22Quotes%5C%22%22';
+      const result = 'com.test-escape="Double \\"Quotes\\""';
       expect(query).toBe(result);
     });
   });

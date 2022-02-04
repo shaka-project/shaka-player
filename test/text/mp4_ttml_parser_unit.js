@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+goog.require('shaka.test.TtmlUtils');
 goog.require('shaka.test.Util');
 goog.require('shaka.text.Mp4TtmlParser');
 goog.require('shaka.util.BufferUtils');
@@ -48,7 +49,14 @@ describe('Mp4TtmlParser', () => {
     parser.parseInit(ttmlInitSegment);
     const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
     const ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time);
-    expect(ret.length).toBe(20);
+    // Bodies.
+    expect(ret.length).toBe(2);
+    // Divs.
+    expect(ret[0].nestedCues.length).toBe(1);
+    expect(ret[1].nestedCues.length).toBe(1);
+    // Cues.
+    expect(ret[0].nestedCues[0].nestedCues.length).toBe(10);
+    expect(ret[1].nestedCues[0].nestedCues.length).toBe(10);
   });
 
   it('accounts for offset', () => {
@@ -159,22 +167,7 @@ describe('Mp4TtmlParser', () => {
     parser.parseInit(ttmlInitSegment);
     const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
     const result = parser.parseMedia(ttmlSegment, time);
-    verifyHelper(cues, result);
+    shaka.test.TtmlUtils.verifyHelper(
+        cues, result, {startTime: 23, endTime: 53.5});
   });
-
-  function verifyHelper(/** !Array */ expected, /** !Array */ actual) {
-    const mapExpected = (cue) => {
-      if (cue.region) {
-        cue.region = jasmine.objectContaining(cue.region);
-      }
-
-      if (cue.nestedCues) {
-        cue.nestedCues = cue.nestedCues.map(mapExpected);
-      }
-
-      return jasmine.objectContaining(cue);
-    };
-
-    expect(actual).toEqual(expected.map(mapExpected));
-  }
 });

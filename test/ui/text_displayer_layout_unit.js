@@ -34,11 +34,8 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
    */
   let beforeScreenshot;
 
-  // Legacy Edge seems to have inconsistent font kerning.  A one-pixel offset in
-  // the position of one character appears about 60% of the time, requiring us
-  // to have this change tolerance in our tests.  So far, all past bugs in our
-  // implementation that we have tests for would exceed this threshold by a lot.
-  const threshold = 160;  // px
+  // A minimum similarity score for screenshots, between 0 and 1.
+  const minSimilarity = 0.95;
 
   const originalCast = window.chrome && window.chrome.cast;
 
@@ -196,6 +193,7 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
 
         // The video must be played a little now, after the cues were appended,
         // but before the screenshot.
+        video.playbackRate = 1;
         video.play();
         await waiter.failOnTimeout(false).timeoutAfter(5)
             .waitForMovement(video);
@@ -203,10 +201,13 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
 
         // Seek to a time when cues should be showing.
         video.currentTime = time;
+        // Get into a playing state, but without movement.
+        video.playbackRate = 0;
+        video.play();
 
         // Add a short delay to ensure that the system has caught up and that
         // native text displayers have been updated by the browser.
-        await Util.shortDelay();
+        await Util.delay(0.1);
       };
     });
 
@@ -475,6 +476,6 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
     return Util.checkScreenshot(
         /* element= */ videoContainer,
         prefix + '-' + baseName,
-        threshold);
+        minSimilarity);
   }
 });

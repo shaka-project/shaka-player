@@ -1,3 +1,142 @@
+## 3.3.1 (2022-01-28)
+
+Bugfixes:
+  - Fix duplicate CMCD parameters in HLS live content
+    - https://github.com/google/shaka-player/issues/3862
+    - https://github.com/google/shaka-player/pull/3875
+  - Inherit alignment from regions
+  - Fix support for TTAF1 namespace (old version of TTML)
+    - https://github.com/google/shaka-player/issues/3009
+    - https://github.com/google/shaka-player/pull/3864
+    - https://github.com/google/shaka-player/pull/3906
+  - Fix misdetection of HEVC support on MS Edge
+    - https://github.com/google/shaka-player/pull/3897
+  - Fix caption overlap
+    - https://github.com/google/shaka-player/issues/3850
+    - https://github.com/google/shaka-player/issues/3741
+  - Fix missing throughput in CMCD for HLS live
+    - https://github.com/google/shaka-player/issues/3873
+    - https://github.com/google/shaka-player/pull/3874
+  - Support multiple chapter tracks with same language
+    - https://github.com/google/shaka-player/issues/3597
+    - https://github.com/google/shaka-player/pull/3868
+  - Fix text UI not updating when text is disabled
+    - https://github.com/google/shaka-player/issues/3728
+    - https://github.com/google/shaka-player/pull/3867
+  - Clear buffer on seek if mediaState is updating
+    - https://github.com/google/shaka-player/issues/3299
+    - https://github.com/google/shaka-player/pull/3795
+  - Fix thumbnails issues
+    - https://github.com/google/shaka-player/pull/3858
+  - Made nested cues inherit region
+    - https://github.com/google/shaka-player/issues/3743
+    - https://github.com/google/shaka-player/pull/3837
+  - Fix CMCD top bitrate reporting
+    - https://github.com/google/shaka-player/issues/3851
+    - https://github.com/google/shaka-player/pull/3852
+  - Fix MediaCapabilities polyfill on Safari
+    - https://github.com/google/shaka-player/issues/3696
+    - https://github.com/google/shaka-player/issues/3530
+  - Fix usage of Shaka without polyfills
+    - https://github.com/google/shaka-player/issues/3843
+  - Fix playback failure due to rounding errors
+    - https://github.com/google/shaka-player/issues/3717
+  - Fix HLS image track issues
+    - https://github.com/google/shaka-player/issues/3840
+  - Fix CMCD property mangling
+    - https://github.com/google/shaka-player/issues/3839
+    - https://github.com/google/shaka-player/pull/3842
+  - Remove caption wrapper bgColor
+    - https://github.com/google/shaka-player/issues/3745
+    - https://github.com/google/shaka-player/pull/3838
+  - Avoid WebCrypto randomUUID when CMCD disabled
+
+
+## 3.2.3 (2022-01-28)
+
+Bugfixes:
+  - Fix support for TTAF1 namespace (old version of TTML)
+    - https://github.com/google/shaka-player/issues/3009
+    - https://github.com/google/shaka-player/pull/3864
+    - https://github.com/google/shaka-player/pull/3906
+  - Fix misdetection of HEVC support on MS Edge
+    - https://github.com/google/shaka-player/pull/3897
+  - Fix caption overlap
+    - https://github.com/google/shaka-player/issues/3850
+    - https://github.com/google/shaka-player/issues/3741
+  - Support multiple chapter tracks with same language
+    - https://github.com/google/shaka-player/issues/3597
+    - https://github.com/google/shaka-player/pull/3868
+  - Fix text UI not updating when text is disabled
+    - https://github.com/google/shaka-player/issues/3728
+    - https://github.com/google/shaka-player/pull/3867
+  - Clear buffer on seek if mediaState is updating
+    - https://github.com/google/shaka-player/issues/3299
+    - https://github.com/google/shaka-player/pull/3795
+  - Fix thumbnails issues
+    - https://github.com/google/shaka-player/pull/3858
+  - Made nested cues inherit region
+    - https://github.com/google/shaka-player/issues/3743
+    - https://github.com/google/shaka-player/pull/3837
+  - Fix MediaCapabilities polyfill on Safari
+    - https://github.com/google/shaka-player/issues/3696
+    - https://github.com/google/shaka-player/issues/3530
+  - Fix usage of Shaka without polyfills
+    - https://github.com/google/shaka-player/issues/3843
+  - Fix playback failure due to rounding errors
+    - https://github.com/google/shaka-player/issues/3717
+  - Fix HLS image track issues
+    - https://github.com/google/shaka-player/issues/3840
+  - Remove caption wrapper bgColor
+    - https://github.com/google/shaka-player/issues/3745
+    - https://github.com/google/shaka-player/pull/3838
+  - Support "forced-subtitle" role
+    - https://github.com/google/shaka-player/issues/3767
+    - https://github.com/google/shaka-player/pull/3807
+  - Fix time element height on Safari
+    - https://github.com/google/shaka-player/issues/3739
+    - https://github.com/google/shaka-player/pull/3809
+
+
+## 3.1.5 (2022-01-28)
+
+Bugfixes:
+  - Fix support for TTAF1 namespace (old version of TTML)
+    - https://github.com/google/shaka-player/issues/3009
+    - https://github.com/google/shaka-player/pull/3864
+    - https://github.com/google/shaka-player/pull/3906
+  - Fix misdetection of HEVC support on MS Edge
+    - https://github.com/google/shaka-player/pull/3897
+  - Fix caption overlap
+    - https://github.com/google/shaka-player/issues/3850
+    - https://github.com/google/shaka-player/issues/3741
+  - Fix text UI not updating when text is disabled
+    - https://github.com/google/shaka-player/issues/3728
+    - https://github.com/google/shaka-player/pull/3867
+  - Clear buffer on seek if mediaState is updating
+    - https://github.com/google/shaka-player/issues/3299
+    - https://github.com/google/shaka-player/pull/3795
+  - Made nested cues inherit region
+    - https://github.com/google/shaka-player/issues/3743
+    - https://github.com/google/shaka-player/pull/3837
+  - Fix MediaCapabilities polyfill on Safari
+    - https://github.com/google/shaka-player/issues/3696
+    - https://github.com/google/shaka-player/issues/3530
+  - Fix usage of Shaka without polyfills
+    - https://github.com/google/shaka-player/issues/3843
+  - Fix playback failure due to rounding errors
+    - https://github.com/google/shaka-player/issues/3717
+  - Remove caption wrapper bgColor
+    - https://github.com/google/shaka-player/issues/3745
+    - https://github.com/google/shaka-player/pull/3838
+  - Support "forced-subtitle" role
+    - https://github.com/google/shaka-player/issues/3767
+    - https://github.com/google/shaka-player/pull/3807
+  - Fix time element height on Safari
+    - https://github.com/google/shaka-player/issues/3739
+    - https://github.com/google/shaka-player/pull/3809
+
+
 ## 3.3.0 (2022-01-07)
 
 New Features:
