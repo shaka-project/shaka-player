@@ -167,7 +167,7 @@ NOTES:
 
 |Manifest  |Widevine  |PlayReady|FairPlay |ClearKey  |
 |:--------:|:--------:|:-------:|:-------:|:--------:|
-|DASH      |**Y**     |**Y**    |**Y**    |**Y**     |
+|DASH      |**Y**     |**Y**    | -       |**Y**     |
 |HLS       |**Y**     |**Y**    |**Y** ¹  | -        |
 
 NOTES:

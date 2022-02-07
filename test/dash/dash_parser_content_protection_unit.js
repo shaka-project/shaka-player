@@ -461,7 +461,6 @@ describe('DashParser ContentProtection', () => {
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.microsoft.playready', keyIds),
       buildDrmInfo('com.adobe.primetime', keyIds),
-      buildDrmInfo('com.apple.fps', keyIds),
     ], variantKeyIds);
     await testDashParser(source, expected, /* ignoreDrmInfo= */ true);
   });
