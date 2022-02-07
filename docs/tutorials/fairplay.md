@@ -1,24 +1,30 @@
 # FairPlay Support
 
-When using native `src=` playback, we support using FairPlay on Safari.
+We support FairPlay with EME on compatible environments or native `src=`.
 Adding FairPlay support involves a bit more work than other key systems.
-
 
 ## Server certificate
 
-All FairPlay content requires setting a server certificate.  This is set in the
-Player configuration:
+All FairPlay content requires setting a server certificate. You can either
+provide it directly or set a serverCertificateUri for Shaka to fetch it for
+you.
 
 ```js
 const req = await fetch('https://example.com/cert.der');
 const cert = await req.arrayBuffer();
 
-player.configure('drm.advanced.com\\.apple\\.fps\\.1_0.serverCertificate',
+player.configure('drm.advanced.com\\.apple\\.fps\\.serverCertificate',
                  new Uint8Array(cert));
 ```
 
+```js
+player.configure('drm.advanced.com\\.apple\\.fps\\.serverCertificateUri',
+                 'https://example.com/cert.der');
+```
 
 ## Content ID
+
+Note: This only applies when legacy Apple Media Keys is used.
 
 Some FairPlay content use custom signaling for the content ID.  The content ID
 is used by the browser to generate the license request.  If you don't use the

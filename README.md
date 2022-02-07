@@ -171,7 +171,9 @@ NOTES:
 |HLS       |**Y**     |**Y**    |**Y** ¹  | -        |
 
 NOTES:
- - ¹: We support FairPlay through Apple's native HLS player.
+ - ¹: By default, FairPlay is handled using Apple's native HLS player, when on
+   Safari. We do support FairPlay through MSE/EME, however. See the
+   `streaming.useNativeHlsOnSafari` configuration value.
 
 
 ## Media container and subtitle support

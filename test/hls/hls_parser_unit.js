@@ -2231,6 +2231,42 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('constructs DrmInfo for FairPlay', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:6\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
+      'KEYFORMAT="com.apple.streamingkeydelivery",',
+      'URI="skd://f93d4e700d7ddde90529a27735d9e7cb",\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.encrypted = true;
+          stream.addDrmInfo('com.apple.fps', (drmInfo) => {
+            drmInfo.addInitData('sinf', new Uint8Array(0));
+          });
+        });
+      });
+    });
+
+    await testHlsParser(master, media, manifest);
+  });
+
   it('falls back to mp4 if HEAD request fails', async () => {
     const master = [
       '#EXTM3U\n',
@@ -2425,6 +2461,34 @@ describe('HlsParser', () => {
         config.hls.ignoreTextStreamFailures = false;
         await verifyMissingAttribute(master, media, 'URI');
       });
+    });
+
+    it('if FairPlay encryption with MSE and mp2t content', async () => {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'video\n',
+      ].join('');
+
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:6\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
+        'KEYFORMAT="com.apple.streamingkeydelivery",',
+        'URI="skd://f93d4e700d7ddde90529a27735d9e7cb",\n',
+        '#EXTINF:5,\n',
+        '#EXT-X-BYTERANGE:121090@616\n',
+        'main.ts',
+      ].join('');
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MANIFEST,
+          Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED);
+
+      await verifyError(master, media, error);
     });
 
     describe('if required tags are missing', () => {

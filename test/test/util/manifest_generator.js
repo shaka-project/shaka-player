@@ -433,7 +433,7 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     if (!this.initData) {
       this.initData = [];
     }
-    this.initData.push({initData: buffer, initDataType: type, keyId: null});
+    this.initData.push({initData: buffer, initDataType: type});
   }
 
   /**
