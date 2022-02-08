@@ -152,6 +152,7 @@ describe('Playhead', () => {
       presentationTimeline: timeline,
       minBufferTime: 10,
       offlineSessionIds: [],
+      sequenceMode: false,
     };
 
     config = shaka.util.PlayerConfiguration.createDefault().streaming;

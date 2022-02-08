@@ -209,8 +209,6 @@ shakaDemo.Config = class {
             'manifest.hls.ignoreTextStreamFailures')
         .addBoolInput_(MessageIds.IGNORE_HLS_IMAGE_FAILURES,
             'manifest.hls.ignoreImageStreamFailures')
-        .addBoolInput_(MessageIds.USE_FULL_SEGMENTS_FOR_START_TIME,
-            'manifest.hls.useFullSegmentsForStartTime')
         .addTextInput_(MessageIds.DEFAULT_AUDIO_CODEC,
             'manifest.hls.defaultAudioCodec')
         .addTextInput_(MessageIds.DEFAULT_VIDEO_CODEC,

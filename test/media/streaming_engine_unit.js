@@ -520,7 +520,8 @@ describe('StreamingEngine', () => {
     expectedMseInit.set(ContentType.VIDEO, videoStream);
     expectedMseInit.set(ContentType.TEXT, textStream);
 
-    expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit, false);
+    expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit,
+        /** forceTransmuxTS= */ false, /** sequenceMode= */ false);
     expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
 
     expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);

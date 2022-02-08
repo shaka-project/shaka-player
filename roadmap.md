@@ -9,8 +9,6 @@ The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
 
 Priority features up next:
- - Support containerless formats
-   https://github.com/google/shaka-player/issues/2337
  - Preload API
    https://github.com/google/shaka-player/issues/880
  - Codec-switching and order preference

@@ -123,6 +123,8 @@ shakaAssets.Feature = {
   MP4: shakaDemo.MessageIds.MP4,
   // Set if the asset has at least one MPEG-2 TS stream.
   MP2TS: shakaDemo.MessageIds.MP2TS,
+  // Set if the asset has at least one containerless stream (AAC, etc).
+  CONTAINERLESS: shakaDemo.MessageIds.CONTAINERLESS,
 
   // Set if the asset has at least one stream that is at least 720p.
   HIGH_DEFINITION: shakaDemo.MessageIds.HIGH_DEFINITION,
@@ -1188,6 +1190,14 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Audio only HLS with raw AAC',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/raw-hls-audio-only/manifest.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.CONTAINERLESS)
+      .addFeature(shakaAssets.Feature.AUDIO_ONLY),
   // }}}
 
   // IRT assets {{{

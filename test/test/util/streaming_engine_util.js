@@ -290,6 +290,7 @@ shaka.test.StreamingEngineUtil = class {
       variants: [],
       textStreams: [],
       imageStreams: [],
+      sequenceMode: false,
     };
 
     /** @type {shaka.extern.Variant} */

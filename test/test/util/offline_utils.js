@@ -25,6 +25,7 @@ shaka.test.OfflineUtils = class {
       streams: [],
       sessionIds: [],
       size: 1024,
+      sequenceMode: false,
     };
   }
 
