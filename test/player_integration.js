@@ -437,9 +437,19 @@ describe('Player', () => {
       const testSchemeMimeType = 'application/x-test-manifest';
       player = new compiledShaka.Player(video);
       await player.load('test:sintel_sequence_compiled', 0, testSchemeMimeType);
-      video.play();
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
       expect(player.getManifest().sequenceMode).toBe(true);
+      
+      // Ensure the video plays.
+      video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 10);
+
+      // Seek the video, and see if it can continue playing from that point.
+      video.pause();
+      video.currentTime = 20;
+      await waiter.waitForEvent(player, 'buffering');
+      video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 30, 20);
+      expect(video.ended).toBe(true);
     });
 
     // Regression test for #2326.
