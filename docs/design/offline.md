@@ -70,7 +70,7 @@ Like v1, v2 will use IndexedDB for storage.
 
 In v1, applications were required to persist the list of stored content and any
 app metadata in window.localStorage.  In v2, we will provide an API to list
-stored content and we will store app metadata along-side the content.
+stored content and we will store app metadata alongside the content.
 
 In v1, progress was inaccurate.  It was calculated in terms of segments, even
 though segment sizes are very different between audio and video.  In v2,
@@ -123,13 +123,13 @@ It's okay if the app selects multiple streams of a type.  For text, this may be
 necessary, for example, to store subtitles for all languages.  For audio it may
 be necessary as well, for similar reasons.  For video it makes little sense, but
 we won't restrict it.  Apps can make whatever decision they want about tracks to
-store, but we should document best practice.
+store, but we should document best practices.
 
-We could also issue a warning if multiple tracks of same type, kind, and
-language are selected, since offline adaptation is currently an uncommon
+We could also issue a warning if multiple tracks of the same type, kind, and
+language is selected since offline adaptation is currently an uncommon
 scenario and may indicate a mistake on the part of the app developer.  For
-example, this would trigger on two video with different bitrate or size, or two
-audio of same language but different bitrate, or two text of same language and
+example, this would trigger on two video with different bitrate or sizes, or two
+audio of same language but different bitrate, or two texts of the same language and
 kind.
 
 `Storage` will need good unit and integration tests.  Integration tests should
@@ -149,5 +149,5 @@ Errors during `store()`:
 
 Errors while loading content:
   - Content not found
-  - Persistent license cannot be loaded (may have been cleared by browser)
+  - Persistent license cannot be loaded (may have been cleared by the browser)
   - Any error that could occur during player.load()

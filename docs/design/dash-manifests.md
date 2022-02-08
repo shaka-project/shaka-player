@@ -31,7 +31,7 @@ media player (e.g. the browser) to play the segment.  So if the segment has a
 media time of 30 seconds, then the browser will put the segment at 30 seconds in
 the `<video>`.
 
-The manifest specifies values which can adjust the media time.  Both the
+The manifest specifies values that can adjust the media time.  Both the
 `presentationTimeOffset` and the `Period@start` will change the media times so
 the segment appears at the correct time in the `<video>` element.
 
@@ -67,7 +67,7 @@ The presentation timeline is composed of one or more sequential Periods.  A
 Period represents an independent piece of the timeline.  Periods cannot overlap
 and should not have gaps between them (although Shaka Player supports gap
 jumping). Each Period has a start time, which can be explicit through the
-`start` attribute, or can be implicit by using the `duration` attribute of the
+`start` attribute or can be implicit by using the `duration` attribute of the
 previous Period.
 
 Content is clamped to a Period.  Any content that appears before the Period
@@ -78,7 +78,7 @@ Note that we implement content deleting using the MSE `appendWindowStart`.  This
 has a subtle problem if we have a partial segment at the start of the Period.
 When the browser drops content at the start of the Period, it will continue to
 drop frames until the next keyframe.  This means that if your first segment
-starts at -0.1 relative to the Period (e.g. `PTO > S@t`), then we may loose the
+starts at -0.1 relative to the Period (e.g. `PTO > S@t`), then we may lose the
 whole segment if there are no more keyframes in it.  See the
 [coded frame processing][] algorithm for more info.
 
@@ -115,8 +115,8 @@ start = 111;  // S@t
 presentationTime = (start - presentationTimeOffset) / timescale + periodStart;
 ```
 
-First the start time in the manifest needs to be offset by the
-`presentationTimeOffset` (PTO).  The reason this exists is because the time
+First, the start time in the manifest needs to be offset by the
+`presentationTimeOffset` (PTO).  The reason this exists is that the time
 specified in the time attribute MUST match the media time.  The PTO will adjust
 the media time too; this means if you just change the `S@t`, when we append the
 media, the browser will put the segment at the wrong time since we didn't adjust
@@ -127,7 +127,7 @@ to convert that to seconds.
 
 Lastly, times in the manifest are relative to the Period.  This means that you
 need to add the Period time to get the real presentation time.  This allows you
-to specify each Period independent to where the Period is within the timeline.
+to specify each Period independent of where the Period is within the timeline.
 This is especially useful for ad-insertion.
 
 So in the above example, the first segment starts playing at
@@ -142,10 +142,10 @@ There is a gap before the third segment, and it will start at
 
 You want to set `S@t` to exactly the same value as the media time.  If that
 doesn't result in a presentation time you want, you should use PTO or Period
-start to change that.  If there is a single Period, you can have Period start be
+start to change that.  If there is a single Period, you can have the Period start be
 0 and just use PTO to adjust the segment to be at the right time; in
 multi-Period content you'll need to adjust it so that the segments within the
-Period start at 0.
+Period starts at 0.
 
 Be sure to use the same value for PTO for all streams.  It may be tempting to
 just use the first `S@t` value for PTO, but that won't work.  If you use
@@ -160,7 +160,7 @@ other stream will be negative.  See note in the Periods section above.
 
 ## Live
 
-It is important to note that live works almost exactly the same as VOD.  Live
+It is important to note that live works almost the same as VOD.  Live
 still has the same timeline and same presentation times.  For live content,
 the presentation time of 0 represents when the live stream started.  This is
 given in the manifest as `availabilityStartTime`.  So when we start playing a
@@ -173,7 +173,7 @@ doesn't mean the segment will be played at 9:05; the app can pause the video
 which will delay when it is played.  All it means is that is when it was
 recorded.
 
-Also note that it is common to use Unix timestamps for the media timestamps in
+Also, note that it is common to use Unix timestamps for the media timestamps in
 live content.  Then setting the AST to the epoch means the segments appear at
 the correct time.  This is valid, but not required.  Just like VOD content, the
 media time doesn't matter so long as the adjusted presentation time puts the
@@ -204,7 +204,7 @@ video.currentTime = liveEdge;  // Start playing at live edge.
 
 But even then, manifest updates and network delays can cause us to stall if we
 try to play at the live edge.  So we will actually delay where we will play at
-so we don't stall.  The time we adjust by can be specified in the manifest using
+so we don't stall.  The time we adjust can be specified in the manifest using
 the `MPD@suggestedPresentationDelay` attribute.  This specifies the delay to
 give the live stream to allow for smooth playback.  If it isn't specified, we
 will give a reasonable default value.
@@ -222,7 +222,7 @@ between the live edge and 10 minutes before that.
 
 A manifest may list more or fewer segments than the availability window.  If it
 lists more, the extra segments may already be unavailable when the manifest is
-downloaded; if the manifest lists less segments, then we may not be able to fill
+downloaded; if the manifest lists fewer segments, then we may not be able to fill
 the whole availability window.  Note that the player is allowed to remember the
 segments even if they are no longer listed.  So if an updated manifest no longer
 includes some segments, they are still available to be downloaded until they
@@ -240,7 +240,7 @@ This means that DASH manifests are sensitive to drift and clock-sync issues.  It
 is very common for live manifests to have clock problems, so if your live
 manifest doesn't play, it is likely because of clock sync.  This is so common
 that Shaka Player will be changing to determine the live edge using the list of
-segments.  You can follow progress in [#999][].  But note that DASH requires
+segments.  You can follow the progress in [#999][].  But note that DASH requires
 accurate clock times, so even after that feature is added, your manifest may
 not play in other DASH players.
 

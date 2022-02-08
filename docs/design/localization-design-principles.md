@@ -45,8 +45,8 @@ an idea of what the problem is:
    video playback" in "en-US".
  - We don't have one in "en-US" but we have one in "en", "en-CA", "fr-CA".
 
-Now let's bring in the jarring-problem. People often know more than one
-language, so their preferences may include more than one language. Let's look a
+Now let's bring in the jarring problem. People often know more than one
+language, so their preferences may include more than one language. Let's look at a
 slightly more accurate example to get an idea of what the problem is:
 
  - The user wants a localized phrase for "the title for a button that stops
@@ -113,7 +113,7 @@ When we have multiple locales (e.g. "en-US" or "fr-CA") we only move to a later
 locale if no matches were found in the earlier locales. This is because no
 matter how loosely we match, we prefer displaying everything in one language.
 For example, suppose we returned the best matches across all locales. The user
-could end-up seeing some English and some French. While it may be more accurate
+could end up seeing some English and some French. While it may be more accurate
 case-by-case, it would be less desirable overall.
 
 ```
@@ -138,7 +138,7 @@ Since we assume that insertions will happen far less often than look-ups, we
 decided that our system must prioritize the efficiency of look-ups.
 
 To achieve the simplest look-up possible, we take all the localization tables
-that we would end-up searching and flatten them into a single map. We do this
+that we would end up searching and flatten them into a single map. We do this
 once before any requests are made, so that each request is a table look-up
 rather than multiple table look-ups. When we merge the tables, we go in
 reverse-preference order. This allows the more preferred entries to override

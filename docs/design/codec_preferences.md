@@ -36,7 +36,7 @@ preferences. The new configurations include:
 
 ### Asynchronous `StreamUtils.filterManifest`
 
-Previously, all of the manifest filtering happens within the
+Previously, all of the manifest filterings happens within the
 `StreamUtils.filterManifest`. Now `StreamUtils.filterManifest` will call
 `MediaCapabilities.decodingInfo` to get the decoding information for manifest
 filtering and then codec choosing.
@@ -53,7 +53,7 @@ The MediaCapabilities API provides the Player with whether decoding the media
 is:
 - supported
 - smooth
-- power efficient
+- power-efficient
 
 We want to allow applications to choose the ideal codec based on the decoding
 information of the codecs dynamically. The application can specify by
@@ -83,7 +83,7 @@ Based on the configuration, Shaka Player will:
 
 ### Configurable codec priorities
 
-If more than one codec are supported and available for choosing, and
+If more than one codec is supported and available for choosing, and
 `preferredDecodingAttributes` is not configured, an application can specify
 which codecs it prefers via the `preferredCodecs` config.
 
@@ -152,7 +152,7 @@ consistent with the current Player behavior.
 
 ## Challenges
 
-Currently the filtering, sorting and choosing algorithms are in various places
+Currently, the filtering, sorting and choosing algorithms are in various places
 in our code base, including `StreamUtils.filterManifest`, `DrmEngine`, and
 `StreamUtils.chooseCodecsAndFilterManifest`.  To simplify the code and improve
 readability, we’ll conduct the new codec preferences algorithm in one place.

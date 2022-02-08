@@ -7,9 +7,9 @@ Language is a complex issue, and trying to match what language someone speaks wi
 For a full explanation of the terms and definitions used when we talk about language please see our ["Talking about Languages"](talking-about-languages.md) article.
 
 ## Strategy
-The question boils down to, "If the user says they prefer a specific locale, and we don't have it. What locale should we present to them?" To make things easier on us, we do not support dialects in our searches. When we read the locale, we purposely drop the dialect component as it simplifies the searches. We chose to adopt this short-cut because we have yet to see dialects appear in any content.
+The question boils down to, "If the user says they prefer a specific locale, and we don't have it. What locale should we present to them?" To make things easier on us, we do not support dialects in our searches. When we read the locale, we purposely drop the dialect component as it simplifies the searches. We chose to adopt this shortcut because we have yet to see dialects appear in any content.
 
-Conceptually locales follow a tree-like structure, so give a set of locales, we could create a tree like:
+Conceptually locales follow a tree-like structure, so giving a set of locales, we could create a tree-like:
 
 ![Locales Tree](locales_tree.svg)
 
@@ -28,7 +28,7 @@ If we assume that we can only respond to requests with the following locales:
  - en-US
  - fr-CA
 
-Then for any given request, we should be able to identify what match we can make and what locale we would respond wit. The table below shows some examples:
+Then for any given request, we should be able to identify what match we can make and what locale we would respond with. The table below shows some examples:
 
 ```
 User Wants | Matching Type       | Locale
