@@ -531,6 +531,18 @@ shaka.test.TestScheme.DATA = {
     duration: 30,
   },
 
+  // Like 'sintel', but flagged as sequence mode.
+  'sintel_sequence': {
+    video: inherit(sintelVideoSegment, {
+      sequenceMode: true,
+    }),
+    audio: inherit(sintelAudioSegment, {
+      sequenceMode: true,
+    }),
+    text: vttSegment,
+    duration: 30,
+  },
+
   // Like 'sintel', but much longer to test buffering and seeking.
   'sintel_long': {
     video: sintelVideoSegment,

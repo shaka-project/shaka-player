@@ -433,6 +433,14 @@ describe('Player', () => {
       expect(video.playbackRate).toBe(1);
     });
 
+    it('in sequence mode', async () => {
+      const testSchemeMimeType = 'application/x-test-manifest';
+      player = new compiledShaka.Player(video);
+      await player.load('test:sintel_compiled', 0, testSchemeMimeType);
+      video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+    });
+
     // Regression test for #2326.
     //
     // 1. Construct an instance with a video element.
