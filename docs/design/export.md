@@ -52,7 +52,7 @@ compiler because they are not part of the library's public API.  For example,
 `shaka.util.IDestroyable`, which is implemented by `shaka.Player`.
 
 To make this work, we created another new annotation: `@exportInterface`.  This
-annotation is used by the extern generator but is ignored by the compiler.
+annotation is used by the extern generator, but is ignored by the compiler.
 
 In some cases, public member variables need to be preserved when they would
 otherwise be renamed by the compiler. `@export` is not sufficient to keep the
@@ -64,7 +64,7 @@ be preserved.
 
 ## Summary
 
- - `@export`: truly exported (attached to a namespace) by the compiler
+ - `@export`: truly exported (attached to namespace) by the compiler
  - `@expose`: deprecated
  - `@exportDoc`: considered part of the exports in the docs
  - `@exportInterface`: considered part of the exports in generated externs

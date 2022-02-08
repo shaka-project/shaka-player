@@ -48,7 +48,7 @@ The MediaSourceEngine manages the MediaSource and the SourceBuffers.
 ## Design Overview
 
 The design will address two major requirements:
-1. Enable preloading a manifest in Player before attaching it to a video element
+1. Enable preloading a manifest in Player before attaching to a video element
 2. Enable StreamingEngine to fetch and store a segment in memory without a video
    element
 
@@ -230,7 +230,7 @@ MediaSourceEngine should be able to start without the video element, and store
 the downloaded content in memory.
 
 This way, the initialization steps of StreamingEngine, MediaSourceEngine,
-MediaSource when preloading remains almost the same with the original loading
+MediaSource when preloading remain almost the same with the original loading
 process. The state of MediaSourceEngine remains the same, and StreamingEngine
 doesn't need to know the state of MediaSource. The downloaded content is kept
 in and managed by MediaSourceEngine, whether stored in memory or appended to the
@@ -285,7 +285,7 @@ keep segments in memory and parse them later, and this can't be done with src=.
 
 ### Existing use case
 
-StreamingEngine fetches a piece of content and appends it to MediaSourceEngine.
+StreamingEngine fetches a piece of content and appends to MediaSourceEngine.
 When preloading, the MediaSourceEngine appends the data to the SourceBuffer.
 
 ### New use cases

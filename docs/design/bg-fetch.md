@@ -16,7 +16,7 @@ it has still been a low-priority feature.
 
 ## Design Concept
 
-This design attempts to reuse existing code whenever possible, to
+This design attempts to reuse existing code whenever possible, in order to
 minimize the amount of new code that has to be tested. The code will be made in
 two main stages:
 1. Refactor the offline download process to change the order that the asset is
@@ -25,7 +25,7 @@ segment should be downloaded. As a segment is downloaded, it should be stored.
 The code for storing a segment, in particular, should be broken out into an
 exported static (e.g. stateless) function.
 1. Modify the Shaka Player wrapper to add the appropriate background fetch event
-listeners if the environment is detected to be a service worker so that a
+listeners if the environment is detected to be a service worker, so that a
 compiled Shaka Player bundle can be used as a service worker. If background
 fetch is used, the segment downloading step should be passed to this service
 worker. When each segment is downloaded, it should be passed to the static
@@ -78,12 +78,12 @@ cancellation for inaccurate manifests.
 1. Create a new public static method, assignStreamToManifest. This is a static
 method that requires no internal state, so that the service worker can call it.
 It stores the data provided, loads the manifest from storage, applies the
-storage id of the data to the appropriate segments (based on URI), and then
+storage id of the data to the appropriate segments (based on uri), and then
 stores the modified manifest. It should have a mutex over the part that loads
 and changes the manifest, to keep one invocation from overriding the manifest
 changes of another. It should have the following parameters:
    1. manifestStorageId
-   1. URI
+   1. uri
    1. data
    1. throwIfAbortedFn
 1. Create a second public static method, cleanStoredManifest. This method is

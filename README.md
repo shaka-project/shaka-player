@@ -244,7 +244,7 @@ For general help and before filing any bugs, please read the
 
 If you have improvements or fixes, we would love to have your contributions.
 Please read [CONTRIBUTING.md](CONTRIBUTING.md)
-for more information on the process, we would like contributors to follow.
+for more information on the process we would like contributors to follow.
 
 
 ## Framework Integrations ##

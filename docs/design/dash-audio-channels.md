@@ -29,7 +29,7 @@ The DASH spec says this of the <AudioChannelConfiguration> element:
 >
 > NOTE: A scheme for audio channel configuration is also defined in 5.8.5.4 of
 > this part of ISO/IEC 23009. This scheme is maintained for
-> backward-compatibility, but is recommended to use the signalling as defined in
+> backward-compatibility, but it recommended to use the signalling as defined in
 > ISO/IEC 23001-8.
 
 > 5.8.5.4 Audio channel configuration schemes
@@ -68,11 +68,11 @@ The DASH spec says this is "the channel configuration as defined by Table 68 ...
 of ISO/IEC 23003-3. The @value shall be the value as defined for
 OutputChannelPosition in ISO/IEC 23001-8."
 
-The statement about OutputChannelPosition and 23001-8 conflicts with the available
+The statement about OutputChannelPosition and 23001-8 conflicts with available
 evidence.  Both Shaka Packager and the [open source DASH encoder from Cast
 Labs][cast_labs_23003] use [the number of channels in the @value
 attribute][shaka_packager_23003]. Therefore, we assume that 23003-3 defines this
-very simply as the number of channels and that the second statement about
+very simply as the number of channels, and that the second statement about
 23001-8 was added to that paragraph in error.
 
 Neither 23003-3 nor the DASH spec corrigenda were freely available at the time
@@ -89,10 +89,10 @@ The [DASH-IF website][dash_if_audio_config] also lists the
 description:
 
 > Dolby audio channel configuration information. The @value attribute shall
-> contain a four-digit hexadecimal representation of the 16 bit field that
+> contain a four digit hexadecimal representation of the 16 bit field that
 > describes the channel assignment as defined by table E.5 in ETSI TS 102 366
-> where the left channel is MSB. For example, for a stream with L, C, R, Ls, Rs,
-> LFE, the value shall be 'F801' (the hexadecimal equivalent of the binary value
+> where left channel is MSB. For example, for a stream with L, C, R, Ls, Rs,
+> LFE, the value shall be 'F801' (hexadecimal equivalent of the binary value
 > 1111 1000 0000 0001).
 
 From the example, it would appear that each channel is represented by a single
