@@ -436,9 +436,10 @@ describe('Player', () => {
     it('in sequence mode', async () => {
       const testSchemeMimeType = 'application/x-test-manifest';
       player = new compiledShaka.Player(video);
-      await player.load('test:sintel_compiled', 0, testSchemeMimeType);
+      await player.load('test:sintel_sequence_compiled', 0, testSchemeMimeType);
       video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+      expect(player.getManifest().sequenceMode).toBe(true);
     });
 
     // Regression test for #2326.
