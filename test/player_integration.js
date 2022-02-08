@@ -445,7 +445,6 @@ describe('Player', () => {
 
       // Seek the video, and see if it can continue playing from that point.
       video.currentTime = 20;
-      await waiter.waitForEvent(player, 'buffering');
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 30, 20);
       expect(video.ended).toBe(true);
     });
