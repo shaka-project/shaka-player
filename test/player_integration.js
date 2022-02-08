@@ -438,7 +438,7 @@ describe('Player', () => {
       player = new compiledShaka.Player(video);
       await player.load('test:sintel_sequence_compiled', 0, testSchemeMimeType);
       expect(player.getManifest().sequenceMode).toBe(true);
-      
+
       // Ensure the video plays.
       video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 10);
