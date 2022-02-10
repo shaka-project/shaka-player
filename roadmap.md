@@ -11,37 +11,39 @@ so the exact milestone for future features is not pre-determined.
 Priority features up next:
  - Preload API
    https://github.com/google/shaka-player/issues/880
- - Codec-switching and order preference
-   https://github.com/google/shaka-player/issues/1528
-   https://github.com/google/shaka-player/issues/2179
 
 Candidate features for future release cycles:
- - HLS interstitial support
-   https://github.com/google/shaka-player/issues/3364
- - Support ID3 tags in mp4
-   https://github.com/google/shaka-player/issues/3351
- - MSE support for FairPlay
-   https://github.com/google/shaka-player/issues/3346
- - Smaller, more modular binary
  - Official TypeScript defs, generated from source
    https://github.com/google/shaka-player/issues/1030
- - Shaka Analytics Component and an integration with BigQuery Analytics
-   https://github.com/google/shaka-player/issues/3359
- - Integration with Google Video ML/Cloud AI
-
-v3.3 - 2021 Q3 or Q4
+ - Codec-switching
+   https://github.com/google/shaka-player/issues/1528
  - Background fetch for offline storage
    https://github.com/google/shaka-player/issues/879
- - HLS performance improvements
-   https://github.com/google/shaka-player/issues/3363
+ - Support ID3 tags in mp4
+   https://github.com/google/shaka-player/issues/3351
+ - Smaller, more modular binary
+
+v3.4 - 2022 Q1 or Q2
+ - MSE support for FairPlay
+   https://github.com/google/shaka-player/issues/3346
+ - Support containerless formats
+   https://github.com/google/shaka-player/issues/2337
 
 =====
+
+v3.3 - 2022 Q1
+ - Common Media Client Data (CMCD) logging support
+   https://github.com/google/shaka-player/issues/3619
+ - Non-linear IMA CS ads
+   https://github.com/google/shaka-player/pull/3639
 
 v3.2 - 2021 Q3
  - MediaCapabilities to make performance-based decisions
    https://github.com/google/shaka-player/issues/1391
  - Configurable key-system priority
    https://github.com/google/shaka-player/issues/3002
+ - Codec order preferences
+   https://github.com/google/shaka-player/issues/2179
 
 v3.1 - 2021 Q2
  - Low-latency live (LL-HLS, LL-DASH)
