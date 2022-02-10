@@ -22,5 +22,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd .github/workflows/tools/update-issues
-          npm install
+          npm ci
           node main.js
