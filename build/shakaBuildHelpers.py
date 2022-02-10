@@ -325,9 +325,9 @@ def update_node_modules():
   # Actually change directories instead of using npm --prefix.
   # See npm/npm#17027 and shaka-project/shaka-player#776 for more details.
   with InDir(base):
-    # npm update seems to be the wrong thing in npm v5, so use install.
-    # See google/shaka-player#854 for more details.
-    execute_get_output(['npm', 'install'])
+    # npm ci uses package-lock.json to get a stable, reproducible set of
+    # packages installed.
+    execute_get_output(['npm', 'ci'])
 
   # Update the timestamp of the file that tracks when we last updated.
   open(_node_modules_last_update_path(), 'wb').close()
