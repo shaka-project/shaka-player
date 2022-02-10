@@ -726,6 +726,9 @@ shakaDemo.Main = class {
     if (asset.features.includes(shakaAssets.Feature.MP2TS)) {
       mimeTypes.push('video/mp2t');
     }
+    if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
+      mimeTypes.push('audio/aac');
+    }
     const hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
     });

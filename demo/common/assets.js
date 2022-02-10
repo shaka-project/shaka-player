@@ -1198,6 +1198,16 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.CONTAINERLESS)
       .addFeature(shakaAssets.Feature.AUDIO_ONLY),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Apple Advanced HLS Stream (TS) with raw AAC',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
+      /* manifestUri= */ 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8',
+      /* source= */ shakaAssets.Source.APPLE)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.CONTAINERLESS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.OFFLINE),
   // }}}
 
   // IRT assets {{{
