@@ -146,7 +146,11 @@ module.exports = (config) => {
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/locales/en.json', included: false},
       {pattern: 'demo/locales/source.json', included: false},
-      {pattern: 'node_modules/**/*.js', included: false},
+      // load node modules manually, so as to not overload karma
+      {pattern: 'node_modules/fontfaceonload/**/*.js', included: false},
+      {pattern: 'node_modules/less/**/*.js', included: false},
+      {pattern: 'node_modules/sprintf-js/**/*.js', included: false},
+      {pattern: 'node_modules/karma-*/**/*.js', included: false},
     ],
 
     // NOTE: Do not use proxies at all!  They cannot be used with the --hostname
