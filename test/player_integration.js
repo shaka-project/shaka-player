@@ -445,8 +445,8 @@ describe('Player', () => {
 
       // Seek the video, and see if it can continue playing from that point.
       video.currentTime = 20;
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 30, 20);
-      expect(video.ended).toBe(true);
+      // Expect that we can then reach the end of the video.
+      await waiter.timeoutAfter(20).waitForEnd(video);
     });
 
     // Regression test for #2326.
