@@ -1,3 +1,4 @@
+# Install this in .github/workflows/ to automate issue maintenance.
 name: Update Issues
 
 on:
@@ -16,11 +17,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          repository: joeyparrish/shaka-github-tools
 
       - name: Update Issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd .github/workflows/tools/update-issues
+          cd update-issues
           npm ci
           node main.js
