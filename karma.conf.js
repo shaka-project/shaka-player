@@ -148,7 +148,7 @@ module.exports = (config) => {
       {pattern: 'demo/locales/source.json', included: false},
       // load node modules manually, so as to not overload karma
       {pattern: 'node_modules/fontfaceonload/**/*.js', included: false},
-      {pattern: 'node_modules/less/**/*.js', included: false},
+      {pattern: 'node_modules/less*/**/*.js', included: false},
       {pattern: 'node_modules/sprintf-js/**/*.js', included: false},
       {pattern: 'node_modules/karma-*/**/*.js', included: false},
     ],
