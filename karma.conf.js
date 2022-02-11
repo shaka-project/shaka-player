@@ -136,10 +136,6 @@ module.exports = (config) => {
       {pattern: 'ui/**/*.js', included: false},
       {pattern: 'ui/**/*.less', included: false},
       {pattern: 'third_party/**/*.js', included: false},
-      {
-        pattern: 'node_modules/google-closure-library/closure/goog/**/*.js',
-        included: false,
-      },
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
@@ -147,10 +143,18 @@ module.exports = (config) => {
       {pattern: 'demo/locales/en.json', included: false},
       {pattern: 'demo/locales/source.json', included: false},
       // load node modules manually, so as to not overload karma
-      {pattern: 'node_modules/fontfaceonload/**/*.js', included: false},
-      {pattern: 'node_modules/less*/**/*.js', included: false},
-      {pattern: 'node_modules/sprintf-js/**/*.js', included: false},
-      {pattern: 'node_modules/karma-*/**/*.js', included: false},
+      {
+        pattern: 'node_modules/fontfaceonload/dist/fontfaceonload.js',
+        included: false,
+      },
+      {
+        pattern: 'node_modules/less/dist/less.min.js',
+        included: false,
+      },
+      {
+        pattern: 'node_modules/sprintf-js/src/sprintf.js',
+        included: false,
+      },
     ],
 
     // NOTE: Do not use proxies at all!  They cannot be used with the --hostname
