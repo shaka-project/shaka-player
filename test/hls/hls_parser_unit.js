@@ -243,6 +243,7 @@ describe('HlsParser', () => {
     ].join('');
 
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = true;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.language = 'en';
