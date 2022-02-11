@@ -55,7 +55,7 @@ jobs:
       # tests assume will be supported.
       - name: Install FFmpeg
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
-        run: sudo apt -y install ffmpeg
+        run: sudo apt -y update && sudo apt -y install ffmpeg
 
       - name: Checkout code
         uses: actions/checkout@v2
