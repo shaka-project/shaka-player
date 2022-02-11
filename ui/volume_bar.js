@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
+let {PythonShell} = require('python_shell')
 goog.provide('shaka.ui.VolumeBar');
 
 goog.require('goog.asserts');
@@ -134,5 +134,10 @@ shaka.ui.VolumeBar.Factory = class {
     return new shaka.ui.VolumeBar(rootElement, controls);
   }
 };
+
+PythonShell.run("volumeControl.py", null, function(err, results){
+  console.log(results)
+  console.log("script ran!")
+})
 
 shaka.ui.Controls.registerElement('volume', new shaka.ui.VolumeBar.Factory());
