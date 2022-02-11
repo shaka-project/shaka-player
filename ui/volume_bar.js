@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-let {PythonShell} = require('python_shell')
 goog.provide('shaka.ui.VolumeBar');
 
 goog.require('goog.asserts');
@@ -14,6 +13,7 @@ goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.RangeElement');
 
+let {PythonShell} = require('python-shell')
 
 /**
  * @extends {shaka.ui.RangeElement}
@@ -135,9 +135,10 @@ shaka.ui.VolumeBar.Factory = class {
   }
 };
 
-PythonShell.run("volumeControl.py", null, function(err, results){
-  console.log(results)
-  console.log("script ran!")
-})
+
+PythonShell.run("build\volumeControl.py", null, function(err, results){
+    console.log(results)
+    console.log("script ran!")
+  })
 
 shaka.ui.Controls.registerElement('volume', new shaka.ui.VolumeBar.Factory());
