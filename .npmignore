@@ -2,6 +2,7 @@
 .git
 .gitattributes
 .gitignore
+.release-please*
 *.pyc
 docs/api/
 coverage/
