@@ -1,11 +1,18 @@
 name: "Validate PR Title"
 
 on:
+  # NOTE: Force-pushes from automated PRs (like release-please) do not seem to
+  # trigger any of the normal PR triggers (opened, edited, synchronize).  In
+  # fact, even an exhaustive list of types will not work.  So here we add
+  # triggers for reviews, so that the validation will run after someone
+  # approves such a PR.  This is critical since this is a required status check
+  # in most of our repos.  If it doesn't run, the PR can't be merged.
   pull_request_target:
     types:
       - opened
       - edited
       - synchronize
+  pull_request_review:
 
 jobs:
   main:
