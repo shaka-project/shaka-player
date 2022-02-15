@@ -5,3 +5,5 @@
     Lints the player, and builds and tests each combination of OS and browser.
   - 'update_issues.yaml':
     Updates GitHub issues on a timer.
+  - 'sync-labels.yaml':
+    Synchronize issue labels using a central configuration.
