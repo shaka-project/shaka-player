@@ -30,3 +30,4 @@ jobs:
           prune: true
           manifest: sync-labels/configs/${{ github.repository }}.yaml
           repository: ${{ github.repository }}
+          token: ${{ github.token }}
