@@ -7,7 +7,7 @@ on:
     inputs:
       ref:
         description: "The ref to build and test."
-        required: False
+        required: false
 
 jobs:
   lint:

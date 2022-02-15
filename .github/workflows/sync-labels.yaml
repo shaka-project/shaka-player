@@ -1,0 +1,32 @@
+# Install this in .github/workflows/ to automate label updates
+name: Sync Labels
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering.
+    inputs:
+      dry_run:
+        description: "If true, don't make any actual changes"
+        required: false
+        default: false
+  schedule:
+    # Run every week on Sunday at 5:42 AM.
+    - cron: '42 5 * * 0'
+
+jobs:
+  sync-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repository: joeyparrish/shaka-github-tools
+
+      # TODO: revert to micnncim and new release after landing
+      #       https://github.com/micnncim/action-label-syncer/pull/68
+      - uses: joeyparrish/action-label-syncer@v1.8.0
+        with:
+          dry_run: ${{ github.event.inputs.ref || false }}
+          prune: true
+          manifest: sync-labels/configs/${{ github.repository }}.yaml
+          repository: ${{ github.repository }}
