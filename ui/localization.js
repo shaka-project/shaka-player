@@ -23,17 +23,18 @@ goog.require('shaka.util.LanguageUtils');
  * If a string is not available, it will return the localized
  * form in the closest related locale.
  *
- * @implements {EventTarget}
  * @final
  * @export
  */
-shaka.ui.Localization = class {
+shaka.ui.Localization = class extends shaka.util.FakeEventTarget {
   /**
    * @param {string} fallbackLocale
    *    The fallback locale that should be used. It will be assumed that this
    *    locale should have entries for just about every request.
    */
   constructor(fallbackLocale) {
+    super();
+
     /** @private {string} */
     this.fallbackLocale_ = shaka.util.LanguageUtils.normalize(fallbackLocale);
 
@@ -62,41 +63,16 @@ shaka.ui.Localization = class {
      * @private {!Map.<string, !Map.<string, string>>}
      */
     this.localizations_ = new Map();
-
-    /**
-     * The event target that we will wrap so that we can fire events
-     * without having to manage the listeners directly.
-     *
-     * @private {!EventTarget}
-     */
-    this.events_ = new shaka.util.FakeEventTarget();
   }
 
   /**
    * @override
    * @export
    */
-  addEventListener(type, listener, options) {
-    this.events_.addEventListener(type, listener, options);
-  }
-
-  /**
-   * @override
-   * @export
-   */
-  removeEventListener(type, listener, options) {
-    // Apparently Closure says we can be passed a null |option|, but we can't
-    // pass a null option, so if we get have a null-like |option|, force it to
-    // be undefined.
-    this.events_.removeEventListener(type, listener, options || undefined);
-  }
-
-  /**
-   * @override
-   * @export
-   */
-  dispatchEvent(event) {
-    return this.events_.dispatchEvent(event);
+  release() {
+    // Placeholder so that readers know this implements IReleasable (via
+    // FakeEventTarget)
+    super.release();
   }
 
   /**
@@ -130,7 +106,7 @@ shaka.ui.Localization = class {
         (locale) => !this.localizations_.has(locale));
 
     if (missing.length) {
-      this.events_.dispatchEvent(new shaka.util.FakeEvent(
+      this.dispatchEvent(new shaka.util.FakeEvent(
           Class.UNKNOWN_LOCALES,
           (new Map()).set('locales', missing)));
     }
@@ -141,7 +117,7 @@ shaka.ui.Localization = class {
 
     const data = (new Map()).set(
         'locales', found.length ? found : [this.fallbackLocale_]);
-    this.events_.dispatchEvent(new shaka.util.FakeEvent(
+    this.dispatchEvent(new shaka.util.FakeEvent(
         Class.LOCALE_CHANGED,
         data));
   }
@@ -193,7 +169,7 @@ shaka.ui.Localization = class {
     // data from.
     this.updateCurrentMap_();
 
-    this.events_.dispatchEvent(new FakeEvent(Class.LOCALE_UPDATED));
+    this.dispatchEvent(new FakeEvent(Class.LOCALE_UPDATED));
 
     return this;
   }
@@ -249,7 +225,7 @@ shaka.ui.Localization = class {
         // Make a copy to avoid leaking references.
         .set('locales', Array.from(this.currentLocales_))
         .set('missing', id);
-    this.events_.dispatchEvent(new FakeEvent(Class.UNKNOWN_LOCALIZATION, data));
+    this.dispatchEvent(new FakeEvent(Class.UNKNOWN_LOCALIZATION, data));
 
     return '';
   }
@@ -377,7 +353,7 @@ shaka.ui.Localization = class {
           // an array.
           .set('missing', Array.from(missing));
 
-      this.events_.dispatchEvent(new shaka.util.FakeEvent(
+      this.dispatchEvent(new shaka.util.FakeEvent(
           shaka.ui.Localization.MISSING_LOCALIZATIONS,
           data));
     }

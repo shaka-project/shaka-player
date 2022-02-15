@@ -254,6 +254,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.localization_ = null;
     this.pressedKeys_.clear();
+
+    // FakeEventTarget implements IReleasable
+    super.release();
   }
 
 
