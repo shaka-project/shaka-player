@@ -17,6 +17,8 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
+          # Required input to specify the release type (node package).
+          release-type: node
           # Make sure the player version gets updated.
           extra-files: lib/player.js
           # Make sure we create the PR against the correct branch.
