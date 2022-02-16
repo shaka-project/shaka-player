@@ -1,0 +1,70 @@
+name: Build and Test PR
+
+on:
+  pull_request: # Trigger for pull requests.
+    types: [opened, synchronize, reopened]
+  workflow_dispatch: # Allows for manual triggering.
+    inputs:
+      ref:
+        description: "The ref to build and test."
+        required: False
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Lint
+        run: python build/check.py
+
+  build_and_test:
+    # Don't waste time doing a full matrix of test runs when there was an
+    # obvious linter error.
+    needs: lint
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        browser: ["Chrome", "Firefox", "Edge", "Safari"]
+        exclude:
+          - os: ubuntu-latest
+            browser: Edge
+          - os: windows-latest
+            browser: Safari
+          - os: ubuntu-latest
+            browser: Safari
+        include:
+          # Run Linux browsers with xvfb, so they're in a headless X session.
+          - os: ubuntu-latest
+            extra_flags: "--use-xvfb"
+      # Disable fail-fast so that one matrix-job failing doesn't make the other
+      # ones end early.
+      fail-fast: false
+
+    name: Build and test ${{ matrix.os }} ${{ matrix.browser }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # Firefox on Ubuntu appears to not have the right things installed in
+      # the environment used by GitHub actions, so make sure that ffmpeg is
+      # installed. Otherwise, the browser might not support some codecs that the
+      # tests assume will be supported.
+      - name: Install FFmpeg
+        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
+        run: sudo apt -y update && sudo apt -y install ffmpeg
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Build Player
+        run: python build/all.py
+
+      - name: Test Player
+        run: |
+          python build/test.py --browsers ${{ matrix.browser }} --reporters spec --spec-hide-passed --drm ${{ matrix.extra_flags }}
