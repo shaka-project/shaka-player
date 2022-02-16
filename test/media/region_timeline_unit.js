@@ -25,7 +25,9 @@ describe('RegionTimeline', () => {
 
     timeline = new shaka.media.RegionTimeline(
         shaka.test.Util.spyFunc(onSeekRange));
-    timeline.setListeners(shaka.test.Util.spyFunc(onNewRegion));
+    timeline.addEventListener('regionadd', (event) => {
+      shaka.test.Util.spyFunc(onNewRegion)(event['region']);
+    });
   });
 
   afterEach(() => {
