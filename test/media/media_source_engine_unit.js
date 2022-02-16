@@ -1120,7 +1120,7 @@ describe('MediaSourceEngine', () => {
     });
 
     it('destroys text engines', async () => {
-      mediaSourceEngine.reinitText('text/vtt');
+      mediaSourceEngine.reinitText('text/vtt', false);
 
       await mediaSourceEngine.destroy();
       expect(mockTextEngine).toBeTruthy();
