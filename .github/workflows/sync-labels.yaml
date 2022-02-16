@@ -26,7 +26,7 @@ jobs:
       #       https://github.com/micnncim/action-label-syncer/pull/68
       - uses: joeyparrish/action-label-syncer@v1.8.0
         with:
-          dry_run: ${{ github.event.inputs.ref || false }}
+          dry_run: ${{ github.event.inputs.dry_run || false }}
           prune: true
           manifest: sync-labels/configs/${{ github.repository }}.yaml
           repository: ${{ github.repository }}
