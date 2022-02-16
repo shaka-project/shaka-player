@@ -31,10 +31,15 @@ describe('RegionObserver', () => {
         () => { return {start: 0, end: 100}; });
 
     observer = new shaka.media.RegionObserver(timeline);
-    observer.setListeners(
-        /* onEnter= */ shaka.test.Util.spyFunc(onEnterRegion),
-        /* onExit= */ shaka.test.Util.spyFunc(onExitRegion),
-        /* onSkip= */ shaka.test.Util.spyFunc(onSkipRegion));
+    observer.addEventListener('enter', (event) => {
+      shaka.test.Util.spyFunc(onEnterRegion)(event['region'], event['seeking']);
+    });
+    observer.addEventListener('exit', (event) => {
+      shaka.test.Util.spyFunc(onExitRegion)(event['region'], event['seeking']);
+    });
+    observer.addEventListener('skip', (event) => {
+      shaka.test.Util.spyFunc(onSkipRegion)(event['region'], event['seeking']);
+    });
   });
 
   it('fires enter event when adding a region the playhead is in', () => {
