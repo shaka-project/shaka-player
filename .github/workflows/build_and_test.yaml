@@ -2,7 +2,7 @@ name: Build and Test PR
 
 on:
   pull_request: # Trigger for pull requests.
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, edited, ready_for_review]
     branches:
       - master
       - v[0-9]*
