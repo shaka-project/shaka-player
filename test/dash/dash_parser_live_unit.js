@@ -1289,6 +1289,49 @@ describe('DashParser Live', () => {
           .toHaveBeenCalledWith(
               jasmine.objectContaining({id: '2', startTime: 10, endTime: 25}));
     });
+
+    it('will not add timeline regions outside the DVR window', async () => {
+      const manifest = [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z"',
+        '    suggestedPresentationDelay="PT0S"',
+        '    timeShiftBufferDepth="PT30S">',
+        '  <Period id="1">',
+        '    <EventStream schemeIdUri="http://example.com" timescale="1">',
+        '      <Event id="0" presentationTime="0" duration="10"/>',
+        '      <Event id="1" presentationTime="10" duration="10"/>',
+        '      <Event id="2" presentationTime="20" duration="10"/>',
+        '      <Event id="3" presentationTime="30" duration="10"/>',
+        '      <Event id="4" presentationTime="40" duration="10"/>',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      // 45 seconds after the epoch, which is also 45 seconds after the
+      // presentation started.  Only the last 30 seconds are available, from
+      // time 15 to 45.
+      Date.now = () => 45 * 1000;
+
+      fakeNetEngine.setResponseText('dummy://foo', manifest);
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(4);
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({id: '1'}));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({id: '2'}));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({id: '3'}));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({id: '4'}));
+    });
   });
 
   it('honors clockSyncUri for in-progress recordings', async () => {
