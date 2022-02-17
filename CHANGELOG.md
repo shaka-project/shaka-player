@@ -1,6 +1,6 @@
 # Changelog
 
-### [3.2.4](https://github.com/google/shaka-player/compare/v3.2.3...v3.2.4) (2022-02-17)
+## [3.2.4](https://github.com/google/shaka-player/compare/v3.2.3...v3.2.4) (2022-02-17)
 
 
 ### Bug Fixes
