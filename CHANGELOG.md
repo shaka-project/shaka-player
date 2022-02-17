@@ -1,5 +1,16 @@
 # Changelog
 
+### [3.3.2](https://github.com/google/shaka-player/compare/v3.3.1...v3.3.2) (2022-02-16)
+
+
+### Bug Fixes
+
+* Add explicit release() for FakeEventTarget ([#3950](https://github.com/google/shaka-player/issues/3950)) ([1f9dd98](https://github.com/google/shaka-player/commit/1f9dd9856eb21079ca789b2c8f7e461438cb13de))
+* Fix download of some HLS assets ([#3934](https://github.com/google/shaka-player/issues/3934)) ([449065c](https://github.com/google/shaka-player/commit/449065c84c5b6e4bbceba03c2345a3330ac2d1a7))
+* Fix exception in StreamingEngine for EMSG with HLS ([#3887](https://github.com/google/shaka-player/issues/3887)) ([ca1ca33](https://github.com/google/shaka-player/commit/ca1ca33c3caf1787c52713ccb151ea59a9285649)), closes [#3886](https://github.com/google/shaka-player/issues/3886)
+* Fix memory leak in DASH live streams with inband EventStream ([#3957](https://github.com/google/shaka-player/issues/3957)) ([6eb81da](https://github.com/google/shaka-player/commit/6eb81dae36a9cced95bd99f5356b69205c264ee0))
+* **HLS:** skip whitespace in attributes ([#3884](https://github.com/google/shaka-player/issues/3884)) ([6305555](https://github.com/google/shaka-player/commit/6305555d40ca0e8be1604fc1f07dd34112b62530))
+
 ## 3.3.1 (2022-01-28)
 
 Bugfixes:
@@ -4878,4 +4889,3 @@ Broken Compatibility:
 ## 0.1b (2014-11-21)
 
 Private beta release.
-
