@@ -329,19 +329,24 @@ shaka.test.FakePlayhead = class {
 /** @extends {TextTrack} */
 shaka.test.FakeTextTrack = class {
   constructor() {
+    // The compiler knows TextTrack.cues is const, and we lied and said we
+    // "extend" TextTrack, so it won't let us assign to cues here.  But we
+    // must, because this fake is a from-scratch implementation of the API.
+    // This cast-hack works around the issue.
     /** @type {!Array.<TextTrackCue>} */
-    this.cues = [];
+    const cues = [];
+    (/** @type {?} */(this))['cues'] = cues;
 
     /** @type {!jasmine.Spy} */
     this.addCue = jasmine.createSpy('addCue').and.callFake((cue) => {
-      this.cues.push(cue);
+      cues.push(cue);
     });
 
     /** @type {!jasmine.Spy} */
     this.removeCue = jasmine.createSpy('removeCue').and.callFake((cue) => {
-      const idx = this.cues.indexOf(cue);
+      const idx = cues.indexOf(cue);
       expect(idx).not.toBeLessThan(0);
-      this.cues.splice(idx, 1);
+      cues.splice(idx, 1);
     });
   }
 };
