@@ -59,6 +59,21 @@ class _HandleKeyValuePairs(argparse.Action):
     merged[key] = value
     setattr(namespace, self.dest, merged)
 
+def _KeyValueValidator(argument):
+    '''To validate the option has a key value pair format.
+
+      When you forget to provide the option in key=value format,
+      it reminds you by throwing an error before executing any tests.
+    '''
+
+    keyValuePair = [str for str in argument.split('=') if str != ''];
+
+    if len(keyValuePair) == 2:
+      return argument
+    else:
+      raise argparse.ArgumentTypeError(
+        'Received %s but expecting format of key=value' % argument
+      ) 
 
 def _IntGreaterThanZero(x):
   i = int(x)
@@ -244,7 +259,7 @@ class Launcher:
         help='Configure license servers for the custom asset playback test. '
              'May be specified multiple times to configure multiple key '
              'systems.',
-        type=str,
+        type=_KeyValueValidator,
         metavar='KEY_SYSTEM_ID=LICENSE_SERVER_URI',
         action=_HandleKeyValuePairs)
     running_commands.add_argument(
