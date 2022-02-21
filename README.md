@@ -112,6 +112,8 @@ DASH features **not** supported:
 
 ## HLS features
 
+**Only supported on browsers with SourceBuffer.mode=sequence support**
+
 HLS features supported:
  - VOD, Live, and Event types
  - Low-latency streaming with partial segments, preload hints, and delta updates
