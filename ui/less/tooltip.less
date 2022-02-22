@@ -48,7 +48,7 @@
 
       /* Override .material-icons-round text styling */
       font-family: Roboto-Regular, Roboto, sans-serif;
-      line-height: @material-icons-width / 2;
+      line-height: calc(@material-icons-width / 2);
       white-space: nowrap;
       font-size: 13px;
 
@@ -60,10 +60,10 @@
 
       /* Positioning */
       position: absolute;
-      bottom: @material-icons-width + 5px;
+      bottom: calc(@material-icons-width + 5px);
 
       /* Left attribute is set to half of the width of the parent button */
-      left: @material-icons-width / 2;
+      left: calc(@material-icons-width / 2);
 
       /* The tooltip is also translated 50% to appear centered */
       .translateX(-0.5);

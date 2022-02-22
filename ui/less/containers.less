@@ -6,8 +6,6 @@
 
 /* All of the top-level containers into which various visible features go. */
 
-@transparent: rgba(0, 0, 0, 0);
-
 /* A container for the entire video + controls combo.  This is the auto-setup
  * div which we populate. */
 .shaka-video-container {
@@ -277,7 +275,7 @@
   .show-when-controls-shown();
 
   /* A black gradient at the bottom, behind the controls, but only so high. */
-  background: linear-gradient(to top, rgba(0, 0, 0, 1) 0, @transparent 15%);
+  background: linear-gradient(to top, black 0, transparent 15%);
 }
 
 .shaka-text-container {
@@ -348,7 +346,7 @@
 
   margin: 0;
   box-sizing: border-box;
-  padding: @spinner-size-percentage / 2;
+  padding: calc(@spinner-size-percentage / 2);
   width: 0;
   height: 0;
 
