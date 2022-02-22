@@ -38,7 +38,7 @@
   border-radius: 50%;
 
   /* A small drop shadow below the button. */
-  box-shadow: rgba(0, 0, 0, 0.1) 0 0 20px 0;
+  box-shadow: rgba(0 0 0 / 10%) 0 0 20px 0;
 
   /* No border. */
   border: none;
@@ -51,7 +51,7 @@
   background-position: center center;
 
   /* A background color behind the play arrow. */
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255 255 255 / 90%);
 
   .show-when-controls-shown();
 
@@ -60,11 +60,11 @@
    * deployed separately from the compiled CSS.
    * Note that these URIs should relative to ui/controls.less, not this file. */
   &[icon="play"] {
-    background-image: data-uri('images/play_arrow.svg');
+    background-image: data-uri("images/play_arrow.svg");
   }
 
   &[icon="pause"] {
-    background-image: data-uri('images/pause.svg');
+    background-image: data-uri("images/pause.svg");
   }
 }
 
@@ -74,7 +74,7 @@
  */
 .shaka-current-time {
   font-size: 14px;
-  color: rgb(255, 255, 255);
+  color: white;
   cursor: pointer;
 
   &[disabled] {
