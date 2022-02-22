@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* stylelint-disable selector-class-pattern -- MDL classes can't be changed */
+
 // Import the MDL styles with the desired color scheme.
 @import (css, inline) "../node_modules/material-design-lite/dist/material.indigo-blue.min.css";
 @import (css, inline) "../node_modules/dialog-polyfill/dialog-polyfill.css";
@@ -15,7 +17,7 @@
 @drawer-width: 550px;
 
 @mdl-footer-link-color: #9e9e9e;  /* copied from MDL stylesheet */
-@mdl-button-color: rgb(63,81,181);  /* copied from MDL stylesheet */
+@mdl-button-color: rgb(63 81 181);  /* copied from MDL stylesheet */
 
 @progress-circle-size: 45px;
 @progress-circle-thickness: 5px;
@@ -24,7 +26,7 @@
  * here we override the font family for the MDL class.  Without this, the menu
  * on the left side of the screen has no icon. */
 .material-icons {
-  font-family: 'Material Icons Round';
+  font-family: "Material Icons Round";
 }
 
 /* Conflicting styles between the icons font & the MDL buttons caused some
@@ -73,7 +75,7 @@ main.mdl-layout__content {
   border-radius: 50%;
   width: 32px;
   color: #000;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255 255 255 / 85%);
 }
 
 html, body {
@@ -180,7 +182,7 @@ html, body {
   background-color: @error-color;
   color: white;
   position: relative;
-  padding: 0 0;
+  padding: 0;
   top: 0;
   right: 1em;
   float: right;
@@ -212,56 +214,56 @@ html, body {
 
   /* features */
   &[icon="high_definition"] {
-    background-image: data-uri('icons/custom_high_definition.svg');
+    background-image: data-uri("icons/custom_high_definition.svg");
   }
 
   &[icon="ultra_high_definition"] {
-    background-image: data-uri('icons/custom_ultra_high_definition.svg');
+    background-image: data-uri("icons/custom_ultra_high_definition.svg");
   }
 
   &[icon="subtitles"] {
-    background-image: data-uri('icons/baseline-subtitles-24px.svg');
+    background-image: data-uri("icons/baseline-subtitles-24px.svg");
   }
 
   &[icon="closed_caption"] {
-    background-image: data-uri('icons/baseline-closed_caption-24px.svg');
+    background-image: data-uri("icons/baseline-closed_caption-24px.svg");
   }
 
   &[icon="live"] {
-    background-image: data-uri('icons/baseline-live_tv-24px.svg');
+    background-image: data-uri("icons/baseline-live_tv-24px.svg");
   }
 
   &[icon="trick_mode"] {
-    background-image: data-uri('icons/baseline-fast_forward-24px.svg');
+    background-image: data-uri("icons/baseline-fast_forward-24px.svg");
   }
 
   &[icon="surround_sound"] {
-    background-image: data-uri('icons/baseline-surround_sound-24px.svg');
+    background-image: data-uri("icons/baseline-surround_sound-24px.svg");
   }
 
   &[icon="multiple_languages"] {
-    background-image: data-uri('icons/baseline-language-24px.svg');
+    background-image: data-uri("icons/baseline-language-24px.svg");
   }
 
   &[icon="ad"] {
-    background-image: data-uri('icons/custom_ad.svg');
+    background-image: data-uri("icons/custom_ad.svg");
   }
 
   &[icon="audio_only"] {
-    background-image: data-uri('icons/baseline-audiotrack-24px.svg');
+    background-image: data-uri("icons/baseline-audiotrack-24px.svg");
   }
 
   /* key systems */
   &[icon="widevine"] {
-    background-image: data-uri('icons/custom_widevine.svg');
+    background-image: data-uri("icons/custom_widevine.svg");
   }
 
   &[icon="clear_key"] {
-    background-image: data-uri('icons/custom_clear_key.svg');
+    background-image: data-uri("icons/custom_clear_key.svg");
   }
 
   &[icon="playready"] {
-    background-image: data-uri('icons/custom_playready.svg');
+    background-image: data-uri("icons/custom_playready.svg");
   }
 }
 
