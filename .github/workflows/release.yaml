@@ -14,18 +14,55 @@ jobs:
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       # Create/update release PR
-      - uses: google-github-actions/release-please-action@v3
+      # TODO: Switch back to upstream release after this fix is available:
+      # https://github.com/google-github-actions/release-please-action/pull/444
+      - uses: joeyparrish/release-please-action@1c11660970e1ddbdc40c040b5f65453e5ab08d8f
         id: release
         with:
           # Required input to specify the release type (node package).
           release-type: node
-          # Make sure the player version gets updated.
-          extra-files: lib/player.js
           # Make sure we create the PR against the correct branch.
           default-branch: ${{ github.ref_name }}
 
+      # If we didn't create a release, we may have created or updated a PR.
+      - uses: actions/checkout@v2
+        if: ${{ ! steps.release.outputs.release_created }}
+      - name: Custom update Player version
+        if: ${{ ! steps.release.outputs.release_created }}
+        run: |
+          # Check out the branch that release-please created, if it exists.
+          git fetch
+          git checkout release-please--branches--${{ github.ref_name }} || exit 0
+          # If it does exist, update lib/player.js in the PR branch, so that the
+          # -uncompiled tag remains in the player version in that context.
+          VERSION="v$(jq -r .version package.json)-uncompiled"
+          sed -e "s/^\\(shaka.Player.version =\\).*/\\1 '$VERSION';/" \
+              -i lib/player.js
+          git add lib/player.js
+          # Emulate the actions bot.
+          git config user.email "github-actions[bot]"
+          git config user.name "41898282+github-actions[bot]@users.noreply.github.com"
+          # Update the PR.
+          git commit --amend --no-edit
+          git push -f
+
   # The jobs below are all conditional on a release having been created by
   # someone merging the release PR.  They all run in parallel.
+
+  tag-master:
+    runs-on: ubuntu-latest
+    needs: release
+    if: ${{ needs.release.outputs.release_created }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Tag the master branch
+        run: |
+          # Emulate the actions bot.
+          git config user.email "github-actions[bot]"
+          git config user.name "41898282+github-actions[bot]@users.noreply.github.com"
+          VERSION=${{ needs.release.outputs.tag_name }}
+          git tag -m "$VERSION-master" "$VERSION-master"
+          git push origin "$VERSION-master"
 
   npm:
     runs-on: ubuntu-latest
@@ -35,8 +72,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 16
           registry-url: 'https://registry.npmjs.org'
+      # Without this, git describe won't work in the npm prepublish steps
+      - run: git fetch --unshallow
       - run: npm ci
       - run: npm publish
         env:
