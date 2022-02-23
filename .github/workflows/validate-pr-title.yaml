@@ -1,18 +1,29 @@
-name: "Validate PR Title"
+name: Validate PR Title
+
+# We recommend that maintainers use this Chrome/Firefox extension so that
+# squashed PRs will have the merged commit message default to the PR title and
+# description:  https://github.com/zachwhaley/squashed-merge-message
+#
+# This avoids the need to amend commits after the fact to match the desired PR
+# syntax.  As long as the PR itself is properly-formatted, this extension will
+# help you commit the right format to the repo, too.  This, in turn, feeds the
+# changelog and release workflows.
 
 on:
-  # NOTE: Force-pushes from automated PRs (like release-please) do not seem to
-  # trigger any of the normal PR triggers (opened, edited, synchronize).  In
-  # fact, even an exhaustive list of types will not work.  So here we add
-  # triggers for reviews, so that the validation will run after someone
-  # approves such a PR.  This is critical since this is a required status check
-  # in most of our repos.  If it doesn't run, the PR can't be merged.
+  # NOTE: The automated PRs from release-please-action do not seem to trigger
+  # any of the default PR triggers (opened, synchronize, reopened).  So we need
+  # additional types.  This is a good set that makes it easy to trigger the
+  # workflow manually if needed.
   pull_request_target:
     types:
       - opened
+      - reopened
       - edited
       - synchronize
-  pull_request_review:
+      - assigned
+      - labeled
+      - ready_for_review
+      - review_requested
 
 jobs:
   main:
@@ -22,12 +33,3 @@ jobs:
       - uses: amannn/action-semantic-pull-request@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # When using "Squash and merge" on a PR with only one commit, GitHub
-          # will suggest using that commit message instead of the PR title for
-          # the merge commit, and it's easy to commit this by mistake. Enable
-          # this option to also validate the commit message for one-commit PRs.
-          validateSingleCommit: true
-          # Opt-in to validate that the PR title matches the single commit to
-          # avoid confusion.
-          validateSingleCommitMatchesPrTitle: true
