@@ -1,10 +1,10 @@
+name: Release
+
 on:
   push:
     branches:
       - master
       - v[0-9]*
-
-name: Release
 
 jobs:
   release:
