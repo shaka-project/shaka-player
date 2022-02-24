@@ -295,7 +295,27 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 5,
-        /* appendWindowEnd= */ 18);
+        /* appendWindowEnd= */ 18,
+        /* sequenceMode= */ false);
+    expect(buffered(ContentType.VIDEO, 0)).toBe(0);
+    await append(ContentType.VIDEO, 0);
+    expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
+    expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(5, 1);
+    await append(ContentType.VIDEO, 1);
+    expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(13, 1);
+  });
+
+  it('does not initialize timestamp offset in sequence mode', async () => {
+    const initObject = new Map();
+    initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
+    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.setDuration(presentationDuration);
+    await appendInit(ContentType.VIDEO);
+    await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
+        /* timestampOffset= */ 100,
+        /* appendWindowStart= */ 5,
+        /* appendWindowEnd= */ 18,
+        /* sequenceMode= */ true);
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 0);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
@@ -314,7 +334,8 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
-        /* appendWindowEnd= */ 20);
+        /* appendWindowEnd= */ 20,
+        /* sequenceMode= */ false);
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
@@ -326,7 +347,8 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
         /* timestampOffset= */ 15,
         /* appendWindowStart= */ 20,
-        /* appendWindowEnd= */ 35);
+        /* appendWindowEnd= */ 35,
+        /* sequenceMode= */ false);
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
