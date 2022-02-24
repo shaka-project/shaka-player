@@ -825,7 +825,8 @@ describe('MediaSourceEngine', () => {
       await mediaSourceEngine.setStreamProperties(ContentType.TEXT,
           /* timestampOffset= */ 10,
           /* appendWindowStart= */ 0,
-          /* appendWindowEnd= */ 20);
+          /* appendWindowEnd= */ 20,
+          /* sequenceMode= */ false);
       expect(mockTextEngine.setTimestampOffset).toHaveBeenCalledWith(10);
       expect(mockTextEngine.setAppendWindow).toHaveBeenCalledWith(0, 20);
     });
