@@ -20,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          repository: joeyparrish/shaka-github-tools
+          repository: shaka-project/shaka-github-tools
 
       # TODO: revert to micnncim and new release after landing
       #       https://github.com/micnncim/action-label-syncer/pull/68

@@ -18,7 +18,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          repository: joeyparrish/shaka-github-tools
+          repository: shaka-project/shaka-github-tools
 
       - name: Update Issues
         env:
