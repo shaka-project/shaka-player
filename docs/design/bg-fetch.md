@@ -12,7 +12,7 @@ At the time it was added to the backlog, the feature was not quite ready for
 use. Since then, it has matured, and now is something we could feasibly use, but
 it has still been a low-priority feature.
 
-[since 2017]: https://github.com/google/shaka-player/issues/879
+[since 2017]: https://github.com/shaka-project/shaka-player/issues/879
 
 ## Design Concept
 

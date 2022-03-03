@@ -184,7 +184,7 @@ describe('StreamUtils', () => {
     });
 
     it('chooses only one role, even if none is preferred', () => {
-      // Regression test for https://github.com/google/shaka-player/issues/949
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/949
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(0, (stream) => {
           stream.language = 'en';
@@ -223,7 +223,7 @@ describe('StreamUtils', () => {
     });
 
     it('chooses only one role, even if all are primary', () => {
-      // Regression test for https://github.com/google/shaka-player/issues/949
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/949
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(0, (stream) => {
           stream.language = 'en';
@@ -269,7 +269,7 @@ describe('StreamUtils', () => {
     });
 
     it('chooses only one language, even if all are primary', () => {
-      // Regression test for https://github.com/google/shaka-player/issues/918
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/918
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(0, (stream) => {
           stream.language = 'en';

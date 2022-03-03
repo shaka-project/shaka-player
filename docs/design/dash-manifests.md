@@ -244,5 +244,5 @@ segments.  You can follow progress in [#999][].  But note that DASH requires
 accurate clock times, so even after that feature is added, your manifest may
 not play in other DASH players.
 
-[#999]: https://github.com/google/shaka-player/issues/999
+[#999]: https://github.com/shaka-project/shaka-player/issues/999
 

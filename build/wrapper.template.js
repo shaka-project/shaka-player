@@ -6,7 +6,7 @@
 
 (function() {
   // This is "window" in browsers and "global" in nodejs.
-  // See https://github.com/google/shaka-player/issues/1445
+  // See https://github.com/shaka-project/shaka-player/issues/1445
   var innerGlobal = typeof window != 'undefined' ? window : global;
 
   // This is where our library exports things to.  It is "this" in the wrapped
@@ -18,7 +18,7 @@
   // $jscomp.global, which will be "window", or "global", or "this", depending
   // on circumstances.
   // See https://github.com/google/closure-compiler/issues/2957 and
-  // https://github.com/google/shaka-player/issues/1455#issuecomment-393250035
+  // https://github.com/shaka-project/shaka-player/issues/1455#issuecomment-393250035
 
   // We provide "global" for use by Closure, and "window" for use by the Shaka
   // library itself.  Both point to "innerGlobal" above.

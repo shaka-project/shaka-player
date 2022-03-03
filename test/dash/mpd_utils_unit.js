@@ -384,7 +384,7 @@ describe('MpdUtils', () => {
 
     it('adjust start time w/ t missing', () => {
       // No S@t is equivalent to t=0, which should use PTO to make negative.
-      // See https://github.com/google/shaka-player/issues/2590
+      // See https://github.com/shaka-project/shaka-player/issues/2590
       const timePoints = [
         createTimePoint(null, 10, 0),
         createTimePoint(10, 10, 0),

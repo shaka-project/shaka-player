@@ -756,7 +756,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       expect(mockGenericMessageBus.broadcast).toHaveBeenCalledTimes(1);
 
       // This covers the lack of scrubber in the Google Home app, as described
-      // in https://github.com/google/shaka-player/issues/2606
+      // in https://github.com/shaka-project/shaka-player/issues/2606
       expectMediaInfo('URI A', 1);
     });
 

@@ -325,7 +325,7 @@ describe('Player', () => {
       // We used to fire the event /before/ filtering, which meant that for
       // multi-codec content, the application might select something which will
       // later be removed during filtering.
-      // https://github.com/google/shaka-player/issues/1119
+      // https://github.com/shaka-project/shaka-player/issues/1119
       it('fires after tracks have been filtered', async () => {
         streamingListener.and.callFake(() => {
           const tracks = player.getVariantTracks();
@@ -621,7 +621,7 @@ describe('Player', () => {
       expect(logWarnSpy).not.toHaveBeenCalled();
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/784
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/784
     it('does not throw when overwriting serverCertificate', () => {
       player.configure({
         drm: {
@@ -798,7 +798,7 @@ describe('Player', () => {
       expect(newConfig.streaming.bufferBehind).toBe(77);
     });
 
-    // https://github.com/google/shaka-player/issues/1524
+    // https://github.com/shaka-project/shaka-player/issues/1524
     it('does not pollute other advanced DRM configs', () => {
       player.configure('drm.advanced.foo', {});
       player.configure('drm.advanced.bar', {});
@@ -1692,8 +1692,8 @@ describe('Player', () => {
       expect(getActiveTextTrack().id).toBe(spanishTextTrack.id);
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/2906
-    // and https://github.com/google/shaka-player/issues/2909.
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/2906
+    // and https://github.com/shaka-project/shaka-player/issues/2909.
     it('selectAudioLanguage() can choose role-less tracks', async () => {
       // For this test, we use a different (and simpler) manifest.
       // Both audio tracks are English; one has a role, and one has no roles.
@@ -1753,7 +1753,7 @@ describe('Player', () => {
       expect(getActiveVariantTrack().audioRoles).toEqual([]);
     });
 
-    // https://github.com/google/shaka-player/issues/3262
+    // https://github.com/shaka-project/shaka-player/issues/3262
     it('selectAudioLanguage() doesn\'t change resolution', () => {
       player.configure('abr.enabled', false);
       abrManager.chooseIndex = 1;
@@ -1831,7 +1831,7 @@ describe('Player', () => {
       expect(getActiveTextTrack().language).toBe('en');
     });
 
-    // https://github.com/google/shaka-player/issues/2010
+    // https://github.com/shaka-project/shaka-player/issues/2010
     it('changing text lang changes active stream when not streaming', () => {
       player.setTextTrackVisibility(false);
 
@@ -2572,7 +2572,7 @@ describe('Player', () => {
       expect(variants[0].id).toBe(2);
 
       // Now increase the restriction, AbrManager should still be updated.
-      // https://github.com/google/shaka-player/issues/1533
+      // https://github.com/shaka-project/shaka-player/issues/1533
       abrManager.setVariants.calls.reset();
       player.configure({restrictions: {maxBandwidth: Infinity}});
       expect(abrManager.setVariants).toHaveBeenCalledTimes(1);
@@ -3210,7 +3210,7 @@ describe('Player', () => {
     // Most of our Player unit tests never adapt.  This allowed some assertions
     // to creep in that went uncaught until they happened during manual testing.
     // Repro only happens with audio+video variants in which we only adapt one
-    // type.  This test covers https://github.com/google/shaka-player/issues/954
+    // type.  This test covers https://github.com/shaka-project/shaka-player/issues/954
 
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.addVariant(0, (variant) => {
@@ -3292,7 +3292,7 @@ describe('Player', () => {
 
   describe('load', () => {
     it('tolerates bandwidth of NaN, undefined, or 0', async () => {
-      // Regression test for https://github.com/google/shaka-player/issues/938
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/938
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.bandwidth = /** @type {?} */(undefined);

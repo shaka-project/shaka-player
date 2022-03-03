@@ -392,10 +392,10 @@ describe('AbortableOperation', () => {
         expect(value).toBe(500);
       }).finally((ok) => {
         expect(ok).toBe(true);
-        // The bug https://github.com/google/shaka-player/issues/1260 makes this
-        // expectation fail because some stages were skipped.  Without this
-        // check, the test would pass, even though the bug shows up first in the
-        // basic functionality of 'chain'.
+        // The bug https://github.com/shaka-project/shaka-player/issues/1260
+        // makes this expectation fail because some stages were skipped.
+        // Without this check, the test would pass, even though the bug shows
+        // up first in the basic functionality of 'chain'.
         expect(values).toEqual([100, 200, 300, 400, 500]);
       });
       await op.promise;

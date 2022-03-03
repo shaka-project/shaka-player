@@ -1059,7 +1059,7 @@ describe('PeriodCombiner', () => {
   it('The number of variants stays stable after many periods ' +
       'when going between similar content and varying ads', async () => {
     // This test is based on the content from
-    // https://github.com/google/shaka-player/issues/2716
+    // https://github.com/shaka-project/shaka-player/issues/2716
     // that used to cause our period flattening logic to keep
     // creating new variants for every new period added.
     // It's ok to create a few additional varinats/streams,

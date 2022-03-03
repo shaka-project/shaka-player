@@ -299,7 +299,7 @@ describe('Player', () => {
       expect(variantTrack.language).toBe(textTrack.language);
     });
 
-    // Repro for https://github.com/google/shaka-player/issues/1879.
+    // Repro for https://github.com/shaka-project/shaka-player/issues/1879.
     it('appends cues when enabled initially', async () => {
       let cues = [];
       /** @const {!shaka.test.FakeTextDisplayer} */
@@ -356,7 +356,7 @@ describe('Player', () => {
       expect(cues.length).toBeGreaterThan(0);
     });
 
-    // https://github.com/google/shaka-player/issues/2553
+    // https://github.com/shaka-project/shaka-player/issues/2553
     it('does not change the selected track', async () => {
       player.configure('streaming.alwaysStreamText', false);
       await player.load('test:forced_subs_simulation_compiled');
@@ -498,7 +498,7 @@ describe('Player', () => {
       expect(configuredTextDisplayer).toBe(textDisplayer);
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/1187
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/1187
     it('does not throw on destroy', async () => {
       await player.load('test:sintel_compiled');
       video.play();
@@ -529,7 +529,7 @@ describe('Player', () => {
     // and the track selection was ignored.  Because this bug involved
     // interactions between Player and StreamingEngine, it is an integration
     // test and not a unit test.
-    // https://github.com/google/shaka-player/issues/1119
+    // https://github.com/shaka-project/shaka-player/issues/1119
     it('allows early selection of specific tracks', async () => {
       /** @type {!jasmine.Spy} */
       const streamingListener = jasmine.createSpy('listener');
@@ -564,7 +564,7 @@ describe('Player', () => {
     // switchingPeriods_ in Player.  Because this bug involved interactions
     // between Player and StreamingEngine, it is an integration test and not a
     // unit test.
-    // https://github.com/google/shaka-player/issues/1119
+    // https://github.com/shaka-project/shaka-player/issues/1119
     it('allows selection of tracks in subsequent loads', async () => {
       /** @type {!jasmine.Spy} */
       const streamingListener = jasmine.createSpy('listener');
