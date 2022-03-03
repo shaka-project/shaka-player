@@ -341,7 +341,7 @@ describe('TextEngine', () => {
     it('does not use timestamp offset', async () => {
       // The start and end times passed to appendBuffer are now absolute, so
       // they already account for timestampOffset and period offset.
-      // See https://github.com/google/shaka-player/issues/1562
+      // See https://github.com/shaka-project/shaka-player/issues/1562
       textEngine.setTimestampOffset(60);
       await textEngine.appendBuffer(dummyData, 0, 3);
       expect(textEngine.bufferStart()).toBe(0);
@@ -384,7 +384,7 @@ describe('TextEngine', () => {
     it('does not use timestamp offset', async () => {
       // The start and end times passed to appendBuffer are now absolute, so
       // they already account for timestampOffset and period offset.
-      // See https://github.com/google/shaka-player/issues/1562
+      // See https://github.com/shaka-project/shaka-player/issues/1562
       textEngine.setTimestampOffset(60);
       await textEngine.appendBuffer(dummyData, 3, 6);
       expect(textEngine.bufferedAheadOf(4)).toBe(2);

@@ -333,8 +333,8 @@ describe('Playhead', () => {
     });
 
     // This is important for recovering from drift.
-    // See: https://github.com/google/shaka-player/issues/1105
-    // TODO: Re-evaluate after https://github.com/google/shaka-player/issues/999
+    // See: https://github.com/shaka-project/shaka-player/issues/1105
+    // TODO: Re-evaluate after https://github.com/shaka-project/shaka-player/issues/999
     it('does not change once the initial position is set', () => {
       timeline.isLive.and.returnValue(true);
       timeline.getDuration.and.returnValue(Infinity);
@@ -782,9 +782,9 @@ describe('Playhead', () => {
   });  // clamps playhead even before seeking completes
 
   // Regression test for:
-  //  - https://github.com/google/shaka-player/pull/2849
-  //  - https://github.com/google/shaka-player/issues/2748
-  //  - https://github.com/google/shaka-player/issues/2848
+  //  - https://github.com/shaka-project/shaka-player/pull/2849
+  //  - https://github.com/shaka-project/shaka-player/issues/2748
+  //  - https://github.com/shaka-project/shaka-player/issues/2848
   it('does not apply seek range before initial seek has completed', () => {
     // These attributes allow the seek range callback to do its thing.
     video.readyState = HTMLMediaElement.HAVE_METADATA;
@@ -1237,7 +1237,7 @@ describe('Playhead', () => {
     it('works with rounding errors when seeking', () => {
       // If the browser sets the time to slightly before where we seek to, we
       // shouldn't get stuck in an infinite loop trying to jump the tiny gap.
-      // https://github.com/google/shaka-player/issues/1309
+      // https://github.com/shaka-project/shaka-player/issues/1309
       const buffered = [{start: 10, end: 20}];
       video.buffered = createFakeBuffered(buffered);
       video.readyState = HTMLMediaElement.HAVE_METADATA;
@@ -1296,7 +1296,7 @@ describe('Playhead', () => {
       expect(video.currentTime).toBe(5);
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/2987
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/2987
     it('does gap jump if paused at 0 and has autoplay', () => {
       const buffered = [{start: 10, end: 20}];
       video.buffered = createFakeBuffered(buffered);
@@ -1321,7 +1321,7 @@ describe('Playhead', () => {
       expect(video.currentTime).toBe(10);
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/3451
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/3451
     it('doesn\'t gap jump if paused at 0 and hasn\'t autoplay', () => {
       const buffered = [{start: 10, end: 20}];
       video.buffered = createFakeBuffered(buffered);

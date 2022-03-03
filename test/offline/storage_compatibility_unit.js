@@ -80,7 +80,7 @@ const compatibilityTestsMetadata = [
     // This is the v4 version of the database as written by v2.5.0 - v2.5.9.  A
     // bug in v2.5 caused the stream metadata from all periods to be written to
     // each period.  This was corrected in v2.5.10.
-    // See https://github.com/google/shaka-player/issues/2389
+    // See https://github.com/shaka-project/shaka-player/issues/2389
     name: 'v4-broken',
     dbImagePath: '/base/test/test/assets/db-dump-v4-broken.json',
     manifestKey: 1,

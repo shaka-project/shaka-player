@@ -1718,7 +1718,7 @@ describe('TtmlTextParser', () => {
         {startTime: 1, endTime: 4});
   });
 
-  // Regression test for https://github.com/google/shaka-player/issues/2478
+  // Regression test for https://github.com/shaka-project/shaka-player/issues/2478
   it('supports nested cues with only non-ASCII characters', () => {
     verifyHelper(
         [
@@ -1920,7 +1920,7 @@ describe('TtmlTextParser', () => {
     );
   });
 
-  // Regression test for https://github.com/google/shaka-player/issues/3743
+  // Regression test for https://github.com/shaka-project/shaka-player/issues/3743
   it('inherits styles from other styles on nestedCues', () => {
     verifyHelper(
         [

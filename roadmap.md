@@ -10,49 +10,49 @@ so the exact milestone for future features is not pre-determined.
 
 Priority features up next:
  - Preload API
-   https://github.com/google/shaka-player/issues/880
+   https://github.com/shaka-project/shaka-player/issues/880
 
 Candidate features for future release cycles:
  - Official TypeScript defs, generated from source
-   https://github.com/google/shaka-player/issues/1030
+   https://github.com/shaka-project/shaka-player/issues/1030
  - Codec-switching
-   https://github.com/google/shaka-player/issues/1528
+   https://github.com/shaka-project/shaka-player/issues/1528
  - Background fetch for offline storage
-   https://github.com/google/shaka-player/issues/879
+   https://github.com/shaka-project/shaka-player/issues/879
  - Support ID3 tags in mp4
-   https://github.com/google/shaka-player/issues/3351
+   https://github.com/shaka-project/shaka-player/issues/3351
  - Smaller, more modular binary
 
 v3.4 - 2022 Q1 or Q2
  - MSE support for FairPlay
-   https://github.com/google/shaka-player/issues/3346
+   https://github.com/shaka-project/shaka-player/issues/3346
  - Support containerless formats
-   https://github.com/google/shaka-player/issues/2337
+   https://github.com/shaka-project/shaka-player/issues/2337
 
 =====
 
 v3.3 - 2022 Q1
  - Common Media Client Data (CMCD) logging support
-   https://github.com/google/shaka-player/issues/3619
+   https://github.com/shaka-project/shaka-player/issues/3619
  - Non-linear IMA CS ads
-   https://github.com/google/shaka-player/pull/3639
+   https://github.com/shaka-project/shaka-player/pull/3639
 
 v3.2 - 2021 Q3
  - MediaCapabilities to make performance-based decisions
-   https://github.com/google/shaka-player/issues/1391
+   https://github.com/shaka-project/shaka-player/issues/1391
  - Configurable key-system priority
-   https://github.com/google/shaka-player/issues/3002
+   https://github.com/shaka-project/shaka-player/issues/3002
  - Codec order preferences
-   https://github.com/google/shaka-player/issues/2179
+   https://github.com/shaka-project/shaka-player/issues/2179
 
 v3.1 - 2021 Q2
  - Low-latency live (LL-HLS, LL-DASH)
-   https://github.com/google/shaka-player/issues/1525
+   https://github.com/shaka-project/shaka-player/issues/1525
  - Own CEA parser, use mux.js only for TS
-   https://github.com/google/shaka-player/issues/2648
+   https://github.com/shaka-project/shaka-player/issues/2648
  - Thumbnail tracks
-   DASH: https://github.com/google/shaka-player/issues/559
-   HLS: https://github.com/google/shaka-player/issues/2429
+   DASH: https://github.com/shaka-project/shaka-player/issues/559
+   HLS: https://github.com/shaka-project/shaka-player/issues/2429
 
 v3.0 - 2020 Q2
  - Code health improvements

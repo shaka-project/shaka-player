@@ -348,7 +348,7 @@ def update_node_modules():
 
   # Update the modules.
   # Actually change directories instead of using npm --prefix.
-  # See npm/npm#17027 and google/shaka-player#776 for more details.
+  # See npm/npm#17027 and shaka-project/shaka-player#776 for more details.
   with InDir(base):
     # npm ci uses package-lock.json to get a stable, reproducible set of
     # packages installed.

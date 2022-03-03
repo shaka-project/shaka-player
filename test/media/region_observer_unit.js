@@ -324,7 +324,7 @@ describe('RegionObserver', () => {
     expect(onSkipRegion).not.toHaveBeenCalled();
   });
 
-  // See https://github.com/google/shaka-player/issues/3949
+  // See https://github.com/shaka-project/shaka-player/issues/3949
   it('cleans up references to regions', async () => {
     const region = createRegion('my-region', 0, 10);
     timeline.addRegion(region);

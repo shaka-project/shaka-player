@@ -1128,7 +1128,7 @@ describe('MediaSourceEngine', () => {
       expect(mockTextEngine.destroy).toHaveBeenCalled();
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/984
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/984
     it('destroys TextDisplayer on destroy', async () => {
       await mediaSourceEngine.destroy();
       expect(mockTextDisplayer.destroySpy).toHaveBeenCalled();
