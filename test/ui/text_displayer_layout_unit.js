@@ -416,7 +416,7 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       await checkScreenshot(prefix, 'flat-cue-bg');
     });
 
-    // https://github.com/google/shaka-player/issues/2761
+    // https://github.com/shaka-project/shaka-player/issues/2761
     it('deeply-nested cues', async () => {
       const makeCue = (text, fg = '', bg = '', nestedCues = []) => {
         const cue = new shaka.text.Cue(0, 1, text);

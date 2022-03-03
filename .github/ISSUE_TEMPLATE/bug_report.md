@@ -18,7 +18,7 @@ assignees: ''
 **Can you reproduce the issue with our latest release version?**
 
 
-**Can you reproduce the issue with the latest code from `master`?**
+**Can you reproduce the issue with the latest code from `main`?**
 
 
 **Are you using the demo app or your own custom app?**

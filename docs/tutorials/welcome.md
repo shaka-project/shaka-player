@@ -39,7 +39,7 @@ To quickly install these prerequisites on Ubuntu or Debian, you can run this
 script:
 
 ```sh
-curl https://raw.githubusercontent.com/google/shaka-player/master/build/install-linux-prereqs.sh | bash
+curl https://raw.githubusercontent.com/shaka-project/shaka-player/main/build/install-linux-prereqs.sh | bash
 ```
 
 We do not provide detailed instructions or scripts for installing these
@@ -51,7 +51,7 @@ links above to download and install the prerequisites manually on any OS.
 #### Get the source
 
 ```sh
-git clone https://github.com/google/shaka-player.git
+git clone https://github.com/shaka-project/shaka-player.git
 cd shaka-player
 ```
 

@@ -183,7 +183,7 @@ describe('PresentationTimeline', () => {
 
       // In spite of the current time, the explicit segment times will decide
       // the availability window.
-      // See https://github.com/google/shaka-player/issues/999
+      // See https://github.com/shaka-project/shaka-player/issues/999
       setElapsed(1000);
       timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
 
@@ -283,7 +283,7 @@ describe('PresentationTimeline', () => {
 
       // In spite of the current time, the explicit segment times will decide
       // the availability window.
-      // See https://github.com/google/shaka-player/issues/999
+      // See https://github.com/shaka-project/shaka-player/issues/999
       setElapsed(1000);
       timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
 
@@ -396,7 +396,7 @@ describe('PresentationTimeline', () => {
       expect(timeline.getSafeSeekRangeStart(25)).toBe(5);
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/2831
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/2831
     it('will round up to the nearest ms', () => {
       const timeline = makeVodTimeline(/* duration= */ 60);
       // Seeking to this exact number may result in seeking to slightly less

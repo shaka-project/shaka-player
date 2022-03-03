@@ -348,7 +348,7 @@ def update_node_modules():
 
   # Update the modules.
   # Actually change directories instead of using npm --prefix.
-  # See npm/npm#17027 and google/shaka-player#776 for more details.
+  # See npm/npm#17027 and shaka-project/shaka-player#776 for more details.
   with InDir(base):
     # npm update seems to be the wrong thing in npm v5, so use install.
     # See google/shaka-player#854 for more details.

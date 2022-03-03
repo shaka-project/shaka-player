@@ -99,7 +99,7 @@ will choose a defaults based on your platform.  However, if you pass any
 arguments to `test.py`, it will not choose browsers and you *must* pass
 `--browsers`.
 
-[lib/debug/log.js]: https://github.com/google/shaka-player/blob/master/lib/debug/log.js
+[lib/debug/log.js]: https://github.com/shaka-project/shaka-player/blob/main/lib/debug/log.js
 
 ## Stats
 

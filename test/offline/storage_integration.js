@@ -1277,7 +1277,7 @@ filterDescribe('Storage', storageSupport, () => {
     const testSchemeMimeType = 'application/x-test-manifest';
     const manifestUri = 'test:sintel';
 
-    // Regression test for https://github.com/google/shaka-player/issues/2781
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/2781
     it('does not cache failures or cancellations', async () => {
       /** @type {shaka.offline.Storage} */
       const storage = new shaka.offline.Storage();

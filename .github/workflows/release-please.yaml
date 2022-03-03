@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - master
+      - main
       - v[0-9]*
 
 jobs:
@@ -49,20 +49,20 @@ jobs:
   # The jobs below are all conditional on a release having been created by
   # someone merging the release PR.  They all run in parallel.
 
-  tag-master:
+  tag-main:
     runs-on: ubuntu-latest
     needs: release
     if: ${{ needs.release.outputs.release_created }}
     steps:
       - uses: actions/checkout@v2
-      - name: Tag the master branch
+      - name: Tag the main branch
         run: |
           # Emulate the actions bot.
           git config user.email "github-actions[bot]"
           git config user.name "41898282+github-actions[bot]@users.noreply.github.com"
           VERSION=${{ needs.release.outputs.tag_name }}
-          git tag -m "$VERSION-master" "$VERSION-master"
-          git push origin "$VERSION-master"
+          git tag -m "$VERSION-main" "$VERSION-main"
+          git push origin "$VERSION-main"
 
   npm:
     runs-on: ubuntu-latest
