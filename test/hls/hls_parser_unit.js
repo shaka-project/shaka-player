@@ -2944,7 +2944,7 @@ describe('HlsParser', () => {
     expect(audio0).toBe(audio1);
   });
 
-  // https://github.com/google/shaka-player/issues/1664
+  // https://github.com/shaka-project/shaka-player/issues/1664
   it('correctly resolves relative playlist URIs', async () => {
     const master = [
       '#EXTM3U\n',
@@ -2987,7 +2987,7 @@ describe('HlsParser', () => {
     expect(manifest.variants.length).toBe(1);
   });
 
-  // https://github.com/google/shaka-player/issues/1908
+  // https://github.com/shaka-project/shaka-player/issues/1908
   it('correctly pairs variants with multiple video and audio', async () => {
     const master = [
       '#EXTM3U\n',

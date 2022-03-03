@@ -578,7 +578,7 @@ shaka.test.TestScheme.DATA = {
     duration: 30,
   },
 
-  // https://github.com/google/shaka-player/issues/2553
+  // https://github.com/shaka-project/shaka-player/issues/2553
   'forced_subs_simulation': {
     audio: sintelAudioSegment,
     text: vttSegment,

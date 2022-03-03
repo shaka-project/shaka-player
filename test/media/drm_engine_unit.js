@@ -925,7 +925,7 @@ describe('DrmEngine', () => {
           .toHaveBeenCalledWith('cenc', initData1);
     });
 
-    // https://github.com/google/shaka-player/issues/2754
+    // https://github.com/shaka-project/shaka-player/issues/2754
     it('ignores duplicate init data from newInitData', async () => {
       /** @type {!Uint8Array} */
       const initData = new Uint8Array(1);
@@ -1311,7 +1311,7 @@ describe('DrmEngine', () => {
         expect(onKeyStatusSpy).toHaveBeenCalled();
       });
 
-      // See https://github.com/google/shaka-player/issues/1541
+      // See https://github.com/shaka-project/shaka-player/issues/1541
       it('does not update public key statuses before callback', async () => {
         await initAndAttach();
 
@@ -1349,7 +1349,7 @@ describe('DrmEngine', () => {
         expect(keyIds.length).toBe(2);
       });
 
-      // See https://github.com/google/shaka-player/issues/1541
+      // See https://github.com/shaka-project/shaka-player/issues/1541
       it('does not invoke callback until all sessions are loaded', async () => {
         // Set up init data overrides in the manifest so that we get multiple
         // sessions.
@@ -1962,7 +1962,7 @@ describe('DrmEngine', () => {
       // this doesn't work if the session is not callable (no license request
       // sent).  So |session.closed| should never resolve and |session.close()|
       // should be rejected and destroy() should still succeed.
-      // https://github.com/google/shaka-player/issues/664
+      // https://github.com/shaka-project/shaka-player/issues/664
       await initAndAttach();
       session1.closed = new shaka.util.PublicPromise();
       session2.closed = new shaka.util.PublicPromise();

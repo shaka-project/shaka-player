@@ -757,7 +757,7 @@ describe('StreamingEngine', () => {
     expect(timeline.setDuration).toHaveBeenCalledWith(35);
   });
 
-  // https://github.com/google/shaka-player/issues/979
+  // https://github.com/shaka-project/shaka-player/issues/979
   it('does not expand the timeline duration', async () => {
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -783,7 +783,7 @@ describe('StreamingEngine', () => {
     expect(timeline.setDuration).not.toHaveBeenCalled();
   });
 
-  // https://github.com/google/shaka-player/issues/1967
+  // https://github.com/shaka-project/shaka-player/issues/1967
   it('does not change duration when 0', async () => {
     setupVod();
     mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
@@ -828,7 +828,7 @@ describe('StreamingEngine', () => {
         .toHaveBeenCalledWith('video', 0, lt20, gt40);
   });
 
-  // Regression test for https://github.com/google/shaka-player/issues/3717
+  // Regression test for https://github.com/shaka-project/shaka-player/issues/3717
   it('applies fudge factors for the duration', async () => {
     setupVod();
 
@@ -931,7 +931,7 @@ describe('StreamingEngine', () => {
     expect(mediaSourceEngine.appendBuffer).toHaveBeenCalled();
   });
 
-  // https://github.com/google/shaka-player/issues/2957
+  // https://github.com/shaka-project/shaka-player/issues/2957
   it('plays with fewer text segments', async () => {
     setupVod();
 
@@ -1093,7 +1093,7 @@ describe('StreamingEngine', () => {
       expect(mediaSourceEngine.resetCaptionParser).not.toHaveBeenCalled();
     });
 
-    // See https://github.com/google/shaka-player/issues/2956
+    // See https://github.com/shaka-project/shaka-player/issues/2956
     it('works with fast variant switches during update', async () => {
       // Delay the appendBuffer call until later so we are waiting for this to
       // finish when we switch.
@@ -1661,7 +1661,7 @@ describe('StreamingEngine', () => {
       });
     });
 
-    // https://github.com/google/shaka-player/issues/2670
+    // https://github.com/shaka-project/shaka-player/issues/2670
     it('rapid unbuffered seeks', async () => {
       // This test simulates rapid dragging of the seek bar, as in #2670.
       // In that issue, we would buffer the wrong segments due to a race

@@ -124,7 +124,7 @@ describe('Player Load Graph', () => {
 
   // There was a bug when calling unload before calling load would cause
   // the load to continue before the (first) unload was complete.
-  // https://github.com/google/shaka-player/issues/612
+  // https://github.com/shaka-project/shaka-player/issues/612
   it('load will wait for unload to finish', async () => {
     createPlayer(/* attachedTo= */ null);
 
