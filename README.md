@@ -52,7 +52,7 @@ NOTES:
  - ⁶: These are expected to work, but are community-supported and untested by
    us.
      - Official support for LG WebOS TV:
-       https://github.com/google/shaka-player/issues/1330
+       https://github.com/shaka-project/shaka-player/issues/1330
 
 We support iOS 12+ through Apple's native HLS player.  We provide the same
 top-level API, but we just set the video's `src` element to the manifest/media.
@@ -65,7 +65,7 @@ features and similar APIs for native apps on iOS.  This project uses its own
 media stack, which allows it to play content that would otherwise not be
 supported.  This supports both DASH and HLS manifests.
 
-[Shaka Player Embedded]: https://github.com/google/shaka-player-embedded
+[Shaka Player Embedded]: https://github.com/shaka-project/shaka-player-embedded
 
 
 ## Manifest format support matrix
@@ -102,12 +102,12 @@ DASH features supported:
 DASH features **not** supported:
  - Xlink with actuate=onRequest
  - Manifests without any segment info:
-   https://github.com/google/shaka-player/issues/1088
+   https://github.com/shaka-project/shaka-player/issues/1088
  - Changing codecs during a presentation (unsupported by MSE)
  - Multiple trick mode tracks for the same resolution at varying framerates or
    bitrates
  - Timescales so large that timestamps cannot be represented as integers in
-   JavaScript (2^53): https://github.com/google/shaka-player/issues/1667
+   JavaScript (2^53): https://github.com/shaka-project/shaka-player/issues/1667
 
 
 ## HLS features
@@ -125,10 +125,10 @@ HLS features supported:
  - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
 
 HLS features **not** supported:
- - Key rotation: https://github.com/google/shaka-player/issues/917
- - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
+ - Key rotation: https://github.com/shaka-project/shaka-player/issues/917
+ - I-frame-only playlists: https://github.com/shaka-project/shaka-player/issues/742
  - Raw AAC, MP3, etc (without an MP4 container):
-   https://github.com/google/shaka-player/issues/2337
+   https://github.com/shaka-project/shaka-player/issues/2337
  - Low-latency streaming with blocking playlist reload
 
 [mux.js]: https://github.com/videojs/mux.js/releases

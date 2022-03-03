@@ -74,7 +74,7 @@ describe('SimpleTextDisplayer', () => {
     });
 
     it('appends equal time cues in reverse order', () => {
-      // Regression test for https://github.com/google/shaka-player/issues/848
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/848
 
       // When VTTCue is seen as the real thing (because of the presence of
       // VTTCue.prototype.line), then the reverse-order behavior comes into

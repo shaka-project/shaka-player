@@ -73,7 +73,7 @@ describe('Functional', () => {
       expect(obj.val).toBe(1);
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/2958
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/2958
     it('supports ES6 classes', () => {
       const obj = Functional.callFactory(Es6Class);
       expect(obj.val).toBe(1);

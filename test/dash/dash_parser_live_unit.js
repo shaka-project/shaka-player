@@ -1128,8 +1128,8 @@ describe('DashParser Live', () => {
       const liveEdge =
           manifest.presentationTimeline.getSegmentAvailabilityEnd();
 
-      // In https://github.com/google/shaka-player/issues/1204, a get on the
-      // final segment failed an assertion and returned endTime == 0.
+      // In https://github.com/shaka-project/shaka-player/issues/1204, a get on
+      // the final segment failed an assertion and returned endTime == 0.
       // Find the last segment by looking just before the live edge.  Looking
       // right on the live edge creates test flake, and the segments are 2
       // seconds in duration.

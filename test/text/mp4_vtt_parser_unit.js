@@ -133,7 +133,7 @@ describe('Mp4VttParser', () => {
   });
 
   it('parses media segments without a sample duration', () => {
-    // Regression test for https://github.com/google/shaka-player/issues/919
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/919
     const cues = [
       {startTime: 10, endTime: 11, payload: 'cue 10'},
       {startTime: 11, endTime: 12, payload: 'cue 11'},
