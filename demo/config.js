@@ -213,6 +213,8 @@ shakaDemo.Config = class {
             'manifest.hls.defaultAudioCodec')
         .addTextInput_(MessageIds.DEFAULT_VIDEO_CODEC,
             'manifest.hls.defaultVideoCodec')
+        .addBoolInput_(MessageIds.IGNORE_MANIFEST_PROGRAM_DATE_TIME,
+            'manifest.hls.ignoreManifestProgramDateTime')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,

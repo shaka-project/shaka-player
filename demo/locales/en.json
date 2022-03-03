@@ -99,6 +99,7 @@
   "DEMO_IMA_ASSET_KEY": "Asset key (for LIVE DAI Content)",
   "DEMO_IMA_CONTENT_SRC_ID": "Content source ID (for VOD DAI Content)",
   "DEMO_IMA_VIDEO_ID": "Video ID (for VOD DAI Content)",
+  "DEMO_IGNORE_MANIFEST_PROGRAM_DATE_TIME": "Ignore Program Date Time from manifest",
   "DEMO_IGNORE_MIN_BUFFER_TIME": "Ignore Min Buffer Time",
   "DEMO_IGNORE_TEXT_FAILURES": "Ignore Text Stream Failures",
   "DEMO_INACCURATE_MANIFEST_TOLERANCE": "Inaccurate Manifest Tolerance",
