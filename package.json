@@ -74,5 +74,8 @@
   },
   "dependencies": {
     "eme-encryption-scheme-polyfill": "^2.0.3"
+  },
+  "engines": {
+    "npm": ">= 5.0.0"
   }
 }
