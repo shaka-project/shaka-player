@@ -39,6 +39,7 @@ if (assert.strict) {
 const esprima = require('esprima');
 const fs = require('fs');
 
+const googModule = ['goog.module', 'goog.provide'];
 // The annotations we will consider "exporting" a symbol.
 const EXPORT_REGEX = /@(?:export|exportInterface|expose)\b/;
 
@@ -127,7 +128,7 @@ function dumpNode(node) {
  */
 function isProvideNode(node) {
   return isCallNode(node) &&
-         getIdentifierString(node.expression.callee) == 'goog.provide';
+          googModule.includes(getIdentifierString(node.expression.callee));
 }
 
 
