@@ -1,17 +1,5 @@
 @Library('tivoPipeline') _
 
-def aws_docker_registry = '846866821192.dkr.ecr.us-west-1.amazonaws.com/build'
-def aws = 'AWS_DEFAULT_REGION=us-west-1 docker run --rm -eAWS_DEFAULT_REGION -eAWS_ACCESS_KEY_ID -eAWS_SECRET_ACCESS_KEY dostar/alpine-awscli:3.8-1.16.125 aws'
-
-ecr_publish_credentials_env = [
-    string(credentialsId: 'swp-build-aws-access-key-id',     variable: 'AWS_ACCESS_KEY_ID'),
-    string(credentialsId: 'swp-build-aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-];
-
-deployment_credentials_env = [
-    file  (credentialsId: 'swp-build-rpmsrv-deployment-key', variable: 'APP_DEPLOY_KEY')
-];
-
 pipeline {
     agent {
         node {
@@ -35,19 +23,8 @@ pipeline {
                     commit_short = vars.GIT_COMMIT.substring(0,7)
                     project = env.JOB_NAME.split('/')[0];
                     tag = "${project}:${branch}-${build_timestamp_docker}-${commit_short}"
-                    tag_full = "${aws_docker_registry}/${tag}"
 
                     echo "Building PROJECT=${project} BRANCH=${branch} GIT_COMMIT=${commit} TAG=${tag}"
-
-                    deployment_config_env = [
-                        configFile(fileId: "${project}_${branch}_ansible.inventory", variable: 'APP_ANSIBLE_INVENTORY'),
-                        configFile(fileId: 'credentials.properties', variable: 'CREDENTIAL_PROPERTIES_FILE')
-                    ];
-
-                    build_env = [
-                        "APP_NAME=${project}",
-                        "APP_IMAGE=${tag_full}"
-                    ];
                 }
                 sh "env | sort"
             }
