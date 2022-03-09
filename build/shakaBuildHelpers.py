@@ -63,23 +63,6 @@ def _modules_need_update():
 
   return False
 
-
-def _parse_version(version):
-  """Converts the given string version to a tuple of numbers."""
-  # Handle any prerelease or build metadata, such as -beta or -g1234
-  if '-' in version:
-    version, trailer = version.split('-')
-  else:
-    # Versions without a trailer should sort later than those with a trailer.
-    # For example, 2.5.0-beta comes before 2.5.0.
-    # To accomplish this, we synthesize a trailer which sorts later than any
-    # _reasonable_ alphanumeric version trailer would.  These characters have a
-    # high value in ASCII.
-    trailer = '}}}'
-  numeric_parts = [int(i) for i in version.split('.')]
-  return tuple(numeric_parts + [trailer])
-
-
 def get_source_base():
   """Returns the absolute path to the source code base."""
   return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -337,14 +320,6 @@ def update_node_modules():
     return True
 
   base = cygwin_safe_path(get_source_base())
-
-  # Check the version of npm.
-  version = execute_get_output(['npm', '-v']).decode('utf8')
-
-  if _parse_version(version) < _parse_version('5.0.0'):
-    logging.error('npm version is too old, please upgrade.  e.g.:')
-    logging.error('  npm install -g npm')
-    return False
 
   # Update the modules.
   # Actually change directories instead of using npm --prefix.
