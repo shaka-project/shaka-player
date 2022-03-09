@@ -14,9 +14,7 @@ jobs:
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       # Create/update release PR
-      # TODO: Switch back to upstream release after this fix is available:
-      # https://github.com/google-github-actions/release-please-action/pull/444
-      - uses: joeyparrish/release-please-action@1c11660970e1ddbdc40c040b5f65453e5ab08d8f
+      - uses: google-github-actions/release-please-action@v3
         id: release
         with:
           # Without this command, the manifest file will be ignored.  At least
