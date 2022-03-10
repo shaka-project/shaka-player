@@ -65,6 +65,10 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
       - name: Build Player
         run: python build/all.py
 
