@@ -172,8 +172,7 @@ def main(args):
   force = parsed_args.force
 
   # Update node modules if needed.
-  if not shakaBuildHelpers.update_node_modules():
-    return 1
+  shakaBuildHelpers.update_node_modules()
 
   for is_debug in [True, False]:
     if not build_all(force, is_debug):

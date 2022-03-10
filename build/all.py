@@ -110,7 +110,7 @@ def main(args):
     return 1
 
   if not compile_less('ui', 'controls', parsed_args):
-    return 1;
+    return 1
   if not compile_less('demo', 'demo', parsed_args):
     return 1
 

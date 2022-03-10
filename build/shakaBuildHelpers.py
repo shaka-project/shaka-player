@@ -30,38 +30,12 @@ import platform
 import re
 import subprocess
 import sys
-import time
-
-import subprocessWindowsPatch
 
 
 # Python 3 no longer has a separate unicode type.  For type-checking done in
 # get_node_binary, create an alias to the str type.
 if sys.version_info[0] == 3:
   unicode = str
-
-
-def _node_modules_last_update_path():
-  return os.path.join(get_source_base(), 'node_modules', '.last_update')
-
-
-def _modules_need_update():
-  try:
-    last_update = os.path.getmtime(_node_modules_last_update_path())
-    if last_update > time.time():
-      # Update time in the future!  Something is wrong, so update.
-      return True
-
-    package_json_path = os.path.join(get_source_base(), 'package.json')
-    last_json_change = os.path.getmtime(package_json_path)
-    if last_json_change >= last_update:
-      # The json file has changed, so update.
-      return True
-  except:
-    # No such file, so we should update.
-    return True
-
-  return False
 
 def get_source_base():
   """Returns the absolute path to the source code base."""
@@ -316,9 +290,6 @@ class InDir(object):
 def update_node_modules():
   """Updates the node modules using 'npm', if they have not already been
      updated recently enough."""
-  if not _modules_need_update():
-    return True
-
   base = cygwin_safe_path(get_source_base())
 
   # Update the modules.
@@ -327,11 +298,7 @@ def update_node_modules():
   with InDir(base):
     # npm ci uses package-lock.json to get a stable, reproducible set of
     # packages installed.
-    execute_get_output(['npm', 'ci'])
-
-  # Update the timestamp of the file that tracks when we last updated.
-  open(_node_modules_last_update_path(), 'wb').close()
-  return True
+    execute_get_output(['npm', 'ci'] if os.getenv("CI") else ["npm", "install"])
 
 
 def run_main(main):

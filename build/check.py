@@ -340,8 +340,7 @@ def main(args):
     pass
 
   # Update node modules if needed.
-  if not shakaBuildHelpers.update_node_modules():
-    return 1
+  shakaBuildHelpers.update_node_modules()
 
   for name, step in _CHECKS:
     if not parsed_args.filter or name in parsed_args.filter:

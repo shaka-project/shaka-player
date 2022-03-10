@@ -362,8 +362,7 @@ def main(args):
     pass
 
   # Update node modules if needed.
-  if not shakaBuildHelpers.update_node_modules():
-    return 1
+  shakaBuildHelpers.update_node_modules()
 
   # If no commands are given then use complete  by default.
   if len(commands) == 0:

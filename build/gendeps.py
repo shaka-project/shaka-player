@@ -38,8 +38,7 @@ deps_args = [
 def main(_):
   """Generates the uncompiled dependencies files."""
   # Update node modules if needed.
-  if not shakaBuildHelpers.update_node_modules():
-    return 1
+  shakaBuildHelpers.update_node_modules()
 
   logging.info('Generating Closure dependencies...')
 

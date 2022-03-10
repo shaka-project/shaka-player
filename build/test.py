@@ -430,9 +430,7 @@ class Launcher:
       logging.error('xvfb can only be used on Linux')
       return 1
 
-    if not shakaBuildHelpers.update_node_modules():
-      logging.error('Failed to update node modules')
-      return 1
+    shakaBuildHelpers.update_node_modules()
 
     karma = shakaBuildHelpers.get_node_binary('karma')
     cmd = ['xvfb-run', '--auto-servernum'] if self.parsed_args.use_xvfb else []
