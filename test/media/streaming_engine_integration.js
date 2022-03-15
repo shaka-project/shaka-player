@@ -637,6 +637,7 @@ describe('StreamingEngine', () => {
         minBufferTime: 2,
         textStreams: [],
         imageStreams: [],
+        sequenceMode: false,
         variants: [{
           id: 1,
           video: {

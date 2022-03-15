@@ -88,7 +88,7 @@ describe('Player Src Equals', () => {
     expect(player.isBuffering()).toBeTruthy();
   });
 
-  // A regression test for https://github.com/google/shaka-player/issues/2523
+  // A regression test for https://github.com/shaka-project/shaka-player/issues/2523
   it('detects subtitles in native HLS', async () => {
     const supportsNativeHls =
         video.canPlayType('application/vnd.apple.mpegurl') != '';
@@ -103,8 +103,8 @@ describe('Player Src Equals', () => {
   });
 
   // A regression test for
-  // https://github.com/google/shaka-player/issues/2483#issuecomment-633412527
-  // and https://github.com/google/shaka-player/issues/2593
+  // https://github.com/shaka-project/shaka-player/issues/2483#issuecomment-633412527
+  // and https://github.com/shaka-project/shaka-player/issues/2593
   it('honors preferred audio and text languages', async () => {
     const supportsNativeHls =
         video.canPlayType('application/vnd.apple.mpegurl') != '';

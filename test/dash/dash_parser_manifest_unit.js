@@ -985,7 +985,8 @@ describe('DashParser Manifest', () => {
 
     it('duplicate Representation ids with live', async () => {
       const source = [
-        '<MPD minBufferTime="PT75S" type="dynamic">',
+        '<MPD minBufferTime="PT75S" type="dynamic"',
+        '     availabilityStartTime="1970-01-01T00:00:00Z">',
         '  <Period id="1" duration="PT30S">',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <Representation id="1" bandwidth="1">',
@@ -1276,7 +1277,8 @@ describe('DashParser Manifest', () => {
   });
 
   it('handles bandwidth of 0 or missing', async () => {
-    // Regression test for https://github.com/google/shaka-player/issues/938
+    // Regression test for
+    // https://github.com/shaka-project/shaka-player/issues/938
     const source = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',

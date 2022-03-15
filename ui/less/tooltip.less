@@ -48,22 +48,22 @@
 
       /* Override .material-icons-round text styling */
       font-family: Roboto-Regular, Roboto, sans-serif;
-      line-height: @material-icons-width / 2;
+      line-height: calc(@material-icons-width / 2);
       white-space: nowrap;
       font-size: 13px;
 
       /* Styling */
-      background: rgba(35, 35, 35, 0.9);
+      background: rgba(35 35 35 / 90%);
       color: white;
       border-radius: 3px;
       padding: 5px 10px;
 
       /* Positioning */
       position: absolute;
-      bottom: @material-icons-width + 5px;
+      bottom: calc(@material-icons-width + 5px);
 
       /* Left attribute is set to half of the width of the parent button */
-      left: @material-icons-width / 2;
+      left: calc(@material-icons-width / 2);
 
       /* The tooltip is also translated 50% to appear centered */
       .translateX(-0.5);

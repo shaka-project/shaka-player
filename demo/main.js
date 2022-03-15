@@ -164,7 +164,7 @@ shakaDemo.Main = class {
       case shaka.ui.Overlay.FailReasonCode.NO_BROWSER_SUPPORT:
         message = this.getLocalizedString(
             shakaDemo.MessageIds.FAILURE_NO_BROWSER_SUPPORT);
-        href = 'https://github.com/google/shaka-player#' +
+        href = 'https://github.com/shaka-project/shaka-player#' +
                 'platform-and-browser-support-matrix';
         break;
       case shaka.ui.Overlay.FailReasonCode.PLAYER_FAILED_TO_LOAD:
@@ -289,7 +289,7 @@ shakaDemo.Main = class {
 
     // Navigate to the github issue opening interface, with the
     // partially-filled template as a preset body.
-    let url = 'https://github.com/google/shaka-player/issues/new?';
+    let url = 'https://github.com/shaka-project/shaka-player/issues/new?';
     url += 'body=' + encodeURIComponent(text);
     // Open in another tab.
     window.open(url, '_blank');
@@ -725,6 +725,9 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.MP2TS)) {
       mimeTypes.push('video/mp2t');
+    }
+    if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
+      mimeTypes.push('audio/aac');
     }
     const hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
@@ -1611,7 +1614,7 @@ shakaDemo.Main = class {
 
   /**
    * Sets the "version-string" divs to a version string.
-   * For example, "v2.5.4-master (uncompiled)".
+   * For example, "v2.5.4-main (uncompiled)".
    * @private
    */
   setUpVersionStrings_() {

@@ -16,6 +16,9 @@ describe('RegionObserver', () => {
   let observer;
 
   /** @type {!jasmine.Spy} */
+  let onSeekRange;
+
+  /** @type {!jasmine.Spy} */
   let onEnterRegion;
   /** @type {!jasmine.Spy} */
   let onExitRegion;
@@ -23,18 +26,26 @@ describe('RegionObserver', () => {
   let onSkipRegion;
 
   beforeEach(() => {
+    onSeekRange = jasmine.createSpy('onSeekRange');
+    onSeekRange.and.returnValue({start: 0, end: 100});
+
     onEnterRegion = jasmine.createSpy('onEnterRegion');
     onExitRegion = jasmine.createSpy('onExitRegion');
     onSkipRegion = jasmine.createSpy('onSkipRegion');
 
     timeline = new shaka.media.RegionTimeline(
-        () => { return {start: 0, end: 100}; });
+        shaka.test.Util.spyFunc(onSeekRange));
 
     observer = new shaka.media.RegionObserver(timeline);
-    observer.setListeners(
-        /* onEnter= */ shaka.test.Util.spyFunc(onEnterRegion),
-        /* onExit= */ shaka.test.Util.spyFunc(onExitRegion),
-        /* onSkip= */ shaka.test.Util.spyFunc(onSkipRegion));
+    observer.addEventListener('enter', (event) => {
+      shaka.test.Util.spyFunc(onEnterRegion)(event['region'], event['seeking']);
+    });
+    observer.addEventListener('exit', (event) => {
+      shaka.test.Util.spyFunc(onExitRegion)(event['region'], event['seeking']);
+    });
+    observer.addEventListener('skip', (event) => {
+      shaka.test.Util.spyFunc(onSkipRegion)(event['region'], event['seeking']);
+    });
   });
 
   it('fires enter event when adding a region the playhead is in', () => {
@@ -311,6 +322,30 @@ describe('RegionObserver', () => {
     expect(onEnterRegion).not.toHaveBeenCalled();
     expect(onExitRegion).not.toHaveBeenCalled();
     expect(onSkipRegion).not.toHaveBeenCalled();
+  });
+
+  // See https://github.com/shaka-project/shaka-player/issues/3949
+  it('cleans up references to regions', async () => {
+    const region = createRegion('my-region', 0, 10);
+    timeline.addRegion(region);
+
+    // Poll so that RegionObserver will store regions.
+    poll(observer,
+        /* timeInSeconds= */ 5,
+        /* seeking= */ false);
+
+    // Hack to get a private member without the compiler complaining:
+    /** @type {Map} */
+    const regionMap = (/** @type {?} */(observer))['oldPosition_'];
+    expect(regionMap.size).not.toBe(0);
+
+    // Move the seek range so that the region will be removed.
+    onSeekRange.and.returnValue({start: 20, end: 100});
+    // Give the timeline time to filter regions
+    await shaka.test.Util.delay(
+        shaka.media.RegionTimeline.REGION_FILTER_INTERVAL * 2);
+
+    expect(regionMap.size).toBe(0);
   });
 
   /**

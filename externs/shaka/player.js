@@ -746,7 +746,6 @@ shaka.extern.DashManifestConfiguration;
  * @typedef {{
  *   ignoreTextStreamFailures: boolean,
  *   ignoreImageStreamFailures: boolean,
- *   useFullSegmentsForStartTime: boolean,
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string
  * }}
@@ -757,9 +756,6 @@ shaka.extern.DashManifestConfiguration;
  * @property {boolean} ignoreImageStreamFailures
  *   If <code>true</code>, ignore any errors in a image stream and filter out
  *   those streams.
- * @property {boolean} useFullSegmentsForStartTime
- *   If <code>true</code>, force HlsParser to use a full segment request for
- *   determining start time in case the server does not support partial requests
  * @property {string} defaultAudioCodec
  *   The default audio codec if it is not specified in the HLS playlist.
  *   <i>Defaults to <code>'mp4a.40.2'</code>.</i>
@@ -934,8 +930,9 @@ shaka.extern.ManifestConfiguration;
  * @property {boolean} useNativeHlsOnSafari
  *   Desktop Safari has both MediaSource and their native HLS implementation.
  *   Depending on the application's needs, it may prefer one over the other.
- *   Examples: FairPlay is only supported via Safari's native HLS, but it
- *   doesn't have an API for selecting specific tracks.
+ *   Warning when disabled: Where single-key DRM streams work fine, multi-keys
+ *   streams is showing unexpected behaviours (stall, audio playing with video
+ *   freezes, ...). Use with care.
  * @property {number} inaccurateManifestTolerance
  *   The maximum difference, in seconds, between the times in the manifest and
  *   the times in the segments.  Larger values allow us to compensate for more

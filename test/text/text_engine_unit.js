@@ -25,6 +25,9 @@ describe('TextEngine', () => {
   let mockParseInit;
 
   /** @type {!jasmine.Spy} */
+  let mockSetSequenceMode;
+
+  /** @type {!jasmine.Spy} */
   let mockParseMedia;
 
   /** @type {!shaka.text.TextEngine} */
@@ -32,11 +35,13 @@ describe('TextEngine', () => {
 
   beforeEach(() => {
     mockParseInit = jasmine.createSpy('mockParseInit');
+    mockSetSequenceMode = jasmine.createSpy('mockSetSequenceMode');
     mockParseMedia = jasmine.createSpy('mockParseMedia');
     // eslint-disable-next-line no-restricted-syntax
     mockParserPlugIn = function() {
       return {
         parseInit: mockParseInit,
+        setSequenceMode: mockSetSequenceMode,
         parseMedia: mockParseMedia,
       };
     };
@@ -46,7 +51,7 @@ describe('TextEngine', () => {
 
     TextEngine.registerParser(dummyMimeType, mockParserPlugIn);
     textEngine = new TextEngine(mockDisplayer);
-    textEngine.initParser(dummyMimeType);
+    textEngine.initParser(dummyMimeType, false);
   });
 
   afterEach(() => {
@@ -336,7 +341,7 @@ describe('TextEngine', () => {
     it('does not use timestamp offset', async () => {
       // The start and end times passed to appendBuffer are now absolute, so
       // they already account for timestampOffset and period offset.
-      // See https://github.com/google/shaka-player/issues/1562
+      // See https://github.com/shaka-project/shaka-player/issues/1562
       textEngine.setTimestampOffset(60);
       await textEngine.appendBuffer(dummyData, 0, 3);
       expect(textEngine.bufferStart()).toBe(0);
@@ -379,7 +384,7 @@ describe('TextEngine', () => {
     it('does not use timestamp offset', async () => {
       // The start and end times passed to appendBuffer are now absolute, so
       // they already account for timestampOffset and period offset.
-      // See https://github.com/google/shaka-player/issues/1562
+      // See https://github.com/shaka-project/shaka-player/issues/1562
       textEngine.setTimestampOffset(60);
       await textEngine.appendBuffer(dummyData, 3, 6);
       expect(textEngine.bufferedAheadOf(4)).toBe(2);

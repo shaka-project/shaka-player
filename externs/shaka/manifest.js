@@ -17,7 +17,8 @@
  *   textStreams: !Array.<shaka.extern.Stream>,
  *   imageStreams: !Array.<shaka.extern.Stream>,
  *   offlineSessionIds: !Array.<string>,
- *   minBufferTime: number
+ *   minBufferTime: number,
+ *   sequenceMode: boolean
  * }}
  *
  * @description
@@ -72,6 +73,9 @@
  *   The minimum number of seconds of content that must be buffered before
  *   playback can begin.  Can be overridden by a higher value from the Player
  *   configuration.
+ * @property {boolean} sequenceMode
+ *   If true, we will append the media segments using sequence mode; that is to
+ *   say, ignoring any timestamps inside the media files.
  *
  * @exportDoc
  */

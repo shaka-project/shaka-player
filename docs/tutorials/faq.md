@@ -43,17 +43,6 @@ headers in the response.  Additionally, with some manifests, we will send a
 This can also happen with mixed-content restrictions.  If the site is using
 `https:`, then your manifest and segments must also.
 
-*Sending `Range` header at the start of HLS playback can be disabled using this config:*
-```
-player.configure({
-    manifest: {
-        hls: {
-            useFullSegmentsForStartTime: true,
-        },
-    },
-})
-```
-
 <hr>
 
 **Q:** I am getting `REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE` or error code
@@ -274,18 +263,18 @@ so don't declare it using a ref(), and if you put your player instance into a
 data() object, you can prefix the property name with "$" or "_" to make Vue not
 proxy them.
 
-[386]: https://github.com/google/shaka-player/issues/386#issuecomment-227898001
-[489]: https://github.com/google/shaka-player/issues/489#issuecomment-240466224
-[743]: https://github.com/google/shaka-player/issues/743
-[887]: https://github.com/google/shaka-player/issues/887
-[999]: https://github.com/google/shaka-player/issues/999
-[1667]: https://github.com/google/shaka-player/issues/1667
+[386]: https://github.com/shaka-project/shaka-player/issues/386#issuecomment-227898001
+[489]: https://github.com/shaka-project/shaka-player/issues/489#issuecomment-240466224
+[743]: https://github.com/shaka-project/shaka-player/issues/743
+[887]: https://github.com/shaka-project/shaka-player/issues/887
+[999]: https://github.com/shaka-project/shaka-player/issues/999
+[1667]: https://github.com/shaka-project/shaka-player/issues/1667
 [BigInteger.js]: https://github.com/peterolson/BigInteger.js
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-[Shaka Player Embedded]: https://github.com/google/shaka-player-embedded
+[Shaka Player Embedded]: https://github.com/shaka-project/shaka-player-embedded
 [auth]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-server-auth.html
 [buffering]: https://shaka-player-demo.appspot.com/docs/api/tutorial-network-and-buffering-config.html
 [drm_tutorial]: https://shaka-player-demo.appspot.com/docs/api/tutorial-drm-config.html
 [eme_https]: https://sites.google.com/a/chromium.org/dev/Home/chromium-security/deprecating-powerful-features-on-insecure-origins
 [wrapping]: https://shaka-player-demo.appspot.com/docs/api/tutorial-license-wrapping.html
-[including mux.js]: https://github.com/google/shaka-player/blob/967f3399/demo/index.html#L39
+[including mux.js]: https://github.com/shaka-project/shaka-player/blob/967f3399/demo/index.html#L39

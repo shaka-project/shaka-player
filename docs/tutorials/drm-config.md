@@ -184,6 +184,11 @@ Microsoft Documentation: https://docs.microsoft.com/en-us/playready/overview/sec
 
 NB: Audio Hardware DRM is not supported (PlayReady limitation)
 
+##### FairPlay
+
+Based on [Apple's Documentation](https://developer.apple.com/streaming/fps/),
+you should provide an empty string as robustness
+
 ##### Other key-systems
 
 Values for other key systems are not known to us at this time.

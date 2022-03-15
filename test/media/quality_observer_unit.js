@@ -50,7 +50,10 @@ describe('QualityObserver', () => {
   beforeEach(() => {
     onQualityChange = jasmine.createSpy('onQualityChange');
     observer = new shaka.media.QualityObserver(getBufferedInfo);
-    observer.setListeners(shaka.test.Util.spyFunc(onQualityChange));
+    observer.addEventListener('qualitychange', (event) => {
+      shaka.test.Util.spyFunc(onQualityChange)(
+          event['quality'], event['position']);
+    });
     emptyBuffer = true;
     bufferStart = 0;
     bufferEnd = 0;
