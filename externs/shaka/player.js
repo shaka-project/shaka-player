@@ -1070,6 +1070,22 @@ shaka.extern.AdvancedAbrConfiguration;
  */
 shaka.extern.CmcdConfiguration;
 
+/**
+ * @typedef {{
+ *   enabled: boolean
+ * }}
+ *
+ * @description
+ *   Decoding for MPEG-5 Part2 LCEVC.
+ *
+ * @property {boolean} enabled
+ *   If <code>true</code>, enable LCEVC data to be passed to LCEVC Dil and
+ *   decode frames on a canvas element.
+ *   Defaults to <code>false</code>.
+ * @exportDoc
+ */
+shaka.extern.LcevcConfiguration;
+
 
 /**
  * @typedef {{
@@ -1113,6 +1129,7 @@ shaka.extern.OfflineConfiguration;
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
+ *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
@@ -1141,6 +1158,9 @@ shaka.extern.OfflineConfiguration;
  *   ABR configuration and settings.
  * @property {shaka.extern.CmcdConfiguration} cmcd
  *   CMCD configuration and settings. (Common Media Client Data)
+ * @property {shaka.extern.LcevcConfiguration} lcevc
+ *   MPEG-5 LCEVC configuration and settings.
+ *   (Low Complexity Enhancement Video Codec)
  * @property {shaka.extern.OfflineConfiguration} offline
  *   Offline configuration and settings.
  * @property {string} preferredAudioLanguage

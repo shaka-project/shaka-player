@@ -223,6 +223,24 @@ shakaAssets.UplynkRequestFilter = (type, request) => {
 /** @const {!Array.<!ShakaDemoAssetInfo>} */
 shakaAssets.testAssets = [
   // Shaka assets {{{
+  /* LCEVC Enabled Content with LCEVC Encoded Stream */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny (LCEVC H264)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vnt7topK63ddrPqk/master.m3u8',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addDescription('H264 HLS stream with LCEVC enhancement')
+      .markAsFeatured('Big Buck Bunny (LCEVC H264)')
+      .setExtraConfig({
+        lcevc: {
+          enabled: true,
+        },
+      }),
   new ShakaDemoAssetInfo(
       /* name= */ 'Big Buck Bunny: the Dark Truths of a Video Dev Cartoon (DASH)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dark_truth.png',
