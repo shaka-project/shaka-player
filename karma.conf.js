@@ -345,7 +345,7 @@ module.exports = (config) => {
               // Don't instrument these parts of the codebase.
               exclude: [
                 'demo/**/*.js',
-                'lib/(debug|deprecate|polyfill)/*.js',
+                'lib/(debug|deprecate|polyfill|lcevc)/*.js',
                 'test/**/*.js',
                 'third_party/**/*.js',
               ],
