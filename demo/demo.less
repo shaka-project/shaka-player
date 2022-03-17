@@ -80,7 +80,16 @@ main.mdl-layout__content {
 
 html, body {
   /* Ensure everything has a consistent font. */
-  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-family: Roboto-Regular, Roboto, sans-serif, TengwarTelcontar;
+}
+
+// This font supports the Sindarin (sjn) translation.
+@font-face {
+  font-family: TengwarTelcontar;
+  // This could be served from demo/ (uncompiled) or dist (compiled).
+  src: url("../demo/TengwarTelcontar.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
 }
 
 /* Change the default opacity of the ripple container, to get around an iOS bug.
