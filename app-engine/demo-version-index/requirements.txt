@@ -1,0 +1,6 @@
+# Shaka Player Version Index - Appspot Python Runtime Requirements
+# Copyright 2022 Google LLC
+# SPDX-License-Identifier: Apache-2.0
+
+Flask==2.0.3
+appengine-python-standard==0.3.1

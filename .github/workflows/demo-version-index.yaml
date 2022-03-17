@@ -1,0 +1,29 @@
+name: Deploy Demo Version Index
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering.
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/demo-version-index.yaml
+      - app-engine/demo-version-index/**
+
+jobs:
+  appspot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
+
+      - uses: google-github-actions/deploy-appengine@v0
+        with:
+          project_id: shaka-player-demo
+          version: index
+          working_directory: app-engine/demo-version-index/
+          promote: false
+

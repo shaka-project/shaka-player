@@ -60,6 +60,27 @@
     "tippy.js": "^4.3.5",
     "which": "^2.0.2"
   },
+  "shakaCustom": {
+    "purposeOfDemoDeps": "These are the files from node_modules that need to be deployed with the demo app.",
+    "demoDeps": [
+      "awesomplete/awesomplete.css",
+      "awesomplete/awesomplete.min.js",
+      "dialog-polyfill/dialog-polyfill.css",
+      "dialog-polyfill/dist/dialog-polyfill.js",
+      "eme-encryption-scheme-polyfill/index.js",
+      "es6-promise-polyfill/promise.min.js",
+      "fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js",
+      "google-closure-library/closure/goog/base.js",
+      "less/dist/less.js",
+      "material-design-lite/dist/material.indigo-blue.min.css",
+      "material-design-lite/dist/material.min.js",
+      "mux.js/dist/mux.min.js",
+      "popper.js/dist/umd/popper.min.js",
+      "pwacompat/pwacompat.min.js",
+      "tippy.js/umd/index.min.js",
+      "tippy.js/index.css"
+    ]
+  },
   "main": "dist/shaka-player.compiled.js",
   "repository": {
     "type": "git",
