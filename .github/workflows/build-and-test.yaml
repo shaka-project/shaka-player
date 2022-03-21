@@ -48,7 +48,7 @@ jobs:
       # ones end early.
       fail-fast: false
 
-    name: Build and test ${{ matrix.os }} ${{ matrix.browser }}
+    name: ${{ matrix.os }} ${{ matrix.browser }}
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -71,3 +71,13 @@ jobs:
       - name: Test Player
         run: |
           python build/test.py --browsers ${{ matrix.browser }} --reporters spec --spec-hide-passed --drm ${{ matrix.extra_flags }}
+
+  build_in_docker:
+    # Don't waste time doing a full matrix of test runs when there was an
+    # obvious linter error.
+    needs: lint
+    name: Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker
+      - run: docker build build/docker/
