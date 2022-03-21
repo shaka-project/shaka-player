@@ -74,16 +74,20 @@ jobs:
     if: needs.release.outputs.release_created
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
       - uses: actions/setup-node@v1
         with:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
-      # Without this, git describe won't work in the npm prepublish steps
-      - run: git fetch --unshallow
+
       - run: npm ci
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
       - run: npm pack
       - uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
         with:
