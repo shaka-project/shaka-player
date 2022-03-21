@@ -87,4 +87,51 @@ jobs:
           file_glob: true
           overwrite: true
 
-  # TODO: Publish to appspot
+  appspot:
+    runs-on: ubuntu-latest
+    needs: release
+    if: ${{ needs.release.outputs.release_created }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: ./.github/workflows/custom-actions/prep-for-appspot
+
+      - uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
+
+      - name: Compute appspot subdomain
+        run: |
+          # This is the same as the version tag, but with dots replaced by
+          # dashes.  For example, v3.2.2 would have the subdomain v3-2-2.
+          APPSPOT_SUBDOMAIN=$( echo ${{ needs.release.outputs.tag_name }} | sed -e 's/\./-/' )
+          echo APPSPOT_SUBDOMAIN=$APPSPOT_SUBDOMAIN >> $GITHUB_ENV
+
+      - name: Compute appspot promotion
+        run: |
+          # "Promoting" an appspot deployment makes it the default which shows
+          # up on shaka-player-demo.appspot.com (no subdomain).  This should be
+          # done for the latest release version from the latest release branch.
+          RELEASE_TAGS=$(git tag | grep ^v[0-9] | grep -Ev -- '-(master|main)')
+          LATEST_RELEASE=$(echo "$RELEASE_TAGS" | sort --version-sort | tail -1)
+          TAG_NAME=${{ needs.release.outputs.tag_name }}
+
+          if [[ "$TAG_NAME" == "$LATEST_RELEASE" ]]; then
+            echo APPSPOT_PROMOTE=true >> $GITHUB_ENV
+          else
+            echo APPSPOT_PROMOTE=false >> $GITHUB_ENV
+          fi
+
+      - uses: google-github-actions/deploy-appengine@v0
+        with:
+          project_id: shaka-player-demo
+          version: ${{ env.APPSPOT_SUBDOMAIN }}
+          promote: ${{ env.APPSPOT_PROMOTE }}
