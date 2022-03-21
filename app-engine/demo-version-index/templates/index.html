@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Shaka Player Demo - Version Index</title>
+    <style>
+
+#background {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: fixed;
+  z-index: -1;
+
+  background:
+    url(https://shaka-player-demo.appspot.com/assets/poster.jpg)
+    no-repeat center center fixed;
+  background-size: contain;
+
+  opacity: 0.4;
+  filter: sepia(50%);
+}
+
+#links {
+  margin: 20px;
+}
+
+#links a {
+  margin: 0.5em;
+  padding: 0.5em;
+
+  border: 2px solid black;
+  background-color: #006;
+
+  font-size: 110%;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+table.best tr.old {
+  display: none;
+}
+
+th, td {
+  border: 1px solid black;
+  padding: 0.2em 2em;
+}
+
+table.best tr.best-even,
+table.all tr:nth-child(2n) {
+  background-color: rgba(0,0,0,0.1);
+}
+
+    </style>
+    <script>
+      function display(which) {
+        table.class = 'which';
+      }
+    </script>
+  </head>
+  <body>
+    <div id="background"></div>
+
+    <h1>Shaka Player release demos on appspot</h1>
+
+    <div id="links">
+      <a href="#" onclick="table.className = 'best'">Best versions</a>
+      <a href="#" onclick="table.className = 'all'">All versions</a>
+    </div>
+
+    <table id="table" class="best">
+      <tr><th>Version</th></tr>
+      {% set best_counter = 0 %}
+      {% for v in versions %}
+      {% if v.best %}
+      <tr class="best {{'best-even' if best_counter % 2 == 0 else ''}}">
+      {% set best_counter = best_counter + 1 %}
+      {% else %}
+      <tr class="old">
+      {% endif %}
+        <th>{{ v.version }}</th>
+        <td><a href="{{ v.demo }}">demo</a></td>
+        <td><a href="{{ v.lib }}">non-UI library</a></td>
+        <td>
+          {% if v.ui_lib %}
+          <a href="{{ v.ui_lib }}">UI-enabled library</a>
+          {% endif %}
+        </td>
+        <td>
+          {% if v.lib_externs %}
+          <a href="{{ v.lib_externs }}">non-UI externs</a>
+          {% endif %}
+        </td>
+        <td>
+          {% if v.ui_lib_externs %}
+          <a href="{{ v.ui_lib_externs }}">UI-enabled externs</a>
+          {% endif %}
+        </td>
+        <td>
+          {% if v.lib_defs %}
+          <a href="{{ v.lib_defs }}">non-UI typescript defs</a>
+          {% endif %}
+        </td>
+        <td>
+          {% if v.ui_lib_defs %}
+          <a href="{{ v.ui_lib_defs }}">UI-enabled typescript defs</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
