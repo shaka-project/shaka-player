@@ -61,6 +61,8 @@ shaka.extern.RetryParameters;
  *   licenseRequestType: ?string,
  *   sessionId: ?string,
  *   drmInfo: ?shaka.extern.DrmInfo,
+ *   initData: ?Uint8Array,
+ *   initDataType: ?string,
  *   streamDataCallback: ?function(BufferSource):!Promise
  * }}
  *
@@ -94,6 +96,12 @@ shaka.extern.RetryParameters;
  * @property {?shaka.extern.DrmInfo} drmInfo
  *   If this is a LICENSE request, this field contains the DRM info used to
  *   initialize EME.
+ * @property {?Uint8Array} initData
+ *   If this is a LICENSE request, this field contains the initData info used
+ *   to initialize EME.
+ * @property {?string} initDataType
+ *   If this is a LICENSE request, this field contains the initDataType info
+ *   used to initialize EME.
  * @property {?function(BufferSource):!Promise} streamDataCallback
  *   A callback function to handle the chunked data of the ReadableStream.
  * @exportDoc

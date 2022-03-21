@@ -124,6 +124,8 @@ describe('CmcdManager', () => {
       licenseRequestType: null,
       sessionId: null,
       drmInfo: null,
+      initData: null,
+      initDataType: null,
       streamDataCallback: null,
     };
 
