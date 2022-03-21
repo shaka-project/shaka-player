@@ -108,21 +108,13 @@ jobs:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
 
-      - uses: ./.github/workflows/custom-actions/prep-for-appspot
-
-      - uses: google-github-actions/auth@v0
-        with:
-          credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
-
-      - name: Compute appspot subdomain
+      - name: Compute appspot subdomain and promotion
         run: |
           # This is the same as the version tag, but with dots replaced by
           # dashes.  For example, v3.2.2 would have the subdomain v3-2-2.
           APPSPOT_SUBDOMAIN=$( echo ${{ needs.release.outputs.tag_name }} | sed -e 's/\./-/' )
           echo APPSPOT_SUBDOMAIN=$APPSPOT_SUBDOMAIN >> $GITHUB_ENV
 
-      - name: Compute appspot promotion
-        run: |
           # "Promoting" an appspot deployment makes it the default which shows
           # up on shaka-player-demo.appspot.com (no subdomain).  This should be
           # done for the latest release version from the latest release branch.
@@ -135,6 +127,18 @@ jobs:
           else
             echo APPSPOT_PROMOTE=false >> $GITHUB_ENV
           fi
+
+          # Debug the decisions made here.
+          echo "Subdomain: $APPSPOT_SUBDOMAIN"
+          echo "Latest release: $LATEST_RELEASE"
+          echo "This release: $TAG_NAME"
+          echo "Promote: $APPSPOT_PROMOTE"
+
+      - uses: ./.github/workflows/custom-actions/prep-for-appspot
+
+      - uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
 
       - uses: google-github-actions/deploy-appengine@v0
         with:
