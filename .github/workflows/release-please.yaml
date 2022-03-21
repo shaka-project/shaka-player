@@ -141,3 +141,18 @@ jobs:
           project_id: shaka-player-demo
           version: ${{ env.APPSPOT_SUBDOMAIN }}
           promote: ${{ env.APPSPOT_PROMOTE }}
+
+  auto-branch:
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0')
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Create release branch
+        run: |
+          TAG=${{ needs.release.outputs.tag_name }}
+          BRANCH=$(echo "$TAG" | sed -e 's/\.0$/.x/')
+          git push origin HEAD:"$BRANCH"
