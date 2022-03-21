@@ -38,8 +38,8 @@ jobs:
               -i lib/player.js
           git add lib/player.js
           # Emulate the actions bot.
-          git config user.email "github-actions[bot]"
-          git config user.name "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Update the PR.
           git commit --amend --no-edit
           git push -f
@@ -56,8 +56,8 @@ jobs:
       - name: Tag the main branch
         run: |
           # Emulate the actions bot.
-          git config user.email "github-actions[bot]"
-          git config user.name "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           VERSION=${{ needs.release.outputs.tag_name }}
           git tag -m "$VERSION-main" "$VERSION-main"
           git push origin "$VERSION-main"
