@@ -2,7 +2,7 @@ name: Build and Test PR
 
 on:
   pull_request: # Trigger for pull requests.
-    types: [opened, synchronize, reopened, edited, ready_for_review]
+    types: [opened, synchronize, reopened]
     branches:
       - main
       - v[0-9]*
@@ -10,7 +10,7 @@ on:
     inputs:
       ref:
         description: "The ref to build and test."
-        required: False
+        required: false
 
 jobs:
   lint:
@@ -48,7 +48,7 @@ jobs:
       # ones end early.
       fail-fast: false
 
-    name: Build and test ${{ matrix.os }} ${{ matrix.browser }}
+    name: ${{ matrix.os }} ${{ matrix.browser }}
     runs-on: ${{ matrix.os }}
 
     steps:
