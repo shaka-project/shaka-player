@@ -80,4 +80,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Docker
-      - run: docker build build/docker/
+        run: docker build build/docker/
