@@ -3,7 +3,7 @@
   "packages": {
     ".": {
       "include-component-in-tag": false,
-      "release-as": "3.4.0"
+      "release-as": "4.0.0"
     }
   }
 }
