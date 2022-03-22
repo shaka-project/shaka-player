@@ -477,7 +477,7 @@ describe('PeriodCombiner', () => {
     a3.originalId = 'a3';
     a3.bandwidth = 97065;
     a3.roles = ['role1', 'role2'];
-    a2.codecs = 'mp4a.40.2';
+    a3.codecs = 'mp4a.40.2';
 
     // a4 has a different label from a3, and should not
     // be filtered out.
@@ -500,14 +500,24 @@ describe('PeriodCombiner', () => {
     const t1 = makeTextStream('en');
     t1.originalId = 't1';
     t1.roles = ['role1'];
+    t1.bandwidth = 1158;
 
     const t2 = makeTextStream('en');
     t2.originalId = 't2';
     t2.roles = ['role1', 'role2'];
+    t2.bandwidth = 1172;
 
     const t3 = makeTextStream('en');
     t3.originalId = 't3';
     t3.roles = ['role1'];
+    t3.bandwidth = 1158;
+
+    // t4 has a different bandwidth from t3, and should not
+    // be filtered out.
+    const t4 = makeTextStream('en');
+    t4.originalId = 't4';
+    t4.roles = ['role1'];
+    t4.bandwidth = 1186;
 
     // i1 and i3 are duplicates.
     const i1 = makeImageStream(240);
@@ -539,6 +549,7 @@ describe('PeriodCombiner', () => {
           t1,
           t2,
           t3,
+          t4,
         ],
         imageStreams: [
           i1,
@@ -565,7 +576,7 @@ describe('PeriodCombiner', () => {
     }
 
     const textStreams = combiner.getTextStreams();
-    expect(textStreams.length).toBe(2);
+    expect(textStreams.length).toBe(3);
 
     // t3 should've been filtered out
     const textIds = textStreams.map((t) => t.originalId);
