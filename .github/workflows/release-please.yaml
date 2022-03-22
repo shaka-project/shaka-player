@@ -43,11 +43,11 @@ jobs:
           sed -e "s/^\\(shaka.Player.version =\\).*/\\1 '$VERSION';/" \
               -i lib/player.js
           git add lib/player.js
-          # Emulate the actions bot.
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Update the PR.
-          git commit --amend --no-edit
+          # Update the PR as shaka-bot.
+          git config user.name "shaka-bot"
+          git config user.email "13107131+shaka-bot@users.noreply.github.com"
+          git commit --amend --no-edit \
+              --author="shaka-bot <13107131+shaka-bot@users.noreply.github.com>"
           git push -f
 
   # The jobs below are all conditional on a release having been created by
@@ -61,9 +61,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Tag the main branch
         run: |
-          # Emulate the actions bot.
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           VERSION=${{ needs.release.outputs.tag_name }}
           git tag -m "$VERSION-main" "$VERSION-main"
           git push origin "$VERSION-main"
