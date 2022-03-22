@@ -1,5 +1,14 @@
 # Changelog
 
+### [3.2.5](https://github.com/shaka-project/shaka-player/compare/v3.2.4...v3.2.5) (2022-03-22)
+
+
+### Bug Fixes
+
+* **cea:** make a more robust CEA MP4 parser ([#3965](https://github.com/shaka-project/shaka-player/issues/3965)) ([70cbd25](https://github.com/shaka-project/shaka-player/commit/70cbd250044150ccb396f21015bd7fb7a79c7a72))
+* Select first of identical audio streams ([#3869](https://github.com/shaka-project/shaka-player/issues/3869)) ([8ee0edb](https://github.com/shaka-project/shaka-player/commit/8ee0edbb8fb9a342a19253845af3e98de9db9f77))
+* **ttml:** Center subtitles by default ([#4023](https://github.com/shaka-project/shaka-player/issues/4023)) ([9944e93](https://github.com/shaka-project/shaka-player/commit/9944e93f58f860913441d718a94d6d5411771f71))
+
 ## [3.2.4](https://github.com/shaka-project/shaka-player/compare/v3.2.3...v3.2.4) (2022-02-17)
 
 
