@@ -747,7 +747,8 @@ shaka.extern.DashManifestConfiguration;
  *   ignoreTextStreamFailures: boolean,
  *   ignoreImageStreamFailures: boolean,
  *   defaultAudioCodec: string,
- *   defaultVideoCodec: string
+ *   defaultVideoCodec: string,
+ *   ignoreManifestProgramDateTime: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -762,6 +763,11 @@ shaka.extern.DashManifestConfiguration;
  * @property {string} defaultVideoCodec
  *   The default video codec if it is not specified in the HLS playlist.
  *   <i>Defaults to <code>'avc1.42E01E'</code>.</i>
+ * @property {boolean} ignoreManifestProgramDateTime
+ *   If <code>true</code>, the HLS parser will ignore the
+ *   <code>EXT-X-PROGRAM-DATE-TIME</code> tags in the manifest.
+ *   Meant for tags that are incorrect or malformed.
+ *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
