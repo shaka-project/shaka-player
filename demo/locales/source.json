@@ -355,6 +355,10 @@
     "description": "Text that describes an asset that is packaged in an HLS manifest.",
     "message": "[PROPER_NAME:HLS]"
   },
+  "DEMO_HLS_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "[PROPER_NAME:HLS]"
+  },
   "DEMO_HOME": {
     "description": "A link in the header, that switches to a page configuration for viewing the curated set of front-page content.",
     "message": "HOME"
@@ -666,6 +670,10 @@
   "DEMO_FAILURE_NO_BROWSER_SUPPORT": {
     "description": "An error displayed if Shaka Player is unable to load due to lack of browser support.",
     "message": "Your browser is not supported!"
+  },
+  "DEMO_HLS_FULL_MIME_TYPE": {
+    "description": "The label on a field that allows users to provide a full mime type for a custom asset.",
+    "message": "Full Mime Type for Playing Media Playlists Directly"
   },
   "DEMO_PLAY": {
     "description": "A button to play the attached asset.",

@@ -98,7 +98,8 @@ describe('Demo', () => {
           .add('preferredVariantRole')
           .add('playRangeStart')
           .add('playRangeEnd')
-          .add('manifest.dash.keySystemsByURI');
+          .add('manifest.dash.keySystemsByURI')
+          .add('manifest.hls.mediaPlaylistFullMimeType');
 
       /**
        * @param {!Object} section
