@@ -32,7 +32,7 @@
     "google-closure-compiler-java": "^20220301.0.0",
     "google-closure-deps": "^20220301.0.0",
     "google-closure-library": "^20220301.0.0",
-    "htmlhint": "github:joeyparrish/HTMLHint#1c3a7e8b",
+    "htmlhint": "^1.1.3",
     "jasmine-ajax": "^4.0.0",
     "jimp": "^0.16.1",
     "jsdoc": "github:joeyparrish/jsdoc#2ca85bb6",
