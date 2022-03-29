@@ -687,7 +687,6 @@ describe('Player', () => {
     });
 
     it('configures play and seek range for VOD', async () => {
-      player.configure({playRangeStart: 5, playRangeEnd: 10});
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
       timeline.setDuration(300);
@@ -698,7 +697,10 @@ describe('Player', () => {
         });
       });
       goog.asserts.assert(manifest, 'manifest must be non-null');
+
+      player.configure({playRangeStart: 5, playRangeEnd: 10});
       await player.load(fakeManifestUri, 0, fakeMimeType);
+
       const seekRange = player.seekRange();
       expect(seekRange.start).toBe(5);
       expect(seekRange.end).toBe(10);
@@ -706,9 +708,10 @@ describe('Player', () => {
 
     // Test for https://github.com/shaka-project/shaka-player/issues/4026
     it('configures play and seek range with notifySegments', async () => {
-      player.configure({playRangeStart: 5, playRangeEnd: 10});
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
+      // This duration is used by useSegmentTemplate below to decide how many
+      // references to generate.
       timeline.setDuration(300);
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.presentationTimeline = timeline;
@@ -731,7 +734,9 @@ describe('Player', () => {
           'Must have references for this test!');
       timeline.notifySegments(references);
 
+      player.configure({playRangeStart: 5, playRangeEnd: 10});
       await player.load(fakeManifestUri, 0, fakeMimeType);
+
       const seekRange = player.seekRange();
       expect(seekRange.start).toBe(5);
       expect(seekRange.end).toBe(10);
