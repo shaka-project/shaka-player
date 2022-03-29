@@ -801,7 +801,7 @@ describe('Player', () => {
 
       // Check that the final seek range is as expected.
       const seekRange = player.seekRange();
-      expect(seekRange.end).toBe(14);
+      expect(seekRange.end).toBeCloseTo(14);
     });
   });
 
