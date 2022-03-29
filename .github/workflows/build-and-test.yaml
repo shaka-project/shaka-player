@@ -79,5 +79,10 @@ jobs:
     name: Docker
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
       - name: Docker
-        run: docker build build/docker/
+        run: docker-compose -f build/docker/docker-compose.yml up
