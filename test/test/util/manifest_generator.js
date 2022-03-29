@@ -604,9 +604,16 @@ shaka.test.ManifestGenerator.Stream = class {
         segmentDuration, 'Must pass a non-zero segment duration');
 
     const shaka_ = this.manifest_.shaka_;
-    const totalDuration = this.manifest_.presentationTimeline.getDuration();
+    let totalDuration = this.manifest_.presentationTimeline.getDuration();
     goog.asserts.assert(
         isFinite(totalDuration), 'Must specify a manifest duration');
+    if (!isFinite(totalDuration)) {
+      // Without this, a mistake of an infinite duration would result in an
+      // infinite loop and a crash, which would in turn prevent you from seeing
+      // the above assertion fail.
+      totalDuration = 0;
+    }
+
     const segmentCount = totalDuration / segmentDuration;
     const references = [];
 
