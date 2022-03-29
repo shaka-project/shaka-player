@@ -45,6 +45,7 @@ goog.require('shaka.polyfill.PatchedMediaKeysNop');
 goog.require('shaka.polyfill.PatchedMediaKeysWebkit');
 goog.require('shaka.polyfill.PiPWebkit');
 goog.require('shaka.polyfill.RandomUUID');
+goog.require('shaka.polyfill.Symbol');
 goog.require('shaka.polyfill.VTTCue');
 goog.require('shaka.polyfill.VideoPlayPromise');
 goog.require('shaka.polyfill.VideoPlaybackQuality');
