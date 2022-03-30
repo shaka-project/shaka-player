@@ -719,6 +719,10 @@
     "description": "A button to save a custom asset.",
     "message": "Save"
   },
+  "DEMO_SEGMENT_RELATIVE_VTT_TIMING": {
+    "description": "The name of a configuration value.",
+    "message": "Enable segment-relative VTT Timing"
+  },
   "DEMO_SESSION_ID": {
     "description": "The name of a configuration value.",
     "message": "Session ID"

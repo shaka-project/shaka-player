@@ -782,6 +782,7 @@ shaka.extern.HlsManifestConfiguration;
  *   disableText: boolean,
  *   disableThumbnails: boolean,
  *   defaultPresentationDelay: number,
+ *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
  * }}
@@ -813,6 +814,10 @@ shaka.extern.HlsManifestConfiguration;
  *   configured or set as 0.
  *   For HLS, the default value is 3 segments duration if not configured or
  *   set as 0.
+ * @property {boolean} segmentRelativeVttTiming
+ *   Option to calculate VTT text timings relatively to the segment start
+ *   instead of relative to the period start (which is the default).
+ *   Defaults to <code>false</code>.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls

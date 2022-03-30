@@ -96,7 +96,7 @@ describe('TextEngine', () => {
       await textEngine.appendBuffer(dummyData, 0, 3);
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3},
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
       ]);
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -111,7 +111,7 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 3, segmentEnd: 5},
+        {periodStart: 0, segmentStart: 3, segmentEnd: 5, vttOffset: 0},
       ]);
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -263,7 +263,7 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3},
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
@@ -277,13 +277,43 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 4, segmentStart: 4, segmentEnd: 7},
+        {periodStart: 4, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
           createFakeCue(4, 5),
           createFakeCue(6, 7),
         ],
+      ]);
+    });
+
+    it('vttOffset when segmentRelativeVttTiming is set', async () => {
+      // set segmentRelativeVttTiming to true
+      textEngine.initParser(dummyMimeType, false, true);
+
+      mockParseMedia.and.callFake((data, time) => {
+        return [
+          createFakeCue(time.periodStart + 0,
+              time.periodStart + 1),
+          createFakeCue(time.periodStart + 2,
+              time.periodStart + 3),
+        ];
+      });
+
+      await textEngine.appendBuffer(dummyData, 0, 3);
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+      ]);
+
+      textEngine.setTimestampOffset(8);
+      await textEngine.appendBuffer(dummyData, 4, 7);
+
+      // vttOffset should equal segmentStart instead of periodStart
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 8, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
       ]);
     });
   });
