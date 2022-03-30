@@ -229,7 +229,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Big Buck Bunny (LCEVC H264)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
-      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vnt7topK63ddrPqk/master.m3u8',
+      /* manifestUri= */ 'https://dyctis843rxh5.cloudfront.net/vnIAZIaowG1K7qOt/master.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
@@ -241,6 +241,10 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         lcevc: {
           enabled: true,
+        },
+        streaming: {
+          useNativeHlsOnSafari: false,
+          forceTransmuxTS: true,
         },
       }),
   new ShakaDemoAssetInfo(

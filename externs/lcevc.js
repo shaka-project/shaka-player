@@ -25,6 +25,9 @@ LcevcDil.LcevcDIL = class {
 
     /** @type {Boolean} */
     this.isFullscreen;
+
+    /** @type {Object} */
+    this.support;
   }
 
   /**
@@ -63,3 +66,28 @@ LcevcDil.LcevcDIL = class {
    */
   close() {}
 };
+
+/**
+* LCEVC Support Check
+*/
+LcevcDil.SupportObject = {
+
+  /**
+   * Check if canvas has WebGL support
+   *  @param {HTMLCanvasElement} canvas
+   */
+  webGLSupport(canvas) {},
+
+};
+
+/**
+* LCEVC Support Checklist Result
+* @type {Boolean}
+*/
+LcevcDil.SupportStatus;
+
+/**
+* LCEVC Support CheckList Error if any.
+* @type {String}
+*/
+LcevcDil.SupportError;

@@ -122,7 +122,7 @@ The LCEVC workflow is only enabled when the config option for LCEVC is enabled.
 The Dil object is created only if LCEVC is supported (LCEVC libs are loaded) and the config object for lcevc is enabled also if it was not already created in another `onLoad_()` event execution.
 
 ```javascript
-  this.setupLcevc_(this.config_.lcevc.enabled);
+  this.setupLcevc_(this.config_);
 ```
 
 ```javascript
@@ -139,7 +139,6 @@ The Dil object is created only if LCEVC is supported (LCEVC libs are loaded) and
           this.lcevcDilConfig_,
       );
       this.canvas_ = this.lcevcDil_.canvas_;
-      this.lcevcDil_.media_.style.display = 'none';
       this.mediaSourceEngine_.updateLcevcDil(this.lcevcDil_);
     }
   }
@@ -164,13 +163,30 @@ The Dil object is created only if LCEVC is supported (LCEVC libs are loaded) and
    * Setup shaka.lcevc.Dil object
    * @private
    */
-  setupLcevc_(enabled) {
-    if (enabled) {
-      if (this.lcevcDil_) {
-        this.lcevcDil_.reset();
-      } else {
-        this.createDIL_();
+    setupLcevc_(config) {
+    if (config.lcevc.enabled) {
+      const safariVersion = shaka.util.Platform.safariVersion();
+      if (safariVersion) {
+        if (config.streaming.useNativeHlsOnSafari) {
+          shaka.log.alwaysWarn('LCEVC Error: Only Safari with MSE enabled ' +
+            'is supported. Please set config.streaming.useNativeHlsOnSafari ' +
+            'to false for LCEVC decoding.' );
+          return;
+        }
       }
+      const edge = shaka.util.Platform.isEdge() ||
+        shaka.util.Platform.isLegacyEdge();
+      if (edge) {
+        if (!config.streaming.forceTransmuxTS) {
+          shaka.log.alwaysWarn('LCEVC Warning: For MPEG-2 TS decoding '+
+          'the config.streaming.forceTransmux must be enabled.');
+        }
+      }
+
+      if (this.lcevcDil_) {
+        this.closeDIL_();
+      }
+      this.createDIL_();
     } else {
       if (this.lcevcDil_) {
         this.closeDIL_();
@@ -227,7 +243,7 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Big Buck Bunny (LCEVC H264)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
-      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vnt7topK63ddrPqk/master.m3u8',
+      /* manifestUri= */ 'https://dyctis843rxh5.cloudfront.net/vnIAZIaowG1K7qOt/master.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
