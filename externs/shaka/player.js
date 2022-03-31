@@ -748,7 +748,8 @@ shaka.extern.DashManifestConfiguration;
  *   ignoreImageStreamFailures: boolean,
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string,
- *   ignoreManifestProgramDateTime: boolean
+ *   ignoreManifestProgramDateTime: boolean,
+ *   mediaPlaylistFullMimeType: string
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -768,6 +769,15 @@ shaka.extern.DashManifestConfiguration;
  *   <code>EXT-X-PROGRAM-DATE-TIME</code> tags in the manifest.
  *   Meant for tags that are incorrect or malformed.
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {string} mediaPlaylistFullMimeType
+ *   A string containing a full mime type, including both the basic mime type
+ *   and also the codecs. Used when the HLS parser parses a media playlist
+ *   directly, required since all of the mime type and codecs information is
+ *   contained within the master playlist.
+ *   You can use the <code>shaka.util.MimeUtils.getFullType()</code> utility to
+ *   format this value.
+ *   <i>Defaults to
+ *   <code>'video/mp2t; codecs="avc1.42E01E, mp4a.40.2"'</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
