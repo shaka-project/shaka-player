@@ -777,7 +777,7 @@ shaka.extern.DashManifestConfiguration;
  *   You can use the <code>shaka.util.MimeUtils.getFullType()</code> utility to
  *   format this value.
  *   <i>Defaults to
- *   <code>'video/mp4; codecs="avc1.42E01E, mp4a.40.2"'</code>.</i>
+ *   <code>'video/mp2t; codecs="avc1.42E01E, mp4a.40.2"'</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;

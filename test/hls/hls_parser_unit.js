@@ -3370,7 +3370,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
-          stream.mime('video/mp4', 'avc1.42E01E');
+          stream.mime('video/mp2t', 'avc1.42E01E, mp4a.40.2');
         });
       });
     });
