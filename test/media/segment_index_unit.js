@@ -699,22 +699,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       expect(iterator.current()).toBe(null);
     });
 
-    describe('seek', () => {
-      it('returns the matching segment', () => {
-        const index = new shaka.media.SegmentIndex(inputRefs);
-        const iterator = index[Symbol.iterator]();
-        expect(iterator.seek(10)).toBe(inputRefs[1]);
-        expect(iterator.current()).toBe(inputRefs[1]);
-      });
-
-      it('returns the matching segment with partial segments', () => {
-        const index = new shaka.media.SegmentIndex(inputRefsWithPartial);
-        const iterator = index[Symbol.iterator]();
-        expect(iterator.seek(8)).toBe(inputRefsWithPartial[0]);
-        expect(iterator.seek(10)).toBe(partialRefs1[0]);
-      });
-    });
-
     describe('next', () => {
       it('starts with the first segment', () => {
         const index = new shaka.media.SegmentIndex(inputRefs);
@@ -731,20 +715,20 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         expect(iterator.next().value).toBe(null);
       });
 
-      it('iterates forward after a seek', () => {
+      it('iterates from getIteratorForTime', () => {
         const index = new shaka.media.SegmentIndex(inputRefs);
-        const iterator = index[Symbol.iterator]();
-        expect(iterator.seek(10)).toBe(inputRefs[1]);
+        const iterator = index.getIteratorForTime(10);
+        expect(iterator.next().value).toBe(inputRefs[1]);
         expect(iterator.current()).toBe(inputRefs[1]);
         expect(iterator.next().value).toBe(inputRefs[2]);
         expect(iterator.current()).toBe(inputRefs[2]);
         expect(iterator.next().value).toBe(null);
       });
 
-      it('iterates forward after a seek with partial segments', () => {
+      it('iterates from getIteratorForTime with partial segments', () => {
         const index = new shaka.media.SegmentIndex(inputRefsWithPartial);
-        const iterator = index[Symbol.iterator]();
-        expect(iterator.seek(10)).toBe(partialRefs1[0]);
+        const iterator = index.getIteratorForTime(10);
+        expect(iterator.next().value).toBe(partialRefs1[0]);
         expect(iterator.current()).toBe(partialRefs1[0]);
         expect(iterator.next().value).toBe(partialRefs1[1]);
         expect(iterator.current()).toBe(partialRefs1[1]);

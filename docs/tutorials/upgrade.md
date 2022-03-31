@@ -69,9 +69,9 @@ application:
   - Manifest API changes:
     - `shaka.media.SegmentIndex.prototype.destroy()` has been replaced by
       `release()`, which is synchronous (deprecated in v3.0.0)
-    - `shaka.media.SegmentIndex.prototype.seek()`, which mutates the index, has
-      been replaced by `getIteratorForTime()`, which does not (deprecated in
-      v3.1.0)
+    - `shaka.media.SegmentIterator.prototype.seek()`, which mutates the
+      iterator, has been replaced by
+      `shaka.media.SegmentIndex.getIteratorForTime()` (deprecated in v3.1.0)
     - `shaka.media.SegmentIndex.prototype.merge()` has become private; use
       `mergeAndEvict()` instead (deprecated in v3.2.0)
 
