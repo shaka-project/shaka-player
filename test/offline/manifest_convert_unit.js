@@ -545,8 +545,6 @@ describe('ManifestConverter', () => {
 
     // Assume that we don't have to call createSegmentIndex.
 
-    const iterator = stream.segmentIndex[Symbol.iterator]();
-
     streamDb.segments.forEach((segmentDb, i) => {
       const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
