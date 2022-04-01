@@ -295,6 +295,15 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.OFFLINE),
   new ShakaDemoAssetInfo(
+      /* name= */ 'Angel One (HLS, MP4, video media playlist only)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/playlist_v-0480p-1000k-libx264.mp4.m3u8',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .setMediaPlaylistFullMimeType('video/mp4; codecs="avc1.4d401f"'),
+  new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (HLS, MP4, multilingual, Widevine)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one-widevine-hls/hls.m3u8',

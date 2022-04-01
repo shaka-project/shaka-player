@@ -30,7 +30,7 @@
     "fastestsmallesttextencoderdecoder": "^1.0.22",
     "fontfaceonload": "^1.0.2",
     "google-closure-compiler-java": "^20220301.0.0",
-    "google-closure-deps": "^20220301.0.0",
+    "google-closure-deps": "https://gitpkg.now.sh/google/closure-library/closure-deps?d7736da6",
     "google-closure-library": "^20220301.0.0",
     "htmlhint": "^1.1.3",
     "jasmine-ajax": "^4.0.0",
