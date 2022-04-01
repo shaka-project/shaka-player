@@ -51,7 +51,10 @@ describe('TextEngine', () => {
 
     TextEngine.registerParser(dummyMimeType, mockParserPlugIn);
     textEngine = new TextEngine(mockDisplayer);
-    textEngine.initParser(dummyMimeType, false);
+    textEngine.initParser(
+        dummyMimeType,
+        /* sequenceMode= */ false,
+        /* segmentRelativeVttTiming= */ false);
   });
 
   afterEach(() => {
@@ -288,8 +291,10 @@ describe('TextEngine', () => {
     });
 
     it('vttOffset when segmentRelativeVttTiming is set', async () => {
-      // set segmentRelativeVttTiming to true
-      textEngine.initParser(dummyMimeType, false, true);
+      textEngine.initParser(
+          dummyMimeType,
+          /* sequenceMode= */ false,
+          /* segmentRelativeVttTiming= */ true);
 
       mockParseMedia.and.callFake((data, time) => {
         return [
