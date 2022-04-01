@@ -237,7 +237,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DISABLE_TEXT,
             'manifest.disableText')
         .addBoolInput_(MessageIds.DISABLE_THUMBNAILS,
-            'manifest.disableThumbnails');
+            'manifest.disableThumbnails')
+        .addBoolInput_(MessageIds.SEGMENT_RELATIVE_VTT_TIMING,
+            'manifest.segmentRelativeVttTiming');
 
     this.addRetrySection_('manifest', MessageIds.MANIFEST_RETRY_SECTION_HEADER);
   }
