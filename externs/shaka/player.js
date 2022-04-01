@@ -815,7 +815,7 @@ shaka.extern.HlsManifestConfiguration;
  *   For HLS, the default value is 3 segments duration if not configured or
  *   set as 0.
  * @property {boolean} segmentRelativeVttTiming
- *   Option to calculate VTT text timings relatively to the segment start
+ *   Option to calculate VTT text timings relative to the segment start
  *   instead of relative to the period start (which is the default).
  *   Defaults to <code>false</code>.
  * @property {shaka.extern.DashManifestConfiguration} dash
