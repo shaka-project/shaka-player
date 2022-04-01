@@ -32,14 +32,18 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        browser: ["Chrome", "Firefox", "Edge", "Safari"]
+        browser: ["Chrome", "Firefox", "Edge", "Safari", "Safari-14"]
         exclude:
           - os: ubuntu-latest
             browser: Edge
           - os: windows-latest
             browser: Safari
+          - os: windows-latest
+            browser: Safari-14
           - os: ubuntu-latest
             browser: Safari
+          - os: ubuntu-latest
+            browser: Safari-14
         include:
           # Run Linux browsers with xvfb, so they're in a headless X session.
           - os: ubuntu-latest
@@ -65,12 +69,43 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
+      # Safari 14 can be installed, but not to the root, and it can't replace
+      # the standard version, at least not on GitHub's VMs.  If you try to
+      # install directly to the root with sudo, it will appear to succeed, but
+      # will have no effect.  If you try to script it explicitly with rm -rf
+      # and cp, this will fail.  Safari may be on a read-only filesystem.
+      - name: Install Safari 14 to home directory
+        if: matrix.os == 'macos-latest' && matrix.browser == 'Safari-14'
+        run: |
+          # Download Safari 14
+          # See also https://www.macupdate.com/app/mac/15675/apple-safari/old-versions
+          curl -Lv https://www.macupdate.com/action/download/63550 > safari-14.1.2.pkg
+
+          # Install Safari 14 to homedir specifically.
+          installer -pkg safari-14.1.2.pkg -target CurrentUserHomeDirectory
+
+          # Install a launcher that can execute a shell script to launch this
+          npm install karma-script-launcher --save-dev
+
       - name: Build Player
         run: python build/all.py
 
       - name: Test Player
+        shell: bash
         run: |
-          python build/test.py --browsers ${{ matrix.browser }} --reporters spec --spec-hide-passed --drm ${{ matrix.extra_flags }}
+          browser=${{ matrix.browser }}
+
+          if [[ "$browser" == "Safari-14" ]]; then
+            # Replace the browser name with a script that can launch this
+            # browser from the command line.
+            browser="$PWD/.github/workflows/safari-homedir-launcher.sh"
+          fi
+
+          python build/test.py \
+            --browsers "$browser" \
+            --reporters spec --spec-hide-passed \
+            --drm \
+            ${{ matrix.extra_flags }}
 
   build_in_docker:
     # Don't waste time doing a full matrix of test runs when there was an
