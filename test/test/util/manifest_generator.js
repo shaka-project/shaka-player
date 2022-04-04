@@ -8,7 +8,6 @@ goog.provide('shaka.test.ManifestGenerator');
 
 goog.require('goog.asserts');
 goog.require('shaka.test.Util');
-goog.require('shaka.util.Iterables');
 goog.require('shaka.util.ManifestParserUtils');
 goog.require('shaka.util.Uint8ArrayUtils');
 goog.requireType('shaka.media.InitSegmentReference');
@@ -621,7 +620,7 @@ shaka.test.ManifestGenerator.Stream = class {
     const segmentCount = totalDuration / segmentDuration;
     const references = [];
 
-    for (const index of shaka.util.Iterables.range(segmentCount)) {
+    for (let index = 0; index < segmentCount; index++) {
       const getUris = () => [sprintf(template, index)];
       const start = index * segmentDuration;
       const end = Math.min(totalDuration, (index + 1) * segmentDuration);
