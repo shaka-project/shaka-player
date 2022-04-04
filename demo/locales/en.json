@@ -180,6 +180,7 @@
   "DEMO_RESTRICTIONS_SECTION_HEADER": "Restrictions",
   "DEMO_SAFE_SEEK_OFFSET": "Safe Seek Offset",
   "DEMO_SAFE_SKIP_DISTANCE": "Safe Skip Distance",
+  "DEMO_SEGMENT_RELATIVE_VTT_TIMING": "Enable segment-relative VTT Timing",
   "DEMO_SESSION_ID": "Session ID",
   "DEMO_SAVE_BUTTON": "Save",
   "DEMO_SHAKA": "Shaka",

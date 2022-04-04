@@ -139,6 +139,8 @@ describe('Player', () => {
             jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
+        setSegmentRelativeVttTiming:
+            jasmine.createSpy('setSegmentRelativeVttTiming'),
         getTextDisplayer: () => textDisplayer,
         ended: jasmine.createSpy('ended').and.returnValue(false),
       };

@@ -12,7 +12,7 @@ describe('LrcTextParser', () => {
   it('supports no cues', () => {
     verifyHelper([],
         '',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('handles a blank line at the start of the file', () => {
@@ -22,7 +22,7 @@ describe('LrcTextParser', () => {
         ],
         '\n\n' +
         '[00:00.00]Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('handles a blank line at the end of the file', () => {
@@ -32,7 +32,7 @@ describe('LrcTextParser', () => {
         ],
         '[00:00.00]Test' +
         '\n\n',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('handles no blank line at the end of the file', () => {
@@ -41,8 +41,7 @@ describe('LrcTextParser', () => {
           {startTime: 0, endTime: 2, payload: 'Test'},
         ],
         '[00:00.00]Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports multiple cues', () => {
@@ -55,7 +54,7 @@ describe('LrcTextParser', () => {
         '[00:00.00]Test\n' +
         '[00:10.00]Test2\n' +
         '[00:20.00]Test3',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports different time formats', () => {
@@ -74,7 +73,7 @@ describe('LrcTextParser', () => {
         '[00:30,1]Test4\n' +
         '[00:40,001]Test5\n' +
         '[00:50,02]Test6',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   /**
