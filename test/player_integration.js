@@ -17,8 +17,6 @@ goog.require('shaka.test.UiUtils');
 goog.require('shaka.test.Util');
 goog.require('shaka.test.Waiter');
 goog.require('shaka.util.EventManager');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.Iterables');
 
 describe('Player', () => {
   /** @type {!jasmine.Spy} */
@@ -816,8 +814,7 @@ describe('Player', () => {
     }
 
     async function waitUntilBuffered(amount) {
-      for (const _ of shaka.util.Iterables.range(25)) {
-        shaka.util.Functional.ignored(_);
+      for (let i = 0; i < 25; i++) {
         // We buffer from an internal segment, so this shouldn't take long to
         // buffer.
         await Util.delay(0.1);  // eslint-disable-line no-await-in-loop

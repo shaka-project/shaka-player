@@ -15,8 +15,6 @@ goog.require('shaka.net.NetworkingEngine');
 goog.require('shaka.test.TestScheme');
 goog.require('shaka.test.UiUtils');
 goog.require('shaka.util.EventManager');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.Iterables');
 goog.require('shaka.util.Platform');
 goog.require('shaka.util.PublicPromise');
 
@@ -198,8 +196,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       // the average length is expected to be lower than the length of the first
       // update message.
       let totalLength = 0;
-      for (const _ of shaka.util.Iterables.range(50)) {
-        shaka.util.Functional.ignored(_);
+      for (let i = 0; i < 50; i++) {
         // eslint-disable-next-line no-await-in-loop
         const message = await waitForUpdateMessage();
         totalLength += message.length;

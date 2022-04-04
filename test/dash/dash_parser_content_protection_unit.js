@@ -9,7 +9,6 @@ goog.require('shaka.dash.DashParser');
 goog.require('shaka.test.Dash');
 goog.require('shaka.test.FakeNetworkingEngine');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.Iterables');
 goog.require('shaka.util.PlayerConfiguration');
 goog.require('shaka.util.Uint8ArrayUtils');
 
@@ -140,7 +139,7 @@ describe('DashParser ContentProtection', () => {
 
     const variants = [];
     const numVariants = 2;
-    for (const i of shaka.util.Iterables.range(numVariants)) {
+    for (let i = 0; i < numVariants; i++) {
       const variant = jasmine.objectContaining({
         video: jasmine.objectContaining({
           keyIds: new Set(keyIds[i] ? [keyIds[i]] : []),
