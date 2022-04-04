@@ -18,7 +18,6 @@ goog.require('shaka.test.StreamingEngineUtil');
 goog.require('shaka.test.Util');
 goog.require('shaka.util.AbortableOperation');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.Iterables');
 goog.require('shaka.util.ManifestParserUtils');
 goog.require('shaka.util.MimeUtils');
 goog.require('shaka.util.PlayerConfiguration');
@@ -284,7 +283,7 @@ describe('StreamingEngine', () => {
     };
 
     const segmentsInFirstPeriod = 12;
-    for (const i of shaka.util.Iterables.range(segmentsInFirstPeriod)) {
+    for (let i = 0; i < segmentsInFirstPeriod; i++) {
       segmentData[ContentType.AUDIO].segments.push(
           makeBuffer(segmentSizes[ContentType.AUDIO]));
       segmentData[ContentType.VIDEO].segments.push(
@@ -298,7 +297,7 @@ describe('StreamingEngine', () => {
     }
 
     const segmentsInSecondPeriod = 2;
-    for (const i of shaka.util.Iterables.range(segmentsInSecondPeriod)) {
+    for (let i = 0; i < segmentsInSecondPeriod; i++) {
       segmentData[ContentType.AUDIO].segments.push(
           makeBuffer(segmentSizes[ContentType.AUDIO]));
       segmentData[ContentType.VIDEO].segments.push(
@@ -649,7 +648,7 @@ describe('StreamingEngine', () => {
     // should be buffered.  Those segment numbers are 1-based, and this array
     // is 0-based, so we expect i >= 9 to be downloaded.
     const segments = mediaSourceEngine.segments;
-    for (const i of shaka.util.Iterables.range(14)) {
+    for (let i = 0; i < 14; i++) {
       expect(segments[ContentType.AUDIO][i]).withContext(i).toBe(i >= 9);
       expect(segments[ContentType.VIDEO][i]).withContext(i).toBe(i >= 9);
       expect(segments[ContentType.TEXT][i]).withContext(i).toBe(i >= 9);
@@ -1798,7 +1797,7 @@ describe('StreamingEngine', () => {
 
       // Since we performed an unbuffered seek into the second Period, the
       // first 12 segments should not be buffered.
-      for (const i of shaka.util.Iterables.range(14)) {
+      for (let i = 0; i < 14; i++) {
         expect(mediaSourceEngine.segments[ContentType.AUDIO][i]).toBe(i >= 12);
         expect(mediaSourceEngine.segments[ContentType.VIDEO][i]).toBe(i >= 12);
         expect(mediaSourceEngine.segments[ContentType.TEXT][i]).toBe(i >= 12);
@@ -2600,7 +2599,7 @@ describe('StreamingEngine', () => {
       // should be buffered.  Those segment numbers are 1-based, and this array
       // is 0-based, so we expect i >= 9 to be downloaded.
       const segments = mediaSourceEngine.segments;
-      for (const i of shaka.util.Iterables.range(14)) {
+      for (let i = 0; i < 14; i++) {
         expect(segments[ContentType.AUDIO][i]).withContext(i).toBe(i >= 9);
         expect(segments[ContentType.VIDEO][i]).withContext(i).toBe(i >= 9);
         expect(segments[ContentType.TEXT][i]).withContext(i).toBe(i >= 9);

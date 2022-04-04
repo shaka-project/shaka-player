@@ -24,7 +24,6 @@ goog.require('shaka.test.ManifestGenerator');
 goog.require('shaka.test.Util');
 goog.require('shaka.util.ConfigUtils');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.Iterables');
 goog.require('shaka.util.ManifestParserUtils');
 goog.requireType('shaka.media.Playhead');
 
@@ -2151,8 +2150,8 @@ describe('Player', () => {
     async function runTest(languages, preference, expectedIndex) {
       // A manifest we can use to test language selection.
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        const enumerate = (it) => shaka.util.Iterables.enumerate(it);
-        for (const {i, item: lang} of enumerate(languages)) {
+        for (let i = 0; i < languages.length; i++) {
+          const lang = languages[i];
           if (lang.charAt(0) == '*') {
             manifest.addVariant(i, (variant) => {
               variant.primary = true;

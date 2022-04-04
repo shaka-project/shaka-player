@@ -9,7 +9,6 @@ goog.require('shaka.net.NetworkingEngine');
 goog.require('shaka.test.FakeNetworkingEngine');
 goog.require('shaka.test.Util');
 goog.require('shaka.util.Error');
-goog.require('shaka.util.Iterables');
 goog.requireType('shaka.util.PublicPromise');
 
 describe('MpdUtils', () => {
@@ -536,7 +535,7 @@ describe('MpdUtils', () => {
           '<ToReplace xlink:href="https://xlink0" xlink:actuate="onLoad" />');
       // Create a large but finite number of links, so this won't
       // infinitely recurse if there isn't a depth limit.
-      for (const i of shaka.util.Iterables.range(20)) {
+      for (let i = 0; i < 20; i++) {
         const key = 'https://xlink' + i;
         const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1));
 
@@ -659,7 +658,7 @@ describe('MpdUtils', () => {
           '<ToReplace xlink:href="https://xlink0" xlink:actuate="onLoad" />');
       // Create a few links.  This is few enough that it would succeed if we
       // didn't abort it.
-      for (const i of shaka.util.Iterables.range(4)) {
+      for (let i = 0; i < 4; i++) {
         const key = 'https://xlink' + i;
         const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1));
 
