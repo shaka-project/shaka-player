@@ -5,7 +5,6 @@
  */
 
 goog.require('shaka.media.BufferingObserver');
-goog.require('shaka.util.Iterables');
 
 describe('BufferingObserver', () => {
   const BufferingObserver = shaka.media.BufferingObserver;
@@ -115,7 +114,7 @@ describe('BufferingObserver', () => {
       /** @type {boolean} */
       let changed;
 
-      for (const lead of shaka.util.Iterables.range(5)) {
+      for (let lead = 0; lead < 5; lead++) {
         changed = controller.update(lead, /* toEnd= */ false);
         expect(changed).toBeFalsy();
       }
