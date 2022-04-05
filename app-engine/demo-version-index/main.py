@@ -112,19 +112,8 @@ def version_key(version):
   return version_tuple + [suffix]
 
 def get_appengine_versions():
-  if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-    # NOTE: this doesn't return anything useful in a local dev server.
-    return google.appengine.api.modules.modules.get_versions()
-
-  # For a local dev server, fake it so we can test sorting.
-  fake_versions = [
-    'v1-6-0', 'v1-6-1', 'v1-6-2', 'v1-6-3', 'v1-6-4', 'v1-6-5',
-    'v2-0-0-beta', 'v2-0-0-beta2', 'v2-0-0-beta3', 'v2-0-0',
-    'v2-1-0', 'v2-1-1', 'v2-1-2',
-    'v2-2-1', 'v2-2-2-beta', 'v2-2-2-beta2', 'v2-2-2', 'v2-2-9', 'v2-2-10',
-  ]
-  random.shuffle(fake_versions)  # in-place shuffle
-  return fake_versions
+  # NOTE: this doesn't return anything useful in a local dev server.
+  return google.appengine.api.modules.modules.get_versions()
 
 
 app = Flask(__name__)
