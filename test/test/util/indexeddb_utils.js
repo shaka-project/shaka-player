@@ -4,12 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.IndexedDBUtils');
-
-goog.require('shaka.test.Util');
-goog.require('shaka.util.PublicPromise');
-
-
 shaka.test.IndexedDBUtils = class {
   /**
    * Make a connection to indexeddb. This assumes that it will be a new

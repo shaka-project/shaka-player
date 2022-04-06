@@ -4,12 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.Util');
-goog.require('shaka.text.Cue');
-goog.require('shaka.text.Mp4VttParser');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.Error');
-
 describe('Mp4VttParser', () => {
   const vttInitSegmentUri = '/base/test/test/assets/vtt-init.mp4';
   const vttSegmentUri = '/base/test/test/assets/vtt-segment.mp4';

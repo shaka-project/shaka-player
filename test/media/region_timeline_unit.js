@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.RegionTimeline');
-goog.require('shaka.test.Util');
-
 describe('RegionTimeline', () => {
   /** @type {!shaka.media.RegionTimeline} */
   let timeline;

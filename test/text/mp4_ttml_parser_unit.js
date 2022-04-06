@@ -4,12 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.TtmlUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.text.Mp4TtmlParser');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.Error');
-
 describe('Mp4TtmlParser', () => {
   const ttmlInitSegmentUri = '/base/test/test/assets/ttml-init.mp4';
   const ttmlSegmentUri = '/base/test/test/assets/ttml-segment.mp4';

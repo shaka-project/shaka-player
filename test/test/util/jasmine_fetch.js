@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 // TODO: this only contains the methods that we use; if this is published
 // it should contain the entire breadth of options in jasmine-ajax.
 

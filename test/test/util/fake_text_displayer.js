@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeTextDisplayer');
-
-goog.require('shaka.test.Util');
-
-
 /**
  * @implements {shaka.extern.TextDisplayer}
  * @final

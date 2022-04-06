@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.Player');
-goog.require('shaka.log');
-goog.require('shaka.polyfill');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Platform');
-
 // If ENABLE_DEBUG_LOADER is not set to false, goog.require() will try to load
 // extra sources on-the-fly using pre-computed pathes in deps.js, which is not
 // applicable for the tests.

@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.AdaptationSet');
-
 describe('AdaptationSet', () => {
   describe('roles', () => {
     const mimeType = 'mime-type';
