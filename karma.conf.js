@@ -9,6 +9,7 @@
 
 const Jimp = require('jimp');
 const fs = require('fs');
+const glob = require('glob');
 const path = require('path');
 const rimraf = require('rimraf');
 const {ssim} = require('ssim.js');
@@ -107,39 +108,38 @@ module.exports = (config) => {
       'dist/deps.js',
       'shaka-player.uncompiled.js',
 
+      // the demo's config tab will register with shakaDemoMain, and will be
+      // tested in test/demo/demo_unit.js
+      'demo/config.js',
+
       // cajon module (an AMD variant of requirejs) next
       'node_modules/cajon/cajon.js',
 
-      // bootstrapping for the test suite
-      'test/test/boot.js',
+      // define the test namespace next (shaka.test)
+      'test/test/namespace.js',
 
-      // test utils next
+      // test utilities next, which fill in that namespace
       'test/test/util/*.js',
 
-      // list of test assets next
-      'demo/common/message_ids.js',
-      'demo/common/asset.js',
-      'demo/common/assets.js',
+      // bootstrapping for the test suite last; this will load the actual tests
+      'test/test/boot.js',
 
       // if --test-custom-asset *is not* present, we will add unit tests.
       // if --quick *is not* present, we will add integration tests.
       // if --external *is* present, we will add external asset tests.
 
-      // load relevant demo files
-      {
-        pattern: 'demo/!(main|load|demo_uncompiled|service_worker).js',
-        included: true,
-      },
-
-      // source files - these are only watched and served
+      // source files - these are only watched and served.
+      // anything not listed here can't be dynamically loaded by other scripts.
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'ui/**/*.js', included: false},
       {pattern: 'ui/**/*.less', included: false},
       {pattern: 'third_party/**/*.js', included: false},
+      {pattern: 'test/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
+      {pattern: 'demo/**/*.js', included: false},
       {pattern: 'demo/locales/en.json', included: false},
       {pattern: 'demo/locales/source.json', included: false},
       {pattern: 'node_modules/sprintf-js/src/sprintf.js', included: false},
@@ -284,26 +284,30 @@ module.exports = (config) => {
     });
   }
 
+  const clientArgs = config.client.args[0];
+  clientArgs.testFiles = [];
+
   if (settings.test_custom_asset) {
     // If testing custom assets, we don't serve other unit or integration tests.
     // External asset tests are the basis for custom asset testing, so this file
     // is automatically included.
-    config.files.push('test/player_external.js');
+    clientArgs.testFiles.push('test/player_external.js');
   } else {
     // In a normal test run, we serve unit tests.
-    config.files.push('test/**/*_unit.js');
+    clientArgs.testFiles.push('test/**/*_unit.js');
 
     if (!settings.quick) {
       // If --quick is present, we don't serve integration tests.
-      config.files.push('test/**/*_integration.js');
+      clientArgs.testFiles.push('test/**/*_integration.js');
     }
     if (settings.external) {
       // If --external is present, we serve external asset tests.
-      config.files.push('test/**/*_external.js');
+      clientArgs.testFiles.push('test/**/*_external.js');
     }
   }
-  // We just modified the config in-place.  No need for config.set() after we
-  // push to config.files.
+
+  // These are the test files that will be dynamically loaded by boot.js.
+  clientArgs.testFiles = resolveGlobs(clientArgs.testFiles);
 
   const reporters = [];
 
@@ -348,13 +352,33 @@ module.exports = (config) => {
     const seed = settings.seed == null ? new Date().getTime() : settings.seed;
 
     // Run tests in a random order.
-    const clientArgs = config.client.args[0];
     clientArgs.random = true;
     clientArgs.seed = seed;
 
     console.log('Using a random test order (--random) with --seed=' + seed);
   }
 };
+
+/**
+ * Resolves a list of paths using globs into a list of explicit paths.
+ * Paths are all relative to the source directory.
+ *
+ * @param {!Array.<string>} list
+ * @return {!Array.<string>}
+ */
+function resolveGlobs(list) {
+  const options = {
+    cwd: __dirname,
+  };
+
+  const resolved = [];
+  for (const path of list) {
+    for (const resolvedPath of glob.sync(path, options)) {
+      resolved.push(resolvedPath);
+    }
+  }
+  return resolved;
+}
 
 /**
  * Determines which launchers and customLaunchers can be used and returns an
