@@ -11,7 +11,6 @@ goog.require('goog.asserts');
 goog.require('shakaDemo.BoolInput');
 goog.require('shakaDemo.DatalistInput');
 goog.require('shakaDemo.InputContainer');
-goog.require('shakaDemo.Main');
 goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.NumberInput');
 goog.require('shakaDemo.SelectInput');
