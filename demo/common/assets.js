@@ -239,9 +239,6 @@ shakaAssets.testAssets = [
       .addDescription('H264 HLS stream with LCEVC enhancement')
       .markAsFeatured('Big Buck Bunny (LCEVC H264)')
       .setExtraConfig({
-        lcevc: {
-          enabled: true,
-        },
         streaming: {
           useNativeHlsOnSafari: false,
           forceTransmuxTS: true,

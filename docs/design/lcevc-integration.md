@@ -5,10 +5,6 @@
 
 This article describes the V-Nova LCEVC Shaka Player integration.
 
-Shaka Player is an open-source JavaScript library for adaptive media. It plays adaptive media formats (such as [DASH](http://dashif.org/) and [HLS](https://developer.apple.com/streaming/)) in a browser, without using plugins or Flash. Instead, Shaka Player uses the open web standards [MediaSource Extensions](https://www.w3.org/TR/media-source/) and [Encrypted Media Extensions](https://www.w3.org/TR/encrypted-media/).
-
-The official project GitHub repository is <https://github.com/google/shaka-player>. This integration is a fork from the Shaka Player open source project from version 3.3.0-pre with commit hash: 73b430248ba76038b466da902b776ecc920b2a35.
-
 # LCEVC integration
 
 ## Adding V-Nova required files
@@ -19,9 +15,9 @@ It parses the JavaScript code, analyzes it, removes dead code and rewrites and m
 
 ### Importing Dil.js
 
-In order to import the necessary V-Nova libraries we followed the approach that other externals libraries are using. The necessary V-Nova files need to be imported in the HTML page that is going to use the Shaka Player library.
+In order to import the necessary V-Nova libraries we followed the approach that other external libraries are using. The necessary V-Nova files need to be imported in the HTML page that is going to be used by Shaka Player to decode LCEVC.
 
-We have at as an npm package : <https://www.npmjs.com/package/lcevc_dil.js>
+Npm package : <https://www.npmjs.com/package/lcevc_dil.js>
 
 ```javascript
   <!-- MPEG-5 Part2 LCEVC support is enabled by including this: -->
@@ -32,11 +28,7 @@ To allow the Closure compiler to use the objects and methods that are exported b
 
 ### Defining an Extern for LCEVC
 
-Externs are declarations that tell Closure Compiler the names of symbols that should not be renamed during advanced compilation. They are called externs because these symbols are most often defined by code outside the compilation, such a native code, or third-party libraries. For this reason, externs often also have type annotations, so that Closure Compiler can type check your use of those symbols.
-
-In general, it is best to think of externs as an API contract between the implementor and the consumers of some piece of compiled code. The externs define what the implementor promises to supply, and what the consumers can depend on using. Both sides need a copy of the contract. Externs are similar to header files in other languages.
-
-We created the file `externs/lcevc.js` file that exposes the following methods:
+We have created the file `externs/lcevc.js` file that exposes the following methods:
 
 `constructor(media, canvas, dilConfig):` It receives the video element (media), the canvas, and the Dil configuration as a JSON string and creates the LcevcDil object.
 
@@ -49,27 +41,6 @@ We created the file `externs/lcevc.js` file that exposes the following methods:
 `setContainerFormat(containerFormat):` Set the container format of the stream.
 
 `close():` Close LCEVC DIL Object.
-
-We have also created a config option for enabling LCEVC in `externs/shaka/player.js`.
-
-```javascript
-  /**
-  * @typedef {{
-  *   enabled: boolean
-  * }}
-  *
-  * @description
-  *   Decoding for MPEG-5 Part2 LCEVC.
-  *
-  * @property {boolean} enabled
-  *   If <code>true</code>, enable LCEVC data to be passed to LCEVC Dil and
-  *   decode frames on a canvas element.
-  *   Defaults to <code>false</code>.
-  * @exportDoc
-  */
-  shaka.extern.LcevcConfiguration;
-
-```
 
 ## Integration point
 
@@ -109,8 +80,6 @@ Both LcevcConfig and canvas parameters can be left blank. In that case, default 
     this.lcevcDilConfig_ = lcevcDilConfig;
 ```
 
-The config option to enable LCEVC comes from the `shaka.config_.lcevc` where we decide to enable the lcevc workflow only if the flag is enabled.
-
 On the other hand, if a canvas element is provided to the constructor, this canvas it is used to draw the LCEVC enhanced video and no styles are applied. The user is responsible for placing the canvas element in the desired position.
 
 The Dil object is created in the `onLoad_()` event that is triggered when a new video is loaded in Shaka Player. Attaching to a media element is defined as:
@@ -118,8 +87,7 @@ The Dil object is created in the `onLoad_()` event that is triggered when a new 
 -   Registering error listeners to the media element.
 -   Catching the video element for use outside of the load graph.
 
-The LCEVC workflow is only enabled when the config option for LCEVC is enabled.
-The Dil object is created only if LCEVC is supported (LCEVC libs are loaded) and the config object for lcevc is enabled also if it was not already created in another `onLoad_()` event execution.
+The Dil object is created only if LCEVC is supported (LCEVC libs are loaded on the page) and also when it was not already created in another `onLoad_()` event execution.
 
 ```javascript
   this.setupLcevc_(this.config_);
@@ -138,23 +106,18 @@ The Dil object is created only if LCEVC is supported (LCEVC libs are loaded) and
           this.canvas_,
           this.lcevcDilConfig_,
       );
-      this.canvas_ = this.lcevcDil_.canvas_;
       this.mediaSourceEngine_.updateLcevcDil(this.lcevcDil_);
     }
   }
-
+  
   /**
    * Close a shaka.lcevc.Dil object
    * @private
    */
   closeDIL_() {
     if (this.lcevcDil_ != null) {
-      if (this.lcevcDil_.media_) {
-        this.lcevcDil_.media_.style.display = 'block';
-        this.lcevcDil_.canvas_.style.display = 'none';
-      }
+      this.lcevcDil_.hideCanvas();
       this.lcevcDil_.close();
-      delete this.lcevcDil_;
       this.lcevcDil_ = null;
     }
   }
