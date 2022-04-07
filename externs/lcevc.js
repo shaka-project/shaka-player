@@ -16,7 +16,7 @@ LcevcDil.LcevcDIL = class {
   /**
      *  @param {HTMLVideoElement} media
      *  @param {HTMLCanvasElement} canvas
-     *  @param {Object} dilConfig
+     *  @param {LcevcDil.LcevcDilConfig} dilConfig
      */
   constructor(media, canvas, dilConfig) {
     /** @type {number} */
