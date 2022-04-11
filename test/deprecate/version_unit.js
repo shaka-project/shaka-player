@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.deprecate.Version');
-
 describe('Version', () => {
   const Version = shaka.deprecate.Version;
 

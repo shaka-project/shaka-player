@@ -4,14 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.CannedIDB');
-
-goog.require('shaka.log');
-goog.require('shaka.offline.indexeddb.DBOperation');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.Uint8ArrayUtils');
-
-
 /**
  * A testing utility that can be used to dump and restore entire IndexedDB
  * databases.  This can be inserted into a running app to snapshot databases

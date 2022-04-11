@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.text.Cue');
-goog.require('shaka.text.SsaTextParser');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.StringUtils');
-
 describe('SsaTextParser', () => {
   const Cue = shaka.text.Cue;
 
