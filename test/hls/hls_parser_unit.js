@@ -4,17 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.hls.HlsParser');
-goog.require('shaka.log');
-goog.require('shaka.test.FakeNetworkingEngine');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.PlayerConfiguration');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 describe('HlsParser', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;

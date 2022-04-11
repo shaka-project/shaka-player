@@ -26,7 +26,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 
 ## Platform and browser support matrix
 
-|Browser    |Windows   |Mac      |Linux    |Android  |iOS >= 12 |ChromeOS|Other|
+|Browser    |Windows   |Mac      |Linux    |Android  |iOS >= 13 |ChromeOS|Other|
 |:---------:|:--------:|:-------:|:-------:|:-------:|:--------:|:------:|:---:|
 |Chrome¹    |**Y**     |**Y**    |**Y**    |**Y**    |**Native**|**Y**   | -   |
 |Firefox¹   |**Y**     |**Y**    |**Y**    |untested⁵|**Native**| -      | -   |
@@ -41,7 +41,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 |Xbox One   | -        | -       | -       | -       | -        | -      |**Y**|
 
 NOTES:
- - ¹: On macOS, only Safari 12+ is supported.  On iOS, only iOS 12+ is
+ - ¹: On macOS, only Safari 13+ is supported.  On iOS, only iOS 13+ is
    supported.  Older versions will be rejected.
  - ²: The latest stable Chromecast firmware is tested. Both sender and receiver
    can be implemented with Shaka Player.
@@ -54,7 +54,7 @@ NOTES:
      - Official support for LG WebOS TV:
        https://github.com/shaka-project/shaka-player/issues/1330
 
-We support iOS 12+ through Apple's native HLS player.  We provide the same
+We support iOS 13+ through Apple's native HLS player.  We provide the same
 top-level API, but we just set the video's `src` element to the manifest/media.
 So we are dependent on the browser supporting the manifests.
 
@@ -124,7 +124,7 @@ HLS features supported:
  - WebVTT and TTML
  - CEA-608/708 captions
  - Encrypted content with PlayReady and Widevine
- - Encrypted content with FairPlay (Safari on macOS and iOS 12+ only)
+ - Encrypted content with FairPlay (Safari on macOS and iOS 13+ only)
  - Raw AAC, MP3, etc (without an MP4 container)
 
 HLS features **not** supported:

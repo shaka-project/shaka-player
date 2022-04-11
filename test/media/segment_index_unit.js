@@ -4,12 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.media.MetaSegmentIndex');
-goog.require('shaka.media.SegmentIndex');
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.test.Util');
-
 describe('SegmentIndex', /** @suppress {accessControls} */ () => {
   const actual1 = makeReference(uri(0), 0, 10);
   const actual2 = makeReference(uri(20), 10, 20);

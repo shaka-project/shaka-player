@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Pssh');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 describe('Pssh', () => {
   const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
 

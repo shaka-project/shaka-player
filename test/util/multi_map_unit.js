@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.Util');
-goog.require('shaka.util.MultiMap');
-
 describe('MultiMap', () => {
   /** @type {shaka.util.MultiMap<number>} */
   let map;

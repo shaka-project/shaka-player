@@ -22,27 +22,6 @@ player.configure('drm.advanced.com\\.apple\\.fps\\.serverCertificateUri',
                  'https://example.com/cert.der');
 ```
 
-## Content ID
-
-Note: This only applies when legacy Apple Media Keys is used.
-
-Some FairPlay content use custom signaling for the content ID.  The content ID
-is used by the browser to generate the license request.  If you don't use the
-default content ID derivation, you need to specify a custom init data transform:
-
-```js
-player.configure('drm.initDataTransform', (initData, initDataType) => {
-  if (initDataType != 'skd')
-    return initData;
-
-  // 'initData' is a buffer containing an 'skd://' URL as a UTF-8 string.
-  const skdUri = shaka.util.StringUtils.fromBytesAutoDetect(initData);
-  const contentId = getMyContentId(skdUri);
-  const cert = player.drmInfo().serverCertificate;
-  return shaka.util.FairPlayUtils.initDataTransform(initData, contentId, cert);
-});
-```
-
 ## License wrapping
 
 Some FairPlay servers need to accept the license request in a different format

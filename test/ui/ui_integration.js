@@ -4,22 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('mozilla.LanguageMapping');
-goog.require('shaka.test.Loader');
-goog.require('shaka.test.TestScheme');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.test.Waiter');
-goog.require('shaka.ui.Element');
-goog.require('shaka.util.Dom');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.Iterables');
-goog.requireType('shaka.Player');
-goog.requireType('shaka.ui.Controls');
-goog.requireType('shaka.ui.Overlay');
-
-
 describe('UI', () => {
   const Util = shaka.test.Util;
   const UiUtils = shaka.test.UiUtils;

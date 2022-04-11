@@ -4,18 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.Player');
-goog.require('shaka.log');
-goog.require('shaka.polyfill');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Platform');
-
-// If ENABLE_DEBUG_LOADER is not set to false, goog.require() will try to load
-// extra sources on-the-fly using pre-computed pathes in deps.js, which is not
-// applicable for the tests.
-goog['ENABLE_DEBUG_LOADER'] = false;
-
 /**
  * Gets the value of an argument passed from karma.
  * @param {string} name
@@ -384,9 +372,10 @@ function configureJasmineEnvironment() {
   };
 }
 
-// Executed before test utilities and tests are loaded, but after Shaka Player
-// is loaded in uncompiled mode.
-try {
+/**
+ * Set up the Shaka Player test environment.
+ */
+function setupTestEnvironment() {
   failTestsOnFailedAssertions();
   failTestsOnNamespacedElementOrAttributeNames();
   failTestsOnUnhandledRejections();
@@ -399,12 +388,76 @@ try {
   shaka.polyfill.installAll();
 
   configureJasmineEnvironment();
-
-  // eslint-disable-next-line no-restricted-syntax
-} catch (error) {
-  // Throw this boot-sequence error in place of jasmine's execute method, to
-  // fail clearly and right away without running any tests.
-  jasmine.getEnv().execute = () => {
-    throw error;
-  };
 }
+
+/**
+ * Load a script dynamically and await completion.
+ *
+ * @param {string} file
+ * @return {!Promise}
+ */
+function loadScript(file) {
+  return new Promise((resolve, reject) => {
+    const script = /** @type {!HTMLScriptElement} */(
+      document.createElement('script'));
+    script.defer = false;
+    script['async'] = false;
+    script.onload = resolve;
+    script.onerror = reject;
+    script.setAttribute('src', '/base/' + file);
+    document.head.appendChild(script);
+  });
+}
+
+/**
+ * Load all test scripts and await completion.
+ *
+ * @return {!Promise}
+ */
+function loadTests() {
+  const loadPromises = [];
+  for (const file of getClientArg('testFiles')) {
+    loadPromises.push(loadScript(file));
+  }
+  return Promise.all(loadPromises);
+}
+
+// Hijack Karma's start() method and start things our way.
+// eslint-disable-next-line no-restricted-syntax
+const originalStart = window.__karma__.start.bind(window.__karma__);
+window.__karma__.start = async () => {
+  // Executed when Karma has finished loading everything it loads for us.
+  // Those things were all loaded in parallel, and had no interdependencies
+  // other than those in the Shaka Player library, tracked by the Closure
+  // library's goog.require/goog.provide.
+
+  // Now we load the tests from here, rather than letting Karma do it.  This
+  // give us control over the order, so that everything else is loaded and
+  // complete before any tests are requested.  Then we may reference test
+  // utilities and library namespaces in the body of describe() blocks, which
+  // are executed synchronously as the test scripts are loaded.  Without this
+  // ordering, we would have to either:
+  //    1. very carefully avoid references in describe() and defer them to
+  //       beforeAll()
+  // or 2. strictly adopt goog.provide/goog.require throughout our tests
+  // In those scenarios, failure to do so would only manifest some of the time
+  // and on certain platforms.  So this seems to be the more robust solution.
+
+  // See https://github.com/shaka-project/shaka-player/issues/4094
+
+  try {
+    setupTestEnvironment();
+    console.log('Set up test environment.');
+    await loadTests();
+    console.log('Loaded all tests.');
+
+    // eslint-disable-next-line no-restricted-syntax
+  } catch (error) {
+    console.error('Error during setup:', error);
+    window.__karma__.error(error);
+    return;
+  }
+
+  // Finally, start the tests.
+  originalStart();
+};
