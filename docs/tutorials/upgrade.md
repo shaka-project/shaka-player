@@ -35,12 +35,15 @@ application:
   - Support removed:
     - Older TVs and set-top boxes that do not support MediaSource sequence mode
       can no longer play HLS content (since we now use sequence mode for that)
+    - Support for iOS 12 and Safari 12 has been removed
 
   - Configuration changes:
     - `manifest.dash.defaultPresentationDelay` has been replaced by
       `manifest.defaultPresentationDelay` (deprecated in v3.0.0)
     - Configuration of factories should be plain factory functions, not
       constructors; these will not be invoked with `new` (deprecated in v3.1.0)
+    - `drm.initDataTransform` has been removed (no longer needed since the
+      minimum supported version of iOS is now 13)
 
   - Player API changes:
     - `shaka.Player.prototype.addTextTrack()` has been replaced by
