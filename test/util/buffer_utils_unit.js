@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.util.BufferUtils');
-
 describe('BufferUtils', () => {
   const BufferUtils = shaka.util.BufferUtils;
 

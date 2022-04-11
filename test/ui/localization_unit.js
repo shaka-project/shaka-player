@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.ui.Localization');
-goog.requireType('shaka.util.FakeEvent');
-
 describe('Localization', () => {
   const Localization = shaka.ui.Localization;
 

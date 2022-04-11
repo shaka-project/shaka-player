@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.text.SrtTextParser');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.StringUtils');
-
 describe('SrtTextParser', () => {
   it('supports no cues', () => {
     verifyHelper([],

@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.dash.MpdUtils');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.test.FakeNetworkingEngine');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.requireType('shaka.util.PublicPromise');
-
 describe('MpdUtils', () => {
   const MpdUtils = shaka.dash.MpdUtils;
 

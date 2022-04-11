@@ -4,15 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeAdManager');
-
-goog.require('shaka.ads.AdManager');
-goog.require('shaka.ads.AdsStats');
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.FakeEventTarget');
-goog.requireType('shaka.test.FakeAd');
-
-
 /**
  * @implements {shaka.extern.IAdManager}
  * @final

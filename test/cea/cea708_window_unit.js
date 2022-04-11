@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.cea.Cea708Window');
-goog.require('shaka.cea.CeaUtils');
-goog.require('shaka.test.CeaUtils');
-goog.require('shaka.text.Cue');
-
 describe('Cea708Window', () => {
   const CeaUtils = shaka.test.CeaUtils;
 
