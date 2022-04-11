@@ -13,6 +13,8 @@
 goog.require('ShakaDemoAssetInfo');
 goog.require('shakaDemo.MessageIds');
 
+goog.provide('shakaAssets');
+
 
 // Types and enums {{{
 /**
