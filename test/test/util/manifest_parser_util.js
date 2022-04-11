@@ -4,12 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.ManifestParser');
-
-goog.require('shaka.media.InitSegmentReference');
-goog.require('shaka.media.SegmentReference');
-
-
 shaka.test.ManifestParser = class {
   /**
    * Verifies the segment references of a stream.

@@ -4,12 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeDrmEngine');
-
-goog.require('shaka.media.DrmEngine');
-goog.require('shaka.test.Util');
-
-
 /**
  * A fake DrmEngine.
  *

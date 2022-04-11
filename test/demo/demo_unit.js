@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.FakeDemoMain');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.StringUtils');
-goog.require('shakaDemo.MessageIds');
-
 describe('Demo', () => {
   beforeEach(() => {
     // Make mock versions of misc third-party libraries.

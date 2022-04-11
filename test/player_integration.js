@@ -4,20 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.Uri');
-goog.require('shaka.Player');
-goog.require('shaka.log');
-goog.require('shaka.media.DrmEngine');
-goog.require('shaka.media.TimeRangesUtils');
-goog.require('shaka.test.FakeAbrManager');
-goog.require('shaka.test.FakeTextDisplayer');
-goog.require('shaka.test.Loader');
-goog.require('shaka.test.TestScheme');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.test.Waiter');
-goog.require('shaka.util.EventManager');
-
 describe('Player', () => {
   /** @type {!jasmine.Spy} */
   let onErrorSpy;

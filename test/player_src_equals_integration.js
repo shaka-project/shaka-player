@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.Uri');
-goog.require('shaka.Player');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.test.Waiter');
-goog.require('shaka.util.EventManager');
-
 // These tests are for testing Shaka Player's integration with
 // |HTMLMediaElement.src=|. These tests are to verify that all |shaka.Player|
 // public methods behaviour correctly when playing content video |src=|.

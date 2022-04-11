@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.TtmlUtils');
-
 shaka.test.TtmlUtils = class {
   /**
    * @param {!Array} expectedCues

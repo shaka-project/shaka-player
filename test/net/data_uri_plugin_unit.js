@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.net.DataUriPlugin');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.net.NetworkingEngine.RequestType');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.StringUtils');
-
 describe('DataUriPlugin', () => {
   const retryParameters = shaka.net.NetworkingEngine.defaultRetryParameters();
 

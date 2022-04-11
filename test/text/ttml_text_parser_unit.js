@@ -4,15 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.TtmlUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.text.Cue');
-goog.require('shaka.text.CueRegion');
-goog.require('shaka.text.TtmlTextParser');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.StringUtils');
-
 describe('TtmlTextParser', () => {
   const Cue = shaka.text.Cue;
   const CueRegion = shaka.text.CueRegion;
