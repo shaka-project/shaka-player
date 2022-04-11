@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.FakeDrmEngine');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.StreamUtils');
-
 describe('StreamUtils', () => {
   const StreamUtils = shaka.util.StreamUtils;
 

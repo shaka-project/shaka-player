@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.text.Cue');
-goog.require('shaka.text.WebVttGenerator');
-
 describe('WebVttGenerator', () => {
   it('supports no cues', () => {
     verifyHelper([], [], 'WEBVTT\n\n');

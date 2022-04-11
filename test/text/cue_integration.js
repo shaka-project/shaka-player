@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.text.VttTextParser');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.StringUtils');
-
 describe('Cue', () => {
   // This integration test checks platform support for various cue scenarios
   // that have caused platform-specific issues.  The unit tests for each parser
