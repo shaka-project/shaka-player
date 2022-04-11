@@ -464,13 +464,13 @@ shaka.test.Util = class {
  */
 shaka.test.Util.customMatchers_ = {
   // Custom matcher for Element objects.
-  toEqualElement: (util, customEqualityTesters) => {
+  toEqualElement: (util) => {
     return {
       compare: shaka.test.Util.expectToEqualElementCompare_,
     };
   },
   // Custom matcher for working with spies.
-  toHaveBeenCalledOnceMore: (util, customEqualityTesters) => {
+  toHaveBeenCalledOnceMore: (util) => {
     return {
       compare: (actual, expected) => {
         const callCount = actual.calls.count();
@@ -490,7 +490,7 @@ shaka.test.Util.customMatchers_ = {
       },
     };
   },
-  toHaveBeenCalledOnceMoreWith: (util, customEqualityTesters) => {
+  toHaveBeenCalledOnceMoreWith: (util) => {
     return {
       compare: (actual, expected) => {
         const callCount = actual.calls.count();
@@ -503,7 +503,7 @@ shaka.test.Util.customMatchers_ = {
         if (callCount != 1) {
           result.pass = false;
           result.message = 'Expected to be called once, not ' + callCount;
-        } else if (!util.equals(callArgs, expected, customEqualityTesters)) {
+        } else if (!util.equals(callArgs, expected)) {
           result.pass = false;
           result.message =
               'Expected to be called with ' + expected + ' not ' + callArgs;
