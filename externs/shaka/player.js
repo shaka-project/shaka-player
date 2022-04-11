@@ -618,9 +618,6 @@ shaka.extern.AdvancedDrmConfiguration;
  *   clearKeys: !Object.<string, string>,
  *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
- *   initDataTransform:
- *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
- *         undefined),
  *   logLicenseExchange: boolean,
  *   updateExpirationTime: number,
  *   preferredKeySystems: !Array.<string>
@@ -644,14 +641,6 @@ shaka.extern.AdvancedDrmConfiguration;
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
  *   those key systems.
- * @property
- *     {((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
- *        undefined)}
- *   initDataTransform
- *   <i>Optional.</i><br>
- *   If given, this function is called with the init data from the
- *   manifest/media and should return the (possibly transformed) init data to
- *   pass to the browser.
  * @property {boolean} logLicenseExchange
  *   <i>Optional.</i><br>
  *   If set to <code>true</code>, prints logs containing the license exchange.
