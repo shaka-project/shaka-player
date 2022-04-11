@@ -53,6 +53,13 @@ def main(_):
       '--closure-path', 'node_modules/google-closure-library/closure/goog',
     ]
     deps = shakaBuildHelpers.execute_get_output(cmd_line)
+
+    # This command doesn't use exit codes for some stupid reason.
+    # TODO: Remove when https://github.com/google/closure-library/issues/1162
+    # is resolved and we have upgraded.
+    if len(deps) == 0:
+      return 1
+
     with open(os.path.join(base, 'dist', 'deps.js'), 'wb') as f:
       f.write(deps)
     return 0
