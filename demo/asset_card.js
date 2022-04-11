@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 goog.provide('shakaDemo.AssetCard');
 
-
 goog.require('goog.asserts');
+goog.require('shakaAssets');
 goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.Tooltips');
 goog.requireType('ShakaDemoAssetInfo');
