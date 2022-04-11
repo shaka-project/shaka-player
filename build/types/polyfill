@@ -4,7 +4,6 @@
 +../../lib/polyfill/aria.js
 +../../lib/polyfill/encryption_scheme.js
 +../../lib/polyfill/fullscreen.js
-+../../lib/polyfill/mathround.js
 +../../lib/polyfill/mediasource.js
 +../../lib/polyfill/media_capabilities.js
 +../../lib/polyfill/orientation.js
