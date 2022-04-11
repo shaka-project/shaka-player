@@ -58,8 +58,8 @@ application:
       `.promise.then()` and `await rv` to `await rv.promise` (deprecated in
       v3.0.0)
     - `shaka.offline.Storage.prototype.getStoreInProgress()` has been removed;
-      concurrent operations are supported, so callers don't need to check this
-      (deprecated in v3.0.0)
+      concurrent operations are supported since v3, so callers don't need to
+      check this (deprecated in v3.0.0)
 
   - Utility API changes:
     - `shaka.util.Uint8ArrayUtils.equal` has been replaced by
