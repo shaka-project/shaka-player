@@ -69,9 +69,8 @@ __Polyfills__
       {@linksource shaka.polyfill.Fullscreen}
     - prefixed video QoE metrics:
       {@linksource shaka.polyfill.VideoPlaybackQuality}
-    - prefixed EME implementations for IE 11 and very old versions of embedded
-      Chrome/Chromium:
-      - {@linksource shaka.polyfill.PatchedMediaKeysMs}
+    - prefixed EME implementations:
+      - {@linksource shaka.polyfill.PatchedMediaKeysApple}
       - {@linksource shaka.polyfill.PatchedMediaKeysWebkit}
       - {@linksource shaka.polyfill.PatchedMediaKeysNop}
     - variants of VTTCue and TextTrackCue constructors:
