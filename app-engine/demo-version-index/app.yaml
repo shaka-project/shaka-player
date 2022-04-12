@@ -15,7 +15,13 @@
 runtime: python39
 default_expiration: 1h
 
-# Serve the static/ folder directly.
+handlers:
+# Server static/index.html as the root.
+- url: /
+  secure: always
+  static_files: static/index.html
+  upload: static/index.html
+# Any other requests are served from the static/ folder.
 - url: /(.+)
   secure: always
   static_files: static/\1
