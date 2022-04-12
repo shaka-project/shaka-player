@@ -70,7 +70,6 @@ __Polyfills__
     - prefixed video QoE metrics:
       {@linksource shaka.polyfill.VideoPlaybackQuality}
     - prefixed EME implementations:
-      - {@linksource shaka.polyfill.PatchedMediaKeysApple}
       - {@linksource shaka.polyfill.PatchedMediaKeysWebkit}
       - {@linksource shaka.polyfill.PatchedMediaKeysNop}
     - variants of VTTCue and TextTrackCue constructors:
