@@ -448,14 +448,6 @@ shaka.ui.Overlay.TrackLabelFormat = {
   'LABEL': 3,
 };
 
-/*
- * "shaka.ui.TrackLabelFormat" is deprecated and will be removed in v4.
- *
- * @deprecated
- * @enum {number}
- */
-shaka.ui.TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
-
 /**
  * Describes the possible reasons that the UI might fail to load.
  *
@@ -466,15 +458,6 @@ shaka.ui.Overlay.FailReasonCode = {
   'NO_BROWSER_SUPPORT': 0,
   'PLAYER_FAILED_TO_LOAD': 1,
 };
-
-
-/**
- * "shaka.ui.FailReasonCode" is deprecated and will be removed in v4.
- *
- * @deprecated
- * @enum {number}
- */
-shaka.ui.FailReasonCode = shaka.ui.Overlay.FailReasonCode;
 
 
 if (document.readyState == 'complete') {

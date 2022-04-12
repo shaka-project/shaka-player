@@ -537,8 +537,6 @@ describe('ManifestConverter', () => {
 
     // Assume that we don't have to call createSegmentIndex.
 
-    const iterator = stream.segmentIndex[Symbol.iterator]();
-
     streamDb.segments.forEach((segmentDb, i) => {
       const uri = shaka.offline.OfflineUri.segment(
           'mechanism', 'cell', segmentDb.dataKey);
@@ -548,10 +546,14 @@ describe('ManifestConverter', () => {
           null;
 
       /** @type {shaka.media.SegmentReference} */
-      const segment = iterator.seek(segmentDb.startTime);
+      const segment =
+          stream.segmentIndex
+              .getIteratorForTime(segmentDb.startTime).next().value;
 
       /** @type {shaka.media.SegmentReference} */
-      const sameSegment = iterator.seek(segmentDb.endTime - 0.1);
+      const sameSegment =
+          stream.segmentIndex
+              .getIteratorForTime(segmentDb.endTime - 0.1).next().value;
 
       expect(segment).toBe(sameSegment);
       expect(segment.startTime).toBe(segmentDb.startTime);

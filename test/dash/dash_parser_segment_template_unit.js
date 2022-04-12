@@ -106,9 +106,8 @@ describe('DashParser SegmentTemplate', () => {
           's2.mp4', 50, 60, baseUri);
       expectedRef2.timestampOffset = -10;
 
-      const iterator = stream.segmentIndex[Symbol.iterator]();
-      const ref1 = iterator.seek(45);
-      const ref2 = iterator.seek(55);
+      const ref1 = stream.segmentIndex.getIteratorForTime(45).next().value;
+      const ref2 = stream.segmentIndex.getIteratorForTime(55).next().value;
       expect(ref1).toEqual(expectedRef1);
       expect(ref2).toEqual(expectedRef2);
     });
@@ -445,7 +444,7 @@ describe('DashParser SegmentTemplate', () => {
       await variants[2].video.createSegmentIndex();
 
       const getRefAt = (stream, time) => {
-        return stream.segmentIndex[Symbol.iterator]().seek(time);
+        return stream.segmentIndex.getIteratorForTime(time).next().value;
       };
 
       expect(getRefAt(variants[0].video, 0)).toEqual(

@@ -9,7 +9,6 @@ goog.provide('shaka.ui.Controls');
 goog.provide('shaka.ui.ControlsPanel');
 
 goog.require('goog.asserts');
-goog.require('shaka.Deprecate');
 goog.require('shaka.ads.AdManager');
 goog.require('shaka.cast.CastProxy');
 goog.require('shaka.log');
@@ -868,22 +867,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         const factory =
             shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
         const element = factory.create(this.controlsButtonPanel_, this);
-
-        if (typeof element.release != 'function') {
-          shaka.Deprecate.deprecateFeature(4,
-              'shaka.extern.IUIElement',
-              'Please update UI elements to have a release() method.');
-
-          // This cast works around compiler strictness about the IUIElement
-          // type being "@struct" (as ES6 classes are by default).
-          const moddableElement = /** @type {Object} */(element);
-          moddableElement['release'] = () => {
-            if (moddableElement['destroy']) {
-              moddableElement['destroy']();
-            }
-          };
-        }
-
         this.elements_.push(element);
       } else {
         shaka.log.alwaysWarn('Unrecognized control panel element requested:',
