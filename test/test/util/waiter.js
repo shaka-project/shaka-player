@@ -255,7 +255,7 @@ shaka.test.Waiter = class {
 
       // Improve the error message with media-specific debug info.
       if (target instanceof HTMLMediaElement) {
-        this.logDebugInfoForMedia_(error.message, target);
+        this.logDebugInfoForMedia_(error, target);
       }
 
       // Reject or resolve based on our settings.
@@ -268,20 +268,21 @@ shaka.test.Waiter = class {
   }
 
   /**
-   * @param {string} message
+   * @param {!Error} error
    * @param {!HTMLMediaElement} mediaElement
    * @private
    */
-  logDebugInfoForMedia_(message, mediaElement) {
+  logDebugInfoForMedia_(error, mediaElement) {
     const buffered =
         shaka.media.TimeRangesUtils.getBufferedInfo(mediaElement.buffered);
-    shaka.log.error(message,
-        'current time', mediaElement.currentTime,
-        'duration', mediaElement.duration,
-        'ready state', mediaElement.readyState,
-        'playback rate', mediaElement.playbackRate,
-        'paused', mediaElement.paused,
-        'ended', mediaElement.ended,
-        'buffered', buffered);
+    error.message += '\n' +
+        `current time: ${mediaElement.currentTime}\n` +
+        `duration: ${mediaElement.duration}\n` +
+        `ready state: ${mediaElement.readyState}\n` +
+        `playback rate: ${mediaElement.playbackRate}\n` +
+        `paused: ${mediaElement.paused}\n` +
+        `ended: ${mediaElement.ended}\n` +
+        `buffered: ${JSON.stringify(buffered)}\n`;
+    shaka.log.error(error.message);
   }
 };

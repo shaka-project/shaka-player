@@ -284,11 +284,23 @@ describe('StreamingEngine', () => {
 
       // Something weird happens on some platforms (variously Chromecast, legacy
       // Edge, and Safari) where the playhead can go past duration.
-      // To cope with this, don't fail on timeout.  If the video never got
-      // flagged as "ended", check for the playhead to be near or past the end.
-      await waiter.timeoutAfter(30).failOnTimeout(false).waitForEnd(video);
-      if (!video.ended) {
-        expect(video.currentTime).toBeGreaterThan(video.duration - 0.1);
+      // To cope with this, don't always fail on timeout.  If the video never
+      // got flagged as "ended", check for the playhead to be near or past the
+      // end.
+      try {
+        await waiter.timeoutAfter(30).waitForEnd(video);
+        // eslint-disable-next-line no-restricted-syntax
+      } catch (error) {
+        if (video.currentTime >= video.duration - 0.1) {
+          // Actually a success!
+        } else {
+          // This error has debugging info to help explain the state.
+          // Get buffering info from MediaSourceEngine to add to that.
+          const bufferedInfo = mediaSourceEngine.getBufferedInfo();
+          error.message += `bufferedInfo: ${JSON.stringify(bufferedInfo)}\n`;
+
+          throw error;
+        }
       }
     });
 
