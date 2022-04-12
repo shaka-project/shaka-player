@@ -18,6 +18,7 @@
   { "offline": { "title": "Offline Storage and Playback" } },
   { "fairplay": { "title": "FairPlay support" } },
   { "application-level-redirects": { "title": "Application-Level Redirects" } },
+  { "selenium-grid-config": { "title": "Selenium Grid Config" } },
   { "faq": { "title": "Frequently Asked Questions" } },
   { "upgrade": {
       "title": "Upgrade Guide",
