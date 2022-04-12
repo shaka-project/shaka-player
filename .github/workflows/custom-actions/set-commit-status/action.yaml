@@ -29,9 +29,11 @@ runs:
         # attached to the commit status, so that when someone clicks "details"
         # next to the status on the PR, it will link to this run where they can
         # see the logs.
-        RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+        RUN_URL="https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
         SHA1=$(git rev-parse "${{ inputs.ref }}")
-        GITHUB_TOKEN=${{ inputs.token }} gh api \
+
+        GITHUB_TOKEN=${{ inputs.token }} \
+        gh api \
           -X POST \
           -F "context=${{ inputs.context }}" \
           -F "state=${{ inputs.state }}" \
