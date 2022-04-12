@@ -15,6 +15,7 @@ const rimraf = require('rimraf');
 const {ssim} = require('ssim.js');
 const util = require('karma/common/util');
 const which = require('which');
+const yaml = require('js-yaml');
 
 /**
  * @param {Object} config
@@ -44,6 +45,58 @@ module.exports = (config) => {
   const settings =
       settingsIndex >= 0 ? JSON.parse(args[settingsIndex + 1]) : {};
 
+  if (settings.grid_config) {
+    const gridBrowserMetadata =
+        yaml.load(fs.readFileSync(settings.grid_config, 'utf8'));
+    const customLaunchers = {};
+    const [gridHostname, gridPort] = settings.grid_address.split(':');
+    console.log(`Using Selenium grid at ${gridHostname}:${gridPort}`);
+
+    // By default, run on all grid browsers instead of the platform-specific
+    // default.  This does not disable local browsers, though.  Users can still
+    // specify a mix of grid and local browsers explicitly.
+    settings.default_browsers = [];
+
+    for (const name in gridBrowserMetadata) {
+      if (name == 'vars') {
+        // Skip variable defs in the YAML file
+        continue;
+      }
+
+      const metadata = gridBrowserMetadata[name];
+
+      const launcher = {};
+      customLaunchers[name] = launcher;
+
+      // Disabled-by-default browsers are still defined, but not put in the
+      // default list.  A user can ask for one explicitly.  This allows us to
+      // disable a browser that is down for some reason in the lab, but still
+      // ask for it manually if we want to test it before re-enabling it for
+      // everyone.
+      if (!metadata.disabled) {
+        settings.default_browsers.push(name);
+      }
+
+      // Add standard WebDriver configs.
+      Object.assign(launcher, {
+        base: 'WebDriver',
+        config: {hostname: gridHostname, port: gridPort},
+        pseudoActivityInterval: 20000,
+        browserName: metadata.browser,
+        platform: metadata.os,
+        version: metadata.version,
+      });
+
+      if (metadata.extra_config) {
+        Object.assign(launcher, metadata.extra_config);
+      }
+    }
+
+    config.set({
+      customLaunchers: customLaunchers,
+    });
+  }
+
   if (settings.browsers && settings.browsers.length == 1 &&
       settings.browsers[0] == 'help') {
     console.log('Available browsers:');
@@ -52,6 +105,24 @@ module.exports = (config) => {
       console.log('  ' + name);
     }
     process.exit(1);
+  }
+
+  // Resolve the set of browsers we will use.
+  const browserSet = new Set(settings.browsers && settings.browsers.length ?
+      settings.browsers : settings.default_browsers);
+  if (settings.exclude_browsers) {
+    for (const excluded of settings.exclude_browsers) {
+      browserSet.delete(excluded);
+    }
+  }
+
+  let browsers = Array.from(browserSet).sort();
+  if (settings.no_browsers) {
+    console.warn(
+        '--no-browsers: In this mode, you must connect browsers to Karma.');
+    browsers = null;
+  } else {
+    console.warn('Running tests on: ' + browsers.join(', '));
   }
 
   config.set({
@@ -213,7 +284,7 @@ module.exports = (config) => {
 
     // Set which browsers to run on. If this is null, then Karma will wait for
     // an incoming connection.
-    browsers: settings.browsers,
+    browsers,
 
     // Enable / disable colors in the output (reporters and logs). Defaults
     // to true.
@@ -244,6 +315,7 @@ module.exports = (config) => {
 
     specReporter: {
       suppressSkipped: true,
+      showBrowser: true,
     },
   });
 
@@ -357,6 +429,16 @@ module.exports = (config) => {
 
     console.log('Using a random test order (--random) with --seed=' + seed);
   }
+
+  if (settings.tls_key && settings.tls_cert) {
+    config.set({
+      protocol: 'https',
+      httpsServerOptions: {
+        key: fs.readFileSync(settings.tls_key),
+        cert: fs.readFileSync(settings.tls_cert),
+      },
+    });
+  }
 };
 
 /**
@@ -446,7 +528,7 @@ function allUsableBrowserLaunchers(config) {
     browsers.push(...Object.keys(config.customLaunchers));
   }
 
-  return browsers;
+  return browsers.sort();
 }
 
 /**
