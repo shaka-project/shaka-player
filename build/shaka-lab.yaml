@@ -6,8 +6,8 @@
 
 # A set of variables to contain repeated configurations which can then be
 # referenced below.  The syntax for the variable is "name: &name", which
-# generates an "anchor" with the given nae.  Later, you can inject the contents
-# of the variable with "*name".
+# generates an "anchor" with the given name.  Later, you can inject the
+# contents of the variable with "*name".
 vars:
   firefox_config: &firefox_config
     moz:firefoxOptions:
