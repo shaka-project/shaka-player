@@ -1,0 +1,41 @@
+name: Set Commit Status
+
+description: |
+  A reusable action that sets the commit status.  This is used to set PR status
+  from workflows with non-PR triggers (such as manually-triggered workflows).
+
+inputs:
+  context:
+    description: An arbitrary string to identify the status check.
+    required: true
+  state:
+    description: Either "pending", "error", "success", or "failure".
+    required: true
+  ref:
+    description: A git ref for which to set the commit status.  For PRs, use the head commit, not the merge commit.  Defaults to HEAD.
+    required: false
+    default: HEAD
+  token:
+    description: A GitHub access token.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Report Commit Status
+      shell: bash
+      run: |
+        # This is the URL to view this workflow run on GitHub.  It will be
+        # attached to the commit status, so that when someone clicks "details"
+        # next to the status on the PR, it will link to this run where they can
+        # see the logs.
+        RUN_URL="https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
+        SHA1=$(git rev-parse "${{ inputs.ref }}")
+
+        GITHUB_TOKEN=${{ inputs.token }} \
+        gh api \
+          -X POST \
+          -F "context=${{ inputs.context }}" \
+          -F "state=${{ inputs.state }}" \
+          -F "target_url=$RUN_URL" \
+          "repos/${{ github.repository }}/statuses/$SHA1"

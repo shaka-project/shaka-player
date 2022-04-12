@@ -1,0 +1,93 @@
+name: Selenium Lab Tests
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering on PRs.  They should be reviewed first, to
+    # avoid malicious code executing in the lab.
+    inputs:
+      pr:
+        description: "A PR number to build and test in the lab.  If empty, will build and test from main."
+        required: false
+  schedule:
+    # Runs every night at 2am PST / 10am UTC, testing against the main branch.
+    - cron: '0 10 * * *'
+
+# Only one run of this workflow is allowed at a time, since it uses physical
+# resources in our lab.
+concurrency: selenium-lab
+
+jobs:
+  lab-tests:
+    # This is a self-hosted runner in a Docker container, with access to our
+    # lab's Selenium grid on port 4444.
+    runs-on: self-hosted-selenium
+
+    steps:
+      # This runs on our self-hosted runner, and the Docker image it is based
+      # on doesn't have GitHub's CLI pre-installed.  This installs it.  Taken
+      # verbatim from the official installation instructions at
+      # https://github.com/cli/cli/blob/trunk/docs/install_linux.md
+      - name: Install GitHub Actions CLI
+        run: |
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh
+
+      - name: Compute ref
+        run: |
+          if [[ "${{ github.event.inputs.pr }}" != "" ]]; then
+            echo LAB_TEST_REF="refs/pull/${{ github.event.inputs.pr }}/head" >> $GITHUB_ENV
+          else
+            echo LAB_TEST_REF="main" >> $GITHUB_ENV
+          fi
+
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.LAB_TEST_REF }}
+
+      - name: Set Commit Status to Pending
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Selenium Lab Tests
+          state: pending
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          registry-url: 'https://registry.npmjs.org'
+
+      # The Docker image for this self-hosted runner doesn't contain java.
+      - uses: actions/setup-java@v2
+        with:
+          distribution: zulu
+          java-version: 11
+
+      # The Docker image for this self-hosted runner has "python3" but not
+      # plain "python".
+      - name: Build Player
+        run: python3 build/all.py
+
+      # Run tests on the Selenium grid in our lab.  This uses a private
+      # hostname and TLS cert to get EME tests working on all platforms
+      # (since EME only works on https or localhost).
+      - name: Test Player
+        run: |
+          python3 build/test.py \
+              --reporters spec --spec-hide-passed \
+              --drm \
+              --lets-encrypt-folder /etc/shakalab.rocks \
+              --hostname karma.shakalab.rocks \
+              --port 61731 \
+              --grid-config build/shaka-lab.yaml \
+              --grid-address selenium-grid.lab:4444
+
+      - name: Report Final Commit Status
+        # Will run on success or failure, but not if the workflow is cancelled.
+        if: ${{ success() || failure() }}
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Selenium Lab Tests
+          state: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}

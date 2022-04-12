@@ -19,11 +19,20 @@
 import argparse
 import json
 import logging
+import os
 import platform
+import re
 
 import build
 import gendeps
 import shakaBuildHelpers
+
+
+# Set a higher default for capture_timeout in grid mode.  If the test gets
+# queued by the grid, this may prevent Karma from killing the session while
+# waiting.
+LOCAL_CAPTURE_TIMEOUT = 1 * 60 * 1000  # 1m in ms
+SELENIUM_CAPTURE_TIMEOUT = 10 * 60 * 1000  # 10m in ms
 
 
 class _HandleMixedListsAction(argparse.Action):
@@ -100,6 +109,8 @@ def _GetDefaultBrowsers():
   raise Error('Unrecognized system: %s' % platform.uname()[0])
 
 
+# TODO(joeyparrish): When internal tools using this Launcher system are removed,
+# simplify this whole mess.
 class Launcher:
   """A stateful object for parsing arguments and running Karma commands.
 
@@ -126,7 +137,7 @@ class Launcher:
 
     running_commands = self.parser.add_argument_group(
         'Running',
-        'These commands affect how tests are ran.')
+        'These commands affect how tests are run.')
     logging_commands = self.parser.add_argument_group(
         'Logging',
         'These commands affect what gets logged and how the logs will appear.')
@@ -230,9 +241,9 @@ class Launcher:
     running_commands.add_argument(
         '--capture-timeout',
         help='Kill the browser if it does not capture in the given time [ms]. '
-             '(default %(default)s)',
-        type=int,
-        default=60000)
+             '(default {} for local, {} for Selenium)'.format(
+                 LOCAL_CAPTURE_TIMEOUT, SELENIUM_CAPTURE_TIMEOUT),
+        type=int)
     running_commands.add_argument(
         '--delay-tests',
         help='Insert an artificial delay between tests, in seconds. '
@@ -273,6 +284,13 @@ class Launcher:
         help="Don't use Babel to convert ES6 to ES5.",
         dest='babel',
         action='store_false')
+    running_commands.add_argument(
+        '--grid-address',
+        help='Address (hostname:port) of a Selenium grid to run tests on.')
+    running_commands.add_argument(
+        '--grid-config',
+        help='Path to a yaml config defining Selenium grid browsers. '
+             '(See docs/selenium-grid-config.md)')
 
 
     logging_commands.add_argument(
@@ -328,6 +346,17 @@ class Launcher:
         help='Specify the hostname to be used when capturing browsers. This '
              'defaults to localhost.',
         default='localhost')
+    networking_commands.add_argument(
+        '--tls-key',
+        help='Specify a TLS key to serve tests over HTTPs.')
+    networking_commands.add_argument(
+        '--tls-cert',
+        help='Specify a TLS cert to serve tests over HTTPs.')
+    networking_commands.add_argument(
+        '--lets-encrypt-folder',
+        help="Specify a Let's Encrypt folder to search for the latest key and "
+             "cert, to serve tests over HTTPs.  This overrides --tls-key and "
+             "--tls-cert.")
 
 
     pre_launch_commands.add_argument(
@@ -360,28 +389,36 @@ class Launcher:
     pass_through = [
       'auto_watch',
       'babel',
+      'browsers',
       'capture_timeout',
       'colors',
+      'delay_tests',
       'drm',
+      'exclude_browsers',
       'external',
       'filter',
+      'grid_address',
+      'grid_config',
       'hostname',
       'html_coverage_report',
       'log_level',
       'logging',
+      'no_browsers',
       'port',
       'quarantined',
       'quick',
       'random',
+      'reporters',
       'report_slower_than',
       'seed',
       'single_run',
-      'uncompiled',
-      'delay_tests',
       'spec_hide_passed',
       'test_custom_asset',
       'test_custom_license_server',
       'test_timeout',
+      'tls_key',
+      'tls_cert',
+      'uncompiled',
     ]
 
     # Check each value before setting it to avoid passing null values.
@@ -390,8 +427,33 @@ class Launcher:
       if value is not None:
         self.karma_config[name] = value
 
-    if self.parsed_args.reporters:
-      self.karma_config['reporters'] = self.parsed_args.reporters
+    if not self.parsed_args.capture_timeout:
+      # The default for capture_timeout depends on whether or not we are using
+      # a Selenium grid.
+      if self.parsed_args.grid_config:
+        self.karma_config['capture_timeout'] = SELENIUM_CAPTURE_TIMEOUT
+      else:
+        self.karma_config['capture_timeout'] = LOCAL_CAPTURE_TIMEOUT
+
+    self._HandleLetsEncryptConfig()
+
+  def _HandleLetsEncryptConfig(self):
+    folder = self.parsed_args.lets_encrypt_folder
+    if not folder:
+      return
+
+    max_serial_number = 0
+    # Go through the contents of the folder to find the latest key & cert.
+    for file_name in os.listdir(folder):
+      matches = re.match(r'(?:privkey|fullchain)(\d+).pem', file_name)
+      if matches:
+        serial_number = int(matches.group(1))
+        max_serial_number = max(max_serial_number, serial_number)
+
+    self.karma_config['tls_key'] = os.path.join(
+        folder, 'privkey{}.pem'.format(max_serial_number))
+    self.karma_config['tls_cert'] = os.path.join(
+        folder, 'fullchain{}.pem'.format(max_serial_number))
 
   def ResolveBrowsers(self, default_browsers):
     """Decide what browsers we should use.
@@ -400,25 +462,7 @@ class Launcher:
        additional logic to derive a browser list from the parsed arguments.
     """
     assert(default_browsers and len(default_browsers))
-
-    if self.parsed_args.no_browsers:
-      logging.warning('In this mode browsers must manually connect to karma.')
-    elif self.parsed_args.browsers:
-      self.karma_config['browsers'] = self.parsed_args.browsers
-    else:
-      logging.warning('Using default browsers: %s', default_browsers)
-      self.karma_config['browsers'] = default_browsers
-
-    # Check if there are any browsers that we should remove
-    if self.parsed_args.exclude_browsers and 'browsers' in self.karma_config:
-      all_browsers = set(self.karma_config['browsers'])
-      bad_browsers = set(self.parsed_args.exclude_browsers)
-      if bad_browsers - all_browsers:
-        raise RuntimeError('Attempting to exclude unselected browsers: %s' %
-                           ','.join(bad_browsers - all_browsers))
-
-      good_browsers = all_browsers - bad_browsers
-      self.karma_config['browsers'] = list(good_browsers)
+    self.karma_config['default_browsers'] = default_browsers
 
   def RunCommand(self, karma_conf):
     """Build a command and send it to Karma for execution.
