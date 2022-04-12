@@ -1,17 +1,16 @@
-# Shaka Player Version Index - Appspot Entrypoint
+#!/usr/bin/env python3
+
+# Shaka Player Version Index Generator
 # Copyright 2022 Google LLC
 # SPDX-License-Identifier: Apache-2.0
 
 # Generate an index of Shaka Player versions on appspot.
 
 import collections
-import google.appengine.api.modules
 import jinja2
 import os
-import random
 import re
-
-from flask import Flask, render_template
+import subprocess
 
 DEMO_URL_TEMPLATE = 'https://{0}-dot-shaka-player-demo.appspot.com/'
 
@@ -90,13 +89,20 @@ def version_to_metadata(v):
     'ui_lib_defs': version_to_ui_lib_defs_url(v),
   }
 
-def is_release_version(name):
-  return re.match(r'v\d+-\d+-\d+(?:-.+)?', name)
-
-def appengine_version_to_package_version(version):
-  # Replace the first two dashes with dots.  More dashes indicate a prerelease
-  # version, as seen in "v2.0.0-beta3".
-  return version.replace('-', '.', 2)
+def is_release_tag(name):
+  matches = re.match(r'v\d+\.\d+\.\d+(-.+)?', name)
+  # Doesn't match, not a version tag.
+  if not matches:
+    return False
+  # A "master" (old) or "main" (new) tag, indicating the state of the main
+  # branch at the time of a release.  Not an actual version in itself, though.
+  if matches.group(1) == '-master' or matches.group(1) == '-main':
+    return False
+  # For historical reasons, these oldest few tags are not currently deployed to
+  # appengine.  All other matching tags are, though.
+  if name in ['v1.2.0', 'v1.2.1', 'v1.2.2', 'v1.2.3']:
+    return False
+  return True
 
 def version_key(version):
   if version == 'nightly':
@@ -111,32 +117,13 @@ def version_key(version):
   version_tuple = [int(x) for x in main_version.split('.')]
   return version_tuple + [suffix]
 
-def get_appengine_versions():
-  if os.getenv('GAE_ENV', '').startswith('standard'):
-    # NOTE: this doesn't return anything useful in a local dev server.
-    return google.appengine.api.modules.modules.get_versions()
+def get_release_tags():
+  output = subprocess.check_output(['git', 'tag'], text=True)
+  return list(filter(is_release_tag, output.split('\n')))
 
-  # For a local dev server, fake it so we can test sorting.
-  fake_versions = [
-    'v1-6-0', 'v1-6-1', 'v1-6-2', 'v1-6-3', 'v1-6-4', 'v1-6-5',
-    'v2-0-0-beta', 'v2-0-0-beta2', 'v2-0-0-beta3', 'v2-0-0',
-    'v2-1-0', 'v2-1-1', 'v2-1-2',
-    'v2-2-1', 'v2-2-2-beta', 'v2-2-2-beta2', 'v2-2-2', 'v2-2-9', 'v2-2-10',
-  ]
-  random.shuffle(fake_versions)  # in-place shuffle
-  return fake_versions
-
-
-app = Flask(__name__)
-
-@app.route('/')
-def root():
-  appengine_versions = get_appengine_versions()
-  # Filter for release versions only.
-  appengine_versions = filter(is_release_version, appengine_versions)
-
-  # Now convert from appengine versions (v2-0-0) to package versions (v2.0.0).
-  versions = list(map(appengine_version_to_package_version, appengine_versions))
+def generate():
+  # Get all release tags.
+  versions = get_release_tags()
   # Now sort, putting prerelease versions ahead of the corresponding release.
   versions.sort(key=version_key)
 
@@ -158,5 +145,20 @@ def root():
   version_metadata['nightly'] = version_to_metadata('nightly')
   version_metadata['nightly']['best'] = True
 
-  for i in version_metadata.values(): print(i)
-  return render_template('index.html', versions=version_metadata.values())
+  # Debug: uncomment to see a list of version metadata objects.
+  #for i in version_metadata.values(): print(i)
+
+  script_path = os.path.dirname(__file__)
+  template_path = os.path.join(script_path, 'templates', 'index.html')
+  output_path = os.path.join(script_path, 'static', 'index.html')
+
+  os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+  with open(template_path, 'r') as template_file:
+    with open(output_path, 'w') as output_file:
+      template = jinja2.Template(template_file.read())
+      output = template.render(versions=version_metadata.values())
+      output_file.write(output)
+
+if __name__ == '__main__':
+  generate()
