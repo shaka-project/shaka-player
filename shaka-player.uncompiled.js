@@ -35,7 +35,6 @@ goog.require('shaka.offline.indexeddb.StorageMechanism');
 goog.require('shaka.polyfill.Aria');
 goog.require('shaka.polyfill.EncryptionScheme');
 goog.require('shaka.polyfill.Fullscreen');
-goog.require('shaka.polyfill.MathRound');
 goog.require('shaka.polyfill.MediaSource');
 goog.require('shaka.polyfill.MediaCapabilities');
 goog.require('shaka.polyfill.Orientation');
