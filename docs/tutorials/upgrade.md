@@ -44,6 +44,8 @@ application:
       constructors; these will not be invoked with `new` (deprecated in v3.1.0)
     - `drm.initDataTransform` has been removed (no longer needed since the
       minimum supported version of iOS is now 13)
+    - `streaming.smallGapLimit` and `streaming.jumpLargeGaps` have been removed;
+      all gaps will now be jumped
 
   - Player API changes:
     - `shaka.Player.prototype.addTextTrack()` has been replaced by
