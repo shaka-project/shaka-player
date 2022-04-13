@@ -944,9 +944,6 @@ shakaDemo.Main = class {
     if ('noadaptation' in params) {
       this.configure('abr.enabled', false);
     }
-    if ('jumpLargeGaps' in params) {
-      this.configure('streaming.jumpLargeGaps', true);
-    }
 
     // Add compiled/uncompiled links.
     this.makeVersionLinks_();
@@ -1356,9 +1353,6 @@ shakaDemo.Main = class {
     }
     if (!this.getCurrentConfigValue('abr.enabled')) {
       params.push('noadaptation');
-    }
-    if (this.getCurrentConfigValue('streaming.jumpLargeGaps')) {
-      params.push('jumpLargeGaps');
     }
     params.push('uilang=' + this.getUILocale());
 

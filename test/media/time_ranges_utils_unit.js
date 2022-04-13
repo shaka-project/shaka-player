@@ -22,11 +22,6 @@ describe('TimeRangesUtils', () => {
       expect(TimeRangesUtils.isBuffered(b, 13)).toBe(true);
     });
 
-    it('returns buffered when having a small gap', () => {
-      const b = createFakeBuffered([{start: 10, end: 20}]);
-      expect(TimeRangesUtils.isBuffered(b, 9, 1)).toBe(true);
-    });
-
     // Ranges: [10-20], [30-40], [50-60]
     defineTest('returns false when before range', {time: 3, expected: false});
     defineTest('returns true inside first range', {time: 12, expected: true});

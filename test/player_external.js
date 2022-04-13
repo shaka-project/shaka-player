@@ -106,12 +106,6 @@ describe('Player', () => {
         player.configure('manifest.dash.clockSyncUri',
             'https://shaka-player-demo.appspot.com/time.txt');
 
-        // Make sure we don't get stuck on gaps that only appear in some
-        // browsers (Safari, Firefox).
-        // TODO(https://github.com/shaka-project/shaka-player/issues/1702):
-        // Is this necessary because of a bug in Shaka Player?
-        player.configure('streaming.jumpLargeGaps', true);
-
         // Add asset-specific configuration.
         player.configure(asset.getConfiguration());
 

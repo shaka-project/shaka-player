@@ -352,9 +352,6 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.GAP_DETECTION_THRESHOLD,
             'streaming.gapDetectionThreshold',
             /* canBeDecimal= */ true)
-        .addNumberInput_(MessageIds.MAX_SMALL_GAP_SIZE,
-            'streaming.smallGapLimit',
-            /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.BUFFERING_GOAL,
             'streaming.bufferingGoal',
             /* canBeDecimal= */ true)
@@ -407,10 +404,8 @@ shakaDemo.Config = class {
       this.latestInput_.input().checked = true;
     }
 
-    this.addBoolInput_(MessageIds.JUMP_LARGE_GAPS,
-        'streaming.jumpLargeGaps')
-        .addBoolInput_(MessageIds.FORCE_TRANSMUX_TS,
-            'streaming.forceTransmuxTS')
+    this.addBoolInput_(MessageIds.FORCE_TRANSMUX_TS,
+        'streaming.forceTransmuxTS')
         .addBoolInput_(MessageIds.START_AT_SEGMENT_BOUNDARY,
             'streaming.startAtSegmentBoundary')
         .addBoolInput_(MessageIds.IGNORE_TEXT_FAILURES,
