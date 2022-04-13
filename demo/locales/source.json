@@ -435,10 +435,6 @@
     "description": "A link in the footer, to Shaka Player in the jsDelivr CDN.",
     "message": "[PROPER_NAME:jsDelivr]"
   },
-  "DEMO_JUMP_LARGE_GAPS": {
-    "description": "The name of a configuration value.",
-    "message": "Jump Large Gaps"
-  },
   "DEMO_LANGUAGE_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "Language"
@@ -550,10 +546,6 @@
   "DEMO_MAX_PIXELS": {
     "description": "The name of a configuration value.",
     "message": "Max Pixels"
-  },
-  "DEMO_MAX_SMALL_GAP_SIZE": {
-    "description": "The name of a configuration value.",
-    "message": "Maximum Small Gap Size"
   },
   "DEMO_MAX_WIDTH": {
     "description": "The name of a configuration value.",
