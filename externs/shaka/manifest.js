@@ -176,6 +176,7 @@ shaka.extern.DrmInfo;
  * @typedef {{
  *   id: number,
  *   language: string,
+ *   disabledTime: number,
  *   primary: boolean,
  *   audio: ?shaka.extern.Stream,
  *   video: ?shaka.extern.Stream,
@@ -198,6 +199,10 @@ shaka.extern.DrmInfo;
  *   The Variant's language, specified as a language code. <br>
  *   See {@link https://tools.ietf.org/html/rfc5646} <br>
  *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm}
+ * @property {number} disabledTime
+ *   <i>Defaults to 0.</i> <br>
+ *   Set by the Player to indicate when the variant is disabled so it's
+ *   not allowed to be played by the application for an ammount of time.
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
  *   True indicates that the player should use this Variant over others if user

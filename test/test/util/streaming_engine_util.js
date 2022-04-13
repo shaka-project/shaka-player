@@ -287,6 +287,7 @@ shaka.test.StreamingEngineUtil = class {
       bandwidth: 0,
       id: 0,
       language: 'und',
+      disabledTime: 0,
       primary: false,
       decodingInfos: [],
     };

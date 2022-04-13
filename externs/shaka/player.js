@@ -350,7 +350,9 @@ shaka.extern.TrackList;
  *   maxFrameRate: number,
  *
  *   minBandwidth: number,
- *   maxBandwidth: number
+ *   maxBandwidth: number,
+ *
+ *   maxDisabledTime: number
  * }}
  *
  * @description
@@ -387,6 +389,9 @@ shaka.extern.TrackList;
  *   The minimum bandwidth of a variant track, in bit/sec.
  * @property {number} maxBandwidth
  *   The maximum bandwidth of a variant track, in bit/sec.
+ * @property {number} maxDisabledTime
+ *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
+ *   is reached, in seconds.
  * @exportDoc
  */
 shaka.extern.Restrictions;
