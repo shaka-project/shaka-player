@@ -155,8 +155,6 @@ Chromebook:
   extra_config: *chromeos_config
 
 Tizen:
-  # TODO(joeyparrish): Get Tizen TV mounted in the lab and connected
-  disabled: true
   browser: tizen
 
 XboxOne:
