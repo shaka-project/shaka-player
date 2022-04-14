@@ -12,6 +12,13 @@ on:
         description: "The ref to build and test."
         required: false
 
+# If another instance of this workflow is started for the same PR, cancel the
+# old one.  If a PR is updated and a new test run is started, the old test run
+# will be cancelled automatically to conserve resources.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Lint
