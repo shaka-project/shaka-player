@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        # We need a list of all tags for this, so fetch the entire history.
+        fetch-depth: 0
 
       - name: Generate static content
         run: python3 app-engine/demo-version-index/generate.py
