@@ -1424,6 +1424,105 @@ describe('HlsParser', () => {
     }
   });
 
+  it('parse EXT-X-GAP', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-GAP\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-GAP\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+
+    expect(actual.variants.length).toBe(1);
+
+    const variant = actual.variants[0];
+    expect(variant.video).toBeTruthy();
+    expect(variant.audio).toBeTruthy();
+
+    const available = shaka.media.SegmentReference.Status.AVAILABLE;
+    const missing = shaka.media.SegmentReference.Status.MISSING;
+
+    await variant.video.createSegmentIndex();
+    goog.asserts.assert(variant.video.segmentIndex != null,
+        'Null segmentIndex!');
+
+    const firstVideoReference = variant.video.segmentIndex.get(0);
+    const secondVideoReference = variant.video.segmentIndex.get(1);
+    const thirdVideoReference = variant.video.segmentIndex.get(2);
+
+    expect(firstVideoReference).not.toBe(null);
+    expect(secondVideoReference).not.toBe(null);
+    expect(thirdVideoReference).not.toBe(null);
+
+    if (firstVideoReference) {
+      expect(firstVideoReference.getStatus()).toBe(available);
+    }
+    if (secondVideoReference) {
+      expect(secondVideoReference.getStatus()).toBe(missing);
+    }
+    if (thirdVideoReference) {
+      expect(thirdVideoReference.getStatus()).toBe(available);
+    }
+
+    await variant.audio.createSegmentIndex();
+    goog.asserts.assert(variant.audio.segmentIndex != null,
+        'Null segmentIndex!');
+
+    const firstAudioReference = variant.audio.segmentIndex.get(0);
+    const secondAudioReference = variant.audio.segmentIndex.get(1);
+    const thirdAudioReference = variant.audio.segmentIndex.get(2);
+
+    expect(firstAudioReference).not.toBe(null);
+    expect(secondAudioReference).not.toBe(null);
+    expect(thirdAudioReference).not.toBe(null);
+
+    if (firstAudioReference) {
+      expect(firstAudioReference.getStatus()).toBe(available);
+    }
+    if (secondAudioReference) {
+      expect(secondAudioReference.getStatus()).toBe(missing);
+    }
+    if (thirdAudioReference) {
+      expect(thirdAudioReference.getStatus()).toBe(available);
+    }
+  });
+
   it('Disable audio does not create audio streams', async () => {
     const master = [
       '#EXTM3U\n',
