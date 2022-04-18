@@ -649,7 +649,7 @@ describe('Player', () => {
 
       const waiter = new shaka.test.Waiter(eventManager)
           .setPlayer(player)
-          .setTimeoutAfter(10);
+          .timeoutAfter(10);
       const canPlayThrough = waiter.waitForEvent(video, 'canplaythrough');
 
       await player.load('test:sintel_compiled', 5);
