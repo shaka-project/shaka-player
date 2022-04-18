@@ -305,7 +305,7 @@ shaka.test.Waiter = class {
     let buffered;
     if (this.player_) {
       buffered = player.getBufferedInfo();
-    else if (this.mediaSourceEngine_) {
+    } else if (this.mediaSourceEngine_) {
       buffered = mediaSourceEngine.getBufferedInfo();
     } else {
       buffered = shaka.media.TimeRangesUtils.getBufferedInfo(
