@@ -15,6 +15,12 @@ shaka.test.Waiter = class {
 
     /** @private {number} */
     this.timeoutSeconds_ = 5;
+
+    /** @private {shaka.Player} */
+    this.player_ = null;
+
+    /** @private {shaka.media.MediaSourceEngine} */
+    this.mediaSourceEngine_ = null;
   }
 
   // TODO: Consider replacing this with a settings argument on the individual
@@ -40,6 +46,30 @@ shaka.test.Waiter = class {
    */
   failOnTimeout(shouldFailOnTimeout) {
     this.failOnTimeout_ = shouldFailOnTimeout;
+    return this;
+  }
+
+  /**
+   * For tests with access to MediaSourceEngine, this can provide better
+   * debugging for buffered ranges on failure.
+   *
+   * @param {shaka.Player} player
+   * @return {!shaka.test.Waiter}
+   */
+  setPlayer(player) {
+    this.player_ = player;
+    return this;
+  }
+
+  /**
+   * For tests with access to MediaSourceEngine, this can provide better
+   * debugging for buffered ranges on failure.
+   *
+   * @param {shaka.media.MediaSourceEngine} mediaSourceEngine
+   * @return {!shaka.test.Waiter}
+   */
+  setMediaSourceEngine(mediaSourceEngine) {
+    this.mediaSourceEngine_ = mediaSourceEngine;
     return this;
   }
 
@@ -100,7 +130,6 @@ shaka.test.Waiter = class {
 
     return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
   }
-
 
   /**
    * Wait for the video playhead to reach a certain target time.
@@ -273,8 +302,16 @@ shaka.test.Waiter = class {
    * @private
    */
   logDebugInfoForMedia_(error, mediaElement) {
-    const buffered =
-        shaka.media.TimeRangesUtils.getBufferedInfo(mediaElement.buffered);
+    let buffered;
+    if (this.player_) {
+      buffered = player.getBufferedInfo();
+    else if (this.mediaSourceEngine_) {
+      buffered = mediaSourceEngine.getBufferedInfo();
+    } else {
+      buffered = shaka.media.TimeRangesUtils.getBufferedInfo(
+          mediaElement.buffered);
+    }
+
     error.message += '\n' +
         `current time: ${mediaElement.currentTime}\n` +
         `duration: ${mediaElement.duration}\n` +

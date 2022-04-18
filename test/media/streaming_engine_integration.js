@@ -68,6 +68,7 @@ describe('StreamingEngine', () => {
         video,
         new shaka.test.FakeClosedCaptionParser(),
         new shaka.test.FakeTextDisplayer());
+    waiter.setMediaSourceEngine(mediaSourceEngine);
   });
 
   afterEach(async () => {
@@ -295,10 +296,6 @@ describe('StreamingEngine', () => {
           // Actually a success!
         } else {
           // This error has debugging info to help explain the state.
-          // Get buffering info from MediaSourceEngine to add to that.
-          const bufferedInfo = mediaSourceEngine.getBufferedInfo();
-          error.message += `bufferedInfo: ${JSON.stringify(bufferedInfo)}\n`;
-
           throw error;
         }
       }
