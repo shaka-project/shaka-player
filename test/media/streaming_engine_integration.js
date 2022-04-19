@@ -283,22 +283,7 @@ describe('StreamingEngine', () => {
       await waiter.timeoutAfter(10).waitForMovement(video);
       video.playbackRate = 10;
 
-      // Something weird happens on some platforms (variously Chromecast, legacy
-      // Edge, and Safari) where the playhead can go past duration.
-      // To cope with this, don't always fail on timeout.  If the video never
-      // got flagged as "ended", check for the playhead to be near or past the
-      // end.
-      try {
-        await waiter.timeoutAfter(30).waitForEnd(video);
-        // eslint-disable-next-line no-restricted-syntax
-      } catch (error) {
-        if (video.currentTime >= video.duration - 0.1) {
-          // Actually a success!
-        } else {
-          // This error has debugging info to help explain the state.
-          throw error;
-        }
-      }
+      await waiter.timeoutAfter(30).waitForEnd(video);
     });
 
     it('can handle buffered seeks', async () => {
