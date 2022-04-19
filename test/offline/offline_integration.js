@@ -35,6 +35,7 @@ filterDescribe('Offline', supportsStorage, () => {
 
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
+    waiter.setPlayer(player);
 
     // Make sure we are starting with a blank slate.
     await shaka.offline.Storage.deleteAll();
