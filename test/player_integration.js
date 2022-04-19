@@ -37,6 +37,7 @@ describe('Player', () => {
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
+    waiter.setPlayer(player);
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake((event) => {
@@ -595,7 +596,9 @@ describe('Player', () => {
       eventManager.listen(video, 'waiting', checkOnEvent);
       eventManager.listen(player, 'trackschanged', checkOnEvent);
 
-      const waiter = (new shaka.test.Waiter(eventManager)).timeoutAfter(10);
+      const waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
+          .timeoutAfter(10);
       const canPlayThrough = waiter.waitForEvent(video, 'canplaythrough');
 
       await player.load('test:sintel_compiled', 5);
@@ -662,7 +665,9 @@ describe('Player', () => {
       eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
       /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager)
-          .timeoutAfter(20).failOnTimeout(true);
+          .setPlayer(player)
+          .timeoutAfter(20)
+          .failOnTimeout(true);
       await waiter.waitForEnd(video);
 
       // The stream should have transitioned to VOD by now.
@@ -687,6 +692,7 @@ describe('Player', () => {
       player.addEventListener('buffering', Util.spyFunc(onBuffering));
 
       waiter = new shaka.test.Waiter(eventManager)
+          .setPlayer(player)
           .timeoutAfter(10)
           .failOnTimeout(true);
     });
@@ -877,7 +883,9 @@ describe('Player', () => {
 
       /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager)
-          .timeoutAfter(1).failOnTimeout(true);
+          .setPlayer(player)
+          .timeoutAfter(1)
+          .failOnTimeout(true);
 
       await waiter.waitForPromise(abrEnabled, 'AbrManager enabled');
 
@@ -897,7 +905,9 @@ describe('Player', () => {
 
       /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager)
-          .timeoutAfter(1).failOnTimeout(true);
+          .setPlayer(player)
+          .timeoutAfter(1)
+          .failOnTimeout(true);
 
       await waiter.waitForPromise(abrEnabled, 'AbrManager enabled');
 

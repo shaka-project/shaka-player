@@ -262,11 +262,12 @@ describe('DrmEngine', () => {
       video.play();
 
       const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(15);
+      waiter.setMediaSourceEngine(mediaSourceEngine);
       await waiter.waitForMovement(video);
 
       // Something should have played by now.
       expect(video.readyState).toBeGreaterThan(1);
       expect(video.currentTime).toBeGreaterThan(0);
-    });
-  }  // describe('basic flow')
+    });  // describe('basic flow')
+  }
 });

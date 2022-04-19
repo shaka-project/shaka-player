@@ -15,6 +15,12 @@ shaka.test.Waiter = class {
 
     /** @private {number} */
     this.timeoutSeconds_ = 5;
+
+    /** @private {shaka.Player} */
+    this.player_ = null;
+
+    /** @private {shaka.media.MediaSourceEngine} */
+    this.mediaSourceEngine_ = null;
   }
 
   // TODO: Consider replacing this with a settings argument on the individual
@@ -40,6 +46,30 @@ shaka.test.Waiter = class {
    */
   failOnTimeout(shouldFailOnTimeout) {
     this.failOnTimeout_ = shouldFailOnTimeout;
+    return this;
+  }
+
+  /**
+   * For tests with access to MediaSourceEngine, this can provide better
+   * debugging for buffered ranges on failure.
+   *
+   * @param {shaka.Player} player
+   * @return {!shaka.test.Waiter}
+   */
+  setPlayer(player) {
+    this.player_ = player;
+    return this;
+  }
+
+  /**
+   * For tests with access to MediaSourceEngine, this can provide better
+   * debugging for buffered ranges on failure.
+   *
+   * @param {shaka.media.MediaSourceEngine} mediaSourceEngine
+   * @return {!shaka.test.Waiter}
+   */
+  setMediaSourceEngine(mediaSourceEngine) {
+    this.mediaSourceEngine_ = mediaSourceEngine;
     return this;
   }
 
@@ -100,7 +130,6 @@ shaka.test.Waiter = class {
 
     return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
   }
-
 
   /**
    * Wait for the video playhead to reach a certain target time.
@@ -255,7 +284,7 @@ shaka.test.Waiter = class {
 
       // Improve the error message with media-specific debug info.
       if (target instanceof HTMLMediaElement) {
-        this.logDebugInfoForMedia_(error.message, target);
+        this.logDebugInfoForMedia_(error, target);
       }
 
       // Reject or resolve based on our settings.
@@ -268,20 +297,29 @@ shaka.test.Waiter = class {
   }
 
   /**
-   * @param {string} message
+   * @param {!Error} error
    * @param {!HTMLMediaElement} mediaElement
    * @private
    */
-  logDebugInfoForMedia_(message, mediaElement) {
-    const buffered =
-        shaka.media.TimeRangesUtils.getBufferedInfo(mediaElement.buffered);
-    shaka.log.error(message,
-        'current time', mediaElement.currentTime,
-        'duration', mediaElement.duration,
-        'ready state', mediaElement.readyState,
-        'playback rate', mediaElement.playbackRate,
-        'paused', mediaElement.paused,
-        'ended', mediaElement.ended,
-        'buffered', buffered);
+  logDebugInfoForMedia_(error, mediaElement) {
+    let buffered;
+    if (this.player_) {
+      buffered = this.player_.getBufferedInfo();
+    } else if (this.mediaSourceEngine_) {
+      buffered = this.mediaSourceEngine_.getBufferedInfo();
+    } else {
+      buffered = shaka.media.TimeRangesUtils.getBufferedInfo(
+          mediaElement.buffered);
+    }
+
+    error.message += '\n' +
+        `current time: ${mediaElement.currentTime}\n` +
+        `duration: ${mediaElement.duration}\n` +
+        `ready state: ${mediaElement.readyState}\n` +
+        `playback rate: ${mediaElement.playbackRate}\n` +
+        `paused: ${mediaElement.paused}\n` +
+        `ended: ${mediaElement.ended}\n` +
+        `buffered: ${JSON.stringify(buffered)}\n`;
+    shaka.log.error(error.message);
   }
 };
