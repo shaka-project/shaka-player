@@ -39,6 +39,7 @@ describe('Player', () => {
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
+    waiter.setPlayer(player);
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake((event) => fail(event.detail));
