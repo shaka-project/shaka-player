@@ -262,7 +262,11 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
       video.play();
-      await waiter.timeoutAfter(90).waitForEnd(video);
+      // The overall test timeout is 120 seconds, and the content is 60
+      // seconds.  It should be possible to complete this test in 100 seconds,
+      // and if not, we want the error thrown to be within the overall test's
+      // timeout window.
+      await waiter.timeoutAfter(100).waitForEnd(video);
     });
 
     it('plays at high playback rates', async () => {
@@ -293,9 +297,9 @@ describe('StreamingEngine', () => {
       video.play();
 
       // After 35 seconds seek back 10 seconds into the first Period.
-      await waiter.timeoutAfter(60).waitUntilPlayheadReaches(video, 35);
+      await waiter.timeoutAfter(80).waitUntilPlayheadReaches(video, 35);
       video.currentTime = 25;
-      await waiter.timeoutAfter(60).waitForEnd(video);
+      await waiter.timeoutAfter(80).waitForEnd(video);
     });
 
     it('can handle unbuffered seeks', async () => {
