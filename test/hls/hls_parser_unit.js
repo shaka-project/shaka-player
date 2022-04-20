@@ -1138,6 +1138,69 @@ describe('HlsParser', () => {
     expect(actual).toEqual(manifest);
   });
 
+  it('gets mime type of SUBTITLES from header request', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'URI="audio"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="text"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const textMedia = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.subs',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.mime('video/mp4', 'avc1');
+        });
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mp4', 'mp4a');
+        });
+      });
+      manifest.addPartialTextStream((stream) => {
+        stream.language = 'en';
+        stream.kind = TextStreamKind.SUBTITLE;
+        stream.mime('application/mp4', '');
+      });
+      manifest.sequenceMode = true;
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/text', textMedia)
+        .setResponseText('test:/main.subs', vttText)
+        .setHeaders('test:/main.subs', {
+          'content-type': 'application/mp4; foo=bar',
+        })
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
+  });
+
   it('parses manifest with FORCED SUBTITLES', async () => {
     const master = [
       '#EXTM3U\n',
