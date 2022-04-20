@@ -153,40 +153,51 @@ shaka.test.Waiter = class {
    * @return {!Promise}
    */
   waitForEnd(mediaElement) {
-    // Sometimes, the ended flag is not set, or the event does not fire,
-    // (I'm looking at **you**, Safari), so also check if we've reached the
-    // duration.
-    if (mediaElement.ended ||
-        mediaElement.currentTime >= mediaElement.duration) {
-      return Promise.resolve();
-    }
-
     // The name of what we're waiting for.
     const goalName = 'end of media';
-
-    // Cleanup on timeout.
-    const cleanup = () => {
-      this.eventManager_.unlisten(mediaElement, 'timeupdate');
-      this.eventManager_.unlisten(mediaElement, 'ended');
-    };
 
     // The conditions for success.  Don't rely on either time, or the ended
     // flag, or the ended event, specifically.  Any of these is sufficient.
     // This flexibility cuts down on test flake on Safari (currently 14) in
     // particular, where the flag might be set, but the ended event did not
-    // fire.
+    // fire.  We also see flake on Firefox (currently 99), where test playbacks
+    // sometimes stop right before duration is reached.  (Duration 60.01, audio
+    // buffered to 60.01, video buffered to exactly 60.)
+    const hasEnded = () => {
+      return mediaElement.currentTime >= mediaElement.duration - 0.1 ||
+          mediaElement.ended;
+    };
+
+    if (hasEnded()) {
+      return Promise.resolve();
+    }
+
+    // Cleanup on timeout.
+    let timer = null;
+    const cleanup = () => {
+      if (timer) {
+        timer.stop();
+      }
+      this.eventManager_.unlisten(mediaElement, 'timeupdate');
+      this.eventManager_.unlisten(mediaElement, 'ended');
+    };
+
     const p = new Promise((resolve) => {
-      this.eventManager_.listen(mediaElement, 'timeupdate', () => {
-        if (mediaElement.currentTime >= mediaElement.duration ||
-            mediaElement.ended) {
+      const check = () => {
+        if (hasEnded()) {
           cleanup();
           resolve();
         }
-      });
-      this.eventManager_.listen(mediaElement, 'ended', () => {
-        cleanup();
-        resolve();
-      });
+      };
+
+      // In Firefox 99, there appears to be some bug in the browser preventing
+      // events from being triggered at the end of the presentation.  So we
+      // check for the end once per second.  Without this, StreamingEngine
+      // integration tests were failing.
+      timer = new shaka.util.Timer(check);
+      timer.tickEvery(/* seconds= */ 1);
+      this.eventManager_.listen(mediaElement, 'timeupdate', check);
+      this.eventManager_.listen(mediaElement, 'ended', check);
     });
 
     return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
