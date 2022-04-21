@@ -88,7 +88,7 @@ module.exports = (config) => {
       //   Promise polyfill, required since we test uncompiled code on IE11
       'node_modules/es6-promise-polyfill/promise.js',
       //   Babel polyfill, required for async/await
-      'node_modules/babel-polyfill/dist/polyfill.js',
+      'node_modules/@babel/polyfill/dist/polyfill.js',
       //   TextDecoder polyfill, required for TextDecoder/TextEncoder on IE and
       //   legacy Edge
       //   eslint-disable-next-line max-len
@@ -261,7 +261,7 @@ module.exports = (config) => {
 
       babelPreprocessor: {
         options: {
-          presets: ['env'],
+          presets: ['@babel/preset-env'],
           // Add source maps so that backtraces refer to the original code.
           // Babel will output inline source maps, and the 'sourcemap'
           // preprocessor will read them and feed them to Karma.  Karma will
