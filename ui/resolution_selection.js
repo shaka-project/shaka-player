@@ -61,9 +61,6 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     });
 
     this.updateResolutionSelection_();
-
-    // Set up all the strings in the user's preferred language.
-    this.updateLocalizedStrings_();
   }
 
 
@@ -71,27 +68,6 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   updateResolutionSelection_() {
     /** @type {!Array.<shaka.extern.Track>} */
     let tracks = this.player.getVariantTracks();
-
-    // Hide resolution menu and button for audio-only content and src= content
-    // without resolution information.
-    // TODO: for audio-only content, this should be a bitrate selection menu
-    // instead.
-    if (tracks.length && !tracks[0].height) {
-      shaka.ui.Utils.setDisplay(this.menu, false);
-      shaka.ui.Utils.setDisplay(this.button, false);
-      return;
-    }
-    // Otherwise, restore it.
-    shaka.ui.Utils.setDisplay(this.button, true);
-
-    tracks.sort((t1, t2) => {
-      // We have already screened for audio-only content, but the compiler
-      // doesn't know that.
-      goog.asserts.assert(t1.height != null, 'Null height');
-      goog.asserts.assert(t2.height != null, 'Null height');
-
-      return t2.height - t1.height;
-    });
 
     // If there is a selected variant track, then we filter out any tracks in
     // a different language.  Then we use those remaining tracks to display the
@@ -104,13 +80,30 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
               track.channelsCount == selectedTrack.channelsCount);
     }
 
-    // Remove duplicate entries with the same height.  This can happen if
-    // we have multiple resolutions of audio.  Pick an arbitrary one.
+    // Remove duplicate entries with the same resolution or quality depending
+    // on content type.  Pick an arbitrary one.
     tracks = tracks.filter((track, idx) => {
-      // Keep the first one with the same height.
-      const otherIdx = tracks.findIndex((t) => t.height == track.height);
+      // Keep the first one with the same height or bandwidth.
+      const otherIdx = this.player.isAudioOnly() ?
+          tracks.findIndex((t) => t.bandwidth == track.bandwidth) :
+          tracks.findIndex((t) => t.height == track.height);
       return otherIdx == idx;
     });
+
+    // Sort the tracks by height or bandwith depending on content type.
+    if (this.player.isAudioOnly()) {
+      tracks.sort((t1, t2) => {
+        goog.asserts.assert(t1.bandwidth != null, 'Null bandwidth');
+        goog.asserts.assert(t2.bandwidth != null, 'Null bandwidth');
+        return t2.bandwidth - t1.bandwidth;
+      });
+    } else {
+      tracks.sort((t1, t2) => {
+        goog.asserts.assert(t1.height != null, 'Null height');
+        goog.asserts.assert(t2.height != null, 'Null height');
+        return t2.height - t1.height;
+      });
+    }
 
     // Remove old shaka-resolutions
     // 1. Save the back to menu button
@@ -133,7 +126,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           () => this.onTrackSelected_(track));
 
       const span = shaka.util.Dom.createHTMLElement('span');
-      span.textContent = track.height + 'p';
+      span.textContent = this.player.isAudioOnly() ?
+          Math.round(track.bandwidth / 1000) + ' kbits/s' : track.height + 'p';
       button.appendChild(span);
 
       if (!abrEnabled && track == selectedTrack) {
@@ -179,6 +173,8 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
     this.controls.dispatchEvent(
         new shaka.util.FakeEvent('resolutionselectionupdated'));
+
+    this.updateLocalizedStrings_();
   }
 
 
@@ -200,13 +196,15 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
    */
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
+    const locId = this.player.isAudioOnly() ?
+        LocIds.QUALITY : LocIds.RESOLUTION;
 
-    this.button.ariaLabel = this.localization.resolve(LocIds.RESOLUTION);
-    this.backButton.ariaLabel = this.localization.resolve(LocIds.RESOLUTION);
+    this.button.ariaLabel = this.localization.resolve(locId);
+    this.backButton.ariaLabel = this.localization.resolve(locId);
     this.backSpan.textContent =
-        this.localization.resolve(LocIds.RESOLUTION);
+        this.localization.resolve(locId);
     this.nameSpan.textContent =
-        this.localization.resolve(LocIds.RESOLUTION);
+        this.localization.resolve(locId);
     this.abrOnSpan_.textContent =
         this.localization.resolve(LocIds.AUTO_QUALITY);
 
