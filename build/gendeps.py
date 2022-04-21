@@ -24,17 +24,6 @@ import sys
 import shakaBuildHelpers
 
 
-# The relative path in each of these is relative to Closure's base.js, which
-# lives at node_modules/google-closure-library/closure/goog/base.js
-deps_args = [
-    '--root_with_prefix=lib ../../../../lib',
-    '--root_with_prefix=ui ../../../../ui',
-    '--root_with_prefix=third_party ../../../../third_party',
-    '--root_with_prefix=dist ../../../../dist',
-    '--root_with_prefix=demo ../../../../demo',
-]
-
-
 def main(_):
   """Generates the uncompiled dependencies files."""
   # Update node modules if needed.
@@ -50,13 +39,27 @@ def main(_):
   except OSError:
     pass
   os.chdir(base)
-  deps_writer = os.path.join(
-      'node_modules', 'google-closure-library',
-      'closure', 'bin', 'build', 'depswriter.py')
+
+  make_deps = shakaBuildHelpers.get_node_binary(
+      'google-closure-deps', 'closure-make-deps')
 
   try:
-    cmd_line = [sys.executable or 'python', deps_writer] + deps_args
+    cmd_line = make_deps + [
+      # Folders to search for sources using goog.require/goog.provide
+      '-r', 'demo', 'lib', 'ui', 'third_party',
+      # Individual files to add to those
+      '-f', 'dist/locales.js',
+      # The path to the folder containing the Closure library's base.js
+      '--closure-path', 'node_modules/google-closure-library/closure/goog',
+    ]
     deps = shakaBuildHelpers.execute_get_output(cmd_line)
+
+    # This command doesn't use exit codes for some stupid reason.
+    # TODO: Remove when https://github.com/google/closure-library/issues/1162
+    # is resolved and we have upgraded.
+    if len(deps) == 0:
+      return 1
+
     with open(os.path.join(base, 'dist', 'deps.js'), 'wb') as f:
       f.write(deps)
     return 0
