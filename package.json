@@ -39,7 +39,7 @@
     "karma-ie-launcher": "^1.0.0",
     "karma-jasmine": "^3.3.1",
     "karma-jasmine-ajax": "^0.1.13",
-    "karma-local-wd-launcher": "^1.4.1",
+    "karma-local-wd-launcher": "^1.6.1",
     "karma-opera-launcher": "^1.0.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "0.0.32",
