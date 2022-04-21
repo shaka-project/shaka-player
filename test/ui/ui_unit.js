@@ -668,7 +668,7 @@ describe('UI', () => {
 
         expect(qualityOptions).toEqual(['200 kbits/s', '100 kbits/s']);
       });
-      
+
       /**
        * Use internals to update the resolution menu.  Our fake manifest can
        * cause problems with startup where the Player will get stuck using
