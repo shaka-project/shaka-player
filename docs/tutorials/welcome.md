@@ -35,6 +35,8 @@ To get the sources and compile the library, you will need:
     * _NOTE: A local web server is required because browsers place restrictions
       on applications from file:/// URLs._
 
+If you just want to compile for export to other projects, you might consider compiling through a docker container. (see compile instructions)
+
 To quickly install these prerequisites on Ubuntu or Debian, you can run this
 script:
 
@@ -60,6 +62,12 @@ cd shaka-player
 
 ```sh
 python build/all.py
+```
+
+Alternatively you can use a docker container:
+```sh
+cd build/docker
+docker-compose run --rm shaka-compiler
 ```
 
 The output is:

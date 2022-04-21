@@ -113,3 +113,18 @@ jobs:
             --reporters spec --spec-hide-passed \
             --drm \
             ${{ matrix.extra_flags }}
+
+  build_in_docker:
+    # Don't waste time doing a full matrix of test runs when there was an
+    # obvious linter error.
+    needs: lint
+    name: Docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - name: Docker
+        run: docker-compose -f build/docker/docker-compose.yml up
