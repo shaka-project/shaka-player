@@ -110,7 +110,7 @@ jobs:
         run: |
           # This is the same as the version tag, but with dots replaced by
           # dashes.  For example, v3.2.2 would have the subdomain v3-2-2.
-          APPSPOT_SUBDOMAIN=$( echo ${{ needs.release.outputs.tag_name }} | sed -e 's/\./-/' )
+          APPSPOT_SUBDOMAIN=$( echo ${{ needs.release.outputs.tag_name }} | sed -e 's/\./-/g' )
           echo APPSPOT_SUBDOMAIN=$APPSPOT_SUBDOMAIN >> $GITHUB_ENV
 
           # "Promoting" an appspot deployment makes it the default which shows
