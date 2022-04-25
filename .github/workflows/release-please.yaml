@@ -53,6 +53,8 @@ jobs:
     if: needs.release.outputs.release_created
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: main
       - name: Tag the main branch
         run: |
           # Emulate the actions bot.
