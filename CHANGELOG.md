@@ -1,5 +1,22 @@
 # Changelog
 
+### [3.3.3](https://github.com/shaka-project/shaka-player/compare/v3.3.2...v3.3.3) (2022-04-25)
+
+
+### Bug Fixes
+
+* **cea:** make a more robust CEA MP4 parser ([#3965](https://github.com/shaka-project/shaka-player/issues/3965)) ([7281e0f](https://github.com/shaka-project/shaka-player/commit/7281e0f229bcc004b64ad3b899ad16131541036b))
+* **cmcd:** Fix Symbol usage in CMCD on Xbox One ([#4073](https://github.com/shaka-project/shaka-player/issues/4073)) ([c638b4f](https://github.com/shaka-project/shaka-player/commit/c638b4fe882da5b0331ec0ad3ba3648fa63cb786)), closes [#4072](https://github.com/shaka-project/shaka-player/issues/4072)
+* **dash:** Account for bandwidth before filtering text stream ([#3765](https://github.com/shaka-project/shaka-player/issues/3765)) ([edd58fc](https://github.com/shaka-project/shaka-player/commit/edd58fc9a5e0461d69fed635433fc7d0ea7e31ee)), closes [#3724](https://github.com/shaka-project/shaka-player/issues/3724)
+* **dash:** Fix performance regression ([#4064](https://github.com/shaka-project/shaka-player/issues/4064)) ([bfac645](https://github.com/shaka-project/shaka-player/commit/bfac645e589190d002f91a57b68941ab68584941))
+* **demo:** Fix default demo index versions ([#4116](https://github.com/shaka-project/shaka-player/issues/4116)) ([19c1e3c](https://github.com/shaka-project/shaka-player/commit/19c1e3c22997f9b5c6756642aa524ab23875dae0))
+* Fix exceptions when quickly shutting down src= on Safari ([#4088](https://github.com/shaka-project/shaka-player/issues/4088)) ([2e10748](https://github.com/shaka-project/shaka-player/commit/2e107484e3975f17b9d9a99f6074b804aab05f04)), closes [#4087](https://github.com/shaka-project/shaka-player/issues/4087)
+* Fix playRangeEnd for certain content ([#4068](https://github.com/shaka-project/shaka-player/issues/4068)) ([11f998d](https://github.com/shaka-project/shaka-player/commit/11f998d97254a1b9ca27b2a461bf850db2c76eaa)), closes [#4026](https://github.com/shaka-project/shaka-player/issues/4026)
+* **performance:** Eliminate use of ES6 generators ([#4092](https://github.com/shaka-project/shaka-player/issues/4092)) ([5bb5502](https://github.com/shaka-project/shaka-player/commit/5bb5502a194154c6277ac7fb48addd314c37ebdb)), closes [#4062](https://github.com/shaka-project/shaka-player/issues/4062)
+* Select first of identical audio streams ([#3869](https://github.com/shaka-project/shaka-player/issues/3869)) ([603fdc1](https://github.com/shaka-project/shaka-player/commit/603fdc16014fad6a0cde520675b4c2359877c62b))
+* **ttml:** Center subtitles by default ([#4023](https://github.com/shaka-project/shaka-player/issues/4023)) ([02604ab](https://github.com/shaka-project/shaka-player/commit/02604abb3d831d33cbe14f6b8a7808e29f419cbf))
+* **UI:** Add cursor pointer to range elements ([#4059](https://github.com/shaka-project/shaka-player/issues/4059)) ([2ca947e](https://github.com/shaka-project/shaka-player/commit/2ca947ecad3ca208a379185e916cef7189b605bf)), closes [#3220](https://github.com/shaka-project/shaka-player/issues/3220)
+
 ## [3.3.2](https://github.com/shaka-project/shaka-player/compare/v3.3.1...v3.3.2) (2022-02-16)
 
 
