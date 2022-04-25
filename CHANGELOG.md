@@ -1,5 +1,20 @@
 # Changelog
 
+### [3.2.5](https://github.com/shaka-project/shaka-player/compare/v3.2.4...v3.2.5) (2022-04-25)
+
+
+### Bug Fixes
+
+* **cea:** make a more robust CEA MP4 parser ([#3965](https://github.com/shaka-project/shaka-player/issues/3965)) ([70cbd25](https://github.com/shaka-project/shaka-player/commit/70cbd250044150ccb396f21015bd7fb7a79c7a72))
+* **dash:** Account for bandwidth before filtering text stream ([#3765](https://github.com/shaka-project/shaka-player/issues/3765)) ([c97438a](https://github.com/shaka-project/shaka-player/commit/c97438ae03ffd44382b2e682b9e55f311385f788)), closes [#3724](https://github.com/shaka-project/shaka-player/issues/3724)
+* **dash:** Fix performance regression ([#4064](https://github.com/shaka-project/shaka-player/issues/4064)) ([e313815](https://github.com/shaka-project/shaka-player/commit/e313815ead460f3c3bc0005252c171dcaa37a103))
+* Fix exceptions when quickly shutting down src= on Safari ([#4088](https://github.com/shaka-project/shaka-player/issues/4088)) ([8ed53a3](https://github.com/shaka-project/shaka-player/commit/8ed53a35e29041b7361dfa5d80acbe33d12026fc)), closes [#4087](https://github.com/shaka-project/shaka-player/issues/4087)
+* Fix playRangeEnd for certain content ([#4068](https://github.com/shaka-project/shaka-player/issues/4068)) ([65c1a72](https://github.com/shaka-project/shaka-player/commit/65c1a7231ad9e609198f6ff527d3a4efbe01aace)), closes [#4026](https://github.com/shaka-project/shaka-player/issues/4026)
+* **performance:** Eliminate use of ES6 generators ([#4092](https://github.com/shaka-project/shaka-player/issues/4092)) ([e6912da](https://github.com/shaka-project/shaka-player/commit/e6912dac15807fca4537be080c0f917f30399d51)), closes [#4062](https://github.com/shaka-project/shaka-player/issues/4062)
+* Select first of identical audio streams ([#3869](https://github.com/shaka-project/shaka-player/issues/3869)) ([8ee0edb](https://github.com/shaka-project/shaka-player/commit/8ee0edbb8fb9a342a19253845af3e98de9db9f77))
+* **ttml:** Center subtitles by default ([#4023](https://github.com/shaka-project/shaka-player/issues/4023)) ([9944e93](https://github.com/shaka-project/shaka-player/commit/9944e93f58f860913441d718a94d6d5411771f71))
+* **UI:** Add cursor pointer to range elements ([#4059](https://github.com/shaka-project/shaka-player/issues/4059)) ([c71ca9c](https://github.com/shaka-project/shaka-player/commit/c71ca9c3c76df006ae1aad617176da71b9bff8f3)), closes [#3220](https://github.com/shaka-project/shaka-player/issues/3220)
+
 ## [3.2.4](https://github.com/shaka-project/shaka-player/compare/v3.2.3...v3.2.4) (2022-02-17)
 
 
