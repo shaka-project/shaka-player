@@ -263,8 +263,8 @@
 
 .shaka-spinner {
   /* This uses the same trickery as the big play button define
-  the spinner's width and height. See .shaka-play-button
-  for the detailed explanation. */
+   * the spinner's width and height. See .shaka-play-button
+   * for the detailed explanation. */
 
   /* For the padding thing to work, spinner div needs to be an
   overlay-parent and spinner svg - an overlay child. */
@@ -272,11 +272,11 @@
 
   margin: 0;
   box-sizing: border-box;
-  padding: @spinner-size-percentage / 2;
+  padding: calc(@spinner-size-percentage / 2);
   width: 0;
   height: 0;
 
   /* Add a bit of a white shadow to keep our black spinner visible
-  on a black background. */
+   * on a black background. */
   filter: drop-shadow(0 0 2px rgba(255 255 255 / 50%));
 }
