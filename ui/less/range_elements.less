@@ -39,7 +39,7 @@
   .overlay-parent();
 
   /* Vertical margins to occupy the same space as the thumb. */
-  margin: (@thumb-size - @track-height)/2 6px;
+  margin: calc((@thumb-size - @track-height) / 2) 6px;
 
   /* Smaller height to contain the background for the virtual track. */
   height: @track-height;
@@ -109,7 +109,7 @@
 
   /* Position the top of the range element so that it is centered on the
    * container. Note that the container is actually smaller than the thumb. */
-  top: (@track-height - @thumb-size) / 2;
+  top: calc((@track-height - @thumb-size) / 2);
 
   /* Make sure clicking at the very top of the bar still takes effect and is not
    * confused with clicking the video to play/pause it. */
