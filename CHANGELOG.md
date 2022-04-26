@@ -1,5 +1,14 @@
 # Changelog
 
+### [3.2.6](https://github.com/shaka-project/shaka-player/compare/v3.2.5...v3.2.6) (2022-04-26)
+
+
+### Bug Fixes
+
+* Add missing module export in generated typescript defs ([#4163](https://github.com/shaka-project/shaka-player/issues/4163)) ([3dc10d4](https://github.com/shaka-project/shaka-player/commit/3dc10d406f15a8b513ae2fc339e15738980acb90))
+* **css:** Fix missing % in calculation ([#4157](https://github.com/shaka-project/shaka-player/issues/4157)) ([16eefe2](https://github.com/shaka-project/shaka-player/commit/16eefe231c57397a67676fb379b99d90fe5252e8))
+* **css:** Fix missing calc() statements ([#4156](https://github.com/shaka-project/shaka-player/issues/4156)) ([db22e99](https://github.com/shaka-project/shaka-player/commit/db22e9989bf3df84702fea37a686f0d374811b9b)), closes [#4155](https://github.com/shaka-project/shaka-player/issues/4155)
+
 ### [3.2.5](https://github.com/shaka-project/shaka-player/compare/v3.2.4...v3.2.5) (2022-04-25)
 
 
