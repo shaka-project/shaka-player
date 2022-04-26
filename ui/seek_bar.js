@@ -75,7 +75,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     });
 
     /**
-     * When user is scrubbing the seek bar - we should pause the video - see https://git.io/JUhHG
+     * When user is scrubbing the seek bar - we should pause the video - see
+     * https://github.com/google/shaka-player/pull/2898#issuecomment-705229215
      * but will conditionally pause or play the video after scrubbing
      * depending on its previous state
      *
