@@ -102,6 +102,8 @@ def GenerateTsDefs(inputs, output):
     f.write(license_header)
     f.write(b'\n')
     f.write(contents)
+    f.write(b'\n')
+    f.write('export default shaka;'.encode(encoding='utf-8'))
 
 
 def CreateParser():
