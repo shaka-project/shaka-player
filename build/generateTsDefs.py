@@ -103,7 +103,7 @@ def GenerateTsDefs(inputs, output):
     f.write(b'\n')
     f.write(contents)
     f.write(b'\n')
-    f.write('export default shaka;'.encode(encoding='utf-8'))
+    f.write(b'export default shaka;\n')
 
 
 def CreateParser():
