@@ -97,13 +97,13 @@ LcevcDil.SupportObject.SupportError;
  *
  * @description LCEVC DIL Custom Config that can be passed
  * through the constructor.
- * @property {number} logLevel // LogLevel for LCEVC DIl Logs. Defaults to 0.
- * @property {boolean} dps // The dynamic performance scaling
- * or DPS checks and disable LCEVC for some time.
+ * @property {!number} logLevel for LCEVC DIl Logs. Defaults to 0.
+ * @property {!boolean} dps or dynamic performance scaling
+ * checks and disable LCEVC for some time.
  * If it is triggered again in a short period of time, the disabled
  * time will be higher and if it is done in three times in a row the LCEVC
  * Dil will always be disabled for that playback session. Defaults to true.
- * @property {boolean} logo // LCCEVC Logo placed on the top right hand corner
+ * @property {!boolean} logo is placed on the top right hand corner
  * which only appears when the LCEVC enahanced Frames are being rendered.
  * Defaults to true for the lib but is forced to false in this integration
  * unless explicitly set to true through config.
