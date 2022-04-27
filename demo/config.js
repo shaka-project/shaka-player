@@ -341,7 +341,9 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.OfflineConfiguration');
     this.addSection_(MessageIds.OFFLINE_SECTION_HEADER, docLink)
         .addBoolInput_(MessageIds.USE_PERSISTENT_LICENSES,
-            'offline.usePersistentLicense');
+            'offline.usePersistentLicense')
+        .addNumberInput_(MessageIds.NUMBER_OF_PARALLEL_DOWNLOADS,
+            'offline.numberOfParallelDownloads');
   }
 
   /** @private */

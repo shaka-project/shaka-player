@@ -1110,10 +1110,7 @@ filterDescribe('Storage', storageSupport, () => {
           aRequestIsStarted.resolve();
           await promise;
 
-          // All downloads for a given stream are in the same "download group",
-          // and will be downloaded sequentially. Thus, we expect only the first
-          // download to be aborted.
-          expect(abortCheck()).toBe(i == 0 ? true : false);
+          expect(abortCheck()).toBe(true);
 
           return new ArrayBuffer(16);
         });
