@@ -189,6 +189,7 @@ describe('CastUtils', () => {
         const fakeVideoStream = {
           mimeType: 'video/mp4',
           codecs: 'avc1.42c01e',
+          drmInfos: [],
         };
         const initSegmentUrl = '/base/test/test/assets/sintel-video-init.mp4';
         const videoSegmentUrl =

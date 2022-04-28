@@ -621,6 +621,7 @@ describe('StreamingEngine', () => {
             width: 600,
             height: 400,
             type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+            drmInfos: [],
           },
           audio: {
             id: 3,
@@ -630,6 +631,7 @@ describe('StreamingEngine', () => {
             codecs: 'mp4a.40.2',
             bandwidth: 192000,
             type: shaka.util.ManifestParserUtils.ContentType.AUDIO,
+            drmInfos: [],
           },
         }],
       };
