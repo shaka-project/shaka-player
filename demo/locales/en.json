@@ -159,6 +159,7 @@
   "DEMO_NUMBER_INTEGER_WARNING": "Must be a positive integer.",
   "DEMO_NUMBER_NONZERO_DECIMAL_WARNING": "Must be a positive, nonzero number.",
   "DEMO_NUMBER_NONZERO_INTEGER_WARNING": "Must be a positive, nonzero integer.",
+  "DEMO_NUMBER_OF_PARALLEL_DOWNLOADS": "Number of parallel downloads",
   "DEMO_OBSERVE_QUALITY_CHANGES": "Observe media quality changes",
   "DEMO_OFFLINE": "Downloadable",
   "DEMO_OFFLINE_SEARCH": "Filters for assets that can be stored offline.",

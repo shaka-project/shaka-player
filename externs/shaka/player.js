@@ -1075,7 +1075,8 @@ shaka.extern.CmcdConfiguration;
  *       function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>,
  *   downloadSizeCallback: function(number):!Promise<boolean>,
  *   progressCallback: function(shaka.extern.StoredContent,number),
- *   usePersistentLicense: boolean
+ *   usePersistentLicense: boolean,
+ *   numberOfParallelDownloads: number
  * }}
  *
  * @property {function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>}
@@ -1098,6 +1099,11 @@ shaka.extern.CmcdConfiguration;
  *   license.  A network will be required to retrieve a temporary license to
  *   view.
  *   Defaults to <code>true</code>.
+ * @property {number} numberOfParallelDownloads
+ *   Number of parallel downloads.
+ *   Note: normally browsers limit to 5 request in parallel, so putting a
+ *   number higher than this will not help it download faster.
+ *   Defaults to <code>5</code>.
  * @exportDoc
  */
 shaka.extern.OfflineConfiguration;

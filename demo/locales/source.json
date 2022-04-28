@@ -639,6 +639,10 @@
     "description": "A warning on number inputs, telling the user what the expected input format is.",
     "message": "Must be a positive, nonzero integer."
   },
+  "DEMO_NUMBER_OF_PARALLEL_DOWNLOADS": {
+    "description": "The name of a configuration value.",
+    "message": "Number of parallel downloads."
+  },
   "DEMO_OBSERVE_QUALITY_CHANGES": {
     "description": "The name of a configuration value.",
     "message": "Observe media quality changes"
