@@ -1100,8 +1100,7 @@ shaka.extern.CmcdConfiguration;
  *   view.
  *   Defaults to <code>true</code>.
  * @property {number} numberOfParallelDownloads
- *   Number of parallel downloads. Putting a number other than the default can
- *   help reduce download time.
+ *   Number of parallel downloads.
  *   Note: normally browsers limit to 5 request in parallel, so putting a
  *   number higher than this will not help it download faster.
  *   Defaults to <code>5</code>.
