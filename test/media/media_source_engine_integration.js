@@ -103,6 +103,7 @@ describe('MediaSourceEngine', () => {
     return {
       mimeType: streamMetadata.mimeType,
       codecs: streamMetadata.codecs,
+      drmInfos: [],
     };
   }
 
