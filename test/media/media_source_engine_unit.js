@@ -49,10 +49,10 @@ describe('MediaSourceEngine', () => {
   const buffer2 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (2));
   const buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
 
-  const fakeVideoStream = {mimeType: 'video/foo'};
-  const fakeAudioStream = {mimeType: 'audio/foo'};
-  const fakeTextStream = {mimeType: 'text/foo'};
-  const fakeTransportStream = {mimeType: 'tsMimetype'};
+  const fakeVideoStream = {mimeType: 'video/foo', drmInfos: []};
+  const fakeAudioStream = {mimeType: 'audio/foo', drmInfos: []};
+  const fakeTextStream = {mimeType: 'text/foo', drmInfos: []};
+  const fakeTransportStream = {mimeType: 'tsMimetype', drmInfos: []};
 
   let audioSourceBuffer;
   let videoSourceBuffer;
