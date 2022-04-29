@@ -111,7 +111,6 @@ jobs:
           python build/test.py \
             --browsers "$browser" \
             --reporters spec --spec-hide-passed \
-            --drm \
             ${{ matrix.extra_flags }}
 
   build_in_docker:
