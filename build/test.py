@@ -209,8 +209,14 @@ class Launcher:
         action='store_true')
     running_commands.add_argument(
         '--drm',
-        help='Run tests that require DRM.',
+        help='Run tests that require DRM (on by default).',
+        default=True,
         action='store_true')
+    running_commands.add_argument(
+        '--no-drm', '--nodrm',
+        help='Skip tests that require DRM (opposite of --drm).',
+        dest='drm',
+        action='store_false')
     running_commands.add_argument(
         '--quarantined',
         help='Run tests that have been quarantined.',
