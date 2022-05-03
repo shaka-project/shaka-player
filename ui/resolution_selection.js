@@ -90,7 +90,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
       return otherIdx == idx;
     });
 
-    // Sort the tracks by height or bandwith depending on content type.
+    // Sort the tracks by height or bandwidth depending on content type.
     if (this.player.isAudioOnly()) {
       tracks.sort((t1, t2) => {
         goog.asserts.assert(t1.bandwidth != null, 'Null bandwidth');
