@@ -17,14 +17,8 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
-          # Without this command, the manifest file will be ignored.  At least
-          # for our initial main-branch releases using this workflow, we must
-          # use the manifest and config file.
-          command: manifest
-          config-file: .release-please-config.json
-          manifest-file: .release-please-manifest.json
-          # Make sure the player version gets updated.
-          extra-files: lib/player.js
+          # Required input to specify the release type (node package).
+          release-type: node
           # Make sure we create the PR against the correct branch.
           default-branch: ${{ github.ref_name }}
 
