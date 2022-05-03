@@ -1253,11 +1253,14 @@ shaka.extern.Thumbnail;
 
 /**
  * @typedef {{
+ *   id: string,
  *   title: string,
  *   startTime: number,
  *   endTime: number
  * }}
  *
+ * @property {string} id
+ *    The id of the chapter.
  * @property {string} title
  *    The title of the chapter.
  * @property {number} startTime
