@@ -351,7 +351,6 @@ shaka.extern.TrackList;
  *
  *   minBandwidth: number,
  *   maxBandwidth: number,
- *
  *   maxDisabledTime: number
  * }}
  *

@@ -201,8 +201,10 @@ shaka.extern.DrmInfo;
  *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm}
  * @property {number} disabledTime
  *   <i>Defaults to 0.</i> <br>
- *   Set by the Player to indicate when the variant is disabled so it's
- *   not allowed to be played by the application for an ammount of time.
+ *   0 means the variant is enabled. The Player will set this value to
+ *   the current time in seconds in order to disable the variant for an amount
+ *   of time. Once maxDisabledTime time has passed Player will set the value
+ *   to 0 to reenable it.
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
  *   True indicates that the player should use this Variant over others if user
