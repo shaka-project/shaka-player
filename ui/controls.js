@@ -53,7 +53,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.cast.CastProxy} */
     this.castProxy_ = new shaka.cast.CastProxy(
-        video, player, this.config_.castReceiverAppId);
+        video, player, this.config_.castReceiverAppId,
+        this.config_.castAndroidReceiverCompatible);
 
     /** @private {boolean} */
     this.castAllowed_ = true;
@@ -315,7 +316,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   configure(config) {
     this.config_ = config;
 
-    this.castProxy_.changeReceiverId(config.castReceiverAppId);
+    this.castProxy_.changeReceiverId(config.castReceiverAppId,
+        config.castAndroidReceiverCompatible);
 
     // Deconstruct the old layout if applicable
     if (this.seekBar_) {

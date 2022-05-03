@@ -13,6 +13,7 @@ describe('CastSender', () => {
   const originalStatusDelay = shaka.cast.CastSender.STATUS_DELAY;
 
   const fakeAppId = 'asdf';
+  const fakeAndroidReceiverCompatible = false;
   const fakeInitState = {
     manifest: null,
     player: null,
@@ -52,7 +53,8 @@ describe('CastSender', () => {
     sender = new CastSender(
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+        fakeAndroidReceiverCompatible);
   });
 
   afterEach(async () => {
@@ -87,7 +89,12 @@ describe('CastSender', () => {
       expect(sender.apiReady()).toBe(true);
       expect(sender.hasReceivers()).toBe(false);
       expect(onStatusChanged).toHaveBeenCalled();
-      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(fakeAppId);
+      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(
+          fakeAppId,
+          /* capabilities= */ [],
+          /* timeout= */ null,
+          fakeAndroidReceiverCompatible,
+          /* credentialsData= */ null);
       expect(mockCastApi.initialize).toHaveBeenCalled();
     });
 
@@ -97,7 +104,12 @@ describe('CastSender', () => {
       expect(sender.apiReady()).toBe(true);
       expect(sender.hasReceivers()).toBe(false);
       expect(onStatusChanged).toHaveBeenCalled();
-      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(fakeAppId);
+      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(
+          fakeAppId,
+          /* capabilities= */ [],
+          /* timeout= */ null,
+          fakeAndroidReceiverCompatible,
+          /* credentialsData= */ null);
       expect(mockCastApi.initialize).toHaveBeenCalled();
     });
   });
@@ -122,7 +134,8 @@ describe('CastSender', () => {
       sender = new CastSender(
           fakeAppId, Util.spyFunc(onStatusChanged),
           Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+          /* androidReceiverCompatible= */ false);
       sender.init();
       // You get an initial call to onStatusChanged when it initializes.
       expect(onStatusChanged).toHaveBeenCalledTimes(3);
@@ -256,7 +269,8 @@ describe('CastSender', () => {
     sender = new CastSender(
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+        /* androidReceiverCompatible= */ false);
     sender.init();
 
     // The sender should automatically rejoin the session, without needing
@@ -288,7 +302,8 @@ describe('CastSender', () => {
     sender = new CastSender(
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+        /* androidReceiverCompatible= */ false);
     sender.init();
 
     expect(sender.isCasting()).toBe(false);
