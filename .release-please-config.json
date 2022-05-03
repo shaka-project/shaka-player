@@ -1,9 +1,0 @@
-{
-  "last-release-sha": "c5faf244b30aa0a99af0e1a1bc7cb4340a1a9f91",
-  "packages": {
-    ".": {
-      "include-component-in-tag": false,
-      "release-as": "4.0.0"
-    }
-  }
-}
