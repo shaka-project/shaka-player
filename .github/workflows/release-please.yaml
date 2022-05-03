@@ -56,7 +56,7 @@ jobs:
   tag-main:
     runs-on: ubuntu-latest
     needs: release
-    if: needs.release.outputs.release_created
+    if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0') == false
     steps:
       - uses: actions/checkout@v2
         with:
