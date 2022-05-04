@@ -266,7 +266,7 @@ shaka.test.ManifestGenerator.Variant = class {
       /** @type {number} */
       this.bandwidth = 0;
       /** @type {number} */
-      this.disabledTime = 0;
+      this.disabledUntilTime = 0;
       /** @type {boolean} */
       this.primary = false;
       /** @type {boolean} */

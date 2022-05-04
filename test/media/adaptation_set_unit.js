@@ -179,7 +179,7 @@ describe('AdaptationSet', () => {
       audio: audio,
       bandwidth: 1024,
       id: id,
-      disabledTime: 0,
+      disabledUntilTime: 0,
       language: '',
       primary: false,
       video: video,

@@ -396,7 +396,7 @@ describe('StreamingEngine', () => {
       video: /** @type {shaka.extern.Stream} */ (alternateVideoStream),
       id: 0,
       language: 'und',
-      disabledTime: 0,
+      disabledUntilTime: 0,
       primary: false,
       bandwidth: 0,
       allowedByApplication: true,

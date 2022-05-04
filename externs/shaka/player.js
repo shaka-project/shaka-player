@@ -350,8 +350,7 @@ shaka.extern.TrackList;
  *   maxFrameRate: number,
  *
  *   minBandwidth: number,
- *   maxBandwidth: number,
- *   maxDisabledTime: number
+ *   maxBandwidth: number
  * }}
  *
  * @description
@@ -388,9 +387,6 @@ shaka.extern.TrackList;
  *   The minimum bandwidth of a variant track, in bit/sec.
  * @property {number} maxBandwidth
  *   The maximum bandwidth of a variant track, in bit/sec.
- * @property {number} maxDisabledTime
- *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
- *   is reached, in seconds.
  * @exportDoc
  */
 shaka.extern.Restrictions;
@@ -856,7 +852,8 @@ shaka.extern.ManifestConfiguration;
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
  *   dispatchAllEmsgBoxes: boolean,
- *   observeQualityChanges: boolean
+ *   observeQualityChanges: boolean,
+ *   maxDisabledTime: number
  * }}
  *
  * @description
@@ -961,6 +958,10 @@ shaka.extern.ManifestConfiguration;
  * @property {boolean} observeQualityChanges
  *   If true, monitor media quality changes and emit
  *   <code.shaka.Player.MediaQualityChangedEvent</code>.
+ * @property {number} maxDisabledTime
+ *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
+ *   is reached, in seconds.
+ *   If 0 variants will not be disabled if NETWORK HTTP_ERROR is thrown.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
