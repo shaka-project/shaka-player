@@ -902,4 +902,112 @@ describe('StreamUtils', () => {
       expect(manifest.variants[0].video.id).toBe(2);
     });
   });
+
+  describe('meetsRestrictions', () => {
+    const oldDateNow = Date.now;
+    /* @param {shaka.extern.Restrictions} */
+    const restrictions = {
+      minWidth: 10,
+      maxWidth: 20,
+      minHeight: 10,
+      maxHeight: 20,
+      minPixels: 10,
+      maxPixels: 20,
+      minFrameRate: 21,
+      maxFrameRate: 25,
+      minBandwidth: 1000,
+      maxBandwidth: 3000,
+    };
+    /* @param {{width: number, height: number}} */
+    const maxHwRes = {width: 123, height: 456};
+    /* @param {shaka.extern.Variant} */
+    let variant;
+    /* @param {boolean} */
+    let meetsRestrictionsResult;
+
+    beforeEach(() => {
+      Date.now = () => 123 * 1000;
+    });
+
+    afterEach(() => {
+      Date.now = oldDateNow;
+    });
+
+    /*
+     * @param {number} disabledUntilTime
+     */
+    const checkRestrictions = ({disabledUntilTime = 0}) => {
+      /* @param {shaka.extern.Variant} */
+      variant = {
+        id: 1,
+        language: 'es',
+        disabledUntilTime,
+        video: null,
+        audio: null,
+        primary: false,
+        bandwidth: 2000,
+        allowedByApplication: true,
+        allowedByKeySystem: true,
+        decodingInfos: [],
+      };
+      meetsRestrictionsResult = StreamUtils.meetsRestrictions(variant,
+          restrictions, maxHwRes);
+    };
+
+    describe('when disabledUntilTime > now', () => {
+      beforeEach(() => {
+        checkRestrictions({disabledUntilTime: 124});
+      });
+
+      it('does not meet the restrictions', () => {
+        expect(meetsRestrictionsResult).toBeFalsy();
+      });
+
+      it('does not reset disabledUntilTime', () => {
+        expect(variant.disabledUntilTime).toBe(124);
+      });
+    });
+
+    describe('when disabledUntilTime == now', () => {
+      beforeEach(() => {
+        checkRestrictions({disabledUntilTime: 123});
+      });
+
+      it('meets the restrictions', () => {
+        expect(meetsRestrictionsResult).toBeTruthy();
+      });
+
+      it('resets disabledUntilTime', () => {
+        expect(variant.disabledUntilTime).toBe(0);
+      });
+    });
+
+    describe('when disabledUntilTime == now', () => {
+      beforeEach(() => {
+        checkRestrictions({disabledUntilTime: 122});
+      });
+
+      it('meets the restrictions', () => {
+        expect(meetsRestrictionsResult).toBeTruthy();
+      });
+
+      it('resets disabledUntilTime', () => {
+        expect(variant.disabledUntilTime).toBe(0);
+      });
+    });
+
+    describe('when disabledUntilTime == 0', () => {
+      beforeEach(() => {
+        checkRestrictions({disabledUntilTime: 0});
+      });
+
+      it('meets the restrictions', () => {
+        expect(meetsRestrictionsResult).toBeTruthy();
+      });
+
+      it('leaves disabledUntilTime = 0', () => {
+        expect(variant.disabledUntilTime).toBe(0);
+      });
+    });
+  });
 });
