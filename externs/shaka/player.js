@@ -961,7 +961,7 @@ shaka.extern.ManifestConfiguration;
  * @property {number} maxDisabledTime
  *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
  *   is reached, in seconds.
- *   If 0 variants will not be disabled if NETWORK HTTP_ERROR is thrown.
+ *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
