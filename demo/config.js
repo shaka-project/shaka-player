@@ -306,9 +306,7 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.MIN_FRAMERATE, prefix + 'minFrameRate')
         .addNumberInput_(MessageIds.MAX_FRAMERATE, prefix + 'maxFrameRate')
         .addNumberInput_(MessageIds.MIN_BANDWIDTH, prefix + 'minBandwidth')
-        .addNumberInput_(MessageIds.MAX_BANDWIDTH, prefix + 'maxBandwidth')
-        .addNumberInput_(MessageIds.MAX_DISABLED_TIME,
-            prefix + 'maxDisabledTime');
+        .addNumberInput_(MessageIds.MAX_BANDWIDTH, prefix + 'maxBandwidth');
   }
 
   /**
@@ -392,7 +390,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DISPATCH_ALL_EMSG_BOXES,
             'streaming.dispatchAllEmsgBoxes')
         .addBoolInput_(MessageIds.OBSERVE_QUALITY_CHANGES,
-            'streaming.observeQualityChanges');
+            'streaming.observeQualityChanges')
+        .addNumberInput_(MessageIds.MAX_DISABLED_TIME,
+            'streaming.maxDisabledTime');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
