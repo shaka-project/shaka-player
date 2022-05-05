@@ -3,6 +3,7 @@
 # same as the match.
 {
     r'(?i)arti?fi?ci?ai?l': 'artificial',
+    r'(?i)bandwith': 'bandwidth',
     r'(?i)cur+ent': 'current',
     r"(?i)doens?'t": "doesn't",
     r'(?i)ful+screen': 'fullscreen',
