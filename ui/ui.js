@@ -218,6 +218,7 @@ shaka.ui.Overlay = class {
       addBigPlayButton: false,
       customContextMenu: false,
       castReceiverAppId: '',
+      castAndroidReceiverCompatible: false,
       clearBufferOnQualityChange: true,
       showUnbufferedStart: false,
       seekBarColors: {
@@ -388,19 +389,28 @@ shaka.ui.Overlay = class {
     // Get and configure cast app id.
     let castAppId = '';
 
+    // Get and configure cast Android Receiver Compatibility
+    let castAndroidReceiverCompatible = false;
+
     // Cast receiver id can be specified on either container or video.
     // It should not be provided on both. If it was, we will use the last
     // one we saw.
     if (container['dataset'] &&
         container['dataset']['shakaPlayerCastReceiverId']) {
       castAppId = container['dataset']['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+          container['dataset']['shakaPlayerCastAndroidReceiverCompatible'] ===
+          'true';
     } else if (video['dataset'] &&
                video['dataset']['shakaPlayerCastReceiverId']) {
       castAppId = video['dataset']['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+        video['dataset']['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
     }
 
     if (castAppId.length) {
-      ui.configure({castReceiverAppId: castAppId});
+      ui.configure({castReceiverAppId: castAppId,
+        castAndroidReceiverCompatible: castAndroidReceiverCompatible});
     }
 
     if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
