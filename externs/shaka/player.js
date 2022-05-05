@@ -852,7 +852,8 @@ shaka.extern.ManifestConfiguration;
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
  *   dispatchAllEmsgBoxes: boolean,
- *   observeQualityChanges: boolean
+ *   observeQualityChanges: boolean,
+ *   maxDisabledTime: number
  * }}
  *
  * @description
@@ -957,6 +958,10 @@ shaka.extern.ManifestConfiguration;
  * @property {boolean} observeQualityChanges
  *   If true, monitor media quality changes and emit
  *   <code.shaka.Player.MediaQualityChangedEvent</code>.
+ * @property {number} maxDisabledTime
+ *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
+ *   is reached, in seconds.
+ *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

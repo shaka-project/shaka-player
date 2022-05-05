@@ -133,6 +133,7 @@
   "DEMO_MANIFEST_URL_ERROR": "Must have a manifest URL, or IMA DAI id fields",
   "DEMO_MAX_ATTEMPTS": "Max Attempts",
   "DEMO_MAX_BANDWIDTH": "Max Bandwidth",
+  "DEMO_MAX_DISABLED_TIME": "Max Variant Disabled Time",
   "DEMO_MAX_FRAMERATE": "Max Framerate",
   "DEMO_MAX_HEIGHT": "Max Height",
   "DEMO_MAX_PIXELS": "Max Pixels",

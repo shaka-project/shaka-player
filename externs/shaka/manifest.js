@@ -176,6 +176,7 @@ shaka.extern.DrmInfo;
  * @typedef {{
  *   id: number,
  *   language: string,
+ *   disabledUntilTime: number,
  *   primary: boolean,
  *   audio: ?shaka.extern.Stream,
  *   video: ?shaka.extern.Stream,
@@ -198,6 +199,12 @@ shaka.extern.DrmInfo;
  *   The Variant's language, specified as a language code. <br>
  *   See {@link https://tools.ietf.org/html/rfc5646} <br>
  *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm}
+ * @property {number} disabledUntilTime
+ *   <i>Defaults to 0.</i> <br>
+ *   0 means the variant is enabled. The Player will set this value to
+ *   "(Date.now() / 1000) + config.streaming.maxDisabledTime" and once this
+ *   maxDisabledTime has passed Player will set the value to 0 in order to
+ *   reenable the variant.
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
  *   True indicates that the player should use this Variant over others if user

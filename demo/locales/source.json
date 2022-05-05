@@ -535,6 +535,10 @@
     "description": "The name of a configuration value.",
     "message": "Max Bandwidth"
   },
+  "DEMO_MAX_DISABLED_TIME": {
+    "description": "The maximum amount of seconds a variant can be disabled when an error is thrown.",
+    "message": "Max Variant Disabled Time"
+  },
   "DEMO_MAX_FRAMERATE": {
     "description": "The name of a configuration value.",
     "message": "Max Framerate"

@@ -392,7 +392,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DISPATCH_ALL_EMSG_BOXES,
             'streaming.dispatchAllEmsgBoxes')
         .addBoolInput_(MessageIds.OBSERVE_QUALITY_CHANGES,
-            'streaming.observeQualityChanges');
+            'streaming.observeQualityChanges')
+        .addNumberInput_(MessageIds.MAX_DISABLED_TIME,
+            'streaming.maxDisabledTime');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
