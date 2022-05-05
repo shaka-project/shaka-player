@@ -202,8 +202,9 @@ shaka.extern.DrmInfo;
  * @property {number} disabledUntilTime
  *   <i>Defaults to 0.</i> <br>
  *   0 means the variant is enabled. The Player will set this value to
- *   "Date.now + config.streaming.maxDisabledTime" and once this maxDisabledTime
- *   has passed Player will set the value to 0 in order to reenable the variant.
+ *   "(Date.now() / 1000) + config.streaming.maxDisabledTime" and once this
+ *   maxDisabledTime has passed Player will set the value to 0 in order to
+ *   reenable the variant.
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
  *   True indicates that the player should use this Variant over others if user
