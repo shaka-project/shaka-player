@@ -1027,12 +1027,22 @@ describe('PeriodCombiner', () => {
     stream6.bandwidth = 120000;
     stream6.codecs = 'avc3.42001f';
 
+    const stream7 = makeVideoStream(1080);
+    stream7.originalId = '7';
+    stream7.bandwidth = 120000;
+    stream7.codecs = 'vp09.00.10.08';
+
+    const stream8 = makeVideoStream(1080);
+    stream8.originalId = '8';
+    stream8.bandwidth = 120000;
+    stream8.codecs = 'vp09.01.20.08.01';
+
     /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
     const periods = [
       {
         id: '0',
         videoStreams: [
-          stream1, stream3, stream5,
+          stream1, stream3, stream5, stream7,
         ],
         audioStreams: [],
         textStreams: [],
@@ -1041,7 +1051,7 @@ describe('PeriodCombiner', () => {
       {
         id: '1',
         videoStreams: [
-          stream2, stream4, stream6,
+          stream2, stream4, stream6, stream8,
         ],
         audioStreams: [],
         textStreams: [],
@@ -1051,7 +1061,7 @@ describe('PeriodCombiner', () => {
 
     await combiner.combinePeriods(periods, /* isDynamic= */ true);
     const variants = combiner.getVariants();
-    expect(variants.length).toBe(3);
+    expect(variants.length).toBe(4);
     // We can use the originalId field to see what each track is composed of.
     const video1 = variants[0].video;
     expect(video1.originalId).toBe('1,2');
@@ -1061,6 +1071,9 @@ describe('PeriodCombiner', () => {
 
     const video3 = variants[2].video;
     expect(video3.originalId).toBe('5,6');
+
+    const video4 = variants[3].video;
+    expect(video4.originalId).toBe('7,8');
   });
 
   it('Matches streams with most roles in common', async () => {
