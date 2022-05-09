@@ -1032,7 +1032,7 @@ describe('PeriodCombiner', () => {
       {
         id: '0',
         videoStreams: [
-          stream1,stream3,stream5,
+          stream1, stream3, stream5,
         ],
         audioStreams: [],
         textStreams: [],
@@ -1041,7 +1041,7 @@ describe('PeriodCombiner', () => {
       {
         id: '1',
         videoStreams: [
-          stream2,stream4,stream6,
+          stream2, stream4, stream6,
         ],
         audioStreams: [],
         textStreams: [],
