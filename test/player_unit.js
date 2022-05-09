@@ -154,6 +154,7 @@ describe('Player', () => {
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
       shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
       navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
+      onError.calls.reset();
     }
   });
 
@@ -2630,6 +2631,51 @@ describe('Player', () => {
 
       activeVariant = getActiveVariantTrack();
       expect(activeVariant.id).toBe(1);
+    });
+
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/4190
+    it('throws only one RESTRICTIONS_CANNOT_BE_MET error', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.keyIds = new Set(['abc']);
+          });
+        });
+      });
+
+      // Check that error is RESTRICTIONS_CANNOT_BE_MET
+      onError.and.callFake((e) => {
+        const error = e.detail;
+        shaka.test.Util.expectToEqualError(
+            error,
+            new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.MANIFEST,
+                shaka.util.Error.Code.RESTRICTIONS_CANNOT_BE_MET, {
+                  hasAppRestrictions: false,
+                  missingKeys: ['abc'],
+                  restrictedKeyStatuses: [],
+                }));
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const activeVariant = getActiveVariantTrack();
+      expect(activeVariant.id).toBe(0);
+
+      abrManager.chooseIndex = 0;
+      abrManager.chooseVariant.calls.reset();
+
+      onKeyStatus({'abc': 'output-restricted'});
+
+      // Ensure that RESTRICTIONS_CANNOT_BE_MET is thrown once
+      expect(onError).toHaveBeenCalledTimes(1);
+
+      // It does not call chooseVariant
+      expect(abrManager.chooseVariant).not.toHaveBeenCalled();
+
+      // The first variant is disallowed.
+      expect(manifest.variants[0].id).toBe(0);
+      expect(manifest.variants[0].allowedByKeySystem).toBe(false);
     });
 
     it('doesn\'t switch if the active stream isn\'t restricted', async () => {
