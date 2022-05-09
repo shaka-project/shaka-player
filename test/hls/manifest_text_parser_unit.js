@@ -240,6 +240,25 @@ describe('ManifestTextParser', () => {
 
           // manifest URI:
           'https://test/manifest.m3u8');
+
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MASTER,
+            tags: [
+              new shaka.hls.Tag(/* id= */ 3, 'EXT-X-MEDIA',
+                  [
+                    new shaka.hls.Attribute('CODECS',
+                        'av01.0.08M.08,mp4a.40.2'),
+                  ]),
+            ],
+          },
+
+          // playlist text:
+          '#EXTM3U\n' +
+          '#EXT-X-MEDIA:CODECS="av01.0.08M.08,mp4a.40.2"',
+
+          // manifest URI:
+          'https://test/manifest.m3u8');
     });
 
     it('rejects invalid tags', () => {
