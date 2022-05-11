@@ -697,6 +697,32 @@ describe('HlsParser live', () => {
       ManifestParser.verifySegmentIndex(video, [ref, ref2]);
     });
 
+    // Test for https://github.com/shaka-project/shaka-player/issues/4185
+    it('does not fail on preload hints with LL mode off', async () => {
+      // LL mode must be off for this test!
+      playerInterface.isLowLatencyMode = () => false;
+
+      const mediaWithPartialSegments = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXTINF:4,\n',
+        'main.mp4\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0\n',
+        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210\n',
+      ].join('');
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', mediaWithPartialSegments)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData)
+          .setResponseValue('test:/partial.mp4', segmentData);
+
+      // If this throws, the test fails.  Otherwise, it passes.
+      await parser.start('test:/master', playerInterface);
+    });
+
     describe('update', () => {
       it('adds new segments when they appear', async () => {
         const ref1 = ManifestParser.makeReference('test:/main.mp4', 2, 4);
