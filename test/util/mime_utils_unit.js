@@ -26,22 +26,8 @@ describe('MimeUtils', () => {
 
     expect(getNormalizedCodec('mp4a.40.42')).toBe('mpeg4_xhe_aac');
 
-    expect(getNormalizedCodec('ac-3')).toBe('ac-3');
-    expect(getNormalizedCodec('mp4a.a5')).toBe('ac-3');
-    expect(getNormalizedCodec('mp4a.A5')).toBe('ac-3');
-
-    expect(getNormalizedCodec('ec-3')).toBe('ec-3');
-    expect(getNormalizedCodec('mp4a.a6')).toBe('ec-3');
-    expect(getNormalizedCodec('mp4a.A6')).toBe('ec-3');
-
     expect(getNormalizedCodec('vp8')).toBe('vp8');
     expect(getNormalizedCodec('vp8.0')).toBe('vp8');
-
-    expect(getNormalizedCodec('dtsc')).toBe('dtsc');
-    expect(getNormalizedCodec('mp4a.a9')).toBe('dtsc');
-
-    expect(getNormalizedCodec('dtsx')).toBe('dtsx');
-    expect(getNormalizedCodec('mp4a.b2')).toBe('dtsx');
 
     expect(getNormalizedCodec('avc1')).toBe('avc');
     expect(getNormalizedCodec('avc3')).toBe('avc');
