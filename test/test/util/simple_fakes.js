@@ -308,11 +308,18 @@ shaka.test.FakePlayhead = class {
     /** @type {!jasmine.Spy} */
     this.setRebufferingGoal = jasmine.createSpy('setRebufferingGoal');
 
-    /** @type {!jasmine.Spy} */
-    this.setStartTime = jasmine.createSpy('setStartTime');
+    /** @private {number} */
+    this.startTime_ = 0;
 
     /** @type {!jasmine.Spy} */
-    this.getTime = jasmine.createSpy('getTime').and.returnValue(0);
+    this.setStartTime = jasmine.createSpy('setStartTime')
+        .and.callFake((value) => {
+          this.startTime_ = value;
+        });
+
+    /** @type {!jasmine.Spy} */
+    this.getTime = jasmine.createSpy('getTime')
+        .and.callFake(() => this.startTime_);
 
     /** @type {!jasmine.Spy} */
     this.setBuffering = jasmine.createSpy('setBuffering');
