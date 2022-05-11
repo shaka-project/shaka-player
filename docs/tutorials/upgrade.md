@@ -46,6 +46,9 @@ application:
       minimum supported version of iOS is now 13)
     - `streaming.smallGapLimit` and `streaming.jumpLargeGaps` have been removed;
       all gaps will now be jumped
+    - `manifest.hls.useFullSegmentsForStartTime` has been removed; this setting
+      is no longer necessary, as we no longer fetch segments for start times in
+      the HLS parser
 
   - Player API changes:
     - `shaka.Player.prototype.addTextTrack()` has been replaced by
