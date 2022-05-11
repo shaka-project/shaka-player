@@ -535,7 +535,61 @@ describe('VttTextParser', () => {
         'Test\n\n' +
         '00:00:40.000 --> 00:00:50.000 line:-1\n' +
         'Test2',
-        {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0});
+        {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
+        /* sequenceMode= */ true);
+  });
+
+  it('ignores X-TIMESTAMP-MAP header if not in sequence mode', () => {
+    verifyHelper(
+        [
+          {startTime: 20, endTime: 40, payload: 'Test'},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
+        ],
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:01:00:00.000\n\n' +
+        '00:00:20.000 --> 00:00:40.000 line:0\n' +
+        'Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000 line:-1\n' +
+        'Test2',
+        {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
+        /* sequenceMode= */ false);
+  });
+
+  it('parses X-TIMESTAMP-MAP header with non-zero local base', () => {
+    verifyHelper(
+        [
+          {startTime: 1800, endTime: 1810, payload: 'Test'},
+          {startTime: 1820, endTime: 1830, payload: 'Test2'},
+        ],
+        // 162000000 = 30 * 60 * 90k = 30 minutes for the TS part of the map.
+        // The local (VTT) part of the map is 1 hour.
+        // So text times of 1 hour map to media times of 30 minutes.
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:162000000,LOCAL:01:00:00.000\n\n' +
+        '01:00:00.000 --> 01:00:10.000 line:0\n' +
+        'Test\n\n' +
+        '01:00:20.000 --> 01:00:30.000 line:-1\n' +
+        'Test2',
+        {periodStart: 0, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
+        /* sequenceMode= */ true);
+  });
+
+  it('combines X-TIMESTAMP-MAP header with periodStart', () => {
+    verifyHelper(
+        [
+          {startTime: 130, endTime: 150, payload: 'Test'},
+          {startTime: 150, endTime: 160, payload: 'Test2'},
+        ],
+        // 900000 = 10 sec, so expect every timestamp to be 10
+        // seconds ahead of what is specified.
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000\n\n' +
+        '00:00:20.000 --> 00:00:40.000 line:0\n' +
+        'Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000 line:-1\n' +
+        'Test2',
+        {periodStart: 100, segmentStart: 25, segmentEnd: 65, vttOffset: 0},
+        /* sequenceMode= */ true);
   });
 
   it('handles timestamp rollover with X-TIMESTAMP-MAP header', () => {
@@ -551,7 +605,8 @@ describe('VttTextParser', () => {
         'Test',
         // Non-null segmentStart takes precedence over X-TIMESTAMP-MAP.
         // This protects us from rollover in the MPEGTS field.
-        {periodStart: 0, segmentStart: 95440, segmentEnd: 95550, vttOffset: 0});
+        {periodStart: 0, segmentStart: 95440, segmentEnd: 95550, vttOffset: 0},
+        /* sequenceMode= */ true);
 
     verifyHelper(
         [
@@ -564,7 +619,8 @@ describe('VttTextParser', () => {
         'X-TIMESTAMP-MAP=MPEGTS:9745408,LOCAL:00:00:00.000\n\n' +
         '00:00:00.000 --> 00:00:02.000 line:0\n' +
         'Test2',
-        {periodStart: 0, segmentStart: 95550, segmentEnd: 95560, vttOffset: 0});
+        {periodStart: 0, segmentStart: 95550, segmentEnd: 95560, vttOffset: 0},
+        /* sequenceMode= */ true);
   });
 
   it('supports global style blocks', () => {
@@ -978,11 +1034,14 @@ describe('VttTextParser', () => {
    * @param {!Array} cues
    * @param {string} text
    * @param {shaka.extern.TextParser.TimeContext} time
+   * @param {boolean=} sequenceMode
    */
-  function verifyHelper(cues, text, time) {
+  function verifyHelper(cues, text, time, sequenceMode = false) {
     const data =
         shaka.util.BufferUtils.toUint8(shaka.util.StringUtils.toUTF8(text));
-    const result = new shaka.text.VttTextParser().parseMedia(data, time);
+    const parser = new shaka.text.VttTextParser();
+    parser.setSequenceMode(sequenceMode);
+    const result = parser.parseMedia(data, time);
 
     const expected = cues.map((cue) => {
       if (cue.nestedCues) {
