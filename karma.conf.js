@@ -363,6 +363,8 @@ module.exports = (config) => {
     // If testing custom assets, we don't serve other unit or integration tests.
     // External asset tests are the basis for custom asset testing, so this file
     // is automatically included.
+    clientArgs.testFiles.push('demo/common/asset.js');
+    clientArgs.testFiles.push('demo/common/assets.js');
     clientArgs.testFiles.push('test/player_external.js');
   } else {
     // In a normal test run, we serve unit tests.
@@ -374,6 +376,8 @@ module.exports = (config) => {
     }
     if (settings.external) {
       // If --external is present, we serve external asset tests.
+      clientArgs.testFiles.push('demo/common/asset.js');
+      clientArgs.testFiles.push('demo/common/assets.js');
       clientArgs.testFiles.push('test/**/*_external.js');
     }
   }

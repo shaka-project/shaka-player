@@ -114,7 +114,13 @@ describe('Player', () => {
         const networkingEngine = player.getNetworkingEngine();
         asset.applyFilters(networkingEngine);
 
-        await player.load(asset.manifestUri);
+        // Rather than awaiting the load() method, catch any load() errors and
+        // wait on the 'canplay' event.  This has the advantage that we will
+        // get better logging of the media state on a timeout, since that
+        // capabilitiy is built into the waiter for media element events.
+        player.load(asset.manifestUri).catch(fail);
+        await waiter.timeoutAfter(60).waitForEvent(video, 'canplay');
+
         if (asset.features) {
           const isLive = asset.features.includes(Feature.LIVE);
           expect(player.isLive()).toBe(isLive);
