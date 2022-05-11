@@ -124,7 +124,13 @@ describe('Player', () => {
 
       player.createDrmEngine = () => drmEngine;
       player.createNetworkingEngine = () => networkingEngine;
-      player.createPlayhead = () => playhead;
+      player.createPlayhead = (startTime) => {
+        const callableSetStartTime =
+            shaka.test.Util.spyFunc(playhead.setStartTime);
+        callableSetStartTime(startTime);
+        playhead.setStartTime.calls.reset();
+        return playhead;
+      };
       player.createMediaSourceEngine = () => mediaSourceEngine;
       player.createStreamingEngine = () => streamingEngine;
     }
@@ -3707,6 +3713,51 @@ describe('Player', () => {
         expect(thumbnail8.startTime).toBe(80);
         expect(thumbnail8.duration).toBe(10);
       });
+    });
+  });
+
+  describe('config streaming.startAtSegmentBoundary', () => {
+    // Test for https://github.com/shaka-project/shaka-player/issues/4188
+    // In that issue, using streaming.startAtSegmentBoundary in v4.0.0 caused
+    // an exception due to the use of a removed method.
+    it('adjusts start time', async () => {
+      player.configure('streaming.startAtSegmentBoundary', true);
+
+      // In order to adjust the start time to a segment boundary, we need
+      // segment descriptions in the segment index.  So create a non-default
+      // fake manifest.
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      // This duration is used by useSegmentTemplate below to decide how many
+      // references to generate.
+      timeline.setDuration(300);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.useSegmentTemplate(
+                '$Number$.mp4', /* segmentDuration= */ 10);
+          });
+        });
+      });
+
+      await player.load(fakeManifestUri, 12, fakeMimeType);
+
+      expect(playhead.setStartTime).toHaveBeenCalledWith(10);
+    });
+
+    it('does not fail with no segments', async () => {
+      player.configure('streaming.startAtSegmentBoundary', true);
+
+      // Without useSegmentTemplate in the fake manifest, the call to
+      // getIteratorForTime() in Player produces a null iterator.  Using the
+      // default fake manifest should cover that case.  But just to make sure,
+      // verify that we have no segments before calling load().
+      const variant = manifest.variants[0];
+      expect(variant.video.segmentIndex.getIteratorForTime(0)).toBeNull();
+      expect(variant.audio.segmentIndex.getIteratorForTime(0)).toBeNull();
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
     });
   });
 
