@@ -23,8 +23,7 @@ describe('MimeUtils', () => {
     expect(getNormalizedCodec('mp4a.40.5')).toBe('aac');
     expect(getNormalizedCodec('mp4a.40.05')).toBe('aac');
     expect(getNormalizedCodec('mp4a.40.29')).toBe('aac');
-
-    expect(getNormalizedCodec('mp4a.40.42')).toBe('xhe_aac');
+    expect(getNormalizedCodec('mp4a.40.42')).toBe('aac');
 
     expect(getNormalizedCodec('ac-3')).toBe('ac-3');
     expect(getNormalizedCodec('mp4a.a5')).toBe('ac-3');
