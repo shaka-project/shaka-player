@@ -1,0 +1,42 @@
+{
+  "name": "disco-bucket-client-shaka-player",
+  "version": "3.14.1",
+  "description": "using disco-bucket sample",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "clean": "rm -rf cdk.out build/ lambdas/build node_modules",
+    "postinstall": "cd lambdas ; npm install ; npm run edge:build",
+    "preinstall": "./preinstall.sh",
+    "doctor": "npm run cdk -- doctor"
+  },
+  "author": {
+    "name": "anto_cvitic@discovery.com",
+    "url": "https://github.com/discoveryinc-dtc/disco-bucket-client-template.git"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@aws-cdk/aws-certificatemanager": "1.151.0",
+    "@aws-cdk/aws-cloudfront": "1.151.0",
+    "@aws-cdk/aws-cloudfront-origins": "1.151.0",
+    "@aws-cdk/aws-iam": "1.151.0",
+    "@aws-cdk/aws-lambda": "1.151.0",
+    "@aws-cdk/aws-lambda-event-sources": "1.151.0",
+    "@aws-cdk/aws-sns": "1.151.0",
+    "@aws-cdk/aws-sns-subscriptions": "1.151.0",
+    "@aws-cdk/aws-cloudwatch": "1.151.0",
+    "@aws-cdk/aws-cloudwatch-actions": "1.151.0",
+    "@aws-cdk/aws-route53": "1.151.0",
+    "@aws-cdk/aws-route53-targets": "1.151.0",
+    "@aws-cdk/aws-s3": "1.151.0",
+    "@aws-cdk/aws-logs": "1.151.0",
+    "@aws-cdk/region-info": "1.151.0",
+    "@types/node": "^10.17.0",
+    "typescript": "^3.8"
+  },
+  "dependencies": {
+    "@aws-cdk/core": "1.151.0",
+    "aws-cdk": "^1.151.0"
+  }
+}

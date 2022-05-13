@@ -1,0 +1,58 @@
+name: web-infra pull-request
+
+on:
+  pull_request:
+    paths:
+      - "web-infra/**"
+  workflow_dispatch:
+  
+env:
+  PHASE: dev
+
+  ARTIFACTORY_REPOSITORY: "https://discovery.jfrog.io/artifactory/api/npm/npm/"
+  JFROG_ACCESS_TOKEN: ${{ secrets.RT_JFROG_ACCESS_TOKEN }}
+  JFROG_USERNAME: ${{ secrets.RT_JFROG_USERNAME }}
+
+  PRIVATE_ACTIONS_KEY: ${{ secrets.RT_PRIVATE_ACTIONS_KEY }}
+
+  GITHUB_SHA: ${{ github.sha }}
+  GHRID: ${{ github.run_id }}
+  HASH_ID: ${{ github.run_id }}-${{ github.sha }}
+  
+jobs:
+  diff_cdk:
+    if: ${{ github.ref != 'refs/heads/main' }}
+    name: deploy dev
+    environment: dev
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.6.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: cdk diff deploy
+        working-directory: ./web-infra/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JFROG_TOKEN: ${{ secrets.JFROG_TOKEN }}
+        run: |
+          echo not running due to vm2 npm audit --production --audit-level critical
+          npm run clean --if-present
+          npm ci
+          npm run build --if-present
+          npm install -g aws-cdk@1.150.0
+          cdk --version
+          cdk synth
+          # cfn-lint
+          cdk -c phase=${PHASE} diff 2>&1 | tee diff.log
+          cdk -c phase=${PHASE} deploy --require-approval never

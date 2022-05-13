@@ -61,7 +61,7 @@ jobs:
 
     name: ${{ matrix.os }} ${{ matrix.browser }}
     runs-on: ${{ matrix.os }}
-
+    
     steps:
       # Firefox on Ubuntu appears to not have the right things installed in
       # the environment used by GitHub actions, so make sure that ffmpeg is
@@ -112,6 +112,70 @@ jobs:
             --browsers "$browser" \
             --reporters spec --spec-hide-passed \
             ${{ matrix.extra_flags }}
+
+      - name: Select env by branch
+        id: branch_check
+        run: |
+          echo "Running on branch ${{ github.ref }}"
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            echo "::set-output name=env_name::prod"
+          else
+            echo "::set-output name=env_name::dev"
+          fi 
+      outputs:
+          env_name: ${{ steps.branch_check.outputs.env_name }}
+
+  deploy_s3:
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ needs.build_and_test.outputs.env_name }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: install jq
+        run: sudo apt-get install jq
+
+      - name: Get ENVs from cdk.context.json
+        shell: bash
+        working-directory: ./web-infra/
+        env:
+          PHASE: ${{ needs.build_and_test.outputs.env_name }}
+        run: |
+          set -o errexit
+          set -x
+          a=$(jq -r "(\"${PHASE}.\" + .${PHASE}.siteName + \".\" + .${PHASE}.hostedZoneName)" cdk.context.json)
+          echo SITE_NAME="$a" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.6.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_S3_ARN }}
+          aws-region: us-east-1
+
+      - name: deploy to s3
+        shell: bash
+        env:
+          PHASE: ${{ needs.build_and_test.outputs.env_name }}
+          PR_NUMBER: ${{ github.event.number }}
+          HASH_ID: ${{ github.event.number }}-${{ github.sha }}
+        if: github.event_name == 'pull_request'
+        run: |
+          set -o errexit
+          set -x
+
+          VERSION="v$(jq -r .version package.json)-${HASH_ID}"
+          sed -e "s/^\\(shaka.Player.version =\\).*/\\1 '$VERSION';/" \
+              -i lib/player.js
+          
+          export BUCKET=${SITE_NAME//[.]/-}
+          export HASHDEST=s3://${BUCKET}/${SITE_NAME}/live/${HASH_ID}/
+
+          aws s3 sync ./dist $HASHDEST
 
   build_in_docker:
     # Don't waste time doing a full matrix of test runs when there was an

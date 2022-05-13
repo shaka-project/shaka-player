@@ -1,0 +1,75 @@
+name: CDK Prod
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, edited, closed]
+
+env:
+  JFROG_TOKEN: ${{ secrets.JFROG_TOKEN }}
+  PHASE: prod
+
+jobs:
+  diff_prod:
+    # this could be enabled to show a PRs diff vs prod
+    if: ${{ github.ref == 'refs/heads/main' }}
+    name: diff prod
+    # when PR, use prod-readonly, does not need approval/review
+    environment: prod-readonly
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.6.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: cdk diff
+        working-directory: ./web-infra/
+        run: |
+          echo not running due to vm2 npm audit --production --audit-level critical
+          npm run clean --if-present
+          npm ci
+          npm run build --if-present
+          npm install -g aws-cdk@1.150.0
+          cdk --version
+          cdk -c phase=${PHASE} synth
+          cdk -c phase=${PHASE} diff 2>&1 | tee diff.log
+
+  deploy:
+    needs: diff_prod
+    environment: prod
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+      
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.6.1
+        with:
+          role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: cdk deploy
+        working-directory: ./web-infra/
+        run: |
+          echo not running due to vm2 npm audit --production --audit-level critical
+          npm run clean --if-present
+          npm ci
+          npm run build --if-present
+          npm install -g aws-cdk@1.150.0
+          cdk --version
+          cdk -c phase=${PHASE} diff 2>&1 | tee diff.log
+          cdk -c phase=${PHASE} deploy --require-approval never

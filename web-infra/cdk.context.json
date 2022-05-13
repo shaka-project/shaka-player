@@ -1,0 +1,36 @@
+{
+  "dev": {
+    "siteName": "shaka-player",
+    "pagerdutyKey": "25329208e22d400bc02652dc6f3b0d0f",
+    "skipDefaultAlarms": true,
+    "hostedZoneName": "buckets.disco-api.com",
+    "distribution": {"attachEdgeFunctions": ["origin-request", "viewer-response"] },
+    "github": {
+      "organization": "DNI-Mercury",
+      "repository": "shaka-player"
+    }
+  },
+  "prod": {
+    "siteName": "shaka-player",
+    "pagerdutyKey": "8c74bb8264b24301c0d437c40988c1bb",
+    "skipDefaultAlarms": false,
+    "enableLogging": true,
+    "hostedZoneName": "buckets.disco-api.com",
+    "distribution": {"attachEdgeFunctions": ["origin-request"] },
+    "github": {
+      "organization": "DNI-Mercury",
+      "repository": "shaka-player"
+    }
+  },
+  "commonTags": {
+    "Team": "dni-player-platform",
+    "Name": "dni-player-platform",
+    "Owner": "dni-player-platform@discovery.com",
+    "omd_business_service": "dni-player-platform",
+    "omd_service_team_contact": "dni-player-platform@discovery.com",
+    "omd_product": "shaka-player",
+    "omd_region": "amer_apac_emea",
+    "omd_service": "cloudfront",
+    "omd_purpose": "cdn"
+  }
+}

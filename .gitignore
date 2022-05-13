@@ -6,3 +6,4 @@ docs/api/
 coverage/
 .DS_Store
 .vscode
+web-infra/lambdas/build/

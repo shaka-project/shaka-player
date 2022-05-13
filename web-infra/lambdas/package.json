@@ -1,0 +1,27 @@
+{
+  "name": "web-infra-lambda-edge-asite",
+  "version": "3.14.1",
+  "description": "disco-bucket-lambda-edge",
+  "scripts": {
+    "build": "tsc",
+    "edge:build": "./build.sh",
+    "watch": "tsc -w",
+    "clean": "rm -rf build node_modules"
+  },
+  "author": {
+    "name": "anto_cvitic@discovery.com",
+    "url": "https://github.com/discoveryinc-dtc/disco-bucket-client-template"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^16.11.26",
+    "esbuild": "^0.13.9",
+    "ts-node": "^10.3.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.67.0",
+    "@types/aws-lambda": "^8.10.84",
+    "https": "^1.0.0"
+  }
+}
