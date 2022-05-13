@@ -122,8 +122,8 @@ jobs:
           else
             echo "::set-output name=env_name::dev"
           fi 
-      outputs:
-          env_name: ${{ steps.branch_check.outputs.env_name }}
+    outputs:
+        env_name: ${{ steps.branch_check.outputs.env_name }}
 
   deploy_s3:
     needs: build_and_test
