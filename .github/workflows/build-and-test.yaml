@@ -4,7 +4,7 @@ on:
   pull_request: # Trigger for pull requests.
     types: [opened, synchronize, reopened]
     branches:
-      - main
+      - master
       - v[0-9]*
   workflow_dispatch: # Allows for manual triggering.
     inputs:
