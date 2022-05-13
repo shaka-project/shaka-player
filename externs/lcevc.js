@@ -33,8 +33,8 @@ LcevcDil.LcevcDIL = class {
    * the ranges given by the SourceBuffer.buffered() call result
    *
    * @param {!BufferSource} data fMP4 fragment.
-   * @param {string} type The type of the fragment.
-   * @param {!number} level The level of the fragment.
+   * @param {string} type Type of the fragment.
+   * @param {number} level Level (Variant) that the fragment belongs to.
    */
   appendBuffer(data, type, level) {}
 
@@ -98,11 +98,13 @@ LcevcDil.SupportObject.SupportError;
  * @description LCEVC DIL Custom Config that can be passed
  * through the constructor.
  * @property {!number} logLevel for LCEVC DIl Logs. Defaults to 0.
- * @property {!boolean} dps or dynamic performance scaling
- * checks and disable LCEVC for some time.
+ * @property {!boolean} dps or dynamic performance scaling if true,
+ * is triggered when browser is not able to decode frames at the rate that
+ * keeps up to the fps of the video and disables LCEVC decoding for some time.
  * If it is triggered again in a short period of time, the disabled
- * time will be higher and if it is done in three times in a row the LCEVC
- * Dil will always be disabled for that playback session. Defaults to true.
+ * time will be higher and if it is triggered three times in a row the LCEVC
+ * decoding will be disabled for that playback session.
+ * If dps is false, LCEVC decode will be forced. Defaults to true.
  * @property {!boolean} logo is placed on the top right hand corner
  * which only appears when the LCEVC enahanced Frames are being rendered.
  * Defaults to true for the lib but is forced to false in this integration

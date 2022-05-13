@@ -5,7 +5,7 @@
 
 This article describes the V-Nova LCEVC Shaka Player integration.
 
-# LCEVC integration
+# LCEVC Integration
 
 ## Adding V-Nova required files
 
@@ -32,7 +32,7 @@ We have created the file `externs/lcevc.js` file that exposes the following meth
 
 `constructor(media, canvas, dilConfig):` It receives the video element (media), the canvas, and the Dil configuration as a JSON string and creates the LcevcDil object.
 
-`appendBuffer(data, type, level):` Appends the MP4 fragments before the they are appended to the Media Source Extensions SourceBuffer.
+`appendBuffer(data, type, level):` Appends the MP4 fragments before they are appended to the Media Source Extensions SourceBuffer.
 
 `setCurrentLevel(level):` Sets the current level of the fragment.
 
@@ -44,7 +44,7 @@ We have created the file `externs/lcevc.js` file that exposes the following meth
 
 ## Integration point
 
-### The shaka.lcevc.Dil class
+### The shaka.lcevc.Dil class - (Dil : Decoder Integration Layer)
 
 The main logic of the LCEVC integration is located in the `lib/lcevc_dil.min.js` file. In this file the shaka.lcevc.Dil is exported to be used in the project. This class is in charge of creating the Dil object using the already mentioned extern, creating the canvas object and resizing it to be coordinated with the video element, checking if Dil is available, etc.
 
@@ -55,29 +55,7 @@ The shaka.Player class, defined in the `lib/player.js` file, is the main player 
 Both LcevcConfig and canvas parameters can be left blank. In that case, default settings are used to create the Dil, and a new canvas element is created to match the video element.
 
 ```javascript
-  /**
-   * @param {HTMLMediaElement=} mediaElement
-   *    When provided, the player will attach to <code>mediaElement</code>,
-   *    similar to calling <code>attach</code>. When not provided, the player
-   *    will remain detached.
-   * @param {function(shaka.Player)=} dependencyInjector Optional callback
-   *   which is called to inject mocks into the Player.  Used for testing.
-   * @param {?HTMLCanvasElement} [canvas] Optional canvas where LCEVC
-   *    video will be drawn.
-   * @param {?Object} [lcevcDilConfig] Optional canvas where LCEVC
-   *    video will be drawn.
-   */
-  constructor(mediaElement, dependencyInjector, canvas, lcevcDilConfig={}) {
-    super();
-
-    /** @private {?HTMLCanvasElement} */
-    this.canvas_ = null;
-
-    /** @private {?shaka.lcevc.Dil} */
-    this.lcevcDil_ = null;
-
-    /** @private {?Object} */
-    this.lcevcDilConfig_ = lcevcDilConfig;
+  constructor(mediaElement, dependencyInjector, canvas, lcevcDilConfig={})
 ```
 
 On the other hand, if a canvas element is provided to the constructor, this canvas it is used to draw the LCEVC enhanced video and no styles are applied. The user is responsible for placing the canvas element in the desired position.
@@ -89,75 +67,6 @@ The Dil object is created in the `onLoad_()` event that is triggered when a new 
 
 The Dil object is created only if LCEVC is supported (LCEVC libs are loaded on the page) and also when it was not already created in another `onLoad_()` event execution.
 
-```javascript
-  this.setupLcevc_(this.config_);
-```
-
-```javascript
- 
-  /**
-   * Create a shaka.lcevc.Dil object
-   * @private
-   */
-  createDIL_() {
-    if (this.lcevcDil_ == null) {
-      this.lcevcDil_ = new shaka.lcevc.Dil(
-          this.video_,
-          this.canvas_,
-          this.lcevcDilConfig_,
-      );
-      this.mediaSourceEngine_.updateLcevcDil(this.lcevcDil_);
-    }
-  }
-  
-  /**
-   * Close a shaka.lcevc.Dil object
-   * @private
-   */
-  closeDIL_() {
-    if (this.lcevcDil_ != null) {
-      this.lcevcDil_.hideCanvas();
-      this.lcevcDil_.close();
-      this.lcevcDil_ = null;
-    }
-  }
-
-  /**
-   * Setup shaka.lcevc.Dil object
-   * @private
-   */
-    setupLcevc_(config) {
-    if (config.lcevc.enabled) {
-      const safariVersion = shaka.util.Platform.safariVersion();
-      if (safariVersion) {
-        if (config.streaming.useNativeHlsOnSafari) {
-          shaka.log.alwaysWarn('LCEVC Error: Only Safari with MSE enabled ' +
-            'is supported. Please set config.streaming.useNativeHlsOnSafari ' +
-            'to false for LCEVC decoding.' );
-          return;
-        }
-      }
-      const edge = shaka.util.Platform.isEdge() ||
-        shaka.util.Platform.isLegacyEdge();
-      if (edge) {
-        if (!config.streaming.forceTransmuxTS) {
-          shaka.log.alwaysWarn('LCEVC Warning: For MPEG-2 TS decoding '+
-          'the config.streaming.forceTransmux must be enabled.');
-        }
-      }
-
-      if (this.lcevcDil_) {
-        this.closeDIL_();
-      }
-      this.createDIL_();
-    } else {
-      if (this.lcevcDil_) {
-        this.closeDIL_();
-      }
-    }
-  }
-
-```
 
 ### Feeding the Dil
 
@@ -166,24 +75,6 @@ The logic that Shaka Player uses to communicate with the Media Source Extensions
 ![image.png](lcevc-architecture.png)
 
 In order to feed the Dil with the video segments we needed to intercept where the Source buffer of MSE is being fed and this is done in the `append_()` method. We modified this method and now before feeding the MSE source buffer we are appending the data to the Dil object.
-
-```javascript
-  /**
-   * Append data to the SourceBuffer.
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
-   * @param {BufferSource} data
-   * @private
-   */
-  append_(contentType, data) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
-    if (contentType == ContentType.VIDEO && this.lcevcDil_) {
-      this.lcevcDil_.appendBuffer(data);
-    }
-
-    // This will trigger an 'updateend' event.
-    this.sourceBuffers_[contentType].appendBuffer(data);
-  }
-```
 
 ## Demo page
 
@@ -201,9 +92,7 @@ We have at as an npm package : <https://www.npmjs.com/package/lcevc_dil.js>
 And we added a new video sample with enhancement data the `demo/common/assets.js` file.
 
 ```javascript
-shakaAssets.testAssets = [
-  // Shaka assets {{{
-  new ShakaDemoAssetInfo(
+new ShakaDemoAssetInfo(
       /* name= */ 'Big Buck Bunny (LCEVC H264)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
       /* manifestUri= */ 'https://dyctis843rxh5.cloudfront.net/vnIAZIaowG1K7qOt/master.m3u8',
@@ -216,10 +105,11 @@ shakaAssets.testAssets = [
       .addDescription('H264 HLS stream with LCEVC enhancement')
       .markAsFeatured('Big Buck Bunny (LCEVC H264)')
       .setExtraConfig({
-        lcevc: {
-          enabled: true,
+        streaming: {
+          useNativeHlsOnSafari: false,
+          forceTransmuxTS: true,
         },
-      }),
+      })
 ```
 
 And after these changes this is the result
