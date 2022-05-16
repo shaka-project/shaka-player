@@ -953,16 +953,16 @@ describe('Player', () => {
     });
   });  // describe('unloading')
 
-  describe('chapters', () => {
-    it('add external chapters in vtt format', async () => {
+  describe('addChaptersTrack', () => {
+    it('adds external chapters in vtt format', async () => {
       await player.load('test:sintel_no_text_compiled');
       const locationUri = new goog.Uri(location.href);
       const partialUri1 = new goog.Uri('/base/test/test/assets/chapters.vtt');
       const absoluteUri1 = locationUri.resolve(partialUri1);
       await player.addChaptersTrack(absoluteUri1.toString(), 'en');
 
-      await shaka.test.Util.delay(1.5);
-
+      // Data should be available as soon as addChaptersTrack resolves.
+      // See https://github.com/shaka-project/shaka-player/issues/4186
       const chapters = player.getChapters('en');
       expect(chapters.length).toBe(3);
       const chapter1 = chapters[0];
@@ -981,8 +981,6 @@ describe('Player', () => {
       const partialUri2 = new goog.Uri('/base/test/test/assets/chapters2.vtt');
       const absoluteUri2 = locationUri.resolve(partialUri2);
       await player.addChaptersTrack(absoluteUri2.toString(), 'en');
-
-      await shaka.test.Util.delay(1.5);
 
       const chaptersUpdated = player.getChapters('en');
       expect(chaptersUpdated.length).toBe(6);
@@ -1012,14 +1010,12 @@ describe('Player', () => {
       expect(chapterUpdated6.endTime).toBe(61.349);
     });
 
-    it('add external chapters in srt format', async () => {
+    it('adds external chapters in srt format', async () => {
       await player.load('test:sintel_no_text_compiled');
       const locationUri = new goog.Uri(location.href);
       const partialUri = new goog.Uri('/base/test/test/assets/chapters.srt');
       const absoluteUri = locationUri.resolve(partialUri);
       await player.addChaptersTrack(absoluteUri.toString(), 'es');
-
-      await shaka.test.Util.delay(1.5);
 
       const chapters = player.getChapters('es');
       expect(chapters.length).toBe(3);
@@ -1036,5 +1032,5 @@ describe('Player', () => {
       expect(chapter3.startTime).toBe(30);
       expect(chapter3.endTime).toBe(61.349);
     });
-  });  // describe('chapters')
+  });  // describe('addChaptersTrack')
 });
