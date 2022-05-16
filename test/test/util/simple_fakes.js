@@ -152,8 +152,26 @@ shaka.test.FakeVideo = class {
   constructor(currentTime) {
     /** @const {!Object.<string, !Function>} */
     this.on = {};  // event listeners
+
     /** @type {!Array.<!TextTrack>} */
     this.textTracks = [];
+
+    // In a real video element, textTracks is an event target.
+    // Since Player listens to events on textTracks, we need to fake that
+    // interface.
+    this.textTracksEventTarget = new shaka.util.FakeEventTarget();
+    this.textTracks.addEventListener =
+        // eslint-disable-next-line no-restricted-syntax
+        this.textTracksEventTarget.addEventListener.bind(
+            this.textTracksEventTarget);
+    this.textTracks.removeEventListener =
+        // eslint-disable-next-line no-restricted-syntax
+        this.textTracksEventTarget.removeEventListener.bind(
+            this.textTracksEventTarget);
+    this.textTracks.dispatchEvent =
+        // eslint-disable-next-line no-restricted-syntax
+        this.textTracksEventTarget.dispatchEvent.bind(
+            this.textTracksEventTarget);
 
     this.currentTime = currentTime || 0;
     this.readyState = 0;
@@ -173,6 +191,10 @@ shaka.test.FakeVideo = class {
         jasmine.createSpy('addTextTrack').and.callFake((kind, id) => {
           const track = new shaka.test.FakeTextTrack();
           this.textTracks.push(track);
+
+          const trackEvent = new shaka.util.FakeEvent('addtrack', {track});
+          this.textTracksEventTarget.dispatchEvent(trackEvent);
+
           return track;
         });
 
