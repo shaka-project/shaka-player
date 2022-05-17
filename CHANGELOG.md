@@ -1,5 +1,23 @@
 # Changelog
 
+### [3.3.5](https://github.com/shaka-project/shaka-player/compare/v3.3.4...v3.3.5) (2022-05-17)
+
+
+### Bug Fixes
+
+* **dash:** Fix playback of Dolby Atmos ([#4173](https://github.com/shaka-project/shaka-player/issues/4173)) ([ced8ab3](https://github.com/shaka-project/shaka-player/commit/ced8ab31f57229fca9353769caeb7698c9f84d50)), closes [#4171](https://github.com/shaka-project/shaka-player/issues/4171)
+* Do not report MANIFEST RESTRICTIONS_CANNOT_BE_MET error twice ([#4194](https://github.com/shaka-project/shaka-player/issues/4194)) ([565e9e0](https://github.com/shaka-project/shaka-player/commit/565e9e0191cab88094aaa15cd3ae90cef00ffdc3)), closes [#4190](https://github.com/shaka-project/shaka-player/issues/4190)
+* Fix encryption detection to work around broken platforms ([#4169](https://github.com/shaka-project/shaka-player/issues/4169)) ([87893e8](https://github.com/shaka-project/shaka-player/commit/87893e84ec1dda20109ecab1fbc90db8736b4ba9))
+* Fix event listener leaks in Player ([#4229](https://github.com/shaka-project/shaka-player/issues/4229)) ([1fe8df2](https://github.com/shaka-project/shaka-player/commit/1fe8df20c4945ba255b1737540535e587768055f))
+* Fix exception with streaming.startAtSegmentBoundary ([#4216](https://github.com/shaka-project/shaka-player/issues/4216)) ([1b6ca04](https://github.com/shaka-project/shaka-player/commit/1b6ca044672efbfacdbd2444e382f23be77150df)), closes [#4188](https://github.com/shaka-project/shaka-player/issues/4188)
+* Fix PERIOD_FLATTENING_FAILED error when periods have different base sample types ([#4206](https://github.com/shaka-project/shaka-player/issues/4206)) ([04ff0fc](https://github.com/shaka-project/shaka-player/commit/04ff0fcc8b1e1606ecb6dccda96cc7da368d10e6)), closes [#4202](https://github.com/shaka-project/shaka-player/issues/4202)
+* **hls:** Fix av1 codec selection in HLS. ([#4203](https://github.com/shaka-project/shaka-player/issues/4203)) ([e493a56](https://github.com/shaka-project/shaka-player/commit/e493a56b9e51f85afb06d31b75ad6b91f59acd80))
+* **hls:** Fix X-PRELOAD-HINT failure with LL mode off ([#4212](https://github.com/shaka-project/shaka-player/issues/4212)) ([5167717](https://github.com/shaka-project/shaka-player/commit/5167717177edc256d06afef469b0a206ed0b88e4)), closes [#4185](https://github.com/shaka-project/shaka-player/issues/4185)
+* **offline:** Clean up orphaned segments on abort ([#4177](https://github.com/shaka-project/shaka-player/issues/4177)) ([a5cc491](https://github.com/shaka-project/shaka-player/commit/a5cc491a9269994c30e4c6efbd281c332951e281))
+* **offline:** Speed up offline storage by ~87% ([#4176](https://github.com/shaka-project/shaka-player/issues/4176)) ([dc27a26](https://github.com/shaka-project/shaka-player/commit/dc27a263289e42f131f04bbc4c43e2c4f4e27870)), closes [#4166](https://github.com/shaka-project/shaka-player/issues/4166)
+* Revert "Add missing module export in generated typescript defs" ([#4175](https://github.com/shaka-project/shaka-player/issues/4175)) ([c44507a](https://github.com/shaka-project/shaka-player/commit/c44507a2e86a81e56671534a9983da94a1c7baf4)), closes [#4167](https://github.com/shaka-project/shaka-player/issues/4167)
+* Wait for chapters track to be loaded ([#4228](https://github.com/shaka-project/shaka-player/issues/4228)) ([6a1f0d0](https://github.com/shaka-project/shaka-player/commit/6a1f0d0b2779134e472c817491086b2c18c35027)), closes [#4186](https://github.com/shaka-project/shaka-player/issues/4186)
+
 ### [3.3.4](https://github.com/shaka-project/shaka-player/compare/v3.3.3...v3.3.4) (2022-04-26)
 
 
