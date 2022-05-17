@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const offlineSupported = () => shaka.offline.StorageMuxer.support();
 filterDescribe('IndexeddbStorageCell', offlineSupported, () => {
   const IndexedDBUtils = shaka.test.IndexedDBUtils;
   const OfflineUtils = shaka.test.OfflineUtils;

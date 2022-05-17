@@ -243,6 +243,15 @@ window.xfilterDescribe = (describeName, cond, describeBody) => {
 };
 
 /**
+ * A very short alias for filtering offline integration tests.
+ *
+ * @return {boolean}
+ */
+window.offlineSupported = () => {
+  return shaka.offline.StorageMuxer.support();
+};
+
+/**
  * Load node modules used in testing and install them into window.
  * @return {!Promise}
  */

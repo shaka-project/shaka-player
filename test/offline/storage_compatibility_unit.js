@@ -91,7 +91,6 @@ const compatibilityTestsMetadata = [
   },
 ];
 
-const offlineSupported = () => shaka.offline.StorageMuxer.support();
 filterDescribe('Storage Compatibility', offlineSupported, () => {
   for (const metadata of compatibilityTestsMetadata) {
     describe(metadata.name, () => {
