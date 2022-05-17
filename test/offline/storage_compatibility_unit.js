@@ -91,7 +91,7 @@ const compatibilityTestsMetadata = [
   },
 ];
 
-filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
+filterDescribe('Storage Compatibility', offlineSupported, () => {
   for (const metadata of compatibilityTestsMetadata) {
     describe(metadata.name, () => {
       makeTests(metadata);
