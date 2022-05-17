@@ -42,8 +42,7 @@ application:
       `manifest.defaultPresentationDelay` (deprecated in v3.0.0)
     - Configuration of factories should be plain factory functions, not
       constructors; these will not be invoked with `new` (deprecated in v3.1.0)
-    - `drm.initDataTransform` has been removed (no longer needed since the
-      minimum supported version of iOS is now 13)
+    - `drm.initDataTransform` now defaults to a no-op
     - `streaming.smallGapLimit` and `streaming.jumpLargeGaps` have been removed;
       all gaps will now be jumped
     - `manifest.hls.useFullSegmentsForStartTime` has been removed; this setting
