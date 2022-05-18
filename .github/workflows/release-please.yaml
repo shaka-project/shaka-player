@@ -28,9 +28,10 @@ jobs:
       - name: Custom update Player version
         if: steps.release.outputs.release_created == false
         run: |
-          # Check out the branch that release-please created, if it exists.
+          # Check out the branch that release-please created.
+          # If it does not exist, FAIL!
           git fetch
-          git checkout release-please--branches--${{ github.ref_name }} || exit 0
+          git checkout release-please--branches--${{ github.ref_name }}--components--shaka-player || exit 1
           # If it does exist, update lib/player.js in the PR branch, so that the
           # -uncompiled tag remains in the player version in that context.
           VERSION="v$(jq -r .version package.json)-uncompiled"
