@@ -1,5 +1,20 @@
 # Changelog
 
+### [4.0.1](https://github.com/shaka-project/shaka-player/compare/v4.0.0...v4.0.1) (2022-05-18)
+
+
+### Bug Fixes
+
+* Do not report MANIFEST RESTRICTIONS_CANNOT_BE_MET error twice ([#4194](https://github.com/shaka-project/shaka-player/issues/4194)) ([0b03e79](https://github.com/shaka-project/shaka-player/commit/0b03e7900bd28420e6b066f909a69ff511144471)), closes [#4190](https://github.com/shaka-project/shaka-player/issues/4190)
+* **fairplay:** Re-add initDataTransform config ([#4231](https://github.com/shaka-project/shaka-player/issues/4231)) ([9a6f150](https://github.com/shaka-project/shaka-player/commit/9a6f150c082e477f9dae95c4436d6ff764481d02))
+* Fix event listener leaks in Player ([#4229](https://github.com/shaka-project/shaka-player/issues/4229)) ([e6c3b22](https://github.com/shaka-project/shaka-player/commit/e6c3b226ba25cd62b288c75da895531ed27087c0))
+* Fix exception with streaming.startAtSegmentBoundary ([#4216](https://github.com/shaka-project/shaka-player/issues/4216)) ([24eac2c](https://github.com/shaka-project/shaka-player/commit/24eac2c4bcea726f36d11845d8a174672c28e74f)), closes [#4188](https://github.com/shaka-project/shaka-player/issues/4188)
+* Fix PERIOD_FLATTENING_FAILED error when periods have different base sample types ([#4206](https://github.com/shaka-project/shaka-player/issues/4206)) ([0482aec](https://github.com/shaka-project/shaka-player/commit/0482aec127e5429434ba015bd98ae8c5e15fef68)), closes [#4202](https://github.com/shaka-project/shaka-player/issues/4202)
+* Fix VTT cue timing in HLS ([#4217](https://github.com/shaka-project/shaka-player/issues/4217)) ([69d1c14](https://github.com/shaka-project/shaka-player/commit/69d1c143aaade9167cba03a05daea5b94b3ccf95)), closes [#4191](https://github.com/shaka-project/shaka-player/issues/4191)
+* **hls:** Fix av1 codec selection in HLS. ([#4203](https://github.com/shaka-project/shaka-player/issues/4203)) ([4d418be](https://github.com/shaka-project/shaka-player/commit/4d418be18334b181ab7f32f9e9fe66522fc9057a))
+* **hls:** Fix X-PRELOAD-HINT failure with LL mode off ([#4212](https://github.com/shaka-project/shaka-player/issues/4212)) ([ae84aac](https://github.com/shaka-project/shaka-player/commit/ae84aac87cc4331139a98441c90993319a3b19ef)), closes [#4185](https://github.com/shaka-project/shaka-player/issues/4185)
+* Wait for chapters track to be loaded ([#4228](https://github.com/shaka-project/shaka-player/issues/4228)) ([dec3d9c](https://github.com/shaka-project/shaka-player/commit/dec3d9c50505a6a7707232f595acbe1cfea8c3a0)), closes [#4186](https://github.com/shaka-project/shaka-player/issues/4186)
+
 ## [4.0.0](https://github.com/shaka-project/shaka-player/compare/v3.3.0...v4.0.0) (2022-04-30)
 
 
