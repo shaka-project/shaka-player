@@ -1260,21 +1260,23 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
+    const keyboardSeekDistance = this.config_.keyboardSeekDistance;
+
     switch (event.key) {
       case 'ArrowLeft':
         // If it's not focused on the volume bar, move the seek time backward
-        // for 5 sec. Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && !isVolumeBar) {
+        // for a few sec. Otherwise, the volume will be adjusted automatically.
+        if (this.seekBar_ && !isVolumeBar && keyboardSeekDistance > 0) {
           event.preventDefault();
-          this.seek_(this.seekBar_.getValue() - 5);
+          this.seek_(this.seekBar_.getValue() - keyboardSeekDistance);
         }
         break;
       case 'ArrowRight':
         // If it's not focused on the volume bar, move the seek time forward
-        // for 5 sec. Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && !isVolumeBar) {
+        // for a few sec. Otherwise, the volume will be adjusted automatically.
+        if (this.seekBar_ && !isVolumeBar && keyboardSeekDistance > 0) {
           event.preventDefault();
-          this.seek_(this.seekBar_.getValue() + 5);
+          this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
         }
         break;
       // Jump to the beginning of the video's seek range.
