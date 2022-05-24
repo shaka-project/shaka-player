@@ -749,7 +749,8 @@ shaka.extern.DashManifestConfiguration;
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string,
  *   ignoreManifestProgramDateTime: boolean,
- *   mediaPlaylistFullMimeType: string
+ *   mediaPlaylistFullMimeType: string,
+ *   keySystemsMapping: !Object.<string, string>
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -778,6 +779,9 @@ shaka.extern.DashManifestConfiguration;
  *   format this value.
  *   <i>Defaults to
  *   <code>'video/mp2t; codecs="avc1.42E01E, mp4a.40.2"'</code>.</i>
+ * @property {Object.<string, string>} keySystemsMapping
+ *   A map of key system name to key system name. Defaults to default key
+ *   systems mapping handled by Shaka.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
