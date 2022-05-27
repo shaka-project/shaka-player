@@ -298,6 +298,13 @@ shaka.extern.Cue = class {
     this.fontFamily;
 
     /**
+     * Text shadow color as a CSS text-shadow value.
+     * @type {string}
+     * @exportDoc
+     */
+    this.textShadow = '';
+
+    /**
      * Text stroke color as a CSS color, e.g. "#FFFFFF" or "white".
      * @type {string}
      * @exportDoc
