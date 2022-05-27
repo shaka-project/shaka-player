@@ -624,6 +624,7 @@ describe('VttTextParser', () => {
   });
 
   it('supports global style blocks', () => {
+    const textShadow = '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black';
     verifyHelper(
         [
           {
@@ -632,6 +633,7 @@ describe('VttTextParser', () => {
             payload: 'Test',
             color: 'cyan',
             fontSize: '10px',
+            textShadow: textShadow,
           },
           {
             startTime: 40,
@@ -639,6 +641,7 @@ describe('VttTextParser', () => {
             payload: 'Test2',
             color: 'cyan',
             fontSize: '10px',
+            textShadow: textShadow,
           },
         ],
         'WEBVTT\n\n' +
@@ -646,6 +649,7 @@ describe('VttTextParser', () => {
         '::cue {\n' +
         'color: cyan;\n'+
         'font-size: 10px;\n'+
+        `text-shadow: ${textShadow};\n`+
         '}\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         'Test\n\n' +
