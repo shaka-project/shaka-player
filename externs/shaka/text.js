@@ -298,6 +298,13 @@ shaka.extern.Cue = class {
     this.fontFamily;
 
     /**
+     * Text shadow color as a CSS text-shadow value.
+     * @type {string}
+     * @exportDoc
+     */
+    this.textShadow = '';
+
+    /**
      * Text letter spacing as a CSS letter-spacing value.
      * @type {string}
      * @exportDoc

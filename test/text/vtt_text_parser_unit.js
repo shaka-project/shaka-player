@@ -570,6 +570,7 @@ describe('VttTextParser', () => {
   });
 
   it('supports global style blocks', () => {
+    const textShadow = '-1px 0 black, 0 1px black, 1px 0 black, 0 -1px black';
     verifyHelper(
         [
           {
@@ -578,6 +579,7 @@ describe('VttTextParser', () => {
             payload: 'Test',
             color: 'cyan',
             fontSize: '10px',
+            textShadow: textShadow,
           },
           {
             startTime: 40,
@@ -585,6 +587,7 @@ describe('VttTextParser', () => {
             payload: 'Test2',
             color: 'cyan',
             fontSize: '10px',
+            textShadow: textShadow,
           },
         ],
         'WEBVTT\n\n' +
@@ -592,6 +595,7 @@ describe('VttTextParser', () => {
         '::cue {\n' +
         'color: cyan;\n'+
         'font-size: 10px;\n'+
+        `text-shadow: ${textShadow};\n`+
         '}\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         'Test\n\n' +
@@ -993,7 +997,7 @@ describe('VttTextParser', () => {
                 startTime: 40,
                 endTime: 50,
                 payload: 'Test',
-                color: 'cyan',
+                color: 'red',
               },
               {
                 startTime: 40,
@@ -1005,11 +1009,13 @@ describe('VttTextParser', () => {
           },
         ],
         'WEBVTT\n\n' +
-        'STYLE\n::cue(v[voice="Shaka"]) { color: cyan; }\n\n' +
+        'STYLE\n' +
+        '::cue(v[voice="Shaka"]) { color: cyan; }\n' +
+        '::cue(v[voice=ShakaBis]) { color: red; }\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         '<v Shaka>Test\n\n' +
         '00:00:40.000 --> 00:00:50.000\n' +
-        '<v Shaka>Test</v><i>2</i>',
+        '<v ShakaBis>Test</v><i>2</i>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
