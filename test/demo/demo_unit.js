@@ -94,7 +94,8 @@ describe('Demo', () => {
           .add('playRangeStart')
           .add('playRangeEnd')
           .add('manifest.dash.keySystemsByURI')
-          .add('manifest.hls.mediaPlaylistFullMimeType');
+          .add('manifest.hls.mediaPlaylistFullMimeType')
+          .add('drm.keySystemsMapping');
 
       /**
        * @param {!Object} section
