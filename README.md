@@ -119,7 +119,7 @@ HLS features supported:
  - Low-latency streaming with partial segments, preload hints, and delta updates
  - Discontinuity
  - ISO-BMFF / MP4 / CMAF support
- - MPEG-2 TS support (transmuxing provided by [mux.js][] v5.7.0+, must be
+ - MPEG-2 TS support (transmuxing provided by [mux.js][] v6.1.0+, must be
    separately included)
  - WebVTT and TTML
  - CEA-608/708 captions
@@ -191,7 +191,7 @@ Shaka Player supports:
       SegmentTemplate@index
     - Not supported in HLS
   - MPEG-2 TS
-    - With help from [mux.js][] v5.7.0+, can be played on any browser which
+    - With help from [mux.js][] v6.1.0+, can be played on any browser which
       supports MP4
     - Can find and parse timestamps to find segment start time in HLS
   - WebVTT
@@ -200,10 +200,10 @@ Shaka Player supports:
     - Supported in both XML form and embedded in MP4
   - CEA-608
     - Supported embedded in MP4
-    - With help from [mux.js][] v5.7.0+, supported embedded in TS
+    - With help from [mux.js][] v6.1.0+, supported embedded in TS
   - CEA-708
     - Supported embedded in MP4
-    - With help from [mux.js][] v5.7.0+, supported embedded in TS
+    - With help from [mux.js][] v6.1.0+, supported embedded in TS
   - SubRip (SRT)
     - UTF-8 encoding only
   - LyRiCs (LRC)
