@@ -333,6 +333,12 @@ shaka.test.FakePlayhead = class {
     /** @private {number} */
     this.startTime_ = 0;
 
+    /** @private {number} */
+    this.gapsJumped_ = 0;
+
+    /** @private {number} */
+    this.stallsDetected_ = 0;
+
     /** @type {!jasmine.Spy} */
     this.setStartTime = jasmine.createSpy('setStartTime')
         .and.callFake((value) => {
@@ -342,6 +348,14 @@ shaka.test.FakePlayhead = class {
     /** @type {!jasmine.Spy} */
     this.getTime = jasmine.createSpy('getTime')
         .and.callFake(() => this.startTime_);
+
+    /** @type {!jasmine.Spy} */
+    this.getGapsJumped = jasmine.createSpy('getGapsJumped')
+        .and.callFake(() => this.gapsJumped_);
+
+    /** @type {!jasmine.Spy} */
+    this.getStallsDetected = jasmine.createSpy('getTime')
+        .and.callFake(() => this.stallsDetected_);
 
     /** @type {!jasmine.Spy} */
     this.setBuffering = jasmine.createSpy('setBuffering');

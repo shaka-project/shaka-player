@@ -109,6 +109,14 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
           this.currentStats_[name], false) + ' (m)';
     };
 
+    const parseGaps = (name) => {
+      return this.currentStats_[name] + ' (gaps)';
+    };
+
+    const parseStalls = (name) => {
+      return this.currentStats_[name] + ' (stalls)';
+    };
+
     /** @private {!Object.<string, function(string):string>} */
     this.parseFrom_ = {
       'width': parsePx,
@@ -128,6 +136,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       'corruptedFrames': parseFrames,
       'decodedFrames': parseFrames,
       'droppedFrames': parseFrames,
+      'stallsDetected': parseStalls,
+      'gapsJumped': parseGaps,
     };
 
     /** @private {shaka.util.Timer} */

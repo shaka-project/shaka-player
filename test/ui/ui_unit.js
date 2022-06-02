@@ -809,12 +809,25 @@ describe('UI', () => {
         }
       });
       it('is updated periodically', async () => {
-        function getStatsFromContainer() {
+        // There is no guaranteed ordering, so fetch by the stat name.
+        function getStatsElementByName(name) {
           const nodes = statisticsContainer.childNodes;
-          width = nodes[0].childNodes[1].textContent.replace(' (px)', '');
-          height = nodes[1].childNodes[1].textContent.replace(' (px)', '');
-          bufferingTime =
-              nodes[13].childNodes[1].textContent.replace(' (s)', '');
+          for (const node of nodes) {
+            if (node.hasChildNodes() &&
+                node.childNodes[0].textContent.includes(name)) {
+              return node;
+            }
+          }
+          return null;
+        }
+
+        function getStatsFromContainer() {
+          width = getStatsElementByName(
+              'width').childNodes[1].textContent.replace(' (px)', '');
+          height = getStatsElementByName(
+              'height').childNodes[1].textContent.replace(' (px)', '');
+          bufferingTime = getStatsElementByName(
+              'bufferingTime').childNodes[1].textContent.replace(' (s)', '');
         }
 
         /** @type {!string} */
