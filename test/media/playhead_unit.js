@@ -21,12 +21,15 @@ let TimeRange;
  *   start: number,
  *   waitingAt: number,
  *   expectedEndTime: number,
+ *   expectEvent: boolean,
  * }}
  *
  * @description
  * Parameters for a test where we start playing inside a buffered range and play
  * until the end of the buffer.  Then, if we expect it, Playhead should jump
- * to the expected time.
+ * to the expected time. We should get a 'stalldetected' event when the Playhead
+ * detects a stall through the StallDetector, and a 'gapjumped' event when the
+ * Playhead jumps over a gap in the buffered range(s).
  *
  * @property {!Array.<TimeRange>} buffered
  *   The buffered ranges for the test.
@@ -36,6 +39,9 @@ let TimeRange;
  *   The time to pause at and fire a 'waiting' event.
  * @property {number} expectedEndTime
  *   The expected time at the end of the test.
+ * @property {boolean} expectEvent
+ *   If true, expect either the 'stalldetected' or 'gapjumped' event to be
+ *   fired.
  */
 let PlayingTestInfo;
 
@@ -47,6 +53,7 @@ let PlayingTestInfo;
  *   start: number,
  *   seekTo: number,
  *   expectedEndTime: number,
+ *   expectEvent: boolean,
  * }}
  *
  * @description
@@ -65,6 +72,9 @@ let PlayingTestInfo;
  *   The time to seek to.
  * @property {number} expectedEndTime
  *   The expected time at the end of the test.
+ * @property {boolean} expectEvent
+ *   If true, expect either the 'stalldetected' or 'gapjumped' event to be
+ *   fired.
  */
 let SeekTestInfo;
 
@@ -87,6 +97,10 @@ describe('Playhead', () => {
   /** @type {!jasmine.Spy} */
   let onSeek;
 
+  // Callback to us from Playhead when an event should be sent to the app.
+  /** @type {!jasmine.Spy} */
+  let onEvent;
+
   beforeAll(() => {
     jasmine.clock().install();
   });
@@ -100,6 +114,7 @@ describe('Playhead', () => {
     timeline = new shaka.test.FakePresentationTimeline();
 
     onSeek = jasmine.createSpy('onSeek');
+    onEvent = jasmine.createSpy('onEvent');
 
     timeline.isLive.and.returnValue(false);
     timeline.getSeekRangeStart.and.returnValue(5);
@@ -143,7 +158,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 5,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(video.currentTime).toBe(5);
       expect(playhead.getTime()).toBe(5);
@@ -163,7 +179,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 5,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'loadedmetadata', jasmine.any(Function), jasmine.anything());
@@ -203,7 +220,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 5,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       video.on['seeking']();
       expect(playhead.getTime()).toBe(5);
@@ -221,7 +239,12 @@ describe('Playhead', () => {
       timeline.getSeekRangeEnd.and.returnValue(60);
 
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, /* startTime= */ 0, Util.spyFunc(onSeek));
+          video,
+          manifest,
+          config,
+          /* startTime= */ 0,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(0);
     });
@@ -234,7 +257,12 @@ describe('Playhead', () => {
       timeline.getDuration.and.returnValue(60);
 
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, /* startTime= */ 60, Util.spyFunc(onSeek));
+          video,
+          manifest,
+          config,
+          /* startTime= */ 60,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(59);  // duration - durationBackoff
       expect(video.currentTime).toBe(59);  // duration - durationBackoff
@@ -248,7 +276,12 @@ describe('Playhead', () => {
       timeline.getSeekRangeEnd.and.returnValue(60);
 
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, /* startTime= */ -15, Util.spyFunc(onSeek));
+          video,
+          manifest,
+          config,
+          /* startTime= */ -15,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(45);
     });
@@ -262,7 +295,12 @@ describe('Playhead', () => {
       // If the live stream's playback offset time is not available, start
       // playing from the seek range start time.
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, /* startTime= */ -40, Util.spyFunc(onSeek));
+          video,
+          manifest,
+          config,
+          /* startTime= */ -40,
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(30);
     });
@@ -273,7 +311,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 5,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'loadedmetadata', jasmine.any(Function), jasmine.anything());
@@ -305,7 +344,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ null,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'loadedmetadata', jasmine.any(Function), jasmine.anything());
@@ -337,7 +377,8 @@ describe('Playhead', () => {
         manifest,
         config,
         /* startTime= */ 5,
-        Util.spyFunc(onSeek));
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
 
     // This has to periodically increment the mock date to allow the onSeeking_
     // handler to seek, if appropriate.
@@ -496,7 +537,8 @@ describe('Playhead', () => {
         manifest,
         config,
         /* startTime= */ 5,
-        Util.spyFunc(onSeek));
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
 
     setMockDate(0);
     video.on['seeking']();
@@ -544,7 +586,8 @@ describe('Playhead', () => {
         manifest,
         config,
         /* startTime= */ 5,
-        Util.spyFunc(onSeek));
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
 
     // First, seek to start time.
     video.currentTime = 0;
@@ -604,7 +647,8 @@ describe('Playhead', () => {
         manifest,
         config,
         /* startTime= */ 5,
-        Util.spyFunc(onSeek));
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
     expect(currentTime).toBe(1000);
     seekCount = 0;
 
@@ -649,7 +693,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 5,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       video.on['seeking']();
       expect(video.currentTime).toBe(5);
@@ -680,7 +725,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 5,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       video.on['seeking']();
       expect(video.currentTime).toBe(5);
@@ -714,7 +760,8 @@ describe('Playhead', () => {
         manifest,
         config,
         /* startTime= */ 30,
-        Util.spyFunc(onSeek));
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
 
     video.currentTime = 0;
     video.seeking = true;
@@ -759,7 +806,8 @@ describe('Playhead', () => {
         manifest,
         config,
         /* startTime= */ 30,
-        Util.spyFunc(onSeek));
+        Util.spyFunc(onSeek),
+        Util.spyFunc(onEvent));
 
     /**
      * Prevent retries on the initial start time seek.  This will ensure that
@@ -798,6 +846,7 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}],
           start: 3,
           waitingAt: 10,
+          expectEvent: false,
           expectedEndTime: 10,
         });
 
@@ -805,6 +854,7 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}, {start: 20, end: 30}],
           start: 24,
           waitingAt: 30,
+          expectEvent: false,
           expectedEndTime: 30,
         });
 
@@ -812,6 +862,7 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}, {start: 11, end: 20}],
           start: 5,
           waitingAt: 10,
+          expectEvent: true,
           expectedEndTime: 11,
         });
 
@@ -820,6 +871,7 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 11, end: 20}, {start: 21, end: 30}],
           start: 5,
           waitingAt: 10,
+          expectEvent: true,
           expectedEndTime: 11,
         });
 
@@ -828,6 +880,7 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 11, end: 20}, {start: 21, end: 30}],
           start: 15,
           waitingAt: 20,
+          expectEvent: true,
           expectedEndTime: 21,
         });
       });  // with small gaps
@@ -837,6 +890,7 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
           start: 5,
           waitingAt: 10,
+          expectEvent: true,
           expectedEndTime: 30,
         });
 
@@ -845,6 +899,7 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 30, end: 40}, {start: 50, end: 60}],
           start: 5,
           waitingAt: 10,
+          expectEvent: true,
           expectedEndTime: 30,
         });
 
@@ -853,6 +908,7 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 20, end: 30}, {start: 50, end: 60}],
           start: 24,
           waitingAt: 30,
+          expectEvent: true,
           expectedEndTime: 50,
         });
       });  // with large gaps
@@ -867,12 +923,15 @@ describe('Playhead', () => {
           video.currentTime = data.start;
           video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
+          onEvent.and.callFake((event) => {});
+
           playhead = new shaka.media.MediaSourcePlayhead(
               video,
               manifest,
               config,
               /* startTime= */ data.start,
-              Util.spyFunc(onSeek));
+              Util.spyFunc(onSeek),
+              Util.spyFunc(onEvent));
 
           jasmine.clock().tick(500);
           for (let time = data.start; time < data.waitingAt; time++) {
@@ -893,11 +952,14 @@ describe('Playhead', () => {
             expect(video.currentTime).toBe(time + 0.4);
           }
 
+          expect(onEvent).not.toHaveBeenCalled();
+
           video.currentTime = data.waitingAt;
           video.readyState = HTMLMediaElement.HAVE_CURRENT_DATA;
           video.on['waiting']();
           jasmine.clock().tick(500);
 
+          expect(onEvent).toHaveBeenCalledTimes(data.expectEvent ? 1 : 0);
           expect(video.currentTime).toBe(data.expectedEndTime);
         });
       }
@@ -909,6 +971,7 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}],
           start: 4,
           seekTo: 14,
+          expectEvent: false,
           expectedEndTime: 14,
         });
 
@@ -916,6 +979,7 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}, {start: 11, end: 20}],
           start: 3,
           seekTo: 10.4,
+          expectEvent: true,
           expectedEndTime: 11,
         });
 
@@ -924,6 +988,7 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 11, end: 20}, {start: 21, end: 30}],
           start: 3,
           seekTo: 10.4,
+          expectEvent: true,
           expectedEndTime: 11,
         });
 
@@ -932,6 +997,7 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 11, end: 20}, {start: 21, end: 30}],
           start: 3,
           seekTo: 20.5,
+          expectEvent: true,
           expectedEndTime: 21,
         });
 
@@ -939,6 +1005,7 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
           start: 3,
           seekTo: 29.2,
+          expectEvent: true,
           expectedEndTime: 30,
         });
       });  // with small gaps
@@ -948,6 +1015,7 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
           start: 5,
           seekTo: 12,
+          expectEvent: true,
           expectedEndTime: 30,
         });
       });  // with large gaps
@@ -961,6 +1029,7 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}, {start: 31, end: 40}],
           start: 3,
           seekTo: 22,
+          expectEvent: false,
           expectedEndTime: 22,
         });
 
@@ -971,6 +1040,7 @@ describe('Playhead', () => {
           newBuffered: [{start: 0.2, end: 10}],
           start: 4,
           seekTo: 0,
+          expectEvent: true,
           expectedEndTime: 0.2,
         });
 
@@ -980,6 +1050,7 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}, {start: 31, end: 40}],
           start: 3,
           seekTo: 30.2,
+          expectEvent: true,
           expectedEndTime: 31,
         });
 
@@ -989,6 +1060,7 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}, {start: 31, end: 40}],
           start: 3,
           seekTo: 30,
+          expectEvent: true,
           expectedEndTime: 31,
         });
 
@@ -998,6 +1070,7 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}],
           start: 3,
           seekTo: 34,
+          expectEvent: false,
           expectedEndTime: 34,
         });
 
@@ -1007,6 +1080,7 @@ describe('Playhead', () => {
           newBuffered: [{start: 0, end: 10}],
           start: 24,
           seekTo: 4,
+          expectEvent: false,
           expectedEndTime: 4,
         });
 
@@ -1017,6 +1091,7 @@ describe('Playhead', () => {
           // should still be waiting.
           start: 24,
           seekTo: 4,
+          expectEvent: false,
           expectedEndTime: 4,
         });
 
@@ -1026,6 +1101,7 @@ describe('Playhead', () => {
           newBuffered: [{start: 2, end: 10}],
           start: 24,
           seekTo: 1.6,
+          expectEvent: true,
           expectedEndTime: 2,
         });
       });  // with small gaps
@@ -1036,6 +1112,7 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}],
           start: 25,
           seekTo: 0,
+          expectEvent: true,
           expectedEndTime: 20,
         });
 
@@ -1045,6 +1122,7 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}, {start: 40, end: 50}],
           start: 3,
           seekTo: 32,
+          expectEvent: true,
           expectedEndTime: 40,
         });
       });  // with large gaps
@@ -1061,9 +1139,11 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 12,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       jasmine.clock().tick(500);
+      expect(onEvent).not.toHaveBeenCalled();
 
       // Append a segment before seeking.
       playhead.notifyOfBufferingChange();
@@ -1107,7 +1187,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 0,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       playhead.notifyOfBufferingChange();
       jasmine.clock().tick(500);
@@ -1128,7 +1209,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 5,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       playhead.notifyOfBufferingChange();
       jasmine.clock().tick(500);
@@ -1151,7 +1233,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 0,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       playhead.notifyOfBufferingChange();
       jasmine.clock().tick(500);
@@ -1174,7 +1257,8 @@ describe('Playhead', () => {
           manifest,
           config,
           /* startTime= */ 0,
-          Util.spyFunc(onSeek));
+          Util.spyFunc(onSeek),
+          Util.spyFunc(onEvent));
 
       playhead.notifyOfBufferingChange();
       jasmine.clock().tick(500);
@@ -1193,14 +1277,18 @@ describe('Playhead', () => {
         video.currentTime = data.start;
         video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
+        onEvent.and.callFake((event) => {});
+
         playhead = new shaka.media.MediaSourcePlayhead(
             video,
             manifest,
             config,
             /* startTime= */ data.start,
-            Util.spyFunc(onSeek));
+            Util.spyFunc(onSeek),
+            Util.spyFunc(onEvent));
 
         jasmine.clock().tick(500);
+        expect(onEvent).not.toHaveBeenCalled();
 
         // Seek to the given position and update ready state.
         video.currentTime = data.seekTo;
@@ -1232,6 +1320,7 @@ describe('Playhead', () => {
           jasmine.clock().tick(250);
         }
 
+        expect(onEvent).toHaveBeenCalledTimes(data.expectEvent ? 1 : 0);
         expect(video.currentTime).toBe(data.expectedEndTime);
       });
     }

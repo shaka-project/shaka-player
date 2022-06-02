@@ -82,6 +82,9 @@ shaka.extern.StateChange;
  *
  *   maxSegmentDuration: number,
  *
+ *   gapsJumped: number,
+ *   stallsDetected: number,
+ *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
  * }}
@@ -111,6 +114,11 @@ shaka.extern.StateChange;
  *   <code>NaN</code> if this is not supported by the browser.
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
+ *
+ * @property {number} gapsJumped
+ *   The total number of playback gaps jumped by the GapJumpingController.
+ * @property {number} stallsDetected
+ *   The total number of playback stalls detected by the StallDetector.
  *
  * @property {number} completionPercent
  *   This is the greatest completion percent that the user has experienced in
