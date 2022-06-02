@@ -38,7 +38,7 @@ import shakaBuildHelpers
 
 _INDENTATION = '  '
 
-# These are Google's "Tier 1" languages as of April 2019.
+# These are Google's "Tier 1" languages as of June 2022.
 DEFAULT_LOCALES = [
     'ar',
     'de',
@@ -56,6 +56,7 @@ DEFAULT_LOCALES = [
     'ru',
     'th',
     'tr',
+    'vi',
     'zh',
     'zh-TW',
 ]
