@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.2.8](https://github.com/shaka-project/shaka-player/compare/v3.2.7...v3.2.8) (2022-06-02)
+
+
+### Bug Fixes
+
+* **abr:** use Network Info API in ABR getBandwidthEstimate ([#4263](https://github.com/shaka-project/shaka-player/issues/4263)) ([1694b99](https://github.com/shaka-project/shaka-player/commit/1694b995b9b608ae396aa84e4e161e2878b2e14c))
+* Don't send drmsessionupdate after unload ([#4248](https://github.com/shaka-project/shaka-player/issues/4248)) ([f404c88](https://github.com/shaka-project/shaka-player/commit/f404c88bbe001edf44d7ba6f6ab24e1fb60cfcc9))
+* Fix audio mime type in multiplexed HLS stream ([#4241](https://github.com/shaka-project/shaka-player/issues/4241)) ([0c0d6a2](https://github.com/shaka-project/shaka-player/commit/0c0d6a22396cdc71c7a624ff485895aa1355a45d))
+* **HLS:** Fix duplicate hinted segments ([#4258](https://github.com/shaka-project/shaka-player/issues/4258)) ([4c8e8e7](https://github.com/shaka-project/shaka-player/commit/4c8e8e7d75e7060f2c9468725206a456a3059faa)), closes [#4223](https://github.com/shaka-project/shaka-player/issues/4223)
+* **ui:** Widen touchable button area ([#3249](https://github.com/shaka-project/shaka-player/issues/3249)) ([f32e6aa](https://github.com/shaka-project/shaka-player/commit/f32e6aa96d29b39fb05d60c0057126293139103a))
+
 ### [3.2.7](https://github.com/shaka-project/shaka-player/compare/v3.2.6...v3.2.7) (2022-05-17)
 
 
