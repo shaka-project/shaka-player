@@ -104,7 +104,7 @@ def _GetDefaultBrowsers():
     return ['Chrome','Edge','Firefox','Safari']
 
   if shakaBuildHelpers.is_windows() or shakaBuildHelpers.is_cygwin():
-    return ['Chrome','Edge','Firefox','IE']
+    return ['Chrome','Edge','Firefox']
 
   raise Error('Unrecognized system: %s' % platform.uname()[0])
 
