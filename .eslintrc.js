@@ -175,13 +175,6 @@ module.exports = {
       // verbatim through the compiler.
       'markers': ['*', '!'],
     }],
-    'require-jsdoc': ['error', {
-      'require': {
-        'FunctionDeclaration': true,
-        'MethodDefinition': true,
-        'ClassDeclaration': true,
-      },
-    }],
     // }}}
 
     // "ECMAScript 6" rules: {{{
