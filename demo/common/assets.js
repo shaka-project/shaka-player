@@ -84,7 +84,7 @@ shakaAssets.identifierForKeySystem = (keySystem) => {
   const KeySystem = shakaAssets.KeySystem;
   switch (keySystem) {
     case KeySystem.CLEAR_KEY: return 'org.w3.clearkey';
-    case KeySystem.FAIRPLAY: return 'com.apple.fps.1_0';
+    case KeySystem.FAIRPLAY: return 'com.apple.fps';
     case KeySystem.PLAYREADY: return 'com.microsoft.playready';
     case KeySystem.WIDEVINE: return 'com.widevine.alpha';
     default: return 'no drm protection';
