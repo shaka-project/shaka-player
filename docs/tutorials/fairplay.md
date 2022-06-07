@@ -61,3 +61,43 @@ player.getNetworkingEngine().registerResponseFilter((type, response) => {
   response.data = shaka.util.Uint8ArrayUtils.fromBase64(responseText).buffer;
 });
 ```
+
+## Integration with some DRMs providers
+
+### EZDRM
+
+For integration with EZDRM the following can be used:
+
+```js
+const FairPlayUtils = shaka.util.FairPlayUtils;
+player.getNetworkingEngine()
+    .registerRequestFilter(FairPlayUtils.ezdrmFairPlayRequest);
+player.getNetworkingEngine()
+    .registerResponseFilter(FairPlayUtils.commonFairPlayResponse);
+```
+
+Note: If the url of the license server has to undergo any transformation
+(eg: add the contentId), you would have to create your filter manually.
+
+```js
+player.getNetworkingEngine().registerRequestFilter((type, request) => {
+  if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
+    return;
+  }
+  const uri = request.uris;
+  const FairPlayUtils = shaka.util.FairPlayUtils;
+  const contentId = FairPlayUtils.defaultGetContentId(request.initData);
+  const newUri = uri.replace('^assetId^', contentId);
+  request.uris = [newUri];
+  request.headers['Content-Type'] = 'application/octet-stream'
+});
+```
+
+### Conax
+
+Comming soon
+
+
+### Verimatrix
+
+Comming soon
