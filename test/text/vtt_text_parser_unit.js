@@ -1008,6 +1008,32 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
+  it('supports karaoke style text', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20, endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: 'Test',
+              },
+              {
+                startTime: 25,
+                endTime: 40,
+                payload: ' 1',
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.00 --> 00:00:40.00\n' +
+        'Test<00:00:25.00> 1',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
   it('supports default color overriding', () => {
     verifyHelper(
         [
