@@ -2021,6 +2021,10 @@ describe('HlsParser', () => {
   });
 
   describe('produces syncTime', () => {
+    // Corresponds to "2000-01-01T00:00:00.00Z".
+    // All the PROGRAM-DATE-TIME values in the tests below are at or after this.
+    const syncTimeBase = 946684800;
+
     /**
      * @param {number} startTime
      * @param {number} endTime
@@ -2039,9 +2043,10 @@ describe('HlsParser', () => {
     /**
      * @param {string} media
      * @param {!Array.<number>} startTimes
+     * @param {number} syncTimeOffset
      * @param {(function(!shaka.media.SegmentReference))=} modifyFn
      */
-    async function test(media, startTimes, modifyFn) {
+    async function test(media, startTimes, syncTimeOffset, modifyFn) {
       const master = [
         '#EXTM3U\n',
         '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,vtt",',
@@ -2053,7 +2058,8 @@ describe('HlsParser', () => {
       for (let i = 0; i < startTimes.length - 1; i++) {
         const startTime = startTimes[i];
         const endTime = startTimes[i + 1];
-        const reference = makeReference(startTime, endTime, startTime);
+        const reference = makeReference(
+            startTime, endTime, syncTimeOffset + startTime);
         if (modifyFn) {
           modifyFn(reference);
         }
@@ -2100,7 +2106,7 @@ describe('HlsParser', () => {
         '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:25.00Z\n',
         '#EXTINF:5,\n',
         'main.mp4',
-      ].join(''), [0, 5, 10, 15, 20, 25]);
+      ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5);
     });
 
     it('when some EXT-X-PROGRAM-DATE-TIME values are missing', async () => {
@@ -2122,7 +2128,7 @@ describe('HlsParser', () => {
         'main.mp4\n',
         '#EXTINF:4,\n',
         'main.mp4',
-      ].join(''), [0, 2, 7, 12, 17, 19, 23]);
+      ].join(''), [0, 2, 7, 12, 17, 19, 23], syncTimeBase + 8);
     });
 
     it('except when ignoreManifestProgramDateTime is set', async () => {
@@ -2148,7 +2154,7 @@ describe('HlsParser', () => {
         '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:25.00Z\n',
         '#EXTINF:5,\n',
         'main.mp4',
-      ].join(''), [0, 5, 10, 15, 20, 25], (reference) => {
+      ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5, (reference) => {
         reference.syncTime = null;
       });
     });
@@ -2176,11 +2182,11 @@ describe('HlsParser', () => {
         '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:25.00Z\n',
         '#EXTINF:5,\n',
         'main.mp4',
-      ].join(''), [0, 5, 10, 15, 20, 25], (reference) => {
+      ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5, (reference) => {
         if (reference.startTime == 10) {
           reference.partialReferences = [
-            makeReference(10, 12.5, 10),
-            makeReference(12.5, 15, 12.5),
+            makeReference(10, 12.5, syncTimeBase + 15),
+            makeReference(12.5, 15, syncTimeBase + 17.5),
           ];
         }
       });
