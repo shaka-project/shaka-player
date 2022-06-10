@@ -3561,4 +3561,92 @@ describe('HlsParser', () => {
 
     await testHlsParser(media, '', manifest);
   });
+
+  it('syncs on sequence with ignoreManifestProgramDateTime', async () => {
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.hls.ignoreManifestProgramDateTime = true;
+    parser.configure(config);
+
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:1\n',
+      '#EXTINF:5,\n',
+      'video1.mp4\n',
+      '#EXTINF:5,\n',
+      'video2.mp4\n',
+      '#EXTINF:5,\n',
+      'video3.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:3\n',
+      '#EXTINF:5,\n',
+      'audio3.mp4\n',
+      '#EXTINF:5,\n',
+      'audio4.mp4\n',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = true;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.language = 'en';
+        variant.bandwidth = 200;
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.mime('video/mp4', 'avc1');
+          stream.size(960, 540);
+          stream.frameRate = 60;
+        });
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.language = 'en';
+          stream.mime('audio/mp4', 'mp4a');
+        });
+      });
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseValue('test:/init.mp4', initSegmentData);
+
+    const actualManifest = await parser.start('test:/master', playerInterface);
+    expect(actualManifest).toEqual(manifest);
+
+    const actualVideo = actualManifest.variants[0].video;
+    await actualVideo.createSegmentIndex();
+    goog.asserts.assert(actualVideo.segmentIndex != null, 'Null segmentIndex!');
+
+    const actualAudio = actualManifest.variants[0].audio;
+    await actualAudio.createSegmentIndex();
+    goog.asserts.assert(actualAudio.segmentIndex != null, 'Null segmentIndex!');
+
+    // Verify that the references are aligned on sequence number.
+    const videoSegments = Array.from(actualVideo.segmentIndex);
+    const audioSegments = Array.from(actualAudio.segmentIndex);
+
+    // The first two were dropped to align with the audio.
+    expect(videoSegments.map((ref) => ref.getUris()[0])).toEqual([
+      'test:/video3.mp4',
+    ]);
+    // Audio has a 4th segment that video doesn't, but that doesn't get clipped
+    // or used as the base.  Alignment is truly based on media sequence number.
+    expect(audioSegments.map((ref) => ref.getUris()[0])).toEqual([
+      'test:/audio3.mp4',
+      'test:/audio4.mp4',
+    ]);
+  });
 });
