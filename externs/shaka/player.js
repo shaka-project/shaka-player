@@ -766,8 +766,10 @@ shaka.extern.DashManifestConfiguration;
  *   <i>Defaults to <code>'avc1.42E01E'</code>.</i>
  * @property {boolean} ignoreManifestProgramDateTime
  *   If <code>true</code>, the HLS parser will ignore the
- *   <code>EXT-X-PROGRAM-DATE-TIME</code> tags in the manifest.
- *   Meant for tags that are incorrect or malformed.
+ *   <code>EXT-X-PROGRAM-DATE-TIME</code> tags in the manifest and use media
+ *   sequence numbers instead.
+ *   Meant for streams where <code>EXT-X-PROGRAM-DATE-TIME</code> is incorrect
+ *   or malformed.
  *   <i>Defaults to <code>false</code>.</i>
  * @property {string} mediaPlaylistFullMimeType
  *   A string containing a full mime type, including both the basic mime type
