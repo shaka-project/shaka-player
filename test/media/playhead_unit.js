@@ -4,14 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
-goog.require('shaka.media.MediaSourcePlayhead');
-goog.require('shaka.test.FakePresentationTimeline');
-goog.require('shaka.test.FakeVideo');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.PlayerConfiguration');
-goog.requireType('shaka.media.Playhead');
-
 /**
  * @typedef {{start: number, end: number}}
  *
@@ -30,15 +22,14 @@ let TimeRange;
  *   waitingAt: number,
  *   expectedEndTime: number,
  *   expectEvent: boolean,
- *   jumpLargeGaps: (boolean|undefined),
- *   preventDefault: (boolean|undefined)
  * }}
  *
  * @description
  * Parameters for a test where we start playing inside a buffered range and play
  * until the end of the buffer.  Then, if we expect it, Playhead should jump
- * to the expected time.  Also, if the gap is large, we should get a 'largegap'
- * event from the Playhead, which we may optionally suppress.
+ * to the expected time. We should get a 'stalldetected' event when the Playhead
+ * detects a stall through the StallDetector, and a 'gapjumped' event when the
+ * Playhead jumps over a gap in the buffered range(s).
  *
  * @property {!Array.<TimeRange>} buffered
  *   The buffered ranges for the test.
@@ -49,11 +40,8 @@ let TimeRange;
  * @property {number} expectedEndTime
  *   The expected time at the end of the test.
  * @property {boolean} expectEvent
- *   If true, expect the 'largegap' event to be fired.
- * @property {(boolean|undefined)} jumpLargeGaps
- *   If given, set this field of the Playhead configuration.
- * @property {(boolean|undefined)} preventDefault
- *   If true, call preventDefault() on the 'largegap' event.
+ *   If true, expect either the 'stalldetected' or 'gapjumped' event to be
+ *   fired.
  */
 let PlayingTestInfo;
 
@@ -66,16 +54,12 @@ let PlayingTestInfo;
  *   seekTo: number,
  *   expectedEndTime: number,
  *   expectEvent: boolean,
- *   jumpLargeGaps: (boolean|undefined),
- *   preventDefault: (boolean|undefined)
  * }}
  *
  * @description
  * Parameters for a test where we start playing inside a buffered range and seek
  * to a given time, which may have different buffered ranges.  If we are in a
- * gap, Playhead should jump the gap to the expected time.  Also, if the gap is
- * large, we should get a 'largegap' event from the Playhead, which we may
- * optionally suppress.
+ * gap, Playhead should jump the gap to the expected time.
  *
  * @property {!Array.<TimeRange>} buffered
  *   The buffered ranges for the test.
@@ -89,11 +73,8 @@ let PlayingTestInfo;
  * @property {number} expectedEndTime
  *   The expected time at the end of the test.
  * @property {boolean} expectEvent
- *   If true, expect the 'largegap' event to be fired.
- * @property {(boolean|undefined)} jumpLargeGaps
- *   If given, set this field of the Playhead configuration.
- * @property {(boolean|undefined)} preventDefault
- *   If true, call preventDefault() on the 'largegap' event.
+ *   If true, expect either the 'stalldetected' or 'gapjumped' event to be
+ *   fired.
  */
 let SeekTestInfo;
 
@@ -258,7 +239,11 @@ describe('Playhead', () => {
       timeline.getSeekRangeEnd.and.returnValue(60);
 
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, /* startTime= */ 0, Util.spyFunc(onSeek),
+          video,
+          manifest,
+          config,
+          /* startTime= */ 0,
+          Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(0);
@@ -272,7 +257,11 @@ describe('Playhead', () => {
       timeline.getDuration.and.returnValue(60);
 
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, /* startTime= */ 60, Util.spyFunc(onSeek),
+          video,
+          manifest,
+          config,
+          /* startTime= */ 60,
+          Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(59);  // duration - durationBackoff
@@ -287,7 +276,11 @@ describe('Playhead', () => {
       timeline.getSeekRangeEnd.and.returnValue(60);
 
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, /* startTime= */ -15, Util.spyFunc(onSeek),
+          video,
+          manifest,
+          config,
+          /* startTime= */ -15,
+          Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(45);
@@ -302,7 +295,11 @@ describe('Playhead', () => {
       // If the live stream's playback offset time is not available, start
       // playing from the seek range start time.
       playhead = new shaka.media.MediaSourcePlayhead(
-          video, manifest, config, /* startTime= */ -40, Util.spyFunc(onSeek),
+          video,
+          manifest,
+          config,
+          /* startTime= */ -40,
+          Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
       expect(playhead.getTime()).toBe(30);
@@ -841,8 +838,6 @@ describe('Playhead', () => {
       timeline.getSeekRangeStart.and.returnValue(0);
       timeline.getSeekRangeEnd.and.returnValue(60);
       timeline.getDuration.and.returnValue(60);
-
-      config.smallGapLimit = 1;
     });
 
     describe('when playing', () => {
@@ -867,7 +862,7 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}, {start: 11, end: 20}],
           start: 5,
           waitingAt: 10,
-          expectEvent: false,
+          expectEvent: true,
           expectedEndTime: 11,
         });
 
@@ -876,7 +871,7 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 11, end: 20}, {start: 21, end: 30}],
           start: 5,
           waitingAt: 10,
-          expectEvent: false,
+          expectEvent: true,
           expectedEndTime: 11,
         });
 
@@ -885,25 +880,16 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 11, end: 20}, {start: 21, end: 30}],
           start: 15,
           waitingAt: 20,
-          expectEvent: false,
+          expectEvent: true,
           expectedEndTime: 21,
         });
       });  // with small gaps
 
       describe('with large gaps', () => {
-        playingTest('will fire an event', {
-          buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
-          start: 5,
-          waitingAt: 10,
-          expectEvent: true,
-          expectedEndTime: 10,
-        });
-
         playingTest('will jump large gaps if set', {
           buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
           start: 5,
           waitingAt: 10,
-          jumpLargeGaps: true,
           expectEvent: true,
           expectedEndTime: 30,
         });
@@ -913,7 +899,6 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 30, end: 40}, {start: 50, end: 60}],
           start: 5,
           waitingAt: 10,
-          jumpLargeGaps: true,
           expectEvent: true,
           expectedEndTime: 30,
         });
@@ -923,19 +908,8 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 20, end: 30}, {start: 50, end: 60}],
           start: 24,
           waitingAt: 30,
-          jumpLargeGaps: true,
           expectEvent: true,
           expectedEndTime: 50,
-        });
-
-        playingTest('won\'t jump gaps when preventDefault() is called', {
-          buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
-          start: 5,
-          waitingAt: 10,
-          jumpLargeGaps: true,
-          preventDefault: true,
-          expectEvent: true,
-          expectedEndTime: 10,
         });
       });  // with large gaps
 
@@ -949,13 +923,8 @@ describe('Playhead', () => {
           video.currentTime = data.start;
           video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
-          onEvent.and.callFake((event) => {
-            if (data.preventDefault) {
-              event.preventDefault();
-            }
-          });
+          onEvent.and.callFake((event) => {});
 
-          config.jumpLargeGaps = !!data.jumpLargeGaps;
           playhead = new shaka.media.MediaSourcePlayhead(
               video,
               manifest,
@@ -1002,16 +971,16 @@ describe('Playhead', () => {
           buffered: [{start: 0, end: 10}],
           start: 4,
           seekTo: 14,
-          expectedEndTime: 14,
           expectEvent: false,
+          expectedEndTime: 14,
         });
 
         seekTest('will jump when seeking into gap', {
           buffered: [{start: 0, end: 10}, {start: 11, end: 20}],
           start: 3,
           seekTo: 10.4,
+          expectEvent: true,
           expectedEndTime: 11,
-          expectEvent: false,
         });
 
         seekTest('won\'t jump multiple buffers', {
@@ -1019,8 +988,8 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 11, end: 20}, {start: 21, end: 30}],
           start: 3,
           seekTo: 10.4,
+          expectEvent: true,
           expectedEndTime: 11,
-          expectEvent: false,
         });
 
         seekTest('will jump into last range with seeking', {
@@ -1028,45 +997,26 @@ describe('Playhead', () => {
               [{start: 0, end: 10}, {start: 11, end: 20}, {start: 21, end: 30}],
           start: 3,
           seekTo: 20.5,
+          expectEvent: true,
           expectedEndTime: 21,
-          expectEvent: false,
         });
 
         seekTest('treats large gaps as small if playhead near end', {
           buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
           start: 3,
           seekTo: 29.2,
+          expectEvent: true,
           expectedEndTime: 30,
-          expectEvent: false,
         });
       });  // with small gaps
 
       describe('with large gaps', () => {
-        seekTest('will raise event', {
-          buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
-          start: 5,
-          seekTo: 12,
-          expectedEndTime: 12,
-          expectEvent: true,
-        });
-
         seekTest('will jump large gaps', {
           buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
           start: 5,
           seekTo: 12,
-          jumpLargeGaps: true,
+          expectEvent: true,
           expectedEndTime: 30,
-          expectEvent: true,
-        });
-
-        seekTest('won\'t jump if preventDefault() is called', {
-          buffered: [{start: 0, end: 10}, {start: 30, end: 40}],
-          start: 5,
-          seekTo: 12,
-          jumpLargeGaps: true,
-          preventDefault: true,
-          expectedEndTime: 12,
-          expectEvent: true,
         });
       });  // with large gaps
     });  // with buffered seeks
@@ -1079,8 +1029,8 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}, {start: 31, end: 40}],
           start: 3,
           seekTo: 22,
-          expectedEndTime: 22,
           expectEvent: false,
+          expectedEndTime: 22,
         });
 
         // Seeking to the beginning is considered an unbuffered seek even if
@@ -1090,8 +1040,8 @@ describe('Playhead', () => {
           newBuffered: [{start: 0.2, end: 10}],
           start: 4,
           seekTo: 0,
+          expectEvent: true,
           expectedEndTime: 0.2,
-          expectEvent: false,
         });
 
         seekTest('will jump when seeking into gap', {
@@ -1100,8 +1050,8 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}, {start: 31, end: 40}],
           start: 3,
           seekTo: 30.2,
+          expectEvent: true,
           expectedEndTime: 31,
-          expectEvent: false,
         });
 
         seekTest('will jump when seeking to the end of a range', {
@@ -1110,8 +1060,8 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}, {start: 31, end: 40}],
           start: 3,
           seekTo: 30,
+          expectEvent: true,
           expectedEndTime: 31,
-          expectEvent: false,
         });
 
         seekTest('won\'t jump when past end', {
@@ -1120,8 +1070,8 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}],
           start: 3,
           seekTo: 34,
-          expectedEndTime: 34,
           expectEvent: false,
+          expectedEndTime: 34,
         });
 
         seekTest('won\'t jump when seeking backwards into buffered range', {
@@ -1130,8 +1080,8 @@ describe('Playhead', () => {
           newBuffered: [{start: 0, end: 10}],
           start: 24,
           seekTo: 4,
-          expectedEndTime: 4,
           expectEvent: false,
+          expectedEndTime: 4,
         });
 
         seekTest('will wait to jump when seeking backwards', {
@@ -1141,8 +1091,8 @@ describe('Playhead', () => {
           // should still be waiting.
           start: 24,
           seekTo: 4,
-          expectedEndTime: 4,
           expectEvent: false,
+          expectedEndTime: 4,
         });
 
         seekTest('will jump when seeking backwards into gap', {
@@ -1151,8 +1101,8 @@ describe('Playhead', () => {
           newBuffered: [{start: 2, end: 10}],
           start: 24,
           seekTo: 1.6,
+          expectEvent: true,
           expectedEndTime: 2,
-          expectEvent: false,
         });
       });  // with small gaps
 
@@ -1162,19 +1112,8 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}],
           start: 25,
           seekTo: 0,
-          jumpLargeGaps: true,
+          expectEvent: true,
           expectedEndTime: 20,
-          expectEvent: true,
-        });
-
-        seekTest('will raise event', {
-          // [0-10], [20-30], [40-50]
-          buffered: [{start: 0, end: 10}],
-          newBuffered: [{start: 20, end: 30}, {start: 40, end: 50}],
-          start: 3,
-          seekTo: 32,
-          expectedEndTime: 32,
-          expectEvent: true,
         });
 
         seekTest('will jump large gaps', {
@@ -1183,21 +1122,8 @@ describe('Playhead', () => {
           newBuffered: [{start: 20, end: 30}, {start: 40, end: 50}],
           start: 3,
           seekTo: 32,
+          expectEvent: true,
           expectedEndTime: 40,
-          jumpLargeGaps: true,
-          expectEvent: true,
-        });
-
-        seekTest('will jump large gaps', {
-          // [0-10], [20-30], [40-50]
-          buffered: [{start: 0, end: 10}],
-          newBuffered: [{start: 20, end: 30}, {start: 40, end: 50}],
-          start: 3,
-          seekTo: 32,
-          expectedEndTime: 32,
-          jumpLargeGaps: true,
-          preventDefault: true,
-          expectEvent: true,
         });
       });  // with large gaps
     });  // with unbuffered seeks
@@ -1208,7 +1134,6 @@ describe('Playhead', () => {
       video.currentTime = 12;
       video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
-      config.jumpLargeGaps = true;
       playhead = new shaka.media.MediaSourcePlayhead(
           video,
           manifest,
@@ -1257,7 +1182,6 @@ describe('Playhead', () => {
         },
       });
 
-      config.jumpLargeGaps = true;
       playhead = new shaka.media.MediaSourcePlayhead(
           video,
           manifest,
@@ -1280,7 +1204,6 @@ describe('Playhead', () => {
       video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
       video.paused = true;
 
-      config.jumpLargeGaps = true;
       playhead = new shaka.media.MediaSourcePlayhead(
           video,
           manifest,
@@ -1305,7 +1228,6 @@ describe('Playhead', () => {
       video.paused = true;
       video.autoplay = true;
 
-      config.jumpLargeGaps = true;
       playhead = new shaka.media.MediaSourcePlayhead(
           video,
           manifest,
@@ -1330,7 +1252,6 @@ describe('Playhead', () => {
       video.paused = true;
       video.autoplay = false;
 
-      config.jumpLargeGaps = true;
       playhead = new shaka.media.MediaSourcePlayhead(
           video,
           manifest,
@@ -1356,13 +1277,8 @@ describe('Playhead', () => {
         video.currentTime = data.start;
         video.readyState = HTMLMediaElement.HAVE_ENOUGH_DATA;
 
-        onEvent.and.callFake((event) => {
-          if (data.preventDefault) {
-            event.preventDefault();
-          }
-        });
+        onEvent.and.callFake((event) => {});
 
-        config.jumpLargeGaps = !!data.jumpLargeGaps;
         playhead = new shaka.media.MediaSourcePlayhead(
             video,
             manifest,

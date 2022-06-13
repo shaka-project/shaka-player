@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.OfflineUtils');
-
-goog.require('shaka.util.BufferUtils');
-
-
 shaka.test.OfflineUtils = class {
   /**
    * @param {string} originalUri

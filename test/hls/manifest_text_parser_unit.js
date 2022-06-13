@@ -4,16 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
-goog.require('shaka.hls.Attribute');
-goog.require('shaka.hls.ManifestTextParser');
-goog.require('shaka.hls.PlaylistType');
-goog.require('shaka.hls.Segment');
-goog.require('shaka.hls.Tag');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.StringUtils');
-
 describe('ManifestTextParser', () => {
   /** @type {!shaka.hls.ManifestTextParser} */
   let parser;
@@ -247,6 +237,25 @@ describe('ManifestTextParser', () => {
           // playlist text:
           '#EXTM3U\n' +
           '#EXT-X-MEDIA:CODECS="avc1.64002a,mp4a.40.2",AUDIO="a1,a2"',
+
+          // manifest URI:
+          'https://test/manifest.m3u8');
+
+      verifyPlaylist(
+          {
+            type: shaka.hls.PlaylistType.MASTER,
+            tags: [
+              new shaka.hls.Tag(/* id= */ 3, 'EXT-X-MEDIA',
+                  [
+                    new shaka.hls.Attribute('CODECS',
+                        'av01.0.08M.08,mp4a.40.2'),
+                  ]),
+            ],
+          },
+
+          // playlist text:
+          '#EXTM3U\n' +
+          '#EXT-X-MEDIA:CODECS="av01.0.08M.08,mp4a.40.2"',
 
           // manifest URI:
           'https://test/manifest.m3u8');

@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.Util');
-goog.require('shaka.util.EbmlParser');
-goog.require('shaka.util.Error');
-
 describe('EbmlParser', /** @suppress {accessControls} */ () => {
   const Util = shaka.test.Util;
 

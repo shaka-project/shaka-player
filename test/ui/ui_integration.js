@@ -4,22 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('mozilla.LanguageMapping');
-goog.require('shaka.test.Loader');
-goog.require('shaka.test.TestScheme');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.test.Waiter');
-goog.require('shaka.ui.Element');
-goog.require('shaka.util.Dom');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.Iterables');
-goog.requireType('shaka.Player');
-goog.requireType('shaka.ui.Controls');
-goog.requireType('shaka.ui.Overlay');
-
-
 describe('UI', () => {
   const Util = shaka.test.Util;
   const UiUtils = shaka.test.UiUtils;
@@ -468,22 +452,6 @@ describe('UI', () => {
       const isChosen = auto.querySelector('.shaka-chosen-item');
 
       expect(isChosen).not.toBe(null);
-    });
-
-    it('restores the resolutions menu after audio-only playback', async () => {
-      /** @type {HTMLElement} */
-      const resolutionButton = shaka.util.Dom.getElementByClassName(
-          'shaka-resolution-button', videoContainer);
-
-      // Load an audio-only clip.  The menu should be hidden.
-      await player.load('test:sintel_audio_only_compiled');
-      expect(player.isAudioOnly()).toBe(true);
-      expect(resolutionButton.classList.contains('shaka-hidden')).toBe(true);
-
-      // Load an audio-video clip.  The menu should be visible again.
-      await player.load('test:sintel_multi_lingual_multi_res_compiled');
-      expect(player.isAudioOnly()).toBe(false);
-      expect(resolutionButton.classList.contains('shaka-hidden')).toBe(false);
     });
 
     /**

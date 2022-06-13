@@ -4,15 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
-goog.require('shaka.net.HttpFetchPlugin');
-goog.require('shaka.net.HttpXHRPlugin');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.net.NetworkingEngine.RequestType');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.Error');
-
 /**
  * Add a set of http plugin tests, for the given scheme plugin.
  *

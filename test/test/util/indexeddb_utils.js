@@ -4,14 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.IndexedDBUtils');
-
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.Iterables');
-goog.require('shaka.util.PublicPromise');
-
-
 shaka.test.IndexedDBUtils = class {
   /**
    * Make a connection to indexeddb. This assumes that it will be a new
@@ -41,8 +33,7 @@ shaka.test.IndexedDBUtils = class {
     // connection after 5 attempts (with delays in between), just give
     // up.
     let lastError;
-    for (const _ of shaka.util.Iterables.range(5)) {
-      shaka.util.Functional.ignored(_);
+    for (let i = 0; i < 5; i++) {
       try {
         return await tryOpen();  // eslint-disable-line no-await-in-loop
       } catch (e) {  // eslint-disable-line no-restricted-syntax

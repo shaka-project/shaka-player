@@ -72,6 +72,7 @@ shaka.extern.UIVolumeBarColors;
  *   addBigPlayButton: boolean,
  *   customContextMenu: boolean,
  *   castReceiverAppId: string,
+ *   castAndroidReceiverCompatible: boolean,
  *   clearBufferOnQualityChange: boolean,
  *   showUnbufferedStart: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
@@ -83,7 +84,8 @@ shaka.extern.UIVolumeBarColors;
  *   enableKeyboardPlaybackControls: boolean,
  *   enableFullscreenOnRotation: boolean,
  *   forceLandscapeOnFullscreen: boolean,
- *   enableTooltips: boolean
+ *   enableTooltips: boolean,
+ *   keyboardSeekDistance: number
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -109,6 +111,8 @@ shaka.extern.UIVolumeBarColors;
  *   Whether or not a custom context menu replaces the default.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
+ * @property {boolean} castAndroidReceiverCompatible
+ *   Indicates if the app is compatible with an Android Cast Receiver.
  * @property {boolean} clearBufferOnQualityChange
  *   Only applicable if the resolution selection is part of the UI.
  *   Whether buffer should be cleared when changing resolution
@@ -174,6 +178,11 @@ shaka.extern.UIVolumeBarColors;
  *   Whether or not buttons in the control panel display tooltips that contain
  *   information about their function.
  *   Defaults to false.
+ * @property {number} keyboardSeekDistance
+ *   The time interval, in seconds, to seek when the user presses the left or
+ *   right keyboard keys when the video is selected. If less than or equal to 0,
+ *   no seeking will occur.
+ *   Defaults to 5 seconds.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

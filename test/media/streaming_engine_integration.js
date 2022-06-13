@@ -4,31 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.InitSegmentReference');
-goog.require('shaka.media.MediaSourceEngine');
-goog.require('shaka.media.MediaSourcePlayhead');
-goog.require('shaka.media.SegmentIndex');
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.media.StreamingEngine');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.test.FakeClosedCaptionParser');
-goog.require('shaka.test.FakeTextDisplayer');
-goog.require('shaka.test.Mp4LiveStreamGenerator');
-goog.require('shaka.test.Mp4VodStreamGenerator');
-goog.require('shaka.test.StreamingEngineUtil');
-goog.require('shaka.test.TestScheme');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.test.Waiter');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.Platform');
-goog.require('shaka.util.PlayerConfiguration');
-goog.requireType('shaka.media.Playhead');
-goog.requireType('shaka.media.PresentationTimeline');
-goog.requireType('shaka.test.FakeNetworkingEngine');
-goog.requireType('shaka.test.FakePresentationTimeline');
-
 describe('StreamingEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const Util = shaka.test.Util;
@@ -93,6 +68,7 @@ describe('StreamingEngine', () => {
         video,
         new shaka.test.FakeClosedCaptionParser(),
         new shaka.test.FakeTextDisplayer());
+    waiter.setMediaSourceEngine(mediaSourceEngine);
   });
 
   afterEach(async () => {
@@ -287,7 +263,11 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
       video.play();
-      await waiter.timeoutAfter(120).waitForEnd(video);
+      // The overall test timeout is 120 seconds, and the content is 60
+      // seconds.  It should be possible to complete this test in 100 seconds,
+      // and if not, we want the error thrown to be within the overall test's
+      // timeout window.
+      await waiter.timeoutAfter(100).waitForEnd(video);
     });
 
     it('plays at high playback rates', async () => {
@@ -308,14 +288,7 @@ describe('StreamingEngine', () => {
       await waiter.timeoutAfter(10).waitForMovement(video);
       video.playbackRate = 10;
 
-      // Something weird happens on some platforms (variously Chromecast, legacy
-      // Edge, and Safari) where the playhead can go past duration.
-      // To cope with this, don't fail on timeout.  If the video never got
-      // flagged as "ended", check for the playhead to be near or past the end.
-      await waiter.timeoutAfter(30).failOnTimeout(false).waitForEnd(video);
-      if (!video.ended) {
-        expect(video.currentTime).toBeGreaterThan(video.duration - 0.1);
-      }
+      await waiter.timeoutAfter(30).waitForEnd(video);
     });
 
     it('can handle buffered seeks', async () => {
@@ -325,9 +298,9 @@ describe('StreamingEngine', () => {
       video.play();
 
       // After 35 seconds seek back 10 seconds into the first Period.
-      await waiter.timeoutAfter(60).waitUntilPlayheadReaches(video, 35);
+      await waiter.timeoutAfter(80).waitUntilPlayheadReaches(video, 35);
       video.currentTime = 25;
-      await waiter.timeoutAfter(60).waitForEnd(video);
+      await waiter.timeoutAfter(80).waitForEnd(video);
     });
 
     it('can handle unbuffered seeks', async () => {
@@ -430,7 +403,6 @@ describe('StreamingEngine', () => {
   // TODO: Consider also adding tests for missing frames.
   describe('gap jumping', () => {
     it('jumps small gaps at the beginning', async () => {
-      config.smallGapLimit = 5;
       await setupGappyContent(/* gapAtStart= */ 1, /* dropSegment= */ false);
 
       // Let's go!
@@ -446,8 +418,6 @@ describe('StreamingEngine', () => {
     });
 
     it('jumps large gaps at the beginning', async () => {
-      config.smallGapLimit = 1;
-      config.jumpLargeGaps = true;
       await setupGappyContent(/* gapAtStart= */ 5, /* dropSegment= */ false);
 
       // Let's go!
@@ -463,7 +433,6 @@ describe('StreamingEngine', () => {
     });
 
     it('jumps small gaps in the middle', async () => {
-      config.smallGapLimit = 20;
       await setupGappyContent(/* gapAtStart= */ 0, /* dropSegment= */ true);
 
       // Let's go!
@@ -478,11 +447,9 @@ describe('StreamingEngine', () => {
       await waiter.timeoutAfter(60).waitUntilPlayheadReaches(video, 23);
       // Should be close enough to still have the gap buffered.
       expect(video.buffered.length).toBe(2);
-      expect(onEvent).not.toHaveBeenCalled();
     });
 
     it('jumps large gaps in the middle', async () => {
-      config.jumpLargeGaps = true;
       await setupGappyContent(/* gapAtStart= */ 0, /* dropSegment= */ true);
 
       // Let's go!
@@ -497,37 +464,6 @@ describe('StreamingEngine', () => {
       await waiter.timeoutAfter(60).waitUntilPlayheadReaches(video, 23);
       // Should be close enough to still have the gap buffered.
       expect(video.buffered.length).toBe(2);
-      expect(onEvent).toHaveBeenCalled();
-    });
-
-    it('won\'t jump large gaps with preventDefault()', async () => {
-      config.jumpLargeGaps = true;
-      await setupGappyContent(/* gapAtStart= */ 0, /* dropSegment= */ true);
-
-      onEvent.and.callFake((event) => {
-        event.preventDefault();
-      });
-
-      // Let's go!
-      streamingEngine.switchVariant(variant);
-      await streamingEngine.start();
-
-      await waiter.timeoutAfter(5).waitForEvent(video, 'loadeddata');
-
-      let seekCount = 0;
-      eventManager.listen(video, 'seeking', () => {
-        seekCount++;
-      });
-
-      video.currentTime = 8;
-      video.play();
-
-      await shaka.test.Util.delay(5);
-
-      // Edge somehow plays _into_ the gap, and Xbox One plays _through_ the
-      // gap.  Just make sure _we_ don't jump the gap by seeking.  One seek is
-      // required to start playback at time 8.
-      expect(seekCount).toBe(1);
     });
 
     /**
@@ -650,6 +586,7 @@ describe('StreamingEngine', () => {
             width: 600,
             height: 400,
             type: shaka.util.ManifestParserUtils.ContentType.VIDEO,
+            drmInfos: [],
           },
           audio: {
             id: 3,
@@ -659,6 +596,7 @@ describe('StreamingEngine', () => {
             codecs: 'mp4a.40.2',
             bandwidth: 192000,
             type: shaka.util.ManifestParserUtils.ContentType.AUDIO,
+            drmInfos: [],
           },
         }],
       };

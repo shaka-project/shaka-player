@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.Player');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-
 describe('Player Load Graph', () => {
   const SMALL_MP4_CONTENT_URI = '/base/test/test/assets/small.mp4';
 

@@ -4,28 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeAbrManager');
-goog.provide('shaka.test.FakeClosedCaptionParser');
-goog.provide('shaka.test.FakeManifestParser');
-goog.provide('shaka.test.FakePlayhead');
-goog.provide('shaka.test.FakePlayheadObserver');
-goog.provide('shaka.test.FakePresentationTimeline');
-goog.provide('shaka.test.FakeSegmentIndex');
-goog.provide('shaka.test.FakeStreamingEngine');
-goog.provide('shaka.test.FakeTextTrack');
-goog.provide('shaka.test.FakeTransmuxer');
-goog.provide('shaka.test.FakeVideo');
-
-goog.require('shaka.test.Util');
-goog.require('shaka.abr.SimpleAbrManager');
-goog.require('shaka.media.IClosedCaptionParser');
-goog.require('shaka.media.Playhead');
-goog.require('shaka.media.PresentationTimeline');
-goog.require('shaka.media.SegmentIndex');
-goog.require('shaka.media.StreamingEngine');
-goog.require('shaka.media.Transmuxer');
-
-
 /**
  * @fileoverview Defines simple mocks for library types.
  * @suppress {checkTypes} Suppress errors about missmatches between the
@@ -174,8 +152,26 @@ shaka.test.FakeVideo = class {
   constructor(currentTime) {
     /** @const {!Object.<string, !Function>} */
     this.on = {};  // event listeners
+
     /** @type {!Array.<!TextTrack>} */
     this.textTracks = [];
+
+    // In a real video element, textTracks is an event target.
+    // Since Player listens to events on textTracks, we need to fake that
+    // interface.
+    this.textTracksEventTarget = new shaka.util.FakeEventTarget();
+    this.textTracks.addEventListener =
+        // eslint-disable-next-line no-restricted-syntax
+        this.textTracksEventTarget.addEventListener.bind(
+            this.textTracksEventTarget);
+    this.textTracks.removeEventListener =
+        // eslint-disable-next-line no-restricted-syntax
+        this.textTracksEventTarget.removeEventListener.bind(
+            this.textTracksEventTarget);
+    this.textTracks.dispatchEvent =
+        // eslint-disable-next-line no-restricted-syntax
+        this.textTracksEventTarget.dispatchEvent.bind(
+            this.textTracksEventTarget);
 
     this.currentTime = currentTime || 0;
     this.readyState = 0;
@@ -195,6 +191,10 @@ shaka.test.FakeVideo = class {
         jasmine.createSpy('addTextTrack').and.callFake((kind, id) => {
           const track = new shaka.test.FakeTextTrack();
           this.textTracks.push(track);
+
+          const trackEvent = new shaka.util.FakeEvent('addtrack', {track});
+          this.textTracksEventTarget.dispatchEvent(trackEvent);
+
           return track;
         });
 
@@ -330,11 +330,32 @@ shaka.test.FakePlayhead = class {
     /** @type {!jasmine.Spy} */
     this.setRebufferingGoal = jasmine.createSpy('setRebufferingGoal');
 
-    /** @type {!jasmine.Spy} */
-    this.setStartTime = jasmine.createSpy('setStartTime');
+    /** @private {number} */
+    this.startTime_ = 0;
+
+    /** @private {number} */
+    this.gapsJumped_ = 0;
+
+    /** @private {number} */
+    this.stallsDetected_ = 0;
 
     /** @type {!jasmine.Spy} */
-    this.getTime = jasmine.createSpy('getTime').and.returnValue(0);
+    this.setStartTime = jasmine.createSpy('setStartTime')
+        .and.callFake((value) => {
+          this.startTime_ = value;
+        });
+
+    /** @type {!jasmine.Spy} */
+    this.getTime = jasmine.createSpy('getTime')
+        .and.callFake(() => this.startTime_);
+
+    /** @type {!jasmine.Spy} */
+    this.getGapsJumped = jasmine.createSpy('getGapsJumped')
+        .and.callFake(() => this.gapsJumped_);
+
+    /** @type {!jasmine.Spy} */
+    this.getStallsDetected = jasmine.createSpy('getTime')
+        .and.callFake(() => this.stallsDetected_);
 
     /** @type {!jasmine.Spy} */
     this.setBuffering = jasmine.createSpy('setBuffering');

@@ -4,15 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.dash.ContentProtection');
-goog.require('shaka.dash.DashParser');
-goog.require('shaka.test.Dash');
-goog.require('shaka.test.FakeNetworkingEngine');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Iterables');
-goog.require('shaka.util.PlayerConfiguration');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 // Test DRM-related parsing.
 describe('DashParser ContentProtection', () => {
   const Dash = shaka.test.Dash;
@@ -142,7 +133,7 @@ describe('DashParser ContentProtection', () => {
 
     const variants = [];
     const numVariants = 2;
-    for (const i of shaka.util.Iterables.range(numVariants)) {
+    for (let i = 0; i < numVariants; i++) {
       const variant = jasmine.objectContaining({
         video: jasmine.objectContaining({
           keyIds: new Set(keyIds[i] ? [keyIds[i]] : []),
@@ -810,6 +801,50 @@ describe('DashParser ContentProtection', () => {
         node: strToXml('<test></test>'),
       };
       const actual = ContentProtection.getWidevineLicenseUrl(input);
+      expect(actual).toBe('');
+    });
+  });
+
+  describe('getClearKeyLicenseUrl', () => {
+    it('valid clearkey:Laurl node', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node: strToXml([
+          '<test xmlns:clearkey="http://dashif.org/guidelines/clearKey">',
+          '  <clearkey:Laurl ',
+          '     Lic_type="EME-1.0">www.example.com</clearkey:Laurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getClearKeyLicenseUrl(input);
+      expect(actual).toBe('www.example.com');
+    });
+
+    it('clearkey:Laurl without license url', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node: strToXml([
+          '<test xmlns:clearkey="http://dashif.org/guidelines/clearKey">',
+          '  <clearkey:Laurl Lic_type="EME-1.0"></clearkey:Laurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getClearKeyLicenseUrl(input);
+      expect(actual).toBe('');
+    });
+
+    it('no clearkey:Laurl node', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node: strToXml('<test></test>'),
+      };
+      const actual = ContentProtection.getClearKeyLicenseUrl(input);
       expect(actual).toBe('');
     });
   });

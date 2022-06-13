@@ -218,6 +218,7 @@ shaka.ui.Overlay = class {
       addBigPlayButton: false,
       customContextMenu: false,
       castReceiverAppId: '',
+      castAndroidReceiverCompatible: false,
       clearBufferOnQualityChange: true,
       showUnbufferedStart: false,
       seekBarColors: {
@@ -238,6 +239,7 @@ shaka.ui.Overlay = class {
       enableFullscreenOnRotation: true,
       forceLandscapeOnFullscreen: true,
       enableTooltips: false,
+      keyboardSeekDistance: 5,
     };
 
     // Check AirPlay support
@@ -388,19 +390,28 @@ shaka.ui.Overlay = class {
     // Get and configure cast app id.
     let castAppId = '';
 
+    // Get and configure cast Android Receiver Compatibility
+    let castAndroidReceiverCompatible = false;
+
     // Cast receiver id can be specified on either container or video.
     // It should not be provided on both. If it was, we will use the last
     // one we saw.
     if (container['dataset'] &&
         container['dataset']['shakaPlayerCastReceiverId']) {
       castAppId = container['dataset']['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+          container['dataset']['shakaPlayerCastAndroidReceiverCompatible'] ===
+          'true';
     } else if (video['dataset'] &&
                video['dataset']['shakaPlayerCastReceiverId']) {
       castAppId = video['dataset']['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+        video['dataset']['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
     }
 
     if (castAppId.length) {
-      ui.configure({castReceiverAppId: castAppId});
+      ui.configure({castReceiverAppId: castAppId,
+        castAndroidReceiverCompatible: castAndroidReceiverCompatible});
     }
 
     if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
@@ -448,14 +459,6 @@ shaka.ui.Overlay.TrackLabelFormat = {
   'LABEL': 3,
 };
 
-/*
- * "shaka.ui.TrackLabelFormat" is deprecated and will be removed in v4.
- *
- * @deprecated
- * @enum {number}
- */
-shaka.ui.TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat;
-
 /**
  * Describes the possible reasons that the UI might fail to load.
  *
@@ -466,15 +469,6 @@ shaka.ui.Overlay.FailReasonCode = {
   'NO_BROWSER_SUPPORT': 0,
   'PLAYER_FAILED_TO_LOAD': 1,
 };
-
-
-/**
- * "shaka.ui.FailReasonCode" is deprecated and will be removed in v4.
- *
- * @deprecated
- * @enum {number}
- */
-shaka.ui.FailReasonCode = shaka.ui.Overlay.FailReasonCode;
 
 
 if (document.readyState == 'complete') {

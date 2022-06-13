@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.QualityObserver');
-goog.require('shaka.test.Util');
-
-
 describe('QualityObserver', () => {
   /** @type {!shaka.media.QualityObserver} */
   let observer;

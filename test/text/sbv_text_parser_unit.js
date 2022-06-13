@@ -4,15 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.text.SbvTextParser');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.StringUtils');
-
 describe('SbvTextParser', () => {
   it('supports no cues', () => {
     verifyHelper([],
         '',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('handles a blank line at the end of the file', () => {
@@ -22,7 +18,7 @@ describe('SbvTextParser', () => {
         ],
         '0:00:20.000,0:00:40.000\n' +
         'Test\n\n',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('handles no blank line at the end of the file', () => {
@@ -32,8 +28,7 @@ describe('SbvTextParser', () => {
         ],
         '0:00:20.000,0:00:40.000\n' +
         'Test\n',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('handles no newline after the final text payload', () => {
@@ -43,7 +38,7 @@ describe('SbvTextParser', () => {
         ],
         '0:00:20.000,0:00:40.000\n' +
         'Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports multiple cues', () => {
@@ -56,7 +51,7 @@ describe('SbvTextParser', () => {
         'Test\n\n' +
         '0:00:40.000,0:00:50.000\n' +
         'Test2',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   /**

@@ -4,18 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.ManifestGenerator');
-
-goog.require('goog.asserts');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Iterables');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.Uint8ArrayUtils');
-goog.requireType('shaka.media.InitSegmentReference');
-goog.requireType('shaka.media.PresentationTimeline');
-goog.requireType('shaka.media.SegmentIndex');
-
-
 /**
  * @summary
  * A helper class used to generate manifests.  This is done through a series
@@ -277,6 +265,8 @@ shaka.test.ManifestGenerator.Variant = class {
       this.language = 'und';
       /** @type {number} */
       this.bandwidth = 0;
+      /** @type {number} */
+      this.disabledUntilTime = 0;
       /** @type {boolean} */
       this.primary = false;
       /** @type {boolean} */
@@ -608,13 +598,20 @@ shaka.test.ManifestGenerator.Stream = class {
         segmentDuration, 'Must pass a non-zero segment duration');
 
     const shaka_ = this.manifest_.shaka_;
-    const totalDuration = this.manifest_.presentationTimeline.getDuration();
+    let totalDuration = this.manifest_.presentationTimeline.getDuration();
     goog.asserts.assert(
         isFinite(totalDuration), 'Must specify a manifest duration');
+    if (!isFinite(totalDuration)) {
+      // Without this, a mistake of an infinite duration would result in an
+      // infinite loop and a crash, which would in turn prevent you from seeing
+      // the above assertion fail.
+      totalDuration = 0;
+    }
+
     const segmentCount = totalDuration / segmentDuration;
     const references = [];
 
-    for (const index of shaka.util.Iterables.range(segmentCount)) {
+    for (let index = 0; index < segmentCount; index++) {
       const getUris = () => [sprintf(template, index)];
       const start = index * segmentDuration;
       const end = Math.min(totalDuration, (index + 1) * segmentDuration);

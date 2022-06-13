@@ -355,6 +355,10 @@
     "description": "Text that describes an asset that is packaged in an HLS manifest.",
     "message": "[PROPER_NAME:HLS]"
   },
+  "DEMO_HLS_TAB": {
+    "description": "The header for a tab within the custom asset creation dialog.",
+    "message": "[PROPER_NAME:HLS]"
+  },
   "DEMO_HOME": {
     "description": "A link in the header, that switches to a page configuration for viewing the curated set of front-page content.",
     "message": "HOME"
@@ -399,6 +403,10 @@
     "description": "The label on a field that allows users to provide a video id for a custom asset.",
     "message": "Video ID (for VOD DAI Content)"
   },
+  "DEMO_IGNORE_MANIFEST_PROGRAM_DATE_TIME": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore Program Date Time from manifest"
+  },
   "DEMO_IGNORE_MIN_BUFFER_TIME": {
     "description": "The name of a configuration value.",
     "message": "Ignore Min Buffer Time"
@@ -426,10 +434,6 @@
   "DEMO_JSDELIVR": {
     "description": "A link in the footer, to Shaka Player in the jsDelivr CDN.",
     "message": "[PROPER_NAME:jsDelivr]"
-  },
-  "DEMO_JUMP_LARGE_GAPS": {
-    "description": "The name of a configuration value.",
-    "message": "Jump Large Gaps"
   },
   "DEMO_LANGUAGE_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
@@ -531,6 +535,10 @@
     "description": "The name of a configuration value.",
     "message": "Max Bandwidth"
   },
+  "DEMO_MAX_DISABLED_TIME": {
+    "description": "The maximum amount of seconds a variant can be disabled when an error is thrown.",
+    "message": "Max Variant Disabled Time"
+  },
   "DEMO_MAX_FRAMERATE": {
     "description": "The name of a configuration value.",
     "message": "Max Framerate"
@@ -542,10 +550,6 @@
   "DEMO_MAX_PIXELS": {
     "description": "The name of a configuration value.",
     "message": "Max Pixels"
-  },
-  "DEMO_MAX_SMALL_GAP_SIZE": {
-    "description": "The name of a configuration value.",
-    "message": "Maximum Small Gap Size"
   },
   "DEMO_MAX_WIDTH": {
     "description": "The name of a configuration value.",
@@ -639,6 +643,10 @@
     "description": "A warning on number inputs, telling the user what the expected input format is.",
     "message": "Must be a positive, nonzero integer."
   },
+  "DEMO_NUMBER_OF_PARALLEL_DOWNLOADS": {
+    "description": "The name of a configuration value.",
+    "message": "Number of parallel downloads."
+  },
   "DEMO_OBSERVE_QUALITY_CHANGES": {
     "description": "The name of a configuration value.",
     "message": "Observe media quality changes"
@@ -662,6 +670,10 @@
   "DEMO_FAILURE_NO_BROWSER_SUPPORT": {
     "description": "An error displayed if Shaka Player is unable to load due to lack of browser support.",
     "message": "Your browser is not supported!"
+  },
+  "DEMO_HLS_FULL_MIME_TYPE": {
+    "description": "The label on a field that allows users to provide a full mime type for a custom asset.",
+    "message": "Full Mime Type for Playing Media Playlists Directly"
   },
   "DEMO_PLAY": {
     "description": "A button to play the attached asset.",
@@ -714,6 +726,10 @@
   "DEMO_SAVE_BUTTON": {
     "description": "A button to save a custom asset.",
     "message": "Save"
+  },
+  "DEMO_SEGMENT_RELATIVE_VTT_TIMING": {
+    "description": "The name of a configuration value.",
+    "message": "Enable segment-relative VTT Timing"
   },
   "DEMO_SESSION_ID": {
     "description": "The name of a configuration value.",

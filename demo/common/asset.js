@@ -77,6 +77,8 @@ const ShakaDemoAssetInfo = class {
     this.imaContentSrcId = null;
     /** @type {?string} */
     this.mimeType = null;
+    /** @type {?string} */
+    this.mediaPlaylistFullMimeType = null;
 
 
     // Offline storage values.
@@ -159,6 +161,15 @@ const ShakaDemoAssetInfo = class {
   /** @return {boolean} */
   isClear() {
     return this.drm.length == 1 && this.drm[0] == shakaAssets.KeySystem.CLEAR;
+  }
+
+  /**
+   * @param {string} mediaPlaylistFullMimeType
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setMediaPlaylistFullMimeType(mediaPlaylistFullMimeType) {
+    this.mediaPlaylistFullMimeType = mediaPlaylistFullMimeType;
+    return this;
   }
 
   /**
@@ -368,12 +379,17 @@ const ShakaDemoAssetInfo = class {
    */
   getConfiguration() {
     const config = /** @type {shaka.extern.PlayerConfiguration} */(
-      {drm: {advanced: {}}, manifest: {dash: {}}});
+      {drm: {advanced: {}}, manifest: {dash: {}, hls: {}}});
 
     if (this.extraConfig) {
       for (const key in this.extraConfig) {
         config[key] = this.extraConfig[key];
       }
+    }
+
+    if (this.mediaPlaylistFullMimeType) {
+      config.manifest.hls.mediaPlaylistFullMimeType =
+          this.mediaPlaylistFullMimeType;
     }
 
     if (this.licenseServers.size) {

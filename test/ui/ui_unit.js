@@ -4,21 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.media.ManifestParser');
-goog.require('shaka.test.FakeManifestParser');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.ui.OverflowMenu');
-goog.require('shaka.ui.ResolutionSelection');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.Iterables');
-goog.require('shaka.util.Platform');
-goog.requireType('shaka.Player');
-goog.requireType('shaka.ui.Controls');
-goog.requireType('shaka.ui.Overlay');
-
 describe('UI', () => {
   const UiUtils = shaka.test.UiUtils;
   const Util = shaka.test.Util;
@@ -137,8 +122,7 @@ describe('UI', () => {
         // Four is just a random number I (ismena) came up with to test a
         // multi-video use case. It could be replaces with any other
         // (reasonable) number.
-        for (const _ of shaka.util.Iterables.range(4)) {
-          shaka.util.Functional.ignored(_);
+        for (let i = 0; i < 4; i++) {
           const video = /** @type {!HTMLVideoElement} */
               (document.createElement('video'));
 
@@ -658,6 +642,33 @@ describe('UI', () => {
         expect(getResolutions()).toEqual(['540p']);
       });
 
+      it('displays audio quality based on current stream', async () => {
+        const manifest =
+          shaka.test.ManifestGenerator.generate((manifest) => {
+            manifest.addVariant(0, (variant) => {
+              variant.addAudio(0);
+              variant.bandwidth = 100000;
+            });
+            manifest.addVariant(1, (variant) => {
+              variant.addAudio(1);
+              variant.bandwidth = 200000;
+            });
+          });
+
+        shaka.media.ManifestParser.registerParserByMime(
+            fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
+
+        await player.load(
+            /* uri= */ 'fake', /* startTime= */ 0, fakeMimeType);
+
+        const qualityButtons = videoContainer.querySelectorAll(
+            'button.explicit-resolution > span');
+        const qualityOptions =
+            Array.from(qualityButtons).map((btn) => btn.innerText);
+
+        expect(qualityOptions).toEqual(['200 kbits/s', '100 kbits/s']);
+      });
+
       /**
        * Use internals to update the resolution menu.  Our fake manifest can
        * cause problems with startup where the Player will get stuck using
@@ -798,12 +809,25 @@ describe('UI', () => {
         }
       });
       it('is updated periodically', async () => {
-        function getStatsFromContainer() {
+        // There is no guaranteed ordering, so fetch by the stat name.
+        function getStatsElementByName(name) {
           const nodes = statisticsContainer.childNodes;
-          width = nodes[0].childNodes[1].textContent.replace(' (px)', '');
-          height = nodes[1].childNodes[1].textContent.replace(' (px)', '');
-          bufferingTime =
-              nodes[13].childNodes[1].textContent.replace(' (s)', '');
+          for (const node of nodes) {
+            if (node.hasChildNodes() &&
+                node.childNodes[0].textContent.includes(name)) {
+              return node;
+            }
+          }
+          return null;
+        }
+
+        function getStatsFromContainer() {
+          width = getStatsElementByName(
+              'width').childNodes[1].textContent.replace(' (px)', '');
+          height = getStatsElementByName(
+              'height').childNodes[1].textContent.replace(' (px)', '');
+          bufferingTime = getStatsElementByName(
+              'bufferingTime').childNodes[1].textContent.replace(' (s)', '');
         }
 
         /** @type {!string} */

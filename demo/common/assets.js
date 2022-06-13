@@ -13,6 +13,8 @@
 goog.require('ShakaDemoAssetInfo');
 goog.require('shakaDemo.MessageIds');
 
+goog.provide('shakaAssets');
+
 
 // Types and enums {{{
 /**
@@ -82,7 +84,7 @@ shakaAssets.identifierForKeySystem = (keySystem) => {
   const KeySystem = shakaAssets.KeySystem;
   switch (keySystem) {
     case KeySystem.CLEAR_KEY: return 'org.w3.clearkey';
-    case KeySystem.FAIRPLAY: return 'com.apple.fps.1_0';
+    case KeySystem.FAIRPLAY: return 'com.apple.fps';
     case KeySystem.PLAYREADY: return 'com.microsoft.playready';
     case KeySystem.WIDEVINE: return 'com.widevine.alpha';
     default: return 'no drm protection';
@@ -294,6 +296,15 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.SURROUND)
       .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Angel One (HLS, MP4, video media playlist only)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/playlist_v-0480p-1000k-libx264.mp4.m3u8',
+      /* source= */ shakaAssets.Source.SHAKA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .setMediaPlaylistFullMimeType('video/mp4; codecs="avc1.4d401f"'),
   new ShakaDemoAssetInfo(
       /* name= */ 'Angel One (HLS, MP4, multilingual, Widevine)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/angel_one.png',

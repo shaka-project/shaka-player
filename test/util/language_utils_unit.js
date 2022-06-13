@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.util.LanguageUtils');
-goog.require('shaka.util.ManifestParserUtils');
-
 describe('LanguageUtils', () => {
   const LanguageUtils = shaka.util.LanguageUtils;
 

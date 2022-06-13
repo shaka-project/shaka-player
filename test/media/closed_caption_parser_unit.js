@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.ClosedCaptionParser');
-goog.require('shaka.test.Util');
-
 describe('ClosedCaptionParser', () => {
   it('can handle empty caption packets', async () => {
     const initSegment = await shaka.test.Util.fetch(

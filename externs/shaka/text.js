@@ -298,6 +298,13 @@ shaka.extern.Cue = class {
     this.fontFamily;
 
     /**
+     * Text shadow color as a CSS text-shadow value.
+     * @type {string}
+     * @exportDoc
+     */
+    this.textShadow = '';
+
+    /**
      * Text stroke color as a CSS color, e.g. "#FFFFFF" or "white".
      * @type {string}
      * @exportDoc
@@ -380,17 +387,6 @@ shaka.extern.Cue = class {
      * @exportDoc
      */
     this.lineBreak;
-
-    /**
-     * @deprecated
-     * "spacer" is deprecated and will be removed in v4. Use "lineBreak"
-     * instead.
-     * Whether or not the cue only acts as a line break between two nested cues.
-     * Should only appear in nested cues.
-     * @type {boolean}
-     * @exportDoc
-     */
-    this.spacer;
   }
 };
 
@@ -442,7 +438,8 @@ shaka.extern.TextParser = class {
  * @typedef {{
  *   periodStart: number,
  *   segmentStart: number,
- *   segmentEnd: number
+ *   segmentEnd: number,
+ *   vttOffset: number
  * }}
  *
  * @property {number} periodStart
@@ -451,6 +448,9 @@ shaka.extern.TextParser = class {
  *     The absolute start time of the segment in seconds.
  * @property {number} segmentEnd
  *     The absolute end time of the segment in seconds.
+ * @property {number} vttOffset
+ *     The start time relative to either segment or period start depending
+ *     on <code>segmentRelativeVttTiming</code> configuration.
  *
  * @exportDoc
  */

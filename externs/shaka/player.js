@@ -82,6 +82,9 @@ shaka.extern.StateChange;
  *
  *   maxSegmentDuration: number,
  *
+ *   gapsJumped: number,
+ *   stallsDetected: number,
+ *
  *   switchHistory: !Array.<shaka.extern.TrackChoice>,
  *   stateHistory: !Array.<shaka.extern.StateChange>
  * }}
@@ -111,6 +114,11 @@ shaka.extern.StateChange;
  *   <code>NaN</code> if this is not supported by the browser.
  * @property {number} estimatedBandwidth
  *   The current estimated network bandwidth (in bit/sec).
+ *
+ * @property {number} gapsJumped
+ *   The total number of playback gaps jumped by the GapJumpingController.
+ * @property {number} stallsDetected
+ *   The total number of playback stalls detected by the StallDetector.
  *
  * @property {number} completionPercent
  *   This is the greatest completion percent that the user has experienced in
@@ -623,7 +631,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *         undefined),
  *   logLicenseExchange: boolean,
  *   updateExpirationTime: number,
- *   preferredKeySystems: !Array.<string>
+ *   preferredKeySystems: !Array.<string>,
+ *   keySystemsMapping: !Object.<string, string>
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -664,6 +673,8 @@ shaka.extern.AdvancedDrmConfiguration;
  * @property {!Array.<string>} preferredKeySystems
  *   <i>Defaults to an empty array. </i> <br>
  *   Specifies the priorties of available DRM key systems.
+ * @property {Object.<string, string>} keySystemsMapping
+ *   A map of key system name to key system name.
  *
  * @exportDoc
  */
@@ -747,7 +758,9 @@ shaka.extern.DashManifestConfiguration;
  *   ignoreTextStreamFailures: boolean,
  *   ignoreImageStreamFailures: boolean,
  *   defaultAudioCodec: string,
- *   defaultVideoCodec: string
+ *   defaultVideoCodec: string,
+ *   ignoreManifestProgramDateTime: boolean,
+ *   mediaPlaylistFullMimeType: string
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -762,6 +775,22 @@ shaka.extern.DashManifestConfiguration;
  * @property {string} defaultVideoCodec
  *   The default video codec if it is not specified in the HLS playlist.
  *   <i>Defaults to <code>'avc1.42E01E'</code>.</i>
+ * @property {boolean} ignoreManifestProgramDateTime
+ *   If <code>true</code>, the HLS parser will ignore the
+ *   <code>EXT-X-PROGRAM-DATE-TIME</code> tags in the manifest and use media
+ *   sequence numbers instead.
+ *   Meant for streams where <code>EXT-X-PROGRAM-DATE-TIME</code> is incorrect
+ *   or malformed.
+ *   <i>Defaults to <code>false</code>.</i>
+ * @property {string} mediaPlaylistFullMimeType
+ *   A string containing a full mime type, including both the basic mime type
+ *   and also the codecs. Used when the HLS parser parses a media playlist
+ *   directly, required since all of the mime type and codecs information is
+ *   contained within the master playlist.
+ *   You can use the <code>shaka.util.MimeUtils.getFullType()</code> utility to
+ *   format this value.
+ *   <i>Defaults to
+ *   <code>'video/mp2t; codecs="avc1.42E01E, mp4a.40.2"'</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -776,6 +805,7 @@ shaka.extern.HlsManifestConfiguration;
  *   disableText: boolean,
  *   disableThumbnails: boolean,
  *   defaultPresentationDelay: number,
+ *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
  * }}
@@ -807,6 +837,10 @@ shaka.extern.HlsManifestConfiguration;
  *   configured or set as 0.
  *   For HLS, the default value is 3 segments duration if not configured or
  *   set as 0.
+ * @property {boolean} segmentRelativeVttTiming
+ *   Option to calculate VTT text timings relative to the segment start
+ *   instead of relative to the period start (which is the default).
+ *   Defaults to <code>false</code>.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
@@ -828,8 +862,6 @@ shaka.extern.ManifestConfiguration;
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
  *   gapDetectionThreshold: number,
- *   smallGapLimit: number,
- *   jumpLargeGaps: boolean,
  *   durationBackoff: number,
  *   forceTransmuxTS: boolean,
  *   safeSeekOffset: number,
@@ -844,7 +876,8 @@ shaka.extern.ManifestConfiguration;
  *   preferNativeHls: boolean,
  *   updateIntervalSeconds: number,
  *   dispatchAllEmsgBoxes: boolean,
- *   observeQualityChanges: boolean
+ *   observeQualityChanges: boolean,
+ *   maxDisabledTime: number
  * }}
  *
  * @description
@@ -884,18 +917,8 @@ shaka.extern.ManifestConfiguration;
  *   to <code>false</code>.
  * @property {number} gapDetectionThreshold
  *   TThe maximum distance (in seconds) before a gap when we'll automatically
- *   jump. This value  defaults to <code>0.1</code>, except in Edge Legacy, IE,
+ *   jump. This value  defaults to <code>0.1</code>, except in Edge Legacy,
  *   Tizen, Chromecast that value defaults value is <code>0.5</code>
- * @property {number} smallGapLimit
- *   The limit (in seconds) for a gap in the media to be considered "small".
- *   Small gaps are jumped automatically without events.  Large gaps result
- *   in a Player event and can be jumped.
- * @property {boolean} jumpLargeGaps
- *   If <code>true</code>, jump large gaps in addition to small gaps.  A
- *   <code>largegap</code> event will be raised first.  Then, if the app doesn't
- *   call <code>preventDefault()</code> on the event, the Player will jump the
- *   gap.  If <code>false</code>, then the event will be raised, but the gap
- *   will not be jumped.
  * @property {number} durationBackoff
  *   By default, we will not allow seeking to exactly the duration of a
  *   presentation.  This field is the number of seconds before duration we will
@@ -959,6 +982,10 @@ shaka.extern.ManifestConfiguration;
  * @property {boolean} observeQualityChanges
  *   If true, monitor media quality changes and emit
  *   <code.shaka.Player.MediaQualityChangedEvent</code>.
+ * @property {number} maxDisabledTime
+ *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
+ *   is reached, in seconds.
+ *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -1077,7 +1104,8 @@ shaka.extern.CmcdConfiguration;
  *       function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>,
  *   downloadSizeCallback: function(number):!Promise<boolean>,
  *   progressCallback: function(shaka.extern.StoredContent,number),
- *   usePersistentLicense: boolean
+ *   usePersistentLicense: boolean,
+ *   numberOfParallelDownloads: number
  * }}
  *
  * @property {function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>}
@@ -1100,6 +1128,11 @@ shaka.extern.CmcdConfiguration;
  *   license.  A network will be required to retrieve a temporary license to
  *   view.
  *   Defaults to <code>true</code>.
+ * @property {number} numberOfParallelDownloads
+ *   Number of parallel downloads.
+ *   Note: normally browsers limit to 5 request in parallel, so putting a
+ *   number higher than this will not help it download faster.
+ *   Defaults to <code>5</code>.
  * @exportDoc
  */
 shaka.extern.OfflineConfiguration;
@@ -1249,11 +1282,14 @@ shaka.extern.Thumbnail;
 
 /**
  * @typedef {{
+ *   id: string,
  *   title: string,
  *   startTime: number,
  *   endTime: number
  * }}
  *
+ * @property {string} id
+ *    The id of the chapter.
  * @property {string} title
  *    The title of the chapter.
  * @property {number} startTime

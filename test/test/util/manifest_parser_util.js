@@ -4,12 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.ManifestParser');
-
-goog.require('shaka.media.InitSegmentReference');
-goog.require('shaka.media.SegmentReference');
-
-
 shaka.test.ManifestParser = class {
   /**
    * Verifies the segment references of a stream.
@@ -57,11 +51,12 @@ shaka.test.ManifestParser = class {
    * @param {number=} timestampOffset
    * @param {!Array.<!shaka.media.SegmentReference>=} partialReferences
    * @param {?string=} tilesLayout
+   * @param {?number=} syncTime
    * @return {!shaka.media.SegmentReference}
    */
   static makeReference(uri, start, end, baseUri = '',
       startByte = 0, endByte = null, timestampOffset = 0,
-      partialReferences = [], tilesLayout = '') {
+      partialReferences = [], tilesLayout = '', syncTime = null) {
     const getUris = () => uri.length ? [baseUri + uri] : [];
 
     // If a test wants to verify these, they can be set explicitly after
@@ -86,6 +81,8 @@ shaka.test.ManifestParser = class {
         appendWindowEnd,
         partialReferences,
         tilesLayout,
+        /* tileDuration= */ undefined,
+        syncTime,
     );
   }
 };

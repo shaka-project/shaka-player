@@ -582,7 +582,10 @@ shakaDemo.Main = class {
         };
         asset.storedProgress = 0;
         this.dispatchEventWithName_('shaka-main-offline-progress');
+        const start = Date.now();
         const stored = await storage.store(asset.manifestUri, metadata).promise;
+        const end = Date.now();
+        console.log('Download time:', end - start);
         asset.storedContent = stored;
       } catch (error) {
         this.onError_(/** @type {!shaka.util.Error} */ (error));
@@ -944,9 +947,6 @@ shakaDemo.Main = class {
     if ('noadaptation' in params) {
       this.configure('abr.enabled', false);
     }
-    if ('jumpLargeGaps' in params) {
-      this.configure('streaming.jumpLargeGaps', true);
-    }
 
     // Add compiled/uncompiled links.
     this.makeVersionLinks_();
@@ -1233,9 +1233,6 @@ shakaDemo.Main = class {
       // The currently-selected asset changed, so update asset cards.
       this.dispatchEventWithName_('shaka-main-selected-asset-changed');
 
-      await this.drmConfiguration_(asset);
-      this.controls_.getCastProxy().setAppData({'asset': asset});
-
       // Enable the correct set of controls before loading.
       // The video container influences the TextDisplayer used.
       if (this.nativeControlsEnabled_) {
@@ -1249,6 +1246,9 @@ shakaDemo.Main = class {
         // This will force the player to use UITextDisplayer.
         this.player_.setVideoContainer(this.container_);
       }
+
+      await this.drmConfiguration_(asset);
+      this.controls_.getCastProxy().setAppData({'asset': asset});
 
       // Finally, the asset can be loaded.
       let manifestUri = asset.manifestUri;
@@ -1356,9 +1356,6 @@ shakaDemo.Main = class {
     }
     if (!this.getCurrentConfigValue('abr.enabled')) {
       params.push('noadaptation');
-    }
-    if (this.getCurrentConfigValue('streaming.jumpLargeGaps')) {
-      params.push('jumpLargeGaps');
     }
     params.push('uilang=' + this.getUILocale());
 

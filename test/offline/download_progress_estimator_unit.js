@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.offline.DownloadProgressEstimator');
-
 describe('DownloadProgressEstimator', () => {
   /** @type {!shaka.offline.DownloadProgressEstimator} */
   let estimator;

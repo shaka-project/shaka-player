@@ -4,15 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('ShakaDemoAssetInfo');
-goog.require('shaka.test.Loader');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.test.Waiter');
-goog.require('shaka.util.EventManager');
-goog.requireType('shaka.Player');
-goog.requireType('shaka.net.NetworkingEngine.RequestType');
-
 describe('Player', () => {
   const Util = shaka.test.Util;
   const Feature = shakaAssets.Feature;
@@ -48,6 +39,7 @@ describe('Player', () => {
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
+    waiter.setPlayer(player);
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake((event) => fail(event.detail));
@@ -115,12 +107,6 @@ describe('Player', () => {
         player.configure('manifest.dash.clockSyncUri',
             'https://shaka-player-demo.appspot.com/time.txt');
 
-        // Make sure we don't get stuck on gaps that only appear in some
-        // browsers (Safari, Firefox).
-        // TODO(https://github.com/shaka-project/shaka-player/issues/1702):
-        // Is this necessary because of a bug in Shaka Player?
-        player.configure('streaming.jumpLargeGaps', true);
-
         // Add asset-specific configuration.
         player.configure(asset.getConfiguration());
 
@@ -128,7 +114,13 @@ describe('Player', () => {
         const networkingEngine = player.getNetworkingEngine();
         asset.applyFilters(networkingEngine);
 
-        await player.load(asset.manifestUri);
+        // Rather than awaiting the load() method, catch any load() errors and
+        // wait on the 'canplay' event.  This has the advantage that we will
+        // get better logging of the media state on a timeout, since that
+        // capabilitiy is built into the waiter for media element events.
+        player.load(asset.manifestUri).catch(fail);
+        await waiter.timeoutAfter(60).waitForEvent(video, 'canplay');
+
         if (asset.features) {
           const isLive = asset.features.includes(Feature.LIVE);
           expect(player.isLive()).toBe(isLive);

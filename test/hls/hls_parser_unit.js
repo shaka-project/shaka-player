@@ -4,17 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.hls.HlsParser');
-goog.require('shaka.log');
-goog.require('shaka.test.FakeNetworkingEngine');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.PlayerConfiguration');
-goog.require('shaka.util.Uint8ArrayUtils');
-
 describe('HlsParser', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
@@ -1149,6 +1138,69 @@ describe('HlsParser', () => {
     expect(actual).toEqual(manifest);
   });
 
+  it('gets mime type of SUBTITLES from header request', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'URI="audio"\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'URI="text"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const textMedia = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.subs',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.mime('video/mp4', 'avc1');
+        });
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mp4', 'mp4a');
+        });
+      });
+      manifest.addPartialTextStream((stream) => {
+        stream.language = 'en';
+        stream.kind = TextStreamKind.SUBTITLE;
+        stream.mime('application/mp4', '');
+      });
+      manifest.sequenceMode = true;
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/text', textMedia)
+        .setResponseText('test:/main.subs', vttText)
+        .setHeaders('test:/main.subs', {
+          'content-type': 'application/mp4; foo=bar',
+        })
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
+  });
+
   it('parses manifest with FORCED SUBTITLES', async () => {
     const master = [
       '#EXTM3U\n',
@@ -1432,6 +1484,105 @@ describe('HlsParser', () => {
     }
     if (thirdThumbnailReference) {
       expect(thirdThumbnailReference.getTilesLayout()).toBe('1x1');
+    }
+  });
+
+  it('parse EXT-X-GAP', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-GAP\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-GAP\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+
+    expect(actual.variants.length).toBe(1);
+
+    const variant = actual.variants[0];
+    expect(variant.video).toBeTruthy();
+    expect(variant.audio).toBeTruthy();
+
+    const available = shaka.media.SegmentReference.Status.AVAILABLE;
+    const missing = shaka.media.SegmentReference.Status.MISSING;
+
+    await variant.video.createSegmentIndex();
+    goog.asserts.assert(variant.video.segmentIndex != null,
+        'Null segmentIndex!');
+
+    const firstVideoReference = variant.video.segmentIndex.get(0);
+    const secondVideoReference = variant.video.segmentIndex.get(1);
+    const thirdVideoReference = variant.video.segmentIndex.get(2);
+
+    expect(firstVideoReference).not.toBe(null);
+    expect(secondVideoReference).not.toBe(null);
+    expect(thirdVideoReference).not.toBe(null);
+
+    if (firstVideoReference) {
+      expect(firstVideoReference.getStatus()).toBe(available);
+    }
+    if (secondVideoReference) {
+      expect(secondVideoReference.getStatus()).toBe(missing);
+    }
+    if (thirdVideoReference) {
+      expect(thirdVideoReference.getStatus()).toBe(available);
+    }
+
+    await variant.audio.createSegmentIndex();
+    goog.asserts.assert(variant.audio.segmentIndex != null,
+        'Null segmentIndex!');
+
+    const firstAudioReference = variant.audio.segmentIndex.get(0);
+    const secondAudioReference = variant.audio.segmentIndex.get(1);
+    const thirdAudioReference = variant.audio.segmentIndex.get(2);
+
+    expect(firstAudioReference).not.toBe(null);
+    expect(secondAudioReference).not.toBe(null);
+    expect(thirdAudioReference).not.toBe(null);
+
+    if (firstAudioReference) {
+      expect(firstAudioReference.getStatus()).toBe(available);
+    }
+    if (secondAudioReference) {
+      expect(secondAudioReference.getStatus()).toBe(missing);
+    }
+    if (thirdAudioReference) {
+      expect(thirdAudioReference.getStatus()).toBe(available);
     }
   });
 
@@ -1867,6 +2018,179 @@ describe('HlsParser', () => {
 
     const actual = await parser.start('test:/master', playerInterface);
     expect(actual).toEqual(manifest);
+  });
+
+  describe('produces syncTime', () => {
+    // Corresponds to "2000-01-01T00:00:00.00Z".
+    // All the PROGRAM-DATE-TIME values in the tests below are at or after this.
+    const syncTimeBase = 946684800;
+
+    /**
+     * @param {number} startTime
+     * @param {number} endTime
+     * @param {number} syncTime
+     * @return {!shaka.media.SegmentReference}
+     */
+    function makeReference(startTime, endTime, syncTime) {
+      const initUris = () => ['test:/init.mp4'];
+      const init = new shaka.media.InitSegmentReference(initUris, 0, 615);
+      const uris = () => ['test:/main.mp4'];
+      return new shaka.media.SegmentReference(
+          startTime, endTime, uris, 0, null, init, 0, 0, Infinity,
+          [], undefined, undefined, syncTime);
+    }
+
+    /**
+     * @param {string} media
+     * @param {!Array.<number>} startTimes
+     * @param {number} syncTimeOffset
+     * @param {(function(!shaka.media.SegmentReference))=} modifyFn
+     */
+    async function test(media, startTimes, syncTimeOffset, modifyFn) {
+      const master = [
+        '#EXTM3U\n',
+        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,vtt",',
+        'RESOLUTION=960x540,FRAME-RATE=60\n',
+        'video\n',
+      ].join('');
+
+      const segments = [];
+      for (let i = 0; i < startTimes.length - 1; i++) {
+        const startTime = startTimes[i];
+        const endTime = startTimes[i + 1];
+        const reference = makeReference(
+            startTime, endTime, syncTimeOffset + startTime);
+        if (modifyFn) {
+          modifyFn(reference);
+        }
+        segments.push(reference);
+      }
+
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.anyTimeline();
+        manifest.addPartialVariant((variant) => {
+          variant.addPartialStream(ContentType.VIDEO, (stream) => {
+            stream.segmentIndex = new shaka.media.SegmentIndex(segments);
+          });
+        });
+        manifest.sequenceMode = true;
+      });
+
+      fakeNetEngine
+          .setResponseText('test:/master', master)
+          .setResponseText('test:/video', media)
+          .setResponseValue('test:/init.mp4', initSegmentData)
+          .setResponseValue('test:/main.mp4', segmentData);
+
+      const actual = await parser.start('test:/master', playerInterface);
+      expect(actual).toEqual(manifest);
+    }
+
+    it('from EXT-X-PROGRAM-DATE-TIME', async () => {
+      await test([
+        '#EXTM3U\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:05.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:10.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:15.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:20.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:25.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4',
+      ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5);
+    });
+
+    it('when some EXT-X-PROGRAM-DATE-TIME values are missing', async () => {
+      await test([
+        '#EXTM3U\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXTINF:2,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:10.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:25.00Z\n',
+        '#EXTINF:2,\n',
+        'main.mp4\n',
+        '#EXTINF:4,\n',
+        'main.mp4',
+      ].join(''), [0, 2, 7, 12, 17, 19, 23], syncTimeBase + 8);
+    });
+
+    it('except when ignoreManifestProgramDateTime is set', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.hls.ignoreManifestProgramDateTime = true;
+      parser.configure(config);
+      await test([
+        '#EXTM3U\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:05.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:10.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:15.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:20.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:25.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4',
+      ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5, (reference) => {
+        reference.syncTime = null;
+      });
+    });
+
+    it('when there are partial segments', async () => {
+      playerInterface.isLowLatencyMode = () => true;
+      await test([
+        '#EXTM3U\n',
+        '#EXT-X-PLAYLIST-TYPE:VOD\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:05.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:10.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:15.00Z\n',
+        '#EXT-X-PART:DURATION=2.5,URI="main.mp4"\n',
+        '#EXT-X-PART:DURATION=2.5,URI="main.mp4"\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:20.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4\n',
+        '#EXT-X-PROGRAM-DATE-TIME:2000-01-01T00:00:25.00Z\n',
+        '#EXTINF:5,\n',
+        'main.mp4',
+      ].join(''), [0, 5, 10, 15, 20, 25], syncTimeBase + 5, (reference) => {
+        if (reference.startTime == 10) {
+          reference.partialReferences = [
+            makeReference(10, 12.5, syncTimeBase + 15),
+            makeReference(12.5, 15, syncTimeBase + 17.5),
+          ];
+        }
+      });
+    });
   });
 
   it('drops failed text streams when configured to', async () => {
@@ -3186,5 +3510,143 @@ describe('HlsParser', () => {
       expect(onEventSpy).toHaveBeenCalledWith(
           jasmine.objectContaining(eventValue3));
     });
+  });
+
+  it('parses media playlists directly', async () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = true;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.mime('video/mp2t', 'avc1.42E01E, mp4a.40.2');
+        });
+      });
+    });
+
+    await testHlsParser(media, '', manifest);
+  });
+
+  it('honors hls.mediaPlaylistFullMimeType', async () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.hls.mediaPlaylistFullMimeType = 'audio/webm; codecs="vorbis"';
+    parser.configure(config);
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = true;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/webm', 'vorbis');
+        });
+      });
+    });
+
+    await testHlsParser(media, '', manifest);
+  });
+
+  it('syncs on sequence with ignoreManifestProgramDateTime', async () => {
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    config.hls.ignoreManifestProgramDateTime = true;
+    parser.configure(config);
+
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:1\n',
+      '#EXTINF:5,\n',
+      'video1.mp4\n',
+      '#EXTINF:5,\n',
+      'video2.mp4\n',
+      '#EXTINF:5,\n',
+      'video3.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:3\n',
+      '#EXTINF:5,\n',
+      'audio3.mp4\n',
+      '#EXTINF:5,\n',
+      'audio4.mp4\n',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = true;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.language = 'en';
+        variant.bandwidth = 200;
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.mime('video/mp4', 'avc1');
+          stream.size(960, 540);
+          stream.frameRate = 60;
+        });
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.language = 'en';
+          stream.mime('audio/mp4', 'mp4a');
+        });
+      });
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseValue('test:/init.mp4', initSegmentData);
+
+    const actualManifest = await parser.start('test:/master', playerInterface);
+    expect(actualManifest).toEqual(manifest);
+
+    const actualVideo = actualManifest.variants[0].video;
+    await actualVideo.createSegmentIndex();
+    goog.asserts.assert(actualVideo.segmentIndex != null, 'Null segmentIndex!');
+
+    const actualAudio = actualManifest.variants[0].audio;
+    await actualAudio.createSegmentIndex();
+    goog.asserts.assert(actualAudio.segmentIndex != null, 'Null segmentIndex!');
+
+    // Verify that the references are aligned on sequence number.
+    const videoSegments = Array.from(actualVideo.segmentIndex);
+    const audioSegments = Array.from(actualAudio.segmentIndex);
+
+    // The first two were dropped to align with the audio.
+    expect(videoSegments.map((ref) => ref.getUris()[0])).toEqual([
+      'test:/video3.mp4',
+    ]);
+    // Audio has a 4th segment that video doesn't, but that doesn't get clipped
+    // or used as the base.  Alignment is truly based on media sequence number.
+    expect(audioSegments.map((ref) => ref.getUris()[0])).toEqual([
+      'test:/audio3.mp4',
+      'test:/audio4.mp4',
+    ]);
   });
 });

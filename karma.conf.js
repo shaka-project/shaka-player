@@ -9,11 +9,13 @@
 
 const Jimp = require('jimp');
 const fs = require('fs');
+const glob = require('glob');
 const path = require('path');
 const rimraf = require('rimraf');
 const {ssim} = require('ssim.js');
 const util = require('karma/common/util');
 const which = require('which');
+const yaml = require('js-yaml');
 
 /**
  * @param {Object} config
@@ -43,6 +45,58 @@ module.exports = (config) => {
   const settings =
       settingsIndex >= 0 ? JSON.parse(args[settingsIndex + 1]) : {};
 
+  if (settings.grid_config) {
+    const gridBrowserMetadata =
+        yaml.load(fs.readFileSync(settings.grid_config, 'utf8'));
+    const customLaunchers = {};
+    const [gridHostname, gridPort] = settings.grid_address.split(':');
+    console.log(`Using Selenium grid at ${gridHostname}:${gridPort}`);
+
+    // By default, run on all grid browsers instead of the platform-specific
+    // default.  This does not disable local browsers, though.  Users can still
+    // specify a mix of grid and local browsers explicitly.
+    settings.default_browsers = [];
+
+    for (const name in gridBrowserMetadata) {
+      if (name == 'vars') {
+        // Skip variable defs in the YAML file
+        continue;
+      }
+
+      const metadata = gridBrowserMetadata[name];
+
+      const launcher = {};
+      customLaunchers[name] = launcher;
+
+      // Disabled-by-default browsers are still defined, but not put in the
+      // default list.  A user can ask for one explicitly.  This allows us to
+      // disable a browser that is down for some reason in the lab, but still
+      // ask for it manually if we want to test it before re-enabling it for
+      // everyone.
+      if (!metadata.disabled) {
+        settings.default_browsers.push(name);
+      }
+
+      // Add standard WebDriver configs.
+      Object.assign(launcher, {
+        base: 'WebDriver',
+        config: {hostname: gridHostname, port: gridPort},
+        pseudoActivityInterval: 20000,
+        browserName: metadata.browser,
+        platform: metadata.os,
+        version: metadata.version,
+      });
+
+      if (metadata.extra_config) {
+        Object.assign(launcher, metadata.extra_config);
+      }
+    }
+
+    config.set({
+      customLaunchers: customLaunchers,
+    });
+  }
+
   if (settings.browsers && settings.browsers.length == 1 &&
       settings.browsers[0] == 'help') {
     console.log('Available browsers:');
@@ -51,6 +105,24 @@ module.exports = (config) => {
       console.log('  ' + name);
     }
     process.exit(1);
+  }
+
+  // Resolve the set of browsers we will use.
+  const browserSet = new Set(settings.browsers && settings.browsers.length ?
+      settings.browsers : settings.default_browsers);
+  if (settings.exclude_browsers) {
+    for (const excluded of settings.exclude_browsers) {
+      browserSet.delete(excluded);
+    }
+  }
+
+  let browsers = Array.from(browserSet).sort();
+  if (settings.no_browsers) {
+    console.warn(
+        '--no-browsers: In this mode, you must connect browsers to Karma.');
+    browsers = null;
+  } else {
+    console.warn('Running tests on: ' + browsers.join(', '));
   }
 
   config.set({
@@ -107,46 +179,46 @@ module.exports = (config) => {
       'dist/deps.js',
       'shaka-player.uncompiled.js',
 
+      // the demo's config tab will register with shakaDemoMain, and will be
+      // tested in test/demo/demo_unit.js
+      'demo/config.js',
+
       // cajon module (an AMD variant of requirejs) next
       'node_modules/cajon/cajon.js',
 
-      // bootstrapping for the test suite
-      'test/test/boot.js',
+      // define the test namespace next (shaka.test)
+      'test/test/namespace.js',
 
-      // test utils next
+      // test utilities next, which fill in that namespace
       'test/test/util/*.js',
 
-      // list of test assets next
-      'demo/common/message_ids.js',
-      'demo/common/asset.js',
-      'demo/common/assets.js',
+      // bootstrapping for the test suite last; this will load the actual tests
+      'test/test/boot.js',
 
       // if --test-custom-asset *is not* present, we will add unit tests.
       // if --quick *is not* present, we will add integration tests.
       // if --external *is* present, we will add external asset tests.
 
-      // load relevant demo files
-      {
-        pattern: 'demo/!(main|load|demo_uncompiled|service_worker).js',
-        included: true,
-      },
-
-      // source files - these are only watched and served
+      // source files - these are only watched and served.
+      // anything not listed here can't be dynamically loaded by other scripts.
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'ui/**/*.js', included: false},
       {pattern: 'ui/**/*.less', included: false},
       {pattern: 'third_party/**/*.js', included: false},
-      {
-        pattern: 'node_modules/google-closure-library/closure/goog/**/*.js',
-        included: false,
-      },
+      {pattern: 'test/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
+      {pattern: 'demo/**/*.js', included: false},
       {pattern: 'demo/locales/en.json', included: false},
       {pattern: 'demo/locales/source.json', included: false},
-      {pattern: 'node_modules/**/*.js', included: false},
+      {pattern: 'node_modules/sprintf-js/src/sprintf.js', included: false},
+      {pattern: 'node_modules/less/dist/less.js', included: false},
+      {
+        pattern: 'node_modules/fontfaceonload/dist/fontfaceonload.js',
+        included: false,
+      },
     ],
 
     // NOTE: Do not use proxies at all!  They cannot be used with the --hostname
@@ -212,7 +284,7 @@ module.exports = (config) => {
 
     // Set which browsers to run on. If this is null, then Karma will wait for
     // an incoming connection.
-    browsers: settings.browsers,
+    browsers,
 
     // Enable / disable colors in the output (reporters and logs). Defaults
     // to true.
@@ -243,6 +315,7 @@ module.exports = (config) => {
 
     specReporter: {
       suppressSkipped: true,
+      showBrowser: true,
     },
   });
 
@@ -283,26 +356,34 @@ module.exports = (config) => {
     });
   }
 
+  const clientArgs = config.client.args[0];
+  clientArgs.testFiles = [];
+
   if (settings.test_custom_asset) {
     // If testing custom assets, we don't serve other unit or integration tests.
     // External asset tests are the basis for custom asset testing, so this file
     // is automatically included.
-    config.files.push('test/player_external.js');
+    clientArgs.testFiles.push('demo/common/asset.js');
+    clientArgs.testFiles.push('demo/common/assets.js');
+    clientArgs.testFiles.push('test/player_external.js');
   } else {
     // In a normal test run, we serve unit tests.
-    config.files.push('test/**/*_unit.js');
+    clientArgs.testFiles.push('test/**/*_unit.js');
 
     if (!settings.quick) {
       // If --quick is present, we don't serve integration tests.
-      config.files.push('test/**/*_integration.js');
+      clientArgs.testFiles.push('test/**/*_integration.js');
     }
     if (settings.external) {
       // If --external is present, we serve external asset tests.
-      config.files.push('test/**/*_external.js');
+      clientArgs.testFiles.push('demo/common/asset.js');
+      clientArgs.testFiles.push('demo/common/assets.js');
+      clientArgs.testFiles.push('test/**/*_external.js');
     }
   }
-  // We just modified the config in-place.  No need for config.set() after we
-  // push to config.files.
+
+  // These are the test files that will be dynamically loaded by boot.js.
+  clientArgs.testFiles = resolveGlobs(clientArgs.testFiles);
 
   const reporters = [];
 
@@ -347,13 +428,43 @@ module.exports = (config) => {
     const seed = settings.seed == null ? new Date().getTime() : settings.seed;
 
     // Run tests in a random order.
-    const clientArgs = config.client.args[0];
     clientArgs.random = true;
     clientArgs.seed = seed;
 
     console.log('Using a random test order (--random) with --seed=' + seed);
   }
+
+  if (settings.tls_key && settings.tls_cert) {
+    config.set({
+      protocol: 'https',
+      httpsServerOptions: {
+        key: fs.readFileSync(settings.tls_key),
+        cert: fs.readFileSync(settings.tls_cert),
+      },
+    });
+  }
 };
+
+/**
+ * Resolves a list of paths using globs into a list of explicit paths.
+ * Paths are all relative to the source directory.
+ *
+ * @param {!Array.<string>} list
+ * @return {!Array.<string>}
+ */
+function resolveGlobs(list) {
+  const options = {
+    cwd: __dirname,
+  };
+
+  const resolved = [];
+  for (const path of list) {
+    for (const resolvedPath of glob.sync(path, options)) {
+      resolved.push(resolvedPath);
+    }
+  }
+  return resolved;
+}
 
 /**
  * Determines which launchers and customLaunchers can be used and returns an
@@ -421,7 +532,7 @@ function allUsableBrowserLaunchers(config) {
     browsers.push(...Object.keys(config.customLaunchers));
   }
 
-  return browsers;
+  return browsers.sort();
 }
 
 /**

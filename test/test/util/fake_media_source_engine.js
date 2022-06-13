@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeMediaSourceEngine');
-
-goog.require('shaka.media.MediaSourceEngine');
-goog.require('shaka.test.FakeTextDisplayer');
-goog.require('shaka.util.ManifestParserUtils');
-
-
 /**
  * @summary
  * This simulates multiple SourceBuffers. However, it only
@@ -132,6 +125,10 @@ shaka.test.FakeMediaSourceEngine = class {
     this.getTextDisplayer =
         jasmine.createSpy('getTextDisplayer')
             .and.returnValue(new shaka.test.FakeTextDisplayer());
+
+    /** @type {!jasmine.Spy} */
+    this.setSegmentRelativeVttTiming =
+        jasmine.createSpy('setSegmentRelativeVttTiming').and.stub();
   }
 
   /** @override */

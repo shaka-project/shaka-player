@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.TimeRangesUtils');
-
 describe('TimeRangesUtils', () => {
   const TimeRangesUtils = shaka.media.TimeRangesUtils;
 
@@ -22,11 +20,6 @@ describe('TimeRangesUtils', () => {
     it('returns buffered when inside a single range', () => {
       const b = createFakeBuffered([{start: 10, end: 20}]);
       expect(TimeRangesUtils.isBuffered(b, 13)).toBe(true);
-    });
-
-    it('returns buffered when having a small gap', () => {
-      const b = createFakeBuffered([{start: 10, end: 20}]);
-      expect(TimeRangesUtils.isBuffered(b, 9, 1)).toBe(true);
     });
 
     // Ranges: [10-20], [30-40], [50-60]

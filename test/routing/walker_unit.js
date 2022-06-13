@@ -4,14 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.routing.Walker');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.AbortableOperation');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.PublicPromise');
-goog.requireType('shaka.routing.Node');
-
 describe('Walker', () => {
   const AbortableOperation = shaka.util.AbortableOperation;
 

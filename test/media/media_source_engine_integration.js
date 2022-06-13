@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.ClosedCaptionParser');
-goog.require('shaka.media.MediaSourceEngine');
-goog.require('shaka.test.FakeTextDisplayer');
-goog.require('shaka.test.TestScheme');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.util.ManifestParserUtils');
-
 describe('MediaSourceEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const presentationDuration = 840;
@@ -110,6 +103,7 @@ describe('MediaSourceEngine', () => {
     return {
       mimeType: streamMetadata.mimeType,
       codecs: streamMetadata.codecs,
+      drmInfos: [],
     };
   }
 

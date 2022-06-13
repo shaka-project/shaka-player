@@ -9,7 +9,6 @@ goog.provide('shaka.ui.Controls');
 goog.provide('shaka.ui.ControlsPanel');
 
 goog.require('goog.asserts');
-goog.require('shaka.Deprecate');
 goog.require('shaka.ads.AdManager');
 goog.require('shaka.cast.CastProxy');
 goog.require('shaka.log');
@@ -54,7 +53,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.cast.CastProxy} */
     this.castProxy_ = new shaka.cast.CastProxy(
-        video, player, this.config_.castReceiverAppId);
+        video, player, this.config_.castReceiverAppId,
+        this.config_.castAndroidReceiverCompatible);
 
     /** @private {boolean} */
     this.castAllowed_ = true;
@@ -316,7 +316,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   configure(config) {
     this.config_ = config;
 
-    this.castProxy_.changeReceiverId(config.castReceiverAppId);
+    this.castProxy_.changeReceiverId(config.castReceiverAppId,
+        config.castAndroidReceiverCompatible);
 
     // Deconstruct the old layout if applicable
     if (this.seekBar_) {
@@ -868,22 +869,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         const factory =
             shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
         const element = factory.create(this.controlsButtonPanel_, this);
-
-        if (typeof element.release != 'function') {
-          shaka.Deprecate.deprecateFeature(4,
-              'shaka.extern.IUIElement',
-              'Please update UI elements to have a release() method.');
-
-          // This cast works around compiler strictness about the IUIElement
-          // type being "@struct" (as ES6 classes are by default).
-          const moddableElement = /** @type {Object} */(element);
-          moddableElement['release'] = () => {
-            if (moddableElement['destroy']) {
-              moddableElement['destroy']();
-            }
-          };
-        }
-
         this.elements_.push(element);
       } else {
         shaka.log.alwaysWarn('Unrecognized control panel element requested:',
@@ -1275,21 +1260,23 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
+    const keyboardSeekDistance = this.config_.keyboardSeekDistance;
+
     switch (event.key) {
       case 'ArrowLeft':
         // If it's not focused on the volume bar, move the seek time backward
-        // for 5 sec. Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && !isVolumeBar) {
+        // for a few sec. Otherwise, the volume will be adjusted automatically.
+        if (this.seekBar_ && !isVolumeBar && keyboardSeekDistance > 0) {
           event.preventDefault();
-          this.seek_(this.seekBar_.getValue() - 5);
+          this.seek_(this.seekBar_.getValue() - keyboardSeekDistance);
         }
         break;
       case 'ArrowRight':
         // If it's not focused on the volume bar, move the seek time forward
-        // for 5 sec. Otherwise, the volume will be adjusted automatically.
-        if (this.seekBar_ && !isVolumeBar) {
+        // for a few sec. Otherwise, the volume will be adjusted automatically.
+        if (this.seekBar_ && !isVolumeBar && keyboardSeekDistance > 0) {
           event.preventDefault();
-          this.seek_(this.seekBar_.getValue() + 5);
+          this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
         }
         break;
       // Jump to the beginning of the video's seek range.

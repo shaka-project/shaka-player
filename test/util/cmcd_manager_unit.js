@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.util.CmcdManager');
-goog.require('shaka.util.ObjectUtils');
-
 describe('CmcdManager', () => {
   const CmcdManager = shaka.util.CmcdManager;
   const uuidRegex =
@@ -123,6 +120,9 @@ describe('CmcdManager', () => {
       retryParameters: /** @type {shaka.extern.RetryParameters} */({}),
       licenseRequestType: null,
       sessionId: null,
+      drmInfo: null,
+      initData: null,
+      initDataType: null,
       streamDataCallback: null,
     };
 

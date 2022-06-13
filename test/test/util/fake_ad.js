@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeAd');
-
-
 /**
  * @implements {shaka.extern.IAd}
  */

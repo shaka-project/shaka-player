@@ -17,26 +17,21 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
-          # Without this command, the manifest file will be ignored.  At least
-          # for our initial main-branch releases using this workflow, we must
-          # use the manifest and config file.
-          command: manifest
-          config-file: .release-please-config.json
-          manifest-file: .release-please-manifest.json
-          # Make sure the player version gets updated.
-          extra-files: lib/player.js
+          # Required input to specify the release type (node package).
+          release-type: node
           # Make sure we create the PR against the correct branch.
           default-branch: ${{ github.ref_name }}
 
       # If we didn't create a release, we may have created or updated a PR.
       - uses: actions/checkout@v2
-        if: ${{ ! steps.release.outputs.release_created }}
+        if: steps.release.outputs.release_created == false
       - name: Custom update Player version
-        if: ${{ ! steps.release.outputs.release_created }}
+        if: steps.release.outputs.release_created == false
         run: |
-          # Check out the branch that release-please created, if it exists.
+          # Check out the branch that release-please created.
+          # If it does not exist, FAIL!
           git fetch
-          git checkout release-please--branches--${{ github.ref_name }} || exit 0
+          git checkout release-please--branches--${{ github.ref_name }}--components--shaka-player || exit 1
           # If it does exist, update lib/player.js in the PR branch, so that the
           # -uncompiled tag remains in the player version in that context.
           VERSION="v$(jq -r .version package.json)-uncompiled"
@@ -44,8 +39,8 @@ jobs:
               -i lib/player.js
           git add lib/player.js
           # Emulate the actions bot.
-          git config user.email "github-actions[bot]"
-          git config user.name "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Update the PR.
           git commit --amend --no-edit
           git push -f
@@ -56,14 +51,16 @@ jobs:
   tag-main:
     runs-on: ubuntu-latest
     needs: release
-    if: ${{ needs.release.outputs.release_created }}
+    if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0') == false
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: main
       - name: Tag the main branch
         run: |
           # Emulate the actions bot.
-          git config user.email "github-actions[bot]"
-          git config user.name "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           VERSION=${{ needs.release.outputs.tag_name }}
           git tag -m "$VERSION-main" "$VERSION-main"
           git push origin "$VERSION-main"
@@ -71,19 +68,23 @@ jobs:
   npm:
     runs-on: ubuntu-latest
     needs: release
-    if: ${{ needs.release.outputs.release_created }}
+    if: needs.release.outputs.release_created
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
       - uses: actions/setup-node@v1
         with:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
-      # Without this, git describe won't work in the npm prepublish steps
-      - run: git fetch --unshallow
+
       - run: npm ci
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+
       - run: npm pack
       - uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
         with:
@@ -93,4 +94,70 @@ jobs:
           file_glob: true
           overwrite: true
 
-  # TODO: Publish to appspot
+  appspot:
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.release_created
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Compute appspot subdomain and promotion
+        run: |
+          # This is the same as the version tag, but with dots replaced by
+          # dashes.  For example, v3.2.2 would have the subdomain v3-2-2.
+          APPSPOT_SUBDOMAIN=$( echo ${{ needs.release.outputs.tag_name }} | sed -e 's/\./-/g' )
+          echo APPSPOT_SUBDOMAIN=$APPSPOT_SUBDOMAIN >> $GITHUB_ENV
+
+          # "Promoting" an appspot deployment makes it the default which shows
+          # up on shaka-player-demo.appspot.com (no subdomain).  This should be
+          # done for the latest release version from the latest release branch.
+          RELEASE_TAGS=$(git tag | grep ^v[0-9] | grep -Ev -- '-(master|main)')
+          LATEST_RELEASE=$(echo "$RELEASE_TAGS" | sort --version-sort | tail -1)
+          TAG_NAME=${{ needs.release.outputs.tag_name }}
+
+          if [[ "$TAG_NAME" == "$LATEST_RELEASE" ]]; then
+            echo APPSPOT_PROMOTE=true >> $GITHUB_ENV
+          else
+            echo APPSPOT_PROMOTE=false >> $GITHUB_ENV
+          fi
+
+          # Debug the decisions made here.
+          echo "Subdomain: $APPSPOT_SUBDOMAIN"
+          echo "Latest release: $LATEST_RELEASE"
+          echo "This release: $TAG_NAME"
+          echo "Promote: $APPSPOT_PROMOTE"
+
+      - uses: ./.github/workflows/custom-actions/prep-for-appspot
+
+      - uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
+
+      - uses: google-github-actions/deploy-appengine@v0
+        with:
+          project_id: shaka-player-demo
+          version: ${{ env.APPSPOT_SUBDOMAIN }}
+          promote: ${{ env.APPSPOT_PROMOTE }}
+
+  auto-branch:
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0')
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Create release branch
+        run: |
+          TAG=${{ needs.release.outputs.tag_name }}
+          BRANCH=$(echo "$TAG" | sed -e 's/\.0$/.x/')
+          git push origin HEAD:"$BRANCH"
