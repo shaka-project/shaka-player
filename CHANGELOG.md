@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.1.1](https://github.com/shaka-project/shaka-player/compare/v4.1.0...v4.1.1) (2022-06-14)
+
+
+### Bug Fixes
+
+* **demo:** allow switch between UITextDisplayer and SimpleTextDisplayer ([#4275](https://github.com/shaka-project/shaka-player/issues/4275)) ([f6cb4e2](https://github.com/shaka-project/shaka-player/commit/f6cb4e212c586e5bb8e16de445f9e9a2d49648bd))
+* **demo:** erroneous FairPlay keysystem in demo ([#4276](https://github.com/shaka-project/shaka-player/issues/4276)) ([8ff9fdf](https://github.com/shaka-project/shaka-player/commit/8ff9fdffadb284b13511b4d39fb9f1ba57e2dae1))
+* **hls:** Fix AV sync issues, fallback to sequence numbers if PROGRAM-DATE-TIME ignored ([#4289](https://github.com/shaka-project/shaka-player/issues/4289)) ([e5bfb8b](https://github.com/shaka-project/shaka-player/commit/e5bfb8bfa5720830da939880ad4e502369cdd160)), closes [#4287](https://github.com/shaka-project/shaka-player/issues/4287)
+* New EME polyfill fixes EME/MCap issues on some smart TVs ([#4279](https://github.com/shaka-project/shaka-player/issues/4279)) ([2168937](https://github.com/shaka-project/shaka-player/commit/21689375e081567328d704450145d6489e3e5d23))
+* Populate track's spatialAudio property ([#4291](https://github.com/shaka-project/shaka-player/issues/4291)) ([636f232](https://github.com/shaka-project/shaka-player/commit/636f232adf26ba47296fd6a624f4606c78a98ab6))
+* Remove IE 11 from default browsers for Windows ([#4272](https://github.com/shaka-project/shaka-player/issues/4272)) ([bc96abd](https://github.com/shaka-project/shaka-player/commit/bc96abdb9d567c56321d8489c51e12493776f7de)), closes [#4271](https://github.com/shaka-project/shaka-player/issues/4271)
+* Use middle segment when guessing MIME type on HLS ([#4269](https://github.com/shaka-project/shaka-player/issues/4269)) ([#4270](https://github.com/shaka-project/shaka-player/issues/4270)) ([7879424](https://github.com/shaka-project/shaka-player/commit/78794246a369151473bfbb4cbfee0a9de16628b3))
+
 ## [4.1.0](https://github.com/shaka-project/shaka-player/compare/v4.0.0...v4.1.0) (2022-06-02)
 
 
