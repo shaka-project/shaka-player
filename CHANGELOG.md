@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.3.7](https://github.com/shaka-project/shaka-player/compare/v3.3.6...v3.3.7) (2022-06-14)
+
+
+### Bug Fixes
+
+* **demo:** allow switch between UITextDisplayer and SimpleTextDisplayer ([#4275](https://github.com/shaka-project/shaka-player/issues/4275)) ([251dc19](https://github.com/shaka-project/shaka-player/commit/251dc190fa72d3a9bb9aad668faa9284e7716ade))
+* Populate track's spatialAudio property ([#4291](https://github.com/shaka-project/shaka-player/issues/4291)) ([43fb21c](https://github.com/shaka-project/shaka-player/commit/43fb21ce904b6580a200769b83f265a51c5f312d))
+* Remove IE 11 from default browsers for Windows ([#4272](https://github.com/shaka-project/shaka-player/issues/4272)) ([c90e687](https://github.com/shaka-project/shaka-player/commit/c90e687530650254950c5cde06a3004bfc32d051)), closes [#4271](https://github.com/shaka-project/shaka-player/issues/4271)
+
 ## [3.3.6](https://github.com/shaka-project/shaka-player/compare/v3.3.5...v3.3.6) (2022-06-02)
 
 
