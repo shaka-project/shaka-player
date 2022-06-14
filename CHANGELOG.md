@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.2.9](https://github.com/shaka-project/shaka-player/compare/v3.2.8...v3.2.9) (2022-06-14)
+
+
+### Bug Fixes
+
+* **demo:** allow switch between UITextDisplayer and SimpleTextDisplayer ([#4275](https://github.com/shaka-project/shaka-player/issues/4275)) ([76cd039](https://github.com/shaka-project/shaka-player/commit/76cd0398ff0115cf2c4c8369a50eee7fa12975cf))
+* **demo:** erroneous FairPlay keysystem in demo ([#4276](https://github.com/shaka-project/shaka-player/issues/4276)) ([bfdeb73](https://github.com/shaka-project/shaka-player/commit/bfdeb738aa5e9c464e79cdb787be11215eff6cc9))
+* New EME polyfill fixes EME/MCap issues on some smart TVs ([#4279](https://github.com/shaka-project/shaka-player/issues/4279)) ([312570f](https://github.com/shaka-project/shaka-player/commit/312570f3bbdbbabdc20a76f1afcba85aabc9c744))
+* Populate track's spatialAudio property ([#4291](https://github.com/shaka-project/shaka-player/issues/4291)) ([ab1b442](https://github.com/shaka-project/shaka-player/commit/ab1b442f057a305a4592f93062fb479fa72839d4))
+* Remove IE 11 from default browsers for Windows ([#4272](https://github.com/shaka-project/shaka-player/issues/4272)) ([3f2cb2e](https://github.com/shaka-project/shaka-player/commit/3f2cb2e761d8b78672935852903b5c6ecaa6a5c8)), closes [#4271](https://github.com/shaka-project/shaka-player/issues/4271)
+* Use middle segment when guessing MIME type on HLS ([#4269](https://github.com/shaka-project/shaka-player/issues/4269)) ([#4270](https://github.com/shaka-project/shaka-player/issues/4270)) ([51af232](https://github.com/shaka-project/shaka-player/commit/51af23244bd7307ff656e02b53383f4913cf1249))
+
 ## [3.2.8](https://github.com/shaka-project/shaka-player/compare/v3.2.7...v3.2.8) (2022-06-02)
 
 
