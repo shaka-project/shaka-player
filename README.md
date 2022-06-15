@@ -1,9 +1,5 @@
 # ![Shaka Player](docs/shaka-player-logo.png)
 
-Shaka Player is an open-source JavaScript library for adaptive media.  It plays
-adaptive media formats (such as [DASH][] and [HLS][]) in a browser, without
-using plugins or Flash.  Instead, Shaka Player uses the open web standards
-[MediaSource Extensions][] and [Encrypted Media Extensions][].
 
 Shaka Player also supports [offline storage and playback][] of media using
 [IndexedDB][].  Content can be stored on any browser.  Storage of licenses
