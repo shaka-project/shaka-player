@@ -275,3 +275,4 @@ Shaka + Angular integration:
 
 If you have published Shaka Integration code/tutorials, please feel free to submit PRs
 to add them to this list, we will gladly approve!
+
