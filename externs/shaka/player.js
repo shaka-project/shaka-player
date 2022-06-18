@@ -1099,6 +1099,29 @@ shaka.extern.CmcdConfiguration;
 
 /**
  * @typedef {{
+ *   dps: boolean,
+ *   logLevel: number,
+ *   logo: boolean
+ * }}
+ *
+ * @description
+ *   Decoding for MPEG-5 Part2 LCEVC.
+ *
+ * @property {boolean} dps
+ *   If <code>true</code>, enable LCEVC DPS - Dynamic Performance Scaling
+ *   Defaults to <code>true</code>.
+ * @property {number} logLevel
+ *   Loglevel 0-5 for logging.
+ *   Defaults to <code>0</code>.
+ * @property {boolean} logo
+ *   If <code>false</code>, shows LCEVC Logo on top left corner of canvas.
+ *   Defaults to <code>false</code>.
+ * @exportDoc
+ */
+shaka.extern.LcevcConfiguration;
+
+/**
+ * @typedef {{
  *   trackSelectionCallback:
  *       function(shaka.extern.TrackList):!Promise<shaka.extern.TrackList>,
  *   downloadSizeCallback: function(number):!Promise<boolean>,
@@ -1145,6 +1168,7 @@ shaka.extern.OfflineConfiguration;
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
+ *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
@@ -1173,6 +1197,9 @@ shaka.extern.OfflineConfiguration;
  *   ABR configuration and settings.
  * @property {shaka.extern.CmcdConfiguration} cmcd
  *   CMCD configuration and settings. (Common Media Client Data)
+ * @property {shaka.extern.LcevcConfiguration} lcevc
+ *   MPEG-5 LCEVC configuration and settings.
+ *   (Low Complexity Enhancement Video Codec)
  * @property {shaka.extern.OfflineConfiguration} offline
  *   Offline configuration and settings.
  * @property {string} preferredAudioLanguage

@@ -243,6 +243,11 @@ shakaAssets.testAssets = [
           useNativeHlsOnSafari: false,
           forceTransmuxTS: true,
         },
+        lcevc: {
+          dps: true,
+          logLevel: 0,
+          logo: false,
+        },
       }),
   new ShakaDemoAssetInfo(
       /* name= */ 'Big Buck Bunny: the Dark Truths of a Video Dev Cartoon (DASH)',

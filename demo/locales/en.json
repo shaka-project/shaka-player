@@ -34,6 +34,7 @@
   "DEMO_CLEAR_KEY": "Clear Key DRM",
   "DEMO_CLOCK_SYNC_URI": "Clock Sync URI",
   "DEMO_CMCD_SECTION_HEADER": "CMCD",
+  "DEMO_LCEVC_SECTION_HEADER": "MPEG-5 Part-2 LCEVC",
   "DEMO_COMPILED_DEBUG": "Compiled (Debug)",
   "DEMO_COMPILED_RELEASE": "Compiled (Release)",
   "DEMO_CONNECTION_TIMEOUT": "Connection timeout",

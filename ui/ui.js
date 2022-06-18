@@ -386,7 +386,10 @@ shaka.ui.Overlay = class {
     const ui = new shaka.ui.Overlay(player,
         shaka.util.Dom.asHTMLElement(container),
         shaka.util.Dom.asHTMLMediaElement(video));
+    const canvas = shaka.util.Dom.createHTMLElement('canvas');
+    canvas.classList.add('shaka-canvas-container');
 
+    container.appendChild(canvas);
     // Get and configure cast app id.
     let castAppId = '';
 
