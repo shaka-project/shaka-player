@@ -98,11 +98,14 @@ You can find a full list of available browsers with `--browsers help`, and you
 can find a complete list of testing options with `--help`.
 
 
-#### Join the announcement list
+#### Announcements
 
-If you want to receive release or survey announcements, you should join our
+To subscribe to new releases on GitHub, you can follow
+[instructions from this blog](https://www.jessesquires.com/blog/2020/07/30/github-tip-watching-releases/).
+
+To receive infrequent announcements and surveys from us, you can join our
 [mailing list](https://groups.google.com/forum/#!forum/shaka-player-users).
-The list is very low volume.
+The list is very low volume, and can only be written to by us.
 
 
 #### Continue the Tutorials
