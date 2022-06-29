@@ -38,6 +38,7 @@ goog.require('shaka.polyfill.Fullscreen');
 goog.require('shaka.polyfill.MediaSource');
 goog.require('shaka.polyfill.MediaCapabilities');
 goog.require('shaka.polyfill.Orientation');
+goog.require('shaka.polyfill.PatchedMediaKeysApple');
 goog.require('shaka.polyfill.PatchedMediaKeysNop');
 goog.require('shaka.polyfill.PatchedMediaKeysWebkit');
 goog.require('shaka.polyfill.PiPWebkit');
