@@ -70,7 +70,6 @@
       "dialog-polyfill/dist/dialog-polyfill.js",
       "eme-encryption-scheme-polyfill/index.js",
       "es6-promise-polyfill/promise.min.js",
-      "fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js",
       "google-closure-library/closure/goog/base.js",
       "less/dist/less.js",
       "material-design-lite/dist/material.indigo-blue.min.css",
