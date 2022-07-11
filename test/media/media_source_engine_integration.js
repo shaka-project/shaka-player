@@ -57,32 +57,32 @@ describe('MediaSourceEngine', () => {
 
   function appendInit(type) {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
+    const reference = null;
     return mediaSourceEngine.appendBuffer(
-        type, segment, null, null, /* hasClosedCaptions= */ false);
+        type, segment, reference, /* hasClosedCaptions= */ false);
   }
 
   function append(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, Date.now() / 1000);
+    const reference = dummyReference(type, segmentNumber);
     return mediaSourceEngine.appendBuffer(
-        type, segment, null, null, /* hasClosedCaptions= */ false);
+        type, segment, reference, /* hasClosedCaptions= */ false);
   }
 
-  // The start time and end time should be null for init segment with closed
-  // captions.
   function appendInitWithClosedCaptions(type) {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, /* startTime= */ null,
-        /* endTime= */ null, /* hasClosedCaptions= */ true);
+    const reference = null;
+    return mediaSourceEngine.appendBuffer(
+        type, segment, reference, /* hasClosedCaptions= */ true);
   }
 
-  // The start time and end time should be valid for the segments with closed
-  // captions.
   function appendWithClosedCaptions(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, /* startTime= */ 0,
-        /* endTime= */ 2, /* hasClosedCaptions= */ true);
+    const reference = dummyReference(type, segmentNumber);
+    return mediaSourceEngine.appendBuffer(
+        type, segment, reference, /* hasClosedCaptions= */ true);
   }
 
   function buffered(type, time) {
@@ -91,6 +91,20 @@ describe('MediaSourceEngine', () => {
 
   function bufferStart(type) {
     return mediaSourceEngine.bufferStart(type);
+  }
+
+  function dummyReference(type, segmentNumber) {
+    const start = segmentNumber * metadata[type].segmentDuration;
+    const end = (segmentNumber + 1) * metadata[type].segmentDuration;
+    return new shaka.media.SegmentReference(
+        start, end,
+        /* uris= */ () => ['foo://bar'],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
   }
 
   function remove(type, segmentNumber) {
