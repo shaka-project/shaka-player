@@ -868,9 +868,9 @@ describe('StreamingEngine', () => {
     netEngineDelays.audio = 1.0;
     netEngineDelays.video = 5.0; // Need init segment and media segment
 
-    mediaSourceEngine.appendBuffer.and.callFake((type, data, start, end) => {
+    mediaSourceEngine.appendBuffer.and.callFake((type, data, reference) => {
       // Call to the underlying implementation.
-      const p = mediaSourceEngine.appendBufferImpl(type, data, start, end);
+      const p = mediaSourceEngine.appendBufferImpl(type, data, reference);
 
       // Validate that no one media type got ahead of any other.
       let minBuffered = Infinity;
@@ -1012,8 +1012,8 @@ describe('StreamingEngine', () => {
 
       const bufferEnd = {audio: 0, video: 0, text: 0};
       mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, start, end) => {
-            bufferEnd[type] = end;
+          (type, data, reference) => {
+            bufferEnd[type] = reference && reference.endTime;
             return Promise.resolve();
           });
       mediaSourceEngine.bufferEnd.and.callFake((type) => {
@@ -1080,9 +1080,9 @@ describe('StreamingEngine', () => {
       // Replace the whole spy since we want to call the original.
       mediaSourceEngine.appendBuffer =
           jasmine.createSpy('appendBuffer')
-              .and.callFake(async (type, data, start, end) => {
+              .and.callFake(async (type, data, reference) => {
                 await p;
-                return Util.invokeSpy(old, type, data, start, end);
+                return Util.invokeSpy(old, type, data, reference);
               });
 
       await streamingEngine.start();
@@ -1107,9 +1107,9 @@ describe('StreamingEngine', () => {
       // Replace the whole spy since we want to call the original.
       mediaSourceEngine.appendBuffer =
           jasmine.createSpy('appendBuffer')
-              .and.callFake(async (type, data, start, end) => {
+              .and.callFake(async (type, data, reference) => {
                 await p;
-                return Util.invokeSpy(old, type, data, start, end);
+                return Util.invokeSpy(old, type, data, reference);
               });
 
       await streamingEngine.start();
@@ -1750,9 +1750,9 @@ describe('StreamingEngine', () => {
           // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
       mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, startTime, endTime) => {
+          (type, data, reference) => {
             expect(presentationTimeInSeconds).toBe(125);
-            if (startTime >= 100) {
+            if (reference && reference.startTime >= 100) {
               // Ignore a possible call for the first Period.
               expect(Util.invokeSpy(timeline.getSegmentAvailabilityStart))
                   .toBe(100);
@@ -1765,7 +1765,7 @@ describe('StreamingEngine', () => {
 
             // eslint-disable-next-line no-restricted-syntax
             return originalAppendBuffer.call(
-                mediaSourceEngine, type, data, startTime, endTime);
+                mediaSourceEngine, type, data, reference);
           });
 
       await runTest(slideSegmentAvailabilityWindow);
@@ -1862,14 +1862,14 @@ describe('StreamingEngine', () => {
           // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
       mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, startTime, endTime) => {
+          (type, data, reference) => {
             // Reject the first video init segment.
             if (data == segmentData[ContentType.VIDEO].initSegments[0]) {
               return Promise.reject(expectedError);
             } else {
               // eslint-disable-next-line no-restricted-syntax
               return originalAppendBuffer.call(
-                  mediaSourceEngine, type, data, startTime, endTime);
+                  mediaSourceEngine, type, data, reference);
             }
           });
 
@@ -1896,14 +1896,14 @@ describe('StreamingEngine', () => {
           // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
       mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, startTime, endTime) => {
+          (type, data, reference) => {
             // Reject the first audio segment.
             if (data == segmentData[ContentType.AUDIO].segments[0]) {
               return Promise.reject(expectedError);
             } else {
               // eslint-disable-next-line no-restricted-syntax
               return originalAppendBuffer.call(
-                  mediaSourceEngine, type, data, startTime, endTime);
+                  mediaSourceEngine, type, data, reference);
             }
           });
 
@@ -2187,7 +2187,7 @@ describe('StreamingEngine', () => {
           // Now that we're streaming, throw QuotaExceededError on every segment
           // to quickly trigger the quota error.
           const appendBufferSpy = jasmine.createSpy('appendBuffer');
-          appendBufferSpy.and.callFake((type, data, startTime, endTime) => {
+          appendBufferSpy.and.callFake((type, data, reference) => {
             throw new shaka.util.Error(
                 shaka.util.Error.Severity.CRITICAL,
                 shaka.util.Error.Category.MEDIA,
@@ -2373,9 +2373,10 @@ describe('StreamingEngine', () => {
       // Throw two QuotaExceededErrors at different times.
       let numErrorsThrown = 0;
       appendBufferSpy.and.callFake(
-          (type, data, startTime, endTime) => {
-            const throwError = (numErrorsThrown == 0 && startTime == 10) ||
-                             (numErrorsThrown == 1 && startTime == 20);
+          (type, data, reference) => {
+            const throwError = reference &&
+                ((numErrorsThrown == 0 && reference.startTime == 10) ||
+                 (numErrorsThrown == 1 && reference.startTime == 20));
             if (throwError) {
               numErrorsThrown++;
               throw new shaka.util.Error(
@@ -2386,7 +2387,7 @@ describe('StreamingEngine', () => {
             } else {
               // eslint-disable-next-line no-restricted-syntax
               const p = originalAppendBuffer.call(
-                  mediaSourceEngine, type, data, startTime, endTime);
+                  mediaSourceEngine, type, data, reference);
               return p;
             }
           });
@@ -2435,8 +2436,8 @@ describe('StreamingEngine', () => {
       // Throw QuotaExceededError multiple times after at least one segment of
       // each type has been appended.
       appendBufferSpy.and.callFake(
-          (type, data, startTime, endTime) => {
-            if (startTime >= 10) {
+          (type, data, reference) => {
+            if (reference && reference.startTime >= 10) {
               throw new shaka.util.Error(
                   shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.MEDIA,
@@ -2445,7 +2446,7 @@ describe('StreamingEngine', () => {
             } else {
               // eslint-disable-next-line no-restricted-syntax
               const p = originalAppendBuffer.call(
-                  mediaSourceEngine, type, data, startTime, endTime);
+                  mediaSourceEngine, type, data, reference);
               return p;
             }
           });
@@ -2986,8 +2987,8 @@ describe('StreamingEngine', () => {
 
       // Naive buffered range tracking that only tracks the buffer end.
       const bufferEnd = {audio: 0, video: 0, text: 0};
-      mediaSourceEngine.appendBuffer.and.callFake((type, data, start, end) => {
-        bufferEnd[type] = end;
+      mediaSourceEngine.appendBuffer.and.callFake((type, data, reference) => {
+        bufferEnd[type] = reference && reference.endTime;
         return Promise.resolve();
       });
       mediaSourceEngine.bufferEnd.and.callFake((type) => bufferEnd[type]);
@@ -3281,8 +3282,8 @@ describe('StreamingEngine', () => {
 
       const bufferEnd = {audio: 0, video: 0, text: 0};
       mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, start, end) => {
-            bufferEnd[type] = end;
+          (type, data, reference) => {
+            bufferEnd[type] = reference && reference.endTime;
             return Promise.resolve();
           });
       mediaSourceEngine.bufferEnd.and.callFake((type) => {
