@@ -25,6 +25,7 @@ application:
     - TextDecoder/TextEncoder platform support or polyfill required (affects
       Xbox One, but not evergreen browsers); we suggest the polyfill
       [https://github.com/anonyco/FastestSmallestTextEncoderDecoder](fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js)
+      Fallback included by default in v4.2
 
   - Support removed:
     - IE11 support removed
