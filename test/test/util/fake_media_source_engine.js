@@ -78,8 +78,8 @@ shaka.test.FakeMediaSourceEngine = class {
 
     /** @type {!jasmine.Spy} */
     this.appendBuffer = jasmine.createSpy('appendBuffer')
-        .and.callFake((type, data, start, end) =>
-          this.appendBufferImpl(type, data, start, end));
+        .and.callFake((type, data, reference) =>
+          this.appendBufferImpl(type, data, reference));
 
     /** @type {!jasmine.Spy} */
     this.clear = jasmine.createSpy('clear')
@@ -229,11 +229,10 @@ shaka.test.FakeMediaSourceEngine = class {
   /**
    * @param {string} type
    * @param {!ArrayBuffer} data
-   * @param {?number} startTime
-   * @param {?number} endTime
+   * @param {?shaka.media.SegmentReference} reference
    * @return {!Promise}
    */
-  appendBufferImpl(type, data, startTime, endTime) {
+  appendBufferImpl(type, data, reference) {
     if (!this.segments[type]) {
       throw new Error('unexpected type');
     }
@@ -257,8 +256,7 @@ shaka.test.FakeMediaSourceEngine = class {
     }
     if (i >= 0) {
       // Update the list of which init segment was appended last.
-      expect(startTime).toBe(null);
-      expect(endTime).toBe(null);
+      expect(reference).toBe(null);
       this.initSegments[type] =
           this.segmentData[type].initSegments.map((c) => false);
       this.initSegments[type][i] = true;
@@ -289,8 +287,11 @@ shaka.test.FakeMediaSourceEngine = class {
     const expectedStartTime = i * segmentData.segmentDuration;
     const expectedEndTime = expectedStartTime + segmentData.segmentDuration;
     expect(appendedTime).toBe(expectedStartTime);
-    expect(startTime).toBe(expectedStartTime);
-    expect(endTime).toBe(expectedEndTime);
+    expect(reference).not.toBe(null);
+    if (reference) {
+      expect(reference.startTime).toBe(expectedStartTime);
+      expect(reference.endTime).toBe(expectedEndTime);
+    }
 
     this.segments[type][i] = true;
     return Promise.resolve();
