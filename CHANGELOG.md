@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.0.4](https://github.com/shaka-project/shaka-player/compare/v4.0.3...v4.0.4) (2022-07-14)
+
+
+### Bug Fixes
+
+* Add fallback to TextDecoder and TextEncoder ([#4324](https://github.com/shaka-project/shaka-player/issues/4324)) ([92f9190](https://github.com/shaka-project/shaka-player/commit/92f91904b08a09a56558d91818924287d35a4cb0))
+* Debug buffer placement ([9f8520c](https://github.com/shaka-project/shaka-player/commit/9f8520c0e5c67a4404b03a7b96cbc3163db0844c))
+* Fix EOS set-top box being identified as Apple. ([#4310](https://github.com/shaka-project/shaka-player/issues/4310)) ([1d642e5](https://github.com/shaka-project/shaka-player/commit/1d642e5fb101d985c05e68c7bcabab471ef122dd))
+* Fix getVideoPlaybackQuality in WebOS 3 ([#4316](https://github.com/shaka-project/shaka-player/issues/4316)) ([a1af9dd](https://github.com/shaka-project/shaka-player/commit/a1af9dd5b9ebe6b671f5fe7daa97f713f66f8cfa))
+* Fix MediaCapabilities polyfill on Playstation 4 ([#4320](https://github.com/shaka-project/shaka-player/issues/4320)) ([0f20944](https://github.com/shaka-project/shaka-player/commit/0f20944f34fef2dbb7dad62cdb3129729dfefcb5))
+* Fix segment index assertions with DAI ([9a8bf42](https://github.com/shaka-project/shaka-player/commit/9a8bf42928e82818909e33b056644fd740636c94))
+* VTT Cue Parsing On PlayStation 4 ([#4340](https://github.com/shaka-project/shaka-player/issues/4340)) ([37dc855](https://github.com/shaka-project/shaka-player/commit/37dc855d3613b8bb8a68c1f7da1ff2e76e948ed7)), closes [#4321](https://github.com/shaka-project/shaka-player/issues/4321)
+
 ## [4.0.3](https://github.com/shaka-project/shaka-player/compare/v4.0.2...v4.0.3) (2022-06-14)
 
 
