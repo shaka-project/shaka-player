@@ -246,6 +246,39 @@ shaka.extern.CreateSegmentIndexFunction;
 
 /**
  * @typedef {{
+ *   method: string,
+ *   cryptoKey: (webCrypto.CryptoKey|undefined),
+ *   fetchKey: (shaka.extern.CreateSegmentIndexFunction|undefined),
+ *   iv: (!Uint8Array|undefined),
+ *   firstMediaSequenceNumber: number
+ * }}
+ *
+ * @description
+ * AES-128 key and iv info from the HLS manifest.
+ *
+ * @property {string} method
+ *   The key method defined in the HLS manifest.
+ * @property {webCrypto.CryptoKey|undefined} cryptoKey
+ *   Web crypto key object of the AES-128 CBC key. If unset, the "fetchKey"
+ *   property should be provided.
+ * @property {shaka.extern.CreateSegmentIndexFunction|undefined} fetchKey
+ *   A function that fetches the key.
+ *   Should be provided if the "cryptoKey" property is unset.
+ *   Should update this object in-place, to set "cryptoKey".
+ * @property {(!Uint8Array|undefined)} iv
+ *   The IV in the HLS manifest, if defined. See HLS RFC 8216 Section 5.2 for
+ *   handling undefined IV.
+ * @property {number} firstMediaSequenceNumber
+ *   The starting Media Sequence Number of the playlist, used when IV is
+ *   undefined.
+ *
+ * @exportDoc
+ */
+shaka.extern.HlsAes128Key;
+
+
+/**
+ * @typedef {{
  *   id: number,
  *   originalId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
