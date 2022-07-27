@@ -1099,22 +1099,33 @@ shaka.extern.CmcdConfiguration;
 
 /**
  * @typedef {{
- *   dps: boolean,
+ *   dynamicPerformanceScaling: boolean,
  *   logLevel: number,
- *   logo: boolean
+ *   drawLogo: boolean
  * }}
  *
  * @description
  *   Decoding for MPEG-5 Part2 LCEVC.
  *
- * @property {boolean} dps
- *   If <code>true</code>, enable LCEVC DPS - Dynamic Performance Scaling
+ * @property {boolean} dynamicPerformanceScaling
+ *   If <code>true</code>, LCEVC Dynamic Performance Scaling or dps is enabled
+ *   to be triggered, when the system is not able to decode frames within a
+ *   specific tolerance of the fps of the video and disables LCEVC decoding
+ *   for some time. The base video will be shown upscaled to target resolution.
+ *   If it is triggered again within a short period of time, the disabled
+ *   time will be higher and if it is triggered three times in a row the LCEVC
+ *   decoding will be disabled for that playback session.
+ *   If dynamicPerformanceScaling is false, LCEVC decode will be forced
+ *   and will drop frames appropriately if performance is sub optimal.
  *   Defaults to <code>true</code>.
  * @property {number} logLevel
  *   Loglevel 0-5 for logging.
  *   Defaults to <code>0</code>.
- * @property {boolean} logo
- *   If <code>false</code>, shows LCEVC Logo on top left corner of canvas.
+ * @property {boolean} drawLogo
+ *   If <code>true</code>, LCEVC Logo is placed on the top left hand corner
+ *   which only appears when the LCEVC enahanced Frames are being rendered.
+ *   Defaults to true for the lib but is forced to false in this integration
+ *   unless explicitly set to true through config.
  *   Defaults to <code>false</code>.
  * @exportDoc
  */

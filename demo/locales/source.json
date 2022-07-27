@@ -139,10 +139,6 @@
     "description": "The header for a section of configuration values.",
     "message": "[JARGON:CMCD]"
   },
-  "DEMO_LCEVC_SECTION_HEADER": {
-    "description": "The header for a section of configuration values.",
-    "message": "MPEG-5 Part-2 LCEVC [JARGON:LCEVC]"
-  },
   "DEMO_COMPILED_DEBUG": {
     "description": "A link in the footer, to the debug build of the demo.",
     "message": "Compiled (Debug)"
@@ -442,6 +438,10 @@
   "DEMO_LANGUAGE_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "Language"
+  },
+  "DEMO_LCEVC_SECTION_HEADER": {
+    "description": "The header for a section of configuration values.",
+    "message": "MPEG-5 Part-2 LCEVC [JARGON:LCEVC]"
   },
   "DEMO_LIBRARIES": {
     "description": "A link in the footer, to Shaka Player in the Google Hosted Libraries CDN.",
