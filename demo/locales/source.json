@@ -439,6 +439,18 @@
     "description": "The header for a section of configuration values.",
     "message": "Language"
   },
+  "DEMO_LCEVC_DRAW_LOGO": {
+    "description": "LCEVC Watermark on the left hand top corner of the canvas.",
+    "message": "Draw LCEVC Logo [JARGON:LCEVC]"
+  },
+  "DEMO_LCEVC_DYNAMIC_PERFORMANCE_SCALING": {
+    "description": "Dynamic Performance scaling for enabling/disabling LCEVC decoding based on decode performance.",
+    "message": "LCEVC Dynamic Performance scaling [JARGON:LCEVC]"
+  },
+  "DEMO_LCEVC_LOG_LEVEL": {
+    "description": "Log Level for LCEVC Lib",
+    "message": "LCEVC Log Level [JARGON:LCEVC]"
+  },
   "DEMO_LCEVC_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "MPEG-5 Part-2 LCEVC [JARGON:LCEVC]"

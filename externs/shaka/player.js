@@ -1120,6 +1120,12 @@ shaka.extern.CmcdConfiguration;
  *   Defaults to <code>true</code>.
  * @property {number} logLevel
  *   Loglevel 0-5 for logging.
+ *   NONE = 0
+ *   ERROR = 1
+ *   WARNING = 2
+ *   INFO = 3
+ *   DEBUG = 4
+ *   VERBOSE = 5
  *   Defaults to <code>0</code>.
  * @property {boolean} drawLogo
  *   If <code>true</code>, LCEVC Logo is placed on the top left hand corner
