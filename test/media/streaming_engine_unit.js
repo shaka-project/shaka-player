@@ -2893,6 +2893,72 @@ describe('StreamingEngine', () => {
     });
   });
 
+  describe('emmbeded prft boxes', () => {
+    const prftSegment = Uint8ArrayUtils.fromHex(
+        '00000020707266740100000000000001E683B62E8E63CC580000001B319D5767');
+
+    const prftEventObj = {
+      wallClockTime: 1658402734000,
+      mediaTime: 116796512103,
+      timescale: 1,
+    };
+
+    beforeEach(() => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.parsePrftBox = true;
+      createStreamingEngine(config);
+    });
+
+    it('raises an event for registered prft v1', async () => {
+      segmentData[ContentType.VIDEO].segments[0] = prftSegment;
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+      expect(onEvent).toHaveBeenCalled();
+
+      const event = onEvent.calls.argsFor(0)[0];
+      expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
+      expect(event.detail.mediaTime).toBe(prftEventObj.mediaTime);
+      expect(event.detail.timescale).toBe(prftEventObj.timescale);
+    });
+
+    it('raises an event for registered prft v0', async () => {
+      const prftSegment = Uint8ArrayUtils.fromHex(
+          '0000001C707266740000000000000001E683B62E8E63CC5819999999');
+      segmentData[ContentType.VIDEO].segments[0] = prftSegment;
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+      expect(onEvent).toHaveBeenCalled();
+
+      const event = onEvent.calls.argsFor(0)[0];
+      expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
+      expect(event.detail.mediaTime).toBe(429496729);
+      expect(event.detail.timescale).toBe(prftEventObj.timescale);
+    });
+
+    it('raises an event once only', async () => {
+      segmentData[ContentType.VIDEO].segments[0] =
+          shaka.util.Uint8ArrayUtils.concat(prftSegment, prftSegment);
+      segmentData[ContentType.VIDEO].segments[1] = prftSegment;
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+      expect(onEvent).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('network downgrading', () => {
     /** @type {shaka.extern.Variant} */
     let initialVariant;

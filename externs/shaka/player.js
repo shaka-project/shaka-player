@@ -567,6 +567,28 @@ shaka.extern.EmsgInfo;
 
 /**
  * @typedef {{
+ *   wallClockTime: number,
+ *   mediaTime: number,
+ *   timescale: number
+ * }}
+ *
+ * @description
+ * Contains information about an PRFT MP4 box.
+ *
+ * @property {number} wallClockTime
+ *   A UTC timestamp corresponding to decoding time.
+ * @property {number} mediaTime
+ *   Is an number containing the starting time within the media of
+ *   this edit segment (in media time scale units, in composition time).
+ * @property {number} timescale
+ *   Provides the timescale, in ticks per second.
+ * @exportDoc
+ */
+shaka.extern.ProducerReferenceTime;
+
+
+/**
+ * @typedef {{
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
  *   videoRobustness: string,
@@ -877,7 +899,8 @@ shaka.extern.ManifestConfiguration;
  *   updateIntervalSeconds: number,
  *   dispatchAllEmsgBoxes: boolean,
  *   observeQualityChanges: boolean,
- *   maxDisabledTime: number
+ *   maxDisabledTime: number,
+ *   parsePrftBox: boolean
  * }}
  *
  * @description
@@ -986,6 +1009,10 @@ shaka.extern.ManifestConfiguration;
  *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
  *   is reached, in seconds.
  *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
+ * @property {boolean} parsePrftBox
+ *   If <code>true</code>, will raise a shaka.extern.ProducerReferenceTime
+ *   player event.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
