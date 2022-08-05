@@ -38,23 +38,34 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        browser: ["Chrome", "Firefox", "Edge", "Safari", "Safari-14"]
-        exclude:
-          - os: ubuntu-latest
-            browser: Edge
-          - os: windows-latest
-            browser: Safari
-          - os: windows-latest
-            browser: Safari-14
-          - os: ubuntu-latest
-            browser: Safari
-          - os: ubuntu-latest
-            browser: Safari-14
         include:
           # Run Linux browsers with xvfb, so they're in a headless X session.
+          # Additionally, generate a code coverage report from Linux Chrome.
           - os: ubuntu-latest
+            browser: Chrome
+            extra_flags: "--use-xvfb --html-coverage-report"
+          - os: ubuntu-latest
+            browser: Firefox
             extra_flags: "--use-xvfb"
+
+          - os: macos-latest
+            browser: Chrome
+          - os: macos-latest
+            browser: Firefox
+          - os: macos-latest
+            browser: Edge
+          - os: macos-latest
+            browser: Safari
+          - os: macos-latest
+            browser: Safari-14
+
+          - os: windows-latest
+            browser: Chrome
+          - os: windows-latest
+            browser: Firefox
+          - os: windows-latest
+            browser: Edge
+
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
       fail-fast: false
@@ -113,6 +124,49 @@ jobs:
             --browsers "$browser" \
             --reporters spec --spec-hide-passed \
             ${{ matrix.extra_flags }}
+
+      - name: Find coverage report
+        id: coverage
+        if: always() # Even on failure of an earlier step.
+        shell: bash
+        run: |
+          # If the directory exists...
+          if [ -d coverage ]; then
+            # Find the path to the coverage report.  It includes the exact
+            # browser version in the path, so it will vary.  Having a single
+            # path will make the artifact zip simpler, whereas using a wildcard
+            # in the upload step will result in a zip file with internal
+            # directories.  In case there are multiple folders (there shouldn't
+            # be), this shell script will extract just a single path.
+            coverage_report="$( (ls coverage/*/coverage.xml || true) | head -1 )"
+
+            # Show what's there, for debugging purposes.
+            ls -l coverage/
+
+            if [ -f "$coverage_report" ]; then
+              echo "Found coverage report: $coverage_report"
+              echo "::set-output name=coverage_report::$coverage_report"
+            else
+              echo "Could not locate coverage report!"
+              exit 1
+            fi
+          else
+            echo "No coverage report generated."
+          fi
+
+      - uses: actions/upload-artifact@v3
+        # If there's a coverage report, upload it, even if a previous step
+        # failed.
+        if: ${{ always() && steps.coverage.outputs.coverage_report }}
+        with:
+          # This will create a download called coverage.zip containing only
+          # coverage.xml.
+          path: ${{ steps.coverage.outputs.coverage_report }}
+          name: coverage
+          # Since we've already filtered this step for instances where there is
+          # an environment variable set for this, the file should definitely be
+          # there.
+          if-no-files-found: error
 
   build_in_docker:
     # Don't waste time doing a full matrix of test runs when there was an
