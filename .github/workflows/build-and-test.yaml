@@ -86,11 +86,10 @@ jobs:
         run: |
           # Download Safari 14
           # See also https://www.macupdate.com/app/mac/15675/apple-safari/old-versions
-          curl -Lv https://www.macupdate.com/action/download/62946 > Safari14.0CatalinaAuto.pkg.zip
+          curl -Lv https://www.macupdate.com/action/download/63550 > safari-14.1.2.pkg
 
           # Install Safari 14 to homedir specifically.
-          unzip Safari14.0CatalinaAuto.pkg.zip
-          installer -pkg Safari14.0CatalinaAuto.pkg -target CurrentUserHomeDirectory
+          installer -pkg safari-14.1.2.pkg -target CurrentUserHomeDirectory
 
           # Install a launcher that can execute a shell script to launch this
           npm install karma-script-launcher --save-dev
