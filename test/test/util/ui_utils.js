@@ -154,7 +154,7 @@ shaka.test.UiUtils = class {
   }
 
   /**
-   * Creates a muted, fixed size video element for testing.
+   * Creates a "muted", fixed size video element for testing.
    *
    * @return {!HTMLVideoElement}
    */
@@ -162,7 +162,21 @@ shaka.test.UiUtils = class {
     const video = /** @type {!HTMLVideoElement} */(document.createElement(
         'video'));
 
-    video.muted = true;
+    // To work around a bug in Chrome and/or Selenium (root cause unclear),
+    // play unmuted, but very quiet.  Without this, playback may progress very
+    // slowly (~0.5x) in some cases, and tests can time out.  The actual cause
+    // of this issue was never determined because it was also "resolved" by
+    // restarting Selenium.  Since restarting Selenium is not a strategy for
+    // reducing test flake, we will keep the runtime workaround.
+    if (shaka.util.Platform.isChrome()) {
+      video.muted = false;
+      video.volume = 1e-3;
+    } else {
+      // Since not every browser has a command-line flag to enable autoplay, we
+      // continue to use a muted video element for non-Chrome.
+      video.muted = true;
+    }
+
     video.width = 600;
     video.height = 400;
 
