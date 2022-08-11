@@ -138,7 +138,7 @@ jobs:
             # in the upload step will result in a zip file with internal
             # directories.  In case there are multiple folders (there shouldn't
             # be), this shell script will extract just a single path.
-            coverage_report="$( (ls coverage/*/coverage.xml || true) | head -1 )"
+            coverage_report="$( (ls coverage/*/coverage.json || true) | head -1 )"
 
             # Show what's there, for debugging purposes.
             ls -l coverage/
@@ -160,7 +160,7 @@ jobs:
         if: ${{ always() && steps.coverage.outputs.coverage_report }}
         with:
           # This will create a download called coverage.zip containing only
-          # coverage.xml.
+          # coverage.json.
           path: ${{ steps.coverage.outputs.coverage_report }}
           name: coverage
           # Since we've already filtered this step for instances where there is

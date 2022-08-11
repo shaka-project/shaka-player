@@ -306,13 +306,6 @@ module.exports = (config) => {
     // Force failure when running empty test-suites.
     failOnEmptyTestSuite: true,
 
-    coverageReporter: {
-      includeAllSources: true,
-      reporters: [
-        {type: 'text'},
-      ],
-    },
-
     specReporter: {
       suppressSkipped: true,
       showBrowser: true,
@@ -405,9 +398,11 @@ module.exports = (config) => {
 
     config.set({
       coverageReporter: {
+        includeAllSources: true,
         reporters: [
           {type: 'html', dir: 'coverage'},
           {type: 'cobertura', dir: 'coverage', file: 'coverage.xml'},
+          {type: 'json-summary', dir: 'coverage', file: 'coverage.json'},
         ],
       },
     });
