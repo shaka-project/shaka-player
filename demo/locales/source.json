@@ -703,6 +703,10 @@
     "description": "A button to say 'yes' to a question (for example, DEMO_DELETE_CUSTOM_PROMPT).",
     "message": "Yes"
   },
+  "DEMO_QUALITY_RESTRICTIONS_ELEMENT_SIZE": {
+    "description": "The name of a configuration value.",
+    "message": "Quality restrictions based on element size"
+  },
   "DEMO_REBUFFERING_GOAL": {
     "description": "The name of a configuration value.",
     "message": "Rebuffering Goal"

@@ -271,7 +271,9 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.SLOW_HALF_LIFE,
             'abr.advanced.slowHalfLife',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addBoolInput_(MessageIds.QUALITY_RESTRICTIONS_ELEMENT_SIZE,
+            'abr.qualityRestrictionsElementSize');
     this.addRetrictionsSection_('abr',
         MessageIds.ADAPTATION_RESTRICTIONS_SECTION_HEADER);
   }

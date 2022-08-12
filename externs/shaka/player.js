@@ -1000,7 +1000,8 @@ shaka.extern.StreamingConfiguration;
  *   switchInterval: number,
  *   bandwidthUpgradeTarget: number,
  *   bandwidthDowngradeTarget: number,
- *   advanced: shaka.extern.AdvancedAbrConfiguration
+ *   advanced: shaka.extern.AdvancedAbrConfiguration,
+ *   qualityRestrictionsElementSize: boolean
  * }}
  *
  * @property {boolean} enabled
@@ -1029,7 +1030,11 @@ shaka.extern.StreamingConfiguration;
  *   The largest fraction of the estimated bandwidth we should use. We should
  *   downgrade to avoid this.
  * @property {shaka.extern.AdvancedAbrConfiguration} advanced
- *   Advanced ABR configuration.
+ *   Advanced ABR configuration
+ * @property {boolean} qualityRestrictionsElementSize
+ *   If true, limits the quality to the size of the media element.
+ *   Note: The use of ResizeObserver is required for it to work properly.
+ *   Defaults false.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
