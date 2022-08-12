@@ -383,6 +383,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:DASH] [JARGON:suggestedPresentationDelay]"
   },
+  "DEMO_IGNORE_DEVICE_PIXEL_RATIO": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore device pixel ratio"
+  },
   "DEMO_IGNORE_HLS_TEXT_FAILURES": {
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures"
@@ -710,6 +714,10 @@
   "DEMO_REPORT_BUG": {
     "description": "A link in the header, that files a bug report.",
     "message": "REPORT BUG"
+  },
+  "DEMO_RESTRICT_TO_ELEMENT_SIZE": {
+    "description": "The name of a configuration value.",
+    "message": "Restrict to element size"
   },
   "DEMO_RESTRICTIONS_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
