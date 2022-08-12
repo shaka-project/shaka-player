@@ -273,7 +273,9 @@ shakaDemo.Config = class {
             'abr.advanced.slowHalfLife',
             /* canBeDecimal= */ true)
         .addBoolInput_(MessageIds.RESTRICT_TO_ELEMENT_SIZE,
-            'abr.restrictToElementSize');
+            'abr.restrictToElementSize')
+        .addBoolInput_(MessageIds.IGNORE_DEVICE_PIXEL_RATIO,
+            'abr.ignoreDevicePixelRatio');
     this.addRetrictionsSection_('abr',
         MessageIds.ADAPTATION_RESTRICTIONS_SECTION_HEADER);
   }

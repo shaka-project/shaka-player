@@ -1001,7 +1001,8 @@ shaka.extern.StreamingConfiguration;
  *   bandwidthUpgradeTarget: number,
  *   bandwidthDowngradeTarget: number,
  *   advanced: shaka.extern.AdvancedAbrConfiguration,
- *   restrictToElementSize: boolean
+ *   restrictToElementSize: boolean,
+ *   ignoreDevicePixelRatio: boolean
  * }}
  *
  * @property {boolean} enabled
@@ -1035,6 +1036,10 @@ shaka.extern.StreamingConfiguration;
  *   If true, restrict the quality to media element size.
  *   Note: The use of ResizeObserver is required for it to work properly. If
  *   true without ResizeObserver, it behaves as false.
+ *   Defaults false.
+ * @property {boolean} ignoreDevicePixelRatio
+ *   If true, device pixel ratio is ignore to restrict the quality to media
+ *   element size.
  *   Defaults false.
  * @exportDoc
  */
