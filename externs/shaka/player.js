@@ -1038,8 +1038,8 @@ shaka.extern.StreamingConfiguration;
  *   true without ResizeObserver, it behaves as false.
  *   Defaults false.
  * @property {boolean} ignoreDevicePixelRatio
- *   If true, device pixel ratio is ignore to restrict the quality to media
- *   element size.
+ *   If true,device pixel ratio is ignored when restricting the quality to
+ *   media element size.
  *   Defaults false.
  * @exportDoc
  */
