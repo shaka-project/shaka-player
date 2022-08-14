@@ -5,6 +5,29 @@
  */
 
 describe('StringUtils', () => {
+  describe('with TextDecoder', () => {
+    if (window.TextDecoder) {
+      defineStringUtilTests();
+    }
+  });
+
+  describe('without TextDecoder', () => {
+    let originalTextDecoder;
+
+    beforeAll(() => {
+      originalTextDecoder = window.TextDecoder;
+      window['TextDecoder'] = null;
+    });
+
+    afterAll(() => {
+      window.TextDecoder = originalTextDecoder;
+    });
+
+    defineStringUtilTests();
+  });
+});
+
+function defineStringUtilTests() {
   const StringUtils = shaka.util.StringUtils;
 
   it('parses fromUTF8', () => {
@@ -140,4 +163,4 @@ describe('StringUtils', () => {
     expect(StringUtils.fromUTF16(buffer, true).length)
         .toBe(buffer.byteLength / 2);
   });
-});
+}
