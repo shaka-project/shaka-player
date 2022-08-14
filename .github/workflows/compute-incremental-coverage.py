@@ -27,7 +27,6 @@ def StripGitDir(path):
   return re.sub(r'.*?/(lib|ui)/', r'\1/', path)
 
 def RunCommand(args, text=True):
-  # print("Running command", args, file=sys.stderr)
   proc = subprocess.run(args, capture_output=True, text=text)
   if proc.returncode != 0:
     raise RuntimeError("Command failed:", args, proc.stdout, proc.stderr)
@@ -42,10 +41,13 @@ def GitHubApi(repo, path, text=True):
     return output
 
 def GetCoverageArtifacts(repo, run_id):
+  # Fetch all artifacts from this run ID.
   api_path = "actions/runs/%s/artifacts" % run_id
   results = GitHubApi(repo, api_path)["artifacts"]
+  # Get the one that is named "coverage" (should be the only one).
   artifact = list(filter(lambda x: x["name"] == "coverage", results))[0]
 
+  # Fetch and open the zip file containing the artifacts.
   api_path = "actions/artifacts/%s/zip" % artifact["id"]
   zip_data = GitHubApi(repo, api_path, text=False)
   return zipfile.ZipFile(io.BytesIO(zip_data), 'r')
@@ -56,11 +58,45 @@ class CoverageDetails(object):
 
     self.files = {}
 
+    # The structure is something like:
+    # {
+    #   "/path/to/lib/player.js": {
+    #     "statementMap": { ... },
+    #     "s": { ... }
+    #   }
+    # }
     for path, path_data in json_data.items():
       path = StripGitDir(path)
 
       statement_to_lines = {}
       instrumented_lines = set()
+
+      # The statement map is a structure to map where each statement is in a
+      # source file:
+      # {
+      #   "0": {
+      #     "start": {
+      #       "line": 7,
+      #       "column": 0
+      #     },
+      #     "end": {
+      #       "line": 7,
+      #       "column": 29
+      #     },
+      #   },
+      #   "1": {
+      #     "start": {
+      #       "line": 9,
+      #       "column": 0
+      #     },
+      #     "end": {
+      #       "line": 10,
+      #       "column": 22
+      #     },
+      #   },
+      #   ...
+      # }
+      # We first convert this into a set of lines with instrumentation.
       for key, value in path_data["statementMap"].items():
         statement_to_lines[key] = []
 
@@ -70,6 +106,8 @@ class CoverageDetails(object):
           statement_to_lines[key].append(line)
           instrumented_lines.add(line)
 
+      # The "s" field is a map from statement numbers to number of times
+      # executed.
       executed_lines = set()
       for key, executed in path_data["s"].items():
         if executed:
