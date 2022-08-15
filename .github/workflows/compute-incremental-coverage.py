@@ -21,6 +21,7 @@ import re
 import subprocess
 import zipfile
 
+# TODO(joeyparrish): Figure out how to get karma to output relative paths only.
 def StripGitDir(path):
   # Strip the path to the git clone, leaving only the source path within the
   # repo.
@@ -101,7 +102,7 @@ class CoverageDetails(object):
         statement_to_lines[key] = []
 
         start_line = value["start"]["line"]
-        end_line = value["start"]["line"]
+        end_line = value["end"]["line"]
         for line in range(start_line, end_line + 1):
           statement_to_lines[key].append(line)
           instrumented_lines.add(line)
