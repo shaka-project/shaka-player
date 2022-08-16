@@ -73,6 +73,7 @@
 +../../lib/util/functional.js
 +../../lib/util/i_destroyable.js
 +../../lib/util/i_releasable.js
++../../lib/util/id3_utils.js
 +../../lib/util/iterables.js
 +../../lib/util/language_utils.js
 +../../lib/util/lazy.js

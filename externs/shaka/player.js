@@ -453,6 +453,42 @@ shaka.extern.ID3Metadata;
 
 /**
  * @typedef {{
+ *   type: string,
+ *   size: number,
+ *   data: Uint8Array
+ * }}
+ *
+ * @description metadata raw frame.
+ * @property {string} type
+ * @property {number} size
+ * @property {Uint8Array} data
+ * @exportDoc
+ */
+shaka.extern.MetadataRawFrame;
+
+
+/**
+ * @typedef {{
+ *   data: (ArrayBuffer|string),
+ *   description: string,
+ *   id: string,
+ *   key: string,
+ *   value: (ArrayBuffer|string)
+ * }}
+ *
+ * @description metadata frame parsed.
+ * @property {ArrayBuffer|string} data
+ * @property {string} description
+ * @property {string} id
+ * @property {string} key
+ * @property {ArrayBuffer|string} value
+ * @exportDoc
+ */
+shaka.extern.MetadataFrame;
+
+
+/**
+ * @typedef {{
  *   schemeIdUri: string,
  *   value: string,
  *   startTime: number,
