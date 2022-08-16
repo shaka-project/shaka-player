@@ -50,6 +50,7 @@ describe('UITextDisplayer', () => {
   });
 
   beforeEach(() => {
+    video.currentTime = 0;
     textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
   });
 
@@ -395,5 +396,69 @@ describe('UITextDisplayer', () => {
     parentCueElements = textContainer.querySelectorAll('div');
     expect(parentCueElements.length).toBe(1);
     expect(parentCueElements[0].textContent).toBe('');
+  });
+
+  it('creates separate elements for cue regions', () => {
+    const cueRegion = new shaka.text.CueRegion();
+    cueRegion.id = 'regionId';
+    cueRegion.height = 80;
+    cueRegion.heightUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion.width = 80;
+    cueRegion.widthUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion.viewportAnchorX = 10;
+    cueRegion.viewportAnchorY = 10;
+    cueRegion.viewportAnchorUnits = shaka.text.CueRegion.units.PERCENTAGE;
+
+    // These all attach to the same region, but only one region element should
+    // be created.
+    const cues = [
+      new shaka.text.Cue(0, 100, ''),
+      new shaka.text.Cue(0, 100, ''),
+      new shaka.text.Cue(0, 100, ''),
+    ];
+    for (const cue of cues) {
+      cue.displayAlign = shaka.text.Cue.displayAlign.CENTER;
+      cue.region = cueRegion;
+    }
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append(cues);
+    updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const allRegionElements = textContainer.querySelectorAll(
+        '.shaka-text-region');
+
+    // Verify that the nested cues are all attached to a single region element.
+    expect(allRegionElements.length).toBe(1);
+    const regionElement = allRegionElements[0];
+    const children = Array.from(regionElement.childNodes).filter(
+        (e) => e.nodeType == Node.ELEMENT_NODE);
+    expect(children.length).toBe(3);
+
+    // Verify styles applied to the region element.
+    const regionCssObj = parseCssText(regionElement.style.cssText);
+    const expectRegionCssObj = {
+      'position': 'absolute',
+      'height': '80%',
+      'width': '80%',
+      'top': '10%',
+      'left': '10%',
+      'display': 'flex',
+      'flex-direction': 'column',
+      'align-items': 'center',
+      'justify-content': 'center',
+    };
+    expect(regionCssObj).toEqual(jasmine.objectContaining(expectRegionCssObj));
+
+    for (const caption of children) {
+      // Verify that styles applied to the nested cues _DO NOT_ include region
+      // placement.
+      const cueCssObj = parseCssText(caption.style.cssText);
+      expect(Object.keys(cueCssObj)).not.toContain('height');
+      expect(Object.keys(cueCssObj)).not.toContain('width');
+      expect(Object.keys(cueCssObj)).not.toContain('top');
+      expect(Object.keys(cueCssObj)).not.toContain('left');
+    }
   });
 });
