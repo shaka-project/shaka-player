@@ -53,6 +53,15 @@ def GetCoverageArtifacts(repo, run_id):
   zip_data = GitHubApi(repo, api_path, text=False)
   return zipfile.ZipFile(io.BytesIO(zip_data), 'r')
 
+def CoverageLines(coverage_range):
+  start_line = coverage_range["start"]["line"]
+  end_line = coverage_range["end"]["line"]
+
+  lines = set()
+  for line in range(start_line, end_line + 1):
+    lines.add(line)
+  return lines
+
 class CoverageDetails(object):
   def __init__(self, file_data):
     json_data = json.loads(file_data)
@@ -63,6 +72,7 @@ class CoverageDetails(object):
     # {
     #   "/path/to/lib/player.js": {
     #     "statementMap": { ... },
+    #     "fnMap": { ... },
     #     "s": { ... }
     #   }
     # }
@@ -71,6 +81,31 @@ class CoverageDetails(object):
 
       statement_to_lines = {}
       instrumented_lines = set()
+
+      # The function map is a structure to map where each function is in a
+      # source file:
+      # {
+      #   "0": {
+      #     "loc": {
+      #       "start": {
+      #         "line": 7,
+      #         "column": 0
+      #       },
+      #       "end": {
+      #         "line": 8,
+      #         "column": 29
+      #       }
+      #     }
+      #   },
+      #   ...
+      # }
+      # We extract function locations and remove them from statement spans
+      # below, so that we don't count (for example) class declaration statements
+      # as containing all the lines of every method in the class.
+      function_locations = []
+      for key, value in path_data["fnMap"].items():
+        lines = CoverageLines(value["loc"])
+        function_locations.append(lines)
 
       # The statement map is a structure to map where each statement is in a
       # source file:
@@ -81,30 +116,38 @@ class CoverageDetails(object):
       #       "column": 0
       #     },
       #     "end": {
-      #       "line": 7,
+      #       "line": 8,
       #       "column": 29
-      #     },
-      #   },
-      #   "1": {
-      #     "start": {
-      #       "line": 9,
-      #       "column": 0
-      #     },
-      #     "end": {
-      #       "line": 10,
-      #       "column": 22
-      #     },
+      #     }
       #   },
       #   ...
       # }
-      # We first convert this into a set of lines with instrumentation.
       for key, value in path_data["statementMap"].items():
-        statement_to_lines[key] = []
+        # All the lines of the statement, which may include other functions or
+        # statements.
+        lines = CoverageLines(value)
 
-        start_line = value["start"]["line"]
-        end_line = value["end"]["line"]
-        for line in range(start_line, end_line + 1):
-          statement_to_lines[key].append(line)
+        # Subtract from that the lines of any function that is a subset of
+        # these lines.  By excluding entire methods before adding back their
+        # child statements, we exclude empty lines in class methods.
+        for function_lines in function_locations:
+          if function_lines < lines:  # strict subset
+            lines -= function_lines  # set subtraction
+
+        # If this statement is inside the range of another statement, remove
+        # this inner range from that outer one.  This is important because loops
+        # and conditional statements contain their inner branches.
+        for older_key, older_lines in statement_to_lines.items():
+          # Check for a proper subset (lines contains all elements of
+          # child_lines, but child_lines is not an equal set).
+          if lines < older_lines:  # strict subset
+            statement_to_lines[older_key] -= lines  # set subtraction
+
+        statement_to_lines[key] = lines
+
+      # Whatever is left in any statement, we count as instrumented.
+      for key, lines in statement_to_lines.items():
+        for line in lines:
           instrumented_lines.add(line)
 
       # The "s" field is a map from statement numbers to number of times
