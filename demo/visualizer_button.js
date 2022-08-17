@@ -40,8 +40,6 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
     label.classList.add('shaka-overflow-button-label');
     label.classList.add('shaka-overflow-menu-only');
     this.nameSpan_ = document.createElement('span');
-    this.nameSpan_.textContent = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.VISUALIZER_BUTTON);
     label.appendChild(this.nameSpan_);
 
     /** @private {!HTMLElement} */
@@ -59,7 +57,22 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
           !shakaDemoMain.getIsVisualizerActive());
       this.setIcon_();
     });
+    
+    this.eventManager.listen(
+        this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+          this.updateLocalizedStrings_();
+        });
 
+    this.eventManager.listen(
+        this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+          this.updateLocalizedStrings_();
+        });
+  }
+
+  /** @private */
+  updateLocalizedStrings_() {
+    this.nameSpan_.textContent = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.VISUALIZER_BUTTON);
     // TODO: Make sure that the screenreader description of this control is
     // localized!
   }
