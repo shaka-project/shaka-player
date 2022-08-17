@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.0.5](https://github.com/shaka-project/shaka-player/compare/v4.0.4...v4.0.5) (2022-08-17)
+
+### This is the **last planned release** in the v4.0.x branch.
+
+### Bug Fixes
+
+* add strictMissingProperties suppressions to unblock strict missing properties on union types. ([#4371](https://github.com/shaka-project/shaka-player/issues/4371)) ([2e26775](https://github.com/shaka-project/shaka-player/commit/2e2677528074e6180e80d21bfa92880c99eface9))
+* exception if on early adError ([#4362](https://github.com/shaka-project/shaka-player/issues/4362)) ([94413d2](https://github.com/shaka-project/shaka-player/commit/94413d253edcf6bb9d11dc147c661426236bc0a9)), closes [#4004](https://github.com/shaka-project/shaka-player/issues/4004)
+* Fix key ID byteswapping for PlayReady on PS4 ([#4377](https://github.com/shaka-project/shaka-player/issues/4377)) ([e677606](https://github.com/shaka-project/shaka-player/commit/e6776061436855ad508900d6b3826cbe6f4959a4))
+* Fix MediaCapabilities polyfill on Tizen and WebOS ([#4396](https://github.com/shaka-project/shaka-player/issues/4396)) ([124f882](https://github.com/shaka-project/shaka-player/commit/124f8821b00d35530a533ad237a9ce2f0979addf)), closes [#4383](https://github.com/shaka-project/shaka-player/issues/4383) [#4357](https://github.com/shaka-project/shaka-player/issues/4357)
+* Fix TextDecoder fallback and browser support check ([#4403](https://github.com/shaka-project/shaka-player/issues/4403)) ([d86b1ba](https://github.com/shaka-project/shaka-player/commit/d86b1baf3bf2c202e06276671dddfb07d63f2d5a))
+* Fix UI captions icon state ([#4384](https://github.com/shaka-project/shaka-player/issues/4384)) ([65a90e8](https://github.com/shaka-project/shaka-player/commit/65a90e88b99a6508c04e38602dd3455f660bbfdc)), closes [#4358](https://github.com/shaka-project/shaka-player/issues/4358)
+* Fix VP9 codec checks on Mac Firefox ([#4391](https://github.com/shaka-project/shaka-player/issues/4391)) ([0721b19](https://github.com/shaka-project/shaka-player/commit/0721b199467162ba777db5781bd39f39f75ac45c))
+* **text:** Fix cue region rendering in UI ([#4412](https://github.com/shaka-project/shaka-player/issues/4412)) ([54184bb](https://github.com/shaka-project/shaka-player/commit/54184bb2c5224324b42e0e28383bcb8b073971f9)), closes [#4381](https://github.com/shaka-project/shaka-player/issues/4381)
+* **text:** Fix TTML render timing and line break issues ([#4407](https://github.com/shaka-project/shaka-player/issues/4407)) ([6726d47](https://github.com/shaka-project/shaka-player/commit/6726d4728694a91bfac3d946a3e7c9abeb2aba0c)), closes [#4381](https://github.com/shaka-project/shaka-player/issues/4381)
+* Update v4.0.x branch Cast receiver ID ([874fcd6](https://github.com/shaka-project/shaka-player/commit/874fcd64c8605c842be27b7bdd4457754e883f3e))
+
 ## [4.0.4](https://github.com/shaka-project/shaka-player/compare/v4.0.3...v4.0.4) (2022-07-14)
 
 
