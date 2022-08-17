@@ -2,6 +2,7 @@
 
 ## [4.0.5](https://github.com/shaka-project/shaka-player/compare/v4.0.4...v4.0.5) (2022-08-17)
 
+### This is the **last planned release** in the v4.0.x branch.
 
 ### Bug Fixes
 
