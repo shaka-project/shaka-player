@@ -125,6 +125,7 @@ shakaDemo.Visualizer = class {
   stop() {
     this.timer_.stop();
     this.div_.classList.add('hidden');
+    this.updates_ = [];
   }
 
   /**
