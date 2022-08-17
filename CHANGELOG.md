@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.2.11](https://github.com/shaka-project/shaka-player/compare/v3.2.10...v3.2.11) (2022-08-17)
+
+
+### Bug Fixes
+
+* add strictMissingProperties suppressions to unblock strict missing properties on union types. ([#4371](https://github.com/shaka-project/shaka-player/issues/4371)) ([c5678fb](https://github.com/shaka-project/shaka-player/commit/c5678fbad3a63bb93eac1abbf70e9e23b79911f6))
+* Fix key ID byteswapping for PlayReady on PS4 ([#4377](https://github.com/shaka-project/shaka-player/issues/4377)) ([bbb0640](https://github.com/shaka-project/shaka-player/commit/bbb0640e2c6230732f6d0789ea82a2721a2a975c))
+* Fix MediaCapabilities polyfill on Tizen and WebOS ([#4396](https://github.com/shaka-project/shaka-player/issues/4396)) ([f5fb3e5](https://github.com/shaka-project/shaka-player/commit/f5fb3e5d4670b177db001b28d13cb25a6e947ffa)), closes [#4383](https://github.com/shaka-project/shaka-player/issues/4383) [#4357](https://github.com/shaka-project/shaka-player/issues/4357)
+* Fix TextDecoder fallback and browser support check ([#4403](https://github.com/shaka-project/shaka-player/issues/4403)) ([e67b64a](https://github.com/shaka-project/shaka-player/commit/e67b64af4c0e357fb0f3fae67dba00d4bd7c6bf5))
+* Fix VP9 codec checks on Mac Firefox ([#4391](https://github.com/shaka-project/shaka-player/issues/4391)) ([136348d](https://github.com/shaka-project/shaka-player/commit/136348d2215a951f8395a79d63f930fc95d9593f))
+* **text:** Fix cue region rendering in UI ([#4412](https://github.com/shaka-project/shaka-player/issues/4412)) ([3f65d3b](https://github.com/shaka-project/shaka-player/commit/3f65d3b60fce1398e3a078b2cbbafec351e7e249)), closes [#4381](https://github.com/shaka-project/shaka-player/issues/4381)
+* **text:** Fix TTML render timing and line break issues ([#4407](https://github.com/shaka-project/shaka-player/issues/4407)) ([0e626c0](https://github.com/shaka-project/shaka-player/commit/0e626c0836b4ea0070e29c0a51e49845a36f8ef3)), closes [#4381](https://github.com/shaka-project/shaka-player/issues/4381)
+
 ## [3.2.10](https://github.com/shaka-project/shaka-player/compare/v3.2.9...v3.2.10) (2022-07-14)
 
 
