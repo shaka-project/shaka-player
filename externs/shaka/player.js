@@ -568,7 +568,7 @@ shaka.extern.EmsgInfo;
 /**
  * @typedef {{
  *   wallClockTime: number,
- *   progamStartDate: Date
+ *   programStartDate: Date
  * }}
  *
  * @description
@@ -576,7 +576,7 @@ shaka.extern.EmsgInfo;
  *
  * @property {number} wallClockTime
  *   A UTC timestamp corresponding to decoding time.
- * @property {Date} progamStartDate
+ * @property {Date} programStartDate
  *   The derived start date of the program.
  * @exportDoc
  */

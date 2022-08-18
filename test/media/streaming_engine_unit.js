@@ -2927,9 +2927,9 @@ describe('StreamingEngine', () => {
 
       const event = onEvent.calls.argsFor(0)[0];
       expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
-      expect(event.detail.progamStartDate.getUTCMilliseconds()).toBe(
+      expect(event.detail.programStartDate.getUTCMilliseconds()).toBe(
           prftEventObj.startDate.getUTCMilliseconds());
-      expect(event.detail.progamStartDate.toUTCString()).toBe(
+      expect(event.detail.programStartDate.toUTCString()).toBe(
           prftEventObj.startDate.toUTCString());
     });
 
@@ -2949,9 +2949,9 @@ describe('StreamingEngine', () => {
 
       const event = onEvent.calls.argsFor(0)[0];
       expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
-      expect(event.detail.progamStartDate.getUTCMilliseconds()).toBe(
+      expect(event.detail.programStartDate.getUTCMilliseconds()).toBe(
           expectedStartDate.getUTCMilliseconds());
-      expect(event.detail.progamStartDate.toUTCString()).toBe(
+      expect(event.detail.programStartDate.toUTCString()).toBe(
           expectedStartDate.toUTCString());
     });
 
