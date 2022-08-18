@@ -465,15 +465,21 @@ describe('Player', () => {
           });
 
           describe('but browser is truly offline', () => {
+            /** @type {!Object} */
             let navigatorOnLineDescriptor;
-            beforeEach(() => {
-              // eslint-disable-next-line no-restricted-syntax
-              navigatorOnLineDescriptor = Object.getOwnPropertyDescriptor(
-                  Navigator.prototype, 'onLine');
 
+            // eslint-disable-next-line no-restricted-syntax
+            const navigatorPrototype = Navigator.prototype;
+
+            beforeAll(() => {
+              navigatorOnLineDescriptor =
+                /** @type {!Object} */(Object.getOwnPropertyDescriptor(
+                    navigatorPrototype, 'onLine'));
+            });
+
+            beforeEach(() => {
               // Redefine the property, replacing only the getter.
-              // eslint-disable-next-line no-restricted-syntax
-              Object.defineProperty(Navigator.prototype, 'onLine',
+              Object.defineProperty(navigatorPrototype, 'onLine',
                   Object.assign(navigatorOnLineDescriptor, {
                     get: () => false,
                   }));
@@ -481,9 +487,8 @@ describe('Player', () => {
 
             afterEach(() => {
               // Restore the original property definition.
-              // eslint-disable-next-line no-restricted-syntax
               Object.defineProperty(
-                  Navigator.prototype, 'onLine', navigatorOnLineDescriptor);
+                  navigatorPrototype, 'onLine', navigatorOnLineDescriptor);
             });
 
             it('does not handle HTTP_ERROR', () => {
