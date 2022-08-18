@@ -2893,14 +2893,17 @@ describe('StreamingEngine', () => {
     });
   });
 
-  describe('emmbeded prft boxes', () => {
+  describe('embedded prft boxes', () => {
     const prftSegment = Uint8ArrayUtils.fromHex(
         '00000020707266740100000000000001E683B62E8E63CC580000001B319D5767');
+    const mdhdSegment = Uint8ArrayUtils.fromHex(
+        '000000446D6F6F760000003C7472616B000000346D6469610000002C6D646864'+
+        '0100000000000000DF22526500000000DF22526500989680FFFFFFFFFFFFFFFF'+
+        '15C70000');
 
     const prftEventObj = {
-      wallClockTime: 1658402734000,
-      mediaTime: 116796512103,
-      timescale: 1,
+      wallClockTime: 1658402734556,
+      startDate: new Date(1658391054904.7898),
     };
 
     beforeEach(() => {
@@ -2913,6 +2916,7 @@ describe('StreamingEngine', () => {
 
     it('raises an event for registered prft v1', async () => {
       segmentData[ContentType.VIDEO].segments[0] = prftSegment;
+      segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
 
       streamingEngine.switchVariant(variant);
       streamingEngine.switchTextStream(textStream);
@@ -2923,14 +2927,18 @@ describe('StreamingEngine', () => {
 
       const event = onEvent.calls.argsFor(0)[0];
       expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
-      expect(event.detail.mediaTime).toBe(prftEventObj.mediaTime);
-      expect(event.detail.timescale).toBe(prftEventObj.timescale);
+      expect(event.detail.progamStartDate.getUTCMilliseconds()).toBe(
+          prftEventObj.startDate.getUTCMilliseconds());
+      expect(event.detail.progamStartDate.toUTCString()).toBe(
+          prftEventObj.startDate.toUTCString());
     });
 
     it('raises an event for registered prft v0', async () => {
       const prftSegment = Uint8ArrayUtils.fromHex(
           '0000001C707266740000000000000001E683B62E8E63CC5819999999');
+      const expectedStartDate = new Date(1658402691606.3271);
       segmentData[ContentType.VIDEO].segments[0] = prftSegment;
+      segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
 
       streamingEngine.switchVariant(variant);
       streamingEngine.switchTextStream(textStream);
@@ -2941,14 +2949,33 @@ describe('StreamingEngine', () => {
 
       const event = onEvent.calls.argsFor(0)[0];
       expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
-      expect(event.detail.mediaTime).toBe(429496729);
-      expect(event.detail.timescale).toBe(prftEventObj.timescale);
+      expect(event.detail.progamStartDate.getUTCMilliseconds()).toBe(
+          expectedStartDate.getUTCMilliseconds());
+      expect(event.detail.progamStartDate.toUTCString()).toBe(
+          expectedStartDate.toUTCString());
     });
+
+    it('does not raise event if mediatime exceeds Number.MAX_VALUE',
+        async () => {
+          const prftSegment = Uint8ArrayUtils.fromHex(
+              '00000020707266740100000000000001E683B62E8E63CC58'+
+              'FFFFFFFFFFFFFFFF');
+          segmentData[ContentType.VIDEO].segments[1] = prftSegment;
+          segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
+
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          await streamingEngine.start();
+          playing = true;
+          await runTest();
+          expect(onEvent).not.toHaveBeenCalled();
+        });
 
     it('raises an event once only', async () => {
       segmentData[ContentType.VIDEO].segments[0] =
           shaka.util.Uint8ArrayUtils.concat(prftSegment, prftSegment);
       segmentData[ContentType.VIDEO].segments[1] = prftSegment;
+      segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
 
       streamingEngine.switchVariant(variant);
       streamingEngine.switchTextStream(textStream);

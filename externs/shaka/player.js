@@ -568,8 +568,7 @@ shaka.extern.EmsgInfo;
 /**
  * @typedef {{
  *   wallClockTime: number,
- *   mediaTime: number,
- *   timescale: number
+ *   progamStartDate: Date
  * }}
  *
  * @description
@@ -577,11 +576,8 @@ shaka.extern.EmsgInfo;
  *
  * @property {number} wallClockTime
  *   A UTC timestamp corresponding to decoding time.
- * @property {number} mediaTime
- *   Is an number containing the starting time within the media of
- *   this edit segment (in media time scale units, in composition time).
- * @property {number} timescale
- *   Provides the timescale, in ticks per second.
+ * @property {Date} progamStartDate
+ *   The derived start date of the program.
  * @exportDoc
  */
 shaka.extern.ProducerReferenceTime;
@@ -1011,7 +1007,10 @@ shaka.extern.ManifestConfiguration;
  *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
  * @property {boolean} parsePrftBox
  *   If <code>true</code>, will raise a shaka.extern.ProducerReferenceTime
- *   player event.
+ *   player event via the shaka.util.FakeEvent.EventName.Prft event.
+ *   The event will be raised only once per playback session as program
+ *   start date will not change, and would save parsing the segment multiple
+ *   times needlessly.
  *   Defaults to <code>false</code>.
  * @exportDoc
  */

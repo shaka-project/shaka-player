@@ -121,7 +121,6 @@ describe('DashParser SegmentBase', () => {
         ['http://example.com/init.mp4']);
     expect(initSegmentReference.getStartByte()).toBe(201);
     expect(initSegmentReference.getEndByte()).toBe(300);
-    expect(initSegmentReference.timescale).toBe(9000);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
     fakeNetEngine.expectRangeRequest('http://example.com', 100, 200);
@@ -265,7 +264,6 @@ describe('DashParser SegmentBase', () => {
         ['http://example.com/special.mp4']);
     expect(initSegmentReference.getStartByte()).toBe(0);
     expect(initSegmentReference.getEndByte()).toBe(null);
-    expect(initSegmentReference.timescale).toBe(10);
     expect(segmentReference.timestampOffset).toBe(-20);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);

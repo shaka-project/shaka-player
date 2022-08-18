@@ -202,7 +202,7 @@ describe('DashParser SegmentTemplate', () => {
     it('defaults to index with multiple segment sources', async () => {
       const source = Dash.makeSimpleManifestText([
         '<SegmentTemplate startNumber="1" index="index-$Bandwidth$.mp4"',
-        '    timescale="10000000" initialization="init-$Bandwidth$.mp4">',
+        '    initialization="init-$Bandwidth$.mp4">',
         '  <SegmentTimeline>',
         '    <S t="0" d="3" r="12" />',
         '  </SegmentTimeline>',
@@ -221,7 +221,6 @@ describe('DashParser SegmentTemplate', () => {
           ['http://example.com/init-500.mp4']);
       expect(initSegmentReference.getStartByte()).toBe(0);
       expect(initSegmentReference.getEndByte()).toBe(null);
-      expect(initSegmentReference.timescale).toBe(10000000);
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
       fakeNetEngine.expectRangeRequest(
