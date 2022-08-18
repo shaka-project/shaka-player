@@ -422,7 +422,6 @@ describe('Player', () => {
             dispatchEventSpy.calls.reset();
             player.configure({streaming: {maxDisabledTime}});
             player.setMaxHardwareResolution(123, 456);
-            onErrorCallback(httpError);
           });
 
           afterEach(() => {
@@ -434,14 +433,18 @@ describe('Player', () => {
           });
 
           it('handles HTTP_ERROR', () => {
+            onErrorCallback(httpError);
             expect(httpError.handled).toBeTruthy();
           });
 
           it('does not dispatch any error', () => {
+            onErrorCallback(httpError);
             expect(dispatchEventSpy).not.toHaveBeenCalled();
           });
 
           it('disables the current variant and applies restrictions', () => {
+            onErrorCallback(httpError);
+
             const foundDisabledVariant =
                 manifest.variants.some(({disabledUntilTime}) =>
                   disabledUntilTime == currentTime + maxDisabledTime);
@@ -453,10 +456,37 @@ describe('Player', () => {
           });
 
           it('switches the variant', () => {
+            onErrorCallback(httpError);
+
             expect(chooseVariantSpy).toHaveBeenCalled();
             expect(getBufferedInfoSpy).toHaveBeenCalled();
             expect(switchVariantSpy)
                 .toHaveBeenCalledWith(chosenVariant, false, true, 14);
+          });
+
+          describe('but browser is truly offline', () => {
+            let navigatorOnLineDescriptor;
+            beforeEach(() => {
+              navigatorOnLineDescriptor = Object.getOwnPropertyDescriptor(
+                  Navigator.prototype, 'onLine');
+
+              // Redefine the property, replacing only the getter.
+              Object.defineProperty(navigator, 'onLine',
+                  Object.assign(navigatorOnLineDescriptor, {
+                    get: () => false,
+                  }));
+            });
+
+            afterEach(() => {
+              // Restore the original property definition.
+              Object.defineProperty(
+                  navigator, 'onLine', navigatorOnLineDescriptor);
+            });
+
+            it('does not handle HTTP_ERROR', () => {
+              onErrorCallback(httpError);
+              expect(httpError.handled).toBe(false);
+            });
           });
         });
       });
