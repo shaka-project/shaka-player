@@ -64,25 +64,17 @@ shakaDemo.Visualizer = class {
      *   age: number,
      *   start: number,
      *   end: number,
-     *   isAudio: boolean,
+     *   contentType: string,
      * }>}
      */
     this.updates_ = [];
 
     // Listen for when new buffers are appended.
-    player.addEventListener('segmentAppended', (event) => {
+    player.addEventListener('segmentappended', (event) => {
       const start = /** @type {number} */ (event['start']);
       const end = /** @type {number} */ (event['end']);
       const contentType = /** @type {string} */ (event['contentType']);
-      let isAudio = false;
-      if (contentType == 'audio') {
-        isAudio = true;
-      } else if (contentType != 'video') {
-        // If it's not video or audio, either it's text or it's invalid.
-        // We don't care either way.
-        return;
-      }
-      this.updates_.push({age: 0, start, end, isAudio});
+      this.updates_.push({age: 0, start, end, contentType});
     });
 
     // Add controls.
@@ -154,7 +146,12 @@ shakaDemo.Visualizer = class {
           (this.canvas_.width / 2));
     };
 
+    // Choose text drawing settings.
     const fontSize = Math.floor(h / 4);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold ' + fontSize + 'px serif';
+    ctx.textBaseline = 'bottom';
+    const longFormText = scaleFactor > fontSize * 4;
 
     // Draw updates.
     for (const update of this.updates_) {
@@ -169,22 +166,27 @@ shakaDemo.Visualizer = class {
         // overlap.
         // They also fade away further over time, until they are gone entirely.
         ctx.globalAlpha =
-            0.1 + 0.3 * (1 - update.age / shakaDemo.Visualizer.maxUpdateAge_);
+            0.1 + 0.2 * (1 - update.age / shakaDemo.Visualizer.maxUpdateAge_);
         ctx.fillRect(s, y, e - s, h);
         ctx.globalAlpha = 1;
 
-        // Also draw text, to show what type of segment this was.
-        const longForm = scaleFactor > fontSize * 4;
-        const textX = s + (e - s) / 2;
-        ctx.textAlign = 'center';
-        ctx.font = 'bold ' + fontSize + 'px serif';
-        if (update.isAudio) {
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(longForm ? 'AUDIO' : 'A', textX, y + h);
-        } else {
-          ctx.textBaseline = 'top';
-          ctx.fillText(longForm ? 'VIDEO' : 'V', textX, y);
+        // Also draw text labels, to show what type of segment this was.
+        let text = update.contentType.toUpperCase();
+        if (!longFormText) {
+          text = text[0];
         }
+        const textX = s + (e - s) / 2;
+        let textY = y + h;
+        switch (update.contentType) {
+          case 'video':
+            textY -= fontSize * 2;
+            break;
+          case 'audio':
+            textY -= fontSize;
+            break;
+          // Text is at the bottom.
+        }
+        ctx.fillText(text, textX, textY);
       }
     }
 
@@ -199,8 +201,8 @@ shakaDemo.Visualizer = class {
         e = Math.min(e, this.canvas_.width);
         const colorI = (i - activeI + this.colorIOffset_ +
             10000 * colors.length) % colors.length;
-        const barHeight = (h - 2 * fontSize) / colors.length;
-        const barY = y + fontSize + (colorI * barHeight);
+        const barHeight = (h - 3 * fontSize) / colors.length;
+        const barY = y + (colorI * barHeight);
 
         // Draw the bar as a richer color.
         ctx.fillStyle = colors[colorI];
@@ -271,6 +273,11 @@ shakaDemo.Visualizer = class {
     ctx.fillRect(0, 0, this.canvas_.width, this.canvas_.height);
 
     // Define the colors.
+    // Each buffered range is represented by a bar of a solid color, so that
+    // gaps in the presentation are more visually obvious; the two bars
+    // representing the two ranges will be at different y-positions and be
+    // drawn with different colors.
+    // These colors are, in order: red, green, and blue.
     const colors = ['#FF0000', '#00FF00', '#0000FF'];
 
     // Determine what buffered range is centered, so that colors can remain

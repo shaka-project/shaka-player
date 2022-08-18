@@ -228,6 +228,7 @@ shakaDemo.Main = class {
       document.getElementById('video-bar').classList.add('no-input-sized');
     } else {
       goog.asserts.assert(this.player_, 'Player should exist by now.');
+
       // Make the visualizer element.
       const vCanvas = /** @type {!HTMLCanvasElement} */ (
         document.getElementById('visualizer-canvas'));

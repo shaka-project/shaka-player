@@ -57,7 +57,7 @@ shakaDemo.VisualizerButton = class extends shaka.ui.Element {
           !shakaDemoMain.getIsVisualizerActive());
       this.setIcon_();
     });
-    
+
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
           this.updateLocalizedStrings_();
