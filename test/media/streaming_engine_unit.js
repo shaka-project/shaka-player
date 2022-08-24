@@ -2959,8 +2959,8 @@ describe('StreamingEngine', () => {
         async () => {
           const prftSegment = Uint8ArrayUtils.fromHex(
               '00000020707266740100000000000001E683B62E8E63CC58'+
-              'FFFFFFFFFFFFFFFF');
-          segmentData[ContentType.VIDEO].segments[1] = prftSegment;
+                                              'FFFFFFFFFFFFFFFF');
+          segmentData[ContentType.VIDEO].segments[0] = prftSegment;
           segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
 
           streamingEngine.switchVariant(variant);
