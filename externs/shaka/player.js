@@ -962,7 +962,9 @@ shaka.extern.ManifestConfiguration;
  *   dispatchAllEmsgBoxes: boolean,
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
- *   parsePrftBox: boolean
+ *   parsePrftBox: boolean,
+ *   correctTimestampOffset: boolean,
+ *   maxTimestampDiscrepancy: number
  * }}
  *
  * @description
@@ -1078,6 +1080,10 @@ shaka.extern.ManifestConfiguration;
  *   start date will not change, and would save parsing the segment multiple
  *   times needlessly.
  *   Defaults to <code>false</code>.
+ * @property {boolean} correctTimestampOffset
+ *   Correct timestamp offsets when they appear to be incorrect
+ * @property {number} maxTimestampDiscrepancy
+ *   Correct timestamp offset when greater than maxTimestampDiscrepancy
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

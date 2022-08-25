@@ -187,6 +187,10 @@
     "description": "The name of a configuration value.",
     "message": "Content ID"
   },
+  "DEMO_CORRECT_TIMESTAMP_OFFSET": {
+    "description": "The name of a configuration value.",
+    "message": "Correct timestamp offset"
+  },
   "DEMO_CUSTOM": {
     "description": "Text that describes an asset that was defined by the user.",
     "message": "Custom"
@@ -598,6 +602,10 @@
   "DEMO_MAX_PIXELS": {
     "description": "The name of a configuration value.",
     "message": "Max Pixels"
+  },
+  "DEMO_MAX_TIMESTAMP_DISCREPANCY": {
+    "description": "The name of a configuration value.",
+    "message": "Maximum timestamp discrepancy"
   },
   "DEMO_MAX_WIDTH": {
     "description": "The name of a configuration value.",
