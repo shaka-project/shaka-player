@@ -877,7 +877,9 @@ shaka.extern.ManifestConfiguration;
  *   updateIntervalSeconds: number,
  *   dispatchAllEmsgBoxes: boolean,
  *   observeQualityChanges: boolean,
- *   maxDisabledTime: number
+ *   maxDisabledTime: number,
+ *   correctTimestampOffset: boolean,
+ *   maxTimestampDiscrepancy: number
  * }}
  *
  * @description
@@ -986,6 +988,10 @@ shaka.extern.ManifestConfiguration;
  *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
  *   is reached, in seconds.
  *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
+ * @property {boolean} correctTimestampOffset
+ *   Correct timestamp offsets when they appear to be incorrect
+ * @property {number} maxTimestampDiscrepancy
+ *   Correct timestamp offset when greater than maxTimestampDiscrepancy
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

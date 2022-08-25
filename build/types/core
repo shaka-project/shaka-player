@@ -36,6 +36,7 @@
 +../../lib/media/stall_detector.js
 +../../lib/media/streaming_engine.js
 +../../lib/media/time_ranges_utils.js
++../../lib/media/timestamp_offset_corrector.js
 +../../lib/media/transmuxer.js
 +../../lib/media/video_wrapper.js
 +../../lib/media/webm_segment_index_parser.js
