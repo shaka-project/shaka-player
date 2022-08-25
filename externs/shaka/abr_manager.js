@@ -104,6 +104,14 @@ shaka.extern.AbrManager = class {
   playbackRateChanged(rate) {}
 
   /**
+   * Set media element.
+   *
+   * @param {HTMLMediaElement} mediaElement
+   * @exportDoc
+   */
+  setMediaElement(mediaElement) {}
+
+  /**
    * Sets the ABR configuration.
    *
    * It is the responsibility of the AbrManager implementation to implement the
