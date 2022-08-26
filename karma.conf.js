@@ -399,6 +399,7 @@ module.exports = (config) => {
           {type: 'html', dir: 'coverage'},
           {type: 'cobertura', dir: 'coverage', file: 'coverage.xml'},
           {type: 'json-summary', dir: 'coverage', file: 'coverage.json'},
+          {type: 'json', dir: 'coverage', file: 'coverage-details.json'},
         ],
       },
     });
