@@ -394,7 +394,7 @@ shaka.test.ManifestGenerator.DrmInfo = class {
     /** @type {Uint8Array} */
     this.serverCertificate = null;
     /** @type {Array.<shaka.extern.InitDataOverride>} */
-    this.initData = null;
+    this.initData = [];
     /** @type {Set.<string>} */
     this.keyIds = new Set();
     /** @type {string} */
@@ -422,9 +422,6 @@ shaka.test.ManifestGenerator.DrmInfo = class {
    * @param {!Uint8Array} buffer
    */
   addInitData(type, buffer) {
-    if (!this.initData) {
-      this.initData = [];
-    }
     this.initData.push({initData: buffer, initDataType: type});
   }
 

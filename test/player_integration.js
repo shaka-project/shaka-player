@@ -1152,4 +1152,14 @@ describe('Player', () => {
       expect(chapter3.endTime).toBe(61.349);
     });
   });  // describe('addChaptersTrack')
+
+  it('requires a license server for HLS ClearKey content', async () => {
+    const expectedError = Util.jasmineError(new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.DRM,
+        shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN,
+        "org.w3.clearkey"));
+    await expectAsync(player.load('test:sintel-hls-clearkey'))
+        .toBeRejectedWith(expectedError);
+  });
 });
