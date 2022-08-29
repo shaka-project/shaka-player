@@ -52,7 +52,7 @@ let ExtraMetadataType;
  *   duration: number,
  *   licenseServers: (!Object.<string, string>|undefined),
  *   licenseRequestHeaders: (!Object.<string, string>|undefined),
- *   customizeStream: (function(!shaka.test.ManifestGenerator.Stream)|undefined),
+ *   customizeStream: (function(shaka.test.ManifestGenerator.Stream)|undefined),
  *   sequenceMode: (boolean|undefined)
  * }}
  */
