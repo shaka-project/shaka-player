@@ -424,7 +424,7 @@ shaka.ui.Overlay = class {
         shaka.util.Dom.asHTMLMediaElement(video));
 
     // Attach Canvas used for LCEVC Decoding
-    player.attachCanvas(canvas);
+    player.attachCanvas(/** @type {HTMLCanvasElement} */(canvas));
 
     // Get and configure cast app id.
     let castAppId = '';

@@ -440,20 +440,20 @@
     "message": "Language"
   },
   "DEMO_LCEVC_DRAW_LOGO": {
-    "description": "LCEVC Watermark on the left hand top corner of the canvas.",
-    "message": "Draw LCEVC Logo [JARGON:LCEVC]"
+    "description": "LCEVC Watermark on the top left hand corner of the canvas.",
+    "message": "Draw [PROPER_NAME:LCEVC] Logo"
   },
   "DEMO_LCEVC_DYNAMIC_PERFORMANCE_SCALING": {
     "description": "Dynamic Performance scaling for enabling/disabling LCEVC decoding based on decode performance.",
-    "message": "LCEVC Dynamic Performance scaling [JARGON:LCEVC]"
+    "message": "[PROPER_NAME:LCEVC] [JARGON:Dynamic Performance scaling]"
   },
   "DEMO_LCEVC_LOG_LEVEL": {
-    "description": "Log Level for LCEVC Lib",
-    "message": "LCEVC Log Level [JARGON:LCEVC]"
+    "description": "Log Level for LCEVC Lib (0-5)",
+    "message": "[PROPER_NAME:LCEVC] Log Level"
   },
   "DEMO_LCEVC_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
-    "message": "MPEG-5 Part-2 LCEVC [JARGON:LCEVC]"
+    "message": "[PROPER_NAME:MPEG-5 Part-2 LCEVC]"
   },
   "DEMO_LIBRARIES": {
     "description": "A link in the footer, to Shaka Player in the Google Hosted Libraries CDN.",
@@ -938,6 +938,10 @@
   "DEMO_VIDEO_ROBUSTNESS": {
     "description": "The name of a configuration value.",
     "message": "Video Robustness"
+  },
+  "DEMO_VNOVA": {
+    "description": "Text that describes an asset that comes from V-Nova.",
+    "message": "[PROPER_NAME:V-Nova]"
   },
   "DEMO_VOD": {
     "description": "Text that describes an asset that is a VOD (Video On Delivery).",

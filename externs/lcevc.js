@@ -15,10 +15,10 @@ var LcevcDil = {};
 */
 LcevcDil.LcevcDIL = class {
   /**
-     *  @param {HTMLVideoElement} media
-     *  @param {Element} canvas
-     *  @param {shaka.extern.LcevcConfiguration} dilConfig
-     */
+   * @param {HTMLVideoElement} media
+   * @param {HTMLCanvasElement} canvas
+   * @param {shaka.extern.LcevcConfiguration} dilConfig
+   */
   constructor(media, canvas, dilConfig) {
   }
 
@@ -61,7 +61,7 @@ LcevcDil.SupportObject = {
 
   /**
    * Check if canvas has WebGL support
-   * @param {Element} canvas
+   * @param {HTMLCanvasElement} canvas
    * @return {boolean} true if requirements are met.
    */
   webGLSupport(canvas) {},

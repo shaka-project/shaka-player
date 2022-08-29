@@ -293,8 +293,8 @@ shakaDemo.Config = class {
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.LcevcConfiguration');
     this.addSection_(MessageIds.LCEVC_SECTION_HEADER, docLink)
-        .addBoolInput_(MessageIds.LCEVC_DYNAMIC_PERFORMANCE_SCALING
-            , 'lcevc.dynamicPerformanceScaling')
+        .addBoolInput_(MessageIds.LCEVC_DYNAMIC_PERFORMANCE_SCALING,
+            'lcevc.dynamicPerformanceScaling')
         .addNumberInput_(MessageIds.LCEVC_LOG_LEVEL, 'lcevc.logLevel')
         .addBoolInput_(MessageIds.LCEVC_DRAW_LOGO, 'lcevc.drawLogo');
   }

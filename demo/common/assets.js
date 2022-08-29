@@ -40,7 +40,7 @@ shakaAssets.Source = {
   APPLE: shakaDemo.MessageIds.APPLE,
   IRT: shakaDemo.MessageIds.IRT,
   MICROSOFT: shakaDemo.MessageIds.MICROSOFT,
-  LCEVC: shakaDemo.MessageIds.LCEVC_SECTION_HEADER,
+  VNOVA: shakaDemo.MessageIds.VNOVA,
 };
 
 
@@ -1266,7 +1266,7 @@ shakaAssets.testAssets = [
       /* name= */ 'Big Buck Bunny (LCEVC H264)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
       /* manifestUri= */ 'https://dyctis843rxh5.cloudfront.net/vnIAZIaowG1K7qOt/master.m3u8',
-      /* source= */ shakaAssets.Source.LCEVC)
+      /* source= */ shakaAssets.Source.VNOVA)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
