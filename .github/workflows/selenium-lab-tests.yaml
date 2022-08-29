@@ -17,101 +17,206 @@ on:
 concurrency: selenium-lab
 
 jobs:
+  compute-ref:
+    name: Compute ref
+    runs-on: ubuntu-latest
+    outputs:
+      REF: ${{ steps.compute.outputs.REF }}
+
+    steps:
+      - name: Compute ref
+        id: compute
+        run: |
+          if [[ "${{ github.event.inputs.pr }}" != "" ]]; then
+            LAB_TEST_REF="refs/pull/${{ github.event.inputs.pr }}/head"
+          else
+            LAB_TEST_REF="main"
+          fi
+          echo "::set-output name=REF::$LAB_TEST_REF"
+
+  # Configure the build matrix based on our grid's YAML config.
+  # The matrix contents will be computed by this first job and deserialized
+  # into the second job's config.
+  matrix-config:
+    name: Matrix config
+    needs: compute-ref
+    runs-on: ubuntu-latest
+    outputs:
+      INCLUDE: ${{ steps.configure.outputs.INCLUDE }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.compute-ref.REF }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure build matrix
+        id: configure
+        shell: node {0}
+        run: |
+          const fs = require('fs');
+          const yaml = require(
+              '${{ github.workspace }}/node_modules/js-yaml/index.js');
+
+          const gridBrowserYaml =
+              fs.readFileSync('build/shaka-lab.yaml', 'utf8');
+          const gridBrowserMetadata = yaml.load(gridBrowserYaml);
+
+          const include = [];
+
+          for (const name in gridBrowserMetadata) {
+            if (name == 'vars') {
+              // Skip variable defs in the YAML file
+              continue;
+            }
+            if (!gridBrowserMetadata[name].disabled) {
+              include.push({browser: name});
+            }
+          }
+
+          // Output JSON object consumed by the build matrix below.
+          console.log(`::set-output name=INCLUDE::${ JSON.stringify(include) }`);
+
+          // Log the output, for the sake of debugging this script.
+          console.log({include});
+
+  # Build Shaka Player once, then distribute that build to the runners in the
+  # build matrix.  For N runners, runs N times faster (since all the
+  # self-hosted Selenium jobs are run in containers on one machine).
+  build-shaka:
+    name: Pre-build Player
+    needs: compute-ref
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.compute-ref.REF }}
+
+      - name: Set commit status to pending
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Selenium / Build
+          state: pending
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Player
+        run: python3 build/all.py
+
+      - name: Store Player build
+        uses: actions/upload-artifact@v3
+        with:
+          name: shaka-player
+          path: dist/
+          retention-days: 1
+
+      - name: Report final commit status
+        # Will run on success or failure, but not if the workflow is cancelled.
+        if: ${{ success() || failure() }}
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Selenium / Build
+          state: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   lab-tests:
     # This is a self-hosted runner in a Docker container, with access to our
     # lab's Selenium grid on port 4444.
     runs-on: self-hosted-selenium
+    needs: [compute-ref, build-shaka, matrix-config]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.matrix-config.outputs.INCLUDE) }}
+    name: ${{ matrix.browser }}
 
     steps:
-      # This runs on our self-hosted runner, and the Docker image it is based
-      # on doesn't have GitHub's CLI pre-installed.  This installs it.  Taken
-      # verbatim from the official installation instructions at
-      # https://github.com/cli/cli/blob/trunk/docs/install_linux.md
-      - name: Install GitHub Actions CLI
-        run: |
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-          sudo apt update
-          sudo apt install gh
-
-      - name: Compute ref
-        run: |
-          if [[ "${{ github.event.inputs.pr }}" != "" ]]; then
-            echo LAB_TEST_REF="refs/pull/${{ github.event.inputs.pr }}/head" >> $GITHUB_ENV
-          else
-            echo LAB_TEST_REF="main" >> $GITHUB_ENV
-          fi
-
       - uses: actions/checkout@v2
         with:
-          ref: ${{ env.LAB_TEST_REF }}
+          ref: ${{ needs.compute-ref.REF }}
 
-      - name: Set Commit Status to Pending
+      - name: Set commit status to pending
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
-          context: Selenium Lab Tests
+          context: Selenium / ${{ matrix.browser }}
           state: pending
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
 
       # The Docker image for this self-hosted runner doesn't contain java.
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: 11
 
-      # The Docker image for this self-hosted runner has "python3" but not
-      # plain "python".
-      - name: Build Player
-        run: python3 build/all.py
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: node_modules/
+          key: node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      # Instead of building Shaka N times, build it once and fetch the build to
+      # each Selenium runner in the matrix.
+      - name: Fetch Player build
+        uses: actions/download-artifact@v3
+        with:
+          name: shaka-player
+          path: dist/
 
       # Run tests on the Selenium grid in our lab.  This uses a private
       # hostname and TLS cert to get EME tests working on all platforms
-      # (since EME only works on https or localhost).
+      # (since EME only works on https or localhost).  The variable KARMA_PORT
+      # must be defined by the self-hosted runner, and mapped from the host to
+      # the container.
       - name: Test Player
         run: |
           python3 build/test.py \
+              --no-build \
               --reporters spec --spec-hide-passed \
               --lets-encrypt-folder /etc/shakalab.rocks \
               --hostname karma.shakalab.rocks \
-              --port 61731 \
+              --port $KARMA_PORT \
               --grid-config build/shaka-lab.yaml \
               --grid-address selenium-grid.lab:4444 \
+              --browsers ${{ matrix.browser }} \
               --html-coverage-report
 
-      - name: Find coverage report
+      - name: Find coverage report (ChromeLinux only)
         id: coverage
-        if: always() # Even on failure of an earlier step.
+        # Run even if an earlier step fails, but only on ChromeLinux.
+        if: ${{ always() && matrix.browser == 'ChromeLinux' }}
         shell: bash
         run: |
-          # If the directory exists...
-          if [ -d coverage ]; then
-            # Find the path to the coverage report specifically for Chrome on
-            # Linux.  It includes the exact browser version in the path, so it
-            # will vary.  Having a single path will make the artifact zip
-            # simpler, whereas using a wildcard in the upload step will result
-            # in a zip file with internal directories.
-            coverage_report="$( (ls coverage/Chrome*Linux*/coverage.json || true) | head -1 )"
+          # Find the path to the coverage report specifically for Chrome on
+          # Linux.  It includes the exact browser version in the path, so it
+          # will vary.  Having a single path will make the artifact zip
+          # simpler, whereas using a wildcard in the upload step will result
+          # in a zip file with internal directories.
+          coverage_report="$( (ls coverage/Chrome*Linux*/coverage.json || true) | head -1 )"
 
-            # Show what's there, for debugging purposes.
-            ls -l coverage/
+          # Show what's there, for debugging purposes.
+          ls -l coverage/
 
-            if [ -f "$coverage_report" ]; then
-              echo "Found coverage report: $coverage_report"
-              echo "::set-output name=coverage_report::$coverage_report"
-            else
-              echo "Could not locate coverage report!"
-              exit 1
-            fi
+          if [ -f "$coverage_report" ]; then
+            echo "Found coverage report: $coverage_report"
+            echo "::set-output name=coverage_report::$coverage_report"
           else
-            echo "No coverage report generated."
+            echo "Could not locate coverage report!"
+            exit 1
           fi
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload coverage report (ChromeLinux only)
+        uses: actions/upload-artifact@v3
         # If there's a coverage report, upload it, even if a previous step
         # failed.
         if: ${{ always() && steps.coverage.outputs.coverage_report }}
@@ -125,11 +230,11 @@ jobs:
           # there.
           if-no-files-found: error
 
-      - name: Report Final Commit Status
+      - name: Report final commit status
         # Will run on success or failure, but not if the workflow is cancelled.
         if: ${{ success() || failure() }}
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
-          context: Selenium Lab Tests
+          context: Selenium / ${{ matrix.browser }}
           state: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
