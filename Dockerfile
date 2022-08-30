@@ -1,3 +1,3 @@
 FROM alpine:edge
 
-RUN apk update && apk add nodejs npm python2 git openjdk8
+RUN apk update && apk add nodejs npm python3 git openjdk8
