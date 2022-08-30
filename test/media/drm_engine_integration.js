@@ -68,6 +68,22 @@ describe('DrmEngine', () => {
   });
 
   beforeEach(async () => {
+    await setUpDrmEngine(undefined);
+  });
+
+  afterEach(async () => {
+    eventManager.release();
+
+    await mediaSourceEngine.destroy();
+    await networkingEngine.destroy();
+    await drmEngine.destroy();
+  });
+
+  afterAll(() => {
+    document.body.removeChild(video);
+  });
+
+  async function setUpDrmEngine(drmData) {
     onErrorSpy = jasmine.createSpy('onError');
     onKeyStatusSpy = jasmine.createSpy('onKeyStatus');
     onExpirationSpy = jasmine.createSpy('onExpirationUpdated');
@@ -96,12 +112,12 @@ describe('DrmEngine', () => {
       onEvent: shaka.test.Util.spyFunc(onEventSpy),
     };
 
-    drmEngine = new shaka.media.DrmEngine(playerInterface);
+    drmEngine = new shaka.media.DrmEngine(playerInterface, undefined, drmData);
     const config = shaka.util.PlayerConfiguration.createDefault().drm;
     config.servers['com.widevine.alpha'] =
-        'https://drm-widevine-licensing.axtest.net/AcquireLicense';
+      'https://drm-widevine-licensing.axtest.net/AcquireLicense';
     config.servers['com.microsoft.playready'] =
-        'https://drm-playready-licensing.axtest.net/AcquireLicense';
+      'https://drm-playready-licensing.axtest.net/AcquireLicense';
     drmEngine.configure(config);
 
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -133,19 +149,7 @@ describe('DrmEngine', () => {
     expectedObject.set(ContentType.AUDIO, audioStream);
     expectedObject.set(ContentType.VIDEO, videoStream);
     await mediaSourceEngine.init(expectedObject, false);
-  });
-
-  afterEach(async () => {
-    eventManager.release();
-
-    await mediaSourceEngine.destroy();
-    await networkingEngine.destroy();
-    await drmEngine.destroy();
-  });
-
-  afterAll(() => {
-    document.body.removeChild(video);
-  });
+  }
 
   function checkTrueDrmSupport() {
     if (shaka.util.Platform.isXboxOne()) {
@@ -164,7 +168,9 @@ describe('DrmEngine', () => {
   }
 
   filterDescribe('basic flow', checkTrueDrmSupport, () => {
-    drmIt('gets a license and can play encrypted segments', async () => {
+    async function basicPlaybackTest(
+        {shouldWaitForKeyEvents} = {shouldWaitForKeyEvents: true},
+    ) {
       // The error callback should not be invoked.
       onErrorSpy.and.callFake(fail);
 
@@ -215,10 +221,33 @@ describe('DrmEngine', () => {
           ContentType.AUDIO, audioInitSegment, null,
           /* hasClosedCaptions= */ false);
       await encryptedEventSeen;
-      // With PlayReady, a persistent license policy can cause a different
-      // chain of events.  In particular, the request is bypassed and we
-      // get a usable key right away.
-      await Promise.race([requestMade, keyStatusEventSeen]);
+      // In the scenario that we are re-using an existing key session, we don't
+      // expect to make any extra requests or have key status changes, and so
+      // we do not wait for them.
+      if (shouldWaitForKeyEvents) {
+        // With PlayReady, a persistent license policy can cause a different
+        // chain of events.  In particular, the request is bypassed and we
+        // get a usable key right away.
+        await Promise.race([requestMade, keyStatusEventSeen]);
+      } else {
+        // In this scenario we want to check that we have the expected number
+        // of media key sessions and that their status are all usable. Since we
+        // only created one media key session, and the test video and audio are
+        // encrypted with a single key, we can expect 1 session with 1 key
+        // status that is usable.
+        const mediaKeySessions = drmEngine.getMediaKeySessions();
+        expect(mediaKeySessions.length).toBe(1);
+        for (const session of mediaKeySessions) {
+          expect(session.keyStatuses.size).toBe(1);
+          // For some reason Closure doesn't realize that keyStatuses are
+          // Iterable but it is fine with forEach so going with that approach
+          // and silencing the linter instead.
+          // eslint-disable-next-line no-restricted-syntax
+          session.keyStatuses.forEach((status) => {
+            expect(status).toBe('usable');
+          });
+        }
+      }
 
       if (requestSpy.calls.count()) {
         // We made a license request.
@@ -264,6 +293,28 @@ describe('DrmEngine', () => {
       // Something should have played by now.
       expect(video.readyState).toBeGreaterThan(1);
       expect(video.currentTime).toBeGreaterThan(0);
+    }
+
+    drmIt('gets a license and can play encrypted segments', async () => {
+      await basicPlaybackTest();
+    });
+
+    drmIt('re-uses drm session for subsequent playback', async () => {
+      // Set up initial session to preserve media keys.
+      drmEngine.setShouldPreserveMediaKeySessions(true);
+      // Run the basic test as all expectations should still hold.
+      await basicPlaybackTest();
+      // Get the existing media keys from the current session.
+      const drmData = drmEngine.getMediaKeysData();
+      // Destroy the current session.
+      eventManager.release();
+      await mediaSourceEngine.destroy();
+      await networkingEngine.destroy();
+      await drmEngine.destroy();
+      // Set up a new DrmEngine.
+      await setUpDrmEngine(drmData);
+      // Same expectations should apply for new stream.
+      await basicPlaybackTest({shouldWaitForKeyEvents: false});
     });
   });  // describe('basic flow')
 
