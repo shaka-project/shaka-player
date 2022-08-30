@@ -2590,7 +2590,6 @@ describe('HlsParser', () => {
     }
   });
 
-
   it('constructs DrmInfo for Widevine', async () => {
     const master = [
       '#EXTM3U\n',
@@ -2705,6 +2704,73 @@ describe('HlsParser', () => {
           stream.addDrmInfo('com.apple.fps', (drmInfo) => {
             drmInfo.addInitData('sinf', new Uint8Array(0));
           });
+        });
+      });
+      manifest.sequenceMode = true;
+    });
+
+    await testHlsParser(master, media, manifest);
+  });
+
+  it('constructs DrmInfo for ClearKey with explicit KEYFORMAT', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:6\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
+      'KEYFORMAT="identity",',
+      'URI="key.bin",\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXTINF:5,\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.encrypted = true;
+          stream.addDrmInfo('org.w3.clearkey');
+        });
+      });
+      manifest.sequenceMode = true;
+    });
+
+    await testHlsParser(master, media, manifest);
+  });
+
+  it('constructs DrmInfo for ClearKey without explicit KEYFORMAT', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:6\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
+      'URI="key.bin",\n',
+      '#EXT-X-MAP:URI="init.mp4"\n',
+      '#EXTINF:5,\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.encrypted = true;
+          stream.addDrmInfo('org.w3.clearkey');
         });
       });
       manifest.sequenceMode = true;
