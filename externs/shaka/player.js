@@ -687,6 +687,7 @@ shaka.extern.AdvancedDrmConfiguration;
  *   servers: !Object.<string, string>,
  *   clearKeys: !Object.<string, string>,
  *   delayLicenseRequestUntilPlayed: boolean,
+ *   persistentSessionOnlinePlayback: boolean,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
  *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
@@ -713,6 +714,11 @@ shaka.extern.AdvancedDrmConfiguration;
  *   <i>Defaults to false.</i> <br>
  *   True to configure drm to delay sending a license request until a user
  *   actually starts playing content.
+ * @property {boolean} persistentSessionOnlinePlayback
+ *   <i>Defaults to false.</i> <br>
+ *   True to configure drm to try playback with given persistent session ids
+ *   before requesting a license. Also prevents the session removal at playback
+ *   stop, as-to be able to re-use it later.
  * @property {Object.<string, shaka.extern.AdvancedDrmConfiguration>} advanced
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
@@ -935,11 +941,14 @@ shaka.extern.MssManifestConfiguration;
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
- *   mss: shaka.extern.MssManifestConfiguration
+ *   mss: shaka.extern.MssManifestConfiguration,
+ *   persistentSessionIds: !Array.<string>
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
  *   Retry parameters for manifest requests.
+ * @property {!Array.<string>} persistentSessionIds
+ *   Persistent session ids to load before starting playback
  * @property {number} availabilityWindowOverride
  *   A number, in seconds, that overrides the availability window in the
  *   manifest, or <code>NaN</code> if the default value should be used.  This is
