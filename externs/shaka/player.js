@@ -683,11 +683,58 @@ shaka.extern.AdvancedDrmConfiguration;
 
 /**
  * @typedef {{
+ *   sessionId: string,
+ *   sessionType: string,
+ *   initData: ?Uint8Array,
+ *   initDataType: ?string
+ * }}
+ *
+ * @description
+ * DRM Session Metadata for as session
+ *
+ * @property {string} sessionId
+ *   Session id
+ * @property {string} sessionType
+ *   Session type
+ * @property {?Uint8Array} initData
+ *   Initialization data in the format indicated by initDataType.
+ * @property {string} initDataType
+ *   A string to indicate what format initData is in.
+ * @exportDoc
+ */
+shaka.extern.DrmSessionMetadata;
+
+
+/**
+ * @typedef {{
+ *   sessionId: string,
+ *   initData: ?Uint8Array,
+ *   initDataType: ?string
+ * }}
+ *
+ * @description
+ * DRM Session Metadata for as session
+ *
+ * @property {string} sessionId
+ *   Session id
+ * @property {?Uint8Array} initData
+ *   Initialization data in the format indicated by initDataType.
+ * @property {?string} initDataType
+ *   A string to indicate what format initData is in.
+ * @exportDoc
+ */
+shaka.extern.PersistentSessionMetadata;
+
+
+/**
+ * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   servers: !Object.<string, string>,
  *   clearKeys: !Object.<string, string>,
  *   delayLicenseRequestUntilPlayed: boolean,
  *   persistentSessionOnlinePlayback: boolean,
+ *   persistentSessionsMetadata:
+ *       !Array.<shaka.extern.PersistentSessionMetadata>,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
  *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
@@ -719,6 +766,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   True to configure drm to try playback with given persistent session ids
  *   before requesting a license. Also prevents the session removal at playback
  *   stop, as-to be able to re-use it later.
+ * @property {!Array.<PersistentSessionMetadata>} persistentSessionsMetadata
+ *   Persistent sessions metadata to load before starting playback
  * @property {Object.<string, shaka.extern.AdvancedDrmConfiguration>} advanced
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
@@ -947,8 +996,6 @@ shaka.extern.MssManifestConfiguration;
  *
  * @property {shaka.extern.RetryParameters} retryParameters
  *   Retry parameters for manifest requests.
- * @property {!Array.<string>} persistentSessionIds
- *   Persistent session ids to load before starting playback
  * @property {number} availabilityWindowOverride
  *   A number, in seconds, that overrides the availability window in the
  *   manifest, or <code>NaN</code> if the default value should be used.  This is

@@ -135,7 +135,6 @@ describe('DrmEngine', () => {
   });
 
   afterEach(async () => {
-    console.warn('AFTER EACH');
     await drmEngine.destroy();
 
     navigator.requestMediaKeySystemAccess =
@@ -1146,8 +1145,11 @@ describe('DrmEngine', () => {
       // Given persistent session is available
       session1.load.and.returnValue(true);
 
-      manifest.offlineSessionIds = ['persistent-session-id'];
       config.persistentSessionOnlinePlayback = true;
+      config.persistentSessionsMetadata = [{
+        sessionId: 'persistent-session-id',
+        initData: initData1,
+        initDataType: 'cenc'}];
 
       drmEngine.configure(config);
 
@@ -1195,8 +1197,12 @@ describe('DrmEngine', () => {
           session1.load.and.returnValue(Promise.resolve(false));
           session2.load.and.returnValue(Promise.resolve(false));
 
-          manifest.offlineSessionIds =
-              ['persistent-session-id-1', 'persistent-session-id-2'];
+          manifest.offlineSessionIds = ['persistent-session-id-1'];
+
+          config.persistentSessionsMetadata = [{
+            sessionId: 'persistent-session-id-2',
+            initData: initData1,
+            initDataType: 'cenc'}];
           config.persistentSessionOnlinePlayback = true;
 
           drmEngine.configure(config);
