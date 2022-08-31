@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.2.12](https://github.com/shaka-project/shaka-player/compare/v3.2.11...v3.2.12) (2022-08-31)
+
+
+### Bug Fixes
+
+* Fix bitmap-based cue size ([#4453](https://github.com/shaka-project/shaka-player/issues/4453)) ([598c0b4](https://github.com/shaka-project/shaka-player/commit/598c0b4c3ab2a3986f3d8d885b3fd36879eaf535))
+* return width and height in the stats when we are using src= ([#4435](https://github.com/shaka-project/shaka-player/issues/4435)) ([e16e8df](https://github.com/shaka-project/shaka-player/commit/e16e8dfbb8fc65065efd5a8f8f3c2d4a18fbe2eb))
+* **UI:** Ad position and ad counter are too close to each other ([#4416](https://github.com/shaka-project/shaka-player/issues/4416)) ([ff1aaa2](https://github.com/shaka-project/shaka-player/commit/ff1aaa2c8a892a41e404e68fc560c0f4556d54a0))
+
 ## [3.2.11](https://github.com/shaka-project/shaka-player/compare/v3.2.10...v3.2.11) (2022-08-17)
 
 
