@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.1.4](https://github.com/shaka-project/shaka-player/compare/v4.1.3...v4.1.4) (2022-08-31)
+
+
+### Bug Fixes
+
+* Fix bitmap-based cue size ([#4453](https://github.com/shaka-project/shaka-player/issues/4453)) ([3c5a07f](https://github.com/shaka-project/shaka-player/commit/3c5a07f0259145bdce0c94f90b842de28026d6fa))
+* Fix drm.keySystemsMapping config ([#4425](https://github.com/shaka-project/shaka-player/issues/4425)) ([1aab613](https://github.com/shaka-project/shaka-player/commit/1aab6130690eab0cc148ba8f05e483e4fc8db716)), closes [#4422](https://github.com/shaka-project/shaka-player/issues/4422)
+* Fix vanishing tracks while offline ([#4426](https://github.com/shaka-project/shaka-player/issues/4426)) ([186d298](https://github.com/shaka-project/shaka-player/commit/186d298b00475818f744925cb3828bfa11c43c0b)), closes [#4408](https://github.com/shaka-project/shaka-player/issues/4408)
+* return width and height in the stats when we are using src= ([#4435](https://github.com/shaka-project/shaka-player/issues/4435)) ([1eff9ed](https://github.com/shaka-project/shaka-player/commit/1eff9ed022950a2ef8722768da02ad96ef1ff821))
+* **UI:** Ad position and ad counter are too close to each other ([#4416](https://github.com/shaka-project/shaka-player/issues/4416)) ([5f5c7c3](https://github.com/shaka-project/shaka-player/commit/5f5c7c35853e27b088af2840ab986f90c8d3bbb5))
+
 ## [4.1.3](https://github.com/shaka-project/shaka-player/compare/v4.1.2...v4.1.3) (2022-08-16)
 
 
