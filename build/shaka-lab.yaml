@@ -159,3 +159,4 @@ Tizen:
 
 XboxOne:
   browser: xboxone
+  disabled: true
