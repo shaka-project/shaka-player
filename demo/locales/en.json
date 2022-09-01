@@ -206,6 +206,7 @@
   "DEMO_SWITCH_INTERVAL": "Switch Interval",
   "DEMO_TEXT_LANGUAGE": "Preferred Text Language",
   "DEMO_TEXT_ROLE": "Preferred Text Role",
+  "DEMO_SELECT_TEXT_WITHOUT_AUDIO": "Select Text without audio concern",
   "DEMO_THUMBNAILS": "Thumbnails",
   "DEMO_TIMEOUT": "Timeout Factor",
   "DEMO_TRICK_MODE": "Special trick mode track",

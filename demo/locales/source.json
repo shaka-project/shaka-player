@@ -827,6 +827,10 @@
     "description": "The name of a configuration value.",
     "message": "Preferred Text Role"
   },
+  "DEMO_SELECT_TEXT_WITHOUT_AUDIO": {
+    "description": "The name of a configuration value.",
+    "message": "Select Text without audio concern"
+  },
   "DEMO_THUMBNAILS": {
     "description": "Text that describes an asset that has a thumbnail stream.",
     "message": "Thumbnails"

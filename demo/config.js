@@ -433,7 +433,10 @@ shakaDemo.Config = class {
     this.addSection_(MessageIds.LANGUAGE_SECTION_HEADER, docLink)
         .addTextInput_(MessageIds.AUDIO_LANGUAGE, 'preferredAudioLanguage')
         .addTextInput_(MessageIds.TEXT_LANGUAGE, 'preferredTextLanguage')
-        .addTextInput_(MessageIds.TEXT_ROLE, 'preferredTextRole');
+        .addTextInput_(MessageIds.TEXT_ROLE, 'preferredTextRole')
+        .addBoolInput_(
+            MessageIds.SELECT_TEXT_WITHOUT_AUDIO,
+            'selectTextWithoutAudioConcern');
     const onChange = (input) => {
       shakaDemoMain.setUILocale(input.value);
       shakaDemoMain.remakeHash();
