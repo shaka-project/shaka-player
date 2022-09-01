@@ -1096,32 +1096,32 @@ describe('DrmEngine', () => {
           message, nativeError, undefined));
     });
 
-    // it('should throw a OFFLINE_SESSION_REMOVED error', async () => {
-    //   // Given persistent session is not available
-    //   session1.load.and.returnValue(false);
+    it('should throw a OFFLINE_SESSION_REMOVED error', async () => {
+      // Given persistent session is not available
+      session1.load.and.returnValue(false);
 
-    //   onErrorSpy.and.stub();
+      onErrorSpy.and.stub();
 
-    //   await drmEngine.initForPlayback(
-    //       manifest.variants, ['persistent-session-id']);
-    //   await drmEngine.attach(mockVideo);
+      await drmEngine.initForPlayback(
+          manifest.variants, ['persistent-session-id']);
+      await drmEngine.attach(mockVideo);
 
-    //   expect(drmEngine.initialized()).toBe(true);
+      expect(drmEngine.initialized()).toBe(true);
 
-    //   await Util.shortDelay();
+      await Util.shortDelay();
 
-    //   expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
-    //   expect(mockMediaKeys.createSession)
-    //       .toHaveBeenCalledWith('persistent-license');
-    //   expect(session1.load).toHaveBeenCalledWith('persistent-session-id');
+      expect(mockMediaKeys.createSession).toHaveBeenCalledTimes(1);
+      expect(mockMediaKeys.createSession)
+          .toHaveBeenCalledWith('persistent-license');
+      expect(session1.load).toHaveBeenCalledWith('persistent-session-id');
 
-    //   expect(onErrorSpy).toHaveBeenCalled();
-    //   const error = onErrorSpy.calls.argsFor(0)[0];
-    //   shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
-    //       shaka.util.Error.Severity.CRITICAL,
-    //       shaka.util.Error.Category.DRM,
-    //       shaka.util.Error.Code.OFFLINE_SESSION_REMOVED));
-    // });
+      expect(onErrorSpy).toHaveBeenCalled();
+      const error = onErrorSpy.calls.argsFor(0)[0];
+      shaka.test.Util.expectToEqualError(error, new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.DRM,
+          shaka.util.Error.Code.OFFLINE_SESSION_REMOVED));
+    });
 
     it('uses persistent session ids when available', async () => {
       const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
