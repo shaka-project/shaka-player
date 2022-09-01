@@ -1158,6 +1158,7 @@ shaka.extern.OfflineConfiguration;
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
+ *   selectTextWithoutAudioConcern: boolean,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
  *   preferredVariantRole: string,
@@ -1187,6 +1188,9 @@ shaka.extern.OfflineConfiguration;
  *   CMCD configuration and settings. (Common Media Client Data)
  * @property {shaka.extern.OfflineConfiguration} offline
  *   Offline configuration and settings.
+ * @property {boolean} selectTextWithoutAudioConcern
+ *   A flag to select text tracks only according to the given preferences
+ *   without taking audio in concern.
  * @property {string} preferredAudioLanguage
  *   The preferred language to use for audio tracks.  If not given it will use
  *   the <code>'main'</code> track.

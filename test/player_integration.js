@@ -287,6 +287,33 @@ describe('Player', () => {
       expect(variantTrack.language).toBe(textTrack.language);
     });
 
+    it('is called automatically with text match only', async () => {
+      // If the audio and text tracks use the same language, we do not enable
+      // text display automatically, no matter the text preference.
+
+      const preferredTextLanguage = 'und';  // The same as in the content itself
+      player.configure({
+        selectTextWithoutAudioConcern: true,
+        preferredTextLanguage: preferredTextLanguage});
+
+      // Now load the content and wait for completion.
+      await player.load('test:sintel_compiled');
+
+      // Make sure the automatic setting did not happen.
+      expect(player.isTextTrackVisible()).toBe(true);
+
+      // Make sure the content we tested with has text tracks, that the
+      // config we used matches the content, and that the text and audio
+      // languages match each other.  This will catch any changes to the
+      // underlying content that would invalidate the test setup.
+      expect(player.getTextTracks().length).not.toBe(0);
+      const textTrack = player.getTextTracks()[0];
+      expect(textTrack.language).toBe(preferredTextLanguage);
+
+      const variantTrack = player.getVariantTracks()[0];
+      expect(variantTrack.language).toBe(textTrack.language);
+    });
+
     // Repro for https://github.com/shaka-project/shaka-player/issues/1879.
     it('appends cues when enabled initially', async () => {
       let cues = [];
