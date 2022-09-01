@@ -939,6 +939,18 @@
     "description": "The name of a configuration value.",
     "message": "Video Robustness"
   },
+  "DEMO_VISUALIZER_AUTO_SCREENSHOT_TOGGLE": {
+    "description": "A configuration toggle that makes the visualizer take a screenshot when the presentation stalls.",
+    "message": "Take Screenshot On Stall"
+  },
+  "DEMO_VISUALIZER_BUTTON": {
+    "description": "A button on the video that opens or hides the visualizer.",
+    "message": "Buffer Visualizer"
+  },
+  "DEMO_VISUALIZER_SCREENSHOT_BUTTON": {
+    "description": "A button that takes a screenshot of the current visualizer state.",
+    "message": "Take Screenshot"
+  },
   "DEMO_VNOVA": {
     "description": "Text that describes an asset that comes from V-Nova.",
     "message": "[PROPER_NAME:V-Nova]"
