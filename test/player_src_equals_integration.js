@@ -305,6 +305,8 @@ describe('Player Src Equals', () => {
     expect(stats.loadLatency).toBeGreaterThan(0);
     expect(stats.manifestTimeSeconds).toBeNaN(); // There's no manifest.
     expect(stats.drmTimeSeconds).toBeNaN(); // There's no DRM.
+    expect(stats.height).toBe(110);
+    expect(stats.width).toBe(256);
   });
 
   it('plays with external text tracks', async () => {

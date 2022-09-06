@@ -38,23 +38,34 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        browser: ["Chrome", "Firefox", "Edge", "Safari", "Safari-14"]
-        exclude:
-          - os: ubuntu-latest
-            browser: Edge
-          - os: windows-latest
-            browser: Safari
-          - os: windows-latest
-            browser: Safari-14
-          - os: ubuntu-latest
-            browser: Safari
-          - os: ubuntu-latest
-            browser: Safari-14
         include:
           # Run Linux browsers with xvfb, so they're in a headless X session.
+          # Additionally, generate a code coverage report from Linux Chrome.
           - os: ubuntu-latest
+            browser: Chrome
+            extra_flags: "--use-xvfb --html-coverage-report"
+          - os: ubuntu-latest
+            browser: Firefox
             extra_flags: "--use-xvfb"
+
+          - os: macos-latest
+            browser: Chrome
+          - os: macos-latest
+            browser: Firefox
+          - os: macos-latest
+            browser: Edge
+          - os: macos-latest
+            browser: Safari
+          - os: macos-latest
+            browser: Safari-14
+
+          - os: windows-latest
+            browser: Chrome
+          - os: windows-latest
+            browser: Firefox
+          - os: windows-latest
+            browser: Edge
+
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
       fail-fast: false
@@ -86,10 +97,11 @@ jobs:
         run: |
           # Download Safari 14
           # See also https://www.macupdate.com/app/mac/15675/apple-safari/old-versions
-          curl -Lv https://www.macupdate.com/action/download/63550 > safari-14.1.2.pkg
+          curl -Lv https://www.macupdate.com/action/download/62946 > Safari14.0CatalinaAuto.pkg.zip
 
           # Install Safari 14 to homedir specifically.
-          installer -pkg safari-14.1.2.pkg -target CurrentUserHomeDirectory
+          unzip Safari14.0CatalinaAuto.pkg.zip
+          installer -pkg Safari14.0CatalinaAuto.pkg -target CurrentUserHomeDirectory
 
           # Install a launcher that can execute a shell script to launch this
           npm install karma-script-launcher --save-dev
@@ -112,6 +124,46 @@ jobs:
             --browsers "$browser" \
             --reporters spec --spec-hide-passed \
             ${{ matrix.extra_flags }}
+
+      - name: Find coverage reports
+        id: coverage
+        if: always() # Even on failure of an earlier step.
+        shell: bash
+        run: |
+          # If the "coverage" directory exists...
+          if [ -d coverage ]; then
+            # Find the path to the coverage output folder.  It includes the
+            # exact browser version in the path, so it will vary.
+            coverage_folder="$( (ls -d coverage/* || true) | head -1 )"
+
+            # Build a folder to stage all the coverage artifacts with
+            # predictable paths.  The resulting zip file will not have any
+            # internal directories.
+            mkdir coverage/staging/
+            cp "$coverage_folder"/coverage.json coverage/staging/
+            cp "$coverage_folder"/coverage-details.json coverage/staging/
+            echo "${{ github.event.number }}" > coverage/staging/pr-number.json
+
+            echo "::set-output name=coverage_found::true"
+            echo "Coverage report staged."
+          else
+            echo "No coverage report generated."
+          fi
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v3
+        if: ${{ always() && steps.coverage.outputs.coverage_found }}
+        with:
+          name: coverage
+          # This will create a download called coverage.zip containing all of
+          # these files, with no internal folders.
+          path: |
+            coverage/staging/coverage.json
+            coverage/staging/coverage-details.json
+            coverage/staging/pr-number.json
+          # Since we've already filtered this step for instances where there is
+          # an environment variable set, the file should definitely be there.
+          if-no-files-found: error
 
   build_in_docker:
     # Don't waste time doing a full matrix of test runs when there was an
