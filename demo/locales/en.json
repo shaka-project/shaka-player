@@ -113,7 +113,7 @@
   "DEMO_LCEVC_SECTION_HEADER": "MPEG-5 Part-2 LCEVC",
   "DEMO_LCEVC_DRAW_LOGO": "MPEG-5 Part-2 LCEVC Show/Hide Logo",
   "DEMO_LCEVC_DYNAMIC_PERFORMANCE_SCALING": "MPEG-5 Part-2 LCEVC - Dynamic Performance Scaling",
-  "DEMO_LCEVC_LOG_LEVEL": "MPEG-5 Part-2 LCEVC Log Levels",
+  "DEMO_LCEVC_LOG_LEVEL": "MPEG-5 Part-2 LCEVC Log Level",
   "DEMO_LIBRARIES": "Google Hosted Libraries",
   "DEMO_LICENSE": "Apache License",
   "DEMO_LICENSE_CERTIFICATE_URL": "Custom License Certificate URL",
