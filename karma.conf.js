@@ -160,10 +160,6 @@ module.exports = (config) => {
       'node_modules/es6-promise-polyfill/promise.js',
       //   Babel polyfill, required for async/await
       'node_modules/@babel/polyfill/dist/polyfill.js',
-      //   TextDecoder polyfill, required for TextDecoder/TextEncoder on IE and
-      //   legacy Edge
-      //   eslint-disable-next-line max-len
-      'node_modules/fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js',
 
       // muxjs module next
       'node_modules/mux.js/dist/mux.min.js',
@@ -306,13 +302,6 @@ module.exports = (config) => {
     // Force failure when running empty test-suites.
     failOnEmptyTestSuite: true,
 
-    coverageReporter: {
-      includeAllSources: true,
-      reporters: [
-        {type: 'text'},
-      ],
-    },
-
     specReporter: {
       suppressSkipped: true,
       showBrowser: true,
@@ -405,9 +394,12 @@ module.exports = (config) => {
 
     config.set({
       coverageReporter: {
+        includeAllSources: true,
         reporters: [
           {type: 'html', dir: 'coverage'},
           {type: 'cobertura', dir: 'coverage', file: 'coverage.xml'},
+          {type: 'json-summary', dir: 'coverage', file: 'coverage.json'},
+          {type: 'json', dir: 'coverage', file: 'coverage-details.json'},
         ],
       },
     });

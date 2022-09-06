@@ -12,6 +12,8 @@ goog.require('goog.asserts');
 goog.require('shakaDemo.CloseButton');
 goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.Utils');
+goog.require('shakaDemo.Visualizer');
+goog.require('shakaDemo.VisualizerButton');
 
 /**
  * Shaka Player demo, main section.
@@ -80,6 +82,9 @@ shakaDemo.Main = class {
     // Override the icon for the MDL library's menu button.
     // eslint-disable-next-line no-restricted-syntax
     MaterialLayout.prototype.Constant_.MENU_ICON = 'settings';
+
+    /** @private {?shakaDemo.Visualizer} */
+    this.visualizer_ = null;
   }
 
   /**
@@ -183,7 +188,7 @@ shakaDemo.Main = class {
     this.support_ = await shaka.Player.probeSupport();
 
     this.video_ =
-      /** @type {!HTMLVideoElement} */(document.getElementById('video'));
+      /** @type {!HTMLVideoElement} */ (document.getElementById('video'));
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
     this.container_ = /** @type {!HTMLElement} */(
@@ -221,6 +226,22 @@ shakaDemo.Main = class {
       // Also fullscreen the container.
       this.container_.classList.add('no-input-sized');
       document.getElementById('video-bar').classList.add('no-input-sized');
+    } else {
+      goog.asserts.assert(this.player_, 'Player should exist by now.');
+
+      // Make the visualizer element.
+      const vCanvas = /** @type {!HTMLCanvasElement} */ (
+        document.getElementById('visualizer-canvas'));
+      const vDiv = /** @type {!HTMLElement} */ (
+        document.getElementById('visualizer-div'));
+      const vControlsDiv = /** @type {!HTMLElement} */ (
+        document.getElementById('visualizer-controls-div'));
+      const vScreenshotDiv = /** @type {!HTMLElement} */ (
+        document.getElementById('visualizer-screenshot-div'));
+      /** @private {?shakaDemo.Visualizer} */
+      this.visualizer_ = new shakaDemo.Visualizer(
+          vCanvas, vDiv, vScreenshotDiv, vControlsDiv, this.video_,
+          this.player_);
     }
 
     // The main page is loaded. Dispatch an event, so the various
@@ -337,6 +358,9 @@ shakaDemo.Main = class {
     if (!uiConfig.controlPanelElements.includes('close')) {
       uiConfig.controlPanelElements.push('close');
     }
+    if (!uiConfig.overflowMenuButtons.includes('visualizer')) {
+      uiConfig.overflowMenuButtons.push('visualizer');
+    }
     ui.configure(uiConfig);
   }
 
@@ -356,6 +380,8 @@ shakaDemo.Main = class {
       // Register custom controls to the UI.
       const closeFactory = new shakaDemo.CloseButton.Factory();
       shaka.ui.Controls.registerElement('close', closeFactory);
+      const visualizerFactory = new shakaDemo.VisualizerButton.Factory();
+      shaka.ui.OverflowMenu.registerElement('visualizer', visualizerFactory);
 
       // Configure UI.
       this.configureUI_();
@@ -1117,8 +1143,34 @@ shakaDemo.Main = class {
     return response.data;
   }
 
+  /** @return {boolean} */
+  getIsVisualizerActive() {
+    if (this.visualizer_) {
+      return this.visualizer_.active;
+    }
+    return false;
+  }
+
+  /** @param {boolean} active */
+  setIsVisualizerActive(active) {
+    if (this.visualizer_) {
+      const wasActive = this.visualizer_.active;
+      this.visualizer_.active = active;
+      if (wasActive != active) {
+        if (active) {
+          this.visualizer_.start();
+        } else {
+          this.visualizer_.stop();
+        }
+      }
+    }
+  }
+
   /** Unload the currently-playing asset. */
   unload() {
+    if (this.visualizer_) {
+      this.visualizer_.stop();
+    }
     this.selectedAsset = null;
     const videoBar = document.getElementById('video-bar');
     this.hideElement_(videoBar);
@@ -1298,6 +1350,10 @@ shakaDemo.Main = class {
         };
         metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
+      }
+
+      if (this.visualizer_ && this.visualizer_.active) {
+        this.visualizer_.start();
       }
     } catch (reason) {
       const error = /** @type {!shaka.util.Error} */ (reason);

@@ -1,3 +1,4 @@
 # FairPlay
 
++../../lib/polyfill/patchedmediakeys_apple.js
 +../../lib/util/fairplay_utils.js

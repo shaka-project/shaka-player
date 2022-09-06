@@ -677,6 +677,35 @@ describe('DrmEngine', () => {
           .toBeRejectedWith(expected);
     });
 
+    it('uses key system IDs from keySystemsMapping config', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.encrypted = true;
+            stream.addDrmInfo('drm.abc');
+          });
+        });
+      });
+
+      setDecodingInfoSpy([]);
+
+      config.keySystemsMapping['drm.abc'] = 'drm.def';
+      drmEngine.configure(config);
+
+      const variants = manifest.variants;
+      await expectAsync(
+          drmEngine.initForPlayback(variants, manifest.offlineSessionIds))
+          .toBeRejected();
+
+      expect(drmEngine.initialized()).toBe(false);
+      expect(decodingInfoSpy).toHaveBeenCalledTimes(1);
+      expect(decodingInfoSpy).toHaveBeenCalledWith(containing({
+        keySystemConfiguration: containing({
+          keySystem: 'drm.def',
+        }),
+      }));
+    });
+
     it('maps TS MIME types through the transmuxer', async () => {
       const originalIsSupported = shaka.media.Transmuxer.isSupported;
 
