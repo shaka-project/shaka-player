@@ -129,6 +129,10 @@ shaka.test.FakeMediaSourceEngine = class {
     /** @type {!jasmine.Spy} */
     this.setSegmentRelativeVttTiming =
         jasmine.createSpy('setSegmentRelativeVttTiming').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.updateLcevcDil =
+        jasmine.createSpy('updateLcevcDil').and.stub();
   }
 
   /** @override */

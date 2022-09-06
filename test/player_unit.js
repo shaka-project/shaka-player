@@ -130,6 +130,8 @@ describe('Player', () => {
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
         setSegmentRelativeVttTiming:
             jasmine.createSpy('setSegmentRelativeVttTiming'),
+        updateLcevcDil:
+            jasmine.createSpy('updateLcevcDil'),
         getTextDisplayer: () => textDisplayer,
         getBufferedInfo: () => bufferedInfo,
         ended: jasmine.createSpy('ended').and.returnValue(false),
