@@ -4,18 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.text.Cue');
-goog.require('shaka.text.SsaTextParser');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.StringUtils');
-
 describe('SsaTextParser', () => {
   const Cue = shaka.text.Cue;
 
   it('supports no cues', () => {
     verifyHelper([],
         '',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('handles a blank line at the start of the file', () => {
@@ -38,7 +33,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('handles a blank line at the end of the file', () => {
@@ -61,7 +56,7 @@ describe('SsaTextParser', () => {
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test' +
         '\n\n',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('handles no blank line at the end of the file', () => {
@@ -83,8 +78,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports no styles', () => {
@@ -99,8 +93,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('support no script info', () => {
@@ -120,8 +113,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports only events', () => {
@@ -134,8 +126,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports text with commas', () => {
@@ -148,8 +139,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test,1,Test2',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports different time formats', () => {
@@ -168,7 +158,7 @@ describe('SsaTextParser', () => {
         ',,{\\pos(400,570)}Test2\n' +
         'Dialogue: 0,0:00:08.01,0:00:10.001,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test3',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports multiple cues', () => {
@@ -187,7 +177,7 @@ describe('SsaTextParser', () => {
         ',,{\\pos(400,570)}Test2\n' +
         'Dialogue: 0,0:00:08.01,0:00:10.10,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test3',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports fontFamily style', () => {
@@ -212,8 +202,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports color & backgroundColor style', () => {
@@ -239,8 +228,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports bold style', () => {
@@ -265,8 +253,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports italic style', () => {
@@ -291,8 +278,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports underline style', () => {
@@ -317,8 +303,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports letterSpacing style', () => {
@@ -343,8 +328,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports V4 style', () => {
@@ -369,8 +353,7 @@ describe('SsaTextParser', () => {
         'Effect, Text\n' +
         'Dialogue: 0,0:00:00.00,0:00:02.00,DefaultVCD, NTP,0000,0000,0000' +
         ',,{\\pos(400,570)}Test',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0,
-        });
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   /**

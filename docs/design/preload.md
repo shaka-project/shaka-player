@@ -15,7 +15,7 @@ This allows an application using Shaka Player to:
   the user is making a decision on which video to play.
 - Start to play the selected video almost immediately.
 
-[Github issue](https://github.com/google/shaka-player/issues/880)
+[Github issue](https://github.com/shaka-project/shaka-player/issues/880)
 
 
 ## Background & Context

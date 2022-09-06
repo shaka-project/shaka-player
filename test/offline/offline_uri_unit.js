@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.offline.OfflineUri');
-
 describe('OfflineUri', () => {
   const OfflineUri = shaka.offline.OfflineUri;
 

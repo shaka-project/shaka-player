@@ -69,9 +69,7 @@ __Polyfills__
       {@linksource shaka.polyfill.Fullscreen}
     - prefixed video QoE metrics:
       {@linksource shaka.polyfill.VideoPlaybackQuality}
-    - prefixed EME implementations for IE 11 and very old versions of embedded
-      Chrome/Chromium:
-      - {@linksource shaka.polyfill.PatchedMediaKeysMs}
+    - prefixed EME implementations:
       - {@linksource shaka.polyfill.PatchedMediaKeysWebkit}
       - {@linksource shaka.polyfill.PatchedMediaKeysNop}
     - variants of VTTCue and TextTrackCue constructors:
@@ -108,7 +106,7 @@ python build/build.py +@complete -@polyfill
 python build/build.py +@complete -@polyfill -@text
 ```
 
-To see the complete list of categories, its in [`build/types/`](https://github.com/google/shaka-player/tree/master/build/types)
+To see the complete list of categories, its in [`build/types/`](https://github.com/shaka-project/shaka-player/tree/main/build/types)
 
 #### Build Configs
 
@@ -177,5 +175,5 @@ If you have a great plugin that you'd like to contribute back to the community,
 we'd love to hear from you.  You can get in touch via our [issue tracker][] to
 discuss it, and once it's ready, you can send a [pull request][] on github.
 
-[issue tracker]: https://github.com/google/shaka-player/issues/new/choose
-[pull request]: https://github.com/google/shaka-player/pull/new/master
+[issue tracker]: https://github.com/shaka-project/shaka-player/issues/new/choose
+[pull request]: https://github.com/shaka-project/shaka-player/pull/new/main

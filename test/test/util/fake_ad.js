@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeAd');
-
-
 /**
  * @implements {shaka.extern.IAd}
  */
@@ -153,6 +150,13 @@ shaka.test.FakeAd = class {
     return this.volume_ == 0;
   }
 
+
+  /**
+   * @override
+   */
+  isLinear() {
+    return true;
+  }
 
   /**
    * @override

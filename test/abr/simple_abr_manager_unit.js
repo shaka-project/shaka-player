@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.abr.SimpleAbrManager');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.PlayerConfiguration');
-
 describe('SimpleAbrManager', () => {
   const sufficientBWMultiplier = 1.06;
   const defaultBandwidthEstimate = 500e3; // 500kbps
@@ -91,7 +86,7 @@ describe('SimpleAbrManager', () => {
     config.defaultBandwidthEstimate = 3e6;
     abrManager.configure(config);
     const chosen = abrManager.chooseVariant();
-    expect(chosen.id).toBe(104);
+    expect(chosen.id).toBe(103);
   });
 
   it('can handle empty variants', () => {
@@ -170,7 +165,7 @@ describe('SimpleAbrManager', () => {
   it('can handle 0 duration segments', () => {
     // Makes sure bandwidth estimate doesn't get set to NaN
     // when a 0 duration segment is encountered.
-    // https://github.com/google/shaka-player/issues/582
+    // https://github.com/shaka-project/shaka-player/issues/582
     const bandwidth = 5e5;
     const bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
 
@@ -208,7 +203,7 @@ describe('SimpleAbrManager', () => {
     abrManager.segmentDownloaded(1000, bytesPerSecond);
 
     // Expect variants 4 to be chosen
-    const expectedVariant = variants[4];
+    const expectedVariant = variants[3];
 
     expect(switchCallback).toHaveBeenCalledWith(expectedVariant);
   });

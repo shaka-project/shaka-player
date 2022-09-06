@@ -63,23 +63,6 @@ def _modules_need_update():
 
   return False
 
-
-def _parse_version(version):
-  """Converts the given string version to a tuple of numbers."""
-  # Handle any prerelease or build metadata, such as -beta or -g1234
-  if '-' in version:
-    version, trailer = version.split('-')
-  else:
-    # Versions without a trailer should sort later than those with a trailer.
-    # For example, 2.5.0-beta comes before 2.5.0.
-    # To accomplish this, we synthesize a trailer which sorts later than any
-    # _reasonable_ alphanumeric version trailer would.  These characters have a
-    # high value in ASCII.
-    trailer = '}}}'
-  numeric_parts = [int(i) for i in version.split('.')]
-  return tuple(numeric_parts + [trailer])
-
-
 def get_source_base():
   """Returns the absolute path to the source code base."""
   return os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -338,21 +321,13 @@ def update_node_modules():
 
   base = cygwin_safe_path(get_source_base())
 
-  # Check the version of npm.
-  version = execute_get_output(['npm', '-v']).decode('utf8')
-
-  if _parse_version(version) < _parse_version('5.0.0'):
-    logging.error('npm version is too old, please upgrade.  e.g.:')
-    logging.error('  npm install -g npm')
-    return False
-
   # Update the modules.
   # Actually change directories instead of using npm --prefix.
-  # See npm/npm#17027 and google/shaka-player#776 for more details.
+  # See npm/npm#17027 and shaka-project/shaka-player#776 for more details.
   with InDir(base):
-    # npm update seems to be the wrong thing in npm v5, so use install.
-    # See google/shaka-player#854 for more details.
-    execute_get_output(['npm', 'install'])
+    # npm ci uses package-lock.json to get a stable, reproducible set of
+    # packages installed.
+    execute_get_output(['npm', 'ci'])
 
   # Update the timestamp of the file that tracks when we last updated.
   open(_node_modules_last_update_path(), 'wb').close()

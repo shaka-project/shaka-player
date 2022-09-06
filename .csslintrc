@@ -1,13 +1,23 @@
 {
     "extends": "stylelint-config-standard",
+    "customSyntax": "postcss-less",
     "rules": {
       "font-family-no-missing-generic-family-keyword": null,
       "declaration-block-single-line-max-declarations": null,
       "declaration-empty-line-before": null,
-      "max-line-length": [ 80, {
+      "max-line-length": [80, {
         ignorePattern: "/^@import\\s+/",
       }],
+      "function-no-unknown": [true, {
+        ignoreFunctions: [
+          "data-uri",
+          "lighten",
+          "percentage",
+        ],
+      }],
+      "property-no-vendor-prefix": null,
       "selector-list-comma-newline-after": "always-multi-line",
+      "selector-no-vendor-prefix": null,
       "selector-pseudo-element-colon-notation": "single",
       "unit-allowed-list": ["em", "%", "px", "s", "deg", "vmin", "ms", "vh"]
     }

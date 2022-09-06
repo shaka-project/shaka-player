@@ -50,8 +50,6 @@
     <script defer src="../node_modules/tippy.js/umd/index.min.js"></script>
     <!-- Improved PWA capability on mobile Safari is enabled by loading pwacompat: -->
     <script defer src="../node_modules/pwacompat/pwacompat.min.js"></script>
-    <!-- TextDecoder polyfill, required for legacy Edge. -->
-    <script defer src="../node_modules/fastestsmallesttextencoderdecoder/EncoderDecoderTogether.min.js"></script>
 
     <!-- Include IMA SDK to enable client-side ad insertion: -->
     <script type="text/javascript" src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
@@ -128,9 +126,14 @@ UNCOMPILED_JS = [
       </div>
       <main class="mdl-layout__content" id="main-div">
         <div id="video-bar" class="hidden">
-          <div data-shaka-player-container data-shaka-player-cast-receiver-id="1BA79154" class="video-container">
+          <div data-shaka-player-container data-shaka-player-cast-receiver-id="07AEE832" class="video-container">
             <video data-shaka-player autoplay playsinline id="video"></video>
           </div>
+        </div>
+        <div id="visualizer-div" class="hidden should-disable-on-fail">
+          <canvas id="visualizer-canvas"></canvas>
+          <div id="visualizer-controls-div"></div>
+          <div id="visualizer-screenshot-div"></div>
         </div>
         <div id="contents" class="should-hide-in-no-input-mode"></div>
         <footer class="mdl-mega-footer should-hide-in-no-input-mode">
@@ -141,7 +144,7 @@ UNCOMPILED_JS = [
               <ul class="mdl-mega-footer__link-list">
                 <li><a rel="noopener" target="_blank" href="../docs/api/index.html" localized-string="DOCUMENTATION"></a></li>
                 <li><a rel="noopener" target="_blank" href="https://www.apache.org/licenses/LICENSE-2.0" localized-string="LICENSE"></a></li>
-                <li><a rel="noopener" target="_blank" href="https://github.com/google/shaka-player" localized-string="SOURCE"></a></li>
+                <li><a rel="noopener" target="_blank" href="https://github.com/shaka-project/shaka-player" localized-string="SOURCE"></a></li>
                 <li><a rel="noopener" target="_blank" href="https://www.npmjs.com/package/shaka-player" localized-string="NPM"></a></li>
                 <li><a rel="noopener" target="_blank" href="../support.html" localized-string="SUPPORT"></a></li>
               </ul>

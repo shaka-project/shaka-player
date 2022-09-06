@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.util.XmlUtils');
-
-
 describe('XmlUtils', () => {
   // A number that cannot be represented as a Javascript number.
   const HUGE_NUMBER_STRING = new Array(500).join('7');

@@ -36,6 +36,7 @@ shaka.ui.AirPlayButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.airplayButton_ = shaka.util.Dom.createButton();
     this.airplayButton_.classList.add('shaka-airplay-button');
+    this.airplayButton_.classList.add('shaka-tooltip');
     this.airplayButton_.ariaPressed = 'false';
 
     /** @private {!HTMLElement} */

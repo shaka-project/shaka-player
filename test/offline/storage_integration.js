@@ -4,32 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.Player');
-goog.require('shaka.media.DrmEngine');
-goog.require('shaka.media.ManifestParser');
-goog.require('shaka.media.SegmentIndex');
-goog.require('shaka.net.NetworkingEngine.RequestType');
-goog.require('shaka.offline.ManifestConverter');
-goog.require('shaka.offline.OfflineUri');
-goog.require('shaka.offline.Storage');
-goog.require('shaka.offline.StorageMuxer');
-goog.require('shaka.test.FakeDrmEngine');
-goog.require('shaka.test.FakeManifestParser');
-goog.require('shaka.test.FakeNetworkingEngine');
-goog.require('shaka.test.Loader');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.TestScheme');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.AbortableOperation');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.PlayerConfiguration');
-goog.require('shaka.util.PublicPromise');
-goog.require('shaka.util.Uint8ArrayUtils');
-goog.requireType('shaka.media.SegmentReference');
-
 /** @return {boolean} */
 function storageSupport() {
   return shaka.offline.Storage.support();
@@ -1136,10 +1110,7 @@ filterDescribe('Storage', storageSupport, () => {
           aRequestIsStarted.resolve();
           await promise;
 
-          // All downloads for a given stream are in the same "download group",
-          // and will be downloaded sequentially. Thus, we expect only the first
-          // download to be aborted.
-          expect(abortCheck()).toBe(i == 0 ? true : false);
+          expect(abortCheck()).toBe(true);
 
           return new ArrayBuffer(16);
         });
@@ -1323,7 +1294,7 @@ filterDescribe('Storage', storageSupport, () => {
     const testSchemeMimeType = 'application/x-test-manifest';
     const manifestUri = 'test:sintel';
 
-    // Regression test for https://github.com/google/shaka-player/issues/2781
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/2781
     it('does not cache failures or cancellations', async () => {
       /** @type {shaka.offline.Storage} */
       const storage = new shaka.offline.Storage();
@@ -1381,6 +1352,8 @@ filterDescribe('Storage', storageSupport, () => {
       pixelAspectRatio: '59:54',
       hdr: null,
       mimeType: 'video/mp4,audio/mp4',
+      audioMimeType: 'audio/mp4',
+      videoMimeType: 'video/mp4',
       codecs: 'mp4,mp4',
       audioCodec: 'mp4',
       videoCodec: 'mp4',
@@ -1423,6 +1396,8 @@ filterDescribe('Storage', storageSupport, () => {
       pixelAspectRatio: null,
       hdr: null,
       mimeType: 'text/vtt',
+      audioMimeType: null,
+      videoMimeType: null,
       codecs: 'vtt',
       audioCodec: null,
       videoCodec: null,

@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.UiUtils');
-
 // This tests three assumptions we make about text tracks in Shaka Player:
 //   1. If a non-null value for cues is stored, it will always be the
 //      non-null value for cues when cues returns a non-null value.

@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeNetworkingEngine');
-
-/** @fileoverview @suppress {missingRequire} */
-
-
 /**
  * A fake networking engine that returns constant data.  The request member
  * is a jasmine spy and can be used to check the actual calls that occurred.

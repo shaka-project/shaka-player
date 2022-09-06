@@ -4,32 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.Player');
-goog.require('shaka.log');
-goog.require('shaka.media.BufferingObserver');
-goog.require('shaka.media.ManifestParser');
-goog.require('shaka.media.PresentationTimeline');
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.media.SegmentIndex');
-goog.require('shaka.test.FakeAbrManager');
-goog.require('shaka.test.FakeDrmEngine');
-goog.require('shaka.test.FakeManifestParser');
-goog.require('shaka.test.FakeNetworkingEngine');
-goog.require('shaka.test.FakePlayhead');
-goog.require('shaka.test.FakeStreamingEngine');
-goog.require('shaka.test.FakeTextDisplayer');
-goog.require('shaka.test.FakeVideo');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.ConfigUtils');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Iterables');
-goog.require('shaka.util.ManifestParserUtils');
-goog.requireType('shaka.media.Playhead');
-
 describe('Player', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const StreamUtils = shaka.util.StreamUtils;
   const Util = shaka.test.Util;
 
   const originalLogError = shaka.log.error;
@@ -53,6 +30,8 @@ describe('Player', () => {
   let player;
   /** @type {!shaka.test.FakeAbrManager} */
   let abrManager;
+  /** @type {function(!shaka.util.Error)} */
+  let onErrorCallback;
 
   /** @type {!shaka.test.FakeNetworkingEngine} */
   let networkingEngine;
@@ -64,6 +43,8 @@ describe('Player', () => {
   let playhead;
   /** @type {!shaka.test.FakeTextDisplayer} */
   let textDisplayer;
+  /** @type {shaka.extern.BufferedInfo} */
+  let bufferedInfo;
 
   let mediaSourceEngine;
 
@@ -125,6 +106,13 @@ describe('Player', () => {
     abrManager = new shaka.test.FakeAbrManager();
     textDisplayer = createTextDisplayer();
 
+    bufferedInfo = {
+      total: [],
+      audio: [],
+      video: [{start: 12, end: 26}],
+      text: [],
+    };
+
     function dependencyInjector(player) {
       // Create a networking engine that always returns an empty buffer.
       networkingEngine = new shaka.test.FakeNetworkingEngine();
@@ -140,13 +128,25 @@ describe('Player', () => {
             jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
         setUseEmbeddedText: jasmine.createSpy('setUseEmbeddedText'),
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
+        setSegmentRelativeVttTiming:
+            jasmine.createSpy('setSegmentRelativeVttTiming'),
         getTextDisplayer: () => textDisplayer,
+        getBufferedInfo: () => bufferedInfo,
         ended: jasmine.createSpy('ended').and.returnValue(false),
       };
 
-      player.createDrmEngine = () => drmEngine;
+      player.createDrmEngine = ({onError}) => {
+        onErrorCallback = onError;
+        return drmEngine;
+      };
       player.createNetworkingEngine = () => networkingEngine;
-      player.createPlayhead = () => playhead;
+      player.createPlayhead = (startTime) => {
+        const callableSetStartTime =
+            shaka.test.Util.spyFunc(playhead.setStartTime);
+        callableSetStartTime(startTime);
+        playhead.setStartTime.calls.reset();
+        return playhead;
+      };
       player.createMediaSourceEngine = () => mediaSourceEngine;
       player.createStreamingEngine = () => streamingEngine;
     }
@@ -178,6 +178,7 @@ describe('Player', () => {
       window.MediaSource.isTypeSupported = originalIsTypeSupported;
       shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
       navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
+      onError.calls.reset();
     }
   });
 
@@ -325,7 +326,7 @@ describe('Player', () => {
       // We used to fire the event /before/ filtering, which meant that for
       // multi-codec content, the application might select something which will
       // later be removed during filtering.
-      // https://github.com/google/shaka-player/issues/1119
+      // https://github.com/shaka-project/shaka-player/issues/1119
       it('fires after tracks have been filtered', async () => {
         streamingListener.and.callFake(() => {
           const tracks = player.getVariantTracks();
@@ -333,6 +334,169 @@ describe('Player', () => {
           expect(tracks.length).toBe(1);
         });
         await runTest();
+      });
+    });
+
+    describe('onError and tryToRecoverFromError', () => {
+      const httpError = new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.HTTP_ERROR);
+      const nonHttpError = new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.TIMEOUT);
+      /** @type {?jasmine.Spy} */
+      let dispatchEventSpy;
+
+      beforeEach(async () => {
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(11, (variant) => {
+            variant.addAudio(2);
+            variant.addVideo(3);
+          });
+          manifest.addVariant(12, (variant) => {
+            variant.addAudio(4);
+            variant.addVideo(5);
+          });
+        });
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+        dispatchEventSpy = spyOn(player, 'dispatchEvent').and.returnValue(true);
+      });
+
+      afterEach(() => {
+        dispatchEventSpy.calls.reset();
+      });
+
+      it('does not handle non NETWORK HTTP_ERROR', () => {
+        onErrorCallback(nonHttpError);
+        expect(nonHttpError.handled).toBeFalsy();
+        expect(player.dispatchEvent).toHaveBeenCalled();
+      });
+
+      describe('when config.streaming.maxDisabledTime is 0', () => {
+        it('does not handle NETWORK HTTP_ERROR', () => {
+          player.configure({streaming: {maxDisabledTime: 0}});
+          httpError.handled = false;
+          onErrorCallback(httpError);
+          expect(httpError.handled).toBeFalsy();
+          expect(player.dispatchEvent).toHaveBeenCalled();
+        });
+      });
+
+      describe('when config.streaming.maxDisabledTime is 30', () => {
+        /** @type {number} */
+        const maxDisabledTime = 30;
+        /** @type {number} */
+        const currentTime = 123;
+        const chosenVariant = {
+          id: 1,
+          language: 'es',
+          disabledUntilTime: 0,
+          primary: false,
+          bandwidth: 2100,
+          allowedByApplication: true,
+          allowedByKeySystem: true,
+          decodingInfos: [],
+        };
+        /** @type {?jasmine.Spy} */
+        let applyRestrictionsSpy;
+        /** @type {?jasmine.Spy} */
+        let chooseVariantSpy;
+        /** @type {?jasmine.Spy} */
+        let getBufferedInfoSpy;
+        /** @type {?jasmine.Spy} */
+        let switchVariantSpy;
+
+        describe('and there is new variant', () => {
+          const oldDateNow = Date.now;
+          beforeEach(() => {
+            Date.now = () => currentTime * 1000;
+            chooseVariantSpy = spyOn(player, 'chooseVariant_')
+                .and.returnValue(chosenVariant);
+            getBufferedInfoSpy = spyOn(player, 'getBufferedInfo')
+                .and.returnValue(bufferedInfo);
+            switchVariantSpy = spyOn(player, 'switchVariant_');
+            applyRestrictionsSpy = spyOn(StreamUtils, 'applyRestrictions');
+            httpError.handled = false;
+            dispatchEventSpy.calls.reset();
+            player.configure({streaming: {maxDisabledTime}});
+            player.setMaxHardwareResolution(123, 456);
+          });
+
+          afterEach(() => {
+            Date.now = oldDateNow;
+            chooseVariantSpy.calls.reset();
+            getBufferedInfoSpy.calls.reset();
+            switchVariantSpy.calls.reset();
+            applyRestrictionsSpy.calls.reset();
+          });
+
+          it('handles HTTP_ERROR', () => {
+            onErrorCallback(httpError);
+            expect(httpError.handled).toBeTruthy();
+          });
+
+          it('does not dispatch any error', () => {
+            onErrorCallback(httpError);
+            expect(dispatchEventSpy).not.toHaveBeenCalled();
+          });
+
+          it('disables the current variant and applies restrictions', () => {
+            onErrorCallback(httpError);
+
+            const foundDisabledVariant =
+                manifest.variants.some(({disabledUntilTime}) =>
+                  disabledUntilTime == currentTime + maxDisabledTime);
+            expect(foundDisabledVariant).toBeTruthy();
+            expect(applyRestrictionsSpy).toHaveBeenCalledWith(
+                manifest.variants,
+                player.getConfiguration().restrictions,
+                {width: 123, height: 456});
+          });
+
+          it('switches the variant', () => {
+            onErrorCallback(httpError);
+
+            expect(chooseVariantSpy).toHaveBeenCalled();
+            expect(getBufferedInfoSpy).toHaveBeenCalled();
+            expect(switchVariantSpy)
+                .toHaveBeenCalledWith(chosenVariant, false, true, 14);
+          });
+
+          describe('but browser is truly offline', () => {
+            /** @type {!Object} */
+            let navigatorOnLineDescriptor;
+
+            // eslint-disable-next-line no-restricted-syntax
+            const navigatorPrototype = Navigator.prototype;
+
+            beforeAll(() => {
+              navigatorOnLineDescriptor =
+                /** @type {!Object} */(Object.getOwnPropertyDescriptor(
+                    navigatorPrototype, 'onLine'));
+            });
+
+            beforeEach(() => {
+              // Redefine the property, replacing only the getter.
+              Object.defineProperty(navigatorPrototype, 'onLine',
+                  Object.assign(navigatorOnLineDescriptor, {
+                    get: () => false,
+                  }));
+            });
+
+            afterEach(() => {
+              // Restore the original property definition.
+              Object.defineProperty(
+                  navigatorPrototype, 'onLine', navigatorOnLineDescriptor);
+            });
+
+            it('does not handle HTTP_ERROR', () => {
+              onErrorCallback(httpError);
+              expect(httpError.handled).toBe(false);
+            });
+          });
+        });
       });
     });
 
@@ -621,7 +785,7 @@ describe('Player', () => {
       expect(logWarnSpy).not.toHaveBeenCalled();
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/784
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/784
     it('does not throw when overwriting serverCertificate', () => {
       player.configure({
         drm: {
@@ -687,9 +851,9 @@ describe('Player', () => {
     });
 
     it('configures play and seek range for VOD', async () => {
-      player.configure({playRangeStart: 5, playRangeEnd: 10});
       const timeline = new shaka.media.PresentationTimeline(300, 0);
       timeline.setStatic(true);
+      timeline.setDuration(300);
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.presentationTimeline = timeline;
         manifest.addVariant(0, (variant) => {
@@ -697,7 +861,46 @@ describe('Player', () => {
         });
       });
       goog.asserts.assert(manifest, 'manifest must be non-null');
+
+      player.configure({playRangeStart: 5, playRangeEnd: 10});
       await player.load(fakeManifestUri, 0, fakeMimeType);
+
+      const seekRange = player.seekRange();
+      expect(seekRange.start).toBe(5);
+      expect(seekRange.end).toBe(10);
+    });
+
+    // Test for https://github.com/shaka-project/shaka-player/issues/4026
+    it('configures play and seek range with notifySegments', async () => {
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      // This duration is used by useSegmentTemplate below to decide how many
+      // references to generate.
+      timeline.setDuration(300);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.useSegmentTemplate(
+                '$Number$.mp4', /* segmentDuration= */ 10);
+          });
+        });
+      });
+      goog.asserts.assert(manifest, 'manifest must be non-null');
+
+      // Explicitly notify the timeline of the segment references.
+      const videoStream = manifest.variants[0].video;
+      await videoStream.createSegmentIndex();
+      goog.asserts.assert(videoStream.segmentIndex,
+          'SegmentIndex must be non-null');
+      const references = Array.from(videoStream.segmentIndex);
+      goog.asserts.assert(references.length != 0,
+          'Must have references for this test!');
+      timeline.notifySegments(references);
+
+      player.configure({playRangeStart: 5, playRangeEnd: 10});
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+
       const seekRange = player.seekRange();
       expect(seekRange.start).toBe(5);
       expect(seekRange.end).toBe(10);
@@ -798,7 +1001,7 @@ describe('Player', () => {
       expect(newConfig.streaming.bufferBehind).toBe(77);
     });
 
-    // https://github.com/google/shaka-player/issues/1524
+    // https://github.com/shaka-project/shaka-player/issues/1524
     it('does not pollute other advanced DRM configs', () => {
       player.configure('drm.advanced.foo', {});
       player.configure('drm.advanced.bar', {});
@@ -1092,8 +1295,8 @@ describe('Player', () => {
         // Image tracks
         manifest.addImageStream(53, (stream) => {
           stream.originalId = 'thumbnail';
-          stream.width = 100;
-          stream.height = 200;
+          stream.width = 200;
+          stream.height = 400;
           stream.bandwidth = 10;
           stream.mimeType = 'image/jpeg';
           stream.tilesLayout = '1x1';
@@ -1115,6 +1318,8 @@ describe('Player', () => {
           pixelAspectRatio: '59:54',
           hdr: null,
           mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
@@ -1149,6 +1354,8 @@ describe('Player', () => {
           pixelAspectRatio: '59:54',
           hdr: null,
           mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
@@ -1183,6 +1390,8 @@ describe('Player', () => {
           pixelAspectRatio: '59:54',
           hdr: null,
           mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
@@ -1217,6 +1426,8 @@ describe('Player', () => {
           pixelAspectRatio: '59:54',
           hdr: null,
           mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
@@ -1251,6 +1462,8 @@ describe('Player', () => {
           pixelAspectRatio: '59:54',
           hdr: null,
           mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
@@ -1285,6 +1498,8 @@ describe('Player', () => {
           pixelAspectRatio: '59:54',
           hdr: null,
           mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
@@ -1319,6 +1534,8 @@ describe('Player', () => {
           pixelAspectRatio: '59:54',
           hdr: null,
           mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
@@ -1353,6 +1570,8 @@ describe('Player', () => {
           pixelAspectRatio: '59:54',
           hdr: null,
           mimeType: 'video/mp4',
+          audioMimeType: 'audio/mp4',
+          videoMimeType: 'video/mp4',
           codecs: 'avc1.4d401f, mp4a.40.2',
           audioCodec: 'mp4a.40.2',
           videoCodec: 'avc1.4d401f',
@@ -1384,6 +1603,8 @@ describe('Player', () => {
           label: 'Spanish',
           kind: 'caption',
           mimeType: 'text/vtt',
+          audioMimeType: null,
+          videoMimeType: null,
           codecs: null,
           audioCodec: null,
           videoCodec: null,
@@ -1418,6 +1639,8 @@ describe('Player', () => {
           label: 'English',
           kind: 'caption',
           mimeType: 'application/ttml+xml',
+          audioMimeType: null,
+          videoMimeType: null,
           codecs: null,
           audioCodec: null,
           videoCodec: null,
@@ -1452,6 +1675,8 @@ describe('Player', () => {
           label: 'English',
           kind: 'caption',
           mimeType: 'application/ttml+xml',
+          audioMimeType: null,
+          videoMimeType: null,
           codecs: null,
           audioCodec: null,
           videoCodec: null,
@@ -1489,6 +1714,8 @@ describe('Player', () => {
           label: null,
           kind: null,
           mimeType: 'image/jpeg',
+          audioMimeType: null,
+          videoMimeType: null,
           codecs: null,
           audioCodec: null,
           videoCodec: null,
@@ -1503,8 +1730,8 @@ describe('Player', () => {
           audioBandwidth: null,
           videoBandwidth: null,
           bandwidth: 10,
-          width: 100,
-          height: 200,
+          width: 200,
+          height: 400,
           frameRate: null,
           pixelAspectRatio: null,
           hdr: null,
@@ -1668,8 +1895,8 @@ describe('Player', () => {
       expect(getActiveTextTrack().id).toBe(spanishTextTrack.id);
     });
 
-    // Regression test for https://github.com/google/shaka-player/issues/2906
-    // and https://github.com/google/shaka-player/issues/2909.
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/2906
+    // and https://github.com/shaka-project/shaka-player/issues/2909.
     it('selectAudioLanguage() can choose role-less tracks', async () => {
       // For this test, we use a different (and simpler) manifest.
       // Both audio tracks are English; one has a role, and one has no roles.
@@ -1729,7 +1956,7 @@ describe('Player', () => {
       expect(getActiveVariantTrack().audioRoles).toEqual([]);
     });
 
-    // https://github.com/google/shaka-player/issues/3262
+    // https://github.com/shaka-project/shaka-player/issues/3262
     it('selectAudioLanguage() doesn\'t change resolution', () => {
       player.configure('abr.enabled', false);
       abrManager.chooseIndex = 1;
@@ -1807,7 +2034,7 @@ describe('Player', () => {
       expect(getActiveTextTrack().language).toBe('en');
     });
 
-    // https://github.com/google/shaka-player/issues/2010
+    // https://github.com/shaka-project/shaka-player/issues/2010
     it('changing text lang changes active stream when not streaming', () => {
       player.setTextTrackVisibility(false);
 
@@ -2112,8 +2339,8 @@ describe('Player', () => {
     async function runTest(languages, preference, expectedIndex) {
       // A manifest we can use to test language selection.
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        const enumerate = (it) => shaka.util.Iterables.enumerate(it);
-        for (const {i, item: lang} of enumerate(languages)) {
+        for (let i = 0; i < languages.length; i++) {
+          const lang = languages[i];
           if (lang.charAt(0) == '*') {
             manifest.addVariant(i, (variant) => {
               variant.primary = true;
@@ -2548,7 +2775,7 @@ describe('Player', () => {
       expect(variants[0].id).toBe(2);
 
       // Now increase the restriction, AbrManager should still be updated.
-      // https://github.com/google/shaka-player/issues/1533
+      // https://github.com/shaka-project/shaka-player/issues/1533
       abrManager.setVariants.calls.reset();
       player.configure({restrictions: {maxBandwidth: Infinity}});
       expect(abrManager.setVariants).toHaveBeenCalledTimes(1);
@@ -2615,6 +2842,51 @@ describe('Player', () => {
 
       activeVariant = getActiveVariantTrack();
       expect(activeVariant.id).toBe(1);
+    });
+
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/4190
+    it('throws only one RESTRICTIONS_CANNOT_BE_MET error', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.keyIds = new Set(['abc']);
+          });
+        });
+      });
+
+      // Check that error is RESTRICTIONS_CANNOT_BE_MET
+      onError.and.callFake((e) => {
+        const error = e.detail;
+        shaka.test.Util.expectToEqualError(
+            error,
+            new shaka.util.Error(
+                shaka.util.Error.Severity.CRITICAL,
+                shaka.util.Error.Category.MANIFEST,
+                shaka.util.Error.Code.RESTRICTIONS_CANNOT_BE_MET, {
+                  hasAppRestrictions: false,
+                  missingKeys: ['abc'],
+                  restrictedKeyStatuses: [],
+                }));
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      const activeVariant = getActiveVariantTrack();
+      expect(activeVariant.id).toBe(0);
+
+      abrManager.chooseIndex = 0;
+      abrManager.chooseVariant.calls.reset();
+
+      onKeyStatus({'abc': 'output-restricted'});
+
+      // Ensure that RESTRICTIONS_CANNOT_BE_MET is thrown once
+      expect(onError).toHaveBeenCalledTimes(1);
+
+      // It does not call chooseVariant
+      expect(abrManager.chooseVariant).not.toHaveBeenCalled();
+
+      // The first variant is disallowed.
+      expect(manifest.variants[0].id).toBe(0);
+      expect(manifest.variants[0].allowedByKeySystem).toBe(false);
     });
 
     it('doesn\'t switch if the active stream isn\'t restricted', async () => {
@@ -3186,7 +3458,7 @@ describe('Player', () => {
     // Most of our Player unit tests never adapt.  This allowed some assertions
     // to creep in that went uncaught until they happened during manual testing.
     // Repro only happens with audio+video variants in which we only adapt one
-    // type.  This test covers https://github.com/google/shaka-player/issues/954
+    // type.  This test covers https://github.com/shaka-project/shaka-player/issues/954
 
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.addVariant(0, (variant) => {
@@ -3268,7 +3540,7 @@ describe('Player', () => {
 
   describe('load', () => {
     it('tolerates bandwidth of NaN, undefined, or 0', async () => {
-      // Regression test for https://github.com/google/shaka-player/issues/938
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/938
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.bandwidth = /** @type {?} */(undefined);
@@ -3537,29 +3809,39 @@ describe('Player', () => {
 
         await player.load(fakeManifestUri, 0, fakeMimeType);
 
+        expect(player.getImageTracks()[0].width).toBe(100);
+        expect(player.getImageTracks()[0].height).toBe(50);
         const thumbnail0 = await player.getThumbnails(5, 0);
         const thumbnail1 = await player.getThumbnails(5, 11);
         const thumbnail2 = await player.getThumbnails(5, 21);
         const thumbnail5 = await player.getThumbnails(5, 51);
         expect(thumbnail0).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
           positionX: 0,
           positionY: 0,
           width: 100,
           height: 50,
         }));
         expect(thumbnail1).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
           positionX: 100,
           positionY: 0,
           width: 100,
           height: 50,
         }));
         expect(thumbnail2).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
           positionX: 0,
           positionY: 50,
           width: 100,
           height: 50,
         }));
         expect(thumbnail5).toEqual(jasmine.objectContaining({
+          imageHeight: 150,
+          imageWidth: 200,
           positionX: 100,
           positionY: 100,
           width: 100,
@@ -3610,6 +3892,51 @@ describe('Player', () => {
         expect(thumbnail8.startTime).toBe(80);
         expect(thumbnail8.duration).toBe(10);
       });
+    });
+  });
+
+  describe('config streaming.startAtSegmentBoundary', () => {
+    // Test for https://github.com/shaka-project/shaka-player/issues/4188
+    // In that issue, using streaming.startAtSegmentBoundary in v4.0.0 caused
+    // an exception due to the use of a removed method.
+    it('adjusts start time', async () => {
+      player.configure('streaming.startAtSegmentBoundary', true);
+
+      // In order to adjust the start time to a segment boundary, we need
+      // segment descriptions in the segment index.  So create a non-default
+      // fake manifest.
+      const timeline = new shaka.media.PresentationTimeline(300, 0);
+      timeline.setStatic(true);
+      // This duration is used by useSegmentTemplate below to decide how many
+      // references to generate.
+      timeline.setDuration(300);
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline = timeline;
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.useSegmentTemplate(
+                '$Number$.mp4', /* segmentDuration= */ 10);
+          });
+        });
+      });
+
+      await player.load(fakeManifestUri, 12, fakeMimeType);
+
+      expect(playhead.setStartTime).toHaveBeenCalledWith(10);
+    });
+
+    it('does not fail with no segments', async () => {
+      player.configure('streaming.startAtSegmentBoundary', true);
+
+      // Without useSegmentTemplate in the fake manifest, the call to
+      // getIteratorForTime() in Player produces a null iterator.  Using the
+      // default fake manifest should cover that case.  But just to make sure,
+      // verify that we have no segments before calling load().
+      const variant = manifest.variants[0];
+      expect(variant.video.segmentIndex.getIteratorForTime(0)).toBeNull();
+      expect(variant.audio.segmentIndex.getIteratorForTime(0)).toBeNull();
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
     });
   });
 

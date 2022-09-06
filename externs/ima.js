@@ -43,6 +43,8 @@ google.ima.AdsLoader = class {
 
   /** @override */
   dispatchEvent() {}
+
+  destroy() {}
 };
 
 
@@ -78,6 +80,8 @@ google.ima.AdsManager = class {
   skip() {}
 
   stop() {}
+
+  destroy() {}
 
   /**
    * @param {number} volume
@@ -160,6 +164,9 @@ google.ima.Ad = class {
 
   /** @return {string} */
   getAdvertiserName() {}
+
+  /** @return {boolean} */
+  isLinear() {}
 };
 
 

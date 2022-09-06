@@ -362,7 +362,8 @@ shakaDemo.Search = class {
         [Feature.DASH, Feature.HLS], FEATURE);
     this.makeSelectInput_(coreContainer,
         shakaDemo.MessageIds.CONTAINER_SEARCH,
-        [Feature.MP4, Feature.MP2TS, Feature.WEBM], FEATURE);
+        [Feature.MP4, Feature.MP2TS, Feature.WEBM, Feature.CONTAINERLESS],
+        FEATURE);
     this.makeSelectInput_(coreContainer,
         shakaDemo.MessageIds.DRM_SEARCH,
         Object.values(shakaAssets.KeySystem), DRM);

@@ -4,24 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.TestScheme');
-
-goog.require('goog.asserts');
-goog.require('goog.Uri');
-goog.require('shaka.Player');
-goog.require('shaka.media.ManifestParser');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.Mp4VodStreamGenerator');
-goog.require('shaka.test.TSVodStreamGenerator');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.AbortableOperation');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.ManifestParserUtils');
-goog.requireType('shaka.net.NetworkingEngine.RequestType');
-goog.requireType('shaka.test.IStreamGenerator');
-
-
 /**
  * @typedef {{
  *   initSegmentUri: string,
@@ -69,7 +51,9 @@ let ExtraMetadataType;
  *   textLanguages: (!Array.<string>|undefined),
  *   duration: number,
  *   licenseServers: (!Object.<string, string>|undefined),
- *   licenseRequestHeaders: (!Object.<string, string>|undefined)
+ *   licenseRequestHeaders: (!Object.<string, string>|undefined),
+ *   customizeStream: (function(shaka.test.ManifestGenerator.Stream)|undefined),
+ *   sequenceMode: (boolean|undefined)
  * }}
  */
 let MetadataType;
@@ -206,10 +190,23 @@ shaka.test.TestScheme = class {
      * @param {string} name
      */
     function addStreamInfo(stream, variant, data, contentType, name) {
+      const mediaQualityInfo = {
+        bandwidth: 1,
+        codecs: data[contentType].codecs || 'unknown',
+        contentType: contentType,
+        mimeType: data[contentType].mimeType,
+        audioSamplingRate: null,
+        frameRate: null,
+        height: null,
+        channelsCount: null,
+        pixelAspectRatio: null,
+        width: null,
+      };
       stream.mimeType = data[contentType].mimeType;
       stream.codecs = data[contentType].codecs;
       stream.setInitSegmentReference(
-          ['test:' + name + '/' + contentType + '/init'], 0, null);
+          ['test:' + name + '/' + contentType + '/init'], 0, null,
+          mediaQualityInfo);
       stream.useSegmentTemplate(
           'test:' + name + '/' + contentType + '/%d',
           data[contentType].segmentDuration);
@@ -247,6 +244,10 @@ shaka.test.TestScheme = class {
           });
         }
       }
+
+      if (data.customizeStream) {
+        data.customizeStream(stream);
+      }
     }
 
     /**
@@ -283,6 +284,7 @@ shaka.test.TestScheme = class {
 
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.presentationTimeline.setDuration(data.duration);
+        manifest.sequenceMode = data.sequenceMode || false;
 
         const videoResolutions = data.videoResolutions || [undefined];
         const audioLanguages = data.audioLanguages ||
@@ -518,6 +520,15 @@ shaka.test.TestScheme.DATA = {
     duration: 30,
   },
 
+  // Like 'sintel', but flagged as sequence mode.
+  'sintel_sequence': {
+    video: sintelVideoSegment,
+    audio: sintelAudioSegment,
+    text: vttSegment,
+    duration: 30,
+    sequenceMode: true,
+  },
+
   // Like 'sintel', but much longer to test buffering and seeking.
   'sintel_long': {
     video: sintelVideoSegment,
@@ -565,7 +576,7 @@ shaka.test.TestScheme.DATA = {
     duration: 30,
   },
 
-  // https://github.com/google/shaka-player/issues/2553
+  // https://github.com/shaka-project/shaka-player/issues/2553
   'forced_subs_simulation': {
     audio: sintelAudioSegment,
     text: vttSegment,
@@ -579,6 +590,19 @@ shaka.test.TestScheme.DATA = {
     text: vttSegment,
     licenseServers: widevineDrmServers,
     duration: 30,
+  },
+
+  // Equivalent to what you get with HLS METHOD=SAMPLE-AES, KEYFORMAT=identity.
+  // Requires explicit clear keys or license server configuration.
+  'sintel-hls-clearkey': {
+    video: sintelEncryptedVideo,
+    audio: sintelEncryptedAudio,
+    duration: 30,
+    sequenceMode: true,
+    customizeStream: (stream) => {
+      stream.encrypted = true;
+      stream.addDrmInfo('org.w3.clearkey');
+    },
   },
 
   'multidrm': {

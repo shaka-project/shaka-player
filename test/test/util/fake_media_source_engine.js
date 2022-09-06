@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeMediaSourceEngine');
-
-goog.require('shaka.media.MediaSourceEngine');
-goog.require('shaka.test.FakeTextDisplayer');
-goog.require('shaka.util.ManifestParserUtils');
-
-
 /**
  * @summary
  * This simulates multiple SourceBuffers. However, it only
@@ -85,8 +78,8 @@ shaka.test.FakeMediaSourceEngine = class {
 
     /** @type {!jasmine.Spy} */
     this.appendBuffer = jasmine.createSpy('appendBuffer')
-        .and.callFake((type, data, start, end) =>
-          this.appendBufferImpl(type, data, start, end));
+        .and.callFake((type, data, reference) =>
+          this.appendBufferImpl(type, data, reference));
 
     /** @type {!jasmine.Spy} */
     this.clear = jasmine.createSpy('clear')
@@ -114,8 +107,8 @@ shaka.test.FakeMediaSourceEngine = class {
 
     /** @type {!jasmine.Spy} */
     this.setStreamProperties = jasmine.createSpy('setStreamProperties')
-        .and.callFake((type, offset, end) =>
-          this.setStreamPropertiesImpl_(type, offset, end));
+        .and.callFake((type, offset, end, sequenceMode) =>
+          this.setStreamPropertiesImpl_(type, offset, end, sequenceMode));
 
     /** @type {!jasmine.Spy} */
     this.remove = jasmine.createSpy('remove')
@@ -132,6 +125,10 @@ shaka.test.FakeMediaSourceEngine = class {
     this.getTextDisplayer =
         jasmine.createSpy('getTextDisplayer')
             .and.returnValue(new shaka.test.FakeTextDisplayer());
+
+    /** @type {!jasmine.Spy} */
+    this.setSegmentRelativeVttTiming =
+        jasmine.createSpy('setSegmentRelativeVttTiming').and.stub();
   }
 
   /** @override */
@@ -232,11 +229,10 @@ shaka.test.FakeMediaSourceEngine = class {
   /**
    * @param {string} type
    * @param {!ArrayBuffer} data
-   * @param {?number} startTime
-   * @param {?number} endTime
+   * @param {?shaka.media.SegmentReference} reference
    * @return {!Promise}
    */
-  appendBufferImpl(type, data, startTime, endTime) {
+  appendBufferImpl(type, data, reference) {
     if (!this.segments[type]) {
       throw new Error('unexpected type');
     }
@@ -260,8 +256,7 @@ shaka.test.FakeMediaSourceEngine = class {
     }
     if (i >= 0) {
       // Update the list of which init segment was appended last.
-      expect(startTime).toBe(null);
-      expect(endTime).toBe(null);
+      expect(reference).toBe(null);
       this.initSegments[type] =
           this.segmentData[type].initSegments.map((c) => false);
       this.initSegments[type][i] = true;
@@ -292,8 +287,11 @@ shaka.test.FakeMediaSourceEngine = class {
     const expectedStartTime = i * segmentData.segmentDuration;
     const expectedEndTime = expectedStartTime + segmentData.segmentDuration;
     expect(appendedTime).toBe(expectedStartTime);
-    expect(startTime).toBe(expectedStartTime);
-    expect(endTime).toBe(expectedEndTime);
+    expect(reference).not.toBe(null);
+    if (reference) {
+      expect(reference.startTime).toBe(expectedStartTime);
+      expect(reference.endTime).toBe(expectedEndTime);
+    }
 
     this.segments[type][i] = true;
     return Promise.resolve();
@@ -362,14 +360,17 @@ shaka.test.FakeMediaSourceEngine = class {
    * @param {string} type
    * @param {number} offset
    * @param {number} appendWindowEnd
+   * @param {boolean} sequenceMode
    * @return {!Promise}
    * @private
    */
-  setStreamPropertiesImpl_(type, offset, appendWindowEnd) {
+  setStreamPropertiesImpl_(type, offset, appendWindowEnd, sequenceMode) {
     if (!this.segments[type]) {
       throw new Error('unexpected type');
     }
-    this.timestampOffsets_[type] = offset;
+    if (!sequenceMode) {
+      this.timestampOffsets_[type] = offset;
+    }
     // Don't use |appendWindowEnd|.
     return Promise.resolve();
   }

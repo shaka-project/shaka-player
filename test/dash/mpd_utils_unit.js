@@ -4,14 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.dash.MpdUtils');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.test.FakeNetworkingEngine');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Iterables');
-goog.requireType('shaka.util.PublicPromise');
-
 describe('MpdUtils', () => {
   const MpdUtils = shaka.dash.MpdUtils;
 
@@ -384,7 +376,7 @@ describe('MpdUtils', () => {
 
     it('adjust start time w/ t missing', () => {
       // No S@t is equivalent to t=0, which should use PTO to make negative.
-      // See https://github.com/google/shaka-player/issues/2590
+      // See https://github.com/shaka-project/shaka-player/issues/2590
       const timePoints = [
         createTimePoint(null, 10, 0),
         createTimePoint(10, 10, 0),
@@ -536,7 +528,7 @@ describe('MpdUtils', () => {
           '<ToReplace xlink:href="https://xlink0" xlink:actuate="onLoad" />');
       // Create a large but finite number of links, so this won't
       // infinitely recurse if there isn't a depth limit.
-      for (const i of shaka.util.Iterables.range(20)) {
+      for (let i = 0; i < 20; i++) {
         const key = 'https://xlink' + i;
         const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1));
 
@@ -659,7 +651,7 @@ describe('MpdUtils', () => {
           '<ToReplace xlink:href="https://xlink0" xlink:actuate="onLoad" />');
       // Create a few links.  This is few enough that it would succeed if we
       // didn't abort it.
-      for (const i of shaka.util.Iterables.range(4)) {
+      for (let i = 0; i < 4; i++) {
         const key = 'https://xlink' + i;
         const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1));
 

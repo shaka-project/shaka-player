@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.test.Dash');
-goog.require('shaka.test.FakeNetworkingEngine');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.requireType('shaka.dash.DashParser');
-
 describe('DashParser SegmentBase', () => {
   const Dash = shaka.test.Dash;
 
@@ -35,6 +28,8 @@ describe('DashParser SegmentBase', () => {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
+      modifyManifestRequest: (request, manifestInfo) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
       filter: (manifest) => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
@@ -306,7 +301,7 @@ describe('DashParser SegmentBase', () => {
     expect(reference.endTime).toBe(10);  // would be 12 without PTO
   });
 
-  // https://github.com/google/shaka-player/issues/3230
+  // https://github.com/shaka-project/shaka-player/issues/3230
   it('works with multi-Period with eviction', async () => {
     const source = [
       '<MPD mediaPresentationDuration="PT75S">',

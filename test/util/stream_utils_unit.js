@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.FakeDrmEngine');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.StreamUtils');
-
 describe('StreamUtils', () => {
   const StreamUtils = shaka.util.StreamUtils;
 
@@ -184,7 +179,7 @@ describe('StreamUtils', () => {
     });
 
     it('chooses only one role, even if none is preferred', () => {
-      // Regression test for https://github.com/google/shaka-player/issues/949
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/949
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(0, (stream) => {
           stream.language = 'en';
@@ -223,7 +218,7 @@ describe('StreamUtils', () => {
     });
 
     it('chooses only one role, even if all are primary', () => {
-      // Regression test for https://github.com/google/shaka-player/issues/949
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/949
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(0, (stream) => {
           stream.language = 'en';
@@ -269,7 +264,7 @@ describe('StreamUtils', () => {
     });
 
     it('chooses only one language, even if all are primary', () => {
-      // Regression test for https://github.com/google/shaka-player/issues/918
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/918
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addTextStream(0, (stream) => {
           stream.language = 'en';
@@ -537,6 +532,47 @@ describe('StreamUtils', () => {
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].decodingInfos.length).toBe(0);
     });
+
+    it('includes transferFunction in config when hdr', async () => {
+      const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
+
+      try {
+        navigator.mediaCapabilities.decodingInfo =
+            shaka.test.Util.spyFunc(decodingInfoSpy);
+
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(0, (stream) => {
+              stream.mime('video/mp4', 'avc1.640028');
+              stream.hdr = 'SDR';
+            });
+          });
+          manifest.addVariant(1, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.mime('video/mp4', 'hvc1.2.4.L150.90');
+              stream.hdr = 'PQ';
+            });
+          });
+          manifest.addVariant(2, (variant) => {
+            variant.addVideo(2, (stream) => {
+              stream.mime('video/mp4', 'hvc1.2.4.L153.B0');
+              stream.hdr = 'HLG';
+            });
+          });
+        });
+
+        await StreamUtils.getDecodingInfosForVariants(manifest.variants,
+            /* usePersistentLicenses= */ false, /* srcEquals= */ false);
+        expect(decodingInfoSpy.calls.argsFor(0)[0].video.transferFunction)
+            .toBe('srgb');
+        expect(decodingInfoSpy.calls.argsFor(1)[0].video.transferFunction)
+            .toBe('pq');
+        expect(decodingInfoSpy.calls.argsFor(2)[0].video.transferFunction)
+            .toBe('hlg');
+      } finally {
+        navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
+      }
+    });
   });
 
   describe('filterManifest', () => {
@@ -583,10 +619,19 @@ describe('StreamUtils', () => {
           stream.mimeType = 'image/png';
         });
         manifest.addImageStream(3, (stream) => {
-          stream.mimeType = 'image/jpeg';
+          stream.mimeType = 'image/jpg';
         });
         manifest.addImageStream(4, (stream) => {
+          stream.mimeType = 'image/jpeg';
+        });
+        manifest.addImageStream(5, (stream) => {
           stream.mimeType = 'image/bogus';
+        });
+        manifest.addImageStream(6, (stream) => {
+          stream.mimeType = 'image/avif';
+        });
+        manifest.addImageStream(7, (stream) => {
+          stream.mimeType = 'image/webp';
         });
       });
 
@@ -595,12 +640,19 @@ describe('StreamUtils', () => {
           fakeDrmEngine, noVariant, manifest);
 
       // Covers a regression in which we would remove streams with codecs.
-      // The last two streams should be removed because their full MIME types
-      // are bogus.
-      expect(manifest.imageStreams.length).toBe(3);
-      expect(manifest.imageStreams[0].id).toBe(1);
-      expect(manifest.imageStreams[1].id).toBe(2);
-      expect(manifest.imageStreams[2].id).toBe(3);
+      // The first 4 streams should be there because they are always supported.
+      // The 5th stream should be removed because the MIME type is bogus.
+      // The 6th and 7th streams may be there, based on platform support.
+      expect(manifest.imageStreams).toContain(
+          jasmine.objectContaining({id: 1}));
+      expect(manifest.imageStreams).toContain(
+          jasmine.objectContaining({id: 2}));
+      expect(manifest.imageStreams).toContain(
+          jasmine.objectContaining({id: 3}));
+      expect(manifest.imageStreams).toContain(
+          jasmine.objectContaining({id: 4}));
+      expect(manifest.imageStreams).not.toContain(
+          jasmine.objectContaining({id: 5}));
     });
 
     it('filters transport streams', async () => {
@@ -848,6 +900,114 @@ describe('StreamUtils', () => {
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].id).toBe(1);
       expect(manifest.variants[0].video.id).toBe(2);
+    });
+  });
+
+  describe('meetsRestrictions', () => {
+    const oldDateNow = Date.now;
+    /* @param {shaka.extern.Restrictions} */
+    const restrictions = {
+      minWidth: 10,
+      maxWidth: 20,
+      minHeight: 10,
+      maxHeight: 20,
+      minPixels: 10,
+      maxPixels: 20,
+      minFrameRate: 21,
+      maxFrameRate: 25,
+      minBandwidth: 1000,
+      maxBandwidth: 3000,
+    };
+    /* @param {{width: number, height: number}} */
+    const maxHwRes = {width: 123, height: 456};
+    /* @param {shaka.extern.Variant} */
+    let variant;
+    /* @param {boolean} */
+    let meetsRestrictionsResult;
+
+    beforeEach(() => {
+      Date.now = () => 123 * 1000;
+    });
+
+    afterEach(() => {
+      Date.now = oldDateNow;
+    });
+
+    /*
+     * @param {number} disabledUntilTime
+     */
+    const checkRestrictions = ({disabledUntilTime = 0}) => {
+      /* @param {shaka.extern.Variant} */
+      variant = {
+        id: 1,
+        language: 'es',
+        disabledUntilTime,
+        video: null,
+        audio: null,
+        primary: false,
+        bandwidth: 2000,
+        allowedByApplication: true,
+        allowedByKeySystem: true,
+        decodingInfos: [],
+      };
+      meetsRestrictionsResult = StreamUtils.meetsRestrictions(variant,
+          restrictions, maxHwRes);
+    };
+
+    describe('when disabledUntilTime > now', () => {
+      beforeEach(() => {
+        checkRestrictions({disabledUntilTime: 124});
+      });
+
+      it('does not meet the restrictions', () => {
+        expect(meetsRestrictionsResult).toBeFalsy();
+      });
+
+      it('does not reset disabledUntilTime', () => {
+        expect(variant.disabledUntilTime).toBe(124);
+      });
+    });
+
+    describe('when disabledUntilTime == now', () => {
+      beforeEach(() => {
+        checkRestrictions({disabledUntilTime: 123});
+      });
+
+      it('meets the restrictions', () => {
+        expect(meetsRestrictionsResult).toBeTruthy();
+      });
+
+      it('resets disabledUntilTime', () => {
+        expect(variant.disabledUntilTime).toBe(0);
+      });
+    });
+
+    describe('when disabledUntilTime == now', () => {
+      beforeEach(() => {
+        checkRestrictions({disabledUntilTime: 122});
+      });
+
+      it('meets the restrictions', () => {
+        expect(meetsRestrictionsResult).toBeTruthy();
+      });
+
+      it('resets disabledUntilTime', () => {
+        expect(variant.disabledUntilTime).toBe(0);
+      });
+    });
+
+    describe('when disabledUntilTime == 0', () => {
+      beforeEach(() => {
+        checkRestrictions({disabledUntilTime: 0});
+      });
+
+      it('meets the restrictions', () => {
+        expect(meetsRestrictionsResult).toBeTruthy();
+      });
+
+      it('leaves disabledUntilTime = 0', () => {
+        expect(variant.disabledUntilTime).toBe(0);
+      });
     });
   });
 });

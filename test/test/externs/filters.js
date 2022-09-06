@@ -38,3 +38,7 @@ var filterDescribe = function(name, cond, callback) {};
  * @param {function()} callback
  */
 var xfilterDescribe = function(name, cond, callback) {};
+
+
+/** @return {boolean} */
+var offlineSupported = function() {};

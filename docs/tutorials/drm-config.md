@@ -75,6 +75,22 @@ player.configure({
 If the browser supports it and you configured a license server URL for it, we'll
 use it.
 
+Alternative there are a config for make a mapping of keysystem if you know that
+is broadly supported. For example, `com.microsoft.playready.recommendation`:
+
+```js
+player.configure({
+  drm: {
+    keySystemsMapping: {
+      'com.microsoft.playready': 'com.microsoft.playready.recommendation',
+    }
+  }
+});
+```
+
+With the previous configuration you will choose the `recommendation` keySystem
+when your manifest (HLS or DASH) uses PlayReady.
+
 
 #### Clear Key
 
@@ -183,6 +199,11 @@ Microsoft Documentation: https://docs.microsoft.com/en-us/playready/overview/sec
 `2000` decryption level.
 
 NB: Audio Hardware DRM is not supported (PlayReady limitation)
+
+##### FairPlay
+
+Based on [Apple's Documentation](https://developer.apple.com/streaming/fps/),
+you should provide an empty string as robustness
 
 ##### Other key-systems
 

@@ -4,13 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.ClosedCaptionParser');
-goog.require('shaka.media.MediaSourceEngine');
-goog.require('shaka.test.FakeTextDisplayer');
-goog.require('shaka.test.TestScheme');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.util.ManifestParserUtils');
-
 describe('MediaSourceEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
   const presentationDuration = 840;
@@ -64,32 +57,32 @@ describe('MediaSourceEngine', () => {
 
   function appendInit(type) {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
+    const reference = null;
     return mediaSourceEngine.appendBuffer(
-        type, segment, null, null, /* hasClosedCaptions= */ false);
+        type, segment, reference, /* hasClosedCaptions= */ false);
   }
 
   function append(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, Date.now() / 1000);
+    const reference = dummyReference(type, segmentNumber);
     return mediaSourceEngine.appendBuffer(
-        type, segment, null, null, /* hasClosedCaptions= */ false);
+        type, segment, reference, /* hasClosedCaptions= */ false);
   }
 
-  // The start time and end time should be null for init segment with closed
-  // captions.
   function appendInitWithClosedCaptions(type) {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, /* startTime= */ null,
-        /* endTime= */ null, /* hasClosedCaptions= */ true);
+    const reference = null;
+    return mediaSourceEngine.appendBuffer(
+        type, segment, reference, /* hasClosedCaptions= */ true);
   }
 
-  // The start time and end time should be valid for the segments with closed
-  // captions.
   function appendWithClosedCaptions(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, /* startTime= */ 0,
-        /* endTime= */ 2, /* hasClosedCaptions= */ true);
+    const reference = dummyReference(type, segmentNumber);
+    return mediaSourceEngine.appendBuffer(
+        type, segment, reference, /* hasClosedCaptions= */ true);
   }
 
   function buffered(type, time) {
@@ -98,6 +91,20 @@ describe('MediaSourceEngine', () => {
 
   function bufferStart(type) {
     return mediaSourceEngine.bufferStart(type);
+  }
+
+  function dummyReference(type, segmentNumber) {
+    const start = segmentNumber * metadata[type].segmentDuration;
+    const end = (segmentNumber + 1) * metadata[type].segmentDuration;
+    return new shaka.media.SegmentReference(
+        start, end,
+        /* uris= */ () => ['foo://bar'],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
   }
 
   function remove(type, segmentNumber) {
@@ -110,6 +117,7 @@ describe('MediaSourceEngine', () => {
     return {
       mimeType: streamMetadata.mimeType,
       codecs: streamMetadata.codecs,
+      drmInfos: [],
     };
   }
 
@@ -295,7 +303,27 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 5,
-        /* appendWindowEnd= */ 18);
+        /* appendWindowEnd= */ 18,
+        /* sequenceMode= */ false);
+    expect(buffered(ContentType.VIDEO, 0)).toBe(0);
+    await append(ContentType.VIDEO, 0);
+    expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
+    expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(5, 1);
+    await append(ContentType.VIDEO, 1);
+    expect(buffered(ContentType.VIDEO, 5)).toBeCloseTo(13, 1);
+  });
+
+  it('does not initialize timestamp offset in sequence mode', async () => {
+    const initObject = new Map();
+    initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
+    await mediaSourceEngine.init(initObject, false);
+    await mediaSourceEngine.setDuration(presentationDuration);
+    await appendInit(ContentType.VIDEO);
+    await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
+        /* timestampOffset= */ 100,
+        /* appendWindowStart= */ 5,
+        /* appendWindowEnd= */ 18,
+        /* sequenceMode= */ true);
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 0);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
@@ -314,7 +342,8 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
-        /* appendWindowEnd= */ 20);
+        /* appendWindowEnd= */ 20,
+        /* sequenceMode= */ false);
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
@@ -326,7 +355,8 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.setStreamProperties(ContentType.VIDEO,
         /* timestampOffset= */ 15,
         /* appendWindowStart= */ 20,
-        /* appendWindowEnd= */ 35);
+        /* appendWindowEnd= */ 35,
+        /* sequenceMode= */ false);
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);

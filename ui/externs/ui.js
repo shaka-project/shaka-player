@@ -65,10 +65,14 @@ shaka.extern.UIVolumeBarColors;
  *   overflowMenuButtons: !Array.<string>,
  *   contextMenuElements: !Array.<string>,
  *   statisticsList: !Array.<string>,
+ *   playbackRates: !Array.<number>,
+ *   fastForwardRates: !Array.<number>,
+ *   rewindRates: !Array.<number>,
  *   addSeekBar: boolean,
  *   addBigPlayButton: boolean,
  *   customContextMenu: boolean,
  *   castReceiverAppId: string,
+ *   castAndroidReceiverCompatible: boolean,
  *   clearBufferOnQualityChange: boolean,
  *   showUnbufferedStart: boolean,
  *   seekBarColors: shaka.extern.UISeekBarColors,
@@ -76,9 +80,12 @@ shaka.extern.UIVolumeBarColors;
  *   trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat,
  *   fadeDelay: number,
  *   doubleClickForFullscreen: boolean,
+ *   singleClickForPlayAndPause: boolean,
  *   enableKeyboardPlaybackControls: boolean,
  *   enableFullscreenOnRotation: boolean,
- *   forceLandscapeOnFullscreen: boolean
+ *   forceLandscapeOnFullscreen: boolean,
+ *   enableTooltips: boolean,
+ *   keyboardSeekDistance: number
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -89,6 +96,12 @@ shaka.extern.UIVolumeBarColors;
  *   The ordered list of buttons in the context menu.
  * @property {!Array.<string>} statisticsList
  *   The ordered list of statistics present in the statistics container.
+ * @property {!Array.<number>} playbackRates
+ *   The ordered list of rates for playback selection.
+  * @property {!Array.<number>} fastForwardRates
+ *   The ordered list of rates for fast forward selection.
+ * @property {!Array.<number>} rewindRates
+ *   The ordered list of rates for rewind selection.
  * @property {boolean} addSeekBar
  *   Whether or not a seek bar should be part of the UI.
  * @property {boolean} addBigPlayButton
@@ -98,6 +111,8 @@ shaka.extern.UIVolumeBarColors;
  *   Whether or not a custom context menu replaces the default.
  * @property {string} castReceiverAppId
  *   Receiver app id to use for the Chromecast support.
+ * @property {boolean} castAndroidReceiverCompatible
+ *   Indicates if the app is compatible with an Android Cast Receiver.
  * @property {boolean} clearBufferOnQualityChange
  *   Only applicable if the resolution selection is part of the UI.
  *   Whether buffer should be cleared when changing resolution
@@ -144,6 +159,9 @@ shaka.extern.UIVolumeBarColors;
  *   Whether or not double-clicking on the UI should cause it to enter
  *   fullscreen.
  *   Defaults to true.
+ * @property {boolean} singleClickForPlayAndPause
+ *   Whether or not clicking on the video should cause it to play or pause.
+ *   Defaults to true.
  * @property {boolean} enableKeyboardPlaybackControls
  *   Whether or not playback controls via keyboard is enabled, such as seek
  *   forward, seek backward, jump to the beginning/end of the video.
@@ -156,6 +174,15 @@ shaka.extern.UIVolumeBarColors;
  *   enters fullscreen.  Note that this behavior is based on an experimental
  *   browser API, and may not work on all platforms.
  *   Defaults to true.
+ * @property {boolean} enableTooltips
+ *   Whether or not buttons in the control panel display tooltips that contain
+ *   information about their function.
+ *   Defaults to false.
+ * @property {number} keyboardSeekDistance
+ *   The time interval, in seconds, to seek when the user presses the left or
+ *   right keyboard keys when the video is selected. If less than or equal to 0,
+ *   no seeking will occur.
+ *   Defaults to 5 seconds.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

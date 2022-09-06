@@ -73,7 +73,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.RangeElement {
    * @override
    */
   onChange() {
-    if (this.ad) {
+    if (this.ad && this.ad.isLinear()) {
       this.ad.setVolume(this.getValue());
     } else {
       this.video.volume = this.getValue();

@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.Player');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-
 describe('Player Load Graph', () => {
   const SMALL_MP4_CONTENT_URI = '/base/test/test/assets/small.mp4';
 
@@ -124,7 +119,7 @@ describe('Player Load Graph', () => {
 
   // There was a bug when calling unload before calling load would cause
   // the load to continue before the (first) unload was complete.
-  // https://github.com/google/shaka-player/issues/612
+  // https://github.com/shaka-project/shaka-player/issues/612
   it('load will wait for unload to finish', async () => {
     createPlayer(/* attachedTo= */ null);
 

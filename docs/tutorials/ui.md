@@ -30,7 +30,7 @@ Set up controls with HTML data attributes:
          The data-shaka-player-cast-receiver-id tag allows you to provide a Cast Application ID that
            the cast button will cast to; the value provided here is the sample cast receiver. -->
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="1BA79154">
+         data-shaka-player-cast-receiver-id="07AEE832">
        <!-- The data-shaka-player tag will make the UI library use this video element.
             If no video is provided, the UI will automatically make one inside the container div. -->
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"></video>
@@ -111,7 +111,7 @@ set up a listener for the 'caststatuschanged' events.
 <!-- Add a data-shaka-player-cast-receiver-id tag to provide a Cast Application ID that
            the cast button will cast to; the value provided here is the sample cast receiver. -->
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="1BA79154">
+         data-shaka-player-cast-receiver-id="07AEE832">
     </div>
 ```
 
@@ -130,6 +130,23 @@ Next, let's add a listener to the 'caststatuschanged' event in myapp.js:
   }
 ```
 
+
+#### Enabling Android Receiver Apps
+
+If you'd like to take advantage of Android Receiver App support,
+you will need to provide a boolean flag to enable support for
+casting to an Android receiver app.
+
+```html
+    <div data-shaka-player-container style="max-width:40em"
+         data-shaka-player-cast-receiver-id="E7271BEC"
+         data-shaka-player-cast-android-receiver-compatible="true">
+      <!-- The manifest url in the src attribute will be automatically loaded -->
+      <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
+       src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
+    </div
+
+
 #### Providing source(s) for auto load.
 
 It's also possible to provide the `src` attribute on the `<video>` element
@@ -137,7 +154,7 @@ or a `<source>` tag inside it to enable auto loading of the specified content.
 
 ```html
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="1BA79154">
+         data-shaka-player-cast-receiver-id="07AEE832">
       <!-- The manifest url in the src attribute will be automatically loaded -->
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
        src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
@@ -148,7 +165,7 @@ or
 
 ```html
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="1BA79154">
+         data-shaka-player-cast-receiver-id="07AEE832">
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%">
         <!-- The manifest url in the src attribute will be auto loaded -->
        <source src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"/>
@@ -161,7 +178,7 @@ call to the first one fails.
 
 ```html
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="1BA79154">
+         data-shaka-player-cast-receiver-id="07AEE832">
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%">
         <!-- Try this first -->
         <source src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"/>
@@ -200,6 +217,15 @@ const controls = ui.getControls();
 // your API calls will be routed to the remote playback session.
 const player = controls.getPlayer();
 const video = controls.getVideo();
+
+// Programatically configure the Chromecast Receiver App Id and Android
+// Receiver Compatability.
+ui.configure({
+  // Set the castReceiverAppId
+  'castReceiverAppId': '07AEE832',
+  // Enable casting to native Android Apps (e.g. Android TV Apps)
+  'castAndroidReceiverCompatible': true,
+});
 ```
 
 

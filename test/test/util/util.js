@@ -4,19 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.StatusPromise');
-goog.provide('shaka.test.Util');
-
-goog.require('goog.asserts');
-goog.require('shaka.media.InitSegmentReference');
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.Iterables');
-goog.require('shaka.util.StringUtils');
-goog.require('shaka.util.XmlUtils');
-goog.requireType('shaka.util.Error');
-
-
 /**
  * @extends {Promise}
  */
@@ -52,10 +39,9 @@ shaka.test.Util = class {
    */
   static async fakeEventLoop(duration, onTick) {
     // Run this synchronously:
-    for (const time of shaka.util.Iterables.range(duration)) {
+    for (let time = 0; time < duration; time++) {
       // We shouldn't need more than 6 rounds.
-      for (const _ of shaka.util.Iterables.range(6)) {
-        shaka.util.Functional.ignored(_);
+      for (let i = 0; i < 6; i++) {
         jasmine.clock().tick(0);
         await Promise.resolve();  // eslint-disable-line no-await-in-loop
       }
@@ -203,7 +189,7 @@ shaka.test.Util = class {
       if (actual.childNodes.length != expected.childNodes.length) {
         return prospectiveDiff + 'Different child node list length.';
       }
-      for (const i of shaka.util.Iterables.range(actual.childNodes.length)) {
+      for (let i = 0; i < actual.childNodes.length; i++) {
         const aNode = actual.childNodes[i];
         const eNode = expected.childNodes[i];
         const diff =
@@ -334,9 +320,9 @@ shaka.test.Util = class {
     // TODO: There should be a way to alter the externs for jasmine.Spy so that
     // this utility is not needed.
     // Why isn't there something like ICallable in Closure?
-    // https://github.com/google/closure-compiler/issues/946
+    // https://github.com/shaka-project/closure-compiler/issues/946
     // Why isn't it enough that jasmine.Spy extends Function?
-    // https://github.com/google/closure-compiler/issues/1422
+    // https://github.com/shaka-project/closure-compiler/issues/1422
     return /** @type {Function} */(spy)(...varArgs);
   }
 
@@ -401,10 +387,10 @@ shaka.test.Util = class {
    *   within the bounds of the viewport.
    * @param {string} name An identifier for the screenshot.  Use alphanumeric
    *   plus dash and underscore only.
-   * @param {number} threshold A change threshold in pixels.
+   * @param {number} minSimilarity A minimum similarity score between 0 and 1.
    * @return {!Promise}
    */
-  static async checkScreenshot(element, name, threshold=0) {
+  static async checkScreenshot(element, name, minSimilarity=1) {
     // Make sure the DOM is up-to-date and layout has settled before continuing.
     // Without this delay, or with a shorter delay, we sometimes get missing
     // elements in our UITextDisplayer tests on some platforms.
@@ -448,13 +434,16 @@ shaka.test.Util = class {
     const buffer = await shaka.test.Util.fetch(
         '/screenshot/diff' + parentUrlParams + paramsString);
     const json = shaka.util.StringUtils.fromUTF8(buffer);
-    const pixelsChanged = /** @type {number} */(JSON.parse(json));
+    const similarity = /** @type {number} */(JSON.parse(json));
 
-    // If the change threshold is exceeded, you can review the new screenshot
+    // If the minimum similarity is not met, you can review the new screenshot
     // and the diff image in the screenshots folder.  Look for images that end
-    // with "-new" and "-diff".  If cropping doesn't work right, you can view
-    // the full-page screenshot in the image that ends with "-full".
-    expect(pixelsChanged).withContext(name).not.toBeGreaterThan(threshold);
+    // with "-new" and "-diff".  (NOTE: The diff is a pixel-wise diff for human
+    // review, and is not produced with the same structural similarity
+    // algorithm used to detect changes in the test.)  If cropping doesn't work
+    // right, you can view the full-page screenshot in the image that ends with
+    // "-full".
+    expect(similarity).withContext(name).not.toBeLessThan(minSimilarity);
   }
 };
 
@@ -464,13 +453,13 @@ shaka.test.Util = class {
  */
 shaka.test.Util.customMatchers_ = {
   // Custom matcher for Element objects.
-  toEqualElement: (util, customEqualityTesters) => {
+  toEqualElement: (util) => {
     return {
       compare: shaka.test.Util.expectToEqualElementCompare_,
     };
   },
   // Custom matcher for working with spies.
-  toHaveBeenCalledOnceMore: (util, customEqualityTesters) => {
+  toHaveBeenCalledOnceMore: (util) => {
     return {
       compare: (actual, expected) => {
         const callCount = actual.calls.count();
@@ -490,7 +479,7 @@ shaka.test.Util.customMatchers_ = {
       },
     };
   },
-  toHaveBeenCalledOnceMoreWith: (util, customEqualityTesters) => {
+  toHaveBeenCalledOnceMoreWith: (util) => {
     return {
       compare: (actual, expected) => {
         const callCount = actual.calls.count();
@@ -503,7 +492,7 @@ shaka.test.Util.customMatchers_ = {
         if (callCount != 1) {
           result.pass = false;
           result.message = 'Expected to be called once, not ' + callCount;
-        } else if (!util.equals(callArgs, expected, customEqualityTesters)) {
+        } else if (!util.equals(callArgs, expected)) {
           result.pass = false;
           result.message =
               'Expected to be called with ' + expected + ' not ' + callArgs;

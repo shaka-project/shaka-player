@@ -1,0 +1,29 @@
+# Install this in .github/workflows/ to automate issue maintenance.
+name: Update Issues
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering.
+  schedule:
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
+
+permissions:
+  issues: write
+
+jobs:
+  update-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repository: shaka-project/shaka-github-tools
+
+      - name: Update Issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd update-issues
+          npm ci
+          node main.js

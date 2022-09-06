@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.Util');
-goog.require('shaka.util.DataViewReader');
-goog.require('shaka.util.Error');
-
 describe('DataViewReader', () => {
   const Util = shaka.test.Util;
 

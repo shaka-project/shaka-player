@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.PeriodCombiner');
-
 describe('PeriodCombiner', () => {
   // These test cases don't really read well as "it" statements.  Phrasing them
   // that way would make the names very long, so here we break with that
@@ -477,7 +473,7 @@ describe('PeriodCombiner', () => {
     a3.originalId = 'a3';
     a3.bandwidth = 97065;
     a3.roles = ['role1', 'role2'];
-    a2.codecs = 'mp4a.40.2';
+    a3.codecs = 'mp4a.40.2';
 
     // a4 has a different label from a3, and should not
     // be filtered out.
@@ -500,14 +496,24 @@ describe('PeriodCombiner', () => {
     const t1 = makeTextStream('en');
     t1.originalId = 't1';
     t1.roles = ['role1'];
+    t1.bandwidth = 1158;
 
     const t2 = makeTextStream('en');
     t2.originalId = 't2';
     t2.roles = ['role1', 'role2'];
+    t2.bandwidth = 1172;
 
     const t3 = makeTextStream('en');
     t3.originalId = 't3';
     t3.roles = ['role1'];
+    t3.bandwidth = 1158;
+
+    // t4 has a different bandwidth from t3, and should not
+    // be filtered out.
+    const t4 = makeTextStream('en');
+    t4.originalId = 't4';
+    t4.roles = ['role1'];
+    t4.bandwidth = 1186;
 
     // i1 and i3 are duplicates.
     const i1 = makeImageStream(240);
@@ -539,6 +545,7 @@ describe('PeriodCombiner', () => {
           t1,
           t2,
           t3,
+          t4,
         ],
         imageStreams: [
           i1,
@@ -565,7 +572,7 @@ describe('PeriodCombiner', () => {
     }
 
     const textStreams = combiner.getTextStreams();
-    expect(textStreams.length).toBe(2);
+    expect(textStreams.length).toBe(3);
 
     // t3 should've been filtered out
     const textIds = textStreams.map((t) => t.originalId);
@@ -989,6 +996,85 @@ describe('PeriodCombiner', () => {
     expect(audio2.originalId).toBe('2,4');
   });
 
+  it('Matches streams with related codecs', async () => {
+    const stream1 = makeVideoStream(1080);
+    stream1.originalId = '1';
+    stream1.bandwidth = 120000;
+    stream1.codecs = 'hvc1.1.4.L126.B0';
+
+    const stream2 = makeVideoStream(1080);
+    stream2.originalId = '2';
+    stream2.bandwidth = 120000;
+    stream2.codecs = 'hev1.2.4.L123.B0';
+
+    const stream3 = makeVideoStream(1080);
+    stream3.originalId = '3';
+    stream3.bandwidth = 120000;
+    stream3.codecs = 'dvhe.05.01';
+
+    const stream4 = makeVideoStream(1080);
+    stream4.originalId = '4';
+    stream4.bandwidth = 120000;
+    stream4.codecs = 'dvh1.05.01';
+
+    const stream5 = makeVideoStream(1080);
+    stream5.originalId = '5';
+    stream5.bandwidth = 120000;
+    stream5.codecs = 'avc1.42001f';
+
+    const stream6 = makeVideoStream(1080);
+    stream6.originalId = '6';
+    stream6.bandwidth = 120000;
+    stream6.codecs = 'avc3.42001f';
+
+    const stream7 = makeVideoStream(1080);
+    stream7.originalId = '7';
+    stream7.bandwidth = 120000;
+    stream7.codecs = 'vp09.00.10.08';
+
+    const stream8 = makeVideoStream(1080);
+    stream8.originalId = '8';
+    stream8.bandwidth = 120000;
+    stream8.codecs = 'vp09.01.20.08.01';
+
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '0',
+        videoStreams: [
+          stream1, stream3, stream5, stream7,
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '1',
+        videoStreams: [
+          stream2, stream4, stream6, stream8,
+        ],
+        audioStreams: [],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ true);
+    const variants = combiner.getVariants();
+    expect(variants.length).toBe(4);
+    // We can use the originalId field to see what each track is composed of.
+    const video1 = variants[0].video;
+    expect(video1.originalId).toBe('1,2');
+
+    const video2 = variants[1].video;
+    expect(video2.originalId).toBe('3,4');
+
+    const video3 = variants[2].video;
+    expect(video3.originalId).toBe('5,6');
+
+    const video4 = variants[3].video;
+    expect(video4.originalId).toBe('7,8');
+  });
 
   it('Matches streams with most roles in common', async () => {
     const makeAudioStreamWithRoles = (roles) => {
@@ -1059,7 +1145,7 @@ describe('PeriodCombiner', () => {
   it('The number of variants stays stable after many periods ' +
       'when going between similar content and varying ads', async () => {
     // This test is based on the content from
-    // https://github.com/google/shaka-player/issues/2716
+    // https://github.com/shaka-project/shaka-player/issues/2716
     // that used to cause our period flattening logic to keep
     // creating new variants for every new period added.
     // It's ok to create a few additional varinats/streams,

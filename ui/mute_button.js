@@ -33,6 +33,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-mute-button');
     this.button_.classList.add('material-icons-round');
+    this.button_.classList.add('shaka-tooltip');
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
     this.updateIcon_();
@@ -48,7 +49,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
-      if (this.ad) {
+      if (this.ad && this.ad.isLinear()) {
         this.ad.setMuted(!this.ad.isMuted());
       } else {
         this.video.muted = !this.video.muted;

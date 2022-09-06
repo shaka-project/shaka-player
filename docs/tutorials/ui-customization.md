@@ -88,6 +88,7 @@ The following buttons can be added to the overflow menu:
 * playback_rate: adds a button that controls the playback rate selection.
 * airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
   supports AirPlay.
+* Statistics: adds a button that displays statistics of the video.
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
 
 Example:
@@ -102,10 +103,26 @@ ui.configure(config);
 An important note: the 'overflow_menu' button needs to be part of the 'controlPanelElements'
 layout for the overflow menu to be available to the user.
 
+#### Adding tooltips to control panel buttons
+
+Tooltips can be enabled to display the function of every button in the control panel. Where applicable, they will also contain the current selection in parenthesis.
+
+Example:
+```js
+const config = {
+  'enableTooltips' : true
+}
+ui.configure(config);
+```
+
 #### Replacing the default context menu
 
-A custom context menu can be added through the `customContextMenu` boolean. Additionally, the `contextMenuElements` option can be used to add elements to it. Currently only the statistics button is available:
+A custom context menu can be added through the `customContextMenu` boolean. Additionally, the `contextMenuElements` option can be used to add elements to it.
+The following buttons can be added to the context menu:
 * Statistics: adds a button that displays statistics of the video.
+* loop: adds a button that controls if the currently selected video is played in a loop.
+* picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
+  that support it. Button is invisible on other browsers.
 
 Example:
 ```js
@@ -163,6 +180,22 @@ const config = {
 ui.configure(config);
 ```
 
+#### Configuring playback, fast forward and rewind rates
+The rate in which the player can play, fast forward and rewind content can be configured using the `playbackRates`, `fastForwardRates` and `rewindRates` options.
+
+* `playbackRates`: List of rates available in the `playback_rate` menu.
+* `fastForwardRates`: List of rates available to cycle through every time the `fast_forward` button is clicked.
+* `rewindRates`: List of rates available to cycle through every time the `rewind` button is clicked.
+
+ ```js
+const config = {
+  'controlPanelElements': ['playback_rate', 'fast_forward', 'rewind'],
+  'playbackRates': [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+  'fastForwardRates': [2, 4, 8, 1],
+  'rewindRates': [-1, -2, -4, -8],
+}
+ui.configure(config);
+```
 
 #### Creating custom elements and adding them to the UI
 It's possible to add custom application-specific buttons to the UI.

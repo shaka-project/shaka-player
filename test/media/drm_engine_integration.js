@@ -4,21 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.DrmEngine');
-goog.require('shaka.media.MediaSourceEngine');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.test.FakeClosedCaptionParser');
-goog.require('shaka.test.FakeTextDisplayer');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.test.Waiter');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.Platform');
-goog.require('shaka.util.PlayerConfiguration');
-goog.require('shaka.util.PublicPromise');
-
 describe('DrmEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
@@ -162,7 +147,7 @@ describe('DrmEngine', () => {
     document.body.removeChild(video);
   });
 
-  function checkSupport() {
+  function checkTrueDrmSupport() {
     if (shaka.util.Platform.isXboxOne()) {
       // Axinom won't issue a license for an Xbox One.  The error message from
       // the license server says "Your DRM client's security level is 150, but
@@ -174,7 +159,11 @@ describe('DrmEngine', () => {
     return support['com.widevine.alpha'] || support['com.microsoft.playready'];
   }
 
-  filterDescribe('basic flow', checkSupport, () => {
+  function checkClearKeySupport() {
+    return support['org.w3.clearkey'];
+  }
+
+  filterDescribe('basic flow', checkTrueDrmSupport, () => {
     drmIt('gets a license and can play encrypted segments', async () => {
       // The error callback should not be invoked.
       onErrorSpy.and.callFake(fail);
@@ -220,10 +209,10 @@ describe('DrmEngine', () => {
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       await drmEngine.attach(video);
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoInitSegment, null, null,
+          ContentType.VIDEO, videoInitSegment, null,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioInitSegment, null, null,
+          ContentType.AUDIO, audioInitSegment, null,
           /* hasClosedCaptions= */ false);
       await encryptedEventSeen;
       // With PlayReady, a persistent license policy can cause a different
@@ -256,17 +245,20 @@ describe('DrmEngine', () => {
         }
       }
 
+      const reference = dummyReference(0, 10);
+
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoSegment, 0, 10,
+          ContentType.VIDEO, videoSegment, reference,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioSegment, 0, 10,
+          ContentType.AUDIO, audioSegment, reference,
           /* hasClosedCaptions= */ false);
 
       expect(video.buffered.end(0)).toBeGreaterThan(0);
       video.play();
 
       const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(15);
+      waiter.setMediaSourceEngine(mediaSourceEngine);
       await waiter.waitForMovement(video);
 
       // Something should have played by now.
@@ -274,4 +266,99 @@ describe('DrmEngine', () => {
       expect(video.currentTime).toBeGreaterThan(0);
     });
   });  // describe('basic flow')
+
+  filterDescribe('ClearKey', checkClearKeySupport, () => {
+    drmIt('plays encrypted content with the ClearKey CDM', async () => {
+      // Configure DrmEngine for ClearKey playback.
+      const config = shaka.util.PlayerConfiguration.createDefault().drm;
+      config.clearKeys = {
+        // From https://github.com/Axinom/public-test-vectors/tree/conservative#v61-multidrm
+        '6e5a1d26275747d78046eaa5d1d34b5a': '197f26f572c864d2338b3ae5d114ea9c',
+      };
+      drmEngine.configure(config);
+
+      // The error callback should not be invoked.
+      onErrorSpy.and.callFake(fail);
+
+      /** @type {!shaka.util.PublicPromise} */
+      const encryptedEventSeen = new shaka.util.PublicPromise();
+      eventManager.listen(video, 'encrypted', () => {
+        encryptedEventSeen.resolve();
+      });
+      eventManager.listen(video, 'error', () => {
+        fail('MediaError code ' + video.error.code);
+        let extended = video.error.msExtendedCode;
+        if (extended) {
+          if (extended < 0) {
+            extended += Math.pow(2, 32);
+          }
+          fail('MediaError msExtendedCode ' + extended.toString(16));
+        }
+      });
+
+      /** @type {!shaka.util.PublicPromise} */
+      const keyStatusEventSeen = new shaka.util.PublicPromise();
+      onKeyStatusSpy.and.callFake(() => {
+        keyStatusEventSeen.resolve();
+      });
+
+      const variants = manifest.variants;
+
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+      await drmEngine.attach(video);
+      await mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, videoInitSegment, null,
+          /* hasClosedCaptions= */ false);
+      await mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, audioInitSegment, null,
+          /* hasClosedCaptions= */ false);
+      await encryptedEventSeen;
+
+      // Some platforms (notably 2017 Tizen TVs) do not fire key status
+      // events.
+      const keyStatusTimeout = shaka.test.Util.delay(5);
+      await Promise.race([keyStatusTimeout, keyStatusEventSeen]);
+
+      const call = onKeyStatusSpy.calls.mostRecent();
+      if (call) {
+        const map = /** @type {!Object} */ (call.args[0]);
+        expect(Object.keys(map).length).not.toBe(0);
+        for (const k in map) {
+          expect(map[k]).toBe('usable');
+        }
+      }
+
+      const reference = dummyReference(0, 10);
+
+      await mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, videoSegment, reference,
+          /* hasClosedCaptions= */ false);
+      await mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, audioSegment, reference,
+          /* hasClosedCaptions= */ false);
+
+      expect(video.buffered.end(0)).toBeGreaterThan(0);
+      video.play();
+
+      const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(15);
+      waiter.setMediaSourceEngine(mediaSourceEngine);
+      await waiter.waitForMovement(video);
+
+      // Something should have played by now.
+      expect(video.readyState).toBeGreaterThan(1);
+      expect(video.currentTime).toBeGreaterThan(0);
+    });
+  });  // describe('ClearKey')
+
+  function dummyReference(startTime, endTime) {
+    return new shaka.media.SegmentReference(
+        startTime, endTime,
+        /* uris= */ () => ['foo://bar'],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
+  }
 });

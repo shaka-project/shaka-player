@@ -12,6 +12,8 @@ goog.require('goog.asserts');
 goog.require('shakaDemo.CloseButton');
 goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.Utils');
+goog.require('shakaDemo.Visualizer');
+goog.require('shakaDemo.VisualizerButton');
 
 /**
  * Shaka Player demo, main section.
@@ -80,6 +82,9 @@ shakaDemo.Main = class {
     // Override the icon for the MDL library's menu button.
     // eslint-disable-next-line no-restricted-syntax
     MaterialLayout.prototype.Constant_.MENU_ICON = 'settings';
+
+    /** @private {?shakaDemo.Visualizer} */
+    this.visualizer_ = null;
   }
 
   /**
@@ -164,7 +169,7 @@ shakaDemo.Main = class {
       case shaka.ui.Overlay.FailReasonCode.NO_BROWSER_SUPPORT:
         message = this.getLocalizedString(
             shakaDemo.MessageIds.FAILURE_NO_BROWSER_SUPPORT);
-        href = 'https://github.com/google/shaka-player#' +
+        href = 'https://github.com/shaka-project/shaka-player#' +
                 'platform-and-browser-support-matrix';
         break;
       case shaka.ui.Overlay.FailReasonCode.PLAYER_FAILED_TO_LOAD:
@@ -183,7 +188,7 @@ shakaDemo.Main = class {
     this.support_ = await shaka.Player.probeSupport();
 
     this.video_ =
-      /** @type {!HTMLVideoElement} */(document.getElementById('video'));
+      /** @type {!HTMLVideoElement} */ (document.getElementById('video'));
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
     this.container_ = /** @type {!HTMLElement} */(
@@ -221,6 +226,22 @@ shakaDemo.Main = class {
       // Also fullscreen the container.
       this.container_.classList.add('no-input-sized');
       document.getElementById('video-bar').classList.add('no-input-sized');
+    } else {
+      goog.asserts.assert(this.player_, 'Player should exist by now.');
+
+      // Make the visualizer element.
+      const vCanvas = /** @type {!HTMLCanvasElement} */ (
+        document.getElementById('visualizer-canvas'));
+      const vDiv = /** @type {!HTMLElement} */ (
+        document.getElementById('visualizer-div'));
+      const vControlsDiv = /** @type {!HTMLElement} */ (
+        document.getElementById('visualizer-controls-div'));
+      const vScreenshotDiv = /** @type {!HTMLElement} */ (
+        document.getElementById('visualizer-screenshot-div'));
+      /** @private {?shakaDemo.Visualizer} */
+      this.visualizer_ = new shakaDemo.Visualizer(
+          vCanvas, vDiv, vScreenshotDiv, vControlsDiv, this.video_,
+          this.player_);
     }
 
     // The main page is loaded. Dispatch an event, so the various
@@ -289,7 +310,7 @@ shakaDemo.Main = class {
 
     // Navigate to the github issue opening interface, with the
     // partially-filled template as a preset body.
-    let url = 'https://github.com/google/shaka-player/issues/new?';
+    let url = 'https://github.com/shaka-project/shaka-player/issues/new?';
     url += 'body=' + encodeURIComponent(text);
     // Open in another tab.
     window.open(url, '_blank');
@@ -337,6 +358,9 @@ shakaDemo.Main = class {
     if (!uiConfig.controlPanelElements.includes('close')) {
       uiConfig.controlPanelElements.push('close');
     }
+    if (!uiConfig.overflowMenuButtons.includes('visualizer')) {
+      uiConfig.overflowMenuButtons.push('visualizer');
+    }
     ui.configure(uiConfig);
   }
 
@@ -356,6 +380,8 @@ shakaDemo.Main = class {
       // Register custom controls to the UI.
       const closeFactory = new shakaDemo.CloseButton.Factory();
       shaka.ui.Controls.registerElement('close', closeFactory);
+      const visualizerFactory = new shakaDemo.VisualizerButton.Factory();
+      shaka.ui.OverflowMenu.registerElement('visualizer', visualizerFactory);
 
       // Configure UI.
       this.configureUI_();
@@ -582,7 +608,10 @@ shakaDemo.Main = class {
         };
         asset.storedProgress = 0;
         this.dispatchEventWithName_('shaka-main-offline-progress');
+        const start = Date.now();
         const stored = await storage.store(asset.manifestUri, metadata).promise;
+        const end = Date.now();
+        console.log('Download time:', end - start);
         asset.storedContent = stored;
       } catch (error) {
         this.onError_(/** @type {!shaka.util.Error} */ (error));
@@ -725,6 +754,9 @@ shakaDemo.Main = class {
     }
     if (asset.features.includes(shakaAssets.Feature.MP2TS)) {
       mimeTypes.push('video/mp2t');
+    }
+    if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
+      mimeTypes.push('audio/aac');
     }
     const hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
@@ -941,9 +973,6 @@ shakaDemo.Main = class {
     if ('noadaptation' in params) {
       this.configure('abr.enabled', false);
     }
-    if ('jumpLargeGaps' in params) {
-      this.configure('streaming.jumpLargeGaps', true);
-    }
 
     // Add compiled/uncompiled links.
     this.makeVersionLinks_();
@@ -1114,8 +1143,34 @@ shakaDemo.Main = class {
     return response.data;
   }
 
+  /** @return {boolean} */
+  getIsVisualizerActive() {
+    if (this.visualizer_) {
+      return this.visualizer_.active;
+    }
+    return false;
+  }
+
+  /** @param {boolean} active */
+  setIsVisualizerActive(active) {
+    if (this.visualizer_) {
+      const wasActive = this.visualizer_.active;
+      this.visualizer_.active = active;
+      if (wasActive != active) {
+        if (active) {
+          this.visualizer_.start();
+        } else {
+          this.visualizer_.stop();
+        }
+      }
+    }
+  }
+
   /** Unload the currently-playing asset. */
   unload() {
+    if (this.visualizer_) {
+      this.visualizer_.stop();
+    }
     this.selectedAsset = null;
     const videoBar = document.getElementById('video-bar');
     this.hideElement_(videoBar);
@@ -1123,6 +1178,9 @@ shakaDemo.Main = class {
 
     if (document.fullscreenElement) {
       document.exitFullscreen();
+    }
+    if (this.video_.webkitDisplayingFullscreen) {
+      this.video_.webkitExitFullscreen();
     }
     if (document.pictureInPictureElement) {
       document.exitPictureInPicture();
@@ -1227,9 +1285,6 @@ shakaDemo.Main = class {
       // The currently-selected asset changed, so update asset cards.
       this.dispatchEventWithName_('shaka-main-selected-asset-changed');
 
-      await this.drmConfiguration_(asset);
-      this.controls_.getCastProxy().setAppData({'asset': asset});
-
       // Enable the correct set of controls before loading.
       // The video container influences the TextDisplayer used.
       if (this.nativeControlsEnabled_) {
@@ -1243,6 +1298,9 @@ shakaDemo.Main = class {
         // This will force the player to use UITextDisplayer.
         this.player_.setVideoContainer(this.container_);
       }
+
+      await this.drmConfiguration_(asset);
+      this.controls_.getCastProxy().setAppData({'asset': asset});
 
       // Finally, the asset can be loaded.
       let manifestUri = asset.manifestUri;
@@ -1292,6 +1350,10 @@ shakaDemo.Main = class {
         };
         metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
+      }
+
+      if (this.visualizer_ && this.visualizer_.active) {
+        this.visualizer_.start();
       }
     } catch (reason) {
       const error = /** @type {!shaka.util.Error} */ (reason);
@@ -1350,9 +1412,6 @@ shakaDemo.Main = class {
     }
     if (!this.getCurrentConfigValue('abr.enabled')) {
       params.push('noadaptation');
-    }
-    if (this.getCurrentConfigValue('streaming.jumpLargeGaps')) {
-      params.push('jumpLargeGaps');
     }
     params.push('uilang=' + this.getUILocale());
 
@@ -1608,7 +1667,7 @@ shakaDemo.Main = class {
 
   /**
    * Sets the "version-string" divs to a version string.
-   * For example, "v2.5.4-master (uncompiled)".
+   * For example, "v2.5.4-main (uncompiled)".
    * @private
    */
   setUpVersionStrings_() {

@@ -7,6 +7,7 @@
 
 goog.provide('shaka.ui.LoopButton');
 
+goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -35,6 +36,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     /** @private {!HTMLButtonElement} */
     this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-loop-button');
+    this.button_.classList.add('shaka-tooltip');
 
     /** @private {!HTMLElement} */
     this.icon_ = shaka.util.Dom.createHTMLElement('i');
@@ -170,4 +172,7 @@ shaka.ui.OverflowMenu.registerElement(
     'loop', new shaka.ui.LoopButton.Factory());
 
 shaka.ui.Controls.registerElement(
+    'loop', new shaka.ui.LoopButton.Factory());
+
+shaka.ui.ContextMenu.registerElement(
     'loop', new shaka.ui.LoopButton.Factory());

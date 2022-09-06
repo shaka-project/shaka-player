@@ -4,11 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.FakeDemoMain');
-
-goog.require('shaka.Player');
-
-
 /**
  * @summary
  * This simulates the interface between ShakaDemoMain and the various tabs.

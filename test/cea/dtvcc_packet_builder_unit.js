@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.cea.DtvccPacket');
-goog.require('shaka.cea.DtvccPacketBuilder');
-
 describe('DtvccPacketBuilder', () => {
   /** @type {!shaka.cea.DtvccPacketBuilder} */
   let dtvccPacketBuilder;

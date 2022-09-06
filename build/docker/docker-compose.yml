@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  shaka-compiler:
+    build: ./
+    container_name: shaka-compiler
+    volumes:
+      - ../../:/usr/src/app
+
+# Others services can be added here

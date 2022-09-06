@@ -34,6 +34,24 @@ shaka.extern.AdsStats;
 
 
 /**
+ * @typedef {{
+ *   start: number,
+ *   end: ?number
+ * }}
+ *
+ * @description
+ * Contains the times of a range of an Ad.
+ *
+ * @property {number} start
+ *   The start time of the range, in milliseconds.
+ * @property {number} end
+ *   The end time of the range, in milliseconds.
+ * @exportDoc
+ */
+shaka.extern.AdCuePoint;
+
+
+/**
  * An object that's responsible for all the ad-related logic
  * in the player.
  *
@@ -45,6 +63,8 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {string} locale
    */
   setLocale(locale) {}
+
+  release() {}
 
   onAssetUnload() {}
 
@@ -76,6 +96,11 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {Object} adTagParameters
    */
   replaceServerSideAdTagParameters(adTagParameters) {}
+
+  /**
+   * @return {!Array.<!shaka.extern.AdCuePoint>}
+   */
+  getServerSideCuePoints() {}
 
   /**
    * Get statistics for the current playback session. If the player is not
@@ -181,6 +206,11 @@ shaka.extern.IAd = class {
    * @param {boolean} muted
    */
   setMuted(muted) {}
+
+  /**
+   * @return {boolean}
+   */
+  isLinear() {}
 
   /**
    * @param {number} width

@@ -97,7 +97,7 @@ A platform may support multiple DRM key systems, (for example, Widevine and
 PlayReady). The `drm.preferredKeySystems` configuration allows the application
 to specify which key systems it wants to choose.
 
-[Github issue](https://github.com/google/shaka-player/issues/3002)
+[Github issue](https://github.com/shaka-project/shaka-player/issues/3002)
 
 Previously, Shaka Player chose a DRM key system based on:
 1. Only use the key systems supported by the platform.

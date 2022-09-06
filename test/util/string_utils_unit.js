@@ -4,13 +4,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.test.Util');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.StringUtils');
-
 describe('StringUtils', () => {
+  describe('with TextDecoder', () => {
+    if (window.TextDecoder) {
+      defineStringUtilTests();
+    }
+  });
+
+  describe('without TextDecoder', () => {
+    let originalTextDecoder;
+
+    beforeAll(() => {
+      originalTextDecoder = window.TextDecoder;
+      window['TextDecoder'] = null;
+    });
+
+    afterAll(() => {
+      window.TextDecoder = originalTextDecoder;
+    });
+
+    defineStringUtilTests();
+  });
+});
+
+function defineStringUtilTests() {
   const StringUtils = shaka.util.StringUtils;
 
   it('parses fromUTF8', () => {
@@ -22,17 +39,32 @@ describe('StringUtils', () => {
   });
 
   it('won\'t break if given cut-off UTF8 character', () => {
-    // This array contains the first half of a 2-byte UTF8 character, stranded
-    // at the very end of the string.
-    const arr1 = [0x53, 0x61, 0x6e, 0x20, 0x4a, 0x6f, 0x73, 0x81];
+    const arr1 = [0x53, 0x61, 0x6e, 0x20, 0x4a, 0x6f, 0x73, 0xc3, 0xa9];
     expect(StringUtils.fromUTF8(new Uint8Array(arr1)))
-        .toBe('San Jos\uFFFD');
+        .toBe('San Jos\u00E9');
 
-    // For reasons I don't know, it seems like 0xE9 cannot be the start of a
-    // UTF8 character.  Perhaps it is a reserved number?
-    const arr2 = [0x4a, 0x6f, 0x73, 0xE9, 0x33, 0x33, 0x20, 0x53, 0x61, 0x6e];
-    expect(StringUtils.fromUTF8(new Uint8Array(arr2)))
+    // This array contains the first half of a 2-byte UTF8 character
+    // (0xc3 0xa9 = é).  The half-character is stranded at the very end of the
+    // string.
+    const arr = [0x53, 0x61, 0x6e, 0x20, 0x4a, 0x6f, 0x73, 0xc3];
+    expect(StringUtils.fromUTF8(new Uint8Array(arr)))
+        .toBe('San Jos\uFFFD');
+  });
+
+  it('won\'t break if given an invalid UTF-8 sequence', () => {
+    // 0xe9 0x33 0x33 is an invalid UTF-8 sequence.
+    const arr = [0x4a, 0x6f, 0x73, 0xE9, 0x33, 0x33, 0x20, 0x53, 0x61, 0x6e];
+    expect(StringUtils.fromUTF8(new Uint8Array(arr)))
         .toBe('Jos\uFFFD33 San');
+  });
+
+  it('can handle an 8-byte character', () => {
+    // This is the UTF-8 encoding of the US flag emoji.
+    // It decodes into two Unicode codepoints, which becomes 4 JavaScript
+    // UTF-16 characters.
+    const arr = [0xf0, 0x9f, 0x87, 0xba, 0xf0, 0x9f, 0x87, 0xb8];
+    expect(StringUtils.fromUTF8(new Uint8Array(arr)))
+        .toBe('\uD83C\uDDFA\uD83C\uDDF8');
   });
 
   it('strips the BOM in fromUTF8', () => {
@@ -131,4 +163,4 @@ describe('StringUtils', () => {
     expect(StringUtils.fromUTF16(buffer, true).length)
         .toBe(buffer.byteLength / 2);
   });
-});
+}

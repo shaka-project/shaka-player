@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.ui.Localization');
-goog.requireType('shaka.util.FakeEvent');
-
 describe('Localization', () => {
   const Localization = shaka.ui.Localization;
 
@@ -198,7 +195,7 @@ describe('Localization', () => {
       localization.changeLocale([ELVISH_WOODLAND]);
 
       expect(events.length).toBe(1);
-      expect(events[0].locales).toEqual([ELVISH_WOODLAND]);
+      expect(events[0]['locales']).toEqual([ELVISH_WOODLAND]);
     });
 
 
@@ -214,23 +211,23 @@ describe('Localization', () => {
       localization.changeLocale([ELVISH_WOODLAND, DWARFISH_NORTH]);
 
       expect(events.length).toBe(1);
-      expect(events[0].locales).toEqual([ELVISH_WOODLAND, DWARFISH_NORTH]);
+      expect(events[0]['locales']).toEqual([ELVISH_WOODLAND, DWARFISH_NORTH]);
 
       // We should see an event telling us that dwarfish is still missing.
       localization.insert(ELVISH_WOODLAND, new Map());
       localization.changeLocale([ELVISH_WOODLAND, DWARFISH_NORTH]);
 
       expect(events.length).toBe(2);
-      expect(events[0].locales).toEqual([ELVISH_WOODLAND, DWARFISH_NORTH]);
-      expect(events[1].locales).toEqual([DWARFISH_NORTH]);
+      expect(events[0]['locales']).toEqual([ELVISH_WOODLAND, DWARFISH_NORTH]);
+      expect(events[1]['locales']).toEqual([DWARFISH_NORTH]);
 
       // There should be no more events now that we added the last language.
       localization.insert(DWARFISH_NORTH, new Map());
       localization.changeLocale([ELVISH_WOODLAND, DWARFISH_NORTH]);
 
       expect(events.length).toBe(2);
-      expect(events[0].locales).toEqual([ELVISH_WOODLAND, DWARFISH_NORTH]);
-      expect(events[1].locales).toEqual([DWARFISH_NORTH]);
+      expect(events[0]['locales']).toEqual([ELVISH_WOODLAND, DWARFISH_NORTH]);
+      expect(events[1]['locales']).toEqual([DWARFISH_NORTH]);
     });
   });
 
@@ -373,8 +370,8 @@ describe('Localization', () => {
           // it was in the fallback (HALFLING) but not our preferred language
           // (EVLISH).
           expect(events.length).toBe(1);
-          expect(events[0].locales).toEqual([ELVISH_WOODLAND]);
-          expect(events[0].missing).toEqual(['hello']);
+          expect(events[0]['locales']).toEqual([ELVISH_WOODLAND]);
+          expect(events[0]['missing']).toEqual(['hello']);
         });
 
     it('fires when key/value is missing from preferred but found in base',
@@ -400,8 +397,8 @@ describe('Localization', () => {
           // because it was in the base (ELVISH) but not our preferred language
           // (EVLISH_WOODLAND).
           expect(events.length).toBe(1);
-          expect(events[0].locales).toEqual([ELVISH_WOODLAND]);
-          expect(events[0].missing).toEqual(['Best Wishes']);
+          expect(events[0]['locales']).toEqual([ELVISH_WOODLAND]);
+          expect(events[0]['missing']).toEqual(['Best Wishes']);
         });
 
     it('fires when key/value is missing from preferred but found in sibling',
@@ -427,8 +424,8 @@ describe('Localization', () => {
           // understand" because it was in a sibling locale (HALFLING_SHIRE)
           // but not our preferred language (HALFLING_COMMON).
           expect(events.length).toBe(1);
-          expect(events[0].locales).toEqual([HALFLING_COMMON]);
-          expect(events[0].missing).toEqual(['Do you understand']);
+          expect(events[0]['locales']).toEqual([HALFLING_COMMON]);
+          expect(events[0]['missing']).toEqual(['Do you understand']);
         });
 
     it('fires when key/value is missing from some preferred languages',
@@ -454,8 +451,9 @@ describe('Localization', () => {
 
           // There should have no missing localization events.
           expect(events.length).toBe(1);
-          expect(events[0].locales).toEqual([ELVISH_WOODLAND, DWARFISH_NORTH]);
-          expect(events[0].missing).toEqual(['may your forge burn bright']);
+          expect(events[0]['locales']).toEqual(
+              [ELVISH_WOODLAND, DWARFISH_NORTH]);
+          expect(events[0]['missing']).toEqual(['may your forge burn bright']);
         });
   });
 

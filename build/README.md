@@ -80,8 +80,8 @@ directly:
 * `--external` will run integration tests against external assets.  This will
   take an extremely long time to run, and requires a fast and reliable internet
   connection.
-* `--drm` will run integration tests against DRM license servers.  This will
-  require a connection to the open internet.
+* `--no-drm` will skip integration tests against DRM license servers.  Not
+  specifying this flag requires a connection to the open internet.
 * `--uncompiled` will run integration tests using the uncompiled library instead
   of the compiled version.
 * `--random` will run the tests in a random order to isolate test dependencies.
@@ -99,7 +99,7 @@ will choose a defaults based on your platform.  However, if you pass any
 arguments to `test.py`, it will not choose browsers and you *must* pass
 `--browsers`.
 
-[lib/debug/log.js]: https://github.com/google/shaka-player/blob/master/lib/debug/log.js
+[lib/debug/log.js]: https://github.com/shaka-project/shaka-player/blob/main/lib/debug/log.js
 
 ## Stats
 

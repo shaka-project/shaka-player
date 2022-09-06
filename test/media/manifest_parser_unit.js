@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.media.ManifestParser');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.test.FakeNetworkingEngine');
-
 const testGetMimeType = async (expertedMimeType, contentType) => {
   const netEngine = new shaka.test.FakeNetworkingEngine()
       .setHeaders('dummy://foo', {'content-type': contentType});

@@ -1,0 +1,42 @@
+name: Deploy Nightly Demo
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering.
+  schedule:
+    # Run every night at midnight PST / 8am UTC.
+    - cron: '0 8 * * *'
+
+jobs:
+  appspot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          registry-url: 'https://registry.npmjs.org'
+
+      # The nightly demo has its own receiver app ID that points to the nightly
+      # demo itself for the receiver side.
+      - name: Override Cast Receiver App ID
+        run: |
+          sed \
+            -i demo/index.html \
+            -e 's/\(data-shaka-player-cast-receiver-id\)="[^"]*"/\1="07AEE832"/'
+
+      - uses: ./.github/workflows/custom-actions/prep-for-appspot
+
+      - uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
+
+      - uses: google-github-actions/deploy-appengine@v0
+        with:
+          project_id: shaka-player-demo
+          version: nightly
+          promote: false

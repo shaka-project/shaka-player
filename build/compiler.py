@@ -287,7 +287,7 @@ class Less(object):
     cmd_line = lessc + less_options + [self.main_source_file, self.output]
 
     if shakaBuildHelpers.execute_get_code(cmd_line) != 0:
-      logging.error('Externs generation failed')
+      logging.error('CSS compilation failed')
       return False
 
     # We need to prepend the license header to the compiled CSS.

@@ -71,6 +71,10 @@
   .ad-text-shadow();
 }
 
+.shaka-ad-controls .shaka-ad-position:not(.shaka-hidden) + .shaka-ad-counter {
+  margin-left: 0.75em;
+}
+
 .shaka-skip-ad-container {
   /* Skip button is positioned at the very right edge of the
    * video container unlike the rest of the bottom controls. */
@@ -78,11 +82,11 @@
 
   /* This math is determining how far the button is from the right edge.
    * Ad panel's parent is centered and @bottom-controls-width wide, so
-   * 100 - @bottom-controls-width = margins from both sides of the container.
+   * 100% - @bottom-controls-width = margins from both sides of the container.
    * That divided by 2 is margin on one side, so we take that, and move the
    * button from its normal position to the right by that percentage.
    */
-  right: (100 - @bottom-controls-width) / 2 * -1;
+  right: calc((100% - @bottom-controls-width) / 2 * -1);
   display: flex;
   flex-direction: row;
   margin: 0;
@@ -90,18 +94,18 @@
 
 .shaka-skip-ad-button {
   padding: 5px 15px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0 0 0 / 70%);
   border: none;
 
   &:disabled {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0 0 0 / 30%);
   }
 
   cursor: pointer;
 }
 
 .shaka-skip-ad-counter {
-  padding: 5px 5px;
-  background: rgba(0, 0, 0, 0.7);
+  padding: 5px;
+  background: rgba(0 0 0 / 70%);
   margin: 0;
 }

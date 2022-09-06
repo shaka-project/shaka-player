@@ -4,15 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.test.Dash');
-goog.require('shaka.test.FakeNetworkingEngine');
-goog.require('shaka.test.ManifestParser');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.PlayerConfiguration');
-goog.requireType('shaka.dash.DashParser');
-
 describe('DashParser SegmentTemplate', () => {
   const Dash = shaka.test.Dash;
   const ManifestParser = shaka.test.ManifestParser;
@@ -46,6 +37,8 @@ describe('DashParser SegmentTemplate', () => {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
+      modifyManifestRequest: (request, manifestInfo) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
       filter: (manifest) => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
@@ -113,9 +106,8 @@ describe('DashParser SegmentTemplate', () => {
           's2.mp4', 50, 60, baseUri);
       expectedRef2.timestampOffset = -10;
 
-      const iterator = stream.segmentIndex[Symbol.iterator]();
-      const ref1 = iterator.seek(45);
-      const ref2 = iterator.seek(55);
+      const ref1 = stream.segmentIndex.getIteratorForTime(45).next().value;
+      const ref2 = stream.segmentIndex.getIteratorForTime(55).next().value;
       expect(ref1).toEqual(expectedRef1);
       expect(ref2).toEqual(expectedRef2);
     });
@@ -452,7 +444,7 @@ describe('DashParser SegmentTemplate', () => {
       await variants[2].video.createSegmentIndex();
 
       const getRefAt = (stream, time) => {
-        return stream.segmentIndex[Symbol.iterator]().seek(time);
+        return stream.segmentIndex.getIteratorForTime(time).next().value;
       };
 
       expect(getRefAt(variants[0].video, 0)).toEqual(
@@ -585,4 +577,3 @@ describe('DashParser SegmentTemplate', () => {
     });
   });
 });
-

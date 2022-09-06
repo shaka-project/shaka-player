@@ -4,20 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.IStreamGenerator');
-goog.provide('shaka.test.Mp4LiveStreamGenerator');
-goog.provide('shaka.test.Mp4VodStreamGenerator');
-goog.provide('shaka.test.StreamGenerator');
-goog.provide('shaka.test.TSVodStreamGenerator');
-
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.BufferUtils');
-goog.require('shaka.util.DataViewReader');
-goog.require('shaka.util.Uint8ArrayUtils');
-
-
 /**
  * @summary
  * Defines an interface to generate streams.

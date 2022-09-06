@@ -14,6 +14,7 @@ goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
@@ -53,6 +54,7 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.stateSpan_ = shaka.util.Dom.createHTMLElement('span');
+    this.stateSpan_.classList.add('shaka-current-selection-span');
     label.appendChild(this.stateSpan_);
 
     this.button_.appendChild(label);
@@ -107,6 +109,14 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
           this.currentStats_[name], false) + ' (m)';
     };
 
+    const parseGaps = (name) => {
+      return this.currentStats_[name] + ' (gaps)';
+    };
+
+    const parseStalls = (name) => {
+      return this.currentStats_[name] + ' (stalls)';
+    };
+
     /** @private {!Object.<string, function(string):string>} */
     this.parseFrom_ = {
       'width': parsePx,
@@ -126,6 +136,8 @@ shaka.ui.StatisticsButton = class extends shaka.ui.Element {
       'corruptedFrames': parseFrames,
       'decodedFrames': parseFrames,
       'droppedFrames': parseFrames,
+      'stallsDetected': parseStalls,
+      'gapsJumped': parseGaps,
     };
 
     /** @private {shaka.util.Timer} */
@@ -243,6 +255,9 @@ shaka.ui.StatisticsButton.Factory = class {
   }
 };
 
+
+shaka.ui.OverflowMenu.registerElement(
+    'statistics', new shaka.ui.StatisticsButton.Factory());
 
 shaka.ui.ContextMenu.registerElement(
     'statistics', new shaka.ui.StatisticsButton.Factory());

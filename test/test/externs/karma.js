@@ -20,3 +20,7 @@ __karma__.config = {};
 
 /** @const {!Array.<*>} */
 __karma__.config.args;
+
+
+/** @param {?} error */
+__karma__.error = function(error) {};

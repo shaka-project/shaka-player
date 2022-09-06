@@ -4,17 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('shaka.Player');
-goog.require('shaka.test.FakeVideo');
-goog.require('shaka.test.UiUtils');
-goog.require('shaka.test.Util');
-goog.require('shaka.test.Waiter');
-goog.require('shaka.text.Cue');
-goog.require('shaka.text.SimpleTextDisplayer');
-goog.require('shaka.text.UITextDisplayer');
-goog.require('shaka.ui.Overlay');
-goog.require('shaka.util.EventManager');
-
 // TODO: Move this suite to the text/ folder where it belongs
 const supportsScreenshots = () => shaka.test.Util.supportsScreenshots();
 filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
@@ -34,11 +23,8 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
    */
   let beforeScreenshot;
 
-  // Legacy Edge seems to have inconsistent font kerning.  A one-pixel offset in
-  // the position of one character appears about 60% of the time, requiring us
-  // to have this change tolerance in our tests.  So far, all past bugs in our
-  // implementation that we have tests for would exceed this threshold by a lot.
-  const threshold = 160;  // px
+  // A minimum similarity score for screenshots, between 0 and 1.
+  const minSimilarity = 0.95;
 
   const originalCast = window.chrome && window.chrome.cast;
 
@@ -141,7 +127,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
         cue.region.id = '1';
         // Position the cue *explicitly* at the bottom of the screen.
         cue.region.viewportAnchorX = 0;  // %
-        cue.region.viewportAnchorY = 100;  // %
+        cue.region.viewportAnchorY = 90;  // %
+        cue.region.width = 100;  // %
+        cue.region.height = 10;  // %
         textDisplayer.append([cue]);
 
         await checkScreenshot('ui', 'cue-with-controls');
@@ -194,6 +182,7 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
 
         // The video must be played a little now, after the cues were appended,
         // but before the screenshot.
+        video.playbackRate = 1;
         video.play();
         await waiter.failOnTimeout(false).timeoutAfter(5)
             .waitForMovement(video);
@@ -201,10 +190,13 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
 
         // Seek to a time when cues should be showing.
         video.currentTime = time;
+        // Get into a playing state, but without movement.
+        video.playbackRate = 0;
+        video.play();
 
         // Add a short delay to ensure that the system has caught up and that
         // native text displayers have been updated by the browser.
-        await Util.shortDelay();
+        await Util.delay(0.1);
       };
     });
 
@@ -314,6 +306,16 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       await checkScreenshot(prefix, 'nested-cues-with-linebreak');
     });
 
+    // Regression test for #3600
+    it('cue positioning', async () => {
+      const cue = new shaka.text.Cue(0, 1, 'Text');
+      cue.line = 10;
+      cue.lineInterpretation = shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      textDisplayer.append([cue]);
+
+      await checkScreenshot(prefix, 'cue-position');
+    });
+
     // Regression test for #2157 and #2584
     it('region positioning', async () => {
       const nestedCue = new shaka.text.Cue(
@@ -403,7 +405,7 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       await checkScreenshot(prefix, 'flat-cue-bg');
     });
 
-    // https://github.com/google/shaka-player/issues/2761
+    // https://github.com/shaka-project/shaka-player/issues/2761
     it('deeply-nested cues', async () => {
       const makeCue = (text, fg = '', bg = '', nestedCues = []) => {
         const cue = new shaka.text.Cue(0, 1, text);
@@ -463,6 +465,6 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
     return Util.checkScreenshot(
         /* element= */ videoContainer,
         prefix + '-' + baseName,
-        threshold);
+        minSimilarity);
   }
 });

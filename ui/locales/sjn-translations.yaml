@@ -1,0 +1,257 @@
+# Shaka Player Sindarin (Elvish) Translations
+# Copyright 2022 Google LLC
+# SPDX-License-Identifier: Apache-2.0
+
+# This documents the manual translation of our UI into Sindarin.
+# This file is not consumed automatically.
+
+# References:
+#  - Font: http://freetengwar.sourceforge.net/tengtelc.html
+#  - Transliteration & dictionary: https://www.tecendil.com/?mode=sindarin
+#  - Dictionary: https://www.jrrvf.com/hisweloke/sindar/
+#  - Dictionary: https://www.elfdict.com/w/run/s?include_old=1
+#  - Grammar: https://www.elvish.org/gwaith/sindarin_intro.htm
+#  - Grammar: https://eldamo.org/content/grammar-indexes/grammars-s.html
+#  - Imperative ending: -o
+#  - Thesaurus: https://www.thesaurus.com/
+
+translations:
+ - key: AD_DURATION
+   english: "Ad duration"
+   sjn-literal: "time for break for money"
+   sjn-roman: "lû an hastië an mirian"
+   sjn: "    "
+
+ - key: AD_PROGRESS
+   english: "Ad [AD_ON] of [NUM_ADS]"
+   sjn-literal: "break for money [A] / [B]"
+   sjn-roman: "hastië an mirian [A] / [B]"
+   sjn: "   [AD_ON] / [NUM_ADS]"
+
+ - key: AD_TIME
+   english: "Ad: [AD_TIME]"
+   sjn-literal: "break for money: [A]"
+   sjn-roman: "hastië an mirian: [A]"
+   sjn: "  : [AD_TIME]"
+
+ - key: AIRPLAY
+   english: "AirPlay"
+   sjn-literal: "heavens-make-play"
+   sjn-roman: "menelnortho"
+   sjn: ""
+
+ - key: AUTO_QUALITY
+   english: "Auto"
+   sjn-literal: "adapt/make fit"
+   sjn-roman: "cammo"
+   sjn: ""
+
+ - key: BACK
+   english: "Back"
+   sjn-literal: "return"
+   sjn-roman: "dan"
+   sjn: ""
+
+ - key: CAPTIONS
+   english: "Captions"
+   sjn-literal: "words written"
+   sjn-roman: "pith teithiel"
+   sjn: " "
+
+ - key: CAST
+   english: "Cast..."
+   sjn-literal: "throw"
+   sjn-roman: "hanto"
+   sjn: ""
+
+ - key: ENTER_LOOP_MODE
+   english: "Loop the current video"
+   sjn-literal: "enter repeating"
+   sjn-roman: "minno enquetië"
+   sjn: " "
+
+ - key: ENTER_PICTURE_IN_PICTURE
+   english: "Enter Picture-in-Picture"
+   sjn-literal: "enter mind-picture within mind-picture"
+   sjn-roman: "minno fanwos bir fanwos"
+   sjn: "   "
+
+ - key: EXIT_FULL_SCREEN
+   english: "Exit full screen"
+   sjn-literal: "escape mind-picture full"
+   sjn-roman: "uthro fanwos panta"
+   sjn: "  "
+
+ - key: EXIT_LOOP_MODE
+   english: "Stop looping the current video"
+   sjn-literal: "escape repeating"
+   sjn-roman: "uthro enquetië"
+   sjn: " "
+
+ - key: EXIT_PICTURE_IN_PICTURE
+   english: "Exit Picture-in-Picture"
+   sjn-literal: "escape mind-picture within mind-picture"
+   sjn-roman: "uthro fanwos bir fanwos"
+   sjn: "   "
+
+ - key: FAST_FORWARD
+   english: "Fast-forward"
+   sjn-literal: "make-run fast"
+   sjn-roman: "northo lim"
+   sjn: " "
+
+ - key: FULL_SCREEN
+   english: "Full screen"
+   sjn-literal: "mind-picture full"
+   sjn-roman: "fanwos panta"
+   sjn: " "
+
+ - key: LANGUAGE
+   english: "Language"
+   sjn-literal: "language"
+   sjn-roman: "lambë"
+   sjn: ""
+
+ - key: LIVE
+   english: "Live"
+   sjn-literal: "freshest"
+   sjn-roman: "cîrwain"
+   sjn: ""
+
+ - key: LOOP
+   english: "Loop"
+   sjn-literal: "repeat"
+   sjn-roman: "enqueto"
+   sjn: ""
+
+ - key: MORE_SETTINGS
+   english: "More settings"
+   sjn-literal: "more+choices"
+   sjn-roman: "galainc"
+   sjn: ""
+
+ - key: MULTIPLE_LANGUAGES
+   english: "Multiple languages"
+   sjn-literal: "language without count"
+   sjn-roman: "lambë arnoediad"
+   sjn: " "
+
+ - key: MUTE
+   english: "Mute"
+   sjn-literal: "silence"
+   sjn-roman: "dîn"
+   sjn: ""
+
+ - key: NOT_APPLICABLE
+   english: "Not applicable"
+   sjn-literal: "not important"
+   sjn-roman: "la bâl"
+   sjn: " "
+
+ - key: OFF
+   english: "Off"
+   sjn-literal: "nothing"
+   sjn-roman: "unt"
+   sjn: ""
+
+ - key: ON
+   english: "On"
+   sjn-literal: "active"
+   sjn-roman: "carweg"
+   sjn: ""
+
+ - key: PAUSE
+   english: "Pause"
+   sjn-literal: "tarry/wait/pause"
+   sjn-roman: "hasto"
+   sjn: ""
+
+ - key: PICTURE_IN_PICTURE
+   english: "Picture-in-picture"
+   sjn-literal: "mind-picture within mind-picture"
+   sjn-roman: "fanwos bir fanwos"
+   sjn: "  "
+
+ - key: PLAY
+   english: "Play"
+   sjn-literal: "make-run"
+   sjn-roman: "northo"
+   sjn: ""
+
+ - key: PLAYBACK_RATE
+   english: "Playback speed"
+   sjn-literal: "speed"
+   sjn-roman: "lintië"
+   sjn: ""
+
+ - key: REPLAY
+   english: "Replay"
+   sjn-literal: "make-run again"
+   sjn-roman: "adnortho"
+   sjn: ""
+
+ - key: RESOLUTION
+   english: "Resolution"
+   sjn-literal: "value/preciousness"
+   sjn-roman: "meiras"
+   sjn: ""
+
+ - key: REWIND
+   english: "Rewind"
+   sjn-literal: "make-run backwards"
+   sjn-roman: "northo abont"
+   sjn: " "
+
+ - key: SEEK
+   english: "Seek"
+   sjn-literal: "time"
+   sjn-roman: "lû"
+   sjn: ""
+
+ - key: SKIP_AD
+   english: "Skip Ad"
+   sjn-literal: "leap across break for money"
+   sjn-roman: "cabo thar hastië an mirian"
+   sjn: "    "
+
+ - key: SKIP_TO_LIVE
+   english: "Skip ahead to live"
+   sjn-literal: "leap to freshest"
+   sjn-roman: "cabo na cîrwain"
+   sjn: "  "
+
+ - key: STATISTICS
+   english: "Statistics"
+   sjn-literal: "interrogate numbers"
+   sjn-roman: "cetho neth"
+   sjn: " "
+
+ - key: SUBTITLE_FORCED
+   english: "Forced"
+   sjn-literal: "words written firm/abiding"
+   sjn-roman: "pith teithiel taug"
+   sjn: "  "
+
+ - key: UNDETERMINED_LANGUAGE
+   english: "Undetermined"
+   sjn-literal: "not known"
+   sjn-roman: "la sinnen"
+   sjn: " "
+
+ - key: UNMUTE
+   english: "Unmute"
+   sjn-literal: "noise/sound"
+   sjn-roman: "lhôn"
+   sjn: ""
+
+ - key: UNRECOGNIZED_LANGUAGE
+   english: "Unrecognized"
+   sjn-literal: "not known"
+   sjn-roman: "la sinnen"
+   sjn: " "
+
+ - key: VOLUME
+   english: "Volume"
+   sjn-literal: "loud(ness)"
+   sjn-roman: "brui"
+   sjn: ""

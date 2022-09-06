@@ -15,7 +15,6 @@ goog.require('shaka.ui.RangeElement');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
-goog.requireType('shaka.ads.CuePoint');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -75,7 +74,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     });
 
     /**
-     * When user is scrubbing the seek bar - we should pause the video - see https://git.io/JUhHG
+     * When user is scrubbing the seek bar - we should pause the video - see
+     * https://github.com/google/shaka-player/pull/2898#issuecomment-705229215
      * but will conditionally pause or play the video after scrubbing
      * depending on its previous state
      *
@@ -83,7 +83,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
      */
     this.wasPlaying_ = false;
 
-    /** @private {!Array.<!shaka.ads.CuePoint>} */
+    /** @private {!Array.<!shaka.extern.AdCuePoint>} */
     this.adCuePoints_ = [];
 
     this.eventManager.listen(this.localization,
@@ -96,7 +96,9 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     this.eventManager.listen(
         this.adManager, shaka.ads.AdManager.AD_STARTED, () => {
-          shaka.ui.Utils.setDisplay(this.container, false);
+          if (!this.shouldBeDisplayed_()) {
+            shaka.ui.Utils.setDisplay(this.container, false);
+          }
         });
 
     this.eventManager.listen(
@@ -367,7 +369,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       return false;
     }
 
-    return this.ad == null;
+    return this.ad == null || !this.ad.isLinear();
   }
 
   /** @private */

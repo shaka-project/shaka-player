@@ -4,19 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.require('goog.asserts');
-goog.require('shaka.offline.ManifestConverter');
-goog.require('shaka.offline.indexeddb.V1StorageCell');
-goog.require('shaka.offline.indexeddb.V2StorageCell');
-goog.require('shaka.offline.indexeddb.V5StorageCell');
-goog.require('shaka.test.CannedIDB');
-goog.require('shaka.test.IndexedDBUtils');
-goog.require('shaka.test.ManifestGenerator');
-goog.require('shaka.test.Util');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.StringUtils');
-
 // All of the database dumps referenced below were originally made from the
 // "Heliocentrism" content in our demo app.
 // https://storage.googleapis.com/shaka-demo-assets/heliocentrism/heliocentrism.mpd
@@ -80,7 +67,7 @@ const compatibilityTestsMetadata = [
     // This is the v4 version of the database as written by v2.5.0 - v2.5.9.  A
     // bug in v2.5 caused the stream metadata from all periods to be written to
     // each period.  This was corrected in v2.5.10.
-    // See https://github.com/google/shaka-player/issues/2389
+    // See https://github.com/shaka-project/shaka-player/issues/2389
     name: 'v4-broken',
     dbImagePath: '/base/test/test/assets/db-dump-v4-broken.json',
     manifestKey: 1,
@@ -104,7 +91,7 @@ const compatibilityTestsMetadata = [
   },
 ];
 
-filterDescribe('Storage Compatibility', () => window.indexedDB, () => {
+filterDescribe('Storage Compatibility', offlineSupported, () => {
   for (const metadata of compatibilityTestsMetadata) {
     describe(metadata.name, () => {
       makeTests(metadata);

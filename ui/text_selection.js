@@ -35,6 +35,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         controls, shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS);
 
     this.button.classList.add('shaka-caption-button');
+    this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-text-languages');
 
     if (this.player && this.player.isTextTrackVisible()) {
@@ -65,6 +66,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.eventManager.listen(this.player, 'texttrackvisibility', () => {
       this.onCaptionStateChange_();
+      this.updateTextLanguages_();
     });
 
     this.eventManager.listen(this.player, 'textchanged', () => {
@@ -109,11 +111,11 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
   onCaptionStateChange_() {
     if (this.player.isTextTrackVisible()) {
       this.icon.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS_OFF;
+          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS;
       this.button.ariaPressed = 'true';
     } else {
       this.icon.textContent =
-          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS;
+          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS_OFF;
       this.button.ariaPressed = 'false';
     }
 
@@ -154,6 +156,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);
     }
+
+    this.button.setAttribute('shaka-status', this.currentSelection.textContent);
 
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 
