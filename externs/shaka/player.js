@@ -1081,9 +1081,11 @@ shaka.extern.ManifestConfiguration;
  *   times needlessly.
  *   Defaults to <code>false</code>.
  * @property {boolean} correctTimestampOffset
- *   Correct timestamp offsets when they appear to be incorrect
+ *   Correct timestamp offsets when they appear to be incorrect.
+ *   Defaults to false.
  * @property {number} maxTimestampDiscrepancy
- *   Correct timestamp offset when greater than maxTimestampDiscrepancy
+ *   Correct timestamp offset when greater than maxTimestampDiscrepancy.
+ *   Defaults to 10 seconds.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
