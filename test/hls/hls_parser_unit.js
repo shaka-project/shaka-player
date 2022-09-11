@@ -129,8 +129,28 @@ describe('HlsParser', () => {
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
     return actual;
+  }
+
+  /** @param {!shaka.extern.Manifest} manifest */
+  async function loadAllStreamsFor(manifest) {
+    const promises = [];
+    for (const variant of manifest.variants) {
+      for (const stream of [variant.video, variant.audio]) {
+        if (stream) {
+          promises.push(stream.createSegmentIndex());
+        }
+      }
+    }
+    for (const text of manifest.textStreams) {
+      promises.push(text.createSegmentIndex());
+    }
+    for (const image of manifest.imageStreams) {
+      promises.push(image.createSegmentIndex());
+    }
+    await Promise.all(promises);
   }
 
   it('parses manifest attributes', async () => {
@@ -205,6 +225,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -280,6 +301,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -321,6 +343,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -1129,6 +1152,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -1200,6 +1224,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -1263,6 +1288,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -1324,6 +1350,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -1387,6 +1414,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -1442,6 +1470,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     // Duration should be the minimum of the streams, but ignore the text
     // stream.
     const timeline = actual.presentationTimeline;
@@ -1524,6 +1553,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
 
     expect(actual.imageStreams.length).toBe(1);
     expect(actual.textStreams.length).toBe(1);
@@ -1596,6 +1626,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
 
     expect(actual.variants.length).toBe(1);
 
@@ -1721,6 +1752,7 @@ describe('HlsParser', () => {
     parser.configure(config);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     const variant = actual.variants[0];
     expect(variant.audio).toBe(null);
     expect(variant.video).toBeTruthy();
@@ -1796,6 +1828,7 @@ describe('HlsParser', () => {
     parser.configure(config);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     const variant = actual.variants[0];
     expect(variant.audio).toBeTruthy();
     expect(variant.video).toBe(null);
@@ -1871,6 +1904,7 @@ describe('HlsParser', () => {
     parser.configure(config);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     const stream = actual.textStreams[0];
     expect(stream).toBeUndefined();
   });
@@ -1945,6 +1979,7 @@ describe('HlsParser', () => {
     parser.configure(config);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     const stream = actual.imageStreams[0];
     expect(stream).toBeUndefined();
   });
@@ -1989,6 +2024,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -2040,6 +2076,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -2082,6 +2119,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -2148,6 +2186,7 @@ describe('HlsParser', () => {
           .setResponseValue('test:/main.mp4', segmentData);
 
       const actual = await parser.start('test:/master', playerInterface);
+      await loadAllStreamsFor(actual);
       expect(actual).toEqual(manifest);
     }
 
@@ -2293,6 +2332,7 @@ describe('HlsParser', () => {
 
     config.hls.ignoreTextStreamFailures = true;
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -2331,6 +2371,7 @@ describe('HlsParser', () => {
 
     config.hls.ignoreImageStreamFailures = true;
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -2396,6 +2437,7 @@ describe('HlsParser', () => {
 
     const actual =
         await parser.start('test:/host/master.m3u8', playerInterface);
+    await loadAllStreamsFor(actual);
     const video = actual.variants[0].video;
     const audio = actual.variants[0].audio;
 
@@ -2594,6 +2636,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
   });
 
@@ -2638,7 +2681,8 @@ describe('HlsParser', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MANIFEST,
           shaka.util.Error.Code.NO_WEB_CRYPTO_API));
-      await expectAsync(parser.start('test:/master', playerInterface))
+      const actual = await parser.start('test:/master', playerInterface);
+      await expectAsync(loadAllStreamsFor(actual))
           .toBeRejectedWith(expectedError);
     } finally {
       Object.defineProperty(window, 'crypto', {
@@ -2883,8 +2927,9 @@ describe('HlsParser', () => {
      * @param {string} master
      * @param {string} media
      * @param {!shaka.util.Error} error
+     * @param {boolean=} onCreateSegmentIndex
      */
-    async function verifyError(master, media, error) {
+    async function verifyError(master, media, error, onCreateSegmentIndex) {
       fakeNetEngine
           .setResponseText('test:/master', master)
           .setResponseText('test:/audio', media)
@@ -2895,8 +2940,14 @@ describe('HlsParser', () => {
           .setResponseValue('data:text/plain;base64,AAECAwQFBgcICQoLDA0ODw==',
               aes128Key);
 
-      await expectAsync(parser.start('test:/master', playerInterface))
-          .toBeRejectedWith(Util.jasmineError(error));
+      if (onCreateSegmentIndex) {
+        const actual = await parser.start('test:/master', playerInterface);
+        await expectAsync(loadAllStreamsFor(actual))
+            .toBeRejectedWith(Util.jasmineError(error));
+      } else {
+        await expectAsync(parser.start('test:/master', playerInterface))
+            .toBeRejectedWith(Util.jasmineError(error));
+      }
     }
 
     it('if unable to guess codecs', async () => {
@@ -3033,7 +3084,7 @@ describe('HlsParser', () => {
           shaka.util.Error.Category.MANIFEST,
           Code.HLS_MSE_ENCRYPTED_MP2T_NOT_SUPPORTED);
 
-      await verifyError(master, media, error);
+      await verifyError(master, media, error, /* onCreateSegmentIndex= */ true);
     });
 
     describe('if required tags are missing', () => {
@@ -3049,7 +3100,8 @@ describe('HlsParser', () => {
             Code.HLS_REQUIRED_TAG_MISSING,
             tagName);
 
-        await verifyError(master, media, error);
+        await verifyError(
+            master, media, error, /* onCreateSegmentIndex= */ true);
       }
 
       it('EXTINF', async () => {
@@ -3383,6 +3435,7 @@ describe('HlsParser', () => {
         .setResponseValue('test:/main.mp4', segmentData);
 
     const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
     expect(actual.variants.length).toBe(1);
     expect(actual).toEqual(manifest);
   });
@@ -3415,6 +3468,7 @@ describe('HlsParser', () => {
 
       const actual =
           await parser.start('test:/host/master.m3u8', playerInterface);
+      await loadAllStreamsFor(actual);
       const video = actual.variants[0].video;
       const audio = actual.variants[0].audio;
 
@@ -3462,6 +3516,7 @@ describe('HlsParser', () => {
 
       const actual =
           await parser.start('test:/host/master.m3u8', playerInterface);
+      await loadAllStreamsFor(actual);
       const video = actual.variants[0].video;
       const audio = actual.variants[0].audio;
 
@@ -3509,6 +3564,7 @@ describe('HlsParser', () => {
 
       const actual =
           await parser.start('test:/host/master.m3u8', playerInterface);
+      await loadAllStreamsFor(actual);
       const video = actual.variants[0].video;
       const audio = actual.variants[0].audio;
 
