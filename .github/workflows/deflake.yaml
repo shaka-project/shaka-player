@@ -15,6 +15,8 @@ jobs:
 
     steps:
       - name: Check run count and re-run workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh api /repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }} > run.json
           RUNS=$(jq -r .run_attempt < run.json)
