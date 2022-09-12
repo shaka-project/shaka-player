@@ -87,6 +87,7 @@
 +../../lib/util/mime_utils.js
 +../../lib/util/mp4_box_parsers.js
 +../../lib/util/mp4_parser.js
++../../lib/util/mp4_segment_parsers.js
 +../../lib/util/multi_map.js
 +../../lib/util/networking.js
 +../../lib/util/object_utils.js
