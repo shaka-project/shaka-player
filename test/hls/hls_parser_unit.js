@@ -91,6 +91,7 @@ describe('HlsParser', () => {
       isLowLatencyMode: () => false,
       isAutoLowLatencyMode: () => false,
       enableLowLatencyMode: () => {},
+      updateDuration: () => {},
     };
 
     parser = new shaka.hls.HlsParser();
