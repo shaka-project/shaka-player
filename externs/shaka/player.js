@@ -575,7 +575,7 @@ shaka.extern.EmsgInfo;
  * Contains information about an PRFT MP4 box.
  *
  * @property {number} wallClockTime
- *   A UTC timestamp corresponding to decoding time.
+ *   A UTC timestamp corresponding to decoding time in milliseconds.
  * @property {Date} programStartDate
  *   The derived start date of the program.
  * @exportDoc
