@@ -1003,6 +1003,43 @@ describe('MediaSourceEngine', () => {
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       audioSourceBuffer.updateend();
     });
+
+    it('allows duration to be shrunk', async () => {
+      // Pretend the initial duration was 100.
+      mockMediaSource.durationGetter.and.returnValue(100);
+
+      // When duration is shrunk, 'updateend' events are generated.  This is
+      // because reducing the duration triggers the MSE removal algorithm to
+      // run.
+      mockMediaSource.durationSetter.and.callFake((duration) => {
+        expect(duration).toBe(50);
+        videoSourceBuffer.updateend();
+        audioSourceBuffer.updateend();
+      });
+
+      audioSourceBuffer.appendBuffer.and.callFake(() => {
+        audioSourceBuffer.updateend();
+      });
+      videoSourceBuffer.appendBuffer.and.callFake(() => {
+        videoSourceBuffer.updateend();
+      });
+
+      /** @type {!Promise} */
+      const p1 = mediaSourceEngine.setDuration(50);
+      expect(mockMediaSource.durationSetter).not.toHaveBeenCalled();
+
+      // These operations should be blocked until after duration is shrunk.
+      // This is tested because shrinking duration generates 'updateend'
+      // events, and we want to show that the queue still operates correctly.
+      const a1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null,
+          /* hasClosedCaptions= */ false);
+      const a2 = mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null,
+          /* hasClosedCaptions= */ false);
+
+      await p1;
+      await a1;
+      await a2;
+    });
   });
 
   describe('destroy', () => {
