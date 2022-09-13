@@ -1007,7 +1007,7 @@ shaka.extern.ManifestConfiguration;
  *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
  * @property {boolean} parsePrftBox
  *   If <code>true</code>, will raise a shaka.extern.ProducerReferenceTime
- *   player event via the shaka.util.FakeEvent.EventName.Prft event.
+ *   player event (event name 'prft').
  *   The event will be raised only once per playback session as program
  *   start date will not change, and would save parsing the segment multiple
  *   times needlessly.
