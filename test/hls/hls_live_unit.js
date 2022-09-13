@@ -306,6 +306,74 @@ describe('HlsParser live', () => {
         // Wait for stop to complete.
         await stopPromise;
       });
+
+      it('calls notifySegments on each update', async () => {
+        const manifest = await testInitialManifest(master, media);
+        const notifySegmentsSpy = spyOn(
+            manifest.presentationTimeline, 'notifySegments').and.callThrough();
+
+        // Trigger an update.
+        await delayForUpdatePeriod();
+
+        expect(notifySegmentsSpy).toHaveBeenCalled();
+        notifySegmentsSpy.calls.reset();
+
+        // Trigger another update.
+        await delayForUpdatePeriod();
+
+        expect(notifySegmentsSpy).toHaveBeenCalled();
+      });
+
+      it('converts to VOD only after all playlists end', async () => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+          'URI="audio"\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",AUDIO="aud1",',
+          'RESOLUTION=960x540,FRAME-RATE=60\n',
+          'video\n',
+        ].join('');
+
+        const mediaWithEndList = media + '#EXT-X-ENDLIST';
+
+        const manifest = await testInitialManifest(master, media);
+        expect(manifest.presentationTimeline.isLive()).toBe(true);
+
+        // Update video only.
+        fakeNetEngine.setResponseText('test:/video', mediaWithEndList);
+        await delayForUpdatePeriod();
+
+        // Audio hasn't "ended" yet, so we're still live.
+        expect(manifest.presentationTimeline.isLive()).toBe(true);
+
+        // Update audio.
+        fakeNetEngine.setResponseText('test:/audio', mediaWithEndList);
+        await delayForUpdatePeriod();
+
+        // Now both have "ended", so we're no longer live.
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+      });
+
+      it('stops updating after all playlists end', async () => {
+        const manifest = await testInitialManifest(master, media);
+        expect(manifest.presentationTimeline.isLive()).toBe(true);
+
+        fakeNetEngine.request.calls.reset();
+        await testUpdate(
+            manifest, mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n');
+
+        // We saw one request for the video playlist, which signalled "ENDLIST".
+        fakeNetEngine.expectRequest(
+            'test:/video',
+            shaka.net.NetworkingEngine.RequestType.MANIFEST);
+        expect(manifest.presentationTimeline.isLive()).toBe(false);
+
+        fakeNetEngine.request.calls.reset();
+        await delayForUpdatePeriod();
+
+        // No new updates were requested.
+        expect(fakeNetEngine.request).not.toHaveBeenCalled();
+      });
     });  // describe('update')
   });  // describe('playlist type EVENT')
 
