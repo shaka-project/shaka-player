@@ -469,7 +469,7 @@ google.ima.dai.api.StreamData.prototype.subtitles;
 
 /** @const */
 google.ima.dai.api.StreamEvent = class extends Event {
-  /** @return {!google.ima.dai.api.Ad} */
+  /** @return {?google.ima.dai.api.Ad} */
   getAd() {}
 
   /** @return {!google.ima.dai.api.StreamData} */
