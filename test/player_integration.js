@@ -205,115 +205,6 @@ describe('Player', () => {
       }
     });
 
-    it('is called automatically if language prefs match', async () => {
-      // If the text is a match for the user's preferences, and audio differs
-      // from text, we enable text display automatically.
-
-      // NOTE: This is also a regression test for #1696, in which a change
-      // to this feature broke StreamingEngine initialization.
-
-      const preferredTextLanguage = 'fa';  // The same as in the content itself
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      // Now load a version of Sintel with delayed setup of video & audio
-      // streams and wait for completion.
-      await player.load('test:sintel_realistic_compiled');
-      // By this point, a MediaSource error would be thrown in a repro of bug
-      // #1696.
-
-      // Make sure the automatic setting took effect.
-      expect(player.isTextTrackVisible()).toBe(true);
-
-      // Make sure the content we tested with has text tracks, that the config
-      // we used matches the text language, and that the audio language differs.
-      // These will catch any changes to the underlying content that would
-      // invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).not.toBe(textTrack.language);
-    });
-
-    it('is not called automatically without language pref match', async () => {
-      // If the text preference doesn't match the content, we do not enable text
-      // display automatically.
-
-      const preferredTextLanguage = 'xx';  // Differs from the content itself
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      // Now load the content and wait for completion.
-      await player.load('test:sintel_realistic_compiled');
-
-      // Make sure the automatic setting did not happen.
-      expect(player.isTextTrackVisible()).toBe(false);
-
-      // Make sure the content we tested with has text tracks, that the config
-      // we used does not match the text language, and that the text and audio
-      // languages do not match each other (to keep this distinct from the next
-      // test case).  This will catch any changes to the underlying content that
-      // would invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).not.toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).not.toBe(textTrack.language);
-    });
-
-    it('is not called automatically with audio and text match', async () => {
-      // If the audio and text tracks use the same language, we do not enable
-      // text display automatically, no matter the text preference.
-
-      const preferredTextLanguage = 'und';  // The same as in the content itself
-      player.configure({preferredTextLanguage: preferredTextLanguage});
-
-      // Now load the content and wait for completion.
-      await player.load('test:sintel_compiled');
-
-      // Make sure the automatic setting did not happen.
-      expect(player.isTextTrackVisible()).toBe(false);
-
-      // Make sure the content we tested with has text tracks, that the
-      // config we used matches the content, and that the text and audio
-      // languages match each other.  This will catch any changes to the
-      // underlying content that would invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).toBe(textTrack.language);
-    });
-
-    it('is called automatically with text match only', async () => {
-      // If the audio and text tracks use the same language, we do not enable
-      // text display automatically, no matter the text preference.
-
-      const preferredTextLanguage = 'und';  // The same as in the content itself
-      player.configure({
-        selectTextWithoutAudioConcern: true,
-        preferredTextLanguage: preferredTextLanguage});
-
-      // Now load the content and wait for completion.
-      await player.load('test:sintel_compiled');
-
-      // Make sure the automatic setting did not happen.
-      expect(player.isTextTrackVisible()).toBe(true);
-
-      // Make sure the content we tested with has text tracks, that the
-      // config we used matches the content, and that the text and audio
-      // languages match each other.  This will catch any changes to the
-      // underlying content that would invalidate the test setup.
-      expect(player.getTextTracks().length).not.toBe(0);
-      const textTrack = player.getTextTracks()[0];
-      expect(textTrack.language).toBe(preferredTextLanguage);
-
-      const variantTrack = player.getVariantTracks()[0];
-      expect(variantTrack.language).toBe(textTrack.language);
-    });
-
     // Repro for https://github.com/shaka-project/shaka-player/issues/1879.
     it('appends cues when enabled initially', async () => {
       let cues = [];
@@ -402,6 +293,160 @@ describe('Player', () => {
       expect(getTracksActive()).toEqual([false, true]);
     });
   });  // describe('setTextTrackVisibility')
+
+  describe('autoShowText', () => {
+    async function textMatchesAudioDoesNot() {
+      const preferredTextLanguage = 'fa';  // The same as in the content
+      player.configure({preferredTextLanguage: preferredTextLanguage});
+
+      // NOTE: This is also a regression test for #1696, in which a change to
+      // this feature broke StreamingEngine initialization.
+
+      // Now load a version of Sintel with delayed setup of video & audio
+      // streams and wait for completion.
+      await player.load('test:sintel_realistic_compiled');
+      // By this point, a MediaSource error would be thrown in a repro of bug
+      // #1696.
+
+      // Make sure the content we tested with has text tracks, that the config
+      // we used matches the text language, and that the audio language differs.
+      // These will catch any changes to the underlying content that would
+      // invalidate the test setup.
+      expect(player.getTextTracks().length).not.toBe(0);
+      const textTrack = player.getTextTracks()[0];
+      expect(textTrack.language).toBe(preferredTextLanguage);
+
+      const variantTrack = player.getVariantTracks()[0];
+      expect(variantTrack.language).not.toBe(textTrack.language);
+    }
+
+    async function textDoesNotMatch() {
+      const preferredTextLanguage = 'xx';  // Differs from the content
+      player.configure({preferredTextLanguage: preferredTextLanguage});
+
+      // Now load the content and wait for completion.
+      await player.load('test:sintel_realistic_compiled');
+
+      // Make sure the content we tested with has text tracks, that the config
+      // we used does not match the text language, and that the text and audio
+      // languages do not match each other (to keep this distinct from the next
+      // test case).  This will catch any changes to the underlying content that
+      // would invalidate the test setup.
+      expect(player.getTextTracks().length).not.toBe(0);
+      const textTrack = player.getTextTracks()[0];
+      expect(textTrack.language).not.toBe(preferredTextLanguage);
+
+      const variantTrack = player.getVariantTracks()[0];
+      expect(variantTrack.language).not.toBe(textTrack.language);
+    }
+
+    async function textAndAudioMatch() {
+      const preferredTextLanguage = 'und';  // The same as in the content
+      player.configure({preferredTextLanguage: preferredTextLanguage});
+
+      // Now load the content and wait for completion.
+      await player.load('test:sintel_compiled');
+
+      // Make sure the content we tested with has text tracks, that the config
+      // we used matches the content, and that the text and audio languages
+      // match each other.  This will catch any changes to the underlying
+      // content that would invalidate the test setup.
+      expect(player.getTextTracks().length).not.toBe(0);
+      const textTrack = player.getTextTracks()[0];
+      expect(textTrack.language).toBe(preferredTextLanguage);
+
+      const variantTrack = player.getVariantTracks()[0];
+      expect(variantTrack.language).toBe(textTrack.language);
+    }
+
+    describe('IF_SUBTITLES_MAY_BE_NEEDED', () => {
+      beforeEach(() => {
+        player.configure(
+            'autoShowText',
+            shaka.config.AutoShowText.IF_SUBTITLES_MAY_BE_NEEDED);
+      });
+
+      it('enables text if text matches and audio does not', async () => {
+        await textMatchesAudioDoesNot();
+        expect(player.isTextTrackVisible()).toBe(true);
+      });
+
+      it('disables text if text does not match', async () => {
+        await textDoesNotMatch();
+        expect(player.isTextTrackVisible()).toBe(false);
+      });
+
+      it('disables text if both text and audio match', async () => {
+        await textAndAudioMatch();
+        expect(player.isTextTrackVisible()).toBe(false);
+      });
+    });  // IF_SUBTITLES_MAY_BE_NEEDED
+
+    describe('IF_PREFERRED_TEXT_LANGUAGE', () => {
+      beforeEach(() => {
+        player.configure(
+            'autoShowText',
+            shaka.config.AutoShowText.IF_PREFERRED_TEXT_LANGUAGE);
+      });
+
+      it('enables text if text matches and audio does not', async () => {
+        await textMatchesAudioDoesNot();
+        expect(player.isTextTrackVisible()).toBe(true);
+      });
+
+      it('disables text if text does not match', async () => {
+        await textDoesNotMatch();
+        expect(player.isTextTrackVisible()).toBe(false);
+      });
+
+      it('enables text if both text and audio match', async () => {
+        await textAndAudioMatch();
+        expect(player.isTextTrackVisible()).toBe(true);
+      });
+    });  // IF_PREFERRED_TEXT_LANGUAGE
+
+    describe('ALWAYS', () => {
+      beforeEach(() => {
+        player.configure('autoShowText', shaka.config.AutoShowText.ALWAYS);
+      });
+
+      it('enables text if text matches and audio does not', async () => {
+        await textMatchesAudioDoesNot();
+        expect(player.isTextTrackVisible()).toBe(true);
+      });
+
+      it('enables text if text does not match', async () => {
+        await textDoesNotMatch();
+        expect(player.isTextTrackVisible()).toBe(true);
+      });
+
+      it('enables text if both text and audio match', async () => {
+        await textAndAudioMatch();
+        expect(player.isTextTrackVisible()).toBe(true);
+      });
+    });  // ALWAYS
+
+    describe('NEVER', () => {
+      beforeEach(() => {
+        player.configure('autoShowText', shaka.config.AutoShowText.NEVER);
+      });
+
+      it('disables text if text matches and audio does not', async () => {
+        await textMatchesAudioDoesNot();
+        expect(player.isTextTrackVisible()).toBe(false);
+      });
+
+      it('disables text if text does not match', async () => {
+        await textDoesNotMatch();
+        expect(player.isTextTrackVisible()).toBe(false);
+      });
+
+      it('disables text if both text and audio match', async () => {
+        await textAndAudioMatch();
+        expect(player.isTextTrackVisible()).toBe(false);
+      });
+    });  // NEVER
+  });  // AutoShowText
 
   describe('plays', () => {
     it('with external text tracks', async () => {

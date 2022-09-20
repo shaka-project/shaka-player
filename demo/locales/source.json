@@ -67,6 +67,10 @@
     "description": "The name of a configuration value.",
     "message": "Auto Low Latency Streaming"
   },
+  "DEMO_AUTO_SHOW_TEXT": {
+    "description": "The name of a configuration value.",
+    "message": "Auto-Show Text"
+  },
   "DEMO_AVAILABILITY_WINDOW_OVERRIDE": {
     "description": "The name of a configuration value.",
     "message": "Availability Window Override"
@@ -826,10 +830,6 @@
   "DEMO_TEXT_ROLE": {
     "description": "The name of a configuration value.",
     "message": "Preferred Text Role"
-  },
-  "DEMO_SELECT_TEXT_WITHOUT_AUDIO": {
-    "description": "The name of a configuration value.",
-    "message": "Select Text without audio concern"
   },
   "DEMO_THUMBNAILS": {
     "description": "Text that describes an asset that has a thumbnail stream.",

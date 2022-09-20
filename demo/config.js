@@ -430,13 +430,27 @@ shakaDemo.Config = class {
   addLanguageSection_() {
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
+
+    const autoShowTextOptions = shaka.config.AutoShowText;
+    const localize = (name) => shakaDemoMain.getLocalizedString(name);
+    const autoShowTextOptionNames = {
+      'NEVER': localize(MessageIds.AUTO_SHOW_TEXT_NEVER),
+      'ALWAYS': localize(MessageIds.AUTO_SHOW_TEXT_ALWAYS),
+      'IF_PREFERRED_TEXT_LANGUAGE':
+          localize(MessageIds.AUTO_SHOW_TEXT_IF_PREFERRED_TEXT_LANGUAGE),
+      'IF_SUBTITLES_MAY_BE_NEEDED':
+          localize(MessageIds.AUTO_SHOW_TEXT_IF_SUBTITLES_MAY_BE_NEEDED),
+    };
+
     this.addSection_(MessageIds.LANGUAGE_SECTION_HEADER, docLink)
         .addTextInput_(MessageIds.AUDIO_LANGUAGE, 'preferredAudioLanguage')
         .addTextInput_(MessageIds.TEXT_LANGUAGE, 'preferredTextLanguage')
         .addTextInput_(MessageIds.TEXT_ROLE, 'preferredTextRole')
-        .addBoolInput_(
-            MessageIds.SELECT_TEXT_WITHOUT_AUDIO,
-            'selectTextWithoutAudioConcern');
+        .addSelectInput_(
+            MessageIds.AUTO_SHOW_TEXT,
+            'autoShowText',
+            autoShowTextOptions,
+            autoShowTextOptionNames);
     const onChange = (input) => {
       shakaDemoMain.setUILocale(input.value);
       shakaDemoMain.remakeHash();
@@ -526,7 +540,7 @@ shakaDemo.Config = class {
       }
       shakaDemoMain.remakeHash();
     };
-    this.addSelectInput_(MessageIds.LOG_LEVEL, logLevels, onChange);
+    this.addCustomSelectInput_(MessageIds.LOG_LEVEL, logLevels, onChange);
     const input = this.latestInput_.input();
     switch (shaka['log']['currentLevel']) {
       case Level['DEBUG']:
@@ -708,12 +722,48 @@ shakaDemo.Config = class {
    * @return {!shakaDemo.Config}
    * @private
    */
-  addSelectInput_(name, values, onChange, tooltipMessage) {
+  addCustomSelectInput_(name, values, onChange, tooltipMessage) {
     this.createRow_(name, tooltipMessage);
     // The input is not provided a name, as (in this enclosed space) it makes
     // the actual field unreadable.
     this.latestInput_ = new shakaDemo.SelectInput(
         this.getLatestSection_(), null, onChange, values);
+    return this;
+  }
+
+  /**
+   * @param {!shakaDemo.MessageIds} name
+   * @param {string} valueName
+   * @param {!Object.<string, ?>} options
+   * @param {!Object.<string, string>} optionNames
+   * @param {shakaDemo.MessageIds=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addSelectInput_(name, valueName, options, optionNames, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configure(valueName, options[input.value]);
+      shakaDemoMain.remakeHash();
+    };
+
+    // If there are any translations missing for option names, fill in the
+    // constant from the enum.  This ensures new enum values are usable in the
+    // demo in some form, even if they are forgotten in the demo config.
+    for (const key in options) {
+      if (!(key in optionNames)) {
+        optionNames[key] = key;
+      }
+    }
+
+    this.addCustomSelectInput_(name, optionNames, onChange, tooltipMessage);
+
+    const initialValue = shakaDemoMain.getCurrentConfigValue(valueName);
+    for (const key in options) {
+      if (options[key] == initialValue) {
+        this.latestInput_.input().value = key;
+      }
+    }
+
     return this;
   }
 
