@@ -440,6 +440,7 @@ function buildNav(members) {
       [members.externals, 'Externals', seen, linktoExternal],
       [members.namespaces, 'Namespaces', seen, linkto],
       [members.classes, 'Classes', seen, linkto],
+      [members.enums, 'Enums', seen, linkto],
       [members.interfaces, 'Interfaces', seen, linkto],
       [members.events, 'Events', seen, linkto],
       [members.mixins, 'Mixins', seen, linkto],
@@ -484,6 +485,7 @@ function fixUpType(type) {
 exports.publish = (taffyData, opts, tutorials) => {
     let classes;
     let conf;
+    let enums;
     let externals;
     let files;
     let fromDir;
@@ -733,6 +735,31 @@ exports.publish = (taffyData, opts, tutorials) => {
     });
 
     members = helper.getMembers(data);
+    members.enums = [];
+
+    data().each(doclet => {
+        if (doclet.isEnum) {
+            const hasParent = !!docletMap[doclet.memberof];
+
+            // Enums without parents (not attached to a class, but directly to a
+            // namespace) aren't recognized by jsdoc by default and need to be
+            // massaged into the docs separately.
+            if (!hasParent) {
+                // Temporarily call this a "class", so that we can fix the URL.
+                doclet.kind = 'class';
+                // Regenerate the URL, so that this enum gets its own page
+                // instead of a URL that links to an ID within a non-existent
+                // parent page.
+                delete helper.longnameToUrl[doclet.longname];
+                helper.createLink(doclet);
+                // Mark this as an enum (custom type), so that it doesn't get
+                // slotted with the classes.
+                doclet.kind = 'enum';
+                members.enums.push(doclet);
+            }
+        }
+    });
+
     members.tutorials = tutorials.children;
     if (conf.default.sortTutorialsByConfigOrder) {
         members.tutorials.sort((a, b) => {
@@ -778,6 +805,7 @@ exports.publish = (taffyData, opts, tutorials) => {
 
     // set up the lists that we'll use to generate pages
     classes = taffy(members.classes);
+    enums = taffy(members.enums);
     modules = taffy(members.modules);
     namespaces = taffy(members.namespaces);
     mixins = taffy(members.mixins);
@@ -786,6 +814,7 @@ exports.publish = (taffyData, opts, tutorials) => {
 
     Object.keys(helper.longnameToUrl).forEach(longname => {
         const myClasses = helper.find(classes, {longname: longname});
+        const myEnums = helper.find(enums, {longname: longname});
         const myExternals = helper.find(externals, {longname: longname});
         const myInterfaces = helper.find(interfaces, {longname: longname});
         const myMixins = helper.find(mixins, {longname: longname});
@@ -798,6 +827,10 @@ exports.publish = (taffyData, opts, tutorials) => {
 
         if (myClasses.length) {
             generate(`Class: ${myClasses[0].longname}`, myClasses, helper.longnameToUrl[longname]);
+        }
+
+        if (myEnums.length) {
+            generate(`Enum: ${myEnums[0].longname}`, myEnums, helper.longnameToUrl[longname]);
         }
 
         if (myNamespaces.length) {
