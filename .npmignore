@@ -4,6 +4,8 @@
 .gitignore
 .release-please*
 *.pyc
+app-engine/
+build/
 docs/api/
 coverage/
 test/test/assets/screenshots/

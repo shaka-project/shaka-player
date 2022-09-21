@@ -43,6 +43,7 @@ shaka.test.Dash = class {
       isLowLatencyMode: () => false,
       isAutoLowLatencyMode: () => false,
       enableLowLatencyMode: () => {},
+      updateDuration: () => {},
     };
     const manifest = await dashParser.start('dummy://foo', playerInterface);
     const stream = manifest.variants[0].video;
@@ -77,6 +78,7 @@ shaka.test.Dash = class {
       isLowLatencyMode: () => false,
       isAutoLowLatencyMode: () => false,
       enableLowLatencyMode: () => {},
+      updateDuration: () => {},
     };
     const p = dashParser.start('dummy://foo', playerInterface);
     await expectAsync(p).toBeRejectedWith(

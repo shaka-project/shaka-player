@@ -383,6 +383,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:DASH] [JARGON:suggestedPresentationDelay]"
   },
+  "DEMO_IGNORE_DEVICE_PIXEL_RATIO": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore device pixel ratio"
+  },
   "DEMO_IGNORE_HLS_TEXT_FAILURES": {
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures"
@@ -711,6 +715,10 @@
     "description": "A link in the header, that files a bug report.",
     "message": "REPORT BUG"
   },
+  "DEMO_RESTRICT_TO_ELEMENT_SIZE": {
+    "description": "The name of a configuration value.",
+    "message": "Restrict to element size"
+  },
   "DEMO_RESTRICTIONS_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "Restrictions"
@@ -922,6 +930,18 @@
   "DEMO_VIDEO_ROBUSTNESS": {
     "description": "The name of a configuration value.",
     "message": "Video Robustness"
+  },
+  "DEMO_VISUALIZER_AUTO_SCREENSHOT_TOGGLE": {
+    "description": "A configuration toggle that makes the visualizer take a screenshot when the presentation stalls.",
+    "message": "Take Screenshot On Stall"
+  },
+  "DEMO_VISUALIZER_BUTTON": {
+    "description": "A button on the video that opens or hides the visualizer.",
+    "message": "Buffer Visualizer"
+  },
+  "DEMO_VISUALIZER_SCREENSHOT_BUTTON": {
+    "description": "A button that takes a screenshot of the current visualizer state.",
+    "message": "Take Screenshot"
   },
   "DEMO_VOD": {
     "description": "Text that describes an asset that is a VOD (Video On Delivery).",

@@ -346,7 +346,7 @@ describe('MediaSourceEngine', () => {
 
     it('appends the given data', async () => {
       const p = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       audioSourceBuffer.updateend();
@@ -363,7 +363,7 @@ describe('MediaSourceEngine', () => {
           jasmine.objectContaining({message: 'fail!'})));
       await expectAsync(
           mediaSourceEngine.appendBuffer(
-              ContentType.AUDIO, buffer, null, null,
+              ContentType.AUDIO, buffer, null,
               /* hasClosedCaptions= */ false))
           .toBeRejectedWith(expected);
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
@@ -382,7 +382,7 @@ describe('MediaSourceEngine', () => {
           ContentType.AUDIO));
       await expectAsync(
           mediaSourceEngine.appendBuffer(
-              ContentType.AUDIO, buffer, null, null,
+              ContentType.AUDIO, buffer, null,
               /* hasClosedCaptions= */ false))
           .toBeRejectedWith(expected);
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
@@ -403,10 +403,10 @@ describe('MediaSourceEngine', () => {
           ContentType.AUDIO));
 
       const p1 = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
       const p2 = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
       audioSourceBuffer.updateend();
       await expectAsync(p1).toBeResolved();
@@ -416,7 +416,7 @@ describe('MediaSourceEngine', () => {
     it('rejects the promise if this operation fails async', async () => {
       mockVideo.error = {code: 5};
       const p = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
       audioSourceBuffer.error();
       audioSourceBuffer.updateend();
@@ -433,11 +433,11 @@ describe('MediaSourceEngine', () => {
     it('queues operations on a single SourceBuffer', async () => {
       /** @type {!shaka.test.StatusPromise} */
       const p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false));
       /** @type {!shaka.test.StatusPromise} */
       const p2 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer2, null, null,
+          ContentType.AUDIO, buffer2, null,
           /* hasClosedCaptions= */ false));
 
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
@@ -456,15 +456,15 @@ describe('MediaSourceEngine', () => {
     it('queues operations independently for different types', async () => {
       /** @type {!shaka.test.StatusPromise} */
       const p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false));
       /** @type {!shaka.test.StatusPromise} */
       const p2 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer2, null, null,
+          ContentType.AUDIO, buffer2, null,
           /* hasClosedCaptions= */ false));
       /** @type {!shaka.test.StatusPromise} */
       const p3 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer3, null, null,
+          ContentType.VIDEO, buffer3, null,
           /* hasClosedCaptions= */ false));
 
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
@@ -499,13 +499,13 @@ describe('MediaSourceEngine', () => {
       });
 
       const p1 = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
       const p2 = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer2, null, null,
+          ContentType.AUDIO, buffer2, null,
           /* hasClosedCaptions= */ false);
       const p3 = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer3, null, null,
+          ContentType.AUDIO, buffer3, null,
           /* hasClosedCaptions= */ false);
 
       await expectAsync(p1).toBeResolved();
@@ -519,8 +519,9 @@ describe('MediaSourceEngine', () => {
     it('forwards to TextEngine', async () => {
       const data = new ArrayBuffer(0);
       expect(mockTextEngine.appendBuffer).not.toHaveBeenCalled();
+      const reference = dummyReference(0, 10);
       await mediaSourceEngine.appendBuffer(
-          ContentType.TEXT, data, 0, 10, /* hasClosedCaptions= */ false);
+          ContentType.TEXT, data, reference, /* hasClosedCaptions= */ false);
       expect(mockTextEngine.appendBuffer).toHaveBeenCalledWith(
           data, 0, 10);
     });
@@ -538,7 +539,7 @@ describe('MediaSourceEngine', () => {
       const init = async () => {
         await mediaSourceEngine.init(initObject, false);
         await mediaSourceEngine.appendBuffer(
-            ContentType.VIDEO, buffer, null, null,
+            ContentType.VIDEO, buffer, null,
             /* hasClosedCaptions= */ false);
         expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
         expect(videoSourceBuffer.appendBuffer).toHaveBeenCalled();
@@ -568,7 +569,7 @@ describe('MediaSourceEngine', () => {
       const init = async () => {
         await mediaSourceEngine.init(initObject, false);
         await mediaSourceEngine.appendBuffer(
-            ContentType.VIDEO, buffer, null, null,
+            ContentType.VIDEO, buffer, null,
             /* hasClosedCaptions= */ false);
         expect(mockTextEngine.storeAndAppendClosedCaptions)
             .not.toHaveBeenCalled();
@@ -599,7 +600,8 @@ describe('MediaSourceEngine', () => {
 
       // Initialize the closed caption parser.
       const appendInit = mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, null, null, true);
+          ContentType.VIDEO, buffer, null,
+          /* hasClosedCaptions= */ true);
       // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
       // at the browser level, it's event-based.
       // MediaSourceEngine waits for the 'updateend' event from the
@@ -612,8 +614,9 @@ describe('MediaSourceEngine', () => {
       expect(mockTextEngine.storeAndAppendClosedCaptions).not
           .toHaveBeenCalled();
       // Parse and append the closed captions embedded in video stream.
+      const reference = dummyReference(0, 1000);
       const appendVideo = mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, 0, Infinity, true);
+          ContentType.VIDEO, buffer, reference, true);
       videoSourceBuffer.updateend();
       await appendVideo;
 
@@ -837,11 +840,11 @@ describe('MediaSourceEngine', () => {
     it('waits for all previous operations to complete', async () => {
       /** @type {!shaka.test.StatusPromise} */
       const p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false));
       /** @type {!shaka.test.StatusPromise} */
       const p2 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, null, null,
+          ContentType.VIDEO, buffer, null,
           /* hasClosedCaptions= */ false));
       /** @type {!shaka.test.StatusPromise} */
       const p3 = new shaka.test.StatusPromise(mediaSourceEngine.endOfStream());
@@ -864,11 +867,11 @@ describe('MediaSourceEngine', () => {
     it('makes subsequent operations wait', async () => {
       /** @type {!Promise} */
       const p1 = mediaSourceEngine.endOfStream();
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null,
           /* hasClosedCaptions= */ false);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer2, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer2, null,
           /* hasClosedCaptions= */ false);
 
       // endOfStream hasn't been called yet because blocking multiple queues
@@ -896,7 +899,7 @@ describe('MediaSourceEngine', () => {
       mockMediaSource.endOfStream.and.throwError(new Error());
       /** @type {!Promise} */
       const p1 = mediaSourceEngine.endOfStream();
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
 
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
@@ -928,11 +931,11 @@ describe('MediaSourceEngine', () => {
     it('waits for all previous operations to complete', async () => {
       /** @type {!shaka.test.StatusPromise} */
       const p1 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false));
       /** @type {!shaka.test.StatusPromise} */
       const p2 = new shaka.test.StatusPromise(mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, null, null,
+          ContentType.VIDEO, buffer, null,
           /* hasClosedCaptions= */ false));
       /** @type {!shaka.test.StatusPromise} */
       const p3 =
@@ -956,11 +959,11 @@ describe('MediaSourceEngine', () => {
     it('makes subsequent operations wait', async () => {
       /** @type {!Promise} */
       const p1 = mediaSourceEngine.setDuration(100);
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null,
           /* hasClosedCaptions= */ false);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer2, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer2, null,
           /* hasClosedCaptions= */ false);
 
       // The setter hasn't been called yet because blocking multiple queues
@@ -989,7 +992,7 @@ describe('MediaSourceEngine', () => {
       mockMediaSource.durationSetter.and.throwError(new Error());
       /** @type {!Promise} */
       const p1 = mediaSourceEngine.setDuration(100);
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
 
       expect(audioSourceBuffer.appendBuffer).not.toHaveBeenCalled();
@@ -999,6 +1002,43 @@ describe('MediaSourceEngine', () => {
       await Util.shortDelay();
       expect(audioSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
       audioSourceBuffer.updateend();
+    });
+
+    it('allows duration to be shrunk', async () => {
+      // Pretend the initial duration was 100.
+      mockMediaSource.durationGetter.and.returnValue(100);
+
+      // When duration is shrunk, 'updateend' events are generated.  This is
+      // because reducing the duration triggers the MSE removal algorithm to
+      // run.
+      mockMediaSource.durationSetter.and.callFake((duration) => {
+        expect(duration).toBe(50);
+        videoSourceBuffer.updateend();
+        audioSourceBuffer.updateend();
+      });
+
+      audioSourceBuffer.appendBuffer.and.callFake(() => {
+        audioSourceBuffer.updateend();
+      });
+      videoSourceBuffer.appendBuffer.and.callFake(() => {
+        videoSourceBuffer.updateend();
+      });
+
+      /** @type {!Promise} */
+      const p1 = mediaSourceEngine.setDuration(50);
+      expect(mockMediaSource.durationSetter).not.toHaveBeenCalled();
+
+      // These operations should be blocked until after duration is shrunk.
+      // This is tested because shrinking duration generates 'updateend'
+      // events, and we want to show that the queue still operates correctly.
+      const a1 = mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null,
+          /* hasClosedCaptions= */ false);
+      const a2 = mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null,
+          /* hasClosedCaptions= */ false);
+
+      await p1;
+      await a1;
+      await a2;
     });
   });
 
@@ -1013,9 +1053,9 @@ describe('MediaSourceEngine', () => {
     });
 
     it('waits for all operations to complete', async () => {
-      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
-      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null, null,
+      mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, null,
           /* hasClosedCaptions= */ false);
 
       /** @type {!shaka.test.StatusPromise} */
@@ -1033,7 +1073,7 @@ describe('MediaSourceEngine', () => {
 
     it('resolves even when a pending operation fails', async () => {
       const p = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
       const d = mediaSourceEngine.destroy();
 
@@ -1058,10 +1098,10 @@ describe('MediaSourceEngine', () => {
 
     it('cancels operations that have not yet started', async () => {
       mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
       const rejected = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer2, null, null,
+          ContentType.AUDIO, buffer2, null,
           /* hasClosedCaptions= */ false);
       // Create the expectation first so we don't get unhandled rejection errors
       const expected = expectAsync(rejected).toBeRejected();
@@ -1085,7 +1125,7 @@ describe('MediaSourceEngine', () => {
 
     it('cancels blocking operations that have not yet started', async () => {
       const p1 = mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, buffer, null, null,
+          ContentType.AUDIO, buffer, null,
           /* hasClosedCaptions= */ false);
       const p2 = mediaSourceEngine.endOfStream();
       const d = mediaSourceEngine.destroy();
@@ -1100,7 +1140,7 @@ describe('MediaSourceEngine', () => {
       const d = mediaSourceEngine.destroy();
       await expectAsync(
           mediaSourceEngine.appendBuffer(
-              ContentType.AUDIO, buffer, null, null,
+              ContentType.AUDIO, buffer, null,
               /* hasClosedCaptions= */ false))
           .toBeRejected();
       await d;
@@ -1197,5 +1237,17 @@ describe('MediaSourceEngine', () => {
         object[eventName] = null;
       }
     });
+  }
+
+  function dummyReference(startTime, endTime) {
+    return new shaka.media.SegmentReference(
+        startTime, endTime,
+        /* uris= */ () => ['foo://bar'],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
   }
 });
