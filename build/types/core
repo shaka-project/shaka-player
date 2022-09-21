@@ -5,6 +5,8 @@
 +../../lib/abr/ewma_bandwidth_estimator.js
 +../../lib/abr/simple_abr_manager.js
 
++../../lib/config/auto_show_text.js
+
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
 

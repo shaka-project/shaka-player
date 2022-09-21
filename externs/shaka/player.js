@@ -1177,6 +1177,7 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
+ *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
@@ -1199,6 +1200,8 @@ shaka.extern.OfflineConfiguration;
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
+ * @property {shaka.config.AutoShowText} autoShowText
+ *   Controls behavior of auto-showing text tracks on load().
  * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
  * @property {shaka.extern.ManifestConfiguration} manifest
