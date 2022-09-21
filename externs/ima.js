@@ -143,7 +143,7 @@ google.ima.AdsManagerLoadedEvent.Type = {
 
 /** @const */
 google.ima.AdEvent = class extends Event {
-  /** @return {!google.ima.Ad } */
+  /** @return {?google.ima.Ad} */
   getAd() {}
 };
 
