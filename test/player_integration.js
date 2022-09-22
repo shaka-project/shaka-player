@@ -344,23 +344,25 @@ describe('Player', () => {
       expect(cues.length).toBeGreaterThan(0);
     });
 
-    it('appends thumbnails for external thumbnails with sprites', async () => {
-      await player.load('test:sintel_no_text_compiled');
-      const locationUri = new goog.Uri(location.href);
-      const partialUri =
-          new goog.Uri('/base/test/test/assets/thumbnails-sprites.vtt');
-      const absoluteUri = locationUri.resolve(partialUri);
-      const newTrack = await player.addThumbnailsTrack(absoluteUri.toString());
+    it('skip appended thumbnails for external thumbnails with sprites',
+        async () => {
+          await player.load('test:sintel_no_text_compiled');
+          const locationUri = new goog.Uri(location.href);
+          const partialUri =
+              new goog.Uri('/base/test/test/assets/thumbnails-sprites.vtt');
+          const absoluteUri = locationUri.resolve(partialUri);
+          const newTrack =
+              await player.addThumbnailsTrack(absoluteUri.toString());
 
-      expect(player.getImageTracks()).toEqual([newTrack]);
+          expect(player.getImageTracks()).toEqual([newTrack]);
 
-      const thumbnail1 = await player.getThumbnails(newTrack.id, 0);
-      expect(thumbnail1).toBe(null);
-      const thumbnail2 = await player.getThumbnails(newTrack.id, 10);
-      expect(thumbnail2).toBe(null);
-      const thumbnail3 = await player.getThumbnails(newTrack.id, 40);
-      expect(thumbnail3).toBe(null);
-    });
+          const thumbnail1 = await player.getThumbnails(newTrack.id, 0);
+          expect(thumbnail1).toBe(null);
+          const thumbnail2 = await player.getThumbnails(newTrack.id, 10);
+          expect(thumbnail2).toBe(null);
+          const thumbnail3 = await player.getThumbnails(newTrack.id, 40);
+          expect(thumbnail3).toBe(null);
+        });
 
     it('appends thumbnails for external thumbnails without sprites',
         async () => {
