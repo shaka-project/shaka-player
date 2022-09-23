@@ -295,5 +295,93 @@ describe('Cea608Memory', () => {
       const caption = memory.forceEmit(startTime, endTime);
       expect(caption).toEqual(expectedCaption);
     });
+
+    it('does not move rows if source row index is negative', () => {
+      const startTime = 1;
+      const endTime = 2;
+      const text = 'test';
+
+      // Add the text to the buffer, each character on separate rows.
+      // At this point, the memory looks like:
+      // [1]: t
+      // [2]: e
+      // [3]: s
+      // [4]: t
+      for (const c of text) {
+        memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+            c.charCodeAt(0));
+        memory.setRow(memory.getRow() + 1); // increment row
+      }
+
+      const srcRowIdx = -1;
+      const dstRowIdx = 2;
+      const rowsToMove = 3;
+      memory.moveRows(dstRowIdx, srcRowIdx, rowsToMove);
+
+      // Expected text is 't\ne\ns\nt'
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(startTime, endTime, 't'),
+        CeaUtils.createLineBreakCue(startTime, endTime),
+        CeaUtils.createDefaultCue(startTime, endTime, 'e'),
+        CeaUtils.createLineBreakCue(startTime, endTime),
+        CeaUtils.createDefaultCue(startTime, endTime, 's'),
+        CeaUtils.createLineBreakCue(startTime, endTime),
+        CeaUtils.createDefaultCue(startTime, endTime, 't'),
+      ];
+
+      const expectedCaption = {
+        stream,
+        cue: topLevelCue,
+      };
+
+      // Force out the new memory.
+      const caption = memory.forceEmit(startTime, endTime);
+      expect(caption).toEqual(expectedCaption);
+    });
+
+    it('does not move rows if destination row index is negative', () => {
+      const startTime = 1;
+      const endTime = 2;
+      const text = 'test';
+
+      // Add the text to the buffer, each character on separate rows.
+      // At this point, the memory looks like:
+      // [1]: t
+      // [2]: e
+      // [3]: s
+      // [4]: t
+      for (const c of text) {
+        memory.addChar(CharSet.BASIC_NORTH_AMERICAN,
+            c.charCodeAt(0));
+        memory.setRow(memory.getRow() + 1); // increment row
+      }
+
+      const srcRowIdx = 1;
+      const dstRowIdx = -2;
+      const rowsToMove = 3;
+      memory.moveRows(dstRowIdx, srcRowIdx, rowsToMove);
+
+      // Expected text is 't\ne\ns\nt'
+      const topLevelCue = new shaka.text.Cue(startTime, endTime, '');
+      topLevelCue.nestedCues = [
+        CeaUtils.createDefaultCue(startTime, endTime, 't'),
+        CeaUtils.createLineBreakCue(startTime, endTime),
+        CeaUtils.createDefaultCue(startTime, endTime, 'e'),
+        CeaUtils.createLineBreakCue(startTime, endTime),
+        CeaUtils.createDefaultCue(startTime, endTime, 's'),
+        CeaUtils.createLineBreakCue(startTime, endTime),
+        CeaUtils.createDefaultCue(startTime, endTime, 't'),
+      ];
+
+      const expectedCaption = {
+        stream,
+        cue: topLevelCue,
+      };
+
+      // Force out the new memory.
+      const caption = memory.forceEmit(startTime, endTime);
+      expect(caption).toEqual(expectedCaption);
+    });
   });
 });
