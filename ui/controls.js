@@ -1011,13 +1011,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         await this.onScreenRotation_();
       });
     }
-
-    this.eventManager_.listen(document, 'fullscreenchange', () => {
-      if (this.ad_) {
-        this.ad_.resize(
-            this.localVideo_.offsetWidth, this.localVideo_.offsetHeight);
-      }
-    });
   }
 
 
