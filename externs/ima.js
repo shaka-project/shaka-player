@@ -167,6 +167,9 @@ google.ima.Ad = class {
 
   /** @return {boolean} */
   isLinear() {}
+
+  /** @return {string} */
+  getTitle() {}
 };
 
 
@@ -389,6 +392,9 @@ google.ima.dai.api.Ad = class {
 
   /** @return {boolean} */
   isSkippable() {}
+
+  /** @return {string} */
+  getTitle() {}
 };
 
 
