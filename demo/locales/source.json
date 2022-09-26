@@ -739,6 +739,10 @@
     "description": "The name of a configuration value.",
     "message": "Restrict to element size"
   },
+  "DEMO_RESTRICT_TO_SCREEN_SIZE": {
+    "description": "The name of a configuration value.",
+    "message": "Restrict to screen size"
+  },
   "DEMO_RESTRICTIONS_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "Restrictions"
