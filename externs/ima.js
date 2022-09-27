@@ -143,7 +143,7 @@ google.ima.AdsManagerLoadedEvent.Type = {
 
 /** @const */
 google.ima.AdEvent = class extends Event {
-  /** @return {!google.ima.Ad } */
+  /** @return {?google.ima.Ad} */
   getAd() {}
 };
 
@@ -167,6 +167,9 @@ google.ima.Ad = class {
 
   /** @return {boolean} */
   isLinear() {}
+
+  /** @return {string} */
+  getTitle() {}
 };
 
 
@@ -389,6 +392,9 @@ google.ima.dai.api.Ad = class {
 
   /** @return {boolean} */
   isSkippable() {}
+
+  /** @return {string} */
+  getTitle() {}
 };
 
 

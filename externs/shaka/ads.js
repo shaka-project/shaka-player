@@ -227,4 +227,9 @@ shaka.extern.IAd = class {
    * @return {number}
    */
   getPositionInSequence() {}
+
+  /**
+   * @return {string}
+   */
+  getTitle() {}
 };
