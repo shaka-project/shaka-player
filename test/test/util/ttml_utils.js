@@ -51,8 +51,6 @@ shaka.test.TtmlUtils = class {
         region,
         nestedCues: jasmine.any(Object),
         payload: '',
-        startTime: 0,
-        endTime: Infinity,
         isContainer: true,
       });
       Object.assign(containerCue, properties);
