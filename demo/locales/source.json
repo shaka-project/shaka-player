@@ -67,6 +67,26 @@
     "description": "The name of a configuration value.",
     "message": "Auto Low Latency Streaming"
   },
+  "DEMO_AUTO_SHOW_TEXT": {
+    "description": "The name of a configuration value.",
+    "message": "Auto-Show Text"
+  },
+  "DEMO_AUTO_SHOW_TEXT_NEVER": {
+    "description": "The name of a configuration value.",
+    "message": "Never"
+  },
+  "DEMO_AUTO_SHOW_TEXT_ALWAYS": {
+    "description": "The name of a configuration value.",
+    "message": "Always"
+  },
+  "DEMO_AUTO_SHOW_TEXT_IF_PREFERRED_TEXT_LANGUAGE": {
+    "description": "The name of a configuration value.",
+    "message": "If preferred text language"
+  },
+  "DEMO_AUTO_SHOW_TEXT_IF_SUBTITLES_MAY_BE_NEEDED": {
+    "description": "The name of a configuration value.",
+    "message": "If subtitles may be needed"
+  },
   "DEMO_AVAILABILITY_WINDOW_OVERRIDE": {
     "description": "The name of a configuration value.",
     "message": "Availability Window Override"
@@ -718,6 +738,10 @@
   "DEMO_RESTRICT_TO_ELEMENT_SIZE": {
     "description": "The name of a configuration value.",
     "message": "Restrict to element size"
+  },
+  "DEMO_RESTRICT_TO_SCREEN_SIZE": {
+    "description": "The name of a configuration value.",
+    "message": "Restrict to screen size"
   },
   "DEMO_RESTRICTIONS_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",

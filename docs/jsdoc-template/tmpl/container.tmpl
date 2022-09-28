@@ -144,7 +144,10 @@
                 return m.longname && m.longname.indexOf('module:') !== 0;
             });
         }
-        if (members && members.length && members.forEach) {
+
+        // Skip enums, since they already have their values listed under
+        // "Properties".
+        if (members && members.length && members.forEach && doc.kind != 'enum') {
     ?>
         <h3 class="subsection-title">Members</h3>
 

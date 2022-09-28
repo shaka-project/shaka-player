@@ -5,6 +5,8 @@
 +../../lib/abr/ewma_bandwidth_estimator.js
 +../../lib/abr/simple_abr_manager.js
 
++../../lib/config/auto_show_text.js
+
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
 
@@ -55,6 +57,7 @@
 +../../lib/text/simple_text_displayer.js
 +../../lib/text/text_engine.js
 +../../lib/text/ui_text_displayer.js
++../../lib/text/web_vtt_generator.js
 
 +../../lib/util/abortable_operation.js
 +../../lib/util/array_utils.js

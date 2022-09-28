@@ -1535,6 +1535,52 @@ describe('TtmlTextParser', () => {
         {startTime: 1, endTime: 2});
   });
 
+  // Regression test for #4468
+  it('defaults the body background to transparent', () => {
+    verifyHelper(
+        // One cue, don't care about the details
+        [{}],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head>' +
+        '<styling>' +
+        '<style xml:id="s1" tts:backgroundColor="black" />' +
+        '</styling>' +
+        '</head>' +
+        '<body><div>' +
+        '<p begin="00:01.00" end="00:02.00">' +
+        '<span style="s1">Test</span>' +
+        '</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
+        // The body must have these properties:
+        {backgroundColor: 'transparent'},
+        // The div must have these properties:
+        {});  // don't care
+  });
+
+  // Regression test for #4468
+  it('allows the body background color to be set', () => {
+    verifyHelper(
+        // One cue, don't care about the details
+        [{}],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<head>' +
+        '<styling>' +
+        '<style xml:id="s1" tts:backgroundColor="black" />' +
+        '</styling>' +
+        '</head>' +
+        '<body style="s1"><div>' +
+        '<p begin="00:01.00" end="00:02.00">' +
+        '<span>Test</span>' +
+        '</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
+        // The body must have these properties:
+        {backgroundColor: 'black'},
+        // The div must have these properties:
+        {});  // don't care
+  });
+
   it('parses wrapping option', () => {
     verifyHelper(
         [

@@ -603,6 +603,24 @@ shaka.extern.EmsgInfo;
 
 /**
  * @typedef {{
+ *   wallClockTime: number,
+ *   programStartDate: Date
+ * }}
+ *
+ * @description
+ * Contains information about an PRFT MP4 box.
+ *
+ * @property {number} wallClockTime
+ *   A UTC timestamp corresponding to decoding time in milliseconds.
+ * @property {Date} programStartDate
+ *   The derived start date of the program.
+ * @exportDoc
+ */
+shaka.extern.ProducerReferenceTime;
+
+
+/**
+ * @typedef {{
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
  *   videoRobustness: string,
@@ -913,7 +931,8 @@ shaka.extern.ManifestConfiguration;
  *   updateIntervalSeconds: number,
  *   dispatchAllEmsgBoxes: boolean,
  *   observeQualityChanges: boolean,
- *   maxDisabledTime: number
+ *   maxDisabledTime: number,
+ *   parsePrftBox: boolean
  * }}
  *
  * @description
@@ -1022,6 +1041,13 @@ shaka.extern.ManifestConfiguration;
  *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
  *   is reached, in seconds.
  *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
+ * @property {boolean} parsePrftBox
+ *   If <code>true</code>, will raise a shaka.extern.ProducerReferenceTime
+ *   player event (event name 'prft').
+ *   The event will be raised only once per playback session as program
+ *   start date will not change, and would save parsing the segment multiple
+ *   times needlessly.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -1038,6 +1064,7 @@ shaka.extern.StreamingConfiguration;
  *   bandwidthDowngradeTarget: number,
  *   advanced: shaka.extern.AdvancedAbrConfiguration,
  *   restrictToElementSize: boolean,
+ *   restrictToScreenSize: boolean,
  *   ignoreDevicePixelRatio: boolean
  * }}
  *
@@ -1073,9 +1100,12 @@ shaka.extern.StreamingConfiguration;
  *   Note: The use of ResizeObserver is required for it to work properly. If
  *   true without ResizeObserver, it behaves as false.
  *   Defaults false.
+ * @property {boolean} restrictToScreenSize
+ *   If true, restrict the quality to screen size.
+ *   Defaults false.
  * @property {boolean} ignoreDevicePixelRatio
  *   If true,device pixel ratio is ignored when restricting the quality to
- *   media element size.
+ *   media element size or screen size.
  *   Defaults false.
  * @exportDoc
  */
@@ -1187,6 +1217,7 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
+ *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
@@ -1209,6 +1240,8 @@ shaka.extern.OfflineConfiguration;
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
+ * @property {shaka.config.AutoShowText} autoShowText
+ *   Controls behavior of auto-showing text tracks on load().
  * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
  * @property {shaka.extern.ManifestConfiguration} manifest

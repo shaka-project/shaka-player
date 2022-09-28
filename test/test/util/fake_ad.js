@@ -34,6 +34,9 @@ shaka.test.FakeAd = class {
 
     /** @private {number} */
     this.volume_ = 1;
+
+    /** @private {string} */
+    this.title_ = 'Test Title';
   }
 
   /**
@@ -190,6 +193,13 @@ shaka.test.FakeAd = class {
     return this.position_;
   }
 
+  /**
+   * @override
+   * @export
+   */
+  getTitle() {
+    return this.title_;
+  }
 
   /**
    * @override

@@ -16,6 +16,7 @@
       "navOrder": [
         "Tutorials",
         "Classes",
+        "Enums",
         "Interfaces",
         "Events"
       ]

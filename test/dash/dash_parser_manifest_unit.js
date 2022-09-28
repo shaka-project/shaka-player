@@ -52,6 +52,7 @@ describe('DashParser Manifest', () => {
       isLowLatencyMode: () => false,
       isAutoLowLatencyMode: () => false,
       enableLowLatencyMode: () => {},
+      updateDuration: () => {},
     };
   });
 
