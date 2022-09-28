@@ -274,6 +274,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addBoolInput_(MessageIds.RESTRICT_TO_ELEMENT_SIZE,
             'abr.restrictToElementSize')
+        .addBoolInput_(MessageIds.RESTRICT_TO_SCREEN_SIZE,
+            'abr.restrictToScreenSize')
         .addBoolInput_(MessageIds.IGNORE_DEVICE_PIXEL_RATIO,
             'abr.ignoreDevicePixelRatio');
     this.addRetrictionsSection_('abr',
