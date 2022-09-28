@@ -90,17 +90,17 @@ describe('StreamingEngine', () => {
 
     segmentAvailability = {
       start: 0,
-      end: 60,
+      end: 40,
     };
 
     timeline = shaka.test.StreamingEngineUtil.createFakePresentationTimeline(
         segmentAvailability,
-        /* presentationDuration= */ 60,
+        /* presentationDuration= */ 40,
         /* maxSegmentDuration= */ metadata.video.segmentDuration,
         /* isLive= */ false);
 
     setupNetworkingEngine(
-        /* presentationDuration= */ 60,
+        /* presentationDuration= */ 40,
         {
           audio: metadata.audio.segmentDuration,
           video: metadata.video.segmentDuration,
@@ -108,8 +108,8 @@ describe('StreamingEngine', () => {
 
     setupManifest(
         /* firstPeriodStartTime= */ 0,
-        /* secondPeriodStartTime= */ 30,
-        /* presentationDuration= */ 60);
+        /* secondPeriodStartTime= */ 20,
+        /* presentationDuration= */ 40);
 
     setupPlayhead();
 
@@ -263,10 +263,11 @@ describe('StreamingEngine', () => {
       streamingEngine.switchVariant(variant);
       await streamingEngine.start();
       video.play();
-      // The overall test timeout is 120 seconds, and the content is 60
+      // The overall test timeout is 120 seconds, and the content is 40
       // seconds.  It should be possible to complete this test in 100 seconds,
       // and if not, we want the error thrown to be within the overall test's
-      // timeout window.
+      // timeout window.  Note that we have seen some devices fail to play at
+      // full speed for reasons beyond our control, so we plan for >= 0.5x.
       await waiter.timeoutAfter(100).waitForEnd(video);
     });
 
