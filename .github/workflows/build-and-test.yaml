@@ -57,7 +57,7 @@ jobs:
           - os: macos-latest
             browser: Safari
           - os: macos-latest
-            browser: Safari-14
+            browser: Safari-old
 
           - os: windows-latest
             browser: Chrome
@@ -87,21 +87,22 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
-      # Safari 14 can be installed, but not to the root, and it can't replace
-      # the standard version, at least not on GitHub's VMs.  If you try to
-      # install directly to the root with sudo, it will appear to succeed, but
-      # will have no effect.  If you try to script it explicitly with rm -rf
-      # and cp, this will fail.  Safari may be on a read-only filesystem.
-      - name: Install Safari 14 to home directory
-        if: matrix.os == 'macos-latest' && matrix.browser == 'Safari-14'
+      # Older versions of Safari can be installed, but not to the root, and it
+      # can't replace the standard version, at least not on GitHub's VMs.  If
+      # you try to install directly to the root with sudo, it will appear to
+      # succeed, but will have no effect.  If you try to script it explicitly
+      # with rm -rf and cp, this will fail.  Safari may be on a read-only
+      # filesystem.
+      - name: Install old Safari to home directory
+        if: matrix.os == 'macos-latest' && matrix.browser == 'Safari-old'
         run: |
-          # Download Safari 14
-          # See also https://www.macupdate.com/app/mac/15675/apple-safari/old-versions
-          curl -Lv https://www.macupdate.com/action/download/62946 > Safari14.0CatalinaAuto.pkg.zip
+          # Download Safari 15
+          # This URL discovered through the seed files listed at
+          # https://github.com/zhangyoufu/swscan.apple.com/blob/master/url.txt
+          curl -Lv http://swcdn.apple.com/content/downloads/42/33/012-57329-A_41P2VU6UHN/5fw5vna27fdw4mqfak5adj3pjpxvo9hgh7/Safari15.6.1CatalinaAuto.pkg > Safari.pkg
 
-          # Install Safari 14 to homedir specifically.
-          unzip Safari14.0CatalinaAuto.pkg.zip
-          installer -pkg Safari14.0CatalinaAuto.pkg -target CurrentUserHomeDirectory
+          # Install older Safari to homedir specifically.
+          installer -pkg Safari.pkg -target CurrentUserHomeDirectory
 
           # Install a launcher that can execute a shell script to launch this
           npm install karma-script-launcher --save-dev
@@ -114,7 +115,7 @@ jobs:
         run: |
           browser=${{ matrix.browser }}
 
-          if [[ "$browser" == "Safari-14" ]]; then
+          if [[ "$browser" == "Safari-old" ]]; then
             # Replace the browser name with a script that can launch this
             # browser from the command line.
             browser="$PWD/.github/workflows/safari-homedir-launcher.sh"
