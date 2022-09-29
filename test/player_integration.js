@@ -434,7 +434,7 @@ describe('Player', () => {
       // Seek the video, and see if it can continue playing from that point.
       video.currentTime = 20;
       // Expect that we can then reach the end of the video.
-      await waiter.timeoutAfter(20).waitForEnd(video);
+      await waiter.timeoutAfter(40).waitForEnd(video);
     });
 
     // Regression test for #2326.
@@ -785,7 +785,7 @@ describe('Player', () => {
       /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager)
           .setPlayer(player)
-          .timeoutAfter(20)
+          .timeoutAfter(40)
           .failOnTimeout(true);
       await waiter.waitForEnd(video);
 
