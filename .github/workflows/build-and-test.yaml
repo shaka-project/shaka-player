@@ -41,9 +41,11 @@ jobs:
         include:
           # Run Linux browsers with xvfb, so they're in a headless X session.
           # Additionally, generate a code coverage report from Linux Chrome.
+          # It should be the uncompiled build, or else we won't execute any
+          # coverage instrumentation on full-stack player integration tests.
           - os: ubuntu-latest
             browser: Chrome
-            extra_flags: "--use-xvfb --html-coverage-report"
+            extra_flags: "--use-xvfb --html-coverage-report --uncompiled"
           - os: ubuntu-latest
             browser: Firefox
             extra_flags: "--use-xvfb"
