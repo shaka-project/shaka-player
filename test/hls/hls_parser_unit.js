@@ -109,17 +109,18 @@ describe('HlsParser', () => {
    * @param {string} master
    * @param {string} media
    * @param {shaka.extern.Manifest} manifest
+   * @param {string=} media2
    * @return {!Promise.<shaka.extern.Manifest>}
    */
-  async function testHlsParser(master, media, manifest) {
+  async function testHlsParser(master, media, manifest, media2) {
     fakeNetEngine
         .setResponseText('test:/master', master)
         .setResponseText('test:/audio', media)
-        .setResponseText('test:/audio2', media)
+        .setResponseText('test:/audio2', media2 || media)
         .setResponseText('test:/video', media)
-        .setResponseText('test:/video2', media)
+        .setResponseText('test:/video2', media2 || media)
         .setResponseText('test:/text', media)
-        .setResponseText('test:/text2', media)
+        .setResponseText('test:/text2', media2 || media)
         .setResponseText('test:/main.vtt', vttText)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/init2.mp4', initSegmentData)
@@ -3386,6 +3387,67 @@ describe('HlsParser', () => {
     });
 
     await testHlsParser(master, media, manifest);
+  });
+
+  // https://github.com/shaka-project/shaka-player/issues/4308
+  it('handles unaligned streams', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=1280x720,FRAME-RATE=30\n',
+      'video\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=400,CODECS="avc1",',
+      'RESOLUTION=1920x1080,FRAME-RATE=30\n',
+      'video2\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5\n',
+      'main.mp4\n',
+      '#EXTINF:5\n',
+      'main.mp4',
+    ].join('');
+
+    const media2 = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:4\n',
+      'main.mp4\n',
+      '#EXTINF:5\n',
+      'main.mp4\n',
+      '#EXTINF:1\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.size(1280, 720);
+        });
+      });
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.size(1920, 1080);
+        });
+      });
+      manifest.sequenceMode = true;
+    });
+
+    const actual = await testHlsParser(master, media, manifest, media2);
+
+    const videoSegments =
+          Array.from(actual.variants[0].video.segmentIndex || '');
+    expect(videoSegments[0].endTime).toBe(5);
+    expect(videoSegments[1].endTime).toBe(10);
+
+    const videoSegments2 =
+        Array.from(actual.variants[1].video.segmentIndex || '');
+    expect(videoSegments2[0].endTime).toBe(4);
+    expect(videoSegments2[1].endTime).toBe(9);
+    expect(videoSegments2[2].endTime).toBe(10);
   });
 
   // Issue #1875
