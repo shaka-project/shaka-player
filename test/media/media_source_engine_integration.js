@@ -41,6 +41,8 @@ describe('MediaSourceEngine', () => {
         video,
         new shaka.media.ClosedCaptionParser(),
         textDisplayer);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    mediaSourceEngine.configure(config);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();
