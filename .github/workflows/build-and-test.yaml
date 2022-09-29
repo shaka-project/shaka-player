@@ -165,6 +165,18 @@ jobs:
           # an environment variable set, the file should definitely be there.
           if-no-files-found: error
 
+      # Upload new screenshots and diffs on failure; ignore if missing
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: screenshots-${{ matrix.browser }}
+          path: |
+            test/test/assets/screenshots/*/*.png-new
+            test/test/assets/screenshots/*/*.png-diff
+          if-no-files-found: ignore
+          retention-days: 5
+
   build_in_docker:
     # Don't waste time doing a full matrix of test runs when there was an
     # obvious linter error.
