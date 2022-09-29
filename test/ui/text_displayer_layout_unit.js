@@ -262,11 +262,19 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
 
     // Regression test for #3151
     // Only one cue should be displayed.  Note, however, that we don't control
-    // this in a browser's native display.  As of Feb 2021, only Firefox does
-    // the right thing in native text display.  Chrome, Edge, and Safari all
+    // this in a browser's native display.  As of Sep 2022, both Firefox and
+    // Safari>=16 do the right thing in native text display.  Chrome and Edge
     // show both cues in this edge case.  When we control the display of text
     // through the UI & DOM, we can always get the timing right.
     it('cues ending exactly now', async () => {
+      // Due to a Safari implementation bug, the browser only does the correct
+      // thing for this test case on Safari 16+.  Skip the test on earlier
+      // versions.
+      const safariVersion = shaka.util.Platform.safariVersion();
+      if (prefix == 'native' && safariVersion && safariVersion < 16) {
+        pending('Native implementation known to be broken on Safari < 16');
+      }
+
       // At time exactly 1, this cue should _not_ be displayed any more.
       textDisplayer.append([
         new shaka.text.Cue(0, 1, 'This cue is over and gone.'),
