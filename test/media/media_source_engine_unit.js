@@ -26,7 +26,8 @@ let MockTimeRanges;
  *   timestampOffset: number,
  *   appendWindowEnd: number,
  *   updateend: function(),
- *   error: function()
+ *   error: function(),
+ *   mode: string
  * }}
  */
 let MockSourceBuffer;
@@ -57,6 +58,7 @@ describe('MediaSourceEngine', () => {
   let audioSourceBuffer;
   let videoSourceBuffer;
   let mockVideo;
+
   /** @type {HTMLMediaElement} */
   let video;
   let mockMediaSource;
@@ -623,41 +625,26 @@ describe('MediaSourceEngine', () => {
       expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
     });
 
-    it('sets timestampOffset on automatic adaptations', async () => {
+    it('sets timestampOffset on adaptations in sequence mode', async () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
+      videoSourceBuffer.mode = 'sequence';
 
-      mockClosedCaptionParser.parseFromSpy.and.callFake((data) => {
-        return ['foo', 'bar'];
-      });
+      await mediaSourceEngine.init(
+          initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
 
-      await mediaSourceEngine.init(initObject, false);
       expect(videoSourceBuffer.timestampOffset).toBe(0);
 
-      // Initialize the closed caption parser.
-      const appendInit = mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, null,
-          /* hasClosedCaptions= */ true);
-      // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
-      // at the browser level, it's event-based.
-      // MediaSourceEngine waits for the 'updateend' event from the
-      // SourceBuffer, and uses that to resolve the appendBuffer Promise.
-      // Here, we must trigger the event on the fake/mock SourceBuffer before
-      // waiting on the appendBuffer Promise.
-      videoSourceBuffer.updateend();
-      await appendInit;
-
-      expect(mockTextEngine.storeAndAppendClosedCaptions).not
-          .toHaveBeenCalled();
-      // Parse and append the closed captions embedded in video stream.
+      // Mocks appending a segment from a newly adapted variant with a 0.50
+      // second misalignment from the old variant.
       const reference = dummyReference(0, 1000);
       reference.startTime = 0.50;
       const appendVideo = mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, reference, true);
+          ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false,
+          /* seeked= */ false, /* adaptation= */ true);
       videoSourceBuffer.updateend();
       await appendVideo;
 
-      expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
   });
@@ -1235,6 +1222,7 @@ describe('MediaSourceEngine', () => {
       appendWindowEnd: Infinity,
       updateend: () => {},
       error: () => {},
+      mode: 'segments',
     };
   }
 
