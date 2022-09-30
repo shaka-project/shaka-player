@@ -627,22 +627,37 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-      await mediaSourceEngine.init(initObject, false);
+      mockClosedCaptionParser.parseFromSpy.and.callFake((data) => {
+        return ['foo', 'bar'];
+      });
 
+      await mediaSourceEngine.init(initObject, false);
       expect(videoSourceBuffer.timestampOffset).toBe(0);
 
-      // This dummy segment reference is misaligned with the 'previous'
-      // adaptation by 0.50 seconds. This is the first segment from the 'new'
-      // active variant.
+      // Initialize the closed caption parser.
+      const appendInit = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null,
+          /* hasClosedCaptions= */ true);
+      // In MediaSourceEngine, appendBuffer() is async and Promise-based, but
+      // at the browser level, it's event-based.
+      // MediaSourceEngine waits for the 'updateend' event from the
+      // SourceBuffer, and uses that to resolve the appendBuffer Promise.
+      // Here, we must trigger the event on the fake/mock SourceBuffer before
+      // waiting on the appendBuffer Promise.
+      videoSourceBuffer.updateend();
+      await appendInit;
+
+      expect(mockTextEngine.storeAndAppendClosedCaptions).not
+          .toHaveBeenCalled();
+      // Parse and append the closed captions embedded in video stream.
       const reference = dummyReference(0, 1000);
       reference.startTime = 0.50;
-
       const appendVideo = mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false,
-          /* seeked= */ false, /* adaptation= */ true);
+          ContentType.VIDEO, buffer, reference, true);
       videoSourceBuffer.updateend();
       await appendVideo;
 
+      expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
   });
