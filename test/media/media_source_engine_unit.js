@@ -622,6 +622,29 @@ describe('MediaSourceEngine', () => {
 
       expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
     });
+
+    it('sets timestampOffset on automatic adaptations', async () => {
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+      await mediaSourceEngine.init(initObject, false);
+
+      expect(videoSourceBuffer.timestampOffset).toBe(0);
+
+      // This dummy segment reference is misaligned with the 'previous'
+      // adaptation by 0.50 seconds. This is the first segment from the 'new'
+      // active variant.
+      const reference = dummyReference(0, 1000);
+      reference.timestampOffset = 0.50;
+
+      const appendVideo = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false,
+          /* seeked= */ false, /* adaptation= */ true);
+      videoSourceBuffer.updateend();
+      await appendVideo;
+
+      expect(videoSourceBuffer.timestampOffset).toBe(0.50);
+    });
   });
 
   describe('remove', () => {
