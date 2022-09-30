@@ -635,7 +635,7 @@ describe('MediaSourceEngine', () => {
       // adaptation by 0.50 seconds. This is the first segment from the 'new'
       // active variant.
       const reference = dummyReference(0, 1000);
-      reference.timestampOffset = 0.50;
+      reference.startTime = 0.50;
 
       const appendVideo = mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false,
