@@ -1019,6 +1019,23 @@ shaka.extern.StreamingConfiguration;
 
 /**
  * @typedef {{
+ *   sourceBufferExtraFeatures: string
+ * }}
+ *
+ * @description
+ *   Media source configuration.
+ *
+ * @property {string} sourceBufferExtraFeatures
+ *   Some platforms may need to pass features when initializing the
+ *   sourceBuffer.
+ *   This string is ultimately appended to MIME types in addSourceBuffer().
+ * @exportDoc
+ */
+shaka.extern.MediaSourceConfiguration;
+
+
+/**
+ * @typedef {{
  *   enabled: boolean,
  *   useNetworkInformation: boolean,
  *   defaultBandwidthEstimate: number,
@@ -1185,6 +1202,7 @@ shaka.extern.OfflineConfiguration;
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
+ *   mediaSource: shaka.extern.MediaSourceConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
@@ -1212,6 +1230,8 @@ shaka.extern.OfflineConfiguration;
  *   Manifest configuration and settings.
  * @property {shaka.extern.StreamingConfiguration} streaming
  *   Streaming configuration and settings.
+ * @property {shaka.extern.MediaSourceConfiguration} mediaSource
+ *   Media source configuration and settings.
  * @property {shaka.extern.AbrManager.Factory} abrFactory
  *   A factory to construct an abr manager.
  * @property {shaka.extern.AbrConfiguration} abr
