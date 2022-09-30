@@ -180,6 +180,15 @@ jobs:
       # the container.
       - name: Test Player
         run: |
+          # Generate a coverage report from uncompiled code on ChromeLinux.
+          # It should be the uncompiled build, or else we won't execute any
+          # coverage instrumentation on full-stack player integration tests.
+          if [[ "${{ matrix.browser }}" == "ChromeLinux" ]]; then
+            extra_flags="--html-coverage-report --uncompiled"
+          else
+            extra_flags=""
+          fi
+
           python3 build/test.py \
               --no-build \
               --reporters spec --spec-hide-passed \
@@ -189,7 +198,7 @@ jobs:
               --grid-config build/shaka-lab.yaml \
               --grid-address selenium-grid.lab:4444 \
               --browsers ${{ matrix.browser }} \
-              --html-coverage-report
+              $extra_flags
 
       - name: Find coverage report (ChromeLinux only)
         id: coverage

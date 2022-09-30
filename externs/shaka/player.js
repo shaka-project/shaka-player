@@ -1028,6 +1028,7 @@ shaka.extern.StreamingConfiguration;
  *   bandwidthDowngradeTarget: number,
  *   advanced: shaka.extern.AdvancedAbrConfiguration,
  *   restrictToElementSize: boolean,
+ *   restrictToScreenSize: boolean,
  *   ignoreDevicePixelRatio: boolean
  * }}
  *
@@ -1063,9 +1064,12 @@ shaka.extern.StreamingConfiguration;
  *   Note: The use of ResizeObserver is required for it to work properly. If
  *   true without ResizeObserver, it behaves as false.
  *   Defaults false.
+ * @property {boolean} restrictToScreenSize
+ *   If true, restrict the quality to screen size.
+ *   Defaults false.
  * @property {boolean} ignoreDevicePixelRatio
  *   If true,device pixel ratio is ignored when restricting the quality to
- *   media element size.
+ *   media element size or screen size.
  *   Defaults false.
  * @exportDoc
  */
@@ -1177,6 +1181,7 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
+ *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
@@ -1199,6 +1204,8 @@ shaka.extern.OfflineConfiguration;
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
+ * @property {shaka.config.AutoShowText} autoShowText
+ *   Controls behavior of auto-showing text tracks on load().
  * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
  * @property {shaka.extern.ManifestConfiguration} manifest
