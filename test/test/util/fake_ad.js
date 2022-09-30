@@ -37,6 +37,9 @@ shaka.test.FakeAd = class {
 
     /** @private {string} */
     this.title_ = 'Test Title';
+
+    /** @private {string} */
+    this.description_ = 'Test Description';
   }
 
   /**
@@ -199,6 +202,14 @@ shaka.test.FakeAd = class {
    */
   getTitle() {
     return this.title_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getDescription() {
+    return this.description_;
   }
 
   /**
