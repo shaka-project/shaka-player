@@ -1028,6 +1028,7 @@ shaka.extern.StreamingConfiguration;
  * @property {string} sourceBufferExtraFeatures
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
+ *   This string is ultimately appended to MIME types in addSourceBuffer().
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
