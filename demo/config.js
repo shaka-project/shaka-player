@@ -92,6 +92,7 @@ shakaDemo.Config = class {
     this.addOfflineSection_();
     this.addDrmSection_();
     this.addStreamingSection_();
+    this.addMediaSourceSection_();
     this.addManifestSection_();
     this.addRetrictionsSection_('',
         shakaDemo.MessageIds.RESTRICTIONS_SECTION_HEADER);
@@ -275,6 +276,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addBoolInput_(MessageIds.RESTRICT_TO_ELEMENT_SIZE,
             'abr.restrictToElementSize')
+        .addBoolInput_(MessageIds.RESTRICT_TO_SCREEN_SIZE,
+            'abr.restrictToScreenSize')
         .addBoolInput_(MessageIds.IGNORE_DEVICE_PIXEL_RATIO,
             'abr.ignoreDevicePixelRatio');
     this.addRetrictionsSection_('abr',
@@ -436,6 +439,15 @@ shakaDemo.Config = class {
             'streaming.useNativeHlsOnSafari');
     this.addRetrySection_('streaming',
         MessageIds.STREAMING_RETRY_SECTION_HEADER);
+  }
+
+  /** @private */
+  addMediaSourceSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
+    this.addSection_(MessageIds.MEDIA_SOURCE_SECTION_HEADER, docLink)
+        .addTextInput_(MessageIds.SOURCE_BUFFER_EXTRA_FEATURES,
+            'mediaSource.sourceBufferExtraFeatures');
   }
 
   /** @private */

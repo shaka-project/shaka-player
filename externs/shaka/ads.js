@@ -232,4 +232,9 @@ shaka.extern.IAd = class {
    * @return {string}
    */
   getTitle() {}
+
+  /**
+   * @return {string}
+   */
+  getDescription() {}
 };

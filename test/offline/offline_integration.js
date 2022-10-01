@@ -68,7 +68,7 @@ filterDescribe('Offline', supportsStorage, () => {
     await player.load(contentUri);
 
     video.play();
-    await playTo(/* end= */ 3, /* timeout= */ 10);
+    await playTo(/* end= */ 3, /* timeout= */ 20);
     await player.unload();
     await storage.remove(contentUri);
   });
@@ -104,7 +104,7 @@ filterDescribe('Offline', supportsStorage, () => {
         await player.load(contentUri);
 
         video.play();
-        await playTo(/* end= */ 3, /* timeout= */ 10);
+        await playTo(/* end= */ 3, /* timeout= */ 20);
         await player.unload();
         await storage.remove(contentUri);
       });
@@ -147,7 +147,7 @@ filterDescribe('Offline', supportsStorage, () => {
         await player.load(contentUri);
 
         video.play();
-        await playTo(/* end= */ 3, /* timeout= */ 10);
+        await playTo(/* end= */ 3, /* timeout= */ 20);
         await player.unload();
         await storage.remove(contentUri);
       });
