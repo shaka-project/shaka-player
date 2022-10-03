@@ -696,8 +696,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   A map of key system name to key system name.
  * @property {boolean} parseInbandPsshEnabled
  *   <i>Defaults to true on Xbox One, and false for all other browsers.</i><br>
- *   When true parse DRM init data from pssh boxes in media segments and ignore
- *   'encrypted' events.
+ *   When true parse DRM init data from pssh boxes in media and init segments
+ *   and ignore 'encrypted' events.
  *   This is required when using in-band key rotation on Xbox One.
  *
  * @exportDoc
