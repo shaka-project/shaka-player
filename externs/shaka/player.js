@@ -699,6 +699,7 @@ shaka.extern.AdvancedDrmConfiguration;
  *   When true parse DRM init data from pssh boxes in media segments and ignore
  *   'encrypted' events.
  *   This is required when using in-band key rotation on Xbox One.
+ *
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
