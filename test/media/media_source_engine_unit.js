@@ -150,6 +150,8 @@ describe('MediaSourceEngine', () => {
         video,
         mockClosedCaptionParser,
         mockTextDisplayer);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    mediaSourceEngine.configure(config);
   });
 
   afterEach(() => {
