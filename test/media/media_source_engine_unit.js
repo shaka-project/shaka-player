@@ -26,7 +26,8 @@ let MockTimeRanges;
  *   timestampOffset: number,
  *   appendWindowEnd: number,
  *   updateend: function(),
- *   error: function()
+ *   error: function(),
+ *   mode: string
  * }}
  */
 let MockSourceBuffer;
@@ -57,6 +58,7 @@ describe('MediaSourceEngine', () => {
   let audioSourceBuffer;
   let videoSourceBuffer;
   let mockVideo;
+
   /** @type {HTMLMediaElement} */
   let video;
   let mockMediaSource;
@@ -621,6 +623,29 @@ describe('MediaSourceEngine', () => {
       await appendVideo;
 
       expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
+    });
+
+    it('sets timestampOffset on adaptations in sequence mode', async () => {
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+      videoSourceBuffer.mode = 'sequence';
+
+      await mediaSourceEngine.init(
+          initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
+
+      expect(videoSourceBuffer.timestampOffset).toBe(0);
+
+      // Mocks appending a segment from a newly adapted variant with a 0.50
+      // second misalignment from the old variant.
+      const reference = dummyReference(0, 1000);
+      reference.startTime = 0.50;
+      const appendVideo = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false,
+          /* seeked= */ false, /* adaptation= */ true);
+      videoSourceBuffer.updateend();
+      await appendVideo;
+
+      expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
   });
 
@@ -1197,6 +1222,7 @@ describe('MediaSourceEngine', () => {
       appendWindowEnd: Infinity,
       updateend: () => {},
       error: () => {},
+      mode: 'segments',
     };
   }
 
