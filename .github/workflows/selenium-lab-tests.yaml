@@ -98,6 +98,7 @@ jobs:
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / Build
+          ref: ${{ needs.compute-ref.REF }}
           state: pending
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -117,6 +118,7 @@ jobs:
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / Build
+          ref: ${{ needs.compute-ref.REF }}
           state: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -140,6 +142,7 @@ jobs:
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / ${{ matrix.browser }}
+          ref: ${{ needs.compute-ref.REF }}
           state: pending
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -245,5 +248,6 @@ jobs:
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / ${{ matrix.browser }}
+          ref: ${{ needs.compute-ref.REF }}
           state: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
