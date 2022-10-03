@@ -97,6 +97,7 @@ shakaDemo.Config = class {
     this.addRetrictionsSection_('',
         shakaDemo.MessageIds.RESTRICTIONS_SECTION_HEADER);
     this.addCmcdSection_();
+    this.addLcevcSection_();
   }
 
   /**
@@ -292,6 +293,17 @@ shakaDemo.Config = class {
         .addTextInput_(MessageIds.SESSION_ID, 'cmcd.sessionId')
         .addTextInput_(MessageIds.CONTENT_ID, 'cmcd.contentId')
         .addBoolInput_(MessageIds.USE_HEADERS, 'cmcd.useHeaders');
+  }
+
+  /** @private */
+  addLcevcSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.LcevcConfiguration');
+    this.addSection_(MessageIds.LCEVC_SECTION_HEADER, docLink)
+        .addBoolInput_(MessageIds.LCEVC_DYNAMIC_PERFORMANCE_SCALING,
+            'lcevc.dynamicPerformanceScaling')
+        .addNumberInput_(MessageIds.LCEVC_LOG_LEVEL, 'lcevc.logLevel')
+        .addBoolInput_(MessageIds.LCEVC_DRAW_LOGO, 'lcevc.drawLogo');
   }
 
   /**
