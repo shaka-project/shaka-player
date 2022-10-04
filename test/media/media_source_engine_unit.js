@@ -649,6 +649,34 @@ describe('MediaSourceEngine', () => {
 
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
+
+    it('calls abort before setting timestampOffset', async () => {
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+      await mediaSourceEngine.init(
+          initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
+
+      // First, mock the scenario where timestampOffset is set to help align
+      // text segments. In this case, SourceBuffer mode is still 'segments'.
+      let reference = dummyReference(0, 1000);
+      let appendVideo =
+          mediaSourceEngine.appendBuffer(ContentType.VIDEO, buffer, reference,
+          /* hasClosedCaptions= */ false);
+      videoSourceBuffer.updateend();
+      await appendVideo;
+      expect(videoSourceBuffer.abort.calls).toBe(1);
+
+      // Second, mock the scenario where timestampOffset is set during an
+      // unbuffered seek or adaptation.
+      reference = dummyReference(0, 1000);
+      appendVideo = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false,
+          /* seeked= */ true);
+      videoSourceBuffer.updateend();
+      await appendVideo;
+      expect(videoSourceBuffer.abort.calls).toBe(2);
+    });
   });
 
   describe('remove', () => {
