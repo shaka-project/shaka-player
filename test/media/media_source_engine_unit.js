@@ -651,7 +651,7 @@ describe('MediaSourceEngine', () => {
     });
 
     it('calls abort before setting timestampOffset', async () => {
-      const delay = async () => {
+      const simulateUpdate = async () => {
         await Util.shortDelay();
         videoSourceBuffer.updateend();
       };
@@ -667,14 +667,19 @@ describe('MediaSourceEngine', () => {
       let appendVideo = mediaSourceEngine.appendBuffer(
           ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false);
       // Wait for the first appendBuffer(), in segments mode.
-      await delay();
+      await simulateUpdate();
       // Next, wait for abort(), used to reset the parser state for a safe
-      // setting of timestampOffset.
-      await delay();
+      // setting of timestampOffset. Shaka fakes an updateend event on abort(),
+      // so simulateUpdate() isn't needed.
+      await Util.shortDelay();
       // Next, wait for remove(), used to clear the SourceBuffer from the
       // initial append.
-      await delay();
-      // Lastly, wait for the resolved mediaSourceEngine.appendBuffer() promise.
+      await simulateUpdate();
+      // Next, wait for the second appendBuffer(), falling through to normal
+      // operations.
+      await simulateUpdate();
+      // Lastly, wait for the function-scoped MediaSourceEngine#appendBuffer()
+      // promise to resolve.
       await appendVideo;
       expect(videoSourceBuffer.abort).toHaveBeenCalledTimes(1);
 
@@ -686,10 +691,15 @@ describe('MediaSourceEngine', () => {
           /* seeked= */ true);
       // First, wait for abort(), used to reset the parser state for a safe
       // setting of timestampOffset.
-      await delay();
+      await Util.shortDelay();
       // The subsequent setTimestampOffset() fakes an updateend event for us, so
-      // another delay() isn't needed.
-      // Lastly, wait for the resolved mediaSourceEngine.appendBuffer() promise.
+      // simulateUpdate() isn't needed.
+      await Util.shortDelay();
+      // Next, wait for the second appendBuffer(), falling through to normal
+      // operations.
+      await simulateUpdate();
+      // Lastly, wait for the function-scoped MediaSourceEngine#appendBuffer()
+      // promise to resolve.
       await appendVideo;
       expect(videoSourceBuffer.abort).toHaveBeenCalledTimes(2);
     });
