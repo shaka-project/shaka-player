@@ -17,15 +17,19 @@ shaka.test.Id3Generator = class {
    */
   static generateId3(frames) {
     const Id3Generator = shaka.test.Id3Generator;
-    const result = Id3Generator.stringToInts_('ID3').concat([
-      0x03, 0x00,             // version 3.0 of ID3v2 (aka ID3v.2.3.0)
-      0x40,                   // flags. include an extended header
-      0x00, 0x00, 0x00, 0x00, // size. set later
-      // extended header
-      0x00, 0x00, 0x00, 0x06, // extended header size. no CRC
-      0x00, 0x00,             // extended flags
-      0x00, 0x00, 0x00, 0x02,  // size of padding
-    ], frames);
+    const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+    const result = Uint8ArrayUtils.concat(
+        Id3Generator.stringToInts_('ID3'),
+        new Uint8Array([
+          0x03, 0x00,             // version 3.0 of ID3v2 (aka ID3v.2.3.0)
+          0x40,                   // flags. include an extended header
+          0x00, 0x00, 0x00, 0x00, // size. set later
+          // extended header
+          0x00, 0x00, 0x00, 0x06, // extended header size. no CRC
+          0x00, 0x00,             // extended flags
+          0x00, 0x00, 0x00, 0x02,  // size of padding
+        ]),
+        frames);
 
     // size is stored as a sequence of four 7-bit integers with the
     // high bit of each byte set to zero
@@ -48,10 +52,14 @@ shaka.test.Id3Generator = class {
    */
   static generateId3Frame(type, value) {
     const Id3Generator = shaka.test.Id3Generator;
-    const result = Id3Generator.stringToInts_(type).concat([
-      0x00, 0x00, 0x00, 0x00, // size
-      0xe0, 0x00,             // flags. tag/file alter preservation, read-only
-    ]).concat(value);
+    const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+    const result = Uint8ArrayUtils.concat(
+        Id3Generator.stringToInts_(type),
+        new Uint8Array([
+          0x00, 0x00, 0x00, 0x00, // size
+          0xe0, 0x00,             // flags. tag/file alter preservation, read-only
+        ]),
+        value);
 
     // set the size
     const size = result.length - 10;
@@ -66,7 +74,7 @@ shaka.test.Id3Generator = class {
 
   /**
    * @param {string} string
-   * @return {!Array}
+   * @return {Uint8Array}
    * @private
    */
   static stringToInts_(string) {
@@ -74,6 +82,6 @@ shaka.test.Id3Generator = class {
     for (let i = 0; i < string.length; i++) {
       result[i] = string.charCodeAt(i);
     }
-    return result;
+    return new Uint8Array(result);
   }
 };
