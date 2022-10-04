@@ -162,6 +162,7 @@
   "DEMO_NUMBER_NONZERO_INTEGER_WARNING": "Must be a positive, nonzero integer.",
   "DEMO_NUMBER_OF_PARALLEL_DOWNLOADS": "Number of parallel downloads",
   "DEMO_OBSERVE_QUALITY_CHANGES": "Observe media quality changes",
+  "DEMO_PARSE_INBAND_PSSH_ENABLED": "Parse inband 'pssh' from media segments",
   "DEMO_OFFLINE": "Downloadable",
   "DEMO_OFFLINE_SEARCH": "Filters for assets that can be stored offline.",
   "DEMO_OFFLINE_SECTION_HEADER": "Offline",
