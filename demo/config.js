@@ -131,7 +131,9 @@ shakaDemo.Config = class {
             'drm.updateExpirationTime',
             /* canBeDecimal= */ true,
             /* canBeZero= */ false,
-            /* canBeUnset= */ true);
+            /* canBeUnset= */ true)
+        .addBoolInput_(MessageIds.PARSE_INBAND_PSSH_ENABLED,
+            'drm.parseInbandPsshEnabled');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions) => {
       // All advanced fields of a given type are set at once.
