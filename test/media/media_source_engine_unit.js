@@ -649,6 +649,50 @@ describe('MediaSourceEngine', () => {
 
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
+
+    it('calls abort before setting timestampOffset', async () => {
+      const delay = async () => {
+        await Util.shortDelay();
+        videoSourceBuffer.updateend();
+      };
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+      await mediaSourceEngine.init(
+          initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
+
+      // First, mock the scenario where timestampOffset is set to help align
+      // text segments. In this case, SourceBuffer mode is still 'segments'.
+      let reference = dummyReference(0, 1000);
+      let appendVideo = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false);
+      // Wait for the first appendBuffer(), in segments mode.
+      await delay();
+      // Next, wait for abort(), used to reset the parser state for a safe
+      // setting of timestampOffset.
+      await delay();
+      // Next, wait for remove(), used to clear the SourceBuffer from the
+      // initial append.
+      await delay();
+      // Lastly, wait for the resolved mediaSourceEngine.appendBuffer() promise.
+      await appendVideo;
+      expect(videoSourceBuffer.abort).toHaveBeenCalledTimes(1);
+
+      // Second, mock the scenario where timestampOffset is set during an
+      // unbuffered seek or adaptation. SourceBuffer mode is 'sequence' now.
+      reference = dummyReference(0, 1000);
+      appendVideo = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false,
+          /* seeked= */ true);
+      // First, wait for abort(), used to reset the parser state for a safe
+      // setting of timestampOffset.
+      await delay();
+      // The subsequent setTimestampOffset() fakes an updateend event for us, so
+      // another delay() isn't needed.
+      // Lastly, wait for the resolved mediaSourceEngine.appendBuffer() promise.
+      await appendVideo;
+      expect(videoSourceBuffer.abort).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('remove', () => {
