@@ -719,6 +719,10 @@
     "description": "The label on a field that allows users to provide a full mime type for a custom asset.",
     "message": "Full Mime Type for Playing Media Playlists Directly"
   },
+  "DEMO_PARSE_INBAND_PSSH_ENABLED": {
+    "description": "The name of a configuration value.",
+    "message": "Parse inband 'pssh' from media segments"
+  },
   "DEMO_PLAY": {
     "description": "A button to play the attached asset.",
     "message": "Play"
