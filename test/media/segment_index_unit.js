@@ -207,6 +207,25 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       ];
       expect(index.references).toEqual(newReferences);
     });
+
+    it('preserves hls key of the last reference', () => {
+      // The hls key of the last segment should be preserved.
+      const references = [
+        makeReference(uri(0), 0, 5, [],
+            {method: 'AES-128', firstMediaSequenceNumber: 0}),
+        makeReference(uri(1), 5, 10, [],
+            {method: 'AES-128', firstMediaSequenceNumber: 0}),
+        makeReference(uri(2), 10, 15, [],
+            {method: 'AES-128', firstMediaSequenceNumber: 0}),
+      ];
+      const index = new shaka.media.SegmentIndex(references);
+      expect(index.references).toEqual(references);
+
+      index.fit(/* windowStart= */ 0, /* windowEnd= */ 10);
+      expect(
+          index.references[index.references.length - 1].hlsAes128Key,
+      ).toEqual({method: 'AES-128', firstMediaSequenceNumber: 0});
+    });
   });
 
   describe('merge', () => {
@@ -955,9 +974,11 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
    * @param {number} startTime
    * @param {number} endTime
    * @param {!Array.<!shaka.media.SegmentReference>=} partialReferences
+   * @param {?shaka.extern.HlsAes128Key=} hlsAes128Key
    * @return {shaka.media.SegmentReference}
    */
-  function makeReference(uri, startTime, endTime, partialReferences = []) {
+  function makeReference(uri, startTime, endTime, partialReferences = [],
+      hlsAes128Key = null) {
     return new shaka.media.SegmentReference(
         startTime,
         endTime,
@@ -968,6 +989,11 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity,
-        /* partialReferences= */ partialReferences);
+        /* partialReferences= */ partialReferences,
+        /* tilesLayout= */ undefined,
+        /* tileDuration= */ undefined,
+        /* syncTime= */ undefined,
+        /* status= */ undefined,
+        /* hlsAes128Key= */ hlsAes128Key);
   }
 });
