@@ -650,7 +650,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   logLicenseExchange: boolean,
  *   updateExpirationTime: number,
  *   preferredKeySystems: !Array.<string>,
- *   keySystemsMapping: !Object.<string, string>
+ *   keySystemsMapping: !Object.<string, string>,
+ *   parseInbandPsshEnabled: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -693,6 +694,11 @@ shaka.extern.AdvancedDrmConfiguration;
  *   Specifies the priorties of available DRM key systems.
  * @property {Object.<string, string>} keySystemsMapping
  *   A map of key system name to key system name.
+ * @property {boolean} parseInbandPsshEnabled
+ *   <i>Defaults to true on Xbox One, and false for all other browsers.</i><br>
+ *   When true parse DRM init data from pssh boxes in media and init segments
+ *   and ignore 'encrypted' events.
+ *   This is required when using in-band key rotation on Xbox One.
  *
  * @exportDoc
  */
