@@ -219,6 +219,21 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
 
   /** @param {string} prefix Prepended to screenshot names */
   function defineTests(prefix) {
+    // Due to a Safari implementation bug, the browser only does the correct
+    // thing for "end-time-edge-case" on Safari 16+.  Skip the tests on earlier
+    // versions.
+    const safariVersion = shaka.util.Platform.safariVersion();
+    if (prefix == 'native' && safariVersion && safariVersion < 16) {
+      return;
+    }
+
+    // Due to updates in the rendering and/or default styles in Chrome, the
+    // screenshots for native rendering only match in Chrome 106+.
+    const chromeVersion = shaka.util.Platform.chromeVersion();
+    if (prefix == 'native' && chromeVersion && chromeVersion < 106) {
+      return;
+    }
+
     it('basic cue', async () => {
       textDisplayer.append([
         new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9'),
@@ -267,14 +282,6 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
     // show both cues in this edge case.  When we control the display of text
     // through the UI & DOM, we can always get the timing right.
     it('cues ending exactly now', async () => {
-      // Due to a Safari implementation bug, the browser only does the correct
-      // thing for this test case on Safari 16+.  Skip the test on earlier
-      // versions.
-      const safariVersion = shaka.util.Platform.safariVersion();
-      if (prefix == 'native' && safariVersion && safariVersion < 16) {
-        pending('Native implementation known to be broken on Safari < 16');
-      }
-
       // At time exactly 1, this cue should _not_ be displayed any more.
       textDisplayer.append([
         new shaka.text.Cue(0, 1, 'This cue is over and gone.'),
