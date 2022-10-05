@@ -75,7 +75,7 @@ describe('StreamingEngine', () => {
   /** @type {!jasmine.Spy} */
   let beforeAppendSegment;
   /** @type {!jasmine.Spy} */
-  let onMetadata
+  let onMetadata;
 
   /** @type {function(function(), number)} */
   let realSetTimeout;
@@ -2858,32 +2858,32 @@ describe('StreamingEngine', () => {
       // https://aomedia.org/emsg/ID to indicate a ID3 metadata.
       segmentData[ContentType.VIDEO].segments[0] =
           Uint8ArrayUtils.fromHex((
-              // 105 bytes  emsg box     v0, flags 0
-              '00 00 00 69  65 6d 73 67  00 00 00 00' +
+            // 105 bytes  emsg box     v0, flags 0
+            '00 00 00 69  65 6d 73 67  00 00 00 00' +
 
-              // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
-              '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
-              '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
+            // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
+            '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
+            '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
 
-              // value (1 byte) ''
-              '00' +
+            // value (1 byte) ''
+            '00' +
 
-              // timescale (4 bytes) 49
-              '00 00 00 31' +
+            // timescale (4 bytes) 49
+            '00 00 00 31' +
 
-              // presentation time delta (4 bytes) 8
-              '00 00 00 08' +
+            // presentation time delta (4 bytes) 8
+            '00 00 00 08' +
 
-              // event duration (4 bytes) 255
-              '00 00 00 ff' +
+            // event duration (4 bytes) 255
+            '00 00 00 ff' +
 
-              // id (4 bytes) 51
-              '00 00 00 33' +
+            // id (4 bytes) 51
+            '00 00 00 33' +
 
-              // message data (47 bytes)
-              '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
-              '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
-              '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
+            // message data (47 bytes)
+            '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
+            '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
+            '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
           ).replaceAll(' ', ''));
 
       videoStream.emsgSchemeIdUris = ['https://aomedia.org/emsg/ID3'];
