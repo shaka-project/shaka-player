@@ -57,7 +57,7 @@ shaka.test.Id3Generator = class {
         Id3Generator.stringToInts_(type),
         new Uint8Array([
           0x00, 0x00, 0x00, 0x00, // size
-          0xe0, 0x00,             // flags. tag/file alter preservation, read-only
+          0xe0, 0x00,             // flags
         ]),
         value);
 
