@@ -12,8 +12,8 @@ shaka.test.Id3Generator = class {
   /**
    * Generate an ID3 from a frames.
    *
-   * @param {Uint8Array} frames
-   * @return {Uint8Array}
+   * @param {!Uint8Array} frames
+   * @return {!Uint8Array}
    */
   static generateId3(frames) {
     const Id3Generator = shaka.test.Id3Generator;
@@ -40,15 +40,15 @@ shaka.test.Id3Generator = class {
     result[8] = (size >>> 7) & 0x7f;
     result[9] = size & 0x7f;
 
-    return new Uint8Array(result);
+    return result;
   }
 
   /**
    * Generate an ID3 frame from a type and value.
    *
    * @param {string} type
-   * @param {Uint8Array} value
-   * @return {Uint8Array}
+   * @param {!Uint8Array} value
+   * @return {!Uint8Array}
    */
   static generateId3Frame(type, value) {
     const Id3Generator = shaka.test.Id3Generator;
@@ -69,12 +69,12 @@ shaka.test.Id3Generator = class {
     result[6] = (size >>> 7) & 0x7f;
     result[7] = size & 0x7f;
 
-    return new Uint8Array(result);
+    return result;
   }
 
   /**
    * @param {string} string
-   * @return {Uint8Array}
+   * @return {!Uint8Array}
    * @private
    */
   static stringToInts_(string) {

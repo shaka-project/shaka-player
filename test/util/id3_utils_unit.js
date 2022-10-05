@@ -9,7 +9,7 @@ describe('Id3Utils', () => {
   const Id3Generator = shaka.test.Id3Generator;
 
   it('no valid data produces empty output', () => {
-    expect(Id3Utils.getID3Frames(new Uint8Array())).toEqual([]);
+    expect(Id3Utils.getID3Frames(new Uint8Array([]))).toEqual([]);
   });
 
   it('parse a TXXX frame', () => {
