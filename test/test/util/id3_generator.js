@@ -13,12 +13,13 @@ shaka.test.Id3Generator = class {
    * Generate an ID3 from a frames.
    *
    * @param {!Uint8Array} frames
+   * @param {boolean=} extendedHeader
    * @return {!Uint8Array}
    */
-  static generateId3(frames) {
+  static generateId3(frames, extendedHeader = false) {
     const Id3Generator = shaka.test.Id3Generator;
     const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
-    const result = Uint8ArrayUtils.concat(
+    let result = Uint8ArrayUtils.concat(
         Id3Generator.stringToInts_('ID3'),
         new Uint8Array([
           0x03, 0x00,             // version 3.0 of ID3v2 (aka ID3v.2.3.0)
@@ -30,6 +31,16 @@ shaka.test.Id3Generator = class {
           0x00, 0x00, 0x00, 0x02,  // size of padding
         ]),
         frames);
+    if (!extendedHeader) {
+      result = Uint8ArrayUtils.concat(
+          Id3Generator.stringToInts_('ID3'),
+          new Uint8Array([
+            0x03, 0x00,             // version 3.0 of ID3v2 (aka ID3v.2.3.0)
+            0x00,                   // flags
+            0x00, 0x00, 0x00, 0x00, // size. set later
+          ]),
+          frames);
+    }
 
     // size is stored as a sequence of four 7-bit integers with the
     // high bit of each byte set to zero
