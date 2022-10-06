@@ -401,8 +401,8 @@ describe('MediaSourceEngine', () => {
         /* sequenceMode= */ true);
 
     const segment = generators[videoType].getSegment(0, Date.now() / 1000);
+    const partialSegmentLength = Math.floor(segment.byteLength / 3);
 
-    let partialSegmentLength = Math.floor(segment.byteLength / 3);
     let partialSegment = shaka.util.BufferUtils.toUint8(
         segment, /* offset= */ 0, /* length= */ partialSegmentLength);
     let reference = dummyReference(videoType, 0);
@@ -410,9 +410,8 @@ describe('MediaSourceEngine', () => {
         videoType, partialSegment, reference, /* hasClosedCaptions= */ false);
 
     partialSegment = shaka.util.BufferUtils.toUint8(
-        segment, 
-        /* offset= */ partialSegmentLength, 
-        /* length= */ segment.byteLength - partialSegmentLength);
+        segment,
+        /* offset= */ partialSegmentLength);
     reference = dummyReference(videoType, 1);
     await mediaSourceEngine.appendBuffer(
         videoType, partialSegment, reference, /* hasClosedCaptions= */ false,
