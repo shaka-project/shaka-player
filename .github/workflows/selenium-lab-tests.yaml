@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ needs.compute-ref.REF }}
+          ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Install dependencies
         run: npm ci
@@ -92,7 +92,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ needs.compute-ref.REF }}
+          ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Set commit status to pending
         uses: ./.github/workflows/custom-actions/set-commit-status
@@ -134,7 +134,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ needs.compute-ref.REF }}
+          ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Set commit status to pending
         uses: ./.github/workflows/custom-actions/set-commit-status

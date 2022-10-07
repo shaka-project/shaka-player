@@ -649,6 +649,60 @@ describe('MediaSourceEngine', () => {
 
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
     });
+
+    it('calls abort before setting timestampOffset', async () => {
+      const simulateUpdate = async () => {
+        await Util.shortDelay();
+        videoSourceBuffer.updateend();
+      };
+      const initObject = new Map();
+      initObject.set(ContentType.VIDEO, fakeVideoStream);
+
+      await mediaSourceEngine.init(
+          initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
+
+      // First, mock the scenario where timestampOffset is set to help align
+      // text segments. In this case, SourceBuffer mode is still 'segments'.
+      let reference = dummyReference(0, 1000);
+      let appendVideo = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false);
+      // Wait for the first appendBuffer(), in segments mode.
+      await simulateUpdate();
+      // Next, wait for abort(), used to reset the parser state for a safe
+      // setting of timestampOffset. Shaka fakes an updateend event on abort(),
+      // so simulateUpdate() isn't needed.
+      await Util.shortDelay();
+      // Next, wait for remove(), used to clear the SourceBuffer from the
+      // initial append.
+      await simulateUpdate();
+      // Next, wait for the second appendBuffer(), falling through to normal
+      // operations.
+      await simulateUpdate();
+      // Lastly, wait for the function-scoped MediaSourceEngine#appendBuffer()
+      // promise to resolve.
+      await appendVideo;
+      expect(videoSourceBuffer.abort).toHaveBeenCalledTimes(1);
+
+      // Second, mock the scenario where timestampOffset is set during an
+      // unbuffered seek or adaptation. SourceBuffer mode is 'sequence' now.
+      reference = dummyReference(0, 1000);
+      appendVideo = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, reference, /* hasClosedCaptions= */ false,
+          /* seeked= */ true);
+      // First, wait for abort(), used to reset the parser state for a safe
+      // setting of timestampOffset.
+      await Util.shortDelay();
+      // The subsequent setTimestampOffset() fakes an updateend event for us, so
+      // simulateUpdate() isn't needed.
+      await Util.shortDelay();
+      // Next, wait for the second appendBuffer(), falling through to normal
+      // operations.
+      await simulateUpdate();
+      // Lastly, wait for the function-scoped MediaSourceEngine#appendBuffer()
+      // promise to resolve.
+      await appendVideo;
+      expect(videoSourceBuffer.abort).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('remove', () => {
