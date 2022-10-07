@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.1.5](https://github.com/shaka-project/shaka-player/compare/v4.1.4...v4.1.5) (2022-10-07)
+
+
+### Bug Fixes
+
+* allow build without text ([#4506](https://github.com/shaka-project/shaka-player/issues/4506)) ([1db6265](https://github.com/shaka-project/shaka-player/commit/1db62655276e8d2d5991f732704b7b37bb6994a3))
+* allow the playback on platforms when low latency APIs are not supported ([#4485](https://github.com/shaka-project/shaka-player/issues/4485)) ([55d1390](https://github.com/shaka-project/shaka-player/commit/55d1390c82a2dcc7965d582c33417937944f86b7))
+* check for negative rows before moving ([#4510](https://github.com/shaka-project/shaka-player/issues/4510)) ([31abae3](https://github.com/shaka-project/shaka-player/commit/31abae3201f4904e63a786015634e47a873ec789)), closes [#4508](https://github.com/shaka-project/shaka-player/issues/4508)
+* Filter unsupported H.264 streams in Xbox ([#4493](https://github.com/shaka-project/shaka-player/issues/4493)) ([1ecede6](https://github.com/shaka-project/shaka-player/commit/1ecede6cf55ff1904542bfcad548e8dc4e4b4834))
+* Fix choppy HLS startup ([#4553](https://github.com/shaka-project/shaka-player/issues/4553)) ([1675bff](https://github.com/shaka-project/shaka-player/commit/1675bffa9f410327fb53c34202daa1d75620233a)), closes [#4516](https://github.com/shaka-project/shaka-player/issues/4516)
+* Fix errors with TS segments on Chromecast ([#4543](https://github.com/shaka-project/shaka-player/issues/4543)) ([15a1c60](https://github.com/shaka-project/shaka-player/commit/15a1c60c3f4dcb5e7bc7e915ec81ca3cb17d6625))
+* Fix hang when seeking to the last segment ([#4537](https://github.com/shaka-project/shaka-player/issues/4537)) ([72a119d](https://github.com/shaka-project/shaka-player/commit/72a119d4fb3820fa97416ecedf23f96bbd5ca269))
+* Fix HLS dynamic to static transition ([932d37c](https://github.com/shaka-project/shaka-player/commit/932d37c29cadbbc54f2f9a7b3ce3b510f86384cb))
+* Fix HLS dynamic to static transition ([#4483](https://github.com/shaka-project/shaka-player/issues/4483)) ([932d37c](https://github.com/shaka-project/shaka-player/commit/932d37c29cadbbc54f2f9a7b3ce3b510f86384cb)), closes [#4431](https://github.com/shaka-project/shaka-player/issues/4431)
+* Fix in-band key rotation on Xbox One ([#4478](https://github.com/shaka-project/shaka-player/issues/4478)) ([5a8f09c](https://github.com/shaka-project/shaka-player/commit/5a8f09c03d5ca84a90985d68be6079d2f508d87f)), closes [#4401](https://github.com/shaka-project/shaka-player/issues/4401)
+* Respect existing app usage of Cast SDK ([#4523](https://github.com/shaka-project/shaka-player/issues/4523)) ([9c3a494](https://github.com/shaka-project/shaka-player/commit/9c3a494a2826e24a60898ae47766a7a41c4cce2d)), closes [#4521](https://github.com/shaka-project/shaka-player/issues/4521)
+* **ttml:** Default TTML background color to transparent if unspecified ([#4496](https://github.com/shaka-project/shaka-player/issues/4496)) ([16da1e7](https://github.com/shaka-project/shaka-player/commit/16da1e7416353584c36b29f4028352349617fe45)), closes [#4468](https://github.com/shaka-project/shaka-player/issues/4468)
+
 ## [4.1.4](https://github.com/shaka-project/shaka-player/compare/v4.1.3...v4.1.4) (2022-08-31)
 
 
