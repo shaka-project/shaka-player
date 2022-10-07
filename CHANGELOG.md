@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.3.11](https://github.com/shaka-project/shaka-player/compare/v3.3.10...v3.3.11) (2022-10-07)
+
+
+### Bug Fixes
+
+* allow build without text ([#4506](https://github.com/shaka-project/shaka-player/issues/4506)) ([5014c1d](https://github.com/shaka-project/shaka-player/commit/5014c1d50d2b612bf741f2736cf5f86522f4285b))
+* allow the playback on platforms when low latency APIs are not supported ([#4485](https://github.com/shaka-project/shaka-player/issues/4485)) ([c0fc0b4](https://github.com/shaka-project/shaka-player/commit/c0fc0b4dcaa8d3d6db2782a987e74ebe9064ea53))
+* check for negative rows before moving ([#4510](https://github.com/shaka-project/shaka-player/issues/4510)) ([359b63e](https://github.com/shaka-project/shaka-player/commit/359b63e5c9665a1884daf95aa1cba7c8470ed7bb)), closes [#4508](https://github.com/shaka-project/shaka-player/issues/4508)
+* Filter unsupported H.264 streams in Xbox ([#4493](https://github.com/shaka-project/shaka-player/issues/4493)) ([21ee94f](https://github.com/shaka-project/shaka-player/commit/21ee94fce4daa624561989600f47170c468bf962))
+* Fix hang when seeking to the last segment ([#4537](https://github.com/shaka-project/shaka-player/issues/4537)) ([2868e12](https://github.com/shaka-project/shaka-player/commit/2868e122eb5bc2db57ca96c429ad8178f7f5e3f4))
+* Respect existing app usage of Cast SDK ([#4523](https://github.com/shaka-project/shaka-player/issues/4523)) ([d2258d6](https://github.com/shaka-project/shaka-player/commit/d2258d60fab218738bfa6f80b675e65b9a7994dc)), closes [#4521](https://github.com/shaka-project/shaka-player/issues/4521)
+* **ttml:** Default TTML background color to transparent if unspecified ([#4496](https://github.com/shaka-project/shaka-player/issues/4496)) ([862ee42](https://github.com/shaka-project/shaka-player/commit/862ee42f770b6fbd19e33fd04e98882d203caf4b)), closes [#4468](https://github.com/shaka-project/shaka-player/issues/4468)
+
 ## [3.3.10](https://github.com/shaka-project/shaka-player/compare/v3.3.9...v3.3.10) (2022-08-31)
 
 
