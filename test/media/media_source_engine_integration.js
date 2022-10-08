@@ -46,7 +46,7 @@ describe('MediaSourceEngine', () => {
         video,
         new shaka.media.ClosedCaptionParser(),
         textDisplayer,
-        onMetadata);
+        shaka.test.Util.spyFunc(onMetadata));
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(config);
 
