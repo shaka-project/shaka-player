@@ -455,6 +455,9 @@ describe('MediaSourceEngine', () => {
   });
 
   it('extracts ID3 metadata from AAC', async () => {
+    if (!MediaSource.isTypeSupported('audio/aac')) {
+      return;
+    }
     metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
     generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
 
