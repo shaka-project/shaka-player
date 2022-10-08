@@ -480,19 +480,15 @@ shaka.extern.MetadataRawFrame;
 
 /**
  * @typedef {{
- *   data: (ArrayBuffer|string),
- *   description: string,
- *   id: string,
  *   key: string,
- *   value: (ArrayBuffer|string)
+ *   data: (ArrayBuffer|string),
+ *   description: string
  * }}
  *
  * @description metadata frame parsed.
+ * @property {string} key
  * @property {ArrayBuffer|string} data
  * @property {string} description
- * @property {string} id
- * @property {string} key
- * @property {ArrayBuffer|string} value
  * @exportDoc
  */
 shaka.extern.MetadataFrame;

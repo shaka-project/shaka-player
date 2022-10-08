@@ -19,11 +19,9 @@ describe('Id3Utils', () => {
     const txxxID3 = Id3Generator.generateId3(txxxFrame);
     const expectedID3 = [
       {
-        id: 'TXXX',
         key: 'TXXX',
         description: 'A',
         data: 'Shaka',
-        value: 'Shaka',
       },
     ];
     expect(Id3Utils.getID3Frames(txxxID3)).toEqual(expectedID3);
@@ -35,11 +33,9 @@ describe('Id3Utils', () => {
     const txxxID3 = Id3Generator.generateId3(txxxFrame, true);
     const expectedID3 = [
       {
-        id: 'TXXX',
         key: 'TXXX',
         description: 'A',
         data: 'Shaka',
-        value: 'Shaka',
       },
     ];
     expect(Id3Utils.getID3Frames(txxxID3)).toEqual(expectedID3);
@@ -52,11 +48,9 @@ describe('Id3Utils', () => {
     const tcopID3 = Id3Generator.generateId3(tcopFrame);
     const expectedID3 = [
       {
-        id: 'TCOP',
         key: 'TCOP',
         description: '',
         data: 'Shaka 2016',
-        value: 'Shaka 2016',
       },
     ];
     expect(Id3Utils.getID3Frames(tcopID3)).toEqual(expectedID3);
@@ -69,11 +63,9 @@ describe('Id3Utils', () => {
     const wxxxID3 = Id3Generator.generateId3(wxxxFrame);
     const expectedID3 = [
       {
-        id: 'WXXX',
         key: 'WXXX',
         description: 'A',
         data: 'google.com',
-        value: 'google.com',
       },
     ];
     expect(Id3Utils.getID3Frames(wxxxID3)).toEqual(expectedID3);
@@ -86,11 +78,9 @@ describe('Id3Utils', () => {
     const wcopID3 = Id3Generator.generateId3(wcopFrame);
     const expectedID3 = [
       {
-        id: 'WCOP',
         key: 'WCOP',
         description: '',
         data: 'google.com',
-        value: 'google.com',
       },
     ];
     expect(Id3Utils.getID3Frames(wcopID3)).toEqual(expectedID3);
@@ -102,11 +92,9 @@ describe('Id3Utils', () => {
     const privID3 = Id3Generator.generateId3(privFrame);
     const expectedID3 = [
       {
-        id: 'PRIV',
         key: 'PRIV',
         description: 'A',
         data: BufferUtils.toArrayBuffer(new Uint8Array([83, 104, 97, 107])),
-        value: BufferUtils.toArrayBuffer(new Uint8Array([83, 104, 97, 107])),
       },
     ];
     expect(Id3Utils.getID3Frames(privID3)).toEqual(expectedID3);
@@ -118,11 +106,9 @@ describe('Id3Utils', () => {
     const unknownID3 = Id3Generator.generateId3(unknownFrame);
     const expectedID3 = [
       {
-        id: 'XXXX',
         key: 'XXXX',
         description: '',
         data: BufferUtils.toArrayBuffer(new Uint8Array([83, 104, 97, 107])),
-        value: BufferUtils.toArrayBuffer(new Uint8Array([83, 104, 97, 107])),
       },
     ];
     expect(Id3Utils.getID3Frames(unknownID3)).toEqual(expectedID3);
