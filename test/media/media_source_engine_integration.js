@@ -441,6 +441,19 @@ describe('MediaSourceEngine', () => {
     expect(textDisplayer.appendSpy).toHaveBeenCalled();
   });
 
+  it('extracts ID3 metadata from TS', async () => {
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_ts'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
   it('extracts ID3 metadata from AAC', async () => {
     metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
     generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];

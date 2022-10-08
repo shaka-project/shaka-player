@@ -46,6 +46,6 @@ describe('TsParser', () => {
     const metadata = new shaka.util.TsParser().parse(tsSegment)
         .getMetadata();
     expect(metadata).toBeTruthy();
-    expect(metadata.length).toBe(7);
+    expect(metadata.length).toBe(2);
   });
 });

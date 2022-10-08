@@ -656,6 +656,16 @@ shaka.test.TestScheme.DATA = {
     duration: 30,
   },
 
+  'id3-metadata_ts': {
+    audio: {
+      segmentUri: '/base/test/test/assets/id3-metadata.ts',
+      mimeType: 'video/mp2t',
+      codecs: 'mp4a.40.5',
+      segmentDuration: 4.99,
+    },
+    duration: 4.99,
+  },
+
   'id3-metadata_aac': {
     audio: {
       segmentUri: '/base/test/test/assets/id3-metadata.aac',
