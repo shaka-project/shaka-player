@@ -26,6 +26,9 @@ describe('MediaSourceEngine', () => {
    */
   let textDisplayer;
 
+  /** @type {!jasmine.Spy} */
+  let onMetadata;
+
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -37,10 +40,13 @@ describe('MediaSourceEngine', () => {
 
     textDisplayer = new shaka.test.FakeTextDisplayer();
 
+    onMetadata = jasmine.createSpy('onMetadata');
+
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         new shaka.media.ClosedCaptionParser(),
-        textDisplayer);
+        textDisplayer,
+        onMetadata);
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(config);
 
@@ -433,5 +439,18 @@ describe('MediaSourceEngine', () => {
     await appendWithClosedCaptions(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from AAC', async () => {
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
   });
 });
