@@ -55,6 +55,9 @@ shaka.test.FakeMediaSourceEngine = class {
     this.open = jasmine.createSpy('open').and.returnValue(Promise.resolve());
 
     /** @type {!jasmine.Spy} */
+    this.configure = jasmine.createSpy('configure').and.stub();
+
+    /** @type {!jasmine.Spy} */
     this.reinitText = jasmine.createSpy('reinitText').and.stub();
 
     /** @type {!jasmine.Spy} */
@@ -129,6 +132,10 @@ shaka.test.FakeMediaSourceEngine = class {
     /** @type {!jasmine.Spy} */
     this.setSegmentRelativeVttTiming =
         jasmine.createSpy('setSegmentRelativeVttTiming').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.updateLcevcDil =
+        jasmine.createSpy('updateLcevcDil').and.stub();
   }
 
   /** @override */

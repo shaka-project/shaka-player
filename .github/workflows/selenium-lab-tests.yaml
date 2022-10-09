@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ needs.compute-ref.REF }}
+          ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Install dependencies
         run: npm ci
@@ -92,7 +92,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ needs.compute-ref.REF }}
+          ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Set commit status to pending
         uses: ./.github/workflows/custom-actions/set-commit-status
@@ -134,7 +134,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ needs.compute-ref.REF }}
+          ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Set commit status to pending
         uses: ./.github/workflows/custom-actions/set-commit-status
@@ -180,6 +180,15 @@ jobs:
       # the container.
       - name: Test Player
         run: |
+          # Generate a coverage report from uncompiled code on ChromeLinux.
+          # It should be the uncompiled build, or else we won't execute any
+          # coverage instrumentation on full-stack player integration tests.
+          if [[ "${{ matrix.browser }}" == "ChromeLinux" ]]; then
+            extra_flags="--html-coverage-report --uncompiled"
+          else
+            extra_flags=""
+          fi
+
           python3 build/test.py \
               --no-build \
               --reporters spec --spec-hide-passed \
@@ -189,7 +198,7 @@ jobs:
               --grid-config build/shaka-lab.yaml \
               --grid-address selenium-grid.lab:4444 \
               --browsers ${{ matrix.browser }} \
-              --html-coverage-report
+              $extra_flags
 
       - name: Find coverage report (ChromeLinux only)
         id: coverage

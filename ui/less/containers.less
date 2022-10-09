@@ -98,6 +98,13 @@
   }
 }
 
+/* A container for all canvas for LCEVC decoding
+ * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
+ * below (Y axis) .shaka-play-button-container. */
+.shaka-canvas-container {
+  .overlay-child();
+}
+
 /* Container for controls positioned at the bottom of the video container:
  * controls button panel and the seek bar. */
 .shaka-bottom-controls {

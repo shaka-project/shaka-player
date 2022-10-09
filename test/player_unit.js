@@ -123,6 +123,7 @@ describe('Player', () => {
       streamingEngine = new shaka.test.FakeStreamingEngine();
       mediaSourceEngine = {
         init: jasmine.createSpy('init').and.returnValue(Promise.resolve()),
+        configure: jasmine.createSpy('configure'),
         open: jasmine.createSpy('open').and.returnValue(Promise.resolve()),
         destroy:
             jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
@@ -130,6 +131,8 @@ describe('Player', () => {
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
         setSegmentRelativeVttTiming:
             jasmine.createSpy('setSegmentRelativeVttTiming'),
+        updateLcevcDil:
+            jasmine.createSpy('updateLcevcDil'),
         getTextDisplayer: () => textDisplayer,
         getBufferedInfo: () => bufferedInfo,
         ended: jasmine.createSpy('ended').and.returnValue(false),

@@ -650,7 +650,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   logLicenseExchange: boolean,
  *   updateExpirationTime: number,
  *   preferredKeySystems: !Array.<string>,
- *   keySystemsMapping: !Object.<string, string>
+ *   keySystemsMapping: !Object.<string, string>,
+ *   parseInbandPsshEnabled: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -693,6 +694,11 @@ shaka.extern.AdvancedDrmConfiguration;
  *   Specifies the priorties of available DRM key systems.
  * @property {Object.<string, string>} keySystemsMapping
  *   A map of key system name to key system name.
+ * @property {boolean} parseInbandPsshEnabled
+ *   <i>Defaults to true on Xbox One, and false for all other browsers.</i><br>
+ *   When true parse DRM init data from pssh boxes in media and init segments
+ *   and ignore 'encrypted' events.
+ *   This is required when using in-band key rotation on Xbox One.
  *
  * @exportDoc
  */
@@ -1019,6 +1025,23 @@ shaka.extern.StreamingConfiguration;
 
 /**
  * @typedef {{
+ *   sourceBufferExtraFeatures: string
+ * }}
+ *
+ * @description
+ *   Media source configuration.
+ *
+ * @property {string} sourceBufferExtraFeatures
+ *   Some platforms may need to pass features when initializing the
+ *   sourceBuffer.
+ *   This string is ultimately appended to MIME types in addSourceBuffer().
+ * @exportDoc
+ */
+shaka.extern.MediaSourceConfiguration;
+
+
+/**
+ * @typedef {{
  *   enabled: boolean,
  *   useNetworkInformation: boolean,
  *   defaultBandwidthEstimate: number,
@@ -1028,6 +1051,7 @@ shaka.extern.StreamingConfiguration;
  *   bandwidthDowngradeTarget: number,
  *   advanced: shaka.extern.AdvancedAbrConfiguration,
  *   restrictToElementSize: boolean,
+ *   restrictToScreenSize: boolean,
  *   ignoreDevicePixelRatio: boolean
  * }}
  *
@@ -1063,9 +1087,12 @@ shaka.extern.StreamingConfiguration;
  *   Note: The use of ResizeObserver is required for it to work properly. If
  *   true without ResizeObserver, it behaves as false.
  *   Defaults false.
+ * @property {boolean} restrictToScreenSize
+ *   If true, restrict the quality to screen size.
+ *   Defaults false.
  * @property {boolean} ignoreDevicePixelRatio
  *   If true,device pixel ratio is ignored when restricting the quality to
- *   media element size.
+ *   media element size or screen size.
  *   Defaults false.
  * @exportDoc
  */
@@ -1134,6 +1161,45 @@ shaka.extern.AdvancedAbrConfiguration;
  */
 shaka.extern.CmcdConfiguration;
 
+/**
+ * @typedef {{
+ *   dynamicPerformanceScaling: boolean,
+ *   logLevel: number,
+ *   drawLogo: boolean
+ * }}
+ *
+ * @description
+ *   Decoding for MPEG-5 Part2 LCEVC.
+ *
+ * @property {boolean} dynamicPerformanceScaling
+ *   If <code>true</code>, LCEVC Dynamic Performance Scaling or dps is enabled
+ *   to be triggered, when the system is not able to decode frames within a
+ *   specific tolerance of the fps of the video and disables LCEVC decoding
+ *   for some time. The base video will be shown upscaled to target resolution.
+ *   If it is triggered again within a short period of time, the disabled
+ *   time will be higher and if it is triggered three times in a row the LCEVC
+ *   decoding will be disabled for that playback session.
+ *   If dynamicPerformanceScaling is false, LCEVC decode will be forced
+ *   and will drop frames appropriately if performance is sub optimal.
+ *   Defaults to <code>true</code>.
+ * @property {number} logLevel
+ *   Loglevel 0-5 for logging.
+ *   NONE = 0
+ *   ERROR = 1
+ *   WARNING = 2
+ *   INFO = 3
+ *   DEBUG = 4
+ *   VERBOSE = 5
+ *   Defaults to <code>0</code>.
+ * @property {boolean} drawLogo
+ *   If <code>true</code>, LCEVC Logo is placed on the top left hand corner
+ *   which only appears when the LCEVC enahanced Frames are being rendered.
+ *   Defaults to true for the lib but is forced to false in this integration
+ *   unless explicitly set to true through config.
+ *   Defaults to <code>false</code>.
+ * @exportDoc
+ */
+shaka.extern.LcevcConfiguration;
 
 /**
  * @typedef {{
@@ -1181,9 +1247,11 @@ shaka.extern.OfflineConfiguration;
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
+ *   mediaSource: shaka.extern.MediaSourceConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
+ *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
@@ -1208,12 +1276,17 @@ shaka.extern.OfflineConfiguration;
  *   Manifest configuration and settings.
  * @property {shaka.extern.StreamingConfiguration} streaming
  *   Streaming configuration and settings.
+ * @property {shaka.extern.MediaSourceConfiguration} mediaSource
+ *   Media source configuration and settings.
  * @property {shaka.extern.AbrManager.Factory} abrFactory
  *   A factory to construct an abr manager.
  * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.
  * @property {shaka.extern.CmcdConfiguration} cmcd
  *   CMCD configuration and settings. (Common Media Client Data)
+ * @property {shaka.extern.LcevcConfiguration} lcevc
+ *   MPEG-5 LCEVC configuration and settings.
+ *   (Low Complexity Enhancement Video Codec)
  * @property {shaka.extern.OfflineConfiguration} offline
  *   Offline configuration and settings.
  * @property {string} preferredAudioLanguage

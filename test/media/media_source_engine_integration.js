@@ -41,6 +41,8 @@ describe('MediaSourceEngine', () => {
         video,
         new shaka.media.ClosedCaptionParser(),
         textDisplayer);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    mediaSourceEngine.configure(config);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();
@@ -378,6 +380,42 @@ describe('MediaSourceEngine', () => {
     await append(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('buffers partial TS video segments in sequence mode', async () => {
+    metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
+
+    const videoType = ContentType.VIDEO;
+    const initObject = new Map();
+    initObject.set(videoType, getFakeStream(metadata.video));
+
+    await mediaSourceEngine.init(
+        initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
+    await mediaSourceEngine.setDuration(presentationDuration);
+    await mediaSourceEngine.setStreamProperties(
+        videoType,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity,
+        /* sequenceMode= */ true);
+
+    const segment = generators[videoType].getSegment(0, Date.now() / 1000);
+    const partialSegmentLength = Math.floor(segment.byteLength / 3);
+
+    let partialSegment = shaka.util.BufferUtils.toUint8(
+        segment, /* offset= */ 0, /* length= */ partialSegmentLength);
+    let reference = dummyReference(videoType, 0);
+    await mediaSourceEngine.appendBuffer(
+        videoType, partialSegment, reference, /* hasClosedCaptions= */ false);
+
+    partialSegment = shaka.util.BufferUtils.toUint8(
+        segment,
+        /* offset= */ partialSegmentLength);
+    reference = dummyReference(videoType, 1);
+    await mediaSourceEngine.appendBuffer(
+        videoType, partialSegment, reference, /* hasClosedCaptions= */ false,
+        /* seeked= */ true);
   });
 
   it('extracts CEA-708 captions from dash', async () => {
