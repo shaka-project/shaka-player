@@ -100,18 +100,16 @@ describe('HlsParser live', () => {
 
   /**
    * @param {string} master
-   * @param {string} initialMedia
-   * @param {Array=} initialReferences
-   * @return {!Promise.<shaka.extern.Manifest>}
+   * @param {string} media1
+   * @param {string} media2
    */
-  async function testInitialManifest(
-      master, initialMedia, initialReferences=null) {
+  function configureNetEngineForInitialManifest(master, media1, media2) {
     fakeNetEngine
         .setResponseText('test:/master', master)
-        .setResponseText('test:/video', initialMedia)
-        .setResponseText('test:/redirected/video', initialMedia)
-        .setResponseText('test:/video2', initialMedia)
-        .setResponseText('test:/audio', initialMedia)
+        .setResponseText('test:/video', media1)
+        .setResponseText('test:/redirected/video', media1)
+        .setResponseText('test:/video2', media2)
+        .setResponseText('test:/audio', media1)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData)
         .setResponseValue('test:/main2.mp4', segmentData)
@@ -120,24 +118,35 @@ describe('HlsParser live', () => {
         .setResponseValue('test:/partial.mp4', segmentData)
         .setResponseValue('test:/partial2.mp4', segmentData)
         .setResponseValue('test:/selfInit.mp4', selfInitializingSegmentData);
+  }
+
+  /**
+   * @param {string} master
+   * @param {string} initialMedia
+   * @param {Array=} initialReferences
+   * @return {!Promise.<shaka.extern.Manifest>}
+   */
+  async function testInitialManifest(
+      master, initialMedia, initialReferences=null) {
+    configureNetEngineForInitialManifest(master, initialMedia, initialMedia);
 
     const manifest = await parser.start('test:/master', playerInterface);
 
-    if (initialReferences) {
-      await Promise.all(manifest.variants.map(async (variant) => {
-        await variant.video.createSegmentIndex();
+    // Create the segment index for the variants, to finish the lazy-loading.
+    await Promise.all(manifest.variants.map(async (variant) => {
+      await variant.video.createSegmentIndex();
 
-        // The compiler doesn't count null checks done outside this callback,
-        // so we need an assertion here.
-        goog.asserts.assert(initialReferences != null, 'references non-null');
+      if (initialReferences) {
         ManifestParser.verifySegmentIndex(variant.video, initialReferences);
+      }
 
-        if (variant.audio) {
-          await variant.audio.createSegmentIndex();
+      if (variant.audio) {
+        await variant.audio.createSegmentIndex();
+        if (initialReferences) {
           ManifestParser.verifySegmentIndex(variant.audio, initialReferences);
         }
-      }));
-    }
+      }
+    }));
 
     return manifest;
   }
@@ -415,6 +424,26 @@ describe('HlsParser live', () => {
       'main2.mp4\n',
     ].join('');
 
+    const mediaWithAdditionalSegment2 = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:2,\n',
+      'main3.mp4\n',
+      '#EXTINF:2,\n',
+      'main4.mp4\n',
+    ].join('');
+
+    const mediaWithRemovedSegment2 = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:1\n',
+      '#EXTINF:2,\n',
+      'main4.mp4\n',
+    ].join('');
+
     let mediaWithManySegments = [
       '#EXTM3U\n',
       '#EXT-X-TARGETDURATION:5\n',
@@ -666,6 +695,45 @@ describe('HlsParser live', () => {
         const manifest = await testInitialManifest(
             master, mediaWithAdditionalSegment, [ref1, ref2]);
         await testUpdate(manifest, mediaWithRemovedSegment, [ref2]);
+      });
+
+      it('has correct references if switching after update', async () => {
+        const ref1 = makeReference(
+            'test:/main.mp4', 0, 2, /* syncTime= */ null);
+        const ref2 = makeReference(
+            'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+        const ref4 = makeReference(
+            'test:/main4.mp4', 2, 4, /* syncTime= */ null);
+
+        const secondVariant = [
+          '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+          'RESOLUTION=1200x940,FRAME-RATE=60\n',
+          'video2',
+        ].join('');
+        const masterWithTwoVariants = master + secondVariant;
+        configureNetEngineForInitialManifest(masterWithTwoVariants,
+            mediaWithAdditionalSegment, mediaWithAdditionalSegment2);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        await manifest.variants[0].video.createSegmentIndex();
+        ManifestParser.verifySegmentIndex(
+            manifest.variants[0].video, [ref1, ref2]);
+        expect(manifest.variants[1].video.segmentIndex).toBeNull();
+
+        // Update.
+        fakeNetEngine
+            .setResponseText('test:/video', mediaWithRemovedSegment)
+            .setResponseText('test:/video2', mediaWithRemovedSegment2);
+        await delayForUpdatePeriod();
+
+        // Switch.
+        await manifest.variants[0].video.closeSegmentIndex();
+        await manifest.variants[1].video.createSegmentIndex();
+
+        // Check for variants to be as expected.
+        expect(manifest.variants[0].video.segmentIndex).toBeNull();
+        ManifestParser.verifySegmentIndex(
+            manifest.variants[1].video, [ref4]);
       });
 
       it('handles updates with redirects', async () => {
