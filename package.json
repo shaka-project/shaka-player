@@ -72,6 +72,8 @@
       "eme-encryption-scheme-polyfill/index.js",
       "es6-promise-polyfill/promise.min.js",
       "google-closure-library/closure/goog/base.js",
+      "lcevc_dil.js/dist/lcevc_dil.min.js",
+      "lcevc_dil.js/dist/liblcevc_dpi.wasm",
       "less/dist/less.js",
       "material-design-lite/dist/material.indigo-blue.min.css",
       "material-design-lite/dist/material.min.js",
