@@ -12,9 +12,12 @@ This article describes the V-Nova LCEVC Shaka Player integration.
 
 V-Nova LCEVC DIL Libraries are included using the same approach that the other external libraries are currently using. The necessary V-Nova LCEVC DIL files need to be imported in the HTML page that is going to be used by Shaka Player to decode LCEVC. Checks are inplace that make sure the necessary objects are available.
 
+Npm package : <https://www.npmjs.com/package/lcevc_dil.js>
+
+
 ```javascript
   <!-- MPEG-5 Part2 LCEVC support is enabled by including this: -->
-  <script defer src="https://cdn.jsdelivr.net/npm/lcevc_dil.js@latest/dist/lcevc_dil.min.js"></script>
+  <script defer src="../node_modules/lcevc_dil.js/dist/lcevc_dil.min.js"></script>
 ```
 
 To allow the Closure compiler to use the objects and methods that are exported by the DIL.js a new `extern` is created.
@@ -58,7 +61,7 @@ The relevant libraries are added in the Demo Page like so:
 
 ```javascript
   <!-- MPEG-5 Part2 LCEVC support is enabled by including this: -->
-  <script defer src="https://cdn.jsdelivr.net/npm/lcevc_dil.js@latest/dist/lcevc_dil.min.js"></script>
+  <script defer src="../node_modules/lcevc_dil.js/dist/lcevc_dil.min.js"></script>
 ```
 
 And a new video sample with enhancement data is added to the `demo/common/assets.js` file under a new source `MPEG-5 Part 2 LCEVC`.
