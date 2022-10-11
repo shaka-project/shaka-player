@@ -184,6 +184,7 @@ shaka.extern.InitDataOverride;
  */
 shaka.extern.DrmInfo;
 
+
 /**
  * @typedef {{
  *   id: number,
