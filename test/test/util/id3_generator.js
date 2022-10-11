@@ -62,6 +62,8 @@ shaka.test.Id3Generator = class {
    * @return {!Uint8Array}
    */
   static generateId3Frame(type, value) {
+    goog.asserts.assert(type, 'type must be non-null');
+    goog.asserts.assert(type.length == 4, 'type must contain 4 characters');
     const Id3Generator = shaka.test.Id3Generator;
     const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
     const result = Uint8ArrayUtils.concat(
