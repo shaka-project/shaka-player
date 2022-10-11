@@ -25,7 +25,7 @@ LcevcDil.LcevcDIL = class {
   /**
    * Append the video buffers before they are appended to
    * Media Source Extensions SourceBuffer. Here the lcevc data
-   * will be parsed and managed to enahnce frames based on timestamps.
+   * will be parsed and managed to enhance frames based on timestamps.
    *
    * @param {!BufferSource} data Video Buffer Data.
    * @param {string} type Type of Video Buffer Data.

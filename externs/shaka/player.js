@@ -1236,7 +1236,7 @@ shaka.extern.CmcdConfiguration;
  *   Defaults to <code>0</code>.
  * @property {boolean} drawLogo
  *   If <code>true</code>, LCEVC Logo is placed on the top left hand corner
- *   which only appears when the LCEVC enahanced Frames are being rendered.
+ *   which only appears when the LCEVC enhanced frames are being rendered.
  *   Defaults to true for the lib but is forced to false in this integration
  *   unless explicitly set to true through config.
  *   Defaults to <code>false</code>.
