@@ -3871,6 +3871,32 @@ describe('HlsParser', () => {
     await testHlsParser(media, '', manifest);
   });
 
+  it('honors hls.mediaPlaylistFullMimeType but detects AAC', async () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.aac',
+    ].join('');
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    parser.configure(config);
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = true;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/aac');
+        });
+      });
+    });
+
+    await testHlsParser(media, '', manifest);
+  });
+
   it('syncs on sequence with ignoreManifestProgramDateTime', async () => {
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.hls.ignoreManifestProgramDateTime = true;
