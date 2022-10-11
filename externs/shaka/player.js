@@ -437,18 +437,61 @@ shaka.extern.DrmSupportType;
  */
 shaka.extern.SupportType;
 
-
 /**
- * @typedef {!Object.<string, ?>}
+ * @typedef {{
+ *   cueTime: ?number,
+ *   data: !Uint8Array,
+ *   frames: !Array.<shaka.extern.MetadataFrame>,
+ *   dts: ?number,
+ *   pts: ?number
+ * }}
  *
  * @description
  * ID3 metadata in format defined by
  * https://id3.org/id3v2.3.0#Declared_ID3v2_frames
  * The content of the field.
  *
+ * @property {?number} cueTime
+ * @property {!Uint8Array} data
+ * @property {!Array.<shaka.extern.MetadataFrame>} frames
+ * @property {?number} dts
+ * @property {?number} pts
+ *
  * @exportDoc
  */
 shaka.extern.ID3Metadata;
+
+
+/**
+ * @typedef {{
+ *   type: string,
+ *   size: number,
+ *   data: Uint8Array
+ * }}
+ *
+ * @description metadata raw frame.
+ * @property {string} type
+ * @property {number} size
+ * @property {Uint8Array} data
+ * @exportDoc
+ */
+shaka.extern.MetadataRawFrame;
+
+
+/**
+ * @typedef {{
+ *   key: string,
+ *   data: (ArrayBuffer|string),
+ *   description: string
+ * }}
+ *
+ * @description metadata frame parsed.
+ * @property {string} key
+ * @property {ArrayBuffer|string} data
+ * @property {string} description
+ * @exportDoc
+ */
+shaka.extern.MetadataFrame;
 
 
 /**
