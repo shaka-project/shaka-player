@@ -1045,11 +1045,10 @@ filterDescribe('Storage', storageSupport, () => {
       const oldOpen = window.indexedDB.open;
       window.indexedDB.open = () => {
         // Just return a dummy object.
-        return {
+        return /** @type {!IDBOpenDBRequest} */ ({
           onsuccess: (event) => {},
-          onupgradeneeded: (event) => {},
           onerror: (error) => {},
-        };
+        });
       };
 
       /** @type {!shaka.offline.StorageMuxer} */
