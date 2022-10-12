@@ -956,6 +956,45 @@ describe('HlsParser live', () => {
         await testUpdate(
             manifest, mediaWithSkippedSegments2, [ref1, ref2, ref3, ref4]);
       });
+
+      it('updates encryption keys', async () => {
+        const initialKey = 'abc123';
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:6\n',
+          '#EXT-X-PLAYLIST-TYPE:EVENT\n',
+          '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
+          'KEYID=0X' + initialKey + ',',
+          'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
+          'URI="data:text/plain;base64,',
+          'dGhpcyBpbml0IGRhdGEgY29udGFpbnMgaGlkZGVuIHNlY3JldHMhISE', '",\n',
+          '#EXT-X-MAP:URI="init.mp4"\n',
+          '#EXTINF:5,\n',
+          '#EXT-X-BYTERANGE:121090@616\n',
+          'main.mp4'
+          ].join('');
+
+        const updatedKey = 'xyz345';
+        const updatedMedia = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:6\n',
+          '#EXT-X-PLAYLIST-TYPE:EVENT\n',
+          '#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,',
+          'KEYID=0X' + updatedKey + ',',
+          'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
+          'URI="data:text/plain;base64,',
+          'dGhpcyBpbml0IGRhdGEgY29udGFpbnMgaGlkZGVuIHNlY3JldHMhISE', '",\n',
+          '#EXT-X-MAP:URI="init.mp4"\n',
+          '#EXTINF:5,\n',
+          '#EXT-X-BYTERANGE:121090@616\n',
+          'main.mp4',
+        ].join('');
+
+        const manifest = await testInitialManifest(master, media, null);
+        await testUpdate(manifest, updatedMedia, null);
+
+        expect(Array.from(manifest.variants[0].video.keyIds)[0]).toEqual(updatedKey);
+      });
     });  // describe('update')
   });  // describe('playlist type LIVE')
 
