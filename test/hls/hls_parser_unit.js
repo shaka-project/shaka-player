@@ -3841,7 +3841,9 @@ describe('HlsParser', () => {
       });
     });
 
-    await testHlsParser(media, '', manifest);
+    const actualManifest = await testHlsParser(media, '', manifest);
+
+    expect(actualManifest.presentationTimeline.getDuration()).toBe(5);
   });
 
   it('honors hls.mediaPlaylistFullMimeType', async () => {
