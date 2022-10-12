@@ -971,8 +971,8 @@ describe('HlsParser live', () => {
           '#EXT-X-MAP:URI="init.mp4"\n',
           '#EXTINF:5,\n',
           '#EXT-X-BYTERANGE:121090@616\n',
-          'main.mp4'
-          ].join('');
+          'main.mp4',
+        ].join('');
 
         const updatedKey = 'xyz345';
         const updatedMedia = [
@@ -992,8 +992,8 @@ describe('HlsParser live', () => {
 
         const manifest = await testInitialManifest(master, media, null);
         await testUpdate(manifest, updatedMedia, null);
-
-        expect(Array.from(manifest.variants[0].video.keyIds)[0]).toEqual(updatedKey);
+        const keys = Array.from(manifest.variants[0].video.keyIds);
+        expect(keys[0]).toBe(updatedKey);
       });
     });  // describe('update')
   });  // describe('playlist type LIVE')
