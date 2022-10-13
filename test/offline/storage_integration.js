@@ -1034,6 +1034,36 @@ filterDescribe('Storage', storageSupport, () => {
       }
     });
 
+    /**
+     * In some situations, indexedDB.open() can just hang, and call neither the
+     * 'success' nor the 'error' callbacks.
+     * I'm not sure what causes it, but it seems to happen consistently between
+     * reloads when it does so it might be a browser-based issue.
+     * In that case, we should time out with an error, instead of also hanging.
+     */
+    it('throws an error if indexedDB open times out', async () => {
+      const oldOpen = window.indexedDB.open;
+      window.indexedDB.open = () => {
+        // Just return a dummy object.
+        return /** @type {!IDBOpenDBRequest} */ ({
+          onsuccess: (event) => {},
+          onerror: (error) => {},
+        });
+      };
+
+      /** @type {!shaka.offline.StorageMuxer} */
+      const muxer = new shaka.offline.StorageMuxer();
+      const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.INDEXED_DB_INIT_TIMED_OUT));
+
+      await expectAsync(muxer.init())
+          .toBeRejectedWith(expectedError);
+
+      window.indexedDB.open = oldOpen;
+    });
+
     it('throws an error if the content is a live stream', async () => {
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
