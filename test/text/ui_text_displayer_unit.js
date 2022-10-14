@@ -322,30 +322,6 @@ describe('UITextDisplayer', () => {
     expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
   });
 
-  it('correctly displays styles for cues with negative line numbers', () => {
-    /** @type {!shaka.text.Cue} */
-    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
-
-    cue.writingMode = shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
-    cue.lineInterpretation = shaka.text.Cue.lineInterpretation.LINE_NUMBER;
-    cue.line = -1;
-
-    textDisplayer.setTextVisibility(true);
-    textDisplayer.append([cue]);
-    updateCaptions();
-
-    const textContainer = videoContainer.querySelector('.shaka-text-container');
-    const captions = textContainer.querySelector('div');
-    const cssObj = parseCssText(captions.style.cssText);
-
-    const expectCssObj = {
-      'position': 'absolute',
-      'bottom': '0px',
-    };
-
-    expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
-  });
-
   it('does not display duplicate cues', () => {
     // These are identical.
     const cue1 = new shaka.text.Cue(0, 100, 'Captain\'s log.');
