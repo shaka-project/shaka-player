@@ -355,3 +355,11 @@ requirement: {
     "because is not supported on Xbox and old browsers."
   whitelist_regexp: "lib/util/string_utils.js"
 }
+
+requirement: {
+  type: BANNED_PROPERTY
+  value: "String.prototype.replaceAll"
+  error_message:
+    "Using \"String.replaceAll\" is not allowed; "
+    "use String.replace instead"
+}
