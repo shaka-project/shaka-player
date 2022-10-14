@@ -860,12 +860,11 @@ shaka.extern.DashManifestConfiguration;
  *   <i>Defaults to
  *   <code>'video/mp2t; codecs="avc1.42E01E, mp4a.40.2"'</code>.</i>
  * @property {boolean} useSafariBehaviorForLive
- *   The spec says nothing much about seeking in live content, but Safari's
- *   built-in HLS implementation does not allow it.  Therefore we will set
- *   the availability window equal to the presentation delay.  The player
- *   will be able to buffer ahead three segments, but the seek window will
- *   be zero-sized.
- *   <i>Defaults to <code>truecode>.</i>
+ *   If this is true, playback will set the availability window to the
+ *   presentation delay. The player will be able to buffer ahead three
+ *   segments, but the seek window will be zero-sized, to be consistent with
+ *   Safari. If this is false, the seek window will be the entire duration.
+ *   <i>Defaults to <code>true</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
