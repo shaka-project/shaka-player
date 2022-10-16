@@ -218,6 +218,8 @@ shakaDemo.Config = class {
             'manifest.hls.defaultVideoCodec')
         .addBoolInput_(MessageIds.IGNORE_MANIFEST_PROGRAM_DATE_TIME,
             'manifest.hls.ignoreManifestProgramDateTime')
+        .addBoolInput_(MessageIds.USE_SAFARI_BEHAVIOR_FOR_LIVE,
+            'manifest.hls.useSafariBehaviorForLive')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,

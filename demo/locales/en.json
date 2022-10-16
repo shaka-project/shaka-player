@@ -244,6 +244,7 @@
   "DEMO_USE_HEADERS": "Use Headers",
   "DEMO_USE_NATIVE_HLS_SAFARI": "Use native HLS on Safari",
   "DEMO_USE_PERSISTENT_LICENSES": "Use Persistent Licenses",
+  "DEMO_USE_SAFARI_BEHAVIOR_FOR_LIVE": "Use Safari behavior for live",
   "DEMO_VIDEO_ROBUSTNESS": "Video Robustness",
   "DEMO_VISUALIZER_AUTO_SCREENSHOT_TOGGLE": "Take Screenshot On Stall",
   "DEMO_VISUALIZER_BUTTON": "Buffer Visualizer",

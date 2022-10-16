@@ -979,6 +979,10 @@
     "description": "The name of a configuration value.",
     "message": "Use Persistent Licenses"
   },
+  "DEMO_USE_SAFARI_BEHAVIOR_FOR_LIVE": {
+    "description": "The name of a configuration value.",
+    "message": "Use Safari behavior for live"
+  },
   "DEMO_VIDEO_ROBUSTNESS": {
     "description": "The name of a configuration value.",
     "message": "Video Robustness"
