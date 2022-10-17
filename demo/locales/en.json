@@ -128,6 +128,7 @@
   "DEMO_LICENSE_SERVER_URL": "Custom License Server URL",
   "DEMO_LIVE": "Live",
   "DEMO_LIVE_SEARCH": "Live",
+  "DEMO_LIVE_SEGMENTS_DELAY": "Live segments delay",
   "DEMO_LOG_LEVEL": "Log Level",
   "DEMO_LOG_LEVEL_DEBUG": "Debug",
   "DEMO_LOG_LEVEL_INFO": "Info",

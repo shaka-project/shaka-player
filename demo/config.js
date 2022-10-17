@@ -220,6 +220,8 @@ shakaDemo.Config = class {
             'manifest.hls.ignoreManifestProgramDateTime')
         .addBoolInput_(MessageIds.USE_SAFARI_BEHAVIOR_FOR_LIVE,
             'manifest.hls.useSafariBehaviorForLive')
+        .addNumberInput_(MessageIds.LIVE_SEGMENTS_DELAY,
+            'manifest.hls.liveSegmentsDelay')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
