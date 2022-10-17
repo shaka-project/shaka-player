@@ -515,6 +515,10 @@
     "description": "A header on a search field that filters by whether the asset is live or not.",
     "message": "Live"
   },
+  "DEMO_LIVE_SEGMENTS_DELAY": {
+    "description": "The name of a configuration value.",
+    "message": "Live segments delay"
+  },
   "DEMO_LOG_LEVEL": {
     "description": "The name of a configuration value.",
     "message": "Log Level"

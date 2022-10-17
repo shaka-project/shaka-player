@@ -828,7 +828,8 @@ shaka.extern.DashManifestConfiguration;
  *   defaultVideoCodec: string,
  *   ignoreManifestProgramDateTime: boolean,
  *   mediaPlaylistFullMimeType: string,
- *   useSafariBehaviorForLive: boolean
+ *   useSafariBehaviorForLive: boolean,
+ *   liveSegmentsDelay: number
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -865,6 +866,10 @@ shaka.extern.DashManifestConfiguration;
  *   segments, but the seek window will be zero-sized, to be consistent with
  *   Safari. If this is false, the seek window will be the entire duration.
  *   <i>Defaults to <code>true</code>.</i>
+ * @property {number} liveSegmentsDelay
+ *   The default presentation delay will be calculated as a number of segments.
+ *   This is the number of segments for this calculation..
+ *   <i>Defaults to <code>3</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
