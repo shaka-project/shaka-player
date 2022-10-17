@@ -49,6 +49,9 @@ jobs:
           - os: ubuntu-latest
             browser: Firefox
             extra_flags: "--use-xvfb"
+          - os: ubuntu-latest
+            browser: Edge
+            extra_flags: "--use-xvfb"
 
           - os: macos-latest
             browser: Chrome
