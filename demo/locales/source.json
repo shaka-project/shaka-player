@@ -519,6 +519,10 @@
     "description": "A header on a search field that filters by whether the asset is live or not.",
     "message": "Live"
   },
+  "DEMO_LIVE_SEGMENTS_DELAY": {
+    "description": "The name of a configuration value.",
+    "message": "Live segments delay"
+  },
   "DEMO_LOG_LEVEL": {
     "description": "The name of a configuration value.",
     "message": "Log Level"
@@ -982,6 +986,10 @@
   "DEMO_USE_PERSISTENT_LICENSES": {
     "description": "The name of a configuration value.",
     "message": "Use Persistent Licenses"
+  },
+  "DEMO_USE_SAFARI_BEHAVIOR_FOR_LIVE": {
+    "description": "The name of a configuration value.",
+    "message": "Use Safari behavior for live"
   },
   "DEMO_VIDEO_ROBUSTNESS": {
     "description": "The name of a configuration value.",

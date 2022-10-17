@@ -437,18 +437,61 @@ shaka.extern.DrmSupportType;
  */
 shaka.extern.SupportType;
 
-
 /**
- * @typedef {!Object.<string, ?>}
+ * @typedef {{
+ *   cueTime: ?number,
+ *   data: !Uint8Array,
+ *   frames: !Array.<shaka.extern.MetadataFrame>,
+ *   dts: ?number,
+ *   pts: ?number
+ * }}
  *
  * @description
  * ID3 metadata in format defined by
  * https://id3.org/id3v2.3.0#Declared_ID3v2_frames
  * The content of the field.
  *
+ * @property {?number} cueTime
+ * @property {!Uint8Array} data
+ * @property {!Array.<shaka.extern.MetadataFrame>} frames
+ * @property {?number} dts
+ * @property {?number} pts
+ *
  * @exportDoc
  */
 shaka.extern.ID3Metadata;
+
+
+/**
+ * @typedef {{
+ *   type: string,
+ *   size: number,
+ *   data: Uint8Array
+ * }}
+ *
+ * @description metadata raw frame.
+ * @property {string} type
+ * @property {number} size
+ * @property {Uint8Array} data
+ * @exportDoc
+ */
+shaka.extern.MetadataRawFrame;
+
+
+/**
+ * @typedef {{
+ *   key: string,
+ *   data: (ArrayBuffer|string),
+ *   description: string
+ * }}
+ *
+ * @description metadata frame parsed.
+ * @property {string} key
+ * @property {ArrayBuffer|string} data
+ * @property {string} description
+ * @exportDoc
+ */
+shaka.extern.MetadataFrame;
 
 
 /**
@@ -784,7 +827,9 @@ shaka.extern.DashManifestConfiguration;
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string,
  *   ignoreManifestProgramDateTime: boolean,
- *   mediaPlaylistFullMimeType: string
+ *   mediaPlaylistFullMimeType: string,
+ *   useSafariBehaviorForLive: boolean,
+ *   liveSegmentsDelay: number
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -815,6 +860,16 @@ shaka.extern.DashManifestConfiguration;
  *   format this value.
  *   <i>Defaults to
  *   <code>'video/mp2t; codecs="avc1.42E01E, mp4a.40.2"'</code>.</i>
+ * @property {boolean} useSafariBehaviorForLive
+ *   If this is true, playback will set the availability window to the
+ *   presentation delay. The player will be able to buffer ahead three
+ *   segments, but the seek window will be zero-sized, to be consistent with
+ *   Safari. If this is false, the seek window will be the entire duration.
+ *   <i>Defaults to <code>true</code>.</i>
+ * @property {number} liveSegmentsDelay
+ *   The default presentation delay will be calculated as a number of segments.
+ *   This is the number of segments for this calculation..
+ *   <i>Defaults to <code>3</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -1197,7 +1252,7 @@ shaka.extern.CmcdConfiguration;
  *   Defaults to <code>0</code>.
  * @property {boolean} drawLogo
  *   If <code>true</code>, LCEVC Logo is placed on the top left hand corner
- *   which only appears when the LCEVC enahanced Frames are being rendered.
+ *   which only appears when the LCEVC enhanced frames are being rendered.
  *   Defaults to true for the lib but is forced to false in this integration
  *   unless explicitly set to true through config.
  *   Defaults to <code>false</code>.

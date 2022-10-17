@@ -175,6 +175,9 @@ shaka.test.TestScheme = class {
       if (metadata.segmentUri.includes('.ts')) {
         return new shaka.test.TSVodStreamGenerator(metadata.segmentUri);
       }
+      if (metadata.segmentUri.includes('.aac')) {
+        return new shaka.test.AACVodStreamGenerator(metadata.segmentUri);
+      }
       return new shaka.test.Mp4VodStreamGenerator(
           metadata.initSegmentUri, metadata.mdhdOffset, metadata.segmentUri,
           metadata.tfdtOffset, metadata.segmentDuration);
@@ -651,6 +654,26 @@ shaka.test.TestScheme.DATA = {
       closedCaptions: new Map([['CC1', 'en']]),
     },
     duration: 30,
+  },
+
+  'id3-metadata_ts': {
+    audio: {
+      segmentUri: '/base/test/test/assets/id3-metadata.ts',
+      mimeType: 'video/mp2t',
+      codecs: 'mp4a.40.5',
+      segmentDuration: 4.99,
+    },
+    duration: 4.99,
+  },
+
+  'id3-metadata_aac': {
+    audio: {
+      segmentUri: '/base/test/test/assets/id3-metadata.aac',
+      mimeType: 'audio/aac',
+      codecs: '',
+      segmentDuration: 9.98458,
+    },
+    duration: 9.98458,
   },
 };
 
