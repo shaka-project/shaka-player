@@ -867,8 +867,8 @@ shaka.extern.DashManifestConfiguration;
  *   Safari. If this is false, the seek window will be the entire duration.
  *   <i>Defaults to <code>true</code>.</i>
  * @property {number} liveSegmentsDelay
- *   The live edge will be calculated from segments. This number is the number
- *   of segments for this calculation.
+ *   The default presentation delay will be calculated as a number of segments.
+ *   This is the number of segments for this calculation..
  *   <i>Defaults to <code>3</code>.</i>
  * @exportDoc
  */
