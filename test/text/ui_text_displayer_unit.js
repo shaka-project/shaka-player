@@ -412,7 +412,7 @@ describe('UITextDisplayer', () => {
 
     cue.writingMode = shaka.text.Cue.writingMode.VERTICAL_RIGHT_TO_LEFT;
     cue.lineInterpretation = shaka.text.Cue.lineInterpretation.LINE_NUMBER;
-    cue.line = 0;
+    cue.line = -1;
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([cue]);
