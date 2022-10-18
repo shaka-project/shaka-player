@@ -147,7 +147,7 @@ jobs:
             cp "$coverage_folder"/coverage-details.json coverage/staging/
             echo "${{ github.event.number }}" > coverage/staging/pr-number.json
 
-            echo "::set-output name=coverage_found::true"
+            echo "coverage_found=true" >> $GITHUB_OUTPUT
             echo "Coverage report staged."
           else
             echo "No coverage report generated."
