@@ -1419,7 +1419,8 @@ shaka.extern.LanguageRole;
  *   startTime: number,
  *   duration: number,
  *   uris: !Array.<string>,
- *   width: number
+ *   width: number,
+ *   sprite: boolean
  * }}
  *
  * @property {number} imageHeight
@@ -1443,6 +1444,8 @@ shaka.extern.LanguageRole;
  *   given.
  * @property {number} width
  *    The thumbnail width in px.
+ * @property {boolean} sprite
+ *    Indicate if the thumbnail is a sprite.
  * @exportDoc
  */
 shaka.extern.Thumbnail;
