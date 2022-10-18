@@ -827,7 +827,9 @@ shaka.extern.DashManifestConfiguration;
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string,
  *   ignoreManifestProgramDateTime: boolean,
- *   mediaPlaylistFullMimeType: string
+ *   mediaPlaylistFullMimeType: string,
+ *   useSafariBehaviorForLive: boolean,
+ *   liveSegmentsDelay: number
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -858,6 +860,16 @@ shaka.extern.DashManifestConfiguration;
  *   format this value.
  *   <i>Defaults to
  *   <code>'video/mp2t; codecs="avc1.42E01E, mp4a.40.2"'</code>.</i>
+ * @property {boolean} useSafariBehaviorForLive
+ *   If this is true, playback will set the availability window to the
+ *   presentation delay. The player will be able to buffer ahead three
+ *   segments, but the seek window will be zero-sized, to be consistent with
+ *   Safari. If this is false, the seek window will be the entire duration.
+ *   <i>Defaults to <code>true</code>.</i>
+ * @property {number} liveSegmentsDelay
+ *   The default presentation delay will be calculated as a number of segments.
+ *   This is the number of segments for this calculation..
+ *   <i>Defaults to <code>3</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -1407,7 +1419,8 @@ shaka.extern.LanguageRole;
  *   startTime: number,
  *   duration: number,
  *   uris: !Array.<string>,
- *   width: number
+ *   width: number,
+ *   sprite: boolean
  * }}
  *
  * @property {number} imageHeight
@@ -1431,6 +1444,8 @@ shaka.extern.LanguageRole;
  *   given.
  * @property {number} width
  *    The thumbnail width in px.
+ * @property {boolean} sprite
+ *    Indicate if the thumbnail is a sprite.
  * @exportDoc
  */
 shaka.extern.Thumbnail;

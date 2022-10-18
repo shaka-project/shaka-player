@@ -2884,7 +2884,7 @@ describe('StreamingEngine', () => {
             '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
             '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
             '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
-          ).replaceAll(' ', ''));
+          ).replace(/\s/g, ''));
 
       videoStream.emsgSchemeIdUris = ['https://aomedia.org/emsg/ID3'];
 
