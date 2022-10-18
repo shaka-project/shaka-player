@@ -597,7 +597,7 @@ describe('VttTextParser', () => {
         [
           {startTime: 95443, endTime: 95445, payload: 'Test'},
         ],
-        // 8589870000/900000 = 95443 sec, so expect every timestamp to be 95443
+        // 8589870000/90000 = 95443 sec, so expect every timestamp to be 95443
         // seconds ahead of what is specified.
         'WEBVTT\n' +
         'X-TIMESTAMP-MAP=MPEGTS:8589870000,LOCAL:00:00:00.000\n\n' +
@@ -620,6 +620,28 @@ describe('VttTextParser', () => {
         '00:00:00.000 --> 00:00:02.000 line:0\n' +
         'Test2',
         {periodStart: 0, segmentStart: 95550, segmentEnd: 95560, vttOffset: 0},
+        /* sequenceMode= */ true);
+  });
+
+  // A mock-up of HLS live subs as seen in b/253104251.
+  it('handles timestamp rollover and negative offset in HLS live', () => {
+    // Similar to values seen in b/253104251, for a realistic regression test.
+    // When using sequence mode on live HLS, we get negative offsets that
+    // represent the timestamp of our first append in sequence mode.
+    verifyHelper(
+        [
+          {startTime: 3600, endTime: 3602, payload: 'Test'},
+        ],
+        'WEBVTT\n' +
+        'X-TIMESTAMP-MAP=MPEGTS:8355814896,LOCAL:00:00:00.000\n\n' +
+        '00:00:00.000 --> 00:00:02.000 line:0\n' +
+        'Test',
+        {
+          periodStart: -1234567,
+          segmentStart: 3600,
+          segmentEnd: 3610,
+          vttOffset: -1234567,
+        },
         /* sequenceMode= */ true);
   });
 
