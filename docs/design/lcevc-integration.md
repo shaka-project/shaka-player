@@ -14,7 +14,6 @@ V-Nova LCEVC DIL Libraries are included using the same approach that the other e
 
 Npm package : <https://www.npmjs.com/package/lcevc_dil.js>
 
-
 ```javascript
   <!-- MPEG-5 Part2 LCEVC support is enabled by including this: -->
   <script defer src="../node_modules/lcevc_dil.js/dist/lcevc_dil.min.js"></script>
