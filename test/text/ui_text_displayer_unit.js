@@ -269,6 +269,8 @@ describe('UITextDisplayer', () => {
     const expectCssObj = {
       'position': 'absolute',
       'top': '0px',
+      'left': '50%',
+      'transform': 'translateX(-50%)',
     };
 
     expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
@@ -293,6 +295,8 @@ describe('UITextDisplayer', () => {
     const expectCssObj = {
       'position': 'absolute',
       'top': '0px',
+      'left': '50%',
+      'transform': 'translateX(-50%)',
     };
 
     expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
@@ -317,6 +321,112 @@ describe('UITextDisplayer', () => {
     const expectCssObj = {
       'position': 'absolute',
       'bottom': '0px',
+      'left': '50%',
+      'transform': 'translateX(-50%)',
+    };
+
+    expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
+  });
+
+  it('has correct styles for cues with line numbers (vertical ltr)', () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+
+    cue.writingMode = shaka.text.Cue.writingMode.VERTICAL_LEFT_TO_RIGHT;
+    cue.lineInterpretation = shaka.text.Cue.lineInterpretation.LINE_NUMBER;
+    cue.line = 0;
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('div');
+    const cssObj = parseCssText(captions.style.cssText);
+
+    const expectCssObj = {
+      'position': 'absolute',
+      'top': '0px',
+      'left': '0px',
+      'height': '100%',
+    };
+
+    expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
+  });
+
+  it('has correct styles for cues negative line numbers (vertical ltr)', () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+
+    cue.writingMode = shaka.text.Cue.writingMode.VERTICAL_LEFT_TO_RIGHT;
+    cue.lineInterpretation = shaka.text.Cue.lineInterpretation.LINE_NUMBER;
+    cue.line = -1;
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('div');
+    const cssObj = parseCssText(captions.style.cssText);
+
+    const expectCssObj = {
+      'position': 'absolute',
+      'top': '0px',
+      'right': '0px',
+      'height': '100%',
+    };
+
+    expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
+  });
+
+  it('has correct styles for cues with line numbers (vertical rtl)', () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+
+    cue.writingMode = shaka.text.Cue.writingMode.VERTICAL_RIGHT_TO_LEFT;
+    cue.lineInterpretation = shaka.text.Cue.lineInterpretation.LINE_NUMBER;
+    cue.line = 0;
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('div');
+    const cssObj = parseCssText(captions.style.cssText);
+
+    const expectCssObj = {
+      'position': 'absolute',
+      'top': '0px',
+      'right': '0px',
+      'height': '100%',
+    };
+
+    expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
+  });
+
+  it('has correct styles for cues negative line numbers (vertical rtl)', () => {
+    /** @type {!shaka.text.Cue} */
+    const cue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
+
+    cue.writingMode = shaka.text.Cue.writingMode.VERTICAL_RIGHT_TO_LEFT;
+    cue.lineInterpretation = shaka.text.Cue.lineInterpretation.LINE_NUMBER;
+    cue.line = 0;
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue]);
+    updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const captions = textContainer.querySelector('div');
+    const cssObj = parseCssText(captions.style.cssText);
+
+    const expectCssObj = {
+      'position': 'absolute',
+      'top': '0px',
+      'left': '0px',
+      'height': '100%',
     };
 
     expect(cssObj).toEqual(jasmine.objectContaining(expectCssObj));
