@@ -371,5 +371,47 @@ describe('XmlUtils', () => {
     expect(XmlUtils.parseFloat(HUGE_NUMBER_STRING)).toBe(Infinity);
     expect(XmlUtils.parseFloat('-' + HUGE_NUMBER_STRING)).toBe(-Infinity);
   });
+
+  describe('parseXmlString', () => {
+    it('parses a simple XML document', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <Child></Child>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).not.toBeNull();
+      expect(doc.tagName).toBe('Root');
+    });
+
+    it('returns null on an empty XML document', () => {
+      const xmlString = '';
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).toBeNull();
+    });
+
+    it('returns null on malformed XML', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <Child</Child>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).toBeNull();
+    });
+
+    it('returns null on root element mismatch', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <Child></Child>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Document');
+      expect(doc).toBeNull();
+    });
+  });
 });
 
