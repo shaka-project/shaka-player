@@ -596,6 +596,33 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('accepts mp4a.40.34 codec as audio/mpeg', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=63701,CODECS="mp4a.40.34"\n',
+      'audio\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'main.mp3',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mpeg', '');
+        });
+      });
+      manifest.sequenceMode = true;
+    });
+
+    await testHlsParser(master, media, manifest);
+  });
+
   it('parses audio+video variant with closed captions', async () => {
     const master = [
       '#EXTM3U\n',
