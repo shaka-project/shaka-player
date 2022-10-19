@@ -412,6 +412,28 @@ describe('XmlUtils', () => {
       const doc = XmlUtils.parseXmlString(xmlString, 'Document');
       expect(doc).toBeNull();
     });
+
+    it('returns null on XML that embeds HTML', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <Child xmlns="http://www.w3.org/1999/xhtml"></Child>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).toBeNull();
+    });
+
+    it('returns null on XML that embeds SVG', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <Child xmlns="http://www.w3.org/2000/svg"></Child>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).toBeNull();
+    });
   });
 });
 
