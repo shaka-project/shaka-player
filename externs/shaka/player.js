@@ -1218,6 +1218,7 @@ shaka.extern.CmcdConfiguration;
 
 /**
  * @typedef {{
+ *   enabled: boolean,
  *   dynamicPerformanceScaling: boolean,
  *   logLevel: number,
  *   drawLogo: boolean
@@ -1226,6 +1227,9 @@ shaka.extern.CmcdConfiguration;
  * @description
  *   Decoding for MPEG-5 Part2 LCEVC.
  *
+ * @property {boolean} enabled
+ *   If <code>true</code>, enable LCEVC.
+ *   Defaults to <code>false</code>.
  * @property {boolean} dynamicPerformanceScaling
  *   If <code>true</code>, LCEVC Dynamic Performance Scaling or dps is enabled
  *   to be triggered, when the system is not able to decode frames within a
