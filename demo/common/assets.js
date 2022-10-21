@@ -40,6 +40,7 @@ shakaAssets.Source = {
   APPLE: shakaDemo.MessageIds.APPLE,
   IRT: shakaDemo.MessageIds.IRT,
   MICROSOFT: shakaDemo.MessageIds.MICROSOFT,
+  VNOVA: shakaDemo.MessageIds.VNOVA,
 };
 
 
@@ -143,6 +144,9 @@ shakaAssets.Feature = {
 
   // Set if the asset has at least one image stream.
   THUMBNAILS: shakaDemo.MessageIds.THUMBNAILS,
+
+  // Set if the asset has LCEVC.
+  LCEVC: shakaDemo.MessageIds.LCEVC,
 };
 
 
@@ -1282,6 +1286,60 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addLicenseServer('com.microsoft.playready', 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,ck:W31bfVt9W31bfVt9W31bfQ==,ckt:aescbc)'),
+  // }}}
+
+  // MPEG-5 LCEVC assets {{{
+  /* LCEVC Enabled Content with LCEVC Encoded Stream */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Big Buck Bunny (LCEVC H264)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://dyctis843rxh5.cloudfront.net/vnIAZIaowG1K7qOt/master.m3u8',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.LCEVC)
+      .addDescription('H264 HLS stream with LCEVC enhancement')
+      .markAsFeatured('Big Buck Bunny (LCEVC H264)')
+      .setExtraConfig({
+        streaming: {
+          useNativeHlsOnSafari: false,
+          forceTransmuxTS: true,
+        },
+        lcevc: {
+          enabled: true,
+          dynamicPerformanceScaling: true,
+          logLevel: 0,
+          drawLogo: false,
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Game (LCEVC H264)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://dyctis843rxh5.cloudfront.net/vny72tI8aXJDcTYX/master.m3u8',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.LCEVC)
+      .addDescription('H264 HLS stream with LCEVC enhancement')
+      .markAsFeatured('Game (LCEVC H264)')
+      .setExtraConfig({
+        streaming: {
+          useNativeHlsOnSafari: false,
+          forceTransmuxTS: true,
+        },
+        lcevc: {
+          enabled: true,
+          dynamicPerformanceScaling: true,
+          logLevel: 0,
+          drawLogo: false,
+        },
+      }),
   // }}}
 ];
 /* eslint-enable max-len */

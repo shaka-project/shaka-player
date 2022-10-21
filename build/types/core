@@ -5,6 +5,8 @@
 +../../lib/abr/ewma_bandwidth_estimator.js
 +../../lib/abr/simple_abr_manager.js
 
++../../lib/config/auto_show_text.js
+
 +../../lib/debug/asserts.js
 +../../lib/debug/log.js
 
@@ -55,6 +57,7 @@
 +../../lib/text/simple_text_displayer.js
 +../../lib/text/text_engine.js
 +../../lib/text/ui_text_displayer.js
++../../lib/text/web_vtt_generator.js
 
 +../../lib/util/abortable_operation.js
 +../../lib/util/array_utils.js
@@ -73,6 +76,7 @@
 +../../lib/util/functional.js
 +../../lib/util/i_destroyable.js
 +../../lib/util/i_releasable.js
++../../lib/util/id3_utils.js
 +../../lib/util/iterables.js
 +../../lib/util/language_utils.js
 +../../lib/util/lazy.js
@@ -98,6 +102,7 @@
 +../../lib/util/switch_history.js
 +../../lib/util/text_parser.js
 +../../lib/util/timer.js
++../../lib/util/ts_parser.js
 +../../lib/util/uint8array_utils.js
 +../../lib/util/xml_utils.js
 

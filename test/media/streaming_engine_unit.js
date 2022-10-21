@@ -72,6 +72,10 @@ describe('StreamingEngine', () => {
   let getBandwidthEstimate;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
+  /** @type {!jasmine.Spy} */
+  let beforeAppendSegment;
+  /** @type {!jasmine.Spy} */
+  let onMetadata;
 
   /** @type {function(function(), number)} */
   let realSetTimeout;
@@ -429,8 +433,14 @@ describe('StreamingEngine', () => {
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
     onSegmentAppended = jasmine.createSpy('onSegmentAppended');
+    beforeAppendSegment = jasmine.createSpy('beforeAppendSegment');
+    onMetadata = jasmine.createSpy('onMetadata');
     getBandwidthEstimate = jasmine.createSpy('getBandwidthEstimate');
     getBandwidthEstimate.and.returnValue(1e3);
+
+    beforeAppendSegment.and.callFake((segment) => {
+      return Promise.resolve();
+    });
 
     if (!config) {
       config = shaka.util.PlayerConfiguration.createDefault().streaming;
@@ -453,6 +463,8 @@ describe('StreamingEngine', () => {
       onManifestUpdate: Util.spyFunc(onManifestUpdate),
       onSegmentAppended: Util.spyFunc(onSegmentAppended),
       onInitSegmentAppended: () => {},
+      beforeAppendSegment: Util.spyFunc(beforeAppendSegment),
+      onMetadata: Util.spyFunc(onMetadata),
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
@@ -2840,6 +2852,52 @@ describe('StreamingEngine', () => {
       expect(onEvent).not.toHaveBeenCalled();
       expect(onManifestUpdate).toHaveBeenCalled();
     });
+
+    it('triggers metadata event', async () => {
+      // This is an 'emsg' box that contains a scheme of
+      // https://aomedia.org/emsg/ID to indicate a ID3 metadata.
+      segmentData[ContentType.VIDEO].segments[0] =
+          Uint8ArrayUtils.fromHex((
+            // 105 bytes  emsg box     v0, flags 0
+            '00 00 00 69  65 6d 73 67  00 00 00 00' +
+
+            // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
+            '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
+            '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
+
+            // value (1 byte) ''
+            '00' +
+
+            // timescale (4 bytes) 49
+            '00 00 00 31' +
+
+            // presentation time delta (4 bytes) 8
+            '00 00 00 08' +
+
+            // event duration (4 bytes) 255
+            '00 00 00 ff' +
+
+            // id (4 bytes) 51
+            '00 00 00 33' +
+
+            // message data (47 bytes)
+            '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
+            '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
+            '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
+          ).replace(/\s/g, ''));
+
+      videoStream.emsgSchemeIdUris = ['https://aomedia.org/emsg/ID3'];
+
+      // Here we go!
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+
+      expect(onEvent).not.toHaveBeenCalled();
+      expect(onMetadata).toHaveBeenCalled();
+    });
   });
 
   describe('embedded emsg boxes with non zero timestamps', () => {
@@ -3636,6 +3694,27 @@ describe('StreamingEngine', () => {
 
       // The request should have been aborted.
       expect(isAborted).toBe(true);
+    });
+  });
+
+  describe('beforeAppendSegment', () => {
+    it('is called before appending media segment', async () => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+      beforeAppendSegment.and.callFake((segment) => {
+        return shaka.test.Util.shortDelay();
+      });
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      // Simulate time passing.
+      playing = true;
+      await Util.fakeEventLoop(10);
+      expect(beforeAppendSegment).toHaveBeenCalledWith(
+          ContentType.AUDIO, segmentData[ContentType.AUDIO].initSegments[0]);
+      expect(beforeAppendSegment).toHaveBeenCalledWith(
+          ContentType.AUDIO, segmentData[ContentType.AUDIO].segments[0]);
     });
   });
 

@@ -26,6 +26,9 @@ describe('MediaSourceEngine', () => {
    */
   let textDisplayer;
 
+  /** @type {!jasmine.Spy} */
+  let onMetadata;
+
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -37,10 +40,15 @@ describe('MediaSourceEngine', () => {
 
     textDisplayer = new shaka.test.FakeTextDisplayer();
 
+    onMetadata = jasmine.createSpy('onMetadata');
+
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         new shaka.media.ClosedCaptionParser(),
-        textDisplayer);
+        textDisplayer,
+        shaka.test.Util.spyFunc(onMetadata));
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    mediaSourceEngine.configure(config);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();
@@ -380,6 +388,42 @@ describe('MediaSourceEngine', () => {
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
   });
 
+  it('buffers partial TS video segments in sequence mode', async () => {
+    metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
+
+    const videoType = ContentType.VIDEO;
+    const initObject = new Map();
+    initObject.set(videoType, getFakeStream(metadata.video));
+
+    await mediaSourceEngine.init(
+        initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
+    await mediaSourceEngine.setDuration(presentationDuration);
+    await mediaSourceEngine.setStreamProperties(
+        videoType,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity,
+        /* sequenceMode= */ true);
+
+    const segment = generators[videoType].getSegment(0, Date.now() / 1000);
+    const partialSegmentLength = Math.floor(segment.byteLength / 3);
+
+    let partialSegment = shaka.util.BufferUtils.toUint8(
+        segment, /* offset= */ 0, /* length= */ partialSegmentLength);
+    let reference = dummyReference(videoType, 0);
+    await mediaSourceEngine.appendBuffer(
+        videoType, partialSegment, reference, /* hasClosedCaptions= */ false);
+
+    partialSegment = shaka.util.BufferUtils.toUint8(
+        segment,
+        /* offset= */ partialSegmentLength);
+    reference = dummyReference(videoType, 1);
+    await mediaSourceEngine.appendBuffer(
+        videoType, partialSegment, reference, /* hasClosedCaptions= */ false,
+        /* seeked= */ true);
+  });
+
   it('extracts CEA-708 captions from dash', async () => {
     // Load MP4 file with CEA-708 closed captions.
     metadata = shaka.test.TestScheme.DATA['cea-708_mp4'];
@@ -395,5 +439,34 @@ describe('MediaSourceEngine', () => {
     await appendWithClosedCaptions(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from TS', async () => {
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_ts'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from AAC', async () => {
+    if (!MediaSource.isTypeSupported('audio/aac')) {
+      return;
+    }
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
   });
 });

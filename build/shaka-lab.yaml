@@ -104,6 +104,10 @@ SafariTP:
     safari.options:
       technologyPreview: true
 
+EdgeMac:
+  browser: msedge
+  os: Mac
+
 ChromeWindows:
   browser: chrome
   os: Windows
@@ -138,6 +142,10 @@ FirefoxLinux:
   browser: firefox
   os: Linux
   extra_config: *firefox_config
+
+EdgeLinux:
+  browser: msedge
+  os: Linux
 
 ChromeAndroid:
   browser: chrome

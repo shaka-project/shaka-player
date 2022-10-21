@@ -8,6 +8,13 @@ Modern EME yet, you can use legacy Apple Media Keys with:
 shaka.polyfill.PatchedMediaKeysApple.install();
 ```
 
+If you need to use both legacy and Modern EME, for example if you have to support
+multiple DRM providers, it is possible to enable uninstalling the polyfill:
+```js
+shaka.polyfill.PatchedMediaKeysApple.install(/* enableUninstall= */ true);
+shaka.polyfill.PatchedMediaKeysApple.uninstall();
+```
+
 The support in each case would be the following:
 
 |            |Modern EME |legacy Apple Media Keys|

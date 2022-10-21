@@ -128,6 +128,9 @@ describe('DrmEngine', () => {
         video,
         new shaka.test.FakeClosedCaptionParser(),
         new shaka.test.FakeTextDisplayer());
+    const mediaSourceConfig =
+        shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    mediaSourceEngine.configure(mediaSourceConfig);
 
     const expectedObject = new Map();
     expectedObject.set(ContentType.AUDIO, audioStream);
