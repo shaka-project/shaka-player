@@ -122,7 +122,7 @@ describe('DashParser Manifest', () => {
   describe('parses and inherits attributes with sequenceMode', () => {
     beforeEach(() => {
       const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-      config.sequenceMode = true;
+      config.dash.sequenceMode = true;
       parser.configure(config);
     });
 
@@ -205,7 +205,7 @@ describe('DashParser Manifest', () => {
   describe('parses and inherits attributes without sequenceMode', () => {
     beforeEach(() => {
       const config = shaka.util.PlayerConfiguration.createDefault().manifest;
-      config.sequenceMode = false;
+      config.dash.sequenceMode = false;
       parser.configure(config);
     });
 

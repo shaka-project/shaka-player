@@ -761,7 +761,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!Element)
+ *   manifestPreprocessor: function(!Element),
+ *   sequenceMode: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -815,6 +816,10 @@ shaka.extern.DrmConfiguration;
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
+ * @property {boolean} sequenceMode
+ *   If true, the media segments are appended to the SourceBuffer in strict
+ *   sequence. Defaults to <code>true</code> except on WebOS 3, Tizen 2,
+ *   Tizen 3 and PlayStation 4 which defualt value is <code>false</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -885,7 +890,6 @@ shaka.extern.HlsManifestConfiguration;
  *   disableThumbnails: boolean,
  *   defaultPresentationDelay: number,
  *   segmentRelativeVttTiming: boolean,
- *   sequenceMode: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration
  * }}
@@ -921,10 +925,6 @@ shaka.extern.HlsManifestConfiguration;
  *   Option to calculate VTT text timings relative to the segment start
  *   instead of relative to the period start (which is the default).
  *   Defaults to <code>false</code>.
- * @property {boolean} sequenceMode
- *   If true, the media segments are appended to the SourceBuffer in strict
- *   sequence. Defaults to <code>true</code> except on WebOS 3, Tizen 2,
- *   Tizen 3 and PlayStation 4 which defualt value is <code>false</code>.
  * @property {shaka.extern.DashManifestConfiguration} dash
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls

@@ -237,6 +237,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
+        .addBoolInput_(MessageIds.SEQUENCE_MODE,
+            'manifest.dash.sequenceMode')
         .addBoolInput_(MessageIds.DISABLE_AUDIO,
             'manifest.disableAudio')
         .addBoolInput_(MessageIds.DISABLE_VIDEO,
@@ -246,9 +248,7 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DISABLE_THUMBNAILS,
             'manifest.disableThumbnails')
         .addBoolInput_(MessageIds.SEGMENT_RELATIVE_VTT_TIMING,
-            'manifest.segmentRelativeVttTiming')
-        .addBoolInput_(MessageIds.SEQUENCE_MODE,
-            'manifest.sequenceMode');
+            'manifest.segmentRelativeVttTiming');
 
     this.addRetrySection_('manifest', MessageIds.MANIFEST_RETRY_SECTION_HEADER);
   }
