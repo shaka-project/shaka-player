@@ -237,6 +237,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
+        .addBoolInput_(MessageIds.SEQUENCE_MODE,
+            'manifest.dash.sequenceMode')
         .addBoolInput_(MessageIds.DISABLE_AUDIO,
             'manifest.disableAudio')
         .addBoolInput_(MessageIds.DISABLE_VIDEO,
