@@ -45,7 +45,7 @@ jobs:
       INCLUDE: ${{ steps.configure.outputs.INCLUDE }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ needs.compute-ref.outputs.REF }}
 
@@ -92,7 +92,7 @@ jobs:
     needs: compute-ref
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ needs.compute-ref.outputs.REF }}
 
@@ -134,7 +134,7 @@ jobs:
     name: ${{ matrix.browser }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: ${{ needs.compute-ref.outputs.REF }}
 
