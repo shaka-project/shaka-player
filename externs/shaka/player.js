@@ -817,8 +817,8 @@ shaka.extern.DrmConfiguration;
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
  * @property {boolean} sequenceMode
- *   If true, the media segments are appended to the SourceBuffer in strict
- *   sequence.
+ *   If true, the media segments are appended to the SourceBuffer in
+ *   "sequence mode" (ignoring their internal timestamps).
  *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
