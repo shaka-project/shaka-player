@@ -818,8 +818,8 @@ shaka.extern.DrmConfiguration;
  *   preprocessing of the manifest.
  * @property {boolean} sequenceMode
  *   If true, the media segments are appended to the SourceBuffer in strict
- *   sequence. Defaults to <code>true</code> except on WebOS 3, Tizen 2,
- *   Tizen 3 and PlayStation 4 which defualt value is <code>false</code>.
+ *   sequence.
+ *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
