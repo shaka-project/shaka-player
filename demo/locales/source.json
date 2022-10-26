@@ -795,6 +795,10 @@
     "description": "The name of a configuration value.",
     "message": "Enable segment-relative VTT Timing"
   },
+  "DEMO_SEQUENCE_MODE": {
+    "description": "The name of a configuration value.",
+    "message": "Enable sequence mode"
+  },
   "DEMO_SESSION_ID": {
     "description": "The name of a configuration value.",
     "message": "Session ID"
