@@ -46,6 +46,30 @@ describe('TsParser', () => {
     const metadata = new shaka.util.TsParser().parse(tsSegment)
         .getMetadata();
     expect(metadata).toBeTruthy();
-    expect(metadata.length).toBe(2);
+    expect(metadata.length).toBe(1);
+    const firstMetadata = metadata[0];
+    expect(firstMetadata.frames.length).toBe(2);
+  });
+
+  it('get the start time from a TS segment', async () => {
+    const responses = await Promise.all([
+      Util.fetch('/base/test/test/assets/id3-metadata.ts'),
+    ]);
+    const tsSegment = BufferUtils.toUint8(responses[0]);
+    const starttime = new shaka.util.TsParser().parse(tsSegment)
+        .getStartTime();
+    expect(starttime.audio).toBeCloseTo(90019.586, 3);
+    expect(starttime.video).toBe(null);
+  });
+
+  it('get the codecs from a TS segment', async () => {
+    const responses = await Promise.all([
+      Util.fetch('/base/test/test/assets/id3-metadata.ts'),
+    ]);
+    const tsSegment = BufferUtils.toUint8(responses[0]);
+    const codecs = new shaka.util.TsParser().parse(tsSegment)
+        .getCodecs();
+    expect(codecs.audio).toBe('aac');
+    expect(codecs.video).toBe('');
   });
 });

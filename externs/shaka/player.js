@@ -761,7 +761,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!Element)
+ *   manifestPreprocessor: function(!Element),
+ *   sequenceMode: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -815,6 +816,10 @@ shaka.extern.DrmConfiguration;
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
+ * @property {boolean} sequenceMode
+ *   If true, the media segments are appended to the SourceBuffer in
+ *   "sequence mode" (ignoring their internal timestamps).
+ *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
