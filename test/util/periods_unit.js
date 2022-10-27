@@ -1135,18 +1135,13 @@ describe('PeriodCombiner', () => {
     const variants = combiner.getVariants();
 
     expect(variants).toEqual(jasmine.arrayWithExactContents([
-      makeAVVariant(1080, 'en'),
-      makeAVVariant(1080, 'en'),
+      makeAVVariant(1080, 'en', 2, ['role1', 'role2']),
+      makeAVVariant(1080, 'en', 2, ['role1']),
     ]));
 
     // We can use the originalId field to see what each track is composed of.
-    const audio1 = variants[0].audio;
-    expect(audio1.roles).toEqual(['role1', 'role2']);
-    expect(audio1.originalId).toBe('stream1,stream3');
-
-    const audio2 = variants[1].audio;
-    expect(audio2.roles).toEqual(['role1']);
-    expect(audio2.originalId).toBe('stream2,stream4');
+    expect(variants[0].audio.originalId).toBe('stream1,stream3');
+    expect(variants[1].audio.originalId).toBe('stream2,stream4');
   });
 
   it('Matches streams with roles in common', async () => {
@@ -1188,28 +1183,17 @@ describe('PeriodCombiner', () => {
     expect(variants.length).toBe(4);
 
     expect(variants).toEqual(jasmine.arrayWithExactContents([
-      makeAVVariant(720, 'en'),
-      makeAVVariant(1080, 'en'),
-      makeAVVariant(720, 'en'),
-      makeAVVariant(1080, 'en'),
+      makeAVVariant(720, 'en', 2, ['main']),
+      makeAVVariant(1080, 'en', 2, ['main']),
+      makeAVVariant(720, 'en', 2, ['description']),
+      makeAVVariant(1080, 'en', 2, ['description']),
     ]));
 
     // We can use the originalId field to see what each track is composed of.
-    const audio1 = variants[0].audio;
-    expect(audio1.roles).toEqual(['main']);
-    expect(audio1.originalId).toBe('stream1,stream1');
-
-    const audio2 = variants[1].audio;
-    expect(audio2.roles).toEqual(['main']);
-    expect(audio2.originalId).toBe('stream1,stream1');
-
-    const audio3 = variants[2].audio;
-    expect(audio3.roles).toEqual(['description']);
-    expect(audio3.originalId).toBe('stream2,stream2');
-
-    const audio4 = variants[3].audio;
-    expect(audio4.roles).toEqual(['description']);
-    expect(audio4.originalId).toBe('stream2,stream2');
+    expect(variants[0].audio.originalId).toBe('stream1,stream1');
+    expect(variants[1].audio.originalId).toBe('stream1,stream1');
+    expect(variants[2].audio.originalId).toBe('stream2,stream2');
+    expect(variants[3].audio.originalId).toBe('stream2,stream2');
   });
 
   it('Matches streams with mismatched roles', async () => {
@@ -1275,28 +1259,24 @@ describe('PeriodCombiner', () => {
     expect(variants.length).toBe(4);
 
     expect(variants).toEqual(jasmine.arrayWithExactContents([
-      makeAVVariant(720, 'en'),
-      makeAVVariant(1080, 'en'),
-      makeAVVariant(720, 'en'),
-      makeAVVariant(1080, 'en'),
+      makeAVVariant(720, 'en', 2, ['main']),
+      makeAVVariant(1080, 'en', 2, ['main']),
+      makeAVVariant(720, 'en', 2, ['description', 'main']),
+      makeAVVariant(1080, 'en', 2, ['description', 'main']),
     ]));
 
     // We can use the originalId field to see what each track is composed of.
-    const audio1 = variants[0].audio;
-    expect(audio1.roles).toEqual(['main']);
-    expect(audio1.originalId).toBe('stream1,stream1,stream1,stream1');
+    expect(variants[0].audio.originalId)
+        .toBe('stream1,stream1,stream1,stream1');
 
-    const audio2 = variants[1].audio;
-    expect(audio2.roles).toEqual(['main']);
-    expect(audio2.originalId).toBe('stream1,stream1,stream1,stream1');
+    expect(variants[1].audio.originalId)
+        .toBe('stream1,stream1,stream1,stream1');
 
-    const audio3 = variants[2].audio;
-    expect(audio3.roles).toEqual(['description', 'main']);
-    expect(audio3.originalId).toBe('stream1,stream2,stream1,stream2');
+    expect(variants[2].audio.originalId)
+        .toBe('stream1,stream2,stream1,stream2');
 
-    const audio4 = variants[3].audio;
-    expect(audio4.roles).toEqual(['description', 'main']);
-    expect(audio4.originalId).toBe('stream1,stream2,stream1,stream2');
+    expect(variants[3].audio.originalId)
+        .toBe('stream1,stream2,stream1,stream2');
   });
 
   it('The number of variants stays stable after many periods ' +
@@ -1618,11 +1598,12 @@ describe('PeriodCombiner', () => {
    * @param {number=} channels
    * @return {shaka.extern.Variant}
    */
-  function makeAVVariant(height, language, channels = 2) {
+  function makeAVVariant(height, language, channels = 2, roles = []) {
     const variant = jasmine.objectContaining({
       language,
       audio: jasmine.objectContaining({
         language,
+        roles,
         channelsCount: channels,
       }),
       video: jasmine.objectContaining({
