@@ -761,7 +761,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!Element)
+ *   manifestPreprocessor: function(!Element),
+ *   sequenceMode: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -815,6 +816,10 @@ shaka.extern.DrmConfiguration;
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
+ * @property {boolean} sequenceMode
+ *   If true, the media segments are appended to the SourceBuffer in
+ *   "sequence mode" (ignoring their internal timestamps).
+ *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -1218,6 +1223,7 @@ shaka.extern.CmcdConfiguration;
 
 /**
  * @typedef {{
+ *   enabled: boolean,
  *   dynamicPerformanceScaling: boolean,
  *   logLevel: number,
  *   drawLogo: boolean
@@ -1226,6 +1232,9 @@ shaka.extern.CmcdConfiguration;
  * @description
  *   Decoding for MPEG-5 Part2 LCEVC.
  *
+ * @property {boolean} enabled
+ *   If <code>true</code>, enable LCEVC.
+ *   Defaults to <code>false</code>.
  * @property {boolean} dynamicPerformanceScaling
  *   If <code>true</code>, LCEVC Dynamic Performance Scaling or dps is enabled
  *   to be triggered, when the system is not able to decode frames within a

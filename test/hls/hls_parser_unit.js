@@ -596,6 +596,33 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('accepts mp4a.40.34 codec as audio/mpeg', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=63701,CODECS="mp4a.40.34"\n',
+      'audio\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXTINF:5,\n',
+      'main.mp3',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mpeg', '');
+        });
+      });
+      manifest.sequenceMode = true;
+    });
+
+    await testHlsParser(master, media, manifest);
+  });
+
   it('parses audio+video variant with closed captions', async () => {
     const master = [
       '#EXTM3U\n',
@@ -3899,6 +3926,32 @@ describe('HlsParser', () => {
     await testHlsParser(media, '', manifest);
   });
 
+  it('honors hls.mediaPlaylistFullMimeType but detects MPEG', async () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp3',
+    ].join('');
+
+    const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+    parser.configure(config);
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = true;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mpeg');
+        });
+      });
+    });
+
+    await testHlsParser(media, '', manifest);
+  });
+
   it('syncs on sequence with ignoreManifestProgramDateTime', async () => {
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
     config.hls.ignoreManifestProgramDateTime = true;
@@ -3985,5 +4038,66 @@ describe('HlsParser', () => {
       'test:/audio3.mp4',
       'test:/audio4.mp4',
     ]);
+  });
+
+  it('lazy-loads TS content without filtering it out', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=120,AUDIO="aud1"\n',
+      'video2\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:1\n',
+      '#EXTINF:5,\n',
+      'video1.ts\n',
+      '#EXTINF:5,\n',
+      'video2.ts\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:3\n',
+      '#EXTINF:5,\n',
+      'audio1.ts\n',
+      '#EXTINF:5,\n',
+      'audio2.ts\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseText('test:/video2', video)
+        .setResponseValue('test:/init.mp4', initSegmentData);
+
+    const actualManifest = await parser.start('test:/master', playerInterface);
+    expect(actualManifest.variants.length).toBe(2);
+
+    const actualVideo0 = actualManifest.variants[0].video;
+    const actualVideo1 = actualManifest.variants[1].video;
+
+    // Before loading, all MIME types agree, and are defaulted to video/mp4.
+    expect(actualVideo0.mimeType).toBe('video/mp4');
+    expect(actualVideo1.mimeType).toBe('video/mp4');
+
+    await actualVideo0.createSegmentIndex();
+
+    // After loading just ONE stream, all MIME types agree again, and have been
+    // updated to reflect the TS content found inside the loaded playlist.
+    // This is how we avoid having the unloaded tracks filtered out during
+    // startup.
+    expect(actualVideo0.mimeType).toBe('video/mp2t');
+    expect(actualVideo1.mimeType).toBe('video/mp2t');
   });
 });

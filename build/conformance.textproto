@@ -363,3 +363,16 @@ requirement: {
     "Using \"String.replaceAll\" is not allowed; "
     "use String.replace instead"
 }
+
+# Disallow the general use of DOMParser.parseFromString, which has security
+# implications.
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "DOMParser.prototype.parseFromString"
+  error_message:
+    "Using \"DOMParser.parseFromString\" directly is not allowed; "
+    "use shaka.util.XmlUtils.parseXmlString instead."
+  whitelist_regexp: "lib/util/xml_utils.js"
+  whitelist_regexp: "test/"
+}
+

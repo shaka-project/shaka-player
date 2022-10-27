@@ -237,6 +237,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
+        .addBoolInput_(MessageIds.SEQUENCE_MODE,
+            'manifest.dash.sequenceMode')
         .addBoolInput_(MessageIds.DISABLE_AUDIO,
             'manifest.disableAudio')
         .addBoolInput_(MessageIds.DISABLE_VIDEO,
@@ -306,6 +308,7 @@ shakaDemo.Config = class {
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.LcevcConfiguration');
     this.addSection_(MessageIds.LCEVC_SECTION_HEADER, docLink)
+        .addBoolInput_(MessageIds.ENABLED, 'lcevc.enabled')
         .addBoolInput_(MessageIds.LCEVC_DYNAMIC_PERFORMANCE_SCALING,
             'lcevc.dynamicPerformanceScaling')
         .addNumberInput_(MessageIds.LCEVC_LOG_LEVEL, 'lcevc.logLevel')

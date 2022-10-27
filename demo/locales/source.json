@@ -463,6 +463,10 @@
     "description": "The header for a section of configuration values.",
     "message": "Language"
   },
+  "DEMO_LCEVC": {
+    "description": "Text that describes an asset that has LCEVC.",
+    "message": "[PROPER_NAME:LCEVC]"
+  },
   "DEMO_LCEVC_DRAW_LOGO": {
     "description": "LCEVC Watermark on the top left hand corner of the canvas.",
     "message": "Draw [PROPER_NAME:LCEVC] Logo"
@@ -790,6 +794,10 @@
   "DEMO_SEGMENT_RELATIVE_VTT_TIMING": {
     "description": "The name of a configuration value.",
     "message": "Enable segment-relative VTT Timing"
+  },
+  "DEMO_SEQUENCE_MODE": {
+    "description": "The name of a configuration value.",
+    "message": "Enable sequence mode"
   },
   "DEMO_SESSION_ID": {
     "description": "The name of a configuration value.",
