@@ -163,10 +163,11 @@ Chromebook:
   extra_config: *chromeos_config
 
 Tizen:
-  # TODO(joeyparrish): Get Tizen TV mounted in the lab and connected
-  disabled: true
   browser: tizen
+  # TODO: Re-enable Tizen (https://github.com/shaka-project/generic-webdriver-server/issues/57)
+  disabled: true
 
 XboxOne:
   browser: xboxone
+  # TODO: Re-enable Xbox (https://github.com/shaka-project/shaka-player/issues/4234)
   disabled: true
