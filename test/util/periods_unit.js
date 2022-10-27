@@ -1149,7 +1149,7 @@ describe('PeriodCombiner', () => {
     expect(audio2.originalId).toBe('stream2,stream4');
   });
 
-  it('Matches streams with primary in common', async () => {
+  it('Matches streams with roles in common', async () => {
     /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
     const periods = [
       {
@@ -1212,7 +1212,7 @@ describe('PeriodCombiner', () => {
     expect(audio4.originalId).toBe('stream2,stream2');
   });
 
-  it('Matches streams with mismatched primary', async () => {
+  it('Matches streams with mismatched roles', async () => {
     /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
     const periods = [
       {
