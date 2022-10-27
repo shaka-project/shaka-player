@@ -135,7 +135,9 @@ shakaDemo.Config = class {
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
         .addBoolInput_(MessageIds.PARSE_INBAND_PSSH_ENABLED,
-            'drm.parseInbandPsshEnabled');
+            'drm.parseInbandPsshEnabled')
+        .addBoolInput_(MessageIds.CLEAR_KEYS_AS_RAW,
+            'drm.clearKeysAsRaw');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions) => {
       // All advanced fields of a given type are set at once.

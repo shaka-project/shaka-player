@@ -1537,6 +1537,60 @@ describe('DrmEngine', () => {
       });
     });
 
+    it('honors clearKeysAsRaw', async () => {
+      tweakDrmInfos((drmInfos) => {
+        drmInfos[0].keySystem = 'com.fake.NOT.clearkey';
+      });
+      setDecodingInfoSpy(['org.w3.clearkey']);
+
+      // Configure clear keys (map of hex key IDs to keys)
+      config.clearKeys = {
+        '3q2-796tvu_erb7v3q2-7w': 'GGdTCRhnUwkYZ1MJGGdTCQ',
+        'AgMFBwEQEwFwGQIwKQMQNw': 'AwUHATAjAyBCAQgEJQmAMw',
+      };
+      config.clearKeysAsRaw = true;
+      drmEngine.configure(config);
+
+      // Not mocked.  Run data through real data URI parser to ensure that it is
+      // correctly formatted.
+      fakeNetEngine.request.and.callFake((type, request) => {
+        const requestType = shaka.net.NetworkingEngine.RequestType.LICENSE;
+
+        // A dummy progress callback.
+        const progressUpdated = (elapsedMs, bytes, bytesRemaining) => {};
+
+        return shaka.net.DataUriPlugin.parse(
+            request.uris[0], request, requestType, progressUpdated);
+      });
+
+      await initAndAttach();
+      const message = new Uint8Array(0);
+      session1.on['message']({target: session1, message: message});
+      session1.update.and.returnValue(Promise.resolve());
+
+      await shaka.test.Util.shortDelay();
+      expect(session1.update).toHaveBeenCalledTimes(1);
+      const licenseBuffer = session1.update.calls.argsFor(0)[0];
+      const licenseJson =
+          shaka.util.StringUtils.fromBytesAutoDetect(licenseBuffer);
+      const license = JSON.parse(licenseJson);
+      expect(license).toEqual({
+        keys: [
+          {
+            kid: '3q2-796tvu_erb7v3q2-7w',
+            k: 'GGdTCRhnUwkYZ1MJGGdTCQ',
+            kty: 'oct',
+          },
+          {
+            kid: 'AgMFBwEQEwFwGQIwKQMQNw',
+            k: 'AwUHATAjAyBCAQgEJQmAMw',
+            kty: 'oct',
+          },
+        ],
+      });
+    });
+
+
     it('publishes an event if update succeeds', async () => {
       await initAndAttach();
       await sendEncryptedEvent();

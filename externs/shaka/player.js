@@ -685,6 +685,7 @@ shaka.extern.AdvancedDrmConfiguration;
  *   retryParameters: shaka.extern.RetryParameters,
  *   servers: !Object.<string, string>,
  *   clearKeys: !Object.<string, string>,
+ *   clearKeysAsRaw: boolean,
  *   delayLicenseRequestUntilPlayed: boolean,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
@@ -707,6 +708,9 @@ shaka.extern.AdvancedDrmConfiguration;
  * @property {!Object.<string, string>} clearKeys
  *   <i>Forces the use of the Clear Key CDM.</i>
  *   A map of key IDs (hex) to keys (hex).
+ * @property {boolean} clearKeysAsRaw
+ *   <i>Defaults to false.</i> <br>
+ *   True to send the clearkeys without processing.
  * @property {boolean} delayLicenseRequestUntilPlayed
  *   <i>Defaults to false.</i> <br>
  *   True to configure drm to delay sending a license request until a user
