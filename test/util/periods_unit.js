@@ -12,6 +12,14 @@ describe('PeriodCombiner', () => {
   /** @type {shaka.util.PeriodCombiner} */
   let combiner;
 
+  const makeAudioStreamWithRoles = (id, roles, primary = true) => {
+    const stream = makeAudioStream('en');
+    stream.originalId = id;
+    stream.roles = roles;
+    stream.primary = primary;
+    return stream;
+  };
+
   beforeEach(() => {
     combiner = new shaka.util.PeriodCombiner();
   });
@@ -1141,6 +1149,155 @@ describe('PeriodCombiner', () => {
     expect(audio2.originalId).toBe('stream2,stream4');
   });
 
+  it('Matches streams with primary in common', async () => {
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+          makeAudioStreamWithRoles('stream2', ['description'], false),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+          makeAudioStreamWithRoles('stream2', ['description'], false),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const variants = combiner.getVariants();
+
+    console.log(variants);
+
+    expect(variants.length).toBe(4);
+
+    expect(variants).toEqual(jasmine.arrayWithExactContents([
+      makeAVVariant(720, 'en'),
+      makeAVVariant(1080, 'en'),
+      makeAVVariant(720, 'en'),
+      makeAVVariant(1080, 'en'),
+    ]));
+
+    // We can use the originalId field to see what each track is composed of.
+    const audio1 = variants[0].audio;
+    expect(audio1.roles).toEqual(['main']);
+    expect(audio1.originalId).toBe('stream1,stream1');
+
+    const audio2 = variants[1].audio;
+    expect(audio2.roles).toEqual(['main']);
+    expect(audio2.originalId).toBe('stream1,stream1');
+
+    const audio3 = variants[2].audio;
+    expect(audio3.roles).toEqual(['description']);
+    expect(audio3.originalId).toBe('stream2,stream2');
+
+    const audio4 = variants[3].audio;
+    expect(audio4.roles).toEqual(['description']);
+    expect(audio4.originalId).toBe('stream2,stream2');
+  });
+
+  it('Matches streams with mismatched primary', async () => {
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '0',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+          makeAudioStreamWithRoles('stream2', ['description'], false),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '3',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+          makeAudioStreamWithRoles('stream2', ['description'], false),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const variants = combiner.getVariants();
+
+    console.log(variants);
+
+    expect(variants.length).toBe(4);
+
+    expect(variants).toEqual(jasmine.arrayWithExactContents([
+      makeAVVariant(720, 'en'),
+      makeAVVariant(1080, 'en'),
+      makeAVVariant(720, 'en'),
+      makeAVVariant(1080, 'en'),
+    ]));
+
+    // We can use the originalId field to see what each track is composed of.
+    const audio1 = variants[0].audio;
+    expect(audio1.roles).toEqual(['main']);
+    expect(audio1.originalId).toBe('stream1,stream1,stream1,stream1');
+
+    const audio2 = variants[1].audio;
+    expect(audio2.roles).toEqual(['main']);
+    expect(audio2.originalId).toBe('stream1,stream1,stream1,stream1');
+
+    const audio3 = variants[2].audio;
+    expect(audio3.roles).toEqual(['description', 'main']);
+    expect(audio3.originalId).toBe('stream1,stream2,stream1,stream2');
+
+    const audio4 = variants[3].audio;
+    expect(audio4.roles).toEqual(['description', 'main']);
+    expect(audio4.originalId).toBe('stream1,stream2,stream1,stream2');
+  });
 
   it('The number of variants stays stable after many periods ' +
       'when going between similar content and varying ads', async () => {
@@ -1148,7 +1305,7 @@ describe('PeriodCombiner', () => {
     // https://github.com/shaka-project/shaka-player/issues/2716
     // that used to cause our period flattening logic to keep
     // creating new variants for every new period added.
-    // It's ok to create a few additional varinats/streams,
+    // It's ok to create a few additional variants/streams,
     // but we should stabilize eventually and keep the number
     // of variants from growing indefinitely.
 
@@ -1334,7 +1491,7 @@ describe('PeriodCombiner', () => {
       expect(isCandidateBetter).toBe(WORSE);
 
       // Make sure it works correctly whether it's the candidate or the best
-      // value that is equel to the output.
+      // value that is equal to the output.
       isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
           /* output= */ 5, /* bestValue= */ 3, /* candidateValue= */ 5);
       expect(isCandidateBetter).toBe(BETTER);
