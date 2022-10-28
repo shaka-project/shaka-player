@@ -706,7 +706,7 @@ shaka.extern.AdvancedDrmConfiguration;
  *   <code>{'com.widevine.alpha': 'https://example.com/drm'}</code>.
  * @property {!Object.<string, string>} clearKeys
  *   <i>Forces the use of the Clear Key CDM.</i>
- *   A map of key IDs (hex or raw) to keys (hex or raw).
+ *   A map of key IDs (hex or base64) to keys (hex or base64).
  * @property {boolean} delayLicenseRequestUntilPlayed
  *   <i>Defaults to false.</i> <br>
  *   True to configure drm to delay sending a license request until a user
