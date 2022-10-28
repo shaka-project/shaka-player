@@ -59,6 +59,13 @@ describe('Transmuxer', () => {
     });
   });
 
+  describe('convertAacCodecs', () => {
+    it('returns converted codecs', () => {
+      const expected = 'audio/mp4; codecs="mp4a.40.2"';
+      expect(shaka.media.Transmuxer.convertAacCodecs()).toBe(expected);
+    });
+  });
+
   describe('convertTsCodecs', () => {
     const convertTsCodecs =
         (type, codecs) => shaka.media.Transmuxer.convertTsCodecs(type, codecs);
