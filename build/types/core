@@ -16,7 +16,6 @@
 +../../lib/deprecate/enforcer.js
 +../../lib/deprecate/version.js
 
-+../../lib/media/autoplay.js
 +../../lib/media/adaptation_set.js
 +../../lib/media/adaptation_set_criteria.js
 +../../lib/media/buffering_observer.js
