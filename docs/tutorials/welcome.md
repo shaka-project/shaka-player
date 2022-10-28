@@ -66,8 +66,8 @@ python build/all.py
 
 Alternatively you can use a docker container:
 ```sh
-cd build/docker
-docker-compose run --rm shaka-compiler
+docker build -t shaka-player-build build/docker
+docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
 ```
 
 The output is:
