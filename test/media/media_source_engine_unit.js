@@ -106,10 +106,12 @@ describe('MediaSourceEngine', () => {
     shaka.media.Transmuxer = /** @type {?} */ (function() {
       return /** @type {?} */ (mockTransmuxer);
     });
-    shaka.media.Transmuxer.convertTsCodecs = originalTransmuxer.convertTsCodecs;
+    shaka.media.Transmuxer.convertCodecs = originalTransmuxer.convertCodecs;
     shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
       return mimeType == 'tsMimetype';
     };
+    shaka.media.Transmuxer.isAacContainer = originalTransmuxer.isAacContainer;
+    shaka.media.Transmuxer.isTsContainer = originalTransmuxer.isTsContainer;
 
     shaka.text.TextEngine = createMockTextEngineCtor();
 
@@ -633,7 +635,7 @@ describe('MediaSourceEngine', () => {
       videoSourceBuffer.mode = 'sequence';
 
       await mediaSourceEngine.init(
-          initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
+          initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
 
       expect(videoSourceBuffer.timestampOffset).toBe(0);
 
@@ -659,7 +661,7 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.VIDEO, fakeVideoStream);
 
       await mediaSourceEngine.init(
-          initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
+          initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
 
       // First, mock the scenario where timestampOffset is set to help align
       // text segments. In this case, SourceBuffer mode is still 'segments'.

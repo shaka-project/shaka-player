@@ -1306,7 +1306,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         streaming: {
           useNativeHlsOnSafari: false,
-          forceTransmuxTS: true,
+          forceTransmux: true,
         },
         lcevc: {
           enabled: true,
@@ -1331,7 +1331,7 @@ shakaAssets.testAssets = [
       .setExtraConfig({
         streaming: {
           useNativeHlsOnSafari: false,
-          forceTransmuxTS: true,
+          forceTransmux: true,
         },
         lcevc: {
           enabled: true,

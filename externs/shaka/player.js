@@ -947,7 +947,7 @@ shaka.extern.ManifestConfiguration;
  *   startAtSegmentBoundary: boolean,
  *   gapDetectionThreshold: number,
  *   durationBackoff: number,
- *   forceTransmuxTS: boolean,
+ *   forceTransmux: boolean,
  *   safeSeekOffset: number,
  *   stallEnabled: boolean,
  *   stallThreshold: number,
@@ -1010,12 +1010,12 @@ shaka.extern.ManifestConfiguration;
  *   seek to when the user tries to seek to or start playback at the duration.
  *   To disable this behavior, the config can be set to 0.  We recommend using
  *   the default value unless you have a good reason not to.
- * @property {boolean} forceTransmuxTS
- *   If this is <code>true</code>, we will transmux TS content even if not
- *   strictly necessary for the assets to be played.  Shaka Player currently
- *   only supports CEA 708 captions by transmuxing, so this value is necessary
- *   for enabling them on platforms with native TS support like Edge or
- *   Chromecast. This value defaults to <code>false</code>.
+ * @property {boolean} forceTransmux
+ *   If this is <code>true</code>, we will transmux AAC and TS content even if
+ *   not strictly necessary for the assets to be played.  Shaka Player
+ *   currently only supports CEA 708 captions by transmuxing, so this value is
+ *   necessary for enabling them on platforms with native TS support like Edge
+ *   or Chromecast. This value defaults to <code>false</code>.
  * @property {number} safeSeekOffset
  *   The amount of seconds that should be added when repositioning the playhead
  *   after falling out of the availability window or seek. This gives the player
