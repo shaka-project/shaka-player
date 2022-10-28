@@ -12,6 +12,14 @@ describe('PeriodCombiner', () => {
   /** @type {shaka.util.PeriodCombiner} */
   let combiner;
 
+  const makeAudioStreamWithRoles = (id, roles, primary = true) => {
+    const stream = makeAudioStream('en');
+    stream.originalId = id;
+    stream.roles = roles;
+    stream.primary = primary;
+    return stream;
+  };
+
   beforeEach(() => {
     combiner = new shaka.util.PeriodCombiner();
   });
@@ -1127,20 +1135,149 @@ describe('PeriodCombiner', () => {
     const variants = combiner.getVariants();
 
     expect(variants).toEqual(jasmine.arrayWithExactContents([
-      makeAVVariant(1080, 'en'),
-      makeAVVariant(1080, 'en'),
+      makeAVVariant(1080, 'en', 2, ['role1', 'role2']),
+      makeAVVariant(1080, 'en', 2, ['role1']),
     ]));
 
     // We can use the originalId field to see what each track is composed of.
-    const audio1 = variants[0].audio;
-    expect(audio1.roles).toEqual(['role1', 'role2']);
-    expect(audio1.originalId).toBe('stream1,stream3');
-
-    const audio2 = variants[1].audio;
-    expect(audio2.roles).toEqual(['role1']);
-    expect(audio2.originalId).toBe('stream2,stream4');
+    expect(variants[0].audio.originalId).toBe('stream1,stream3');
+    expect(variants[1].audio.originalId).toBe('stream2,stream4');
   });
 
+  it('Matches streams with roles in common', async () => {
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+          makeAudioStreamWithRoles('stream2', ['description'], false),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+          makeAudioStreamWithRoles('stream2', ['description'], false),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const variants = combiner.getVariants();
+
+    console.log(variants);
+
+    expect(variants.length).toBe(4);
+
+    expect(variants).toEqual(jasmine.arrayWithExactContents([
+      makeAVVariant(720, 'en', 2, ['main']),
+      makeAVVariant(1080, 'en', 2, ['main']),
+      makeAVVariant(720, 'en', 2, ['description']),
+      makeAVVariant(1080, 'en', 2, ['description']),
+    ]));
+
+    // We can use the originalId field to see what each track is composed of.
+    expect(variants[0].audio.originalId).toBe('stream1,stream1');
+    expect(variants[1].audio.originalId).toBe('stream1,stream1');
+    expect(variants[2].audio.originalId).toBe('stream2,stream2');
+    expect(variants[3].audio.originalId).toBe('stream2,stream2');
+  });
+
+  it('Matches streams with mismatched roles', async () => {
+    /** @type {!Array.<shaka.util.PeriodCombiner.Period>} */
+    const periods = [
+      {
+        id: '0',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '1',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+          makeAudioStreamWithRoles('stream2', ['description'], false),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '2',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+      {
+        id: '3',
+        videoStreams: [
+          makeVideoStream(720),
+          makeVideoStream(1080),
+        ],
+        audioStreams: [
+          makeAudioStreamWithRoles('stream1', ['main']),
+          makeAudioStreamWithRoles('stream2', ['description'], false),
+        ],
+        textStreams: [],
+        imageStreams: [],
+      },
+    ];
+
+    await combiner.combinePeriods(periods, /* isDynamic= */ false);
+    const variants = combiner.getVariants();
+
+    console.log(variants);
+
+    expect(variants.length).toBe(4);
+
+    expect(variants).toEqual(jasmine.arrayWithExactContents([
+      makeAVVariant(720, 'en', 2, ['main']),
+      makeAVVariant(1080, 'en', 2, ['main']),
+      makeAVVariant(720, 'en', 2, ['description', 'main']),
+      makeAVVariant(1080, 'en', 2, ['description', 'main']),
+    ]));
+
+    // We can use the originalId field to see what each track is composed of.
+    expect(variants[0].audio.originalId)
+        .toBe('stream1,stream1,stream1,stream1');
+
+    expect(variants[1].audio.originalId)
+        .toBe('stream1,stream1,stream1,stream1');
+
+    expect(variants[2].audio.originalId)
+        .toBe('stream1,stream2,stream1,stream2');
+
+    expect(variants[3].audio.originalId)
+        .toBe('stream1,stream2,stream1,stream2');
+  });
 
   it('The number of variants stays stable after many periods ' +
       'when going between similar content and varying ads', async () => {
@@ -1148,7 +1285,7 @@ describe('PeriodCombiner', () => {
     // https://github.com/shaka-project/shaka-player/issues/2716
     // that used to cause our period flattening logic to keep
     // creating new variants for every new period added.
-    // It's ok to create a few additional varinats/streams,
+    // It's ok to create a few additional variants/streams,
     // but we should stabilize eventually and keep the number
     // of variants from growing indefinitely.
 
@@ -1334,7 +1471,7 @@ describe('PeriodCombiner', () => {
       expect(isCandidateBetter).toBe(WORSE);
 
       // Make sure it works correctly whether it's the candidate or the best
-      // value that is equel to the output.
+      // value that is equal to the output.
       isCandidateBetter = PeriodCombiner.compareClosestPreferLower(
           /* output= */ 5, /* bestValue= */ 3, /* candidateValue= */ 5);
       expect(isCandidateBetter).toBe(BETTER);
@@ -1461,11 +1598,12 @@ describe('PeriodCombiner', () => {
    * @param {number=} channels
    * @return {shaka.extern.Variant}
    */
-  function makeAVVariant(height, language, channels = 2) {
+  function makeAVVariant(height, language, channels = 2, roles = []) {
     const variant = jasmine.objectContaining({
       language,
       audio: jasmine.objectContaining({
         language,
+        roles,
         channelsCount: channels,
       }),
       video: jasmine.objectContaining({
