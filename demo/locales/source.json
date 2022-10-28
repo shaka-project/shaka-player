@@ -151,10 +151,6 @@
     "description": "Text that describes an asset that is protected with the Clear Key Digital Rights Management system.",
     "message": "Clear Key [JARGON:DRM]"
   },
-  "DEMO_CLEAR_KEYS_AS_RAW": {
-    "description": "The name of a configuration value.",
-    "message": "Set clearKeys without processing"
-  },
   "DEMO_CLOCK_SYNC_URI": {
     "description": "The name of a configuration value.",
     "message": "Clock Sync URI"

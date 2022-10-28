@@ -37,7 +37,6 @@
   "DEMO_CDN_HEADER": "CDN",
   "DEMO_CLEAR": "No DRM protection",
   "DEMO_CLEAR_KEY": "Clear Key DRM",
-  "DEMO_CLEAR_KEYS_AS_RAW": "Set clearKeys without processing",
   "DEMO_CLOCK_SYNC_URI": "Clock Sync URI",
   "DEMO_CMCD_SECTION_HEADER": "CMCD",
   "DEMO_COMPILED_DEBUG": "Compiled (Debug)",
