@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.3.12](https://github.com/shaka-project/shaka-player/compare/v3.3.11...v3.3.12) (2022-10-29)
+
+
+### Bug Fixes
+
+* **ads:** Fix IMA crash when autoplay is rejected ([#4518](https://github.com/shaka-project/shaka-player/issues/4518)) ([f77c9f3](https://github.com/shaka-project/shaka-player/commit/f77c9f3bbdf2b7e00c44b4f997528bedc65b4f1a)), closes [#4179](https://github.com/shaka-project/shaka-player/issues/4179)
+* Fix multi-period DASH with descriptive audio ([#4629](https://github.com/shaka-project/shaka-player/issues/4629)) ([3a3cb24](https://github.com/shaka-project/shaka-player/commit/3a3cb24e4e519af24542d3edabd3fab130da08a2)), closes [#4500](https://github.com/shaka-project/shaka-player/issues/4500)
+* Force using mcap polyfill on EOS browsers ([#4630](https://github.com/shaka-project/shaka-player/issues/4630)) ([659a8cf](https://github.com/shaka-project/shaka-player/commit/659a8cf89b42f0470001c30728378d9f762c767d))
+* Limit key ids to 32 characters ([#4614](https://github.com/shaka-project/shaka-player/issues/4614)) ([8e6f20e](https://github.com/shaka-project/shaka-player/commit/8e6f20e26b70c8a40b30a6693f2f6c8d976c1fba))
+* Make XML parsing secure ([#4598](https://github.com/shaka-project/shaka-player/issues/4598)) ([a76c58f](https://github.com/shaka-project/shaka-player/commit/a76c58f6958562c5c6932bbe2042a414fa292315))
+* **offline:** Add storage muxer init timeout ([#4566](https://github.com/shaka-project/shaka-player/issues/4566)) ([71180ce](https://github.com/shaka-project/shaka-player/commit/71180ce5beda2439393026ae8f05db0ccc3d3d25))
+
 ## [3.3.11](https://github.com/shaka-project/shaka-player/compare/v3.3.10...v3.3.11) (2022-10-07)
 
 
