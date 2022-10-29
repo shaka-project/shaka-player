@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.2.3](https://github.com/shaka-project/shaka-player/compare/v4.2.2...v4.2.3) (2022-10-29)
+
+
+### Bug Fixes
+
+* **ads:** Fix IMA crash when autoplay is rejected ([#4518](https://github.com/shaka-project/shaka-player/issues/4518)) ([871a3c0](https://github.com/shaka-project/shaka-player/commit/871a3c0315a2965c91ebdde9815c7f6c5e0a59de)), closes [#4179](https://github.com/shaka-project/shaka-player/issues/4179)
+* Fix HLS live stream subtitle offsets ([#4586](https://github.com/shaka-project/shaka-player/issues/4586)) ([ec0b4dc](https://github.com/shaka-project/shaka-player/commit/ec0b4dcb0e288ceb1a01874db99063ef54fb3e47))
+* Fix multi-period DASH with descriptive audio ([#4629](https://github.com/shaka-project/shaka-player/issues/4629)) ([0e70b87](https://github.com/shaka-project/shaka-player/commit/0e70b874cf8558207b0620516c5608c6a201018d)), closes [#4500](https://github.com/shaka-project/shaka-player/issues/4500)
+* fix support clear and encrypted periods ([#4606](https://github.com/shaka-project/shaka-player/issues/4606)) ([8ece8ea](https://github.com/shaka-project/shaka-player/commit/8ece8ea225fb8b9ec9027dacef0865cceb3fd93b))
+* Force using mcap polyfill on EOS browsers ([#4630](https://github.com/shaka-project/shaka-player/issues/4630)) ([6b9f806](https://github.com/shaka-project/shaka-player/commit/6b9f806df54cc7b8761ef1683cefe5ed8d576a03))
+* **hls:** Fix raw format detection when the main playlist hasn't type ([#4583](https://github.com/shaka-project/shaka-player/issues/4583)) ([4053088](https://github.com/shaka-project/shaka-player/commit/4053088847eff6d7ddb7a969701fa881f6e90e8a))
+* Limit key ids to 32 characters ([#4614](https://github.com/shaka-project/shaka-player/issues/4614)) ([6fc1455](https://github.com/shaka-project/shaka-player/commit/6fc145584ffc0798a6e97c5672409b1e1613f164))
+* Make XML parsing secure ([#4598](https://github.com/shaka-project/shaka-player/issues/4598)) ([2e45696](https://github.com/shaka-project/shaka-player/commit/2e45696c10f3c2199a372a7a5f311579e627cd8e))
+* **offline:** Add storage muxer init timeout ([#4566](https://github.com/shaka-project/shaka-player/issues/4566)) ([6022907](https://github.com/shaka-project/shaka-player/commit/6022907df5e3a18b552a49e537d2c1daeebbc2c6))
+* **playhead:** Safeguard getStallsDetected as stallDetector can be null ([#4581](https://github.com/shaka-project/shaka-player/issues/4581)) ([c4ee14f](https://github.com/shaka-project/shaka-player/commit/c4ee14f2abcdd83b21e64230b67ab121c1db037e))
+* Resolve load failures for TS-based content on Android-based Cast devices ([#4569](https://github.com/shaka-project/shaka-player/issues/4569)). ([#4570](https://github.com/shaka-project/shaka-player/issues/4570)) ([4a4f48d](https://github.com/shaka-project/shaka-player/commit/4a4f48d2cac726e2a5a1d4e51e89f0b854e281ef))
+
 ## [4.2.2](https://github.com/shaka-project/shaka-player/compare/v4.2.1...v4.2.2) (2022-10-07)
 
 
