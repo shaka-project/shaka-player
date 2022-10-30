@@ -629,13 +629,13 @@ describe('Player', () => {
       // Try a bogus streaming config (number instead of Object)
       logErrorSpy.calls.reset();
       player.configure({
-        streaming: 5,
+        drm: 5,
       });
 
       newConfig = player.getConfiguration();
       expect(newConfig).toEqual(defaultConfig);
       expect(logErrorSpy).toHaveBeenCalledWith(
-          stringContaining('.streaming'));
+          stringContaining('.drm'));
     });
 
     it('accepts synchronous function values for async function fields', () => {

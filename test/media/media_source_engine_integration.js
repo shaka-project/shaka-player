@@ -379,9 +379,9 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    // Call with forceTransmuxTS = true, so that it will transmux even on
+    // Call with forceTransmux = true, so that it will transmux even on
     // platforms with native TS support.
-    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ true);
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await append(ContentType.VIDEO, 0);
 
@@ -397,7 +397,7 @@ describe('MediaSourceEngine', () => {
     initObject.set(videoType, getFakeStream(metadata.video));
 
     await mediaSourceEngine.init(
-        initObject, /* forceTransmuxTS= */ false, /* sequenceMode= */ true);
+        initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
     await mediaSourceEngine.setDuration(presentationDuration);
     await mediaSourceEngine.setStreamProperties(
         videoType,
@@ -432,7 +432,7 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInitWithClosedCaptions(ContentType.VIDEO);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
@@ -448,7 +448,7 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
@@ -464,7 +464,7 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
