@@ -170,3 +170,4 @@ muxjs.mp4.ParsedClosedCaptions;
  * @property {string} text The content of the closed caption.
  */
 muxjs.mp4.ClosedCaption;
+
