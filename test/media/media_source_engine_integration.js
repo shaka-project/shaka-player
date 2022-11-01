@@ -78,6 +78,18 @@ describe('MediaSourceEngine', () => {
         type, segment, reference, /* hasClosedCaptions= */ false);
   }
 
+  function appendWithSeek(type, segmentNumber) {
+    const segment = generators[type]
+        .getSegment(segmentNumber, Date.now() / 1000);
+    const reference = dummyReference(type, segmentNumber);
+    return mediaSourceEngine.appendBuffer(
+        type,
+        segment,
+        reference,
+        /* hasClosedCaptions= */ false,
+        /* seeked= */ true);
+  }
+
   function appendInitWithClosedCaptions(type) {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
     const reference = null;
@@ -386,6 +398,25 @@ describe('MediaSourceEngine', () => {
     await append(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('extracts CEA-708 captions from previous segment from hls', async () => {
+    // Load TS file with CEA-708 captions.
+    metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
+
+    const initObject = new Map();
+    initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
+    initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
+    // Call with forceTransmuxTS = true, so that it will transmux even on
+    // platforms with native TS support.
+    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ true);
+    mediaSourceEngine.setSelectedClosedCaptionId('CC1');
+
+    await append(ContentType.VIDEO, 2);
+    await appendWithSeek(ContentType.VIDEO, 0);
+
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(6);
   });
 
   it('buffers partial TS video segments in sequence mode', async () => {

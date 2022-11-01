@@ -74,6 +74,9 @@ muxjs.mp4.Transmuxer = class {
 
   /** Remove all handlers and clean up. */
   dispose() {}
+
+  /** Reset captions. */
+  resetCaptions() {}
 };
 
 
@@ -167,4 +170,3 @@ muxjs.mp4.ParsedClosedCaptions;
  * @property {string} text The content of the closed caption.
  */
 muxjs.mp4.ClosedCaption;
-
