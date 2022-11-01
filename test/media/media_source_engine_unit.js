@@ -106,12 +106,12 @@ describe('MediaSourceEngine', () => {
     shaka.media.Transmuxer = /** @type {?} */ (function() {
       return /** @type {?} */ (mockTransmuxer);
     });
-    shaka.media.Transmuxer.convertCodecs = originalTransmuxer.convertCodecs;
+    shaka.media.Transmuxer.convertCodecs = (mimeType, contentType) => {
+      return 'video/mp4; codecs="avc1.42E01E"';
+    };
     shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
       return mimeType == 'tsMimetype';
     };
-    shaka.media.Transmuxer.isAacContainer = originalTransmuxer.isAacContainer;
-    shaka.media.Transmuxer.isTsContainer = originalTransmuxer.isTsContainer;
 
     shaka.text.TextEngine = createMockTextEngineCtor();
 
