@@ -155,6 +155,19 @@ describe('StreamingEngine', () => {
         /* presentationDuration= */ Infinity);
     setupPlayhead();
 
+    // Retry on failure for live streams.
+    config.failureCallback = () => streamingEngine.retry(0.1);
+
+    // Ignore 404 errors in live stream tests.
+    onError.and.callFake((error) => {
+      if (error.code == shaka.util.Error.Code.BAD_HTTP_STATUS &&
+          error.data[1] == 404) {
+        // 404 error
+      } else {
+        fail(error);
+      }
+    });
+
     createStreamingEngine();
   }
 

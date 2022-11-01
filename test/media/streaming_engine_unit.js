@@ -855,7 +855,7 @@ describe('StreamingEngine', () => {
 
     const config = shaka.util.PlayerConfiguration.createDefault().streaming;
     config.bufferingGoal = 60;
-    config.failureCallback = () => streamingEngine.retry();
+    config.failureCallback = () => streamingEngine.retry(0.1);
     createStreamingEngine(config);
 
     // Make requests for different types take different amounts of time.
@@ -1714,8 +1714,23 @@ describe('StreamingEngine', () => {
     beforeEach(() => {
       setupLive();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData, 0);
-      createStreamingEngine();
+
+      // Retry on failure for live streams.
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.failureCallback = () => streamingEngine.retry(0.1);
+
+      createStreamingEngine(config);
       presentationTimeInSeconds = 100;
+
+      // Ignore 404 errors in live stream tests.
+      onError.and.callFake((error) => {
+        if (error.code == shaka.util.Error.Code.BAD_HTTP_STATUS &&
+            error.data[1] == 404) {
+          // 404 error
+        } else {
+          fail(error);
+        }
+      });
     });
 
     it('outside segment availability window', async () => {
@@ -1751,9 +1766,9 @@ describe('StreamingEngine', () => {
             if (startTime >= 100) {
               // Ignore a possible call for the first Period.
               expect(Util.invokeSpy(timeline.getSegmentAvailabilityStart))
-                  .toBe(100);
+                  .not.toBeLessThan(100);
               expect(Util.invokeSpy(timeline.getSegmentAvailabilityEnd))
-                  .toBe(120);
+                  .not.toBeLessThan(120);
               playing = true;
               mediaSourceEngine.appendBuffer.and.callFake(
                   originalAppendBuffer);
@@ -1978,7 +1993,7 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.failureCallback = () => streamingEngine.retry();
+      config.failureCallback = () => streamingEngine.retry(0.1);
       createStreamingEngine(config);
 
       presentationTimeInSeconds = 100;
@@ -2139,7 +2154,7 @@ describe('StreamingEngine', () => {
         netEngine.request.calls.reset();
 
         // Retry streaming.
-        expect(streamingEngine.retry()).toBe(true);
+        expect(streamingEngine.retry(0.1)).toBe(true);
       });
 
       // Here we go!
@@ -2169,7 +2184,7 @@ describe('StreamingEngine', () => {
 
         // Retry streaming, which should fail and return false.
         netEngine.request.calls.reset();
-        expect(streamingEngine.retry()).toBe(false);
+        expect(streamingEngine.retry(0.1)).toBe(false);
       });
 
       // Here we go!
@@ -2221,7 +2236,7 @@ describe('StreamingEngine', () => {
 
           // Retry streaming, which should fail and return false.
           netEngine.request.calls.reset();
-          expect(streamingEngine.retry()).toBe(false);
+          expect(streamingEngine.retry(0.1)).toBe(false);
         }
       });
 
