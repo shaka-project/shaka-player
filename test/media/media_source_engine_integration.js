@@ -408,9 +408,9 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    // Call with forceTransmuxTS = true, so that it will transmux even on
+    // Call with forceTransmux = true, so that it will transmux even on
     // platforms with native TS support.
-    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ true);
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
     await append(ContentType.VIDEO, 2);
