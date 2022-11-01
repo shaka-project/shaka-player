@@ -454,6 +454,19 @@ describe('MediaSourceEngine', () => {
     expect(onMetadata).toHaveBeenCalled();
   });
 
+  it('extracts ID3 metadata from TS when transmuxing', async () => {
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_ts'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
   it('extracts ID3 metadata from AAC', async () => {
     if (!MediaSource.isTypeSupported('audio/aac')) {
       return;
@@ -465,6 +478,22 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
     await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from AAC when transmuxing', async () => {
+    if (!MediaSource.isTypeSupported('audio/aac')) {
+      return;
+    }
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
