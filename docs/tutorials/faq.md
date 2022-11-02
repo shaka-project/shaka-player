@@ -164,7 +164,7 @@ shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
 contain said captions.  Edge and Chromecast, however, have native TS support and
 thus are not required to transmux.
 In order to force those platforms to transmux, set the
-{@link shaka.extern.StreamingConfiguration|`.streaming.forceTransmuxTS`} 
+{@link shaka.extern.StreamingConfiguration|`.streaming.forceTransmux`}
 configuration to true.
 
 <hr>

@@ -331,9 +331,9 @@
     "description": "The name of a configuration value.",
     "message": "Force [JARGON:HTTPS]"
   },
-  "DEMO_FORCE_TRANSMUX_TS": {
+  "DEMO_FORCE_TRANSMUX": {
     "description": "The name of a configuration value.",
-    "message": "Force Transmux [JARGON:MPEG-2 TS]"
+    "message": "Force Transmux"
   },
   "DEMO_FRONT_INTRO_DISMISS": {
     "description": "A button allowing users to dismiss the intro message.",
