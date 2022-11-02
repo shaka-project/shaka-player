@@ -37,6 +37,7 @@ describe('DashParser Live', () => {
       isAutoLowLatencyMode: () => false,
       enableLowLatencyMode: () => {},
       updateDuration: () => {},
+      newDrmInfo: (stream) => {},
     };
   });
 

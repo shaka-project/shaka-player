@@ -48,6 +48,7 @@ describe('DashParser SegmentTemplate', () => {
       isAutoLowLatencyMode: () => false,
       enableLowLatencyMode: () => {},
       updateDuration: () => {},
+      newDrmInfo: (stream) => {},
     };
   });
 
