@@ -245,18 +245,20 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       const fakeEvent = {type: 'timeupdate'};
       mockVideo.on['timeupdate'](fakeEvent);
 
-      // There are now "update" and "event" messages, in that order.
-      expect(mockShakaMessageBus.messages).toEqual([
-        {
-          type: 'update',
-          update: jasmine.any(Object),
-        },
-        {
-          type: 'event',
-          targetName: 'video',
-          event: jasmine.objectContaining(fakeEvent),
-        },
-      ]);
+      // There are now some number of "update" and "event" messages, in that
+      // order.
+      expect(mockShakaMessageBus.messages).toContain({
+        type: 'update',
+        update: jasmine.any(Object),
+      });
+      expect(mockShakaMessageBus.messages).toContain({
+        type: 'event',
+        targetName: 'video',
+        event: jasmine.objectContaining(fakeEvent),
+      });
+      const eventIndex = mockShakaMessageBus.messages.findIndex(
+          (message) => message.type == 'event');
+      expect(eventIndex).toBe(mockShakaMessageBus.messages.length - 1);
     });
   });
 
@@ -1103,6 +1105,9 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       player[name] = jasmine.createSpy(name);
     }
     for (const name in CastUtils.PlayerGetterMethods) {
+      player[name] = jasmine.createSpy(name);
+    }
+    for (const name in CastUtils.LargePlayerGetterMethods) {
       player[name] = jasmine.createSpy(name);
     }
     for (const name in CastUtils.PlayerGetterMethodsThatRequireLive) {
