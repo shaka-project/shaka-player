@@ -74,6 +74,9 @@ muxjs.mp4.Transmuxer = class {
 
   /** Remove all handlers and clean up. */
   dispose() {}
+
+  /** Reset captions. */
+  resetCaptions() {}
 };
 
 
