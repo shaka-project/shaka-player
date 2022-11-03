@@ -46,8 +46,8 @@ shaka.ui.HiddenFastForwardButton = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.fastforwardContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.fastforwardContainer_.classList.add(
-        'shaka-fast-foward-onControlsContainer');
+    this.fastforwardContainer_.classList
+        .add('shaka-fast-foward-on-controls-container');
     this.parent.appendChild(this.fastforwardContainer_);
 
     this.eventManager.listen(
@@ -70,8 +70,8 @@ shaka.ui.HiddenFastForwardButton = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.fastforwardIcon_ = shaka.util.Dom.createHTMLElement('span');
-    this.fastforwardIcon_.classList.add(
-        'shaka-forward-rewind-onControlsContainer-icon');
+    this.fastforwardIcon_.classList
+        .add('shaka-forward-rewind-on-controls-container-icon');
     this.fastforwardIcon_.textContent =
         shaka.ui.Enums.MaterialDesignIcons.FAST_FORWARD;
     this.fastforwardContainer_.appendChild(this.fastforwardIcon_);

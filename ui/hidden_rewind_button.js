@@ -45,8 +45,8 @@ shaka.ui.HiddenRewindButton = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.rewindContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.rewindContainer_.classList.add(
-        'shaka-rewind-onControlsContainer');
+    this.rewindContainer_.classList
+        .add('shaka-rewind-on-controls-container');
     this.parent.appendChild(this.rewindContainer_);
 
     this.eventManager.listen(this.rewindContainer_, 'touchstart', (event) => {
@@ -68,8 +68,8 @@ shaka.ui.HiddenRewindButton = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.rewindIcon_ = shaka.util.Dom.createHTMLElement('span');
-    this.rewindIcon_.classList.add(
-        'shaka-forward-rewind-onControlsContainer-icon');
+    this.rewindIcon_.classList
+        .add('shaka-forward-rewind-on-controls-container-icon');
     this.rewindIcon_.textContent =
         shaka.ui.Enums.MaterialDesignIcons.REWIND;
     this.rewindContainer_.appendChild(this.rewindIcon_);
