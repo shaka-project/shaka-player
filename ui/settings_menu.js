@@ -12,6 +12,7 @@ goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.Iterables');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -117,8 +118,16 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
         shaka.ui.Utils.setDisplay(this.parent, true);
 
         /** @type {!HTMLElement} */
-        // Selecting the first element that is not hidden
-        (this.parent.querySelectorAll('button:not(.shaka-hidden)')[0].focus());
+        const isDisplayed =
+        (element) => element.classList.contains('shaka-hidden') == false;
+
+        const Iterables = shaka.util.Iterables;
+        if (Iterables.some(this.parent.childNodes, isDisplayed)) {
+          // Focus on the first visible child of the overflow menu
+          const visibleElements =
+            Iterables.filter(this.parent.childNodes, isDisplayed);
+          /** @type {!HTMLElement} */ (visibleElements[0]).focus();
+        }
 
         // Make sure controls are displayed
         this.controls.computeOpacity();
