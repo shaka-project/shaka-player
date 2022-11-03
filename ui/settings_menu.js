@@ -117,7 +117,8 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
         shaka.ui.Utils.setDisplay(this.parent, true);
 
         /** @type {!HTMLElement} */
-        (this.parent.childNodes[0]).focus();
+        // Selecting the first element that is not hidden
+        (this.parent.querySelectorAll('button:not(.shaka-hidden)')[0].focus());
 
         // Make sure controls are displayed
         this.controls.computeOpacity();
