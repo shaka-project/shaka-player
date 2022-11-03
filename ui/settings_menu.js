@@ -117,7 +117,6 @@ shaka.ui.SettingsMenu = class extends shaka.ui.Element {
       this.eventManager.listen(this.backButton, 'click', () => {
         shaka.ui.Utils.setDisplay(this.parent, true);
 
-        /** @type {!HTMLElement} */
         const isDisplayed =
         (element) => element.classList.contains('shaka-hidden') == false;
 
