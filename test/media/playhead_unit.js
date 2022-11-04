@@ -161,6 +161,8 @@ describe('Playhead', () => {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      playhead.ready();
+
       expect(video.currentTime).toBe(5);
       expect(playhead.getTime()).toBe(5);
 
@@ -181,6 +183,8 @@ describe('Playhead', () => {
           /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
+
+      playhead.ready();
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'loadedmetadata', jasmine.any(Function), jasmine.anything());
@@ -223,6 +227,8 @@ describe('Playhead', () => {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      playhead.ready();
+
       video.on['seeking']();
       expect(playhead.getTime()).toBe(5);
       expect(video.currentTime).toBe(5);
@@ -264,6 +270,8 @@ describe('Playhead', () => {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      playhead.ready();
+
       expect(playhead.getTime()).toBe(59);  // duration - durationBackoff
       expect(video.currentTime).toBe(59);  // duration - durationBackoff
     });
@@ -302,6 +310,8 @@ describe('Playhead', () => {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      playhead.ready();
+
       expect(playhead.getTime()).toBe(30);
     });
 
@@ -313,6 +323,8 @@ describe('Playhead', () => {
           /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
+
+      playhead.ready();
 
       expect(video.addEventListener).toHaveBeenCalledWith(
           'loadedmetadata', jasmine.any(Function), jasmine.anything());
@@ -347,6 +359,8 @@ describe('Playhead', () => {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      playhead.ready();
+
       expect(video.addEventListener).toHaveBeenCalledWith(
           'loadedmetadata', jasmine.any(Function), jasmine.anything());
 
@@ -379,6 +393,8 @@ describe('Playhead', () => {
         /* startTime= */ 5,
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
+
+    playhead.ready();
 
     // This has to periodically increment the mock date to allow the onSeeking_
     // handler to seek, if appropriate.
@@ -652,6 +668,8 @@ describe('Playhead', () => {
     expect(currentTime).toBe(1000);
     seekCount = 0;
 
+    playhead.ready();
+
     // The availability window slips ahead.
     timeline.getSeekRangeStart.and.returnValue(1030);
     timeline.getSeekRangeEnd.and.returnValue(1030);
@@ -696,6 +714,8 @@ describe('Playhead', () => {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      playhead.ready();
+
       video.on['seeking']();
       expect(video.currentTime).toBe(5);
       expect(playhead.getTime()).toBe(5);
@@ -727,6 +747,8 @@ describe('Playhead', () => {
           /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
+
+      playhead.ready();
 
       video.on['seeking']();
       expect(video.currentTime).toBe(5);
@@ -765,6 +787,9 @@ describe('Playhead', () => {
 
     video.currentTime = 0;
     video.seeking = true;
+
+    playhead.ready();
+
     // "video.seeking" stays true until the buffered range intersects with
     // "video.currentTime".  Playhead should correct anyway.
     video.on['seeking']();
@@ -808,6 +833,8 @@ describe('Playhead', () => {
         /* startTime= */ 30,
         Util.spyFunc(onSeek),
         Util.spyFunc(onEvent));
+
+    playhead.ready();
 
     /**
      * Prevent retries on the initial start time seek.  This will ensure that
@@ -932,6 +959,8 @@ describe('Playhead', () => {
               /* startTime= */ data.start,
               Util.spyFunc(onSeek),
               Util.spyFunc(onEvent));
+
+          playhead.ready();
 
           jasmine.clock().tick(500);
           for (let time = data.start; time < data.waitingAt; time++) {
@@ -1142,6 +1171,8 @@ describe('Playhead', () => {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      playhead.ready();
+
       jasmine.clock().tick(500);
       expect(onEvent).not.toHaveBeenCalled();
 
@@ -1190,6 +1221,8 @@ describe('Playhead', () => {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      playhead.ready();
+
       playhead.notifyOfBufferingChange();
       jasmine.clock().tick(500);
 
@@ -1211,6 +1244,8 @@ describe('Playhead', () => {
           /* startTime= */ 5,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
+
+      playhead.ready();
 
       playhead.notifyOfBufferingChange();
       jasmine.clock().tick(500);
@@ -1236,6 +1271,8 @@ describe('Playhead', () => {
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
 
+      playhead.ready();
+
       playhead.notifyOfBufferingChange();
       jasmine.clock().tick(500);
 
@@ -1259,6 +1296,8 @@ describe('Playhead', () => {
           /* startTime= */ 0,
           Util.spyFunc(onSeek),
           Util.spyFunc(onEvent));
+
+      playhead.ready();
 
       playhead.notifyOfBufferingChange();
       jasmine.clock().tick(500);
@@ -1286,6 +1325,8 @@ describe('Playhead', () => {
             /* startTime= */ data.start,
             Util.spyFunc(onSeek),
             Util.spyFunc(onEvent));
+
+        playhead.ready();
 
         jasmine.clock().tick(500);
         expect(onEvent).not.toHaveBeenCalled();
