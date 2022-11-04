@@ -23,6 +23,8 @@ describe('HlsParser', () => {
   let parser;
   /** @type {!jasmine.Spy} */
   let onEventSpy;
+  /** @type {!jasmine.Spy} */
+  let newDrmInfoSpy;
   /** @type {shaka.extern.ManifestParser.PlayerInterface} */
   let playerInterface;
   /** @type {shaka.extern.ManifestConfiguration} */
@@ -86,6 +88,7 @@ describe('HlsParser', () => {
 
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     onEventSpy = jasmine.createSpy('onEvent');
+    newDrmInfoSpy = jasmine.createSpy('newDrmInfo');
     playerInterface = {
       modifyManifestRequest: (request, manifestInfo) => {},
       modifySegmentRequest: (request, segmentInfo) => {},
@@ -99,6 +102,7 @@ describe('HlsParser', () => {
       isAutoLowLatencyMode: () => false,
       enableLowLatencyMode: () => {},
       updateDuration: () => {},
+      newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
     };
 
     parser = new shaka.hls.HlsParser();
@@ -2763,6 +2767,7 @@ describe('HlsParser', () => {
     });
 
     await testHlsParser(master, media, manifest);
+    expect(newDrmInfoSpy).toHaveBeenCalled();
   });
 
   it('constructs DrmInfo for PlayReady', async () => {
@@ -2803,6 +2808,7 @@ describe('HlsParser', () => {
     });
 
     await testHlsParser(master, media, manifest);
+    expect(newDrmInfoSpy).toHaveBeenCalled();
   });
 
   it('constructs DrmInfo for FairPlay', async () => {
@@ -2840,6 +2846,7 @@ describe('HlsParser', () => {
     });
 
     await testHlsParser(master, media, manifest);
+    expect(newDrmInfoSpy).toHaveBeenCalled();
   });
 
   it('constructs DrmInfo for ClearKey with explicit KEYFORMAT', async () => {
@@ -2874,6 +2881,7 @@ describe('HlsParser', () => {
     });
 
     await testHlsParser(master, media, manifest);
+    expect(newDrmInfoSpy).toHaveBeenCalled();
   });
 
   it('constructs DrmInfo for ClearKey without explicit KEYFORMAT', async () => {
@@ -2907,6 +2915,7 @@ describe('HlsParser', () => {
     });
 
     await testHlsParser(master, media, manifest);
+    expect(newDrmInfoSpy).toHaveBeenCalled();
   });
 
   it('falls back to mp4 if HEAD request fails', async () => {
