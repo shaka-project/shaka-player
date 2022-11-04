@@ -957,6 +957,84 @@ describe('HlsParser live', () => {
             manifest, mediaWithSkippedSegments2, [ref1, ref2, ref3, ref4]);
       });
     });  // describe('update')
+
+    describe('createSegmentIndex', () => {
+      it('handles multiple concurrent calls', async () => {
+        const secondVariant = [
+          '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+          'RESOLUTION=1200x940,FRAME-RATE=60\n',
+          'video2',
+        ].join('');
+        const masterWithTwoVariants = master + secondVariant;
+        configureNetEngineForInitialManifest(masterWithTwoVariants,
+            mediaWithAdditionalSegment, mediaWithAdditionalSegment2);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+
+        // No segment index yet.
+        expect(manifest.variants[0].video.segmentIndex).toBe(null);
+
+        // Make two calls to create the segment index.
+        const created1 = manifest.variants[0].video.createSegmentIndex();
+        const created2 = manifest.variants[0].video.createSegmentIndex();
+
+        // Still no segment index yet.
+        expect(manifest.variants[0].video.segmentIndex).toBe(null);
+
+        // Without caring what order these Promises complete in, we should be
+        // able to see that neither resolves without a full segment index being
+        // ready.
+        created1.then(() => {
+          expect(manifest.variants[0].video.segmentIndex).not.toBe(null);
+        });
+        created2.then(() => {
+          expect(manifest.variants[0].video.segmentIndex).not.toBe(null);
+        });
+
+        // Now wait for both Promises to resolve.
+        await Promise.all([created1, created2]);
+      });
+
+      it('handles switching during createSegmentIndex', async () => {
+        const secondVariant = [
+          '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+          'RESOLUTION=1200x940,FRAME-RATE=60\n',
+          'video2',
+        ].join('');
+        const masterWithTwoVariants = master + secondVariant;
+        configureNetEngineForInitialManifest(masterWithTwoVariants,
+            mediaWithAdditionalSegment, mediaWithAdditionalSegment2);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+
+        // No segment index yet.
+        expect(manifest.variants[0].video.segmentIndex).toBe(null);
+
+        // Make a call to create the segment index.
+        const created1 = manifest.variants[0].video.createSegmentIndex();
+
+        // Still no segment index yet.
+        expect(manifest.variants[0].video.segmentIndex).toBe(null);
+
+        // Mid-create, switch.
+        await manifest.variants[0].video.closeSegmentIndex();
+        const created2 = manifest.variants[1].video.createSegmentIndex();
+
+        // Finish the original creation call.
+        await created1;
+
+        // The first segment index should never have been created, because the
+        // close call should have cancelled the work in progress.
+        expect(manifest.variants[0].video.segmentIndex).toBe(null);
+
+        // Finish the second creation call.
+        await created2;
+
+        // The second segment index is complete, because the create call was
+        // never interrupted.
+        expect(manifest.variants[1].video.segmentIndex).not.toBe(null);
+      });
+    });  // describe('createSegmentIndex')
   });  // describe('playlist type LIVE')
 
   /**
