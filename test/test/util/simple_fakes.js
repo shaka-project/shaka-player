@@ -340,6 +340,9 @@ shaka.test.FakePlayhead = class {
     this.stallsDetected_ = 0;
 
     /** @type {!jasmine.Spy} */
+    this.ready = jasmine.createSpy('ready');
+
+    /** @type {!jasmine.Spy} */
     this.setStartTime = jasmine.createSpy('setStartTime')
         .and.callFake((value) => {
           this.startTime_ = value;
