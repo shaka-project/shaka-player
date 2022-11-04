@@ -9,27 +9,45 @@ The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
 
 Priority features up next:
- - Preload API
-   https://github.com/shaka-project/shaka-player/issues/880
+ - HLS improvements
+   https://github.com/shaka-project/shaka-player/projects/6
 
 Candidate features for future release cycles:
+ - Preload API
+   https://github.com/shaka-project/shaka-player/issues/880
  - Official TypeScript defs, generated from source
    https://github.com/shaka-project/shaka-player/issues/1030
  - Codec-switching
    https://github.com/shaka-project/shaka-player/issues/1528
  - Background fetch for offline storage
    https://github.com/shaka-project/shaka-player/issues/879
- - Support ID3 tags in mp4
-   https://github.com/shaka-project/shaka-player/issues/3351
  - Smaller, more modular binary
 
-v3.4 - 2022 Q1 or Q2
+v4.3 - 2022 Q4 / 2023 Q1
+ - Support ID3 tags in mp4
+   https://github.com/shaka-project/shaka-player/issues/3351
+ - Lazy-load HLS playlists on adaptation
+   https://github.com/shaka-project/shaka-player/issues/1936
+
+=====
+
+v4.2 - 2022 Q3
+ - Automatic ABR quality restrictions based on size
+   https://github.com/shaka-project/shaka-player/issues/2333
+ - HLS support for AES-128 encryption
+   https://github.com/shaka-project/shaka-player/issues/850
+
+v4.1 - 2022 Q2
+ - HLS support for EXT-X-GAP
+   https://github.com/shaka-project/shaka-player/issues/1308
+ - Temporarily disable the active variant after `HTTP_ERROR`
+   https://github.com/shaka-project/shaka-player/issues/1542
+
+v4.0 - 2022 Q2
  - MSE support for FairPlay
    https://github.com/shaka-project/shaka-player/issues/3346
  - Support containerless formats
    https://github.com/shaka-project/shaka-player/issues/2337
-
-=====
 
 v3.3 - 2022 Q1
  - Common Media Client Data (CMCD) logging support

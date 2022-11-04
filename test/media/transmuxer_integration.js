@@ -14,6 +14,8 @@ describe('Transmuxer', () => {
   const transportStreamAudioMimeType = 'video/mp2t; codecs="mp4a.40.2"';
   const aacAudioMimeType = 'audio/aac';
 
+  const transmuxerMimeType = 'fake/mimeType';
+
   /** @type {!ArrayBuffer} */
   let videoSegment;
   /** @type {!ArrayBuffer} */
@@ -36,7 +38,7 @@ describe('Transmuxer', () => {
   });
 
   beforeEach(() => {
-    transmuxer = new shaka.media.Transmuxer();
+    transmuxer = new shaka.media.Transmuxer(transmuxerMimeType);
   });
 
   afterEach(async () => {
@@ -98,6 +100,10 @@ describe('Transmuxer', () => {
           ContentType.VIDEO, 'video/MP2T; codecs="avc1.420001"'))
           .toBe('video/mp4; codecs="avc1.420001"');
     });
+  });
+
+  it('getOrginalMimeType returns the correct mimeType', () => {
+    expect(transmuxer.getOrginalMimeType()).toBe(transmuxerMimeType);
   });
 
   describe('transmuxing', () => {

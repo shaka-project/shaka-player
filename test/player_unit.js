@@ -3943,6 +3943,93 @@ describe('Player', () => {
     });
   });
 
+  describe('config streaming.failureCallback default', () => {
+    /** @type {jasmine.Spy} */
+    let retryStreaming;
+    /** @type {jasmine.Spy} */
+    let isLive;
+
+    /**
+     * @suppress {accessControls}
+     * @param {!shaka.util.Error} error
+     */
+    function defaultStreamingFailureCallback(error) {
+      player.defaultStreamingFailureCallback_(error);
+    }
+
+    beforeEach(() => {
+      retryStreaming = jasmine.createSpy('retryStreaming');
+      isLive = jasmine.createSpy('isLive');
+
+      player.retryStreaming = Util.spyFunc(retryStreaming);
+      player.isLive = Util.spyFunc(isLive);
+    });
+
+    it('ignores VOD failures', () => {
+      isLive.and.returnValue(false);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS,
+          /* url= */ '',
+          /* http_status= */ 404);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).not.toHaveBeenCalled();
+    });
+
+    it('retries live on HTTP 404', () => {
+      isLive.and.returnValue(true);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS,
+          /* url= */ '',
+          /* http_status= */ 404);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).toHaveBeenCalled();
+    });
+
+    it('retries live on generic HTTP error', () => {
+      isLive.and.returnValue(true);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.HTTP_ERROR);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).toHaveBeenCalled();
+    });
+
+    it('retries live on HTTP timeout', () => {
+      isLive.and.returnValue(true);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.TIMEOUT);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).toHaveBeenCalled();
+    });
+
+    it('ignores other live failures', () => {
+      isLive.and.returnValue(true);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.VIDEO_ERROR);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).not.toHaveBeenCalled();
+    });
+  });
+
   /**
    * Gets the currently active variant track.
    * @return {shaka.extern.Track}

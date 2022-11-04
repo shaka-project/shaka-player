@@ -340,6 +340,9 @@ shaka.test.FakePlayhead = class {
     this.stallsDetected_ = 0;
 
     /** @type {!jasmine.Spy} */
+    this.ready = jasmine.createSpy('ready');
+
+    /** @type {!jasmine.Spy} */
     this.setStartTime = jasmine.createSpy('setStartTime')
         .and.callFake((value) => {
           this.startTime_ = value;
@@ -509,5 +512,9 @@ shaka.test.FakeTransmuxer = class {
     /** @type {!jasmine.Spy} */
     this.transmux =
         jasmine.createSpy('transmux').and.returnValue(Promise.resolve(output));
+
+    /** @type {!jasmine.Spy} */
+    this.getOrginalMimeType =
+        jasmine.createSpy('getOrginalMimeType').and.returnValue('mimeType');
   }
 };
