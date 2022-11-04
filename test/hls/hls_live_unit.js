@@ -736,6 +736,54 @@ describe('HlsParser live', () => {
             manifest.variants[1].video, [ref4]);
       });
 
+      it('handles switching during update', async () => {
+        const ref1 = makeReference(
+            'test:/main.mp4', 0, 2, /* syncTime= */ null);
+        const ref2 = makeReference(
+            'test:/main2.mp4', 2, 4, /* syncTime= */ null);
+        const ref4 = makeReference(
+            'test:/main4.mp4', 2, 4, /* syncTime= */ null);
+
+        const secondVariant = [
+          '#EXT-X-STREAM-INF:BANDWIDTH=300,CODECS="avc1",',
+          'RESOLUTION=1200x940,FRAME-RATE=60\n',
+          'video2',
+        ].join('');
+        const masterWithTwoVariants = master + secondVariant;
+        configureNetEngineForInitialManifest(masterWithTwoVariants,
+            mediaWithAdditionalSegment, mediaWithAdditionalSegment2);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        await manifest.variants[0].video.createSegmentIndex();
+        ManifestParser.verifySegmentIndex(
+            manifest.variants[0].video, [ref1, ref2]);
+        expect(manifest.variants[1].video.segmentIndex).toBe(null);
+
+        // Update.
+        fakeNetEngine
+            .setResponseText('test:/video', mediaWithRemovedSegment)
+            .setResponseText('test:/video2', mediaWithRemovedSegment2);
+
+        const updatePromise = parser.update();
+
+        // Verify that the update is not yet complete.
+        expect(manifest.variants[0].video.segmentIndex).not.toBe(null);
+        ManifestParser.verifySegmentIndex(
+            manifest.variants[0].video, [ref1, ref2]);
+
+        // Mid-update, switch.
+        await manifest.variants[0].video.closeSegmentIndex();
+        await manifest.variants[1].video.createSegmentIndex();
+
+        // Finish the update.
+        await updatePromise;
+
+        // Check for variants to be as expected.
+        expect(manifest.variants[0].video.segmentIndex).toBe(null);
+        ManifestParser.verifySegmentIndex(
+            manifest.variants[1].video, [ref4]);
+      });
+
       it('handles updates with redirects', async () => {
         const oldRef1 = makeReference(
             'test:/main.mp4', 0, 2, /* syncTime= */ null);
