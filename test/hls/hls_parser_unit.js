@@ -3143,7 +3143,8 @@ describe('HlsParser', () => {
       expect(actual).toEqual(manifest);
     });
 
-    it('with different characteristics', async () => {
+    // eslint-disable-next-line max-len
+    it('without EXT-X-STREAM-INF characteristics and with EXT-X-SESSION-KEY characteristics', async () => {
       const initDataBase64 =
           'dGhpcyBpbml0IGRhdGEgY29udGFpbnMgaGlkZGVuIHNlY3JldHMhISE=';
 
@@ -3176,7 +3177,8 @@ describe('HlsParser', () => {
       expect(actual).toEqual(manifest);
     });
 
-    it('with different characteristics', async () => {
+    // eslint-disable-next-line max-len
+    it('with EXT-X-STREAM-INF characteristics and without EXT-X-SESSION-KEY characteristics', async () => {
       const initDataBase64 =
           'dGhpcyBpbml0IGRhdGEgY29udGFpbnMgaGlkZGVuIHNlY3JldHMhISE=';
 
