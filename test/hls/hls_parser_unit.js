@@ -3069,45 +3069,6 @@ describe('HlsParser', () => {
       const actual = await parser.start('test:/master', playerInterface);
       expect(actual).toEqual(manifest);
     });
-
-    it('with match characteristics', async () => {
-      const initDataBase64 =
-          'dGhpcyBpbml0IGRhdGEgY29udGFpbnMgaGlkZGVuIHNlY3JldHMhISE=';
-
-      const keyId = 'abc123';
-
-      const master = [
-        '#EXTM3U\n',
-        '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
-        'CHARACTERISTICS="drm.avc1",',
-        'RESOLUTION=960x540,FRAME-RATE=60\n',
-        'video\n',
-        '#EXT-X-SESSION-KEY:METHOD=SAMPLE-AES-CTR,',
-        'CHARACTERISTICS="drm.avc1",',
-        'KEYID=0X' + keyId + ',',
-        'KEYFORMAT="urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed",',
-        'URI="data:text/plain;base64,',
-        initDataBase64, '",\n',
-      ].join('');
-
-      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        manifest.anyTimeline();
-        manifest.addPartialVariant((variant) => {
-          variant.addPartialStream(ContentType.VIDEO, (stream) => {
-            stream.addDrmInfo('com.widevine.alpha', (drmInfo) => {
-              drmInfo.addCencInitData(initDataBase64);
-              drmInfo.keyIds.add(keyId);
-            });
-          });
-        });
-        manifest.sequenceMode = true;
-      });
-
-      fakeNetEngine.setResponseText('test:/master', master);
-
-      const actual = await parser.start('test:/master', playerInterface);
-      expect(actual).toEqual(manifest);
-    });
   });
 
   it('falls back to mp4 if HEAD request fails', async () => {
