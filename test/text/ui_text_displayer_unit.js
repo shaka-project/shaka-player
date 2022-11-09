@@ -252,6 +252,75 @@ describe('UITextDisplayer', () => {
     expect(captions.length).toBe(1);
   });
 
+  it('does not display duplicate cues that span segment', () => {
+    const cueRegion = new shaka.text.CueRegion();
+    cueRegion.id = 'regionId';
+    cueRegion.height = 80;
+    cueRegion.heightUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion.width = 80;
+    cueRegion.widthUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion.viewportAnchorX = 10;
+    cueRegion.viewportAnchorY = 10;
+    cueRegion.viewportAnchorUnits = shaka.text.CueRegion.units.PERCENTAGE;
+
+    // These have identical nested.
+    const cue1 = new shaka.text.Cue(0, 100, '');
+    cue1.nestedCues = [
+      new shaka.text.Cue(0, 100, ''),
+    ];
+
+    cue1.region = cueRegion;
+
+    cue1.nestedCues[0].nestedCues = [
+      new shaka.text.Cue(0, 100, 'Nested unique1'),
+      new shaka.text.Cue(90, 95, 'Nested duplicate'),
+    ];
+
+    const cue2 = new shaka.text.Cue(90, 200, '');
+    cue2.nestedCues = [
+      new shaka.text.Cue(90, 200, ''),
+    ];
+    cue2.region = cueRegion;
+    cue2.nestedCues[0].nestedCues = [
+      new shaka.text.Cue(90, 95, 'Nested duplicate'),
+      new shaka.text.Cue(95, 200, 'Nested unique2'),
+    ];
+
+    video.currentTime = 92.5;
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue1]);
+    updateCaptions();
+
+    /** @type {Element} */
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    let captions = textContainer.querySelectorAll('div');
+
+    // Expect textContainer to display the cue.
+    expect(captions[0].textContent).toBe('Nested unique1Nested duplicate');
+
+    // Now drop in the second lot which overlaps
+    textDisplayer.append([cue2]);
+    updateCaptions();
+
+    captions = textContainer.querySelectorAll('div');
+
+    // Expect textContainer to display without duplication.
+    expect(captions[0].textContent).toBe('Nested unique1Nested duplicate');
+    expect(captions[1].textContent).toBe('');
+
+    const allRegionElements = textContainer.querySelectorAll(
+        '.shaka-text-region');
+
+    // Verify that the nested cues are all attached to a single region element.
+    expect(allRegionElements.length).toBe(1);
+    const regionElement = allRegionElements[0];
+
+    const children = Array.from(regionElement.childNodes).filter(
+        (e) => e.nodeType == Node.ELEMENT_NODE);
+    expect(children[0].textContent).toBe('Nested unique1Nested duplicate');
+    expect(children[1].textContent).toBe('');
+  });
+
   it('does not mistake cues with nested cues as duplicates', () => {
     // These are not identical, but might look like it at the top level.
     const cue1 = new shaka.text.Cue(0, 100, '');
