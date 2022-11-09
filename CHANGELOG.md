@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.1.7](https://github.com/shaka-project/shaka-player/compare/v4.1.6...v4.1.7) (2022-11-09)
+
+
+### Bug Fixes
+
+* Allow overriding special handling of 404s ([#4635](https://github.com/shaka-project/shaka-player/issues/4635)) ([ad2bffc](https://github.com/shaka-project/shaka-player/commit/ad2bffc798946f4ebe97154a53e74582a71bc886)), closes [#4548](https://github.com/shaka-project/shaka-player/issues/4548)
+* **cast:** Reduce size of Cast update messages ([#4644](https://github.com/shaka-project/shaka-player/issues/4644)) ([687f92c](https://github.com/shaka-project/shaka-player/commit/687f92c50c4cd913d3fc556ec1468a15b27ec257))
+* Content reload starttime with HLS on iOS ([#4575](https://github.com/shaka-project/shaka-player/issues/4575)) ([fe28e26](https://github.com/shaka-project/shaka-player/commit/fe28e26e7cca7cf53d8159e3a82cab344471968d)), closes [#4244](https://github.com/shaka-project/shaka-player/issues/4244)
+* embed cc not shown when seeking back ([#4643](https://github.com/shaka-project/shaka-player/issues/4643)) ([c514d15](https://github.com/shaka-project/shaka-player/commit/c514d15ddfe4892443b99491b3f932ba94c6609d)), closes [#4641](https://github.com/shaka-project/shaka-player/issues/4641)
+* Fix detection of ac4, dts, and dolby h265 ([#4657](https://github.com/shaka-project/shaka-player/issues/4657)) ([4018805](https://github.com/shaka-project/shaka-player/commit/40188056c9b45d41aec7ce3ac7aee82d207cc76e))
+* focus on first element when back to the settings menu ([#4653](https://github.com/shaka-project/shaka-player/issues/4653)) ([fa920d8](https://github.com/shaka-project/shaka-player/commit/fa920d8154cf1254a67989d473d4ff4cc9cc006c)), closes [#4652](https://github.com/shaka-project/shaka-player/issues/4652)
+* **HLS:** Fix detection of WebVTT subtitles in HLS by extension ([#4663](https://github.com/shaka-project/shaka-player/issues/4663)) ([2b02e23](https://github.com/shaka-project/shaka-player/commit/2b02e231390f90325bb7ffce88c499512b3bc541))
+* **HLS:** Infer missing codecs from config ([#4656](https://github.com/shaka-project/shaka-player/issues/4656)) ([1104d80](https://github.com/shaka-project/shaka-player/commit/1104d80100bb243e1a47bd093a5cf78dd8a3aadd))
+* **ui:** Fix exception on screen rotation if fullscreen is not supported ([#4669](https://github.com/shaka-project/shaka-player/issues/4669)) ([d803363](https://github.com/shaka-project/shaka-player/commit/d803363e0f949c90c8fe1b3258723847c1ddb22d))
+
 ## [4.1.6](https://github.com/shaka-project/shaka-player/compare/v4.1.5...v4.1.6) (2022-10-29)
 
 
