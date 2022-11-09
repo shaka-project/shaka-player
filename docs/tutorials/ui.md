@@ -139,7 +139,7 @@ casting to an Android receiver app.
 
 ```html
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="E7271BEC"
+         data-shaka-player-cast-receiver-id="06EDA6EE"
          data-shaka-player-cast-android-receiver-compatible="true">
       <!-- The manifest url in the src attribute will be automatically loaded -->
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
