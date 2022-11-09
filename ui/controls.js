@@ -1024,7 +1024,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     if (!this.video_ ||
         this.video_.readyState == 0 ||
         this.castProxy_.isCasting() ||
-        !this.config_.enableFullscreenOnRotation) { return; }
+        !this.config_.enableFullscreenOnRotation ||
+        !this.isFullScreenSupported()) {
+      return;
+    }
 
     if (screen.orientation.type.includes('landscape') &&
         !document.fullscreenElement) {
