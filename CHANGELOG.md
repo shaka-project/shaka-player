@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.2.15](https://github.com/shaka-project/shaka-player/compare/v3.2.14...v3.2.15) (2022-11-09)
+
+
+### Bug Fixes
+
+* Allow overriding special handling of 404s ([#4635](https://github.com/shaka-project/shaka-player/issues/4635)) ([43598b4](https://github.com/shaka-project/shaka-player/commit/43598b4670fdc95c7a25d3212f3533e3543e1371)), closes [#4548](https://github.com/shaka-project/shaka-player/issues/4548)
+* **cast:** Reduce size of Cast update messages ([#4644](https://github.com/shaka-project/shaka-player/issues/4644)) ([b36b95d](https://github.com/shaka-project/shaka-player/commit/b36b95db0ebfd718286be1281d51304a62d72159))
+* Content reload starttime with HLS on iOS ([#4575](https://github.com/shaka-project/shaka-player/issues/4575)) ([f51f283](https://github.com/shaka-project/shaka-player/commit/f51f283f43d1f2123ca9962b66f16d553a61eddb)), closes [#4244](https://github.com/shaka-project/shaka-player/issues/4244)
+* Fix detection of ac4, dts, and dolby h265 ([#4657](https://github.com/shaka-project/shaka-player/issues/4657)) ([1adc00a](https://github.com/shaka-project/shaka-player/commit/1adc00aec51b0a37926a9f6fdfcd28f0304f049b))
+* **HLS:** Fix detection of WebVTT subtitles in HLS by extension ([#4663](https://github.com/shaka-project/shaka-player/issues/4663)) ([8440e01](https://github.com/shaka-project/shaka-player/commit/8440e01f756226e8c3c0e5967ef504efefce4b72))
+* **ui:** Fix exception on screen rotation if fullscreen is not supported ([#4669](https://github.com/shaka-project/shaka-player/issues/4669)) ([cbefdb8](https://github.com/shaka-project/shaka-player/commit/cbefdb89078d524b54fbcc298923fbdc9e89ce21))
+
 ## [3.2.14](https://github.com/shaka-project/shaka-player/compare/v3.2.13...v3.2.14) (2022-10-29)
 
 
