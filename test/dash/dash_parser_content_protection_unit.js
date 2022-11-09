@@ -44,6 +44,7 @@ describe('DashParser ContentProtection', () => {
       isAutoLowLatencyMode: () => false,
       enableLowLatencyMode: () => {},
       updateDuration: () => {},
+      newDrmInfo: (stream) => {},
     };
 
     const actual = await dashParser.start(

@@ -34,6 +34,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
 
   /** @type {shaka.util.PublicPromise} */
   let messageWaitPromise;
+  /** @type {Array.<string>} */
+  let pendingMessages = null;
 
   /** @type {!Array.<function()>} */
   let toRestore;
@@ -91,6 +93,9 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     toRestore = [];
     pendingWaitWrapperCalls = 0;
 
+    messageWaitPromise = null;
+    pendingMessages = null;
+
     fakeInitState = {
       player: {
         configure: {},
@@ -118,6 +123,12 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     player = null;
     video = null;
     receiver = null;
+
+    if (messageWaitPromise) {
+      messageWaitPromise.resolve([]);
+    }
+    messageWaitPromise = null;
+    pendingMessages = null;
   });
 
   afterAll(() => {
@@ -126,6 +137,66 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       Object.defineProperty(window['navigator'],
           'userAgent', {value: originalUserAgent});
     }
+  });
+
+  describe('without drm', () => {
+    it('sends reasonably-sized updates', async () => {
+      // Use an unencrypted asset.
+      fakeInitState.manifest = 'test:sintel';
+
+      const p = waitForLoadedData();
+
+      // Start the process of loading by sending a fake init message.
+      fakeConnectedSenders(1);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: {},
+      }, mockShakaMessageBus);
+
+      await p;
+      // Wait for an update message.
+      const messages = await waitForUpdateMessages();
+      for (const message of messages) {
+        // Check that the update message is of a reasonable size. From previous
+        // testing we found that the socket would silently reject data that got
+        // too big. 6KB is safely below the limit.
+        expect(message.length).toBeLessThan(6000);
+      }
+    });
+
+    it('has reasonable average message size', async () => {
+      // Use an unencrypted asset.
+      fakeInitState.manifest = 'test:sintel';
+
+      const p = waitForLoadedData();
+
+      // Start the process of loading by sending a fake init message.
+      fakeConnectedSenders(1);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: {},
+      }, mockShakaMessageBus);
+
+      await p;
+
+      // Collect messages over 50 update cycles, and average their length.
+      // Not all properties are passed along on every update message, so
+      // the average length is expected to be lower than the length of the first
+      // update message.
+      let totalLength = 0;
+      let totalMessages = 0;
+      for (let i = 0; i < 50; i++) {
+        // eslint-disable-next-line no-await-in-loop
+        const messages = await waitForUpdateMessages();
+        for (const message of messages) {
+          totalLength += message.length;
+          totalMessages += 1;
+        }
+      }
+      expect(totalLength / totalMessages).toBeLessThan(2000);
+    });
   });
 
   filterDescribe('with drm', () => support['com.widevine.alpha'], () => {
@@ -150,11 +221,13 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
 
       await p;
       // Wait for an update message.
-      const message = await waitForUpdateMessage();
-      // Check that the update message is of a reasonable size. From previous
-      // testing we found that the socket would silently reject data that got
-      // too big. 6KB is safely below the limit.
-      expect(message.length).toBeLessThan(7 * 1024);
+      const messages = await waitForUpdateMessages();
+      for (const message of messages) {
+        // Check that the update message is of a reasonable size. From previous
+        // testing we found that the socket would silently reject data that got
+        // too big. 6KB is safely below the limit.
+        expect(message.length).toBeLessThan(6000);
+      }
     });
 
     drmIt('has reasonable average message size', async () => {
@@ -177,17 +250,22 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       }, mockShakaMessageBus);
 
       await p;
-      // Collect 50 update messages, and average their length.
+
+      // Collect messages over 50 update cycles, and average their length.
       // Not all properties are passed along on every update message, so
       // the average length is expected to be lower than the length of the first
       // update message.
       let totalLength = 0;
+      let totalMessages = 0;
       for (let i = 0; i < 50; i++) {
         // eslint-disable-next-line no-await-in-loop
-        const message = await waitForUpdateMessage();
-        totalLength += message.length;
+        const messages = await waitForUpdateMessages();
+        for (const message of messages) {
+          totalLength += message.length;
+          totalMessages += 1;
+        }
       }
-      expect(totalLength / 50).toBeLessThan(3000);
+      expect(totalLength / totalMessages).toBeLessThan(2000);
     });
   });
 
@@ -227,12 +305,12 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     expect(pendingWaitWrapperCalls).toBe(0);
 
     // Wait for a final update message before proceeding.
-    await waitForUpdateMessage();
+    await waitForUpdateMessages();
   });
 
   /**
    * Creates a wrapper around a method on a given prototype, which makes it
-   * wait on waitForUpdateMessage before returning, and registers that wrapper
+   * wait on waitForUpdateMessages before returning, and registers that wrapper
    * to be uninstalled afterwards.
    * The replaced method is expected to be a method that returns a promise.
    * @param {!Object} prototype
@@ -249,7 +327,7 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
           'Waiting for update message before calling ' +
           name + '.' + methodName + '...');
       const originalArguments = Array.from(arguments);
-      await waitForUpdateMessage();
+      await waitForUpdateMessages();
       // eslint-disable-next-line no-restricted-syntax
       return original.apply(this, originalArguments);
     };
@@ -265,7 +343,8 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     });
   }
 
-  function waitForUpdateMessage() {
+  function waitForUpdateMessages() {
+    pendingMessages = [];
     messageWaitPromise = new shaka.util.PublicPromise();
     return messageWaitPromise;
   }
@@ -316,10 +395,12 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       bus.messages.push(CastUtils.deserialize(message));
       // Check to see if it's an update message.
       const parsed = CastUtils.deserialize(message);
-      if (parsed.type == 'update' && messageWaitPromise) {
+      if (parsed.type == 'update' && pendingMessages) {
         shaka.log.debug('Received update message. Proceeding...');
-        messageWaitPromise.resolve(message);
-        messageWaitPromise = null;
+        // The code waiting on this Promise will get an array of all of the
+        // messages processed within this tick.
+        pendingMessages.push(message);
+        messageWaitPromise.resolve(pendingMessages);
       }
     });
     const channel = {
