@@ -222,7 +222,7 @@ const video = controls.getVideo();
 // Receiver Compatability.
 ui.configure({
   // Set the castReceiverAppId
-  'castReceiverAppId': '07AEE832',
+  'castReceiverAppId': 'A67E4E9A',
   // Enable casting to native Android Apps (e.g. Android TV Apps)
   'castAndroidReceiverCompatible': true,
 });
