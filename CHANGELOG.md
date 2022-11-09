@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.3.13](https://github.com/shaka-project/shaka-player/compare/v3.3.12...v3.3.13) (2022-11-09)
+
+
+### Bug Fixes
+
+* Allow overriding special handling of 404s ([#4635](https://github.com/shaka-project/shaka-player/issues/4635)) ([d927cec](https://github.com/shaka-project/shaka-player/commit/d927cec58921928da9a82be8234ac091e3f18322)), closes [#4548](https://github.com/shaka-project/shaka-player/issues/4548)
+* **cast:** Reduce size of Cast update messages ([#4644](https://github.com/shaka-project/shaka-player/issues/4644)) ([5e0e942](https://github.com/shaka-project/shaka-player/commit/5e0e9427caba7204e887d3187564b57bc14e6d3e))
+* Content reload starttime with HLS on iOS ([#4575](https://github.com/shaka-project/shaka-player/issues/4575)) ([7fea5c2](https://github.com/shaka-project/shaka-player/commit/7fea5c26ebf1705114953d6379d1de6e946832b2)), closes [#4244](https://github.com/shaka-project/shaka-player/issues/4244)
+* Fix detection of ac4, dts, and dolby h265 ([#4657](https://github.com/shaka-project/shaka-player/issues/4657)) ([44e4fd7](https://github.com/shaka-project/shaka-player/commit/44e4fd74fd59c3b11ad265bd1eea26678857a26f))
+* focus on first element when back to the settings menu ([#4653](https://github.com/shaka-project/shaka-player/issues/4653)) ([9ab242e](https://github.com/shaka-project/shaka-player/commit/9ab242e39eea87e39c7864ff8aadf5d68ab1236d)), closes [#4652](https://github.com/shaka-project/shaka-player/issues/4652)
+* **HLS:** Fix detection of WebVTT subtitles in HLS by extension ([#4663](https://github.com/shaka-project/shaka-player/issues/4663)) ([6804c6a](https://github.com/shaka-project/shaka-player/commit/6804c6aad240a454e17a3dae1a26f865f79c391d))
+* **HLS:** Infer missing codecs from config ([#4656](https://github.com/shaka-project/shaka-player/issues/4656)) ([b98ae71](https://github.com/shaka-project/shaka-player/commit/b98ae71a46da96a9e30c595a3fed0ddb9718d335))
+* **ui:** Fix exception on screen rotation if fullscreen is not supported ([#4669](https://github.com/shaka-project/shaka-player/issues/4669)) ([b7a841d](https://github.com/shaka-project/shaka-player/commit/b7a841da65c501680947c54f047bc070035e8b4c))
+
 ## [3.3.12](https://github.com/shaka-project/shaka-player/compare/v3.3.11...v3.3.12) (2022-10-29)
 
 
