@@ -66,7 +66,6 @@ describe('StreamingEngine', () => {
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
-        new shaka.test.FakeClosedCaptionParser(),
         new shaka.test.FakeTextDisplayer());
     const mediaSourceConfig =
         shaka.util.PlayerConfiguration.createDefault().mediaSource;
