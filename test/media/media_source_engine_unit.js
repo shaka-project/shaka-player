@@ -152,8 +152,10 @@ describe('MediaSourceEngine', () => {
     mockTextDisplayer = new shaka.test.FakeTextDisplayer();
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
-        mockClosedCaptionParser,
         mockTextDisplayer);
+    mediaSourceEngine.getCaptionParser = () => {
+      return mockClosedCaptionParser;
+    };
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(config);
   });
@@ -208,7 +210,6 @@ describe('MediaSourceEngine', () => {
     it('creates a MediaSource object and sets video.src', () => {
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
           video,
-          new shaka.test.FakeClosedCaptionParser(),
           new shaka.test.FakeTextDisplayer());
 
       expect(createMediaSourceSpy).toHaveBeenCalled();

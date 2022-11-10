@@ -10,7 +10,8 @@ describe('ClosedCaptionParser', () => {
         'base/test/test/assets/empty_caption_video_init.mp4');
     const videoSegment = await shaka.test.Util.fetch(
         'base/test/test/assets/empty_caption_video_segment.mp4');
-    const parser = new shaka.media.ClosedCaptionParser();
+    const mimeType = 'video/mp4';
+    const parser = new shaka.media.ClosedCaptionParser(mimeType);
     parser.init(initSegment);
     parser.parseFrom(videoSegment);
   });
