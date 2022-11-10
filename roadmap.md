@@ -23,13 +23,15 @@ Candidate features for future release cycles:
    https://github.com/shaka-project/shaka-player/issues/879
  - Smaller, more modular binary
 
-v4.3 - 2022 Q4 / 2023 Q1
+=====
+
+v4.3 - 2022 Q4
  - Support ID3 tags in mp4
    https://github.com/shaka-project/shaka-player/issues/3351
  - Lazy-load HLS playlists on adaptation
    https://github.com/shaka-project/shaka-player/issues/1936
-
-=====
+ - HLS key rotation
+   https://github.com/shaka-project/shaka-player/issues/741
 
 v4.2 - 2022 Q3
  - Automatic ABR quality restrictions based on size
