@@ -50,7 +50,7 @@ describe('Mp4CeaParser', () => {
   });
 
   it('parses cea data from mp4 stream', () => {
-    const cea708Parser = new shaka.cea.Mp4CeaParser();
+    const cea708Parser = new shaka.cea.Mp4CeaParser('avc');
 
     const expectedCea708Packet = new Uint8Array([
       0xb5, 0x00, 0x31, 0x47, 0x41, 0x39, 0x34, 0x03,
@@ -71,7 +71,7 @@ describe('Mp4CeaParser', () => {
   });
 
   it('parses an invalid init segment', () => {
-    const cea708Parser = new shaka.cea.Mp4CeaParser();
+    const cea708Parser = new shaka.cea.Mp4CeaParser('avc');
 
     const expected = Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,

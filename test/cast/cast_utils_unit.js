@@ -206,7 +206,6 @@ describe('CastUtils', () => {
 
         mediaSourceEngine = new shaka.media.MediaSourceEngine(
             video,
-            new shaka.test.FakeClosedCaptionParser(),
             new shaka.test.FakeTextDisplayer());
         const config =
             shaka.util.PlayerConfiguration.createDefault().mediaSource;
