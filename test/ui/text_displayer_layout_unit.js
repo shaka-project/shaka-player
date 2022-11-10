@@ -444,6 +444,20 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
 
       await checkScreenshot(prefix, 'deeply-nested-cues');
     });
+
+    // Regression test for #4567, in which "end" line alignment for VTT was
+    // inverted.
+    it('line alignment', async () => {
+      const cue = new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9');
+
+      cue.line = 70;
+      cue.lineInterpretation = shaka.text.Cue.lineInterpretation.PERCENTAGE;
+      cue.lineAlign = shaka.text.Cue.lineAlign.END;
+
+      textDisplayer.append([cue]);
+
+      await checkScreenshot(prefix, 'line-alignment');
+    });
   }
 
   /** @param {!HTMLElement} element */
