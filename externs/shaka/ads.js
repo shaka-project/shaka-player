@@ -120,7 +120,7 @@ shaka.extern.IAdManager = class extends EventTarget {
   onHlsTimedMetadata(metadata, timestampOffset) {}
 
   /**
-   * @param {shaka.extern.ID3Metadata} value
+   * @param {shaka.extern.MetadataFrame} value
    */
   onCueMetadataChange(value) {}
 };
@@ -227,4 +227,14 @@ shaka.extern.IAd = class {
    * @return {number}
    */
   getPositionInSequence() {}
+
+  /**
+   * @return {string}
+   */
+  getTitle() {}
+
+  /**
+   * @return {string}
+   */
+  getDescription() {}
 };

@@ -30,7 +30,7 @@ Set up controls with HTML data attributes:
          The data-shaka-player-cast-receiver-id tag allows you to provide a Cast Application ID that
            the cast button will cast to; the value provided here is the sample cast receiver. -->
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="BBED8D28">
+         data-shaka-player-cast-receiver-id="8D8C71A7">
        <!-- The data-shaka-player tag will make the UI library use this video element.
             If no video is provided, the UI will automatically make one inside the container div. -->
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"></video>
@@ -111,7 +111,7 @@ set up a listener for the 'caststatuschanged' events.
 <!-- Add a data-shaka-player-cast-receiver-id tag to provide a Cast Application ID that
            the cast button will cast to; the value provided here is the sample cast receiver. -->
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="BBED8D28">
+         data-shaka-player-cast-receiver-id="8D8C71A7">
     </div>
 ```
 
@@ -139,7 +139,7 @@ casting to an Android receiver app.
 
 ```html
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="E7271BEC"
+         data-shaka-player-cast-receiver-id="8D8C71A7"
          data-shaka-player-cast-android-receiver-compatible="true">
       <!-- The manifest url in the src attribute will be automatically loaded -->
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
@@ -154,7 +154,7 @@ or a `<source>` tag inside it to enable auto loading of the specified content.
 
 ```html
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="BBED8D28">
+         data-shaka-player-cast-receiver-id="8D8C71A7">
       <!-- The manifest url in the src attribute will be automatically loaded -->
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%"
        src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"></video>
@@ -165,7 +165,7 @@ or
 
 ```html
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="BBED8D28">
+         data-shaka-player-cast-receiver-id="8D8C71A7">
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%">
         <!-- The manifest url in the src attribute will be auto loaded -->
        <source src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"/>
@@ -178,7 +178,7 @@ call to the first one fails.
 
 ```html
     <div data-shaka-player-container style="max-width:40em"
-         data-shaka-player-cast-receiver-id="BBED8D28">
+         data-shaka-player-cast-receiver-id="8D8C71A7">
       <video autoplay data-shaka-player id="video" style="width:100%;height:100%">
         <!-- Try this first -->
         <source src="https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd"/>
@@ -222,7 +222,7 @@ const video = controls.getVideo();
 // Receiver Compatability.
 ui.configure({
   // Set the castReceiverAppId
-  'castReceiverAppId': 'BBED8D28',
+  'castReceiverAppId': '8D8C71A7',
   // Enable casting to native Android Apps (e.g. Android TV Apps)
   'castAndroidReceiverCompatible': true,
 });

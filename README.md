@@ -24,6 +24,12 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 [offline storage and playback]: https://shaka-player-demo.appspot.com/docs/api/tutorial-offline.html
 
 
+## Maintained branches
+
+See [maintained-branches.md](https://github.com/shaka-project/shaka-player/blob/main/maintained-branches.md)
+for the up-to-date list of maintained branches of Shaka Player.
+
+
 ## Platform and browser support matrix
 
 |Browser    |Windows   |Mac      |Linux    |Android  |iOS >= 13 |ChromeOS|Other|
@@ -137,6 +143,20 @@ HLS features **not** supported:
  - Low-latency streaming with blocking playlist reload
 
 [mux.js]: https://github.com/videojs/mux.js/releases
+
+## MPEG-5 Part2 LCEVC Support
+
+**Only supported on browsers with Media Source Extensions SourceBuffer support**
+
+ - MPEG-5 Part2 LCEVC decoding support (decoding provided by [lcevc_dil.js][], must be
+   separately included)
+
+ - Integration documentation : [docs](docs/design/lcevc-integration.md)
+
+ - More on [MPEG-5 Part2 LCEVC][]
+
+[lcevc_dil.js]: https://www.npmjs.com/package/lcevc_dil.js
+[MPEG-5 Part2 LCEVC]: https://www.lcevc.org
 
 
 ## DRM support matrix

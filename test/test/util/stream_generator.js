@@ -85,6 +85,44 @@ shaka.test.TSVodStreamGenerator = class {
 
 /**
  * @summary
+ * Simulates an HLS, video-on-demand, aac stream.  The StreamGenerator assumes
+ * the stream contains a single segment.
+ *
+ * @implements {shaka.test.IStreamGenerator}
+ */
+shaka.test.AACVodStreamGenerator = class {
+  /** @param {string} segmentUri The URI of the segment. */
+  constructor(segmentUri) {
+    /** @private {string} */
+    this.segmentUri_ = segmentUri;
+
+    /** @private {ArrayBuffer} */
+    this.segment_ = null;
+  }
+
+  /** @override */
+  async init() {
+    const segment = await shaka.test.Util.fetch(this.segmentUri_);
+    this.segment_ = segment;
+  }
+
+  /** @override */
+  getInitSegment(time) {
+    goog.asserts.assert(false, 'getInitSegment not implemented for HLS VOD.');
+    return new ArrayBuffer(0);
+  }
+
+  /** @override */
+  getSegment(position, wallClockTime) {
+    goog.asserts.assert(
+        this.segment_,
+        'init() must be called before getSegment().');
+    return this.segment_;
+  }
+};
+
+/**
+ * @summary
  * Simulates a DASH, video-on-demand, MP4 stream.  The StreamGenerator loops a
  * single segment.
  *

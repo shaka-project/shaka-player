@@ -111,7 +111,9 @@ shaka.extern.ManifestParser = class {
  *   onError: function(!shaka.util.Error),
  *   isLowLatencyMode: function():boolean,
  *   isAutoLowLatencyMode: function():boolean,
- *   enableLowLatencyMode: function()
+ *   enableLowLatencyMode: function(),
+ *   updateDuration: function(),
+ *   newDrmInfo: function(shaka.extern.Stream)
  * }}
  *
  * @description
@@ -147,6 +149,11 @@ shaka.extern.ManifestParser = class {
  *   Return true if auto low latency streaming mode is enabled.
  * @property {function()} enableLowLatencyMode
  *   Enable low latency streaming mode.
+ * @property {function()} updateDuration
+ *   Update the presentation duration based on PresentationTimeline.
+ * @property {function(shaka.extern.Stream)} newDrmInfo
+ *   Inform the player of new DRM info that needs to be processed for the given
+ *   stream.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;

@@ -123,6 +123,7 @@ describe('Player', () => {
       streamingEngine = new shaka.test.FakeStreamingEngine();
       mediaSourceEngine = {
         init: jasmine.createSpy('init').and.returnValue(Promise.resolve()),
+        configure: jasmine.createSpy('configure'),
         open: jasmine.createSpy('open').and.returnValue(Promise.resolve()),
         destroy:
             jasmine.createSpy('destroy').and.returnValue(Promise.resolve()),
@@ -130,6 +131,8 @@ describe('Player', () => {
         getUseEmbeddedText: jasmine.createSpy('getUseEmbeddedText'),
         setSegmentRelativeVttTiming:
             jasmine.createSpy('setSegmentRelativeVttTiming'),
+        updateLcevcDil:
+            jasmine.createSpy('updateLcevcDil'),
         getTextDisplayer: () => textDisplayer,
         getBufferedInfo: () => bufferedInfo,
         ended: jasmine.createSpy('ended').and.returnValue(false),
@@ -422,7 +425,6 @@ describe('Player', () => {
             dispatchEventSpy.calls.reset();
             player.configure({streaming: {maxDisabledTime}});
             player.setMaxHardwareResolution(123, 456);
-            onErrorCallback(httpError);
           });
 
           afterEach(() => {
@@ -434,14 +436,18 @@ describe('Player', () => {
           });
 
           it('handles HTTP_ERROR', () => {
+            onErrorCallback(httpError);
             expect(httpError.handled).toBeTruthy();
           });
 
           it('does not dispatch any error', () => {
+            onErrorCallback(httpError);
             expect(dispatchEventSpy).not.toHaveBeenCalled();
           });
 
           it('disables the current variant and applies restrictions', () => {
+            onErrorCallback(httpError);
+
             const foundDisabledVariant =
                 manifest.variants.some(({disabledUntilTime}) =>
                   disabledUntilTime == currentTime + maxDisabledTime);
@@ -453,10 +459,45 @@ describe('Player', () => {
           });
 
           it('switches the variant', () => {
+            onErrorCallback(httpError);
+
             expect(chooseVariantSpy).toHaveBeenCalled();
             expect(getBufferedInfoSpy).toHaveBeenCalled();
             expect(switchVariantSpy)
                 .toHaveBeenCalledWith(chosenVariant, false, true, 14);
+          });
+
+          describe('but browser is truly offline', () => {
+            /** @type {!Object} */
+            let navigatorOnLineDescriptor;
+
+            // eslint-disable-next-line no-restricted-syntax
+            const navigatorPrototype = Navigator.prototype;
+
+            beforeAll(() => {
+              navigatorOnLineDescriptor =
+                /** @type {!Object} */(Object.getOwnPropertyDescriptor(
+                    navigatorPrototype, 'onLine'));
+            });
+
+            beforeEach(() => {
+              // Redefine the property, replacing only the getter.
+              Object.defineProperty(navigatorPrototype, 'onLine',
+                  Object.assign(navigatorOnLineDescriptor, {
+                    get: () => false,
+                  }));
+            });
+
+            afterEach(() => {
+              // Restore the original property definition.
+              Object.defineProperty(
+                  navigatorPrototype, 'onLine', navigatorOnLineDescriptor);
+            });
+
+            it('does not handle HTTP_ERROR', () => {
+              onErrorCallback(httpError);
+              expect(httpError.handled).toBe(false);
+            });
           });
         });
       });
@@ -588,13 +629,13 @@ describe('Player', () => {
       // Try a bogus streaming config (number instead of Object)
       logErrorSpy.calls.reset();
       player.configure({
-        streaming: 5,
+        drm: 5,
       });
 
       newConfig = player.getConfiguration();
       expect(newConfig).toEqual(defaultConfig);
       expect(logErrorSpy).toHaveBeenCalledWith(
-          stringContaining('.streaming'));
+          stringContaining('.drm'));
     });
 
     it('accepts synchronous function values for async function fields', () => {
@@ -3899,6 +3940,93 @@ describe('Player', () => {
       expect(variant.audio.segmentIndex.getIteratorForTime(0)).toBeNull();
 
       await player.load(fakeManifestUri, 0, fakeMimeType);
+    });
+  });
+
+  describe('config streaming.failureCallback default', () => {
+    /** @type {jasmine.Spy} */
+    let retryStreaming;
+    /** @type {jasmine.Spy} */
+    let isLive;
+
+    /**
+     * @suppress {accessControls}
+     * @param {!shaka.util.Error} error
+     */
+    function defaultStreamingFailureCallback(error) {
+      player.defaultStreamingFailureCallback_(error);
+    }
+
+    beforeEach(() => {
+      retryStreaming = jasmine.createSpy('retryStreaming');
+      isLive = jasmine.createSpy('isLive');
+
+      player.retryStreaming = Util.spyFunc(retryStreaming);
+      player.isLive = Util.spyFunc(isLive);
+    });
+
+    it('ignores VOD failures', () => {
+      isLive.and.returnValue(false);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS,
+          /* url= */ '',
+          /* http_status= */ 404);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).not.toHaveBeenCalled();
+    });
+
+    it('retries live on HTTP 404', () => {
+      isLive.and.returnValue(true);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS,
+          /* url= */ '',
+          /* http_status= */ 404);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).toHaveBeenCalled();
+    });
+
+    it('retries live on generic HTTP error', () => {
+      isLive.and.returnValue(true);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.HTTP_ERROR);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).toHaveBeenCalled();
+    });
+
+    it('retries live on HTTP timeout', () => {
+      isLive.and.returnValue(true);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.TIMEOUT);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).toHaveBeenCalled();
+    });
+
+    it('ignores other live failures', () => {
+      isLive.and.returnValue(true);
+
+      const error = new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.MEDIA,
+          shaka.util.Error.Code.VIDEO_ERROR);
+
+      defaultStreamingFailureCallback(error);
+      expect(retryStreaming).not.toHaveBeenCalled();
     });
   });
 

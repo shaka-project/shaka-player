@@ -2,7 +2,7 @@ name: Build and Test PR
 
 on:
   pull_request: # Trigger for pull requests.
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
       - v[0-9]*
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
@@ -38,23 +38,39 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
-        browser: ["Chrome", "Firefox", "Edge", "Safari", "Safari-14"]
-        exclude:
-          - os: ubuntu-latest
-            browser: Edge
-          - os: windows-latest
-            browser: Safari
-          - os: windows-latest
-            browser: Safari-14
-          - os: ubuntu-latest
-            browser: Safari
-          - os: ubuntu-latest
-            browser: Safari-14
         include:
           # Run Linux browsers with xvfb, so they're in a headless X session.
+          # Additionally, generate a code coverage report from Linux Chrome.
+          # It should be the uncompiled build, or else we won't execute any
+          # coverage instrumentation on full-stack player integration tests.
           - os: ubuntu-latest
+            browser: Chrome
+            extra_flags: "--use-xvfb --html-coverage-report --uncompiled"
+          - os: ubuntu-latest
+            browser: Firefox
             extra_flags: "--use-xvfb"
+          - os: ubuntu-latest
+            browser: Edge
+            extra_flags: "--use-xvfb"
+
+          - os: macos-latest
+            browser: Chrome
+          - os: macos-latest
+            browser: Firefox
+          - os: macos-latest
+            browser: Edge
+          - os: macos-latest
+            browser: Safari
+          - os: macos-latest
+            browser: Safari-old
+
+          - os: windows-latest
+            browser: Chrome
+          - os: windows-latest
+            browser: Firefox
+          - os: windows-latest
+            browser: Edge
+
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
       fail-fast: false
@@ -72,24 +88,26 @@ jobs:
         run: sudo apt -y update && sudo apt -y install ffmpeg
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
-      # Safari 14 can be installed, but not to the root, and it can't replace
-      # the standard version, at least not on GitHub's VMs.  If you try to
-      # install directly to the root with sudo, it will appear to succeed, but
-      # will have no effect.  If you try to script it explicitly with rm -rf
-      # and cp, this will fail.  Safari may be on a read-only filesystem.
-      - name: Install Safari 14 to home directory
-        if: matrix.os == 'macos-latest' && matrix.browser == 'Safari-14'
+      # Older versions of Safari can be installed, but not to the root, and it
+      # can't replace the standard version, at least not on GitHub's VMs.  If
+      # you try to install directly to the root with sudo, it will appear to
+      # succeed, but will have no effect.  If you try to script it explicitly
+      # with rm -rf and cp, this will fail.  Safari may be on a read-only
+      # filesystem.
+      - name: Install old Safari to home directory
+        if: matrix.os == 'macos-latest' && matrix.browser == 'Safari-old'
         run: |
-          # Download Safari 14
-          # See also https://www.macupdate.com/app/mac/15675/apple-safari/old-versions
-          curl -Lv https://www.macupdate.com/action/download/63550 > safari-14.1.2.pkg
+          # Download Safari 15
+          # This URL discovered through the seed files listed at
+          # https://github.com/zhangyoufu/swscan.apple.com/blob/master/url.txt
+          curl -Lv http://swcdn.apple.com/content/downloads/42/33/012-57329-A_41P2VU6UHN/5fw5vna27fdw4mqfak5adj3pjpxvo9hgh7/Safari15.6.1CatalinaAuto.pkg > Safari.pkg
 
-          # Install Safari 14 to homedir specifically.
-          installer -pkg safari-14.1.2.pkg -target CurrentUserHomeDirectory
+          # Install older Safari to homedir specifically.
+          installer -pkg Safari.pkg -target CurrentUserHomeDirectory
 
           # Install a launcher that can execute a shell script to launch this
           npm install karma-script-launcher --save-dev
@@ -102,7 +120,7 @@ jobs:
         run: |
           browser=${{ matrix.browser }}
 
-          if [[ "$browser" == "Safari-14" ]]; then
+          if [[ "$browser" == "Safari-old" ]]; then
             # Replace the browser name with a script that can launch this
             # browser from the command line.
             browser="$PWD/.github/workflows/safari-homedir-launcher.sh"
@@ -113,6 +131,58 @@ jobs:
             --reporters spec --spec-hide-passed \
             ${{ matrix.extra_flags }}
 
+      - name: Find coverage reports
+        id: coverage
+        if: always() # Even on failure of an earlier step.
+        shell: bash
+        run: |
+          # If the "coverage" directory exists...
+          if [ -d coverage ]; then
+            # Find the path to the coverage output folder.  It includes the
+            # exact browser version in the path, so it will vary.
+            coverage_folder="$( (ls -d coverage/* || true) | head -1 )"
+
+            # Build a folder to stage all the coverage artifacts with
+            # predictable paths.  The resulting zip file will not have any
+            # internal directories.
+            mkdir coverage/staging/
+            cp "$coverage_folder"/coverage.json coverage/staging/
+            cp "$coverage_folder"/coverage-details.json coverage/staging/
+            echo "${{ github.event.number }}" > coverage/staging/pr-number.json
+
+            echo "coverage_found=true" >> $GITHUB_OUTPUT
+            echo "Coverage report staged."
+          else
+            echo "No coverage report generated."
+          fi
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v3
+        if: ${{ always() && steps.coverage.outputs.coverage_found }}
+        with:
+          name: coverage
+          # This will create a download called coverage.zip containing all of
+          # these files, with no internal folders.
+          path: |
+            coverage/staging/coverage.json
+            coverage/staging/coverage-details.json
+            coverage/staging/pr-number.json
+          # Since we've already filtered this step for instances where there is
+          # an environment variable set, the file should definitely be there.
+          if-no-files-found: error
+
+      # Upload new screenshots and diffs on failure; ignore if missing
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: screenshots-${{ matrix.browser }}
+          path: |
+            test/test/assets/screenshots/*/*.png-new
+            test/test/assets/screenshots/*/*.png-diff
+          if-no-files-found: ignore
+          retention-days: 5
+
   build_in_docker:
     # Don't waste time doing a full matrix of test runs when there was an
     # obvious linter error.
@@ -121,9 +191,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
       - name: Docker
-        run: docker-compose -f build/docker/docker-compose.yml up
+        run: |
+          docker build -t shaka-player-build build/docker
+          docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build

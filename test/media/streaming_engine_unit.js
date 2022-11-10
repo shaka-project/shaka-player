@@ -72,6 +72,10 @@ describe('StreamingEngine', () => {
   let getBandwidthEstimate;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
+  /** @type {!jasmine.Spy} */
+  let beforeAppendSegment;
+  /** @type {!jasmine.Spy} */
+  let onMetadata;
 
   /** @type {function(function(), number)} */
   let realSetTimeout;
@@ -100,10 +104,13 @@ describe('StreamingEngine', () => {
     jasmine.clock().mockDate();
   });
 
-  /** @param {boolean=} trickMode
+  /**
+   * @param {boolean=} trickMode
    * @param {number=} mediaOffset The offset from 0 for the segment start times
+   * @param {shaka.extern.HlsAes128Key=} hlsAes128Key The AES-128 key to put in
+   *   the manifest, if one should exist
    */
-  function setupVod(trickMode, mediaOffset) {
+  function setupVod(trickMode, mediaOffset, hlsAes128Key) {
     // For VOD, we fake a presentation that has 2 Periods of equal duration
     // (20 seconds), where each Period has 1 Variant and 1 text stream.
     //
@@ -209,7 +216,8 @@ describe('StreamingEngine', () => {
     setupManifest(
         /* firstPeriodStartTime= */ 0,
         /* secondPeriodStartTime= */ 20,
-        /* presentationDuration= */ 40);
+        /* presentationDuration= */ 40,
+        hlsAes128Key);
   }
 
   function setupLive() {
@@ -356,8 +364,15 @@ describe('StreamingEngine', () => {
         /* delays= */ netEngineDelays);
   }
 
+  /**
+   * @param {number} firstPeriodStartTime
+   * @param {number} secondPeriodStartTime
+   * @param {number} presentationDuration
+   * @param {shaka.extern.HlsAes128Key=} hlsAes128Key
+   */
   function setupManifest(
-      firstPeriodStartTime, secondPeriodStartTime, presentationDuration) {
+      firstPeriodStartTime, secondPeriodStartTime, presentationDuration,
+      hlsAes128Key) {
     const segmentDurations = {
       audio: segmentData[ContentType.AUDIO].segmentDuration,
       video: segmentData[ContentType.VIDEO].segmentDuration,
@@ -380,7 +395,7 @@ describe('StreamingEngine', () => {
         /** @type {!shaka.media.PresentationTimeline} */(timeline),
         [firstPeriodStartTime, secondPeriodStartTime],
         presentationDuration, segmentDurations, initSegmentRanges,
-        timestampOffsets);
+        timestampOffsets, hlsAes128Key);
 
     audioStream = manifest.variants[0].audio;
     videoStream = manifest.variants[0].video;
@@ -418,8 +433,14 @@ describe('StreamingEngine', () => {
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
     onSegmentAppended = jasmine.createSpy('onSegmentAppended');
+    beforeAppendSegment = jasmine.createSpy('beforeAppendSegment');
+    onMetadata = jasmine.createSpy('onMetadata');
     getBandwidthEstimate = jasmine.createSpy('getBandwidthEstimate');
     getBandwidthEstimate.and.returnValue(1e3);
+
+    beforeAppendSegment.and.callFake((segment) => {
+      return Promise.resolve();
+    });
 
     if (!config) {
       config = shaka.util.PlayerConfiguration.createDefault().streaming;
@@ -442,6 +463,8 @@ describe('StreamingEngine', () => {
       onManifestUpdate: Util.spyFunc(onManifestUpdate),
       onSegmentAppended: Util.spyFunc(onSegmentAppended),
       onInitSegmentAppended: () => {},
+      beforeAppendSegment: Util.spyFunc(beforeAppendSegment),
+      onMetadata: Util.spyFunc(onMetadata),
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
@@ -498,7 +521,7 @@ describe('StreamingEngine', () => {
     expectedMseInit.set(ContentType.TEXT, textStream);
 
     expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit,
-        /** forceTransmuxTS= */ false, /** sequenceMode= */ false);
+        /** forceTransmux= */ false, /** sequenceMode= */ false);
     expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
 
     expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
@@ -859,7 +882,7 @@ describe('StreamingEngine', () => {
 
     const config = shaka.util.PlayerConfiguration.createDefault().streaming;
     config.bufferingGoal = 60;
-    config.failureCallback = () => streamingEngine.retry();
+    config.failureCallback = () => streamingEngine.retry(0.1);
     createStreamingEngine(config);
 
     // Make requests for different types take different amounts of time.
@@ -868,9 +891,9 @@ describe('StreamingEngine', () => {
     netEngineDelays.audio = 1.0;
     netEngineDelays.video = 5.0; // Need init segment and media segment
 
-    mediaSourceEngine.appendBuffer.and.callFake((type, data, start, end) => {
+    mediaSourceEngine.appendBuffer.and.callFake((type, data, reference) => {
       // Call to the underlying implementation.
-      const p = mediaSourceEngine.appendBufferImpl(type, data, start, end);
+      const p = mediaSourceEngine.appendBufferImpl(type, data, reference);
 
       // Validate that no one media type got ahead of any other.
       let minBuffered = Infinity;
@@ -1012,8 +1035,8 @@ describe('StreamingEngine', () => {
 
       const bufferEnd = {audio: 0, video: 0, text: 0};
       mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, start, end) => {
-            bufferEnd[type] = end;
+          (type, data, reference) => {
+            bufferEnd[type] = reference && reference.endTime;
             return Promise.resolve();
           });
       mediaSourceEngine.bufferEnd.and.callFake((type) => {
@@ -1080,9 +1103,9 @@ describe('StreamingEngine', () => {
       // Replace the whole spy since we want to call the original.
       mediaSourceEngine.appendBuffer =
           jasmine.createSpy('appendBuffer')
-              .and.callFake(async (type, data, start, end) => {
+              .and.callFake(async (type, data, reference) => {
                 await p;
-                return Util.invokeSpy(old, type, data, start, end);
+                return Util.invokeSpy(old, type, data, reference);
               });
 
       await streamingEngine.start();
@@ -1107,9 +1130,9 @@ describe('StreamingEngine', () => {
       // Replace the whole spy since we want to call the original.
       mediaSourceEngine.appendBuffer =
           jasmine.createSpy('appendBuffer')
-              .and.callFake(async (type, data, start, end) => {
+              .and.callFake(async (type, data, reference) => {
                 await p;
-                return Util.invokeSpy(old, type, data, start, end);
+                return Util.invokeSpy(old, type, data, reference);
               });
 
       await streamingEngine.start();
@@ -1718,8 +1741,23 @@ describe('StreamingEngine', () => {
     beforeEach(() => {
       setupLive();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData, 0);
-      createStreamingEngine();
+
+      // Retry on failure for live streams.
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.failureCallback = () => streamingEngine.retry(0.1);
+
+      createStreamingEngine(config);
       presentationTimeInSeconds = 100;
+
+      // Ignore 404 errors in live stream tests.
+      onError.and.callFake((error) => {
+        if (error.code == shaka.util.Error.Code.BAD_HTTP_STATUS &&
+            error.data[1] == 404) {
+          // 404 error
+        } else {
+          fail(error);
+        }
+      });
     });
 
     it('outside segment availability window', async () => {
@@ -1749,24 +1787,22 @@ describe('StreamingEngine', () => {
       const originalAppendBuffer =
           // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
-      mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, startTime, endTime) => {
-            expect(presentationTimeInSeconds).toBe(125);
-            if (startTime >= 100) {
-              // Ignore a possible call for the first Period.
-              expect(Util.invokeSpy(timeline.getSegmentAvailabilityStart))
-                  .toBe(100);
-              expect(Util.invokeSpy(timeline.getSegmentAvailabilityEnd))
-                  .toBe(120);
-              playing = true;
-              mediaSourceEngine.appendBuffer.and.callFake(
-                  originalAppendBuffer);
-            }
+      mediaSourceEngine.appendBuffer.and.callFake((type, data, reference) => {
+        expect(presentationTimeInSeconds).toBe(125);
+        // Ignore a possible call for the first Period.
+        if (reference && reference.startTime >= 100) {
+          expect(Util.invokeSpy(timeline.getSegmentAvailabilityStart))
+              .not.toBeLessThan(100);
+          expect(Util.invokeSpy(timeline.getSegmentAvailabilityEnd))
+              .not.toBeLessThan(120);
+          playing = true;
+          mediaSourceEngine.appendBuffer.and.callFake(originalAppendBuffer);
+        }
 
-            // eslint-disable-next-line no-restricted-syntax
-            return originalAppendBuffer.call(
-                mediaSourceEngine, type, data, startTime, endTime);
-          });
+        // eslint-disable-next-line no-restricted-syntax
+        return originalAppendBuffer.call(
+            mediaSourceEngine, type, data, reference);
+      });
 
       await runTest(slideSegmentAvailabilityWindow);
       // Verify buffers.
@@ -1862,14 +1898,14 @@ describe('StreamingEngine', () => {
           // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
       mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, startTime, endTime) => {
+          (type, data, reference) => {
             // Reject the first video init segment.
             if (data == segmentData[ContentType.VIDEO].initSegments[0]) {
               return Promise.reject(expectedError);
             } else {
               // eslint-disable-next-line no-restricted-syntax
               return originalAppendBuffer.call(
-                  mediaSourceEngine, type, data, startTime, endTime);
+                  mediaSourceEngine, type, data, reference);
             }
           });
 
@@ -1896,14 +1932,14 @@ describe('StreamingEngine', () => {
           // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
       mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, startTime, endTime) => {
+          (type, data, reference) => {
             // Reject the first audio segment.
             if (data == segmentData[ContentType.AUDIO].segments[0]) {
               return Promise.reject(expectedError);
             } else {
               // eslint-disable-next-line no-restricted-syntax
               return originalAppendBuffer.call(
-                  mediaSourceEngine, type, data, startTime, endTime);
+                  mediaSourceEngine, type, data, reference);
             }
           });
 
@@ -1982,7 +2018,7 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.failureCallback = () => streamingEngine.retry();
+      config.failureCallback = () => streamingEngine.retry(0.1);
       createStreamingEngine(config);
 
       presentationTimeInSeconds = 100;
@@ -2143,7 +2179,7 @@ describe('StreamingEngine', () => {
         netEngine.request.calls.reset();
 
         // Retry streaming.
-        expect(streamingEngine.retry()).toBe(true);
+        expect(streamingEngine.retry(0.1)).toBe(true);
       });
 
       // Here we go!
@@ -2173,7 +2209,7 @@ describe('StreamingEngine', () => {
 
         // Retry streaming, which should fail and return false.
         netEngine.request.calls.reset();
-        expect(streamingEngine.retry()).toBe(false);
+        expect(streamingEngine.retry(0.1)).toBe(false);
       });
 
       // Here we go!
@@ -2187,7 +2223,7 @@ describe('StreamingEngine', () => {
           // Now that we're streaming, throw QuotaExceededError on every segment
           // to quickly trigger the quota error.
           const appendBufferSpy = jasmine.createSpy('appendBuffer');
-          appendBufferSpy.and.callFake((type, data, startTime, endTime) => {
+          appendBufferSpy.and.callFake((type, data, reference) => {
             throw new shaka.util.Error(
                 shaka.util.Error.Severity.CRITICAL,
                 shaka.util.Error.Category.MEDIA,
@@ -2225,7 +2261,7 @@ describe('StreamingEngine', () => {
 
           // Retry streaming, which should fail and return false.
           netEngine.request.calls.reset();
-          expect(streamingEngine.retry()).toBe(false);
+          expect(streamingEngine.retry(0.1)).toBe(false);
         }
       });
 
@@ -2373,9 +2409,10 @@ describe('StreamingEngine', () => {
       // Throw two QuotaExceededErrors at different times.
       let numErrorsThrown = 0;
       appendBufferSpy.and.callFake(
-          (type, data, startTime, endTime) => {
-            const throwError = (numErrorsThrown == 0 && startTime == 10) ||
-                             (numErrorsThrown == 1 && startTime == 20);
+          (type, data, reference) => {
+            const throwError = reference &&
+                ((numErrorsThrown == 0 && reference.startTime == 10) ||
+                 (numErrorsThrown == 1 && reference.startTime == 20));
             if (throwError) {
               numErrorsThrown++;
               throw new shaka.util.Error(
@@ -2386,7 +2423,7 @@ describe('StreamingEngine', () => {
             } else {
               // eslint-disable-next-line no-restricted-syntax
               const p = originalAppendBuffer.call(
-                  mediaSourceEngine, type, data, startTime, endTime);
+                  mediaSourceEngine, type, data, reference);
               return p;
             }
           });
@@ -2435,8 +2472,8 @@ describe('StreamingEngine', () => {
       // Throw QuotaExceededError multiple times after at least one segment of
       // each type has been appended.
       appendBufferSpy.and.callFake(
-          (type, data, startTime, endTime) => {
-            if (startTime >= 10) {
+          (type, data, reference) => {
+            if (reference && reference.startTime >= 10) {
               throw new shaka.util.Error(
                   shaka.util.Error.Severity.CRITICAL,
                   shaka.util.Error.Category.MEDIA,
@@ -2445,7 +2482,7 @@ describe('StreamingEngine', () => {
             } else {
               // eslint-disable-next-line no-restricted-syntax
               const p = originalAppendBuffer.call(
-                  mediaSourceEngine, type, data, startTime, endTime);
+                  mediaSourceEngine, type, data, reference);
               return p;
             }
           });
@@ -2828,6 +2865,52 @@ describe('StreamingEngine', () => {
       expect(onEvent).not.toHaveBeenCalled();
       expect(onManifestUpdate).toHaveBeenCalled();
     });
+
+    it('triggers metadata event', async () => {
+      // This is an 'emsg' box that contains a scheme of
+      // https://aomedia.org/emsg/ID to indicate a ID3 metadata.
+      segmentData[ContentType.VIDEO].segments[0] =
+          Uint8ArrayUtils.fromHex((
+            // 105 bytes  emsg box     v0, flags 0
+            '00 00 00 69  65 6d 73 67  00 00 00 00' +
+
+            // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
+            '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
+            '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
+
+            // value (1 byte) ''
+            '00' +
+
+            // timescale (4 bytes) 49
+            '00 00 00 31' +
+
+            // presentation time delta (4 bytes) 8
+            '00 00 00 08' +
+
+            // event duration (4 bytes) 255
+            '00 00 00 ff' +
+
+            // id (4 bytes) 51
+            '00 00 00 33' +
+
+            // message data (47 bytes)
+            '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
+            '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
+            '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
+          ).replace(/\s/g, ''));
+
+      videoStream.emsgSchemeIdUris = ['https://aomedia.org/emsg/ID3'];
+
+      // Here we go!
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+
+      expect(onEvent).not.toHaveBeenCalled();
+      expect(onMetadata).toHaveBeenCalled();
+    });
   });
 
   describe('embedded emsg boxes with non zero timestamps', () => {
@@ -2889,6 +2972,99 @@ describe('StreamingEngine', () => {
 
       const event = onEvent.calls.argsFor(0)[0];
       expect(event.detail).toEqual(emsgObj);
+    });
+  });
+
+  describe('embedded prft boxes', () => {
+    const prftSegment = Uint8ArrayUtils.fromHex(
+        '00000020707266740100000000000001E683B62E8E63CC580000001B319D5767');
+    const mdhdSegment = Uint8ArrayUtils.fromHex(
+        '000000446D6F6F760000003C7472616B000000346D6469610000002C6D646864'+
+        '0100000000000000DF22526500000000DF22526500989680FFFFFFFFFFFFFFFF'+
+        '15C70000');
+
+    const prftEventObj = {
+      wallClockTime: 1658402734556,
+      startDate: new Date(1658391054904.7898),
+    };
+
+    beforeEach(() => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.parsePrftBox = true;
+      createStreamingEngine(config);
+    });
+
+    it('raises an event for registered prft v1', async () => {
+      segmentData[ContentType.VIDEO].segments[0] = prftSegment;
+      segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+      expect(onEvent).toHaveBeenCalled();
+
+      const event = onEvent.calls.argsFor(0)[0];
+      expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
+      expect(event.detail.programStartDate.getUTCMilliseconds()).toBe(
+          prftEventObj.startDate.getUTCMilliseconds());
+      expect(event.detail.programStartDate.toUTCString()).toBe(
+          prftEventObj.startDate.toUTCString());
+    });
+
+    it('raises an event for registered prft v0', async () => {
+      const prftSegment = Uint8ArrayUtils.fromHex(
+          '0000001C707266740000000000000001E683B62E8E63CC5819999999');
+      const expectedStartDate = new Date(1658402691606.3271);
+      segmentData[ContentType.VIDEO].segments[0] = prftSegment;
+      segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+      expect(onEvent).toHaveBeenCalled();
+
+      const event = onEvent.calls.argsFor(0)[0];
+      expect(event.detail.wallClockTime).toBe(prftEventObj.wallClockTime);
+      expect(event.detail.programStartDate.getUTCMilliseconds()).toBe(
+          expectedStartDate.getUTCMilliseconds());
+      expect(event.detail.programStartDate.toUTCString()).toBe(
+          expectedStartDate.toUTCString());
+    });
+
+    it('does not raise event if mediatime exceeds Number.MAX_VALUE',
+        async () => {
+          const prftSegment = Uint8ArrayUtils.fromHex(
+              '00000020707266740100000000000001E683B62E8E63CC58'+
+                                              'FFFFFFFFFFFFFFFF');
+          segmentData[ContentType.VIDEO].segments[0] = prftSegment;
+          segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
+
+          streamingEngine.switchVariant(variant);
+          streamingEngine.switchTextStream(textStream);
+          await streamingEngine.start();
+          playing = true;
+          await runTest();
+          expect(onEvent).not.toHaveBeenCalled();
+        });
+
+    it('raises an event once only', async () => {
+      segmentData[ContentType.VIDEO].segments[0] =
+          shaka.util.Uint8ArrayUtils.concat(prftSegment, prftSegment);
+      segmentData[ContentType.VIDEO].segments[1] = prftSegment;
+      segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
+
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+      expect(onEvent).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -2986,8 +3162,8 @@ describe('StreamingEngine', () => {
 
       // Naive buffered range tracking that only tracks the buffer end.
       const bufferEnd = {audio: 0, video: 0, text: 0};
-      mediaSourceEngine.appendBuffer.and.callFake((type, data, start, end) => {
-        bufferEnd[type] = end;
+      mediaSourceEngine.appendBuffer.and.callFake((type, data, reference) => {
+        bufferEnd[type] = reference && reference.endTime;
         return Promise.resolve();
       });
       mediaSourceEngine.bufferEnd.and.callFake((type) => bufferEnd[type]);
@@ -3281,8 +3457,8 @@ describe('StreamingEngine', () => {
 
       const bufferEnd = {audio: 0, video: 0, text: 0};
       mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, start, end) => {
-            bufferEnd[type] = end;
+          (type, data, reference) => {
+            bufferEnd[type] = reference && reference.endTime;
             return Promise.resolve();
           });
       mediaSourceEngine.bufferEnd.and.callFake((type) => {
@@ -3429,6 +3605,69 @@ describe('StreamingEngine', () => {
     expect(alternateVideoStream.createSegmentIndex).not.toHaveBeenCalled();
   });
 
+  describe('AES-128', () => {
+    let key;
+    /** @type {!shaka.extern.HlsAes128Key} */
+    let hlsAes128Key;
+
+    beforeEach(async () => {
+      // Get a key.
+      const keyData = new ArrayBuffer(16);
+      const keyDataView = new DataView(keyData);
+      keyDataView.setInt16(0, 31710); // 0111 1011 1101 1110
+      key = await window.crypto.subtle.importKey(
+          'raw', keyData, 'AES-CBC', true, ['decrypt']);
+
+      // Set up a manifest with AES-128 key info.
+      // We don't actually provide the imported key OR the key fetching function
+      // here, though, so that the individual tests can choose what the starting
+      // state of the hlsAes128Key object is.
+      hlsAes128Key = {method: 'AES-128', firstMediaSequenceNumber: 0};
+
+      setupVod(false, 0, hlsAes128Key);
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      presentationTimeInSeconds = 0;
+      createStreamingEngine();
+      streamingEngine.switchVariant(variant);
+    });
+
+    afterEach(async () => {
+      await streamingEngine.destroy();
+    });
+
+    async function runTest() {
+      spyOn(window.crypto.subtle, 'decrypt').and.callThrough();
+
+      await streamingEngine.start();
+      playing = true;
+      await Util.fakeEventLoop(10);
+
+      expect(mediaSourceEngine.appendBuffer).toHaveBeenCalledTimes(2);
+      expect(window.crypto.subtle.decrypt).toHaveBeenCalledTimes(2);
+      expect(window.crypto.subtle.decrypt).toHaveBeenCalledWith(
+          {name: 'AES-CBC', iv: jasmine.any(Object)}, key, jasmine.any(Object));
+    }
+
+    it('decrypts segments', async () => {
+      hlsAes128Key.cryptoKey = key;
+      await runTest();
+    });
+
+    it('downloads key if not pre-filled', async () => {
+      hlsAes128Key.fetchKey = () => {
+        hlsAes128Key.cryptoKey = key;
+        hlsAes128Key.fetchKey = undefined;
+        return Promise.resolve();
+      };
+
+      await runTest();
+
+      // The key should have been fetched.
+      expect(hlsAes128Key.cryptoKey).not.toBeUndefined();
+      expect(hlsAes128Key.fetchKey).toBeUndefined();
+    });
+  });
+
   describe('destroy', () => {
     it('aborts pending network operations', async () => {
       setupVod();
@@ -3468,6 +3707,27 @@ describe('StreamingEngine', () => {
 
       // The request should have been aborted.
       expect(isAborted).toBe(true);
+    });
+  });
+
+  describe('beforeAppendSegment', () => {
+    it('is called before appending media segment', async () => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+      beforeAppendSegment.and.callFake((segment) => {
+        return shaka.test.Util.shortDelay();
+      });
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      // Simulate time passing.
+      playing = true;
+      await Util.fakeEventLoop(10);
+      expect(beforeAppendSegment).toHaveBeenCalledWith(
+          ContentType.AUDIO, segmentData[ContentType.AUDIO].initSegments[0]);
+      expect(beforeAppendSegment).toHaveBeenCalledWith(
+          ContentType.AUDIO, segmentData[ContentType.AUDIO].segments[0]);
     });
   });
 

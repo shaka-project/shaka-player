@@ -90,3 +90,9 @@ application:
       clearly-named `lineBreak` (deprecated in v3.1.0)
     - `IUIElement` plugins must have a `release()` method (not `destroy()`)
       (deprecated in v3.0.0)
+
+## v5.0 (unreleased)
+
+  - Configuration changes:
+    - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`
+      (deprecated in v4.3.0)

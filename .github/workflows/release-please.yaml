@@ -23,7 +23,7 @@ jobs:
           default-branch: ${{ github.ref_name }}
 
       # If we didn't create a release, we may have created or updated a PR.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         if: steps.release.outputs.release_created == false
       - name: Custom update Player version
         if: steps.release.outputs.release_created == false
@@ -53,7 +53,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0') == false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: main
       - name: Tag the main branch
@@ -70,7 +70,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -99,7 +99,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -152,7 +152,7 @@ jobs:
     needs: release
     if: needs.release.outputs.release_created && endsWith(needs.release.outputs.tag_name, '.0')
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 

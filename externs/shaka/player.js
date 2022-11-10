@@ -437,18 +437,61 @@ shaka.extern.DrmSupportType;
  */
 shaka.extern.SupportType;
 
-
 /**
- * @typedef {!Object.<string, ?>}
+ * @typedef {{
+ *   cueTime: ?number,
+ *   data: !Uint8Array,
+ *   frames: !Array.<shaka.extern.MetadataFrame>,
+ *   dts: ?number,
+ *   pts: ?number
+ * }}
  *
  * @description
  * ID3 metadata in format defined by
  * https://id3.org/id3v2.3.0#Declared_ID3v2_frames
  * The content of the field.
  *
+ * @property {?number} cueTime
+ * @property {!Uint8Array} data
+ * @property {!Array.<shaka.extern.MetadataFrame>} frames
+ * @property {?number} dts
+ * @property {?number} pts
+ *
  * @exportDoc
  */
 shaka.extern.ID3Metadata;
+
+
+/**
+ * @typedef {{
+ *   type: string,
+ *   size: number,
+ *   data: Uint8Array
+ * }}
+ *
+ * @description metadata raw frame.
+ * @property {string} type
+ * @property {number} size
+ * @property {Uint8Array} data
+ * @exportDoc
+ */
+shaka.extern.MetadataRawFrame;
+
+
+/**
+ * @typedef {{
+ *   key: string,
+ *   data: (ArrayBuffer|string),
+ *   description: string
+ * }}
+ *
+ * @description metadata frame parsed.
+ * @property {string} key
+ * @property {ArrayBuffer|string} data
+ * @property {string} description
+ * @exportDoc
+ */
+shaka.extern.MetadataFrame;
 
 
 /**
@@ -567,6 +610,24 @@ shaka.extern.EmsgInfo;
 
 /**
  * @typedef {{
+ *   wallClockTime: number,
+ *   programStartDate: Date
+ * }}
+ *
+ * @description
+ * Contains information about an PRFT MP4 box.
+ *
+ * @property {number} wallClockTime
+ *   A UTC timestamp corresponding to decoding time in milliseconds.
+ * @property {Date} programStartDate
+ *   The derived start date of the program.
+ * @exportDoc
+ */
+shaka.extern.ProducerReferenceTime;
+
+
+/**
+ * @typedef {{
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
  *   videoRobustness: string,
@@ -632,7 +693,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   logLicenseExchange: boolean,
  *   updateExpirationTime: number,
  *   preferredKeySystems: !Array.<string>,
- *   keySystemsMapping: !Object.<string, string>
+ *   keySystemsMapping: !Object.<string, string>,
+ *   parseInbandPsshEnabled: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -644,7 +706,7 @@ shaka.extern.AdvancedDrmConfiguration;
  *   <code>{'com.widevine.alpha': 'https://example.com/drm'}</code>.
  * @property {!Object.<string, string>} clearKeys
  *   <i>Forces the use of the Clear Key CDM.</i>
- *   A map of key IDs (hex) to keys (hex).
+ *   A map of key IDs (hex or base64) to keys (hex or base64).
  * @property {boolean} delayLicenseRequestUntilPlayed
  *   <i>Defaults to false.</i> <br>
  *   True to configure drm to delay sending a license request until a user
@@ -675,6 +737,11 @@ shaka.extern.AdvancedDrmConfiguration;
  *   Specifies the priorties of available DRM key systems.
  * @property {Object.<string, string>} keySystemsMapping
  *   A map of key system name to key system name.
+ * @property {boolean} parseInbandPsshEnabled
+ *   <i>Defaults to true on Xbox One, and false for all other browsers.</i><br>
+ *   When true parse DRM init data from pssh boxes in media and init segments
+ *   and ignore 'encrypted' events.
+ *   This is required when using in-band key rotation on Xbox One.
  *
  * @exportDoc
  */
@@ -694,7 +761,8 @@ shaka.extern.DrmConfiguration;
  *   ignoreEmptyAdaptationSet: boolean,
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
- *   manifestPreprocessor: function(!Element)
+ *   manifestPreprocessor: function(!Element),
+ *   sequenceMode: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -748,6 +816,10 @@ shaka.extern.DrmConfiguration;
  *   Called immediately after the DASH manifest has been parsed into an
  *   XMLDocument. Provides a way for applications to perform efficient
  *   preprocessing of the manifest.
+ * @property {boolean} sequenceMode
+ *   If true, the media segments are appended to the SourceBuffer in
+ *   "sequence mode" (ignoring their internal timestamps).
+ *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
@@ -760,7 +832,9 @@ shaka.extern.DashManifestConfiguration;
  *   defaultAudioCodec: string,
  *   defaultVideoCodec: string,
  *   ignoreManifestProgramDateTime: boolean,
- *   mediaPlaylistFullMimeType: string
+ *   mediaPlaylistFullMimeType: string,
+ *   useSafariBehaviorForLive: boolean,
+ *   liveSegmentsDelay: number
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -791,6 +865,16 @@ shaka.extern.DashManifestConfiguration;
  *   format this value.
  *   <i>Defaults to
  *   <code>'video/mp2t; codecs="avc1.42E01E, mp4a.40.2"'</code>.</i>
+ * @property {boolean} useSafariBehaviorForLive
+ *   If this is true, playback will set the availability window to the
+ *   presentation delay. The player will be able to buffer ahead three
+ *   segments, but the seek window will be zero-sized, to be consistent with
+ *   Safari. If this is false, the seek window will be the entire duration.
+ *   <i>Defaults to <code>true</code>.</i>
+ * @property {number} liveSegmentsDelay
+ *   The default presentation delay will be calculated as a number of segments.
+ *   This is the number of segments for this calculation..
+ *   <i>Defaults to <code>3</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -863,7 +947,7 @@ shaka.extern.ManifestConfiguration;
  *   startAtSegmentBoundary: boolean,
  *   gapDetectionThreshold: number,
  *   durationBackoff: number,
- *   forceTransmuxTS: boolean,
+ *   forceTransmux: boolean,
  *   safeSeekOffset: number,
  *   stallEnabled: boolean,
  *   stallThreshold: number,
@@ -877,7 +961,8 @@ shaka.extern.ManifestConfiguration;
  *   updateIntervalSeconds: number,
  *   dispatchAllEmsgBoxes: boolean,
  *   observeQualityChanges: boolean,
- *   maxDisabledTime: number
+ *   maxDisabledTime: number,
+ *   parsePrftBox: boolean
  * }}
  *
  * @description
@@ -925,12 +1010,12 @@ shaka.extern.ManifestConfiguration;
  *   seek to when the user tries to seek to or start playback at the duration.
  *   To disable this behavior, the config can be set to 0.  We recommend using
  *   the default value unless you have a good reason not to.
- * @property {boolean} forceTransmuxTS
- *   If this is <code>true</code>, we will transmux TS content even if not
- *   strictly necessary for the assets to be played.  Shaka Player currently
- *   only supports CEA 708 captions by transmuxing, so this value is necessary
- *   for enabling them on platforms with native TS support like Edge or
- *   Chromecast. This value defaults to <code>false</code>.
+ * @property {boolean} forceTransmux
+ *   If this is <code>true</code>, we will transmux AAC and TS content even if
+ *   not strictly necessary for the assets to be played.  Shaka Player
+ *   currently only supports CEA 708 captions by transmuxing, so this value is
+ *   necessary for enabling them on platforms with native TS support like Edge
+ *   or Chromecast. This value defaults to <code>false</code>.
  * @property {number} safeSeekOffset
  *   The amount of seconds that should be added when repositioning the playhead
  *   after falling out of the availability window or seek. This gives the player
@@ -986,9 +1071,33 @@ shaka.extern.ManifestConfiguration;
  *   The maximum time a variant can be disabled when NETWORK HTTP_ERROR
  *   is reached, in seconds.
  *   If all variants are disabled this way, NETWORK HTTP_ERROR will be thrown.
+ * @property {boolean} parsePrftBox
+ *   If <code>true</code>, will raise a shaka.extern.ProducerReferenceTime
+ *   player event (event name 'prft').
+ *   The event will be raised only once per playback session as program
+ *   start date will not change, and would save parsing the segment multiple
+ *   times needlessly.
+ *   Defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
+
+
+/**
+ * @typedef {{
+ *   sourceBufferExtraFeatures: string
+ * }}
+ *
+ * @description
+ *   Media source configuration.
+ *
+ * @property {string} sourceBufferExtraFeatures
+ *   Some platforms may need to pass features when initializing the
+ *   sourceBuffer.
+ *   This string is ultimately appended to MIME types in addSourceBuffer().
+ * @exportDoc
+ */
+shaka.extern.MediaSourceConfiguration;
 
 
 /**
@@ -1000,7 +1109,10 @@ shaka.extern.StreamingConfiguration;
  *   switchInterval: number,
  *   bandwidthUpgradeTarget: number,
  *   bandwidthDowngradeTarget: number,
- *   advanced: shaka.extern.AdvancedAbrConfiguration
+ *   advanced: shaka.extern.AdvancedAbrConfiguration,
+ *   restrictToElementSize: boolean,
+ *   restrictToScreenSize: boolean,
+ *   ignoreDevicePixelRatio: boolean
  * }}
  *
  * @property {boolean} enabled
@@ -1029,7 +1141,19 @@ shaka.extern.StreamingConfiguration;
  *   The largest fraction of the estimated bandwidth we should use. We should
  *   downgrade to avoid this.
  * @property {shaka.extern.AdvancedAbrConfiguration} advanced
- *   Advanced ABR configuration.
+ *   Advanced ABR configuration
+ * @property {boolean} restrictToElementSize
+ *   If true, restrict the quality to media element size.
+ *   Note: The use of ResizeObserver is required for it to work properly. If
+ *   true without ResizeObserver, it behaves as false.
+ *   Defaults false.
+ * @property {boolean} restrictToScreenSize
+ *   If true, restrict the quality to screen size.
+ *   Defaults false.
+ * @property {boolean} ignoreDevicePixelRatio
+ *   If true,device pixel ratio is ignored when restricting the quality to
+ *   media element size or screen size.
+ *   Defaults false.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
@@ -1097,6 +1221,49 @@ shaka.extern.AdvancedAbrConfiguration;
  */
 shaka.extern.CmcdConfiguration;
 
+/**
+ * @typedef {{
+ *   enabled: boolean,
+ *   dynamicPerformanceScaling: boolean,
+ *   logLevel: number,
+ *   drawLogo: boolean
+ * }}
+ *
+ * @description
+ *   Decoding for MPEG-5 Part2 LCEVC.
+ *
+ * @property {boolean} enabled
+ *   If <code>true</code>, enable LCEVC.
+ *   Defaults to <code>false</code>.
+ * @property {boolean} dynamicPerformanceScaling
+ *   If <code>true</code>, LCEVC Dynamic Performance Scaling or dps is enabled
+ *   to be triggered, when the system is not able to decode frames within a
+ *   specific tolerance of the fps of the video and disables LCEVC decoding
+ *   for some time. The base video will be shown upscaled to target resolution.
+ *   If it is triggered again within a short period of time, the disabled
+ *   time will be higher and if it is triggered three times in a row the LCEVC
+ *   decoding will be disabled for that playback session.
+ *   If dynamicPerformanceScaling is false, LCEVC decode will be forced
+ *   and will drop frames appropriately if performance is sub optimal.
+ *   Defaults to <code>true</code>.
+ * @property {number} logLevel
+ *   Loglevel 0-5 for logging.
+ *   NONE = 0
+ *   ERROR = 1
+ *   WARNING = 2
+ *   INFO = 3
+ *   DEBUG = 4
+ *   VERBOSE = 5
+ *   Defaults to <code>0</code>.
+ * @property {boolean} drawLogo
+ *   If <code>true</code>, LCEVC Logo is placed on the top left hand corner
+ *   which only appears when the LCEVC enhanced frames are being rendered.
+ *   Defaults to true for the lib but is forced to false in this integration
+ *   unless explicitly set to true through config.
+ *   Defaults to <code>false</code>.
+ * @exportDoc
+ */
+shaka.extern.LcevcConfiguration;
 
 /**
  * @typedef {{
@@ -1140,12 +1307,15 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
+ *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
  *   streaming: shaka.extern.StreamingConfiguration,
+ *   mediaSource: shaka.extern.MediaSourceConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
  *   cmcd: shaka.extern.CmcdConfiguration,
+ *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
  *   preferredTextLanguage: string,
@@ -1162,18 +1332,25 @@ shaka.extern.OfflineConfiguration;
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
+ * @property {shaka.config.AutoShowText} autoShowText
+ *   Controls behavior of auto-showing text tracks on load().
  * @property {shaka.extern.DrmConfiguration} drm
  *   DRM configuration and settings.
  * @property {shaka.extern.ManifestConfiguration} manifest
  *   Manifest configuration and settings.
  * @property {shaka.extern.StreamingConfiguration} streaming
  *   Streaming configuration and settings.
+ * @property {shaka.extern.MediaSourceConfiguration} mediaSource
+ *   Media source configuration and settings.
  * @property {shaka.extern.AbrManager.Factory} abrFactory
  *   A factory to construct an abr manager.
  * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.
  * @property {shaka.extern.CmcdConfiguration} cmcd
  *   CMCD configuration and settings. (Common Media Client Data)
+ * @property {shaka.extern.LcevcConfiguration} lcevc
+ *   MPEG-5 LCEVC configuration and settings.
+ *   (Low Complexity Enhancement Video Codec)
  * @property {shaka.extern.OfflineConfiguration} offline
  *   Offline configuration and settings.
  * @property {string} preferredAudioLanguage
@@ -1251,7 +1428,8 @@ shaka.extern.LanguageRole;
  *   startTime: number,
  *   duration: number,
  *   uris: !Array.<string>,
- *   width: number
+ *   width: number,
+ *   sprite: boolean
  * }}
  *
  * @property {number} imageHeight
@@ -1275,6 +1453,8 @@ shaka.extern.LanguageRole;
  *   given.
  * @property {number} width
  *    The thumbnail width in px.
+ * @property {boolean} sprite
+ *    Indicate if the thumbnail is a sprite.
  * @exportDoc
  */
 shaka.extern.Thumbnail;

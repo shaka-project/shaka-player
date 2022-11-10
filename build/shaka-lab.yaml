@@ -104,6 +104,10 @@ SafariTP:
     safari.options:
       technologyPreview: true
 
+EdgeMac:
+  browser: msedge
+  os: Mac
+
 ChromeWindows:
   browser: chrome
   os: Windows
@@ -139,6 +143,10 @@ FirefoxLinux:
   os: Linux
   extra_config: *firefox_config
 
+EdgeLinux:
+  browser: msedge
+  os: Linux
+
 ChromeAndroid:
   browser: chrome
   os: Android
@@ -156,6 +164,10 @@ Chromebook:
 
 Tizen:
   browser: tizen
+  # TODO: Re-enable Tizen (https://github.com/shaka-project/generic-webdriver-server/issues/57)
+  disabled: true
 
 XboxOne:
   browser: xboxone
+  # TODO: Re-enable Xbox (https://github.com/shaka-project/shaka-player/issues/4234)
+  disabled: true

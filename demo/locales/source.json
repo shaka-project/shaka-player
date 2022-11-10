@@ -67,6 +67,26 @@
     "description": "The name of a configuration value.",
     "message": "Auto Low Latency Streaming"
   },
+  "DEMO_AUTO_SHOW_TEXT": {
+    "description": "The name of a configuration value.",
+    "message": "Auto-Show Text"
+  },
+  "DEMO_AUTO_SHOW_TEXT_NEVER": {
+    "description": "The name of a configuration value.",
+    "message": "Never"
+  },
+  "DEMO_AUTO_SHOW_TEXT_ALWAYS": {
+    "description": "The name of a configuration value.",
+    "message": "Always"
+  },
+  "DEMO_AUTO_SHOW_TEXT_IF_PREFERRED_TEXT_LANGUAGE": {
+    "description": "The name of a configuration value.",
+    "message": "If preferred text language"
+  },
+  "DEMO_AUTO_SHOW_TEXT_IF_SUBTITLES_MAY_BE_NEEDED": {
+    "description": "The name of a configuration value.",
+    "message": "If subtitles may be needed"
+  },
   "DEMO_AVAILABILITY_WINDOW_OVERRIDE": {
     "description": "The name of a configuration value.",
     "message": "Availability Window Override"
@@ -311,9 +331,9 @@
     "description": "The name of a configuration value.",
     "message": "Force [JARGON:HTTPS]"
   },
-  "DEMO_FORCE_TRANSMUX_TS": {
+  "DEMO_FORCE_TRANSMUX": {
     "description": "The name of a configuration value.",
-    "message": "Force Transmux [JARGON:MPEG-2 TS]"
+    "message": "Force Transmux"
   },
   "DEMO_FRONT_INTRO_DISMISS": {
     "description": "A button allowing users to dismiss the intro message.",
@@ -383,6 +403,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:DASH] [JARGON:suggestedPresentationDelay]"
   },
+  "DEMO_IGNORE_DEVICE_PIXEL_RATIO": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore device pixel ratio"
+  },
   "DEMO_IGNORE_HLS_TEXT_FAILURES": {
     "description": "The name of a configuration value.",
     "message": "Ignore [PROPER_NAME:HLS] Text Stream Failures"
@@ -439,6 +463,26 @@
     "description": "The header for a section of configuration values.",
     "message": "Language"
   },
+  "DEMO_LCEVC": {
+    "description": "Text that describes an asset that has LCEVC.",
+    "message": "[PROPER_NAME:LCEVC]"
+  },
+  "DEMO_LCEVC_DRAW_LOGO": {
+    "description": "LCEVC Watermark on the top left hand corner of the canvas.",
+    "message": "Draw [PROPER_NAME:LCEVC] Logo"
+  },
+  "DEMO_LCEVC_DYNAMIC_PERFORMANCE_SCALING": {
+    "description": "Dynamic Performance scaling for enabling/disabling LCEVC decoding based on decode performance.",
+    "message": "[PROPER_NAME:LCEVC] [JARGON:Dynamic Performance scaling]"
+  },
+  "DEMO_LCEVC_LOG_LEVEL": {
+    "description": "Log Level for LCEVC Lib (0-5)",
+    "message": "[PROPER_NAME:LCEVC] Log Level"
+  },
+  "DEMO_LCEVC_SECTION_HEADER": {
+    "description": "The header for a section of configuration values.",
+    "message": "[PROPER_NAME:MPEG-5 Part-2 LCEVC]"
+  },
   "DEMO_LIBRARIES": {
     "description": "A link in the footer, to Shaka Player in the Google Hosted Libraries CDN.",
     "message": "[PROPER_NAME:Google Hosted Libraries]"
@@ -474,6 +518,10 @@
   "DEMO_LIVE_SEARCH": {
     "description": "A header on a search field that filters by whether the asset is live or not.",
     "message": "Live"
+  },
+  "DEMO_LIVE_SEGMENTS_DELAY": {
+    "description": "The name of a configuration value.",
+    "message": "Live segments delay"
   },
   "DEMO_LOG_LEVEL": {
     "description": "The name of a configuration value.",
@@ -554,6 +602,10 @@
   "DEMO_MAX_WIDTH": {
     "description": "The name of a configuration value.",
     "message": "Max Width"
+  },
+  "DEMO_MEDIA_SOURCE_SECTION_HEADER": {
+    "description": "The header for a section of configuration values.",
+    "message": "Media source"
   },
   "DEMO_METACDN": {
     "description": "Text that describes an asset that comes from the MetaCDN asset library.",
@@ -675,6 +727,10 @@
     "description": "The label on a field that allows users to provide a full mime type for a custom asset.",
     "message": "Full Mime Type for Playing Media Playlists Directly"
   },
+  "DEMO_PARSE_INBAND_PSSH_ENABLED": {
+    "description": "The name of a configuration value.",
+    "message": "Parse inband 'pssh' from media segments"
+  },
   "DEMO_PLAY": {
     "description": "A button to play the attached asset.",
     "message": "Play"
@@ -711,6 +767,14 @@
     "description": "A link in the header, that files a bug report.",
     "message": "REPORT BUG"
   },
+  "DEMO_RESTRICT_TO_ELEMENT_SIZE": {
+    "description": "The name of a configuration value.",
+    "message": "Restrict to element size"
+  },
+  "DEMO_RESTRICT_TO_SCREEN_SIZE": {
+    "description": "The name of a configuration value.",
+    "message": "Restrict to screen size"
+  },
   "DEMO_RESTRICTIONS_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "Restrictions"
@@ -731,6 +795,10 @@
     "description": "The name of a configuration value.",
     "message": "Enable segment-relative VTT Timing"
   },
+  "DEMO_SEQUENCE_MODE": {
+    "description": "The name of a configuration value.",
+    "message": "Enable sequence mode"
+  },
   "DEMO_SESSION_ID": {
     "description": "The name of a configuration value.",
     "message": "Session ID"
@@ -750,6 +818,10 @@
   "DEMO_SOURCE": {
     "description": "A link in the footer, to the Shaka Player source on GitHub.",
     "message": "Source on [PROPER_NAME:GitHub]"
+  },
+  "DEMO_SOURCE_BUFFER_EXTRA_FEATURES": {
+    "description": "The name of a configuration value.",
+    "message": "Source buffer extra features"
   },
   "DEMO_SOURCE_SEARCH": {
     "description": "A header on a search field that filters by the source of the asset.",
@@ -919,9 +991,29 @@
     "description": "The name of a configuration value.",
     "message": "Use Persistent Licenses"
   },
+  "DEMO_USE_SAFARI_BEHAVIOR_FOR_LIVE": {
+    "description": "The name of a configuration value.",
+    "message": "Use Safari behavior for live"
+  },
   "DEMO_VIDEO_ROBUSTNESS": {
     "description": "The name of a configuration value.",
     "message": "Video Robustness"
+  },
+  "DEMO_VISUALIZER_AUTO_SCREENSHOT_TOGGLE": {
+    "description": "A configuration toggle that makes the visualizer take a screenshot when the presentation stalls.",
+    "message": "Take Screenshot On Stall"
+  },
+  "DEMO_VISUALIZER_BUTTON": {
+    "description": "A button on the video that opens or hides the visualizer.",
+    "message": "Buffer Visualizer"
+  },
+  "DEMO_VISUALIZER_SCREENSHOT_BUTTON": {
+    "description": "A button that takes a screenshot of the current visualizer state.",
+    "message": "Take Screenshot"
+  },
+  "DEMO_VNOVA": {
+    "description": "Text that describes an asset that comes from V-Nova.",
+    "message": "[PROPER_NAME:V-Nova]"
   },
   "DEMO_VOD": {
     "description": "Text that describes an asset that is a VOD (Video On Delivery).",

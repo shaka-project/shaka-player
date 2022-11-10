@@ -26,6 +26,9 @@ describe('MediaSourceEngine', () => {
    */
   let textDisplayer;
 
+  /** @type {!jasmine.Spy} */
+  let onMetadata;
+
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -37,10 +40,15 @@ describe('MediaSourceEngine', () => {
 
     textDisplayer = new shaka.test.FakeTextDisplayer();
 
+    onMetadata = jasmine.createSpy('onMetadata');
+
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
         new shaka.media.ClosedCaptionParser(),
-        textDisplayer);
+        textDisplayer,
+        shaka.test.Util.spyFunc(onMetadata));
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    mediaSourceEngine.configure(config);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();
@@ -57,32 +65,44 @@ describe('MediaSourceEngine', () => {
 
   function appendInit(type) {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
+    const reference = null;
     return mediaSourceEngine.appendBuffer(
-        type, segment, null, null, /* hasClosedCaptions= */ false);
+        type, segment, reference, /* hasClosedCaptions= */ false);
   }
 
   function append(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, Date.now() / 1000);
+    const reference = dummyReference(type, segmentNumber);
     return mediaSourceEngine.appendBuffer(
-        type, segment, null, null, /* hasClosedCaptions= */ false);
+        type, segment, reference, /* hasClosedCaptions= */ false);
   }
 
-  // The start time and end time should be null for init segment with closed
-  // captions.
+  function appendWithSeek(type, segmentNumber) {
+    const segment = generators[type]
+        .getSegment(segmentNumber, Date.now() / 1000);
+    const reference = dummyReference(type, segmentNumber);
+    return mediaSourceEngine.appendBuffer(
+        type,
+        segment,
+        reference,
+        /* hasClosedCaptions= */ false,
+        /* seeked= */ true);
+  }
+
   function appendInitWithClosedCaptions(type) {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, /* startTime= */ null,
-        /* endTime= */ null, /* hasClosedCaptions= */ true);
+    const reference = null;
+    return mediaSourceEngine.appendBuffer(
+        type, segment, reference, /* hasClosedCaptions= */ true);
   }
 
-  // The start time and end time should be valid for the segments with closed
-  // captions.
   function appendWithClosedCaptions(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, Date.now() / 1000);
-    return mediaSourceEngine.appendBuffer(type, segment, /* startTime= */ 0,
-        /* endTime= */ 2, /* hasClosedCaptions= */ true);
+    const reference = dummyReference(type, segmentNumber);
+    return mediaSourceEngine.appendBuffer(
+        type, segment, reference, /* hasClosedCaptions= */ true);
   }
 
   function buffered(type, time) {
@@ -91,6 +111,20 @@ describe('MediaSourceEngine', () => {
 
   function bufferStart(type) {
     return mediaSourceEngine.bufferStart(type);
+  }
+
+  function dummyReference(type, segmentNumber) {
+    const start = segmentNumber * metadata[type].segmentDuration;
+    const end = (segmentNumber + 1) * metadata[type].segmentDuration;
+    return new shaka.media.SegmentReference(
+        start, end,
+        /* uris= */ () => ['foo://bar'],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
   }
 
   function remove(type, segmentNumber) {
@@ -357,13 +391,68 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    // Call with forceTransmuxTS = true, so that it will transmux even on
+    // Call with forceTransmux = true, so that it will transmux even on
     // platforms with native TS support.
-    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ true);
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await append(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('extracts CEA-708 captions from previous segment from hls', async () => {
+    // Load TS file with CEA-708 captions.
+    metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
+
+    const initObject = new Map();
+    initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
+    initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
+    // Call with forceTransmux = true, so that it will transmux even on
+    // platforms with native TS support.
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    mediaSourceEngine.setSelectedClosedCaptionId('CC1');
+
+    await append(ContentType.VIDEO, 2);
+    await appendWithSeek(ContentType.VIDEO, 0);
+
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(6);
+  });
+
+  it('buffers partial TS video segments in sequence mode', async () => {
+    metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
+
+    const videoType = ContentType.VIDEO;
+    const initObject = new Map();
+    initObject.set(videoType, getFakeStream(metadata.video));
+
+    await mediaSourceEngine.init(
+        initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
+    await mediaSourceEngine.setDuration(presentationDuration);
+    await mediaSourceEngine.setStreamProperties(
+        videoType,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity,
+        /* sequenceMode= */ true);
+
+    const segment = generators[videoType].getSegment(0, Date.now() / 1000);
+    const partialSegmentLength = Math.floor(segment.byteLength / 3);
+
+    let partialSegment = shaka.util.BufferUtils.toUint8(
+        segment, /* offset= */ 0, /* length= */ partialSegmentLength);
+    let reference = dummyReference(videoType, 0);
+    await mediaSourceEngine.appendBuffer(
+        videoType, partialSegment, reference, /* hasClosedCaptions= */ false);
+
+    partialSegment = shaka.util.BufferUtils.toUint8(
+        segment,
+        /* offset= */ partialSegmentLength);
+    reference = dummyReference(videoType, 1);
+    await mediaSourceEngine.appendBuffer(
+        videoType, partialSegment, reference, /* hasClosedCaptions= */ false,
+        /* seeked= */ true);
   });
 
   it('extracts CEA-708 captions from dash', async () => {
@@ -374,12 +463,70 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInitWithClosedCaptions(ContentType.VIDEO);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await appendWithClosedCaptions(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from TS', async () => {
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_ts'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from TS when transmuxing', async () => {
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_ts'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from AAC', async () => {
+    if (!MediaSource.isTypeSupported('audio/aac')) {
+      return;
+    }
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from AAC when transmuxing', async () => {
+    if (!MediaSource.isTypeSupported('audio/aac')) {
+      return;
+    }
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
   });
 });

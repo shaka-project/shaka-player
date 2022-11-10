@@ -11,10 +11,6 @@ inputs:
   state:
     description: Either "pending", "error", "success", or "failure".
     required: true
-  ref:
-    description: A git ref for which to set the commit status.  For PRs, use the head commit, not the merge commit.  Defaults to HEAD.
-    required: false
-    default: HEAD
   token:
     description: A GitHub access token.
     required: true
@@ -30,7 +26,7 @@ runs:
         # next to the status on the PR, it will link to this run where they can
         # see the logs.
         RUN_URL="https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
-        SHA1=$(git rev-parse "${{ inputs.ref }}")
+        SHA1=$(git rev-parse HEAD)
 
         GITHUB_TOKEN=${{ inputs.token }} \
         gh api \
