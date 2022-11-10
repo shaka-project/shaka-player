@@ -769,6 +769,17 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('support escaped html payload', () => {
+    verifyHelper(
+        [
+          {startTime: 20.1, endTime: 40.505, payload: '"Test & 1"\u{a0}'},
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.100 --> 00:00:40.505\n' +
+        '&quot;Test &amp; 1&quot;&nbsp;',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
   it('supports specific style blocks', () => {
     verifyHelper(
         [
