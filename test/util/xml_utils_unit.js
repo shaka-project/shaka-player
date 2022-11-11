@@ -425,10 +425,15 @@ describe('XmlUtils', () => {
     });
 
     it('returns null on XML that embeds SVG', () => {
+      // Some platforms, such as Xbox One, don't recognize elements as SVG
+      // based on namespace alone.  So the SVG element below needs to be a real
+      // SVG element.
       const xmlString = [
         '<?xml version="1.0"?>',
         '<Root>',
-        '  <Child xmlns="http://www.w3.org/2000/svg"></Child>',
+        '  <svg viewBox="0 0 100 100">',
+        '    <rect x="0" y="0" width="100" height"100" />',
+        '  </svg>',
         '</Root>',
       ].join('\n');
       const doc = XmlUtils.parseXmlString(xmlString, 'Root');
