@@ -77,7 +77,7 @@ describe('MediaSourceEngine', () => {
         type, segment, reference, /* hasClosedCaptions= */ false);
   }
 
-  function appendWithSeek(type, segmentNumber) {
+  function appendWithSeekAndClosedCaptions(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, Date.now() / 1000);
     const reference = dummyReference(type, segmentNumber);
@@ -85,7 +85,7 @@ describe('MediaSourceEngine', () => {
         type,
         segment,
         reference,
-        /* hasClosedCaptions= */ false,
+        /* hasClosedCaptions= */ true,
         /* seeked= */ true);
   }
 
@@ -394,7 +394,7 @@ describe('MediaSourceEngine', () => {
     // platforms with native TS support.
     await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
-    await append(ContentType.VIDEO, 0);
+    await appendWithClosedCaptions(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
   });
@@ -412,8 +412,8 @@ describe('MediaSourceEngine', () => {
     await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
-    await append(ContentType.VIDEO, 2);
-    await appendWithSeek(ContentType.VIDEO, 0);
+    await appendWithClosedCaptions(ContentType.VIDEO, 2);
+    await appendWithSeekAndClosedCaptions(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(6);
   });
