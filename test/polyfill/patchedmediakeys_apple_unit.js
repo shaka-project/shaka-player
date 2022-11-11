@@ -1,3 +1,9 @@
+/*! @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 describe('PatchedMediaKeys_Apple', () => {
   const PatchedMediaKeysApple = shaka.polyfill.PatchedMediaKeysApple;
   let originalMediaKeys;
