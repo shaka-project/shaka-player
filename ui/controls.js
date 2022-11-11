@@ -1038,11 +1038,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (screen.orientation) {
       this.eventManager_.listen(screen.orientation, 'change', async () => {
-        try {
-          await this.onScreenRotation_();
-        } catch (e) {
-          console.log(e);
-        }
+        await this.onScreenRotation_();
       });
     }
   }
