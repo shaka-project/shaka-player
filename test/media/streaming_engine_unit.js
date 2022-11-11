@@ -2823,7 +2823,6 @@ describe('StreamingEngine', () => {
       // Here we go!
       streamingEngine.switchVariant(variant);
       streamingEngine.switchTextStream(textStream);
-      console.log('Skipping native screenshot tests on Safari < 16');
       await streamingEngine.start();
       playing = true;
       await runTest();
