@@ -269,6 +269,7 @@ requirement: {
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
   whitelist_regexp: "lib/util/delayed_tick.js"
+  whitelist_regexp: "lib/polyfill/abort_controller.js"
 }
 requirement: {
   type: BANNED_NAME
