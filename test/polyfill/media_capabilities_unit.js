@@ -76,8 +76,8 @@ describe('MediaCapabilities', () => {
   });
 
   describe('decodingInfo', () => {
-    it('should check codec support when MediaDecodingConfiguration ' +
-      'when type is "media-source"', () => {
+    it('should check codec support when MediaDecodingConfiguration.type ' +
+      'is "media-source"', () => {
       const isTypeSupportedSpy =
           spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
       shaka.polyfill.MediaCapabilities.install();
@@ -91,8 +91,9 @@ describe('MediaCapabilities', () => {
           mockDecodingConfig.audio.contentType,
       );
     });
-    it('should check codec support when MediaDecodingConfiguration ' +
-      'when type is "file"', () => {
+
+    it('should check codec support when MediaDecodingConfiguration.type ' +
+      'is "file"', () => {
       const supportsMediaTypeSpy =
           spyOn(shaka['util']['Platform'],
               'supportsMediaType').and.returnValue(true);
@@ -108,6 +109,7 @@ describe('MediaCapabilities', () => {
           mockDecodingConfig.audio.contentType,
       );
     });
+
     it('should check MediaKeySystem when keySystemConfiguration is present',
         async () => {
           const mockResult = {mockKeySystemAccess: 'mockKeySystemAccess'};
@@ -143,13 +145,14 @@ describe('MediaCapabilities', () => {
         });
   });
 
-  describe('generateKeySystemCacheKey', () => {
+  describe('generateKeySystemCacheKey_', () => {
     it('should create key as expected', () => {
       const videoCodec = 'video/mp4; codecs="avc1.4D4015"';
       const audioCodec = 'audio/mp4; codecs="mp4a.40.2"';
       const keySystem = 'com.widevine.alpha';
 
-      const key = shaka.polyfill.MediaCapabilities.generateKeySystemCacheKey(
+      /** @suppress {accessControls} */
+      const key = shaka.polyfill.MediaCapabilities.generateKeySystemCacheKey_(
           videoCodec,
           audioCodec,
           keySystem,
@@ -166,7 +169,8 @@ describe('MediaCapabilities', () => {
       const audioCodec = 'audio/mp4; codecs="mp4a.40.2"';
       const keySystem = 'com.widevine.alpha';
 
-      const key = shaka.polyfill.MediaCapabilities.generateKeySystemCacheKey(
+      /** @suppress {accessControls} */
+      const key = shaka.polyfill.MediaCapabilities.generateKeySystemCacheKey_(
           videoCodec,
           audioCodec,
           keySystem,
