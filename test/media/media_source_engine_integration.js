@@ -396,7 +396,7 @@ describe('MediaSourceEngine', () => {
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await appendWithClosedCaptions(ContentType.VIDEO, 0);
 
-    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(2);
   });
 
   it('extracts CEA-708 captions from previous segment from hls', async () => {
