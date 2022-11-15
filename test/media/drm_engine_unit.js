@@ -120,11 +120,17 @@ describe('DrmEngine', () => {
     };
 
     drmEngine = new shaka.media.DrmEngine(playerInterface);
+
     config = shaka.util.PlayerConfiguration.createDefault().drm;
     config.servers = {
       'drm.abc': 'http://abc.drm/license',
       'drm.def': 'http://def.drm/license',
     };
+    // Some platforms, such as Xbox, default to parseInbandPssh: true, which
+    // ignores encrypted events.  So set it explicitly to false, and let
+    // individual tests set it to true where relevant.
+    config.parseInbandPsshEnabled = false;
+
     drmEngine.configure(config);
   });
 
@@ -2548,7 +2554,11 @@ describe('DrmEngine', () => {
    */
   async function sendEncryptedEvent(
       initDataType = 'cenc', initData = new Uint8Array(1), keyId = null) {
-    mockVideo.on['encrypted']({initDataType, initData, keyId});
+    // For some platforms, such as Xbox, where parseInbandPssh defaults to
+    // true, this listener may never be set.
+    if (mockVideo.on['encrypted']) {
+      mockVideo.on['encrypted']({initDataType, initData, keyId});
+    }
 
     await Util.shortDelay();
   }
