@@ -112,6 +112,13 @@ jobs:
           # Install a launcher that can execute a shell script to launch this
           npm install karma-script-launcher --save-dev
 
+      # Some CI images (self-hosted or otherwise) don't have the minimum Java
+      # version necessary for the compiler (Java 11).
+      - uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+
       - name: Build Player
         run: python build/all.py
 

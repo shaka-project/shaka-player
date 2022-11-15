@@ -164,8 +164,6 @@ Chromebook:
 
 Tizen:
   browser: tizen
-  # TODO: Re-enable Tizen (https://github.com/shaka-project/generic-webdriver-server/issues/57)
-  disabled: true
 
 XboxOne:
   browser: xboxone
