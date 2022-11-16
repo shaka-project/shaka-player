@@ -7,6 +7,8 @@
 describe('MediaCapabilities', () => {
   const originalVendor = navigator.vendor;
   const originalUserAgent = navigator.userAgent;
+  const originalRequestMediaKeySystemAccess =
+    navigator.requestMediaKeySystemAccess;
   const originalMediaCapabilities = navigator.mediaCapabilities;
   /** @type {MediaDecodingConfiguration} */
   let mockDecodingConfig;
@@ -19,6 +21,11 @@ describe('MediaCapabilities', () => {
         });
     Object.defineProperty(window['navigator'],
         'vendor', {
+          value: 'unknown', configurable: true,
+          writable: true,
+        });
+    Object.defineProperty(window['navigator'],
+        'requestMediaKeySystemAccess', {
           value: 'unknown', configurable: true,
           writable: true,
         });
@@ -63,6 +70,9 @@ describe('MediaCapabilities', () => {
         'userAgent', {value: originalUserAgent});
     Object.defineProperty(window['navigator'],
         'vendor', {value: originalVendor});
+    Object.defineProperty(window['navigator'],
+        'requestMediaKeySystemAccess',
+        {value: originalRequestMediaKeySystemAccess});
     Object.defineProperty(window['navigator'],
         'mediaCapabilities', {value: originalMediaCapabilities});
   });
