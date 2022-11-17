@@ -2106,6 +2106,7 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.imageStreams.length).toBe(1);
+    expect(manifest.presentationTimeline.getMaxSegmentDuration()).toBe(1);
     const imageStream = manifest.imageStreams[0];
     expect(imageStream.width).toBe(1024);
     expect(imageStream.height).toBe(1152);
