@@ -483,22 +483,18 @@ describe('UITextDisplayer', () => {
     const nested1 = new shaka.text.Cue(168, 170.92, '');
     nested1.nestedCues = [new shaka.text.Cue(0, 170.92,
         'Emo look. I mean listen.')];
-    nested1.nestedCues[0].region = cueRegion;
 
     const nested2 = new shaka.text.Cue(172, 174.84, '');
     nested2.nestedCues = [new shaka.text.Cue(172, 174.84,
         'You have to learn to listen.')];
-    nested2.nestedCues[0].region = cueRegion;
 
     const nested3 = new shaka.text.Cue(175.84, 177.64, '');
     nested3.nestedCues = [new shaka.text.Cue(175.84, 177.64,
         'This is not some game.')];
-    nested3.nestedCues[0].region = cueRegion;
 
     const nested4 = new shaka.text.Cue(177.68, 181.84, '');
     nested4.nestedCues = [new shaka.text.Cue(177.68, 181.84,
         'You - I mean we - we could easily die out here.')];
-    nested4.nestedCues[0].region = cueRegion;
 
     cue1.nestedCues[0].nestedCues = [nested1, nested2, nested3, nested4];
 
@@ -511,19 +507,17 @@ describe('UITextDisplayer', () => {
     const textContainer = videoContainer.querySelector('.shaka-text-container');
     let captions = textContainer.querySelectorAll('div');
     expect(captions.length).toBe(1);
-
-    // Expect textContainer to display the cue.
-    expect(captions[0].textContent).toBe('Emo look. I mean listen.'); // empty?
+    let allRegionElements = textContainer.querySelectorAll(
+        '.shaka-text-region');
+    // Verify that the nested cues are all attached to a single region element.
+    expect(allRegionElements.length).toBe(1);
 
     // Advance time to where there is none to show
     video.currentTime = 171;
     updateCaptions();
-    captions = textContainer.querySelectorAll('div');
 
-    expect(captions.length).toBe(0);
-    let allRegionElements = textContainer.querySelectorAll(
+    allRegionElements = textContainer.querySelectorAll(
         '.shaka-text-region');
-    // Verify that the nested cues are all attached to a single region element.
     expect(allRegionElements.length).toBe(1);
 
     // Advance time to where there is something to show
@@ -536,19 +530,11 @@ describe('UITextDisplayer', () => {
 
     captions = textContainer.querySelectorAll('div');
 
-    console.log(`seeing ${captions.length}`);
-
     expect(captions.length).toBe(1);
     expect(captions[0].textContent).toBe('You have to learn to listen.');
 
     allRegionElements = textContainer.querySelectorAll(
         '.shaka-text-region');
     expect(allRegionElements.length).toBe(1);
-
-    const regionElement = allRegionElements[0];
-    const children = Array.from(regionElement.childNodes).filter(
-        (e) => e.nodeType == Node.ELEMENT_NODE);
-    expect(children.length).toBe(1);
   });
-
 });
