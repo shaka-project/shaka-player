@@ -4265,4 +4265,64 @@ describe('HlsParser', () => {
     expect(actualVideo0.mimeType).toBe('video/mp2t');
     expect(actualVideo1.mimeType).toBe('video/mp2t');
   });
+
+  it('lazy-loads AAC content without filtering it out', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",URI="audio"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="spa",URI="audio2"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MEDIA-SEQUENCE:1\n',
+      '#EXTINF:5,\n',
+      'video1.ts\n',
+      '#EXTINF:5,\n',
+      'video2.ts\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:3\n',
+      '#EXTINF:5,\n',
+      'audio1.aac\n',
+      '#EXTINF:5,\n',
+      'audio2.aac\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/audio2', audio)
+        .setResponseText('test:/video', video)
+        .setResponseValue('test:/init.mp4', initSegmentData);
+
+    const actualManifest = await parser.start('test:/master', playerInterface);
+    expect(actualManifest.variants.length).toBe(2);
+
+    const actualAudio0 = actualManifest.variants[0].audio;
+    const actualAudio1 = actualManifest.variants[1].audio;
+
+    // Before loading, all MIME types agree, and are defaulted to audio/mp4.
+    expect(actualAudio0.mimeType).toBe('audio/mp4');
+    expect(actualAudio1.mimeType).toBe('audio/mp4');
+
+    await actualAudio0.createSegmentIndex();
+
+    // After loading just ONE stream, all MIME types agree again, and have been
+    // updated to reflect the AAC content found inside the loaded playlist.
+    // This is how we avoid having the unloaded tracks filtered out during
+    // startup.
+    expect(actualAudio0.mimeType).toBe('audio/aac');
+    expect(actualAudio0.codecs).toBe('');
+    expect(actualAudio1.mimeType).toBe('audio/aac');
+    expect(actualAudio1.codecs).toBe('');
+  });
 });
