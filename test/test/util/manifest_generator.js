@@ -97,6 +97,8 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.minBufferTime = 0;
     /** @type {boolean} */
     this.sequenceMode = false;
+    /** @type {string} */
+    this.type = 'UNKNOWN';
 
     /** @type {shaka.extern.Manifest} */
     const foo = this;
