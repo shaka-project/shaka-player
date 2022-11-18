@@ -63,6 +63,7 @@ describe('MediaCapabilities', () => {
         width: 512,
       },
     };
+    shaka.polyfill.MediaCapabilities.memoizedMediaKeySystemAccessRequests_ = {};
   });
 
   afterAll(() => {
@@ -153,59 +154,23 @@ describe('MediaCapabilities', () => {
           );
           expect(result.keySystemAccess).toEqual(mockResult);
         });
-  });
 
-  describe('generateKeySystemCacheKey_', () => {
-    it('should create key as expected', () => {
-      const videoCodec = 'video/mp4; codecs="avc1.4D4015"';
-      const audioCodec = 'audio/mp4; codecs="mp4a.40.2"';
-      const keySystem = 'com.widevine.alpha';
-
-      /** @suppress {accessControls} */
-      const key = shaka.polyfill.MediaCapabilities.generateKeySystemCacheKey_(
-          videoCodec,
-          audioCodec,
-          keySystem,
-      );
-
-      expect(key).toBe('video/mp4; codecs="avc1.4D4015"' +
-        '#audio/mp4; codecs="mp4a.40.2"#com.widevine.alpha');
-    });
-  });
-
-  describe('appendKeySystemCache', () => {
-    it('should populate cache and not call requestMediaKeySystemAccess', () => {
-      const videoCodec = 'video/mp4; codecs="avc1.4D4015"';
-      const audioCodec = 'audio/mp4; codecs="mp4a.40.2"';
-      const keySystem = 'com.widevine.alpha';
-
-      /** @suppress {accessControls} */
-      const key = shaka.polyfill.MediaCapabilities.generateKeySystemCacheKey_(
-          videoCodec,
-          audioCodec,
-          keySystem,
-      );
-
-      const keySystemAccessResult = /** @type {!MediaKeySystemAccess} */ ({
-        keySystem: 'com.widevine.alpha',
-      });
-
+    it('should read previously requested codec/key system'+
+        'combinations from cache', async () => {
+      const mockResult = {mockKeySystemAccess: 'mockKeySystemAccess'};
       spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
       const requestKeySystemAccessSpy =
-          spyOn(window['navigator'], 'requestMediaKeySystemAccess');
+          spyOn(window['navigator'],
+              'requestMediaKeySystemAccess').and.returnValue(mockResult);
 
       shaka.polyfill.MediaCapabilities.install();
-      shaka.polyfill.MediaCapabilities.appendKeySystemCache(
-          videoCodec,
-          audioCodec,
-          keySystem, keySystemAccessResult);
-      navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
+      await navigator.mediaCapabilities
+          .decodingInfo(mockDecodingConfig);
+      await navigator.mediaCapabilities
+          .decodingInfo(mockDecodingConfig);
 
       expect(requestKeySystemAccessSpy)
-          .not.toHaveBeenCalled();
-      expect(shaka.polyfill.MediaCapabilities
-          .memoizedMediaKeySystemAccessRequests_[key])
-          .toBe(keySystemAccessResult);
+          .toHaveBeenCalledTimes(1);
     });
   });
 });
