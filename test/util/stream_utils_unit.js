@@ -701,6 +701,24 @@ describe('StreamUtils', () => {
 
       expect(manifest.variants.length).toBe(1);
     });
+
+    it('supports legacy AVC1 codec', async () => {
+      if (!MediaSource.isTypeSupported('video/mp4; codecs="avc1.42001e"')) {
+        pending('Codec avc1.42001e is not supported by the platform.');
+      }
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addVideo(1, (stream) => {
+            stream.mime('video/mp4', 'avc1.66.30');
+          });
+        });
+      });
+
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, /* currentVariant= */ null, manifest);
+
+      expect(manifest.variants.length).toBe(1);
+    });
   });
 
   describe('chooseCodecsAndFilterManifest', () => {
