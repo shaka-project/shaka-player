@@ -5,6 +5,7 @@
  */
 
 describe('MediaCapabilities', () => {
+  const Util = shaka.test.Util;
   const originalVendor = navigator.vendor;
   const originalUserAgent = navigator.userAgent;
   const originalRequestMediaKeySystemAccess =
@@ -12,6 +13,8 @@ describe('MediaCapabilities', () => {
   const originalMediaCapabilities = navigator.mediaCapabilities;
   /** @type {MediaDecodingConfiguration} */
   let mockDecodingConfig;
+  /** @type {!jasmine.Spy} */
+  let mockCanDisplayType;
 
   beforeAll(() => {
     Object.defineProperty(window['navigator'],
@@ -64,6 +67,9 @@ describe('MediaCapabilities', () => {
       },
     };
     shaka.polyfill.MediaCapabilities.memoizedMediaKeySystemAccessRequests_ = {};
+
+    mockCanDisplayType = jasmine.createSpy('canDisplayType');
+    mockCanDisplayType.and.returnValue(false);
   });
 
   afterAll(() => {
@@ -171,6 +177,64 @@ describe('MediaCapabilities', () => {
 
       expect(requestKeySystemAccessSpy)
           .toHaveBeenCalledTimes(1);
+    });
+
+    it('fails when the cast namespace is not available', async () => {
+      // Mock Shaka throwing an error from identifying an unexpected, non-Cast
+      // platform when performing Cast logic.
+      const isChromecastSpy =
+          spyOn(shaka['util']['Platform'],
+              'isChromecast').and.returnValue(true);
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.CAST,
+          shaka.util.Error.Code.CAST_UNEXPECTED_PLATFORM));
+      const isTypeSupportedSpy =
+          spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
+
+      shaka.polyfill.MediaCapabilities.install();
+      await expectAsync(
+          navigator.mediaCapabilities.decodingInfo(mockDecodingConfig)).
+              toBeRejectedWith(expected);
+    });
+
+    it('should use cast.__platform__.canDisplayType for "supported" field ' +
+        'when platform is Cast', async () => {
+      // We're using quotes to access window.cast because the compiler
+      // knows about lots of Cast-specific APIs we aren't mocking.  We
+      // don't need this mock strictly type-checked.
+      window['cast'] = {
+        __platform__: {canDisplayType: mockCanDisplayType},
+      };
+      const isChromecastSpy =
+          spyOn(shaka['util']['Platform'],
+              'isChromecast').and.returnValue(true);
+      const isTypeSupportedSpy =
+          spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
+
+      // Tests an HDR stream's extended MIME type is correctly provided.
+      mockDecodingConfig.video.transferFunction = 'pq';
+      mockDecodingConfig.video.contentType =
+          'video/mp4; codecs="hev1.2.4.L153.B0"';
+      mockCanDisplayType.and.callFake((type) => {
+        expect(type).toBe(
+            'video/mp4; ' +
+            'codecs="hev1.2.4.L153.B0"; ' +
+            'width=512; ' +
+            'height=288; ' +
+            'framerate=23.976023976023978; ' +
+            'eotf=smpte2084');
+        return true;
+      });
+
+      shaka.polyfill.MediaCapabilities.install();
+      await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
+
+      // Called once for audioConfig. Resolution, frame rate, and EOTF aren't
+      // applicable for audio, so isTypeSupported() is sufficient.
+      expect(isTypeSupportedSpy).toHaveBeenCalledTimes(1);
+      // Called once for videoConfig.
+      expect(mockCanDisplayType).toHaveBeenCalledTimes(1);
     });
   });
 });
