@@ -11,6 +11,8 @@ describe('MediaCapabilities', () => {
   const originalRequestMediaKeySystemAccess =
     navigator.requestMediaKeySystemAccess;
   const originalMediaCapabilities = navigator.mediaCapabilities;
+  const originalCast = window['cast'];
+
   /** @type {MediaDecodingConfiguration} */
   let mockDecodingConfig;
   /** @type {!jasmine.Spy} */
@@ -73,6 +75,7 @@ describe('MediaCapabilities', () => {
   });
 
   afterAll(() => {
+    window['cast'] = originalCast;
     Object.defineProperty(window['navigator'],
         'userAgent', {value: originalUserAgent});
     Object.defineProperty(window['navigator'],
