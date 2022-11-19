@@ -194,8 +194,14 @@ describe('MediaCapabilities', () => {
 
       shaka.polyfill.MediaCapabilities.install();
       await expectAsync(
-          navigator.mediaCapabilities.decodingInfo(mockDecodingConfig)).
-              toBeRejectedWith(expected);
+          navigator.mediaCapabilities.decodingInfo(mockDecodingConfig))
+          .toBeRejectedWith(expected);
+
+      // 1 (during install()) + 1 (for video config check).
+      expect(isChromecastSpy).toHaveBeenCalledTimes(2);
+      // Called for decodingConfig.audio. This is never reached because of the
+      // error throw.
+      expect(isTypeSupportedSpy).not.toHaveBeenCalled();
     });
 
     it('should use cast.__platform__.canDisplayType for "supported" field ' +
@@ -230,10 +236,12 @@ describe('MediaCapabilities', () => {
       shaka.polyfill.MediaCapabilities.install();
       await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
-      // Called once for audioConfig. Resolution, frame rate, and EOTF aren't
-      // applicable for audio, so isTypeSupported() is sufficient.
+      // 1 (during install()) + 1 (for video config check).
+      expect(isChromecastSpy).toHaveBeenCalledTimes(2);
+      // Called once for mockDecodingConfig.audio. Resolution, frame rate, and
+      // EOTF aren't applicable for audio, so isTypeSupported() is sufficient.
       expect(isTypeSupportedSpy).toHaveBeenCalledTimes(1);
-      // Called once for videoConfig.
+      // Called once for mockDecodingConfig.video.
       expect(mockCanDisplayType).toHaveBeenCalledTimes(1);
     });
   });
