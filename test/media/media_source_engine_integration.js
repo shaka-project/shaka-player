@@ -35,103 +35,24 @@ describe('MediaSourceEngine', () => {
   });
 
   const tsCeaCue0 = jasmine.objectContaining({
-    startTime: Util.closeTo(0, 0.001),
-    endTime: Util.closeTo(2.134, 0.001),
-    textAlign: Cue.textAlign.CENTER,
-    nestedCues: [
-      jasmine.objectContaining({
-        startTime: Util.closeTo(0, 0.001),
-        endTime: Util.closeTo(2.134, 0.001),
-        payload: 'These are 608 captions',
-        textAlign: Cue.textAlign.CENTER,
-      }),
-      jasmine.objectContaining({
-        startTime: Util.closeTo(0, 0.001),
-        endTime: Util.closeTo(2.134, 0.001),
-        lineBreak: true,
-      }),
-      jasmine.objectContaining({
-        startTime: Util.closeTo(0, 0.001),
-        endTime: Util.closeTo(2.134, 0.001),
-        payload: '(top left)',
-        textAlign: Cue.textAlign.CENTER,
-      }),
-    ],
-  });
-
-  const tsCeaCue1 = jasmine.objectContaining({
     startTime: Util.closeTo(2.167, 0.001),
     endTime: Util.closeTo(6.372, 0.001),
     textAlign: Cue.textAlign.CENTER,
-    nestedCues: [
-      jasmine.objectContaining({
-        startTime: Util.closeTo(2.167, 0.001),
-        endTime: Util.closeTo(6.372, 0.001),
-        payload: 'These are 608 captions',
-        textAlign: Cue.textAlign.CENTER,
-      }),
-      jasmine.objectContaining({
-        startTime: Util.closeTo(2.167, 0.001),
-        endTime: Util.closeTo(6.372, 0.001),
-        lineBreak: true,
-      }),
-      jasmine.objectContaining({
-        startTime: Util.closeTo(2.167, 0.001),
-        endTime: Util.closeTo(6.372, 0.001),
-        payload: '(top left)',
-        textAlign: Cue.textAlign.CENTER,
-      }),
-    ],
+    payload: 'These are 608 captions\n(top left)',
   });
 
-  const tsCeaCue2 = jasmine.objectContaining({
+  const tsCeaCue1 = jasmine.objectContaining({
     startTime: Util.closeTo(6.705, 0.001),
     endTime: Util.closeTo(13.379, 0.001),
     textAlign: Cue.textAlign.CENTER,
-    nestedCues: [
-      jasmine.objectContaining({
-        startTime: Util.closeTo(6.705, 0.001),
-        endTime: Util.closeTo(13.379, 0.001),
-        payload: 'These are 608 captions',
-        textAlign: Cue.textAlign.CENTER,
-      }),
-      jasmine.objectContaining({
-        startTime: Util.closeTo(6.705, 0.001),
-        endTime: Util.closeTo(13.379, 0.001),
-        lineBreak: true,
-      }),
-      jasmine.objectContaining({
-        startTime: Util.closeTo(6.705, 0.001),
-        endTime: Util.closeTo(13.379, 0.001),
-        payload: '(middle)',
-        textAlign: Cue.textAlign.CENTER,
-      }),
-    ],
+    payload: 'These are 608 captions\n(middle)',
   });
 
-  const tsCeaCue3 = jasmine.objectContaining({
+  const tsCeaCue2 = jasmine.objectContaining({
     startTime: Util.closeTo(13.712, 0.001),
     endTime: Util.closeTo(20.719, 0.001),
     textAlign: Cue.textAlign.CENTER,
-    nestedCues: [
-      jasmine.objectContaining({
-        startTime: Util.closeTo(13.712, 0.001),
-        endTime: Util.closeTo(20.719, 0.001),
-        payload: 'These are 608 captions',
-        textAlign: Cue.textAlign.CENTER,
-      }),
-      jasmine.objectContaining({
-        startTime: Util.closeTo(13.712, 0.001),
-        endTime: Util.closeTo(20.719, 0.001),
-        lineBreak: true,
-      }),
-      jasmine.objectContaining({
-        startTime: Util.closeTo(13.712, 0.001),
-        endTime: Util.closeTo(20.719, 0.001),
-        payload: '(bottom left)',
-        textAlign: Cue.textAlign.CENTER,
-      }),
-    ],
+    payload: 'These are 608 captions\n(bottom left)',
   });
 
   /**
@@ -516,10 +437,8 @@ describe('MediaSourceEngine', () => {
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
-    // We don't get tsCeaCue1 in this segment.
-    // (Not sure if this is right, but it's the current state w/ mux.js.)
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
-    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue3]);
   });
 
   it('extracts CEA-708 captions from previous segment from hls', async () => {
@@ -536,15 +455,19 @@ describe('MediaSourceEngine', () => {
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
     await append(ContentType.VIDEO, 2);
-    await appendWithSeek(ContentType.VIDEO, 0);
 
-    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(6);
-
-    // Some of these cues are repeated.  There are actually only 4 unique ones.
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
-    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue3]);
+
+    textDisplayer.appendSpy.calls.reset();
+    await appendWithSeek(ContentType.VIDEO, 0);
+
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
   });
 
   it('buffers partial TS video segments in sequence mode', async () => {
