@@ -88,10 +88,12 @@ describe('TimestampOffsetCorrector', () => {
       tsoc.configure(createStreamingConfig(true, 10));
       const segRef =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec);
+
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
       const corrected =
           tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
-      expect(corrected === false);
+
+      expect(corrected).toBeFalse();
       expect(segRef.timestampOffset).toBeCloseTo(
           -baseMediaDecodeTimeSec, 1);
       expect(onEvent).not.toHaveBeenCalled();
@@ -102,10 +104,12 @@ describe('TimestampOffsetCorrector', () => {
       tsoc.configure(createStreamingConfig(true, 10));
       const segRef =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 30);
+
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
       const corrected =
           tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
-      expect(corrected);
+
+      expect(corrected).toBeTrue();
       expect(segRef.timestampOffset).toBeCloseTo(-baseMediaDecodeTimeSec, 1);
       expect(onEvent).toHaveBeenCalledWith(jasmine.objectContaining({
         type: 'timestampcorrected',
@@ -121,9 +125,11 @@ describe('TimestampOffsetCorrector', () => {
       tsoc.configure(createStreamingConfig(true, 10));
       const segRef =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 5);
+
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
       const corrected =
           tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
+
       expect(corrected).toBeFalse();
       expect(segRef.timestampOffset).toBeCloseTo(
           -baseMediaDecodeTimeSec + 5, 1);
@@ -134,11 +140,15 @@ describe('TimestampOffsetCorrector', () => {
       tsoc.configure(createStreamingConfig(true, 10));
       const segRef =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 15);
+
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
       tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
+
       expect(onEvent).toHaveBeenCalled();
+
       const corrected =
           tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
+
       expect(corrected).toBeFalse();
       expect(onEvent).toHaveBeenCalledTimes(1);
     });
@@ -147,9 +157,11 @@ describe('TimestampOffsetCorrector', () => {
       tsoc.configure(createStreamingConfig(false, 10));
       const segRef =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 30);
+
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
       const corrected =
           tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
+
       expect(corrected).toBeFalse();
       expect(segRef.timestampOffset).toBeCloseTo(
           -baseMediaDecodeTimeSec + 30, 1);
@@ -163,13 +175,17 @@ describe('TimestampOffsetCorrector', () => {
       tsoc.configure(createStreamingConfig(true, 10));
       const segRef =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 30);
+
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
       const corrected = tsoc.checkTimestampOffset(
           contentType, segRef, mediaSegment);
+
       expect(corrected).toBeTrue();
       expect(segRef.timestampOffset).toBeCloseTo(-baseMediaDecodeTimeSec, 1);
+
       const segRef2 =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 30);
+
       tsoc.correctTimestampOffset(contentType, segRef2);
       expect(segRef2.timestampOffset).toBeCloseTo(-baseMediaDecodeTimeSec, 1);
     });
@@ -179,14 +195,18 @@ describe('TimestampOffsetCorrector', () => {
       tsoc.configure(createStreamingConfig(true, 10));
       const segRef =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 30);
+
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
       const corrected = tsoc.checkTimestampOffset(
           contentType, segRef, mediaSegment);
+
       expect(corrected).toBeTrue();
       expect(segRef.timestampOffset).toBeCloseTo(-baseMediaDecodeTimeSec, 1);
+
       const segRef2 =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 40);
       tsoc.correctTimestampOffset(contentType, segRef2);
+
       expect(segRef2.timestampOffset)
           .toBeCloseTo(-baseMediaDecodeTimeSec + 40, 1);
     });
