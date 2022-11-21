@@ -6,6 +6,8 @@
 
 describe('MediaSourceEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const Cue = shaka.text.Cue;
+  const Util = shaka.test.Util;
   const presentationDuration = 840;
 
   /** @type {!HTMLVideoElement} */
@@ -17,6 +19,41 @@ describe('MediaSourceEngine', () => {
   let generators;
   let metadata;
   // TODO: add text streams to MSE integration tests
+
+  const mp4CeaCue0 = jasmine.objectContaining({
+    startTime: Util.closeTo(0.067, 0.001),
+    endTime: Util.closeTo(1, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    nestedCues: [
+      jasmine.objectContaining({
+        startTime: Util.closeTo(0.067, 0.001),
+        endTime: Util.closeTo(1, 0.001),
+        payload: 'eng:⠀00:00:00:00',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+    ],
+  });
+
+  const tsCeaCue0 = jasmine.objectContaining({
+    startTime: Util.closeTo(2.167, 0.001),
+    endTime: Util.closeTo(6.372, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(top left)',
+  });
+
+  const tsCeaCue1 = jasmine.objectContaining({
+    startTime: Util.closeTo(6.705, 0.001),
+    endTime: Util.closeTo(13.379, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(middle)',
+  });
+
+  const tsCeaCue2 = jasmine.objectContaining({
+    startTime: Util.closeTo(13.712, 0.001),
+    endTime: Util.closeTo(20.719, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(bottom left)',
+  });
 
   /**
    * We use a fake text displayer so that we can check if CEA text is being
@@ -387,9 +424,14 @@ describe('MediaSourceEngine', () => {
     // platforms with native TS support.
     await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ true);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
+
     await append(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
   });
 
   it('extracts CEA-708 captions from previous segment from hls', async () => {
@@ -406,9 +448,19 @@ describe('MediaSourceEngine', () => {
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
     await append(ContentType.VIDEO, 2);
+
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
+
+    textDisplayer.appendSpy.calls.reset();
     await appendWithSeek(ContentType.VIDEO, 0);
 
-    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(6);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
   });
 
   it('buffers partial TS video segments in sequence mode', async () => {
@@ -461,6 +513,7 @@ describe('MediaSourceEngine', () => {
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await appendWithClosedCaptions(ContentType.VIDEO, 0);
 
-    expect(textDisplayer.appendSpy).toHaveBeenCalled();
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(1);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([mp4CeaCue0]);
   });
 });
