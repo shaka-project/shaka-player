@@ -64,8 +64,8 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   updateTime_() {
     const isSeeking = this.controls.isSeeking();
     let displayTime = this.controls.getDisplayTime();
-    const duration = this.video.duration;
     const seekRange = this.player.seekRange();
+    const duration = seekRange.end - seekRange.start;
     const seekRangeSize = seekRange.end - seekRange.start;
     const Utils = shaka.ui.Utils;
 
