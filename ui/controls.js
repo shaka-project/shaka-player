@@ -591,25 +591,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   async enterFullScreen_() {
     try {
       if (document.fullscreenEnabled) {
-        try {
-          if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-          }
-          await this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        }
+        await this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
 
-          if (this.config_.forceLandscapeOnFullscreen && screen.orientation) {
-            try {
-              // Locking to 'landscape' should let it be either
-              // 'landscape-primary' or 'landscape-secondary' as appropriate.
-              await screen.orientation.lock('landscape');
-            } catch (error) {
-              // If screen.orientation.lock does not work on a device, it will
-              // be rejected with an error. Suppress that error.
-            }
-          }
-        } catch (error) {
-          this.dispatchEvent(new shaka.util.FakeEvent(
-              'error', (new Map()).set('detail', error)));
+        if (this.config_.forceLandscapeOnFullscreen && screen.orientation) {
+          // Locking to 'landscape' should let it be either
+          // 'landscape-primary' or 'landscape-secondary' as appropriate.
+          await screen.orientation.lock('landscape');
         }
       } else {
         const video = /** @type {HTMLVideoElement} */(this.localVideo_);
@@ -618,6 +608,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
       }
     } catch (error) {
+      this.dispatchEvent(new shaka.util.FakeEvent(
+          'error', (new Map()).set('detail', error)));
       // Entering fullscreen can fail
       // if the user didn't interacting with the video.
       // be rejected with an error. Suppress that error.
