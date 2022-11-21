@@ -89,12 +89,14 @@ shaka.test.Util = class {
    * given value.
    *
    * @param {number} val
+   * @param {number=} maxDelta
    * @return {number}
    */
-  static closeTo(val) {
-    const E = 0.000001;
+  static closeTo(val, maxDelta = 0.000001) {
     return /** @type {number} */(/** @type {?} */({
-      asymmetricMatch: (other) => other >= val - E && other <= val + E,
+      asymmetricMatch: (other) => {
+        return other >= val - maxDelta && other <= val + maxDelta;
+      },
       jasmineToString: () => '<closeTo: ' + val + '>',
     }));
   }
