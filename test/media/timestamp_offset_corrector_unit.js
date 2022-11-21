@@ -152,21 +152,6 @@ describe('TimestampOffsetCorrector', () => {
       expect(corrected).toBeFalse();
       expect(onEvent).toHaveBeenCalledTimes(1);
     });
-
-    it('does not correct timestampOffset when disabled', () => {
-      tsoc.configure(createStreamingConfig(false, 10));
-      const segRef =
-          createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 30);
-
-      tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
-      const corrected =
-          tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
-
-      expect(corrected).toBeFalse();
-      expect(segRef.timestampOffset).toBeCloseTo(
-          -baseMediaDecodeTimeSec + 30, 1);
-      expect(onEvent).not.toHaveBeenCalled();
-    });
   });
 
   describe('correctTimestampOffset()', () => {
