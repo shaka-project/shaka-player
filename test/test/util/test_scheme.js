@@ -172,7 +172,8 @@ shaka.test.TestScheme = class {
      */
     function createStreamGenerator(metadata) {
       if (metadata.segmentUri.includes('.ts')) {
-        return new shaka.test.TSVodStreamGenerator(metadata.segmentUri);
+        return new shaka.test.TSVodStreamGenerator(
+            metadata.segmentUri, metadata.segmentDuration);
       }
       return new shaka.test.Mp4VodStreamGenerator(
           metadata.initSegmentUri, metadata.mdhdOffset, metadata.segmentUri,
@@ -623,7 +624,7 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/captions-test.ts',
       mimeType: 'video/mp2t',
       codecs: 'avc1.64001e',
-      segmentDuration: 2,
+      segmentDuration: 20,  // yes, this is accurate
     },
     text: {
       mimeType: 'application/cea-608',
