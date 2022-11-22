@@ -35,22 +35,45 @@ describe('MediaSourceEngine', () => {
   });
 
   const tsCeaCue0 = jasmine.objectContaining({
-    startTime: Util.closeTo(2.167, 0.001),
-    endTime: Util.closeTo(6.372, 0.001),
+    startTime: Util.closeTo(0.767, 0.001),
+    endTime: Util.closeTo(4.972, 0.001),
     textAlign: Cue.textAlign.CENTER,
     payload: 'These are 608 captions\n(top left)',
   });
 
   const tsCeaCue1 = jasmine.objectContaining({
-    startTime: Util.closeTo(6.705, 0.001),
-    endTime: Util.closeTo(13.379, 0.001),
+    startTime: Util.closeTo(5.305, 0.001),
+    endTime: Util.closeTo(11.979, 0.001),
     textAlign: Cue.textAlign.CENTER,
     payload: 'These are 608 captions\n(middle)',
   });
 
   const tsCeaCue2 = jasmine.objectContaining({
-    startTime: Util.closeTo(13.712, 0.001),
-    endTime: Util.closeTo(20.719, 0.001),
+    startTime: Util.closeTo(12.312, 0.001),
+    endTime: Util.closeTo(19.319, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(bottom left)',
+  });
+
+  // The same segments as above, but offset by 40 seconds (yes, 40), which is
+  // also 2 segments.
+  const tsCeaCue3 = jasmine.objectContaining({
+    startTime: Util.closeTo(40.767, 0.001),
+    endTime: Util.closeTo(44.972, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(top left)',
+  });
+
+  const tsCeaCue4 = jasmine.objectContaining({
+    startTime: Util.closeTo(45.305, 0.001),
+    endTime: Util.closeTo(51.979, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(middle)',
+  });
+
+  const tsCeaCue5 = jasmine.objectContaining({
+    startTime: Util.closeTo(52.312, 0.001),
+    endTime: Util.closeTo(59.319, 0.001),
     textAlign: Cue.textAlign.CENTER,
     payload: 'These are 608 captions\n(bottom left)',
   });
@@ -457,9 +480,9 @@ describe('MediaSourceEngine', () => {
     await appendWithClosedCaptions(ContentType.VIDEO, 2);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
-    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
-    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
-    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue3]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue4]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue5]);
 
     textDisplayer.appendSpy.calls.reset();
     await appendWithSeekAndClosedCaptions(ContentType.VIDEO, 0);
