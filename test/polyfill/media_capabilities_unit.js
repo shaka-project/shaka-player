@@ -74,6 +74,10 @@ describe('MediaCapabilities', () => {
     mockCanDisplayType.and.returnValue(false);
   });
 
+  afterEach(() => {
+    window['cast'] = originalCast;
+  });
+
   afterAll(() => {
     window['cast'] = originalCast;
     Object.defineProperty(window['navigator'],
@@ -183,7 +187,8 @@ describe('MediaCapabilities', () => {
     });
 
     it('throws when the cast namespace is not available', async () => {
-      // We don't set a mock cast namespace here to signal an error.
+      delete window['cast'];
+
       const isChromecastSpy =
           spyOn(shaka['util']['Platform'],
               'isChromecast').and.returnValue(true);
