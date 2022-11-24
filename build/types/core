@@ -38,6 +38,7 @@
 +../../lib/media/segment_reference.js
 +../../lib/media/stall_detector.js
 +../../lib/media/streaming_engine.js
++../../lib/media/segment_prefetch.js
 +../../lib/media/time_ranges_utils.js
 +../../lib/media/transmuxer.js
 +../../lib/media/video_wrapper.js
