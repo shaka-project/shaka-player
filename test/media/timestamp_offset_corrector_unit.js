@@ -46,14 +46,15 @@ describe('TimestampOffsetCorrector', () => {
         timestampOffset, // timestampOffset
         0, // appendWindowStart
         Infinity); // appendWindowEnd
-  };
+  }
 
   /**
-   * Create streamingConfig with designated values for correctTimestampOffset flag
-   * and maxTimestampDiscrepancy
-   * @param {boolean} correctTimestampOffset 
-   * @param {number} maxTimestampDiscrepancy 
-   * @returns {!shaka.extern.StreamingConfiguration}
+   * Create streamingConfig with designated values for correctTimestampOffset
+   * flag and maxTimestampDiscrepancy.
+   *
+   * @param {boolean} correctTimestampOffset
+   * @param {number} maxTimestampDiscrepancy
+   * @return {!shaka.extern.StreamingConfiguration}
    */
   function createStreamingConfig(
       correctTimestampOffset, maxTimestampDiscrepancy) {
@@ -61,7 +62,7 @@ describe('TimestampOffsetCorrector', () => {
     config.correctTimestampOffset = correctTimestampOffset;
     config.maxTimestampDiscrepancy = maxTimestampDiscrepancy;
     return config;
-  };
+  }
 
   beforeAll(async () => {
     const responses = await Promise.all([
@@ -93,7 +94,7 @@ describe('TimestampOffsetCorrector', () => {
       const corrected =
           tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
 
-      expect(corrected).toBeFalse();
+      expect(corrected).toBe(false);
       expect(segRef.timestampOffset).toBeCloseTo(
           -baseMediaDecodeTimeSec, 1);
       expect(onEvent).not.toHaveBeenCalled();
@@ -109,7 +110,7 @@ describe('TimestampOffsetCorrector', () => {
       const corrected =
           tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
 
-      expect(corrected).toBeTrue();
+      expect(corrected).toBe(true);
       expect(segRef.timestampOffset).toBeCloseTo(-baseMediaDecodeTimeSec, 1);
       expect(onEvent).toHaveBeenCalledWith(jasmine.objectContaining({
         type: 'timestampcorrected',
@@ -130,7 +131,7 @@ describe('TimestampOffsetCorrector', () => {
       const corrected =
           tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
 
-      expect(corrected).toBeFalse();
+      expect(corrected).toBe(false);
       expect(segRef.timestampOffset).toBeCloseTo(
           -baseMediaDecodeTimeSec + 5, 1);
       expect(onEvent).not.toHaveBeenCalled();
@@ -149,7 +150,7 @@ describe('TimestampOffsetCorrector', () => {
       const corrected =
           tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
 
-      expect(corrected).toBeFalse();
+      expect(corrected).toBe(false);
       expect(onEvent).toHaveBeenCalledTimes(1);
     });
   });
@@ -165,7 +166,7 @@ describe('TimestampOffsetCorrector', () => {
       const corrected = tsoc.checkTimestampOffset(
           contentType, segRef, mediaSegment);
 
-      expect(corrected).toBeTrue();
+      expect(corrected).toBe(true);
       expect(segRef.timestampOffset).toBeCloseTo(-baseMediaDecodeTimeSec, 1);
 
       const segRef2 =
@@ -185,7 +186,7 @@ describe('TimestampOffsetCorrector', () => {
       const corrected = tsoc.checkTimestampOffset(
           contentType, segRef, mediaSegment);
 
-      expect(corrected).toBeTrue();
+      expect(corrected).toBe(true);
       expect(segRef.timestampOffset).toBeCloseTo(-baseMediaDecodeTimeSec, 1);
 
       const segRef2 =
