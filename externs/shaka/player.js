@@ -1178,7 +1178,6 @@ shaka.extern.CmcdConfiguration;
  */
 shaka.extern.OfflineConfiguration;
 
-
 /**
  * @typedef {{
  *   autoShowText: shaka.config.AutoShowText,
@@ -1187,6 +1186,7 @@ shaka.extern.OfflineConfiguration;
  *   streaming: shaka.extern.StreamingConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
+ *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   cmcd: shaka.extern.CmcdConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
@@ -1216,6 +1216,8 @@ shaka.extern.OfflineConfiguration;
  *   A factory to construct an abr manager.
  * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.
+ * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
+ *   Audio codec switching strategy
  * @property {shaka.extern.CmcdConfiguration} cmcd
  *   CMCD configuration and settings. (Common Media Client Data)
  * @property {shaka.extern.OfflineConfiguration} offline
