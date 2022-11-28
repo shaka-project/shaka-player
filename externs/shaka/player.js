@@ -871,6 +871,7 @@ shaka.extern.ManifestConfiguration;
 
 /**
  * @typedef {{
+ *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   retryParameters: shaka.extern.RetryParameters,
  *   failureCallback: function(!shaka.util.Error),
  *   rebufferingGoal: number,
@@ -901,7 +902,10 @@ shaka.extern.ManifestConfiguration;
  *
  * @description
  * The StreamingEngine's configuration options.
- *
+ * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
+ *  Allow codec switching strategy. Default behavior is disabled.
+ *  Smooth loading uses SourceBuffer.changeType. Reload uses cycling of
+ *  MediaSource.
  * @property {shaka.extern.RetryParameters} retryParameters
  *   Retry parameters for segment requests.
  * @property {function(!shaka.util.Error)} failureCallback
@@ -1186,7 +1190,6 @@ shaka.extern.OfflineConfiguration;
  *   streaming: shaka.extern.StreamingConfiguration,
  *   abrFactory: shaka.extern.AbrManager.Factory,
  *   abr: shaka.extern.AbrConfiguration,
- *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   cmcd: shaka.extern.CmcdConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
@@ -1216,8 +1219,6 @@ shaka.extern.OfflineConfiguration;
  *   A factory to construct an abr manager.
  * @property {shaka.extern.AbrConfiguration} abr
  *   ABR configuration and settings.
- * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
- *   Audio codec switching strategy
  * @property {shaka.extern.CmcdConfiguration} cmcd
  *   CMCD configuration and settings. (Common Media Client Data)
  * @property {shaka.extern.OfflineConfiguration} offline
