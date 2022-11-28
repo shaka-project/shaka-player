@@ -2244,7 +2244,7 @@ describe('Player', () => {
 
       player.configure({
         preferredAudioLanguage: '',
-        preferredAudioLabel: 'es-label'
+        preferredAudioLabel: 'es-label',
       });
 
       await player.load(fakeManifestUri, 0, fakeMimeType);

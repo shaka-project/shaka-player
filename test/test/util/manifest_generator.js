@@ -263,6 +263,8 @@ shaka.test.ManifestGenerator.Variant = class {
     if (!isPartial) {
       /** @type {string} */
       this.language = 'und';
+      /** @type {string} */
+      this.label = '';
       /** @type {number} */
       this.bandwidth = 0;
       /** @type {number} */
@@ -447,7 +449,7 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {?number} id
    * @param {shaka.util.ManifestParserUtils.ContentType} type
    * @param {string=} lang
-   * @param {?string} label
+   * @param {string=} label
    */
   constructor(manifest, isPartial, id, type, lang, label) {
     goog.asserts.assert(
