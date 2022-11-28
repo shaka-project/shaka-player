@@ -1318,6 +1318,7 @@ shaka.extern.OfflineConfiguration;
  *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
+ *   preferredAudioLabel: string,
  *   preferredTextLanguage: string,
  *   preferredVariantRole: string,
  *   preferredTextRole: string,
@@ -1357,6 +1358,8 @@ shaka.extern.OfflineConfiguration;
  *   The preferred language to use for audio tracks.  If not given it will use
  *   the <code>'main'</code> track.
  *   Changing this during playback will not affect the current playback.
+ * @property {string} preferredAudioLabel
+ *   The preferred label to use for audio tracks
  * @property {string} preferredTextLanguage
  *   The preferred language to use for text tracks.  If a matching text track
  *   is found, and the selected audio and text tracks have different languages,
