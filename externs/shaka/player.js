@@ -1012,10 +1012,8 @@ shaka.extern.ManifestConfiguration;
  *   the default value unless you have a good reason not to.
  * @property {boolean} forceTransmux
  *   If this is <code>true</code>, we will transmux AAC and TS content even if
- *   not strictly necessary for the assets to be played.  Shaka Player
- *   currently only supports CEA 708 captions by transmuxing, so this value is
- *   necessary for enabling them on platforms with native TS support like Edge
- *   or Chromecast. This value defaults to <code>false</code>.
+ *   not strictly necessary for the assets to be played.
+ *   This value defaults to <code>false</code>.
  * @property {number} safeSeekOffset
  *   The amount of seconds that should be added when repositioning the playhead
  *   after falling out of the availability window or seek. This gives the player
