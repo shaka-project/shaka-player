@@ -120,11 +120,17 @@ describe('DrmEngine', () => {
     };
 
     drmEngine = new shaka.media.DrmEngine(playerInterface);
+
     config = shaka.util.PlayerConfiguration.createDefault().drm;
     config.servers = {
       'drm.abc': 'http://abc.drm/license',
       'drm.def': 'http://def.drm/license',
     };
+    // Some platforms, such as Xbox, default to parseInbandPssh: true, which
+    // ignores encrypted events.  So set it explicitly to false, and let
+    // individual tests set it to true where relevant.
+    config.parseInbandPsshEnabled = false;
+
     drmEngine.configure(config);
   });
 
@@ -1094,6 +1100,14 @@ describe('DrmEngine', () => {
       it('is listened for', async () => {
         await initAndAttach();
         expect(mockVideo.addEventListener).toHaveBeenCalledWith(
+            'encrypted', jasmine.any(Function), jasmine.anything());
+      });
+
+      it('is not listened for if parseInbandPsshEnabled is true', async () => {
+        config.parseInbandPsshEnabled = true;
+        drmEngine.configure(config);
+        await initAndAttach();
+        expect(mockVideo.addEventListener).not.toHaveBeenCalledWith(
             'encrypted', jasmine.any(Function), jasmine.anything());
       });
 
@@ -2355,6 +2369,59 @@ describe('DrmEngine', () => {
     }
   });
 
+  describe('parseInbandPssh', () => {
+    const WIDEVINE_PSSH =
+        '00000028' +                          // atom size
+        '70737368' +                          // atom type='pssh'
+        '00000000' +                          // v0, flags=0
+        'edef8ba979d64acea3c827dcd51d21ed' +  // system id (Widevine)
+        '00000008' +                          // data size
+        '0102030405060708';                   // data
+
+    const PLAYREADY_PSSH =
+        '00000028' +                          // atom size
+        '70737368' +                          // atom type 'pssh'
+        '00000000' +                          // v0, flags=0
+        '9a04f07998404286ab92e65be0885f95' +  // system id (PlayReady)
+        '00000008' +                          // data size
+        '0102030405060708';                   // data
+
+    const SEGMENT =
+        '00000058' + // atom size = 28x + 28x + 8x
+        '6d6f6f66' + // atom type 'moof'
+        WIDEVINE_PSSH +
+        PLAYREADY_PSSH;
+
+    const binarySegment = shaka.util.Uint8ArrayUtils.fromHex(SEGMENT);
+
+    it('calls newInitData when enabled', async () => {
+      config.parseInbandPsshEnabled = true;
+      await initAndAttach();
+
+      /** @type {!jasmine.Spy} */
+      const newInitDataSpy = jasmine.createSpy('newInitData');
+      drmEngine.newInitData = shaka.test.Util.spyFunc(newInitDataSpy);
+
+      await drmEngine.parseInbandPssh(
+          shaka.util.ManifestParserUtils.ContentType.VIDEO, binarySegment);
+      const expectedInitData = shaka.util.Uint8ArrayUtils.fromHex(
+          WIDEVINE_PSSH + PLAYREADY_PSSH);
+      expect(newInitDataSpy).toHaveBeenCalledWith('cenc', expectedInitData);
+    });
+
+    it('does not call newInitData when disabled', async () => {
+      config.parseInbandPsshEnabled = false;
+      await initAndAttach();
+
+      /** @type {!jasmine.Spy} */
+      const newInitDataSpy = jasmine.createSpy('newInitData');
+      drmEngine.newInitData = shaka.test.Util.spyFunc(newInitDataSpy);
+      await drmEngine.parseInbandPssh(
+          shaka.util.ManifestParserUtils.ContentType.VIDEO, binarySegment);
+      expect(newInitDataSpy).not.toHaveBeenCalled();
+    });
+  });
+
   async function initAndAttach() {
     const variants = manifest.variants;
     await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
@@ -2487,7 +2554,11 @@ describe('DrmEngine', () => {
    */
   async function sendEncryptedEvent(
       initDataType = 'cenc', initData = new Uint8Array(1), keyId = null) {
-    mockVideo.on['encrypted']({initDataType, initData, keyId});
+    // For some platforms, such as Xbox, where parseInbandPssh defaults to
+    // true, this listener may never be set.
+    if (mockVideo.on['encrypted']) {
+      mockVideo.on['encrypted']({initDataType, initData, keyId});
+    }
 
     await Util.shortDelay();
   }

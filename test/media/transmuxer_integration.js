@@ -12,6 +12,9 @@ describe('Transmuxer', () => {
   const mp4MimeType = 'video/mp4; codecs="avc1.42E01E"';
   const transportStreamVideoMimeType = 'video/mp2t; codecs="avc1.42E01E"';
   const transportStreamAudioMimeType = 'video/mp2t; codecs="mp4a.40.2"';
+  const aacAudioMimeType = 'audio/aac';
+
+  const transmuxerMimeType = 'fake/mimeType';
 
   /** @type {!ArrayBuffer} */
   let videoSegment;
@@ -35,7 +38,7 @@ describe('Transmuxer', () => {
   });
 
   beforeEach(() => {
-    transmuxer = new shaka.media.Transmuxer();
+    transmuxer = new shaka.media.Transmuxer(transmuxerMimeType);
   });
 
   afterEach(async () => {
@@ -59,40 +62,48 @@ describe('Transmuxer', () => {
     });
   });
 
-  describe('convertTsCodecs', () => {
-    const convertTsCodecs =
-        (type, codecs) => shaka.media.Transmuxer.convertTsCodecs(type, codecs);
+  describe('convertCodecs', () => {
+    const convertCodecs =
+        (type, codecs) => shaka.media.Transmuxer.convertCodecs(type, codecs);
 
     it('returns converted codecs', () => {
       const convertedVideoCodecs =
-          convertTsCodecs(ContentType.VIDEO, transportStreamVideoMimeType);
+          convertCodecs(ContentType.VIDEO, transportStreamVideoMimeType);
       const convertedAudioCodecs =
-          convertTsCodecs(ContentType.AUDIO, transportStreamAudioMimeType);
+          convertCodecs(ContentType.AUDIO, transportStreamAudioMimeType);
+      const convertedAacCodecs =
+          convertCodecs(ContentType.AUDIO, aacAudioMimeType);
       const expectedVideoCodecs = 'video/mp4; codecs="avc1.42E01E"';
       const expectedAudioCodecs = 'audio/mp4; codecs="mp4a.40.2"';
+      const expectedAacCodecs = 'audio/mp4; codecs="mp4a.40.2"';
       expect(convertedVideoCodecs).toBe(expectedVideoCodecs);
       expect(convertedAudioCodecs).toBe(expectedAudioCodecs);
+      expect(convertedAacCodecs).toBe(expectedAacCodecs);
     });
 
     it('converts legacy avc1 codec strings', () => {
       expect(
-          convertTsCodecs(
+          convertCodecs(
               ContentType.VIDEO, 'video/mp2t; codecs="avc1.100.42"'))
           .toBe('video/mp4; codecs="avc1.64002a"');
       expect(
-          convertTsCodecs(ContentType.VIDEO, 'video/mp2t; codecs="avc1.77.80"'))
+          convertCodecs(ContentType.VIDEO, 'video/mp2t; codecs="avc1.77.80"'))
           .toBe('video/mp4; codecs="avc1.4d0050"');
       expect(
-          convertTsCodecs(ContentType.VIDEO, 'video/mp2t; codecs="avc1.66.1"'))
+          convertCodecs(ContentType.VIDEO, 'video/mp2t; codecs="avc1.66.1"'))
           .toBe('video/mp4; codecs="avc1.420001"');
     });
 
     // Issue #1991
     it('handles upper-case MIME types', () => {
-      expect(convertTsCodecs(
+      expect(convertCodecs(
           ContentType.VIDEO, 'video/MP2T; codecs="avc1.420001"'))
           .toBe('video/mp4; codecs="avc1.420001"');
     });
+  });
+
+  it('getOrginalMimeType returns the correct mimeType', () => {
+    expect(transmuxer.getOrginalMimeType()).toBe(transmuxerMimeType);
   });
 
   describe('transmuxing', () => {

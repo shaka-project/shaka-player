@@ -104,6 +104,10 @@ SafariTP:
     safari.options:
       technologyPreview: true
 
+EdgeMac:
+  browser: msedge
+  os: Mac
+
 ChromeWindows:
   browser: chrome
   os: Windows
@@ -139,6 +143,10 @@ FirefoxLinux:
   os: Linux
   extra_config: *firefox_config
 
+EdgeLinux:
+  browser: msedge
+  os: Linux
+
 ChromeAndroid:
   browser: chrome
   os: Android
@@ -159,4 +167,5 @@ Tizen:
 
 XboxOne:
   browser: xboxone
+  # TODO: Re-enable Xbox (https://github.com/shaka-project/shaka-player/issues/4234)
   disabled: true

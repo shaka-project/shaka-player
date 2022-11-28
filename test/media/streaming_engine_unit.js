@@ -72,6 +72,10 @@ describe('StreamingEngine', () => {
   let getBandwidthEstimate;
   /** @type {!shaka.media.StreamingEngine} */
   let streamingEngine;
+  /** @type {!jasmine.Spy} */
+  let beforeAppendSegment;
+  /** @type {!jasmine.Spy} */
+  let onMetadata;
 
   /** @type {function(function(), number)} */
   let realSetTimeout;
@@ -429,8 +433,14 @@ describe('StreamingEngine', () => {
     onEvent = jasmine.createSpy('onEvent');
     onManifestUpdate = jasmine.createSpy('onManifestUpdate');
     onSegmentAppended = jasmine.createSpy('onSegmentAppended');
+    beforeAppendSegment = jasmine.createSpy('beforeAppendSegment');
+    onMetadata = jasmine.createSpy('onMetadata');
     getBandwidthEstimate = jasmine.createSpy('getBandwidthEstimate');
     getBandwidthEstimate.and.returnValue(1e3);
+
+    beforeAppendSegment.and.callFake((segment) => {
+      return Promise.resolve();
+    });
 
     if (!config) {
       config = shaka.util.PlayerConfiguration.createDefault().streaming;
@@ -453,6 +463,8 @@ describe('StreamingEngine', () => {
       onManifestUpdate: Util.spyFunc(onManifestUpdate),
       onSegmentAppended: Util.spyFunc(onSegmentAppended),
       onInitSegmentAppended: () => {},
+      beforeAppendSegment: Util.spyFunc(beforeAppendSegment),
+      onMetadata: Util.spyFunc(onMetadata),
     };
     streamingEngine = new shaka.media.StreamingEngine(
         /** @type {shaka.extern.Manifest} */(manifest), playerInterface);
@@ -509,7 +521,7 @@ describe('StreamingEngine', () => {
     expectedMseInit.set(ContentType.TEXT, textStream);
 
     expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit,
-        /** forceTransmuxTS= */ false, /** sequenceMode= */ false);
+        /** forceTransmux= */ false, /** sequenceMode= */ false);
     expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
 
     expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
@@ -870,7 +882,7 @@ describe('StreamingEngine', () => {
 
     const config = shaka.util.PlayerConfiguration.createDefault().streaming;
     config.bufferingGoal = 60;
-    config.failureCallback = () => streamingEngine.retry();
+    config.failureCallback = () => streamingEngine.retry(0.1);
     createStreamingEngine(config);
 
     // Make requests for different types take different amounts of time.
@@ -1729,8 +1741,23 @@ describe('StreamingEngine', () => {
     beforeEach(() => {
       setupLive();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData, 0);
-      createStreamingEngine();
+
+      // Retry on failure for live streams.
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.failureCallback = () => streamingEngine.retry(0.1);
+
+      createStreamingEngine(config);
       presentationTimeInSeconds = 100;
+
+      // Ignore 404 errors in live stream tests.
+      onError.and.callFake((error) => {
+        if (error.code == shaka.util.Error.Code.BAD_HTTP_STATUS &&
+            error.data[1] == 404) {
+          // 404 error
+        } else {
+          fail(error);
+        }
+      });
     });
 
     it('outside segment availability window', async () => {
@@ -1760,24 +1787,22 @@ describe('StreamingEngine', () => {
       const originalAppendBuffer =
           // eslint-disable-next-line no-restricted-syntax
           shaka.test.FakeMediaSourceEngine.prototype.appendBufferImpl;
-      mediaSourceEngine.appendBuffer.and.callFake(
-          (type, data, reference) => {
-            expect(presentationTimeInSeconds).toBe(125);
-            if (reference && reference.startTime >= 100) {
-              // Ignore a possible call for the first Period.
-              expect(Util.invokeSpy(timeline.getSegmentAvailabilityStart))
-                  .toBe(100);
-              expect(Util.invokeSpy(timeline.getSegmentAvailabilityEnd))
-                  .toBe(120);
-              playing = true;
-              mediaSourceEngine.appendBuffer.and.callFake(
-                  originalAppendBuffer);
-            }
+      mediaSourceEngine.appendBuffer.and.callFake((type, data, reference) => {
+        expect(presentationTimeInSeconds).toBe(125);
+        // Ignore a possible call for the first Period.
+        if (reference && reference.startTime >= 100) {
+          expect(Util.invokeSpy(timeline.getSegmentAvailabilityStart))
+              .not.toBeLessThan(100);
+          expect(Util.invokeSpy(timeline.getSegmentAvailabilityEnd))
+              .not.toBeLessThan(120);
+          playing = true;
+          mediaSourceEngine.appendBuffer.and.callFake(originalAppendBuffer);
+        }
 
-            // eslint-disable-next-line no-restricted-syntax
-            return originalAppendBuffer.call(
-                mediaSourceEngine, type, data, reference);
-          });
+        // eslint-disable-next-line no-restricted-syntax
+        return originalAppendBuffer.call(
+            mediaSourceEngine, type, data, reference);
+      });
 
       await runTest(slideSegmentAvailabilityWindow);
       // Verify buffers.
@@ -1993,7 +2018,7 @@ describe('StreamingEngine', () => {
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
 
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
-      config.failureCallback = () => streamingEngine.retry();
+      config.failureCallback = () => streamingEngine.retry(0.1);
       createStreamingEngine(config);
 
       presentationTimeInSeconds = 100;
@@ -2154,7 +2179,7 @@ describe('StreamingEngine', () => {
         netEngine.request.calls.reset();
 
         // Retry streaming.
-        expect(streamingEngine.retry()).toBe(true);
+        expect(streamingEngine.retry(0.1)).toBe(true);
       });
 
       // Here we go!
@@ -2184,7 +2209,7 @@ describe('StreamingEngine', () => {
 
         // Retry streaming, which should fail and return false.
         netEngine.request.calls.reset();
-        expect(streamingEngine.retry()).toBe(false);
+        expect(streamingEngine.retry(0.1)).toBe(false);
       });
 
       // Here we go!
@@ -2236,7 +2261,7 @@ describe('StreamingEngine', () => {
 
           // Retry streaming, which should fail and return false.
           netEngine.request.calls.reset();
-          expect(streamingEngine.retry()).toBe(false);
+          expect(streamingEngine.retry(0.1)).toBe(false);
         }
       });
 
@@ -2839,6 +2864,52 @@ describe('StreamingEngine', () => {
 
       expect(onEvent).not.toHaveBeenCalled();
       expect(onManifestUpdate).toHaveBeenCalled();
+    });
+
+    it('triggers metadata event', async () => {
+      // This is an 'emsg' box that contains a scheme of
+      // https://aomedia.org/emsg/ID to indicate a ID3 metadata.
+      segmentData[ContentType.VIDEO].segments[0] =
+          Uint8ArrayUtils.fromHex((
+            // 105 bytes  emsg box     v0, flags 0
+            '00 00 00 69  65 6d 73 67  00 00 00 00' +
+
+            // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
+            '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
+            '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
+
+            // value (1 byte) ''
+            '00' +
+
+            // timescale (4 bytes) 49
+            '00 00 00 31' +
+
+            // presentation time delta (4 bytes) 8
+            '00 00 00 08' +
+
+            // event duration (4 bytes) 255
+            '00 00 00 ff' +
+
+            // id (4 bytes) 51
+            '00 00 00 33' +
+
+            // message data (47 bytes)
+            '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
+            '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
+            '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
+          ).replace(/\s/g, ''));
+
+      videoStream.emsgSchemeIdUris = ['https://aomedia.org/emsg/ID3'];
+
+      // Here we go!
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+
+      expect(onEvent).not.toHaveBeenCalled();
+      expect(onMetadata).toHaveBeenCalled();
     });
   });
 
@@ -3636,6 +3707,27 @@ describe('StreamingEngine', () => {
 
       // The request should have been aborted.
       expect(isAborted).toBe(true);
+    });
+  });
+
+  describe('beforeAppendSegment', () => {
+    it('is called before appending media segment', async () => {
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+      beforeAppendSegment.and.callFake((segment) => {
+        return shaka.test.Util.shortDelay();
+      });
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      // Simulate time passing.
+      playing = true;
+      await Util.fakeEventLoop(10);
+      expect(beforeAppendSegment).toHaveBeenCalledWith(
+          ContentType.AUDIO, segmentData[ContentType.AUDIO].initSegments[0]);
+      expect(beforeAppendSegment).toHaveBeenCalledWith(
+          ContentType.AUDIO, segmentData[ContentType.AUDIO].segments[0]);
     });
   });
 

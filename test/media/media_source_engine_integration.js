@@ -6,6 +6,8 @@
 
 describe('MediaSourceEngine', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
+  const Cue = shaka.text.Cue;
+  const Util = shaka.test.Util;
   const presentationDuration = 840;
 
   /** @type {!HTMLVideoElement} */
@@ -18,6 +20,64 @@ describe('MediaSourceEngine', () => {
   let metadata;
   // TODO: add text streams to MSE integration tests
 
+  const mp4CeaCue0 = jasmine.objectContaining({
+    startTime: Util.closeTo(0.067, 0.001),
+    endTime: Util.closeTo(1, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    nestedCues: [
+      jasmine.objectContaining({
+        startTime: Util.closeTo(0.067, 0.001),
+        endTime: Util.closeTo(1, 0.001),
+        payload: 'eng:⠀00:00:00:00',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+    ],
+  });
+
+  const tsCeaCue0 = jasmine.objectContaining({
+    startTime: Util.closeTo(0.767, 0.001),
+    endTime: Util.closeTo(4.972, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(top left)',
+  });
+
+  const tsCeaCue1 = jasmine.objectContaining({
+    startTime: Util.closeTo(5.305, 0.001),
+    endTime: Util.closeTo(11.979, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(middle)',
+  });
+
+  const tsCeaCue2 = jasmine.objectContaining({
+    startTime: Util.closeTo(12.312, 0.001),
+    endTime: Util.closeTo(19.319, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(bottom left)',
+  });
+
+  // The same segments as above, but offset by 40 seconds (yes, 40), which is
+  // also 2 segments.
+  const tsCeaCue3 = jasmine.objectContaining({
+    startTime: Util.closeTo(40.767, 0.001),
+    endTime: Util.closeTo(44.972, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(top left)',
+  });
+
+  const tsCeaCue4 = jasmine.objectContaining({
+    startTime: Util.closeTo(45.305, 0.001),
+    endTime: Util.closeTo(51.979, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(middle)',
+  });
+
+  const tsCeaCue5 = jasmine.objectContaining({
+    startTime: Util.closeTo(52.312, 0.001),
+    endTime: Util.closeTo(59.319, 0.001),
+    textAlign: Cue.textAlign.CENTER,
+    payload: 'These are 608 captions\n(bottom left)',
+  });
+
   /**
    * We use a fake text displayer so that we can check if CEA text is being
    * passed through the system correctly.
@@ -25,6 +85,9 @@ describe('MediaSourceEngine', () => {
    * @type {!shaka.test.FakeTextDisplayer}
    */
   let textDisplayer;
+
+  /** @type {!jasmine.Spy} */
+  let onMetadata;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -37,10 +100,14 @@ describe('MediaSourceEngine', () => {
 
     textDisplayer = new shaka.test.FakeTextDisplayer();
 
+    onMetadata = jasmine.createSpy('onMetadata');
+
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
-        new shaka.media.ClosedCaptionParser(),
-        textDisplayer);
+        textDisplayer,
+        shaka.test.Util.spyFunc(onMetadata));
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    mediaSourceEngine.configure(config);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();
@@ -68,6 +135,18 @@ describe('MediaSourceEngine', () => {
     const reference = dummyReference(type, segmentNumber);
     return mediaSourceEngine.appendBuffer(
         type, segment, reference, /* hasClosedCaptions= */ false);
+  }
+
+  function appendWithSeek(type, segmentNumber) {
+    const segment = generators[type]
+        .getSegment(segmentNumber, Date.now() / 1000);
+    const reference = dummyReference(type, segmentNumber);
+    return mediaSourceEngine.appendBuffer(
+        type,
+        segment,
+        reference,
+        /* hasClosedCaptions= */ false,
+        /* seeked= */ true);
   }
 
   function appendInitWithClosedCaptions(type) {
@@ -371,13 +450,83 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    // Call with forceTransmuxTS = true, so that it will transmux even on
+    // Call with forceTransmux = true, so that it will transmux even on
     // platforms with native TS support.
-    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ true);
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
+
     await append(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
+  });
+
+  it('extracts CEA-708 captions from previous segment from hls', async () => {
+    // Load TS file with CEA-708 captions.
+    metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
+
+    const initObject = new Map();
+    initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
+    initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
+    // Call with forceTransmux = true, so that it will transmux even on
+    // platforms with native TS support.
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    mediaSourceEngine.setSelectedClosedCaptionId('CC1');
+
+    await append(ContentType.VIDEO, 2);
+
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue3]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue4]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue5]);
+
+    textDisplayer.appendSpy.calls.reset();
+    await appendWithSeek(ContentType.VIDEO, 0);
+
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
+  });
+
+  it('buffers partial TS video segments in sequence mode', async () => {
+    metadata = shaka.test.TestScheme.DATA['cea-708_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['cea-708_ts'];
+
+    const videoType = ContentType.VIDEO;
+    const initObject = new Map();
+    initObject.set(videoType, getFakeStream(metadata.video));
+
+    await mediaSourceEngine.init(
+        initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
+    await mediaSourceEngine.setDuration(presentationDuration);
+    await mediaSourceEngine.setStreamProperties(
+        videoType,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity,
+        /* sequenceMode= */ true);
+
+    const segment = generators[videoType].getSegment(0, Date.now() / 1000);
+    const partialSegmentLength = Math.floor(segment.byteLength / 3);
+
+    let partialSegment = shaka.util.BufferUtils.toUint8(
+        segment, /* offset= */ 0, /* length= */ partialSegmentLength);
+    let reference = dummyReference(videoType, 0);
+    await mediaSourceEngine.appendBuffer(
+        videoType, partialSegment, reference, /* hasClosedCaptions= */ false);
+
+    partialSegment = shaka.util.BufferUtils.toUint8(
+        segment,
+        /* offset= */ partialSegmentLength);
+    reference = dummyReference(videoType, 1);
+    await mediaSourceEngine.appendBuffer(
+        videoType, partialSegment, reference, /* hasClosedCaptions= */ false,
+        /* seeked= */ true);
   });
 
   it('extracts CEA-708 captions from dash', async () => {
@@ -388,12 +537,71 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(initObject, /* forceTransmuxTS= */ false);
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInitWithClosedCaptions(ContentType.VIDEO);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
     await appendWithClosedCaptions(ContentType.VIDEO, 0);
 
-    expect(textDisplayer.appendSpy).toHaveBeenCalled();
+    expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(1);
+    expect(textDisplayer.appendSpy).toHaveBeenCalledWith([mp4CeaCue0]);
+  });
+
+  it('extracts ID3 metadata from TS', async () => {
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_ts'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from TS when transmuxing', async () => {
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_ts'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_ts'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from AAC', async () => {
+    if (!MediaSource.isTypeSupported('audio/aac')) {
+      return;
+    }
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
+  });
+
+  it('extracts ID3 metadata from AAC when transmuxing', async () => {
+    if (!MediaSource.isTypeSupported('audio/aac')) {
+      return;
+    }
+    metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
+    generators = shaka.test.TestScheme.GENERATORS['id3-metadata_aac'];
+
+    const audioType = ContentType.AUDIO;
+    const initObject = new Map();
+    initObject.set(audioType, getFakeStream(metadata.audio));
+    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    await append(ContentType.AUDIO, 0);
+
+    expect(onMetadata).toHaveBeenCalled();
   });
 });

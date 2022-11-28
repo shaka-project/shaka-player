@@ -170,6 +170,9 @@ google.ima.Ad = class {
 
   /** @return {string} */
   getTitle() {}
+
+  /** @return {string} */
+  getDescription() {}
 };
 
 
@@ -395,6 +398,9 @@ google.ima.dai.api.Ad = class {
 
   /** @return {string} */
   getTitle() {}
+
+  /** @return {string} */
+  getDescription() {}
 };
 
 

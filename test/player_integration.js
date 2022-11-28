@@ -506,7 +506,7 @@ describe('Player', () => {
       // Seek the video, and see if it can continue playing from that point.
       video.currentTime = 20;
       // Expect that we can then reach the end of the video.
-      await waiter.timeoutAfter(20).waitForEnd(video);
+      await waiter.timeoutAfter(40).waitForEnd(video);
     });
 
     // Regression test for #2326.
@@ -857,7 +857,7 @@ describe('Player', () => {
       /** @type {shaka.test.Waiter} */
       const waiter = new shaka.test.Waiter(eventManager)
           .setPlayer(player)
-          .timeoutAfter(20)
+          .timeoutAfter(40)
           .failOnTimeout(true);
       await waiter.waitForEnd(video);
 
@@ -1234,4 +1234,64 @@ describe('Player', () => {
     await expectAsync(player.load('test:sintel-hls-clearkey'))
         .toBeRejectedWith(expectedError);
   });
+
+  describe('addThumbnailsTrack', () => {
+    it('appends thumbnails for external thumbnails with sprites',
+        async () => {
+          await player.load('test:sintel_no_text_compiled');
+          const locationUri = new goog.Uri(location.href);
+          const partialUri =
+              new goog.Uri('/base/test/test/assets/thumbnails-sprites.vtt');
+          const absoluteUri = locationUri.resolve(partialUri);
+          const newTrack =
+              await player.addThumbnailsTrack(absoluteUri.toString());
+
+          expect(player.getImageTracks()).toEqual([newTrack]);
+
+          const thumbnail1 = await player.getThumbnails(newTrack.id, 0);
+          expect(thumbnail1.startTime).toBe(0);
+          expect(thumbnail1.duration).toBe(5);
+          expect(thumbnail1.height).toBe(90);
+          expect(thumbnail1.positionX).toBe(0);
+          expect(thumbnail1.positionY).toBe(0);
+          expect(thumbnail1.width).toBe(160);
+          const thumbnail2 = await player.getThumbnails(newTrack.id, 10);
+          expect(thumbnail2.startTime).toBe(5);
+          expect(thumbnail2.duration).toBe(25);
+          expect(thumbnail2.height).toBe(90);
+          expect(thumbnail2.positionX).toBe(160);
+          expect(thumbnail2.positionY).toBe(0);
+          expect(thumbnail2.width).toBe(160);
+          const thumbnail3 = await player.getThumbnails(newTrack.id, 40);
+          expect(thumbnail3.startTime).toBe(30);
+          expect(thumbnail3.duration).toBe(30);
+          expect(thumbnail3.height).toBe(90);
+          expect(thumbnail3.positionX).toBe(160);
+          expect(thumbnail3.positionY).toBe(90);
+          expect(thumbnail3.width).toBe(160);
+        });
+
+    it('appends thumbnails for external thumbnails without sprites',
+        async () => {
+          await player.load('test:sintel_no_text_compiled');
+          const locationUri = new goog.Uri(location.href);
+          const partialUri =
+              new goog.Uri('/base/test/test/assets/thumbnails.vtt');
+          const absoluteUri = locationUri.resolve(partialUri);
+          const newTrack =
+              await player.addThumbnailsTrack(absoluteUri.toString());
+
+          expect(player.getImageTracks()).toEqual([newTrack]);
+
+          const thumbnail1 = await player.getThumbnails(newTrack.id, 0);
+          expect(thumbnail1.startTime).toBe(0);
+          expect(thumbnail1.duration).toBe(5);
+          const thumbnail2 = await player.getThumbnails(newTrack.id, 10);
+          expect(thumbnail2.startTime).toBe(5);
+          expect(thumbnail2.duration).toBe(25);
+          const thumbnail3 = await player.getThumbnails(newTrack.id, 40);
+          expect(thumbnail3.startTime).toBe(30);
+          expect(thumbnail3.duration).toBe(30);
+        });
+  });  // describe('addThumbnailsTrack')
 });

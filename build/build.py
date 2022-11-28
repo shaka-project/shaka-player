@@ -54,7 +54,7 @@ import shakaBuildHelpers
 shaka_version = shakaBuildHelpers.calculate_version()
 
 common_closure_opts = [
-    '--language_out', 'ECMASCRIPT3',
+    '--language_out', 'ECMASCRIPT5',
 
     '--jscomp_error=*',
 

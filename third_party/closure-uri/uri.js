@@ -798,7 +798,7 @@ goog.Uri.QueryData.prototype.add = function(key, value) {
   // Invalidate the cache.
   this.encodedQuery_ = null;
 
-  var values = this.keyMap_.hasOwnProperty(key) && this.keyMap_[key];
+  var values = this.keyMap_.hasOwnProperty(key) ? this.keyMap_[key] : null;
   if (!values) {
     this.keyMap_[key] = (values = []);
   }

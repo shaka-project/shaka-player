@@ -92,10 +92,12 @@ shakaDemo.Config = class {
     this.addOfflineSection_();
     this.addDrmSection_();
     this.addStreamingSection_();
+    this.addMediaSourceSection_();
     this.addManifestSection_();
     this.addRetrictionsSection_('',
         shakaDemo.MessageIds.RESTRICTIONS_SECTION_HEADER);
     this.addCmcdSection_();
+    this.addLcevcSection_();
   }
 
   /**
@@ -131,7 +133,9 @@ shakaDemo.Config = class {
             'drm.updateExpirationTime',
             /* canBeDecimal= */ true,
             /* canBeZero= */ false,
-            /* canBeUnset= */ true);
+            /* canBeUnset= */ true)
+        .addBoolInput_(MessageIds.PARSE_INBAND_PSSH_ENABLED,
+            'drm.parseInbandPsshEnabled');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
     const addDRMAdvancedField = (name, valueName, suggestions) => {
       // All advanced fields of a given type are set at once.
@@ -214,6 +218,10 @@ shakaDemo.Config = class {
             'manifest.hls.defaultVideoCodec')
         .addBoolInput_(MessageIds.IGNORE_MANIFEST_PROGRAM_DATE_TIME,
             'manifest.hls.ignoreManifestProgramDateTime')
+        .addBoolInput_(MessageIds.USE_SAFARI_BEHAVIOR_FOR_LIVE,
+            'manifest.hls.useSafariBehaviorForLive')
+        .addNumberInput_(MessageIds.LIVE_SEGMENTS_DELAY,
+            'manifest.hls.liveSegmentsDelay')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
@@ -229,6 +237,8 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
+        .addBoolInput_(MessageIds.SEQUENCE_MODE,
+            'manifest.dash.sequenceMode')
         .addBoolInput_(MessageIds.DISABLE_AUDIO,
             'manifest.disableAudio')
         .addBoolInput_(MessageIds.DISABLE_VIDEO,
@@ -291,6 +301,18 @@ shakaDemo.Config = class {
         .addTextInput_(MessageIds.SESSION_ID, 'cmcd.sessionId')
         .addTextInput_(MessageIds.CONTENT_ID, 'cmcd.contentId')
         .addBoolInput_(MessageIds.USE_HEADERS, 'cmcd.useHeaders');
+  }
+
+  /** @private */
+  addLcevcSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.LcevcConfiguration');
+    this.addSection_(MessageIds.LCEVC_SECTION_HEADER, docLink)
+        .addBoolInput_(MessageIds.ENABLED, 'lcevc.enabled')
+        .addBoolInput_(MessageIds.LCEVC_DYNAMIC_PERFORMANCE_SCALING,
+            'lcevc.dynamicPerformanceScaling')
+        .addNumberInput_(MessageIds.LCEVC_LOG_LEVEL, 'lcevc.logLevel')
+        .addBoolInput_(MessageIds.LCEVC_DRAW_LOGO, 'lcevc.drawLogo');
   }
 
   /**
@@ -414,8 +436,8 @@ shakaDemo.Config = class {
       this.latestInput_.input().checked = true;
     }
 
-    this.addBoolInput_(MessageIds.FORCE_TRANSMUX_TS,
-        'streaming.forceTransmuxTS')
+    this.addBoolInput_(MessageIds.FORCE_TRANSMUX,
+        'streaming.forceTransmux')
         .addBoolInput_(MessageIds.START_AT_SEGMENT_BOUNDARY,
             'streaming.startAtSegmentBoundary')
         .addBoolInput_(MessageIds.IGNORE_TEXT_FAILURES,
@@ -426,6 +448,15 @@ shakaDemo.Config = class {
             'streaming.useNativeHlsOnSafari');
     this.addRetrySection_('streaming',
         MessageIds.STREAMING_RETRY_SECTION_HEADER);
+  }
+
+  /** @private */
+  addMediaSourceSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
+    this.addSection_(MessageIds.MEDIA_SOURCE_SECTION_HEADER, docLink)
+        .addTextInput_(MessageIds.SOURCE_BUFFER_EXTRA_FEATURES,
+            'mediaSource.sourceBufferExtraFeatures');
   }
 
   /** @private */
