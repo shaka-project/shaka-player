@@ -12,3 +12,4 @@
 +../../lib/cea/i_cea_parser.js
 +../../lib/cea/mp4_cea_parser.js
 +../../lib/cea/sei_processor.js
++../../lib/cea/ts_cea_parser.js
