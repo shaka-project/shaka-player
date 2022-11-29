@@ -1252,6 +1252,7 @@ describe('Player', () => {
         manifest.addVariant(106, (variant) => {  // spanish stereo, low res
           variant.language = 'es';
           variant.bandwidth = 1100;
+          variant.label = 'es-label';
           variant.addExistingStream(1);  // video
           variant.addAudio(6, (stream) => {
             stream.originalId = 'audio-es';
@@ -1263,6 +1264,7 @@ describe('Player', () => {
         manifest.addVariant(107, (variant) => {  // spanish stereo, high res
           variant.language = 'es';
           variant.bandwidth = 2100;
+          variant.label = 'es-label';
           variant.addExistingStream(2);  // video
           variant.addExistingStream(6);  // audio
         });
@@ -1529,7 +1531,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 1100,
           language: 'es',
-          label: null,
+          label: 'es-label',
           kind: null,
           width: 100,
           height: 200,
@@ -1565,7 +1567,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 2100,
           language: 'es',
-          label: null,
+          label: 'es-label',
           kind: null,
           width: 200,
           height: 400,
@@ -2235,6 +2237,18 @@ describe('Player', () => {
         language: 'en',
         roles: ['commentary'],
       }));
+    });
+
+    it('chooses a variant with preferred audio label', async () => {
+      expect(getActiveVariantTrack().label).toBe(null);
+
+      player.configure({
+        preferredAudioLanguage: '',
+        preferredAudioLabel: 'es-label',
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(getActiveVariantTrack().label).toBe('es-label');
     });
   });  // describe('tracks')
 

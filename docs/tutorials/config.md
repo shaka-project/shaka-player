@@ -64,6 +64,7 @@ player.getConfiguration();
      playRangeEnd: Infinity
      playRangeStart: 0
      preferredAudioLanguage: ""
+     preferredAudioLabel: ""
      preferredTextLanguage: ""
      restrictions: Object
      streaming: Object
