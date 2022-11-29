@@ -251,13 +251,16 @@ describe('MediaCapabilities', () => {
       mockDecodingConfig.video.transferFunction = 'pq';
       mockDecodingConfig.video.contentType =
           'video/mp4; codecs="hev1.2.4.L153.B0"';
+      // Round to a whole number since we can't rely on number => string
+      // conversion precision on all devices.
+      mockDecodingConfig.video.framerate = 24;
       mockCanDisplayType.and.callFake((type) => {
         expect(type).toBe(
             'video/mp4; ' +
             'codecs="hev1.2.4.L153.B0"; ' +
             'width=512; ' +
             'height=288; ' +
-            'framerate=23.976023976023978; ' +
+            'framerate=24; ' +
             'eotf=smpte2084');
         return true;
       });
