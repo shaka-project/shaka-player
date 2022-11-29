@@ -111,43 +111,40 @@ describe('Transmuxer', () => {
       let sawMDAT = false;
 
       const transmuxedData = await transmuxer.transmux(videoSegment);
-      expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-      expect(transmuxedData.data.length).toBeGreaterThan(0);
-      expect(transmuxedData.captions).toEqual(jasmine.any(Array));
+      expect(transmuxedData).toEqual(jasmine.any(Uint8Array));
+      expect(transmuxedData.length).toBeGreaterThan(0);
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
             expect(data.byteLength).toBeGreaterThan(0);
           }))
-          .parse(transmuxedData.data);
+          .parse(transmuxedData);
       expect(sawMDAT).toBeTruthy();
     });
 
     it('transmux audio from TS to MP4', async () => {
       let sawMDAT = false;
       const transmuxedData = await transmuxer.transmux(audioSegment);
-      expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-      expect(transmuxedData.data.length).toBeGreaterThan(0);
-      expect(transmuxedData.captions).toEqual(jasmine.any(Array));
+      expect(transmuxedData).toEqual(jasmine.any(Uint8Array));
+      expect(transmuxedData.length).toBeGreaterThan(0);
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
             expect(data.byteLength).toBeGreaterThan(0);
           }))
-          .parse(transmuxedData.data);
+          .parse(transmuxedData);
       expect(sawMDAT).toBeTruthy();
     });
 
     it('transmux empty video from TS to MP4', async () => {
       let sawMDAT = false;
       const transmuxedData = await transmuxer.transmux(emptySegment);
-      expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-      expect(transmuxedData.captions).toEqual([]);
+      expect(transmuxedData).toEqual(jasmine.any(Uint8Array));
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
           }))
-          .parse(transmuxedData.data);
+          .parse(transmuxedData);
       expect(sawMDAT).toBeFalsy();
     });
 
@@ -171,7 +168,7 @@ describe('Transmuxer', () => {
             mp4Timestamp = parsedTFDTBox.baseMediaDecodeTime;
             parsed = true;
           })
-          .parse(transmuxedData.data);
+          .parse(transmuxedData);
 
       expect(parsed).toBe(true);
       expect(mp4Timestamp).toBe(expectedMp4Timestamp);

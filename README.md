@@ -225,11 +225,9 @@ Shaka Player supports:
   - TTML
     - Supported in both XML form and embedded in MP4
   - CEA-608
-    - Supported embedded in MP4
-    - With help from [mux.js][] v6.2.0+, supported embedded in TS
+    - Supported embedded in MP4 and TS
   - CEA-708
-    - Supported embedded in MP4
-    - With help from [mux.js][] v6.2.0+, supported embedded in TS
+    - Supported embedded in MP4 and TS
   - SubRip (SRT)
     - UTF-8 encoding only
   - LyRiCs (LRC)

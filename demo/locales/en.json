@@ -11,6 +11,7 @@
   "DEMO_APPLE": "Apple",
   "DEMO_AUDIO_CHANNEL_COUNT": "Preferred Audio Channel Count",
   "DEMO_AUDIO_LANGUAGE": "Preferred Audio Language",
+  "DEMO_AUDIO_LABEL": "Preferred Audio Label",
   "DEMO_AUDIO_ONLY": "Audio only",
   "DEMO_AUDIO_ONLY_SEARCH": "Filters for assets that do not have video streams.",
   "DEMO_AUDIO_ROBUSTNESS": "Audio Robustness",
