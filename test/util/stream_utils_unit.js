@@ -600,7 +600,8 @@ describe('StreamUtils', () => {
 
       const noVariant = null;
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, noVariant, manifest);
+          fakeDrmEngine, noVariant, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -637,7 +638,8 @@ describe('StreamUtils', () => {
 
       const noVariant = null;
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, noVariant, manifest);
+          fakeDrmEngine, noVariant, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       // Covers a regression in which we would remove streams with codecs.
       // The first 4 streams should be there because they are always supported.
@@ -669,7 +671,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -696,7 +699,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
       expect(manifest.variants.length).toBe(1);
     });
 
@@ -713,7 +717,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       expect(manifest.variants.length).toBe(1);
     });
@@ -835,7 +840,9 @@ describe('StreamUtils', () => {
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
           /* preferredAudioChannelCount= */2,
-          /* preferredDecodingAttributes= */[]);
+          /* preferredDecodingAttributes= */[],
+          /* codecSwitchingStrategy= */
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
@@ -851,7 +858,9 @@ describe('StreamUtils', () => {
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
           /* preferredAudioChannelCount= */2,
-          /* preferredDecodingAttributes= */[]);
+          /* preferredDecodingAttributes= */[],
+          /* codecSwitchingStrategy= */
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
@@ -895,7 +904,9 @@ describe('StreamUtils', () => {
           /* preferredAudioCodecs= */[],
           /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */
-          [shaka.util.StreamUtils.DecodingAttributes.SMOOTH]);
+          [shaka.util.StreamUtils.DecodingAttributes.SMOOTH],
+          /* codecSwitchingStrategy= */
+          shaka.config.CodecSwitchingStrategy.DISABLED);
       // 2 video codecs are smooth. Choose the one with the lowest bandwidth.
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].id).toBe(1);
