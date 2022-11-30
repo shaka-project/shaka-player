@@ -269,6 +269,7 @@ requirement: {
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
   whitelist_regexp: "lib/util/delayed_tick.js"
+  whitelist_regexp: "lib/polyfill/abort_controller.js"
 }
 requirement: {
   type: BANNED_NAME
@@ -355,3 +356,24 @@ requirement: {
     "because is not supported on Xbox and old browsers."
   whitelist_regexp: "lib/util/string_utils.js"
 }
+
+requirement: {
+  type: BANNED_PROPERTY
+  value: "String.prototype.replaceAll"
+  error_message:
+    "Using \"String.replaceAll\" is not allowed; "
+    "use String.replace instead"
+}
+
+# Disallow the general use of DOMParser.parseFromString, which has security
+# implications.
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "DOMParser.prototype.parseFromString"
+  error_message:
+    "Using \"DOMParser.parseFromString\" directly is not allowed; "
+    "use shaka.util.XmlUtils.parseXmlString instead."
+  whitelist_regexp: "lib/util/xml_utils.js"
+  whitelist_regexp: "test/"
+}
+

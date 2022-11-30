@@ -371,5 +371,74 @@ describe('XmlUtils', () => {
     expect(XmlUtils.parseFloat(HUGE_NUMBER_STRING)).toBe(Infinity);
     expect(XmlUtils.parseFloat('-' + HUGE_NUMBER_STRING)).toBe(-Infinity);
   });
+
+  describe('parseXmlString', () => {
+    it('parses a simple XML document', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <Child></Child>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).not.toBeNull();
+      expect(doc.tagName).toBe('Root');
+    });
+
+    it('returns null on an empty XML document', () => {
+      const xmlString = '';
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).toBeNull();
+    });
+
+    it('returns null on malformed XML', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <Child</Child>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).toBeNull();
+    });
+
+    it('returns null on root element mismatch', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <Child></Child>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Document');
+      expect(doc).toBeNull();
+    });
+
+    it('returns null on XML that embeds HTML', () => {
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <Child xmlns="http://www.w3.org/1999/xhtml"></Child>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).toBeNull();
+    });
+
+    it('returns null on XML that embeds SVG', () => {
+      // Some platforms, such as Xbox One, don't recognize elements as SVG
+      // based on namespace alone.  So the SVG element below needs to be a real
+      // SVG element.
+      const xmlString = [
+        '<?xml version="1.0"?>',
+        '<Root>',
+        '  <svg viewBox="0 0 100 100">',
+        '    <rect x="0" y="0" width="100" height"100" />',
+        '  </svg>',
+        '</Root>',
+      ].join('\n');
+      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
+      expect(doc).toBeNull();
+    });
+  });
 });
 
