@@ -37,6 +37,7 @@ describe('HlsParser', () => {
 
   afterEach(() => {
     shaka.log.alwaysWarn = originalAlwaysWarn;
+    parser.stop();
   });
 
   beforeEach(() => {
