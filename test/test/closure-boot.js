@@ -10,6 +10,6 @@
 // document.write().  This is more compatible with a wider variety of setups,
 // and allows us to enable Karma options {useIframe: false, runInParent: true}
 // to test in a single frame.
-window.CLOSURE_UNCOMPILED_DEFINES = {
+window['CLOSURE_UNCOMPILED_DEFINES'] = {
   'goog.ENABLE_CHROME_APP_SAFE_SCRIPT_LOADING': true,
 };
