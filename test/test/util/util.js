@@ -403,15 +403,9 @@ shaka.test.Util = class {
     const parentUrlParams = window.parent.location.search;
     goog.asserts.assert(parentUrlParams.includes('id='), 'No ID in URL!');
 
-    // Tests run in an iframe.  So we also need the coordinates of that iframe
-    // within the page, so that the screenshot can be consistently cropped to
-    // the element we care about.
-    const iframe = /** @type {HTMLIFrameElement} */(
-      window.parent.document.getElementById('context'));
-    const iframeRect = iframe.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
-    const x = iframeRect.left + elementRect.left;
-    const y = iframeRect.top + elementRect.top;
+    const x = elementRect.left;
+    const y = elementRect.top;
     const width = elementRect.width;
     const height = elementRect.height;
 
