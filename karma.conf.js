@@ -230,6 +230,15 @@ module.exports = (config) => {
     captureTimeout: settings.capture_timeout,
     // https://support.saucelabs.com/customer/en/portal/articles/2440724
 
+    // Allow Karma's files to be loaded cross-origin.  This is important for
+    // the Chromecast test infrastructure, starting with v1.2 of Chromecast
+    // WebDriver Server.
+    customHeaders: [{
+      match: '.',
+      name: 'Access-Control-Allow-Origin',
+      value: '*',
+    }],
+
     client: {
       // Hide the list of connected clients in Karma, to make screenshots more
       // stable.
