@@ -115,7 +115,9 @@ describe('Ad manager', () => {
         startedEventB = /** @type {!google.ima.AdEvent} */ (
           new shaka.util.FakeEvent(google.ima.AdEvent.Type.STARTED));
         startedEventB.getAd = () => {
-          return {};
+          return {
+            isLinear: () => true,
+          };
         };
       }
       makeMocks();
