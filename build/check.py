@@ -284,6 +284,7 @@ def check_tests(args):
   files.add(os.path.join(base, 'demo', 'common', 'asset.js'))
   files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
   files.add(os.path.join(base, 'demo', 'common', 'message_ids.js'))
+  files.remove(os.path.join(base, 'ui', 'cast_proxy_container_no_cast.js'))
 
   localizations = compiler.GenerateLocalizations(None)
   localizations.generate(args.force)
