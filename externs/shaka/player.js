@@ -968,6 +968,7 @@ shaka.extern.ManifestConfiguration;
  *
  * @description
  * The StreamingEngine's configuration options.
+ *
  * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
  *  Allow codec switching strategy. Default behavior is disabled.
  *  Smooth loading uses SourceBuffer.changeType. Reload uses cycling of

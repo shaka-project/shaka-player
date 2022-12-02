@@ -736,7 +736,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       expect(manifest.variants.length).toBe(1);
     });
