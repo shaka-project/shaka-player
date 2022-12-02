@@ -10,11 +10,11 @@ goog.provide('shaka.ui.ControlsPanel');
 
 goog.require('goog.asserts');
 goog.require('shaka.ads.AdManager');
+goog.require('shaka.cast.CastProxy');
 goog.require('shaka.log');
 goog.require('shaka.ui.AdCounter');
 goog.require('shaka.ui.AdPosition');
 goog.require('shaka.ui.BigPlayButton');
-goog.require('shaka.ui.CastProxyContainer');
 goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
@@ -51,8 +51,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.extern.UIConfiguration} */
     this.config_ = config;
 
-    /** @private {shaka.ui.CastProxyContainer} */
-    this.castProxyContainer_ = new shaka.ui.CastProxyContainer(
+    /** @private {shaka.cast.CastProxy} */
+    this.castProxy_ = new shaka.cast.CastProxy(
         video, player, this.config_.castReceiverAppId,
         this.config_.castAndroidReceiverCompatible);
 
@@ -60,13 +60,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.castAllowed_ = true;
 
     /** @private {HTMLMediaElement} */
-    this.video_ = this.castProxyContainer_.getVideo();
+    this.video_ = this.castProxy_.getVideo();
 
     /** @private {HTMLMediaElement} */
     this.localVideo_ = video;
 
     /** @private {shaka.Player} */
-    this.player_ = this.castProxyContainer_.getPlayer();
+    this.player_ = this.castProxy_.getPlayer();
 
     /** @private {shaka.Player} */
     this.localPlayer_ = player;
@@ -238,9 +238,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.controlsContainer_ = null;
     }
 
-    if (this.castProxyContainer_) {
-      await this.castProxyContainer_.destroy();
-      this.castProxyContainer_ = null;
+    if (this.castProxy_) {
+      await this.castProxy_.destroy();
+      this.castProxy_ = null;
     }
 
     if (this.localPlayer_) {
@@ -316,7 +316,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   configure(config) {
     this.config_ = config;
 
-    this.castProxyContainer_.changeReceiverId(config.castReceiverAppId,
+    this.castProxy_.changeReceiverId(config.castReceiverAppId,
         config.castAndroidReceiverCompatible);
 
     // Deconstruct the old layout if applicable
@@ -414,10 +414,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @export
-   * @return {shaka.ui.CastProxyContainer}
+   * @return {shaka.cast.CastProxy}
    */
-  getCastProxyContainer() {
-    return this.castProxyContainer_;
+  getCastProxy() {
+    return this.castProxy_;
   }
 
   /**
@@ -982,10 +982,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseLeave_();
     });
 
-    this.eventManager_.listen(
-        this.castProxyContainer_, 'caststatuschanged', () => {
-          this.onCastStatusChange_();
-        });
+    this.eventManager_.listen(this.castProxy_, 'caststatuschanged', () => {
+      this.onCastStatusChange_();
+    });
 
     this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
       this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
@@ -1024,7 +1023,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   async onScreenRotation_() {
     if (!this.video_ ||
         this.video_.readyState == 0 ||
-        this.castProxyContainer_.isCasting() ||
+        this.castProxy_.isCasting() ||
         !this.config_.enableFullscreenOnRotation ||
         !this.isFullScreenSupported()) {
       return;
@@ -1221,7 +1220,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onCastStatusChange_() {
-    const isCasting = this.castProxyContainer_.isCasting();
+    const isCasting = this.castProxy_.isCasting();
     this.dispatchEvent(new shaka.util.FakeEvent(
         'caststatuschanged', (new Map()).set('newStatus', isCasting)));
 

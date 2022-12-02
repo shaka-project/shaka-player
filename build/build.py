@@ -265,16 +265,6 @@ class Build(object):
 
     return True
 
-  def pick_cast_proxy_container(self):
-    """Picks which version of CastProxyContainer should be used."""
-    if self.has_cast():
-      toRemove = 'ui/cast_proxy_container_no_cast.js'
-    else:
-      toRemove = 'ui/cast_proxy_container.js'
-    toRemove = os.path.abspath(toRemove)
-    self.exclude.add(toRemove)
-    self.include.discard(toRemove)
-
   def build_library(self, name, locales, force, is_debug):
     """Builds Shaka Player using the files in |self.include|.
 
@@ -292,7 +282,10 @@ class Build(object):
       return False
     if self.has_ui():
       self.generate_localizations(locales, force)
-      self.pick_cast_proxy_container();
+      # So that the UI will correctly build if the cast is disabled, add the
+      # dummy cast proxy.
+      if not self.has_cast():
+        self.include.add(os.path.abspath('ui/dummy_cast_proxy.js'))
 
     if is_debug:
       name += '.debug'

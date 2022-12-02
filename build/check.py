@@ -140,6 +140,7 @@ def check_complete(_):
   all_files.update(shakaBuildHelpers.get_all_js_files('lib'))
   all_files.update(shakaBuildHelpers.get_all_js_files('ui'))
   all_files.update(shakaBuildHelpers.get_all_js_files('third_party'))
+  all_files.remove(os.path.join(base, 'ui', 'dummy_cast_proxy.js'))
   missing_files = all_files - complete_build
 
   if missing_files:
@@ -284,7 +285,6 @@ def check_tests(args):
   files.add(os.path.join(base, 'demo', 'common', 'asset.js'))
   files.add(os.path.join(base, 'demo', 'common', 'assets.js'))
   files.add(os.path.join(base, 'demo', 'common', 'message_ids.js'))
-  files.remove(os.path.join(base, 'ui', 'cast_proxy_container_no_cast.js'))
 
   localizations = compiler.GenerateLocalizations(None)
   localizations.generate(args.force)

@@ -1300,7 +1300,7 @@ shakaDemo.Main = class {
       }
 
       await this.drmConfiguration_(asset);
-      this.controls_.getCastProxyContainer().setAppData({'asset': asset});
+      this.controls_.getCastProxy().setAppData({'asset': asset});
 
       // Finally, the asset can be loaded.
       let manifestUri = asset.manifestUri;

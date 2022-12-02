@@ -184,7 +184,7 @@ describe('UI Customization', () => {
 
     // Save controls and cast proxy objects
     const controls = ui.getControls();
-    const castProxyContainer = controls.getCastProxyContainer();
+    const castProxy = controls.getCastProxy();
 
     goog.asserts.assert(controls != null, 'Should have a controls object!');
 
@@ -199,9 +199,9 @@ describe('UI Customization', () => {
     await p;
 
     const newControls = ui.getControls();
-    const newCastProxyContainer = newControls.getCastProxyContainer();
+    const newCastProxy = newControls.getCastProxy();
 
     expect(newControls).toBe(controls);
-    expect(newCastProxyContainer).toBe(castProxyContainer);
+    expect(newCastProxy).toBe(castProxy);
   });
 });
