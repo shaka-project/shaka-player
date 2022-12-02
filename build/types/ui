@@ -9,6 +9,8 @@
 +../../ui/big_play_button.js
 +../../ui/airplay_button.js
 +../../ui/cast_button.js
++../../ui/cast_proxy_container.js
++../../ui/cast_proxy_container_no_cast.js
 +../../ui/context_menu.js
 +../../ui/controls.js
 +../../ui/constants.js

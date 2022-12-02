@@ -7,7 +7,7 @@
 
 goog.provide('shaka.ui.CastButton');
 
-goog.require('shaka.cast.CastProxy');
+goog.require('shaka.ui.CastProxyContainer');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
@@ -18,7 +18,6 @@ goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Error');
 goog.require('shaka.util.FakeEvent');
-goog.requireType('shaka.cast.CastProxy');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -35,8 +34,8 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {shaka.cast.CastProxy} */
-    this.castProxy_ = this.controls.getCastProxy();
+    /** @private {shaka.ui.CastProxyContainer} */
+    this.castProxyContainer_ = this.controls.getCastProxyContainer();
 
     /** @private {!HTMLButtonElement} */
     this.castButton_ = shaka.util.Dom.createButton();
@@ -92,12 +91,12 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 
   /** @private */
   async onCastClick_() {
-    if (this.castProxy_.isCasting()) {
-      this.castProxy_.suggestDisconnect();
+    if (this.castProxyContainer_.isCasting()) {
+      this.castProxyContainer_.suggestDisconnect();
     } else {
       try {
         this.castButton_.disabled = true;
-        await this.castProxy_.cast();
+        await this.castProxyContainer_.cast();
         this.castButton_.disabled = false;
       } catch (error) {
         this.castButton_.disabled = false;
@@ -114,8 +113,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
    * @private
    */
   onCastStatusChange_() {
-    const canCast = this.castProxy_.canCast() && this.controls.isCastAllowed();
-    const isCasting = this.castProxy_.isCasting();
+    const canCast =
+        this.castProxyContainer_.canCast() && this.controls.isCastAllowed();
+    const isCasting = this.castProxyContainer_.isCasting();
     const materialDesignIcons = shaka.ui.Enums.MaterialDesignIcons;
     shaka.ui.Utils.setDisplay(this.castButton_, canCast);
     this.castIcon_.textContent = isCasting ?
@@ -139,9 +139,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
    * @private
    */
   setCurrentCastSelection_() {
-    if (this.castProxy_.isCasting()) {
+    if (this.castProxyContainer_.isCasting()) {
       this.castCurrentSelectionSpan_.textContent =
-          this.castProxy_.receiverName();
+          this.castProxyContainer_.receiverName();
     } else {
       this.castCurrentSelectionSpan_.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);

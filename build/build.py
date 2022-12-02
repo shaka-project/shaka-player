@@ -185,6 +185,13 @@ class Build(object):
         return True
     return False
 
+  def has_cast(self):
+    """Returns True if the cast system is in the build."""
+    for path in self.include:
+      if 'cast' in path.split(os.path.sep):
+        return True
+    return False
+
   def generate_localizations(self, locales, force):
     localizations = compiler.GenerateLocalizations(locales)
     localizations.generate(force)
@@ -258,6 +265,16 @@ class Build(object):
 
     return True
 
+  def pick_cast_proxy_container(self):
+    """Picks which version of CastProxyContainer should be used."""
+    if self.has_cast():
+      toRemove = 'ui/cast_proxy_container_no_cast.js'
+    else:
+      toRemove = 'ui/cast_proxy_container.js'
+    toRemove = os.path.abspath(toRemove)
+    self.exclude.add(toRemove)
+    self.include.discard(toRemove)
+
   def build_library(self, name, locales, force, is_debug):
     """Builds Shaka Player using the files in |self.include|.
 
@@ -275,6 +292,7 @@ class Build(object):
       return False
     if self.has_ui():
       self.generate_localizations(locales, force)
+      self.pick_cast_proxy_container();
 
     if is_debug:
       name += '.debug'

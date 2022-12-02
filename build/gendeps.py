@@ -49,6 +49,8 @@ def main(_):
       '-r', 'demo', 'lib', 'ui', 'third_party',
       # Individual files to add to those
       '-f', 'dist/locales.js',
+      # Remove the no-cast version of the cast proxy container
+      '-e', 'ui/cast_proxy_container_no_cast.js',
       # The path to the folder containing the Closure library's base.js
       '--closure-path', 'node_modules/google-closure-library/closure/goog',
     ]
