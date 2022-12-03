@@ -510,9 +510,10 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    // Call with forceTransmux = true, so that it will transmux even on
-    // platforms with native TS support.
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    config.forceTransmux = true;
+    mediaSourceEngine.configure(config);
+    await mediaSourceEngine.init(initObject);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
     await appendWithClosedCaptions(ContentType.VIDEO, 0);
@@ -531,9 +532,10 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    // Call with forceTransmux = true, so that it will transmux even on
-    // platforms with native TS support.
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    config.forceTransmux = true;
+    mediaSourceEngine.configure(config);
+    await mediaSourceEngine.init(initObject);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
     await appendWithClosedCaptions(ContentType.VIDEO, 2);
@@ -560,8 +562,7 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(videoType, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(
-        initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
+    await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
     await mediaSourceEngine.setDuration(presentationDuration);
     await mediaSourceEngine.setStreamProperties(
         videoType,
@@ -596,7 +597,7 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInitWithClosedCaptions(ContentType.VIDEO);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
@@ -613,7 +614,7 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
@@ -626,7 +627,10 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    config.forceTransmux = true;
+    mediaSourceEngine.configure(config);
+    await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
@@ -642,7 +646,7 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
@@ -658,7 +662,10 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    config.forceTransmux = true;
+    mediaSourceEngine.configure(config);
+    await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
