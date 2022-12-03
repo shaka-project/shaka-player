@@ -140,7 +140,6 @@ def check_complete(_):
   all_files.update(shakaBuildHelpers.get_all_js_files('lib'))
   all_files.update(shakaBuildHelpers.get_all_js_files('ui'))
   all_files.update(shakaBuildHelpers.get_all_js_files('third_party'))
-  all_files.remove(os.path.join(base, 'ui', 'dummy_cast_proxy.js'))
   missing_files = all_files - complete_build
 
   if missing_files:

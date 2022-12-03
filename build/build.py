@@ -285,7 +285,7 @@ class Build(object):
       # So that the UI will correctly build if the cast is disabled, add the
       # dummy cast proxy.
       if not self.has_cast():
-        self.include.add(os.path.abspath('ui/dummy_cast_proxy.js'))
+        self.include.add(os.path.abspath('conditional/dummy_cast_proxy.js'))
 
     if is_debug:
       name += '.debug'
