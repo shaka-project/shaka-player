@@ -1,4 +1,4 @@
-/*! @license
+  /*! @license
  * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
@@ -377,8 +377,20 @@ shakaDemo.Config = class {
   /** @private */
   addStreamingSection_() {
     const MessageIds = shakaDemo.MessageIds;
+    const localize = (name) => shakaDemoMain.getLocalizedString(name);
+    const strategyOptions = shaka.config.CodecSwitchingStrategy;
+    const strategyOptionsNames = {
+      'DISABLED': localize(MessageIds.CODEC_SWITCHING_STRATEGY_DISABLED),
+      'RELOAD': localize(MessageIds.CODEC_SWITCHING_STRATEGY_RELOAD),
+      'SMOOTH': localize(MessageIds.CODEC_SWITCHING_STRATEGY_SMOOTH),
+    };
     const docLink = this.resolveExternLink_('.StreamingConfiguration');
     this.addSection_(MessageIds.STREAMING_SECTION_HEADER, docLink)
+        .addSelectInput_(
+            MessageIds.CODEC_SWITCHING_STRATEGY_HEADER,
+            'streaming.codecSwitchingStrategy',
+            strategyOptions,
+            strategyOptionsNames)
         .addNumberInput_(MessageIds.GAP_DETECTION_THRESHOLD,
             'streaming.gapDetectionThreshold',
             /* canBeDecimal= */ true)
