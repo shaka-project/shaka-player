@@ -14,5 +14,5 @@
 /** @type {string} */
 SourceBuffer.prototype.mode;
 
-/** @type {function} */
+/** @type {Function} */
 SourceBuffer.prototype.changeType;
