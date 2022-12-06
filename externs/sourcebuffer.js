@@ -13,3 +13,6 @@
 
 /** @type {string} */
 SourceBuffer.prototype.mode;
+
+/** @type {function} */
+SourceBuffer.prototype.changeType;
