@@ -424,7 +424,7 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.MAX_DISABLED_TIME,
             'streaming.maxDisabledTime')
         .addNumberInput_(MessageIds.SEGMENT_PREFETCH_LIMIT,
-          'streaming.segmentPrefetchLimit');
+            'streaming.segmentPrefetchLimit');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
