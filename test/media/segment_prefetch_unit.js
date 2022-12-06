@@ -54,7 +54,7 @@ describe('SegmentPrefetch', () => {
   describe('prefetchSegments', () => {
     it('should prefetch next 3 segments', async () => {
       segmentPrefetch.prefetchSegments(references[0]);
-      expectSegmentsPrefetched(0);
+      await expectSegmentsPrefetched(0);
       const op = segmentPrefetch.getPrefetchedSegment(references[3]);
       expect(op).toBeNull();
       expect(fetchDispatcher).toHaveBeenCalledTimes(3);
@@ -82,12 +82,12 @@ describe('SegmentPrefetch', () => {
       segmentPrefetch.prefetchSegments(references[2]);
 
       expect(fetchDispatcher).toHaveBeenCalledTimes(3);
-      expectSegmentsPrefetched(1);
+      await expectSegmentsPrefetched(1);
     });
   });
 
   describe('clearAll', () => {
-    it('clears all prefetched segments', async () => {
+    it('clears all prefetched segments', () => {
       segmentPrefetch.prefetchSegments(references[0]);
       segmentPrefetch.clearAll();
       for (let i = 0; i < 4; i++) {
@@ -97,7 +97,7 @@ describe('SegmentPrefetch', () => {
       expect(fetchDispatcher).toHaveBeenCalledTimes(3);
     });
 
-    it('resets time pos so prefetch can happen again', async () => {
+    it('resets time pos so prefetch can happen again', () => {
       segmentPrefetch.prefetchSegments(references[3]);
       segmentPrefetch.clearAll();
       for (let i = 0; i < 4; i++) {
@@ -116,7 +116,7 @@ describe('SegmentPrefetch', () => {
   });
 
   describe('switchStream', () => {
-    it('clears all prefetched segments', async () => {
+    it('clears all prefetched segments', () => {
       segmentPrefetch.prefetchSegments(references[0]);
       segmentPrefetch.switchStream(createStream());
       for (let i = 0; i < 4; i++) {
@@ -129,7 +129,7 @@ describe('SegmentPrefetch', () => {
     it('do nothing if its same stream', async () => {
       segmentPrefetch.prefetchSegments(references[0]);
       segmentPrefetch.switchStream(stream);
-      expectSegmentsPrefetched(0);
+      await expectSegmentsPrefetched(0);
     });
   });
 
@@ -142,14 +142,14 @@ describe('SegmentPrefetch', () => {
         expect(op).toBeNull();
       }
       segmentPrefetch.prefetchSegments(references[0]);
-      expectSegmentsPrefetched(0, 2);
+      await expectSegmentsPrefetched(0, 2);
       expect(fetchDispatcher).toHaveBeenCalledTimes(3 + 2);
     });
 
     it('do nothing if its same stream', async () => {
       segmentPrefetch.prefetchSegments(references[0]);
       segmentPrefetch.resetLimit(3);
-      expectSegmentsPrefetched(0);
+      await expectSegmentsPrefetched(0);
     });
   });
   /**

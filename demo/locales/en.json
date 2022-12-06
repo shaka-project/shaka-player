@@ -259,5 +259,6 @@
   "DEMO_WIDEVINE": "Widevine DRM",
   "DEMO_XLINK": "XLink",
   "DEMO_XLINK_FAIL_GRACEFULLY": "Xlink Should Fail Gracefully",
-  "DEMO_XLINK_SEARCH": "Filters for assets that have XLINK tags in their manifests, so that they can be broken into multiple files."
+  "DEMO_XLINK_SEARCH": "Filters for assets that have XLINK tags in their manifests, so that they can be broken into multiple files.",
+  "DEMO_SEGMENT_PREFETCH_LIMIT": "Segment Prefetch Limit"
 }

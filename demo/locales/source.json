@@ -1042,5 +1042,9 @@
   "DEMO_XLINK_SEARCH": {
     "description": "A tooltip for an optional search term.",
     "message": "Filters for assets that have [JARGON:XLINK] tags in their manifests, so that they can be broken into multiple files."
+  },
+  "DEMO_SEGMENT_PREFETCH_LIMIT": {
+    "description": "Segment Prefetch Limit configuration used by StreamingEngine.",
+    "message": "Segment Prefetch Limit."
   }
 }
