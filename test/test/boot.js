@@ -332,8 +332,8 @@ function configureJasmineEnvironment() {
   }
 
   // Reset decoding config cache after each test.
-  afterEach(() => {
-    shaka.util.StreamUtils.decodingConfigCache = {};
+  afterEach(/** @suppress {accessControls} */ () => {
+    shaka.util.StreamUtils.decodingConfigCache_ = {};
   });
 
   // Code in karma-jasmine's adapter will malform test failures when the
