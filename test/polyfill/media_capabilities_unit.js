@@ -12,6 +12,7 @@ describe('MediaCapabilities', () => {
   const originalRequestMediaKeySystemAccess =
     navigator.requestMediaKeySystemAccess;
   const originalMediaCapabilities = navigator.mediaCapabilities;
+  const supportMap = shaka.media.Capabilities.MediaSourceTypeSupportMap;
 
   /** @type {MediaDecodingConfiguration} */
   let mockDecodingConfig;
@@ -102,18 +103,12 @@ describe('MediaCapabilities', () => {
   describe('decodingInfo', () => {
     it('should check codec support when MediaDecodingConfiguration.type ' +
       'is "media-source"', () => {
-      const isTypeSupportedSpy =
-          spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
+      expect(window['MediaSource']['isTypeSupported']).toBeDefined();
       shaka.polyfill.MediaCapabilities.install();
       navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
-      expect(isTypeSupportedSpy).toHaveBeenCalledTimes(2);
-      expect(isTypeSupportedSpy).toHaveBeenCalledWith(
-          mockDecodingConfig.video.contentType,
-      );
-      expect(isTypeSupportedSpy).toHaveBeenCalledWith(
-          mockDecodingConfig.audio.contentType,
-      );
+      expect(supportMap.has(mockDecodingConfig.video.contentType)).toBe(true);
+      expect(supportMap.has(mockDecodingConfig.audio.contentType)).toBe(true);
     });
 
     it('should check codec support when MediaDecodingConfiguration.type ' +
@@ -200,9 +195,7 @@ describe('MediaCapabilities', () => {
           const isChromecastSpy =
               spyOn(shaka['util']['Platform'],
                   'isChromecast').and.returnValue(true);
-          const isTypeSupportedSpy =
-              spyOn(window['MediaSource'], 'isTypeSupported')
-                  .and.returnValue(true);
+          expect(window['MediaSource']['isTypeSupported']).toBeDefined();
 
           shaka.polyfill.MediaCapabilities.install();
           await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
@@ -212,7 +205,10 @@ describe('MediaCapabilities', () => {
           expect(isChromecastSpy).toHaveBeenCalledTimes(2);
           // 1 (fallback in canCastDisplayType()) +
           // 1 (mockDecodingConfig.audio).
-          expect(isTypeSupportedSpy).toHaveBeenCalledTimes(2);
+          expect(supportMap.has(mockDecodingConfig.video.contentType))
+              .toBe(true);
+          expect(supportMap.has(mockDecodingConfig.audio.contentType))
+              .toBe(true);
         });
 
     it('should use cast.__platform__.canDisplayType for "supported" field ' +
@@ -226,8 +222,7 @@ describe('MediaCapabilities', () => {
       const isChromecastSpy =
           spyOn(shaka['util']['Platform'],
               'isChromecast').and.returnValue(true);
-      const isTypeSupportedSpy =
-          spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
+      expect(window['MediaSource']['isTypeSupported']).toBeDefined();
 
       // Tests an HDR stream's extended MIME type is correctly provided.
       mockDecodingConfig.video.transferFunction = 'pq';
@@ -236,14 +231,17 @@ describe('MediaCapabilities', () => {
       // Round to a whole number since we can't rely on number => string
       // conversion precision on all devices.
       mockDecodingConfig.video.framerate = 24;
+
+      const chromecastType =
+          'video/mp4; ' +
+          'codecs="hev1.2.4.L153.B0"; ' +
+          'width=512; ' +
+          'height=288; ' +
+          'framerate=24; ' +
+          'eotf=smpte2084';
       mockCanDisplayType.and.callFake((type) => {
-        expect(type).toBe(
-            'video/mp4; ' +
-            'codecs="hev1.2.4.L153.B0"; ' +
-            'width=512; ' +
-            'height=288; ' +
-            'framerate=24; ' +
-            'eotf=smpte2084');
+        expect(type).toBe(chromecastType);
+        supportMap.set(type, true);
         return true;
       });
 
@@ -253,7 +251,7 @@ describe('MediaCapabilities', () => {
       // 1 (during install()) + 1 (for video config check).
       expect(isChromecastSpy).toHaveBeenCalledTimes(2);
       // 1 (mockDecodingConfig.audio).
-      expect(isTypeSupportedSpy).toHaveBeenCalledTimes(1);
+      expect(supportMap.has(chromecastType)).toBe(true);
       // Called once in canCastDisplayType.
       expect(mockCanDisplayType).toHaveBeenCalledTimes(1);
     });
