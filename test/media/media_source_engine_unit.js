@@ -602,8 +602,7 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       videoSourceBuffer.mode = 'sequence';
 
-      await mediaSourceEngine.init(
-          initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
 
       expect(videoSourceBuffer.timestampOffset).toBe(0);
 
@@ -628,8 +627,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-      await mediaSourceEngine.init(
-          initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
 
       // First, mock the scenario where timestampOffset is set to help align
       // text segments. In this case, SourceBuffer mode is still 'segments'.

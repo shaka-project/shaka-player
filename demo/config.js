@@ -436,10 +436,8 @@ shakaDemo.Config = class {
       this.latestInput_.input().checked = true;
     }
 
-    this.addBoolInput_(MessageIds.FORCE_TRANSMUX,
-        'streaming.forceTransmux')
-        .addBoolInput_(MessageIds.START_AT_SEGMENT_BOUNDARY,
-            'streaming.startAtSegmentBoundary')
+    this.addBoolInput_(MessageIds.START_AT_SEGMENT_BOUNDARY,
+        'streaming.startAtSegmentBoundary')
         .addBoolInput_(MessageIds.IGNORE_TEXT_FAILURES,
             'streaming.ignoreTextStreamFailures')
         .addBoolInput_(MessageIds.STALL_DETECTOR_ENABLED,
@@ -456,7 +454,9 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
     this.addSection_(MessageIds.MEDIA_SOURCE_SECTION_HEADER, docLink)
         .addTextInput_(MessageIds.SOURCE_BUFFER_EXTRA_FEATURES,
-            'mediaSource.sourceBufferExtraFeatures');
+            'mediaSource.sourceBufferExtraFeatures')
+        .addBoolInput_(MessageIds.FORCE_TRANSMUX,
+            'mediaSource.forceTransmux');
   }
 
   /** @private */
