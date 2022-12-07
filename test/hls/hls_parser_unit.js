@@ -1116,15 +1116,6 @@ describe('HlsParser', () => {
       'URI="text2"\n',
     ].join('');
 
-    const media = [
-      '#EXTM3U\n',
-      '#EXT-X-PLAYLIST-TYPE:VOD\n',
-      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
-      '#EXTINF:5,\n',
-      '#EXT-X-BYTERANGE:121090@616\n',
-      'main.mp4',
-    ].join('');
-
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
