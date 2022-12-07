@@ -461,4 +461,80 @@ describe('UITextDisplayer', () => {
       expect(Object.keys(cueCssObj)).not.toContain('left');
     }
   });
+
+  it('does not lose second item in a region', () => {
+    const cueRegion = new shaka.text.CueRegion();
+    cueRegion.id = 'regionId';
+    cueRegion.height = 80;
+    cueRegion.heightUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion.width = 80;
+    cueRegion.widthUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion.viewportAnchorX = 10;
+    cueRegion.viewportAnchorY = 10;
+    cueRegion.viewportAnchorUnits = shaka.text.CueRegion.units.PERCENTAGE;
+
+    // These have identical nested.
+    const cue1 = new shaka.text.Cue(168, 181.84, '');
+    cue1.nestedCues = [
+      new shaka.text.Cue(168, 181.84, ''),
+    ];
+    cue1.region = cueRegion;
+
+    const nested1 = new shaka.text.Cue(168, 170.92, '');
+    nested1.nestedCues = [new shaka.text.Cue(0, 170.92,
+        'Emo look. I mean listen.')];
+
+    const nested2 = new shaka.text.Cue(172, 174.84, '');
+    nested2.nestedCues = [new shaka.text.Cue(172, 174.84,
+        'You have to learn to listen.')];
+
+    const nested3 = new shaka.text.Cue(175.84, 177.64, '');
+    nested3.nestedCues = [new shaka.text.Cue(175.84, 177.64,
+        'This is not some game.')];
+
+    const nested4 = new shaka.text.Cue(177.68, 181.84, '');
+    nested4.nestedCues = [new shaka.text.Cue(177.68, 181.84,
+        'You - I mean we - we could easily die out here.')];
+
+    cue1.nestedCues[0].nestedCues = [nested1, nested2, nested3, nested4];
+
+    video.currentTime = 170;
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append([cue1]);
+    updateCaptions();
+
+    /** @type {Element} */
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    let captions = textContainer.querySelectorAll('div');
+    expect(captions.length).toBe(1);
+    let allRegionElements = textContainer.querySelectorAll(
+        '.shaka-text-region');
+    // Verify that the nested cues are all attached to a single region element.
+    expect(allRegionElements.length).toBe(1);
+
+    // Advance time to where there is none to show
+    video.currentTime = 171;
+    updateCaptions();
+
+    allRegionElements = textContainer.querySelectorAll(
+        '.shaka-text-region');
+    expect(allRegionElements.length).toBe(1);
+
+    // Advance time to where there is something to show
+    video.currentTime = 173;
+    updateCaptions();
+
+    allRegionElements = textContainer.querySelectorAll(
+        '.shaka-text-region');
+    expect(allRegionElements.length).toBe(1);
+
+    captions = textContainer.querySelectorAll('div');
+
+    expect(captions.length).toBe(1);
+    expect(captions[0].textContent).toBe('You have to learn to listen.');
+
+    allRegionElements = textContainer.querySelectorAll(
+        '.shaka-text-region');
+    expect(allRegionElements.length).toBe(1);
+  });
 });
