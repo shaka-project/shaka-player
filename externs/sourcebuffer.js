@@ -15,4 +15,4 @@
 SourceBuffer.prototype.mode;
 
 /** @type {Function} */
-SourceBuffer.prototype.changeType;
+// SourceBuffer.prototype.changeType;
