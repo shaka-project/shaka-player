@@ -11,6 +11,7 @@
 
 /**
  * @typedef {{
+ *    name: string,
  *    parser: !shaka.util.Mp4Parser,
  *    partialOkay: boolean,
  *    start: number,
@@ -21,6 +22,8 @@
  *    has64BitSize: boolean
  * }}
  *
+ * @property {string} name
+ *   The box name, a 4-character string (fourcc).
  * @property {!shaka.util.Mp4Parser} parser
  *   The parser that parsed this box. The parser can be used to parse child
  *   boxes where the configuration of the current parser is needed to parsed

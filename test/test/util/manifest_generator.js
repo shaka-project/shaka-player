@@ -265,6 +265,8 @@ shaka.test.ManifestGenerator.Variant = class {
     if (!isPartial) {
       /** @type {string} */
       this.language = 'und';
+      /** @type {string} */
+      this.label = '';
       /** @type {number} */
       this.bandwidth = 0;
       /** @type {number} */
@@ -318,7 +320,7 @@ shaka.test.ManifestGenerator.Variant = class {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     const stream = new shaka.test.ManifestGenerator.Stream(
         this.manifest_, /* isPartial= */ false, id, ContentType.AUDIO,
-        this.language);
+        this.language, this.label);
     if (func) {
       func(stream);
     }
@@ -449,8 +451,9 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {?number} id
    * @param {shaka.util.ManifestParserUtils.ContentType} type
    * @param {string=} lang
+   * @param {string=} label
    */
-  constructor(manifest, isPartial, id, type, lang) {
+  constructor(manifest, isPartial, id, type, lang, label) {
     goog.asserts.assert(
         !manifest || !manifest.isIdUsed_(id),
         'Streams should have unique ids!');
@@ -520,7 +523,7 @@ shaka.test.ManifestGenerator.Stream = class {
       /** @type {string} */
       this.language = lang || 'und';
       /** @type {?string} */
-      this.label = null;
+      this.label = label || null;
       /** @type {boolean} */
       this.primary = false;
       /** @type {?shaka.extern.Stream} */
