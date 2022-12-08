@@ -2034,7 +2034,8 @@ describe('TtmlTextParser', () => {
         '    <span style="s1">Emo look.<br/>I mean listen.</span>' +
         '  </p>' +
         '</div></body></tt>',
-        {periodStart: 0, segmentStart: 160, segmentEnd: 170, vttOffset: 0});
+        {periodStart: 0, segmentStart: 160, segmentEnd: 170, vttOffset: 0},
+        {});
 
     verifyHelper(
         [
@@ -2046,7 +2047,8 @@ describe('TtmlTextParser', () => {
         '    <span style="s1">Emo look.<br/>I mean listen.</span>' +
         '  </p>' +
         '</div></body></tt>',
-        {periodStart: 0, segmentStart: 170, segmentEnd: 180, vttOffset: 0});
+        {periodStart: 0, segmentStart: 170, segmentEnd: 180, vttOffset: 0},
+        {});
   });
 
   /**
