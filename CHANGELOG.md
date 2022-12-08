@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.3.14](https://github.com/shaka-project/shaka-player/compare/v3.3.13...v3.3.14) (2022-12-08)
+
+
+### Bug Fixes
+
+* 4676 - Virgin Media set top box is incorrectly categorized as Apple/Safari ([#4678](https://github.com/shaka-project/shaka-player/issues/4678)) ([dff6683](https://github.com/shaka-project/shaka-player/commit/dff66831ed9ad5844108bd0333c0f0f706863fcb)), closes [#4676](https://github.com/shaka-project/shaka-player/issues/4676)
+* **cast:** Use cast platform APIs in MediaCapabilties polyfill ([#4727](https://github.com/shaka-project/shaka-player/issues/4727)) ([dccb28d](https://github.com/shaka-project/shaka-player/commit/dccb28da887ba6a51302a34a819d82c81387c850))
+* **cea:** Fix MAX_ROWS in CEA-708 window ([#4757](https://github.com/shaka-project/shaka-player/issues/4757)) ([4909b0d](https://github.com/shaka-project/shaka-player/commit/4909b0d2f8ad4f34d4a082cab859e53e360c0a43))
+* Fix bufferBehind setting broken by image segments ([#4718](https://github.com/shaka-project/shaka-player/issues/4718)) ([f9121b5](https://github.com/shaka-project/shaka-player/commit/f9121b520e9178e195f342070c863741d1962c3e)), closes [#4717](https://github.com/shaka-project/shaka-player/issues/4717)
+* Fix DRM workaround for Tizen and Xbox with hvc1/hev1 boxes ([#4743](https://github.com/shaka-project/shaka-player/issues/4743)) ([a84fe2a](https://github.com/shaka-project/shaka-player/commit/a84fe2ae1428055c8f1b565056c563b7c2e38aa7)), closes [#4742](https://github.com/shaka-project/shaka-player/issues/4742)
+* Fix subtitles not added to DOM region ([#4733](https://github.com/shaka-project/shaka-player/issues/4733)) ([a42b803](https://github.com/shaka-project/shaka-player/commit/a42b803b9928648c26b54971809e0939495ae5d7)), closes [#4680](https://github.com/shaka-project/shaka-player/issues/4680)
+* **HLS:** Fix lowLatencyPresentationDelay when using autoLowLatencyMode ([#4712](https://github.com/shaka-project/shaka-player/issues/4712)) ([a9bb695](https://github.com/shaka-project/shaka-player/commit/a9bb6955351520c5f079afa752b990f942773d7f))
+* **HLS:** Fix support legacy AVC1 codec used in HLS ([#4716](https://github.com/shaka-project/shaka-player/issues/4716)) ([8dcab18](https://github.com/shaka-project/shaka-player/commit/8dcab182d8c6ab545ff286f08eefaefb93a36662))
+* **HLS:** Single alternative video renditions not working ([#4785](https://github.com/shaka-project/shaka-player/issues/4785)) ([4d2371f](https://github.com/shaka-project/shaka-player/commit/4d2371f7caf95a0145de58a9331d2dc9fcf7d2fa))
+* **TTML:** Add font-family mapping ([#4801](https://github.com/shaka-project/shaka-player/issues/4801)) ([7e93455](https://github.com/shaka-project/shaka-player/commit/7e934556905e8be9f09de3efe81382b90978175f))
+* **TTML:** Fix duplicate cues overlapping segment boundaries ([#4798](https://github.com/shaka-project/shaka-player/issues/4798)) ([be98ae3](https://github.com/shaka-project/shaka-player/commit/be98ae3720051c87a7685bb84aaa70567c5e3cb7)), closes [#4631](https://github.com/shaka-project/shaka-player/issues/4631)
+* **ui:** Check event cancelable before event.preventDefault ([#4690](https://github.com/shaka-project/shaka-player/issues/4690)) ([4a9a2f2](https://github.com/shaka-project/shaka-player/commit/4a9a2f2da53af1216971ebf742a7a04ea14193c5))
+* WebVTT line not correctly positioned in UITextDisplayer ([#4567](https://github.com/shaka-project/shaka-player/issues/4567)) ([#4682](https://github.com/shaka-project/shaka-player/issues/4682)) ([fecf044](https://github.com/shaka-project/shaka-player/commit/fecf044119704fd41db5c4d5ee7ed3deb492d862))
+
 ## [3.3.13](https://github.com/shaka-project/shaka-player/compare/v3.3.12...v3.3.13) (2022-11-09)
 
 
