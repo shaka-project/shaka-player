@@ -331,6 +331,11 @@ function configureJasmineEnvironment() {
     });
   }
 
+  // Reset decoding config cache after each test.
+  afterEach(/** @suppress {accessControls} */ () => {
+    shaka.util.StreamUtils.decodingConfigCache_ = {};
+  });
+
   // Code in karma-jasmine's adapter will malform test failures when the
   // expectation message contains a stack trace, losing the failure message and
   // mixing up the stack trace of the failure.  To avoid this, we modify

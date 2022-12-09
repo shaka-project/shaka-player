@@ -185,6 +185,13 @@ class Build(object):
         return True
     return False
 
+  def has_cast(self):
+    """Returns True if the cast system is in the build."""
+    for path in self.include:
+      if 'cast' in path.split(os.path.sep):
+        return True
+    return False
+
   def generate_localizations(self, locales, force):
     localizations = compiler.GenerateLocalizations(locales)
     localizations.generate(force)
@@ -275,6 +282,10 @@ class Build(object):
       return False
     if self.has_ui():
       self.generate_localizations(locales, force)
+      # So that the UI will correctly build if the cast is disabled, add the
+      # dummy cast proxy.
+      if not self.has_cast():
+        self.include.add(os.path.abspath('conditional/dummy_cast_proxy.js'))
 
     if is_debug:
       name += '.debug'

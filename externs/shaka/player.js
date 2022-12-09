@@ -131,7 +131,8 @@ shaka.extern.StateChange;
  * @property {number} manifestTimeSeconds
  *   The amount of time it took to download and parse the manifest.
  * @property {number} drmTimeSeconds
- *   The amount of time it took to download the first drm key.
+ *   The amount of time it took to download the first drm key, and load that key
+ *   into the drm system.
  * @property {number} playTime
  *   The total time spent in a playing state in seconds.
  * @property {number} pauseTime
@@ -947,7 +948,6 @@ shaka.extern.ManifestConfiguration;
  *   startAtSegmentBoundary: boolean,
  *   gapDetectionThreshold: number,
  *   durationBackoff: number,
- *   forceTransmux: boolean,
  *   safeSeekOffset: number,
  *   stallEnabled: boolean,
  *   stallThreshold: number,
@@ -1010,12 +1010,6 @@ shaka.extern.ManifestConfiguration;
  *   seek to when the user tries to seek to or start playback at the duration.
  *   To disable this behavior, the config can be set to 0.  We recommend using
  *   the default value unless you have a good reason not to.
- * @property {boolean} forceTransmux
- *   If this is <code>true</code>, we will transmux AAC and TS content even if
- *   not strictly necessary for the assets to be played.  Shaka Player
- *   currently only supports CEA 708 captions by transmuxing, so this value is
- *   necessary for enabling them on platforms with native TS support like Edge
- *   or Chromecast. This value defaults to <code>false</code>.
  * @property {number} safeSeekOffset
  *   The amount of seconds that should be added when repositioning the playhead
  *   after falling out of the availability window or seek. This gives the player
@@ -1085,7 +1079,8 @@ shaka.extern.StreamingConfiguration;
 
 /**
  * @typedef {{
- *   sourceBufferExtraFeatures: string
+ *   sourceBufferExtraFeatures: string,
+ *   forceTransmux: boolean
  * }}
  *
  * @description
@@ -1095,6 +1090,10 @@ shaka.extern.StreamingConfiguration;
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
  *   This string is ultimately appended to MIME types in addSourceBuffer().
+ * @property {boolean} forceTransmux
+ *   If this is <code>true</code>, we will transmux AAC and TS content even if
+ *   not strictly necessary for the assets to be played.
+ *   This value defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
@@ -1318,6 +1317,7 @@ shaka.extern.OfflineConfiguration;
  *   lcevc: shaka.extern.LcevcConfiguration,
  *   offline: shaka.extern.OfflineConfiguration,
  *   preferredAudioLanguage: string,
+ *   preferredAudioLabel: string,
  *   preferredTextLanguage: string,
  *   preferredVariantRole: string,
  *   preferredTextRole: string,
@@ -1357,6 +1357,8 @@ shaka.extern.OfflineConfiguration;
  *   The preferred language to use for audio tracks.  If not given it will use
  *   the <code>'main'</code> track.
  *   Changing this during playback will not affect the current playback.
+ * @property {string} preferredAudioLabel
+ *   The preferred label to use for audio tracks
  * @property {string} preferredTextLanguage
  *   The preferred language to use for text tracks.  If a matching text track
  *   is found, and the selected audio and text tracks have different languages,

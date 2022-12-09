@@ -345,10 +345,18 @@ describe('Player', () => {
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.HTTP_ERROR);
-      const nonHttpError = new shaka.util.Error(
+      const badHttpStatusError = new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.BAD_HTTP_STATUS);
+      const timeoutError = new shaka.util.Error(
           shaka.util.Error.Severity.RECOVERABLE,
           shaka.util.Error.Category.NETWORK,
           shaka.util.Error.Code.TIMEOUT);
+      const operationAbortedError = new shaka.util.Error(
+          shaka.util.Error.Severity.RECOVERABLE,
+          shaka.util.Error.Category.NETWORK,
+          shaka.util.Error.Code.OPERATION_ABORTED);
       /** @type {?jasmine.Spy} */
       let dispatchEventSpy;
 
@@ -371,9 +379,9 @@ describe('Player', () => {
         dispatchEventSpy.calls.reset();
       });
 
-      it('does not handle non NETWORK HTTP_ERROR', () => {
-        onErrorCallback(nonHttpError);
-        expect(nonHttpError.handled).toBeFalsy();
+      it('does not handle non recoverable network error', () => {
+        onErrorCallback(operationAbortedError);
+        expect(operationAbortedError.handled).toBeFalsy();
         expect(player.dispatchEvent).toHaveBeenCalled();
       });
 
@@ -438,6 +446,16 @@ describe('Player', () => {
           it('handles HTTP_ERROR', () => {
             onErrorCallback(httpError);
             expect(httpError.handled).toBeTruthy();
+          });
+
+          it('handles BAD_HTTP_STATUS', () => {
+            onErrorCallback(badHttpStatusError);
+            expect(badHttpStatusError.handled).toBeTruthy();
+          });
+
+          it('handles TIMEOUT', () => {
+            onErrorCallback(timeoutError);
+            expect(timeoutError.handled).toBeTruthy();
           });
 
           it('does not dispatch any error', () => {
@@ -1252,6 +1270,7 @@ describe('Player', () => {
         manifest.addVariant(106, (variant) => {  // spanish stereo, low res
           variant.language = 'es';
           variant.bandwidth = 1100;
+          variant.label = 'es-label';
           variant.addExistingStream(1);  // video
           variant.addAudio(6, (stream) => {
             stream.originalId = 'audio-es';
@@ -1263,6 +1282,7 @@ describe('Player', () => {
         manifest.addVariant(107, (variant) => {  // spanish stereo, high res
           variant.language = 'es';
           variant.bandwidth = 2100;
+          variant.label = 'es-label';
           variant.addExistingStream(2);  // video
           variant.addExistingStream(6);  // audio
         });
@@ -1529,7 +1549,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 1100,
           language: 'es',
-          label: null,
+          label: 'es-label',
           kind: null,
           width: 100,
           height: 200,
@@ -1565,7 +1585,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 2100,
           language: 'es',
-          label: null,
+          label: 'es-label',
           kind: null,
           width: 200,
           height: 400,
@@ -2235,6 +2255,18 @@ describe('Player', () => {
         language: 'en',
         roles: ['commentary'],
       }));
+    });
+
+    it('chooses a variant with preferred audio label', async () => {
+      expect(getActiveVariantTrack().label).toBe(null);
+
+      player.configure({
+        preferredAudioLanguage: '',
+        preferredAudioLabel: 'es-label',
+      });
+
+      await player.load(fakeManifestUri, 0, fakeMimeType);
+      expect(getActiveVariantTrack().label).toBe('es-label');
     });
   });  // describe('tracks')
 
