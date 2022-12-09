@@ -1,5 +1,29 @@
 # Changelog
 
+## [4.2.5](https://github.com/shaka-project/shaka-player/compare/v4.2.4...v4.2.5) (2022-12-08)
+
+
+### Bug Fixes
+
+* 4676 - Virgin Media set top box is incorrectly categorized as Apple/Safari ([#4678](https://github.com/shaka-project/shaka-player/issues/4678)) ([fe1c3d8](https://github.com/shaka-project/shaka-player/commit/fe1c3d821bc38abfe945ac7afb7278a564174b12)), closes [#4676](https://github.com/shaka-project/shaka-player/issues/4676)
+* **cast:** Use cast platform APIs in MediaCapabilties polyfill ([#4727](https://github.com/shaka-project/shaka-player/issues/4727)) ([6f3b2da](https://github.com/shaka-project/shaka-player/commit/6f3b2dab5f8e488305c30cb644ca44ad835d593b))
+* **cea:** Fix MAX_ROWS in CEA-708 window ([#4757](https://github.com/shaka-project/shaka-player/issues/4757)) ([05d959b](https://github.com/shaka-project/shaka-player/commit/05d959b0ef36cfa4c4a512143ffde506a20de914))
+* Correct default initDataTransform for legacy Apple Media Keys ([#4797](https://github.com/shaka-project/shaka-player/issues/4797)) ([6eed72f](https://github.com/shaka-project/shaka-player/commit/6eed72fd84ca0f7971b01db39a411c544d022c8f))
+* Fix bufferBehind setting broken by image segments ([#4718](https://github.com/shaka-project/shaka-player/issues/4718)) ([2987451](https://github.com/shaka-project/shaka-player/commit/298745149efc9608938aa133a354c7f2133609e0)), closes [#4717](https://github.com/shaka-project/shaka-player/issues/4717)
+* Fix DRM workaround for Tizen and Xbox with hvc1/hev1 boxes ([#4743](https://github.com/shaka-project/shaka-player/issues/4743)) ([6e6a15f](https://github.com/shaka-project/shaka-player/commit/6e6a15f42aa0bfeb71b2fc426824280712d29360)), closes [#4742](https://github.com/shaka-project/shaka-player/issues/4742)
+* Fix subtitles not added to DOM region ([#4733](https://github.com/shaka-project/shaka-player/issues/4733)) ([c7cb175](https://github.com/shaka-project/shaka-player/commit/c7cb17501d71c1d2ea7e50897b07cb57a87e60b6)), closes [#4680](https://github.com/shaka-project/shaka-player/issues/4680)
+* Fix usage of WebCrypto in old browsers ([#4711](https://github.com/shaka-project/shaka-player/issues/4711)) ([9934cd7](https://github.com/shaka-project/shaka-player/commit/9934cd7be4e5f00e7da58ee667a10236ada8af25))
+* **HLS:** Fix lowLatencyPresentationDelay when using autoLowLatencyMode ([#4712](https://github.com/shaka-project/shaka-player/issues/4712)) ([c4ef744](https://github.com/shaka-project/shaka-player/commit/c4ef7441ecda7b68d0dede2fd4782d8d25116518))
+* **HLS:** Fix support legacy AVC1 codec used in HLS ([#4716](https://github.com/shaka-project/shaka-player/issues/4716)) ([e34e380](https://github.com/shaka-project/shaka-player/commit/e34e3809d2eb34ccc5e5c940fb5cd0137619fb5a))
+* **HLS:** Single alternative video renditions not working ([#4785](https://github.com/shaka-project/shaka-player/issues/4785)) ([655d080](https://github.com/shaka-project/shaka-player/commit/655d08016231a2aa9b8860f6e963ab586aec023a))
+* Polyfill missing AbortController on Tizen ([#4707](https://github.com/shaka-project/shaka-player/issues/4707)) ([eae487d](https://github.com/shaka-project/shaka-player/commit/eae487dd11c188ef740c8e36bc55462c86cc173a))
+* **TTML:** Add font-family mapping ([#4801](https://github.com/shaka-project/shaka-player/issues/4801)) ([9262f92](https://github.com/shaka-project/shaka-player/commit/9262f921b7601f230bfd2ec854c80dd25fc2a36e))
+* **TTML:** Fix duplicate cues overlapping segment boundaries ([#4798](https://github.com/shaka-project/shaka-player/issues/4798)) ([7aa3e5d](https://github.com/shaka-project/shaka-player/commit/7aa3e5d656d4dec1cace286cc54009dd4d79eff7)), closes [#4631](https://github.com/shaka-project/shaka-player/issues/4631)
+* **ui:** Check event cancelable before event.preventDefault ([#4690](https://github.com/shaka-project/shaka-player/issues/4690)) ([9d90919](https://github.com/shaka-project/shaka-player/commit/9d90919dd29d0d0b8299d416b1039dabcc91608c))
+* **ui:** Fix iOS fullscreen on rotation ([#4679](https://github.com/shaka-project/shaka-player/issues/4679)) ([04051fd](https://github.com/shaka-project/shaka-player/commit/04051fdcd5faaf1303e2875b4de7225e2534938e))
+* Update v4.2 receiver app ID ([56466dc](https://github.com/shaka-project/shaka-player/commit/56466dce484e5ced69eddeb0c62c68615f4ed8d3))
+* WebVTT line not correctly positioned in UITextDisplayer ([#4567](https://github.com/shaka-project/shaka-player/issues/4567)) ([#4682](https://github.com/shaka-project/shaka-player/issues/4682)) ([e9e6c94](https://github.com/shaka-project/shaka-player/commit/e9e6c945a31c9dfa84e4890606c606fa9346ef9e))
+
 ## [4.2.4](https://github.com/shaka-project/shaka-player/compare/v4.2.3...v4.2.4) (2022-11-09)
 
 
