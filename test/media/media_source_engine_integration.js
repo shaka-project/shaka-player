@@ -38,21 +38,51 @@ describe('MediaSourceEngine', () => {
     startTime: Util.closeTo(0.767, 0.001),
     endTime: Util.closeTo(4.972, 0.001),
     textAlign: Cue.textAlign.CENTER,
-    payload: 'These are 608 captions\n(top left)',
+    nestedCues: [
+      jasmine.objectContaining({
+        payload: 'These are 608 captions',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+      jasmine.objectContaining({lineBreak: true}),
+      jasmine.objectContaining({
+        payload: '(top left)',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+    ],
   });
 
   const tsCeaCue1 = jasmine.objectContaining({
     startTime: Util.closeTo(5.305, 0.001),
     endTime: Util.closeTo(11.979, 0.001),
     textAlign: Cue.textAlign.CENTER,
-    payload: 'These are 608 captions\n(middle)',
+    nestedCues: [
+      jasmine.objectContaining({
+        payload: 'These are 608 captions',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+      jasmine.objectContaining({lineBreak: true}),
+      jasmine.objectContaining({
+        payload: '(middle)',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+    ],
   });
 
   const tsCeaCue2 = jasmine.objectContaining({
     startTime: Util.closeTo(12.312, 0.001),
     endTime: Util.closeTo(19.319, 0.001),
     textAlign: Cue.textAlign.CENTER,
-    payload: 'These are 608 captions\n(bottom left)',
+    nestedCues: [
+      jasmine.objectContaining({
+        payload: 'These are 608 captions',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+      jasmine.objectContaining({lineBreak: true}),
+      jasmine.objectContaining({
+        payload: '(bottom left)',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+    ],
   });
 
   // The same segments as above, but offset by 40 seconds (yes, 40), which is
@@ -61,21 +91,51 @@ describe('MediaSourceEngine', () => {
     startTime: Util.closeTo(40.767, 0.001),
     endTime: Util.closeTo(44.972, 0.001),
     textAlign: Cue.textAlign.CENTER,
-    payload: 'These are 608 captions\n(top left)',
+    nestedCues: [
+      jasmine.objectContaining({
+        payload: 'These are 608 captions',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+      jasmine.objectContaining({lineBreak: true}),
+      jasmine.objectContaining({
+        payload: '(top left)',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+    ],
   });
 
   const tsCeaCue4 = jasmine.objectContaining({
     startTime: Util.closeTo(45.305, 0.001),
     endTime: Util.closeTo(51.979, 0.001),
     textAlign: Cue.textAlign.CENTER,
-    payload: 'These are 608 captions\n(middle)',
+    nestedCues: [
+      jasmine.objectContaining({
+        payload: 'These are 608 captions',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+      jasmine.objectContaining({lineBreak: true}),
+      jasmine.objectContaining({
+        payload: '(middle)',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+    ],
   });
 
   const tsCeaCue5 = jasmine.objectContaining({
     startTime: Util.closeTo(52.312, 0.001),
     endTime: Util.closeTo(59.319, 0.001),
     textAlign: Cue.textAlign.CENTER,
-    payload: 'These are 608 captions\n(bottom left)',
+    nestedCues: [
+      jasmine.objectContaining({
+        payload: 'These are 608 captions',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+      jasmine.objectContaining({lineBreak: true}),
+      jasmine.objectContaining({
+        payload: '(bottom left)',
+        textAlign: Cue.textAlign.CENTER,
+      }),
+    ],
   });
 
   /**
@@ -137,7 +197,7 @@ describe('MediaSourceEngine', () => {
         type, segment, reference, /* hasClosedCaptions= */ false);
   }
 
-  function appendWithSeek(type, segmentNumber) {
+  function appendWithSeekAndClosedCaptions(type, segmentNumber) {
     const segment = generators[type]
         .getSegment(segmentNumber, Date.now() / 1000);
     const reference = dummyReference(type, segmentNumber);
@@ -145,7 +205,7 @@ describe('MediaSourceEngine', () => {
         type,
         segment,
         reference,
-        /* hasClosedCaptions= */ false,
+        /* hasClosedCaptions= */ true,
         /* seeked= */ true);
   }
 
@@ -450,15 +510,15 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    // Call with forceTransmux = true, so that it will transmux even on
-    // platforms with native TS support.
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    config.forceTransmux = true;
+    mediaSourceEngine.configure(config);
+    await mediaSourceEngine.init(initObject);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
-    await append(ContentType.VIDEO, 0);
+    await appendWithClosedCaptions(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
-
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue1]);
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue2]);
@@ -472,12 +532,13 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
     initObject.set(ContentType.TEXT, getFakeStream(metadata.text));
-    // Call with forceTransmux = true, so that it will transmux even on
-    // platforms with native TS support.
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    config.forceTransmux = true;
+    mediaSourceEngine.configure(config);
+    await mediaSourceEngine.init(initObject);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
 
-    await append(ContentType.VIDEO, 2);
+    await appendWithClosedCaptions(ContentType.VIDEO, 2);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue3]);
@@ -485,7 +546,7 @@ describe('MediaSourceEngine', () => {
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue5]);
 
     textDisplayer.appendSpy.calls.reset();
-    await appendWithSeek(ContentType.VIDEO, 0);
+    await appendWithSeekAndClosedCaptions(ContentType.VIDEO, 0);
 
     expect(textDisplayer.appendSpy).toHaveBeenCalledTimes(3);
     expect(textDisplayer.appendSpy).toHaveBeenCalledWith([tsCeaCue0]);
@@ -501,8 +562,7 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(videoType, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(
-        initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
+    await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
     await mediaSourceEngine.setDuration(presentationDuration);
     await mediaSourceEngine.setStreamProperties(
         videoType,
@@ -537,7 +597,7 @@ describe('MediaSourceEngine', () => {
     const initObject = new Map();
     initObject.set(ContentType.VIDEO, getFakeStream(metadata.video));
 
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await mediaSourceEngine.init(initObject);
     await mediaSourceEngine.setDuration(presentationDuration);
     await appendInitWithClosedCaptions(ContentType.VIDEO);
     mediaSourceEngine.setSelectedClosedCaptionId('CC1');
@@ -554,7 +614,7 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
@@ -567,7 +627,10 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    config.forceTransmux = true;
+    mediaSourceEngine.configure(config);
+    await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
@@ -583,7 +646,7 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ false);
+    await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
@@ -599,7 +662,10 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject, /* forceTransmux= */ true);
+    const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    config.forceTransmux = true;
+    mediaSourceEngine.configure(config);
+    await mediaSourceEngine.init(initObject);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
