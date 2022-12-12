@@ -378,19 +378,8 @@ shakaDemo.Config = class {
   addStreamingSection_() {
     const MessageIds = shakaDemo.MessageIds;
     const localize = (name) => shakaDemoMain.getLocalizedString(name);
-    const strategyOptions = shaka.config.CodecSwitchingStrategy;
-    const strategyOptionsNames = {
-      'DISABLED': localize(MessageIds.CODEC_SWITCHING_STRATEGY_DISABLED),
-      'RELOAD': localize(MessageIds.CODEC_SWITCHING_STRATEGY_RELOAD),
-      'SMOOTH': localize(MessageIds.CODEC_SWITCHING_STRATEGY_SMOOTH),
-    };
     const docLink = this.resolveExternLink_('.StreamingConfiguration');
     this.addSection_(MessageIds.STREAMING_SECTION_HEADER, docLink)
-        .addSelectInput_(
-            MessageIds.CODEC_SWITCHING_STRATEGY_HEADER,
-            'streaming.codecSwitchingStrategy',
-            strategyOptions,
-            strategyOptionsNames)
         .addNumberInput_(MessageIds.GAP_DETECTION_THRESHOLD,
             'streaming.gapDetectionThreshold',
             /* canBeDecimal= */ true)
@@ -464,11 +453,22 @@ shakaDemo.Config = class {
   addMediaSourceSection_() {
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
+    const strategyOptions = shaka.config.CodecSwitchingStrategy;
+    const strategyOptionsNames = {
+      'DISABLED': localize(MessageIds.CODEC_SWITCHING_STRATEGY_DISABLED),
+      'RELOAD': localize(MessageIds.CODEC_SWITCHING_STRATEGY_RELOAD),
+      'SMOOTH': localize(MessageIds.CODEC_SWITCHING_STRATEGY_SMOOTH),
+    };
     this.addSection_(MessageIds.MEDIA_SOURCE_SECTION_HEADER, docLink)
         .addTextInput_(MessageIds.SOURCE_BUFFER_EXTRA_FEATURES,
             'mediaSource.sourceBufferExtraFeatures')
         .addBoolInput_(MessageIds.FORCE_TRANSMUX,
-            'mediaSource.forceTransmux');
+            'mediaSource.forceTransmux')
+        .addSelectInput_(
+            MessageIds.CODEC_SWITCHING_STRATEGY_HEADER,
+            'mediaSource.codecSwitchingStrategy',
+            strategyOptions,
+            strategyOptionsNames);
   }
 
   /** @private */
