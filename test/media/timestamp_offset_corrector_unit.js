@@ -84,15 +84,15 @@ describe('TimestampOffsetCorrector', () => {
         shaka.test.Util.spyFunc(onEvent));
   });
 
-  describe('checkTimestampOffset()', () => {
+  describe('checkAndCorrectTimestampOffset()', () => {
     it('does not alter correct timestampOffset', () => {
       tsoc.configure(createStreamingConfig(true, 10));
       const segRef =
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec);
 
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
-      const corrected =
-          tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
+      const corrected = tsoc.checkAndCorrectTimestampOffset(
+          contentType, segRef, mediaSegment);
 
       expect(corrected).toBe(false);
       expect(segRef.timestampOffset).toBeCloseTo(
@@ -107,8 +107,8 @@ describe('TimestampOffsetCorrector', () => {
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 30);
 
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
-      const corrected =
-          tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
+      const corrected = tsoc.checkAndCorrectTimestampOffset(
+          contentType, segRef, mediaSegment);
 
       expect(corrected).toBe(true);
       expect(segRef.timestampOffset).toBeCloseTo(-baseMediaDecodeTimeSec, 1);
@@ -128,8 +128,8 @@ describe('TimestampOffsetCorrector', () => {
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 5);
 
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
-      const corrected =
-          tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
+      const corrected = tsoc.checkAndCorrectTimestampOffset(
+          contentType, segRef, mediaSegment);
 
       expect(corrected).toBe(false);
       expect(segRef.timestampOffset).toBeCloseTo(
@@ -143,12 +143,12 @@ describe('TimestampOffsetCorrector', () => {
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 15);
 
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
-      tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
+      tsoc.checkAndCorrectTimestampOffset(contentType, segRef, mediaSegment);
 
       expect(onEvent).toHaveBeenCalled();
 
-      const corrected =
-          tsoc.checkTimestampOffset(contentType, segRef, mediaSegment);
+      const corrected = tsoc.checkAndCorrectTimestampOffset(
+          contentType, segRef, mediaSegment);
 
       expect(corrected).toBe(false);
       expect(onEvent).toHaveBeenCalledTimes(1);
@@ -163,7 +163,7 @@ describe('TimestampOffsetCorrector', () => {
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 30);
 
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
-      const corrected = tsoc.checkTimestampOffset(
+      const corrected = tsoc.checkAndCorrectTimestampOffset(
           contentType, segRef, mediaSegment);
 
       expect(corrected).toBe(true);
@@ -183,7 +183,7 @@ describe('TimestampOffsetCorrector', () => {
           createSegmenRefWithTimestampOffset(-baseMediaDecodeTimeSec + 30);
 
       tsoc.parseTimescalesFromInitSegment(contentType, initSegment);
-      const corrected = tsoc.checkTimestampOffset(
+      const corrected = tsoc.checkAndCorrectTimestampOffset(
           contentType, segRef, mediaSegment);
 
       expect(corrected).toBe(true);
