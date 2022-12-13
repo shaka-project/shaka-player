@@ -66,22 +66,40 @@ function failTestsOnNamespacedElementOrAttributeNames() {
 }
 
 /**
- * Listen for unhandled Promise rejections (which may occur after a test) and
- * convert them into test failures.
+ * Fail the current test on a given error, constructed with a given header and
+ * the full stack trace of the error.
+ *
+ * @param {string} messageHeader
+ * @param {!Error} error
  */
-function failTestsOnUnhandledRejections() {
+function failOnError(messageHeader, error) {
+  let message = `${messageHeader}: ${error}`;
+  // Shaka errors have the stack trace in their toString() already, so don't
+  // add it again.  For native errors, we need to see where it came from.
+  if (error && error.stack && !(error instanceof shaka.util.Error)) {
+    message += '\n' + error.stack;
+  }
+  fail(message);
+}
+
+/**
+ * Listen for unhandled errors and Promise rejections (which may occur after a
+ * test) and convert them into test failures.
+ */
+function failTestsOnUnhandledErrors() {
   // https://developer.mozilla.org/en-US/docs/Web/Events/unhandledrejection
   window.addEventListener('unhandledrejection', (event) => {
     /** @type {?} */
     const error = event.reason;
-    let message = 'Unhandled rejection in Promise: ' + error;
+    failOnError('Unhandled rejection in Promise', error);
+  });
 
-    // Shaka errors have the stack trace in their toString() already, so don't
-    // add it again.  For native errors, we need to see where it came from.
-    if (error && error.stack && !(error instanceof shaka.util.Error)) {
-      message += '\n' + error.stack;
-    }
-    fail(message);
+  // https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event
+  // https://developer.mozilla.org/en-US/docs/Web/API/ErrorEvent
+  window.addEventListener('error', (event) => {
+    /** @type {?} */
+    const error = event['error'];
+    failOnError('Unhandled error', error);
   });
 }
 
@@ -392,7 +410,7 @@ function configureJasmineEnvironment() {
 function setupTestEnvironment() {
   failTestsOnFailedAssertions();
   failTestsOnNamespacedElementOrAttributeNames();
-  failTestsOnUnhandledRejections();
+  failTestsOnUnhandledErrors();
   disableScrollbars();
   workAroundLegacyEdgePromiseIssues();
 
