@@ -91,7 +91,7 @@ jobs:
       # to update to 108+.
       - name: Upgrade Edge
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Edge'
-        run: sudo apt -y update && sudo apt -y upgrade microsoft-edge
+        run: sudo apt -y update && sudo apt -y upgrade microsoft-edge-stable
 
       - name: Checkout code
         uses: actions/checkout@v3
