@@ -73,7 +73,7 @@ shaka.test.ManifestParser = class {
     const appendWindowStart = /** @type {?} */(jasmine.any(Number));
     const appendWindowEnd = /** @type {?} */(jasmine.any(Number));
 
-    return new shaka.media.SegmentReference(
+    const ref = new shaka.media.SegmentReference(
         start, end, getUris, startByte, endByte,
         initSegmentReference,
         timestampOffset,
@@ -82,7 +82,8 @@ shaka.test.ManifestParser = class {
         partialReferences,
         tilesLayout,
         /* tileDuration= */ undefined,
-        syncTime,
-    );
+        syncTime);
+    ref.discontinuitySequence = /** @type {?} */(jasmine.any(Number));
+    return ref;
   }
 };
