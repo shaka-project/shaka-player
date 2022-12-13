@@ -135,10 +135,10 @@ HLS features supported:
  - CEA-608/708 captions
  - Encrypted content with PlayReady and Widevine
  - Encrypted content with FairPlay (Safari on macOS and iOS 13+ only)
+ - Key rotation
  - Raw AAC, MP3, etc (without an MP4 container)
 
 HLS features **not** supported:
- - Key rotation: https://github.com/shaka-project/shaka-player/issues/917
  - I-frame-only playlists: https://github.com/shaka-project/shaka-player/issues/742
  - Low-latency streaming with blocking playlist reload
 
