@@ -599,7 +599,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.config_.forceLandscapeOnFullscreen && screen.orientation) {
           // Locking to 'landscape' should let it be either
           // 'landscape-primary' or 'landscape-secondary' as appropriate.
-          await screen.orientation.lock('landscape');
+          // We ignore errors from this specific call, since it creates noise
+          // on desktop otherwise.
+          try {
+            await screen.orientation.lock('landscape');
+          } catch (error) {}
         }
       } else {
         const video = /** @type {HTMLVideoElement} */(this.localVideo_);
