@@ -402,7 +402,7 @@ const sintelAudioSegment = {
   mdhdOffset: 0x1b6,
   segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
   tfdtOffset: 0x3c,
-  segmentDuration: 10.005,
+  segmentDuration: 10,
   mimeType: 'audio/mp4',
   codecs: 'mp4a.40.2',
 };
@@ -428,7 +428,7 @@ const sintelEncryptedAudio = {
   mdhdOffset: 0x1b6,
   segmentUri: '/base/test/test/assets/encrypted-sintel-audio-segment.mp4',
   tfdtOffset: 0x3c,
-  segmentDuration: 10.005,
+  segmentDuration: 10,
   mimeType: 'audio/mp4',
   codecs: 'mp4a.40.2',
   initData:
