@@ -997,7 +997,7 @@ describe('Player', () => {
     }
 
     async function waitUntilBuffered(amount) {
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 50; i++) {
         // We buffer from an internal segment, so this shouldn't take long to
         // buffer.
         await Util.delay(0.1);  // eslint-disable-line no-await-in-loop
