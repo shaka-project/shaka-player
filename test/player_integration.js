@@ -970,7 +970,7 @@ describe('Player', () => {
       expect(getBufferedBehind()).toBe(20);  // Buffered to start still.
       video.currentTime = 50;
       await waitUntilBuffered(30);
-      expect(getBufferedBehind()).toBeLessThan(30);
+      expect(getBufferedBehind()).toBeLessThan(40);  // 30 + segment_size
 
       player.configure('streaming.bufferBehind', 10);
       // We only evict content when we append a segment, so increase the
@@ -997,7 +997,7 @@ describe('Player', () => {
     }
 
     async function waitUntilBuffered(amount) {
-      for (let i = 0; i < 25; i++) {
+      for (let i = 0; i < 50; i++) {
         // We buffer from an internal segment, so this shouldn't take long to
         // buffer.
         await Util.delay(0.1);  // eslint-disable-line no-await-in-loop
@@ -1005,7 +1005,14 @@ describe('Player', () => {
           return;
         }
       }
-      throw new Error('Timeout waiting to buffer');
+
+      const ranges =
+          shaka.media.TimeRangesUtils.getBufferedInfo(video.buffered);
+      const currentTime = video.currentTime;
+      const target = currentTime + amount;
+
+      throw new Error('Timeout waiting to buffer! ' +
+          JSON.stringify({ranges, currentTime, target}));
     }
   });  // describe('buffering')
 
