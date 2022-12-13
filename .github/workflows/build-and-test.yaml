@@ -87,6 +87,19 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
         run: sudo apt -y update && sudo apt -y install ffmpeg
 
+      # Edge 107 fails DRM tests due to an outdated Widevine CDM.  Force Edge
+      # to update to 108+.
+      - name: Upgrade Edge
+        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Edge'
+        run: |
+          # If it's Edge 107, update it.  Otherwise, don't.  This way, we don't
+          # break something later when Edge 108+ is available by default in
+          # GitHub Actions.
+          if apt show microsoft-edge-stable | grep -q '^Version: 107'; then
+            wget https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-stable/microsoft-edge-stable_108.0.1462.46-1_amd64.deb
+            sudo dpkg -i microsoft-edge-stable_108.0.1462.46-1_amd64.deb
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v3
         with:
