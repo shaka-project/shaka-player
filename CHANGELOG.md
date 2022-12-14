@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.3.15](https://github.com/shaka-project/shaka-player/compare/v3.3.14...v3.3.15) (2022-12-14)
+
+
+### Bug Fixes
+
+* **chapters:** removed duplicate chapters by id ([#4810](https://github.com/shaka-project/shaka-player/issues/4810)) ([8fc7883](https://github.com/shaka-project/shaka-player/commit/8fc78835147dfee13749c2f09a1b27e0df5939b9))
+* Fix duplicate updates in StreamingEngine ([#4840](https://github.com/shaka-project/shaka-player/issues/4840)) ([ca72438](https://github.com/shaka-project/shaka-player/commit/ca724387488ca6f8943b3caa9c63fe241d517a77)), closes [#4831](https://github.com/shaka-project/shaka-player/issues/4831)
+* Fix rare exception after StreamingEngine teardown ([#4830](https://github.com/shaka-project/shaka-player/issues/4830)) ([6e170c6](https://github.com/shaka-project/shaka-player/commit/6e170c61768aa3946f3b2ab630b4f0cf214c825d)), closes [#4813](https://github.com/shaka-project/shaka-player/issues/4813)
+
 ## [3.3.14](https://github.com/shaka-project/shaka-player/compare/v3.3.13...v3.3.14) (2022-12-08)
 
 
