@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.2.6](https://github.com/shaka-project/shaka-player/compare/v4.2.5...v4.2.6) (2022-12-14)
+
+
+### Bug Fixes
+
+* **chapters:** removed duplicate chapters by id ([#4810](https://github.com/shaka-project/shaka-player/issues/4810)) ([50b7c91](https://github.com/shaka-project/shaka-player/commit/50b7c910f8381c035c061c0c58667b6c4be557b8))
+* Fix duplicate updates in StreamingEngine ([#4840](https://github.com/shaka-project/shaka-player/issues/4840)) ([bb25ff8](https://github.com/shaka-project/shaka-player/commit/bb25ff876b4cb48df98d8f7d033a79a9026b2cdf)), closes [#4831](https://github.com/shaka-project/shaka-player/issues/4831)
+* Fix rare exception after StreamingEngine teardown ([#4830](https://github.com/shaka-project/shaka-player/issues/4830)) ([e0f513e](https://github.com/shaka-project/shaka-player/commit/e0f513e7fec1c497ad1ef0135f700488dd9a6473)), closes [#4813](https://github.com/shaka-project/shaka-player/issues/4813)
+* **HLS:** Fix AV sync over ad boundaries ([#4824](https://github.com/shaka-project/shaka-player/issues/4824)) ([12cbf96](https://github.com/shaka-project/shaka-player/commit/12cbf96734ba421adb00a5875e96d3a442363cf3)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* **UI:** Suppress error log from fullscreen button on desktop ([#4823](https://github.com/shaka-project/shaka-player/issues/4823)) ([6d5f112](https://github.com/shaka-project/shaka-player/commit/6d5f1124ad56e74f61aacb68bb9161bfd5bc192a)), closes [#4822](https://github.com/shaka-project/shaka-player/issues/4822)
+
 ## [4.2.5](https://github.com/shaka-project/shaka-player/compare/v4.2.4...v4.2.5) (2022-12-08)
 
 
