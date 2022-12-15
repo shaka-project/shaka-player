@@ -537,4 +537,74 @@ describe('UITextDisplayer', () => {
         '.shaka-text-region');
     expect(allRegionElements.length).toBe(1);
   });
+
+  it('creates separate regions when dimensions differ but id same', () => {
+    const identicalRegionId = 'regionId';
+
+    const cueRegion1 = new shaka.text.CueRegion();
+    const cueRegion2 = new shaka.text.CueRegion();
+    cueRegion1.id = identicalRegionId;
+    cueRegion2.id = identicalRegionId;
+
+    cueRegion1.height = 80;
+    cueRegion1.heightUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion1.width = 80;
+    cueRegion1.widthUnits = shaka.text.CueRegion.units.PERCENTAGE;
+
+    cueRegion2.height = 160; // the only difference!
+    cueRegion2.heightUnits = shaka.text.CueRegion.units.PERCENTAGE;
+    cueRegion2.width = 80;
+    cueRegion2.widthUnits = shaka.text.CueRegion.units.PERCENTAGE;
+
+    cueRegion1.viewportAnchorX = 10;
+    cueRegion1.viewportAnchorY = 10;
+    cueRegion1.viewportAnchorUnits = shaka.text.CueRegion.units.PERCENTAGE;
+
+    cueRegion2.viewportAnchorX = 10;
+    cueRegion2.viewportAnchorY = 10;
+    cueRegion2.viewportAnchorUnits = shaka.text.CueRegion.units.PERCENTAGE;
+
+    // These all attach to the same region, but only one region element should
+    // be created.
+    const firstBatchOfCues = [
+      new shaka.text.Cue(0, 100, ''),
+      new shaka.text.Cue(0, 100, ''),
+      new shaka.text.Cue(0, 100, ''),
+    ];
+    for (const cue of firstBatchOfCues) {
+      cue.displayAlign = shaka.text.Cue.displayAlign.CENTER;
+      cue.region = cueRegion1;
+    }
+
+    // Another batch for the other region
+    const secondBatchOfCues = [
+      new shaka.text.Cue(0, 100, ''),
+      new shaka.text.Cue(0, 100, ''),
+      new shaka.text.Cue(0, 100, ''),
+    ];
+    for (const cue of secondBatchOfCues) {
+      cue.displayAlign = shaka.text.Cue.displayAlign.CENTER;
+      cue.region = cueRegion2;
+    }
+
+    textDisplayer.setTextVisibility(true);
+    textDisplayer.append(firstBatchOfCues);
+    textDisplayer.append(secondBatchOfCues);
+    updateCaptions();
+
+    const textContainer = videoContainer.querySelector('.shaka-text-container');
+    const allRegionElements = textContainer.querySelectorAll(
+        '.shaka-text-region');
+
+    // Verify that the nested cues are attached to respective region element.
+    expect(allRegionElements.length).toBe(2);
+
+    const childrenOfOne = Array.from(allRegionElements[0].childNodes).filter(
+        (e) => e.nodeType == Node.ELEMENT_NODE);
+    expect(childrenOfOne.length).toBe(3);
+
+    const childrenOfTwo = Array.from(allRegionElements[1].childNodes).filter(
+        (e) => e.nodeType == Node.ELEMENT_NODE);
+    expect(childrenOfTwo.length).toBe(3);
+  });
 });
