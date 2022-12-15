@@ -11,8 +11,9 @@
  * @externs
  */
 
+
 /** @type {string} */
 SourceBuffer.prototype.mode;
 
-/** @type {Function} */
-// SourceBuffer.prototype.changeType;
+// TODO: need to figure out how to correctly override this
+// SourceBuffer.prototype.changeType = function(type) {};
