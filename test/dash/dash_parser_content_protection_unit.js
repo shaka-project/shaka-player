@@ -839,7 +839,37 @@ describe('DashParser ContentProtection', () => {
       expect(actual).toBe('');
     });
 
-    it('no clearkey:Laurl node', () => {
+    it('valid dashif:Laurl node', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node: strToXml([
+          '<test xmlns:dashif="https://dashif.org/CPS">',
+          '  <dashif:Laurl>www.example.com</dashif:Laurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getClearKeyLicenseUrl(input);
+      expect(actual).toBe('www.example.com');
+    });
+
+    it('dashif:Laurl without license url', () => {
+      const input = {
+        init: null,
+        keyId: null,
+        schemeUri: '',
+        node: strToXml([
+          '<test xmlns:dashif="https://dashif.org/CPS">',
+          '  <dashif:Laurl></dashif:Laurl>',
+          '</test>',
+        ].join('\n')),
+      };
+      const actual = ContentProtection.getClearKeyLicenseUrl(input);
+      expect(actual).toBe('');
+    });
+
+    it('no clearkey:Laurl or dashif:Laurl node', () => {
       const input = {
         init: null,
         keyId: null,
