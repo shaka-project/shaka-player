@@ -47,6 +47,10 @@
     "description": "The name of a configuration value.",
     "message": "Preferred Audio Language"
   },
+  "DEMO_AUDIO_LABEL": {
+    "description": "The name of a configuration value.",
+    "message": "Preferred Audio Label"
+  },
   "DEMO_AUDIO_ONLY": {
     "description": "A tag that marks an asset as having multiple languages.",
     "message": "Audio only"

@@ -2,15 +2,14 @@
 
 # Installs prerequisites for Shaka Player development on Linux:
 #  - Git v1.9+ (to check out the code)
-#  - Python v2.7 (to run the build scripts)
-#  - Java Runtime Environment v8+ (to run the Closure compiler)
+#  - Python v2.7 or v3.5+ (to run the build scripts)
+#  - Java Runtime Environment v11+ (to run the Closure compiler)
 #  - Apache (to serve the Shaka Player demo)
-#  - NodeJS v8+ (to run some build deps, such as jsdoc, karma, etc)
+#  - NodeJS v14+ (to run some build deps, such as jsdoc, karma, etc)
 
 # Tested on:
-#  - Ubuntu 16.04 LTS (Xenial)
-#  - Ubuntu 17.10 (Artful)
-#  - Debian 9 (Stretch)
+#  - Ubuntu 18.04 LTS (Bionic)
+#  - Debian 10 (Buster)
 #  - gLinux
 
 # Tested with:
@@ -19,8 +18,10 @@
 #  - Previous install/upgrade of nodejs/npm through n or nvm
 
 # Not supported:
+#  - Ubuntu 16.04 LTS (Xenial) - Java 9
 #  - Ubuntu 14.04 LTS (Trusty) - Java 7
 #  - Debian 8 (Jessie) - Java 7
+#  - Debian 9 (Stretch) - Java 8
 #  - RHEL/CentOS 6 - python 2.6, git 1.7
 #  - RHEL/CentOS 7 - git 1.8
 
@@ -53,14 +54,14 @@ echo "*****" 1>&2
 echo "Updating packages and installing git, Python, JRE, and Apache." 1>&2
 echo "*****" 1>&2
 sudo apt -y update
-sudo apt -y install git python2.7 default-jre-headless apache2
+sudo apt -y install git python default-jre-headless apache2
 
 # NodeJS in Ubuntu and Debian is often out of date, so we may need to grab a
-# newer version.  We require v8+.
+# newer version.  We require v14+.
 
-if node --version 2>/dev/null | grep -q 'v\([89]\|1[0-9]\)'; then
+if node --version 2>/dev/null | grep -q 'v\(1[4-9]\|[2-9][0-9]\)'; then
   echo "*****" 1>&2
-  echo "NodeJS v8+ detected.  No update needed." 1>&2
+  echo "NodeJS v14+ detected.  No update needed." 1>&2
   echo "*****" 1>&2
 else
   if node --version &>/dev/null; then
@@ -101,7 +102,7 @@ else
       fi
     else
       echo "*****" 1>&2
-      echo "You will need to upgrade NodeJS yourself to v8+." 1>&2
+      echo "You will need to upgrade NodeJS yourself to v14+." 1>&2
       echo "*****" 1>&2
       exit 1
     fi
@@ -115,22 +116,22 @@ else
       | grep '^Version:' | cut -f 2 -d ' ')
   available_node_major_version=$(echo "$available_node_version" \
       | cut -f 1 -d '.')
-  if [ "$available_node_major_version" -gt "8" ]; then
+  if [ "$available_node_major_version" -gt "13" ]; then
     sudo apt -y install nodejs npm
     echo "*****" 1>&2
     echo "NodeJS v$available_node_version installed from your distro." 1>&2
     echo "*****" 1>&2
   else
     # Fetch a known-good copy of NodeJS from nodesource.com and install it.
-    # NodeJS v10.19.0 has npm v6.13.4.
+    # NodeJS v14.21.1 has npm v6.14.17.
     deb_file=$(mktemp --suffix .deb)
     curl -o "$deb_file" \
-        https://deb.nodesource.com/node_10.x/pool/main/n/nodejs/nodejs_10.19.0-1nodesource1_amd64.deb
+        https://deb.nodesource.com/node_14.x/pool/main/n/nodejs/nodejs_14.21.1-1nodesource1_amd64.deb
     sudo dpkg -i "$deb_file"
     rm -f "$deb_file"
 
     echo "*****" 1>&2
-    echo "NodeJS v10.19 installed from nodesource." 1>&2
+    echo "NodeJS v14.21 installed from nodesource." 1>&2
     echo "*****" 1>&2
   fi
 fi

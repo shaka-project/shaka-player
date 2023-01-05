@@ -24,6 +24,7 @@
 +../../lib/media/drm_engine.js
 +../../lib/media/gap_jumping_controller.js
 +../../lib/media/manifest_parser.js
++../../lib/media/media_source_capabilities.js
 +../../lib/media/media_source_engine.js
 +../../lib/media/mp4_segment_index_parser.js
 +../../lib/media/play_rate_controller.js
@@ -39,7 +40,6 @@
 +../../lib/media/streaming_engine.js
 +../../lib/media/time_ranges_utils.js
 +../../lib/media/timestamp_offset_corrector.js
-+../../lib/media/transmuxer.js
 +../../lib/media/video_wrapper.js
 +../../lib/media/webm_segment_index_parser.js
 
@@ -60,6 +60,8 @@
 +../../lib/text/ui_text_displayer.js
 +../../lib/text/web_vtt_generator.js
 
++../../lib/transmuxer/transmuxer_engine.js
+
 +../../lib/util/abortable_operation.js
 +../../lib/util/array_utils.js
 +../../lib/util/buffer_utils.js
@@ -72,6 +74,7 @@
 +../../lib/util/ebml_parser.js
 +../../lib/util/error.js
 +../../lib/util/event_manager.js
++../../lib/util/fairplay_utils.js
 +../../lib/util/fake_event.js
 +../../lib/util/fake_event_target.js
 +../../lib/util/functional.js

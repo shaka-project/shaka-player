@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-describe('Transmuxer', () => {
+describe('MuxjsTransmuxer', () => {
   const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
   const videoSegmentUri = '/base/test/test/assets/video.ts';
@@ -14,8 +14,6 @@ describe('Transmuxer', () => {
   const transportStreamAudioMimeType = 'video/mp2t; codecs="mp4a.40.2"';
   const aacAudioMimeType = 'audio/aac';
 
-  const transmuxerMimeType = 'fake/mimeType';
-
   /** @type {!ArrayBuffer} */
   let videoSegment;
   /** @type {!ArrayBuffer} */
@@ -23,9 +21,16 @@ describe('Transmuxer', () => {
   /** @type {!ArrayBuffer} */
   let emptySegment;
 
-  /** @type {!shaka.media.Transmuxer} */
+  /** @type {?shaka.transmuxer.MuxjsTransmuxer} */
   let transmuxer;
 
+  function useTsTransmuxer() {
+    transmuxer = new shaka.transmuxer.MuxjsTransmuxer('video/mp2t');
+  }
+
+  function useAacTransmuxer() {
+    transmuxer = new shaka.transmuxer.MuxjsTransmuxer('audio/aac');
+  }
 
   beforeAll(async () => {
     const responses = await Promise.all([
@@ -38,7 +43,7 @@ describe('Transmuxer', () => {
   });
 
   beforeEach(() => {
-    transmuxer = new shaka.media.Transmuxer(transmuxerMimeType);
+    transmuxer = null;
   });
 
   afterEach(async () => {
@@ -46,42 +51,49 @@ describe('Transmuxer', () => {
   });
 
   describe('isSupported', () => {
-    const Transmuxer = shaka.media.Transmuxer;
-
     it('returns whether the content type is supported', () => {
-      expect(Transmuxer.isSupported(
+      useTsTransmuxer();
+      expect(transmuxer.isSupported(
           mp4MimeType, ContentType.VIDEO)).toBe(false);
-      expect(Transmuxer.isSupported(
+      expect(transmuxer.isSupported(
           transportStreamVideoMimeType, ContentType.VIDEO)).toBe(true);
     });
 
     // Issue #1991
     it('handles upper-case MIME types', () => {
+      useTsTransmuxer();
       const mimeType = transportStreamVideoMimeType.replace('mp2t', 'MP2T');
-      expect(Transmuxer.isSupported(mimeType, ContentType.VIDEO)).toBe(true);
+      expect(transmuxer.isSupported(
+          mimeType, ContentType.VIDEO)).toBe(true);
     });
   });
 
   describe('convertCodecs', () => {
     const convertCodecs =
-        (type, codecs) => shaka.media.Transmuxer.convertCodecs(type, codecs);
+        (type, codecs) => transmuxer.convertCodecs(type, codecs);
 
-    it('returns converted codecs', () => {
+    it('returns converted codecs for TS', () => {
+      useTsTransmuxer();
       const convertedVideoCodecs =
           convertCodecs(ContentType.VIDEO, transportStreamVideoMimeType);
       const convertedAudioCodecs =
           convertCodecs(ContentType.AUDIO, transportStreamAudioMimeType);
-      const convertedAacCodecs =
-          convertCodecs(ContentType.AUDIO, aacAudioMimeType);
       const expectedVideoCodecs = 'video/mp4; codecs="avc1.42E01E"';
       const expectedAudioCodecs = 'audio/mp4; codecs="mp4a.40.2"';
-      const expectedAacCodecs = 'audio/mp4; codecs="mp4a.40.2"';
       expect(convertedVideoCodecs).toBe(expectedVideoCodecs);
       expect(convertedAudioCodecs).toBe(expectedAudioCodecs);
+    });
+
+    it('returns converted codecs for AAC', () => {
+      useAacTransmuxer();
+      const convertedAacCodecs =
+          convertCodecs(ContentType.AUDIO, aacAudioMimeType);
+      const expectedAacCodecs = 'audio/mp4; codecs="mp4a.40.2"';
       expect(convertedAacCodecs).toBe(expectedAacCodecs);
     });
 
     it('converts legacy avc1 codec strings', () => {
+      useTsTransmuxer();
       expect(
           convertCodecs(
               ContentType.VIDEO, 'video/mp2t; codecs="avc1.100.42"'))
@@ -96,6 +108,7 @@ describe('Transmuxer', () => {
 
     // Issue #1991
     it('handles upper-case MIME types', () => {
+      useTsTransmuxer();
       expect(convertCodecs(
           ContentType.VIDEO, 'video/MP2T; codecs="avc1.420001"'))
           .toBe('video/mp4; codecs="avc1.420001"');
@@ -103,55 +116,57 @@ describe('Transmuxer', () => {
   });
 
   it('getOrginalMimeType returns the correct mimeType', () => {
-    expect(transmuxer.getOrginalMimeType()).toBe(transmuxerMimeType);
+    useAacTransmuxer();
+    expect(transmuxer.getOrginalMimeType()).toBe(aacAudioMimeType);
   });
 
   describe('transmuxing', () => {
     it('transmux video from TS to MP4', async () => {
+      useTsTransmuxer();
       let sawMDAT = false;
 
       const transmuxedData = await transmuxer.transmux(videoSegment);
-      expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-      expect(transmuxedData.data.length).toBeGreaterThan(0);
-      expect(transmuxedData.captions).toEqual(jasmine.any(Array));
+      expect(transmuxedData).toEqual(jasmine.any(Uint8Array));
+      expect(transmuxedData.length).toBeGreaterThan(0);
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
             expect(data.byteLength).toBeGreaterThan(0);
           }))
-          .parse(transmuxedData.data);
+          .parse(transmuxedData);
       expect(sawMDAT).toBeTruthy();
     });
 
     it('transmux audio from TS to MP4', async () => {
+      useTsTransmuxer();
       let sawMDAT = false;
       const transmuxedData = await transmuxer.transmux(audioSegment);
-      expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-      expect(transmuxedData.data.length).toBeGreaterThan(0);
-      expect(transmuxedData.captions).toEqual(jasmine.any(Array));
+      expect(transmuxedData).toEqual(jasmine.any(Uint8Array));
+      expect(transmuxedData.length).toBeGreaterThan(0);
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
             expect(data.byteLength).toBeGreaterThan(0);
           }))
-          .parse(transmuxedData.data);
+          .parse(transmuxedData);
       expect(sawMDAT).toBeTruthy();
     });
 
     it('transmux empty video from TS to MP4', async () => {
+      useTsTransmuxer();
       let sawMDAT = false;
       const transmuxedData = await transmuxer.transmux(emptySegment);
-      expect(transmuxedData.data).toEqual(jasmine.any(Uint8Array));
-      expect(transmuxedData.captions).toEqual([]);
+      expect(transmuxedData).toEqual(jasmine.any(Uint8Array));
       new shaka.util.Mp4Parser()
           .box('mdat', shaka.util.Mp4Parser.allData((data) => {
             sawMDAT = true;
           }))
-          .parse(transmuxedData.data);
+          .parse(transmuxedData);
       expect(sawMDAT).toBeFalsy();
     });
 
     it('passes through true timestamps', async () => {
+      useTsTransmuxer();
       let parsed = false;
       const expectedMp4Timestamp = 5166000;  // in timescale units
       let mp4Timestamp;
@@ -171,7 +186,7 @@ describe('Transmuxer', () => {
             mp4Timestamp = parsedTFDTBox.baseMediaDecodeTime;
             parsed = true;
           })
-          .parse(transmuxedData.data);
+          .parse(transmuxedData);
 
       expect(parsed).toBe(true);
       expect(mp4Timestamp).toBe(expectedMp4Timestamp);

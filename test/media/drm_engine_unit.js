@@ -713,15 +713,17 @@ describe('DrmEngine', () => {
     });
 
     it('maps TS MIME types through the transmuxer', async () => {
-      const originalIsSupported = shaka.media.Transmuxer.isSupported;
+      const originalIsSupported =
+          shaka.transmuxer.TransmuxerEngine.isSupported;
 
       try {
         // Mock out isSupported on Transmuxer so that we don't have to care
         // about what MediaSource supports under that.  All we really care about
         // is the translation of MIME types.
-        shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
-          return mimeType.startsWith('video/mp2t');
-        };
+        shaka.transmuxer.TransmuxerEngine.isSupported =
+            (mimeType, contentType) => {
+              return mimeType.startsWith('video/mp2t');
+            };
 
         // The default mock for this is so unrealistic, some of our test
         // conditions would always fail.  Make it realistic enough for this
@@ -758,7 +760,7 @@ describe('DrmEngine', () => {
         expect(drmEngine.supportsVariant(variants[0])).toBeTruthy();
       } finally {
         // Restore the mock.
-        shaka.media.Transmuxer.isSupported = originalIsSupported;
+        shaka.transmuxer.TransmuxerEngine.isSupported = originalIsSupported;
       }
     });
   });  // describe('init')

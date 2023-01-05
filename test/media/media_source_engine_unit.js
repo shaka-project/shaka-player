@@ -42,7 +42,13 @@ describe('MediaSourceEngine', () => {
   const originalCreateMediaSource =
       // eslint-disable-next-line no-restricted-syntax
       shaka.media.MediaSourceEngine.prototype.createMediaSource;
-  const originalTransmuxer = shaka.media.Transmuxer;
+
+  const originalFindTransmuxer =
+      shaka.transmuxer.TransmuxerEngine.findTransmuxer;
+  const originalConvertCodecs =
+      shaka.transmuxer.TransmuxerEngine.convertCodecs;
+  const originalIsSupported =
+      shaka.transmuxer.TransmuxerEngine.isSupported;
 
   // Jasmine Spies don't handle toHaveBeenCalledWith well with objects, so use
   // some numbers instead.
@@ -89,7 +95,12 @@ describe('MediaSourceEngine', () => {
 
   afterAll(() => {
     window.MediaSource.isTypeSupported = originalIsTypeSupported;
-    shaka.media.Transmuxer = originalTransmuxer;
+    shaka.transmuxer.TransmuxerEngine.findTransmuxer =
+        originalFindTransmuxer;
+    shaka.transmuxer.TransmuxerEngine.convertCodecs =
+        originalConvertCodecs;
+    shaka.transmuxer.TransmuxerEngine.isSupported =
+        originalIsSupported;
   });
 
   beforeEach(/** @suppress {invalidCasts} */ () => {
@@ -101,17 +112,18 @@ describe('MediaSourceEngine', () => {
       return type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
     });
     mockTransmuxer = new shaka.test.FakeTransmuxer();
-
-    // eslint-disable-next-line no-restricted-syntax
-    shaka.media.Transmuxer = /** @type {?} */ (function() {
-      return /** @type {?} */ (mockTransmuxer);
-    });
-    shaka.media.Transmuxer.convertCodecs = (mimeType, contentType) => {
-      return 'video/mp4; codecs="avc1.42E01E"';
-    };
-    shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
-      return mimeType == 'tsMimetype';
-    };
+    shaka.transmuxer.TransmuxerEngine.findTransmuxer =
+        (mimeType) => {
+          return () => mockTransmuxer;
+        };
+    shaka.transmuxer.TransmuxerEngine.convertCodecs =
+        (mimeType, contentType) => {
+          return 'video/mp4; codecs="avc1.42E01E"';
+        };
+    shaka.transmuxer.TransmuxerEngine.isSupported =
+        (mimeType, contentType) => {
+          return mimeType == 'tsMimetype';
+        };
 
     shaka.text.TextEngine = createMockTextEngineCtor();
 
@@ -533,7 +545,7 @@ describe('MediaSourceEngine', () => {
           data, 0, 10);
     });
 
-    it('appends transmuxed data and captions', async () => {
+    it('appends transmuxed data', async () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeTransportStream);
 
@@ -548,40 +560,7 @@ describe('MediaSourceEngine', () => {
         await mediaSourceEngine.appendBuffer(
             ContentType.VIDEO, buffer, null,
             /* hasClosedCaptions= */ false);
-        expect(mockTextEngine.storeAndAppendClosedCaptions).toHaveBeenCalled();
         expect(videoSourceBuffer.appendBuffer).toHaveBeenCalled();
-      };
-
-      // The 'updateend' event fires once the data is done appending to the
-      // media source.  We only append to the media source once transmuxing is
-      // done.  Since transmuxing is done using Promises, we need to delay the
-      // event until MediaSourceEngine calls appendBuffer.
-      const delay = async () => {
-        await Util.shortDelay();
-        videoSourceBuffer.updateend();
-      };
-      await Promise.all([init(), delay()]);
-    });
-
-    it('appends only transmuxed data without embedded text', async () => {
-      const initObject = new Map();
-      initObject.set(ContentType.VIDEO, fakeTransportStream);
-
-      const output = {
-        data: new Uint8Array(1),
-        captions: [],
-      };
-      mockTransmuxer.transmux.and.returnValue(Promise.resolve(output));
-
-      const init = async () => {
-        await mediaSourceEngine.init(initObject, false);
-        await mediaSourceEngine.appendBuffer(
-            ContentType.VIDEO, buffer, null,
-            /* hasClosedCaptions= */ false);
-        expect(mockTextEngine.storeAndAppendClosedCaptions)
-            .not.toHaveBeenCalled();
-        expect(videoSourceBuffer.appendBuffer)
-            .toHaveBeenCalledWith(output.data);
       };
 
       // The 'updateend' event fires once the data is done appending to the
@@ -635,8 +614,7 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       videoSourceBuffer.mode = 'sequence';
 
-      await mediaSourceEngine.init(
-          initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
 
       expect(videoSourceBuffer.timestampOffset).toBe(0);
 
@@ -661,8 +639,7 @@ describe('MediaSourceEngine', () => {
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
 
-      await mediaSourceEngine.init(
-          initObject, /* forceTransmux= */ false, /* sequenceMode= */ true);
+      await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
 
       // First, mock the scenario where timestampOffset is set to help align
       // text segments. In this case, SourceBuffer mode is still 'segments'.
@@ -1298,7 +1275,7 @@ describe('MediaSourceEngine', () => {
       mockTextEngine = jasmine.createSpyObj('TextEngine', [
         'initParser', 'destroy', 'appendBuffer', 'remove', 'setTimestampOffset',
         'setAppendWindow', 'bufferStart', 'bufferEnd', 'bufferedAheadOf',
-        'storeAndAppendClosedCaptions', 'convertMuxjsCaptionsToShakaCaptions',
+        'storeAndAppendClosedCaptions',
       ]);
 
       const resolve = () => Promise.resolve();
