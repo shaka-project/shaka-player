@@ -39,7 +39,6 @@
 +../../lib/media/stall_detector.js
 +../../lib/media/streaming_engine.js
 +../../lib/media/time_ranges_utils.js
-+../../lib/media/transmuxer.js
 +../../lib/media/video_wrapper.js
 +../../lib/media/webm_segment_index_parser.js
 
@@ -59,6 +58,8 @@
 +../../lib/text/text_engine.js
 +../../lib/text/ui_text_displayer.js
 +../../lib/text/web_vtt_generator.js
+
++../../lib/transmuxer/transmuxer_engine.js
 
 +../../lib/util/abortable_operation.js
 +../../lib/util/array_utils.js
