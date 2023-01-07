@@ -72,6 +72,31 @@ describe('Player', () => {
     });
   });  // describe('attach')
 
+  describe('destroy', () => {
+    afterEach(() => {
+      compiledShaka.util.Timer.onTimerTick = null;
+    });
+
+    // Regression test for:
+    // https://github.com/shaka-project/shaka-player/issues/4850
+    it('does not leave any lingering timers', async () => {
+      // Play the video for a little while.
+      await player.load('test:sintel_compiled');
+      video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+
+      // Destroy the player.
+      await player.destroy();
+
+      // Wait a while to see if anything ticks.
+      compiledShaka.util.Timer.onTimerTick = () => {
+        fail('A timer has continued to tick after the destruction of the ' +
+             'player.');
+      };
+      await shaka.test.Util.delay(3);
+    });
+  });
+
   describe('updateStartTime() in manifestparsed event handler', () => {
     it('does not get segments prior to startTime', async () => {
       player.addEventListener('manifestparsed', () => {
