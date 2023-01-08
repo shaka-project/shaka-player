@@ -2751,7 +2751,6 @@ describe('StreamingEngine', () => {
     // This is an 'emsg' box that contains a scheme of
     // urn:mpeg:dash:event:2012 to indicate a manifest update.
     const emsgSegmentV0ReloadManifest = Uint8ArrayUtils.fromHex(
-        '0000003f656d7367010000000000000100000000000000080000ffff00000001' +
         '0000003a656d73670000000075726e3a6d7065673a646173683a6576656e743a' +
         '3230313200000000003100000008000000ff0000000c74657374');
 
