@@ -521,7 +521,7 @@ describe('StreamingEngine', () => {
     expectedMseInit.set(ContentType.TEXT, textStream);
 
     expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit,
-        /** forceTransmux= */ false, /** sequenceMode= */ false);
+        /** sequenceMode= */ false);
     expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
 
     expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
@@ -2789,7 +2789,7 @@ describe('StreamingEngine', () => {
 
     const id3SchemeUri = 'https://aomedia.org/emsg/ID3';
 
-    const emsgObjV0 = {
+    const emsgObj = {
       startTime: 8,
       endTime: 0xffff + 8,
       schemeIdUri: 'foo:bar:customdatascheme',
@@ -2801,8 +2801,17 @@ describe('StreamingEngine', () => {
       messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
     };
 
-    // Different box version, same contents.
-    const emsgObjV1 = emsgObjV0;
+    const emsgObjWithOffset = {
+      startTime: -2,
+      endTime: 0xffff - 2,
+      schemeIdUri: 'foo:bar:customdatascheme',
+      value: '1',
+      timescale: 1,
+      presentationTimeDelta: -2,
+      eventDuration: 0xffff,
+      id: 1,
+      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
+    };
 
     beforeEach(() => {
       // setup an offset for the timestamps.
@@ -2817,7 +2826,7 @@ describe('StreamingEngine', () => {
 
     it('raises an event for registered embedded emsg boxes', async () => {
       setSegment0(emsgSegmentV0);
-      videoStream.emsgSchemeIdUris = [emsgObjV0.schemeIdUri];
+      videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -2829,12 +2838,12 @@ describe('StreamingEngine', () => {
       expect(onEvent).toHaveBeenCalledTimes(1);
 
       const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual(emsgObjV0);
+      expect(event.detail).toEqual(emsgObj);
     });
 
     it('raises an event for registered embedded v1 emsg boxes', async () => {
       setSegment0(emsgSegmentV1);
-      videoStream.emsgSchemeIdUris = [emsgObjV1.schemeIdUri];
+      videoStream.emsgSchemeIdUris = [emsgObjWithOffset.schemeIdUri];
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -2846,12 +2855,12 @@ describe('StreamingEngine', () => {
       expect(onEvent).toHaveBeenCalledTimes(1);
 
       const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual(emsgObjV1);
+      expect(event.detail).toEqual(emsgObjWithOffset);
     });
 
     it('raises multiple events', async () => {
       setSegment0(emsgSegmentV0Twice);
-      videoStream.emsgSchemeIdUris = [emsgObjV0.schemeIdUri];
+      videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -2877,7 +2886,7 @@ describe('StreamingEngine', () => {
     });
 
     it('won\'t raise an event when no emsg boxes present', async () => {
-      videoStream.emsgSchemeIdUris = [emsgObjV0.schemeIdUri];
+      videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -2922,7 +2931,7 @@ describe('StreamingEngine', () => {
     it('event start matches presentation time', async () => {
       // This box has a non-zero event time, which doesn't matter.
       setSegment0(emsgSegmentV1NonZeroStart);
-      videoStream.emsgSchemeIdUris = [emsgObjV1.schemeIdUri];
+      videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -2934,7 +2943,7 @@ describe('StreamingEngine', () => {
       expect(onEvent).toHaveBeenCalledTimes(1);
 
       const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual(emsgObjV1);
+      expect(event.detail).toEqual(emsgObj);
     });
   });
 
