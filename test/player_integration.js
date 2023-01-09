@@ -92,7 +92,7 @@ describe('Player', () => {
       // Are there any timers left?
       for (const timer of shaka.util.Timer.activeTimers.keys()) {
         const stackTrace = shaka.util.Timer.activeTimers.get(timer);
-        fail('Stack trace exists! Stack trace of creation: ' + stackTrace);
+        fail('Lingering timer exists! Stack trace of creation: ' + stackTrace);
       }
     });
   });
