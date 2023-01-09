@@ -73,27 +73,27 @@ describe('Player', () => {
   });  // describe('attach')
 
   describe('destroy', () => {
-    afterEach(() => {
-      compiledShaka.util.Timer.onTimerTick = null;
-    });
-
     // Regression test for:
     // https://github.com/shaka-project/shaka-player/issues/4850
     it('does not leave any lingering timers', async () => {
+      // Unlike the other tests in this file, this uses an uncompiled build of
+      // Shaka, so that we don't need to expose shaka.util.Timer.activeTimers.
+      player = new shaka.Player(video);
+      waiter.setPlayer(player);
+
       // Play the video for a little while.
-      await player.load('test:sintel_compiled');
+      await player.load('test:sintel');
       video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
       // Destroy the player.
       await player.destroy();
 
-      // Wait a while to see if anything ticks.
-      compiledShaka.util.Timer.onTimerTick = () => {
-        fail('A timer has continued to tick after the destruction of the ' +
-             'player.');
-      };
-      await shaka.test.Util.delay(3);
+      // Are there any timers left?
+      for (const timer of shaka.util.Timer.activeTimers.keys()) {
+        const stackTrace = shaka.util.Timer.activeTimers.get(timer);
+        fail('Stack trace exists! Stack trace of creation: ' + stackTrace);
+      }
     });
   });
 
