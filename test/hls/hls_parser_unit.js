@@ -2669,6 +2669,9 @@ describe('HlsParser', () => {
       '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
       'main.mp4',
     ].join('');
 
@@ -2680,6 +2683,10 @@ describe('HlsParser', () => {
       '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      '#EXT-X-KEY:METHOD=NONE\n',
       'main.mp4',
     ].join('');
 
@@ -2689,6 +2696,9 @@ describe('HlsParser', () => {
       '#EXT-X-KEY:METHOD=AES-128,',
       'URI="800k.key"\n',
       '#EXTINF:5,\n',
+      'main.ts\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-KEY:METHOD=NONE\n',
       'main.ts',
     ].join('');
 
@@ -2742,6 +2752,26 @@ describe('HlsParser', () => {
     const actual = await parser.start('test:/master', playerInterface);
     await loadAllStreamsFor(actual);
     expect(actual).toEqual(manifest);
+
+    const mp4AesEncryptionVideo = actual.variants[1].video;
+    await mp4AesEncryptionVideo.createSegmentIndex();
+    goog.asserts.assert(mp4AesEncryptionVideo.segmentIndex != null,
+        'Null segmentIndex!');
+
+    const firstMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(0);
+    expect(firstMp4Segment.hlsAes128Key).toBeDefined();
+    const secondMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(1);
+    expect(secondMp4Segment.hlsAes128Key).toBeNull();
+
+    const tsAesEncryptionVideo = actual.variants[2].video;
+    await tsAesEncryptionVideo.createSegmentIndex();
+    goog.asserts.assert(tsAesEncryptionVideo.segmentIndex != null,
+        'Null segmentIndex!');
+
+    const firstTsSegment = tsAesEncryptionVideo.segmentIndex.get(0);
+    expect(firstTsSegment.hlsAes128Key).toBeDefined();
+    const secondTsSegment = tsAesEncryptionVideo.segmentIndex.get(1);
+    expect(secondTsSegment.hlsAes128Key).toBeNull();
   });
 
   it('fails on AES-128 if WebCrypto APIs are not available', async () => {
