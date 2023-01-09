@@ -2728,9 +2728,67 @@ describe('StreamingEngine', () => {
   });
 
   describe('embedded emsg boxes', () => {
-    const emsgSegment = Uint8ArrayUtils.fromHex(
+    // V0 box format
+    const emsgSegmentV0 = Uint8ArrayUtils.fromHex(
         '0000003b656d736700000000666f6f3a6261723a637573746f6d646174617363' +
         '68656d6500310000000001000000080000ffff0000000174657374');
+
+    // V1 box format
+    const emsgSegmentV1 = Uint8ArrayUtils.fromHex(
+        '0000003f656d7367010000000000000100000000000000080000ffff00000001' +
+        '666f6f3a6261723a637573746f6d64617461736368656d6500310074657374');
+
+    // V1 box format, non-zero start time
+    const emsgSegmentV1NonZeroStart = Uint8ArrayUtils.fromHex(
+        '0000003f656d7367010000000000000100000000000000120000ffff00000001' +
+        '666f6f3a6261723a637573746f6d64617461736368656d6500310074657374');
+
+    const dummyBox = Uint8ArrayUtils.fromHex('0000000c6672656501020304');
+
+    const emsgSegmentV0Twice =
+        Uint8ArrayUtils.concat(emsgSegmentV0, dummyBox, emsgSegmentV0);
+
+    // This is an 'emsg' box that contains a scheme of
+    // urn:mpeg:dash:event:2012 to indicate a manifest update.
+    const emsgSegmentV0ReloadManifest = Uint8ArrayUtils.fromHex(
+        '0000003a656d73670000000075726e3a6d7065673a646173683a6576656e743a' +
+        '3230313200000000003100000008000000ff0000000c74657374');
+
+    const reloadManifestSchemeUri = 'urn:mpeg:dash:event:2012';
+
+    // This is an 'emsg' box that contains a scheme of
+    // https://aomedia.org/emsg/ID to indicate a ID3 metadata.
+    const emsgSegmentV0ID3 = Uint8ArrayUtils.fromHex((
+      // 105 bytes  emsg box     v0, flags 0
+      '00 00 00 69  65 6d 73 67  00 00 00 00' +
+
+      // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
+      '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
+      '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
+
+      // value (1 byte) ''
+      '00' +
+
+      // timescale (4 bytes) 49
+      '00 00 00 31' +
+
+      // presentation time delta (4 bytes) 8
+      '00 00 00 08' +
+
+      // event duration (4 bytes) 255
+      '00 00 00 ff' +
+
+      // id (4 bytes) 51
+      '00 00 00 33' +
+
+      // message data (47 bytes)
+      '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
+      '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
+      '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
+    ).replace(/\s/g, ''));
+
+    const id3SchemeUri = 'https://aomedia.org/emsg/ID3';
+
     const emsgObj = {
       startTime: 8,
       endTime: 0xffff + 8,
@@ -2743,14 +2801,31 @@ describe('StreamingEngine', () => {
       messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
     };
 
+    const emsgObjWithOffset = {
+      startTime: -2,
+      endTime: 0xffff - 2,
+      schemeIdUri: 'foo:bar:customdatascheme',
+      value: '1',
+      timescale: 1,
+      presentationTimeDelta: -2,
+      eventDuration: 0xffff,
+      id: 1,
+      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
+    };
+
     beforeEach(() => {
-      setupVod();
+      // setup an offset for the timestamps.
+      setupVod(false, 10);
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
     });
 
+    function setSegment0(emsgBox) {
+      segmentData[ContentType.VIDEO].segments[0] = emsgBox;
+    }
+
     it('raises an event for registered embedded emsg boxes', async () => {
-      segmentData[ContentType.VIDEO].segments[0] = emsgSegment;
+      setSegment0(emsgSegmentV0);
       videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
@@ -2767,12 +2842,8 @@ describe('StreamingEngine', () => {
     });
 
     it('raises an event for registered embedded v1 emsg boxes', async () => {
-      // same event but verison 1.
-      const v1EmsgSegment = Uint8ArrayUtils.fromHex(
-          '0000003f656d7367010000000000000100000000000000080000ffff00000001' +
-          '666f6f3a6261723a637573746f6d64617461736368656d6500310074657374');
-      segmentData[ContentType.VIDEO].segments[0] = v1EmsgSegment;
-      videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
+      setSegment0(emsgSegmentV1);
+      videoStream.emsgSchemeIdUris = [emsgObjWithOffset.schemeIdUri];
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -2784,14 +2855,11 @@ describe('StreamingEngine', () => {
       expect(onEvent).toHaveBeenCalledTimes(1);
 
       const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual(emsgObj);
+      expect(event.detail).toEqual(emsgObjWithOffset);
     });
 
     it('raises multiple events', async () => {
-      const dummyBox =
-          shaka.util.Uint8ArrayUtils.fromHex('0000000c6672656501020304');
-      segmentData[ContentType.VIDEO].segments[0] =
-          shaka.util.Uint8ArrayUtils.concat(emsgSegment, dummyBox, emsgSegment);
+      setSegment0(emsgSegmentV0Twice);
       videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
@@ -2804,8 +2872,8 @@ describe('StreamingEngine', () => {
       expect(onEvent).toHaveBeenCalledTimes(2);
     });
 
-    it('won\'t raise an event without stream field set', async () => {
-      segmentData[ContentType.VIDEO].segments[0] = emsgSegment;
+    it('won\'t raise an event for an unregistered emsg box', async () => {
+      setSegment0(emsgSegmentV0);
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -2830,30 +2898,9 @@ describe('StreamingEngine', () => {
       expect(onEvent).not.toHaveBeenCalled();
     });
 
-    it('won\'t raise an event for an unregistered emsg box', async () => {
-      segmentData[ContentType.VIDEO].segments[0] = emsgSegment;
-
-      // Here we go!
-      streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
-      await streamingEngine.start();
-      playing = true;
-      await runTest();
-
-      expect(onEvent).not.toHaveBeenCalled();
-    });
-
     it('triggers manifest updates', async () => {
-      // This is an 'emsg' box that contains a scheme of
-      // urn:mpeg:dash:event:2012 to indicate a manifest update.
-      segmentData[ContentType.VIDEO].segments[0] =
-          Uint8ArrayUtils
-              .fromHex(
-                  '0000003a656d73670000000075726e3a' +
-                  '6d7065673a646173683a6576656e743a' +
-                  '32303132000000000031000000080000' +
-                  '00ff0000000c74657374');
-      videoStream.emsgSchemeIdUris = ['urn:mpeg:dash:event:2012'];
+      setSegment0(emsgSegmentV0ReloadManifest);
+      videoStream.emsgSchemeIdUris = [reloadManifestSchemeUri];
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -2867,39 +2914,8 @@ describe('StreamingEngine', () => {
     });
 
     it('triggers metadata event', async () => {
-      // This is an 'emsg' box that contains a scheme of
-      // https://aomedia.org/emsg/ID to indicate a ID3 metadata.
-      segmentData[ContentType.VIDEO].segments[0] =
-          Uint8ArrayUtils.fromHex((
-            // 105 bytes  emsg box     v0, flags 0
-            '00 00 00 69  65 6d 73 67  00 00 00 00' +
-
-            // scheme id uri (13 bytes) 'https://aomedia.org/emsg/ID3'
-            '68 74 74 70  73 3a 2f 2f   61 6f 6d 65  64 69 61 2e' +
-            '6f 72 67 2f  65 6d 73 67   2f 49 44 33  00' +
-
-            // value (1 byte) ''
-            '00' +
-
-            // timescale (4 bytes) 49
-            '00 00 00 31' +
-
-            // presentation time delta (4 bytes) 8
-            '00 00 00 08' +
-
-            // event duration (4 bytes) 255
-            '00 00 00 ff' +
-
-            // id (4 bytes) 51
-            '00 00 00 33' +
-
-            // message data (47 bytes)
-            '49 44 33 03  00 40 00 00   00 1b 00 00  00 06 00 00' +
-            '00 00 00 02  54 58 58 58   00 00 00 07  e0 00 03 00' +
-            '53 68 61 6b  61 33 44 49   03 00 40 00  00 00 1b'
-          ).replace(/\s/g, ''));
-
-      videoStream.emsgSchemeIdUris = ['https://aomedia.org/emsg/ID3'];
+      setSegment0(emsgSegmentV0ID3);
+      videoStream.emsgSchemeIdUris = [id3SchemeUri];
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -2911,54 +2927,10 @@ describe('StreamingEngine', () => {
       expect(onEvent).not.toHaveBeenCalled();
       expect(onMetadata).toHaveBeenCalled();
     });
-  });
 
-  describe('embedded emsg boxes with non zero timestamps', () => {
-    const emsgSegment = Uint8ArrayUtils.fromHex(
-        '0000003b656d736700000000666f6f3a6261723a637573746f6d646174617363' +
-        '68656d6500310000000001000000080000ffff0000000174657374');
-    const emsgObj = {
-      startTime: 8,
-      endTime: 0xffff + 8,
-      schemeIdUri: 'foo:bar:customdatascheme',
-      value: '1',
-      timescale: 1,
-      presentationTimeDelta: 8,
-      eventDuration: 0xffff,
-      id: 1,
-      messageData: new Uint8Array([0x74, 0x65, 0x73, 0x74]),
-    };
-
-    beforeEach(() => {
-      // setup an offset for the timestamps.
-      setupVod(false, 10);
-      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
-      createStreamingEngine();
-    });
-
-    it('event start matches presentation times for emsg boxes', async () => {
-      segmentData[ContentType.VIDEO].segments[0] = emsgSegment;
-      videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
-
-      // Here we go!
-      streamingEngine.switchVariant(variant);
-      streamingEngine.switchTextStream(textStream);
-      await streamingEngine.start();
-      playing = true;
-      await runTest();
-
-      expect(onEvent).toHaveBeenCalledTimes(1);
-
-      const event = onEvent.calls.argsFor(0)[0];
-      expect(event.detail).toEqual(emsgObj);
-    });
-
-    it('event start matches presentation time for v1 emsg boxes', async () => {
-      // same event but verison 1. start time is 18.
-      const v1EmsgSegment = Uint8ArrayUtils.fromHex(
-          '0000003f656d7367010000000000000100000000000000120000ffff00000001' +
-          '666f6f3a6261723a637573746f6d64617461736368656d6500310074657374');
-      segmentData[ContentType.VIDEO].segments[0] = v1EmsgSegment;
+    it('event start matches presentation time', async () => {
+      // This box has a non-zero event time, which doesn't matter.
+      setSegment0(emsgSegmentV1NonZeroStart);
       videoStream.emsgSchemeIdUris = [emsgObj.schemeIdUri];
 
       // Here we go!
