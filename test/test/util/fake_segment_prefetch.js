@@ -20,9 +20,9 @@ shaka.test.FakeSegmentPrefetch = class {
     /** @private {shaka.extern.Stream} */
     this.streamObj_ = stream;
 
-    /** @private {
-     * !Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>
-     * } */
+    /**
+    * @private {!Object.<string, shaka.test.FakeMediaSourceEngine.SegmentData>}
+    */
     this.segmentData_ = segmentData;
   }
 

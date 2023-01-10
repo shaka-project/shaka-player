@@ -1076,8 +1076,7 @@ shaka.extern.ManifestConfiguration;
  * @property {boolean} segmentPrefetchLimit
  *   The maximum number of segments for each active stream to be prefetched
  *   ahead of playhead in parallel.
- *   If <code>0</code>, the segments will be fetched
- *   sequentially.
+ *   If <code>0</code>, the segments will be fetched sequentially.
  *   Defaults to <code>0</code>.
  * @exportDoc
  */
