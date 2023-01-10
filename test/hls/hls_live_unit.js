@@ -520,20 +520,24 @@ describe('HlsParser live', () => {
       });
     });
 
-    it('sets timestamp offset for segments with discontinuity', async () => {
+    it('sets discontinuity sequence numbers', async () => {
       const ref1 = makeReference(
           'test:/main.mp4', 0, 2, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
           /* timestampOffset= */ 0);
+      ref1.discontinuitySequence = 30;
 
-      // Expect the timestamp offset to be set for the segment after the
-      // EXT-X-DISCONTINUITY tag.
       const ref2 = makeReference(
           'test:/main2.mp4', 2, 4, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
           /* timestampOffset= */ 0);
+      ref2.discontinuitySequence = 31;
 
-      await testInitialManifest(master, mediaWithDiscontinuity, [ref1, ref2]);
+      const manifest = await testInitialManifest(
+          master, mediaWithDiscontinuity, [ref1, ref2]);
+
+      await testUpdate(
+          manifest, mediaWithUpdatedDiscontinuitySegment, [ref2]);
     });
 
     // Test for https://github.com/shaka-project/shaka-player/issues/4223
@@ -724,32 +728,6 @@ describe('HlsParser live', () => {
             'test:/video',
             shaka.net.NetworkingEngine.RequestType.MANIFEST);
       });
-
-      it('reuses cached timestamp offset for segments with discontinuity',
-          async () => {
-            const ref1 = makeReference(
-                'test:/main.mp4', 0, 2, /* syncTime= */ null);
-            const ref2 = makeReference(
-                'test:/main2.mp4', 2, 4, /* syncTime= */ null);
-
-            const manifest = await testInitialManifest(
-                master, mediaWithDiscontinuity, [ref1, ref2]);
-
-            fakeNetEngine.request.calls.reset();
-            await testUpdate(
-                manifest, mediaWithUpdatedDiscontinuitySegment, [ref2]);
-
-            // Only one request should be made, and it's for the playlist.
-            // Expect to use the cached timestamp offset for the main2.mp4
-            // segment, without fetching the start time again.
-            expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-            fakeNetEngine.expectRequest(
-                'test:/video',
-                shaka.net.NetworkingEngine.RequestType.MANIFEST);
-            fakeNetEngine.expectNoRequest(
-                'test:/main.mp4',
-                shaka.net.NetworkingEngine.RequestType.SEGMENT);
-          });
 
       it('request playlist delta updates to skip segments', async () => {
         const mediaWithDeltaUpdates = [
