@@ -72,6 +72,33 @@ describe('Player', () => {
     });
   });  // describe('attach')
 
+  describe('destroy', () => {
+    // Regression test for:
+    // https://github.com/shaka-project/shaka-player/issues/4850
+    it('does not leave any lingering timers', async () => {
+      shaka.util.Timer.activeTimers.clear();
+
+      // Unlike the other tests in this file, this uses an uncompiled build of
+      // Shaka, so that we don't need to expose shaka.util.Timer.activeTimers.
+      player = new shaka.Player(video);
+      waiter.setPlayer(player);
+
+      // Play the video for a little while.
+      await player.load('test:sintel');
+      video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+
+      // Destroy the player.
+      await player.destroy();
+
+      // Are there any timers left?
+      for (const timer of shaka.util.Timer.activeTimers.keys()) {
+        const stackTrace = shaka.util.Timer.activeTimers.get(timer);
+        fail('Lingering timer exists! Stack trace of creation: ' + stackTrace);
+      }
+    });
+  });
+
   describe('updateStartTime() in manifestparsed event handler', () => {
     it('does not get segments prior to startTime', async () => {
       player.addEventListener('manifestparsed', () => {
