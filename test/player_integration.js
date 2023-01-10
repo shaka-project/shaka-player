@@ -76,6 +76,8 @@ describe('Player', () => {
     // Regression test for:
     // https://github.com/shaka-project/shaka-player/issues/4850
     it('does not leave any lingering timers', async () => {
+      shaka.util.Timer.activeTimers.clear();
+
       // Unlike the other tests in this file, this uses an uncompiled build of
       // Shaka, so that we don't need to expose shaka.util.Timer.activeTimers.
       player = new shaka.Player(video);
