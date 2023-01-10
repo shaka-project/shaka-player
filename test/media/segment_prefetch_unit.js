@@ -90,7 +90,7 @@ describe('SegmentPrefetch', () => {
     it('clears all prefetched segments', () => {
       segmentPrefetch.prefetchSegments(references[0]);
       segmentPrefetch.clearAll();
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
         expect(op).toBeNull();
       }
@@ -100,7 +100,7 @@ describe('SegmentPrefetch', () => {
     it('resets time pos so prefetch can happen again', () => {
       segmentPrefetch.prefetchSegments(references[3]);
       segmentPrefetch.clearAll();
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
         expect(op).toBeNull();
       }
@@ -119,7 +119,7 @@ describe('SegmentPrefetch', () => {
     it('clears all prefetched segments', () => {
       segmentPrefetch.prefetchSegments(references[0]);
       segmentPrefetch.switchStream(createStream());
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 3; i++) {
         const op = segmentPrefetch.getPrefetchedSegment(references[i]);
         expect(op).toBeNull();
       }
@@ -134,22 +134,37 @@ describe('SegmentPrefetch', () => {
   });
 
   describe('resetLimit', () => {
-    it('clears all prefetched segments and start use new limit', async () => {
+    it('do nothing if the new limit is larger', async () => {
       segmentPrefetch.prefetchSegments(references[0]);
-      segmentPrefetch.resetLimit(2);
-      for (let i = 0; i < 4; i++) {
-        const op = segmentPrefetch.getPrefetchedSegment(references[i]);
-        expect(op).toBeNull();
-      }
-      segmentPrefetch.prefetchSegments(references[0]);
-      await expectSegmentsPrefetched(0, 2);
-      expect(fetchDispatcher).toHaveBeenCalledTimes(3 + 2);
+      segmentPrefetch.resetLimit(4);
+      await expectSegmentsPrefetched(0);
     });
 
-    it('do nothing if its same stream', async () => {
+    it('do nothing if the new limit is the same', async () => {
       segmentPrefetch.prefetchSegments(references[0]);
       segmentPrefetch.resetLimit(3);
       await expectSegmentsPrefetched(0);
+    });
+
+    it('clears all prefetched segments beyond new limit', async () => {
+      segmentPrefetch.prefetchSegments(references[0]);
+      segmentPrefetch.resetLimit(1);
+      // expecting prefetched reference 0 is kept
+      expectSegmentsPrefetched(0, 1);
+      // expecting prefetched references 1 and 2 are removd
+      for (let i = 1; i < 3; i++) {
+        const op = segmentPrefetch.getPrefetchedSegment(references[i]);
+        expect(op).toBeNull();
+      }
+
+      // clear all to test the new limit by re-fetching.
+      segmentPrefetch.clearAll();
+      // prefetch again.
+      segmentPrefetch.prefetchSegments(references[0]);
+      // expect only one is prefetched
+      await expectSegmentsPrefetched(0, 1);
+      // only dispatched fetch one more time.
+      expect(fetchDispatcher).toHaveBeenCalledTimes(3 + 1);
     });
   });
   /**
