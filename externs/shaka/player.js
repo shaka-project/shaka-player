@@ -695,7 +695,8 @@ shaka.extern.AdvancedDrmConfiguration;
  *   updateExpirationTime: number,
  *   preferredKeySystems: !Array.<string>,
  *   keySystemsMapping: !Object.<string, string>,
- *   parseInbandPsshEnabled: boolean
+ *   parseInbandPsshEnabled: boolean,
+ *   minHdcpVersion: string
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -743,6 +744,10 @@ shaka.extern.AdvancedDrmConfiguration;
  *   When true parse DRM init data from pssh boxes in media and init segments
  *   and ignore 'encrypted' events.
  *   This is required when using in-band key rotation on Xbox One.
+ * @property {string} minHdcpVersion
+ *   <i>Defaults to not necessary to check the minimum version of HDCP.</i><br>
+ *   Indicates the minimum version of HDCP for start the playback for encrypted
+ *   streams. <b>Only on supported browsers.</b>
  *
  * @exportDoc
  */
