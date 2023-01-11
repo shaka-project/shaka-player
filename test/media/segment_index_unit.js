@@ -532,6 +532,34 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
       goog.asserts.assert(position1 != null, 'Position should not be null!');
       expect(index1.get(position1)).toBe(references2[1]);
     });
+
+    it('does not duplicate references with rounding errors', () => {
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references1 = [
+        makeReference(uri(10), 10, 20),
+        makeReference(uri(20), 20, 30),
+      ];
+      const index1 = new shaka.media.SegmentIndex(references1);
+
+      // 0.24 microseconds: an insignificant rounding error.
+      const tinyError = 0.24e-6;
+
+      /** @type {!Array.<!shaka.media.SegmentReference>} */
+      const references2 = [
+        makeReference(uri(10), 10, 20),
+        // The difference between this and the equivalent old reference is an
+        // insignificant rounding error.
+        makeReference(uri(20), 20 + tinyError, 30 + tinyError),
+        makeReference(uri(30), 30 + tinyError, 40),
+      ];
+
+      index1.merge(references2);
+      expect(index1.references.length).toBe(3);
+      expect(index1.references[0]).toEqual(references1[0]);
+      // The new references replaced the old one.
+      expect(index1.references[1]).toEqual(references2[1]);
+      expect(index1.references[2]).toEqual(references2[2]);
+    });
   });
 
   describe('evict', () => {
