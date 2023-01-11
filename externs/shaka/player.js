@@ -745,9 +745,9 @@ shaka.extern.AdvancedDrmConfiguration;
  *   and ignore 'encrypted' events.
  *   This is required when using in-band key rotation on Xbox One.
  * @property {string} minHdcpVersion
- *   <i>Defaults to not necessary to check the minimum version of HDCP.</i><br>
- *   Indicates the minimum version of HDCP for start the playback for encrypted
- *   streams. <b>Only on supported browsers.</b>
+ *   <i>By default (''), do not check the HDCP version.</i><br>
+ *   Indicates the minimum version of HDCP to start the playback of encrypted
+ *   streams. <b>May be ignored if not supported by the device.</b>
  *
  * @exportDoc
  */
