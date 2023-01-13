@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.2.7](https://github.com/shaka-project/shaka-player/compare/v4.2.6...v4.2.7) (2023-01-13)
+
+
+### Bug Fixes
+
+* Fix exception enabling captions on HLS ([#4894](https://github.com/shaka-project/shaka-player/issues/4894)) ([45b3705](https://github.com/shaka-project/shaka-player/commit/45b37053e0a28ba0f4ee3ca09f8e35e1734caec4)), closes [#4889](https://github.com/shaka-project/shaka-player/issues/4889)
+* Fix flattenedCues in WebVttGenerator ([#4867](https://github.com/shaka-project/shaka-player/issues/4867)) ([2b37820](https://github.com/shaka-project/shaka-player/commit/2b37820fecf23ba8876200cb80626d5454d90b3d))
+* Fix legacy codec support by rewriting codec metadata ([#4858](https://github.com/shaka-project/shaka-player/issues/4858)) ([102c3d9](https://github.com/shaka-project/shaka-player/commit/102c3d902fba987c66c94f1d698ba28bcc0d9203))
+* Fix media source duration when using sequence mode ([#4848](https://github.com/shaka-project/shaka-player/issues/4848)) ([177638c](https://github.com/shaka-project/shaka-player/commit/177638c0e47fb4e6461beefbc3164055f6a47e4b))
+* Fix parsing error on Chromecast when resyncing HLS ([#4869](https://github.com/shaka-project/shaka-player/issues/4869)) ([13e7481](https://github.com/shaka-project/shaka-player/commit/13e7481915fb81430c3566ca91dffa9c13f32412)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* Fix potential AV sync issues after seek or adaptation ([#4886](https://github.com/shaka-project/shaka-player/issues/4886)) ([ac3afb4](https://github.com/shaka-project/shaka-player/commit/ac3afb45c4727abae9ca075597c82bc2a5f24754)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* Fix potential duplicate segments, AV sync issues ([#4884](https://github.com/shaka-project/shaka-player/issues/4884)) ([45b6ccb](https://github.com/shaka-project/shaka-player/commit/45b6ccb96d56ca9338ec7cd458abed0f1702f673)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* **HLS:** Fix discontinuity tracking ([#4881](https://github.com/shaka-project/shaka-player/issues/4881)) ([13d29fd](https://github.com/shaka-project/shaka-player/commit/13d29fd06d7cbf14241ea2507114ff34daeb760e)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* **HLS:** Fix support for mixed AES-128/NONE decryption ([#4847](https://github.com/shaka-project/shaka-player/issues/4847)) ([e866903](https://github.com/shaka-project/shaka-player/commit/e866903a845f375cc0a00ee2d2dd1419faaa6e4b))
+* Make encoding problem detection more robust ([#4885](https://github.com/shaka-project/shaka-player/issues/4885)) ([208c2e2](https://github.com/shaka-project/shaka-player/commit/208c2e298fc53a83fa6842c0a754b6a82c817fdb)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* Release region timeline when unloading ([#4871](https://github.com/shaka-project/shaka-player/issues/4871)) ([af1ee47](https://github.com/shaka-project/shaka-player/commit/af1ee4719016f4bfbaa56e3d1ebfea88b90057bc)), closes [#4850](https://github.com/shaka-project/shaka-player/issues/4850)
+* Sync each segment against EXT-X-PROGRAM-DATE-TIME ([#4870](https://github.com/shaka-project/shaka-player/issues/4870)) ([fadbeb6](https://github.com/shaka-project/shaka-player/commit/fadbeb64f5d31bcacc4872a2dad412bb1b776f73))
+* Treat regions uniquely ([#4841](https://github.com/shaka-project/shaka-player/issues/4841)) ([7952af9](https://github.com/shaka-project/shaka-player/commit/7952af90bf0482a4fcb43520f42cc21bcca79081)), closes [#4839](https://github.com/shaka-project/shaka-player/issues/4839)
+* **ui:** Avoid submitting form if player is inside form ([#4866](https://github.com/shaka-project/shaka-player/issues/4866)) ([c7db48a](https://github.com/shaka-project/shaka-player/commit/c7db48a3070a7bfe69623752ac90a290b75e2b05)), closes [#4861](https://github.com/shaka-project/shaka-player/issues/4861)
+
 ## [4.2.6](https://github.com/shaka-project/shaka-player/compare/v4.2.5...v4.2.6) (2022-12-14)
 
 
