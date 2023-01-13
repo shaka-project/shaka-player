@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.3.3](https://github.com/shaka-project/shaka-player/compare/v4.3.2...v4.3.3) (2023-01-13)
+
+
+### Bug Fixes
+
+* Fix exception enabling captions on HLS ([#4894](https://github.com/shaka-project/shaka-player/issues/4894)) ([1d0ad52](https://github.com/shaka-project/shaka-player/commit/1d0ad529e7e38be07df2ed08fb14a2b88098b7fc)), closes [#4889](https://github.com/shaka-project/shaka-player/issues/4889)
+* Fix flattenedCues in WebVttGenerator ([#4867](https://github.com/shaka-project/shaka-player/issues/4867)) ([e062175](https://github.com/shaka-project/shaka-player/commit/e0621753a5b1342df34a87db462cc4dd18657c3b))
+* Fix legacy codec support by rewriting codec metadata ([#4858](https://github.com/shaka-project/shaka-player/issues/4858)) ([92abfbc](https://github.com/shaka-project/shaka-player/commit/92abfbcca3e0288c4d2a31ef0771a4c0ed2d4405))
+* Fix media source duration when using sequence mode ([#4848](https://github.com/shaka-project/shaka-player/issues/4848)) ([c9db2a0](https://github.com/shaka-project/shaka-player/commit/c9db2a073c096a7a97afc99fb10301aedbc96a87))
+* Fix parsing error on Chromecast when resyncing HLS ([#4869](https://github.com/shaka-project/shaka-player/issues/4869)) ([6dfa6d7](https://github.com/shaka-project/shaka-player/commit/6dfa6d7abbc98c1d1bc18cf70cb6cf1ad80a83f4)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* Fix potential AV sync issues after seek or adaptation ([#4886](https://github.com/shaka-project/shaka-player/issues/4886)) ([72396b0](https://github.com/shaka-project/shaka-player/commit/72396b019dfe69a50526361be7bc5273786424c0)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* Fix potential duplicate segments, AV sync issues ([#4884](https://github.com/shaka-project/shaka-player/issues/4884)) ([0ac5d7e](https://github.com/shaka-project/shaka-player/commit/0ac5d7ef2ad50bbd61d183566888227e4a1dca78)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* **HLS:** Fix discontinuity tracking ([#4881](https://github.com/shaka-project/shaka-player/issues/4881)) ([2a0ab01](https://github.com/shaka-project/shaka-player/commit/2a0ab012ee11778b9e666014afd92dda2343a780)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* **HLS:** Fix support for mixed AES-128/NONE decryption ([#4847](https://github.com/shaka-project/shaka-player/issues/4847)) ([d495255](https://github.com/shaka-project/shaka-player/commit/d495255523aef39b3f6abd1aa3e5196e976c338f))
+* Make encoding problem detection more robust ([#4885](https://github.com/shaka-project/shaka-player/issues/4885)) ([b1f5c9a](https://github.com/shaka-project/shaka-player/commit/b1f5c9af69dba7ba7eac352e444bd75a0d4f2ae6)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* Release region timeline when unloading ([#4871](https://github.com/shaka-project/shaka-player/issues/4871)) ([8795a66](https://github.com/shaka-project/shaka-player/commit/8795a66edaa5b9c26b687cb28dc194db56e63a9f)), closes [#4850](https://github.com/shaka-project/shaka-player/issues/4850)
+* Sync each segment against EXT-X-PROGRAM-DATE-TIME ([#4870](https://github.com/shaka-project/shaka-player/issues/4870)) ([8f9162f](https://github.com/shaka-project/shaka-player/commit/8f9162f154cd63404bbe95667396a9b12fe73ca6)), closes [#4589](https://github.com/shaka-project/shaka-player/issues/4589)
+* Treat regions uniquely ([#4841](https://github.com/shaka-project/shaka-player/issues/4841)) ([36a3a44](https://github.com/shaka-project/shaka-player/commit/36a3a442cffd2067a48759ad03d05d76efc5accf)), closes [#4839](https://github.com/shaka-project/shaka-player/issues/4839)
+* **ui:** Avoid submitting form if player is inside form ([#4866](https://github.com/shaka-project/shaka-player/issues/4866)) ([fc98e1d](https://github.com/shaka-project/shaka-player/commit/fc98e1d90643ead45632e8a0fb43e5c18aa0a267)), closes [#4861](https://github.com/shaka-project/shaka-player/issues/4861)
+
 ## [4.3.2](https://github.com/shaka-project/shaka-player/compare/v4.3.1...v4.3.2) (2022-12-14)
 
 
