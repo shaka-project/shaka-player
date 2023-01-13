@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.3.16](https://github.com/shaka-project/shaka-player/compare/v3.3.15...v3.3.16) (2023-01-13)
+
+
+### Bug Fixes
+
+* Fix flattenedCues in WebVttGenerator ([#4867](https://github.com/shaka-project/shaka-player/issues/4867)) ([45af59e](https://github.com/shaka-project/shaka-player/commit/45af59e90fe8df66ec48bb32d8db4973181a48bf))
+* Fix legacy codec support by rewriting codec metadata ([#4858](https://github.com/shaka-project/shaka-player/issues/4858)) ([bec765c](https://github.com/shaka-project/shaka-player/commit/bec765c467ceffa9c60bc3be657f92ab298a30c1))
+* Release region timeline when unloading ([#4871](https://github.com/shaka-project/shaka-player/issues/4871)) ([4b2c945](https://github.com/shaka-project/shaka-player/commit/4b2c945419f142525b4662385674957e43e1a2d5)), closes [#4850](https://github.com/shaka-project/shaka-player/issues/4850)
+* Treat regions uniquely ([#4841](https://github.com/shaka-project/shaka-player/issues/4841)) ([1c63ab0](https://github.com/shaka-project/shaka-player/commit/1c63ab0d46d10af4cba49e78a095986d309fce3d)), closes [#4839](https://github.com/shaka-project/shaka-player/issues/4839)
+* **ui:** Avoid submitting form if player is inside form ([#4866](https://github.com/shaka-project/shaka-player/issues/4866)) ([37c7cf9](https://github.com/shaka-project/shaka-player/commit/37c7cf99cd5f7293ee0ff20c17551b10c2294266)), closes [#4861](https://github.com/shaka-project/shaka-player/issues/4861)
+
 ## [3.3.15](https://github.com/shaka-project/shaka-player/compare/v3.3.14...v3.3.15) (2022-12-14)
 
 
