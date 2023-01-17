@@ -338,15 +338,13 @@ describe('UITextDisplayer', () => {
   it('hides and shows nested cues at appropriate times', () => {
     const parentCue1 = new shaka.text.Cue(0, 100, '');
     const cue1 = new shaka.text.Cue(0, 50, 'One');
-    parentCue1.nestedCues.push(cue1);
     const cue2 = new shaka.text.Cue(25, 75, 'Two');
-    parentCue1.nestedCues.push(cue2);
     const cue3 = new shaka.text.Cue(50, 100, 'Three');
-    parentCue1.nestedCues.push(cue3);
+    parentCue1.nestedCues = [cue1, cue2, cue3];
 
     const parentCue2 = new shaka.text.Cue(90, 190, '');
     const cue4 = new shaka.text.Cue(90, 130, 'Four');
-    parentCue2.nestedCues.push(cue4);
+    parentCue2.nestedCues = [cue4];
 
     textDisplayer.setTextVisibility(true);
     textDisplayer.append([parentCue1, parentCue2]);
