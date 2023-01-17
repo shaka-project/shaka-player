@@ -64,7 +64,7 @@ const prefixes = [
 ];
 
 const excludes = [
-  'native-cue-with-controls',
+  'text-displayer-native-cue-with-controls',
 ];
 
     </script>
@@ -144,7 +144,7 @@ function allScreenshots() {
 
   for (const prefix of prefixes) {
     for (const screenshot of screenshots) {
-      const fullName = prefix + '-' + screenshot;
+      const fullName = 'text-displayer-' + prefix + '-' + screenshot;
 
       if (!excludes.includes(fullName)) {
         list.push(fullName);
