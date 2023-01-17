@@ -5,97 +5,33 @@
  */
 
 // TODO: Move this suite to the text/ folder where it belongs
-const supportsScreenshots = () => shaka.test.Util.supportsScreenshots();
-filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
-  const UiUtils = shaka.test.UiUtils;
-  const Util = shaka.test.Util;
 
-  /** @type {!shaka.extern.TextDisplayer} */
-  let textDisplayer;
-  /**
-   * The video container or other element which is used for the screenshot.
-   * @type {!HTMLElement}
-   */
-  let videoContainer;
-  /**
-   * Awaited before each screenshot, and can vary by test suite.
-   * @type {function(number):!Promise}
-   */
-  let beforeScreenshot;
+const supported = () => shaka.test.TextLayoutTests.supported();
 
-  // A minimum similarity score for screenshots, between 0 and 1.
-  const minSimilarity = 0.95;
-
-  const originalCast = window.chrome && window.chrome.cast;
-
+filterDescribe('TextDisplayer layout', supported, () => {
+  /** @type {shaka.test.TextLayoutTests} */
+  let helper;
 
   describe('using UI', () => {
-    /** @type {!HTMLLinkElement} */
-    let cssLink;
-    /** @type {!shaka.test.FakeVideo} */
-    let mockVideo;
-
-    function createTextDisplayer() {
-      textDisplayer = new shaka.text.UITextDisplayer(
-          /** @type {!HTMLMediaElement} */(mockVideo),
-          videoContainer);
-      textDisplayer.setTextVisibility(true);
-    }
-
     beforeAll(async () => {
-      // Disable cast so the UI controls don't create cast sessions.
-      if (window.chrome) {
-        window.chrome['cast'] = null;
-      }
+      helper = new shaka.test.DomTextLayoutTests('ui');
 
-      // Add css file
-      cssLink = /** @type {!HTMLLinkElement} */(document.createElement('link'));
-      await UiUtils.setupCSS(cssLink);
-
-      // There's no actual video inside this container, but subtitles will be
-      // positioned within this space.
-      videoContainer = /** @type {!HTMLElement} */(
-        document.createElement('div'));
-      document.body.appendChild(videoContainer);
-
-      positionElementForScreenshot(videoContainer);
-
-      // Some of the styles in our CSS are only applied within this class.  Add
-      // this explicitly, since we don't instantiate controls in all of the
-      // tests.
-      videoContainer.classList.add('shaka-video-container');
-
-      await Util.waitForFont('Roboto');
-
-      // eslint-disable-next-line require-await
-      beforeScreenshot = async (time) => {
-        // Set the faked time.
-        mockVideo.currentTime = time;
-
-        // Trigger the display update logic to notice the time change by
-        // appending an empty array.
-        textDisplayer.append([]);
-      };
+      await helper.beforeAll();
     });
 
-    beforeEach(() => {
-      mockVideo = new shaka.test.FakeVideo();
-      createTextDisplayer();
+    beforeEach(async () => {
+      await helper.beforeEach();
     });
 
     afterEach(async () => {
-      await textDisplayer.destroy();
+      await helper.afterEach();
     });
 
-    afterAll(() => {
-      document.body.removeChild(videoContainer);
-      document.head.removeChild(cssLink);
-      if (window.chrome) {
-        window.chrome['cast'] = originalCast;
-      }
+    afterAll(async () => {
+      await helper.afterAll();
     });
 
-    defineTests('ui');
+    defineTests();
 
     // This test is unique to the UI.
     it('moves cues to avoid controls', async () => {
@@ -107,7 +43,8 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
         // DOM and is purely temporary.
         const player = new shaka.Player(null);
         ui = new shaka.ui.Overlay(
-            player, videoContainer, shaka.test.UiUtils.createVideoElement());
+            player, /** @type {!HTMLElement} */(helper.videoContainer),
+            shaka.test.UiUtils.createVideoElement());
         // Turn off every part of the UI that we can, so that the screenshot is
         // less likey to change because of something unrelated to text
         // rendering.
@@ -119,8 +56,8 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
         // Recreate the text displayer so that the text container comes after
         // the controls (as it does in production).  This is important for the
         // CSS that moves the cues above the controls when they are shown.
-        await textDisplayer.destroy();
-        createTextDisplayer();
+        await helper.textDisplayer.destroy();
+        helper.recreateTextDisplayer();
 
         const cue = new shaka.text.Cue(
             0, 1, 'Captain\'s log, stardate 41636.9');
@@ -130,133 +67,61 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
         cue.region.viewportAnchorY = 90;  // %
         cue.region.width = 100;  // %
         cue.region.height = 10;  // %
-        textDisplayer.append([cue]);
+        helper.textDisplayer.append([cue]);
 
-        await checkScreenshot('ui', 'cue-with-controls');
+        await helper.checkScreenshot('cue-with-controls');
       } finally {
         await ui.destroy();
       }
     });
   });
 
-
   describe('using browser-native rendering', () => {
-    /** @type {!HTMLVideoElement} */
-    let video;
-
     beforeAll(async () => {
-      video = shaka.test.UiUtils.createVideoElement();
+      helper = new shaka.test.NativeTextLayoutTests('native');
 
-      // On some platforms, such as Chrome on Android, we may see a "cast"
-      // button overlayed if this isn't set.
-      video.disableRemotePlayback = true;
-
-      document.body.appendChild(video);
-
-      positionElementForScreenshot(video);
-
-      const eventManager = new shaka.util.EventManager();
-      const waiter = new shaka.test.Waiter(eventManager);
-      const canPlay = waiter.failOnTimeout(false).timeoutAfter(10)
-          .waitForEvent(video, 'canplay');
-
-      // Video content is required to show native subtitles.  This is a small
-      // green frame.
-      video.src = '/base/test/test/assets/green-pixel.mp4';
-      await canPlay;
-      expect(video.duration).toBeGreaterThan(0);
-      expect(video.videoWidth).toBeGreaterThan(0);
-
-      // There is no actual container.  Screenshots will be taken of the video
-      // element itself.
-      videoContainer = video;
-
-      // On Firefox, Safari, and legacy Edge, the video must be played a little
-      // _after_ appending cues in order to consistently show subtitles
-      // natively on the video element.
-      beforeScreenshot = async (time) => {
-        // Seek to the beginning so that we can reasonably wait for movement
-        // after playing below.  If somehow the playhead ends up at the end of
-        // the video, we should seek back before we play.
-        video.currentTime = 0;
-
-        // The video must be played a little now, after the cues were appended,
-        // but before the screenshot.
-        video.playbackRate = 1;
-        video.play();
-        await waiter.failOnTimeout(false).timeoutAfter(5)
-            .waitForMovement(video);
-        video.pause();
-
-        // Seek to a time when cues should be showing.
-        video.currentTime = time;
-        // Get into a playing state, but without movement.
-        video.playbackRate = 0;
-        video.play();
-
-        // Add a short delay to ensure that the system has caught up and that
-        // native text displayers have been updated by the browser.
-        await Util.delay(0.1);
-      };
+      await helper.beforeAll();
     });
 
-    beforeEach(() => {
-      textDisplayer = new shaka.text.SimpleTextDisplayer(video);
-      textDisplayer.setTextVisibility(true);
+    beforeEach(async () => {
+      await helper.beforeEach();
     });
 
     afterEach(async () => {
-      await textDisplayer.destroy();
+      await helper.afterEach();
     });
 
-    afterAll(() => {
-      document.body.removeChild(video);
+    afterAll(async () => {
+      await helper.afterAll();
     });
 
-    defineTests('native');
+    defineTests();
   });
 
-
-  /** @param {string} prefix Prepended to screenshot names */
-  function defineTests(prefix) {
-    // Due to a Safari implementation bug, the browser only does the correct
-    // thing for "end-time-edge-case" on Safari 16+.  Skip the tests on earlier
-    // versions.
-    const safariVersion = shaka.util.Platform.safariVersion();
-    if (prefix == 'native' && safariVersion && safariVersion < 16) {
-      return;
-    }
-
-    // Due to updates in the rendering and/or default styles in Chrome, the
-    // screenshots for native rendering only match in Chrome 106+.
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (prefix == 'native' && chromeVersion && chromeVersion < 106) {
-      return;
-    }
-
+  function defineTests() {
     it('basic cue', async () => {
-      textDisplayer.append([
+      helper.textDisplayer.append([
         new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9'),
       ]);
 
-      await checkScreenshot(prefix, 'basic-cue');
+      await helper.checkScreenshot('basic-cue');
     });
 
     it('cue with newline', async () => {
-      textDisplayer.append([
+      helper.textDisplayer.append([
         new shaka.text.Cue(0, 1, 'Captain\'s log,\nstardate 41636.9'),
       ]);
 
-      await checkScreenshot(prefix, 'cue-with-newline');
+      await helper.checkScreenshot('cue-with-newline');
     });
 
     it('two basic cues', async () => {
-      textDisplayer.append([
+      helper.textDisplayer.append([
         new shaka.text.Cue(0, 1, 'Captain\'s log,'),
         new shaka.text.Cue(0, 1, 'stardate 41636.9'),
       ]);
 
-      await checkScreenshot(prefix, 'two-basic-cues');
+      await helper.checkScreenshot('two-basic-cues');
     });
 
     // Regression test for #2497
@@ -265,14 +130,14 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       // In reality, this occurs when a VTT cue crossed a segment boundary and
       // appears in more than one segment.  So we must simulate this with two
       // calls to append().
-      textDisplayer.append([
+      helper.textDisplayer.append([
         new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9'),
       ]);
-      textDisplayer.append([
+      helper.textDisplayer.append([
         new shaka.text.Cue(0, 1, 'Captain\'s log, stardate 41636.9'),
       ]);
 
-      await checkScreenshot(prefix, 'duplicate-cues');
+      await helper.checkScreenshot('duplicate-cues');
     });
 
     // Regression test for #3151
@@ -283,15 +148,15 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
     // through the UI & DOM, we can always get the timing right.
     it('cues ending exactly now', async () => {
       // At time exactly 1, this cue should _not_ be displayed any more.
-      textDisplayer.append([
+      helper.textDisplayer.append([
         new shaka.text.Cue(0, 1, 'This cue is over and gone.'),
       ]);
       // At time exactly 1, this cue should _just_ be starting.
-      textDisplayer.append([
+      helper.textDisplayer.append([
         new shaka.text.Cue(1, 2, 'This cue is just starting.'),
       ]);
 
-      await checkScreenshot(prefix, 'end-time-edge-case', /* time= */ 1);
+      await helper.checkScreenshot('end-time-edge-case', /* time= */ 1);
     });
 
     // Regression test for #2524
@@ -301,9 +166,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
         new shaka.text.Cue(0, 1, 'Captain\'s log, '),
         new shaka.text.Cue(0, 1, 'stardate 41636.9'),
       ];
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'two-nested-cues');
+      await helper.checkScreenshot('two-nested-cues');
     });
 
     // Distinct from "newline" test above, which has a literal \n character in
@@ -316,9 +181,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
         shaka.text.Cue.lineBreak(0, 1),
         new shaka.text.Cue(0, 1, 'stardate 41636.9'),
       ];
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'nested-cues-with-linebreak');
+      await helper.checkScreenshot('nested-cues-with-linebreak');
     });
 
     // Regression test for #3600
@@ -326,9 +191,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       const cue = new shaka.text.Cue(0, 1, 'Text');
       cue.line = 10;
       cue.lineInterpretation = shaka.text.Cue.lineInterpretation.PERCENTAGE;
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'cue-position');
+      await helper.checkScreenshot('cue-position');
     });
 
     // Regression test for #2157 and #2584
@@ -343,9 +208,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       cue.region.width = 30;  // %
       cue.region.height = 65;  // %
       cue.nestedCues = [nestedCue];
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'region-position');
+      await helper.checkScreenshot('region-position');
     });
 
     // Regression test for #3379, in which the displayAlign was not respected,
@@ -367,9 +232,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
         // For those who don't speak Unicode, \xbf is an upside down "?".
         new shaka.text.Cue(0, 1, '\xbfBien?'),
       ];
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'region-with-display-alignment');
+      await helper.checkScreenshot('region-with-display-alignment');
     });
 
     // Regression test for #2188
@@ -381,9 +246,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       cue.region.viewportAnchorY = 10; // %
       // eslint-disable-next-line max-len
       cue.backgroundImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHAAAAA8BAMAAABMVCNvAAAAElBMVEX9/vtRldU+uUv6vAnvNjWzvsvH461AAAABvUlEQVRIx7WWwY6CMBRFYQb2Nhn22sS9o5m9icy+aPn/X5lS6r221gfTxLsC0pN7XovE6j1p9d6UcB/apYTUU/YlhT7bArCwUocUg9sCsMxVF7i2Pwd3+v93/Ty5uEbZtVVd+nacphw08oJzMUmhzxWgyYHDBHbRo9sMHmVX5bOJTENyrq0rMjB1EUG61ipMBtBEYM41qakVXLk3eVdyagMQrqNB47ProO4hGCbu+/4MMHUlp6J2F8c58pR3bRVj/B1cm94nB2IlatSDq53BW8Z1i4UEed3PueQqhxTkA781L10JBb2aNwAvGdddAj66NhKon0C6onHZtXKhKxolVx46XbtyUHLdRaaxqyXISoBxYfQOftFVBPnZuSfrSpCFcBXAYwp2HlrtSrBi1BrXlFt2RSEGXOn6DRCc6EpQgYMoXGWQIbLsSpCizAOIABQ4yZVgV2VAwfXlgPJvi6DJgnUGvMEUA0qgBTh6cOCAsmsD8LdDIQYUKiuA50FdBwy4DFqAtXCCDMAGYEtOCDYBrgYfFfn/G0ALsAInVgYruIaHnQSxcroKI1ZrU9/PuQmmq9OO43xhhUI5jR3lBX8x/RKsZNOu/wAAAABJRU5ErkJggg==';
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'bitmap-cue');
+      await helper.checkScreenshot('bitmap-cue');
     });
 
     // Used to be a regression test for #2623, but that should have been fixed
@@ -405,9 +270,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       cue.nestedCues[2].backgroundColor = 'yellow';
       cue.backgroundColor = 'purple';
 
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'nested-cue-bg');
+      await helper.checkScreenshot('nested-cue-bg');
     });
 
     it('colors background for flat cues', async () => {
@@ -415,9 +280,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       // This is shown.
       cue.backgroundColor = 'purple';
 
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'flat-cue-bg');
+      await helper.checkScreenshot('flat-cue-bg');
     });
 
     // https://github.com/shaka-project/shaka-player/issues/2761
@@ -440,9 +305,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
         ]),
       ]);
 
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'deeply-nested-cues');
+      await helper.checkScreenshot('deeply-nested-cues');
     });
 
     // Regression test for #4567, in which "end" line alignment for VTT was
@@ -454,46 +319,9 @@ filterDescribe('TextDisplayer layout', supportsScreenshots, () => {
       cue.lineInterpretation = shaka.text.Cue.lineInterpretation.PERCENTAGE;
       cue.lineAlign = shaka.text.Cue.lineAlign.END;
 
-      textDisplayer.append([cue]);
+      helper.textDisplayer.append([cue]);
 
-      await checkScreenshot(prefix, 'line-alignment');
+      await helper.checkScreenshot('line-alignment');
     });
-  }
-
-  /** @param {!HTMLElement} element */
-  function positionElementForScreenshot(element) {
-    // The element we screenshot will be 16:9 and small.
-    element.style.width = '320px';
-    element.style.height = '180px';
-
-    // The background is green so we can better see the background color of
-    // the text spans within the subtitles, and so it is easier to identify
-    // cropping issues.
-    element.style.backgroundColor = 'green';
-
-    // Make sure the element is in the top-left corner of the iframe that
-    // contains the tests.
-    element.style.top = '0';
-    element.style.left = '0';
-    element.style.position = 'fixed';
-    element.style.margin = '0';
-    element.style.padding = '0';
-  }
-
-  /**
-   * @param {string} prefix A prefix added to the screenshot name with a hyphen
-   *   to provide context.
-   * @param {string} baseName The base name of the screenshot.
-   * @param {number=} time The time to seek to in the screenshot.  Defaults to
-   *   0.1, when most of our tests will be showing cues (timed 0-1).
-   * @return {!Promise}
-   */
-  async function checkScreenshot(prefix, baseName, time=0.1) {
-    await beforeScreenshot(time);
-
-    return Util.checkScreenshot(
-        /* element= */ videoContainer,
-        prefix + '-' + baseName,
-        minSimilarity);
   }
 });
