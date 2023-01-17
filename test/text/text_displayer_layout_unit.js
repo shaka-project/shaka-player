@@ -4,11 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// TODO: Move this suite to the text/ folder where it belongs
-
-const supported = () => shaka.test.TextLayoutTests.supported();
-
-filterDescribe('TextDisplayer layout', supported, () => {
+filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
   /** @type {shaka.test.TextLayoutTests} */
   let helper;
 
