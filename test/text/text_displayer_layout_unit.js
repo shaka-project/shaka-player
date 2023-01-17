@@ -10,7 +10,7 @@ filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
 
   describe('using UI', () => {
     beforeAll(async () => {
-      helper = new shaka.test.DomTextLayoutTests('ui');
+      helper = new shaka.test.DomTextLayoutTests('text-displayer-ui');
 
       await helper.beforeAll();
     });
@@ -74,7 +74,7 @@ filterDescribe('Cue layout', shaka.test.TextLayoutTests.supported, () => {
 
   describe('using browser-native rendering', () => {
     beforeAll(async () => {
-      helper = new shaka.test.NativeTextLayoutTests('native');
+      helper = new shaka.test.NativeTextLayoutTests('text-displayer-native');
 
       await helper.beforeAll();
     });
