@@ -263,6 +263,10 @@ function appendScreenshot(platform, suite, prefix, test) {
   const image = document.createElement('img');
   image.src = `${platform}/${suite}-${prefix}-${test}.png`;
   images.appendChild(image);
+  image.onerror = () => {
+    container.style.display = 'none';
+    container.dataset.nodata = true;
+  };
 
   const newImage = document.createElement('img');
   newImage.src = `${platform}/${suite}-${prefix}-${test}.png-new`;
@@ -336,6 +340,12 @@ function applyFilters() {
     }
 
     if (!allTests && !allOptions['prefixedTest'][prefixedTest].checked) {
+      show = false;
+    }
+
+    // For newly-added screenshots, we may not have data for all platforms.
+    // Don't show these.
+    if (container.dataset.nodata) {
       show = false;
     }
 
