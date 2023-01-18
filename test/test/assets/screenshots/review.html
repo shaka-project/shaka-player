@@ -158,6 +158,9 @@ body.ctrl .images:hover img.diff {
       <h3>Suites</h3>
       <div class="optionList" id="suitesElement"></div>
 
+      <h3>Prefixes</h3>
+      <div class="optionList" id="prefixesElement"></div>
+
       <h3>Tests</h3>
       <div class="optionList" id="testsElement"></div>
     </div>
@@ -179,19 +182,17 @@ for (const platform of platforms) {
   appendOption(platformsElement, 'platform', platform, applyFilters);
 }
 
+for (const prefix of prefixes) {
+  appendOption(prefixesElement, 'prefix', prefix, applyFilters);
+}
+
 for (const suite in suites) {
   appendOption(suitesElement, 'suite', suite, applySuiteFilters);
 
-  for (const prefix of prefixes) {
-    for (const test of suites[suite]) {
-      if (excludes.includes(`${suite}-${prefix}-${test}`)) {
-        continue;
-      }
-      const container = appendOption(
-          testsElement, 'prefixedTest', `${prefix}-${test}`, applyFilters);
-      container.dataset.suite = suite;
-      allTestOptionContainers.push(container);
-    }
+  for (const test of suites[suite]) {
+    const container = appendOption(testsElement, 'test', test, applyFilters);
+    container.dataset.suite = suite;
+    allTestOptionContainers.push(container);
   }
 }
 
@@ -253,7 +254,8 @@ function appendScreenshot(platform, suite, prefix, test) {
   const label = document.createElement('label');
   label.textContent = `platform: ${platform}\n` +
                       `suite: ${suite}\n` +
-                      `test: ${prefix}-${test}\n`;
+                      `prefix: ${prefix}\n` +
+                      `test: ${test}\n`;
   container.appendChild(label);
 
   const images = document.createElement('div');
@@ -280,7 +282,8 @@ function appendScreenshot(platform, suite, prefix, test) {
 
   container.dataset.platform = platform;
   container.dataset.suite = suite;
-  container.dataset.prefixedTest = `${prefix}-${test}`;
+  container.dataset.prefix = prefix;
+  container.dataset.test = test;
   reviewElement.appendChild(container);
 
   allScreenshots.push(container);
@@ -320,15 +323,22 @@ function applyFilters() {
   }
 
   // If no test is selected, show all tests.
+  let allPrefixes = true;
+  for (const prefixInput of Object.values(allOptions['prefix'])) {
+    if (prefixInput.checked) allPrefixes = false;
+  }
+
+  // If no test is selected, show all tests.
   let allTests = true;
-  for (const testInput of Object.values(allOptions['prefixedTest'])) {
+  for (const testInput of Object.values(allOptions['test'])) {
     if (testInput.checked) allTests = false;
   }
 
   for (const container of allScreenshots) {
     const platform = container.dataset.platform;
     const suite = container.dataset.suite;
-    const prefixedTest = container.dataset.prefixedTest;
+    const prefix = container.dataset.prefix;
+    const test = container.dataset.test;
 
     let show = true;
     if (!allPlatforms && !allOptions['platform'][platform].checked) {
@@ -339,7 +349,11 @@ function applyFilters() {
       show = false;
     }
 
-    if (!allTests && !allOptions['prefixedTest'][prefixedTest].checked) {
+    if (!allPrefixes && !allOptions['prefix'][prefix].checked) {
+      show = false;
+    }
+
+    if (!allTests && !allOptions['test'][test].checked) {
       show = false;
     }
 
@@ -361,7 +375,7 @@ function applySuiteFilters() {
   }
 
   // Reset all test options.
-  for (const testInput of Object.values(allOptions['prefixedTest'])) {
+  for (const testInput of Object.values(allOptions['test'])) {
     testInput.checked = false;
   }
 
