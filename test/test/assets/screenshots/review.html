@@ -188,7 +188,7 @@ for (const suite in suites) {
         continue;
       }
       const container = appendOption(
-          testsElement, 'test', `${prefix}-${test}`, applyFilters);
+          testsElement, 'prefixedTest', `${prefix}-${test}`, applyFilters);
       container.dataset.suite = suite;
       allTestOptionContainers.push(container);
     }
@@ -202,7 +202,7 @@ for (const platform of platforms) {
         if (excludes.includes(`${suite}-${prefix}-${test}`)) {
           continue;
         }
-        appendScreenshot(platform, suite, `${prefix}-${test}`);
+        appendScreenshot(platform, suite, prefix, test);
       }
     }
   }
@@ -224,8 +224,6 @@ function appendOption(parentElement, key, value, onChange) {
 
   const input = document.createElement('input');
   input.type = 'checkbox';
-  input.dataset.key = key;
-  input.dataset.value = value;
   container.appendChild(input);
 
   const label = document.createElement('label');
@@ -248,14 +246,14 @@ function appendOption(parentElement, key, value, onChange) {
   return container;
 }
 
-function appendScreenshot(platform, suite, test) {
+function appendScreenshot(platform, suite, prefix, test) {
   const container = document.createElement('div');
   container.classList.add('container');
 
   const label = document.createElement('label');
   label.textContent = `platform: ${platform}\n` +
                       `suite: ${suite}\n` +
-                      `test: ${test}\n`;
+                      `test: ${prefix}-${test}\n`;
   container.appendChild(label);
 
   const images = document.createElement('div');
@@ -263,22 +261,22 @@ function appendScreenshot(platform, suite, test) {
   container.appendChild(images);
 
   const image = document.createElement('img');
-  image.src = `${platform}/${suite}-${test}.png`;
+  image.src = `${platform}/${suite}-${prefix}-${test}.png`;
   images.appendChild(image);
 
   const newImage = document.createElement('img');
-  newImage.src = `${platform}/${suite}-${test}.png-new`;
+  newImage.src = `${platform}/${suite}-${prefix}-${test}.png-new`;
   newImage.classList.add('new');
   images.appendChild(newImage);
 
   const diffImage = document.createElement('img');
-  diffImage.src = `${platform}/${suite}-${test}.png-diff`;
+  diffImage.src = `${platform}/${suite}-${prefix}-${test}.png-diff`;
   diffImage.classList.add('diff');
   images.appendChild(diffImage);
 
   container.dataset.platform = platform;
   container.dataset.suite = suite;
-  container.dataset.test = test;
+  container.dataset.prefixedTest = `${prefix}-${test}`;
   reviewElement.appendChild(container);
 
   allScreenshots.push(container);
@@ -319,14 +317,14 @@ function applyFilters() {
 
   // If no test is selected, show all tests.
   let allTests = true;
-  for (const testInput of Object.values(allOptions['test'])) {
+  for (const testInput of Object.values(allOptions['prefixedTest'])) {
     if (testInput.checked) allTests = false;
   }
 
   for (const container of allScreenshots) {
     const platform = container.dataset.platform;
     const suite = container.dataset.suite;
-    const test = container.dataset.test;
+    const prefixedTest = container.dataset.prefixedTest;
 
     let show = true;
     if (!allPlatforms && !allOptions['platform'][platform].checked) {
@@ -337,12 +335,11 @@ function applyFilters() {
       show = false;
     }
 
-    if (!allTests && !allOptions['test'][test].checked) {
+    if (!allTests && !allOptions['prefixedTest'][prefixedTest].checked) {
       show = false;
     }
 
     container.style.display = show ? '' : 'none';
-    console.log({container, platform, suite, test, show});
   }
 }
 
@@ -354,7 +351,7 @@ function applySuiteFilters() {
   }
 
   // Reset all test options.
-  for (const testInput of Object.values(allOptions['test'])) {
+  for (const testInput of Object.values(allOptions['prefixedTest'])) {
     testInput.checked = false;
   }
 
