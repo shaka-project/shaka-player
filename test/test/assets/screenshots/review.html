@@ -215,7 +215,17 @@ window.addEventListener('blur', focusHandler);
 window.addEventListener('focus', focusHandler);
 
 
-applyFilters();
+// Consume URL hash parameters that indicate filters.
+// Ignore the '#' in location.hash with substr(1).
+for (const param of location.hash.substr(1).split('&')) {
+  const [key, value] = param.split('=');
+  try {
+    allOptions[key][value].checked = true;
+  } catch (error) {}  // ignore errors
+}
+
+// Apply the initial filters.
+initializeFilters();
 
 
 function appendOption(parentElement, key, value, onChange) {
@@ -310,29 +320,51 @@ function focusHandler() {
 }
 
 function applyFilters() {
+  // A collection of URL hash parameters to indicate the selected filters.
+  const params = [];
+
   // If no platform is selected, show all platforms.
   let allPlatforms = true;
-  for (const platformInput of Object.values(allOptions['platform'])) {
-    if (platformInput.checked) allPlatforms = false;
+  for (const platformKey in allOptions['platform']) {
+    const platformInput = allOptions['platform'][platformKey];
+    if (platformInput.checked) {
+      allPlatforms = false;
+      params.push(`platform=${platformKey}`);
+    }
   }
 
   // If no suite is selected, show all suites.
   let allSuites = true;
-  for (const suiteInput of Object.values(allOptions['suite'])) {
-    if (suiteInput.checked) allSuites = false;
+  for (const suiteKey in allOptions['suite']) {
+    const suiteInput = allOptions['suite'][suiteKey];
+    if (suiteInput.checked) {
+      allSuites = false;
+      params.push(`suite=${suiteKey}`);
+    }
   }
 
   // If no test is selected, show all tests.
   let allPrefixes = true;
-  for (const prefixInput of Object.values(allOptions['prefix'])) {
-    if (prefixInput.checked) allPrefixes = false;
+  for (const prefixKey in allOptions['prefix']) {
+    const prefixInput = allOptions['prefix'][prefixKey];
+    if (prefixInput.checked) {
+      allPrefixes = false;
+      params.push(`prefix=${prefixKey}`);
+    }
   }
 
   // If no test is selected, show all tests.
   let allTests = true;
-  for (const testInput of Object.values(allOptions['test'])) {
-    if (testInput.checked) allTests = false;
+  for (const testKey in allOptions['test']) {
+    const testInput = allOptions['test'][testKey];
+    if (testInput.checked) {
+      allTests = false;
+      params.push(`test=${testKey}`);
+    }
   }
+
+  // Set the location hash so that we keep the same filters on reload.
+  location.hash = params.join('&');
 
   for (const container of allScreenshots) {
     const platform = container.dataset.platform;
@@ -367,16 +399,18 @@ function applyFilters() {
   }
 }
 
-function applySuiteFilters() {
+function applySuiteFilters(resetTests = true) {
   // If no suite is selected, show the test options for all suites.
   let allSuites = true;
   for (const suiteInput of Object.values(allOptions['suite'])) {
     if (suiteInput.checked) allSuites = false;
   }
 
-  // Reset all test options.
-  for (const testInput of Object.values(allOptions['test'])) {
-    testInput.checked = false;
+  if (resetTests) {
+    // Reset all test options.
+    for (const testInput of Object.values(allOptions['test'])) {
+      testInput.checked = false;
+    }
   }
 
   // Show test options matching the suites.
@@ -388,6 +422,10 @@ function applySuiteFilters() {
 
   // Apply general filtering on screenshots.
   applyFilters();
+}
+
+function initializeFilters() {
+  applySuiteFilters(/* resetTests= */ false);
 }
 
     </script>
