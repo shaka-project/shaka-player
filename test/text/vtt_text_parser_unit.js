@@ -906,25 +906,32 @@ describe('VttTextParser', () => {
           {
             startTime: 80,
             endTime: 90,
-            payload: '<b><c.lime>Parse fail 1</b></c>',
+            payload: '<b><c.lime>Parse fail 1</b></c.lime>',
             nestedCues: [],
           },
           {
             startTime: 90,
             endTime: 100,
-            payload: '<c.lime><b>Parse fail 2</c></b>',
+            payload: '<c.lime><b>Parse fail 2</c.lime></b>',
             nestedCues: [],
           },
           {
             startTime: 100,
             endTime: 110,
-            payload: '<c.lime>forward slash 1/2 in text</c>',
-            nestedCues: [],
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 100,
+                endTime: 110,
+                payload: 'forward slash 1/2 in text',
+                color: '#0F0',
+              },
+            ],
           },
           {
             startTime: 110,
             endTime: 120,
-            payload: '<c.lime>less or more < > in text</c>',
+            payload: '<c.lime>less or more < > in text</c.lime>',
             nestedCues: [],
           },
         ],
@@ -950,6 +957,51 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
   });
 
+  it('supports voice style blocks', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20,
+            endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: 'Test',
+                color: 'cyan',
+              },
+            ],
+          },
+          {
+            startTime: 40,
+            endTime: 50,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 40,
+                endTime: 50,
+                payload: 'Test',
+                color: 'cyan',
+              },
+              {
+                startTime: 40,
+                endTime: 50,
+                payload: '2',
+                fontStyle: Cue.fontStyle.ITALIC,
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        'STYLE\n::cue(v[voice="Shaka"]) { color: cyan; }\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '<v Shaka>Test\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        '<v Shaka>Test</v><i>2</i>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
   it('supports default color overriding', () => {
     verifyHelper(
         [
@@ -970,10 +1022,46 @@ describe('VttTextParser', () => {
         ],
         'WEBVTT\n\n' +
         'STYLE\n' +
-        '::cue(bg_blue) { font-size: 10px; background-color: #FF0 }\n\n' +
+        '::cue(.bg_blue) { font-size: 10px; background-color: #FF0 }\n\n' +
         '00:00:10.000 --> 00:00:20.000\n' +
         '<c.red.bg_blue>Example 1</c>\n\n',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0});
+  });
+
+  // https://github.com/shaka-project/shaka-player/issues/4479
+  it('keep styles when there are line breaks', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10, endTime: 20,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '1',
+                color: '#F0F',
+              },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '',
+                lineBreak: true,
+              },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: '2',
+                color: '#F0F',
+                fontStyle: Cue.fontStyle.ITALIC,
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        '<c.magenta>1</c><br/><c.magenta><i>2</i></c>\n\n',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   /**
