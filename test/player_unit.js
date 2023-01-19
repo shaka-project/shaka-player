@@ -3425,7 +3425,9 @@ describe('Player', () => {
           variant.addAudio(0, (stream) => {
             stream.channelsCount = 6;
             stream.audioSamplingRate = 48000;
-            stream.codecs = 'ac-3';
+            // ac-3 is rewritten as ec-3 on Tizen, so for the stability of this
+            // test case, use ec-3.
+            stream.codecs = 'ec-3';
           });
         });
 
@@ -3450,7 +3452,7 @@ describe('Player', () => {
       expect(abrManager.variants.length).toBe(1);
       // It should be the 6-channel variant, based on our preference.
       expect(abrManager.variants[0].audio.channelsCount).toBe(6);
-      expect(abrManager.variants[0].audio.codecs).toBe('ac-3');
+      expect(abrManager.variants[0].audio.codecs).toBe('ec-3');
     });
   });
 

@@ -639,6 +639,10 @@
     "description": "The name of a configuration value.",
     "message": "Min Bytes"
   },
+  "DEMO_MIN_HDCP_VERSION": {
+    "description": "The name of a configuration value.",
+    "message": "Min HDCP version"
+  },
   "DEMO_MIN_FRAMERATE": {
     "description": "The name of a configuration value.",
     "message": "Min Framerate"

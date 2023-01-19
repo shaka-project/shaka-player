@@ -158,6 +158,7 @@
   "DEMO_MIME_TYPE": "MIME Type",
   "DEMO_MIN_BANDWIDTH": "Min Bandwidth",
   "DEMO_MIN_BYTES": "Min Bytes",
+  "DEMO_MIN_HDCP_VERSION": "Min HDCP version",
   "DEMO_MIN_FRAMERATE": "Min Framerate",
   "DEMO_MIN_HEIGHT": "Min Height",
   "DEMO_MIN_PIXELS": "Min Pixels",
