@@ -1170,6 +1170,22 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
+  it('does not fail on REGION blocks', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10, endTime: 20,
+            payload: 'test',
+          },
+        ],
+        'WEBVTT\n\n' +
+        'REGION\n' +
+        'id:1\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        'test\n\n',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
   /**
    * @param {!Array} cues
    * @param {string} text
