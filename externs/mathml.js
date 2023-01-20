@@ -14,4 +14,4 @@
  * @extends {Element}
  * @see https://w3c.github.io/mathml-core/#webidl-1630693908
  */
-function MathMLElement(){}
+function MathMLElement() {}
