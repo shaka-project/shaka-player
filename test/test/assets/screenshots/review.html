@@ -146,6 +146,12 @@ body.ctrl .images:hover img.diff {
   display: inline-block;
 }
 
+/* If the body element has the lineBreaks class, enable lineBreaks between
+   tests. */
+body.lineBreaks .lineBreak {
+  display: block;
+}
+
     </style>
   </head>
   <body>
@@ -163,6 +169,9 @@ body.ctrl .images:hover img.diff {
 
       <h3>Tests</h3>
       <div class="optionList" id="testsElement"></div>
+
+      <h3>Misc</h3>
+      <div class="optionList" id="miscElement"></div>
     </div>
 
     <div id="reviewElement">
@@ -196,15 +205,18 @@ for (const suite in suites) {
   }
 }
 
-for (const platform of platforms) {
-  for (const suite in suites) {
+appendOption(miscElement, 'misc', 'break between tests', applyFilters);
+
+for (const suite in suites) {
+  for (const test of suites[suite]) {
     for (const prefix of prefixes) {
-      for (const test of suites[suite]) {
-        if (excludes.includes(`${suite}-${prefix}-${test}`)) {
-          continue;
-        }
+      if (excludes.includes(`${suite}-${prefix}-${test}`)) {
+        continue;
+      }
+      for (const platform of platforms) {
         appendScreenshot(platform, suite, prefix, test);
       }
+      appendScreenshotLineBreak();
     }
   }
 }
@@ -220,7 +232,7 @@ window.addEventListener('focus', focusHandler);
 for (const param of location.hash.substr(1).split('&')) {
   const [key, value] = param.split('=');
   try {
-    allOptions[key][value].checked = true;
+    allOptions[key][decodeURIComponent(value)].checked = true;
   } catch (error) {}  // ignore errors
 }
 
@@ -299,6 +311,12 @@ function appendScreenshot(platform, suite, prefix, test) {
   allScreenshots.push(container);
 }
 
+function appendScreenshotLineBreak() {
+  const lineBreak = document.createElement('div');
+  lineBreak.className = 'lineBreak';
+  reviewElement.appendChild(lineBreak);
+}
+
 function keyHandler(event) {
   if (event.shiftKey) {
     document.body.classList.add('shift');
@@ -363,6 +381,14 @@ function applyFilters() {
     }
   }
 
+  // For misc options, collect parameters only.
+  for (const miscKey in allOptions['misc']) {
+    const miscInput = allOptions['misc'][miscKey];
+    if (miscInput.checked) {
+      params.push(`misc=${miscKey}`);
+    }
+  }
+
   // Set the location hash so that we keep the same filters on reload.
   location.hash = params.join('&');
 
@@ -396,6 +422,13 @@ function applyFilters() {
     }
 
     container.style.display = show ? '' : 'none';
+  }
+
+  // This body class enables the styles that make lineBreak divs work.
+  if (allOptions['misc']['break between tests'].checked) {
+    document.body.classList.add('lineBreaks');
+  } else {
+    document.body.classList.remove('lineBreaks');
   }
 }
 
