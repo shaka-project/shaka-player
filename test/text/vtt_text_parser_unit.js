@@ -1099,7 +1099,7 @@ describe('VttTextParser', () => {
                 startTime: 40,
                 endTime: 50,
                 payload: 'Test',
-                color: 'cyan',
+                color: 'red',
               },
               {
                 startTime: 40,
@@ -1111,11 +1111,13 @@ describe('VttTextParser', () => {
           },
         ],
         'WEBVTT\n\n' +
-        'STYLE\n::cue(v[voice="Shaka"]) { color: cyan; }\n\n' +
+        'STYLE\n' +
+        '::cue(v[voice="Shaka"]) { color: cyan; }\n' +
+        '::cue(v[voice=ShakaBis]) { color: red; }\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         '<v Shaka>Test\n\n' +
         '00:00:40.000 --> 00:00:50.000\n' +
-        '<v Shaka>Test</v><i>2</i>',
+        '<v ShakaBis>Test</v><i>2</i>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
