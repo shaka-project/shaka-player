@@ -39,24 +39,26 @@ const platforms = [
   'xboxone',
 ];
 
-const screenshots = [
-  'basic-cue',
-  'cue-position',
-  'cue-with-newline',
-  'two-basic-cues',
-  'duplicate-cues',
-  'two-nested-cues',
-  'nested-cues-with-linebreak',
-  'region-position',
-  'cue-with-controls',
-  'bitmap-cue',
-  'nested-cue-bg',
-  'flat-cue-bg',
-  'deeply-nested-cues',
-  'end-time-edge-case',
-  'region-with-display-alignment',
-  'line-alignment',
-];
+const suites = {
+  'text-displayer': [
+    'basic-cue',
+    'cue-position',
+    'cue-with-newline',
+    'two-basic-cues',
+    'duplicate-cues',
+    'two-nested-cues',
+    'nested-cues-with-linebreak',
+    'region-position',
+    'cue-with-controls',
+    'bitmap-cue',
+    'nested-cue-bg',
+    'flat-cue-bg',
+    'deeply-nested-cues',
+    'end-time-edge-case',
+    'region-with-display-alignment',
+    'line-alignment',
+  ],
+};
 
 const prefixes = [
   'native',
@@ -64,7 +66,7 @@ const prefixes = [
 ];
 
 const excludes = [
-  'native-cue-with-controls',
+  'text-displayer-native-cue-with-controls',
 ];
 
     </script>
@@ -85,10 +87,11 @@ li {
   line-height: 0;
 }
 
-label {
+#reviewElement label {
   display: block;
   padding-left: 1em;
   line-height: 1em;
+  white-space: pre;
 }
 
 .images {
@@ -128,125 +131,334 @@ body.ctrl .images:hover img.diff {
   opacity: 0.8;
 }
 
+#indexElement .optionList {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#indexElement .optionContainer {
+  display: inline-block;
+  margin-right: 20px;
+  flex-basis: 20%;
+}
+
+#indexElement label {
+  display: inline-block;
+}
+
+/* If the body element has the lineBreaks class, enable lineBreaks between
+   tests. */
+body.lineBreaks .lineBreak {
+  display: block;
+}
+
     </style>
   </head>
   <body>
+    <div id="indexElement">
+      <h2>Filters</h2>
+
+      <h3>Platforms</h3>
+      <div class="optionList" id="platformsElement"></div>
+
+      <h3>Suites</h3>
+      <div class="optionList" id="suitesElement"></div>
+
+      <h3>Prefixes</h3>
+      <div class="optionList" id="prefixesElement"></div>
+
+      <h3>Tests</h3>
+      <div class="optionList" id="testsElement"></div>
+
+      <h3>Misc</h3>
+      <div class="optionList" id="miscElement"></div>
+    </div>
+
+    <div id="reviewElement">
+      <h2 id="instructions">
+        Mouse over a screenshot and use "shift" to see the new version or "ctrl"
+        to see changed areas in red.
+      </h2>
+    </div>
+
     <script>
 
-const h1 = document.createElement('h1');
-document.body.appendChild(h1);
+const allOptions = {};
+const allScreenshots = [];
+const allTestOptionContainers = [];
 
-const h2 = document.createElement('h2');
-document.body.appendChild(h2);
-
-function allScreenshots() {
-  const list = [];
-
-  for (const prefix of prefixes) {
-    for (const screenshot of screenshots) {
-      const fullName = prefix + '-' + screenshot;
-
-      if (!excludes.includes(fullName)) {
-        list.push(fullName);
-      }
-    }
-  }
-
-  return list;
+for (const platform of platforms) {
+  appendOption(platformsElement, 'platform', platform, applyFilters);
 }
 
-// Remove the '?' at the front of the search string.
-const query = location.search.substr(1);
-if (!query) {
-  // Present a simple menu of screenshots to review.
-  h1.textContent = 'Select a screenshot or platform to review:';
+for (const prefix of prefixes) {
+  appendOption(prefixesElement, 'prefix', prefix, applyFilters);
+}
 
-  const appendToList = (text) => {
-    const li = document.createElement('li');
-    document.body.appendChild(li);
+for (const suite in suites) {
+  appendOption(suitesElement, 'suite', suite, applySuiteFilters);
 
-    const a = document.createElement('a');
-    a.textContent = text;
-    a.href = '?' + text;
-    li.appendChild(a);
-  };
-
-  for (const screenshot of allScreenshots()) {
-    appendToList(screenshot);
+  for (const test of suites[suite]) {
+    const container = appendOption(testsElement, 'test', test, applyFilters);
+    container.dataset.suite = suite;
+    allTestOptionContainers.push(container);
   }
-  for (const platform of platforms) {
-    appendToList(platform);
-  }
-} else {
-  h1.textContent = 'Screenshots: ' + query;
-  h2.textContent = 'Mouse over a screenshot and use "shift" to see the new ' +
-      'version or "ctrl" to see changed areas in red.';
+}
 
-  const keyHandler = (event) => {
-    if (event.shiftKey) {
-      document.body.classList.add('shift');
-    } else {
-      document.body.classList.remove('shift');
-      if (event.ctrlKey) {
-        document.body.classList.add('ctrl');
-      } else {
-        document.body.classList.remove('ctrl');
+appendOption(miscElement, 'misc', 'break between tests', applyFilters);
+
+for (const suite in suites) {
+  for (const test of suites[suite]) {
+    for (const prefix of prefixes) {
+      if (excludes.includes(`${suite}-${prefix}-${test}`)) {
+        continue;
       }
-    }
-  };
-
-  const focusHandler = () => {
-    // When we gain or lose focus, the keys that were pressed before are not
-    // necessarily pressed now.  Clear those states.
-    document.body.classList.remove('shift');
-    document.body.classList.remove('ctrl');
-  };
-
-  document.body.addEventListener('keydown', keyHandler);
-  document.body.addEventListener('keyup', keyHandler);
-  window.addEventListener('blur', focusHandler);
-  window.addEventListener('focus', focusHandler);
-
-  const appendScreenshot = (labelText, platform, screenshot) => {
-    const container = document.createElement('div');
-    container.classList.add('container');
-
-    const label = document.createElement('label');
-    label.textContent = labelText;
-    container.appendChild(label);
-
-    const images = document.createElement('div');
-    images.classList.add('images');
-    container.appendChild(images);
-
-    const img = document.createElement('img');
-    img.src = platform + '/' + screenshot + '.png';
-    images.appendChild(img);
-
-    const newImage = document.createElement('img');
-    newImage.src = platform + '/' + screenshot + '.png-new';
-    newImage.classList.add('new');
-    images.appendChild(newImage);
-
-    const diffImage = document.createElement('img');
-    diffImage.src = platform + '/' + screenshot + '.png-diff';
-    diffImage.classList.add('diff');
-    images.appendChild(diffImage);
-
-    document.body.appendChild(container);
-  };
-
-  if (platforms.includes(query)) {
-    const platform = query;
-    for (const screenshot of allScreenshots()) {
-      appendScreenshot(/* label= */ screenshot, platform, screenshot);
-    }
-  } else {
-    const screenshot = query;
-    for (const platform of platforms) {
-      appendScreenshot(/* label= */ platform, platform, screenshot);
+      for (const platform of platforms) {
+        appendScreenshot(platform, suite, prefix, test);
+      }
+      appendScreenshotLineBreak();
     }
   }
+}
+
+document.body.addEventListener('keydown', keyHandler);
+document.body.addEventListener('keyup', keyHandler);
+window.addEventListener('blur', focusHandler);
+window.addEventListener('focus', focusHandler);
+
+
+// Consume URL hash parameters that indicate filters.
+// Ignore the '#' in location.hash with substr(1).
+for (const param of location.hash.substr(1).split('&')) {
+  const [key, value] = param.split('=');
+  try {
+    allOptions[key][decodeURIComponent(value)].checked = true;
+  } catch (error) {}  // ignore errors
+}
+
+// Apply the initial filters.
+initializeFilters();
+
+
+function appendOption(parentElement, key, value, onChange) {
+  const container = document.createElement('div');
+  container.className = 'optionContainer';
+  parentElement.appendChild(container);
+
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  container.appendChild(input);
+
+  const label = document.createElement('label');
+  label.textContent = value;
+  container.appendChild(label);
+
+  input.onchange = onChange;
+  allOptions[key] = allOptions[key] || {};
+  allOptions[key][value] = input;
+
+  // Make the label clickable as well.
+  label.onclick = () => {
+    input.checked = !input.checked;
+
+    // The onchange handler of the input not triggered by changing "checked" via
+    // the API.  So call the onChange handler explicitly.
+    onChange();
+  };
+
+  return container;
+}
+
+function appendScreenshot(platform, suite, prefix, test) {
+  const container = document.createElement('div');
+  container.classList.add('container');
+
+  const label = document.createElement('label');
+  label.textContent = `platform: ${platform}\n` +
+                      `suite: ${suite}\n` +
+                      `prefix: ${prefix}\n` +
+                      `test: ${test}\n`;
+  container.appendChild(label);
+
+  const images = document.createElement('div');
+  images.classList.add('images');
+  container.appendChild(images);
+
+  const image = document.createElement('img');
+  image.src = `${platform}/${suite}-${prefix}-${test}.png`;
+  images.appendChild(image);
+  image.onerror = () => {
+    container.style.display = 'none';
+    container.dataset.nodata = true;
+  };
+
+  const newImage = document.createElement('img');
+  newImage.src = `${platform}/${suite}-${prefix}-${test}.png-new`;
+  newImage.classList.add('new');
+  images.appendChild(newImage);
+
+  const diffImage = document.createElement('img');
+  diffImage.src = `${platform}/${suite}-${prefix}-${test}.png-diff`;
+  diffImage.classList.add('diff');
+  images.appendChild(diffImage);
+
+  container.dataset.platform = platform;
+  container.dataset.suite = suite;
+  container.dataset.prefix = prefix;
+  container.dataset.test = test;
+  reviewElement.appendChild(container);
+
+  allScreenshots.push(container);
+}
+
+function appendScreenshotLineBreak() {
+  const lineBreak = document.createElement('div');
+  lineBreak.className = 'lineBreak';
+  reviewElement.appendChild(lineBreak);
+}
+
+function keyHandler(event) {
+  if (event.shiftKey) {
+    document.body.classList.add('shift');
+  } else {
+    document.body.classList.remove('shift');
+    if (event.ctrlKey) {
+      document.body.classList.add('ctrl');
+    } else {
+      document.body.classList.remove('ctrl');
+    }
+  }
+}
+
+function focusHandler() {
+  // When we gain or lose focus, the keys that were pressed before are not
+  // necessarily pressed now.  Clear those states.
+  document.body.classList.remove('shift');
+  document.body.classList.remove('ctrl');
+}
+
+function applyFilters() {
+  // A collection of URL hash parameters to indicate the selected filters.
+  const params = [];
+
+  // If no platform is selected, show all platforms.
+  let allPlatforms = true;
+  for (const platformKey in allOptions['platform']) {
+    const platformInput = allOptions['platform'][platformKey];
+    if (platformInput.checked) {
+      allPlatforms = false;
+      params.push(`platform=${platformKey}`);
+    }
+  }
+
+  // If no suite is selected, show all suites.
+  let allSuites = true;
+  for (const suiteKey in allOptions['suite']) {
+    const suiteInput = allOptions['suite'][suiteKey];
+    if (suiteInput.checked) {
+      allSuites = false;
+      params.push(`suite=${suiteKey}`);
+    }
+  }
+
+  // If no test is selected, show all tests.
+  let allPrefixes = true;
+  for (const prefixKey in allOptions['prefix']) {
+    const prefixInput = allOptions['prefix'][prefixKey];
+    if (prefixInput.checked) {
+      allPrefixes = false;
+      params.push(`prefix=${prefixKey}`);
+    }
+  }
+
+  // If no test is selected, show all tests.
+  let allTests = true;
+  for (const testKey in allOptions['test']) {
+    const testInput = allOptions['test'][testKey];
+    if (testInput.checked) {
+      allTests = false;
+      params.push(`test=${testKey}`);
+    }
+  }
+
+  // For misc options, collect parameters only.
+  for (const miscKey in allOptions['misc']) {
+    const miscInput = allOptions['misc'][miscKey];
+    if (miscInput.checked) {
+      params.push(`misc=${miscKey}`);
+    }
+  }
+
+  // Set the location hash so that we keep the same filters on reload.
+  location.hash = params.join('&');
+
+  for (const container of allScreenshots) {
+    const platform = container.dataset.platform;
+    const suite = container.dataset.suite;
+    const prefix = container.dataset.prefix;
+    const test = container.dataset.test;
+
+    let show = true;
+    if (!allPlatforms && !allOptions['platform'][platform].checked) {
+      show = false;
+    }
+
+    if (!allSuites && !allOptions['suite'][suite].checked) {
+      show = false;
+    }
+
+    if (!allPrefixes && !allOptions['prefix'][prefix].checked) {
+      show = false;
+    }
+
+    if (!allTests && !allOptions['test'][test].checked) {
+      show = false;
+    }
+
+    // For newly-added screenshots, we may not have data for all platforms.
+    // Don't show these.
+    if (container.dataset.nodata) {
+      show = false;
+    }
+
+    container.style.display = show ? '' : 'none';
+  }
+
+  // This body class enables the styles that make lineBreak divs work.
+  if (allOptions['misc']['break between tests'].checked) {
+    document.body.classList.add('lineBreaks');
+  } else {
+    document.body.classList.remove('lineBreaks');
+  }
+}
+
+function applySuiteFilters(resetTests = true) {
+  // If no suite is selected, show the test options for all suites.
+  let allSuites = true;
+  for (const suiteInput of Object.values(allOptions['suite'])) {
+    if (suiteInput.checked) allSuites = false;
+  }
+
+  if (resetTests) {
+    // Reset all test options.
+    for (const testInput of Object.values(allOptions['test'])) {
+      testInput.checked = false;
+    }
+  }
+
+  // Show test options matching the suites.
+  for (const container of allTestOptionContainers) {
+    const suite = container.dataset.suite;
+    const show = allSuites || allOptions['suite'][suite].checked;
+    container.style.display = show ? '' : 'none';
+  }
+
+  // Apply general filtering on screenshots.
+  applyFilters();
+}
+
+function initializeFilters() {
+  applySuiteFilters(/* resetTests= */ false);
 }
 
     </script>

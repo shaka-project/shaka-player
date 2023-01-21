@@ -72,6 +72,33 @@ describe('Player', () => {
     });
   });  // describe('attach')
 
+  describe('destroy', () => {
+    // Regression test for:
+    // https://github.com/shaka-project/shaka-player/issues/4850
+    it('does not leave any lingering timers', async () => {
+      shaka.util.Timer.activeTimers.clear();
+
+      // Unlike the other tests in this file, this uses an uncompiled build of
+      // Shaka, so that we don't need to expose shaka.util.Timer.activeTimers.
+      player = new shaka.Player(video);
+      waiter.setPlayer(player);
+
+      // Play the video for a little while.
+      await player.load('test:sintel');
+      video.play();
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
+
+      // Destroy the player.
+      await player.destroy();
+
+      // Are there any timers left?
+      for (const timer of shaka.util.Timer.activeTimers.keys()) {
+        const stackTrace = shaka.util.Timer.activeTimers.get(timer);
+        fail('Lingering timer exists! Stack trace of creation: ' + stackTrace);
+      }
+    });
+  });
+
   describe('updateStartTime() in manifestparsed event handler', () => {
     it('does not get segments prior to startTime', async () => {
       player.addEventListener('manifestparsed', () => {
@@ -970,7 +997,7 @@ describe('Player', () => {
       expect(getBufferedBehind()).toBe(20);  // Buffered to start still.
       video.currentTime = 50;
       await waitUntilBuffered(30);
-      expect(getBufferedBehind()).toBeLessThan(30);
+      expect(getBufferedBehind()).toBeLessThan(40);  // 30 + segment_size
 
       player.configure('streaming.bufferBehind', 10);
       // We only evict content when we append a segment, so increase the
@@ -997,7 +1024,7 @@ describe('Player', () => {
     }
 
     async function waitUntilBuffered(amount) {
-      for (let i = 0; i < 25; i++) {
+      for (let i = 0; i < 50; i++) {
         // We buffer from an internal segment, so this shouldn't take long to
         // buffer.
         await Util.delay(0.1);  // eslint-disable-line no-await-in-loop
@@ -1005,7 +1032,14 @@ describe('Player', () => {
           return;
         }
       }
-      throw new Error('Timeout waiting to buffer');
+
+      const ranges =
+          shaka.media.TimeRangesUtils.getBufferedInfo(video.buffered);
+      const currentTime = video.currentTime;
+      const target = currentTime + amount;
+
+      throw new Error('Timeout waiting to buffer! ' +
+          JSON.stringify({ranges, currentTime, target}));
     }
   });  // describe('buffering')
 

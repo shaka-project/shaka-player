@@ -42,7 +42,13 @@ describe('MediaSourceEngine', () => {
   const originalCreateMediaSource =
       // eslint-disable-next-line no-restricted-syntax
       shaka.media.MediaSourceEngine.prototype.createMediaSource;
-  const originalTransmuxer = shaka.media.Transmuxer;
+
+  const originalFindTransmuxer =
+      shaka.transmuxer.TransmuxerEngine.findTransmuxer;
+  const originalConvertCodecs =
+      shaka.transmuxer.TransmuxerEngine.convertCodecs;
+  const originalIsSupported =
+      shaka.transmuxer.TransmuxerEngine.isSupported;
 
   // Jasmine Spies don't handle toHaveBeenCalledWith well with objects, so use
   // some numbers instead.
@@ -89,7 +95,12 @@ describe('MediaSourceEngine', () => {
 
   afterAll(() => {
     window.MediaSource.isTypeSupported = originalIsTypeSupported;
-    shaka.media.Transmuxer = originalTransmuxer;
+    shaka.transmuxer.TransmuxerEngine.findTransmuxer =
+        originalFindTransmuxer;
+    shaka.transmuxer.TransmuxerEngine.convertCodecs =
+        originalConvertCodecs;
+    shaka.transmuxer.TransmuxerEngine.isSupported =
+        originalIsSupported;
   });
 
   beforeEach(/** @suppress {invalidCasts} */ () => {
@@ -101,17 +112,18 @@ describe('MediaSourceEngine', () => {
       return type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
     });
     mockTransmuxer = new shaka.test.FakeTransmuxer();
-
-    // eslint-disable-next-line no-restricted-syntax
-    shaka.media.Transmuxer = /** @type {?} */ (function() {
-      return /** @type {?} */ (mockTransmuxer);
-    });
-    shaka.media.Transmuxer.convertCodecs = (mimeType, contentType) => {
-      return 'video/mp4; codecs="avc1.42E01E"';
-    };
-    shaka.media.Transmuxer.isSupported = (mimeType, contentType) => {
-      return mimeType == 'tsMimetype';
-    };
+    shaka.transmuxer.TransmuxerEngine.findTransmuxer =
+        (mimeType) => {
+          return () => mockTransmuxer;
+        };
+    shaka.transmuxer.TransmuxerEngine.convertCodecs =
+        (mimeType, contentType) => {
+          return 'video/mp4; codecs="avc1.42E01E"';
+        };
+    shaka.transmuxer.TransmuxerEngine.isSupported =
+        (mimeType, contentType) => {
+          return mimeType == 'tsMimetype';
+        };
 
     shaka.text.TextEngine = createMockTextEngineCtor();
 
