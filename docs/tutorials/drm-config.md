@@ -229,7 +229,7 @@ player.configure({
 });
 ```
 
-**Using `persistent-license` might now work on every devices, use this feature
+**Using `persistent-license` might not work on every devices, use this feature
 carefully.**
 
 When the playback starts, you can retrieve the sessions metadata:

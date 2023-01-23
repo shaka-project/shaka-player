@@ -690,7 +690,7 @@ shaka.extern.AdvancedDrmConfiguration;
  * }}
  *
  * @description
- * DRM Session Metadata for as session
+ * DRM Session Metadata for an active session
  *
  * @property {string} sessionId
  *   Session id
@@ -713,7 +713,7 @@ shaka.extern.DrmSessionMetadata;
  * }}
  *
  * @description
- * DRM Session Metadata for as session
+ * DRM Session Metadata for saved persistent session
  *
  * @property {string} sessionId
  *   Session id
