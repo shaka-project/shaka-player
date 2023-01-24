@@ -217,3 +217,18 @@ player.getNetworkingEngine()
 player.configure('drm.initDataTransform',
                  FairPlayUtils.conaxInitDataTransform);
 ```
+
+#### ExpressPlay (legacy Apple Media Keys)
+
+For integration with ExpressPlay the following can be used:
+
+```js
+shaka.polyfill.PatchedMediaKeysApple.install();
+const FairPlayUtils = shaka.util.FairPlayUtils;
+player.getNetworkingEngine()
+    .registerRequestFilter(FairPlayUtils.expressplayFairPlayRequest);
+player.getNetworkingEngine()
+    .registerResponseFilter(FairPlayUtils.commonFairPlayResponse);
+player.configure('drm.initDataTransform',
+                 FairPlayUtils.expressplayInitDataTransform);
+```
