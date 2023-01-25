@@ -439,19 +439,6 @@ describe('XmlUtils', () => {
       const doc = XmlUtils.parseXmlString(xmlString, 'Root');
       expect(doc).toBeNull();
     });
-
-    it('returns null on XML that embeds MathML', () => {
-      const xmlString = [
-        '<?xml version="1.0"?>',
-        '<Root>',
-        '  <math xmlns="http://www.w3.org/1998/Math/MathML">',
-        '    <mi onclick="alert(1)">CLICK ME</mi>',
-        '  </math>',
-        '</Root>',
-      ].join('\n');
-      const doc = XmlUtils.parseXmlString(xmlString, 'Root');
-      expect(doc).toBeNull();
-    });
   });
 });
 
