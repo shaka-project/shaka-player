@@ -241,6 +241,20 @@ jobs:
           # there.
           if-no-files-found: error
 
+      # Upload new screenshots and diffs on failure; ignore if missing
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          # In this workflow, "browser" is the selenium node name, which can
+          # contain both browser and OS, such as "ChromeLinux".
+          name: screenshots-${{ matrix.browser }}
+          path: |
+            test/test/assets/screenshots/*/*.png-new
+            test/test/assets/screenshots/*/*.png-diff
+          if-no-files-found: ignore
+          retention-days: 5
+
       - name: Report final commit status
         # Will run on success or failure, but not if the workflow is cancelled.
         if: ${{ success() || failure() }}

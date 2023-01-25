@@ -852,11 +852,11 @@ describe('VttTextParser', () => {
   it('support escaped html payload', () => {
     verifyHelper(
         [
-          {startTime: 20.1, endTime: 40.505, payload: '"Test & 1"'},
+          {startTime: 20.1, endTime: 40.505, payload: '"Test & 1"\u{a0}'},
         ],
         'WEBVTT\n\n' +
         '00:00:20.100 --> 00:00:40.505\n' +
-        '&quot;Test &amp; 1&quot;',
+        '&quot;Test &amp; 1&quot;&nbsp;',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
@@ -1099,7 +1099,7 @@ describe('VttTextParser', () => {
                 startTime: 40,
                 endTime: 50,
                 payload: 'Test',
-                color: 'cyan',
+                color: 'red',
               },
               {
                 startTime: 40,
@@ -1111,11 +1111,13 @@ describe('VttTextParser', () => {
           },
         ],
         'WEBVTT\n\n' +
-        'STYLE\n::cue(v[voice="Shaka"]) { color: cyan; }\n\n' +
+        'STYLE\n' +
+        '::cue(v[voice="Shaka"]) { color: cyan; }\n' +
+        '::cue(v[voice=ShakaBis]) { color: red; }\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         '<v Shaka>Test\n\n' +
         '00:00:40.000 --> 00:00:50.000\n' +
-        '<v Shaka>Test</v><i>2</i>',
+        '<v ShakaBis>Test</v><i>2</i>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
@@ -1178,6 +1180,22 @@ describe('VttTextParser', () => {
         'WEBVTT\n\n' +
         '00:00:10.000 --> 00:00:20.000\n' +
         '<c.magenta>1</c><br/><c.magenta><i>2</i></c>\n\n',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
+  it('does not fail on REGION blocks', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10, endTime: 20,
+            payload: 'test',
+          },
+        ],
+        'WEBVTT\n\n' +
+        'REGION\n' +
+        'id:1\n\n' +
+        '00:00:10.000 --> 00:00:20.000\n' +
+        'test\n\n',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
