@@ -374,11 +374,12 @@ describe('MediaSourceEngine', () => {
 
     it('rejects promise when operation throws', async () => {
       audioSourceBuffer.appendBuffer.and.throwError('fail!');
-      mockVideo.error = {code: 5};
+      mockVideo.error = {code: 5, message: 'something failed'};
       const expected = Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MEDIA,
           shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
+          {code: 5, message: 'something failed'},
           jasmine.objectContaining({message: 'fail!'})));
       await expectAsync(
           mediaSourceEngine.appendBuffer(
@@ -712,6 +713,7 @@ describe('MediaSourceEngine', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MEDIA,
           shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
+          {code: 5},
           jasmine.objectContaining({message: 'fail!'})));
       await expectAsync(mediaSourceEngine.remove(ContentType.AUDIO, 1, 5))
           .toBeRejectedWith(expected);
