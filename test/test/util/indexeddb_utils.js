@@ -1,10 +1,8 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-
-goog.provide('shaka.test.IndexedDBUtils');
-
 
 shaka.test.IndexedDBUtils = class {
   /**
@@ -12,7 +10,7 @@ shaka.test.IndexedDBUtils = class {
    * database. If a new database can't be connected to after 5 attempts,
    * the test will fail.
    *
-   * On IE/Edge, it is possible for the database to not be deleted when the
+   * On Edge, it is possible for the database to not be deleted when the
    * success callback is fired. This means that when we delete the database and
    * immediately create a new connection, we will connect to the old database.
    *
@@ -35,8 +33,7 @@ shaka.test.IndexedDBUtils = class {
     // connection after 5 attempts (with delays in between), just give
     // up.
     let lastError;
-    for (const _ of shaka.util.Iterables.range(5)) {
-      shaka.util.Functional.ignored(_);
+    for (let i = 0; i < 5; i++) {
       try {
         return await tryOpen();  // eslint-disable-line no-await-in-loop
       } catch (e) {  // eslint-disable-line no-restricted-syntax

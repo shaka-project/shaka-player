@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,6 +8,8 @@
 goog.provide('shaka.ui.Utils');
 
 goog.require('goog.asserts');
+goog.require('shaka.ui.Enums');
+goog.require('shaka.util.Dom');
 
 
 shaka.ui.Utils = class {
@@ -15,8 +18,9 @@ shaka.ui.Utils = class {
    * @param {string} className
    * @return {!HTMLElement}
    */
-  // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
   static getFirstDescendantWithClassName(element, className) {
+    // TODO: This can be replaced by shaka.util.Dom.getElementByClassName
+
     const descendant = shaka.ui.Utils.getDescendantIfExists(element, className);
     goog.asserts.assert(descendant != null, 'Should not be null!');
 
@@ -62,11 +66,11 @@ shaka.ui.Utils = class {
    */
   static checkmarkIcon() {
     const icon = shaka.util.Dom.createHTMLElement('i');
-    icon.classList.add('material-icons');
+    icon.classList.add('material-icons-round');
     icon.classList.add('shaka-chosen-item');
     icon.textContent = shaka.ui.Enums.MaterialDesignIcons.CHECKMARK;
     // Screen reader should ignore icon text.
-    icon.setAttribute('aria-hidden', 'true');
+    icon.ariaHidden = 'true';
     return icon;
   }
 
@@ -83,21 +87,12 @@ shaka.ui.Utils = class {
       return;
     }
 
-    // You can't use setDisplay with SVG on IE, because classList isn't on SVG
-    // elements on that browser.  It's better to find out on Chrome through an
-    // assertion, rather than wait for a failed test pass later on IE.
-    goog.asserts.assert(!(element instanceof SVGElement),
-        'Do not use setDisplay with SVG elements!');
-
     if (display) {
-      element.classList.add('shaka-displayed');
       // Removing a non-existent class doesn't throw, so, even if
-      // the element is not hidden, this should be fine. Same for displayed
-      // below.
+      // the element is not hidden, this should be fine.
       element.classList.remove('shaka-hidden');
     } else {
       element.classList.add('shaka-hidden');
-      element.classList.remove('shaka-displayed');
     }
   }
 

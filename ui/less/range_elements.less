@@ -1,18 +1,7 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 /* Special styles for input elements with type "range".
@@ -50,7 +39,7 @@
   .overlay-parent();
 
   /* Vertical margins to occupy the same space as the thumb. */
-  margin: (@thumb-size - @track-height)/2 6px;
+  margin: calc((@thumb-size - @track-height) / 2) 6px;
 
   /* Smaller height to contain the background for the virtual track. */
   height: @track-height;
@@ -67,6 +56,11 @@
 .track() {
   /* The track should fill the range element. */
   width: 100%;
+
+  /* Since range elements are special input elements, they must reflect user
+   * interaction, so when the user hovers over the range element, the cursor
+   * must be a pointer. */
+  cursor: pointer;
 
   /* The track should be tall enough to contain the thumb without clipping it.
    * It is very tricky to make the thumb show outside the track on IE 11, and
@@ -115,7 +109,7 @@
 
   /* Position the top of the range element so that it is centered on the
    * container. Note that the container is actually smaller than the thumb. */
-  top: (@track-height - @thumb-size) / 2;
+  top: calc((@track-height - @thumb-size) / 2);
 
   /* Make sure clicking at the very top of the bar still takes effect and is not
    * confused with clicking the video to play/pause it. */
@@ -138,29 +132,6 @@
   &::-moz-range-thumb {
     .thumb();
   }
-
-  /* Pseudo-elements for IE 11. */
-  &::-ms-track {
-    .track();
-  }
-
-  &::-ms-thumb {
-    .thumb();
-  }
-
-  /* Turn off tooltips for range element values, unique to IE. */
-  &::-ms-tooltip {
-    .hidden();
-  }
-
-  /* Hide the "lower" and "upper" regions of the track, unique to IE. */
-  &::-ms-fill-lower {
-    .hidden();
-  }
-
-  &::-ms-fill-upper {
-    .hidden();
-  }
 }
 
 .shaka-range-container {
@@ -169,6 +140,7 @@
 
 .shaka-volume-bar-container {
   width: 100px;
+  padding: 0;
 }
 
 .shaka-range-element {
@@ -177,4 +149,8 @@
 
 .shaka-seek-bar-container {
   .show-when-controls-shown();
+}
+
+.shaka-ad-markers {
+  .overlay-child();
 }

@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,9 +8,14 @@
 goog.provide('shaka.ui.SkipAdButton');
 
 goog.require('goog.asserts');
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.Timer');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
@@ -36,8 +42,8 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     shaka.ui.Utils.setDisplay(this.counter_, false);
     this.container_.appendChild(this.counter_);
 
-    /** @private {!HTMLElement} */
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-skip-ad-button');
     this.button_.disabled = true;
     shaka.ui.Utils.setDisplay(this.button_, false);
@@ -58,6 +64,7 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
           this.updateAriaLabel_();
+          this.updateLocalizedStrings_();
         });
 
     this.eventManager.listen(
@@ -85,6 +92,20 @@ shaka.ui.SkipAdButton = class extends shaka.ui.Element {
         this.button_, 'click', () => {
           this.ad.skip();
         });
+
+    if (this.ad) {
+      // There was already an ad.
+      this.onAdStarted_();
+    }
+  }
+
+  /**
+   * @override
+   */
+  release() {
+    this.timer_.stop();
+    this.timer_ = null;
+    super.release();
   }
 
   /**

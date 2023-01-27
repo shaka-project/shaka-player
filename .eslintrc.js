@@ -1,5 +1,6 @@
 // vim: foldmethod=marker:foldmarker={{{,}}}
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -28,8 +29,9 @@ const commonNoRestrictedSyntax = [
     'message': 'Use for-of instead of forEach',
   },
   {
-    'selector': 'CallExpression[callee.property.name=/^(bind|call|apply)$/]',
-    'message': 'Don\'t use Function bind/call/apply.',
+    // NOTE: prefer-spread rule covers .apply() already.
+    'selector': 'CallExpression[callee.property.name=/^(bind|call)$/]',
+    'message': 'Don\'t use Function bind/call.',
   },
   {
     'selector': 'MemberExpression[property.name="prototype"]',
@@ -76,19 +78,15 @@ module.exports = {
     'no-shadow': 'off',
     // }}}
 
-    // Temporary Google style overrides while we get in compliance with the
-    // latest style guide {{{
-    'prefer-spread': 'off',
-    'require-jsdoc': 'off',
-    // }}}
-
     // "Possible error" rules: {{{
     'no-async-promise-executor': 'error',
     'no-await-in-loop': 'error',
     'no-empty': ['error', {'allowEmptyCatch': true}],
     'no-misleading-character-class': 'error',
     'no-template-curly-in-string': 'error',
-    'require-atomic-updates': 'error',
+    // TODO: Try to re-enable this if possible.  Right now, it produces way too
+    // many false-positives with eslint 7.  It worked well enough in eslint 5.
+    // 'require-atomic-updates': 'error',
     // }}}
 
     // "Best practices" rules: {{{
@@ -153,7 +151,7 @@ module.exports = {
     'array-bracket-newline': ['error', 'consistent'],
     'block-spacing': ['error', 'always'],
     'brace-style': ['error', '1tbs', {'allowSingleLine': true}],
-    'id-blacklist': ['error', 'async'],
+    'id-denylist': ['error', 'async'],
     'lines-between-class-members': 'error',
     'max-statements-per-line': ['error', {'max': 1}],
     'new-parens': 'error',
@@ -170,6 +168,20 @@ module.exports = {
     'no-whitespace-before-property': 'error',
     'nonblock-statement-body-position': ['error', 'below'],
     'operator-assignment': 'error',
+    'spaced-comment': ['error', 'always', {
+      // Characters which may be glued to the start of a comment block, but
+      // which do not violate the rule.  The "*" is for jsdoc's "/**" syntax,
+      // and the "!" is for the "/*!" of license headers which are passed
+      // verbatim through the compiler.
+      'markers': ['*', '!'],
+    }],
+    'require-jsdoc': ['error', {
+      'require': {
+        'FunctionDeclaration': true,
+        'MethodDefinition': true,
+        'ClassDeclaration': true,
+      },
+    }],
     // }}}
 
     // "ECMAScript 6" rules: {{{
@@ -201,7 +213,7 @@ module.exports = {
           },
           {
             'selector': 'CatchClause',
-            'message': 'Use expect.toFail or expectAsync.toBeRejected',
+            'message': 'Use expect.toThrow or expectAsync.toBeRejected',
           },
           {
             'selector': 'CallExpression[callee.name=expect] >' +
@@ -264,12 +276,34 @@ module.exports = {
       ],
     },
     {
-      'files': ['externs/*', 'externs/shaka/*'],
       'rules': {
         // Disable rules on useless constructors so we can use ES6 classes in
         // externs.
         'no-useless-constructor': 'off',
       },
+      'files': ['externs/**/*.js'],
+    },
+    {
+      'rules': {
+        // JSDoc is not strictly required in externs, tests, and in load.js.
+        'require-jsdoc': 'off',
+      },
+      'files': [
+        'demo/load.js',
+        'externs/**/*.js',
+        'test/**/*.js',
+      ],
+    },
+    {
+      'rules': {
+        // Externs naturally redeclare things eslint knows about.
+        'no-redeclare': 'off',
+      },
+      'files': [
+        'ui/externs/*.js',
+        'externs/**/*.js',
+        'test/test/externs/*.js',
+      ],
     },
   ],
 };

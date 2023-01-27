@@ -1,10 +1,8 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-
-goog.provide('shaka.test.OfflineUtils');
-
 
 shaka.test.OfflineUtils = class {
   /**
@@ -13,14 +11,16 @@ shaka.test.OfflineUtils = class {
    */
   static createManifest(originalUri) {
     return {
+      creationTime: Date.now(),
       appMetadata: null,
       drmInfo: null,
       duration: 90,
       expiration: Infinity,
       originalManifestUri: originalUri,
-      periods: [],
+      streams: [],
       sessionIds: [],
       size: 1024,
+      sequenceMode: false,
     };
   }
 
@@ -31,11 +31,11 @@ shaka.test.OfflineUtils = class {
    */
   static createStream(id, type) {
     return {
-      id: id,
+      id,
       originalId: id.toString(),
       primary: false,
       presentationTimeOffset: 0,
-      contentType: type,
+      type,
       mimeType: '',
       codecs: '',
       frameRate: undefined,
@@ -47,9 +47,15 @@ shaka.test.OfflineUtils = class {
       height: null,
       initSegmentKey: null,
       encrypted: false,
-      keyId: null,
+      keyIds: new Set(),
       segments: [],
       variantIds: [],
+      roles: [],
+      forced: false,
+      channelsCount: null,
+      audioSamplingRate: null,
+      spatialAudio: false,
+      closedCaptions: null,
     };
   }
 

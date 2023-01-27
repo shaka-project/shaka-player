@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -10,6 +11,7 @@ describe('CastProxy', () => {
 
   const originalCastSender = shaka.cast.CastSender;
   const fakeAppId = 'fake app ID';
+  const fakeAndroidReceiverCompatible = false;
 
   let mockPlayer;
   let mockSender;
@@ -30,7 +32,8 @@ describe('CastProxy', () => {
     mockPlayer = createMockPlayer();
     mockSender = null;
 
-    proxy = new CastProxy(mockVideo, mockPlayer, fakeAppId);
+    proxy = new CastProxy(mockVideo, mockPlayer, fakeAppId,
+        fakeAndroidReceiverCompatible);
   });
 
   afterEach(async () => {
@@ -288,7 +291,8 @@ describe('CastProxy', () => {
             'timeupdate', Util.spyFunc(proxyListener));
 
         expect(proxyListener).not.toHaveBeenCalled();
-        const fakeEvent = new FakeEvent('timeupdate', {detail: 8675309});
+        const fakeEvent = new FakeEvent(
+            'timeupdate', (new Map()).set('detail', 8675309));
         mockVideo.on['timeupdate'](fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'timeupdate',
@@ -306,7 +310,8 @@ describe('CastProxy', () => {
         mockSender.hasRemoteProperties.and.returnValue(true);
 
         expect(proxyListener).not.toHaveBeenCalled();
-        const fakeEvent = new FakeEvent('timeupdate', {detail: 8675309});
+        const fakeEvent = new FakeEvent(
+            'timeupdate', (new Map()).set('detail', 8675309));
         mockVideo.on['timeupdate'](fakeEvent);
         expect(proxyListener).not.toHaveBeenCalled();
       });
@@ -323,7 +328,8 @@ describe('CastProxy', () => {
         mockSender.hasRemoteProperties.and.returnValue(true);
 
         expect(proxyListener).not.toHaveBeenCalled();
-        const fakeEvent = new FakeEvent('timeupdate', {detail: 8675309});
+        const fakeEvent = new FakeEvent(
+            'timeupdate', (new Map()).set('detail', 8675309));
         mockSender.onRemoteEvent('video', fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'timeupdate',
@@ -437,7 +443,8 @@ describe('CastProxy', () => {
             'buffering', Util.spyFunc(proxyListener));
 
         expect(proxyListener).not.toHaveBeenCalled();
-        const fakeEvent = new FakeEvent('buffering', {detail: 8675309});
+        const fakeEvent = new FakeEvent(
+            'buffering', (new Map()).set('detail', 8675309));
         mockPlayer.listeners['buffering'](fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'buffering',
@@ -455,7 +462,8 @@ describe('CastProxy', () => {
         mockSender.hasRemoteProperties.and.returnValue(true);
 
         expect(proxyListener).not.toHaveBeenCalled();
-        const fakeEvent = new FakeEvent('buffering', {detail: 8675309});
+        const fakeEvent = new FakeEvent(
+            'buffering', (new Map()).set('detail', 8675309));
         mockPlayer.listeners['buffering'](fakeEvent);
         expect(proxyListener).not.toHaveBeenCalled();
       });
@@ -472,7 +480,8 @@ describe('CastProxy', () => {
         mockSender.hasRemoteProperties.and.returnValue(true);
 
         expect(proxyListener).not.toHaveBeenCalled();
-        const fakeEvent = new FakeEvent('buffering', {detail: 8675309});
+        const fakeEvent = new FakeEvent(
+            'buffering', (new Map()).set('detail', 8675309));
         mockSender.onRemoteEvent('player', fakeEvent);
         expect(proxyListener).toHaveBeenCalledWith(jasmine.objectContaining({
           type: 'buffering',

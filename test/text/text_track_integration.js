@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -45,8 +46,8 @@ describe('TextTrackIntegration', () => {
     trackCues = null;
   });
 
-  // There is a difference in behaviour with IE and Edge compared to everyone
-  // else. Edge and IE will always return a valid list of cues regardless of
+  // There is a difference in behaviour with  Edge compared to everyone
+  // else. Edge will always return a valid list of cues regardless of
   // what the mode is set to. Everyone else will return null for cues when
   // mode is set to "disabled".
   describe('cues', () => {
@@ -77,10 +78,17 @@ describe('TextTrackIntegration', () => {
 
 
   describe('addCue', () => {
-    const cues = [
-      new VTTCue(0, 1000, 'Cue 1 message'),
-      new VTTCue(2000, 3000, 'Cue 2 message'),
-    ];
+    /** @type {!Array.<!VTTCue>} */
+    let cues;
+
+    // Wait to construct cue objects, so we know the polyfill for VTTCue is
+    // loaded.
+    beforeEach(() => {
+      cues = [
+        new VTTCue(0, 1000, 'Cue 1 message'),
+        new VTTCue(2000, 3000, 'Cue 2 message'),
+      ];
+    });
 
     it('adds cues when showing', () => {
       track.mode = 'showing';
@@ -117,10 +125,17 @@ describe('TextTrackIntegration', () => {
   });
 
   describe('removeCue', () => {
-    const cues = [
-      new VTTCue(0, 1000, 'Cue 1 message'),
-      new VTTCue(2000, 3000, 'Cue 2 message'),
-    ];
+    /** @type {!Array.<!VTTCue>} */
+    let cues;
+
+    // Wait to construct cue objects, so we know the polyfill for VTTCue is
+    // loaded.
+    beforeEach(() => {
+      cues = [
+        new VTTCue(0, 1000, 'Cue 1 message'),
+        new VTTCue(2000, 3000, 'Cue 2 message'),
+      ];
+    });
 
     it('removes cues when showing', () => {
       track.mode = 'showing';

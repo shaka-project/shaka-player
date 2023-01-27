@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -104,7 +105,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       // Simulate the canDisplayType reponse of Chromecast v1 or v2
       mockCanDisplayType.and.callFake((type) => {
         const matches = /height=(\d+)/.exec(type);
-        const height = matches[1];
+        const height = parseInt(matches[1], 10);
         if (height && height > 1080) {
           return false;
         }
@@ -121,7 +122,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       // Simulate the canDisplayType reponse of Chromecast Ultra
       mockCanDisplayType.and.callFake((type) => {
         const matches = /height=(\d+)/.exec(type);
-        const height = matches[1];
+        const height = parseInt(matches[1], 10);
         if (height && height > 2160) {
           return false;
         }
@@ -244,18 +245,20 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       const fakeEvent = {type: 'timeupdate'};
       mockVideo.on['timeupdate'](fakeEvent);
 
-      // There are now "update" and "event" messages, in that order.
-      expect(mockShakaMessageBus.messages).toEqual([
-        {
-          type: 'update',
-          update: jasmine.any(Object),
-        },
-        {
-          type: 'event',
-          targetName: 'video',
-          event: jasmine.objectContaining(fakeEvent),
-        },
-      ]);
+      // There are now some number of "update" and "event" messages, in that
+      // order.
+      expect(mockShakaMessageBus.messages).toContain({
+        type: 'update',
+        update: jasmine.any(Object),
+      });
+      expect(mockShakaMessageBus.messages).toContain({
+        type: 'event',
+        targetName: 'video',
+        event: jasmine.objectContaining(fakeEvent),
+      });
+      const eventIndex = mockShakaMessageBus.messages.findIndex(
+          (message) => message.type == 'event');
+      expect(eventIndex).toBe(mockShakaMessageBus.messages.length - 1);
     });
   });
 
@@ -271,6 +274,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
 
       fakeInitState = {
+        manifest: null,
+        startTime: null,
         player: {
           configure: fakeConfig,
         },
@@ -307,7 +312,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       // The rest is done async:
       await shaka.test.Util.shortDelay();
       expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          fakeInitState['playerAfterLoad'].setTextTrackVisibility);
+          fakeInitState.playerAfterLoad.setTextTrackVisibility);
       expect(mockVideo.loop).toBe(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });
@@ -418,7 +423,7 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
 
       // State was still transferred, though:
       expect(mockPlayer.setTextTrackVisibility).toHaveBeenCalledWith(
-          fakeInitState['playerAfterLoad'].setTextTrackVisibility);
+          fakeInitState.playerAfterLoad.setTextTrackVisibility);
       expect(mockVideo.loop).toBe(fakeInitState.video.loop);
       expect(mockVideo.playbackRate).toBe(fakeInitState.video.playbackRate);
     });
@@ -633,11 +638,11 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       fakeConnectedSenders(1);
-      mockPlayer.load = () => {
+      mockPlayer.load.and.callFake(() => {
         mockVideo.duration = 1;
         mockPlayer.getAssetUri = () => 'URI A';
         return Promise.resolve();
-      };
+      });
       fakeIncomingMessage({
         type: 'init',
         initState: {manifest: 'URI A'},
@@ -663,12 +668,12 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     });
 
     it('for correct manifest after loading new', async () => {
-      // Change media information, but only after half a second.
-      mockPlayer.load = async () => {
+      // Change media information, but only after a delay.
+      mockPlayer.load.and.callFake(async () => {
         await Util.shortDelay();
         mockVideo.duration = 2;
         mockPlayer.getAssetUri = () => 'URI B';
-      };
+      });
       fakeIncomingMessage({
         type: 'asyncCall',
         id: '5',
@@ -685,11 +690,11 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     });
 
     it('after LOAD system message', async () => {
-      mockPlayer.load = () => {
+      mockPlayer.load.and.callFake(() => {
         mockVideo.duration = 2;
         mockPlayer.getAssetUri = () => 'URI B';
         return Promise.resolve();
-      };
+      });
       const message = {
         // Arbitrary number
         'requestId': 0,
@@ -708,35 +713,29 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       expectMediaInfo('URI B', 2);
       expect(mockGenericMessageBus.messages.length).toBe(0);
     });
-
-    function expectMediaInfo(expectedUri, expectedDuration) {
-      expect(mockGenericMessageBus.messages.length).toBeGreaterThan(0);
-      if (mockGenericMessageBus.messages.length == 0) {
-        return;
-      }
-      expect(mockGenericMessageBus.messages[0]).toEqual(
-          {
-            requestId: 0,
-            type: 'MEDIA_STATUS',
-            status: [jasmine.objectContaining({
-              media: {
-                contentId: expectedUri,
-                streamType: 'BUFFERED',
-                duration: expectedDuration,
-                contentType: '',
-              },
-            })],
-          }
-      );
-      mockGenericMessageBus.messages.shift();
-    }
   });
 
   describe('respects generic control messages', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       receiver = new CastReceiver(
           mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
       fakeConnectedSenders(1);
+
+      mockPlayer.load.and.callFake(() => {
+        mockVideo.duration = 1;
+        mockPlayer.getAssetUri = () => 'URI A';
+        return Promise.resolve();
+      });
+      fakeIncomingMessage({
+        type: 'init',
+        initState: {manifest: 'URI A'},
+        appData: {},
+      }, mockShakaMessageBus);
+
+      // The messages will show up asychronously:
+      await Util.shortDelay();
+      expectMediaInfo('URI A', 1);
+      mockGenericMessageBus.messages = [];
     });
 
     it('get status', () => {
@@ -749,8 +748,10 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       mockGenericMessageBus.broadcast.calls.reset();
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockGenericMessageBus.broadcast).toHaveBeenCalledTimes(1);
-      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
-          '"requestId":0,"type":"MEDIA_STATUS"')).toBe(true);
+
+      // This covers the lack of scrubber in the Google Home app, as described
+      // in https://github.com/shaka-project/shaka-player/issues/2606
+      expectMediaInfo('URI A', 1);
     });
 
     it('play', () => {
@@ -844,12 +845,147 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       mockGenericMessageBus.broadcast.calls.reset();
       fakeIncomingMessage(message, mockGenericMessageBus);
       expect(mockGenericMessageBus.broadcast).toHaveBeenCalledTimes(1);
-      expect(mockGenericMessageBus.broadcast.calls.argsFor(0)[0].includes(
-          '"requestId":0,' +
-          '"type":"INVALID_REQUEST",' +
-          '"reason":"INVALID_COMMAND"'))
-          .toBe(true);
+      expect(mockGenericMessageBus.messages).toEqual(jasmine.arrayContaining([
+        jasmine.objectContaining({
+          requestId: 0,
+          type: 'INVALID_REQUEST',
+          reason: 'INVALID_COMMAND',
+        }),
+      ]));
     });
+  });
+
+  describe('content metadata methods', () => {
+    beforeEach(async () => {
+      receiver = new CastReceiver(
+          mockVideo, mockPlayer, Util.spyFunc(mockAppDataCallback));
+      fakeConnectedSenders(1);
+
+      mockPlayer.load.and.callFake(() => {
+        mockVideo.duration = 1;
+        mockPlayer.getAssetUri = () => 'URI A';
+        return Promise.resolve();
+      });
+      fakeIncomingMessage({
+        type: 'init',
+        initState: {manifest: 'URI A'},
+        appData: {},
+      }, mockShakaMessageBus);
+
+      // The messages will show up asychronously:
+      await Util.shortDelay();
+      expectMediaInfo('URI A', 1);
+      mockGenericMessageBus.messages = [];
+    });
+
+    it('setContentMetadata sets arbitrary metadata', () => {
+      // In reality, this should follow one of the object formats defined by the
+      // Cast SDK.  For unit testing, it can be anything.
+      const metadata = {
+        foo: 42,
+        bar: 'any old bar',
+      };
+      receiver.setContentMetadata(metadata);
+
+      getStatus();
+      expectMediaInfo('URI A', 1, metadata);
+    });
+
+    it('setContentTitle sets the title individually', () => {
+      const title = 'Title of the Song';
+      receiver.setContentTitle(title);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.GENERIC,
+        title,
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('setContentImage sets the image individually', () => {
+      const imageUrl = 'https://i.ytimg.com/vi/281ax7Ovlsg/hqdefault.jpg';
+      receiver.setContentImage(imageUrl);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.GENERIC,
+        images: [
+          {url: imageUrl},
+        ],
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('setContentArtist sets the artist individually', () => {
+      const artist = 'Da Vinci\'s Notebook';
+
+      receiver.setContentArtist(artist);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.MUSIC_TRACK,
+        artist,
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('setContentArtist creates music metadata after title', () => {
+      const title = 'Title of the Song';
+      const artist = 'Da Vinci\'s Notebook';
+      // https://www.youtube.com/watch?v=734wnHnnNR4
+
+      receiver.setContentTitle(title);
+      receiver.setContentArtist(artist);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.MUSIC_TRACK,
+        title,
+        artist,
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('setContentArtist creates music metadata before title', () => {
+      const title = 'Title of the Song';
+      const artist = 'Da Vinci\'s Notebook';
+      // https://www.youtube.com/watch?v=734wnHnnNR4
+
+      receiver.setContentArtist(artist);
+      receiver.setContentTitle(title);
+
+      const expectedMetadata = {
+        metadataType: cast.receiver.media.MetadataType.MUSIC_TRACK,
+        title,
+        artist,
+      };
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    it('clearContentMetadata clears all metadata', () => {
+      const title = 'Title of the Song';
+
+      receiver.setContentTitle(title);
+      receiver.clearContentMetadata();
+
+      const expectedMetadata = undefined;
+      getStatus();
+      expectMediaInfo('URI A', 1, expectedMetadata);
+    });
+
+    function getStatus() {
+      const message = {
+        // Arbitrary number
+        'requestId': 0,
+        'type': 'GET_STATUS',
+      };
+
+      mockGenericMessageBus.broadcast.calls.reset();
+      fakeIncomingMessage(message, mockGenericMessageBus);
+      expect(mockGenericMessageBus.broadcast).toHaveBeenCalledTimes(1);
+    }
   });
 
   describe('destroy', () => {
@@ -898,6 +1034,13 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     return {
       CastReceiverManager: {
         getInstance: () => mockReceiverManager,
+      },
+      media: {
+        // Defined by the SDK, but we aren't loading it here.
+        MetadataType: {
+          GENERIC: 0,
+          MUSIC_TRACK: 3,
+        },
       },
     };
   }
@@ -964,6 +1107,9 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
     for (const name in CastUtils.PlayerGetterMethods) {
       player[name] = jasmine.createSpy(name);
     }
+    for (const name in CastUtils.LargePlayerGetterMethods) {
+      player[name] = jasmine.createSpy(name);
+    }
     for (const name in CastUtils.PlayerGetterMethodsThatRequireLive) {
       player[name] = jasmine.createSpy(name);
     }
@@ -988,8 +1134,8 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
   }
 
   /**
-   * @param {?} message
-   * @param {!Object} bus
+   * @param {*} message
+   * @param {!cast.receiver.CastMessageBus} bus
    * @param {string=} senderId
    */
   function fakeIncomingMessage(message, bus, senderId) {
@@ -999,5 +1145,39 @@ filterDescribe('CastReceiver', castReceiverSupport, () => {
       data: serialized,
     };
     bus.onMessage(messageEvent);
+  }
+
+  /**
+   * @param {string} expectedUri
+   * @param {number} expectedDuration
+   * @param {Object=} metadata
+   */
+  function expectMediaInfo(expectedUri, expectedDuration, metadata=null) {
+    expect(mockGenericMessageBus.messages.length).toBeGreaterThan(0);
+    if (mockGenericMessageBus.messages.length == 0) {
+      return;
+    }
+
+    const expectedMedia = {
+      contentId: expectedUri,
+      streamType: 'BUFFERED',
+      duration: expectedDuration,
+      contentType: '',
+    };
+
+    if (metadata) {
+      // This field only sometimes shows up.
+      // Setting it to null would cause the check below to fail.
+      expectedMedia.metadata = metadata;
+    }
+
+    expect(mockGenericMessageBus.messages[0]).toEqual({
+      requestId: 0,
+      type: 'MEDIA_STATUS',
+      status: [jasmine.objectContaining({
+        media: expectedMedia,
+      })],
+    });
+    mockGenericMessageBus.messages.shift();
   }
 });

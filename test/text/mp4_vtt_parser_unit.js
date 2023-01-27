@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -64,7 +65,7 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
     const result = parser.parseMedia(vttSegment, time);
     verifyHelper(cues, result);
   });
@@ -92,7 +93,7 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
     const result = parser.parseMedia(vttSegmentMultiPayload, time);
     verifyHelper(cues, result);
   });
@@ -120,13 +121,13 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
     const result = parser.parseMedia(vttSegSettings, time);
     verifyHelper(cues, result);
   });
 
   it('parses media segments without a sample duration', () => {
-    // Regression test for https://github.com/google/shaka-player/issues/919
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/919
     const cues = [
       {startTime: 10, endTime: 11, payload: 'cue 10'},
       {startTime: 11, endTime: 12, payload: 'cue 11'},
@@ -142,7 +143,7 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
     const result = parser.parseMedia(vttSegNoDuration, time);
     verifyHelper(cues, result);
   });
@@ -164,7 +165,8 @@ describe('Mp4VttParser', () => {
 
     const parser = new shaka.text.Mp4VttParser();
     parser.parseInit(vttInitSegment);
-    const time = {periodStart: 10, segmentStart: 0, segmentEnd: 0};
+    const time =
+        {periodStart: 10, segmentStart: 0, segmentEnd: 0, vttOffset: 10};
     const result = parser.parseMedia(vttSegment, time);
     verifyHelper(cues, result);
   });

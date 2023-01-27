@@ -1,0 +1,15 @@
+# Video generated on Linux with:
+
+mkdir -p pixel
+
+# Create a 32x32 green pixel image
+convert xc:#008000[32x32] pixel/pixel0.png
+
+# Copy it to make 300 frames
+for i in $(seq 1 299); do cp pixel/pixel0.png pixel/pixel$i.png; done
+
+# Combine the frames into a 30fps, 10s video, scaled up to 320x180
+ffmpeg -r 30 -i pixel/pixel%d.png \
+  -c:v h264 -vf fps=30 -pix_fmt yuv420p -preset veryslow -tune stillimage \
+  -vf scale=320:180 \
+  -y test/test/assets/green-pixel.mp4

@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,6 +7,7 @@
 
 goog.provide('shaka.ui.Spacer');
 
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.util.Dom');
 
@@ -27,7 +29,7 @@ shaka.ui.Spacer = class extends shaka.ui.Element {
     const div = shaka.util.Dom.createHTMLElement('div');
     div.classList.add('shaka-spacer');
     // Make screen readers ignore the spacer
-    div.setAttribute('aria-hidden', true);
+    div.ariaHidden = 'true';
     this.parent.appendChild(div);
   }
 };

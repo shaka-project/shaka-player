@@ -1,0 +1,37 @@
+name: Deploy Demo Version Index
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering.
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/demo-version-index.yaml
+      - app-engine/demo-version-index/**
+  release:
+    types: [published]
+
+jobs:
+  appspot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # We need a list of all tags for this, so fetch the entire history.
+          fetch-depth: 0
+
+      - name: Generate static content
+        run: python3 app-engine/demo-version-index/generate.py
+
+      - uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
+
+      - uses: google-github-actions/deploy-appengine@v0
+        with:
+          project_id: shaka-player-demo
+          version: index
+          working_directory: app-engine/demo-version-index/
+          promote: false
+

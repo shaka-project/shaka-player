@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2018 Google Inc.  All Rights Reserved.
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import contextlib
 import json
 import os
 import sys
-
+import io
 import shakaBuildHelpers
 
 
@@ -53,7 +53,6 @@ DEFAULT_LOCALES = [
     'nl',
     'pl',
     'pt-BR',
-    'pt-PT',
     'ru',
     'th',
     'tr',
@@ -249,7 +248,7 @@ def main(args):
   combined_localizations = {}
   for locale in args.locales:
     path = os.path.join(args.source, locale + '.json')
-    with open(path, 'rb') as f:
+    with io.open(path, 'r', encoding='utf8') as f:
       combined_localizations[locale] = json.load(f)
 
   doc = GenerateLocalizations(combined_localizations, args.class_name)

@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -13,49 +14,44 @@ describe('CastUtils', () => {
       'getAdManager',  // Handled specially
       'getSharedConfiguration',  // Handled specially
       'getNetworkingEngine',  // Handled specially
+      'getDrmEngine',  // Handled specially
       'getMediaElement',  // Handled specially
       'setMaxHardwareResolution',
       'destroy',  // Should use CastProxy.destroy instead
       'drmInfo',  // Too large to proxy
       'getManifest', // Too large to proxy
-      // TODO(vaage): Remove |getManifestUri| references in v2.6.
-      'getManifestUri',  // Handled specially by CastProxy
       'getManifestParserFactory',  // Would not serialize.
+      'setVideoContainer',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
       'createNetworkingEngine',
       'createPlayhead',
-      'createMediaSource',
       'createMediaSourceEngine',
       'createStreamingEngine',
     ];
 
     const castMembers = CastUtils.PlayerVoidMethods
-        .concat(CastUtils.PlayerPromiseMethods);
-    for (const name in CastUtils.PlayerGetterMethods) {
-      castMembers.push(name);
-    }
-    for (const name in CastUtils.PlayerGetterMethodsThatRequireLive) {
-      castMembers.push(name);
-    }
+        .concat(CastUtils.PlayerPromiseMethods)
+        .concat(Object.keys(CastUtils.PlayerGetterMethods))
+        .concat(Object.keys(CastUtils.LargePlayerGetterMethods))
+        .concat(Object.keys(CastUtils.PlayerGetterMethodsThatRequireLive));
     // eslint-disable-next-line no-restricted-syntax
-    const playerMembers = Object.getOwnPropertyNames(shaka.Player.prototype)
-        .filter((name) => {
-          // Private members end with _.
-          return !ignoredMembers.includes(name) && !name.endsWith('_');
-        });
+    const allPlayerMembers = Object.getOwnPropertyNames(shaka.Player.prototype);
+    expect(
+        ignoredMembers.filter((member) => !allPlayerMembers.includes(member)))
+        .toEqual([]);
+    const playerMembers = allPlayerMembers.filter((name) => {
+      // Private members end with _.
+      return !ignoredMembers.includes(name) && !name.endsWith('_');
+    });
 
     // To make debugging easier, don't check that they are equal; instead check
     // that neither has any extra entries.
-    const extraCastMembers = castMembers.filter((name) => {
-      return !playerMembers.includes(name);
-    });
-    const extraPlayerMembers = playerMembers.filter((name) => {
-      return !castMembers.includes(name);
-    });
-    expect(extraCastMembers).toEqual([]);
-    expect(extraPlayerMembers).toEqual([]);
+    expect(castMembers.filter((name) => !playerMembers.includes(name)))
+        .toEqual([]);
+    expect(playerMembers.filter((name) => !castMembers.includes(name)))
+        .toEqual([]);
   });
 
   describe('serialize/deserialize', () => {
@@ -87,10 +83,7 @@ describe('CastUtils', () => {
     });
 
     it('transfers real Events', () => {
-      // new Event() is not usable on IE11:
-      const event =
-      /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
-      event.initCustomEvent('myEventType', false, false, null);
+      const event = new CustomEvent('myEventType');
 
       // Properties that can definitely be transferred.
       const nativeProperties = [
@@ -118,7 +111,7 @@ describe('CastUtils', () => {
       expect(typeof deserialized).toBe('object');
 
       // The object can be used to construct a FakeEvent.
-      const fakeEvent = new FakeEvent(deserialized['type'], deserialized);
+      const fakeEvent = FakeEvent.fromRealEvent(deserialized);
 
       // The fake event has the same type and properties as the original.
       const asObj = /** @type {!Object} */ (fakeEvent);
@@ -197,6 +190,7 @@ describe('CastUtils', () => {
         const fakeVideoStream = {
           mimeType: 'video/mp4',
           codecs: 'avc1.42c01e',
+          drmInfos: [],
         };
         const initSegmentUrl = '/base/test/test/assets/sintel-video-init.mp4';
         const videoSegmentUrl =
@@ -212,8 +206,10 @@ describe('CastUtils', () => {
 
         mediaSourceEngine = new shaka.media.MediaSourceEngine(
             video,
-            new shaka.test.FakeClosedCaptionParser(),
             new shaka.test.FakeTextDisplayer());
+        const config =
+            shaka.util.PlayerConfiguration.createDefault().mediaSource;
+        mediaSourceEngine.configure(config);
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         const initObject = new Map();
@@ -266,6 +262,40 @@ describe('CastUtils', () => {
         expect(TimeRangesUtils.getBufferedInfo(deserialized))
             .toEqual(TimeRangesUtils.getBufferedInfo(buffered));
       });
+    });  // describe('TimeRanges')
+
+    it('transfers real Errors', () => {
+      let realError;
+      try {
+        // Cast undefined to "?" to convince the compiler to let us dereference
+        // it.
+        const foo = /** @type {?} */(undefined);
+
+        // Now this will generate a TypeError.
+        foo.bar = 'baz';
+
+        // We need to catch a real Error in this test, so we disable eslint on
+        // the next line.
+        // eslint-disable-next-line no-restricted-syntax
+      } catch (error) {
+        realError = error;
+      }
+
+      // The event is turned into a string.
+      const serialized = CastUtils.serialize(realError);
+      expect(typeof serialized).toBe('string');
+
+      // The string is turned back into an object.
+      const deserialized = CastUtils.deserialize(serialized);
+      expect(typeof deserialized).toBe('object');
+
+      // And that object should be an Error type.
+      expect(deserialized).toEqual(jasmine.any(Error));
+
+      // At least these basic properties should match.
+      expect(deserialized.type).toBe(realError.type);
+      expect(deserialized.message).toBe(realError.message);
+      expect(deserialized.stack).toBe(realError.stack);
     });
-  });
-});
+  });  // describe('serialize/deserialize')
+});  // describe('CastUtils')

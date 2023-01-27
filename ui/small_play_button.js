@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,6 +7,9 @@
 
 goog.provide('shaka.ui.SmallPlayButton');
 
+goog.require('shaka.ui.Controls');
+goog.require('shaka.ui.Enums');
+goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.PlayButton');
 
 
@@ -23,7 +27,8 @@ shaka.ui.SmallPlayButton = class extends shaka.ui.PlayButton {
     super(parent, controls);
 
     this.button.classList.add('shaka-small-play-button');
-    this.button.classList.add('material-icons');
+    this.button.classList.add('material-icons-round');
+    this.button.classList.add('shaka-tooltip');
 
     this.updateIcon();
     this.updateAriaLabel();
@@ -33,7 +38,22 @@ shaka.ui.SmallPlayButton = class extends shaka.ui.PlayButton {
   /** @override */
   updateIcon() {
     const Icons = shaka.ui.Enums.MaterialDesignIcons;
-    this.button.textContent = this.isPaused() ? Icons.PLAY : Icons.PAUSE;
+    if (this.video.ended) {
+      this.button.textContent = Icons.REPLAY;
+    } else {
+      this.button.textContent = this.isPaused() ? Icons.PLAY : Icons.PAUSE;
+    }
+  }
+
+  /** @override */
+  updateAriaLabel() {
+    const LocIds = shaka.ui.Locales.Ids;
+    if (this.video.ended) {
+      this.button.ariaLabel = this.localization.resolve(LocIds.REPLAY);
+    } else {
+      const label = this.isPaused() ? LocIds.PLAY : LocIds.PAUSE;
+      this.button.ariaLabel = this.localization.resolve(label);
+    }
   }
 };
 

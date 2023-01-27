@@ -2,7 +2,7 @@
 name: Bug report
 about: Report a bug to help us improve
 title: ''
-labels: ''
+labels: 'type: bug'
 assignees: ''
 
 ---
@@ -18,7 +18,7 @@ assignees: ''
 **Can you reproduce the issue with our latest release version?**
 
 
-**Can you reproduce the issue with the latest code from `master`?**
+**Can you reproduce the issue with the latest code from `main`?**
 
 
 **Are you using the demo app or your own custom app?**
@@ -41,6 +41,14 @@ assignees: ''
   enough to reproduce your issue, and we **will** ask you to send a
   URI instead.  You can copy the URI of the demo app to send us the
   exact asset, licence server, and settings you have selected there.
+-->
+
+
+**What configuration are you using?  What is the output of `player.getConfiguration()`?**
+<!-- NOTE:
+  You can censor URLs to keep them private, but include them in the email.  You
+  can also use JSON.stringify(obj, null, 2) to print nicely on platforms that
+  don't print objects well in the console.  DON'T SEND '[object Object]'!
 -->
 
 

@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -32,7 +33,8 @@ shaka.extern.OfflineSupport;
  *   size: number,
  *   expiration: number,
  *   tracks: !Array.<shaka.extern.Track>,
- *   appMetadata: Object
+ *   appMetadata: Object,
+ *   isIncomplete: boolean
  * }}
  *
  * @property {?string} offlineUri
@@ -49,10 +51,12 @@ shaka.extern.OfflineSupport;
  *   The time that the encrypted license expires, in milliseconds.  If the media
  *   is clear or the license never expires, this will equal Infinity.
  * @property {!Array.<shaka.extern.Track>} tracks
- *   The tracks that are stored.  This only lists those found in the first
- *   Period.
+ *   The tracks that are stored.
  * @property {Object} appMetadata
  *   The metadata passed to store().
+ * @property {boolean} isIncomplete
+ *   If true, the content is still downloading.  Manifests with this set cannot
+ *   be played yet.
  * @exportDoc
  */
 shaka.extern.StoredContent;
@@ -60,16 +64,21 @@ shaka.extern.StoredContent;
 
 /**
  * @typedef {{
+ *   creationTime: number,
  *   originalManifestUri: string,
  *   duration: number,
  *   size: number,
  *   expiration: number,
- *   periods: !Array.<shaka.extern.PeriodDB>,
+ *   streams: !Array.<shaka.extern.StreamDB>,
  *   sessionIds: !Array.<string>,
  *   drmInfo: ?shaka.extern.DrmInfo,
- *   appMetadata: Object
+ *   appMetadata: Object,
+ *   isIncomplete: (boolean|undefined),
+ *   sequenceMode: (boolean|undefined)
  * }}
  *
+ * @property {number} creationTime
+ *   The date time when the asset was created.
  * @property {string} originalManifestUri
  *   The URI that the manifest was originally loaded from.
  * @property {number} duration
@@ -78,30 +87,23 @@ shaka.extern.StoredContent;
  *   The total size of all stored segments, in bytes.
  * @property {number} expiration
  *   The license expiration, in milliseconds; or Infinity if not applicable.
- * @property {!Array.<shaka.extern.PeriodDB>} periods
- *   The Periods that are stored.
+ *   Note that upon JSON serialization, Infinity becomes null, and must be
+ *   converted back upon loading from storage.
+ * @property {!Array.<shaka.extern.StreamDB>} streams
+ *   The Streams that are stored.
  * @property {!Array.<string>} sessionIds
  *   The DRM offline session IDs for the media.
  * @property {?shaka.extern.DrmInfo} drmInfo
  *   The DRM info used to initialize EME.
  * @property {Object} appMetadata
  *   A metadata object passed from the application.
+ * @property {(boolean|undefined)} isIncomplete
+ *   If true, the content is still downloading.
+ * @property {(boolean|undefined)} sequenceMode
+ *   If true, we will append the media segments using sequence mode; that is to
+ *   say, ignoring any timestamps inside the media files.
  */
 shaka.extern.ManifestDB;
-
-
-/**
- * @typedef {{
- *   startTime: number,
- *   streams: !Array.<shaka.extern.StreamDB>
- * }}
- *
- * @property {number} startTime
- *   The start time of the period, in seconds.
- * @property {!Array.<shaka.extern.StreamDB>} streams
- *   The streams that define the Period.
- */
-shaka.extern.PeriodDB;
 
 
 /**
@@ -109,22 +111,28 @@ shaka.extern.PeriodDB;
  *   id: number,
  *   originalId: ?string,
  *   primary: boolean,
- *   presentationTimeOffset: number,
- *   contentType: string,
+ *   type: string,
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
  *   pixelAspectRatio: (string|undefined),
+ *   hdr: (string|undefined),
  *   kind: (string|undefined),
  *   language: string,
  *   label: ?string,
  *   width: ?number,
  *   height: ?number,
- *   initSegmentKey: ?number,
  *   encrypted: boolean,
- *   keyId: ?string,
+ *   keyIds: !Set.<string>,
  *   segments: !Array.<shaka.extern.SegmentDB>,
- *   variantIds: !Array.<number>
+ *   variantIds: !Array.<number>,
+ *   roles: !Array.<string>,
+ *   forced: boolean,
+ *   channelsCount: ?number,
+ *   audioSamplingRate: ?number,
+ *   spatialAudio: boolean,
+ *   closedCaptions: Map.<string, string>,
+ *   tilesLayout: (string|undefined)
  * }}
  *
  * @property {number} id
@@ -134,10 +142,7 @@ shaka.extern.PeriodDB;
  *   DASH, this is the "id" attribute of the Representation element.
  * @property {boolean} primary
  *   Whether the stream set was primary.
- * @property {number} presentationTimeOffset
- *   The presentation time offset of the stream, in seconds.  Note that this is
- *   the inverse of the timestampOffset as defined in the manifest types.
- * @property {string} contentType
+ * @property {string} type
  *   The type of the stream, 'audio', 'text', or 'video'.
  * @property {string} mimeType
  *   The MIME type of the stream.
@@ -147,6 +152,8 @@ shaka.extern.PeriodDB;
  *   The Stream's framerate in frames per second.
  * @property {(string|undefined)} pixelAspectRatio
  *   The Stream's pixel aspect ratio
+ * @property {(string|undefined)} hdr
+ *   The Stream's HDR info
  * @property {(string|undefined)} kind
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
@@ -157,31 +164,81 @@ shaka.extern.PeriodDB;
  *   The width of the stream; null for audio/text.
  * @property {?number} height
  *   The height of the stream; null for audio/text.
- * @property  {?number} initSegmentKey
- *   The storage key where the init segment is found; null if no init segment.
  * @property {boolean} encrypted
  *   Whether this stream is encrypted.
- * @property {?string} keyId
- *   The key ID this stream is encrypted with.
+ * @property {!Set.<string>} keyIds
+ *   The key IDs this stream is encrypted with.
  * @property {!Array.<shaka.extern.SegmentDB>} segments
  *   An array of segments that make up the stream.
  * @property {!Array.<number>} variantIds
  *   An array of ids of variants the stream is a part of.
+ * @property {!Array.<string>} roles
+ *   The roles of the stream as they appear on the manifest,
+ *   e.g. 'main', 'caption', or 'commentary'.
+ * @property {boolean} forced
+ *   Whether the stream set was forced.
+ * @property {?number} channelsCount
+ *   The channel count information for the audio stream.
+ * @property {?number} audioSamplingRate
+ *   Specifies the maximum sampling rate of the content.
+ * @property {boolean} spatialAudio
+ *   Whether the stream set has spatial audio.
+ * @property {Map.<string, string>} closedCaptions
+ *   A map containing the description of closed captions, with the caption
+ *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
+ *   as the value. If the channel number is not provided by the description,
+ *   we'll set an 0-based index as the key.
+ *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
+ * @property {(string|undefined)} tilesLayout
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the arrangement
+ *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
  */
 shaka.extern.StreamDB;
 
 
 /**
  * @typedef {{
+ *   initSegmentKey: ?number,
  *   startTime: number,
  *   endTime: number,
+ *   appendWindowStart: number,
+ *   appendWindowEnd: number,
+ *   timestampOffset: number,
+ *   tilesLayout: ?string,
+ *   pendingSegmentRefId: (string|undefined),
+ *   pendingInitSegmentRefId: (string|undefined),
  *   dataKey: number
  * }}
  *
+ * @property {?number} initSegmentKey
+ *   The storage key where the init segment is found; null if no init segment.
  * @property {number} startTime
- *   The start time of the segment, in seconds from the start of the Period.
+ *   The start time of the segment in the presentation timeline.
  * @property {number} endTime
- *   The end time of the segment, in seconds from the start of the Period.
+ *   The end time of the segment in the presentation timeline.
+ * @property {number} appendWindowStart
+ *   A start timestamp before which media samples will be truncated.
+ * @property {number} appendWindowEnd
+ *   An end timestamp beyond which media samples will be truncated.
+ * @property {number} timestampOffset
+ *   An offset which MediaSource will add to the segment's media timestamps
+ *   during ingestion, to align to the presentation timeline.
+ * @property {?string} tilesLayout
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the
+ *   arrangement of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {(string|undefined)} pendingSegmentRefId
+ *   Contains an id that identifies what the segment was, originally. Used to
+ *   coordinate where segments are stored, during the downloading process.
+ *   If this field is non-null, it's assumed that the segment is not fully
+ *   downloaded.
+ * @property {(string|undefined)} pendingInitSegmentRefId
+ *   Contains an id that identifies what the init segment was, originally.
+ *   Used to coordinate where init segments are stored, during the downloading
+ *   process.
+ *   If this field is non-null, it's assumed that the init segment is not fully
+ *   downloaded.
  * @property {number} dataKey
  *   The key to the data in storage.
  */
@@ -299,6 +356,15 @@ shaka.extern.StorageCell = class {
    * @return {!Promise<!Array.<number>>} keys
    */
   addManifests(manifests) {}
+
+  /**
+   * Updates the given manifest, stored at the given key.
+   *
+   * @param {number} key
+   * @param {!shaka.extern.ManifestDB} manifest
+   * @return {!Promise}
+   */
+  updateManifest(key, manifest) {}
 
   /**
    * Replace the expiration time of the manifest stored under |key| with

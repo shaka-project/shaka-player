@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -23,16 +24,16 @@ shaka.extern.CueRegion = class {
     this.id;
 
     /**
-     * The X offset to start the rendering area in anchorUnits of the video
-     * width.
+     * The X offset to start the rendering area in viewportAnchorUnits of the
+     * video width.
      * @type {number}
      * @exportDoc
      */
     this.viewportAnchorX;
 
     /**
-     * The X offset to start the rendering area in anchorUnits of the video
-     * height.
+     * The X offset to start the rendering area in viewportAnchorUnits of the
+     * video height.
      * @type {number}
      * @exportDoc
      */
@@ -97,7 +98,7 @@ shaka.extern.CueRegion = class {
      * @type {shaka.text.CueRegion.scrollMode}
      * @exportDoc
      */
-    shaka.extern.CueRegion.prototype.scroll;
+    this.scroll;
   }
 };
 
@@ -125,14 +126,16 @@ shaka.extern.Cue = class {
     this.endTime;
 
     /**
-     * The text payload of the cue.
-     * @type {!string}
+     * The text payload of the cue.  If nestedCues is non-empty, this should be
+     * empty.  Top-level block containers should have no payload of their own.
+     * @type {string}
      * @exportDoc
      */
     this.payload;
 
     /**
-     * The region to render the cue into.
+     * The region to render the cue into.  Only supported on top-level cues,
+     * because nested cues are inline elements.
      * @type {shaka.extern.CueRegion}
      * @exportDoc
      */
@@ -154,7 +157,7 @@ shaka.extern.Cue = class {
     this.positionAlign;
 
     /**
-     * Size of the cue box (in percents).
+     * Size of the cue box (in percents), where 0 means "auto".
      * @type {number}
      * @exportDoc
      */
@@ -230,30 +233,41 @@ shaka.extern.Cue = class {
     this.displayAlign;
 
     /**
-     * Text color represented by any string that would be accepted in CSS.
-     * E. g. '#FFFFFF' or 'white'.
-     * @type {!string}
+     * Text color as a CSS color, e.g. "#FFFFFF" or "white".
+     * @type {string}
      * @exportDoc
      */
     this.color;
 
     /**
-     * Text background color represented by any string that would be
-     * accepted in CSS.
-     * E. g. '#FFFFFF' or 'white'.
-     * @type {!string}
+     * Text background color as a CSS color, e.g. "#FFFFFF" or "white".
+     * @type {string}
      * @exportDoc
      */
     this.backgroundColor;
 
     /**
-     * Image background represented by any string that would be
-     * accepted in image HTML element.
-     * E. g. 'data:[mime type];base64,[data]'.
-     * @type {!string}
+     * The number of horizontal and vertical cells into which the Root Container
+     * Region area is divided.
+     *
+     * @type {{ columns: number, rows: number }}
+     * @exportDoc
+     */
+    this.cellResolution;
+
+    /**
+     * The URL of the background image, e.g. "data:[mime type];base64,[data]".
+     * @type {string}
      * @exportDoc
      */
     this.backgroundImage;
+
+    /**
+     * The border around this cue as a CSS border.
+     * @type {string}
+     * @exportDoc
+     */
+    this.border;
 
     /**
      * Text font size in px or em (e.g. '100px'/'100em').
@@ -278,10 +292,52 @@ shaka.extern.Cue = class {
 
     /**
      * Text font family.
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.fontFamily;
+
+    /**
+     * Text shadow color as a CSS text-shadow value.
+     * @type {string}
+     * @exportDoc
+     */
+    this.textShadow = '';
+
+    /**
+     * Text stroke color as a CSS color, e.g. "#FFFFFF" or "white".
+     * @type {string}
+     * @exportDoc
+     */
+    this.textStrokeColor;
+
+    /**
+     * Text stroke width as a CSS stroke-width value.
+     * @type {string}
+     * @exportDoc
+     */
+    this.textStrokeWidth;
+
+    /**
+     * Text letter spacing as a CSS letter-spacing value.
+     * @type {string}
+     * @exportDoc
+     */
+    this.letterSpacing;
+
+    /**
+     * Text line padding as a CSS line-padding value.
+     * @type {string}
+     * @exportDoc
+     */
+    this.linePadding;
+
+    /**
+     * Opacity of the cue element, from 0-1.
+     * @type {number}
+     * @exportDoc
+     */
+    this.opacity;
 
     /**
      * Text decoration. A combination of underline, overline
@@ -300,24 +356,37 @@ shaka.extern.Cue = class {
 
     /**
      * Id of the cue.
-     * @type {!string}
+     * @type {string}
      * @exportDoc
      */
     this.id;
 
     /**
-     * Nested cues
-     * @type {Array.<!shaka.extern.Cue>}
+     * Nested cues, which should be laid out horizontally in one block.
+     * Top-level cues are blocks, and nested cues are inline elements.
+     * Cues can be nested arbitrarily deeply.
+     * @type {!Array.<!shaka.extern.Cue>}
      * @exportDoc
      */
     this.nestedCues;
 
     /**
-     * Whether or not the cue only acts as a spacer between two cues
+     * If true, this represents a container element that is "above" the main
+     * cues. For example, the <body> and <div> tags that contain the <p> tags
+     * in a TTML file. This controls the flow of the final cues; any nested cues
+     * within an "isContainer" cue will be laid out as separate lines.
      * @type {boolean}
      * @exportDoc
      */
-    this.spacer;
+    this.isContainer;
+
+    /**
+     * Whether or not the cue only acts as a line break between two nested cues.
+     * Should only appear in nested cues.
+     * @type {boolean}
+     * @exportDoc
+     */
+    this.lineBreak;
   }
 };
 
@@ -353,6 +422,13 @@ shaka.extern.TextParser = class {
    * @exportDoc
    */
   parseMedia(data, timeContext) {}
+
+  /**
+   * Notifies the stream if the manifest is in sequence mode or not.
+   *
+   * @param {boolean} sequenceMode
+   */
+  setSequenceMode(sequenceMode) {}
 };
 
 
@@ -362,7 +438,8 @@ shaka.extern.TextParser = class {
  * @typedef {{
  *   periodStart: number,
  *   segmentStart: number,
- *   segmentEnd: number
+ *   segmentEnd: number,
+ *   vttOffset: number
  * }}
  *
  * @property {number} periodStart
@@ -371,6 +448,9 @@ shaka.extern.TextParser = class {
  *     The absolute start time of the segment in seconds.
  * @property {number} segmentEnd
  *     The absolute end time of the segment in seconds.
+ * @property {number} vttOffset
+ *     The start time relative to either segment or period start depending
+ *     on <code>segmentRelativeVttTiming</code> configuration.
  *
  * @exportDoc
  */
@@ -378,7 +458,7 @@ shaka.extern.TextParser.TimeContext;
 
 
 /**
- * @typedef {function(new:shaka.extern.TextParser)}
+ * @typedef {function():!shaka.extern.TextParser}
  * @exportDoc
  */
 shaka.extern.TextParserPlugin;
@@ -461,7 +541,7 @@ shaka.extern.TextDisplayer = class {
 /**
  * A factory for creating a TextDisplayer.
  *
- * @typedef {function(new:shaka.extern.TextDisplayer)}
+ * @typedef {function():!shaka.extern.TextDisplayer}
  * @exportDoc
  */
 shaka.extern.TextDisplayer.Factory;

@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,9 +8,6 @@
 // |HTMLMediaElement.src=|. These tests are to verify that all |shaka.Player|
 // public methods behaviour correctly when playing content video |src=|.
 describe('Player Src Equals', () => {
-  const Util = shaka.test.Util;
-  const waitForMovementOrFailOnTimeout = Util.waitForMovementOrFailOnTimeout;
-
   const SMALL_MP4_CONTENT_URI = '/base/test/test/assets/small.mp4';
 
   /** @type {!HTMLVideoElement} */
@@ -18,6 +16,8 @@ describe('Player Src Equals', () => {
   let player;
   /** @type {!shaka.util.EventManager} */
   let eventManager;
+  /** @type {shaka.test.Waiter} */
+  let waiter;
 
   beforeAll(() => {
     video = shaka.test.UiUtils.createVideoElement();
@@ -28,6 +28,7 @@ describe('Player Src Equals', () => {
     player = new shaka.Player();
     player.addEventListener('error', fail);
     eventManager = new shaka.util.EventManager();
+    waiter = new shaka.test.Waiter(eventManager);
   });
 
   afterEach(async () => {
@@ -75,7 +76,11 @@ describe('Player Src Equals', () => {
   it('allow load with startTime', async () => {
     const startTime = 5;
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, startTime);
-    expect(video.currentTime).toBe(startTime);
+
+    // For some reason, the delta on Edge can be 0.1 for this content and
+    // this start time.  It may be rounded to a key frame or something.
+    const delta = Math.abs(video.currentTime - startTime);
+    expect(delta).toBeLessThan(0.2);
   });
 
   // Since we don't have any manifest data, we must assume that we can seek
@@ -97,7 +102,7 @@ describe('Player Src Equals', () => {
 
     // Start playback and wait for the playhead to move.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be before
     // seeking.
@@ -107,7 +112,7 @@ describe('Player Src Equals', () => {
     // Trigger a seek and then wait for the seek to take effect.
     // This seek target is very close to the duration of the video.
     video.currentTime = 10;
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be after
     // seeking.
@@ -134,7 +139,7 @@ describe('Player Src Equals', () => {
 
     // For playback to begin so that we have some content buffered.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     const buffered = player.getBufferedInfo();
 
@@ -158,11 +163,26 @@ describe('Player Src Equals', () => {
 
     // Let playback run for a little.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
+
+    let videoRateChange = false;
+    let playerRateChange = false;
+    eventManager.listen(video, 'ratechange', () => {
+      videoRateChange = true;
+    });
+    eventManager.listen(player, 'ratechange', () => {
+      playerRateChange = true;
+    });
 
     // Enabling trick play should change our playback rate to the same rate.
     player.trickPlay(2);
     expect(video.playbackRate).toBe(2);
+
+    // It should also have fired a 'ratechange' event on both video and player.
+    // We may have to delay a short time to see the events, though.
+    await shaka.test.Util.shortDelay();
+    expect(videoRateChange).toBe(true);
+    expect(playerRateChange).toBe(true);
 
     // Let playback continue playing for a bit longer.
     await shaka.test.Util.delay(2);
@@ -218,6 +238,16 @@ describe('Player Src Equals', () => {
     }
   });
 
+  it('ignores extra text track on the video element', async () => {
+    // The extra text track with label "Shaka Player TextTrack" should not be
+    // listed.
+    video.addTextTrack('subtitles', /* label= */ shaka.Player.TextTrackLabel);
+
+    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+    expect(player.getTextTracks()).toEqual([]);
+  });
+
+
   // TODO: test HLS on platforms with native HLS
   it('returns no languages or roles for simple mp4 content', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
@@ -230,7 +260,7 @@ describe('Player Src Equals', () => {
       // role, while others, such as Edge, do not.  For the purposes of this
       // test, it doesn't matter what the role is.
       expect(player.getAudioLanguagesAndRoles()).toEqual(
-          [{language: 'en', role: jasmine.any(String)}]);
+          [{language: 'en', role: jasmine.any(String), label: null}]);
     } else {
       expect(player.getAudioLanguages()).toEqual([]);
       expect(player.getAudioLanguagesAndRoles()).toEqual([]);
@@ -238,45 +268,6 @@ describe('Player Src Equals', () => {
 
     expect(player.getTextLanguages()).toEqual([]);
     expect(player.getTextLanguagesAndRoles()).toEqual([]);
-  });
-
-  // TODO: test language selection w/ HLS on platforms with native HLS
-  // This test is disabled until then.
-  xit('cannot select language or role', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
-
-    const language = 'en';
-    const role = 'main';
-
-    player.selectAudioLanguage(language);
-    expect(player.getAudioLanguages()).toEqual([]);
-    expect(player.getAudioLanguagesAndRoles()).toEqual([]);
-
-    player.selectAudioLanguage(language, role);
-    expect(player.getAudioLanguages()).toEqual([]);
-    expect(player.getAudioLanguagesAndRoles()).toEqual([]);
-
-    player.selectTextLanguage(language);
-    expect(player.getTextLanguages()).toEqual([]);
-    expect(player.getTextLanguagesAndRoles()).toEqual([]);
-
-    player.selectTextLanguage(language, role);
-    expect(player.getTextLanguages()).toEqual([]);
-    expect(player.getTextLanguagesAndRoles()).toEqual([]);
-  });
-
-  // TODO: test text visibility w/ HLS on platforms with native HLS
-  // This test is disabled until then.
-  xit('persists the text visibility setting', async () => {
-    await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
-
-    expect(player.isTextTrackVisible()).toBe(false);
-
-    await player.setTextTrackVisibility(true);
-    expect(player.isTextTrackVisible()).toBe(true);
-
-    await player.setTextTrackVisibility(false);
-    expect(player.isTextTrackVisible()).toBe(false);
   });
 
   // Even though we loaded content using |src=| we should still be able to get
@@ -289,7 +280,7 @@ describe('Player Src Equals', () => {
 
     // Start playback and wait. We should see the playhead move.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
     await shaka.test.Util.delay(1.5);
 
     // When checking if the playhead moved, check for less progress than time we
@@ -306,7 +297,7 @@ describe('Player Src Equals', () => {
     // Wait some time for playback to start so that we will have a load latency
     // value.
     video.play();
-    await waitForMovementOrFailOnTimeout(eventManager, video, /* timeout= */10);
+    await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Get the stats and check that some stats have been filled in.
     const stats = player.getStats();
@@ -314,20 +305,104 @@ describe('Player Src Equals', () => {
     expect(stats.loadLatency).toBeGreaterThan(0);
     expect(stats.manifestTimeSeconds).toBeNaN(); // There's no manifest.
     expect(stats.drmTimeSeconds).toBeNaN(); // There's no DRM.
+    expect(stats.height).toBe(110);
+    expect(stats.width).toBe(256);
   });
 
-  // Because we have no manifest, we can't add text tracks.
-  it('cannot add text tracks', async () => {
+  it('plays with external text tracks', async () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
 
-    const pendingAdd = player.addTextTrack(
-        'test:need-a-uri-for-text',
-        'en-US',
-        'main',
-        'text/mp4');
+    const locationUri = new goog.Uri(location.href);
+    const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
+    const absoluteUri = locationUri.resolve(partialUri);
+    const newTrack = await player.addTextTrackAsync(
+        absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
 
-    await expectAsync(pendingAdd).toBeRejected();
+    expect(newTrack).toBeTruthy();
   });
+
+  describe('addChaptersTrack', () => {
+    it('adds external chapters in vtt format', async () => {
+      await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+
+      const locationUri = new goog.Uri(location.href);
+      const partialUri1 = new goog.Uri('/base/test/test/assets/chapters.vtt');
+      const absoluteUri1 = locationUri.resolve(partialUri1);
+      await player.addChaptersTrack(absoluteUri1.toString(), 'en');
+
+      // Data should be available as soon as addChaptersTrack resolves.
+      // See https://github.com/shaka-project/shaka-player/issues/4186
+      const chapters = player.getChapters('en');
+      expect(chapters.length).toBe(3);
+      const chapter1 = chapters[0];
+      expect(chapter1.title).toBe('Chapter 1');
+      expect(chapter1.startTime).toBe(0);
+      expect(chapter1.endTime).toBe(5);
+      const chapter2 = chapters[1];
+      expect(chapter2.title).toBe('Chapter 2');
+      expect(chapter2.startTime).toBe(5);
+      expect(chapter2.endTime).toBe(10);
+      const chapter3 = chapters[2];
+      expect(chapter3.title).toBe('Chapter 3');
+      expect(chapter3.startTime).toBe(10);
+      expect(chapter3.endTime).toBe(20);
+
+      const partialUri2 = new goog.Uri('/base/test/test/assets/chapters2.vtt');
+      const absoluteUri2 = locationUri.resolve(partialUri2);
+      await player.addChaptersTrack(absoluteUri2.toString(), 'en');
+
+      const chaptersUpdated = player.getChapters('en');
+      expect(chaptersUpdated.length).toBe(6);
+      const chapterUpdated1 = chaptersUpdated[0];
+      expect(chapterUpdated1.title).toBe('Chapter 1');
+      expect(chapterUpdated1.startTime).toBe(0);
+      expect(chapterUpdated1.endTime).toBe(5);
+      const chapterUpdated2 = chaptersUpdated[1];
+      expect(chapterUpdated2.title).toBe('Chapter 2');
+      expect(chapterUpdated2.startTime).toBe(5);
+      expect(chapterUpdated2.endTime).toBe(10);
+      const chapterUpdated3 = chaptersUpdated[2];
+      expect(chapterUpdated3.title).toBe('Chapter 3');
+      expect(chapterUpdated3.startTime).toBe(10);
+      expect(chapterUpdated3.endTime).toBe(20);
+      const chapterUpdated4 = chaptersUpdated[3];
+      expect(chapterUpdated4.title).toBe('Chapter 4');
+      expect(chapterUpdated4.startTime).toBe(20);
+      expect(chapterUpdated4.endTime).toBe(30);
+      const chapterUpdated5 = chaptersUpdated[4];
+      expect(chapterUpdated5.title).toBe('Chapter 5');
+      expect(chapterUpdated5.startTime).toBe(30);
+      expect(chapterUpdated5.endTime).toBe(40);
+      const chapterUpdated6 = chaptersUpdated[5];
+      expect(chapterUpdated6.title).toBe('Chapter 6');
+      expect(chapterUpdated6.startTime).toBe(40);
+      expect(chapterUpdated6.endTime).toBe(61.349);
+    });
+
+    it('add external chapters in srt format', async () => {
+      await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
+
+      const locationUri = new goog.Uri(location.href);
+      const partialUri = new goog.Uri('/base/test/test/assets/chapters.srt');
+      const absoluteUri = locationUri.resolve(partialUri);
+      await player.addChaptersTrack(absoluteUri.toString(), 'es');
+
+      const chapters = player.getChapters('es');
+      expect(chapters.length).toBe(3);
+      const chapter1 = chapters[0];
+      expect(chapter1.title).toBe('Chapter 1');
+      expect(chapter1.startTime).toBe(0);
+      expect(chapter1.endTime).toBe(5);
+      const chapter2 = chapters[1];
+      expect(chapter2.title).toBe('Chapter 2');
+      expect(chapter2.startTime).toBe(5);
+      expect(chapter2.endTime).toBe(30);
+      const chapter3 = chapters[2];
+      expect(chapter3.title).toBe('Chapter 3');
+      expect(chapter3.startTime).toBe(30);
+      expect(chapter3.endTime).toBe(61.349);
+    });
+  }); // describe('addChaptersTrack')
 
   // Since we are not in-charge of streaming, calling |retryStreaming| should
   // have no effect.
@@ -349,6 +424,9 @@ describe('Player Src Equals', () => {
    * @return {!Promise}
    */
   async function loadWithSrcEquals(contentUri, startTime) {
+    /** @type {!shaka.util.EventManager} */
+    const eventManager = new shaka.util.EventManager();
+
     const ready = new Promise((resolve) => {
       eventManager.listenOnce(video, 'loadeddata', resolve);
     });
@@ -359,5 +437,20 @@ describe('Player Src Equals', () => {
     // Wait until the media element is ready with content. Waiting until this
     // point ensures it is safe to interact with the media element.
     await ready;
+
+    // The initial seek is triggered about the same time this ready promise
+    // resolves.  Wait (with timeout) for movement, so that the initial-seek
+    // promise chain has time to resolve before we test our expectations.
+    if (startTime != null) {
+      const waiter = new shaka.test.Waiter(eventManager);
+      if (video.currentTime == 0) {
+        // A one-second timeout is too short for Chromecast, but a longer
+        // timeout doesn't hurt anyone.  This will always resolve as fast as
+        // playback can actually start.
+        await waiter.waitForMovementOrFailOnTimeout(video, 5);
+      }
+    }
+
+    eventManager.release();
   }
 });

@@ -4,7 +4,7 @@ Shaka Player parses channel count information from HLS manifests, but not yet
 from DASH manifests.  We have had an [open request][dash_channels_request] to
 do this for a year.
 
-[dash_channels_request]: https://github.com/google/shaka-player/issues/424
+[dash_channels_request]: https://github.com/shaka-project/shaka-player/issues/424
 
 
 ## The DASH Spec
@@ -79,7 +79,7 @@ Neither 23003-3 nor the DASH spec corrigenda were freely available at the time
 of this writing, so we have not confirmed these assumptions.
 
 [cast_labs_23003]: https://github.com/castlabs/dashencrypt/blob/1d604896/dash.fragmencrypter/src/main/java/com/castlabs/dash/helpers/DashHelper.java#L193
-[shaka_packager_23003]: https://github.com/google/shaka-packager/blob/4ba5bec6/packager/mpd/base/xml/xml_node.cc#L378
+[shaka_packager_23003]: https://github.com/shaka-project/shaka-packager/blob/4ba5bec6/packager/mpd/base/xml/xml_node.cc#L378
 
 
 ### tag:dolby.com,2014:dash:audio\_channel\_configuration:2011
@@ -101,7 +101,7 @@ Packager][shaka_packager_ec3_enum] supports this interpretation.  This has not
 been confirmed from primary sources.
 
 [dash_if_audio_config]: http://dashif.org/identifiers/audio-source-data/
-[shaka_packager_ec3_enum]: https://github.com/google/shaka-packager/blob/47363dd0/packager/media/codecs/ec3_audio_util.cc#L34
+[shaka_packager_ec3_enum]: https://github.com/shaka-project/shaka-packager/blob/47363dd0/packager/media/codecs/ec3_audio_util.cc#L34
 
 
 ### urn:dts:dash:audio\_channel\_configuration:2012

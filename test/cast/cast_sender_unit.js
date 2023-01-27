@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -12,6 +13,7 @@ describe('CastSender', () => {
   const originalStatusDelay = shaka.cast.CastSender.STATUS_DELAY;
 
   const fakeAppId = 'asdf';
+  const fakeAndroidReceiverCompatible = false;
   const fakeInitState = {
     manifest: null,
     player: null,
@@ -51,7 +53,8 @@ describe('CastSender', () => {
     sender = new CastSender(
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+        fakeAndroidReceiverCompatible);
   });
 
   afterEach(async () => {
@@ -86,7 +89,12 @@ describe('CastSender', () => {
       expect(sender.apiReady()).toBe(true);
       expect(sender.hasReceivers()).toBe(false);
       expect(onStatusChanged).toHaveBeenCalled();
-      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(fakeAppId);
+      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(
+          fakeAppId,
+          /* capabilities= */ [],
+          /* timeout= */ null,
+          fakeAndroidReceiverCompatible,
+          /* credentialsData= */ null);
       expect(mockCastApi.initialize).toHaveBeenCalled();
     });
 
@@ -96,7 +104,12 @@ describe('CastSender', () => {
       expect(sender.apiReady()).toBe(true);
       expect(sender.hasReceivers()).toBe(false);
       expect(onStatusChanged).toHaveBeenCalled();
-      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(fakeAppId);
+      expect(mockCastApi.SessionRequest).toHaveBeenCalledWith(
+          fakeAppId,
+          /* capabilities= */ [],
+          /* timeout= */ null,
+          fakeAndroidReceiverCompatible,
+          /* credentialsData= */ null);
       expect(mockCastApi.initialize).toHaveBeenCalled();
     });
   });
@@ -121,7 +134,8 @@ describe('CastSender', () => {
       sender = new CastSender(
           fakeAppId, Util.spyFunc(onStatusChanged),
           Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+          Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+          /* androidReceiverCompatible= */ false);
       sender.init();
       // You get an initial call to onStatusChanged when it initializes.
       expect(onStatusChanged).toHaveBeenCalledTimes(3);
@@ -255,7 +269,8 @@ describe('CastSender', () => {
     sender = new CastSender(
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+        /* androidReceiverCompatible= */ false);
     sender.init();
 
     // The sender should automatically rejoin the session, without needing
@@ -287,7 +302,8 @@ describe('CastSender', () => {
     sender = new CastSender(
         fakeAppId, Util.spyFunc(onStatusChanged),
         Util.spyFunc(onFirstCastStateUpdate), Util.spyFunc(onRemoteEvent),
-        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired));
+        Util.spyFunc(onResumeLocal), Util.spyFunc(onInitStateRequired),
+        /* androidReceiverCompatible= */ false);
     sender.init();
 
     expect(sender.isCasting()).toBe(false);
@@ -735,6 +751,85 @@ describe('CastSender', () => {
           shaka.util.Error.Category.PLAYER,
           shaka.util.Error.Code.LOAD_INTERRUPTED));
       await expectAsync(p).toBeRejectedWith(expected);
+    });
+
+    it('transfers playback to local device', async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const cast = sender.cast(fakeInitState);
+      fakeSessionConnection();
+      await cast;
+
+      expect(sender.isCasting()).toBe(true);
+      expect(onResumeLocal).not.toHaveBeenCalled();
+
+      sender.forceDisconnect();
+
+      expect(sender.isCasting()).toBe(false);
+      expect(onResumeLocal).toHaveBeenCalled();
+    });
+
+    it('succeeds even if session.stop() throws', async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const cast = sender.cast(fakeInitState);
+      fakeSessionConnection();
+      await cast;
+
+      mockSession.stop.and.throwError(new Error('DISCONNECTED!'));
+
+      expect(() => sender.forceDisconnect()).not.toThrow(jasmine.anything());
+    });
+  });
+
+  describe('sendMessage exception', () => {
+    /** @type {Error} */
+    let originalException;
+
+    /** @type {Object} */
+    let expectedError;
+
+    beforeEach(async () => {
+      sender.init();
+      fakeReceiverAvailability(true);
+      const cast = sender.cast(fakeInitState);
+      fakeSessionConnection();
+      await cast;
+
+      originalException = new Error('DISCONNECTED!');
+
+      expectedError = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.CAST,
+          shaka.util.Error.Code.CAST_CONNECTION_TIMED_OUT,
+          originalException));
+
+      mockSession.sendMessage.and.throwError(originalException);
+    });
+
+    it('propagates to the caller', () => {
+      expect(() => sender.set('video', 'muted', true)).toThrow(expectedError);
+    });
+
+    it('triggers an error event on Player', () => {
+      expect(() => sender.set('video', 'muted', true)).toThrow(expectedError);
+
+      const expectedEvent = jasmine.objectContaining({
+        type: 'error',
+        detail: expectedError,
+      });
+
+      expect(onRemoteEvent).toHaveBeenCalledWith('player', expectedEvent);
+    });
+
+    it('disconnects the sender', () => {
+      expect(sender.isCasting()).toBe(true);
+      expect(onResumeLocal).not.toHaveBeenCalled();
+
+      expect(() => sender.set('video', 'muted', true)).toThrow(expectedError);
+
+      expect(sender.isCasting()).toBe(false);
+      expect(onResumeLocal).toHaveBeenCalled();
     });
   });
 

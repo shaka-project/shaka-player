@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -10,15 +11,19 @@
 
 /**
  * @typedef {{
+ *    name: string,
  *    parser: !shaka.util.Mp4Parser,
  *    partialOkay: boolean,
  *    start: number,
  *    size: number,
  *    version: ?number,
  *    flags: ?number,
- *    reader: !shaka.util.DataViewReader
+ *    reader: !shaka.util.DataViewReader,
+ *    has64BitSize: boolean
  * }}
  *
+ * @property {string} name
+ *   The box name, a 4-character string (fourcc).
  * @property {!shaka.util.Mp4Parser} parser
  *   The parser that parsed this box. The parser can be used to parse child
  *   boxes where the configuration of the current parser is needed to parsed
@@ -40,6 +45,9 @@
  * @property {!shaka.util.DataViewReader} reader
  *   The reader for this box is only for this box. Reading or not reading to
  *   the end will have no affect on the parser reading other sibling boxes.
+ * @property {boolean} has64BitSize
+ *   If true, the box header had a 64-bit size field.  This affects the offsets
+ *   of other fields.
  * @exportDoc
  */
 shaka.extern.ParsedBox;

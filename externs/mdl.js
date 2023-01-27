@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -20,6 +21,12 @@ const componentHandler = class {
 const MaterialLayout = class {
   toggleDrawer() {}
 };
+
+/** @const */
+MaterialLayout.prototype.Constant_ = {};
+
+/** @type {string} */
+MaterialLayout.prototype.Constant_.MENU_ICON;
 
 /** @const {?MaterialLayout} */
 Element.prototype.MaterialLayout;

@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,7 +7,9 @@
 
 goog.provide('shaka.ui.PresentationTimeTracker');
 
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
 
@@ -24,7 +27,8 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.currentTime_ = shaka.util.Dom.createHTMLElement('button');
+    /** @type {!HTMLButtonElement} */
+    this.currentTime_ = shaka.util.Dom.createButton();
     this.currentTime_.classList.add('shaka-current-time');
     this.setValue_('0:00');
     this.parent.appendChild(this.currentTime_);
@@ -103,8 +107,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
   onTracksChanged_() {
     if (this.player.isLive()) {
       const ariaLabel = shaka.ui.Locales.Ids.SKIP_TO_LIVE;
-      this.currentTime_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-          this.localization.resolve(ariaLabel));
+      this.currentTime_.ariaLabel = this.localization.resolve(ariaLabel);
     }
   }
 };

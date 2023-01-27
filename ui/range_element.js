@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,6 +9,8 @@ goog.provide('shaka.ui.RangeElement');
 
 goog.require('shaka.ui.Element');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.Timer');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
@@ -20,7 +23,7 @@ goog.require('shaka.util.Dom');
  * updated at the same time.  This can happen when seeking during playback or
  * when casting.
  *
- * @extends {shaka.ui.Element}
+ * @implements {shaka.extern.IUIRangeElement}
  * @export
  */
 shaka.ui.RangeElement = class extends shaka.ui.Element {
@@ -49,6 +52,12 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.bar =
       /** @type {!HTMLInputElement} */ (document.createElement('input'));
 
+    /** @private {shaka.util.Timer} */
+    this.endFakeChangeTimer_ = new shaka.util.Timer(() => {
+      this.onChangeEnd();
+      this.isChanging_ = false;
+    });
+
     this.bar.classList.add('shaka-range-element');
     this.bar.classList.add(...barClassNames);
     this.bar.type = 'range';
@@ -62,14 +71,18 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     this.parent.appendChild(this.container);
 
     this.eventManager.listen(this.bar, 'mousedown', () => {
-      this.isChanging_ = true;
-      this.onChangeStart();
+      if (this.controls.isOpaque()) {
+        this.isChanging_ = true;
+        this.onChangeStart();
+      }
     });
 
     this.eventManager.listen(this.bar, 'touchstart', (e) => {
-      this.isChanging_ = true;
-      this.setBarValueForTouch_(e);
-      this.onChangeStart();
+      if (this.controls.isOpaque()) {
+        this.isChanging_ = true;
+        this.setBarValueForTouch_(e);
+        this.onChangeStart();
+      }
     });
 
     this.eventManager.listen(this.bar, 'input', () => {
@@ -77,25 +90,41 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
     });
 
     this.eventManager.listen(this.bar, 'touchmove', (e) => {
-      this.setBarValueForTouch_(e);
-      this.onChange();
+      if (this.isChanging_) {
+        this.setBarValueForTouch_(e);
+        this.onChange();
+      }
     });
 
     this.eventManager.listen(this.bar, 'touchend', (e) => {
-      this.isChanging_ = false;
-      this.setBarValueForTouch_(e);
-      this.onChangeEnd();
+      if (this.isChanging_) {
+        this.isChanging_ = false;
+        this.setBarValueForTouch_(e);
+        this.onChangeEnd();
+      }
     });
 
     this.eventManager.listen(this.bar, 'mouseup', () => {
-      this.isChanging_ = false;
-      this.onChangeEnd();
+      if (this.isChanging_) {
+        this.isChanging_ = false;
+        this.onChangeEnd();
+      }
     });
   }
 
+  /** @override */
+  release() {
+    if (this.endFakeChangeTimer_) {
+      this.endFakeChangeTimer_.stop();
+      this.endFakeChangeTimer_ = null;
+    }
+
+    super.release();
+  }
+
   /**
-   * @param {number} min
-   * @param {number} max
+   * @override
+   * @export
    */
   setRange(min, max) {
     this.bar.min = min;
@@ -105,27 +134,68 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
   /**
    * Called when user interaction begins.
    * To be overridden by subclasses.
+   * @override
+   * @export
    */
   onChangeStart() {}
 
   /**
    * Called when a new value is set by user interaction.
    * To be overridden by subclasses.
+   * @override
+   * @export
    */
   onChange() {}
 
   /**
    * Called when user interaction ends.
    * To be overridden by subclasses.
+   * @override
+   * @export
    */
   onChangeEnd() {}
 
-  /** @return {number} */
+  /**
+   * Called to implement keyboard-based changes, where this is no clear "end".
+   * This will simulate events like onChangeStart(), onChange(), and
+   * onChangeEnd() as appropriate.
+   *
+   * @override
+   * @export
+   */
+  changeTo(value) {
+    if (!this.isChanging_) {
+      this.isChanging_ = true;
+      this.onChangeStart();
+    }
+
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
+
+    if (value > max) {
+      this.bar.value = max;
+    } else if (value < min) {
+      this.bar.value = min;
+    } else {
+      this.bar.value = value;
+    }
+    this.onChange();
+
+    this.endFakeChangeTimer_.tickAfter(/* seconds= */ 0.5);
+  }
+
+  /**
+   * @override
+   * @export
+   */
   getValue() {
     return parseFloat(this.bar.value);
   }
 
-  /** @param {number} value */
+  /**
+   * @override
+   * @export
+   */
   setValue(value) {
     // The user interaction overrides any external values being pushed in.
     if (this.isChanging_) {
@@ -147,16 +217,25 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
 
     const changedTouch = /** @type {TouchEvent} */ (event).changedTouches[0];
     const rect = this.bar.getBoundingClientRect();
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
 
     // Calculate the range value based on the touch position.
-    let value = (this.bar.max / rect.width) *
-      (changedTouch.clientX - rect.left);
+
+    // Pixels from the left of the range element
+    const touchPosition = changedTouch.clientX - rect.left;
+
+    // Pixels per unit value of the range element.
+    const scale = (max - min) / rect.width;
+
+    // Touch position in units, which may be outside the allowed range.
+    let value = min + scale * touchPosition;
 
     // Keep value within bounds.
-    if (value < this.bar.min) {
-      value = this.bar.min;
-    } else if (value > this.bar.max) {
-      value = this.bar.max;
+    if (value < min) {
+      value = min;
+    } else if (value > max) {
+      value = max;
     }
 
     this.bar.value = value;

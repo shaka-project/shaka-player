@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -68,7 +69,7 @@ module.exports = {
     return {
       'ClassBody > MethodDefinition': (node) => {
         const comment = source.getCommentsBefore(node).pop();
-        const nameIsPrivate = node.key.name.endsWith('_');
+        const nameIsPrivate = node.key.name && node.key.name.endsWith('_');
         if (!comment) {
           if (nameIsPrivate) {
             ctx.report({

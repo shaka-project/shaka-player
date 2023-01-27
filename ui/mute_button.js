@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,6 +7,8 @@
 
 goog.provide('shaka.ui.MuteButton');
 
+goog.require('shaka.ads.AdManager');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -26,13 +29,14 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    /** @private {!HTMLElement} */
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-mute-button');
-    this.button_.classList.add('material-icons');
-    this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.MUTE;
+    this.button_.classList.add('material-icons-round');
+    this.button_.classList.add('shaka-tooltip');
     this.parent.appendChild(this.button_);
     this.updateAriaLabel_();
+    this.updateIcon_();
 
     this.eventManager.listen(
         this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
@@ -45,7 +49,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.button_, 'click', () => {
-      if (this.ad) {
+      if (this.ad && this.ad.isLinear()) {
         this.ad.setMuted(!this.ad.isMuted());
       } else {
         this.video.muted = !this.video.muted;
@@ -93,8 +97,7 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
       label = this.video.muted ? LocIds.UNMUTE : LocIds.MUTE;
     }
 
-    this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(label));
+    this.button_.ariaLabel = this.localization.resolve(label);
   }
 
   /**

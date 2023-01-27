@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,6 +20,9 @@ describe('TextEngine', () => {
   let mockParseInit;
 
   /** @type {!jasmine.Spy} */
+  let mockSetSequenceMode;
+
+  /** @type {!jasmine.Spy} */
   let mockParseMedia;
 
   /** @type {!shaka.text.TextEngine} */
@@ -26,11 +30,13 @@ describe('TextEngine', () => {
 
   beforeEach(() => {
     mockParseInit = jasmine.createSpy('mockParseInit');
+    mockSetSequenceMode = jasmine.createSpy('mockSetSequenceMode');
     mockParseMedia = jasmine.createSpy('mockParseMedia');
     // eslint-disable-next-line no-restricted-syntax
     mockParserPlugIn = function() {
       return {
         parseInit: mockParseInit,
+        setSequenceMode: mockSetSequenceMode,
         parseMedia: mockParseMedia,
       };
     };
@@ -40,7 +46,10 @@ describe('TextEngine', () => {
 
     TextEngine.registerParser(dummyMimeType, mockParserPlugIn);
     textEngine = new TextEngine(mockDisplayer);
-    textEngine.initParser(dummyMimeType);
+    textEngine.initParser(
+        dummyMimeType,
+        /* sequenceMode= */ false,
+        /* segmentRelativeVttTiming= */ false);
   });
 
   afterEach(() => {
@@ -57,18 +66,13 @@ describe('TextEngine', () => {
       expect(TextEngine.isTypeSupported(dummyMimeType)).toBe(false);
     });
 
-    it('reports support when it\'s closed captions and muxjs is available',
+    it('reports support when it\'s closed captions',
         () => {
-          const closedCaptionsType =
-           shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
-          const originalMuxjs = window.muxjs;
-          expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(true);
-          try {
-            window['muxjs'] = null;
-            expect(TextEngine.isTypeSupported(closedCaptionsType)).toBe(false);
-          } finally {
-            window['muxjs'] = originalMuxjs;
-          }
+          // Both CEA-608 and CEA-708 is supported by our closed caption parser.
+          expect(TextEngine.isTypeSupported(
+              shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE)).toBe(true);
+          expect(TextEngine.isTypeSupported(
+              shaka.util.MimeUtils.CEA708_CLOSED_CAPTION_MIMETYPE)).toBe(true);
         });
   });
 
@@ -90,7 +94,7 @@ describe('TextEngine', () => {
       await textEngine.appendBuffer(dummyData, 0, 3);
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3},
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
       ]);
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -105,7 +109,7 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 3, segmentEnd: 5},
+        {periodStart: 0, segmentStart: 3, segmentEnd: 5, vttOffset: 0},
       ]);
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
@@ -123,13 +127,12 @@ describe('TextEngine', () => {
 
   describe('storeAndAppendClosedCaptions', () => {
     it('appends closed captions with selected id', () => {
+      const startTime = 0;
+      const endTime = 1;
+      const text = 'captions';
       const caption = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 0,
-        endTime: 1,
+        cue: new shaka.text.Cue(startTime, endTime, text),
         stream: 'CC1',
-        text: 'captions',
       };
 
       textEngine.setSelectedClosedCaptionId('CC1', 0);
@@ -139,13 +142,12 @@ describe('TextEngine', () => {
     });
 
     it('does not append closed captions without selected id', () => {
+      const startTime = 1;
+      const endTime = 2;
+      const text = 'caption2';
       const caption = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 1,
-        endTime: 2,
+        cue: new shaka.text.Cue(startTime, endTime, text),
         stream: 'CC1',
-        text: 'caption2',
       };
 
       textEngine.setSelectedClosedCaptionId('CC3', 0);
@@ -156,28 +158,16 @@ describe('TextEngine', () => {
 
     it('stores closed captions', () => {
       const caption0 = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 0,
-        endTime: 1,
+        cue: new shaka.text.Cue(0, 1, 'caption1'),
         stream: 'CC1',
-        text: 'caption1',
       };
       const caption1 = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 1,
-        endTime: 2,
+        cue: new shaka.text.Cue(1, 2, 'caption2'),
         stream: 'CC1',
-        text: 'caption2',
       };
       const caption2 = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 1,
-        endTime: 2,
+        cue: new shaka.text.Cue(1, 2, 'caption3'),
         stream: 'CC3',
-        text: 'caption3',
       };
 
       textEngine.setSelectedClosedCaptionId('CC1', 0);
@@ -204,13 +194,12 @@ describe('TextEngine', () => {
     });
 
     it('offsets closed captions to account for video offset', () => {
+      const startTime = 0;
+      const endTime = 1;
+      const text = 'captions';
       const caption = {
-        startPts: 0,
-        endPts: 100,
-        startTime: 0,
-        endTime: 1,
+        cue: new shaka.text.Cue(startTime, endTime, text),
         stream: 'CC1',
-        text: 'captions',
       };
 
       textEngine.setSelectedClosedCaptionId('CC1', 0);
@@ -272,7 +261,7 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 0, segmentStart: 0, segmentEnd: 3},
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
@@ -286,13 +275,45 @@ describe('TextEngine', () => {
 
       expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
         dummyData,
-        {periodStart: 4, segmentStart: 4, segmentEnd: 7},
+        {periodStart: 4, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [
           createFakeCue(4, 5),
           createFakeCue(6, 7),
         ],
+      ]);
+    });
+
+    it('vttOffset when segmentRelativeVttTiming is set', async () => {
+      textEngine.initParser(
+          dummyMimeType,
+          /* sequenceMode= */ false,
+          /* segmentRelativeVttTiming= */ true);
+
+      mockParseMedia.and.callFake((data, time) => {
+        return [
+          createFakeCue(time.periodStart + 0,
+              time.periodStart + 1),
+          createFakeCue(time.periodStart + 2,
+              time.periodStart + 3),
+        ];
+      });
+
+      await textEngine.appendBuffer(dummyData, 0, 3);
+
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
+      ]);
+
+      textEngine.setTimestampOffset(8);
+      await textEngine.appendBuffer(dummyData, 4, 7);
+
+      // vttOffset should equal segmentStart instead of periodStart
+      expect(mockParseMedia).toHaveBeenCalledOnceMoreWith([
+        dummyData,
+        {periodStart: 8, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
       ]);
     });
   });
@@ -350,7 +371,7 @@ describe('TextEngine', () => {
     it('does not use timestamp offset', async () => {
       // The start and end times passed to appendBuffer are now absolute, so
       // they already account for timestampOffset and period offset.
-      // See https://github.com/google/shaka-player/issues/1562
+      // See https://github.com/shaka-project/shaka-player/issues/1562
       textEngine.setTimestampOffset(60);
       await textEngine.appendBuffer(dummyData, 0, 3);
       expect(textEngine.bufferStart()).toBe(0);
@@ -393,7 +414,7 @@ describe('TextEngine', () => {
     it('does not use timestamp offset', async () => {
       // The start and end times passed to appendBuffer are now absolute, so
       // they already account for timestampOffset and period offset.
-      // See https://github.com/google/shaka-player/issues/1562
+      // See https://github.com/shaka-project/shaka-player/issues/1562
       textEngine.setTimestampOffset(60);
       await textEngine.appendBuffer(dummyData, 3, 6);
       expect(textEngine.bufferedAheadOf(4)).toBe(2);

@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,12 +7,16 @@
 
 goog.provide('shaka.ui.LoopButton');
 
+goog.require('shaka.ui.ContextMenu');
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.util.Dom');
 goog.require('shaka.util.Timer');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
@@ -28,18 +33,20 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
     super(parent, controls);
 
     const LocIds = shaka.ui.Locales.Ids;
-    /** @private {!HTMLElement} */
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
+    /** @private {!HTMLButtonElement} */
+    this.button_ = shaka.util.Dom.createButton();
     this.button_.classList.add('shaka-loop-button');
+    this.button_.classList.add('shaka-tooltip');
 
     /** @private {!HTMLElement} */
     this.icon_ = shaka.util.Dom.createHTMLElement('i');
-    this.icon_.classList.add('material-icons');
+    this.icon_.classList.add('material-icons-round');
     this.icon_.textContent = shaka.ui.Enums.MaterialDesignIcons.LOOP;
     this.button_.appendChild(this.icon_);
 
     const label = shaka.util.Dom.createHTMLElement('label');
     label.classList.add('shaka-overflow-button-label');
+    label.classList.add('shaka-overflow-menu-only');
     this.nameSpan_ = shaka.util.Dom.createHTMLElement('span');
     this.nameSpan_.textContent = this.localization.resolve(LocIds.LOOP);
     label.appendChild(this.nameSpan_);
@@ -129,6 +136,7 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
    */
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
+    const Icons = shaka.ui.Enums.MaterialDesignIcons;
 
     this.nameSpan_.textContent =
         this.localization.resolve(LocIds.LOOP);
@@ -137,11 +145,14 @@ shaka.ui.LoopButton = class extends shaka.ui.Element {
 
     this.currentState_.textContent = this.localization.resolve(labelText);
 
+    const icon = this.video.loop ? Icons.UNLOOP : Icons.LOOP;
+
+    this.icon_.textContent = icon;
+
     const ariaText = this.video.loop ?
         LocIds.EXIT_LOOP_MODE : LocIds.ENTER_LOOP_MODE;
 
-    this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(ariaText));
+    this.button_.ariaLabel = this.localization.resolve(ariaText);
   }
 };
 
@@ -158,4 +169,10 @@ shaka.ui.LoopButton.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'loop', new shaka.ui.LoopButton.Factory());
+
+shaka.ui.Controls.registerElement(
+    'loop', new shaka.ui.LoopButton.Factory());
+
+shaka.ui.ContextMenu.registerElement(
     'loop', new shaka.ui.LoopButton.Factory());

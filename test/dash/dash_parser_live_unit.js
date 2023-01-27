@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -25,11 +26,18 @@ describe('DashParser Live', () => {
     parser.configure(shaka.util.PlayerConfiguration.createDefault().manifest);
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterNewPeriod: () => {},
-      filterAllPeriods: () => {},
+      modifyManifestRequest: (request, manifestInfo) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
+      filter: (manifest) => Promise.resolve(),
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
+      isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
+      updateDuration: () => {},
+      newDrmInfo: (stream) => {},
     };
   });
 
@@ -104,10 +112,9 @@ describe('DashParser Live', () => {
   function cloneRefs(references) {
     return references.map((ref) => {
       return new shaka.media.SegmentReference(
-          ref.position,
           ref.startTime,
           ref.endTime,
-          ref.getUris,
+          ref.getUrisInner,
           ref.startByte,
           ref.endByte,
           ref.initSegmentReference,
@@ -149,18 +156,13 @@ describe('DashParser Live', () => {
 
       fakeNetEngine.setResponseText('dummy://foo', firstManifest);
       const manifest = await parser.start('dummy://foo', playerInterface);
-      const stream = manifest.periods[0].variants[0].video;
+      const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
       ManifestParser.verifySegmentIndex(stream, firstReferences);
-      expect(manifest.periods.length).toBe(1);
 
       fakeNetEngine.setResponseText('dummy://foo', secondManifest);
       await updateManifest();
       ManifestParser.verifySegmentIndex(stream, secondReferences);
-      // In https://github.com/google/shaka-player/issues/963, we
-      // duplicated periods during the first update.  This check covers
-      // this case.
-      expect(manifest.periods.length).toBe(1);
     }
 
     it('basic support', async () => {
@@ -196,12 +198,12 @@ describe('DashParser Live', () => {
       const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest).toBeTruthy();
-      const stream = manifest.periods[0].variants[0].video;
+      const stream = manifest.variants[0].video;
       expect(stream).toBeTruthy();
 
       await stream.createSegmentIndex();
       expect(stream.segmentIndex).toBeTruthy();
-      expect(stream.segmentIndex.find(0)).toBe(1);
+      const firstPosition = stream.segmentIndex.find(0);
       ManifestParser.verifySegmentIndex(stream, basicRefs);
 
       // The 30 second availability window is initially full in all cases
@@ -212,7 +214,7 @@ describe('DashParser Live', () => {
       Date.now = () => 11 * 1000;
       await updateManifest();
       // The first reference should have been evicted.
-      expect(stream.segmentIndex.find(0)).toBe(2);
+      expect(stream.segmentIndex.find(0)).toBe(firstPosition + 1);
       ManifestParser.verifySegmentIndex(stream, basicRefs.slice(1));
     });
 
@@ -262,16 +264,17 @@ describe('DashParser Live', () => {
       /** @const {!Array.<!shaka.media.SegmentReference>} */
       const period2Refs = cloneRefs(basicRefs);
       for (const ref of period2Refs) {
+        ref.timestampOffset = pStart;
         ref.startTime += pStart;
         ref.endTime += pStart;
+        ref.trueEndTime += pStart;
       }
+      /** @const {!Array.<!shaka.media.SegmentReference>} */
+      const allRefs = period1Refs.concat(period2Refs);
 
-      const stream1 = manifest.periods[0].variants[0].video;
-      const stream2 = manifest.periods[1].variants[0].video;
+      const stream1 = manifest.variants[0].video;
       await stream1.createSegmentIndex();
-      await stream2.createSegmentIndex();
-      ManifestParser.verifySegmentIndex(stream1, period1Refs);
-      ManifestParser.verifySegmentIndex(stream2, period2Refs);
+      ManifestParser.verifySegmentIndex(stream1, allRefs);
 
       // The 60 second availability window is initially full in all cases
       // (SegmentTemplate+Timeline, etc.)  The first segment is always 10
@@ -281,14 +284,12 @@ describe('DashParser Live', () => {
       Date.now = () => 11 * 1000;
       await updateManifest();
       // The first reference should have been evicted.
-      ManifestParser.verifySegmentIndex(stream1, period1Refs.slice(1));
-      ManifestParser.verifySegmentIndex(stream2, period2Refs);
+      ManifestParser.verifySegmentIndex(stream1, allRefs.slice(1));
 
       // Same as above, but 1 period length later
       Date.now = () => (11 + pStart) * 1000;
       await updateManifest();
-      ManifestParser.verifySegmentIndex(stream1, []);
-      ManifestParser.verifySegmentIndex(stream2, period2Refs.slice(1));
+      ManifestParser.verifySegmentIndex(stream1, period2Refs.slice(1));
     });
 
     it('sets infinite duration for single-period live streams', async () => {
@@ -314,7 +315,6 @@ describe('DashParser Live', () => {
       Date.now = () => 0;
       const manifest = await parser.start('dummy://foo', playerInterface);
 
-      expect(manifest.periods.length).toBe(1);
       const timeline = manifest.presentationTimeline;
       expect(timeline.getDuration()).toBe(Infinity);
     });
@@ -350,59 +350,185 @@ describe('DashParser Live', () => {
       Date.now = () => 0;
       const manifest = await parser.start('dummy://foo', playerInterface);
 
-      expect(manifest.periods.length).toBe(2);
-      expect(manifest.periods[1].startTime).toBe(60);
       const timeline = manifest.presentationTimeline;
       expect(timeline.getDuration()).toBe(Infinity);
     });
   }
 
-  it('can add Periods', async () => {
-    const lines = [
-      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
-    ];
-    const template = [
+  it('can add Periods with SegmentTemplate', async () => {
+    const template1 = [
       '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
       '    suggestedPresentationDelay="PT5S"',
       '    minimumUpdatePeriod="PT%(updateTime)dS">',
-      '  <Period id="4">',
+      '  <Period id="1">',
       '    <AdaptationSet mimeType="video/mp4">',
-      '      <Representation id="6" bandwidth="500">',
+      '      <Representation id="1" bandwidth="500">',
       '        <BaseURL>http://example.com</BaseURL>',
-      '%(contents)s',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" r="1" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
       '</MPD>',
     ].join('\n');
-    const secondManifest =
-        sprintf(template, {updateTime: updateTime, contents: lines.join('\n')});
-    const firstManifest = makeSimpleLiveManifestText(lines, updateTime);
-
-    /** @type {!jasmine.Spy} */
-    const filterNewPeriod = jasmine.createSpy('filterNewPeriod');
-    playerInterface.filterNewPeriod = Util.spyFunc(filterNewPeriod);
-
-    /** @type {!jasmine.Spy} */
-    const filterAllPeriods = jasmine.createSpy('filterAllPeriods');
-    playerInterface.filterAllPeriods = Util.spyFunc(filterAllPeriods);
+    const template2 = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
+      '    minimumUpdatePeriod="PT%(updateTime)dS">',
+      '  <Period id="1" duration="PT10S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" r="4" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period id="2">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="2" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S t="0" d="2" r="1" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    const firstManifest = sprintf(template1, {updateTime: updateTime});
+    const secondManifest = sprintf(template2, {updateTime: updateTime});
 
     fakeNetEngine.setResponseText('dummy://foo', firstManifest);
-    const manifest = await parser.start('dummy://foo', playerInterface);
+    // First two segments should exist
+    Date.now = () => 5;
 
-    expect(manifest.periods.length).toBe(1);
-    // Should call filterAllPeriods for parsing the first manifest
-    expect(filterNewPeriod).not.toHaveBeenCalled();
-    expect(filterAllPeriods).toHaveBeenCalledTimes(1);
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    const stream = variant.video;
+    await stream.createSegmentIndex();
+
+    // First two segments exist, but not the third.
+    expect(stream.segmentIndex.find(3)).not.toBe(null);
+    expect(stream.segmentIndex.find(5)).toBe(null);
 
     fakeNetEngine.setResponseText('dummy://foo', secondManifest);
+    // First period (10s) is complete, plus first two segments of next period
+    Date.now = () => 15;
+
     await updateManifest();
 
-    // Should update the same manifest object.
-    expect(manifest.periods.length).toBe(2);
-    // Should call filterNewPeriod for parsing the new manifest
-    expect(filterAllPeriods).toHaveBeenCalledTimes(1);
-    expect(filterNewPeriod).toHaveBeenCalledTimes(1);
+    // The update should have affected the same variant object we captured
+    // before.  Now the entire first period should exist (0-10s), plus the next
+    // two segments (10-14s).
+    expect(stream.segmentIndex.find(9)).not.toBe(null);
+    expect(stream.segmentIndex.find(13)).not.toBe(null);
+
+    stream.closeSegmentIndex();
+    await stream.createSegmentIndex();
+
+    expect(stream.segmentIndex.find(9)).not.toBe(null);
+    expect(stream.segmentIndex.find(13)).not.toBe(null);
+  });
+
+  it('can add Periods with SegmentList', async () => {
+    const list1 = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
+      '    minimumUpdatePeriod="PT%(updateTime)dS">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentList>',
+      '          <SegmentURL media="s1.mp4" />',
+      '          <SegmentURL media="s2.mp4" />',
+      '          <SegmentURL media="s3.mp4" />',
+      '          <SegmentTimeline>',
+      '            <S d="10" t="0" r="2"/>',
+      '          </SegmentTimeline>',
+      '        </SegmentList>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    const list2 = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
+      '    minimumUpdatePeriod="PT%(updateTime)dS">',
+      '  <Period id="1" duration="PT40S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="1" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentList>',
+      '          <SegmentURL media="s1.mp4" />',
+      '          <SegmentURL media="s2.mp4" />',
+      '          <SegmentURL media="s3.mp4" />',
+      '          <SegmentURL media="s4.mp4" />',
+      '          <SegmentTimeline>',
+      '            <S d="10" t="0" r="3"/>',
+      '          </SegmentTimeline>',
+      '        </SegmentList>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period id="2">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="2" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentList>',
+      '          <SegmentURL media="s1.mp4" />',
+      '          <SegmentURL media="s2.mp4" />',
+      '          <SegmentTimeline>',
+      '            <S d="10" t="0" r="1"/>',
+      '          </SegmentTimeline>',
+      '        </SegmentList>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    const firstManifest = sprintf(list1, {updateTime: updateTime});
+    const secondManifest = sprintf(list2, {updateTime: updateTime});
+
+    fakeNetEngine.setResponseText('dummy://foo', firstManifest);
+    // First three segments should exist.
+    Date.now = () => 5;
+
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    const stream = variant.video;
+    await stream.createSegmentIndex();
+
+    // First three segments exist, but not the fourth.
+    expect(stream.segmentIndex.find(25)).not.toBe(null);
+    expect(stream.segmentIndex.find(45)).toBe(null);
+
+    fakeNetEngine.setResponseText('dummy://foo', secondManifest);
+    Date.now = () => 25;
+
+    await updateManifest();
+
+    // The update should have affected the same variant object we captured
+    // before.  Now the entire first period should exist (0-40s), plus the next
+    // two segments of the second period(40-60s).
+    expect(stream.segmentIndex.find(25)).not.toBe(null);
+    expect(stream.segmentIndex.find(45)).not.toBe(null);
+
+    stream.closeSegmentIndex();
+    await stream.createSegmentIndex();
+
+    expect(stream.segmentIndex.find(25)).not.toBe(null);
+    expect(stream.segmentIndex.find(45)).not.toBe(null);
   });
 
   it('uses redirect URL for manifest BaseURL and updates', async () => {
@@ -446,9 +572,12 @@ describe('DashParser Live', () => {
 
     // Since the manifest request was redirected, the segment refers to
     // the redirected base.
-    const stream = manifest.periods[0].variants[0].video;
+    const stream = manifest.variants[0].video;
     await stream.createSegmentIndex();
-    const segmentUri = stream.segmentIndex.get(1).getUris()[0];
+    goog.asserts.assert(stream.segmentIndex != null, 'Null segmentIndex!');
+
+    const ref = Array.from(stream.segmentIndex)[0];
+    const segmentUri = ref.getUris()[0];
     expect(segmentUri).toBe(redirectedUri + 's1.mp4');
   });
 
@@ -635,6 +764,45 @@ describe('DashParser Live', () => {
     // @suggestedPresentationDelay it will be 3:50 minutes.
     expect(timeline.getSegmentAvailabilityEnd()).toBe(290);
     expect(timeline.getSeekRangeEnd()).toBe(230);
+  });
+
+  it('parses availabilityTimeOffset', async () => {
+    const manifestText = [
+      '<MPD type="dynamic" suggestedPresentationDelay="PT0S"',
+      '    minimumUpdatePeriod="PT5S"',
+      '    timeShiftBufferDepth="PT2M"',
+      '    maxSegmentDuration="PT10S"',
+      '    availabilityStartTime="1970-01-01T00:05:00Z">',
+      '  <Period id="1">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '         <BaseURL availabilityTimeOffset="6">http://example.com',
+      '         </BaseURL>',
+      '         <SegmentTemplate availabilityTimeOffset="6.00" ',
+      '          startNumber="1" media="s$Number$.mp4" duration="2" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    playerInterface.isLowLatencyMode = () => true;
+
+    Date.now = () => 600000; /* 10 minutes */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    expect(manifest).toBeTruthy();
+    const timeline = manifest.presentationTimeline;
+    expect(timeline).toBeTruthy();
+
+    //  We are 5 minutes into the presentation, with a @timeShiftBufferDepth of
+    //  120 seconds and a @maxSegmentDuration of 10 seconds, the start will be
+    //  2:50. With the availabilityTimeOffset of 6+6 seconds, it will be 3:02.
+    expect(timeline.getSegmentAvailabilityStart()).toBe(182);
+    // Normally the end should be 4:50; with the availabilityTimeOffset of
+    // 12 seconds, it will be 5:02.
+    expect(timeline.getSegmentAvailabilityEnd()).toBe(302);
+    expect(timeline.getSeekRangeEnd()).toBe(302);
   });
 
   describe('availabilityWindowOverride', () => {
@@ -907,9 +1075,9 @@ describe('DashParser Live', () => {
       '</SegmentTemplate>',
     ];
     const basicRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
     ];
     const updateLines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4">',
@@ -922,10 +1090,10 @@ describe('DashParser Live', () => {
       '</SegmentTemplate>',
     ];
     const updateRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 30, 40, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 30, 40, originalUri),
     ];
     const partialUpdateLines = [
       '<SegmentTemplate startNumber="3" media="s$Number$.mp4">',
@@ -954,9 +1122,9 @@ describe('DashParser Live', () => {
       '</SegmentList>',
     ];
     const basicRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
     ];
     const updateLines = [
       '<SegmentList>',
@@ -973,10 +1141,10 @@ describe('DashParser Live', () => {
       '</SegmentList>',
     ];
     const updateRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 15, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 15, 30, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 30, 40, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 15, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 15, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 30, 40, originalUri),
     ];
     const partialUpdateLines = [
       '<SegmentList startNumber="3">',
@@ -1002,9 +1170,9 @@ describe('DashParser Live', () => {
       '</SegmentList>',
     ];
     const basicRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 20, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 20, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 20, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 20, 30, originalUri),
     ];
     const updateLines = [
       '<SegmentList duration="10">',
@@ -1015,10 +1183,10 @@ describe('DashParser Live', () => {
       '</SegmentList>',
     ];
     const updateRefs = [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 10, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 10, 20, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 20, 30, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 30, 40, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 10, 20, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 20, 30, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 30, 40, originalUri),
     ];
     const partialUpdateLines = [
       '<SegmentList startNumber="3" duration="10">',
@@ -1043,20 +1211,19 @@ describe('DashParser Live', () => {
       fakeNetEngine.setResponseText('dummy://foo', manifestText);
       const manifest = await parser.start('dummy://foo', playerInterface);
 
-      expect(manifest.periods.length).toBe(1);
-      const stream = manifest.periods[0].variants[0].video;
+      const stream = manifest.variants[0].video;
       await stream.createSegmentIndex();
 
       const liveEdge =
           manifest.presentationTimeline.getSegmentAvailabilityEnd();
 
-      // In https://github.com/google/shaka-player/issues/1204, a get on the
-      // final segment failed an assertion and returned endTime == 0.
+      // In https://github.com/shaka-project/shaka-player/issues/1204, a get on
+      // the final segment failed an assertion and returned endTime == 0.
       // Find the last segment by looking just before the live edge.  Looking
       // right on the live edge creates test flake, and the segments are 2
       // seconds in duration.
       const idx = stream.segmentIndex.find(liveEdge - 0.5);
-      expect(idx).not.toBe(null);
+      goog.asserts.assert(idx != null, 'Live edge not found!');
 
       // This should not throw an assertion.
       const ref = stream.segmentIndex.get(idx);
@@ -1077,7 +1244,8 @@ describe('DashParser Live', () => {
       '    </EventStream>',
       '    <AdaptationSet mimeType="video/mp4">',
       '      <Representation bandwidth="1">',
-      '        <SegmentBase indexRange="100-200" />',
+      '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+      '                         duration="2" />',
       '      </Representation>',
       '    </AdaptationSet>',
       '  </Period>',
@@ -1127,7 +1295,8 @@ describe('DashParser Live', () => {
         '    </EventStream>',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <Representation bandwidth="1">',
-        '        <SegmentBase indexRange="100-200" />',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
@@ -1157,7 +1326,8 @@ describe('DashParser Live', () => {
         '    </EventStream>',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <Representation bandwidth="1">',
-        '        <SegmentBase indexRange="100-200" />',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
@@ -1189,7 +1359,8 @@ describe('DashParser Live', () => {
         '    </EventStream>',
         '    <AdaptationSet mimeType="video/mp4">',
         '      <Representation bandwidth="1">',
-        '        <SegmentBase indexRange="100-200" />',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
         '      </Representation>',
         '    </AdaptationSet>',
         '  </Period>',
@@ -1206,6 +1377,49 @@ describe('DashParser Live', () => {
       expect(onTimelineRegionAddedSpy)
           .toHaveBeenCalledWith(
               jasmine.objectContaining({id: '2', startTime: 10, endTime: 25}));
+    });
+
+    it('will not add timeline regions outside the DVR window', async () => {
+      const manifest = [
+        '<MPD type="dynamic" minimumUpdatePeriod="PT' + updateTime + 'S"',
+        '    availabilityStartTime="1970-01-01T00:00:00Z"',
+        '    suggestedPresentationDelay="PT0S"',
+        '    timeShiftBufferDepth="PT30S">',
+        '  <Period id="1">',
+        '    <EventStream schemeIdUri="http://example.com" timescale="1">',
+        '      <Event id="0" presentationTime="0" duration="10"/>',
+        '      <Event id="1" presentationTime="10" duration="10"/>',
+        '      <Event id="2" presentationTime="20" duration="10"/>',
+        '      <Event id="3" presentationTime="30" duration="10"/>',
+        '      <Event id="4" presentationTime="40" duration="10"/>',
+        '    </EventStream>',
+        '    <AdaptationSet mimeType="video/mp4">',
+        '      <Representation bandwidth="1">',
+        '        <SegmentTemplate startNumber="1" media="s$Number$.mp4"',
+        '                         duration="2" />',
+        '      </Representation>',
+        '    </AdaptationSet>',
+        '  </Period>',
+        '</MPD>',
+      ].join('\n');
+
+      // 45 seconds after the epoch, which is also 45 seconds after the
+      // presentation started.  Only the last 30 seconds are available, from
+      // time 15 to 45.
+      Date.now = () => 45 * 1000;
+
+      fakeNetEngine.setResponseText('dummy://foo', manifest);
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledTimes(4);
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({id: '1'}));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({id: '2'}));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({id: '3'}));
+      expect(onTimelineRegionAddedSpy).toHaveBeenCalledWith(
+          jasmine.objectContaining({id: '4'}));
     });
   });
 
@@ -1271,7 +1485,7 @@ describe('DashParser Live', () => {
     // This should be seen as in-progress.
     expect(manifest.presentationTimeline.isInProgress()).toBe(true);
 
-    const stream = manifest.periods[0].variants[0].video;
+    const stream = manifest.variants[0].video;
     expect(stream).toBeTruthy();
 
     await stream.createSegmentIndex();
@@ -1279,8 +1493,8 @@ describe('DashParser Live', () => {
 
     // Check for the 2 initial segments we're expecting.
     ManifestParser.verifySegmentIndex(stream, [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 2, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 2, 4, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 4, originalUri),
     ]);
 
     // Just over 10 seconds after the presentation started, we should now have
@@ -1291,11 +1505,11 @@ describe('DashParser Live', () => {
     await shaka.test.Util.delay(2.1);  // A little longer than the segments are.
 
     ManifestParser.verifySegmentIndex(stream, [
-      shaka.test.ManifestParser.makeReference('s1.mp4', 1, 0, 2, originalUri),
-      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 2, 4, originalUri),
-      shaka.test.ManifestParser.makeReference('s3.mp4', 3, 4, 6, originalUri),
-      shaka.test.ManifestParser.makeReference('s4.mp4', 4, 6, 8, originalUri),
-      shaka.test.ManifestParser.makeReference('s5.mp4', 5, 8, 10, originalUri),
+      shaka.test.ManifestParser.makeReference('s1.mp4', 0, 2, originalUri),
+      shaka.test.ManifestParser.makeReference('s2.mp4', 2, 4, originalUri),
+      shaka.test.ManifestParser.makeReference('s3.mp4', 4, 6, originalUri),
+      shaka.test.ManifestParser.makeReference('s4.mp4', 6, 8, originalUri),
+      shaka.test.ManifestParser.makeReference('s5.mp4', 8, 10, originalUri),
     ]);
   });
 });

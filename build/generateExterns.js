@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -41,6 +42,8 @@ const fs = require('fs');
 // The annotations we will consider "exporting" a symbol.
 const EXPORT_REGEX = /@(?:export|exportInterface|expose)\b/;
 
+// TODO: revisit this when Closure Compiler supports partially-exported classes.
+let partiallyExportedClassesDetected = false;
 
 /**
  * Topological sort of general objects using a DFS approach.
@@ -145,6 +148,47 @@ function isRequireNode(node) {
 function isExportNode(node) {
   const doc = getLeadingBlockComment(node);
   return doc && EXPORT_REGEX.test(doc);
+}
+
+
+/**
+ * @param {ASTNode} node A node from the abstract syntax tree.
+ * @return {boolean} true if this is a class assignment.
+ */
+function isClassAssignmentNode(node) {
+  return node.type == 'ExpressionStatement' &&
+      node.expression.type == 'AssignmentExpression' &&
+      node.expression.right.type == 'ClassExpression';
+}
+
+
+/**
+ * @param {ASTNode} node A node from the abstract syntax tree.
+ * @return {boolean} true if this is a class assignment with exported members.
+ */
+function isPartiallyExportedClassAssignmentNode(node) {
+  if (!isClassAssignmentNode(node)) {
+    return false;
+  }
+
+  const rightSide = node.expression.right;
+  // Example code: foo.bar = class bar2 extends foo.baz { /* ... */ };
+  // Example right side: {
+  //   id: { name: 'bar' },   // or null
+  //   superClass: { type: 'MemberExpression', ... },  // or null
+  //   body: { body: [ ... ] },
+  // }
+
+  for (const member of rightSide.body.body) {
+    // Only look at exported members.  Constructors are exported implicitly
+    // when the class is exported.
+    const comment = getLeadingBlockComment(member);
+    if (EXPORT_REGEX.test(comment)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 
@@ -335,7 +379,8 @@ function createExternFromExportNode(names, node) {
       //   }
       // }
       name = getIdentifierString(node.expression.left);
-      assignment = createExternAssignment(name, node.expression.right);
+      assignment = createExternAssignment(name, node.expression.right,
+          /* alwaysIncludeConstructor= */ true);
       break;
 
     case 'MemberExpression':
@@ -377,6 +422,42 @@ function createExternFromExportNode(names, node) {
 
 
 /**
+ * Some classes are not exported, but contain exported members.  These need to
+ * have externs generated, too.
+ *
+ * @param {!Set.<string>} names A set of the names of exported nodes.
+ * @param {ASTNode} node An exported node from the abstract syntax tree.
+ * @return {string} An extern string for this node.
+ */
+function createExternFromPartiallyExportedClassAssignmentNode(names, node) {
+  assert.equal(node.type, 'ExpressionStatement', 'Unknown node type');
+  assert.equal(node.expression.type, 'AssignmentExpression',
+      'Should be assignment node');
+  assert.equal(node.expression.right.type, 'ClassExpression',
+      'Should be class assignment');
+
+  const name = getIdentifierString(node.expression.left);
+  const assignment = createExternAssignment(name, node.expression.right,
+      /* alwaysIncludeConstructor= */ false);
+
+  let externString = name + assignment + ';\n';
+
+  // Find this.foo = bar in the constructor, and potentially generate externs
+  // for that, too.
+  const rightSide = node.expression.right;
+  const ctor = getClassConstructor(node.expression.right);
+  if (ctor) {
+    externString += createExternsFromConstructor(name, ctor);
+  }
+
+  // Keep track of the names we've externed.
+  names.add(name);
+
+  return externString;
+}
+
+
+/**
  * @param {ASTNode} node A method node from the abstract syntax tree.
  * @return {string} The extern string for this method.
  */
@@ -409,7 +490,7 @@ function createExternMethod(node) {
   if (node.static) {
     methodString += 'static ';
   }
-  methodString += id + '(' + params + ') {}';
+  methodString += id + '(' + params.join(', ') + ') {}';
   return methodString;
 }
 
@@ -453,9 +534,11 @@ function getClassConstructor(classNode) {
 /**
  * @param {string} name The name of the thing we are assigning.
  * @param {ASTNode} node An assignment node from the abstract syntax tree.
+ * @param {boolean} alwaysIncludeConstructor Include the constructor of a class
+ *   expression, even if there is no export annotation.
  * @return {string} The assignment part of the extern string for this node.
  */
-function createExternAssignment(name, node) {
+function createExternAssignment(name, node, alwaysIncludeConstructor) {
   switch (node.type) {
     case 'ClassExpression': {
       // Example code: foo.bar = class bar2 extends foo.baz { /* ... */ };
@@ -473,11 +556,20 @@ function createExternAssignment(name, node) {
       }
       classString += '{\n';
       for (const member of node.body.body) {
-        // Only look at exported members.  Constructors are exported implicitly
-        // when the class is exported.
         const comment = getLeadingBlockComment(member);
-        if (!EXPORT_REGEX.test(comment) && member.key.name != 'constructor') {
-          continue;
+
+        if (EXPORT_REGEX.test(comment)) {
+          // This has an export annotation, so fall through and generate
+          // externs.
+        } else {
+          // If there's no export annotation, we may make an exception for the
+          // constructor in some situations.
+          if (member.key.name == 'constructor' && alwaysIncludeConstructor) {
+            // Fall through and generate externs.
+          } else {
+            // Skip extern generation.
+            continue;
+          }
         }
 
         assert.equal(
@@ -639,8 +731,37 @@ function generateExterns(names, inputPath) {
   const requires = program.body.filter(isRequireNode)
       .map((node) => getArgumentFromCallNode(0, node));
 
-  const rawExterns = program.body.filter(isExportNode)
-      .map((node) => createExternFromExportNode(names, node));
+  // Get all exported nodes and all classes, in order.
+  const rawExterns = program.body.map((node) => {
+    if (isExportNode(node)) {
+      // Explicitly-exported nodes are handled here.
+      return createExternFromExportNode(names, node);
+    } else if (isPartiallyExportedClassAssignmentNode(node)) {
+      // Some classes are not exported, but contain exported members.  These
+      // need to have externs generated, too.
+
+      // But wait!  The latest compiler won't actually export those correctly!
+      // TODO: File a bug against the Closure Compiler.
+      // In the mean time, log these now and throw an error at the end to make
+      // sure we are generating usable releases.  This tends to affect our
+      // plugin registration APIs, and apps should definitely be able to use
+      // those!
+      if (!partiallyExportedClassesDetected) {
+        partiallyExportedClassesDetected = true;
+        console.log('The Closure Compiler does not handle partially-exported ' +
+            'classes correctly!  The following classes need to be exported:');
+      }
+
+      const name = getIdentifierString(node.expression.left);
+      console.log(' * ' + name);
+
+      return createExternFromPartiallyExportedClassAssignmentNode(names, node);
+    } else {
+      // Ignore anything else, and don't generate any externs.
+      return '';
+    }
+  });
+
   const externs = rawExterns.join('');
 
   return {
@@ -678,6 +799,12 @@ function main(args) {
   const names = new Set();
   const results = inputPaths.map((path) => generateExterns(names, path));
 
+  // TODO: revisit this when the compiler supports partially-exported classes.
+  if (partiallyExportedClassesDetected) {
+    throw new Error(
+        'Partially exported classes are not supported in the compiler!');
+  }
+
   // Sort them in dependency order.
   const sorted = topologicalSort(results, /* getDeps= */ (object) => {
     return object.requires.map((id) => {
@@ -691,7 +818,7 @@ function main(args) {
   // foo.bar.baz, foo and foo.bar will both need to be declared first.
   const namespaces = new Set();
   const namespaceDeclarations = [];
-  for (const name of names) {
+  for (const name of Array.from(names).sort()) {
     // Add the full name "foo.bar.baz" and its prototype ahead of time.  We
     // should never generate these as namespaces.
     namespaces.add(name);
@@ -719,8 +846,12 @@ function main(args) {
   // Get externs.
   const externs = sorted.map((x) => x.externs).join('');
 
+  // Get license header.
+  const licenseHeader = fs.readFileSync(__dirname + '/license-header', 'utf-8');
+
   // Output generated externs, with an appropriate header.
   fs.writeFileSync(outputPath,
+      licenseHeader +
       '/**\n' +
       ' * @fileoverview Generated externs.  DO NOT EDIT!\n' +
       ' * @externs\n' +

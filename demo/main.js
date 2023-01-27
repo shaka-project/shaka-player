@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,6 +7,13 @@
 
 goog.provide('shakaDemo.Main');
 
+goog.require('ShakaDemoAssetInfo');
+goog.require('goog.asserts');
+goog.require('shakaDemo.CloseButton');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.Utils');
+goog.require('shakaDemo.Visualizer');
+goog.require('shakaDemo.VisualizerButton');
 
 /**
  * Shaka Player demo, main section.
@@ -14,8 +22,9 @@ goog.provide('shakaDemo.Main');
  * configuration, etc).
  */
 shakaDemo.Main = class {
+  /** */
   constructor() {
-    /** @private {HTMLMediaElement} */
+    /** @private {HTMLVideoElement} */
     this.video_ = null;
 
     /** @private {HTMLElement} */
@@ -26,6 +35,9 @@ shakaDemo.Main = class {
 
     /** @type {?ShakaDemoAssetInfo} */
     this.selectedAsset = null;
+
+    /** @type {shaka.ui.Localization} */
+    this.localization_ = null;
 
     /**
      * The configuration asked for by the user. I.e., not from the asset.
@@ -46,6 +58,9 @@ shakaDemo.Main = class {
     this.initialStoredList_;
 
     /** @private {boolean} */
+    this.trickPlayControlsEnabled_ = false;
+
+    /** @private {boolean} */
     this.nativeControlsEnabled_ = false;
 
     /** @private {shaka.extern.SupportType} */
@@ -56,6 +71,20 @@ shakaDemo.Main = class {
 
     /** @private {boolean} */
     this.noInput_ = false;
+
+    /** @private {!HTMLAnchorElement} */
+    this.errorDisplayLink_ = /** @type {!HTMLAnchorElement} */(
+      document.getElementById('error-display-link'));
+
+    /** @private {?number} */
+    this.currentErrorSeverity_ = null;
+
+    // Override the icon for the MDL library's menu button.
+    // eslint-disable-next-line no-restricted-syntax
+    MaterialLayout.prototype.Constant_.MENU_ICON = 'settings';
+
+    /** @private {?shakaDemo.Visualizer} */
+    this.visualizer_ = null;
   }
 
   /**
@@ -68,14 +97,16 @@ shakaDemo.Main = class {
     // See shakaDemo.Main.initWrapper for a failsafe that works for init-time
     // errors on IE.
     window.addEventListener('error', (event) => {
+      const errorEvent = /** @type {!ErrorEvent} */(event);
+
       // Exception to the exceptions we catch: ChromeVox (screenreader) always
       // throws an error as of Chrome 73.  Screen these out since they are
       // unrelated to our application and we can't control them.
-      if (event.message.includes('cvox.Api')) {
+      if (errorEvent.message.includes('cvox.Api')) {
         return;
       }
 
-      this.onError_(/** @type {!shaka.util.Error} */ (event.error));
+      this.onError_(/** @type {!shaka.util.Error} */ (errorEvent.error));
     });
 
     // Set up event listeners.
@@ -90,16 +121,15 @@ shakaDemo.Main = class {
    * Set up the application with errors to show that load failed.
    * This does not dispatch the shaka-main-loaded event, so it will not cause
    * the nav bar buttons to be set up.
+   * @param {!shaka.ui.Overlay.FailReasonCode} reasonCode
+   * @return {!Promise}
    */
-  initFailed() {
+  async initFailed(reasonCode) {
     this.initCommon_();
 
-    // Process a synthetic error about lack of browser support.
-    const severity = shaka.util.Error.Severity.CRITICAL;
-    const message = 'Your browser is not supported!';
-    const href = 'https://github.com/google/shaka-player#' +
-                 'platform-and-browser-support-matrix';
-    this.handleError_(severity, message, href);
+    // Set up version links, so the user can switch to compiled mode if
+    // necessary.
+    this.makeVersionLinks_();
 
     const errorCloseButton =
         document.getElementById('error-display-close-button');
@@ -115,13 +145,38 @@ shakaDemo.Main = class {
       elementsToDisable.push(element);
     }
     // The hamburger menu close button is added programmatically by MDL, and
-    // thus isn't given our 'disableonfail' clas.
-    elementsToDisable.push(document.getElementsByClassName(
-        'mdl-layout__drawer-button'));
+    // thus isn't given our 'disableonfail' class.
+    for (const element of document.getElementsByClassName(
+        'mdl-layout__drawer-button')) {
+      elementsToDisable.push(element);
+    }
     for (const element of elementsToDisable) {
       element.tabIndex = -1;
       element.classList.add('disabled-by-fail');
     }
+
+    // Because the UI did not load, this will need to set up a localization
+    // object manually.
+    this.localization_ = new shaka.ui.Localization(/* fallbackLocale= */ 'en');
+    this.localization_.changeLocale(navigator.languages || []);
+    await this.setupLocalization_();
+
+    // Process a synthetic error about lack of browser support.
+    const severity = shaka.util.Error.Severity.CRITICAL;
+    let href = '';
+    let message = '';
+    switch (reasonCode) {
+      case shaka.ui.Overlay.FailReasonCode.NO_BROWSER_SUPPORT:
+        message = this.getLocalizedString(
+            shakaDemo.MessageIds.FAILURE_NO_BROWSER_SUPPORT);
+        href = 'https://github.com/shaka-project/shaka-player#' +
+                'platform-and-browser-support-matrix';
+        break;
+      case shaka.ui.Overlay.FailReasonCode.PLAYER_FAILED_TO_LOAD:
+        message = this.getLocalizedString(shakaDemo.MessageIds.FAILURE_MISC);
+        break;
+    }
+    this.handleError_(severity, message, href);
   }
 
   /**
@@ -133,7 +188,7 @@ shakaDemo.Main = class {
     this.support_ = await shaka.Player.probeSupport();
 
     this.video_ =
-      /** @type {!HTMLVideoElement} */(document.getElementById('video'));
+      /** @type {!HTMLVideoElement} */ (document.getElementById('video'));
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
     this.container_ = /** @type {!HTMLElement} */(
@@ -162,15 +217,31 @@ shakaDemo.Main = class {
       // Set the page to noInput mode, disabling the header and footer.
       const hideClass = 'should-hide-in-no-input-mode';
       for (const element of document.getElementsByClassName(hideClass)) {
-        this.hideNode_(element);
+        this.hideElement_(element);
       }
       const showClass = 'should-show-in-no-input-mode';
       for (const element of document.getElementsByClassName(showClass)) {
-        this.showNode_(element);
+        this.showElement_(element);
       }
       // Also fullscreen the container.
       this.container_.classList.add('no-input-sized');
       document.getElementById('video-bar').classList.add('no-input-sized');
+    } else {
+      goog.asserts.assert(this.player_, 'Player should exist by now.');
+
+      // Make the visualizer element.
+      const vCanvas = /** @type {!HTMLCanvasElement} */ (
+        document.getElementById('visualizer-canvas'));
+      const vDiv = /** @type {!HTMLElement} */ (
+        document.getElementById('visualizer-div'));
+      const vControlsDiv = /** @type {!HTMLElement} */ (
+        document.getElementById('visualizer-controls-div'));
+      const vScreenshotDiv = /** @type {!HTMLElement} */ (
+        document.getElementById('visualizer-screenshot-div'));
+      /** @private {?shakaDemo.Visualizer} */
+      this.visualizer_ = new shakaDemo.Visualizer(
+          vCanvas, vDiv, vScreenshotDiv, vControlsDiv, this.video_,
+          this.player_);
     }
 
     // The main page is loaded. Dispatch an event, so the various
@@ -239,7 +310,7 @@ shakaDemo.Main = class {
 
     // Navigate to the github issue opening interface, with the
     // partially-filled template as a preset body.
-    let url = 'https://github.com/google/shaka-player/issues/new?';
+    let url = 'https://github.com/shaka-project/shaka-player/issues/new?';
     url += 'body=' + encodeURIComponent(text);
     // Open in another tab.
     window.open(url, '_blank');
@@ -263,6 +334,36 @@ shakaDemo.Main = class {
     });
   }
 
+  /** @private */
+  configureUI_() {
+    const video = /** @type {!HTMLVideoElement} */ (this.video_);
+    const ui = video['ui'];
+
+    const uiConfig = ui.getConfiguration();
+    // Remove any trick play configurations from a previous config.
+    uiConfig.addSeekBar = true;
+    uiConfig.controlPanelElements =
+        uiConfig.controlPanelElements.filter((element) => {
+          return element != 'rewind' && element != 'fast_forward';
+        });
+    if (this.trickPlayControlsEnabled_) {
+      // Trick mode controls don't have a seek bar.
+      uiConfig.addSeekBar = false;
+      // Replace the position the play_pause button was at with a full suite of
+      // trick play controls, including rewind and fast-forward.
+      const index = uiConfig.controlPanelElements.indexOf('play_pause');
+      uiConfig.controlPanelElements.splice(
+          index, 1, 'rewind', 'play_pause', 'fast_forward');
+    }
+    if (!uiConfig.controlPanelElements.includes('close')) {
+      uiConfig.controlPanelElements.push('close');
+    }
+    if (!uiConfig.overflowMenuButtons.includes('visualizer')) {
+      uiConfig.overflowMenuButtons.push('visualizer');
+    }
+    ui.configure(uiConfig);
+  }
+
   /**
    * @return {!Promise}
    * @private
@@ -279,11 +380,11 @@ shakaDemo.Main = class {
       // Register custom controls to the UI.
       const closeFactory = new shakaDemo.CloseButton.Factory();
       shaka.ui.Controls.registerElement('close', closeFactory);
+      const visualizerFactory = new shakaDemo.VisualizerButton.Factory();
+      shaka.ui.OverflowMenu.registerElement('visualizer', visualizerFactory);
 
       // Configure UI.
-      const uiConfig = ui.getConfiguration();
-      uiConfig.controlPanelElements.push('close');
-      ui.configure(uiConfig);
+      this.configureUI_();
     }
 
     // Add application-level default configs here.  These are not the library
@@ -313,14 +414,57 @@ shakaDemo.Main = class {
       this.onCastStatusChange_(event['newStatus']);
     });
 
+    this.localization_ = this.controls_.getLocalization();
+    await this.setupLocalization_();
+
+    const drawerCloseButton = document.getElementById('drawer-close-button');
+    drawerCloseButton.addEventListener('click', () => {
+      const layout = document.getElementById('main-layout');
+      layout.MaterialLayout.toggleDrawer();
+      this.dispatchEventWithName_('shaka-main-drawer-state-change');
+      this.hideElement_(drawerCloseButton);
+    });
+    // Dispatch drawer state change events when the drawer button or obfuscator
+    // are pressed also.
+    const drawerButton = document.querySelector('.mdl-layout__drawer-button');
+    goog.asserts.assert(drawerButton, 'There should be a drawer button.');
+    const openDrawer = () => {
+      this.dispatchEventWithName_('shaka-main-drawer-state-change');
+      this.showElement_(drawerCloseButton);
+    };
+    // Listen to both the "click" and "keydown" events on the drawer button,
+    // since the element is actually a div rather than a button, which means
+    // that it doesn't fire "click" events when activated by keyboard input.
+    drawerButton.addEventListener('click', openDrawer);
+    drawerButton.addEventListener('keydown', (event) => {
+      const key = (/** @type {!KeyboardEvent} */ (event)).key;
+      // Ignore "keydown" input for keys that won't trigger the button (i.e.
+      // anything besides spacebar or enter).
+      if (key == ' ' || key == 'Spacebar' || key == 'Enter') {
+        openDrawer();
+      }
+    });
+    const obfuscator = document.querySelector('.mdl-layout__obfuscator');
+    goog.asserts.assert(obfuscator, 'There should be an obfuscator.');
+    obfuscator.addEventListener('click', () => {
+      this.dispatchEventWithName_('shaka-main-drawer-state-change');
+      this.hideElement_(drawerCloseButton);
+    });
+    this.hideElement_(drawerCloseButton);
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  async setupLocalization_() {
     // Set up localization lazy-loading.
     const applyNewLocaleIfPossible = () => {
       this.localizeHTMLElements_();
       this.dispatchEventWithName_('shaka-main-locale-changed');
     };
-    const localization = this.controls_.getLocalization();
     const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
-    localization.addEventListener(UNKNOWN_LOCALES, (event) => {
+    this.localization_.addEventListener(UNKNOWN_LOCALES, (event) => {
       for (const locale of event['locales']) {
         // This will leave promise rejections uncaught; this is acceptable, as
         // this function is actually expected to fail fairly often, and has
@@ -334,7 +478,7 @@ shakaDemo.Main = class {
       }
     });
     const LOCALE_CHANGED = shaka.ui.Localization.LOCALE_CHANGED;
-    localization.addEventListener(LOCALE_CHANGED, (event) => {
+    this.localization_.addEventListener(LOCALE_CHANGED, (event) => {
       applyNewLocaleIfPossible();
     });
     const initialLocaleLoads = [];
@@ -351,29 +495,6 @@ shakaDemo.Main = class {
     }
     await Promise.all(initialLocaleLoads);
     this.localizeHTMLElements_();
-
-    const drawerCloseButton = document.getElementById('drawer-close-button');
-    drawerCloseButton.addEventListener('click', () => {
-      const layout = document.getElementById('main-layout');
-      layout.MaterialLayout.toggleDrawer();
-      this.dispatchEventWithName_('shaka-main-drawer-state-change');
-      this.hideNode_(drawerCloseButton);
-    });
-    // Dispatch drawer state change events when the drawer button or obfuscator
-    // are pressed also.
-    const drawerButton = document.querySelector('.mdl-layout__drawer-button');
-    goog.asserts.assert(drawerButton, 'There should be a drawer button.');
-    drawerButton.addEventListener('click', () => {
-      this.dispatchEventWithName_('shaka-main-drawer-state-change');
-      this.showNode_(drawerCloseButton);
-    });
-    const obfuscator = document.querySelector('.mdl-layout__obfuscator');
-    goog.asserts.assert(obfuscator, 'There should be an obfuscator.');
-    obfuscator.addEventListener('click', () => {
-      this.dispatchEventWithName_('shaka-main-drawer-state-change');
-      this.hideNode_(drawerCloseButton);
-    });
-    this.hideNode_(drawerCloseButton);
   }
 
   /** @return {boolean} */
@@ -412,7 +533,11 @@ shakaDemo.Main = class {
 
     const storage = new shaka.offline.Storage();
 
-    // Set the progress callback;
+    // Configure the storage instance.
+    /**
+     * @param {string} identifier
+     * @return {?ShakaDemoAssetInfo}
+     */
     const getAssetWithIdentifier = (identifier) => {
       for (const asset of shakaAssets.testAssets) {
         if (this.getIdentifierFromAsset_(asset) == identifier) {
@@ -428,6 +553,10 @@ shakaDemo.Main = class {
       }
       return null;
     };
+    /**
+     * @param {shaka.extern.StoredContent} content
+     * @param {number} progress
+     */
     const progressCallback = (content, progress) => {
       const identifier = content.appMetadata['identifier'];
       const asset = getAssetWithIdentifier(identifier);
@@ -479,7 +608,10 @@ shakaDemo.Main = class {
         };
         asset.storedProgress = 0;
         this.dispatchEventWithName_('shaka-main-offline-progress');
-        const stored = await storage.store(asset.manifestUri, metadata);
+        const start = Date.now();
+        const stored = await storage.store(asset.manifestUri, metadata).promise;
+        const end = Date.now();
+        console.log('Download time:', end - start);
         asset.storedContent = stored;
       } catch (error) {
         this.onError_(/** @type {!shaka.util.Error} */ (error));
@@ -623,6 +755,9 @@ shakaDemo.Main = class {
     if (asset.features.includes(shakaAssets.Feature.MP2TS)) {
       mimeTypes.push('video/mp2t');
     }
+    if (asset.features.includes(shakaAssets.Feature.CONTAINERLESS)) {
+      mimeTypes.push('audio/aac');
+    }
     const hasSupportedMimeType = mimeTypes.some((type) => {
       return this.support_.media[type];
     });
@@ -631,6 +766,27 @@ shakaDemo.Main = class {
     }
 
     return null;
+  }
+
+  /**
+   * Enable or disable the UI's trick play controls.
+   *
+   * @param {boolean} enabled
+   */
+  setTrickPlayControlsEnabled(enabled) {
+    this.trickPlayControlsEnabled_ = enabled;
+    // Configure the UI, to add or remove the controls.
+    this.configureUI_();
+    this.remakeHash();
+  }
+
+  /**
+   * Get if the trick play controls are enabled.
+   *
+   * @return {boolean} enabled
+   */
+  getTrickPlayControlsEnabled() {
+    return this.trickPlayControlsEnabled_;
   }
 
   /**
@@ -674,7 +830,7 @@ shakaDemo.Main = class {
    * @return {string}
    */
   getLocalizedString(string) {
-    return this.controls_.getLocalization().resolve(string);
+    return this.localization_.resolve(string);
   }
 
   /**
@@ -687,7 +843,6 @@ shakaDemo.Main = class {
       return;
     }
 
-    const localization = this.controls_.getLocalization();
     const load = async (urlBase) => {
       const url = urlBase + '/locales/' + locale + '.json';
 
@@ -695,7 +850,7 @@ shakaDemo.Main = class {
         const text = await this.loadText_(url);
         const obj = /** @type {!Object.<string, string>} */(JSON.parse(text));
         const map = new Map(Object.entries(obj));
-        localization.insert(locale, map);
+        this.localization_.insert(locale, map);
       } catch (error) {
         console.warn('Unable to load locale', locale, 'for url', url);
       }
@@ -710,7 +865,7 @@ shakaDemo.Main = class {
     // Fall back to browser languages after the demo page setting.
     const preferredLocales = [locale].concat(navigator.languages);
 
-    this.controls_.getLocalization().changeLocale(preferredLocales);
+    this.localization_.changeLocale(preferredLocales);
   }
 
   /** @return {string} */
@@ -726,10 +881,11 @@ shakaDemo.Main = class {
     const params = this.getParams_();
 
     const manifest = params['asset'];
+    const adTagUri = params['adTagUri'];
     if (manifest) {
       // See if it's a default asset.
       for (const asset of shakaAssets.testAssets) {
-        if (asset.manifestUri == manifest) {
+        if (asset.manifestUri == manifest && asset.adTagUri == adTagUri) {
           return asset;
         }
       }
@@ -746,7 +902,7 @@ shakaDemo.Main = class {
           /* name= */ 'loaded asset',
           /* iconUri= */ '',
           /* manifestUri= */ manifest,
-          /* source= */ shakaAssets.Source.UNKNOWN);
+          /* source= */ shakaAssets.Source.CUSTOM);
       if ('license' in params) {
         let drmSystems = shakaDemo.Main.commonDrmSystems;
         if ('drmSystem' in params) {
@@ -792,7 +948,7 @@ shakaDemo.Main = class {
       if (advanced) {
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           if (!advanced[drmSystem]) {
-            advanced[drmSystem] = shakaDemo.Config.emptyAdvancedConfiguration();
+            advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
           }
           if ('videoRobustness' in params) {
             advanced[drmSystem].videoRobustness = params['videoRobustness'];
@@ -817,11 +973,45 @@ shakaDemo.Main = class {
     if ('noadaptation' in params) {
       this.configure('abr.enabled', false);
     }
-    if ('jumpLargeGaps' in params) {
-      this.configure('streaming.jumpLargeGaps', true);
-    }
 
     // Add compiled/uncompiled links.
+    this.makeVersionLinks_();
+
+    // Disable custom controls.
+    this.nativeControlsEnabled_ = 'nativecontrols' in params;
+
+    // Enable trick play.
+    if ('trickplay' in params) {
+      this.trickPlayControlsEnabled_ = true;
+      this.configureUI_();
+    }
+
+    // Check if uncompiled mode is supported.
+    if (!shakaDemo.Utils.browserSupportsUncompiledMode()) {
+      const uncompiledLink = document.getElementById('uncompiled-link');
+      goog.asserts.assert(
+          uncompiledLink instanceof HTMLAnchorElement, 'Wrong element type!');
+      uncompiledLink.setAttribute('disabled', '');
+      uncompiledLink.removeAttribute('href');
+      uncompiledLink.title = 'requires a newer browser';
+    }
+
+    if (shaka.log) {
+      if ('vv' in params) {
+        shaka.log.setLevel(shaka.log.Level.V2);
+      } else if ('v' in params) {
+        shaka.log.setLevel(shaka.log.Level.V1);
+      } else if ('debug' in params) {
+        shaka.log.setLevel(shaka.log.Level.DEBUG);
+      } else if ('info' in params) {
+        shaka.log.setLevel(shaka.log.Level.INFO);
+      }
+    }
+  }
+
+  /** @private */
+  makeVersionLinks_() {
+    const params = this.getParams_();
     let buildType = 'uncompiled';
     if ('build' in params) {
       buildType = params['build'];
@@ -830,6 +1020,8 @@ shakaDemo.Main = class {
     }
     for (const type of ['compiled', 'debug_compiled', 'uncompiled']) {
       const elem = document.getElementById(type.split('_').join('-') + '-link');
+      goog.asserts.assert(
+          elem instanceof HTMLAnchorElement, 'Wrong element type!');
       if (buildType == type) {
         elem.setAttribute('disabled', '');
         elem.removeAttribute('href');
@@ -847,29 +1039,6 @@ shakaDemo.Main = class {
           location.reload();
           return false;
         });
-      }
-    }
-
-    // Disable custom controls.
-    this.nativeControlsEnabled_ = 'nativecontrols' in params;
-
-    // Check if uncompiled mode is supported.
-    if (!shakaDemo.Utils.browserSupportsUncompiledMode()) {
-      const uncompiledLink = document.getElementById('uncompiled-link');
-      uncompiledLink.setAttribute('disabled', '');
-      uncompiledLink.removeAttribute('href');
-      uncompiledLink.title = 'requires a newer browser';
-    }
-
-    if (shaka.log) {
-      if ('vv' in params) {
-        shaka.log.setLevel(shaka.log.Level.V2);
-      } else if ('v' in params) {
-        shaka.log.setLevel(shaka.log.Level.V1);
-      } else if ('debug' in params) {
-        shaka.log.setLevel(shaka.log.Level.DEBUG);
-      } else if ('info' in params) {
-        shaka.log.setLevel(shaka.log.Level.INFO);
       }
     }
   }
@@ -964,7 +1133,7 @@ shakaDemo.Main = class {
   /**
    * @param {string} uri
    * @param {!shaka.net.NetworkingEngine} netEngine
-   * @return {!Promise.<ArrayBuffer>}
+   * @return {!Promise.<!ArrayBuffer>}
    * @private
    */
   async requestCertificate_(uri, netEngine) {
@@ -974,15 +1143,44 @@ shakaDemo.Main = class {
     return response.data;
   }
 
+  /** @return {boolean} */
+  getIsVisualizerActive() {
+    if (this.visualizer_) {
+      return this.visualizer_.active;
+    }
+    return false;
+  }
+
+  /** @param {boolean} active */
+  setIsVisualizerActive(active) {
+    if (this.visualizer_) {
+      const wasActive = this.visualizer_.active;
+      this.visualizer_.active = active;
+      if (wasActive != active) {
+        if (active) {
+          this.visualizer_.start();
+        } else {
+          this.visualizer_.stop();
+        }
+      }
+    }
+  }
+
   /** Unload the currently-playing asset. */
   unload() {
+    if (this.visualizer_) {
+      this.visualizer_.stop();
+    }
     this.selectedAsset = null;
     const videoBar = document.getElementById('video-bar');
-    this.hideNode_(videoBar);
+    this.hideElement_(videoBar);
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
     if (document.fullscreenElement) {
       document.exitFullscreen();
+    }
+    if (this.video_.webkitDisplayingFullscreen) {
+      this.video_.webkitExitFullscreen();
     }
     if (document.pictureInPictureElement) {
       document.exitPictureInPicture();
@@ -1067,7 +1265,7 @@ shakaDemo.Main = class {
    */
   showPlayer_() {
     const videoBar = document.getElementById('video-bar');
-    this.showNode_(videoBar);
+    this.showElement_(videoBar);
     this.closeError_();
     this.video_.poster = shakaDemo.Main.mainPoster_;
 
@@ -1087,36 +1285,40 @@ shakaDemo.Main = class {
       // The currently-selected asset changed, so update asset cards.
       this.dispatchEventWithName_('shaka-main-selected-asset-changed');
 
-      await this.drmConfiguration_(asset);
-      this.controls_.getCastProxy().setAppData({'asset': asset});
-
       // Enable the correct set of controls before loading.
+      // The video container influences the TextDisplayer used.
       if (this.nativeControlsEnabled_) {
         this.controls_.setEnabledShakaControls(false);
         this.controls_.setEnabledNativeControls(true);
+        // This will force the player to use SimpleTextDisplayer.
+        this.player_.setVideoContainer(null);
       } else {
         this.controls_.setEnabledShakaControls(true);
         this.controls_.setEnabledNativeControls(false);
+        // This will force the player to use UITextDisplayer.
+        this.player_.setVideoContainer(this.container_);
       }
-      // Also set text displayer, as appropriate.
-      // Make an alias for "this" so that it can be captured inside the
-      // non-arrow function below.
-      const self = this;
-      // eslint-disable-next-line no-restricted-syntax
-      const textDisplayer = function() {
-        if (self.nativeControlsEnabled_) {
-          return new shaka.text.SimpleTextDisplayer(self.video_);
-        } else {
-          return new shaka.ui.TextDisplayer(self.video_, self.container_);
-        }
-      };
-      this.player_.configure('textDisplayFactory', textDisplayer);
+
+      await this.drmConfiguration_(asset);
+      this.controls_.getCastProxy().setAppData({'asset': asset});
 
       // Finally, the asset can be loaded.
-      const manifestUri = (asset.storedContent ?
-                           asset.storedContent.offlineUri :
-                           null) || asset.manifestUri;
-      await this.player_.load(manifestUri);
+      let manifestUri = asset.manifestUri;
+      // If we have an offline copy, use that.  If the offlineUri field is null,
+      // we are still downloading it.
+      if (asset.storedContent && asset.storedContent.offlineUri) {
+        manifestUri = asset.storedContent.offlineUri;
+      }
+      // If it's a server side dai asset, request ad-containing manifest
+      // from the ad manager.
+      if (asset.imaAssetKey || (asset.imaContentSrcId && asset.imaVideoId)) {
+        manifestUri = await this.getManifestUriFromAdManager_(asset);
+      }
+      await this.player_.load(
+          manifestUri,
+          /* startTime= */ null,
+          asset.mimeType || undefined);
+
       if (this.player_.isAudioOnly()) {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
@@ -1129,14 +1331,14 @@ shakaDemo.Main = class {
           // If that happens, just proceed to load.
           goog.asserts.assert(this.video_ != null, 'this.video should exist!');
           adManager.initClientSide(
-              this.controls_.getAdContainer(), this.video_);
+              this.controls_.getClientSideAdContainer(), this.video_);
           const adRequest = new google.ima.AdsRequest();
           adRequest.adTagUrl = asset.adTagUri;
           adManager.requestClientSideAds(adRequest);
         } catch (error) {
           console.log(error);
           console.warn('Ads code has been prevented from running. ' +
-            'Proceeding with the load without ads.');
+            'Proceeding without ads.');
         }
       }
 
@@ -1146,10 +1348,12 @@ shakaDemo.Main = class {
           title: asset.name,
           artwork: [{src: asset.iconUri}],
         };
-        if (asset.source != shakaAssets.Source.UNKNOWN) {
-          metadata.artist = asset.source;
-        }
+        metadata.artist = asset.source;
         navigator.mediaSession.metadata = new MediaMetadata(metadata);
+      }
+
+      if (this.visualizer_ && this.visualizer_.active) {
+        this.visualizer_.start();
       }
     } catch (reason) {
       const error = /** @type {!shaka.util.Error} */ (reason);
@@ -1209,14 +1413,14 @@ shakaDemo.Main = class {
     if (!this.getCurrentConfigValue('abr.enabled')) {
       params.push('noadaptation');
     }
-    if (this.getCurrentConfigValue('streaming.jumpLargeGaps')) {
-      params.push('jumpLargeGaps');
-    }
     params.push('uilang=' + this.getUILocale());
 
     if (this.selectedAsset) {
       const isDefault = shakaAssets.testAssets.includes(this.selectedAsset);
       params.push('asset=' + this.selectedAsset.manifestUri);
+      if (this.selectedAsset.adTagUri) {
+        params.push('adTagUri=' + this.selectedAsset.adTagUri);
+      }
       if (!isDefault && this.selectedAsset.licenseServers.size) {
         const uri = this.selectedAsset.licenseServers.values().next().value;
         params.push('license=' + uri);
@@ -1234,10 +1438,16 @@ shakaDemo.Main = class {
 
     const navButtons = document.getElementById('nav-button-container');
     for (const button of navButtons.childNodes) {
-      if (button.nodeType == Node.ELEMENT_NODE &&
-          button.classList.contains('mdl-button--accent')) {
-        params.push('panel=' + button.getAttribute('tab-identifier'));
-        break;
+      if (button.nodeType == Node.ELEMENT_NODE) {
+        goog.asserts.assert( button instanceof HTMLElement, 'Wrong node type!');
+        if (button.classList.contains('mdl-button--accent')) {
+          params.push('panel=' + button.getAttribute('tab-identifier'));
+          const hashValues = button.getAttribute('tab-hash');
+          if (hashValues) {
+            params.push('panelData=' + hashValues);
+          }
+          break;
+        }
       }
     }
 
@@ -1254,6 +1464,10 @@ shakaDemo.Main = class {
 
     if (this.nativeControlsEnabled_) {
       params.push('nativecontrols');
+    }
+
+    if (this.trickPlayControlsEnabled_) {
+      params.push('trickplay');
     }
 
     // MAX_LOG_LEVEL is the default starting log level. Only save the log level
@@ -1306,19 +1520,58 @@ shakaDemo.Main = class {
   }
 
   /**
-   * @param {Node} node
+   * @param {Element} element
    * @private
    */
-  hideNode_(node) {
-    node.classList.add('hidden');
+  hideElement_(element) {
+    element.classList.add('hidden');
   }
 
   /**
-   * @param {Node} node
+   * @param {Element} element
    * @private
    */
-  showNode_(node) {
-    node.classList.remove('hidden');
+  showElement_(element) {
+    element.classList.remove('hidden');
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
+   * @return {!Promise.<string>}
+   * @private
+   */
+  async getManifestUriFromAdManager_(asset) {
+    const adManager = this.player_.getAdManager();
+    const container = this.controls_.getServerSideAdContainer();
+    try {
+      // If IMA is blocked by an AdBlocker, init() will throw.
+      // If that happens, return our backup uri.
+      goog.asserts.assert(this.video_ != null, 'Video should not be null!');
+      adManager.initServerSide(container, this.video_);
+      let request;
+      if (asset.imaAssetKey != null) {
+        // LIVE stream
+        request = new google.ima.dai.api.LiveStreamRequest();
+        request.assetKey = asset.imaAssetKey;
+      } else {
+        goog.asserts.assert(asset.imaContentSrcId != null &&
+            asset.imaVideoId != null, 'Asset should have ima ids!');
+        // VOD
+        request = new google.ima.dai.api.VODStreamRequest();
+        request.contentSourceId = asset.imaContentSrcId;
+        request.videoId = asset.imaVideoId;
+      }
+
+      const uri = await adManager.requestServerSideStream(
+          request, /* backupUri= */ asset.manifestUri);
+      return uri;
+    } catch (error) {
+      console.log(error);
+      console.warn('Ads code has been prevented from running ' +
+          'or returned an error. Proceeding without ads.');
+
+      return asset.manifestUri;
+    }
   }
 
   /**
@@ -1327,7 +1580,10 @@ shakaDemo.Main = class {
    * setup process.
    * @param {string} containerName Used to determine the id of the button this
    *   is looking for.  Also used as the className of the container, for CSS.
-   * @return {!HTMLDivElement} The container for the tab.
+   * @return {{
+   *   container: !HTMLDivElement,
+   *   button: !HTMLButtonElement,
+   * }} The container for the tab, and the button element that activates it.
    */
   addNavButton(containerName) {
     const navButtons = document.getElementById('nav-button-container');
@@ -1340,14 +1596,20 @@ shakaDemo.Main = class {
     const params = this.getParams_();
     let selected =
         params['panel'] == encodeURI(button.getAttribute('tab-identifier'));
-    if (!selected && !params['panel']) {
+    if (selected) {
+      // Re-apply any saved data from hash.
+      const hashValues = params['panelData'];
+      if (hashValues) {
+        button.setAttribute('tab-hash', hashValues);
+      }
+    } else if (!params['panel']) {
       // Check if it's selected by default.
       selected = button.getAttribute('defaultselected') != null;
     }
 
     // Create the div for this nav button's container within the contents.
     const container = document.createElement('div');
-    this.hideNode_(container);
+    this.hideElement_(container);
     contents.appendChild(container);
 
     // Add a click listener to display this container, and hide the others.
@@ -1355,16 +1617,18 @@ shakaDemo.Main = class {
       // This element should be the selected one.
       for (const child of navButtons.childNodes) {
         if (child.nodeType == Node.ELEMENT_NODE) {
+          goog.asserts.assert(child instanceof Element, 'Wrong node type!');
           child.classList.remove('mdl-button--accent');
         }
       }
       for (const child of contents.childNodes) {
         if (child.nodeType == Node.ELEMENT_NODE) {
-          this.hideNode_(child);
+          goog.asserts.assert(child instanceof Element, 'Wrong node type!');
+          this.hideElement_(child);
         }
       }
       button.classList.add('mdl-button--accent');
-      this.showNode_(container);
+      this.showElement_(container);
       this.remakeHash();
 
       // Dispatch an event so that a page can load any deferred content.
@@ -1380,7 +1644,10 @@ shakaDemo.Main = class {
       Promise.resolve().then(switchPage);
     }
 
-    return /** @type {!HTMLDivElement} */ (container);
+    return {
+      container: /** @type {!HTMLDivElement} */ (container),
+      button: /** @type {!HTMLButtonElement} */ (button),
+    };
   }
 
   /**
@@ -1389,7 +1656,8 @@ shakaDemo.Main = class {
    * @private
    */
   dispatchEventWithName_(name) {
-    const event = document.createEvent('CustomEvent');
+    const event =
+      /** @type {!CustomEvent} */(document.createEvent('CustomEvent'));
     event.initCustomEvent(name,
         /* canBubble= */ false,
         /* cancelable= */ false,
@@ -1399,7 +1667,7 @@ shakaDemo.Main = class {
 
   /**
    * Sets the "version-string" divs to a version string.
-   * For example, "v2.5.4-master (uncompiled)".
+   * For example, "v2.5.4-main (uncompiled)".
    * @private
    */
   setUpVersionStrings_() {
@@ -1432,10 +1700,9 @@ shakaDemo.Main = class {
    */
   closeError_() {
     document.getElementById('error-display').classList.add('hidden');
-    const link = document.getElementById('error-display-link');
-    link.href = '';
-    link.textContent = '';
-    link.severity = null;
+    this.errorDisplayLink_.href = '';
+    this.errorDisplayLink_.textContent = '';
+    this.currentErrorSeverity_ = null;
   }
 
   /**
@@ -1443,7 +1710,9 @@ shakaDemo.Main = class {
    * @private
    */
   onErrorEvent_(event) {
-    this.onError_(event.detail);
+    // TODO: generate externs automatically from @event types
+    // This event should be shaka.Player.ErrorEvent
+    this.onError_(event['detail']);
   }
 
   /**
@@ -1476,25 +1745,24 @@ shakaDemo.Main = class {
    * @private
    */
   handleError_(severity, message, href) {
-    const link = document.getElementById('error-display-link');
-
     // Always show the new error if:
     //   1. there is no error showing currently
     //   2. the new error is more severe than the old one
     // Sadly, we do not (yet?) have localizations for error messages.
-    if (link.severity == null || severity > link.severity) {
-      link.href = href;
+    if (this.currentErrorSeverity_ == null ||
+        severity > this.currentErrorSeverity_) {
+      this.errorDisplayLink_.href = href;
       // IE8 and other very old browsers don't have textContent.
-      if (link.textContent === undefined) {
-        link.innerText = message;
+      if (this.errorDisplayLink_.textContent === undefined) {
+        this.errorDisplayLink_.innerText = message;
       } else {
-        link.textContent = message;
+        this.errorDisplayLink_.textContent = message;
       }
-      link.severity = severity;
-      if (link.href) {
-        link.classList.remove('input-disabled');
+      this.currentErrorSeverity_ = severity;
+      if (this.errorDisplayLink_.href) {
+        this.errorDisplayLink_.classList.remove('input-disabled');
       } else {
-        link.classList.add('input-disabled');
+        this.errorDisplayLink_.classList.add('input-disabled');
       }
       document.getElementById('error-display').classList.remove('hidden');
     }
@@ -1513,6 +1781,20 @@ shakaDemo.Main = class {
       this.showPlayer_();
     }
   }
+
+  /** @return {!shaka.extern.AdvancedDrmConfiguration} */
+  static defaultAdvancedDrmConfig() {
+    return {
+      distinctiveIdentifierRequired: false,
+      persistentStateRequired: false,
+      videoRobustness: '',
+      audioRobustness: '',
+      sessionType: '',
+      serverCertificate: new Uint8Array(0),
+      serverCertificateUri: '',
+      individualizationServer: '',
+    };
+  }
 };
 
 
@@ -1520,7 +1802,7 @@ shakaDemo.Main = class {
 shakaDemo.Main.commonDrmSystems = [
   'com.widevine.alpha',
   'com.microsoft.playready',
-  'com.apple.fps.1_0',
+  'com.apple.fps',
   'com.adobe.primetime',
   'org.w3.clearkey',
 ];
@@ -1566,5 +1848,9 @@ document.addEventListener('shaka-ui-loaded', () => {
   shakaDemo.Main.initWrapper(() => shakaDemoMain.init());
 });
 document.addEventListener('shaka-ui-load-failed', (event) => {
-  shakaDemo.Main.initWrapper(() => shakaDemoMain.initFailed());
+  shakaDemo.Main.initWrapper(() => {
+    const reasonCode = /** @type {!shaka.ui.Overlay.FailReasonCode} */ (
+      event['detail']['reasonCode']);
+    shakaDemoMain.initFailed(reasonCode);
+  });
 });

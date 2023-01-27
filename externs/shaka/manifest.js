@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -12,9 +13,12 @@
 /**
  * @typedef {{
  *   presentationTimeline: !shaka.media.PresentationTimeline,
- *   periods: !Array.<!shaka.extern.Period>,
+ *   variants: !Array.<shaka.extern.Variant>,
+ *   textStreams: !Array.<shaka.extern.Stream>,
+ *   imageStreams: !Array.<shaka.extern.Stream>,
  *   offlineSessionIds: !Array.<string>,
- *   minBufferTime: number
+ *   minBufferTime: number,
+ *   sequenceMode: boolean
  * }}
  *
  * @description
@@ -36,8 +40,6 @@
  * </p>
  *
  * <p>
- * The presentation timeline is divided into one or more Periods, and each of
- * these Periods contains its own collection of Variants and text streams.
  * A variant is a combination of an audio and a video streams that can be played
  * together.
  * </p>
@@ -54,9 +56,15 @@
  * @property {!shaka.media.PresentationTimeline} presentationTimeline
  *   <i>Required.</i> <br>
  *   The presentation timeline.
- * @property {!Array.<!shaka.extern.Period>} periods
+ * @property {!Array.<shaka.extern.Variant>} variants
  *   <i>Required.</i> <br>
- *   The presentation's Periods. There must be at least one Period.
+ *   The presentation's Variants. There must be at least one Variant.
+ * @property {!Array.<shaka.extern.Stream>} textStreams
+ *   <i>Required.</i> <br>
+ *   The presentation's text streams.
+ * @property {!Array.<shaka.extern.Stream>} imageStreams
+ *   <i>Required.</i> <br>
+ *   The presentation's image streams
  * @property {!Array.<string>} offlineSessionIds
  *   <i>Defaults to [].</i> <br>
  *   An array of EME sessions to load for offline playback.
@@ -65,39 +73,13 @@
  *   The minimum number of seconds of content that must be buffered before
  *   playback can begin.  Can be overridden by a higher value from the Player
  *   configuration.
+ * @property {boolean} sequenceMode
+ *   If true, we will append the media segments using sequence mode; that is to
+ *   say, ignoring any timestamps inside the media files.
  *
  * @exportDoc
  */
 shaka.extern.Manifest;
-
-
-/**
- * @typedef {{
- *   startTime: number,
- *   variants: !Array.<shaka.extern.Variant>,
- *   textStreams: !Array.<shaka.extern.Stream>
- * }}
- *
- * @description
- * A Period object contains the Streams for part of the presentation.
- *
- * @property {number} startTime
- *   <i>Required.</i> <br>
- *   The Period's start time, in seconds, relative to the start of the
- *   presentation. The first Period must begin at the start of the
- *   presentation. The Period ends immediately before the next Period's start
- *   time or exactly at the end of the presentation timeline. Periods which
- *   begin after the end of the presentation timeline are ignored.
- * @property {!Array.<shaka.extern.Variant>} variants
- *   <i>Required.</i> <br>
- *   The Period's Variants. There must be at least one Variant.
- * @property {!Array.<shaka.extern.Stream>} textStreams
- *   <i>Required.</i> <br>
- *   The Period's text streams.
- *
- * @exportDoc
- */
-shaka.extern.Period;
 
 
 /**
@@ -133,8 +115,10 @@ shaka.extern.InitDataOverride;
  *   audioRobustness: string,
  *   videoRobustness: string,
  *   serverCertificate: Uint8Array,
+ *   serverCertificateUri: string,
+ *   sessionType: string,
  *   initData: Array.<!shaka.extern.InitDataOverride>,
- *   keyIds: Array.<string>
+ *   keyIds: Set.<string>
  * }}
  *
  * @description
@@ -154,6 +138,9 @@ shaka.extern.InitDataOverride;
  *   <i>Defaults to false.  Can be filled in by advanced DRM config.</i> <br>
  *   True if the application requires the key system to support persistent
  *   state, e.g., for persistent license storage.
+ * @property {string} sessionType
+ *   <i>Defaults to 'temporary' if Shaka wasn't initiated for storage.
+ *   Can be filled in by advanced DRM config sessionType parameter.</i> <br>
  * @property {string} audioRobustness
  *   <i>Defaults to '', e.g., no specific robustness required.  Can be filled in
  *   by advanced DRM config.</i> <br>
@@ -168,12 +155,16 @@ shaka.extern.InitDataOverride;
  *   A key-system-specific server certificate used to encrypt license requests.
  *   Its use is optional and is meant as an optimization to avoid a round-trip
  *   to request a certificate.
+ * @property {string} serverCertificateUri
+ *   <i>Defaults to '', e.g., server certificate will be requested from the
+ *   given URI if serverCertificate is not provided. Can be filled in by
+ *   advanced DRM config.</i>
  * @property {Array.<!shaka.extern.InitDataOverride>} initData
  *   <i>Defaults to [], e.g., no override.</i> <br>
  *   A list of initialization data which override any initialization data found
  *   in the content.  See also shaka.extern.InitDataOverride.
- * @property {Array.<string>} keyIds
- *   <i>Defaults to []</i> <br>
+ * @property {Set.<string>} keyIds
+ *   <i>Defaults to the empty Set</i> <br>
  *   If not empty, contains the default key IDs for this key system, as
  *   lowercase hex strings.
  * @exportDoc
@@ -185,13 +176,14 @@ shaka.extern.DrmInfo;
  * @typedef {{
  *   id: number,
  *   language: string,
+ *   disabledUntilTime: number,
  *   primary: boolean,
  *   audio: ?shaka.extern.Stream,
  *   video: ?shaka.extern.Stream,
  *   bandwidth: number,
- *   drmInfos: !Array.<shaka.extern.DrmInfo>,
  *   allowedByApplication: boolean,
- *   allowedByKeySystem: boolean
+ *   allowedByKeySystem: boolean,
+ *   decodingInfos: !Array.<MediaCapabilitiesDecodingInfo>
  * }}
  *
  * @description
@@ -207,21 +199,23 @@ shaka.extern.DrmInfo;
  *   The Variant's language, specified as a language code. <br>
  *   See {@link https://tools.ietf.org/html/rfc5646} <br>
  *   See {@link http://www.iso.org/iso/home/standards/language_codes.htm}
+ * @property {number} disabledUntilTime
+ *   <i>Defaults to 0.</i> <br>
+ *   0 means the variant is enabled. The Player will set this value to
+ *   "(Date.now() / 1000) + config.streaming.maxDisabledTime" and once this
+ *   maxDisabledTime has passed Player will set the value to 0 in order to
+ *   reenable the variant.
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
- *   True indicates that the player should use this Variant over others in the
- *   same Period. The player may still use another Variant to meet application
- *   preferences.
+ *   True indicates that the player should use this Variant over others if user
+ *   preferences cannot be met.  The player may still use another Variant to
+ *   meet user preferences.
  * @property {?shaka.extern.Stream} audio
  *   The audio stream of the variant.
  * @property {?shaka.extern.Stream} video
  *   The video stream of the variant.
  * @property {number} bandwidth
  *   The variant's required bandwidth in bits per second.
- * @property {!Array.<!shaka.extern.DrmInfo>} drmInfos
- *   <i>Defaults to [] (i.e., no DRM).</i> <br>
- *   An array of DrmInfo objects which describe DRM schemes are compatible with
- *   the content.
  * @property {boolean} allowedByApplication
  *   <i>Defaults to true.</i><br>
  *   Set by the Player to indicate whether the variant is allowed to be played
@@ -230,6 +224,10 @@ shaka.extern.DrmInfo;
  *   <i>Defaults to true.</i><br>
  *   Set by the Player to indicate whether the variant is allowed to be played
  *   by the key system.
+ * @property {!Array.<MediaCapabilitiesDecodingInfo>} decodingInfos
+ *   <i>Defaults to [].</i><br>
+ *   Set by StreamUtils to indicate the results from MediaCapabilities
+ *   decodingInfo.
  *
  * @exportDoc
  */
@@ -248,20 +246,66 @@ shaka.extern.CreateSegmentIndexFunction;
 
 /**
  * @typedef {{
+ *   method: string,
+ *   cryptoKey: (webCrypto.CryptoKey|undefined),
+ *   fetchKey: (shaka.extern.CreateSegmentIndexFunction|undefined),
+ *   iv: (!Uint8Array|undefined),
+ *   firstMediaSequenceNumber: number
+ * }}
+ *
+ * @description
+ * AES-128 key and iv info from the HLS manifest.
+ *
+ * @property {string} method
+ *   The key method defined in the HLS manifest.
+ * @property {webCrypto.CryptoKey|undefined} cryptoKey
+ *   Web crypto key object of the AES-128 CBC key. If unset, the "fetchKey"
+ *   property should be provided.
+ * @property {shaka.extern.FetchCryptoKeysFunction|undefined} fetchKey
+ *   A function that fetches the key.
+ *   Should be provided if the "cryptoKey" property is unset.
+ *   Should update this object in-place, to set "cryptoKey".
+ * @property {(!Uint8Array|undefined)} iv
+ *   The IV in the HLS manifest, if defined. See HLS RFC 8216 Section 5.2 for
+ *   handling undefined IV.
+ * @property {number} firstMediaSequenceNumber
+ *   The starting Media Sequence Number of the playlist, used when IV is
+ *   undefined.
+ *
+ * @exportDoc
+ */
+shaka.extern.HlsAes128Key;
+
+
+/**
+ * A function that fetches the crypto keys for AES-128.
+ * Returns a promise that resolves when the keys have been fetched.
+ *
+ * @typedef {function(): !Promise}
+ * @exportDoc
+ */
+shaka.extern.FetchCryptoKeysFunction;
+
+
+/**
+ * @typedef {{
  *   id: number,
  *   originalId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
+ *   closeSegmentIndex: (function()|undefined),
  *   segmentIndex: shaka.media.SegmentIndex,
  *   mimeType: string,
  *   codecs: string,
  *   frameRate: (number|undefined),
  *   pixelAspectRatio: (string|undefined),
+ *   hdr: (string|undefined),
  *   bandwidth: (number|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
  *   kind: (string|undefined),
  *   encrypted: boolean,
- *   keyId: ?string,
+ *   drmInfos: !Array.<shaka.extern.DrmInfo>,
+ *   keyIds: !Set.<string>,
  *   language: string,
  *   label: ?string,
  *   type: string,
@@ -269,9 +313,15 @@ shaka.extern.CreateSegmentIndexFunction;
  *   trickModeVideo: ?shaka.extern.Stream,
  *   emsgSchemeIdUris: ?Array.<string>,
  *   roles: !Array.<string>,
+ *   forced: boolean,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
- *   closedCaptions: Map.<string, string>
+ *   spatialAudio: boolean,
+ *   closedCaptions: Map.<string, string>,
+ *   tilesLayout: (string|undefined),
+ *   matchedStreams:
+ *      (!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
+ *      undefined)
  * }}
  *
  * @description
@@ -288,6 +338,9 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {shaka.extern.CreateSegmentIndexFunction} createSegmentIndex
  *   <i>Required.</i> <br>
  *   Creates the Stream's segmentIndex (asynchronously).
+ * @property {(function()|undefined)} closeSegmentIndex
+ *   <i>Optional.</i> <br>
+ *   Closes the Stream's segmentIndex.
  * @property {shaka.media.SegmentIndex} segmentIndex
  *   <i>Required.</i> <br>
  *   May be null until createSegmentIndex() is complete.
@@ -305,6 +358,9 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {(string|undefined)} pixelAspectRatio
  *   <i>Video streams only.</i> <br>
  *   The Stream's pixel aspect ratio
+ * @property {(string|undefined)} hdr
+ *   <i>Video streams only.</i> <br>
+ *   The Stream's HDR info
  * @property {(number|undefined)} bandwidth
  *   <i>Audio and video streams only.</i> <br>
  *   The stream's required bandwidth in bits per second.
@@ -321,10 +377,15 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {boolean} encrypted
  *   <i>Defaults to false.</i><br>
  *   True if the stream is encrypted.
- * @property {?string} keyId
- *   <i>Defaults to null (i.e., unencrypted or key ID unknown).</i> <br>
- *   The stream's key ID as a lowercase hex string. This key ID identifies the
- *   encryption key that the browser (key system) can use to decrypt the stream.
+ * @property {!Array.<!shaka.extern.DrmInfo>} drmInfos
+ *   <i>Defaults to [] (i.e., no DRM).</i> <br>
+ *   An array of DrmInfo objects which describe DRM schemes are compatible with
+ *   the content.
+ * @property {!Set.<string>} keyIds
+ *   <i>Defaults to empty (i.e., unencrypted or key ID unknown).</i> <br>
+ *   The stream's key IDs as lowercase hex strings. These key IDs identify the
+ *   encryption keys that the browser (key system) can use to decrypt the
+ *   stream.
  * @property {string} language
  *   The Stream's language, specified as a language code. <br>
  *   Audio stream's language must be identical to the language of the containing
@@ -333,12 +394,12 @@ shaka.extern.CreateSegmentIndexFunction;
  *   The Stream's label, unique text that should describe the audio/text track.
  * @property {string} type
  *   <i>Required.</i> <br>
- *   Content type (e.g. 'video', 'audio' or 'text')
+ *   Content type (e.g. 'video', 'audio' or 'text', 'image')
  * @property {boolean} primary
  *   <i>Defaults to false.</i> <br>
- *   True indicates that the player should prefer this Stream over others
- *   in the same Period. The player may still use another Stream to meet
- *   application preferences.
+ *   True indicates that the player should use this Stream over others if user
+ *   preferences cannot be met.  The player may still use another Variant to
+ *   meet user preferences.
  * @property {?shaka.extern.Stream} trickModeVideo
  *   <i>Video streams only.</i> <br>
  *   An alternate video stream to use for trick mode playback.
@@ -349,16 +410,31 @@ shaka.extern.CreateSegmentIndexFunction;
  * @property {!Array.<string>} roles
  *   The roles of the stream as they appear on the manifest,
  *   e.g. 'main', 'caption', or 'commentary'.
+ * @property {boolean} forced
+ *   <i>Defaults to false.</i> <br>
+ *   Whether the stream set was forced
  * @property {?number} channelsCount
  *   The channel count information for the audio stream.
  * @property {?number} audioSamplingRate
  *   Specifies the maximum sampling rate of the content.
+ * @property {boolean} spatialAudio
+ *   <i>Defaults to false.</i> <br>
+ *   Whether the stream set has spatial audio
  * @property {Map.<string, string>} closedCaptions
  *   A map containing the description of closed captions, with the caption
  *   channel number (CC1 | CC2 | CC3 | CC4) as the key and the language code
  *   as the value. If the channel number is not provided by the description,
  *   we'll set an 0-based index as the key.
  *   Example: {'CC1': 'eng'; 'CC3': 'swe'}, or {'1', 'eng'; '2': 'swe'}, etc.
+ * @property {(string|undefined)} tilesLayout
+ *   <i>Image streams only.</i> <br>
+ *   The value is a grid-item-dimension consisting of two positive decimal
+ *   integers in the format: column-x-row ('4x3'). It describes the arrangement
+ *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {(!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
+ *   undefined)} matchedStreams
+ *   The streams in all periods which match the stream. Used for Dash.
+ *
  * @exportDoc
  */
 shaka.extern.Stream;

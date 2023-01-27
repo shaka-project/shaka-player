@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -373,6 +374,20 @@ describe('MpdUtils', () => {
       checkTimePoints(timePoints, result, 1, 10, Infinity);
     });
 
+    it('adjust start time w/ t missing', () => {
+      // No S@t is equivalent to t=0, which should use PTO to make negative.
+      // See https://github.com/shaka-project/shaka-player/issues/2590
+      const timePoints = [
+        createTimePoint(null, 10, 0),
+        createTimePoint(10, 10, 0),
+      ];
+      const result = [
+        {start: -5, end: 5},
+        {start: 5, end: 15},
+      ];
+      checkTimePoints(timePoints, result, 1, 5, Infinity);
+    });
+
     /**
      * Creates a new TimePoint.
      *
@@ -513,7 +528,7 @@ describe('MpdUtils', () => {
           '<ToReplace xlink:href="https://xlink0" xlink:actuate="onLoad" />');
       // Create a large but finite number of links, so this won't
       // infinitely recurse if there isn't a depth limit.
-      for (const i of shaka.util.Iterables.range(20)) {
+      for (let i = 0; i < 20; i++) {
         const key = 'https://xlink' + i;
         const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1));
 
@@ -636,7 +651,7 @@ describe('MpdUtils', () => {
           '<ToReplace xlink:href="https://xlink0" xlink:actuate="onLoad" />');
       // Create a few links.  This is few enough that it would succeed if we
       // didn't abort it.
-      for (const i of shaka.util.Iterables.range(4)) {
+      for (let i = 0; i < 4; i++) {
         const key = 'https://xlink' + i;
         const value = makeRecursiveXMLString(0, 'https://xlink' + (i + 1));
 

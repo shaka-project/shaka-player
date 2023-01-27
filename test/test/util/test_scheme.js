@@ -1,9 +1,62 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
-goog.provide('shaka.test.TestScheme');
+/**
+ * @typedef {{
+ *   initSegmentUri: string,
+ *   mdhdOffset: number,
+ *   segmentUri: string,
+ *   tfdtOffset: number,
+ *   segmentDuration: number,
+ *   mimeType: string,
+ *   codecs: string,
+ *   delaySetup: (boolean|undefined),
+ *   language: (string|undefined),
+ *   closedCaptions: (!Map.<string, string>|undefined),
+ *   initData: (string|undefined)
+ * }}
+ */
+let AVMetadataType;
+
+/**
+ * @typedef {{
+ *   uri: string,
+ *   mimeType: string,
+ *   codecs: (string|undefined),
+ *   language: (string|undefined)
+ * }}
+ */
+let TextMetadataType;
+
+/**
+ * @typedef {{
+ *   delaySetup: (boolean|undefined),
+ *   closedCaptions: (!Map.<string, string>|undefined),
+ *   initData: (string|undefined),
+ *   language: (string|undefined)
+ * }}
+ */
+let ExtraMetadataType;
+
+/**
+ * @typedef {{
+ *   video: AVMetadataType,
+ *   audio: AVMetadataType,
+ *   text: TextMetadataType,
+ *   videoResolutions: (!Array.<!Array.<number>>|undefined),
+ *   audioLanguages: (!Array.<string>|undefined),
+ *   textLanguages: (!Array.<string>|undefined),
+ *   duration: number,
+ *   licenseServers: (!Object.<string, string>|undefined),
+ *   licenseRequestHeaders: (!Object.<string, string>|undefined),
+ *   customizeStream: (function(shaka.test.ManifestGenerator.Stream)|undefined),
+ *   sequenceMode: (boolean|undefined)
+ * }}
+ */
+let MetadataType;
 
 
 shaka.test.TestScheme = class {
@@ -66,7 +119,7 @@ shaka.test.TestScheme = class {
       responseData = generator.getInitSegment(0);
     } else {
       const index = Number(segmentParts[3]);
-      responseData = generator.getSegment(index + 1, 0, 0);
+      responseData = generator.getSegment(index, 0);
     }
     if (!responseData) {
       return shaka.util.AbortableOperation.failed(malformed);
@@ -109,24 +162,24 @@ shaka.test.TestScheme = class {
 
   /**
    * Creates the manifests and generators.
-   * @param {*} shaka
+   * @param {shakaNamespaceType} compiledShaka
    * @param {string} suffix
    * @return {!Promise}
    */
-  static createManifests(shaka, suffix) {
-    /** @type {?} */
-    const windowShaka = window['shaka'];
-
+  static createManifests(compiledShaka, suffix) {
     /**
-     * @param {Object} metadata
-     * @return {shaka.test.IStreamGenerator}
+     * @param {AVMetadataType} metadata
+     * @return {!shaka.test.IStreamGenerator}
      */
     function createStreamGenerator(metadata) {
       if (metadata.segmentUri.includes('.ts')) {
-        return new windowShaka.test.TSVodStreamGenerator(
-            metadata.segmentUri);
+        return new shaka.test.TSVodStreamGenerator(
+            metadata.segmentUri, metadata.segmentDuration);
       }
-      return new windowShaka.test.Mp4VodStreamGenerator(
+      if (metadata.segmentUri.includes('.aac')) {
+        return new shaka.test.AACVodStreamGenerator(metadata.segmentUri);
+      }
+      return new shaka.test.Mp4VodStreamGenerator(
           metadata.initSegmentUri, metadata.mdhdOffset, metadata.segmentUri,
           metadata.tfdtOffset, metadata.segmentDuration);
     }
@@ -136,42 +189,73 @@ shaka.test.TestScheme = class {
      *
      * @param {!shaka.test.ManifestGenerator.Stream} stream
      * @param {!shaka.test.ManifestGenerator.Variant} variant
-     * @param {Object} data
+     * @param {MetadataType} data
      * @param {shaka.util.ManifestParserUtils.ContentType} contentType
      * @param {string} name
      */
     function addStreamInfo(stream, variant, data, contentType, name) {
-      stream.mime = data[contentType].mimeType;
+      const mediaQualityInfo = {
+        bandwidth: 1,
+        codecs: data[contentType].codecs || 'unknown',
+        contentType: contentType,
+        mimeType: data[contentType].mimeType,
+        audioSamplingRate: null,
+        frameRate: null,
+        height: null,
+        channelsCount: null,
+        pixelAspectRatio: null,
+        width: null,
+      };
+      stream.mimeType = data[contentType].mimeType;
       stream.codecs = data[contentType].codecs;
       stream.setInitSegmentReference(
-          ['test:' + name + '/' + contentType + '/init'], 0, null);
+          ['test:' + name + '/' + contentType + '/init'], 0, null,
+          mediaQualityInfo);
       stream.useSegmentTemplate(
           'test:' + name + '/' + contentType + '/%d',
           data[contentType].segmentDuration);
+      stream.segmentIndex.markImmutable();
       stream.closedCaptions = data[contentType].closedCaptions;
 
-      if (data[contentType].language) {
-        stream.language = data[contentType].language;
-      }
-
       if (data[contentType].delaySetup) {
-        stream.createSegmentIndex = () => windowShaka.test.Util.delay(1);
+        stream.createSegmentIndex = () => shaka.test.Util.delay(1);
       }
 
       if (data.licenseServers) {
-        for (const keySystem in data.licenseServers) {
-          variant.addDrmInfo(keySystem, (drmInfo) => {
-            drmInfo.licenseServerUri = data.licenseServers[keySystem];
+        // Real content typically doesn't contain license server URLs, but if it
+        // does, we use them in preference over everything else.  There is a
+        // config to override that for DASH, but this test utility isn't DASH
+        // and that player config wouldn't do any good for a test case.
+        //
+        // So, we don't put the specific license servers into the manifest
+        // structure.  That should always be done in the player config instead,
+        // and we have the static setupPlayer() method above to do that in
+        // tests.
+        //
+        // Instead, we place generic DrmInfo for all common key systems here,
+        // and tests can use any of them by configuring a license server.
+        const commonKeySystems = [
+          'com.apple.fps.1_0',
+          'com.microsoft.playready',
+          'com.widevine.alpha',
+        ];
+        for (const keySystem of commonKeySystems) {
+          stream.encrypted = true;
+          stream.addDrmInfo(keySystem, (drmInfo) => {
             if (data[contentType].initData) {
               drmInfo.addCencInitData(data[contentType].initData);
             }
           });
         }
       }
+
+      if (data.customizeStream) {
+        data.customizeStream(stream);
+      }
     }
 
     /**
-     * @param {!Object} data
+     * @param {MetadataType} data
      * @return {string}
      */
     function getAbsoluteUri(data) {
@@ -184,10 +268,10 @@ shaka.test.TestScheme = class {
 
     const promises = [];
     // Include 'window' to use uncompiled version version of the library.
-    const DATA = windowShaka.test.TestScheme.DATA;
-    const GENERATORS = windowShaka.test.TestScheme.GENERATORS;
-    const MANIFESTS = windowShaka.test.TestScheme.MANIFESTS;
-    const ContentType = windowShaka.util.ManifestParserUtils.ContentType;
+    const DATA = shaka.test.TestScheme.DATA;
+    const GENERATORS = shaka.test.TestScheme.GENERATORS;
+    const MANIFESTS = shaka.test.TestScheme.MANIFESTS;
+    const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
     for (const name in DATA) {
       GENERATORS[name + suffix] = GENERATORS[name + suffix] || {};
@@ -200,144 +284,98 @@ shaka.test.TestScheme = class {
         }
       }
 
-      const manifest =
-          windowShaka.test.ManifestGenerator.generate((manifest) => {
-            manifest.presentationTimeline.setDuration(data.duration);
-            manifest.addPeriod(/* startTime= */ 0, (period) => {
-              period.addVariant(0, (variant) => {
-                if (data[ContentType.VIDEO]) {
-                  variant.addVideo(1, (stream) => {
+      let nextId = 0;
+
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.presentationTimeline.setDuration(data.duration);
+        manifest.sequenceMode = data.sequenceMode || false;
+
+        const videoResolutions = data.videoResolutions || [undefined];
+        const audioLanguages = data.audioLanguages ||
+            (data.audio && [data.audio.language]) || [undefined];
+
+        if (data.video && data.audio) {
+          const resMap = new Map();
+          const langMap = new Map();
+          for (const res of videoResolutions) {
+            for (const lang of audioLanguages) {
+              manifest.addVariant(nextId++, (variant) => {
+                if (resMap.has(res)) {
+                  variant.addExistingStream(resMap.get(res));
+                } else {
+                  resMap.set(res, nextId);
+                  variant.addVideo(nextId++, (stream) => {
                     addStreamInfo(
                         stream, variant, data, ContentType.VIDEO, name);
+                    if (res) {
+                      stream.size(res[0], res[1]);
+                    }
                   });
                 }
-                if (data[ContentType.AUDIO]) {
-                  variant.addAudio(2, (stream) => {
+
+                if (langMap.has(lang)) {
+                  variant.addExistingStream(langMap.get(lang));
+                } else {
+                  langMap.set(lang, nextId);
+                  variant.addAudio(nextId++, (stream) => {
                     addStreamInfo(
                         stream, variant, data, ContentType.AUDIO, name);
+                    if (lang) {
+                      stream.language = lang;
+                    }
                   });
                 }
+
+                if (lang) {
+                  variant.language = lang;
+                }
               });
+            }
+          }
+        } else if (data.video) {
+          for (const res of videoResolutions) {
+            manifest.addVariant(nextId++, (variant) => {
+              variant.addVideo(nextId++, (stream) => {
+                addStreamInfo(stream, variant, data, ContentType.VIDEO, name);
+                if (res) {
+                  stream.size(res[0], res[1]);
+                }
+              });
+            });
+          }
+        } else if (data.audio) {
+          for (const lang of audioLanguages) {
+            manifest.addVariant(nextId++, (variant) => {
+              variant.addAudio(nextId++, (stream) => {
+                addStreamInfo(stream, variant, data, ContentType.AUDIO, name);
+                if (lang) {
+                  variant.language = lang;
+                  stream.language = lang;
+                }
+              });
+            });
+          }
+        }
 
-              if (data.text) {
-                period.addTextStream(3, (stream) => {
-                  stream.mime = data.text.mimeType;
-                  stream.codecs = data.text.codecs;
-                  stream.textStream(getAbsoluteUri(data));
+        if (data.text) {
+          const textLanguages = data.textLanguages || [data.text.language];
 
-                  if (data.text.language) {
-                    stream.language = data.text.language;
-                  }
-                });
+          for (const lang of textLanguages) {
+            manifest.addTextStream(nextId++, (stream) => {
+              stream.mimeType = data.text.mimeType;
+              stream.codecs = data.text.codecs || '';
+              stream.textStream(getAbsoluteUri(data));
+
+              if (lang) {
+                stream.language = lang;
               }
             });
-          }, shaka);
+          }
+        }
+      }, compiledShaka);
+
       MANIFESTS[name + suffix] = manifest;
     }
-    // Custom generators:
-
-    const data = DATA['sintel'];
-    const periodDuration = 10;
-
-    // Multi-period
-    const numPeriods = 10;
-    let manifest = windowShaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.presentationTimeline.setDuration(periodDuration * numPeriods);
-
-      let idCount = 1;
-      for (const i of windowShaka.util.Iterables.range(numPeriods)) {
-        manifest.addPeriod(
-            /* startTime= */ periodDuration * i,
-            (period) => {
-              period.addVariant(idCount++, (variant) => {
-                variant.language = 'en';
-                variant.addVideo(idCount++, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.VIDEO, 'sintel');
-                });
-                variant.addAudio(idCount++, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.AUDIO, 'sintel');
-                });
-              });
-
-              period.addVariant(idCount++, (variant) => {
-                variant.language = 'es';
-                variant.addVideo(idCount++, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.VIDEO, 'sintel');
-                });
-                variant.addAudio(idCount++, (stream) => {
-                  addStreamInfo(
-                      stream, variant, data, ContentType.AUDIO, 'sintel');
-                });
-              });
-            });
-      }
-    }, shaka);
-    MANIFESTS['sintel_short_periods' + suffix] = manifest;
-
-
-    // Multi-stream. Different languages and resolutions.
-    let idCount = 1;
-    manifest = windowShaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.presentationTimeline.setDuration(periodDuration);
-      manifest.addPeriod(/* startTime= */ 0, (period) => {
-        // Variant in English, res 426x182
-        period.addVariant(idCount++, (variant) => {
-          variant.language = 'en';
-          variant.addVideo(idCount++, (stream) => {
-            stream.size(426, 182);
-            addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
-          });
-          variant.addAudio(idCount++, (stream) => {
-            stream.language = 'en';
-            addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
-          });
-        });
-
-        // Same language, different resolution
-        period.addVariant(idCount++, (variant) => {
-          variant.language = 'en';
-          variant.addVideo(idCount++, (stream) => {
-            stream.size(640, 272);
-            addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
-          });
-          variant.addAudio(idCount++, (stream) => {
-            stream.language = 'en';
-            addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
-          });
-        });
-
-        // Same resolution, different language
-        period.addVariant(idCount++, (variant) => {
-          variant.language = 'es';
-          variant.addVideo(idCount++, (stream) => {
-            stream.size(640, 272);
-            addStreamInfo(stream, variant, data, ContentType.VIDEO, 'sintel');
-          });
-          variant.addAudio(idCount++, (stream) => {
-            stream.language = 'es';
-            addStreamInfo(stream, variant, data, ContentType.AUDIO, 'sintel');
-          });
-        });
-
-        period.addTextStream(idCount++, (stream) => {
-          stream.language = 'zh';
-          stream.mime = data.text.mimeType;
-          stream.codecs = data.text.codecs;
-          stream.textStream(getAbsoluteUri(data));
-        });
-
-        period.addTextStream(idCount++, (stream) => {
-          stream.language = 'fr';
-          stream.mime = data.text.mimeType;
-          stream.codecs = data.text.codecs;
-          stream.textStream(getAbsoluteUri(data));
-        });
-      });
-    }, shaka);
-    MANIFESTS['sintel_multi_lingual_multi_res' + suffix] = manifest;
 
     return Promise.all(promises);
   }
@@ -358,272 +396,237 @@ shaka.test.TestScheme.GENERATORS = {};
 // general MP4 box parser.  We could eliminate these hard-coded offsets and use
 // our box parser to find the boxes at runtime after we load the segments.
 
-/** @const */
+/** @type {AVMetadataType} */
+const sintelVideoSegment = {
+  initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
+  mdhdOffset: 0x1ba,
+  segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
+  tfdtOffset: 0x38,
+  segmentDuration: 10,
+  mimeType: 'video/mp4',
+  codecs: 'avc1.42c01e',
+};
+
+/** @type {AVMetadataType} */
+const sintelAudioSegment = {
+  initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
+  mdhdOffset: 0x1b6,
+  segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
+  tfdtOffset: 0x3c,
+  segmentDuration: 10,
+  mimeType: 'audio/mp4',
+  codecs: 'mp4a.40.2',
+};
+
+/** @type {AVMetadataType} */
+const sintelEncryptedVideo = {
+  initSegmentUri: '/base/test/test/assets/encrypted-sintel-video-init.mp4',
+  mdhdOffset: 0x1ba,
+  segmentUri: '/base/test/test/assets/encrypted-sintel-video-segment.mp4',
+  tfdtOffset: 0x38,
+  segmentDuration: 10,
+  mimeType: 'video/mp4',
+  codecs: 'avc1.42c01e',
+  initData:
+      'AAAAc3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAFMIARIQaKzMBtasU1iYiGwe' +
+      'MeC/ORIQPgfUgWF6UGqdIm5yx/XJtxIQRC1g0g+tXe6lxz4ABfHDnhoNd2lkZXZp' +
+      'bmVfdGVzdCIIzsW/9dxA3ckyAA==',
+};
+
+/** @type {AVMetadataType} */
+const sintelEncryptedAudio = {
+  initSegmentUri: '/base/test/test/assets/encrypted-sintel-audio-init.mp4',
+  mdhdOffset: 0x1b6,
+  segmentUri: '/base/test/test/assets/encrypted-sintel-audio-segment.mp4',
+  tfdtOffset: 0x3c,
+  segmentDuration: 10,
+  mimeType: 'audio/mp4',
+  codecs: 'mp4a.40.2',
+  initData:
+      'AAAAc3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAFMIARIQaKzMBtasU1iYiGwe' +
+      'MeC/ORIQPgfUgWF6UGqdIm5yx/XJtxIQRC1g0g+tXe6lxz4ABfHDnhoNd2lkZXZp' +
+      'bmVfdGVzdCIIzsW/9dxA3ckyAA==',
+};
+
+/** @type {!Object.<string, string>} */
+const widevineDrmServers = {
+  'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
+};
+
+/** @type {AVMetadataType} */
+const axinomMultiDrmVideoSegment = {
+  initSegmentUri: '/base/test/test/assets/multidrm-video-init.mp4',
+  mdhdOffset: 0x1d1,
+  segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
+  tfdtOffset: 0x78,
+  segmentDuration: 4,
+  mimeType: 'video/mp4',
+  codecs: 'avc1.64001e',
+  initData:
+      'AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQblodJidXR9eARuq' +
+      'l0dNLWg==',
+};
+
+/** @type {AVMetadataType} */
+const axinomMultiDrmAudioSegment = {
+  initSegmentUri: '/base/test/test/assets/multidrm-audio-init.mp4',
+  mdhdOffset: 0x192,
+  segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
+  tfdtOffset: 0x7c,
+  segmentDuration: 4,
+  mimeType: 'audio/mp4',
+  codecs: 'mp4a.40.2',
+  initData:
+      'AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQblodJidXR9eARuq' +
+      'l0dNLWg==',
+};
+
+/** @type {!Object.<string, string>} */
+const axinomDrmServers = {
+  'com.widevine.alpha':
+      'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+  'com.microsoft.playready':
+      'https://drm-playready-licensing.axtest.net/AcquireLicense',
+};
+
+/** @type {!Object.<string, string>} */
+const axinomDrmHeaders = {
+  'X-AxDRM-Message':
+      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5' +
+      'X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc' +
+      '2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIj' +
+      'oiNmU1YTFkMjYtMjc1Ny00N2Q3LTgwNDYtZWFhNWQxZDM0YjVhIn1dfX0.yF7PflO' +
+      'Pv9qHnu3ZWJNZ12jgkqTabmwXbDWk_47tLNE',
+};
+
+/** @type {TextMetadataType} */
+const vttSegment = {
+  uri: '/base/test/test/assets/text-clip.vtt',
+  mimeType: 'text/vtt',
+};
+
+/**
+ * @template T
+ * @param {T} base A TextMetadataType or AVMetadataType object.
+ * @param {ExtraMetadataType} overrides Fields to override in the base.
+ * @return {T}
+ */
+function inherit(base, overrides) {
+  return Object.assign({}, base, overrides);
+}
+
+/** @const {!Object.<string, MetadataType>} */
 shaka.test.TestScheme.DATA = {
   'sintel': {
-    video: {
-      initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
-      mdhdOffset: 0x1ba,
-      segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
-      tfdtOffset: 0x38,
-      segmentDuration: 10,
-      mimeType: 'video/mp4',
-      codecs: 'avc1.42c01e',
-    },
-    audio: {
-      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mdhdOffset: 0x1b6,
-      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
-      tfdtOffset: 0x3c,
-      segmentDuration: 10.005,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
-    },
-    text: {
-      uri: '/base/test/test/assets/text-clip.vtt',
-      mimeType: 'text/vtt',
-    },
+    video: sintelVideoSegment,
+    audio: sintelAudioSegment,
+    text: vttSegment,
     duration: 30,
+  },
+
+  // Like 'sintel', but flagged as sequence mode.
+  'sintel_sequence': {
+    video: sintelVideoSegment,
+    audio: sintelAudioSegment,
+    text: vttSegment,
+    duration: 30,
+    sequenceMode: true,
   },
 
   // Like 'sintel', but much longer to test buffering and seeking.
   'sintel_long': {
-    video: {
-      initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
-      mdhdOffset: 0x1ba,
-      segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
-      tfdtOffset: 0x38,
-      segmentDuration: 10,
-      mimeType: 'video/mp4',
-      codecs: 'avc1.42c01e',
-    },
-    audio: {
-      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mdhdOffset: 0x1b6,
-      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
-      tfdtOffset: 0x3c,
-      segmentDuration: 10.005,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
-    },
+    video: sintelVideoSegment,
+    audio: sintelAudioSegment,
     duration: 300,
-  },
-
-  // Like 'sintel' above, but with a non-zero period start time.
-  // This helps expose edge cases around startup and live streams.
-  'sintel_start_at_3': {
-    periodStart: 3,
-    video: {
-      initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
-      mdhdOffset: 0x1ba,
-      segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
-      tfdtOffset: 0x38,
-      segmentDuration: 10,
-      mimeType: 'video/mp4',
-      codecs: 'avc1.42c01e',
-    },
-    audio: {
-      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mdhdOffset: 0x1b6,
-      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
-      tfdtOffset: 0x3c,
-      segmentDuration: 10.005,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
-    },
-    text: {
-      uri: '/base/test/test/assets/text-clip.vtt',
-      mimeType: 'text/vtt',
-    },
-    duration: 30,
   },
 
   // Like 'sintel' above, but with languages and delayed setup.
   // These extra features help expose some edge cases.
   'sintel_realistic': {
-    video: {
-      initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
-      mdhdOffset: 0x1ba,
-      segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
-      tfdtOffset: 0x38,
-      segmentDuration: 10,
-      mimeType: 'video/mp4',
-      codecs: 'avc1.42c01e',
+    video: inherit(sintelVideoSegment, {
       delaySetup: true,  // Necessary to repro #1696
-    },
-    audio: {
-      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mdhdOffset: 0x1b6,
-      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
-      tfdtOffset: 0x3c,
-      segmentDuration: 10.005,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
+    }),
+    audio: inherit(sintelAudioSegment, {
       language: 'uk',  // Necessary to repro #1696
       delaySetup: true,  // Necessary to repro #1696
-    },
-    text: {
-      uri: '/base/test/test/assets/text-clip.vtt',
-      mimeType: 'text/vtt',
+    }),
+    text: inherit(vttSegment, {
       language: 'fa',  // Necessary to repro #1696
-    },
+    }),
     duration: 30,
   },
 
-  // 'sintel_short_periods' : Generated by createManifests().
-  // 'sintel_multi_lingual_multi_res' : Generated by createManifests().
+  'sintel_multi_lingual_multi_res': {
+    video: sintelVideoSegment,
+    audio: sintelAudioSegment,
+    text: vttSegment,
+    videoResolutions: [
+      [426, 182],
+      [640, 272],
+    ],
+    audioLanguages: ['en', 'es'],
+    textLanguages: ['zh', 'fr'],
+    duration: 30,
+  },
 
   'sintel_audio_only': {
-    audio: {
-      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mdhdOffset: 0x1b6,
-      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
-      tfdtOffset: 0x3c,
-      segmentDuration: 10.005,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
-    },
+    audio: sintelAudioSegment,
     duration: 30,
   },
 
   'sintel_no_text': {
-    video: {
-      initSegmentUri: '/base/test/test/assets/sintel-video-init.mp4',
-      mdhdOffset: 0x1ba,
-      segmentUri: '/base/test/test/assets/sintel-video-segment.mp4',
-      tfdtOffset: 0x38,
-      segmentDuration: 10,
-      mimeType: 'video/mp4',
-      codecs: 'avc1.42c01e',
-    },
-    audio: {
-      initSegmentUri: '/base/test/test/assets/sintel-audio-init.mp4',
-      mdhdOffset: 0x1b6,
-      segmentUri: '/base/test/test/assets/sintel-audio-segment.mp4',
-      tfdtOffset: 0x3c,
-      segmentDuration: 10.005,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
-    },
+    video: sintelVideoSegment,
+    audio: sintelAudioSegment,
+    duration: 30,
+  },
+
+  // https://github.com/shaka-project/shaka-player/issues/2553
+  'forced_subs_simulation': {
+    audio: sintelAudioSegment,
+    text: vttSegment,
+    textLanguages: ['de', 'de'],  // one of these is the "forced subs" track
     duration: 30,
   },
 
   'sintel-enc': {
-    video: {
-      initSegmentUri: '/base/test/test/assets/encrypted-sintel-video-init.mp4',
-      mdhdOffset: 0x1ba,
-      segmentUri: '/base/test/test/assets/encrypted-sintel-video-segment.mp4',
-      tfdtOffset: 0x38,
-      segmentDuration: 10,
-      mimeType: 'video/mp4',
-      codecs: 'avc1.42c01e',
-      initData:
-          'AAAAc3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAFMIARIQaKzMBtasU1iYiGwe' +
-          'MeC/ORIQPgfUgWF6UGqdIm5yx/XJtxIQRC1g0g+tXe6lxz4ABfHDnhoNd2lkZXZp' +
-          'bmVfdGVzdCIIzsW/9dxA3ckyAA==',
-    },
-    audio: {
-      initSegmentUri: '/base/test/test/assets/encrypted-sintel-audio-init.mp4',
-      mdhdOffset: 0x1b6,
-      segmentUri: '/base/test/test/assets/encrypted-sintel-audio-segment.mp4',
-      tfdtOffset: 0x3c,
-      segmentDuration: 10.005,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
-      initData:
-          'AAAAc3Bzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAAFMIARIQaKzMBtasU1iYiGwe' +
-          'MeC/ORIQPgfUgWF6UGqdIm5yx/XJtxIQRC1g0g+tXe6lxz4ABfHDnhoNd2lkZXZp' +
-          'bmVfdGVzdCIIzsW/9dxA3ckyAA==',
-    },
-    text: {
-      uri: '/base/test/test/assets/text-clip.vtt',
-      mimeType: 'text/vtt',
-    },
-    licenseServers: {
-      'com.widevine.alpha': 'https://cwip-shaka-proxy.appspot.com/no_auth',
-    },
+    video: sintelEncryptedVideo,
+    audio: sintelEncryptedAudio,
+    text: vttSegment,
+    licenseServers: widevineDrmServers,
     duration: 30,
   },
 
+  // Equivalent to what you get with HLS METHOD=SAMPLE-AES, KEYFORMAT=identity.
+  // Requires explicit clear keys or license server configuration.
+  'sintel-hls-clearkey': {
+    video: sintelEncryptedVideo,
+    audio: sintelEncryptedAudio,
+    duration: 30,
+    sequenceMode: true,
+    customizeStream: (stream) => {
+      stream.encrypted = true;
+      stream.addDrmInfo('org.w3.clearkey');
+    },
+  },
+
   'multidrm': {
-    video: {
-      initSegmentUri: '/base/test/test/assets/multidrm-video-init.mp4',
-      mdhdOffset: 0x1d1,
-      segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
-      tfdtOffset: 0x78,
-      segmentDuration: 4,
-      mimeType: 'video/mp4',
-      codecs: 'avc1.64001e',
-      initData:
-          'AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQblodJidXR9eARuq' +
-          'l0dNLWg==',
-    },
-    audio: {
-      initSegmentUri: '/base/test/test/assets/multidrm-audio-init.mp4',
-      mdhdOffset: 0x192,
-      segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
-      tfdtOffset: 0x7c,
-      segmentDuration: 4,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
-      initData:
-          'AAAANHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABQIARIQblodJidXR9eARuq' +
-          'l0dNLWg==',
-    },
-    text: {
-      uri: '/base/test/test/assets/text-clip.vtt',
-      mimeType: 'text/vtt',
-    },
-    licenseServers: {
-      'com.widevine.alpha':
-          'https://drm-widevine-licensing.axtest.net/AcquireLicense',
-      'com.microsoft.playready':
-          'https://drm-playready-licensing.axtest.net/AcquireLicense',
-    },
-    licenseRequestHeaders: {
-      'X-AxDRM-Message':
-          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5' +
-          'X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc' +
-          '2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIj' +
-          'oiNmU1YTFkMjYtMjc1Ny00N2Q3LTgwNDYtZWFhNWQxZDM0YjVhIn1dfX0.yF7PflO' +
-          'Pv9qHnu3ZWJNZ12jgkqTabmwXbDWk_47tLNE',
-    },
+    video: axinomMultiDrmVideoSegment,
+    audio: axinomMultiDrmAudioSegment,
+    text: vttSegment,
+    licenseServers: axinomDrmServers,
+    licenseRequestHeaders: axinomDrmHeaders,
     duration: 30,
   },
 
   'multidrm_no_init_data': {
-    video: {
-      initSegmentUri: '/base/test/test/assets/multidrm-video-init.mp4',
-      mdhdOffset: 0x1d1,
-      segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
-      tfdtOffset: 0x78,
-      segmentDuration: 4,
-      mimeType: 'video/mp4',
-      codecs: 'avc1.64001e',
-    },
-    audio: {
-      initSegmentUri: '/base/test/test/assets/multidrm-audio-init.mp4',
-      mdhdOffset: 0x192,
-      segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
-      tfdtOffset: 0x7c,
-      segmentDuration: 4,
-      mimeType: 'audio/mp4',
-      codecs: 'mp4a.40.2',
-    },
-    licenseServers: {
-      'com.widevine.alpha':
-          'https://drm-widevine-licensing.axtest.net/AcquireLicense',
-      'com.microsoft.playready':
-          'https://drm-playready-licensing.axtest.net/AcquireLicense',
-    },
-    licenseRequestHeaders: {
-      'X-AxDRM-Message':
-          'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5' +
-          'X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc' +
-          '2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIj' +
-          'oiNmU1YTFkMjYtMjc1Ny00N2Q3LTgwNDYtZWFhNWQxZDM0YjVhIn1dfX0.yF7PflO' +
-          'Pv9qHnu3ZWJNZ12jgkqTabmwXbDWk_47tLNE',
-    },
+    video: inherit(axinomMultiDrmVideoSegment, {
+      initData: undefined,
+    }),
+    audio: inherit(axinomMultiDrmAudioSegment, {
+      initData: undefined,
+    }),
+    licenseServers: axinomDrmServers,
+    licenseRequestHeaders: axinomDrmHeaders,
     duration: 30,
   },
 
@@ -632,6 +635,7 @@ shaka.test.TestScheme.DATA = {
       segmentUri: '/base/test/test/assets/captions-test.ts',
       mimeType: 'video/mp2t',
       codecs: 'avc1.64001e',
+      segmentDuration: 20,  // yes, this is accurate
     },
     text: {
       mimeType: 'application/cea-608',
@@ -652,6 +656,26 @@ shaka.test.TestScheme.DATA = {
     },
     duration: 30,
   },
+
+  'id3-metadata_ts': {
+    audio: {
+      segmentUri: '/base/test/test/assets/id3-metadata.ts',
+      mimeType: 'video/mp2t',
+      codecs: 'mp4a.40.5',
+      segmentDuration: 5,
+    },
+    duration: 4.99,
+  },
+
+  'id3-metadata_aac': {
+    audio: {
+      segmentUri: '/base/test/test/assets/id3-metadata.aac',
+      mimeType: 'audio/aac',
+      codecs: '',
+      segmentDuration: 9.98458,
+    },
+    duration: 9.98458,
+  },
 };
 
 
@@ -659,13 +683,56 @@ beforeAll(async () => {
   await shaka.test.TestScheme.createManifests(shaka, '');
 });
 
+/**
+ * Because our MediaCapabilities integration adds decoding info to each variant,
+ * we need to be careful to reset this info on variants that are cached and
+ * persist between tests and between manifest parser instances.  This ensures
+ * that these unusual test variants will not have persistent decoding infos from
+ * MediaCapabilities.
+ *
+ * For encrypted content, the decoding info contains negotiated EME information
+ * which varies based on the chosen key system and whether the content will be
+ * streamed or stored offline.  If one test loads the content for streaming,
+ * then another test loads the same content for offline storage, the second test
+ * would encounter the cached decoding info from the first test, and the
+ * negotatied key system would not be set up for the correct session types.
+ * This would lead to a test failure.  This sort of failure would not be seen in
+ * real playback (since no supported manifest parser would ever cache variants).
+ *
+ * By resetting variant.decodingInfos when the fake manifest parser is stopped,
+ * we ensure that each test gets a clean slate (as would happen with a real
+ * parser), and the correct decodingInfos show up for each part of each test
+ * case.
+ *
+ * @param {?shaka.extern.Manifest} manifest
+ */
+function resetDecodingInfos(manifest) {
+  if (!manifest) {
+    return;
+  }
+
+  for (const variant of manifest.variants) {
+    variant.decodingInfos = [];
+  }
+}
+
 
 /**
  * @implements {shaka.extern.ManifestParser}
  */
 shaka.test.TestScheme.ManifestParser = class {
+  constructor() {
+    /** @private {?shaka.extern.Manifest} */
+    this.manifest_ = null;
+  }
+
   /** @override */
   configure(config) {}
+
+  /** @return {!shaka.test.TestScheme.ManifestParser} */
+  static factory() {
+    return new shaka.test.TestScheme.ManifestParser();
+  }
 
   /** @override */
   start(uri, playerInterface) {
@@ -682,21 +749,17 @@ shaka.test.TestScheme.ManifestParser = class {
     if (!manifest) {
       throw new Error('Unknown manifest!');
     }
+    this.manifest_ = manifest;
 
-    // Invoke filtering interfaces similar to how a real parser would.
-    // This makes sure the filtering functions are covered implicitly by
-    // tests. This covers regression
-    // https://github.com/google/shaka-player/issues/988
-    playerInterface.filterAllPeriods(manifest.periods);
-    for (const period of manifest.periods) {
-      playerInterface.filterNewPeriod(period);
-    }
+    playerInterface.makeTextStreamsForClosedCaptions(manifest);
 
     return Promise.resolve(manifest);
   }
 
   /** @override */
   stop() {
+    resetDecodingInfos(this.manifest_);
+    this.manifest_ = null;
     return Promise.resolve();
   }
 
@@ -710,4 +773,5 @@ shaka.test.TestScheme.ManifestParser = class {
 
 shaka.net.NetworkingEngine.registerScheme('test', shaka.test.TestScheme.plugin);
 shaka.media.ManifestParser.registerParserByMime(
-    'application/x-test-manifest', shaka.test.TestScheme.ManifestParser);
+    'application/x-test-manifest',
+    shaka.test.TestScheme.ManifestParser.factory);

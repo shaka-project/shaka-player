@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -37,11 +38,11 @@ shakaDemo.Utils = class {
     // Override config values with custom names.
     configOverride('audiolang', 'preferredAudioLanguage');
     configOverride('textlang', 'preferredTextLanguage');
+    configOverride('textrole', 'preferredTextRole');
     configOverride('channels', 'preferredAudioChannelCount');
 
     // Override config values that are handled manually.
     overridden.push('abr.enabled');
-    overridden.push('streaming.jumpLargeGaps');
     overridden.push('drm.advanced');
     overridden.push('drm.servers');
 

@@ -1,11 +1,8 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-
-goog.provide('shaka.test.StatusPromise');
-goog.provide('shaka.test.Util');
-
 
 /**
  * @extends {Promise}
@@ -20,13 +17,14 @@ shaka.test.StatusPromise = class {
     this.status;
 
     // TODO: investigate using expectAsync() for this when possible.
-    p.status = 'pending';
-    p.then(() => {
-      p.status = 'resolved';
+    const p2 = /** @type {!shaka.test.StatusPromise} */(p);
+    p2.status = 'pending';
+    p2.then(() => {
+      p2.status = 'resolved';
     }, () => {
-      p.status = 'rejected';
+      p2.status = 'rejected';
     });
-    return /** @type {!shaka.test.StatusPromise} */(p);
+    return p2;
   }
 };
 
@@ -41,10 +39,9 @@ shaka.test.Util = class {
    */
   static async fakeEventLoop(duration, onTick) {
     // Run this synchronously:
-    for (const time of shaka.util.Iterables.range(duration)) {
+    for (let time = 0; time < duration; time++) {
       // We shouldn't need more than 6 rounds.
-      for (const _ of shaka.util.Iterables.range(6)) {
-        shaka.util.Functional.ignored(_);
+      for (let i = 0; i < 6; i++) {
         jasmine.clock().tick(0);
         await Promise.resolve();  // eslint-disable-line no-await-in-loop
       }
@@ -90,20 +87,22 @@ shaka.test.Util = class {
   /**
    * Creates a custom matcher object that matches a number that is close to the
    * given value.
+   *
    * @param {number} val
-   * @return {!Object}
+   * @param {number=} maxDelta
+   * @return {number}
    */
-  static closeTo(val) {
-    const E = 0.000001;
-    return {
+  static closeTo(val, maxDelta = 0.000001) {
+    const E = /** @type {number} */(maxDelta);
+    return /** @type {number} */(/** @type {?} */({
       asymmetricMatch: (other) => other >= val - E && other <= val + E,
       jasmineToString: () => '<closeTo: ' + val + '>',
-    };
+    }));
   }
 
   /**
    * @param {!shaka.util.Error} error
-   * @return {!Object}
+   * @return {jasmine.ObjectContainingType}
    */
   static jasmineError(error) {
     // NOTE: Safari will add extra properties to any thrown object, and some of
@@ -153,6 +152,14 @@ shaka.test.Util = class {
     const prospectiveDiff = 'The difference was in ' +
         (actual.outerHTML || actual.textContent) + ' vs ' +
         (expected['outerHTML'] || expected.textContent) + ': ';
+    const getAttr = (obj, attr) => {
+      if (attr.namespaceURI) {
+        return shaka.util.XmlUtils.getAttributeNS(
+            obj, attr.namespaceURI, attr.localName);
+      } else {
+        return obj.getAttribute(attr.localName);
+      }
+    };
 
     if (!(actual instanceof Element) && !(expected instanceof Element)) {
       // Compare them as nodes.
@@ -170,23 +177,20 @@ shaka.test.Util = class {
       if (actual.attributes.length != expected.attributes.length) {
         return prospectiveDiff + 'Different attribute list length.';
       }
-      for (const i of shaka.util.Iterables.range(actual.attributes.length)) {
-        const aAttrib = actual.attributes[i].nodeName;
-        const aAttribVal = actual.getAttribute(aAttrib);
-        const eAttrib = expected.attributes[i].nodeName;
-        const eAttribVal = expected.getAttribute(eAttrib);
-        if (aAttrib != eAttrib || aAttribVal != eAttribVal) {
-          const diffNote =
-              aAttrib + '=' + aAttribVal + ' vs ' + eAttrib + '=' + eAttribVal;
-          return prospectiveDiff + 'Attribute #' + i +
-              ' was different (' + diffNote + ').';
+      for (const attr of Array.from(actual.attributes)) {
+        const valueA = getAttr(actual, attr);
+        const valueB = getAttr(expected, attr);
+        if (valueA != valueB) {
+          const name = (attr.prefix ? attr.prefix + ':' : '') + attr.localName;
+          return `${prospectiveDiff} Attribute ${name} was different ` +
+                 `(${valueA} vs ${valueB})`;
         }
       }
 
       if (actual.childNodes.length != expected.childNodes.length) {
         return prospectiveDiff + 'Different child node list length.';
       }
-      for (const i of shaka.util.Iterables.range(actual.childNodes.length)) {
+      for (let i = 0; i < actual.childNodes.length; i++) {
         const aNode = actual.childNodes[i];
         const eNode = expected.childNodes[i];
         const diff =
@@ -212,8 +216,10 @@ shaka.test.Util = class {
     const isInit = first instanceof shaka.media.InitSegmentReference &&
         second instanceof shaka.media.InitSegmentReference;
     if (isSegment || isInit) {
-      const a = first.getUris();
-      const b = second.getUris();
+      const firstRef = /** @type {shaka.media.AnySegmentReference} */(first);
+      const secondRef = /** @type {shaka.media.AnySegmentReference} */(second);
+      const a = firstRef.getUris();
+      const b = secondRef.getUris();
       if (typeof a !== 'object' || typeof b !== 'object' ||
           typeof a.length != 'number' || typeof b.length !== 'number') {
         return false;
@@ -224,14 +230,20 @@ shaka.test.Util = class {
       }
 
       // Make shallow copies of each, without their getUris fields.
-      const trimmedFirst = Object.assign({}, /** @type {Object} */(first));
-      delete trimmedFirst.getUris;
-      const trimmedSecond = Object.assign({}, /** @type {Object} */(second));
-      delete trimmedSecond.getUris;
+      const trimmedFirst = Object.assign({}, /** @type {Object} */(firstRef));
+      delete trimmedFirst['getUris'];
+      delete trimmedFirst['getUrisInner'];
+      const trimmedSecond = Object.assign({}, /** @type {Object} */(secondRef));
+      delete trimmedSecond['getUris'];
+      delete trimmedSecond['getUrisInner'];
 
       // Compare those using Jasmine's utility, which will compare the fields of
       // an object and the items of an array.
-      return jasmine.matchersUtil.equals(trimmedFirst, trimmedSecond);
+      const customEqualityTesters = [
+        shaka.test.Util.compareReferences,
+      ];
+      return jasmine.matchersUtil.equals(
+          trimmedFirst, trimmedSecond, customEqualityTesters);
     }
 
     return undefined;
@@ -255,7 +267,12 @@ shaka.test.Util = class {
             !!xhr.response) {
           resolve(/** @type {!ArrayBuffer} */(xhr.response));
         } else {
-          reject(xhr.status);
+          let message = '';
+          if (xhr.response) {
+            message = ': ' + shaka.util.StringUtils.fromUTF8(
+                /** @type {!ArrayBuffer} */(xhr.response));
+          }
+          reject(xhr.status + message);
         }
       };
 
@@ -280,6 +297,14 @@ shaka.test.Util = class {
   }
 
   /**
+   * @param {!Function} func
+   * @return {!jasmine.Spy}
+   */
+  static funcSpy(func) {
+    return /** @type {!jasmine.Spy} */(func);
+  }
+
+  /**
    * @param {!jasmine.Spy} spy
    * @return {!Function}
    */
@@ -293,103 +318,13 @@ shaka.test.Util = class {
    * @return {*}
    */
   static invokeSpy(spy, ...varArgs) {
-    return spy(...varArgs);
-  }
-
-  /**
-   * @param {boolean} loadUncompiled
-   * @return {*}
-   */
-  static async loadShaka(loadUncompiled) {
-    /** @type {!shaka.util.PublicPromise} */
-    const loaded = new shaka.util.PublicPromise();
-    let compiledShaka;
-    if (loadUncompiled) {
-      // For debugging purposes, use the uncompiled library.
-      compiledShaka = shaka;
-      loaded.resolve();
-    } else {
-      // Load the compiled library as a module.
-      // All tests in this suite will use the compiled library.
-      require(['/base/dist/shaka-player.ui.js'], (shakaModule) => {
-        compiledShaka = shakaModule;
-        compiledShaka.net.NetworkingEngine.registerScheme(
-            'test', shaka.test.TestScheme.plugin);
-        compiledShaka.media.ManifestParser.registerParserByMime(
-            'application/x-test-manifest',
-            shaka.test.TestScheme.ManifestParser);
-
-        loaded.resolve();
-      }, (error) => {
-        loaded.reject('Failed to load compiled player.');
-        shaka.log.error('Error loading compiled player.', error);
-      });
-    }
-
-    await loaded;
-    return compiledShaka;
-  }
-
-
-  /**
-   * Wait for the video playhead to move forward by some meaningful delta.
-   * If this happens before |timeout| seconds pass, the Promise is resolved.
-   * Otherwise, the Promise is rejected.
-   *
-   * @param {!shaka.util.EventManager} eventManager
-   * @param {!HTMLMediaElement} target
-   * @param {number} timeout in seconds, after which the Promise fails
-   * @return {!Promise}
-   */
-  static waitForMovementOrFailOnTimeout(eventManager, target, timeout) {
-    const waiter = new shaka.test.Waiter(eventManager)
-        .timeoutAfter(timeout)
-        .failOnTimeout(true);
-    return waiter.waitForMovement(target);
-  }
-
-  /**
-   * @param {!shaka.util.EventManager} eventManager
-   * @param {!HTMLMediaElement} target
-   * @param {number} playheadTime The time to wait for.
-   * @param {number} timeout in seconds, after which the Promise fails
-   * @return {!Promise}
-   */
-  static waitUntilPlayheadReaches(eventManager, target, playheadTime, timeout) {
-    const waiter = new shaka.test.Waiter(eventManager)
-        .timeoutAfter(timeout)
-        .failOnTimeout(true);
-    return waiter.waitUntilPlayheadReaches(target, playheadTime);
-  }
-
-  /**
-   * Wait for the video to end or for |timeout| seconds to pass, whichever
-   * occurs first.  The Promise is resolved when either of these happens.
-   *
-   * @param {!shaka.util.EventManager} eventManager
-   * @param {!HTMLMediaElement} target
-   * @param {number} timeout in seconds, after which the Promise succeeds
-   * @return {!Promise}
-   */
-  static waitForEndOrTimeout(eventManager, target, timeout) {
-    const waiter = new shaka.test.Waiter(eventManager)
-        .failOnTimeout(false).timeoutAfter(timeout);
-    return waiter.waitForEnd(target);
-  }
-
-  /**
-   * Returns a function that can be used as a factory.  This factory returns
-   * the given static value.
-   *
-   * @param {T} value
-   * @return {function():T}
-   * @template T
-   */
-  static factoryReturns(value) {
-    // eslint-disable-next-line no-restricted-syntax
-    return function() {
-      return value;
-    };
+    // TODO: There should be a way to alter the externs for jasmine.Spy so that
+    // this utility is not needed.
+    // Why isn't there something like ICallable in Closure?
+    // https://github.com/shaka-project/closure-compiler/issues/946
+    // Why isn't it enough that jasmine.Spy extends Function?
+    // https://github.com/shaka-project/closure-compiler/issues/1422
+    return /** @type {Function} */(spy)(...varArgs);
   }
 };
 
@@ -399,13 +334,13 @@ shaka.test.Util = class {
  */
 shaka.test.Util.customMatchers_ = {
   // Custom matcher for Element objects.
-  toEqualElement: (util, customEqualityTesters) => {
+  toEqualElement: (util) => {
     return {
       compare: shaka.test.Util.expectToEqualElementCompare_,
     };
   },
   // Custom matcher for working with spies.
-  toHaveBeenCalledOnceMore: (util, customEqualityTesters) => {
+  toHaveBeenCalledOnceMore: (util) => {
     return {
       compare: (actual, expected) => {
         const callCount = actual.calls.count();
@@ -425,7 +360,7 @@ shaka.test.Util.customMatchers_ = {
       },
     };
   },
-  toHaveBeenCalledOnceMoreWith: (util, customEqualityTesters) => {
+  toHaveBeenCalledOnceMoreWith: (util) => {
     return {
       compare: (actual, expected) => {
         const callCount = actual.calls.count();
@@ -438,7 +373,7 @@ shaka.test.Util.customMatchers_ = {
         if (callCount != 1) {
           result.pass = false;
           result.message = 'Expected to be called once, not ' + callCount;
-        } else if (!util.equals(callArgs, expected, customEqualityTesters)) {
+        } else if (!util.equals(callArgs, expected)) {
           result.pass = false;
           result.message =
               'Expected to be called with ' + expected + ' not ' + callArgs;

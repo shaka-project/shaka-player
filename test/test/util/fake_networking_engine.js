@@ -1,12 +1,8 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-
-goog.provide('shaka.test.FakeNetworkingEngine');
-
-/** @fileoverview @suppress {missingRequire} */
-
 
 /**
  * A fake networking engine that returns constant data.  The request member
@@ -50,6 +46,9 @@ shaka.test.FakeNetworkingEngine = class {
     /** @private {?shaka.extern.ResponseFilter} */
     this.responseFilter_ = null;
 
+    /** @type {!jasmine.Spy} */
+    this.setForceHTTPS = jasmine.createSpy('setForceHTTPS').and.stub();
+
     // The prototype has already been applied; create spies for the
     // methods but still call it by default.
     spyOn(this, 'destroy').and.callThrough();
@@ -86,6 +85,13 @@ shaka.test.FakeNetworkingEngine = class {
     const delay = this.delayNextRequestPromise_;
     this.delayNextRequestPromise_ = null;
 
+    let isAborted = false;
+    const abortOp = () => {
+      isAborted = true;
+      return Promise.resolve();
+    };
+    const abortCheck = () => isAborted;
+
     // Wrap all the async operations into one function so that we can pass it to
     // abortable operation.
     const asyncOp = async () => {
@@ -93,7 +99,13 @@ shaka.test.FakeNetworkingEngine = class {
         await delay;
       }
 
-      const result = await resultCallback();
+      const result = await resultCallback(abortCheck);
+      if (isAborted) {
+        throw new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.STORAGE,
+            shaka.util.Error.Code.OPERATION_ABORTED);
+      }
 
       if (!result && request.method != 'HEAD') {
         // Provide some more useful information.
@@ -123,7 +135,7 @@ shaka.test.FakeNetworkingEngine = class {
       return response;
     };
 
-    return shaka.util.AbortableOperation.notAbortable(asyncOp());
+    return new shaka.util.AbortableOperation(asyncOp(), abortOp);
   }
 
   /**
@@ -193,7 +205,7 @@ shaka.test.FakeNetworkingEngine = class {
    * Set a callback for when the given uri is called.
    *
    * @param {string} uri
-   * @param {function():!Promise<BufferSource>} callback
+   * @param {shaka.test.FakeNetworkingEngine.MockedResponse} callback
    * @return {!shaka.test.FakeNetworkingEngine}
    */
   setResponse(uri, callback) {
@@ -326,6 +338,9 @@ shaka.test.FakeNetworkingEngine = class {
 
 
 /**
- * @typedef {function():!Promise.<BufferSource>}
+ * A callback that creates a response for a given URI.
+ * The callback passed in to this method, "abortCheck", returns whether or not
+ * the network request has been aborted, at time of call.
+ * @typedef {function(function():boolean):!Promise.<BufferSource>}
  */
 shaka.test.FakeNetworkingEngine.MockedResponse;

@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,13 +7,17 @@
 
 goog.provide('shaka.ui.TextSelection');
 
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.LanguageUtils');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.SettingsMenu');
+goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.FakeEvent');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
@@ -30,12 +35,13 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         controls, shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS);
 
     this.button.classList.add('shaka-caption-button');
+    this.button.classList.add('shaka-tooltip-status');
     this.menu.classList.add('shaka-text-languages');
 
     if (this.player && this.player.isTextTrackVisible()) {
-      this.button.setAttribute('aria-pressed', 'true');
+      this.button.ariaPressed = 'true';
     } else {
-      this.button.setAttribute('aria-pressed', 'false');
+      this.button.ariaPressed = 'false';
     }
 
     this.addOffOption_();
@@ -60,6 +66,7 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
 
     this.eventManager.listen(this.player, 'texttrackvisibility', () => {
       this.onCaptionStateChange_();
+      this.updateTextLanguages_();
     });
 
     this.eventManager.listen(this.player, 'textchanged', () => {
@@ -77,6 +84,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.updateLocalizedStrings_();
 
     this.updateTextLanguages_();
+
+    this.onTracksChanged_();
   }
 
 
@@ -84,8 +93,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   addOffOption_() {
-    const off = shaka.util.Dom.createHTMLElement('button');
-    off.setAttribute('aria-selected', 'true');
+    const off = shaka.util.Dom.createButton();
+    off.ariaSelected = 'true';
     this.menu.appendChild(off);
 
     off.appendChild(shaka.ui.Utils.checkmarkIcon());
@@ -101,13 +110,13 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   onCaptionStateChange_() {
     if (this.player.isTextTrackVisible()) {
-      this.icon.classList.add('shaka-captions-on');
-      this.icon.classList.remove('shaka-captions-off');
-      this.button.setAttribute('aria-pressed', 'true');
+      this.icon.textContent =
+          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS;
+      this.button.ariaPressed = 'true';
     } else {
-      this.icon.classList.add('shaka-captions-off');
-      this.icon.classList.remove('shaka-captions-on');
-      this.button.setAttribute('aria-pressed', 'false');
+      this.icon.textContent =
+          shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS_OFF;
+      this.button.ariaPressed = 'false';
     }
 
     this.controls.dispatchEvent(
@@ -129,11 +138,10 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
         this.controls.getConfig().trackLabelFormat);
 
     // Add the Off button
-    const offButton = shaka.util.Dom.createHTMLElement('button');
+    const offButton = shaka.util.Dom.createButton();
     offButton.classList.add('shaka-turn-captions-off-button');
     this.eventManager.listen(offButton, 'click', () => {
-      const p = this.player.setTextTrackVisibility(false);
-      p.catch(() => {});  // TODO(#1993): Handle possible errors.
+      this.player.setTextTrackVisibility(false);
       this.updateTextLanguages_();
     });
 
@@ -142,12 +150,14 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
     this.menu.appendChild(offButton);
 
     if (!this.player.isTextTrackVisible()) {
-      offButton.setAttribute('aria-selected', 'true');
+      offButton.ariaSelected = 'true';
       offButton.appendChild(shaka.ui.Utils.checkmarkIcon());
       this.captionsOffSpan_.classList.add('shaka-chosen-item');
       this.currentSelection.textContent =
           this.localization.resolve(shaka.ui.Locales.Ids.OFF);
     }
+
+    this.button.setAttribute('shaka-status', this.currentSelection.textContent);
 
     shaka.ui.Utils.focusOnTheChosenItem(this.menu);
 
@@ -162,10 +172,13 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
    * @private
    */
   async onTextTrackSelected_(track) {
+    // setTextTrackVisibility should be called after selectTextTrack.
+    // selectTextTrack sets a text stream, and setTextTrackVisiblity(true)
+    // will set a text stream if it isn't already set. Consequently, reversing
+    // the order of these calls makes two languages display simultaneously
+    // if captions are turned off -> on in a different language.
+    this.player.selectTextTrack(track);
     await this.player.setTextTrackVisibility(true);
-    if (this.player) {  // May have become null while awaiting
-      this.player.selectTextLanguage(track.language, track.roles[0]);
-    }
   }
 
 
@@ -175,10 +188,8 @@ shaka.ui.TextSelection = class extends shaka.ui.SettingsMenu {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
 
-    this.button.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.CAPTIONS));
-    this.backButton.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(LocIds.BACK));
+    this.button.ariaLabel = this.localization.resolve(LocIds.CAPTIONS);
+    this.backButton.ariaLabel = this.localization.resolve(LocIds.BACK);
     this.nameSpan.textContent =
         this.localization.resolve(LocIds.CAPTIONS);
     this.backSpan.textContent =
@@ -209,4 +220,7 @@ shaka.ui.TextSelection.Factory = class {
 };
 
 shaka.ui.OverflowMenu.registerElement(
+    'captions', new shaka.ui.TextSelection.Factory());
+
+shaka.ui.Controls.registerElement(
     'captions', new shaka.ui.TextSelection.Factory());

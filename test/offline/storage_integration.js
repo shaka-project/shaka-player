@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -16,16 +17,15 @@ async function drmStorageSupport() {
 
   const support = await shaka.Player.probeSupport();
   const widevineSupport = support.drm['com.widevine.alpha'];
-  return widevineSupport && widevineSupport.persistentState;
+  return !!(widevineSupport && widevineSupport.persistentState);
 }
 
 filterDescribe('Storage', storageSupport, () => {
   const Util = shaka.test.Util;
-  const returnManifest = (manifest) =>
-    Util.factoryReturns(new shaka.test.FakeManifestParser(manifest));
 
   const englishUS = 'en-us';
-  const frenchCanadian= 'fr-ca';
+  const frenchCanadian = 'fr-ca';
+  const fakeMimeType = 'application/test';
 
   const manifestWithPerStreamBandwidthUri =
       'fake:manifest-with-per-stream-bandwidth';
@@ -33,12 +33,21 @@ filterDescribe('Storage', storageSupport, () => {
       'fake:manifest-without-per-stream-bandwidth';
   const manifestWithNonZeroStartUri = 'fake:manifest-with-non-zero-start';
   const manifestWithLiveTimelineUri = 'fake:manifest-with-live-timeline';
-  const manifestWithThreePeriodsUri = 'fake:manifest-with-three-periods';
+  const manifestWithAlternateSegmentsUri = 'fake:manifest-with-alt-segments';
+  const manifestWithVideoInitSegmentsUri =
+      'fake:manifest-with-video-init-segments';
 
+  const initSegmentUri = 'fake:init-segment';
   const segment1Uri = 'fake:segment-1';
   const segment2Uri = 'fake:segment-2';
   const segment3Uri = 'fake:segment-3';
   const segment4Uri = 'fake:segment-4';
+
+  const alternateInitSegmentUri = 'fake:alt-init-segment';
+  const alternateSegment1Uri = 'fake:alt-segment-1';
+  const alternateSegment2Uri = 'fake:alt-segment-2';
+  const alternateSegment3Uri = 'fake:alt-segment-3';
+  const alternateSegment4Uri = 'fake:alt-segment-4';
 
   const noMetadata = {};
 
@@ -47,9 +56,13 @@ filterDescribe('Storage', storageSupport, () => {
   beforeEach(async () => {
     // Make sure we start with a clean slate between each run.
     await eraseStorage();
+
+    shaka.media.ManifestParser.registerParserByMime(
+        fakeMimeType, () => new FakeManifestParser());
   });
 
   afterEach(async () => {
+    shaka.media.ManifestParser.unregisterParserByMime(fakeMimeType);
     // Make sure we don't leave anything behind.
     await eraseStorage();
   });
@@ -70,12 +83,13 @@ filterDescribe('Storage', storageSupport, () => {
     });
 
     it('removes all content from storage', async () => {
-      const TestManifestParser = shaka.test.TestScheme.ManifestParser;
+      const testSchemeMimeType = 'application/x-test-manifest';
       const manifestUri = 'test:sintel';
 
       // Store a piece of content.
       await withStorage((storage) => {
-        return storage.store(manifestUri, noMetadata, TestManifestParser);
+        return storage.store(
+            manifestUri, noMetadata, testSchemeMimeType).promise;
       });
 
       // Make sure that the content can be found.
@@ -141,13 +155,13 @@ filterDescribe('Storage', storageSupport, () => {
     // immediately after a remove.  This can sometimes be fixed with a delay,
     // but it is extremely flaky, so these are disabled until the bug is fixed.
     quarantinedIt('removes persistent license', async () => {
-      const TestManifestParser = shaka.test.TestScheme.ManifestParser;
+      const testSchemeMimeType = 'application/x-test-manifest';
 
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
       const stored = await storage.store(
-          'test:sintel-enc', noMetadata, TestManifestParser);
-      expect(stored.offlineUri).toBeTruthy();
+          'test:sintel-enc', noMetadata, testSchemeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -184,13 +198,13 @@ filterDescribe('Storage', storageSupport, () => {
     });
 
     quarantinedIt('defers removing licenses on error', async () => {
-      const TestManifestParser = shaka.test.TestScheme.ManifestParser;
+      const testSchemeMimeType = 'application/x-test-manifest';
 
       // PART 1 - Download and store content that has a persistent license
       //          associated with it.
       const stored = await storage.store(
-          'test:sintel-enc', noMetadata, TestManifestParser);
-      expect(stored.offlineUri).toBeTruthy();
+          'test:sintel-enc', noMetadata, testSchemeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -369,32 +383,56 @@ filterDescribe('Storage', storageSupport, () => {
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(() => {
-      shaka.offline.StorageMuxer.overrideSupport(new Map());
+    // CAUTION: Do not put overrideSupport() or clearSupport() in
+    // beforEach/afterEach.  They change what is supported at a static level.
+    // When the test is run, a shim will call the support check and the test
+    // will be skipped if overrideSupport() has been called already.  A shim of
+    // afterEach will call the same check and skip afterEach's body, too, and
+    // the clean up will never happen.  So the calls to overrideSupport() and
+    // clearSupport() must be in each test using try/finally.
 
+    beforeEach(() => {
       player = new shaka.Player();
       storage = new shaka.offline.Storage(player);
+      // NOTE: See above "CAUTION" comment about overrideSupport/clearSupport.
     });
 
     afterEach(async () => {
       await storage.destroy();
       await player.destroy();
-
-      shaka.offline.StorageMuxer.clearOverride();
+      // NOTE: See above "CAUTION" comment about overrideSupport/clearSupport.
     });
 
     it('throws error using list', async () => {
-      await expectAsync(storage.list()).toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        await expectAsync(storage.list()).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
 
     it('throws error using store', async () => {
-      await expectAsync(storage.store('the-uri-wont-matter'))
-          .toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        const store = storage.store('any-uri', noMetadata, fakeMimeType);
+        await expectAsync(store.promise).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
 
     it('throws error using remove', async () => {
-      await expectAsync(storage.remove('the-uri-wont-matter'))
-          .toBeRejectedWith(expectedError);
+      try {
+        shaka.offline.StorageMuxer.overrideSupport(new Map());
+
+        const remove = storage.remove('any-uri');
+        await expectAsync(remove).toBeRejectedWith(expectedError);
+      } finally {
+        shaka.offline.StorageMuxer.clearOverride();
+      }
     });
   });
 
@@ -411,22 +449,63 @@ filterDescribe('Storage', storageSupport, () => {
   // To allow us to control the network order, our manifests for these tests
   // could not repeat/reuse segments uris.
   describe('reports progress on store', () => {
-    const audioSegment1Uri = 'audio-segment-1';
-    const audioSegment2Uri = 'audio-segment-2';
-    const audioSegment3Uri = 'audio-segment-3';
-    const audioSegment4Uri = 'audio-segment-4';
+    const audioSegment1Uri = 'fake:audio-segment-1';
+    const audioSegment2Uri = 'fake:audio-segment-2';
+    const audioSegment3Uri = 'fake:audio-segment-3';
+    const audioSegment4Uri = 'fake:audio-segment-4';
 
-    const videoSegment1Uri = 'video-segment-1';
-    const videoSegment2Uri = 'video-segment-2';
-    const videoSegment3Uri = 'video-segment-3';
-    const videoSegment4Uri = 'video-segment-4';
+    const videoSegment1Uri = 'fake:video-segment-1';
+    const videoSegment2Uri = 'fake:video-segment-2';
+    const videoSegment3Uri = 'fake:video-segment-3';
+    const videoSegment4Uri = 'fake:video-segment-4';
 
-    /** @type {!shaka.Player} */
-    let player;
     /** @type {!shaka.offline.Storage} */
     let storage;
 
-    beforeEach(() => {
+    /** @type {!Object.<string, function():!Promise.<ArrayBuffer>>} */
+    let fakeResponses = {};
+
+    let compiledShaka;
+
+    beforeAll(async () => {
+      compiledShaka =
+          await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
+
+      compiledShaka.net.NetworkingEngine.registerScheme(
+          'fake', (uri, req, type, progress) => {
+            if (fakeResponses[uri]) {
+              const operation = async () => {
+                const data = await fakeResponses[uri]();
+                return {
+                  uri,
+                  data,
+                  headers: {},
+                };
+              };
+              return shaka.util.AbortableOperation.notAbortable(operation());
+            } else {
+              return shaka.util.AbortableOperation.failed(
+                  new shaka.util.Error(
+                      shaka.util.Error.Severity.RECOVERABLE,
+                      shaka.util.Error.Category.NETWORK,
+                      shaka.util.Error.Code.HTTP_ERROR));
+            }
+          });
+    });
+
+    beforeEach(async () => {
+      await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
+
+      storage = new compiledShaka.offline.Storage();
+
+      // Since we are using specific manifest with only one video and one audio
+      // we can return all the tracks.
+      storage.configure({
+        offline: {
+          trackSelectionCallback: (tracks) => { return tracks; },
+        },
+      });
+
       // Use these promises to ensure that the data from networking
       // engine arrives in the correct order.
       const delays = {};
@@ -439,15 +518,17 @@ filterDescribe('Storage', storageSupport, () => {
       delays[videoSegment3Uri] = new shaka.util.PublicPromise();
       delays[videoSegment4Uri] = new shaka.util.PublicPromise();
 
-      /** @type {!shaka.test.FakeNetworkingEngine} */
-      const netEngine = new shaka.test.FakeNetworkingEngine();
-
-      // Since the promise chains will be built so that each stream can be
-      // downloaded in parallel, we can force the network requests to
-      // resolve in lock-step (audio seg 0, video seg 0, audio seg 1,
-      // video seg 1, ...).
-      const setResponseFor = (segment, dependingOn) => {
-        netEngine.setResponse(segment, async () => {
+      /**
+       * Since the promise chains will be built so that each stream can be
+       * downloaded in parallel, we can force the network requests to
+       * resolve in lock-step (audio seg 0, video seg 0, audio seg 1,
+       * video seg 1, ...).
+       *
+       * @param {string} segment A URI
+       * @param {?string} dependingOn Another URI, or null
+       */
+      function setResponseFor(segment, dependingOn) {
+        fakeResponses[segment] = async () => {
           if (dependingOn) {
             await delays[dependingOn];
           }
@@ -456,8 +537,9 @@ filterDescribe('Storage', storageSupport, () => {
           // now.
           delays[segment].resolve();
           return new ArrayBuffer(16);
-        });
-      };
+        };
+      }
+      fakeResponses = {};
       setResponseFor(audioSegment1Uri, null);
       setResponseFor(audioSegment2Uri, videoSegment1Uri);
       setResponseFor(audioSegment3Uri, videoSegment2Uri);
@@ -466,26 +548,14 @@ filterDescribe('Storage', storageSupport, () => {
       setResponseFor(videoSegment2Uri, audioSegment2Uri);
       setResponseFor(videoSegment3Uri, audioSegment3Uri);
       setResponseFor(videoSegment4Uri, audioSegment4Uri);
-
-      // Use a real Player as Storage will use it to get a networking
-      // engine.
-      player = new shaka.Player(null, (player) => {
-        player.createNetworkingEngine = () => netEngine;
-      });
-
-      storage = new shaka.offline.Storage(player);
-      // Since we are using specific manifest with only one video and one audio
-      // we can return all the tracks.
-      storage.configure({
-        offline: {
-          trackSelectionCallback: (tracks) => { return tracks; },
-        },
-      });
     });
 
     afterEach(async () => {
       await storage.destroy();
-      await player.destroy();
+    });
+
+    afterAll(() => {
+      compiledShaka.net.NetworkingEngine.unregisterScheme('fake');
     });
 
     it('uses stream bandwidth', async () => {
@@ -555,12 +625,13 @@ filterDescribe('Storage', storageSupport, () => {
           progressCallback: progressCallback,
         },
       });
+      compiledShaka.media.ManifestParser.registerParserByMime(
+          fakeMimeType, () => new shaka.test.FakeManifestParser(manifest));
 
       // Store a manifest with bandwidth only for the variant (no per
       // stream bandwidth). This should result in a less accurate
       // progression of progress values as default values will be used.
-      await storage.store(
-          'uri-wont-matter', noMetadata, returnManifest(manifest));
+      await storage.store('uri-wont-matter', noMetadata, fakeMimeType).promise;
 
       // We should have hit all the progress steps.
       expect(remainingProgress.length).toBe(0);
@@ -579,38 +650,36 @@ filterDescribe('Storage', storageSupport, () => {
     function makeWithStreamBandwidth() {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.presentationTimeline.setDuration(20);
-        manifest.addPeriod(0, (period) => {
-          period.addVariant(0, (variant) => {
-            variant.language = englishUS;
-            variant.bandwidth = kbps(13);
-            variant.addVideo(1, (stream) => {
-              stream.bandwidth = kbps(10);
-              stream.size(100, 200);
-            });
-            variant.addAudio(2, (stream) => {
-              stream.language = englishUS;
-              stream.bandwidth = kbps(3);
-            });
+        manifest.addVariant(0, (variant) => {
+          variant.language = englishUS;
+          variant.bandwidth = kbps(13);
+          variant.addVideo(1, (stream) => {
+            stream.bandwidth = kbps(10);
+            stream.size(100, 200);
+          });
+          variant.addAudio(2, (stream) => {
+            stream.language = englishUS;
+            stream.bandwidth = kbps(3);
           });
         });
-      });
+      }, compiledShaka);
 
-      const audio = manifest.periods[0].variants[0].audio;
+      const audio = manifest.variants[0].audio;
       goog.asserts.assert(audio, 'Created manifest with audio, where is it?');
       overrideSegmentIndex(audio, [
-        makeSegmentReference(0, 0, 1, audioSegment1Uri),
-        makeSegmentReference(1, 1, 2, audioSegment2Uri),
-        makeSegmentReference(2, 2, 3, audioSegment3Uri),
-        makeSegmentReference(3, 3, 4, audioSegment4Uri),
+        makeReference(audioSegment1Uri, 0, 1, compiledShaka),
+        makeReference(audioSegment2Uri, 1, 2, compiledShaka),
+        makeReference(audioSegment3Uri, 2, 3, compiledShaka),
+        makeReference(audioSegment4Uri, 3, 4, compiledShaka),
       ]);
 
-      const video = manifest.periods[0].variants[0].video;
+      const video = manifest.variants[0].video;
       goog.asserts.assert(video, 'Created manifest with video, where is it?');
       overrideSegmentIndex(video, [
-        makeSegmentReference(0, 0, 1, videoSegment1Uri),
-        makeSegmentReference(1, 1, 2, videoSegment2Uri),
-        makeSegmentReference(2, 2, 3, videoSegment3Uri),
-        makeSegmentReference(3, 3, 4, videoSegment4Uri),
+        makeReference(videoSegment1Uri, 0, 1, compiledShaka),
+        makeReference(videoSegment2Uri, 1, 2, compiledShaka),
+        makeReference(videoSegment3Uri, 2, 3, compiledShaka),
+        makeReference(videoSegment4Uri, 3, 4, compiledShaka),
       ]);
 
       return manifest;
@@ -630,13 +699,10 @@ filterDescribe('Storage', storageSupport, () => {
       // the per-stream values.
       const manifest = makeWithStreamBandwidth();
       goog.asserts.assert(
-          manifest.periods.length == 1,
-          'Expecting manifest to only have one period');
-      goog.asserts.assert(
-          manifest.periods[0].variants.length == 1,
+          manifest.variants.length == 1,
           'Expecting manifest to only have one variant');
 
-      const variant = manifest.periods[0].variants[0];
+      const variant = manifest.variants[0];
       goog.asserts.assert(
           variant.audio,
           'Expecting manifest to have audio stream');
@@ -697,7 +763,6 @@ filterDescribe('Storage', storageSupport, () => {
         manifestWithPerStreamBandwidthUri,
         manifestWithoutPerStreamBandwidthUri,
         manifestWithNonZeroStartUri,
-        manifestWithThreePeriodsUri,
       ];
 
       // NOTE: We're working around an apparent compiler bug here, with Closure
@@ -707,7 +772,7 @@ filterDescribe('Storage', storageSupport, () => {
       for (let i = 0; i < manifestUris.length; ++i) {
         const uri = manifestUris[i];
         // eslint-disable-next-line no-await-in-loop
-        await storage.store(uri, noMetadata, FakeManifestParser);
+        await storage.store(uri, noMetadata, fakeMimeType).promise;
       }
 
       const content = await storage.list();
@@ -722,26 +787,48 @@ filterDescribe('Storage', storageSupport, () => {
       }
     });
 
+    it('snapshots config when store is called', async () => {
+      /** @type {!jasmine.Spy} */
+      const selectTracksOne =
+          jasmine.createSpy('selectTracksOne').and.callFake((tracks) => tracks);
+      /** @type {!jasmine.Spy} */
+      const selectTracksTwo =
+          jasmine.createSpy('selectTracksTwo').and.callFake((tracks) => tracks);
+      /** @type {!jasmine.Spy} */
+      const selectTracksBad =
+          jasmine.createSpy('selectTracksBad').and.callFake((tracks) => []);
+
+      storage.configure('offline.trackSelectionCallback', selectTracksOne);
+      const storeOne = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      storage.configure('offline.trackSelectionCallback', selectTracksTwo);
+      const storeTwo = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      storage.configure('offline.trackSelectionCallback', selectTracksBad);
+      await Promise.all([storeOne.promise, storeTwo.promise]);
+
+      expect(selectTracksOne).toHaveBeenCalled();
+      expect(selectTracksTwo).toHaveBeenCalled();
+      expect(selectTracksBad).not.toHaveBeenCalled();
+    });
+
     it('only stores chosen tracks', async () => {
       // Change storage to only store one track so that it will be easy
-      // for use to ensure that only the one track was stored.
-      const selectTrack = (tracks) => {
+      // for us to ensure that only the one track was stored.
+      const selectTracks = (tracks) => {
         const selected = tracks.filter((t) => t.language == frenchCanadian);
         expect(selected.length).toBe(1);
         return selected;
       };
       storage.configure({
         offline: {
-          trackSelectionCallback: selectTrack,
+          trackSelectionCallback: selectTracks,
         },
       });
 
-      // Stored content should reflect the tracks in the first period, so we
-      // should only find track there.
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
-      expect(stored).toBeTruthy();
-      expect(stored.tracks).toBeTruthy();
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
       expect(stored.tracks.length).toBe(1);
       expect(stored.tracks[0].language).toBe(frenchCanadian);
 
@@ -749,7 +836,6 @@ filterDescribe('Storage', storageSupport, () => {
       // has one variant.
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
-      expect(uri).toBeTruthy();
 
       /** @type {!shaka.offline.StorageMuxer} */
       const muxer = new shaka.offline.StorageMuxer();
@@ -758,26 +844,36 @@ filterDescribe('Storage', storageSupport, () => {
         await muxer.init();
         const cell = await muxer.getCell(uri.mechanism(), uri.cell());
         const manifests = await cell.getManifests([uri.key()]);
-        expect(manifests).toBeTruthy();
         expect(manifests.length).toBe(1);
 
         const manifest = manifests[0];
-        expect(manifest).toBeTruthy();
-        expect(manifest.periods).toBeTruthy();
-        expect(manifest.periods.length).toBe(1);
-
-        const period = manifest.periods[0];
-        expect(period).toBeTruthy();
-        expect(period.streams).toBeTruthy();
         // There should be 2 streams, an audio and a video stream.
-        expect(period.streams.length).toBe(2);
+        expect(manifest.streams.length).toBe(2);
 
-        const audio = period.streams.filter((s) => s.contentType == 'audio')[0];
-        expect(audio).toBeTruthy();
+        const audio = manifest.streams.filter(
+            (s) => s.type == 'audio')[0];
         expect(audio.language).toBe(frenchCanadian);
       } finally {
         await muxer.destroy();
       }
+    });
+
+    it('can choose tracks asynchronously', async () => {
+      storage.configure({
+        offline: {
+          trackSelectionCallback: async (tracks) => {
+            await Util.delay(0.1);
+            const selected = tracks.filter((t) => t.language == frenchCanadian);
+            expect(selected.length).toBe(1);
+            return selected;
+          },
+        },
+      });
+
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      expect(stored.tracks.length).toBe(1);
+      expect(stored.tracks[0].language).toBe(frenchCanadian);
     });
 
     it('stores drm info without license', async () => {
@@ -796,9 +892,11 @@ filterDescribe('Storage', storageSupport, () => {
       overrideDrmAndManifest(
           storage,
           drm,
-          makeManifestWithPerStreamBandwidth(1));
+          makeManifestWithPerStreamBandwidth());
 
-      const stored = await storage.store(manifestWithPerStreamBandwidthUri);
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -827,6 +925,66 @@ filterDescribe('Storage', storageSupport, () => {
       }
     });
 
+    it('can extract DRM info from segments', async () => {
+      const pssh1 =
+          '00000028' +                          // atom size
+          '70737368' +                          // atom type='pssh'
+          '00000000' +                          // v0, flags=0
+          'edef8ba979d64acea3c827dcd51d21ed' +  // system id (Widevine)
+          '00000008' +                          // data size
+          '0102030405060708';                   // data
+      const psshData1 = shaka.util.Uint8ArrayUtils.fromHex(pssh1);
+      const pssh2 =
+          '00000028' +                          // atom size
+          '70737368' +                          // atom type='pssh'
+          '00000000' +                          // v0, flags=0
+          'edef8ba979d64acea3c827dcd51d21ed' +  // system id (Widevine)
+          '00000008' +                          // data size
+          '1337420123456789';                   // data
+      const psshData2 = shaka.util.Uint8ArrayUtils.fromHex(pssh2);
+      netEngine.setResponseValue(initSegmentUri,
+          shaka.util.BufferUtils.toArrayBuffer(psshData1));
+      netEngine.setResponseValue(alternateInitSegmentUri,
+          shaka.util.BufferUtils.toArrayBuffer(psshData2));
+
+      const drm = new shaka.test.FakeDrmEngine();
+      const drmInfo = makeDrmInfo();
+      drmInfo.keySystem = 'com.widevine.alpha';
+      drm.setDrmInfo(drmInfo);
+      overrideDrmAndManifest(
+          storage,
+          drm,
+          makeManifestWithVideoInitSegments());
+
+      const stored = await storage.store(
+          manifestWithVideoInitSegmentsUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
+
+      // The manifest chooses the alternate stream, so expect only the alt init
+      // segment.
+      expect(drm.newInitData).toHaveBeenCalledWith('cenc', psshData2);
+    });
+
+    it('can store multiple assets at once', async () => {
+      // Block the network so that we won't finish the first store command.
+      /** @type {!shaka.util.PublicPromise} */
+      const hangingPromise = netEngine.delayNextRequest();
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+
+      // Critical: This manifest should have different segment URIs than the one
+      // above, or else the blocked network request would be shared between the
+      // two storage operations.
+      const secondStorePromise = storage.store(
+          manifestWithAlternateSegmentsUri, noMetadata, fakeMimeType);
+      await secondStorePromise.promise;
+
+      // Unblock the original store and wait for it to complete.
+      hangingPromise.resolve();
+      await storeOperation.promise;
+    });
+
     // Make sure that when we configure storage to NOT store persistent
     // licenses that we don't store the sessions.
     it('stores drm info with no license', async () => {
@@ -843,12 +1001,12 @@ filterDescribe('Storage', storageSupport, () => {
       overrideDrmAndManifest(
           storage,
           drm,
-          makeManifestWithPerStreamBandwidth(1));
-      storage.configure({
-        usePersistentLicense: false,
-      });
+          makeManifestWithPerStreamBandwidth());
+      storage.configure('offline.usePersistentLicense', false);
 
-      const stored = await storage.store(manifestWithPerStreamBandwidthUri);
+      const stored = await storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -876,31 +1034,34 @@ filterDescribe('Storage', storageSupport, () => {
       }
     });
 
-    // TODO(vaage): Remove the need to limit the number of store commands. With
-    //              all the changes, it should be very easy to do now.
-    it('throws an error if another store is in progress', async () => {
-      // Block the network so that we won't finish the first store command.
-      /** @type {!shaka.util.PublicPromise} */
-      const hangingPromise = netEngine.delayNextRequest();
-      /** @type {!Promise} */
-      const storePromise = storage.store(
-          manifestWithPerStreamBandwidthUri,
-          noMetadata,
-          FakeManifestParser);
+    /**
+     * In some situations, indexedDB.open() can just hang, and call neither the
+     * 'success' nor the 'error' callbacks.
+     * I'm not sure what causes it, but it seems to happen consistently between
+     * reloads when it does so it might be a browser-based issue.
+     * In that case, we should time out with an error, instead of also hanging.
+     */
+    it('throws an error if indexedDB open times out', async () => {
+      const oldOpen = window.indexedDB.open;
+      window.indexedDB.open = () => {
+        // Just return a dummy object.
+        return /** @type {!IDBOpenDBRequest} */ ({
+          onsuccess: (event) => {},
+          onerror: (error) => {},
+        });
+      };
 
-      const expected = Util.jasmineError(new shaka.util.Error(
+      /** @type {!shaka.offline.StorageMuxer} */
+      const muxer = new shaka.offline.StorageMuxer();
+      const expectedError = shaka.test.Util.jasmineError(new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.STORE_ALREADY_IN_PROGRESS));
-      await expectAsync(
-          storage.store(
-              manifestWithoutPerStreamBandwidthUri,
-              noMetadata, FakeManifestParser))
-          .toBeRejectedWith(expected);
+          shaka.util.Error.Code.INDEXED_DB_INIT_TIMED_OUT));
 
-      // Unblock the original store and wait for it to complete.
-      hangingPromise.resolve();
-      await storePromise;
+      await expectAsync(muxer.init())
+          .toBeRejectedWith(expectedError);
+
+      window.indexedDB.open = oldOpen;
     });
 
     it('throws an error if the content is a live stream', async () => {
@@ -909,14 +1070,13 @@ filterDescribe('Storage', storageSupport, () => {
           shaka.util.Error.Category.STORAGE,
           shaka.util.Error.Code.CANNOT_STORE_LIVE_OFFLINE,
           manifestWithLiveTimelineUri));
-      await expectAsync(
-          storage.store(
-              manifestWithLiveTimelineUri, noMetadata, FakeManifestParser))
-          .toBeRejectedWith(expected);
+      const storeOperation =
+          storage.store(manifestWithLiveTimelineUri, noMetadata, fakeMimeType);
+      await expectAsync(storeOperation.promise).toBeRejectedWith(expected);
     });
 
     it('throws an error if destroyed mid-store', async () => {
-      const manifest = makeManifestWithPerStreamBandwidth(1);
+      const manifest = makeManifestWithPerStreamBandwidth();
 
       /**
        * Block storage when it goes to parse the manifest. Since we don't want
@@ -929,8 +1089,9 @@ filterDescribe('Storage', storageSupport, () => {
         return manifest;
       };
 
-      // The uri won't matter as we have override |parseManifest|.
-      const waitOnStore = storage.store('uri-does-not-matter');
+      // The uri won't matter much, as we have overriden |parseManifest|.
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const waitOnStore = storage.store('any-uri', noMetadata, fakeMimeType);
 
       // Request for storage to be destroyed. Before waiting for it to resolve,
       // resolve the promise that we are using to stall the store operation.
@@ -943,8 +1104,64 @@ filterDescribe('Storage', storageSupport, () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.STORAGE,
           shaka.util.Error.Code.OPERATION_ABORTED));
-      await expectAsync(waitOnStore).toBeRejectedWith(expected);
+      await expectAsync(waitOnStore.promise).toBeRejectedWith(expected);
     });
+
+    it('cancels downloads if destroyed mid-store', async () => {
+      await networkCancelTest((abortable) => {
+        return storage.destroy();
+      });
+    });
+
+    it('cancels downloads if canceled mid-store', async () => {
+      await networkCancelTest((abortable) => {
+        return abortable.abort();
+      });
+    });
+
+    /**
+     * @param {function(shaka.extern.IAbortableOperation):!Promise} interruption
+     */
+    async function networkCancelTest(interruption) {
+      const delays = [];
+      /** @type {!shaka.util.PublicPromise} */
+      const aRequestIsStarted = new shaka.util.PublicPromise();
+
+      // Set delays for the URIs of the manifest.
+      const uris = [segment1Uri, segment2Uri, segment3Uri, segment4Uri];
+      for (let i = 0; i < uris.length; i++) {
+        const promise = new shaka.util.PublicPromise();
+        delays.push(promise);
+
+        // The fake networking engine provides a "abortCheck" callback to the
+        // response, so that you can check whether or not the network operation
+        // has been aborted.
+        netEngine.setResponse(uris[i], async (abortCheck) => {
+          aRequestIsStarted.resolve();
+          await promise;
+
+          expect(abortCheck()).toBe(true);
+
+          return new ArrayBuffer(16);
+        });
+      }
+
+      /** @type {!shaka.extern.IAbortableOperation} */
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await aRequestIsStarted;
+      const interruptionPromise = interruption(storeOperation);
+      for (const promise of delays) {
+        promise.resolve();
+      }
+      await interruptionPromise;
+
+      const expected = Util.jasmineError(new shaka.util.Error(
+          shaka.util.Error.Severity.CRITICAL,
+          shaka.util.Error.Category.STORAGE,
+          shaka.util.Error.Code.OPERATION_ABORTED));
+      await expectAsync(storeOperation.promise).toBeRejectedWith(expected);
+    }
 
     it('stops for networking errors', async () => {
       // Force all network requests to fail.
@@ -955,10 +1172,9 @@ filterDescribe('Storage', storageSupport, () => {
         return shaka.util.AbortableOperation.failed(error);
       });
 
-      await expectAsync(
-          storage.store(
-              manifestWithPerStreamBandwidthUri, noMetadata,
-              FakeManifestParser))
+      const storeOperation = storage.store(
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType);
+      await expectAsync(storeOperation.promise)
           .toBeRejectedWith(Util.jasmineError(error));
     });
 
@@ -976,9 +1192,8 @@ filterDescribe('Storage', storageSupport, () => {
       // Store a piece of content, but then change the uri slightly so that
       // it won't be found when we try to remove it (with the wrong uri).
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri,
-          noMetadata,
-          FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
       const storedUri = shaka.offline.OfflineUri.parse(stored.offlineUri);
       const missingManifestUri = shaka.offline.OfflineUri.manifest(
           storedUri.mechanism(), storedUri.cell(), storedUri.key() + 1);
@@ -994,14 +1209,15 @@ filterDescribe('Storage', storageSupport, () => {
 
     it('removes manifest', async () => {
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
-
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
       await storage.remove(stored.offlineUri);
     });
 
     it('removes manifest with missing segments', async () => {
       const stored = await storage.store(
-          manifestWithPerStreamBandwidthUri, noMetadata, FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(stored.offlineUri != null, 'URI should not be null!');
 
       /** @type {shaka.offline.OfflineUri} */
       const uri = shaka.offline.OfflineUri.parse(stored.offlineUri);
@@ -1018,7 +1234,7 @@ filterDescribe('Storage', storageSupport, () => {
 
         // Get the stream from the manifest. The segment count is based on how
         // we created manifest in the "make*Manifest" functions.
-        const stream = manifest.periods[0].streams[0];
+        const stream = manifest.streams[0];
         expect(stream).toBeTruthy();
         expect(stream.segments.length).toBe(4);
 
@@ -1061,15 +1277,15 @@ filterDescribe('Storage', storageSupport, () => {
         },
       });
       const content = await storage.store(
-          manifestWithPerStreamBandwidthUri,
-          noMetadata,
-          FakeManifestParser);
+          manifestWithPerStreamBandwidthUri, noMetadata, fakeMimeType).promise;
+      goog.asserts.assert(
+          content.offlineUri != null, 'URI should not be null!');
 
-      /**
-       * @type {!Array.<number>}
-       */
+      // We expect 5 progress events because there are 4 unique segments, plus
+      // the manifest.
+      /** @type {!Array.<number>}*/
       const progressSteps = [
-        0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0,
+        0.2, 0.4, 0.6, 0.8, 1,
       ];
 
       const progressCallback = (content, progress) => {
@@ -1086,66 +1302,56 @@ filterDescribe('Storage', storageSupport, () => {
       expect(progressSteps).toBeTruthy();
       expect(progressSteps.length).toBe(0);
     });
-
-    it('stores multi-period content', async () => {
-      const storedContent = await storage.store(
-          manifestWithThreePeriodsUri, noMetadata, FakeManifestParser);
-
-      let parsed = false;
-
-      eventManager.listen(player, 'manifestparsed', async () => {
-        const manifest = player.getManifest();
-        expect(manifest.periods.length).toBe(3);
-
-        const start0 = manifest.periods[0].startTime;
-        const start1 = manifest.periods[1].startTime;
-        const start2 = manifest.periods[2].startTime;
-
-        const stream0 = manifest.periods[0].variants[0].video;
-        const stream1 = manifest.periods[1].variants[0].video;
-        const stream2 = manifest.periods[2].variants[0].video;
-
-        await stream0.createSegmentIndex();
-        await stream1.createSegmentIndex();
-        await stream2.createSegmentIndex();
-
-        const position0 = stream0.segmentIndex.find(start0);
-        const position1 = stream1.segmentIndex.find(start1);
-        const position2 = stream2.segmentIndex.find(start2);
-
-        expect(position0).not.toBe(null);
-        expect(position1).not.toBe(null);
-        expect(position2).not.toBe(null);
-
-        const segment0 = stream0.segmentIndex.get(position0);
-        const segment1 = stream1.segmentIndex.get(position1);
-        const segment2 = stream2.segmentIndex.get(position2);
-
-        expect(segment0.startTime).toBe(start0);
-        expect(segment1.startTime).toBe(start1);
-        expect(segment2.startTime).toBe(start2);
-
-        parsed = true;
-      });
-
-      await player.load(
-          storedContent.offlineUri, 0, 'application/x-offline-manifest');
-
-      // Make sure the listener with the expectations actually fired and
-      // completed.
-      expect(parsed).toBe(true);
-    });
   });
 
   describe('storage without player', () => {
-    const TestManifestParser = shaka.test.TestScheme.ManifestParser;
+    const testSchemeMimeType = 'application/x-test-manifest';
     const manifestUri = 'test:sintel';
 
     it('stores content', async () => {
       /** @type {shaka.offline.Storage} */
       const storage = new shaka.offline.Storage();
       try {
-        await storage.store(manifestUri, noMetadata, TestManifestParser);
+        await storage.store(
+            manifestUri, noMetadata, testSchemeMimeType).promise;
+      } finally {
+        await storage.destroy();
+      }
+    });
+  });
+
+  describe('deduplication', () => {
+    const testSchemeMimeType = 'application/x-test-manifest';
+    const manifestUri = 'test:sintel';
+
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/2781
+    it('does not cache failures or cancellations', async () => {
+      /** @type {shaka.offline.Storage} */
+      const storage = new shaka.offline.Storage();
+
+      try {
+        storage.getNetworkingEngine().registerRequestFilter(
+            (type, request) => {
+              if (type == shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+                throw new Error('Break download!');
+              }
+            });
+
+        const firstOperation = storage.store(
+            manifestUri, noMetadata, testSchemeMimeType);
+        // We killed the operation with a network failure, so this should be
+        // rejected.
+        await expectAsync(firstOperation.promise).toBeRejected();
+
+        // Clear the filter that caused the error.
+        storage.getNetworkingEngine().clearAllRequestFilters();
+
+        // Now we can try again, and it should be able to succeed, even though
+        // some downloads for the same URIs failed in the first attempt.  In
+        // #2781, this would fail because the network failure was cached.
+        const secondOperation = storage.store(
+            manifestUri, noMetadata, testSchemeMimeType);
+        await expectAsync(secondOperation.promise).toBeResolved();
       } finally {
         await storage.destroy();
       }
@@ -1174,22 +1380,29 @@ filterDescribe('Storage', storageSupport, () => {
       height: height,
       frameRate: 30,
       pixelAspectRatio: '59:54',
+      hdr: null,
       mimeType: 'video/mp4,audio/mp4',
+      audioMimeType: 'audio/mp4',
+      videoMimeType: 'video/mp4',
       codecs: 'mp4,mp4',
       audioCodec: 'mp4',
       videoCodec: 'mp4',
       primary: false,
       roles: [],
       audioRoles: [],
+      forced: false,
       videoId: videoId,
       audioId: audioId,
       channelsCount: 2,
       audioSamplingRate: 48000,
+      spatialAudio: false,
+      tilesLayout: null,
       audioBandwidth: bandwidth * 0.33,
       videoBandwidth: bandwidth * 0.67,
       originalVideoId: videoId.toString(),
       originalAudioId: audioId.toString(),
       originalTextId: null,
+      originalImageId: null,
     };
   }
 
@@ -1211,84 +1424,130 @@ filterDescribe('Storage', storageSupport, () => {
       height: null,
       frameRate: null,
       pixelAspectRatio: null,
+      hdr: null,
       mimeType: 'text/vtt',
+      audioMimeType: null,
+      videoMimeType: null,
       codecs: 'vtt',
       audioCodec: null,
       videoCodec: null,
       primary: false,
       roles: [],
       audioRoles: null,
+      forced: false,
       videoId: null,
       audioId: null,
       channelsCount: null,
       audioSamplingRate: null,
+      spatialAudio: false,
+      tilesLayout: null,
       audioBandwidth: null,
       videoBandwidth: null,
       originalVideoId: null,
       originalAudioId: null,
       originalTextId: id.toString(),
+      originalImageId: null,
     };
   }
 
-  /**
-   * @param {number} numPeriods
-   * @return {shaka.extern.Manifest}
-   */
-  function makeManifestWithPerStreamBandwidth(numPeriods) {
-    const periodDuration = 4;
-    const idsPerPeriod = 6;
-
+  /** @return {shaka.extern.Manifest} */
+  function makeManifestWithVideoInitSegments() {
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.presentationTimeline.setDuration(20);
 
-      for (let i = 0; i < numPeriods; ++i) {
-        const startTime = i * periodDuration;
-        const baseId = i * idsPerPeriod;
-
-        manifest.addPeriod(startTime, (period) => {
-          period.addVariant(baseId + 0, (variant) => {
-            variant.language = englishUS;
-            variant.bandwidth = kbps(13);
-            variant.addVideo(baseId + 1, (stream) => {
-              stream.bandwidth = kbps(10);
-              stream.size(100, 200);
-            });
-            variant.addAudio(baseId + 2, (stream) => {
-              stream.language = englishUS;
-              stream.bandwidth = kbps(3);
-            });
-          });
-          period.addVariant(baseId + 3, (variant) => {
-            variant.language = frenchCanadian;
-            variant.bandwidth = kbps(13);
-            variant.addVideo(baseId + 4, (stream) => {
-              stream.bandwidth = kbps(10);
-              stream.size(100, 200);
-            });
-            variant.addAudio(baseId + 5, (stream) => {
-              stream.language = frenchCanadian;
-              stream.bandwidth = kbps(3);
-            });
-          });
+      manifest.addVariant(0, (variant) => {
+        variant.bandwidth = kbps(13);
+        variant.addVideo(1, (stream) => {
+          stream.bandwidth = kbps(13);
+          stream.size(100, 200);
         });
-      }
+      });
+      manifest.addVariant(2, (variant) => {
+        variant.bandwidth = kbps(20);
+        variant.addVideo(3, (stream) => {
+          stream.bandwidth = kbps(20);
+          stream.size(200, 400);
+        });
+      });
     });
 
-    for (let i = 0; i < numPeriods; ++i) {
-      for (const stream of getAllStreams(manifest, i)) {
-        const startTime = i * periodDuration;
+    const stream = manifest.variants[0].video;
+    goog.asserts.assert(stream, 'The first stream should exist');
+    stream.encrypted = true;
+    const init = new shaka.media.InitSegmentReference(
+        () => [initSegmentUri], 0, null);
+    const refs = [
+      makeReference(segment1Uri, 0, 1),
+      makeReference(segment2Uri, 1, 2),
+      makeReference(segment3Uri, 2, 3),
+      makeReference(segment4Uri, 3, 4),
+    ];
+    for (const ref of refs) {
+      ref.initSegmentReference = init;
+    }
+    overrideSegmentIndex(stream, refs);
 
-        // Make a new copy each time, as the segment index can modify each
-        // reference.
-        const refs = [
-          makeSegmentReference(0, startTime + 0, startTime + 1, segment1Uri),
-          makeSegmentReference(1, startTime + 1, startTime + 2, segment2Uri),
-          makeSegmentReference(2, startTime + 2, startTime + 3, segment3Uri),
-          makeSegmentReference(3, startTime + 3, startTime + 4, segment4Uri),
-        ];
+    const streamAlt = manifest.variants[1].video;
+    goog.asserts.assert(streamAlt, 'The second stream should exist');
+    streamAlt.encrypted = true;
+    const initAlt = new shaka.media.InitSegmentReference(
+        () => [alternateInitSegmentUri], 0, null);
+    const refsAlt = [
+      makeReference(alternateSegment1Uri, 0, 1),
+      makeReference(alternateSegment2Uri, 1, 2),
+      makeReference(alternateSegment3Uri, 2, 3),
+      makeReference(alternateSegment4Uri, 3, 4),
+    ];
+    for (const ref of refsAlt) {
+      ref.initSegmentReference = initAlt;
+    }
+    overrideSegmentIndex(streamAlt, refsAlt);
 
-        overrideSegmentIndex(stream, refs);
-      }
+    return manifest;
+  }
+
+  /** @return {shaka.extern.Manifest} */
+  function makeManifestWithPerStreamBandwidth() {
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.presentationTimeline.setDuration(20);
+
+      manifest.addVariant(0, (variant) => {
+        variant.language = englishUS;
+        variant.bandwidth = kbps(13);
+        variant.addVideo(1, (stream) => {
+          stream.bandwidth = kbps(10);
+          stream.size(100, 200);
+        });
+        variant.addAudio(2, (stream) => {
+          stream.language = englishUS;
+          stream.bandwidth = kbps(3);
+        });
+      });
+      manifest.addVariant(3, (variant) => {
+        variant.language = frenchCanadian;
+        variant.bandwidth = kbps(13);
+        variant.addVideo(4, (stream) => {
+          stream.bandwidth = kbps(10);
+          stream.size(100, 200);
+        });
+        variant.addAudio(5, (stream) => {
+          stream.language = frenchCanadian;
+          stream.bandwidth = kbps(3);
+        });
+      });
+    });
+
+    for (const stream of getAllStreams(manifest)) {
+      // Make a new copy each time, as the segment index can modify each
+      // reference.
+      const refs = [
+        makeReference(segment1Uri, 0, 1),
+        makeReference(segment2Uri, 1, 2),
+        makeReference(segment3Uri, 2, 3),
+        makeReference(segment4Uri, 3, 4),
+      ];
+
+      overrideSegmentIndex(stream, refs);
     }
 
     return manifest;
@@ -1298,10 +1557,10 @@ filterDescribe('Storage', storageSupport, () => {
    * @return {shaka.extern.Manifest}
    */
   function makeManifestWithoutPerStreamBandwidth() {
-    const manifest = makeManifestWithPerStreamBandwidth(1);
+    const manifest = makeManifestWithPerStreamBandwidth();
 
     // Remove the per stream bandwidth.
-    for (const stream of getAllStreams(manifest, 0)) {
+    for (const stream of getAllStreams(manifest)) {
       stream.bandwidth = undefined;
     }
 
@@ -1309,38 +1568,17 @@ filterDescribe('Storage', storageSupport, () => {
   }
 
   /**
-   * @param {number} position
-   * @param {number} startTime
-   * @param {number} endTime
-   * @param {string} uri
-   * @return {!shaka.media.SegmentReference}
-   */
-  function makeSegmentReference(position, startTime, endTime, uri) {
-    return new shaka.media.SegmentReference(
-        position,
-        startTime,
-        endTime,
-        () => [uri],
-        /* startByte= */ 0,
-        /* endByte= */ null,
-        /* initSegmentReference= */ null,
-        /* timestampOffset= */ 0,
-        /* appendWindowStart= */ 0,
-        /* appendWindowEnd= */ Infinity);
-  }
-
-  /**
    * @return {shaka.extern.Manifest}
    */
   function makeManifestWithNonZeroStart() {
-    const manifest = makeManifestWithPerStreamBandwidth(1);
+    const manifest = makeManifestWithPerStreamBandwidth();
 
-    for (const stream of getAllStreams(manifest, 0)) {
+    for (const stream of getAllStreams(manifest)) {
       const refs = [
-        makeSegmentReference(0, 10, 11, segment1Uri),
-        makeSegmentReference(1, 11, 12, segment2Uri),
-        makeSegmentReference(2, 12, 13, segment3Uri),
-        makeSegmentReference(3, 13, 14, segment4Uri),
+        makeReference(segment1Uri, 10, 11),
+        makeReference(segment2Uri, 11, 12),
+        makeReference(segment3Uri, 12, 13),
+        makeReference(segment4Uri, 13, 14),
       ];
 
       overrideSegmentIndex(stream, refs);
@@ -1353,21 +1591,40 @@ filterDescribe('Storage', storageSupport, () => {
    * @return {shaka.extern.Manifest}
    */
   function makeManifestWithLiveTimeline() {
-    const manifest = makeManifestWithPerStreamBandwidth(1);
+    const manifest = makeManifestWithPerStreamBandwidth();
     manifest.presentationTimeline.setDuration(Infinity);
     manifest.presentationTimeline.setStatic(false);
     return manifest;
   }
 
   /**
+   * @return {shaka.extern.Manifest}
+   */
+  function makeManifestWithAlternateSegments() {
+    const manifest = makeManifestWithPerStreamBandwidth();
+
+    for (const stream of getAllStreams(manifest)) {
+      const refs = [
+        makeReference(alternateSegment1Uri, 10, 11),
+        makeReference(alternateSegment2Uri, 11, 12),
+        makeReference(alternateSegment3Uri, 12, 13),
+        makeReference(alternateSegment4Uri, 13, 14),
+      ];
+
+      overrideSegmentIndex(stream, refs);
+    }
+
+    return manifest;
+  }
+
+  /**
    * @param {shaka.extern.Manifest} manifest
-   * @param {number} periodIndex
    * @return {!Array.<shaka.extern.Stream>}
    */
-  function getAllStreams(manifest, periodIndex) {
+  function getAllStreams(manifest) {
     const streams = [];
 
-    for (const variant of manifest.periods[periodIndex].variants) {
+    for (const variant of manifest.variants) {
       if (variant.audio) {
         streams.push(variant.audio);
       }
@@ -1375,7 +1632,7 @@ filterDescribe('Storage', storageSupport, () => {
         streams.push(variant.video);
       }
     }
-    for (const stream of manifest.periods[periodIndex].textStreams) {
+    for (const stream of manifest.textStreams) {
       streams.push(stream);
     }
 
@@ -1388,6 +1645,7 @@ filterDescribe('Storage', storageSupport, () => {
    */
   function overrideSegmentIndex(stream, segments) {
     const index = new shaka.media.SegmentIndex(segments);
+    stream.createSegmentIndex = () => Promise.resolve();
     stream.segmentIndex = index;
   }
 
@@ -1397,7 +1655,11 @@ filterDescribe('Storage', storageSupport, () => {
         .setResponseValue(segment1Uri, new ArrayBuffer(16))
         .setResponseValue(segment2Uri, new ArrayBuffer(16))
         .setResponseValue(segment3Uri, new ArrayBuffer(16))
-        .setResponseValue(segment4Uri, new ArrayBuffer(16));
+        .setResponseValue(segment4Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment1Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment2Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment3Uri, new ArrayBuffer(16))
+        .setResponseValue(alternateSegment4Uri, new ArrayBuffer(16));
   }
 
   async function eraseStorage() {
@@ -1432,7 +1694,9 @@ filterDescribe('Storage', storageSupport, () => {
       distinctiveIdentifierRequired: false,
       initData: null,
       keyIds: null,
+      sessionType: 'temporary',
       serverCertificate: null,
+      serverCertificateUri: '',
       audioRobustness: 'HARDY',
       videoRobustness: 'OTHER',
     };
@@ -1446,15 +1710,17 @@ filterDescribe('Storage', storageSupport, () => {
     constructor() {
       this.map_ = {};
       this.map_[manifestWithPerStreamBandwidthUri] =
-          makeManifestWithPerStreamBandwidth(1);
+          makeManifestWithPerStreamBandwidth();
       this.map_[manifestWithoutPerStreamBandwidthUri] =
           makeManifestWithoutPerStreamBandwidth();
       this.map_[manifestWithNonZeroStartUri] =
           makeManifestWithNonZeroStart();
       this.map_[manifestWithLiveTimelineUri] =
           makeManifestWithLiveTimeline();
-      this.map_[manifestWithThreePeriodsUri] =
-          makeManifestWithPerStreamBandwidth(3);
+      this.map_[manifestWithAlternateSegmentsUri] =
+          makeManifestWithAlternateSegments();
+      this.map_[manifestWithVideoInitSegmentsUri] =
+          makeManifestWithVideoInitSegments();
     }
 
     /** @override */
@@ -1536,7 +1802,7 @@ filterDescribe('Storage', storageSupport, () => {
 
     try {
       drm.configure(player.getConfiguration().drm);
-      const variants = shaka.util.Periods.getAllVariantsFrom(manifest.periods);
+      const variants = manifest.variants;
       await drm.initForStorage(variants, /* usePersistentLicenses= */ true);
       await action(drm);
     } finally {
@@ -1546,5 +1812,33 @@ filterDescribe('Storage', storageSupport, () => {
     if (error) {
       throw error;
     }
+  }
+
+  /**
+   * Creates a real SegmentReference.  This is distinct from the fake ones used
+   * in ManifestParser tests because it can be on the left-hand side of an
+   * expect().  You can't expect jasmine.any(Number) to equal
+   * jasmine.any(Number).  :-(
+   *
+   * @param {string} uri
+   * @param {number} startTime
+   * @param {number} endTime
+   * @param {shakaNamespaceType=} compiledShaka
+   * @return {shaka.media.SegmentReference}
+   */
+  function makeReference(uri, startTime, endTime, compiledShaka) {
+    /** @type {shakaNamespaceType} */
+    const shaka = compiledShaka || window['shaka'];
+
+    return new shaka.media.SegmentReference(
+        startTime,
+        endTime,
+        /* getUris= */ () => [uri],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
   }
 });

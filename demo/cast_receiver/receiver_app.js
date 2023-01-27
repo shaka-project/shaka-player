@@ -1,9 +1,11 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
 goog.require('goog.asserts');
+goog.require('ShakaDemoAssetInfo');
 
 
 /**
@@ -11,8 +13,9 @@ goog.require('goog.asserts');
  * @suppress {missingProvide}
  */
 class ShakaReceiverApp {
+  /** */
   constructor() {
-    /** @private {HTMLMediaElement} */
+    /** @private {HTMLVideoElement} */
     this.video_ = null;
 
     /** @private {shaka.Player} */
@@ -32,15 +35,14 @@ class ShakaReceiverApp {
    * Initialize the application.
    */
   init() {
-    /** @type {HTMLMediaElement} */
-    const video = /** @type {HTMLMediaElement} */
-        (document.getElementById('video'));
-    goog.asserts.assert(video, 'Video element should be available!');
+    const video = document.getElementById('video');
+    goog.asserts.assert(
+        video instanceof HTMLVideoElement, 'Wrong element type!');
     this.video_ = video;
 
-    /** @type {!shaka.ui.Overlay} */
     const ui = this.video_['ui'];
-    goog.asserts.assert(ui, 'UI should be available!');
+    goog.asserts.assert(
+        ui instanceof shaka.ui.Overlay, 'UI not present or wrong type!');
 
     // Make sure we don't show extra UI elements we don't need on the TV.
     ui.configure({
@@ -89,6 +91,12 @@ class ShakaReceiverApp {
     asset.applyFilters(this.player_.getNetworkingEngine());
     const config = asset.getConfiguration();
     this.player_.configure(config);
+
+    this.receiver_.clearContentMetadata();
+    this.receiver_.setContentTitle(asset.name);
+    if (asset.iconUri) {
+      this.receiver_.setContentImage(asset.iconUri);
+    }
   }
 
   /** @private */
@@ -141,7 +149,10 @@ class ShakaReceiverApp {
 ShakaReceiverApp.IDLE_TIMEOUT_MINUTES_ = 5;
 
 document.addEventListener('shaka-ui-loaded', () => {
-  // Initialize the receiver app by instantiating ShakaReceiverApp.
-  window.receiver = new ShakaReceiverApp();
-  window.receiver.init();
+  // Instantiate ShakaReceiverApp.
+  const receiver = new ShakaReceiverApp();
+  // Attach it to window so that it can be seen in a debugger.
+  window['receiver'] = receiver;
+  // Initialize the app.
+  receiver.init();
 });

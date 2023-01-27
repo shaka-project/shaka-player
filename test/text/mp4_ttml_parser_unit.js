@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -40,14 +41,24 @@ describe('Mp4TtmlParser', () => {
   it('handles media segments with multiple mdats', () => {
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const time =
+        {periodStart: 0, segmentStart: 0, segmentEnd: 60, vttOffset: 0};
     const ret = parser.parseMedia(ttmlSegmentMultipleMDAT, time);
-    expect(ret.length).toBe(20);
+    // Bodies.
+    expect(ret.length).toBe(2);
+    // Divs.
+    expect(ret[0].nestedCues.length).toBe(1);
+    expect(ret[1].nestedCues.length).toBe(1);
+    // Cues.
+    expect(ret[0].nestedCues[0].nestedCues.length).toBe(10);
+    expect(ret[1].nestedCues[0].nestedCues.length).toBe(10);
   });
 
   it('accounts for offset', () => {
-    const time1 = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
-    const time2 = {periodStart: 7, segmentStart: 0, segmentEnd: 0};
+    const time1 =
+        {periodStart: 0, segmentStart: 0, segmentEnd: 70, vttOffset: 0};
+    const time2 =
+        {periodStart: 7, segmentStart: 0, segmentEnd: 70, vttOffset: 7};
 
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
@@ -87,14 +98,24 @@ describe('Mp4TtmlParser', () => {
       {
         startTime: 27,
         endTime: 30.5,
-        payload: '...you have your robotics, and I\n'+
-            'just want to be awesome in space.',
+        nestedCues: [{
+          payload: '...you have your robotics, and I',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'just want to be awesome in space.',
+        }],
       },
       {
         startTime: 30.8,
         endTime: 34,
-        payload: 'Why don\'t you just admit that\nyou\'re freaked out by my' +
-            ' robot hand?',
+        nestedCues: [{
+          payload: 'Why don\'t you just admit that',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'you\'re freaked out by my robot hand?',
+        }],
       },
       {
         startTime: 34.5,
@@ -109,8 +130,13 @@ describe('Mp4TtmlParser', () => {
       {
         startTime: 38,
         endTime: 41,
-        payload: 'I\'m freaked out! I have nightmares\nthat I\'m being' +
-            ' chased...',
+        nestedCues: [{
+          payload: 'I\'m freaked out! I have nightmares',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'that I\'m being chased...',
+        }],
       },
       {
         startTime: 41,
@@ -120,7 +146,13 @@ describe('Mp4TtmlParser', () => {
       {
         startTime: 42.2,
         endTime: 45,
-        payload: '"Fourty years later"\nWhatever, Thom. We\'re done.',
+        nestedCues: [{
+          payload: '"Fourty years later"',
+        }, {
+          lineBreak: true,
+        }, {
+          payload: 'Whatever, Thom. We\'re done.',
+        }],
       },
       {
         startTime: 50,
@@ -130,12 +162,10 @@ describe('Mp4TtmlParser', () => {
     ];
     const parser = new shaka.text.Mp4TtmlParser();
     parser.parseInit(ttmlInitSegment);
-    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0};
+    const time =
+        {periodStart: 0, segmentStart: 0, segmentEnd: 60, vttOffset: 0};
     const result = parser.parseMedia(ttmlSegment, time);
-    verifyHelper(cues, result);
+    shaka.test.TtmlUtils.verifyHelper(
+        cues, result, {startTime: 23, endTime: 53.5});
   });
-
-  function verifyHelper(/** !Array */ expected, /** !Array */ actual) {
-    expect(actual).toEqual(expected.map((c) => jasmine.objectContaining(c)));
-  }
 });

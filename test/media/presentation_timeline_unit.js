@@ -1,10 +1,15 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
 describe('PresentationTimeline', () => {
   const originalDateNow = Date.now;
+  const makeSegmentReference = (startTime, endTime) => {
+    return shaka.test.ManifestParser.makeReference(
+        'foo.mp4', startTime, endTime);
+  };
 
   /** @type {!Date} */
   let baseTime;
@@ -109,28 +114,6 @@ describe('PresentationTimeline', () => {
     return timeline;
   }
 
-  /**
-   * Creates a simple, dummy segment reference.
-   * @param {number} startTime
-   * @param {number} endTime
-   * @return {shaka.media.SegmentReference}
-   */
-  function makeSegmentReference(startTime, endTime) {
-    // start and end times are the only fields that matter to
-    // PresentationTimeline.
-    return new shaka.media.SegmentReference(
-        /* position= */ 0,
-        startTime,
-        endTime,
-        /* uris= */ () => [],
-        /* startByte= */ 0,
-        /* endByte= */ null,
-        /* initSegmentReference= */ null,
-        /* timestampOffset= */ 0,
-        /* appendWindowStart= */ 0,
-        /* appendWindowEnd= */ Infinity);
-  }
-
   describe('getSegmentAvailabilityStart', () => {
     it('returns 0 for VOD and IPR', () => {
       const timeline1 = makeVodTimeline(/* duration= */ 60);
@@ -197,7 +180,7 @@ describe('PresentationTimeline', () => {
 
       // In spite of the current time, the explicit segment times will decide
       // the availability window.
-      // See https://github.com/google/shaka-player/issues/999
+      // See https://github.com/shaka-project/shaka-player/issues/999
       setElapsed(1000);
       timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
 
@@ -297,11 +280,30 @@ describe('PresentationTimeline', () => {
 
       // In spite of the current time, the explicit segment times will decide
       // the availability window.
-      // See https://github.com/google/shaka-player/issues/999
+      // See https://github.com/shaka-project/shaka-player/issues/999
       setElapsed(1000);
       timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
 
       // last segment time (50)
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(50);
+    });
+
+    it('calculates time when there a transition of live to static', () => {
+      const timeline = makeLiveTimeline(/* availability= */ 20);
+
+      const ref1 = makeSegmentReference(0, 10);
+      const ref2 = makeSegmentReference(10, 20);
+      const ref3 = makeSegmentReference(20, 30);
+      const ref4 = makeSegmentReference(30, 40);
+      const ref5 = makeSegmentReference(40, 50);
+
+      setElapsed(50);
+      timeline.notifySegments([ref1, ref2, ref3, ref4, ref5]);
+
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(50);
+
+      timeline.setStatic(true);
+
       expect(timeline.getSegmentAvailabilityEnd()).toBe(50);
     });
   });
@@ -389,6 +391,16 @@ describe('PresentationTimeline', () => {
       expect(timeline.getSeekRangeStart()).toBe(0);
       expect(timeline.getSafeSeekRangeStart(0)).toBe(0);
       expect(timeline.getSafeSeekRangeStart(25)).toBe(5);
+    });
+
+    // Regression test for https://github.com/shaka-project/shaka-player/issues/2831
+    it('will round up to the nearest ms', () => {
+      const timeline = makeVodTimeline(/* duration= */ 60);
+      // Seeking to this exact number may result in seeking to slightly less
+      // than that, due to rounding.
+      timeline.setUserSeekStart(1.458666666666666);
+      // So the safe range start should be slightly higher, with fewer digits.
+      expect(timeline.getSafeSeekRangeStart(0)).toBe(1.459);
     });
   });
 

@@ -1,0 +1,35 @@
+name: Validate PR Title
+
+# We recommend that maintainers use this Chrome/Firefox extension so that
+# squashed PRs will have the merged commit message default to the PR title and
+# description:  https://github.com/zachwhaley/squashed-merge-message
+#
+# This avoids the need to amend commits after the fact to match the desired PR
+# syntax.  As long as the PR itself is properly-formatted, this extension will
+# help you commit the right format to the repo, too.  This, in turn, feeds the
+# changelog and release workflows.
+
+on:
+  # NOTE: The automated PRs from release-please-action do not seem to trigger
+  # any of the default PR triggers (opened, synchronize, reopened).  So we need
+  # additional types.  This is a good set that makes it easy to trigger the
+  # workflow manually if needed.
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+      - assigned
+      - labeled
+      - ready_for_review
+      - review_requested
+
+jobs:
+  main:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

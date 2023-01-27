@@ -1,0 +1,171 @@
+# Selenium grid config for the Shaka lab.  This is the source of truth for the
+# browsers and devices in the Shaka lab at Google.
+
+# For syntax and general information, see docs/selenium-grid-config.md
+
+
+# A set of variables to contain repeated configurations which can then be
+# referenced below.  The syntax for the variable is "name: &name", which
+# generates an "anchor" with the given name.  Later, you can inject the
+# contents of the variable with "*name".
+vars:
+  firefox_config: &firefox_config
+    moz:firefoxOptions:
+      # Override Firefox default preferences in the temporary profile created
+      # for each test run.
+      prefs:
+        # Overrides Selenium's explicit default setting, to allow Firefox to
+        # install the Widevine CDM on demand.
+        media.gmp-manager.updateEnabled: true
+        # Overrides Firefox's Linux-specific default setting to disable DRM.
+        media.eme.enabled: true
+
+  minimum_chrome_args: &minimum_chrome_args
+    # On Chrome m59+ we can test EME on platforms with pop-up prompts, such as
+    # Android and ChromeOS.  Note that this flag does not take a port number
+    # (domain vs origin).
+    # This flag requires setting --user-data-dir as well, however, webdriver
+    # already takes care of that for us (except on Android).
+    - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
+    # Normally, Chrome disallows autoplaying videos in many cases.  Enable it
+    # for testing.
+    - "--autoplay-policy=no-user-gesture-required"
+
+  minimum_chrome_android_args: &minimum_chrome_android_args
+    # There is no way in YAML to natively merge arrays, so we start by
+    # duplicating the flags from minimum_chrome_args above.
+    - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
+    - "--autoplay-policy=no-user-gesture-required"
+    # On Android we must set --user-data-dir.  WebDriver does not do it for
+    # us as it does on other platforms.  Without --user-data-dir,
+    # --unsafely-allow... does not work.
+    - "--user-data-dir=/data/data/com.android.chrome/cache"
+
+  minimum_chromeos_args: &minimum_chromeos_args
+    # There is no way in YAML to natively merge arrays, so we start by
+    # duplicating the flags from minimum_chrome_args above.
+    - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
+    - "--autoplay-policy=no-user-gesture-required"
+    # Allow remote attestation even though the device may be in dev mode.  This
+    # is critical for testing involving L1 content licenses.
+    - "--allow-ra-in-dev-mode"
+
+  chrome_config: &chrome_config
+    goog:chromeOptions:
+      args: *minimum_chrome_args
+
+      # Instruct chromedriver not to disable component updater. The
+      # component updater must run in order for the Widevine CDM to be
+      # available when using a new user-data-dir.
+      # TODO(http://crbug.com/613581): Remove once Chrome bug is fixed.
+      excludeSwitches:
+        - "disable-component-update"
+
+  chrome_android_config: &chrome_android_config
+    goog:chromeOptions:
+      args: *minimum_chrome_android_args
+
+      # Once the new session request reaches chromedriver, it will take
+      # the androidPackage option as a request to start Chrome through
+      # adb on the tethered device.
+      androidPackage: com.android.chrome
+
+  chromeos_config: &chromeos_config
+    # Pass these client-specified arguments through generic-webdriver-server.
+    # This array will be appended after "--" instead of being set through one
+    # specific flag.  For example, with ["--foo", "--bar=baz"] in the args,
+    # this would generate a command like:
+    #   chromeos-webdriver-server.js -- --foo --bar=baz
+    # Those parameters will be passed on to Chrome instead of used by the
+    # WebDriver server.
+    generic:args: *minimum_chromeos_args
+
+
+ChromeMac:
+  browser: chrome
+  os: Mac
+  extra_config: *chrome_config
+
+FirefoxMac:
+  browser: firefox
+  os: Mac
+  extra_config: *firefox_config
+
+Safari:
+  browser: safari
+  os: Mac
+
+SafariTP:
+  # TODO(b/152646297): Safari TP not launching as of Safari 15.4
+  disabled: true
+  browser: safari
+  os: Mac
+  extra_config:
+    safari.options:
+      technologyPreview: true
+
+EdgeMac:
+  browser: msedge
+  os: Mac
+
+ChromeWindows:
+  browser: chrome
+  os: Windows
+  extra_config: *chrome_config
+
+FirefoxWindows:
+  browser: firefox
+  os: Windows
+  extra_config: *firefox_config
+
+IE11:
+  # IE11 support has been removed from the latest release branch.
+  disabled: true
+  browser: internet explorer
+  os: Windows
+  extra_config:
+    se:ieOptions:
+      # The zoom setting must be checked, or screenshot tests will be way off!
+      ignoreZoomSetting: false
+      ignoreProtectedModeSettings: true
+
+Edge:
+  browser: msedge
+  os: Windows
+
+ChromeLinux:
+  browser: chrome
+  os: Linux
+  extra_config: *chrome_config
+
+FirefoxLinux:
+  browser: firefox
+  os: Linux
+  extra_config: *firefox_config
+
+EdgeLinux:
+  browser: msedge
+  os: Linux
+
+ChromeAndroid:
+  browser: chrome
+  os: Android
+  extra_config: *chrome_android_config
+
+Chromecast:
+  browser: chromecast
+
+Chromebook:
+  # TODO(b/145916766): Persistent license tests failing
+  disabled: true
+  browser: chromeos
+  version: Pixelbook
+  extra_config: *chromeos_config
+
+Tizen:
+  browser: tizen
+
+XboxOne:
+  browser: xboxone
+  # TODO: Re-enable Xbox (https://github.com/shaka-project/shaka-player/issues/4234)
+  disabled: true

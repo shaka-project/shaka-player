@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,6 +7,15 @@
 
 goog.provide('shakaDemo.Config');
 
+goog.require('goog.asserts');
+goog.require('shakaDemo.BoolInput');
+goog.require('shakaDemo.DatalistInput');
+goog.require('shakaDemo.InputContainer');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.NumberInput');
+goog.require('shakaDemo.SelectInput');
+goog.require('shakaDemo.TextInput');
+goog.requireType('shakaDemo.Input');
 
 /** @type {?shakaDemo.Config} */
 let shakaDemoConfig;
@@ -82,9 +92,12 @@ shakaDemo.Config = class {
     this.addOfflineSection_();
     this.addDrmSection_();
     this.addStreamingSection_();
+    this.addMediaSourceSection_();
     this.addManifestSection_();
     this.addRetrictionsSection_('',
         shakaDemo.MessageIds.RESTRICTIONS_SECTION_HEADER);
+    this.addCmcdSection_();
+    this.addLcevcSection_();
   }
 
   /**
@@ -107,18 +120,6 @@ shakaDemo.Config = class {
     componentHandler.upgradeDom();
   }
 
-  /** @return {!shaka.extern.AdvancedDrmConfiguration} */
-  static emptyAdvancedConfiguration() {
-    return {
-      distinctiveIdentifierRequired: false,
-      persistentStateRequired: false,
-      videoRobustness: '',
-      audioRobustness: '',
-      serverCertificate: new Uint8Array(0),
-      individualizationServer: '',
-    };
-  }
-
   /** @private */
   addDrmSection_() {
     const MessageIds = shakaDemo.MessageIds;
@@ -127,22 +128,24 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DELAY_LICENSE,
             'drm.delayLicenseRequestUntilPlayed')
         .addBoolInput_(MessageIds.LOG_LICENSE_EXCHANGE,
-            'drm.logLicenseExchange');
+            'drm.logLicenseExchange')
+        .addNumberInput_(MessageIds.UPDATE_EXPIRATION_TIME,
+            'drm.updateExpirationTime',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false,
+            /* canBeUnset= */ true)
+        .addBoolInput_(MessageIds.PARSE_INBAND_PSSH_ENABLED,
+            'drm.parseInbandPsshEnabled')
+        .addTextInput_(MessageIds.MIN_HDCP_VERSION,
+            'drm.minHdcpVersion');
     const advanced = shakaDemoMain.getConfiguration().drm.advanced || {};
-    const robustnessSuggestions = [
-      'SW_SECURE_CRYPTO',
-      'SW_SECURE_DECODE',
-      'HW_SECURE_CRYPTO',
-      'HW_SECURE_DECODE',
-      'HW_SECURE_ALL',
-    ];
-    const addRobustnessField = (name, valueName) => {
-      // All robustness fields of a given type are set at once.
-      this.addDatalistInput_(name, robustnessSuggestions, (input) => {
+    const addDRMAdvancedField = (name, valueName, suggestions) => {
+      // All advanced fields of a given type are set at once.
+      this.addDatalistInput_(name, suggestions, (input) => {
         // Add in any common drmSystem not currently in advanced.
         for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
           if (!(drmSystem in advanced)) {
-            advanced[drmSystem] = shakaDemo.Config.emptyAdvancedConfiguration();
+            advanced[drmSystem] = shakaDemo.Main.defaultAdvancedDrmConfig();
           }
         }
         // Set the robustness.
@@ -154,12 +157,37 @@ shakaDemo.Config = class {
       });
       const keySystem = Object.keys(advanced)[0];
       if (keySystem) {
-        const currentRobustness = advanced[keySystem][valueName];
-        this.latestInput_.input().value = currentRobustness;
+        const currentValue = advanced[keySystem][valueName];
+        this.latestInput_.input().value = currentValue;
       }
     };
-    addRobustnessField(MessageIds.VIDEO_ROBUSTNESS, 'videoRobustness');
-    addRobustnessField(MessageIds.AUDIO_ROBUSTNESS, 'audioRobustness');
+
+    const robustnessSuggestions = [
+      'SW_SECURE_CRYPTO',
+      'SW_SECURE_DECODE',
+      'HW_SECURE_CRYPTO',
+      'HW_SECURE_DECODE',
+      'HW_SECURE_ALL',
+      '150',
+      '2000',
+      '3000',
+    ];
+
+    const sessionTypeSuggestions = ['temporary', 'persistent-license'];
+
+    addDRMAdvancedField(
+        MessageIds.VIDEO_ROBUSTNESS,
+        'videoRobustness',
+        robustnessSuggestions);
+    addDRMAdvancedField(
+        MessageIds.AUDIO_ROBUSTNESS,
+        'audioRobustness',
+        robustnessSuggestions);
+    addDRMAdvancedField(
+        MessageIds.DRM_SESSION_TYPE,
+        'sessionType',
+        sessionTypeSuggestions);
+
     this.addRetrySection_('drm', MessageIds.DRM_RETRY_SECTION_HEADER);
   }
 
@@ -172,23 +200,38 @@ shakaDemo.Config = class {
             'manifest.dash.ignoreDrmInfo')
         .addBoolInput_(MessageIds.AUTO_CORRECT_DASH_DRIFT,
             'manifest.dash.autoCorrectDrift')
+        .addBoolInput_(MessageIds.DISABLE_XLINK_PROCESSING,
+            'manifest.dash.disableXlinkProcessing')
         .addBoolInput_(MessageIds.XLINK_FAIL_GRACEFULLY,
             'manifest.dash.xlinkFailGracefully')
         .addBoolInput_(MessageIds.IGNORE_DASH_SUGGESTED_PRESENTATION_DELAY,
             'manifest.dash.ignoreSuggestedPresentationDelay')
         .addBoolInput_(MessageIds.IGNORE_DASH_EMPTY_ADAPTATION_SET,
             'manifest.dash.ignoreEmptyAdaptationSet')
+        .addBoolInput_(MessageIds.IGNORE_DASH_MAX_SEGMENT_DURATION,
+            'manifest.dash.ignoreMaxSegmentDuration')
         .addBoolInput_(MessageIds.IGNORE_HLS_TEXT_FAILURES,
             'manifest.hls.ignoreTextStreamFailures')
+        .addBoolInput_(MessageIds.IGNORE_HLS_IMAGE_FAILURES,
+            'manifest.hls.ignoreImageStreamFailures')
+        .addTextInput_(MessageIds.DEFAULT_AUDIO_CODEC,
+            'manifest.hls.defaultAudioCodec')
+        .addTextInput_(MessageIds.DEFAULT_VIDEO_CODEC,
+            'manifest.hls.defaultVideoCodec')
+        .addBoolInput_(MessageIds.IGNORE_MANIFEST_PROGRAM_DATE_TIME,
+            'manifest.hls.ignoreManifestProgramDateTime')
+        .addBoolInput_(MessageIds.USE_SAFARI_BEHAVIOR_FOR_LIVE,
+            'manifest.hls.useSafariBehaviorForLive')
+        .addNumberInput_(MessageIds.LIVE_SEGMENTS_DELAY,
+            'manifest.hls.liveSegmentsDelay')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
         .addTextInput_(MessageIds.CLOCK_SYNC_URI, 'manifest.dash.clockSyncUri')
-        .addBoolInput_(MessageIds.IGNORE_DRM, 'manifest.dash.ignoreDrmInfo')
         .addNumberInput_(MessageIds.DEFAULT_PRESENTATION_DELAY,
-            'manifest.dash.defaultPresentationDelay')
+            'manifest.defaultPresentationDelay')
         .addBoolInput_(MessageIds.IGNORE_MIN_BUFFER_TIME,
             'manifest.dash.ignoreMinBufferTime')
         .addNumberInput_(MessageIds.INITIAL_SEGMENT_LIMIT,
@@ -196,12 +239,18 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
+        .addBoolInput_(MessageIds.SEQUENCE_MODE,
+            'manifest.dash.sequenceMode')
         .addBoolInput_(MessageIds.DISABLE_AUDIO,
             'manifest.disableAudio')
         .addBoolInput_(MessageIds.DISABLE_VIDEO,
             'manifest.disableVideo')
         .addBoolInput_(MessageIds.DISABLE_TEXT,
-            'manifest.disableText');
+            'manifest.disableText')
+        .addBoolInput_(MessageIds.DISABLE_THUMBNAILS,
+            'manifest.disableThumbnails')
+        .addBoolInput_(MessageIds.SEGMENT_RELATIVE_VTT_TIMING,
+            'manifest.segmentRelativeVttTiming');
 
     this.addRetrySection_('manifest', MessageIds.MANIFEST_RETRY_SECTION_HEADER);
   }
@@ -212,6 +261,8 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.AbrConfiguration');
     this.addSection_(MessageIds.ADAPTATION_SECTION_HEADER, docLink)
         .addBoolInput_(MessageIds.ENABLED, 'abr.enabled')
+        .addBoolInput_(MessageIds.NETWORK_INFORMATION,
+            'abr.useNetworkInformation')
         .addNumberInput_(MessageIds.BANDWIDTH_ESTIMATE,
             'abr.defaultBandwidthEstimate')
         .addNumberInput_(MessageIds.BANDWIDTH_DOWNGRADE,
@@ -222,9 +273,48 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.SWITCH_INTERVAL,
             'abr.switchInterval',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.MIN_TOTAL_BYTES,
+            'abr.advanced.minTotalBytes')
+        .addNumberInput_(MessageIds.MIN_BYTES,
+            'abr.advanced.minBytes')
+        .addNumberInput_(MessageIds.FAST_HALF_LIFE,
+            'abr.advanced.fastHalfLife',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.SLOW_HALF_LIFE,
+            'abr.advanced.slowHalfLife',
+            /* canBeDecimal= */ true)
+        .addBoolInput_(MessageIds.RESTRICT_TO_ELEMENT_SIZE,
+            'abr.restrictToElementSize')
+        .addBoolInput_(MessageIds.RESTRICT_TO_SCREEN_SIZE,
+            'abr.restrictToScreenSize')
+        .addBoolInput_(MessageIds.IGNORE_DEVICE_PIXEL_RATIO,
+            'abr.ignoreDevicePixelRatio');
     this.addRetrictionsSection_('abr',
         MessageIds.ADAPTATION_RESTRICTIONS_SECTION_HEADER);
+  }
+
+  /** @private */
+  addCmcdSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.CmcdConfiguration');
+    this.addSection_(MessageIds.CMCD_SECTION_HEADER, docLink)
+        .addBoolInput_(MessageIds.ENABLED, 'cmcd.enabled')
+        .addTextInput_(MessageIds.SESSION_ID, 'cmcd.sessionId')
+        .addTextInput_(MessageIds.CONTENT_ID, 'cmcd.contentId')
+        .addBoolInput_(MessageIds.USE_HEADERS, 'cmcd.useHeaders');
+  }
+
+  /** @private */
+  addLcevcSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.LcevcConfiguration');
+    this.addSection_(MessageIds.LCEVC_SECTION_HEADER, docLink)
+        .addBoolInput_(MessageIds.ENABLED, 'lcevc.enabled')
+        .addBoolInput_(MessageIds.LCEVC_DYNAMIC_PERFORMANCE_SCALING,
+            'lcevc.dynamicPerformanceScaling')
+        .addNumberInput_(MessageIds.LCEVC_LOG_LEVEL, 'lcevc.logLevel')
+        .addBoolInput_(MessageIds.LCEVC_DRAW_LOGO, 'lcevc.drawLogo');
   }
 
   /**
@@ -267,6 +357,11 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.FUZZ_FACTOR, prefix + 'fuzzFactor',
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.TIMEOUT, prefix + 'timeout',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.STALL_TIMEOUT, prefix + 'stallTimeout',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.CONNECTION_TIMEOUT,
+            prefix + 'connectionTimeout',
             /* canBeDecimal= */ true);
   }
 
@@ -276,7 +371,9 @@ shakaDemo.Config = class {
     const docLink = this.resolveExternLink_('.OfflineConfiguration');
     this.addSection_(MessageIds.OFFLINE_SECTION_HEADER, docLink)
         .addBoolInput_(MessageIds.USE_PERSISTENT_LICENSES,
-            'offline.usePersistentLicense');
+            'offline.usePersistentLicense')
+        .addNumberInput_(MessageIds.NUMBER_OF_PARALLEL_DOWNLOADS,
+            'offline.numberOfParallelDownloads');
   }
 
   /** @private */
@@ -284,8 +381,8 @@ shakaDemo.Config = class {
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.StreamingConfiguration');
     this.addSection_(MessageIds.STREAMING_SECTION_HEADER, docLink)
-        .addNumberInput_(MessageIds.MAX_SMALL_GAP_SIZE,
-            'streaming.smallGapLimit',
+        .addNumberInput_(MessageIds.GAP_DETECTION_THRESHOLD,
+            'streaming.gapDetectionThreshold',
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.BUFFERING_GOAL,
             'streaming.bufferingGoal',
@@ -307,7 +404,27 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.SAFE_SKIP_DISTANCE,
             'streaming.stallSkip',
-            /* canBeDecimal= */ true);
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.INACCURATE_MANIFEST_TOLERANCE,
+            'streaming.inaccurateManifestTolerance',
+            /* canBeDecimal= */ true)
+        .addBoolInput_(MessageIds.LOW_LATENCY,
+            'streaming.lowLatencyMode')
+        .addBoolInput_(MessageIds.AUTO_LOW_LATENCY,
+            'streaming.autoLowLatencyMode')
+        .addBoolInput_(MessageIds.FORCE_HTTPS,
+            'streaming.forceHTTPS')
+        .addBoolInput_(MessageIds.PREFER_NATIVE_HLS,
+            'streaming.preferNativeHls')
+        .addNumberInput_(MessageIds.UPDATE_INTERVAL_SECONDS,
+            'streaming.updateIntervalSeconds',
+            /* canBeDecimal= */ true)
+        .addBoolInput_(MessageIds.DISPATCH_ALL_EMSG_BOXES,
+            'streaming.dispatchAllEmsgBoxes')
+        .addBoolInput_(MessageIds.OBSERVE_QUALITY_CHANGES,
+            'streaming.observeQualityChanges')
+        .addNumberInput_(MessageIds.MAX_DISABLED_TIME,
+            'streaming.maxDisabledTime');
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
@@ -316,17 +433,13 @@ shakaDemo.Config = class {
       // Add a fake custom fixed "input" that warns the users not to change it.
       const noop = (input) => {};
       this.addCustomBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
-          noop, MessageIds.ALWAYS_STREAM_TEXT);
+          noop, MessageIds.ALWAYS_STREAM_TEXT_WARNING);
       this.latestInput_.input().disabled = true;
       this.latestInput_.input().checked = true;
     }
 
-    this.addBoolInput_(MessageIds.JUMP_LARGE_GAPS,
-        'streaming.jumpLargeGaps')
-        .addBoolInput_(MessageIds.FORCE_TRANSMUX_TS,
-            'streaming.forceTransmuxTS')
-        .addBoolInput_(MessageIds.START_AT_SEGMENT_BOUNDARY,
-            'streaming.startAtSegmentBoundary')
+    this.addBoolInput_(MessageIds.START_AT_SEGMENT_BOUNDARY,
+        'streaming.startAtSegmentBoundary')
         .addBoolInput_(MessageIds.IGNORE_TEXT_FAILURES,
             'streaming.ignoreTextStreamFailures')
         .addBoolInput_(MessageIds.STALL_DETECTOR_ENABLED,
@@ -338,12 +451,42 @@ shakaDemo.Config = class {
   }
 
   /** @private */
+  addMediaSourceSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
+    this.addSection_(MessageIds.MEDIA_SOURCE_SECTION_HEADER, docLink)
+        .addTextInput_(MessageIds.SOURCE_BUFFER_EXTRA_FEATURES,
+            'mediaSource.sourceBufferExtraFeatures')
+        .addBoolInput_(MessageIds.FORCE_TRANSMUX,
+            'mediaSource.forceTransmux');
+  }
+
+  /** @private */
   addLanguageSection_() {
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.PlayerConfiguration');
+
+    const autoShowTextOptions = shaka.config.AutoShowText;
+    const localize = (name) => shakaDemoMain.getLocalizedString(name);
+    const autoShowTextOptionNames = {
+      'NEVER': localize(MessageIds.AUTO_SHOW_TEXT_NEVER),
+      'ALWAYS': localize(MessageIds.AUTO_SHOW_TEXT_ALWAYS),
+      'IF_PREFERRED_TEXT_LANGUAGE':
+          localize(MessageIds.AUTO_SHOW_TEXT_IF_PREFERRED_TEXT_LANGUAGE),
+      'IF_SUBTITLES_MAY_BE_NEEDED':
+          localize(MessageIds.AUTO_SHOW_TEXT_IF_SUBTITLES_MAY_BE_NEEDED),
+    };
+
     this.addSection_(MessageIds.LANGUAGE_SECTION_HEADER, docLink)
         .addTextInput_(MessageIds.AUDIO_LANGUAGE, 'preferredAudioLanguage')
-        .addTextInput_(MessageIds.TEXT_LANGUAGE, 'preferredTextLanguage');
+        .addTextInput_(MessageIds.AUDIO_LABEL, 'preferredAudioLabel')
+        .addTextInput_(MessageIds.TEXT_LANGUAGE, 'preferredTextLanguage')
+        .addTextInput_(MessageIds.TEXT_ROLE, 'preferredTextRole')
+        .addSelectInput_(
+            MessageIds.AUTO_SHOW_TEXT,
+            'autoShowText',
+            autoShowTextOptions,
+            autoShowTextOptionNames);
     const onChange = (input) => {
       shakaDemoMain.setUILocale(input.value);
       shakaDemoMain.remakeHash();
@@ -352,6 +495,8 @@ shakaDemo.Config = class {
     this.latestInput_.input().value = shakaDemoMain.getUILocale();
     this.addNumberInput_(MessageIds.AUDIO_CHANNEL_COUNT,
         'preferredAudioChannelCount');
+    this.addBoolInput_(MessageIds.PREFER_FORCED_SUBS,
+        'preferForcedSubs');
   }
 
   /** @private */
@@ -374,6 +519,22 @@ shakaDemo.Config = class {
     // are ready to add ALL of the tooltip messages.
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.latestInput_.input().checked = true;
+    }
+
+    if (!shakaDemoMain.getNativeControlsEnabled()) {
+      this.addCustomBoolInput_(MessageIds.TRICK_PLAY_CONTROLS, (input) => {
+        shakaDemoMain.setTrickPlayControlsEnabled(input.checked);
+      });
+      if (shakaDemoMain.getTrickPlayControlsEnabled()) {
+        this.latestInput_.input().checked = true;
+      }
+    } else {
+      // Add a fake custom fixed "input" that warns the users not to change it.
+      const noop = (input) => {};
+      this.addCustomBoolInput_(MessageIds.TRICK_PLAY_CONTROLS,
+          noop, MessageIds.TRICK_PLAY_CONTROLS_WARNING);
+      this.latestInput_.input().disabled = true;
+      this.latestInput_.input().checked = false;
     }
 
     // shaka.log is not set if logging isn't enabled.
@@ -415,7 +576,7 @@ shakaDemo.Config = class {
       }
       shakaDemoMain.remakeHash();
     };
-    this.addSelectInput_(MessageIds.LOG_LEVEL, logLevels, onChange);
+    this.addCustomSelectInput_(MessageIds.LOG_LEVEL, logLevels, onChange);
     const input = this.latestInput_.input();
     switch (shaka['log']['currentLevel']) {
       case Level['DEBUG']:
@@ -479,7 +640,7 @@ shakaDemo.Config = class {
 
   /**
    * @param {!shakaDemo.MessageIds} name
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    * @param {shakaDemo.MessageIds=} tooltipMessage
    * @return {!shakaDemo.Config}
    * @private
@@ -512,7 +673,7 @@ shakaDemo.Config = class {
 
   /**
    * @param {!shakaDemo.MessageIds} name
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    * @param {shakaDemo.MessageIds=} tooltipMessage
    * @return {!shakaDemo.Config}
    * @private
@@ -576,7 +737,7 @@ shakaDemo.Config = class {
   /**
    * @param {!shakaDemo.MessageIds} name
    * @param {!Array.<string>} values
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    * @param {shakaDemo.MessageIds=} tooltipMessage
    * @return {!shakaDemo.Config}
    * @private
@@ -592,17 +753,53 @@ shakaDemo.Config = class {
   /**
    * @param {!shakaDemo.MessageIds} name
    * @param {!Object.<string, string>} values
-   * @param {function(!Element)} onChange
+   * @param {function(!HTMLInputElement)} onChange
    * @param {shakaDemo.MessageIds=} tooltipMessage
    * @return {!shakaDemo.Config}
    * @private
    */
-  addSelectInput_(name, values, onChange, tooltipMessage) {
+  addCustomSelectInput_(name, values, onChange, tooltipMessage) {
     this.createRow_(name, tooltipMessage);
     // The input is not provided a name, as (in this enclosed space) it makes
     // the actual field unreadable.
     this.latestInput_ = new shakaDemo.SelectInput(
         this.getLatestSection_(), null, onChange, values);
+    return this;
+  }
+
+  /**
+   * @param {!shakaDemo.MessageIds} name
+   * @param {string} valueName
+   * @param {!Object.<string, ?>} options
+   * @param {!Object.<string, string>} optionNames
+   * @param {shakaDemo.MessageIds=} tooltipMessage
+   * @return {!shakaDemo.Config}
+   * @private
+   */
+  addSelectInput_(name, valueName, options, optionNames, tooltipMessage) {
+    const onChange = (input) => {
+      shakaDemoMain.configure(valueName, options[input.value]);
+      shakaDemoMain.remakeHash();
+    };
+
+    // If there are any translations missing for option names, fill in the
+    // constant from the enum.  This ensures new enum values are usable in the
+    // demo in some form, even if they are forgotten in the demo config.
+    for (const key in options) {
+      if (!(key in optionNames)) {
+        optionNames[key] = key;
+      }
+    }
+
+    this.addCustomSelectInput_(name, optionNames, onChange, tooltipMessage);
+
+    const initialValue = shakaDemoMain.getCurrentConfigValue(valueName);
+    for (const key in options) {
+      if (options[key] == initialValue) {
+        this.latestInput_.input().value = key;
+      }
+    }
+
     return this;
   }
 

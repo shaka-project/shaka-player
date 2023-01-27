@@ -1,19 +1,9 @@
-closure/compiler.jar
-  The closure compiler, v20180402, by Google.
-  Apache v2.0 license.
-  https://github.com/google/closure-compiler
-
-closure/goog
-  The closure library (modified), possibly v20150315, by Google.
+closure-uri
+  The closure library URI parser (modified), possibly v20150315, by Google.
   Apache v2.0 license.
   https://github.com/google/closure-library
   Local mods:
-    - Library stripped down to just dependency management & URI parsing
-
-closure/deps
-  The closure dependency generator, part of the closure library, by Google.
-  Apache v2.0 license.
-  https://github.com/google/closure-library
+    - Library stripped down to just URI parsing, and that stripped of all deps
 
 language-mapping-list
   A map of languages to their names, v0.0.16, by Ali Al Dallal / Mozilla.

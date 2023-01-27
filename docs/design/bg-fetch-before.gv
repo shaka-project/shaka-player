@@ -1,0 +1,18 @@
+# Generate png with: dot -Tpng -O before.gv
+digraph storage_before {
+  subgraph cluster_0 {
+    label="Shaka Player";
+    parse[label="Download and parse manifest (parseManifest)"];
+    drm[label="Make DRM engine and load keys (createDrmEngine)"]
+    filter[label="Filter manifest (filterManifest_)"];
+    segments[label="Download and store segments (downloadManifest_)"];
+    store[label="Store manifest (cell.addManifests)"];
+    remove[label="Clean up (cell.removeSegments)"];
+    parse -> drm;
+    drm -> filter;
+    filter -> segments;
+    segments -> store;
+    segments -> remove[label="On Fail"];
+    store -> remove[label="On Fail"];
+  }
+}

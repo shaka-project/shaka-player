@@ -1,8 +1,8 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-
 
 // TODO: this only contains the methods that we use; if this is published
 // it should contain the entire breadth of options in jasmine-ajax.
@@ -57,11 +57,11 @@ jasmine.Fetch = class {
    * @private
    */
   static makeAbortError_() {
-    // As per the spec, this should be a DOMException, but
-    // there is not a public constructor for this
+    // According to the spec, this should be a DOMException, but there is not a
+    // public constructor for that.  So we make this look-alike instead.
     const exception = new Error('The operation was aborted. ');
     exception.name = 'AbortError';
-    exception.code = 20;
+    exception['code'] = DOMException.ABORT_ERR;
     return exception;
   }
 
@@ -211,13 +211,13 @@ jasmine.Fetch.requests = class {
 };
 
 jasmine.Fetch.ReadableStream = class {
-  /** @param {!Object} underlyingSource */
+  /** @param {!ReadableStreamSource} underlyingSource */
   constructor(underlyingSource) {
-    const noop = () => {};
-    const controller = {
-      close: noop,
-      enqueue: noop,
-    };
+    const controller = /** @type {!ReadableByteStreamController} */({
+      close: () => {},
+      enqueue: (chunk) => {},
+      error: (err) => {},
+    });
     underlyingSource.start(controller);
   }
 };

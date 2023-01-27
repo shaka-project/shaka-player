@@ -1,23 +1,10 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 /* All of the top-level containers into which various visible features go. */
-
-@transparent: rgba(0, 0, 0, 0);
 
 /* A container for the entire video + controls combo.  This is the auto-setup
  * div which we populate. */
@@ -28,14 +15,15 @@
    * should be (484px vs 480px). */
   display: flex;
 
-  /* Set the fonts for all contents, with a special exception for material
-   * design icons. */
-  .material-icons {
-    font-family: 'Material Icons';
+  /* Set a special font for material design icons. */
+  .material-icons-round {
+    font-family: "Material Icons Round";
+    font-size: 24px;
   }
 
+  /* Set the fonts for all other content. */
   * {
-    font-family: Roboto-Regular, Roboto, sans-serif;
+    font-family: Roboto-Regular, Roboto, sans-serif, TengwarTelcontar;
   }
 }
 
@@ -110,6 +98,13 @@
   }
 }
 
+/* A container for all canvas for LCEVC decoding
+ * Sits inside .shaka-video-container, on top of (Z axis) .shaka-video, and
+ * below (Y axis) .shaka-play-button-container. */
+.shaka-canvas-container {
+  .overlay-child();
+}
+
 /* Container for controls positioned at the bottom of the video container:
  * controls button panel and the seek bar. */
 .shaka-bottom-controls {
@@ -167,10 +162,13 @@
     /* 32px tall controls. */
     height: 32px;
 
+    /* Consistent alignment of buttons. */
+    line-height: 0.5;
+
     /* Consistent margins (external) and padding (internal) between controls. */
     .bottom-panels-elements-margin();
 
-    padding: 0;
+    padding: 0 5px;
 
     /* Transparent backgrounds, no borders, and a pointer when you mouse over
      * them. */
@@ -178,6 +176,11 @@
     border: 0;
     cursor: pointer;
   }
+}
+
+/* Buttons hide certain items if they are found inside the control panel */
+.shaka-controls-button-panel .shaka-overflow-menu-only {
+  display: none;
 }
 
 /* The container for the giant play button.  Sits above (Y axis) the
@@ -197,7 +200,81 @@
   align-items: center;
 }
 
-.shaka-skim-container {
+.shaka-statistics-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  min-width: 300px;
+
+  color: white;
+  background-color: rgba(35 35 35 / 90%);
+
+  font-size: 14px;
+
+  padding: 5px 10px;
+  border-radius: 2px;
+
+  position: absolute;
+  z-index: 2;
+  left: 15px;
+  top: 15px;
+
+  /* Fades out with the other controls. */
+  .show-when-controls-shown();
+
+  div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  span {
+    color: rgb(150 150 150);
+  }
+}
+
+.shaka-context-menu {
+  background-color: rgba(35 35 35 / 90%);
+
+  border-radius: 2px;
+
+  position: absolute;
+  z-index: 3;
+
+  button {
+    padding: 5px 10px;
+
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    color: white;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+
+    &:hover {
+      background-color: rgba(50 50 50 / 90%);
+    }
+  }
+
+  label {
+    padding: 0 20px;
+
+    align-items: flex-start;
+
+    color: white;
+    cursor: pointer;
+  }
+
+  .shaka-current-selection-span {
+    align-items: flex-start;
+
+    color: white;
+    cursor: pointer;
+  }
+}
+
+.shaka-scrim-container {
   margin: 0;
   .fill-container();
   .shrinkable();
@@ -205,39 +282,50 @@
   .show-when-controls-shown();
 
   /* A black gradient at the bottom, behind the controls, but only so high. */
-  background: linear-gradient(to top, rgba(0, 0, 0, 1) 0, @transparent 92px);
+  background: linear-gradient(to top, black 0, transparent 15%);
 }
 
 .shaka-text-container {
   .absolute-position();
 
-  bottom: 15%;
+  /* Make sure the text container doesn't steal pointer events from another
+   * layer, such as the ad container.  There is nothing interactive in this
+   * layer, so this should be fine. */
+  pointer-events: none;
+
+  /* Place the text container on the bottom of the video container. */
+  bottom: 0%;
   width: 100%;
   min-width: 48px;
-  text-align: center;
 
-  /* Set the captions in the middle horizontally by default. */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  /* Set the captions at the bottom by default. */
-  justify-content: flex-end;
-
-  /* If the captions are too long to fit in the video container, hide the
-   * overflow content. */
-  overflow: hidden;
+  /* When the controls fade in or out, it takes 600ms. Thus, when the text
+   * container adjusts to the presence or absence of controls, we should wait
+   * briefly, so the captions don't end up appearing behind the controls.
+   * Instead of being a gradual animation, this is a fast animation with a
+   * significant delay, since the captions moving around is a little
+   * distracting. */
+  transition: bottom cubic-bezier(0.4, 0, 0.6, 1) 100ms;
+  transition-delay: 500ms;
 
   /* These are defaults which are overridden by JS or cue styles. */
   font-size: 20px;
   line-height: 1.4;  // relative to font size.
+  color: white;
 
-  span {
-    /* These are defaults which are overridden by JS or cue styles. */
-    background-color: rgba(0, 0, 0, 0.8);
-    color: rgb(255, 255, 255);
-    display: inline-block;
+  span.shaka-text-wrapper {
+    display: inline;
+    background: none;
   }
+}
+
+.shaka-controls-container[shown="true"] ~ .shaka-text-container {
+  /* While the controls are shown, the text container should avoid the 15%
+   * at the bottom of the video, to avoid overlapping with controls. */
+  bottom: 15%;
+
+  /* Disable the transition delay when moving the captions up, so that the
+   * controls don't appear over the captions. */
+  transition-delay: 0ms;
 }
 
 /* The buffering spinner. */
@@ -265,11 +353,11 @@
 
   margin: 0;
   box-sizing: border-box;
-  padding: @spinner-size-percentage / 2;
+  padding: calc(@spinner-size-percentage / 2);
   width: 0;
   height: 0;
 
   /* Add a bit of a white shadow to keep our black spinner visible
   on a black background. */
-  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+  filter: drop-shadow(0 0 2px rgba(255 255 255 / 50%));
 }

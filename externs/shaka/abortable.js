@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -11,7 +12,7 @@
 /**
  * A representation of an abortable operation.  Note that these are not
  * cancelable.  Cancelation implies undoing what has been done so far,
- * whereas aborting only means that futher work is stopped.
+ * whereas aborting only means that further work is stopped.
  *
  * @interface
  * @template T

@@ -1,10 +1,12 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 describe('StallDetector', () => {
+  const Util = shaka.test.Util;
+
   /**
    * @implements {shaka.media.StallDetector.Implementation}
    * @final
@@ -38,16 +40,21 @@ describe('StallDetector', () => {
   /** @type {!jasmine.Spy} */
   let onStall;
 
+  /** @type {!jasmine.Spy} */
+  let onEvent;
+
   beforeEach(() => {
     onStall = jasmine.createSpy('onStall');
+    onEvent = jasmine.createSpy('onEvent');
 
     implementation = new TestImplementation();
 
     detector = new shaka.media.StallDetector(
         implementation,
-        /* stallThresholdSeconds= */ 1);
+        /* stallThresholdSeconds= */ 1,
+        Util.spyFunc(onEvent));
 
-    detector.onStall(shaka.test.Util.spyFunc(onStall));
+    detector.onStall(Util.spyFunc(onStall));
   });
 
   it('does not call onStall when values changes', () => {
@@ -63,6 +70,7 @@ describe('StallDetector', () => {
 
     detector.poll();
 
+    expect(onEvent).not.toHaveBeenCalled();
     expect(onStall).not.toHaveBeenCalled();
   });
 
@@ -74,6 +82,7 @@ describe('StallDetector', () => {
       implementation.wallSeconds = time;
 
       detector.poll();
+      expect(onEvent).not.toHaveBeenCalled();
       expect(onStall).not.toHaveBeenCalled();
     }
 
@@ -81,6 +90,7 @@ describe('StallDetector', () => {
     implementation.wallSeconds = 1;
 
     detector.poll();
+    expect(onEvent).toHaveBeenCalled();
     expect(onStall).toHaveBeenCalledOnceMoreWith([
       /* stalledWith= */ 5,
       /* stallDurationSeconds= */ 1,
@@ -96,6 +106,7 @@ describe('StallDetector', () => {
     implementation.wallSeconds = 10;
     detector.poll();
 
+    expect(onEvent).toHaveBeenCalled();
     expect(onStall).toHaveBeenCalledOnceMoreWith([
       /* stalledWith= */ 5,
       /* stallDurationms= */ 10,
@@ -117,6 +128,7 @@ describe('StallDetector', () => {
 
     detector.poll();
 
+    expect(onEvent).not.toHaveBeenCalled();
     expect(onStall).not.toHaveBeenCalled();
   });
 
@@ -135,6 +147,7 @@ describe('StallDetector', () => {
     implementation.wallSeconds = 10;
     detector.poll();
 
+    expect(onEvent).not.toHaveBeenCalled();
     expect(onStall).not.toHaveBeenCalled();
   });
 
@@ -143,16 +156,20 @@ describe('StallDetector', () => {
     implementation.presentationSeconds = 0;
     implementation.wallSeconds = 0;
     detector.poll();
+    expect(onEvent).not.toHaveBeenCalled();
     expect(onStall).not.toHaveBeenCalled();
 
     implementation.wallSeconds = 10;
     detector.poll();
+    expect(onEvent).toHaveBeenCalled();
     expect(onStall).toHaveBeenCalled();
+    onEvent.calls.reset();
     onStall.calls.reset();
 
     // This is the same stall, should not be called again.
     implementation.wallSeconds = 20;
     detector.poll();
+    expect(onEvent).not.toHaveBeenCalled();
     expect(onStall).not.toHaveBeenCalled();
 
     // Now that we changed time, we should get another call.
@@ -161,6 +178,7 @@ describe('StallDetector', () => {
     detector.poll();
     implementation.wallSeconds = 40;
     detector.poll();
+    expect(onEvent).toHaveBeenCalled();
     expect(onStall).toHaveBeenCalled();
   });
 });

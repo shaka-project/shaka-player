@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,6 +7,7 @@
 
 goog.provide('shaka.ui.FullscreenButton');
 
+goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Element');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -26,14 +28,16 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
 
-    this.button_ = shaka.util.Dom.createHTMLElement('button');
-    this.button_.classList.add('shaka-fullscreen-button');
-    this.button_.classList.add('material-icons');
+    /** @private {HTMLMediaElement} */
+    this.localVideo_ = this.controls.getLocalVideo();
 
-    // Don't show the button if fullscreen is not supported
-    if (!document.fullscreenEnabled) {
-      this.button_.classList.add('shaka-hidden');
-    }
+    /** @private {!HTMLButtonElement} */
+    this.button_ = shaka.util.Dom.createButton();
+    this.button_.classList.add('shaka-fullscreen-button');
+    this.button_.classList.add('material-icons-round');
+    this.button_.classList.add('shaka-tooltip');
+
+    this.checkSupport_();
 
     this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.FULLSCREEN;
     this.parent.appendChild(this.button_);
@@ -57,6 +61,26 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
       this.updateIcon_();
       this.updateAriaLabel_();
     });
+
+    this.eventManager.listen(this.localVideo_, 'loadedmetadata', () => {
+      this.checkSupport_();
+    });
+
+    this.eventManager.listen(this.localVideo_, 'loadeddata', () => {
+      this.checkSupport_();
+    });
+  }
+
+  /**
+   * @private
+   */
+  checkSupport_() {
+    // Don't show the button if fullscreen is not supported
+    if (!this.controls.isFullScreenSupported()) {
+      this.button_.classList.add('shaka-hidden');
+    } else {
+      this.button_.classList.remove('shaka-hidden');
+    }
   }
 
   /**
@@ -64,11 +88,10 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
    */
   updateAriaLabel_() {
     const LocIds = shaka.ui.Locales.Ids;
-    const label = document.fullscreenElement ?
+    const label = this.controls.isFullScreenEnabled() ?
         LocIds.EXIT_FULL_SCREEN : LocIds.FULL_SCREEN;
 
-    this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-        this.localization.resolve(label));
+    this.button_.ariaLabel = this.localization.resolve(label);
   }
 
   /**
@@ -76,7 +99,7 @@ shaka.ui.FullscreenButton = class extends shaka.ui.Element {
    */
   updateIcon_() {
     this.button_.textContent =
-      document.fullscreenElement ?
+      this.controls.isFullScreenEnabled() ?
       shaka.ui.Enums.MaterialDesignIcons.EXIT_FULLSCREEN :
       shaka.ui.Enums.MaterialDesignIcons.FULLSCREEN;
   }

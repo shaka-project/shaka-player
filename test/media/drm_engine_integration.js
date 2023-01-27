@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -104,29 +105,31 @@ describe('DrmEngine', () => {
     drmEngine.configure(config);
 
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-      manifest.addPeriod(0, (period) => {
-        period.addVariant(0, (variant) => {
-          variant.addDrmInfo('com.widevine.alpha');
-          variant.addDrmInfo('com.microsoft.playready');
-          variant.addVideo(1, (stream) => {
-            stream.encrypted = true;
-          });
-          variant.addAudio(2, (stream) => {
-            stream.encrypted = true;
-          });
+      manifest.addVariant(0, (variant) => {
+        variant.addVideo(1, (stream) => {
+          stream.encrypted = true;
+          stream.addDrmInfo('com.widevine.alpha');
+          stream.addDrmInfo('com.microsoft.playready');
+        });
+        variant.addAudio(2, (stream) => {
+          stream.encrypted = true;
+          stream.addDrmInfo('com.widevine.alpha');
+          stream.addDrmInfo('com.microsoft.playready');
         });
       });
     });
 
-    const videoStream = manifest.periods[0].variants[0].video;
-    const audioStream = manifest.periods[0].variants[0].audio;
+    const videoStream = manifest.variants[0].video;
+    const audioStream = manifest.variants[0].audio;
 
     eventManager = new shaka.util.EventManager();
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
         video,
-        new shaka.test.FakeClosedCaptionParser(),
         new shaka.test.FakeTextDisplayer());
+    const mediaSourceConfig =
+        shaka.util.PlayerConfiguration.createDefault().mediaSource;
+    mediaSourceEngine.configure(mediaSourceConfig);
 
     const expectedObject = new Map();
     expectedObject.set(ContentType.AUDIO, audioStream);
@@ -146,11 +149,23 @@ describe('DrmEngine', () => {
     document.body.removeChild(video);
   });
 
-  function checkSupport() {
+  function checkTrueDrmSupport() {
+    if (shaka.util.Platform.isXboxOne()) {
+      // Axinom won't issue a license for an Xbox One.  The error message from
+      // the license server says "Your DRM client's security level is 150, but
+      // the entitlement message requires 2000 or higher."
+      // TODO: Stop using Axinom's license server.  Use
+      // https://testweb.playready.microsoft.com/Server/ServiceQueryStringSyntax
+      return false;
+    }
     return support['com.widevine.alpha'] || support['com.microsoft.playready'];
   }
 
-  filterDescribe('basic flow', checkSupport, () => {
+  function checkClearKeySupport() {
+    return support['org.w3.clearkey'];
+  }
+
+  filterDescribe('basic flow', checkTrueDrmSupport, () => {
     drmIt('gets a license and can play encrypted segments', async () => {
       // The error callback should not be invoked.
       onErrorSpy.and.callFake(fail);
@@ -191,16 +206,15 @@ describe('DrmEngine', () => {
         keyStatusEventSeen.resolve();
       });
 
-      const periods = manifest.periods;
-      const variants = shaka.util.Periods.getAllVariantsFrom(periods);
+      const variants = manifest.variants;
 
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       await drmEngine.attach(video);
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoInitSegment, null, null,
+          ContentType.VIDEO, videoInitSegment, null,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioInitSegment, null, null,
+          ContentType.AUDIO, audioInitSegment, null,
           /* hasClosedCaptions= */ false);
       await encryptedEventSeen;
       // With PlayReady, a persistent license policy can cause a different
@@ -233,21 +247,120 @@ describe('DrmEngine', () => {
         }
       }
 
+      const reference = dummyReference(0, 10);
+
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoSegment, null, null,
+          ContentType.VIDEO, videoSegment, reference,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioSegment, null, null,
+          ContentType.AUDIO, audioSegment, reference,
           /* hasClosedCaptions= */ false);
 
       expect(video.buffered.end(0)).toBeGreaterThan(0);
       video.play();
-      // Try to play for 5 seconds.
-      await shaka.test.Util.delay(5);
+
+      const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(15);
+      waiter.setMediaSourceEngine(mediaSourceEngine);
+      await waiter.waitForMovement(video);
 
       // Something should have played by now.
       expect(video.readyState).toBeGreaterThan(1);
       expect(video.currentTime).toBeGreaterThan(0);
     });
   });  // describe('basic flow')
+
+  filterDescribe('ClearKey', checkClearKeySupport, () => {
+    drmIt('plays encrypted content with the ClearKey CDM', async () => {
+      // Configure DrmEngine for ClearKey playback.
+      const config = shaka.util.PlayerConfiguration.createDefault().drm;
+      config.clearKeys = {
+        // From https://github.com/Axinom/public-test-vectors/tree/conservative#v61-multidrm
+        '6e5a1d26275747d78046eaa5d1d34b5a': '197f26f572c864d2338b3ae5d114ea9c',
+      };
+      drmEngine.configure(config);
+
+      // The error callback should not be invoked.
+      onErrorSpy.and.callFake(fail);
+
+      /** @type {!shaka.util.PublicPromise} */
+      const encryptedEventSeen = new shaka.util.PublicPromise();
+      eventManager.listen(video, 'encrypted', () => {
+        encryptedEventSeen.resolve();
+      });
+      eventManager.listen(video, 'error', () => {
+        fail('MediaError code ' + video.error.code);
+        let extended = video.error.msExtendedCode;
+        if (extended) {
+          if (extended < 0) {
+            extended += Math.pow(2, 32);
+          }
+          fail('MediaError msExtendedCode ' + extended.toString(16));
+        }
+      });
+
+      /** @type {!shaka.util.PublicPromise} */
+      const keyStatusEventSeen = new shaka.util.PublicPromise();
+      onKeyStatusSpy.and.callFake(() => {
+        keyStatusEventSeen.resolve();
+      });
+
+      const variants = manifest.variants;
+
+      await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
+      await drmEngine.attach(video);
+      await mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, videoInitSegment, null,
+          /* hasClosedCaptions= */ false);
+      await mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, audioInitSegment, null,
+          /* hasClosedCaptions= */ false);
+      await encryptedEventSeen;
+
+      // Some platforms (notably 2017 Tizen TVs) do not fire key status
+      // events.
+      const keyStatusTimeout = shaka.test.Util.delay(5);
+      await Promise.race([keyStatusTimeout, keyStatusEventSeen]);
+
+      const call = onKeyStatusSpy.calls.mostRecent();
+      if (call) {
+        const map = /** @type {!Object} */ (call.args[0]);
+        expect(Object.keys(map).length).not.toBe(0);
+        for (const k in map) {
+          expect(map[k]).toBe('usable');
+        }
+      }
+
+      const reference = dummyReference(0, 10);
+
+      await mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, videoSegment, reference,
+          /* hasClosedCaptions= */ false);
+      await mediaSourceEngine.appendBuffer(
+          ContentType.AUDIO, audioSegment, reference,
+          /* hasClosedCaptions= */ false);
+
+      expect(video.buffered.end(0)).toBeGreaterThan(0);
+      video.play();
+
+      const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(15);
+      waiter.setMediaSourceEngine(mediaSourceEngine);
+      await waiter.waitForMovement(video);
+
+      // Something should have played by now.
+      expect(video.readyState).toBeGreaterThan(1);
+      expect(video.currentTime).toBeGreaterThan(0);
+    });
+  });  // describe('ClearKey')
+
+  function dummyReference(startTime, endTime) {
+    return new shaka.media.SegmentReference(
+        startTime, endTime,
+        /* uris= */ () => ['foo://bar'],
+        /* startByte= */ 0,
+        /* endByte= */ null,
+        /* initSegmentReference= */ null,
+        /* timestampOffset= */ 0,
+        /* appendWindowStart= */ 0,
+        /* appendWindowEnd= */ Infinity);
+  }
 });

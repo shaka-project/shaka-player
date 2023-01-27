@@ -26,11 +26,13 @@ the `Player` and `HTMLMediaElement` objects.  Receiver apps only have to worry
 about their UI, while the `CastReceiver` takes care of playback and
 communication.
 
+To enable an Android (TV) receiver apps set `androidReceiverCompatible` to true.
+
 
 #### `CastProxy` API sketch
 
 ```js
-new shaka.cast.CastProxy(video, player, receiverAppId)
+new shaka.cast.CastProxy(video, player, receiverAppId, androidReceiverCompatible)
 
 // Also destroys the underlying local Player object
 shaka.cast.CastProxy.prototype.destroy() => Promise

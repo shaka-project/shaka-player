@@ -29,17 +29,19 @@ You can build Shaka on Linux, Windows, or Mac.
 To get the sources and compile the library, you will need:
   * {@link https://git-scm.com/downloads Git v1.9+}
   * {@link https://www.python.org/downloads/ Python v2.7 or v3.5+}
-  * {@link https://java.com/en/download/ Java Runtime Environment v8+}
-  * {@link https://nodejs.org/en/download/ NodeJS v8+}
+  * {@link https://java.com/en/download/ Java Runtime Environment v14+}
+  * {@link https://nodejs.org/en/download/ NodeJS v14+}
   * A local web server, such as {@link https://httpd.apache.org/ Apache}
     * _NOTE: A local web server is required because browsers place restrictions
       on applications from file:/// URLs._
+
+If you just want to compile for export to other projects, you might consider compiling through a docker container. (see compile instructions)
 
 To quickly install these prerequisites on Ubuntu or Debian, you can run this
 script:
 
 ```sh
-curl https://raw.githubusercontent.com/google/shaka-player/master/build/install-linux-prereqs.sh | bash
+curl https://raw.githubusercontent.com/shaka-project/shaka-player/main/build/install-linux-prereqs.sh | bash
 ```
 
 We do not provide detailed instructions or scripts for installing these
@@ -51,7 +53,7 @@ links above to download and install the prerequisites manually on any OS.
 #### Get the source
 
 ```sh
-git clone https://github.com/google/shaka-player.git
+git clone https://github.com/shaka-project/shaka-player.git
 cd shaka-player
 ```
 
@@ -60,6 +62,12 @@ cd shaka-player
 
 ```sh
 python build/all.py
+```
+
+Alternatively you can use a docker container:
+```sh
+docker build -t shaka-player-build build/docker
+docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
 ```
 
 The output is:
@@ -90,11 +98,14 @@ You can find a full list of available browsers with `--browsers help`, and you
 can find a complete list of testing options with `--help`.
 
 
-#### Join the announcement list
+#### Announcements
 
-If you want to receive release or survey announcements, you should join our
+To subscribe to new releases on GitHub, you can follow
+[instructions from this blog](https://www.jessesquires.com/blog/2020/07/30/github-tip-watching-releases/).
+
+To receive infrequent announcements and surveys from us, you can join our
 [mailing list](https://groups.google.com/forum/#!forum/shaka-player-users).
-The list is very low volume.
+The list is very low volume, and can only be written to by us.
 
 
 #### Continue the Tutorials

@@ -1,18 +1,24 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
 
 goog.provide('shaka.ui.Overlay');
+goog.provide('shaka.ui.Overlay.FailReasonCode');
+goog.provide('shaka.ui.Overlay.TrackLabelFormat');
 
 goog.require('goog.asserts');
-goog.require('shaka.Deprecate');
+goog.require('shaka.Player');
+goog.require('shaka.log');
 goog.require('shaka.polyfill');
 goog.require('shaka.ui.Controls');
-goog.require('shaka.ui.TextDisplayer');
+goog.require('shaka.util.ConfigUtils');
+goog.require('shaka.util.Dom');
+goog.require('shaka.util.FakeEvent');
+goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Platform');
-
 
 /**
  * @implements {shaka.util.IDestroyable}
@@ -50,14 +56,8 @@ shaka.ui.Overlay = class {
     this.configure({});
 
     // If the browser's native controls are disabled, use UI TextDisplayer.
-    // Arrow functions cannot be used with "new", so the factory must use
-    // a "function" function.
     if (!video.controls) {
-      // eslint-disable-next-line no-restricted-syntax
-      const textDisplayer = function() {
-        return new shaka.ui.TextDisplayer(video, videoContainer);
-      };
-      player.configure('textDisplayFactory', textDisplayer);
+      player.setVideoContainer(videoContainer);
     }
 
     videoContainer['ui'] = this;
@@ -70,10 +70,14 @@ shaka.ui.Overlay = class {
    * @export
    */
   async destroy() {
-    await this.controls_.destroy();
+    if (this.controls_) {
+      await this.controls_.destroy();
+    }
     this.controls_ = null;
 
-    await this.player_.destroy();
+    if (this.player_) {
+      await this.player_.destroy();
+    }
     this.player_ = null;
   }
 
@@ -141,21 +145,6 @@ shaka.ui.Overlay = class {
 
 
   /**
-   * @return {shaka.Player}
-   * @export
-   * @deprecated Use getControls().getPlayer() instead.
-   */
-  getPlayer() {
-    shaka.Deprecate.deprecateFeature(
-        2, 6,
-        'ui.Overlay.getPlayer()',
-        'Please use getControls().getPlayer() instead.');
-
-    return this.controls_.getPlayer();
-  }
-
-
-  /**
    * @return {shaka.ui.Controls}
    * @export
    */
@@ -196,23 +185,67 @@ shaka.ui.Overlay = class {
         'language',
         'picture_in_picture',
         'cast',
+        'playback_rate',
       ],
+      statisticsList: [
+        'width',
+        'height',
+        'corruptedFrames',
+        'decodedFrames',
+        'droppedFrames',
+        'drmTimeSeconds',
+        'licenseTime',
+        'liveLatency',
+        'loadLatency',
+        'bufferingTime',
+        'manifestTimeSeconds',
+        'estimatedBandwidth',
+        'streamBandwidth',
+        'maxSegmentDuration',
+        'pauseTime',
+        'playTime',
+        'completionPercent',
+      ],
+      contextMenuElements: [
+        'loop',
+        'picture_in_picture',
+        'statistics',
+      ],
+      playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      fastForwardRates: [2, 4, 8, 1],
+      rewindRates: [-1, -2, -4, -8],
       addSeekBar: true,
       addBigPlayButton: false,
+      customContextMenu: false,
       castReceiverAppId: '',
+      castAndroidReceiverCompatible: false,
       clearBufferOnQualityChange: true,
+      showUnbufferedStart: false,
       seekBarColors: {
         base: 'rgba(255, 255, 255, 0.3)',
         buffered: 'rgba(255, 255, 255, 0.54)',
         played: 'rgb(255, 255, 255)',
+        adBreaks: 'rgb(255, 204, 0)',
       },
       volumeBarColors: {
         base: 'rgba(255, 255, 255, 0.54)',
         level: 'rgb(255, 255, 255)',
       },
-      trackLabelFormat: shaka.ui.TrackLabelFormat.LANGUAGE,
+      trackLabelFormat: shaka.ui.Overlay.TrackLabelFormat.LANGUAGE,
       fadeDelay: 0,
+      doubleClickForFullscreen: true,
+      singleClickForPlayAndPause: true,
+      enableKeyboardPlaybackControls: true,
+      enableFullscreenOnRotation: true,
+      forceLandscapeOnFullscreen: true,
+      enableTooltips: false,
+      keyboardSeekDistance: 5,
     };
+
+    // Check AirPlay support
+    if (window.WebKitPlaybackTargetAvailabilityEvent) {
+      config.overflowMenuButtons.push('airplay');
+    }
 
     // On mobile, by default, hide the volume slide and the small play/pause
     // button and show the big play/pause button in the center.
@@ -240,7 +273,8 @@ shaka.ui.Overlay = class {
 
       // After scanning the page for elements, fire a special "loaded" event for
       // when the load fails. This will allow the page to react to the failure.
-      shaka.ui.Overlay.dispatchLoadedEvent_('shaka-ui-load-failed');
+      shaka.ui.Overlay.dispatchLoadedEvent_('shaka-ui-load-failed',
+          shaka.ui.Overlay.FailReasonCode.NO_BROWSER_SUPPORT);
       return;
     }
 
@@ -255,6 +289,12 @@ shaka.ui.Overlay = class {
     // controls.
     const videos = document.querySelectorAll(
         '[data-shaka-player]');
+
+    // Look for elements marked 'data-shaka-player-canvas'
+    // on the page. These will be used to create our default
+    // UI.
+    const canvases = document.querySelectorAll(
+        '[data-shaka-player-canvas]');
 
     if (!videos.length && !containers.length) {
       // No elements have been tagged with shaka attributes.
@@ -273,8 +313,21 @@ shaka.ui.Overlay = class {
         const videoParent = video.parentElement;
         videoParent.replaceChild(container, video);
         container.appendChild(video);
-
-        shaka.ui.Overlay.setupUIandAutoLoad_(container, video);
+        let currentCanvas = null;
+        for (const canvas of canvases) {
+          goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
+              'Should be a canvas element!');
+          if (canvas.parentElement == container) {
+            currentCanvas = canvas;
+            break;
+          }
+        }
+        if (!currentCanvas) {
+          currentCanvas = document.createElement('canvas');
+          currentCanvas.classList.add('shaka-canvas-container');
+          container.appendChild(currentCanvas);
+        }
+        shaka.ui.Overlay.setupUIandAutoLoad_(container, video, currentCanvas);
       }
     } else {
       for (const container of containers) {
@@ -302,8 +355,33 @@ shaka.ui.Overlay = class {
           container.appendChild(currentVideo);
         }
 
-        // eslint-disable-next-line no-await-in-loop
-        await shaka.ui.Overlay.setupUIandAutoLoad_(container, currentVideo);
+        let currentCanvas = null;
+        for (const canvas of canvases) {
+          goog.asserts.assert(canvas.tagName.toLowerCase() == 'canvas',
+              'Should be a canvas element!');
+          if (canvas.parentElement == container) {
+            currentCanvas = canvas;
+            break;
+          }
+        }
+        if (!currentCanvas) {
+          currentCanvas = document.createElement('canvas');
+          currentCanvas.classList.add('shaka-canvas-container');
+          container.appendChild(currentCanvas);
+        }
+
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          await shaka.ui.Overlay.setupUIandAutoLoad_(
+              container, currentVideo, currentCanvas);
+        } catch (e) {
+          // This can fail if, for example, not every player file has loaded.
+          // Ad-block is a likely cause for this sort of failure.
+          shaka.log.error('Error setting up Shaka Player', e);
+          shaka.ui.Overlay.dispatchLoadedEvent_('shaka-ui-load-failed',
+              shaka.ui.Overlay.FailReasonCode.PLAYER_FAILED_TO_LOAD);
+          return;
+        }
       }
     }
 
@@ -316,14 +394,17 @@ shaka.ui.Overlay = class {
 
   /**
    * @param {string} eventName
+   * @param {shaka.ui.Overlay.FailReasonCode=} reasonCode
    * @private
    */
-  static dispatchLoadedEvent_(eventName) {
-    // "Event" is not constructable on IE, so we use this CustomEvent pattern.
-    const uiLoadedEvent = /** @type {!CustomEvent} */(
-      document.createEvent('CustomEvent'));
-    uiLoadedEvent.initCustomEvent(eventName, false, false, null);
-
+  static dispatchLoadedEvent_(eventName, reasonCode) {
+    let detail = null;
+    if (reasonCode != undefined) {
+      detail = {
+        'reasonCode': reasonCode,
+      };
+    }
+    const uiLoadedEvent = new CustomEvent(eventName, {detail});
     document.dispatchEvent(uiLoadedEvent);
   }
 
@@ -331,9 +412,10 @@ shaka.ui.Overlay = class {
   /**
    * @param {!Element} container
    * @param {!Element} video
+   * @param {!Element} canvas
    * @private
    */
-  static async setupUIandAutoLoad_(container, video) {
+  static async setupUIandAutoLoad_(container, video, canvas) {
     // Create the UI
     const player = new shaka.Player(
         shaka.util.Dom.asHTMLMediaElement(video));
@@ -341,8 +423,14 @@ shaka.ui.Overlay = class {
         shaka.util.Dom.asHTMLElement(container),
         shaka.util.Dom.asHTMLMediaElement(video));
 
+    // Attach Canvas used for LCEVC Decoding
+    player.attachCanvas(/** @type {HTMLCanvasElement} */(canvas));
+
     // Get and configure cast app id.
     let castAppId = '';
+
+    // Get and configure cast Android Receiver Compatibility
+    let castAndroidReceiverCompatible = false;
 
     // Cast receiver id can be specified on either container or video.
     // It should not be provided on both. If it was, we will use the last
@@ -350,13 +438,19 @@ shaka.ui.Overlay = class {
     if (container['dataset'] &&
         container['dataset']['shakaPlayerCastReceiverId']) {
       castAppId = container['dataset']['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+          container['dataset']['shakaPlayerCastAndroidReceiverCompatible'] ===
+          'true';
     } else if (video['dataset'] &&
                video['dataset']['shakaPlayerCastReceiverId']) {
       castAppId = video['dataset']['shakaPlayerCastReceiverId'];
+      castAndroidReceiverCompatible =
+        video['dataset']['shakaPlayerCastAndroidReceiverCompatible'] === 'true';
     }
 
     if (castAppId.length) {
-      ui.configure({castReceiverAppId: castAppId});
+      ui.configure({castReceiverAppId: castAppId,
+        castAndroidReceiverCompatible: castAndroidReceiverCompatible});
     }
 
     if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
@@ -397,16 +491,32 @@ shaka.ui.Overlay = class {
  * @enum {number}
  * @export
  */
-shaka.ui.TrackLabelFormat = {
+shaka.ui.Overlay.TrackLabelFormat = {
   'LANGUAGE': 0,
   'ROLE': 1,
   'LANGUAGE_ROLE': 2,
+  'LABEL': 3,
 };
+
+/**
+ * Describes the possible reasons that the UI might fail to load.
+ *
+ * @enum {number}
+ * @export
+ */
+shaka.ui.Overlay.FailReasonCode = {
+  'NO_BROWSER_SUPPORT': 0,
+  'PLAYER_FAILED_TO_LOAD': 1,
+};
+
 
 if (document.readyState == 'complete') {
   // Don't fire this event synchronously.  In a compiled bundle, the "shaka"
   // namespace might not be exported to the window until after this point.
-  Promise.resolve().then(shaka.ui.Overlay.scanPageForShakaElements_);
+  (async () => {
+    await Promise.resolve();
+    shaka.ui.Overlay.scanPageForShakaElements_();
+  })();
 } else {
   window.addEventListener('load', shaka.ui.Overlay.scanPageForShakaElements_);
 }

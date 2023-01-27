@@ -1,19 +1,10 @@
-/**
- * @license
- * Copyright 2016 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/** @license
+ * Shaka Player
+ * Copyright 2016 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
  */
+
+/* stylelint-disable selector-class-pattern -- MDL classes can't be changed */
 
 // Import the MDL styles with the desired color scheme.
 @import (css, inline) "../node_modules/material-design-lite/dist/material.indigo-blue.min.css";
@@ -26,10 +17,23 @@
 @drawer-width: 550px;
 
 @mdl-footer-link-color: #9e9e9e;  /* copied from MDL stylesheet */
-@mdl-button-color: rgb(63,81,181);  /* copied from MDL stylesheet */
+@mdl-button-color: rgb(63 81 181);  /* copied from MDL stylesheet */
 
 @progress-circle-size: 45px;
 @progress-circle-thickness: 5px;
+
+/* This class name is used by MDL, but we use a slightly different font.  So
+ * here we override the font family for the MDL class.  Without this, the menu
+ * on the left side of the screen has no icon. */
+.material-icons {
+  font-family: "Material Icons Round";
+}
+
+/* Conflicting styles between the icons font & the MDL buttons caused some
+ * icons not to be centered in their MDL button.  This fixes it. */
+.mdl-button .material-icons {
+  line-height: 36px;
+}
 
 /* This is a less mixin only, rather than a CSS class. MDL has an equivalent
  * class with the same name, which can be used in the application directly. */
@@ -41,7 +45,22 @@
   outline: none;
 }
 
+/* Use the class name, which is more specific than just "main".  Otherwise, the
+ * MDL styles will be used instead. */
+main.mdl-layout__content {
+  /* Make the main container a flex container oriented as a column. */
+  display: flex;
+  flex-direction: column;
+}
+
 #contents {
+  /* Expand the contents section to take up any extra space on the page.  This
+   * pushes the footer to the bottom when the window is large, while still
+   * allowing the contents to scroll when the window is small.
+   */
+  flex-grow: 1;
+
+  /* Pad the outside of the contents. */
   padding: 20px;
   text-align: center;
 }
@@ -54,14 +73,22 @@
 
   /* Give the button a round background, meant to look like the play button. */
   border-radius: 50%;
-  width: 32px;
   color: #000;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255 255 255 / 85%);
 }
 
 html, body {
   /* Ensure everything has a consistent font. */
-  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-family: Roboto-Regular, Roboto, sans-serif, TengwarTelcontar;
+}
+
+// This font supports the Sindarin (sjn) translation.
+@font-face {
+  font-family: TengwarTelcontar;
+  // This could be served from demo/ (uncompiled) or dist (compiled).
+  src: url("../demo/TengwarTelcontar.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
 }
 
 /* Change the default opacity of the ripple container, to get around an iOS bug.
@@ -74,6 +101,15 @@ html, body {
 .mdl-button--fab {
   filter: drop-shadow(0 2px 5px #333);
   transition: 0.2s ease-in-out;
+}
+
+.mdl-button--fab,
+.mdl-button--icon {
+  /* By default, MDL icon buttons may end up vertically off-center.  This aligns
+   * them to the center both vertically and horizontally. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mdl-button--fab:hover {
@@ -89,7 +125,7 @@ html, body {
 .hamburger-menu .mdl-textfield {
   padding: 0;
   // The default width of 300px is a bit too wide for us.
-  width: 200px;
+  width: 220px;
 }
 
 .hamburger-menu .mdl-textfield__label {
@@ -131,6 +167,10 @@ html, body {
   display: inline-block;
   margin-left: auto;
   margin-right: auto;
+
+  /* Some very long URLs can appear in the error text, and word wrapping is very
+   * helpful. */
+  overflow-wrap: anywhere;
 }
 
 .input-disabled {
@@ -141,7 +181,7 @@ html, body {
   background-color: @error-color;
   color: white;
   position: relative;
-  padding: 0 0;
+  padding: 0;
   top: 0;
   right: 1em;
   float: right;
@@ -173,56 +213,56 @@ html, body {
 
   /* features */
   &[icon="high_definition"] {
-    background-image: data-uri('icons/custom_high_definition.svg');
+    background-image: data-uri("icons/custom_high_definition.svg");
   }
 
   &[icon="ultra_high_definition"] {
-    background-image: data-uri('icons/custom_ultra_high_definition.svg');
+    background-image: data-uri("icons/custom_ultra_high_definition.svg");
   }
 
   &[icon="subtitles"] {
-    background-image: data-uri('icons/baseline-subtitles-24px.svg');
+    background-image: data-uri("icons/baseline-subtitles-24px.svg");
   }
 
   &[icon="closed_caption"] {
-    background-image: data-uri('icons/baseline-closed_caption-24px.svg');
+    background-image: data-uri("icons/baseline-closed_caption-24px.svg");
   }
 
   &[icon="live"] {
-    background-image: data-uri('icons/baseline-live_tv-24px.svg');
+    background-image: data-uri("icons/baseline-live_tv-24px.svg");
   }
 
   &[icon="trick_mode"] {
-    background-image: data-uri('icons/baseline-fast_forward-24px.svg');
+    background-image: data-uri("icons/baseline-fast_forward-24px.svg");
   }
 
   &[icon="surround_sound"] {
-    background-image: data-uri('icons/baseline-surround_sound-24px.svg');
+    background-image: data-uri("icons/baseline-surround_sound-24px.svg");
   }
 
   &[icon="multiple_languages"] {
-    background-image: data-uri('icons/baseline-language-24px.svg');
+    background-image: data-uri("icons/baseline-language-24px.svg");
   }
 
   &[icon="ad"] {
-    background-image: data-uri('icons/custom_ad.svg');
+    background-image: data-uri("icons/custom_ad.svg");
   }
 
   &[icon="audio_only"] {
-    background-image: data-uri('icons/baseline-audiotrack-24px.svg');
+    background-image: data-uri("icons/baseline-audiotrack-24px.svg");
   }
 
   /* key systems */
   &[icon="widevine"] {
-    background-image: data-uri('icons/custom_widevine.svg');
+    background-image: data-uri("icons/custom_widevine.svg");
   }
 
   &[icon="clear_key"] {
-    background-image: data-uri('icons/custom_clear_key.svg');
+    background-image: data-uri("icons/custom_clear_key.svg");
   }
 
   &[icon="playready"] {
-    background-image: data-uri('icons/custom_playready.svg');
+    background-image: data-uri("icons/custom_playready.svg");
   }
 }
 
@@ -343,7 +383,7 @@ html, body {
 
 .mdl-dialog {
   /* Override MDL dialog width, so that input elements don't overflow. */
-  width: 320px;
+  width: 420px;
 }
 
 .mdl-dialog img {
@@ -360,6 +400,16 @@ html, body {
 
   /* Match the padding of the buttons next to the logo. */
   padding: 0 16px;
+}
+
+.app-header .mdl-layout__drawer-button .material-icons {
+  &:hover {
+    /* Spin the gear icon in the settings menu when hovered. */
+    transform: rotate(90deg);
+  }
+
+  /* Animate the spin. */
+  transition: transform 0.3s ease-in-out;
 }
 
 footer li {
@@ -460,6 +510,12 @@ footer .mdl-mega-footer__link-list {
   max-width: 100%;
 }
 
+#visualizer-canvas {
+  display: flex;
+  width: 100%;
+  height: 120px;
+}
+
 #video-bar.no-input-sized {
   /* Add some additional padding so that TV overscan doesn't cut off the version
    * number or other information we might need. */
@@ -493,6 +549,8 @@ footer .mdl-mega-footer__link-list {
 
 /* Style the input containers. */
 .input-container-row {
+  /* When a row is preceded by its label, inline-block will ensure the label
+   * sits before the input row on the same line. */
   display: inline-block;
 }
 
@@ -519,4 +577,14 @@ footer .mdl-mega-footer__link-list {
    * animation is too fast to make out with the eye.
    * So give it a fixed maximum instead. */
   max-height: 1000px;
+}
+
+.input-header {
+  font-size: 125%;
+}
+
+.wide-input,
+.wide-input .input-container-row,
+.wide-input .mdl-textfield {
+  width: 100%;
 }

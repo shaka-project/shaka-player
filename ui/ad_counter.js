@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,10 +8,14 @@
 goog.provide('shaka.ui.AdCounter');
 
 goog.require('goog.asserts');
+goog.require('shaka.ads.AdManager');
 goog.require('shaka.ui.Element');
+goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
+goog.require('shaka.util.Timer');
+goog.requireType('shaka.ui.Controls');
 
 
 /**
@@ -33,6 +38,7 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
 
     /** @private {!HTMLElement} */
     this.span_ = shaka.util.Dom.createHTMLElement('span');
+    this.span_.classList.add('shaka-ad-counter-span');
     this.container_.appendChild(this.span_);
 
     /**
@@ -65,6 +71,11 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
         this.adManager, shaka.ads.AdManager.AD_STOPPED, () => {
           this.reset_();
         });
+
+    if (this.ad) {
+      // There was already an ad.
+      this.onAdStarted_();
+    }
   }
 
   /**
@@ -90,12 +101,19 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
         'this.ad should exist at this point');
 
     const secondsLeft = Math.round(this.ad.getRemainingTime());
+    const adDuration = this.ad.getDuration();
+    if (secondsLeft == -1 || adDuration == -1) {
+      // Not enough information about the ad. Don't show the
+      // counter just yet.
+      return;
+    }
+
     if (secondsLeft > 0) {
-      const timePassed = this.ad.getDuration() - secondsLeft;
+      const timePassed = adDuration - secondsLeft;
       const timePassedStr =
           shaka.ui.Utils.buildTimeString(timePassed, /* showHour= */ false);
       const adLength = shaka.ui.Utils.buildTimeString(
-          this.ad.getDuration(), /* showHour= */ false);
+          adDuration, /* showHour= */ false);
       const timeString = timePassedStr + ' / ' + adLength;
 
       const adsInAdPod = this.ad.getSequenceLength();
@@ -122,6 +140,15 @@ shaka.ui.AdCounter = class extends shaka.ui.Element {
     // Controls are going to hide the whole ad panel once the ad is over,
     // this is just a safeguard.
     this.span_.textContent = '';
+  }
+
+  /**
+   * @override
+   */
+  release() {
+    this.timer_.stop();
+    this.timer_ = null;
+    super.release();
   }
 };
 

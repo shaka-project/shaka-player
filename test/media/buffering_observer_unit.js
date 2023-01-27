@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -111,7 +112,7 @@ describe('BufferingObserver', () => {
       /** @type {boolean} */
       let changed;
 
-      for (const lead of shaka.util.Iterables.range(5)) {
+      for (let lead = 0; lead < 5; lead++) {
         changed = controller.update(lead, /* toEnd= */ false);
         expect(changed).toBeFalsy();
       }

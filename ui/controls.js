@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,8 +8,14 @@
 goog.provide('shaka.ui.Controls');
 goog.provide('shaka.ui.ControlsPanel');
 
+goog.require('goog.asserts');
+goog.require('shaka.ads.AdManager');
+goog.require('shaka.cast.CastProxy');
 goog.require('shaka.log');
-goog.require('shaka.ui.Constants');
+goog.require('shaka.ui.AdCounter');
+goog.require('shaka.ui.AdPosition');
+goog.require('shaka.ui.BigPlayButton');
+goog.require('shaka.ui.ContextMenu');
 goog.require('shaka.ui.Locales');
 goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.SeekBar');
@@ -17,7 +24,10 @@ goog.require('shaka.util.Dom');
 goog.require('shaka.util.EventManager');
 goog.require('shaka.util.FakeEvent');
 goog.require('shaka.util.FakeEventTarget');
+goog.require('shaka.util.IDestroyable');
 goog.require('shaka.util.Timer');
+
+goog.requireType('shaka.Player');
 
 
 /**
@@ -43,7 +53,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     /** @private {shaka.cast.CastProxy} */
     this.castProxy_ = new shaka.cast.CastProxy(
-        video, player, this.config_.castReceiverAppId);
+        video, player, this.config_.castReceiverAppId,
+        this.config_.castAndroidReceiverCompatible);
 
     /** @private {boolean} */
     this.castAllowed_ = true;
@@ -66,17 +77,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {shaka.extern.IAdManager} */
     this.adManager_ = this.player_.getAdManager();
 
-    /** @private {shaka.extern.IAd} */
+    /** @private {?shaka.extern.IAd} */
     this.ad_ = null;
 
-    /** @private {shaka.ui.SeekBar} */
+    /** @private {?shaka.extern.IUISeekBar} */
     this.seekBar_ = null;
 
     /** @private {boolean} */
     this.isSeeking_ = false;
 
-    /** @private {!Array.<!Element>} */
-    this.settingsMenus_ = [];
+    /** @private {!Array.<!HTMLElement>} */
+    this.menus_ = [];
 
     /**
      * Individual controls which, when hovered or tab-focused, will force the
@@ -123,13 +134,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * @private {shaka.util.Timer}
      */
     this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
-      /** @type {function(!HTMLElement)} */
-      const hide = (control) => {
-        shaka.ui.Utils.setDisplay(control, /* visible= */ false);
-      };
-
-      for (const menu of this.settingsMenus_) {
-        hide(/** @type {!HTMLElement} */ (menu));
+      for (const menu of this.menus_) {
+        shaka.ui.Utils.setDisplay(menu, /* visible= */ false);
       }
     });
 
@@ -144,7 +150,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      */
     this.timeAndSeekRangeTimer_ = new shaka.util.Timer(() => {
       // Suppress timer-based updates if the controls are hidden.
-      if (this.isOpaque_()) {
+      if (this.isOpaque()) {
         this.updateTimeAndSeekRange_();
       }
     });
@@ -169,7 +175,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      * The pressed keys set is used to record which keys are currently pressed
      * down, so we can know what keys are pressed at the same time.
      * Used by the focusInsideOverflowMenu_() function.
-     * @private {!Set.<number>}
+     * @private {!Set.<string>}
      */
     this.pressedKeys_ = new Set();
 
@@ -180,6 +186,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Start this timer after we are finished initializing everything,
     this.timeAndSeekRangeTimer_.tickEvery(/* seconds= */ 0.125);
+
+    this.eventManager_.listen(this.localization_,
+        shaka.ui.Localization.LOCALE_CHANGED, (e) => {
+          const locale = e['locales'][0];
+          this.adManager_.setLocale(locale);
+        });
   }
 
   /**
@@ -187,6 +199,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   async destroy() {
+    if (document.pictureInPictureElement == this.localVideo_) {
+      await document.exitPictureInPicture();
+    }
+
     if (this.eventManager_) {
       this.eventManager_.release();
       this.eventManager_ = null;
@@ -212,6 +228,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.timeAndSeekRangeTimer_ = null;
     }
 
+    // Important!  Release all child elements before destroying the cast proxy
+    // or player.  This makes sure those destructions will not trigger event
+    // listeners in the UI which would then invoke the cast proxy or player.
+    this.releaseChildElements_();
+
+    if (this.controlsContainer_) {
+      this.videoContainer_.removeChild(this.controlsContainer_);
+      this.controlsContainer_ = null;
+    }
+
     if (this.castProxy_) {
       await this.castProxy_.destroy();
       this.castProxy_ = null;
@@ -226,10 +252,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.localVideo_ = null;
     this.video_ = null;
 
-    this.releaseChildElements_();
-
     this.localization_ = null;
     this.pressedKeys_.clear();
+
+    // FakeEventTarget implements IReleasable
+    super.release();
   }
 
 
@@ -243,96 +270,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /**
-   * @event shaka.Controls.CastStatusChangedEvent
-   * @description Fired upon receiving a 'caststatuschanged' event from
-   *    the cast proxy.
-   * @property {string} type
-   *   'caststatuschanged'
-   * @property {boolean} newStatus
-   *  The new status of the application. True for 'is casting' and
-   *  false otherwise.
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.Controls.SubMenuOpenEvent
-   * @description Fired when one of the overflow submenus is opened
-   *    (e. g. language/resolution/subtitle selection).
-   * @property {string} type
-   *   'submenuopen'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.Controls.CaptionSelectionUpdatedEvent
-   * @description Fired when the captions/subtitles menu has finished updating.
-   * @property {string} type
-   *   'captionselectionupdated'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.Controls.ResolutionSelectionUpdatedEvent
-   * @description Fired when the resolution menu has finished updating.
-   * @property {string} type
-   *   'resolutionselectionupdated'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.Controls.LanguageSelectionUpdatedEvent
-   * @description Fired when the audio language menu has finished updating.
-   * @property {string} type
-   *   'languageselectionupdated'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.Controls.ErrorEvent
-   * @description Fired when something went wrong with the controls.
-   * @property {string} type
-   *   'error'
-   * @property {!shaka.util.Error} detail
-   *   An object which contains details on the error.  The error's 'category'
-   *   and 'code' properties will identify the specific error that occurred.
-   *   In an uncompiled build, you can also use the 'message' and 'stack'
-   *   properties to debug.
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.Controls.TimeAndSeekRangeUpdatedEvent
-   * @description Fired when the time and seek range elements have finished
-   *    updating.
-   * @property {string} type
-   *   'timeandseekrangeupdated'
-   * @exportDoc
-   */
-
-
-  /**
-   * @event shaka.Controls.UIUpdatedEvent
-   * @description Fired after a call to ui.configure() once the UI has finished
-   *    updating.
-   * @property {string} type
-   *   'uiupdated'
-   * @exportDoc
-   */
-
-
-  /**
    * @param {string} name
    * @param {!shaka.extern.IUIElement.Factory} factory
    * @export
    */
   static registerElement(name, factory) {
     shaka.ui.ControlsPanel.elementNamesToFactories_.set(name, factory);
+  }
+
+  /**
+   * @param {!shaka.extern.IUISeekBar.Factory} factory
+   * @export
+   */
+  static registerSeekBar(factory) {
+    shaka.ui.ControlsPanel.seekBarFactory_ = factory;
   }
 
   /**
@@ -365,7 +316,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   configure(config) {
     this.config_ = config;
 
-    this.castProxy_.changeReceiverId(config.castReceiverAppId);
+    this.castProxy_.changeReceiverId(config.castReceiverAppId,
+        config.castAndroidReceiverCompatible);
 
     // Deconstruct the old layout if applicable
     if (this.seekBar_) {
@@ -376,11 +328,19 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.playButton_ = null;
     }
 
+    if (this.contextMenu_) {
+      this.contextMenu_ = null;
+    }
+
     if (this.controlsContainer_) {
       shaka.util.Dom.removeAllChildren(this.controlsContainer_);
       this.releaseChildElements_();
     } else {
       this.addControlsContainer_();
+      // The client-side ad container is only created once, and is never
+      // re-created or uprooted in the DOM, even when the DOM is re-created,
+      // since that seemingly breaks the IMA SDK.
+      this.addClientAdContainer_();
     }
 
     // Create the new layout
@@ -413,8 +373,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
       // If we're hiding native controls, make sure the video element itself is
       // not tab-navigable.  Our custom controls will still be tab-navigable.
-      this.video_.tabIndex = -1;
-      this.video_.controls = false;
+      this.localVideo_.tabIndex = -1;
+      this.localVideo_.controls = false;
     } else {
       this.videoContainer_.removeAttribute('shaka-controls');
     }
@@ -436,12 +396,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // If we disable the native controls, we want to make sure that the video
     // element itself is not tab-navigable, so that the element is skipped over
     // when tabbing through the page.
-    this.video_.controls = enabled;
-    this.video_.tabIndex = enabled ? 0 : -1;
+    this.localVideo_.controls = enabled;
+    this.localVideo_.tabIndex = enabled ? 0 : -1;
 
     if (enabled) {
       this.setEnabledShakaControls(false);
     }
+  }
+
+  /**
+   * @export
+   * @return {?shaka.extern.IAd}
+   */
+  getAd() {
+    return this.ad_;
   }
 
   /**
@@ -467,16 +435,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   getVideoContainer() {
     return this.videoContainer_;
   }
-
-
-  /**
-   * @return {!HTMLElement}
-   * @export
-   */
-  getAdContainer() {
-    return this.adContainer_;
-  }
-
 
   /**
    * @return {HTMLMediaElement}
@@ -515,7 +473,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   getControlsContainer() {
+    goog.asserts.assert(
+        this.controlsContainer_, 'No controls container after destruction!');
     return this.controlsContainer_;
+  }
+
+  /**
+   * @return {!HTMLElement}
+   * @export
+   */
+  getServerSideAdContainer() {
+    return this.daiAdContainer_;
+  }
+
+  /**
+   * @return {!HTMLElement}
+   * @export
+   */
+  getClientSideAdContainer() {
+    return this.clientAdContainer_;
   }
 
   /**
@@ -572,8 +548,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   anySettingsMenusAreOpen() {
-    return this.settingsMenus_.some(
-        (menu) => menu.classList.contains('shaka-displayed'));
+    return this.menus_.some(
+        (menu) => !menu.classList.contains('shaka-hidden'));
   }
 
   /** @export */
@@ -581,35 +557,103 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.hideSettingsMenusTimer_.tickNow();
   }
 
-  /** @export */
-  async toggleFullScreen() {
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
-    } else {
-      // If we are in PiP mode, leave PiP mode first.
-      try {
+  /**
+   * @return {boolean}
+   * @export
+   */
+  isFullScreenSupported() {
+    if (document.fullscreenEnabled) {
+      return true;
+    }
+    const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+    if (video.webkitSupportsFullscreen) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @return {boolean}
+   * @export
+   */
+  isFullScreenEnabled() {
+    if (document.fullscreenEnabled) {
+      return !!document.fullscreenElement;
+    }
+    const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+    if (video.webkitSupportsFullscreen) {
+      return video.webkitDisplayingFullscreen;
+    }
+    return false;
+  }
+
+  /** @private */
+  async enterFullScreen_() {
+    try {
+      if (document.fullscreenEnabled) {
         if (document.pictureInPictureElement) {
           await document.exitPictureInPicture();
         }
         await this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
-      } catch (error) {
-        this.dispatchEvent(new shaka.util.FakeEvent('error', {
-          detail: error,
-        }));
+
+        if (this.config_.forceLandscapeOnFullscreen && screen.orientation) {
+          // Locking to 'landscape' should let it be either
+          // 'landscape-primary' or 'landscape-secondary' as appropriate.
+          // We ignore errors from this specific call, since it creates noise
+          // on desktop otherwise.
+          try {
+            await screen.orientation.lock('landscape');
+          } catch (error) {}
+        }
+      } else {
+        const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+        if (video.webkitSupportsFullscreen) {
+          video.webkitEnterFullscreen();
+        }
+      }
+    } catch (error) {
+      // Entering fullscreen can fail without user interaction.
+      this.dispatchEvent(new shaka.util.FakeEvent(
+          'error', (new Map()).set('detail', error)));
+    }
+  }
+
+  /** @private */
+  async exitFullScreen_() {
+    if (document.fullscreenEnabled) {
+      if (screen.orientation) {
+        screen.orientation.unlock();
+      }
+      await document.exitFullscreen();
+    } else {
+      const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+      if (video.webkitSupportsFullscreen) {
+        video.webkitExitFullscreen();
       }
     }
   }
 
   /** @export */
+  async toggleFullScreen() {
+    if (this.isFullScreenEnabled()) {
+      await this.exitFullScreen_();
+    } else {
+      await this.enterFullScreen_();
+    }
+  }
+
+  /** @export */
   showAdUI() {
-    // TODO: other ad states (seek bar display etc)
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
+    shaka.ui.Utils.setDisplay(this.clientAdContainer_, true);
+    this.controlsContainer_.setAttribute('ad-active', 'true');
   }
 
   /** @export */
   hideAdUI() {
-    // TODO: other ad states (seek bar display etc)
     shaka.ui.Utils.setDisplay(this.adPanel_, false);
+    shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
+    this.controlsContainer_.removeAttribute('ad-active');
   }
 
   /**
@@ -661,36 +705,32 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   createDOM_() {
     this.videoContainer_.classList.add('shaka-video-container');
-    this.video_.classList.add('shaka-video');
+    this.localVideo_.classList.add('shaka-video');
 
-    this.addSkimContainer_();
+    this.addScrimContainer_();
 
     if (this.config_.addBigPlayButton) {
       this.addPlayButton_();
+    }
+
+    if (this.config_.customContextMenu) {
+      this.addContextMenu_();
     }
 
     if (!this.spinnerContainer_) {
       this.addBufferingSpinner_();
     }
 
-    if (!this.adContainer_) {
-      this.addAdContainer_();
-    }
+    this.addDaiAdContainer_();
 
     this.addControlsButtonPanel_();
 
-    this.settingsMenus_ = Array.from(
+    this.menus_ = Array.from(
         this.videoContainer_.getElementsByClassName('shaka-settings-menu'));
+    this.menus_.push(...Array.from(
+        this.videoContainer_.getElementsByClassName('shaka-overflow-menu')));
 
-    if (this.config_.addSeekBar) {
-      this.seekBar_ = new shaka.ui.SeekBar(this.bottomControls_, this);
-      this.elements_.push(this.seekBar_);
-    } else {
-      // Settings menus need to be positioned lower if the seekbar is absent.
-      for (const menu of this.settingsMenus_) {
-        menu.classList.add('shaka-low-position');
-      }
-    }
+    this.addSeekBar_();
 
     this.showOnHoverControls_ = Array.from(
         this.videoContainer_.getElementsByClassName(
@@ -699,10 +739,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   addControlsContainer_() {
-    /** @private {!HTMLElement} */
+    /** @private {HTMLElement} */
     this.controlsContainer_ = shaka.util.Dom.createHTMLElement('div');
     this.controlsContainer_.classList.add('shaka-controls-container');
     this.videoContainer_.appendChild(this.controlsContainer_);
+
+    // Use our controls by default, without anyone calling
+    // setEnabledShakaControls:
+    this.videoContainer_.setAttribute('shaka-controls', 'true');
 
     this.eventManager_.listen(this.controlsContainer_, 'touchstart', (e) => {
       this.onContainerTouch_(e);
@@ -710,6 +754,13 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     this.eventManager_.listen(this.controlsContainer_, 'click', () => {
       this.onContainerClick_();
+    });
+
+    this.eventManager_.listen(this.controlsContainer_, 'dblclick', () => {
+      if (this.config_.doubleClickForFullscreen &&
+          this.isFullScreenSupported()) {
+        this.toggleFullScreen();
+      }
     });
   }
 
@@ -726,21 +777,20 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 
   /** @private */
-  addSkimContainer_() {
-    // This is the container that gets styled by CSS to have the
-    // black gradient skim at the end of the controls.
-    const skimContainer = shaka.util.Dom.createHTMLElement('div');
-    skimContainer.classList.add('shaka-skim-container');
-    this.controlsContainer_.appendChild(skimContainer);
+  addContextMenu_() {
+    /** @private {shaka.ui.ContextMenu} */
+    this.contextMenu_ =
+        new shaka.ui.ContextMenu(this.controlsButtonPanel_, this);
+    this.elements_.push(this.contextMenu_);
   }
 
   /** @private */
-  addAdContainer_() {
-    // Ad container. IMA will use this div to display client-side ads.
-    /** @private {!HTMLElement} */
-    this.adContainer_ = shaka.util.Dom.createHTMLElement('div');
-    this.adContainer_.classList.add('shaka-ad-container');
-    this.videoContainer_.appendChild(this.adContainer_);
+  addScrimContainer_() {
+    // This is the container that gets styled by CSS to have the
+    // black gradient scrim at the end of the controls.
+    const scrimContainer = shaka.util.Dom.createHTMLElement('div');
+    scrimContainer.classList.add('shaka-scrim-container');
+    this.controlsContainer_.appendChild(scrimContainer);
   }
 
   /** @private */
@@ -748,7 +798,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!HTMLElement} */
     this.adPanel_ = shaka.util.Dom.createHTMLElement('div');
     this.adPanel_.classList.add('shaka-ad-controls');
-    shaka.ui.Utils.setDisplay(this.adPanel_, false);
+    const showAdPanel = this.ad_ != null && this.ad_.isLinear();
+    shaka.ui.Utils.setDisplay(this.adPanel_, showAdPanel);
     this.bottomControls_.appendChild(this.adPanel_);
 
     const adPosition = new shaka.ui.AdPosition(this.adPanel_, this);
@@ -756,12 +807,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     const adCounter = new shaka.ui.AdCounter(this.adPanel_, this);
     this.elements_.push(adCounter);
-
-    const spacer = new shaka.ui.Spacer(this.adPanel_, this);
-    this.elements_.push(spacer);
-
-    const skipButton = new shaka.ui.SkipAdButton(this.adPanel_, this);
-    this.elements_.push(skipButton);
   }
 
   /** @private */
@@ -780,8 +825,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     const svg =
       /** @type {!HTMLElement} */(document.createElementNS(xmlns, 'svg'));
-    // NOTE: SVG elements do not have a classList on IE, so use setAttribute.
-    svg.setAttribute('class', 'shaka-spinner-svg');
+    svg.classList.add('shaka-spinner-svg');
     svg.setAttribute('viewBox', '0 0 30 30');
     spinner.appendChild(svg);
 
@@ -790,7 +834,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // "Scalable." The radius of 14.5 is so that the edges of the 1-px-wide
     // stroke will touch the edges of the viewBox.
     const spinnerCircle = document.createElementNS(xmlns, 'circle');
-    spinnerCircle.setAttribute('class', 'shaka-spinner-path');
+    spinnerCircle.classList.add('shaka-spinner-path');
     spinnerCircle.setAttribute('cx', '15');
     spinnerCircle.setAttribute('cy', '15');
     spinnerCircle.setAttribute('r', '14.5');
@@ -809,11 +853,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.controlsContainer_.appendChild(this.bottomControls_);
 
     // Overflow menus are supposed to hide once you click elsewhere
-    // on the video element. The code in onContainerClick_ ensures that.
+    // on the page. The click event listener on window ensures that.
     // However, clicks on the bottom controls don't propagate to the container,
     // so we have to explicitly hide the menus onclick here.
-    this.eventManager_.listen(this.bottomControls_, 'click', () => {
-      this.hideSettingsMenus();
+    this.eventManager_.listen(this.bottomControls_, 'click', (e) => {
+      // We explicitly deny this measure when clicking on buttons that
+      // open submenus in the control panel.
+      if (!e.target['closest']('.shaka-overflow-button')) {
+        this.hideSettingsMenus();
+      }
     });
 
     this.addAdControls_();
@@ -823,6 +871,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
     this.controlsButtonPanel_.classList.add(
         'shaka-show-controls-on-mouse-over');
+    if (this.config_.enableTooltips) {
+      this.controlsButtonPanel_.classList.add('shaka-tooltips-on');
+    }
     this.bottomControls_.appendChild(this.controlsButtonPanel_);
 
     // Create the elements specified by controlPanelElements
@@ -830,12 +881,65 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       if (shaka.ui.ControlsPanel.elementNamesToFactories_.get(name)) {
         const factory =
             shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
-        this.elements_.push(factory.create(this.controlsButtonPanel_, this));
+        const element = factory.create(this.controlsButtonPanel_, this);
+        this.elements_.push(element);
       } else {
         shaka.log.alwaysWarn('Unrecognized control panel element requested:',
             name);
       }
     }
+  }
+
+
+  /**
+   * Adds a container for server side ad UI with IMA SDK.
+   *
+   * @private
+   */
+  addDaiAdContainer_() {
+    /** @private {!HTMLElement} */
+    this.daiAdContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.daiAdContainer_.classList.add('shaka-server-side-ad-container');
+    this.controlsContainer_.appendChild(this.daiAdContainer_);
+  }
+
+
+  /**
+   * Adds a seekbar depending on the configuration.
+   * By default an instance of shaka.ui.SeekBar is created
+   * This behaviour can be overriden by providing a SeekBar factory using the
+   * registerSeekBarFactory function.
+   *
+   * @private
+   */
+  addSeekBar_() {
+    if (this.config_.addSeekBar) {
+      this.seekBar_ = shaka.ui.ControlsPanel.seekBarFactory_.create(
+          this.bottomControls_, this);
+      this.elements_.push(this.seekBar_);
+    } else {
+      // Settings menus need to be positioned lower if the seekbar is absent.
+      for (const menu of this.menus_) {
+        menu.classList.add('shaka-low-position');
+      }
+    }
+  }
+
+
+  /**
+   * Adds a container for client side ad UI with IMA SDK.
+   *
+   * @private
+   */
+  addClientAdContainer_() {
+    /** @private {!HTMLElement} */
+    this.clientAdContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.clientAdContainer_.classList.add('shaka-client-side-ad-container');
+    shaka.ui.Utils.setDisplay(this.clientAdContainer_, false);
+    this.eventManager_.listen(this.clientAdContainer_, 'click', () => {
+      this.onContainerClick_();
+    });
+    this.videoContainer_.appendChild(this.clientAdContainer_);
   }
 
   /**
@@ -854,22 +958,24 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     // Listen for key down events to detect tab and enable outline
     // for focused elements.
-    this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
+    this.eventManager_.listen(window, 'keydown', (e) => {
+      this.onWindowKeyDown_(/** @type {!KeyboardEvent} */(e));
+    });
 
+    // Listen for click events to dismiss the settings menus.
+    this.eventManager_.listen(window, 'click', () => this.hideSettingsMenus());
+
+    // Avoid having multiple submenus open at the same time.
     this.eventManager_.listen(
-        this.controlsContainer_, 'dblclick', () => this.toggleFullScreen());
+        this, 'submenuopen', () => {
+          this.hideSettingsMenus();
+        });
 
     this.eventManager_.listen(this.video_, 'play', () => {
       this.onPlayStateChange_();
     });
 
     this.eventManager_.listen(this.video_, 'pause', () => {
-      this.onPlayStateChange_();
-    });
-
-    // Since videos go into a paused state at the end, Chrome and Edge both fire
-    // the 'pause' event when a video ends.  IE 11 only fires the 'ended' event.
-    this.eventManager_.listen(this.video_, 'ended', () => {
       this.onPlayStateChange_();
     });
 
@@ -893,8 +999,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onCastStatusChange_();
     });
 
+    this.eventManager_.listen(this.videoContainer_, 'keydown', (e) => {
+      this.onControlsKeyDown_(/** @type {!KeyboardEvent} */(e));
+    });
+
     this.eventManager_.listen(this.videoContainer_, 'keyup', (e) => {
-      this.onKeyUp_(e);
+      this.onControlsKeyUp_(/** @type {!KeyboardEvent} */(e));
     });
 
     this.eventManager_.listen(
@@ -914,12 +1024,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         await this.onScreenRotation_();
       });
     }
-
-    this.eventManager_.listen(document, 'fullscreenchange', () => {
-      if (this.ad_) {
-        this.ad_.resize(this.video_.offsetWidth, this.video_.offsetHeight);
-      }
-    });
   }
 
 
@@ -932,14 +1036,18 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   async onScreenRotation_() {
     if (!this.video_ ||
         this.video_.readyState == 0 ||
-        this.castProxy_.isCasting()) { return; }
+        this.castProxy_.isCasting() ||
+        !this.config_.enableFullscreenOnRotation ||
+        !this.isFullScreenSupported()) {
+      return;
+    }
 
     if (screen.orientation.type.includes('landscape') &&
-        !document.fullscreenElement) {
-      await this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
+        !this.isFullScreenEnabled()) {
+      await this.enterFullScreen_();
     } else if (screen.orientation.type.includes('portrait') &&
-        document.fullscreenElement) {
-      await document.exitFullscreen();
+      this.isFullScreenEnabled()) {
+      await this.exitFullScreen_();
     }
   }
 
@@ -984,7 +1092,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // open.
     this.hideSettingsMenusTimer_.stop();
 
-    if (!this.isOpaque_()) {
+    if (!this.isOpaque()) {
       // Only update the time and seek range on mouse movement if it's the very
       // first movement and we're about to show the controls.  Otherwise, the
       // seek bar will be updated much more rapidly during mouse movement.  Do
@@ -1028,7 +1136,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   onMouseStill_() {
-    // Hide the cursor.  (NOTE: not supported on IE)
+    // Hide the cursor.
     this.videoContainer_.style.cursor = 'none';
     this.recentMouseMovement_ = false;
     this.computeOpacity();
@@ -1039,6 +1147,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   isHovered_() {
+    if (!window.matchMedia('hover: hover').matches) {
+      // This is primarily a touch-screen device, so the :hover query below
+      // doesn't make sense.  In spite of this, the :hover query on an element
+      // can still return true on such a device after a touch ends.
+      // See https://bit.ly/34dBORX for details.
+      return false;
+    }
+
     return this.showOnHoverControls_.some((element) => {
       return element.matches(':hover');
     });
@@ -1057,7 +1173,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // recent mouse movement, we're in keyboard navigation, or one of a special
     // class of elements is hovered.
     if (adIsPaused ||
-        (!this.ad_ && videoIsPaused) ||
+        ((!this.ad_ || !this.ad_.isLinear()) && videoIsPaused) ||
         this.recentMouseMovement_ ||
         keyboardNavigationMode ||
         this.isHovered_()) {
@@ -1081,7 +1197,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    if (this.isOpaque_()) {
+    if (this.isOpaque()) {
       this.lastTouchEventTime_ = Date.now();
       // The controls are showing.
       // Let this event continue and become a click.
@@ -1089,7 +1205,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // The controls are hidden, so show them.
       this.onMouseMove_(event);
       // Stop this event from becoming a click event.
-      event.preventDefault();
+      event.cancelable && event.preventDefault();
     }
   }
 
@@ -1101,14 +1217,14 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (this.anySettingsMenusAreOpen()) {
       this.hideSettingsMenusTimer_.tickNow();
-    } else {
+    } else if (this.config_.singleClickForPlayAndPause) {
       this.onPlayPauseClick_();
     }
   }
 
   /** @private */
   onPlayPauseClick_() {
-    if (this.ad_) {
+    if (this.ad_ && this.ad_.isLinear()) {
       this.playPauseAd();
     } else {
       this.playPausePresentation();
@@ -1118,9 +1234,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   onCastStatusChange_() {
     const isCasting = this.castProxy_.isCasting();
-    this.dispatchEvent(new shaka.util.FakeEvent('caststatuschanged', {
-      newStatus: isCasting,
-    }));
+    this.dispatchEvent(new shaka.util.FakeEvent(
+        'caststatuschanged', (new Map()).set('newStatus', isCasting)));
 
     if (isCasting) {
       this.controlsContainer_.setAttribute('casting', 'true');
@@ -1131,24 +1246,15 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /** @private */
   onPlayStateChange_() {
-    // On IE 11, a video may end without going into a paused state.  To correct
-    // both the UI state and the state of the video tag itself, we explicitly
-    // pause the video if that happens.
-    if (this.video_.ended && !this.video_.paused) {
-      this.video_.pause();
-    }
-
     this.computeOpacity();
   }
 
   /**
    * Support controls with keyboard inputs.
-   * @param {!Event} event
+   * @param {!KeyboardEvent} event
    * @private
    */
-  onKeyUp_(event) {
-    const key = event.key;
-
+  onControlsKeyDown_(event) {
     const activeElement = document.activeElement;
     const isVolumeBar = activeElement && activeElement.classList ?
         activeElement.classList.contains('shaka-volume-bar') : false;
@@ -1159,32 +1265,40 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.onMouseMove_(event);
     }
 
-    // When the key is released, remove it from the pressed keys set.
-    this.pressedKeys_.delete(event.keyCode);
+    if (!this.config_.enableKeyboardPlaybackControls) {
+      return;
+    }
 
+    const keyboardSeekDistance = this.config_.keyboardSeekDistance;
 
-    switch (key) {
+    switch (event.key) {
       case 'ArrowLeft':
         // If it's not focused on the volume bar, move the seek time backward
-        // for 5 sec. Otherwise, the volume will be adjusted automatically.
-        if (!isVolumeBar) {
-          this.seek_(this.video_.currentTime - 5, event);
+        // for a few sec. Otherwise, the volume will be adjusted automatically.
+        if (this.seekBar_ && !isVolumeBar && keyboardSeekDistance > 0) {
+          event.preventDefault();
+          this.seek_(this.seekBar_.getValue() - keyboardSeekDistance);
         }
         break;
       case 'ArrowRight':
         // If it's not focused on the volume bar, move the seek time forward
-        // for 5 sec. Otherwise, the volume will be adjusted automatically.
-        if (!isVolumeBar) {
-          this.seek_(this.video_.currentTime + 5, event);
+        // for a few sec. Otherwise, the volume will be adjusted automatically.
+        if (this.seekBar_ && !isVolumeBar && keyboardSeekDistance > 0) {
+          event.preventDefault();
+          this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
         }
         break;
       // Jump to the beginning of the video's seek range.
       case 'Home':
-        this.seek_(this.player_.seekRange().start, event);
+        if (this.seekBar_) {
+          this.seek_(this.player_.seekRange().start);
+        }
         break;
       // Jump to the end of the video's seek range.
       case 'End':
-        this.seek_(this.player_.seekRange().end, event);
+        if (this.seekBar_) {
+          this.seek_(this.player_.seekRange().end);
+        }
         break;
       // Pause or play by pressing space on the seek bar.
       case ' ':
@@ -1193,6 +1307,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         }
         break;
     }
+  }
+
+  /**
+   * Support controls with keyboard inputs.
+   * @param {!KeyboardEvent} event
+   * @private
+   */
+  onControlsKeyUp_(event) {
+    // When the key is released, remove it from the pressed keys set.
+    this.pressedKeys_.delete(event.key);
   }
 
   /**
@@ -1211,9 +1335,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * @return {boolean}
-   * @private
+   * @export
    */
-  isOpaque_() {
+  isOpaque() {
     if (!this.enabled_) {
       return false;
     }
@@ -1224,13 +1348,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
   /**
    * Update the video's current time based on the keyboard operations.
+   *
    * @param {number} currentTime
-   * @param {!Event} event
    * @private
    */
-  seek_(currentTime, event) {
-    this.video_.currentTime = currentTime;
-    if (this.isOpaque_()) {
+  seek_(currentTime) {
+    goog.asserts.assert(
+        this.seekBar_, 'Caller of seek_ must check for seekBar_ first!');
+
+    this.seekBar_.changeTo(currentTime);
+
+    if (this.isOpaque()) {
       // Only update the time and seek range if it's visible.
       this.updateTimeAndSeekRange_();
     }
@@ -1246,11 +1374,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.seekBar_.update();
 
       if (this.seekBar_.isShowing()) {
-        for (const menu of this.settingsMenus_) {
+        for (const menu of this.menus_) {
           menu.classList.remove('shaka-low-position');
         }
       } else {
-        for (const menu of this.settingsMenus_) {
+        for (const menu of this.menus_) {
           menu.classList.add('shaka-low-position');
         }
       }
@@ -1266,16 +1394,16 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * 3. When navigating on overflow settings menu by pressing Tab
    *    key or Shift+Tab keys keep the focus inside overflow menu.
    *
-   * @param {!Event} event
+   * @param {!KeyboardEvent} event
    * @private
    */
-  onKeyDown_(event) {
-    // Add the key code to the pressed keys set when it's pressed.
-    this.pressedKeys_.add(event.keyCode);
+  onWindowKeyDown_(event) {
+    // Add the key to the pressed keys set when it's pressed.
+    this.pressedKeys_.add(event.key);
 
     const anySettingsMenusAreOpen = this.anySettingsMenusAreOpen();
 
-    if (event.keyCode == shaka.ui.Constants.KEYCODE_TAB) {
+    if (event.key == 'Tab') {
       // Enable blue outline for focused elements for keyboard
       // navigation.
       this.controlsContainer_.classList.add('shaka-keyboard-navigation');
@@ -1284,12 +1412,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     // If escape key was pressed, close any open settings menus.
-    if (event.keyCode == shaka.ui.Constants.KEYCODE_ESCAPE) {
+    if (event.key == 'Escape') {
       this.hideSettingsMenusTimer_.tickNow();
     }
 
-    if (anySettingsMenusAreOpen &&
-          this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_TAB)) {
+    if (anySettingsMenusAreOpen && this.pressedKeys_.has('Tab')) {
       // If Tab key or Shift+Tab keys are pressed when navigating through
       // an overflow settings menu, keep the focus to loop inside the
       // overflow menu.
@@ -1302,14 +1429,21 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * menu (pressing Tab key to go forward, or pressing Shift + Tab keys to go
    * backward), make sure it's focused only on the elements of the overflow
    * panel.
-   * This is called by onKeyDown_() function, when there's a settings overflow
-   * menu open, and the Tab key / Shift+Tab keys are pressed.
+   *
+   * This is called by onWindowKeyDown_() function, when there's a settings
+   * overflow menu open, and the Tab key / Shift+Tab keys are pressed.
+   *
    * @param {!Event} event
    * @private
    */
   keepFocusInMenu_(event) {
-    const openSettingsMenus = this.settingsMenus_.filter(
-        (menu) => menu.classList.contains('shaka-displayed'));
+    const openSettingsMenus = this.menus_.filter(
+        (menu) => !menu.classList.contains('shaka-hidden'));
+    if (!openSettingsMenus.length) {
+      // For example, this occurs when you hit escape to close the menu.
+      return;
+    }
+
     const settingsMenu = openSettingsMenus[0];
     if (settingsMenu.childNodes.length) {
       // Get the first and the last displaying child element from the overflow
@@ -1335,7 +1469,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // previous element. If it's currently focused on the first shown child
       // element of the overflow menu, let the focus move to the last child
       // element of the menu.
-      if (this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_SHIFT)) {
+      if (this.pressedKeys_.has('Shift')) {
         if (activeElement == firstShownChild) {
           event.preventDefault();
           lastShownChild.focus();
@@ -1357,7 +1491,6 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    */
   onMouseDown_() {
     this.eventManager_.unlisten(window, 'mousedown');
-    this.eventManager_.listen(window, 'keydown', (e) => this.onKeyDown_(e));
   }
 
   /**
@@ -1380,5 +1513,92 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   }
 };
 
+
+/**
+ * @event shaka.ui.Controls#CastStatusChangedEvent
+ * @description Fired upon receiving a 'caststatuschanged' event from
+ *    the cast proxy.
+ * @property {string} type
+ *   'caststatuschanged'
+ * @property {boolean} newStatus
+ *  The new status of the application. True for 'is casting' and
+ *  false otherwise.
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#SubMenuOpenEvent
+ * @description Fired when one of the overflow submenus is opened
+ *    (e. g. language/resolution/subtitle selection).
+ * @property {string} type
+ *   'submenuopen'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#CaptionSelectionUpdatedEvent
+ * @description Fired when the captions/subtitles menu has finished updating.
+ * @property {string} type
+ *   'captionselectionupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#ResolutionSelectionUpdatedEvent
+ * @description Fired when the resolution menu has finished updating.
+ * @property {string} type
+ *   'resolutionselectionupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#LanguageSelectionUpdatedEvent
+ * @description Fired when the audio language menu has finished updating.
+ * @property {string} type
+ *   'languageselectionupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#ErrorEvent
+ * @description Fired when something went wrong with the controls.
+ * @property {string} type
+ *   'error'
+ * @property {!shaka.util.Error} detail
+ *   An object which contains details on the error.  The error's 'category'
+ *   and 'code' properties will identify the specific error that occurred.
+ *   In an uncompiled build, you can also use the 'message' and 'stack'
+ *   properties to debug.
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#TimeAndSeekRangeUpdatedEvent
+ * @description Fired when the time and seek range elements have finished
+ *    updating.
+ * @property {string} type
+ *   'timeandseekrangeupdated'
+ * @exportDoc
+ */
+
+
+/**
+ * @event shaka.ui.Controls#UIUpdatedEvent
+ * @description Fired after a call to ui.configure() once the UI has finished
+ *    updating.
+ * @property {string} type
+ *   'uiupdated'
+ * @exportDoc
+ */
+
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
 shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
+
+/** @private {?shaka.extern.IUISeekBar.Factory} */
+shaka.ui.ControlsPanel.seekBarFactory_ = new shaka.ui.SeekBar.Factory();

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
- Copyright 2016 Google Inc.
+ Copyright 2016 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@
     <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
     <!-- transmuxing support is enabled by including this: -->
     <script defer src="../node_modules/mux.js/dist/mux.min.js"></script>
+    <!-- MPEG-5 Part2 LCEVC support is enabled by including this: -->
+    <script defer src="../node_modules/lcevc_dil.js/dist/lcevc_dil.min.js"></script>
     <!-- MDL is enabled by including this: -->
     <script defer src="../node_modules/material-design-lite/dist/material.min.js"></script>
     <!-- MDL modal dialogs are enabled by including these: -->
@@ -49,14 +51,13 @@
     <!-- Tooltips are made using tippy.js: -->
     <script defer src="../node_modules/tippy.js/umd/index.min.js"></script>
     <!-- Improved PWA capability on mobile Safari is enabled by loading pwacompat: -->
-    <script defer src="https://cdn.jsdelivr.net/npm/pwacompat@2.0.9/pwacompat.min.js"
-        integrity="sha384-VcI6S+HIsE80FVM1jgbd6WDFhzKYA0PecD/LcIyMQpT4fMJdijBh0I7Iblaacawc"
-        crossorigin="anonymous"></script>
+    <script defer src="../node_modules/pwacompat/pwacompat.min.js"></script>
+
     <!-- Include IMA SDK to enable client-side ad insertion: -->
-    <script type="text/javascript" src="//imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
-    <!-- Include our Google Ad Manager Id for server-side ad insertion: -->
-    <script data-ad-client="ca-pub-6730898616393663"
-            async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script type="text/javascript" src="https://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+    <!-- Include IMA DAI SDK to enable server-side ad insertion: -->
+    <script type="text/javascript" src="https://imasdk.googleapis.com/js/sdkloader/ima3_dai.js"></script>
+
 
     <script>
 COMPILED_JS = [
@@ -73,7 +74,7 @@ COMPILED_DEBUG_JS = [
 ];
 UNCOMPILED_JS = [
   // Bootstrap the Shaka Player library through the Closure library.
-  '../third_party/closure/goog/base.js',
+  '../node_modules/google-closure-library/closure/goog/base.js',
   '../dist/deps.js',
   // This is required for goog.asserts.
   '../lib/debug/asserts.js',
@@ -100,7 +101,7 @@ UNCOMPILED_JS = [
         <header class="mdl-layout__header-row" id="nav-button-container">
           <img alt="Shaka Player Logo" src="shaka_logo_trans.png" class="logo" />
           <button id="nav-button-front" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" defaultselected localized-string="HOME" tab-identifier="HOME"></button>
-          <button id="nav-button-search" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="SEARCH" tab-identifier="SEARCH"></button>
+          <button id="nav-button-search" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="ALL_CONTENT" tab-identifier="ALL_CONTENT"></button>
           <button id="nav-button-custom" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="CUSTOM_CONTENT" tab-identifier="CUSTOM CONTENT"></button>
           <div class="mdl-layout-spacer"></div>
           <button id="bug-button" class="mdl-button mdl-js-button mdl-js-ripple-effect should-disable-on-fail" localized-string="REPORT_BUG"></button>
@@ -116,7 +117,7 @@ UNCOMPILED_JS = [
         <div id="hamburger-menu-title" class="mdl-layout-title">
           <div localized-string="CONFIG"></div>
           <div class="mdl-layout-spacer"></div>
-          <button id="drawer-close-button" class="mdl-button mdl-js-button mdl-button--icon should-disable-on-fail"><i class="material-icons">close</i></button>
+          <button id="drawer-close-button" class="mdl-button mdl-js-button mdl-button--icon should-disable-on-fail"><i class="material-icons-round">close</i></button>
         </div>
         <nav class="mdl-navigation" id="hamburger-menu-contents">
         </nav>
@@ -131,6 +132,11 @@ UNCOMPILED_JS = [
             <video data-shaka-player autoplay playsinline id="video"></video>
           </div>
         </div>
+        <div id="visualizer-div" class="hidden should-disable-on-fail">
+          <canvas id="visualizer-canvas"></canvas>
+          <div id="visualizer-controls-div"></div>
+          <div id="visualizer-screenshot-div"></div>
+        </div>
         <div id="contents" class="should-hide-in-no-input-mode"></div>
         <footer class="mdl-mega-footer should-hide-in-no-input-mode">
           <div class="mdl-mega-footer__middle-section">
@@ -140,7 +146,7 @@ UNCOMPILED_JS = [
               <ul class="mdl-mega-footer__link-list">
                 <li><a rel="noopener" target="_blank" href="../docs/api/index.html" localized-string="DOCUMENTATION"></a></li>
                 <li><a rel="noopener" target="_blank" href="https://www.apache.org/licenses/LICENSE-2.0" localized-string="LICENSE"></a></li>
-                <li><a rel="noopener" target="_blank" href="https://github.com/google/shaka-player" localized-string="SOURCE"></a></li>
+                <li><a rel="noopener" target="_blank" href="https://github.com/shaka-project/shaka-player" localized-string="SOURCE"></a></li>
                 <li><a rel="noopener" target="_blank" href="https://www.npmjs.com/package/shaka-player" localized-string="NPM"></a></li>
                 <li><a rel="noopener" target="_blank" href="../support.html" localized-string="SUPPORT"></a></li>
               </ul>

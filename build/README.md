@@ -25,7 +25,7 @@ All the scripts here use two environment variables:
 $ PRINT_ARGUMENTS=1 build.py
 git -C /path/to/shaka describe --tags --dirty
 Compiling the library...
-java -jar /path/to/shaka/third_party/closure/compiler.jar --language_in ...
+java -jar /path/to/shaka/node_modules/.../compiler.jar --language_in ...
 ```
 
 ## Configurable Build
@@ -80,8 +80,8 @@ directly:
 * `--external` will run integration tests against external assets.  This will
   take an extremely long time to run, and requires a fast and reliable internet
   connection.
-* `--drm` will run integration tests against DRM license servers.  This will
-  require a connection to the open internet.
+* `--no-drm` will skip integration tests against DRM license servers.  Not
+  specifying this flag requires a connection to the open internet.
 * `--uncompiled` will run integration tests using the uncompiled library instead
   of the compiled version.
 * `--random` will run the tests in a random order to isolate test dependencies.
@@ -90,8 +90,8 @@ directly:
 * `--runs` allows running the tests multiple times in succession. This parameter
   must be specified with a positive integer value, for example `--runs 5`.
 * `--use-xvfb` will launch the browsers in a virtual display (only on Linux).
-* `--specFilter` is used to filter a specific test or set of tests.  This
-  parameter is specified as a RegExp string `--specFilter="DataUriPlugin .*\d"`.
+* `--filter` is used to filter a specific test or set of tests.  This parameter
+  is specified as a RegExp string `--filter="DataUriPlugin .*\d"`.
 
 The `karma` argument `--browsers` will set the browsers used to run the tests
 (e.g. `--browsers Chrome,Firefox`).  If you don't pass any arguments, `test.py`
@@ -99,7 +99,7 @@ will choose a defaults based on your platform.  However, if you pass any
 arguments to `test.py`, it will not choose browsers and you *must* pass
 `--browsers`.
 
-[lib/debug/log.js]: https://github.com/google/shaka-player/blob/master/lib/debug/log.js
+[lib/debug/log.js]: https://github.com/shaka-project/shaka-player/blob/main/lib/debug/log.js
 
 ## Stats
 

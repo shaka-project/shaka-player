@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -103,6 +104,14 @@ shaka.extern.AbrManager = class {
   playbackRateChanged(rate) {}
 
   /**
+   * Set media element.
+   *
+   * @param {HTMLMediaElement} mediaElement
+   * @exportDoc
+   */
+  setMediaElement(mediaElement) {}
+
+  /**
    * Sets the ABR configuration.
    *
    * It is the responsibility of the AbrManager implementation to implement the
@@ -137,9 +146,9 @@ shaka.extern.AbrManager.SwitchCallback;
 
 
 /**
- * A factory for creating the abr manager.  This will be called with 'new'.
+ * A factory for creating the abr manager.
  *
- * @typedef {function(new:shaka.extern.AbrManager)}
+ * @typedef {function():!shaka.extern.AbrManager}
  * @exportDoc
  */
 shaka.extern.AbrManager.Factory;

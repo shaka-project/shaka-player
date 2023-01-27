@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -13,3 +14,10 @@
 
 /** @type {boolean} */
 NetworkInformation.prototype.saveData;
+
+/**
+ * @param {string} type
+ * @param {Function} listener
+ */
+NetworkInformation.prototype.addEventListener =
+    function(type, listener) {};

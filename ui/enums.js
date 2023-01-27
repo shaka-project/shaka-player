@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -15,7 +16,9 @@ goog.provide('shaka.ui.Enums');
 shaka.ui.Enums.MaterialDesignIcons = {
   'FULLSCREEN': 'fullscreen',
   'EXIT_FULLSCREEN': 'fullscreen_exit',
+  'CLOSE': 'close',
   'CLOSED_CAPTIONS': 'closed_caption',
+  'CLOSED_CAPTIONS_OFF': 'closed_caption_disabled',
   'CHECKMARK': 'done',
   'LANGUAGE': 'language',
   'PIP': 'picture_in_picture_alt',
@@ -33,6 +36,12 @@ shaka.ui.Enums.MaterialDesignIcons = {
   'REWIND': 'fast_rewind',
   'FAST_FORWARD': 'fast_forward',
   'PLAY': 'play_arrow',
+  'PLAYBACK_RATE': 'slow_motion_video',
   'PAUSE': 'pause',
-  'LOOP': 'loop',
+  'LOOP': 'repeat',
+  'UNLOOP': 'repeat_on',
+  'AIRPLAY': 'airplay',
+  'REPLAY': 'replay',
+  'STATISTICS_ON': 'insert_chart_outlined',
+  'STATISTICS_OFF': 'insert_chart',
 };

@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,7 +22,7 @@ shakaDemo.CloseButton = class extends shaka.ui.Element {
   constructor(parent, controls) {
     super(parent, controls);
     this.button_ = document.createElement('button');
-    this.button_.classList.add('material-icons');
+    this.button_.classList.add('material-icons-round');
     this.button_.classList.add('close-button');
     this.button_.textContent = 'close'; // Close icon.
     this.parent.appendChild(this.button_);

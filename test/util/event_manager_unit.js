@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -21,12 +22,8 @@ describe('EventManager', () => {
     eventManager = new shaka.util.EventManager();
     target1 = document.createElement('div');
     target2 = document.createElement('div');
-
-    // new Event() is current, but document.createEvent() works back to IE11.
-    event1 = /** @type {!Event} */ (document.createEvent('Event'));
-    event1.initEvent('eventtype1', false, false);
-    event2 = /** @type {!Event} */ (document.createEvent('Event'));
-    event2.initEvent('eventtype2', false, false);
+    event1 = new Event('eventtype1');
+    event2 = new Event('eventtype2');
   });
 
   afterEach(() => {

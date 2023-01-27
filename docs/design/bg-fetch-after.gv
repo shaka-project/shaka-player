@@ -1,0 +1,29 @@
+# Generate png with: dot -Tpng -O after.gv
+digraph storage_after {
+  subgraph cluster_0 {
+    label="Shaka Player";
+    parse[label="Download and parse manifest (parseManifest)"];
+    drm[label="Make DRM engine and load keys (createDrmEngine)"]
+    filter[label="Filter manifest (filterManifest_)"];
+    segments[label="Download segments (downloadSegments_)"];
+    store[label="Store manifest (cell.addManifests)"];
+    parse -> drm;
+    drm -> filter;
+    filter -> store;
+    store -> segments[label="BG Fetch Not Available"];
+  }
+  subgraph cluster_1 {
+    label="Service Worker";
+    bgSegments[label="Download segments in background (backgroundFetch.fetch)"]
+    store -> bgSegments[label="BG Fetch Available"];
+  }
+  subgraph cluster_2 {
+    label="Shaka Player Static Methods";
+    storeSeg[label="Store segments one-by-one (assignStreamToManifest)"]
+    remove[label="Clean up (cleanStoredManifest)"];
+    segments -> remove[label="On Fail"];
+    segments -> storeSeg;
+    bgSegments -> storeSeg;
+    bgSegments -> remove[label="On Fail"];
+  }
+}

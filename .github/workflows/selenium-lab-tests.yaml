@@ -1,0 +1,265 @@
+name: Selenium Lab Tests
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering on PRs.  They should be reviewed first, to
+    # avoid malicious code executing in the lab.
+    inputs:
+      pr:
+        description: "A PR number to build and test in the lab.  If empty, will build and test from main."
+        required: false
+  schedule:
+    # Runs every night at 2am PST / 10am UTC, testing against the main branch.
+    - cron: '0 10 * * *'
+
+# Only one run of this workflow is allowed at a time, since it uses physical
+# resources in our lab.
+concurrency: selenium-lab
+
+jobs:
+  compute-ref:
+    name: Compute ref
+    runs-on: ubuntu-latest
+    outputs:
+      REF: ${{ steps.compute.outputs.REF }}
+
+    steps:
+      - name: Compute ref
+        id: compute
+        run: |
+          if [[ "${{ github.event.inputs.pr }}" != "" ]]; then
+            LAB_TEST_REF="refs/pull/${{ github.event.inputs.pr }}/head"
+          else
+            LAB_TEST_REF="main"
+          fi
+          echo "REF=$LAB_TEST_REF" >> $GITHUB_OUTPUT
+
+  # Configure the build matrix based on our grid's YAML config.
+  # The matrix contents will be computed by this first job and deserialized
+  # into the second job's config.
+  matrix-config:
+    name: Matrix config
+    needs: compute-ref
+    runs-on: ubuntu-latest
+    outputs:
+      INCLUDE: ${{ steps.configure.outputs.INCLUDE }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.compute-ref.outputs.REF }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure build matrix
+        id: configure
+        shell: node {0}
+        run: |
+          const fs = require('fs');
+          const yaml = require(
+              '${{ github.workspace }}/node_modules/js-yaml/index.js');
+
+          const gridBrowserYaml =
+              fs.readFileSync('build/shaka-lab.yaml', 'utf8');
+          const gridBrowserMetadata = yaml.load(gridBrowserYaml);
+
+          const include = [];
+
+          for (const name in gridBrowserMetadata) {
+            if (name == 'vars') {
+              // Skip variable defs in the YAML file
+              continue;
+            }
+            if (!gridBrowserMetadata[name].disabled) {
+              include.push({browser: name});
+            }
+          }
+
+          // Output JSON object consumed by the build matrix below.
+          fs.appendFileSync(
+              process.env['GITHUB_OUTPUT'],
+              `INCLUDE=${ JSON.stringify(include) }\n`);
+
+          // Log the output, for the sake of debugging this script.
+          console.log({include});
+
+  # Build Shaka Player once, then distribute that build to the runners in the
+  # build matrix.  For N runners, runs N times faster (since all the
+  # self-hosted Selenium jobs are run in containers on one machine).
+  build-shaka:
+    name: Pre-build Player
+    needs: compute-ref
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.compute-ref.outputs.REF }}
+
+      - name: Set commit status to pending
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Selenium / Build
+          state: pending
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Player
+        run: python3 build/all.py
+
+      - name: Store Player build
+        uses: actions/upload-artifact@v3
+        with:
+          name: shaka-player
+          path: dist/
+          retention-days: 1
+
+      - name: Report final commit status
+        # Will run on success or failure, but not if the workflow is cancelled.
+        if: ${{ success() || failure() }}
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Selenium / Build
+          state: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  lab-tests:
+    # This is a self-hosted runner in a Docker container, with access to our
+    # lab's Selenium grid on port 4444.
+    runs-on: self-hosted-selenium
+    needs: [compute-ref, build-shaka, matrix-config]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.matrix-config.outputs.INCLUDE) }}
+    name: ${{ matrix.browser }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.compute-ref.outputs.REF }}
+
+      - name: Set commit status to pending
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Selenium / ${{ matrix.browser }}
+          state: pending
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: 'https://registry.npmjs.org'
+
+      # The Docker image for this self-hosted runner doesn't contain java.
+      - uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: node_modules/
+          key: node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      # Instead of building Shaka N times, build it once and fetch the build to
+      # each Selenium runner in the matrix.
+      - name: Fetch Player build
+        uses: actions/download-artifact@v3
+        with:
+          name: shaka-player
+          path: dist/
+
+      # Run tests on the Selenium grid in our lab.  This uses a private
+      # hostname and TLS cert to get EME tests working on all platforms
+      # (since EME only works on https or localhost).  The variable KARMA_PORT
+      # must be defined by the self-hosted runner, and mapped from the host to
+      # the container.
+      - name: Test Player
+        run: |
+          # Generate a coverage report from uncompiled code on ChromeLinux.
+          # It should be the uncompiled build, or else we won't execute any
+          # coverage instrumentation on full-stack player integration tests.
+          if [[ "${{ matrix.browser }}" == "ChromeLinux" ]]; then
+            extra_flags="--html-coverage-report --uncompiled"
+          else
+            extra_flags=""
+          fi
+
+          python3 build/test.py \
+              --no-build \
+              --reporters spec --spec-hide-passed \
+              --lets-encrypt-folder /etc/shakalab.rocks \
+              --hostname karma.shakalab.rocks \
+              --port $KARMA_PORT \
+              --grid-config build/shaka-lab.yaml \
+              --grid-address selenium-grid.lab:4444 \
+              --browsers ${{ matrix.browser }} \
+              $extra_flags
+
+      - name: Find coverage report (ChromeLinux only)
+        id: coverage
+        # Run even if an earlier step fails, but only on ChromeLinux.
+        if: ${{ always() && matrix.browser == 'ChromeLinux' }}
+        shell: bash
+        run: |
+          # Find the path to the coverage report specifically for Chrome on
+          # Linux.  It includes the exact browser version in the path, so it
+          # will vary.  Having a single path will make the artifact zip
+          # simpler, whereas using a wildcard in the upload step will result
+          # in a zip file with internal directories.
+          coverage_report="$( (ls coverage/Chrome*Linux*/coverage.json || true) | head -1 )"
+
+          # Show what's there, for debugging purposes.
+          ls -l coverage/
+
+          if [ -f "$coverage_report" ]; then
+            echo "Found coverage report: $coverage_report"
+            echo "coverage_report=$coverage_report" >> $GITHUB_OUTPUT
+          else
+            echo "Could not locate coverage report!"
+            exit 1
+          fi
+
+      - name: Upload coverage report (ChromeLinux only)
+        uses: actions/upload-artifact@v3
+        # If there's a coverage report, upload it, even if a previous step
+        # failed.
+        if: ${{ always() && steps.coverage.outputs.coverage_report }}
+        with:
+          # This will create a download called coverage.zip containing only
+          # coverage.json.
+          path: ${{ steps.coverage.outputs.coverage_report }}
+          name: coverage
+          # Since we've already filtered this step for instances where there is
+          # an environment variable set for this, the file should definitely be
+          # there.
+          if-no-files-found: error
+
+      # Upload new screenshots and diffs on failure; ignore if missing
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          # In this workflow, "browser" is the selenium node name, which can
+          # contain both browser and OS, such as "ChromeLinux".
+          name: screenshots-${{ matrix.browser }}
+          path: |
+            test/test/assets/screenshots/*/*.png-new
+            test/test/assets/screenshots/*/*.png-diff
+          if-no-files-found: ignore
+          retention-days: 5
+
+      - name: Report final commit status
+        # Will run on success or failure, but not if the workflow is cancelled.
+        if: ${{ success() || failure() }}
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Selenium / ${{ matrix.browser }}
+          state: ${{ job.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}

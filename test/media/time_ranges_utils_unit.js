@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,11 +20,6 @@ describe('TimeRangesUtils', () => {
     it('returns buffered when inside a single range', () => {
       const b = createFakeBuffered([{start: 10, end: 20}]);
       expect(TimeRangesUtils.isBuffered(b, 13)).toBe(true);
-    });
-
-    it('returns buffered when having a small gap', () => {
-      const b = createFakeBuffered([{start: 10, end: 20}]);
-      expect(TimeRangesUtils.isBuffered(b, 9, 1)).toBe(true);
     });
 
     // Ranges: [10-20], [30-40], [50-60]
@@ -87,12 +83,12 @@ describe('TimeRangesUtils', () => {
 
   describe('getGapIndex', () => {
     it('still works when passed null', () => {
-      expect(TimeRangesUtils.getGapIndex(null, 10)).toBe(null);
+      expect(TimeRangesUtils.getGapIndex(null, 10, 0.1)).toBe(null);
     });
 
     it('still works whith nothing buffered', () => {
       const b = createFakeBuffered([]);
-      expect(TimeRangesUtils.getGapIndex(b, 10)).toBe(null);
+      expect(TimeRangesUtils.getGapIndex(b, 10, 0.1)).toBe(null);
     });
 
 
@@ -119,7 +115,8 @@ describe('TimeRangesUtils', () => {
       it(name, () => {
         const b = createFakeBuffered(
             [{start: 10, end: 20}, {start: 30, end: 40}, {start: 50, end: 60}]);
-        expect(TimeRangesUtils.getGapIndex(b, data.time)).toBe(data.expected);
+        expect(TimeRangesUtils.getGapIndex(
+            b, data.time, 0.1)).toBe(data.expected);
       });
     }
   });

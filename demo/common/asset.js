@@ -1,8 +1,14 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
+
+/**
+ * @fileoverview
+ * @suppress {missingRequire}
+ */
 
 goog.provide('ShakaDemoAssetInfo');
 
@@ -48,7 +54,7 @@ const ShakaDemoAssetInfo = class {
     /** @type {!Array.<!shakaAssets.KeySystem>} */
     this.drm = [shakaAssets.KeySystem.CLEAR];
     /** @type {!Array.<!shakaAssets.Feature>} */
-    this.features = [];
+    this.features = [shakaAssets.Feature.VOD];
     /** @type {!Map.<string, string>} */
     this.licenseServers = new Map();
     /** @type {!Map.<string, string>} */
@@ -57,14 +63,23 @@ const ShakaDemoAssetInfo = class {
     this.requestFilter = null;
     /** @type {?shaka.extern.ResponseFilter} */
     this.responseFilter = null;
-    /** @type {?shaka.extern.DashContentProtectionCallback} */
-    this.drmCallback = null; // TODO: Setter method?
     /** @type {!Map.<string, string>} */
     this.clearKeys = new Map(); // TODO: Setter method?
     /** @type {?Object} */
     this.extraConfig = null;
     /** @type {?string} */
     this.adTagUri = null;
+    /** @type {?string} */
+    this.imaVideoId = null;
+    /** @type {?string} */
+    this.imaAssetKey = null;
+    /** @type {?string} */
+    this.imaContentSrcId = null;
+    /** @type {?string} */
+    this.mimeType = null;
+    /** @type {?string} */
+    this.mediaPlaylistFullMimeType = null;
+
 
     // Offline storage values.
     /** @type {?function()} */
@@ -117,6 +132,11 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   addFeature(feature) {
+    const Feature = shakaAssets.Feature;
+    if (feature == Feature.LIVE) {
+      // Unmark this feature as being VOD.
+      this.features = this.features.filter((feature) => feature != Feature.VOD);
+    }
     this.features.push(feature);
     // Sort the features list, so that features are in a predictable order.
     this.features.sort(ShakaDemoAssetInfo.caseLessAlphaComparator_);
@@ -144,11 +164,29 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @param {string} mediaPlaylistFullMimeType
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setMediaPlaylistFullMimeType(mediaPlaylistFullMimeType) {
+    this.mediaPlaylistFullMimeType = mediaPlaylistFullMimeType;
+    return this;
+  }
+
+  /**
    * @param {!Object} extraConfig
    * @return {!ShakaDemoAssetInfo}
    */
   setExtraConfig(extraConfig) {
     this.extraConfig = extraConfig;
+    return this;
+  }
+
+  /**
+   * @param {string} mimeType
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setMimeType(mimeType) {
+    this.mimeType = mimeType;
     return this;
   }
 
@@ -191,12 +229,51 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {string} keySystem
-   * @param {string} licenseRequestHeader
+   * @param {string} id
    * @return {!ShakaDemoAssetInfo}
    */
-  addLicenseRequestHeader(keySystem, licenseRequestHeader) {
-    this.licenseRequestHeaders.set(keySystem, licenseRequestHeader);
+  setIMAContentSourceId(id) {
+    this.imaContentSrcId = id;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} id
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setIMAVideoId(id) {
+    this.imaVideoId = id;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} key
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setIMAAssetKey(key) {
+    this.imaAssetKey = key;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} headerName
+   * @param {string} headerValue
+   * @return {!ShakaDemoAssetInfo}
+   */
+  addLicenseRequestHeader(headerName, headerValue) {
+    this.licenseRequestHeaders.set(headerName, headerValue);
     return this;
   }
 
@@ -302,26 +379,31 @@ const ShakaDemoAssetInfo = class {
    */
   getConfiguration() {
     const config = /** @type {shaka.extern.PlayerConfiguration} */(
-      {drm: {}, manifest: {dash: {}}});
-    if (this.licenseServers.size) {
-      config.drm.servers = {};
-      this.licenseServers.forEach((value, key) => {
-        config.drm.servers[key] = value;
-      });
-    }
-    if (this.drmCallback) {
-      config.manifest.dash.customScheme = this.drmCallback;
-    }
-    if (this.clearKeys.size) {
-      config.drm.clearKeys = {};
-      this.clearKeys.forEach((value, key) => {
-        config.drm.clearKeys[key] = value;
-      });
-    }
+      {drm: {advanced: {}}, manifest: {dash: {}, hls: {}}});
+
     if (this.extraConfig) {
       for (const key in this.extraConfig) {
         config[key] = this.extraConfig[key];
       }
+    }
+
+    if (this.mediaPlaylistFullMimeType) {
+      config.manifest.hls.mediaPlaylistFullMimeType =
+          this.mediaPlaylistFullMimeType;
+    }
+
+    if (this.licenseServers.size) {
+      config.drm.servers = config.drm.servers || {};
+      this.licenseServers.forEach((value, key) => {
+        config.drm.servers[key] = value;
+      });
+    }
+
+    if (this.clearKeys.size) {
+      config.drm.clearKeys = config.drm.clearKeys || {};
+      this.clearKeys.forEach((value, key) => {
+        config.drm.clearKeys[key] = value;
+      });
     }
     return config;
   }

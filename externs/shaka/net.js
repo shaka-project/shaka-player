@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -15,7 +16,9 @@
  *   baseDelay: number,
  *   backoffFactor: number,
  *   fuzzFactor: number,
- *   timeout: number
+ *   timeout: number,
+ *   stallTimeout: number,
+ *   connectionTimeout: number
  * }}
  *
  * @description
@@ -32,6 +35,13 @@
  *   For example, 0.5 means "between 50% below and 50% above the retry delay."
  * @property {number} timeout
  *   The request timeout, in milliseconds.  Zero means "unlimited".
+ *   <i>Defaults to 30000 milliseconds.</i>
+ * @property {number} stallTimeout
+ *   The request stall timeout, in milliseconds.  Zero means "unlimited".
+ *   <i>Defaults to 5000 milliseconds.</i>
+ * @property {number} connectionTimeout
+ *   The request connection timeout, in milliseconds.  Zero means "unlimited".
+ *   <i>Defaults to 10000 milliseconds.</i>
  *
  * @tutorial network-and-buffering-config
  *
@@ -49,7 +59,11 @@ shaka.extern.RetryParameters;
  *   allowCrossSiteCredentials: boolean,
  *   retryParameters: !shaka.extern.RetryParameters,
  *   licenseRequestType: ?string,
- *   sessionId: ?string
+ *   sessionId: ?string,
+ *   drmInfo: ?shaka.extern.DrmInfo,
+ *   initData: ?Uint8Array,
+ *   initDataType: ?string,
+ *   streamDataCallback: ?function(BufferSource):!Promise
  * }}
  *
  * @description
@@ -79,7 +93,17 @@ shaka.extern.RetryParameters;
  * @property {?string} sessionId
  *   If this is a LICENSE request, this field contains the session ID of the
  *   EME session that made the request.
- *
+ * @property {?shaka.extern.DrmInfo} drmInfo
+ *   If this is a LICENSE request, this field contains the DRM info used to
+ *   initialize EME.
+ * @property {?Uint8Array} initData
+ *   If this is a LICENSE request, this field contains the initData info used
+ *   to initialize EME.
+ * @property {?string} initDataType
+ *   If this is a LICENSE request, this field contains the initDataType info
+ *   used to initialize EME.
+ * @property {?function(BufferSource):!Promise} streamDataCallback
+ *   A callback function to handle the chunked data of the ReadableStream.
  * @exportDoc
  */
 shaka.extern.Request;
@@ -89,6 +113,7 @@ shaka.extern.Request;
  * @typedef {{
  *   uri: string,
  *   data: BufferSource,
+ *   status: (number|undefined),
  *   headers: !Object.<string, string>,
  *   timeMs: (number|undefined),
  *   fromCache: (boolean|undefined)
@@ -107,12 +132,14 @@ shaka.extern.Request;
  *   redirects, but after request filters are executed.
  * @property {BufferSource} data
  *   The body of the response.
+ * @property {(number|undefined)} status
+ *   The response HTTP status code.
  * @property {!Object.<string, string>} headers
  *   A map of response headers, if supported by the underlying protocol.
  *   All keys should be lowercased.
  *   For HTTP/HTTPS, may not be available cross-origin.
  * @property {(number|undefined)} timeMs
- *   Optional.  The time it took to get the response, in miliseconds.  If not
+ *   Optional.  The time it took to get the response, in milliseconds.  If not
  *   given, NetworkingEngine will calculate it using Date.now.
  * @property {(boolean|undefined)} fromCache
  *   Optional. If true, this response was from a cache and should be ignored
@@ -127,15 +154,17 @@ shaka.extern.Response;
  * @typedef {!function(string,
  *                     shaka.extern.Request,
  *                     shaka.net.NetworkingEngine.RequestType,
- *                     shaka.extern.ProgressUpdated):
+ *                     shaka.extern.ProgressUpdated,
+ *                     shaka.extern.HeadersReceived):
  *     !shaka.extern.IAbortableOperation.<shaka.extern.Response>}
  * @description
  * Defines a plugin that handles a specific scheme.
  *
  * The functions accepts four parameters, uri string, request, request type,
- * and a progressUpdated function.  The progressUpdated function can be ignored
- * by plugins that do not have this information, but it will always be provided
- * by NetworkingEngine.
+ * a progressUpdated function, and a headersReceived function.  The
+ * progressUpdated and headersReceived functions can be ignored by plugins that
+ * do not have this information, but it will always be provided by
+ * NetworkingEngine.
  *
  * @exportDoc
  */
@@ -157,6 +186,17 @@ shaka.extern.SchemePlugin;
  * @exportDoc
  */
 shaka.extern.ProgressUpdated;
+
+
+/**
+ * @typedef {function(!Object.<string, string>)}
+ *
+ * @description
+ * A callback function to handle headers received events through networking
+ * engine in player.
+ * The first argument is the headers object of the response.
+ */
+shaka.extern.HeadersReceived;
 
 
 /**

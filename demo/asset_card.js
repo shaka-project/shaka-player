@@ -1,11 +1,16 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 goog.provide('shakaDemo.AssetCard');
 
+goog.require('goog.asserts');
+goog.require('shakaAssets');
+goog.require('shakaDemo.MessageIds');
+goog.require('shakaDemo.Tooltips');
+goog.requireType('ShakaDemoAssetInfo');
 
 /**
  * Creates and contains an MDL card that presents info about the given asset.
@@ -58,15 +63,18 @@ shakaDemo.AssetCard = class {
     if (asset.iconUri) {
       const picture = document.createElement('picture');
 
-      const webpSource = document.createElement('source');
+      const webpSource =
+        /** @type {!HTMLSourceElement} */(document.createElement('source'));
       webpSource.srcset = asset.iconUri.replace(/.png$/, '.webp');
       webpSource.type = 'image/webp';
 
-      const pngSource = document.createElement('source');
+      const pngSource =
+        /** @type {!HTMLSourceElement} */(document.createElement('source'));
       pngSource.srcset = asset.iconUri;
       pngSource.type = 'image/png';
 
-      const img = document.createElement('img');
+      const img =
+        /** @type {!HTMLImageElement} */(document.createElement('img'));
       img.src = asset.iconUri;
       img.alt = '';  // Not necessary to understand the page
 
@@ -97,11 +105,9 @@ shakaDemo.AssetCard = class {
     this.progressCircleSvg_.appendChild(this.progressCircleBack_);
     this.progressCircleSvg_.appendChild(this.progressCircleBar_);
     this.progressCircle_.appendChild(this.progressCircleSvg_);
-    // You can't use access the classList of an svg on IE, so set the class
-    // attribute instead.
-    this.progressCircleSvg_.setAttribute('class', 'progress-circle-svg');
-    this.progressCircleBack_.setAttribute('class', 'progress-circle-back');
-    this.progressCircleBar_.setAttribute('class', 'progress-circle-bar');
+    this.progressCircleSvg_.classList.add('progress-circle-svg');
+    this.progressCircleBack_.classList.add('progress-circle-back');
+    this.progressCircleBar_.classList.add('progress-circle-bar');
 
     parentDiv.appendChild(this.card_);
     // Remake buttons AFTER appending to parent div, so that any tooltips can
@@ -255,7 +261,7 @@ shakaDemo.AssetCard = class {
       attachPoint.classList.add('asset-card-corner-button');
       const icon = document.createElement('i');
       icon.textContent = iconText;
-      icon.classList.add('material-icons');
+      icon.classList.add('material-icons-round');
       button.appendChild(icon);
     };
 
@@ -291,7 +297,7 @@ shakaDemo.AssetCard = class {
   }
 
   /**
-   * @param {!Element} deleteButton
+   * @param {!HTMLButtonElement} deleteButton
    * @private
    */
   attachDeleteDialog_(deleteButton) {
@@ -314,7 +320,8 @@ shakaDemo.AssetCard = class {
    * @private
    */
   makeYesNoDialogue_(parentDiv, text, callback) {
-    const dialog = document.createElement('dialog');
+    const dialog =
+      /** @type {!HTMLDialogElement} */(document.createElement('dialog'));
     dialog.classList.add('mdl-dialog');
     parentDiv.appendChild(dialog);
     if (!dialog.showModal) {
@@ -360,12 +367,16 @@ shakaDemo.AssetCard = class {
     if (this.asset_.storedProgress < 1) {
       this.progressCircle_.classList.remove('hidden');
       for (const button of this.actions_.childNodes) {
-        button.disabled = true;
+        if (button instanceof HTMLButtonElement) {
+          button.disabled = true;
+        }
       }
     } else {
       this.progressCircle_.classList.add('hidden');
       for (const button of this.actions_.childNodes) {
-        button.disabled = false;
+        if (button instanceof HTMLButtonElement) {
+          button.disabled = false;
+        }
       }
     }
     this.styleProgressCircle_(this.asset_.storedProgress);
@@ -377,10 +388,11 @@ shakaDemo.AssetCard = class {
    * @param {?shakaDemo.MessageIds} name
    * @param {function()} onclick
    * @param {shakaDemo.MessageIds=} yesNoDialogText
-   * @return {!Element}
+   * @return {!HTMLButtonElement}
    */
   addButton(name, onclick, yesNoDialogText) {
-    const button = document.createElement('button');
+    const button =
+      /** @type {!HTMLButtonElement} */(document.createElement('button'));
     button.classList.add('mdl-button');
     button.classList.add('mdl-button--colored');
     button.classList.add('mdl-js-button');

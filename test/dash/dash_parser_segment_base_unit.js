@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -27,11 +28,18 @@ describe('DashParser SegmentBase', () => {
 
     playerInterface = {
       networkingEngine: fakeNetEngine,
-      filterNewPeriod: () => {},
-      filterAllPeriods: () => {},
+      modifyManifestRequest: (request, manifestInfo) => {},
+      modifySegmentRequest: (request, segmentInfo) => {},
+      filter: (manifest) => Promise.resolve(),
+      makeTextStreamsForClosedCaptions: (manifest) => {},
       onTimelineRegionAdded: fail,  // Should not have any EventStream elements.
       onEvent: fail,
       onError: fail,
+      isLowLatencyMode: () => false,
+      isAutoLowLatencyMode: () => false,
+      enableLowLatencyMode: () => {},
+      updateDuration: () => {},
+      newDrmInfo: (stream) => {},
     };
   });
 
@@ -41,13 +49,13 @@ describe('DashParser SegmentBase', () => {
       '  <BaseURL>http://example.com</BaseURL>',
       '  <Period>',
       '    <AdaptationSet mimeType="video/webm">',
-      '      <Representation id="1" bandwidth="1">',
+      '      <Representation id="1" bandwidth="1" frameRate="3000/3001">',
       '        <BaseURL>media-1.webm</BaseURL>',
       '        <SegmentBase indexRange="100-200" timescale="9000">',
       '          <Initialization sourceURL="init-1.webm" range="201-300" />',
       '        </SegmentBase>',
       '      </Representation>',
-      '      <Representation id="2" bandwidth="1">',
+      '      <Representation id="2" bandwidth="1" frameRate="1500/1501">',
       '        <BaseURL>media-2.webm</BaseURL>',
       '        <SegmentBase indexRange="1100-1200" timescale="9000">',
       '          <Initialization sourceURL="init-2.webm" range="1201-1300" />',
@@ -70,9 +78,9 @@ describe('DashParser SegmentBase', () => {
 
     // Call createSegmentIndex() on each stream to make the requests, but expect
     // failure from the actual parsing, since the data is bogus.
-    const stream1 = manifest.periods[0].variants[0].video;
+    const stream1 = manifest.variants[0].video;
     await expectAsync(stream1.createSegmentIndex()).toBeRejected();
-    const stream2 = manifest.periods[0].variants[1].video;
+    const stream2 = manifest.variants[1].video;
     await expectAsync(stream2.createSegmentIndex()).toBeRejected();
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(5);
@@ -286,12 +294,53 @@ describe('DashParser SegmentBase', () => {
 
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
-    const video = manifest.periods[0].variants[0].video;
+    const video = manifest.variants[0].video;
     await video.createSegmentIndex();  // real data, should succeed
+    goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
 
-    const reference = video.segmentIndex.get(0);
+    const reference = Array.from(video.segmentIndex)[0];
     expect(reference.startTime).toBe(-2);
     expect(reference.endTime).toBe(10);  // would be 12 without PTO
+  });
+
+  // https://github.com/shaka-project/shaka-player/issues/3230
+  it('works with multi-Period with eviction', async () => {
+    const source = [
+      '<MPD mediaPresentationDuration="PT75S">',
+      '  <Period duration="PT30S">',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <BaseURL>http://example.com/index.mp4</BaseURL>',
+      '        <SegmentBase indexRange="30-900" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '  <Period>',
+      '    <AdaptationSet mimeType="video/mp4">',
+      '      <Representation bandwidth="1">',
+      '        <BaseURL>http://example.com/index.mp4</BaseURL>',
+      '        <SegmentBase indexRange="30-900" presentationTimeOffset="30" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine
+        .setResponseText('dummy://foo', source)
+        .setResponseValue('http://example.com/index.mp4', indexSegment);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const video = manifest.variants[0].video;
+    await video.createSegmentIndex();  // real data, should succeed
+    goog.asserts.assert(video.segmentIndex != null, 'Null segmentIndex!');
+
+    // There are originally 5 references, but the segment that spans the Period
+    // boundary is duplicated.  In the bug, we'd stop references at the Period
+    // boundary and only have 3 references.
+    const references = Array.from(video.segmentIndex);
+    expect(references.length).toBe(6);
   });
 
   describe('fails for', () => {

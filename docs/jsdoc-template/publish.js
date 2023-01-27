@@ -422,7 +422,6 @@ function linktoExternal(longName, name) {
  * @param {object} members The members that will be used to create the sidebar.
  * @param {array<object>} members.classes
  * @param {array<object>} members.externals
- * @param {array<object>} members.globals
  * @param {array<object>} members.mixins
  * @param {array<object>} members.modules
  * @param {array<object>} members.namespaces
@@ -432,7 +431,6 @@ function linktoExternal(longName, name) {
  * @return {string} The HTML for the navigation sidebar.
  */
 function buildNav(members) {
-    let globalNav;
     let nav = '<h2><a href="index.html">Home</a></h2>';
     const seen = {};
     const seenTutorials = {};
@@ -442,6 +440,7 @@ function buildNav(members) {
       [members.externals, 'Externals', seen, linktoExternal],
       [members.namespaces, 'Namespaces', seen, linkto],
       [members.classes, 'Classes', seen, linkto],
+      [members.enums, 'Enums', seen, linkto],
       [members.interfaces, 'Interfaces', seen, linkto],
       [members.events, 'Events', seen, linkto],
       [members.mixins, 'Mixins', seen, linkto],
@@ -461,25 +460,6 @@ function buildNav(members) {
       } else {
         logger.error('Section %s in navOrder is unrecognized!', name);
       }
-    }
-
-    if (members.globals.length) {
-        globalNav = '';
-
-        members.globals.forEach(({kind, longname, name}) => {
-            if ( kind !== 'typedef' && !hasOwnProp.call(seen, longname) ) {
-                globalNav += `<li>${linkto(longname, name)}</li>`;
-            }
-            seen[longname] = true;
-        });
-
-        if (!globalNav) {
-            // turn the heading into a link so you can actually get to the global page
-            nav += `<h3>${linkto('global', 'Global')}</h3>`;
-        }
-        else {
-            nav += `<h3>Global</h3><ul>${globalNav}</ul>`;
-        }
     }
 
     return nav;
@@ -505,10 +485,10 @@ function fixUpType(type) {
 exports.publish = (taffyData, opts, tutorials) => {
     let classes;
     let conf;
+    let enums;
     let externals;
     let files;
     let fromDir;
-    let globalUrl;
     let indexUrl;
     let interfaces;
     let members;
@@ -538,9 +518,6 @@ exports.publish = (taffyData, opts, tutorials) => {
     // doesn't try to hand them out later
     indexUrl = helper.getUniqueFilename('index');
     // don't call registerLink() on this one! 'index' is also a valid longname
-
-    globalUrl = helper.getUniqueFilename('global');
-    helper.registerLink('global', globalUrl);
 
     // set up templating
     view.layout = conf.default.layoutFile ?
@@ -758,6 +735,31 @@ exports.publish = (taffyData, opts, tutorials) => {
     });
 
     members = helper.getMembers(data);
+    members.enums = [];
+
+    data().each(doclet => {
+        if (doclet.isEnum) {
+            const hasParent = !!docletMap[doclet.memberof];
+
+            // Enums without parents (not attached to a class, but directly to a
+            // namespace) aren't recognized by jsdoc by default and need to be
+            // massaged into the docs separately.
+            if (!hasParent) {
+                // Temporarily call this a "class", so that we can fix the URL.
+                doclet.kind = 'class';
+                // Regenerate the URL, so that this enum gets its own page
+                // instead of a URL that links to an ID within a non-existent
+                // parent page.
+                delete helper.longnameToUrl[doclet.longname];
+                helper.createLink(doclet);
+                // Mark this as an enum (custom type), so that it doesn't get
+                // slotted with the classes.
+                doclet.kind = 'enum';
+                members.enums.push(doclet);
+            }
+        }
+    });
+
     members.tutorials = tutorials.children;
     if (conf.default.sortTutorialsByConfigOrder) {
         members.tutorials.sort((a, b) => {
@@ -791,23 +793,19 @@ exports.publish = (taffyData, opts, tutorials) => {
         generateSourceFiles(sourceFiles, opts.encoding);
     }
 
-    if (members.globals.length) { generate('Global', [{kind: 'globalobj'}], globalUrl); }
-
     // index page displays information from package.json and lists files
     files = find({kind: 'file'});
     packages = find({kind: 'package'});
 
-    generate('Home',
-        packages.concat(
-            [{
-                kind: 'mainpage',
-                readme: opts.readme,
-                longname: (opts.mainpagetitle) ? opts.mainpagetitle : 'Main Page'
-            }]
-        ).concat(files), indexUrl);
+    generate('Home', [{
+        kind: 'mainpage',
+        readme: opts.readme,
+        longname: (opts.mainpagetitle) ? opts.mainpagetitle : 'Main Page'
+    }], indexUrl);
 
     // set up the lists that we'll use to generate pages
     classes = taffy(members.classes);
+    enums = taffy(members.enums);
     modules = taffy(members.modules);
     namespaces = taffy(members.namespaces);
     mixins = taffy(members.mixins);
@@ -816,6 +814,7 @@ exports.publish = (taffyData, opts, tutorials) => {
 
     Object.keys(helper.longnameToUrl).forEach(longname => {
         const myClasses = helper.find(classes, {longname: longname});
+        const myEnums = helper.find(enums, {longname: longname});
         const myExternals = helper.find(externals, {longname: longname});
         const myInterfaces = helper.find(interfaces, {longname: longname});
         const myMixins = helper.find(mixins, {longname: longname});
@@ -828,6 +827,10 @@ exports.publish = (taffyData, opts, tutorials) => {
 
         if (myClasses.length) {
             generate(`Class: ${myClasses[0].longname}`, myClasses, helper.longnameToUrl[longname]);
+        }
+
+        if (myEnums.length) {
+            generate(`Enum: ${myEnums[0].longname}`, myEnums, helper.longnameToUrl[longname]);
         }
 
         if (myNamespaces.length) {

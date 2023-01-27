@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -99,11 +100,20 @@ shaka.extern.ManifestParser = class {
 /**
  * @typedef {{
  *   networkingEngine: !shaka.net.NetworkingEngine,
- *   filterNewPeriod: function(shaka.extern.Period),
- *   filterAllPeriods: function(!Array.<!shaka.extern.Period>),
+ *   modifyManifestRequest: function(!shaka.extern.Request,
+ *      shaka.util.CmcdManager.ManifestInfo),
+ *   modifySegmentRequest: function(!shaka.extern.Request,
+ *      shaka.util.CmcdManager.SegmentInfo),
+ *   filter: function(shaka.extern.Manifest):!Promise,
+ *   makeTextStreamsForClosedCaptions: function(shaka.extern.Manifest),
  *   onTimelineRegionAdded: function(shaka.extern.TimelineRegionInfo),
  *   onEvent: function(!Event),
- *   onError: function(!shaka.util.Error)
+ *   onError: function(!shaka.util.Error),
+ *   isLowLatencyMode: function():boolean,
+ *   isAutoLowLatencyMode: function():boolean,
+ *   enableLowLatencyMode: function(),
+ *   updateDuration: function(),
+ *   newDrmInfo: function(shaka.extern.Stream)
  * }}
  *
  * @description
@@ -114,28 +124,46 @@ shaka.extern.ManifestParser = class {
  *
  * @property {!shaka.net.NetworkingEngine} networkingEngine
  *   The networking engine to use for network requests.
- * @property {function(shaka.extern.Period)} filterNewPeriod
- *   Should be called on a new Period so that it can be filtered.
- * @property {function(!Array.<!shaka.extern.Period>)} filterAllPeriods
- *   Should be called on all Periods so that they can be filtered.
+ * @property {function(!shaka.extern.Request,
+ *    shaka.util.CmcdManager.ManifestInfo)} modifyManifestRequest
+ *   Modify a manifest request
+ * @property {function(!shaka.extern.Request,
+ *   shaka.util.CmcdManager.SegmentInfo)} modifySegmentRequest
+ *   Modify a segment request
+ * @property {function(shaka.extern.Manifest):!Promise} filter
+ *   Should be called when new variants or text streams are added to the
+ *   Manifest.  Note that this operation is asynchronous.
+ * @property {function(shaka.extern.Manifest)} makeTextStreamsForClosedCaptions
+ *   A callback that adds text streams to represent the closed captions of the
+ *   video streams in the Manifest.  Should be called whenever new video streams
+ *   are added to the Manifest.
  * @property {function(shaka.extern.TimelineRegionInfo)} onTimelineRegionAdded
  *   Should be called when a new timeline region is added.
  * @property {function(!Event)} onEvent
  *   Should be called to raise events.
  * @property {function(!shaka.util.Error)} onError
  *   Should be called when an error occurs.
+ * @property {function():boolean} isLowLatencyMode
+ *   Return true if low latency streaming mode is enabled.
+ * @property {function():boolean} isAutoLowLatencyMode
+ *   Return true if auto low latency streaming mode is enabled.
+ * @property {function()} enableLowLatencyMode
+ *   Enable low latency streaming mode.
+ * @property {function()} updateDuration
+ *   Update the presentation duration based on PresentationTimeline.
+ * @property {function(shaka.extern.Stream)} newDrmInfo
+ *   Inform the player of new DRM info that needs to be processed for the given
+ *   stream.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;
 
 
 /**
- * A factory for creating the manifest parser.  This will be called with 'new'.
- * This function is registered with shaka.media.ManifestParser to create parser
- * instances.
+ * A factory for creating the manifest parser.  This function is registered with
+ * shaka.media.ManifestParser to create parser instances.
  *
- * @typedef {function(new:shaka.extern.ManifestParser)}
+ * @typedef {function():!shaka.extern.ManifestParser}
  * @exportDoc
  */
 shaka.extern.ManifestParser.Factory;
-

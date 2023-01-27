@@ -1,8 +1,8 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-
 
 describe('SimpleTextDisplayer', () => {
   const originalVTTCue = window.VTTCue;
@@ -42,6 +42,10 @@ describe('SimpleTextDisplayer', () => {
     window.VTTCue = /** @type {?} */(FakeVTTCue);
   });
 
+  afterEach(async () => {
+    await displayer.destroy();
+  });
+
   afterAll(() => {
     window.VTTCue = originalVTTCue;
   });
@@ -63,7 +67,18 @@ describe('SimpleTextDisplayer', () => {
     });
 
     it('appends equal time cues in reverse order', () => {
-      // Regression test for https://github.com/google/shaka-player/issues/848
+      // Regression test for https://github.com/shaka-project/shaka-player/issues/848
+
+      // When VTTCue is seen as the real thing (because of the presence of
+      // VTTCue.prototype.line), then the reverse-order behavior comes into
+      // play.  The reverse order is only needed because of VTTCue spec
+      // behavior.
+
+      // First we test the behavior with a real-looking VTTCue (in which
+      // prototype.line merely exists).  This simulates Chrome, Firefox, and
+      // Safari.
+      // eslint-disable-next-line no-restricted-syntax
+      window.VTTCue.prototype['line'] = 'auto';
       verifyHelper(
           [
             {startTime: 20, endTime: 40, text: 'Test1'},
@@ -71,10 +86,155 @@ describe('SimpleTextDisplayer', () => {
             {startTime: 20, endTime: 40, text: 'Test3'},
           ],
           [
+            // Reverse order to compensate for the way line='auto' is
+            // implemented in browsers.
             new shaka.text.Cue(20, 40, 'Test3'),
             new shaka.text.Cue(20, 40, 'Test2'),
             new shaka.text.Cue(20, 40, 'Test1'),
           ]);
+
+      // Next we test the behavior with a VTTCue which is seen as a cheap
+      // polyfill (in which prototype.line does not exist).  This simulates
+      // legacy Edge.
+      // eslint-disable-next-line no-restricted-syntax
+      delete window.VTTCue.prototype['line'];
+      displayer.remove(0, Infinity);  // Clear the cues from above.
+      verifyHelper(
+          [
+            {startTime: 20, endTime: 40, text: 'Test1'},
+            {startTime: 20, endTime: 40, text: 'Test2'},
+            {startTime: 20, endTime: 40, text: 'Test3'},
+          ],
+          [
+            // Input order, since the displayer sees this as a fake VTTCue
+            // implementation.
+            new shaka.text.Cue(20, 40, 'Test1'),
+            new shaka.text.Cue(20, 40, 'Test2'),
+            new shaka.text.Cue(20, 40, 'Test3'),
+          ]);
+    });
+
+    it('appends nested cues', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1 ');
+      const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
+
+      shakaCue.nestedCues = [nestedCue1, nestedCue2];
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, text: 'Test1 Test2'},
+          ],
+          [shakaCue]);
+    });
+
+    it('flattens nested cue payloads correctly', () => {
+      const level0ContainerCue = new shaka.text.Cue(10, 30, '');
+      level0ContainerCue.isContainer = true;
+
+      const level1NonContainerCueA = new shaka.text.Cue(10, 20, '');
+      const level1NonContainerCueB = new shaka.text.Cue(20, 30, '');
+
+      // Add a trailing whitespace character to get a space-delimited expected
+      // result.
+      const cueANestedCue0 = new shaka.text.Cue(10, 20, 'Cue A Test0 ');
+      const cueANestedCue1 = new shaka.text.Cue(10, 20, 'Cue A Test1');
+      const cueBNestedCue0 = new shaka.text.Cue(20, 30, 'Cue B Test0 ');
+      const cueBNestedCue1 = new shaka.text.Cue(20, 30, 'Cue B Test1');
+
+      level1NonContainerCueA.nestedCues = [cueANestedCue0, cueANestedCue1];
+      level1NonContainerCueB.nestedCues = [cueBNestedCue0, cueBNestedCue1];
+      level0ContainerCue.nestedCues =
+          [level1NonContainerCueA, level1NonContainerCueB];
+
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, text: 'Cue A Test0 Cue A Test1'},
+            {startTime: 20, endTime: 30, text: 'Cue B Test0 Cue B Test1'},
+          ],
+          [level0ContainerCue]);
+    });
+
+    // Regression test for b/159050711
+    it('maintains the styles of the parent cue', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1 ');
+      const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
+
+      shakaCue.nestedCues = [nestedCue1, nestedCue2];
+
+      shakaCue.lineAlign = Cue.lineAlign.CENTER;
+      nestedCue1.lineAlign = Cue.lineAlign.START;
+      nestedCue2.lineAlign = Cue.lineAlign.START;
+
+      verifyHelper(
+          [
+            {
+              startTime: 10,
+              endTime: 20,
+              text: 'Test1 Test2',
+              lineAlign: 'center',
+            },
+          ],
+          [shakaCue]);
+    });
+
+    it('creates style tags for cues with underline/italics/bold', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+
+      // First cue is underlined and italicized.
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
+      nestedCue1.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
+      nestedCue1.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
+
+      // Second cue is italicized and bolded.
+      const nestedCue2 = new shaka.text.Cue(10, 20, 'Test2');
+      nestedCue2.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
+      nestedCue2.fontWeight = shaka.text.Cue.fontWeight.BOLD;
+
+      // Third cue has no bold, italics, or underline.
+      const nestedCue3 = new shaka.text.Cue(10, 20, 'Test3');
+
+      // Fourth cue is only underlined.
+      const nestedCue4 = new shaka.text.Cue(10, 20, 'Test4');
+      nestedCue4.textDecoration.push(shaka.text.Cue.textDecoration.UNDERLINE);
+
+      const expectedText =
+          '<i><u>Test1</u></i><b><i>Test2</i></b>Test3<u>Test4</u>';
+      shakaCue.nestedCues = [nestedCue1, nestedCue2, nestedCue3, nestedCue4];
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, text: expectedText},
+          ],
+          [shakaCue]);
+    });
+
+    it('adds linebreaks when a linebreak cue is seen', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+      const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
+
+      // Second cue is a linebreak cue.
+      const nestedCue2 = new shaka.text.Cue(10, 20, '');
+      nestedCue2.lineBreak = true;
+
+      const nestedCue3 = new shaka.text.Cue(10, 20, 'Test2');
+
+      shakaCue.nestedCues = [nestedCue1, nestedCue2, nestedCue3];
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, text: 'Test1\nTest2'},
+          ],
+          [shakaCue]);
+    });
+
+    it('skips duplicate cues', () => {
+      const cue1 = new shaka.text.Cue(10, 20, 'Test');
+      displayer.append([cue1]);
+      expect(mockTrack.addCue).toHaveBeenCalledTimes(1);
+      mockTrack.addCue.calls.reset();
+
+      const cue2 = new shaka.text.Cue(10, 20, 'Test');
+      displayer.append([cue2]);
+      expect(mockTrack.addCue).not.toHaveBeenCalled();
     });
   });
 
@@ -118,13 +278,13 @@ describe('SimpleTextDisplayer', () => {
     it('converts shaka.text.Cues to VttCues', () => {
       verifyHelper(
           [
-            {startTime: 20, endTime: 40, text: 'Test'},
+            {startTime: 20, endTime: 40, text: 'Test4'},
           ],
           [
-            new shaka.text.Cue(20, 40, 'Test'),
+            new shaka.text.Cue(20, 40, 'Test4'),
           ]);
 
-      const cue1 = new shaka.text.Cue(20, 40, 'Test');
+      const cue1 = new shaka.text.Cue(20, 40, 'Test5');
       cue1.positionAlign = Cue.positionAlign.LEFT;
       cue1.lineAlign = Cue.lineAlign.START;
       cue1.size = 80;
@@ -139,7 +299,7 @@ describe('SimpleTextDisplayer', () => {
             {
               startTime: 20,
               endTime: 40,
-              text: 'Test',
+              text: 'Test5',
               lineAlign: 'start',
               positionAlign: 'line-left',
               size: 80,
@@ -174,7 +334,7 @@ describe('SimpleTextDisplayer', () => {
             },
           ], [cue2]);
 
-      const cue3 = new shaka.text.Cue(40, 60, 'Test');
+      const cue3 = new shaka.text.Cue(40, 60, 'Test1');
       cue3.positionAlign = Cue.positionAlign.CENTER;
       cue3.lineAlign = Cue.lineAlign.CENTER;
       cue3.textAlign = Cue.textAlign.START;
@@ -185,7 +345,7 @@ describe('SimpleTextDisplayer', () => {
             {
               startTime: 40,
               endTime: 60,
-              text: 'Test',
+              text: 'Test1',
               lineAlign: 'center',
               positionAlign: 'center',
               align: 'start',
@@ -193,7 +353,7 @@ describe('SimpleTextDisplayer', () => {
             },
           ], [cue3]);
 
-      const cue4 = new shaka.text.Cue(40, 60, 'Test');
+      const cue4 = new shaka.text.Cue(40, 60, 'Test2');
       cue4.line = null;
       cue4.position = null;
 
@@ -202,13 +362,13 @@ describe('SimpleTextDisplayer', () => {
             {
               startTime: 40,
               endTime: 60,
-              text: 'Test',
+              text: 'Test2',
               line: 'auto',
               position: 'auto',
             },
           ], [cue4]);
 
-      const cue5 = new shaka.text.Cue(40, 60, 'Test');
+      const cue5 = new shaka.text.Cue(40, 60, 'Test3');
       cue5.line = 0;
       cue5.position = 0;
 
@@ -217,7 +377,7 @@ describe('SimpleTextDisplayer', () => {
             {
               startTime: 40,
               endTime: 60,
-              text: 'Test',
+              text: 'Test3',
               line: 0,
               position: 0,
             },
@@ -263,10 +423,29 @@ describe('SimpleTextDisplayer', () => {
     });
 
     it('ignores cues with startTime >= endTime', () => {
+      mockTrack.addCue.calls.reset();
       const cue1 = new shaka.text.Cue(60, 40, 'Test');
       const cue2 = new shaka.text.Cue(40, 40, 'Test');
       displayer.append([cue1, cue2]);
       expect(mockTrack.addCue).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('destroy', () => {
+    it('disables the TextTrack it created', async () => {
+      // There should only be the one track created by this displayer.
+      expect(video.textTracks.length).toBe(1);
+
+      /** @type {!TextTrack} */
+      const textTrack = video.textTracks[0];
+
+      // It should not be disabled before we destroy it.
+      expect(textTrack.mode).not.toBe('disabled');
+
+      await displayer.destroy();
+
+      // It should be disabled after we destroy it.
+      expect(textTrack.mode).toBe('disabled');
     });
   });
 
@@ -275,6 +454,7 @@ describe('SimpleTextDisplayer', () => {
   }
 
   /**
+   * Verifies that vttCues are converted to shakaCues and appended.
    * @param {!Array} vttCues
    * @param {!Array.<!shaka.text.Cue>} shakaCues
    */

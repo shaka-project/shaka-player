@@ -1,9 +1,8 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-
-goog.provide('shaka.test.CannedIDB');
 
 /**
  * A testing utility that can be used to dump and restore entire IndexedDB
@@ -13,7 +12,7 @@ goog.provide('shaka.test.CannedIDB');
  * @example
  *   shaka.test = shaka.test || {};
  *   s = document.createElement('script');
- *   s.src = '/shaka/test/test/util/canned_idb.js';
+ *   s.src = '../test/test/util/canned_idb.js';
  *   document.head.appendChild(s);
  *   dump = await shaka.test.CannedIDB.dumpJSON('shaka_offline_db', true);
  */
@@ -27,9 +26,9 @@ shaka.test.CannedIDB = class {
    *   database later in a call to restoreJSON().
    */
   static async dumpJSON(name, dummyArrayBuffers) {
-    const savedDatabase = await this.dump(name, dummyArrayBuffers);
+    const savedDatabase = await this.dump(name);
     const replacer =
-        (key, value) => this.replacer_(dummyArrayBuffers, key, value);
+        (key, value) => this.replacer_(dummyArrayBuffers || false, key, value);
     return JSON.stringify(savedDatabase, replacer);
   }
 
@@ -72,7 +71,9 @@ shaka.test.CannedIDB = class {
    * @return {!Promise} Resolved when the operation is complete.
    */
   static async restoreJSON(name, savedDatabaseJson, wipeDatabase) {
-    const savedDatabase = JSON.parse(savedDatabaseJson, this.reviver_);
+    const savedDatabase =
+      /** @type {shaka.test.CannedIDB.SavedDatabase} */(JSON.parse(
+          savedDatabaseJson, this.reviver_));
     await this.restore(name, savedDatabase, wipeDatabase);
   }
 
@@ -153,7 +154,7 @@ shaka.test.CannedIDB = class {
 
   /**
    * @param {string} name The name of the database to open.
-   * @return {!Promise.<IDBDatabase>} Resolved when the named DB has been
+   * @return {!Promise.<!IDBDatabase>} Resolved when the named DB has been
    *   opened.
    * @private
    */
@@ -272,8 +273,15 @@ shaka.test.CannedIDB = class {
           if (storeName in existingStoreMap) {
             shaka.log.debug('Ignoring existing store', storeName);
           } else {
-            shaka.log.debug('Creating store', storeName);
             const storeInfo = savedDatabase.stores[storeName];
+
+            // Legacy Edge can't handle a null keyPath, and throws errors if you
+            // specify that.  So delete it if it's null.
+            if (storeInfo.parameters.keyPath == null) {
+              delete storeInfo.parameters.keyPath;
+            }
+
+            shaka.log.debug('Creating store', storeName, storeInfo.parameters);
             db.createObjectStore(storeName, storeInfo.parameters);
           }
         }

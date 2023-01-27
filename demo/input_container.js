@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,6 +7,9 @@
 
 goog.provide('shakaDemo.InputContainer');
 
+
+goog.require('shakaDemo.Tooltips');
+goog.requireType('shakaDemo.MessageIds');
 
 /**
  * Creates elements for containing inputs. It represents a single "section" of
@@ -35,6 +39,9 @@ shakaDemo.InputContainer = class {
 
     /** @private {?Element} */
     this.latestRow_;
+
+    /** @private {?string} */
+    this.defaultRowClass_ = null;
 
     /** @type {?Element} */
     this.latestElementContainer;
@@ -113,7 +120,8 @@ shakaDemo.InputContainer = class {
         }
       });
     } else {
-      this.header_ = document.createElement('h3');
+      this.header_ = document.createElement('div');
+      this.header_.classList.add('input-header');
     }
     this.header_.textContent = shakaDemoMain.getLocalizedString(headerText);
     parentDiv.appendChild(this.header_);
@@ -126,18 +134,38 @@ shakaDemo.InputContainer = class {
    * @private
    */
   addDocLink_(parentDiv, docLink) {
-    const link = document.createElement('a');
+    const link = /** @type {!HTMLAnchorElement} */(document.createElement('a'));
     link.href = docLink;
     link.target = '_blank';
     link.classList.add('mdl-button');
     link.classList.add('mdl-js-button');
     link.classList.add('mdl-js-ripple-effect');
     link.classList.add('mdl-button--colored');
+
     const icon = document.createElement('i');
-    icon.classList.add('material-icons');
+    icon.classList.add('material-icons-round');
     icon.textContent = 'help';
+
     link.appendChild(icon);
     parentDiv.appendChild(link);
+  }
+
+  /**
+   * Set the default row class for future calls to addRow().
+   *
+   * @param {?string} rowClass
+   */
+  setDefaultRowClass(rowClass) {
+    this.defaultRowClass_ = rowClass;
+  }
+
+  /**
+   * Return the CSS class list for the container.
+   *
+   * @return {!DOMTokenList}
+   */
+  getClassList() {
+    return this.table_.classList;
   }
 
   /**
@@ -147,6 +175,7 @@ shakaDemo.InputContainer = class {
    * @param {string=} rowClass
    */
   addRow(labelString, tooltipString, rowClass) {
+    rowClass = rowClass || this.defaultRowClass_ || '';
     this.latestRow_ = document.createElement('div');
     if (rowClass) {
       this.latestRow_.classList.add(rowClass);

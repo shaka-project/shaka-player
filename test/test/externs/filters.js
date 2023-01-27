@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -29,3 +30,15 @@ var quarantinedIt = function(name, callback) {};
  * @param {function()} callback
  */
 var filterDescribe = function(name, cond, callback) {};
+
+
+/**
+ * @param {string} name
+ * @param {function():*} cond
+ * @param {function()} callback
+ */
+var xfilterDescribe = function(name, cond, callback) {};
+
+
+/** @return {boolean} */
+var offlineSupported = function() {};

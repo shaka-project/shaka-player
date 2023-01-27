@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2016 Google Inc.  All Rights Reserved.
+# Copyright 2016 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import shakaBuildHelpers
 shaka_version = shakaBuildHelpers.calculate_version()
 
 common_closure_opts = [
-    '--language_out', 'ECMASCRIPT3',
+    '--language_out', 'ECMASCRIPT5',
 
     '--jscomp_error=*',
 
@@ -62,6 +62,18 @@ common_closure_opts = [
     #   "Private property foo_ is never modified, use the @const annotation"
     '--jscomp_off=jsdocMissingConst',
 
+    # Turn off complaints like:
+    #   "Object is a reference type with no nullability modifier that is
+    #   explicitly set to null."
+    # and:
+    #   "Property defineClass of type goog has been deprecated"
+    # Even the Closure Library's base.js doesn't pass these checks yet as of
+    # the 20200406 release.
+    '--jscomp_off=lintChecks',
+    '--jscomp_off=deprecated',
+    # Turn off complaints like:
+    #   "Built-in 'Reflect.setPrototypeOf' not supported in output version es3."
+    '--jscomp_off=missingPolyfill',
     '--extra_annotation_name=listens',
     '--extra_annotation_name=exportDoc',
     '--extra_annotation_name=exportInterface',
@@ -74,13 +86,10 @@ common_closure_opts = [
 ]
 common_closure_defines = [
     '-D', 'COMPILED=true',
-    '-D', 'goog.STRICT_MODE_COMPATIBLE=true',
     '-D', 'goog.ENABLE_DEBUG_LOADER=false',
 ]
 
 debug_closure_opts = [
-    # Don't use a wrapper script in debug mode so all the internals are visible
-    # on the global object.
     '-O', 'SIMPLE',
 ]
 debug_closure_defines = [
@@ -153,13 +162,9 @@ class Build(object):
   def add_closure(self):
     """Adds the closure library and externs."""
     # Add externs and closure dependencies.
-    source_base = shakaBuildHelpers.get_source_base()
-    match = re.compile(r'.*\.js$')
     self.include |= set(
-        shakaBuildHelpers.get_all_files(
-            os.path.join(source_base, 'externs'), match) +
-        shakaBuildHelpers.get_all_files(
-            os.path.join(source_base, 'third_party', 'closure'), match))
+        [shakaBuildHelpers.get_closure_base_js_path()] +
+        shakaBuildHelpers.get_all_js_files('externs'))
 
   def add_core(self):
     """Adds the core library."""
@@ -177,6 +182,13 @@ class Build(object):
     """Returns True if the UI library is in the build."""
     for path in self.include:
       if 'ui' in path.split(os.path.sep):
+        return True
+    return False
+
+  def has_cast(self):
+    """Returns True if the cast system is in the build."""
+    for path in self.include:
+      if 'cast' in path.split(os.path.sep):
         return True
     return False
 
@@ -270,6 +282,10 @@ class Build(object):
       return False
     if self.has_ui():
       self.generate_localizations(locales, force)
+      # So that the UI will correctly build if the cast is disabled, add the
+      # dummy cast proxy.
+      if not self.has_cast():
+        self.include.add(os.path.abspath('conditional/dummy_cast_proxy.js'))
 
     if is_debug:
       name += '.debug'
@@ -277,22 +293,34 @@ class Build(object):
     build_name = 'shaka-player.' + name
     closure = compiler.ClosureCompiler(self.include, build_name)
 
-    # Don't pass node modules to the extern generator.
-    local_include = set([f for f in self.include if 'node_modules' not in f])
-    generator = compiler.ExternGenerator(local_include, build_name)
-
     closure_opts = common_closure_opts + common_closure_defines
     if is_debug:
       closure_opts += debug_closure_opts + debug_closure_defines
-      # The output wrapper is only used in the release build.
-      closure.add_wrapper = False
     else:
       closure_opts += release_closure_opts + release_closure_defines
 
     if not closure.compile(closure_opts, force):
       return False
 
-    if not generator.generate(force):
+    # Don't pass local node modules to the extern generator.  But don't simply
+    # exclude the string 'node_modules', either, since Shaka Player could be
+    # rebuilt after installing it as a node module.
+    node_modules_path = os.path.join(
+        shakaBuildHelpers.get_source_base(), 'node_modules')
+    local_include = set([f for f in self.include if node_modules_path not in f])
+    extern_generator = compiler.ExternGenerator(local_include, build_name)
+
+    if not extern_generator.generate(force):
+      return False
+
+    generated_externs = [extern_generator.output]
+    shaka_externs = shakaBuildHelpers.get_all_js_files('externs')
+    if self.has_ui():
+      shaka_externs += shakaBuildHelpers.get_all_js_files('ui/externs')
+    ts_def_generator = compiler.TsDefGenerator(
+        generated_externs + shaka_externs, build_name)
+
+    if not ts_def_generator.generate(force):
       return False
 
     return True
@@ -337,6 +365,17 @@ def main(args):
 
   parsed_args, commands = parser.parse_known_args(args)
 
+  # Make the dist/ folder, ignore errors.
+  base = shakaBuildHelpers.get_source_base()
+  try:
+    os.mkdir(os.path.join(base, 'dist'))
+  except OSError:
+    pass
+
+  # Update node modules if needed.
+  if not shakaBuildHelpers.update_node_modules():
+    return 1
+
   # If no commands are given then use complete  by default.
   if len(commands) == 0:
     commands.append('+@complete')
@@ -347,10 +386,6 @@ def main(args):
   custom_build = Build()
 
   if not custom_build.parse_build(commands, os.getcwd()):
-    return 1
-
-  # Update node modules if needed.
-  if not shakaBuildHelpers.update_node_modules():
     return 1
 
   name = parsed_args.name

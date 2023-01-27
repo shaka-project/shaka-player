@@ -1,4 +1,5 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -6,8 +7,6 @@
 describe('Player', () => {
   const Util = shaka.test.Util;
   const Feature = shakaAssets.Feature;
-  const waitForMovementOrFailOnTimeout = Util.waitForMovementOrFailOnTimeout;
-  const waitForEndOrTimeout = Util.waitForEndOrTimeout;
 
   /** @type {!jasmine.Spy} */
   let onErrorSpy;
@@ -23,10 +22,14 @@ describe('Player', () => {
 
   let compiledShaka;
 
+  /** @type {!shaka.test.Waiter} */
+  let waiter;
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
-    compiledShaka = await Util.loadShaka(getClientArg('uncompiled'));
+    compiledShaka =
+        await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
     support = await compiledShaka.Player.probeSupport();
   });
 
@@ -35,6 +38,8 @@ describe('Player', () => {
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
+    waiter = new shaka.test.Waiter(eventManager);
+    waiter.setPlayer(player);
 
     onErrorSpy = jasmine.createSpy('onError');
     onErrorSpy.and.callFake((event) => fail(event.detail));
@@ -65,7 +70,11 @@ describe('Player', () => {
       wit(testName, async () => {
         const idFor = shakaAssets.identifierForKeySystem;
         if (!asset.isClear() &&
-            !asset.drm.some((keySystem) => support.drm[idFor(keySystem)])) {
+            !asset.drm.some((keySystem) => {
+              // Demo assets use an enum here, which we look up in idFor.
+              // Command-line assets use a direct key system ID.
+              return support.drm[idFor(keySystem)] || support.drm[keySystem];
+            })) {
           pending('None of the required key systems are supported.');
         }
 
@@ -98,12 +107,6 @@ describe('Player', () => {
         player.configure('manifest.dash.clockSyncUri',
             'https://shaka-player-demo.appspot.com/time.txt');
 
-        // Make sure we don't get stuck on gaps that only appear in some
-        // browsers (Safari, Firefox).
-        // TODO(https://github.com/google/shaka-player/issues/1702):
-        // Is this necessary because of a bug in Shaka Player?
-        player.configure('streaming.jumpLargeGaps', true);
-
         // Add asset-specific configuration.
         player.configure(asset.getConfiguration());
 
@@ -111,7 +114,13 @@ describe('Player', () => {
         const networkingEngine = player.getNetworkingEngine();
         asset.applyFilters(networkingEngine);
 
-        await player.load(asset.manifestUri);
+        // Rather than awaiting the load() method, catch any load() errors and
+        // wait on the 'canplay' event.  This has the advantage that we will
+        // get better logging of the media state on a timeout, since that
+        // capabilitiy is built into the waiter for media element events.
+        player.load(asset.manifestUri).catch(fail);
+        await waiter.timeoutAfter(60).waitForEvent(video, 'canplay');
+
         if (asset.features) {
           const isLive = asset.features.includes(Feature.LIVE);
           expect(player.isLive()).toBe(isLive);
@@ -120,10 +129,10 @@ describe('Player', () => {
 
         // Wait for the video to start playback.  If it takes longer than 20
         // seconds, fail the test.
-        await waitForMovementOrFailOnTimeout(eventManager, video, 20);
+        await waiter.waitForMovementOrFailOnTimeout(video, 20);
 
         // Play for 30 seconds, but stop early if the video ends.
-        await waitForEndOrTimeout(eventManager, video, 30);
+        await waiter.waitForEndOrTimeout(video, 30);
 
         if (video.ended) {
           checkEndedTime();
@@ -143,10 +152,10 @@ describe('Player', () => {
 
             // Wait for the video to start playback again after seeking.  If it
             // takes longer than 20 seconds, fail the test.
-            await waitForMovementOrFailOnTimeout(eventManager, video, 20);
+            await waiter.waitForMovementOrFailOnTimeout(video, 20);
 
             // Play for 30 seconds, but stop early if the video ends.
-            await waitForEndOrTimeout(eventManager, video, 30);
+            await waiter.waitForEndOrTimeout(video, 30);
 
             // By now, ended should be true.
             expect(video.ended).toBe(true);

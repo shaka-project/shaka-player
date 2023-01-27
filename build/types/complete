@@ -2,8 +2,11 @@
 
 +@ads
 +@cast
++@fairplay
 +@networking
 +@manifests
 +@polyfill
 +@text
++@transmuxer
 +@ui
++@lcevc

@@ -1,10 +1,8 @@
-/** @license
+/*! @license
+ * Shaka Player
  * Copyright 2016 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-
-goog.provide('shaka.test.Waiter');
-
 
 shaka.test.Waiter = class {
   /** @param {!shaka.util.EventManager} eventManager */
@@ -17,6 +15,12 @@ shaka.test.Waiter = class {
 
     /** @private {number} */
     this.timeoutSeconds_ = 5;
+
+    /** @private {shaka.Player} */
+    this.player_ = null;
+
+    /** @private {shaka.media.MediaSourceEngine} */
+    this.mediaSourceEngine_ = null;
   }
 
   // TODO: Consider replacing this with a settings argument on the individual
@@ -46,6 +50,30 @@ shaka.test.Waiter = class {
   }
 
   /**
+   * For tests with access to MediaSourceEngine, this can provide better
+   * debugging for buffered ranges on failure.
+   *
+   * @param {shaka.Player} player
+   * @return {!shaka.test.Waiter}
+   */
+  setPlayer(player) {
+    this.player_ = player;
+    return this;
+  }
+
+  /**
+   * For tests with access to MediaSourceEngine, this can provide better
+   * debugging for buffered ranges on failure.
+   *
+   * @param {shaka.media.MediaSourceEngine} mediaSourceEngine
+   * @return {!shaka.test.Waiter}
+   */
+  setMediaSourceEngine(mediaSourceEngine) {
+    this.mediaSourceEngine_ = mediaSourceEngine;
+    return this;
+  }
+
+  /**
    * Wait for the video playhead to move forward by some meaningful delta.  The
    * Promise is resolved when the playhead moves or the video ends.
    *
@@ -56,6 +84,20 @@ shaka.test.Waiter = class {
     console.assert(!mediaElement.ended, 'Video should not be ended!');
     const timeGoal = mediaElement.currentTime + 1;
     return this.waitUntilPlayheadReaches(mediaElement, timeGoal);
+  }
+
+  /**
+   * Wait for the video playhead to move forward by some meaningful delta.
+   * If this happens before |timeout| seconds pass, the Promise is resolved.
+   * Otherwise, the Promise is rejected.
+   *
+   * @param {!HTMLMediaElement} target
+   * @param {number} timeout in seconds, after which the Promise fails
+   * @return {!Promise}
+   */
+  waitForMovementOrFailOnTimeout(target, timeout) {
+    this.timeoutAfter(timeout).failOnTimeout(true);
+    return this.waitForMovement(target);
   }
 
   /**
@@ -90,16 +132,88 @@ shaka.test.Waiter = class {
   }
 
   /**
+   * Wait for the video playhead to reach a certain target time.
+   * If the playhead reaches |timeGoal| or the video ends before |timeout|
+   * seconds pass, the Promise is resolved.
+   * Otherwise, the Promise is rejected.
+   * @param {!HTMLMediaElement} mediaElement
+   * @param {number} timeGoal The time to wait for the playhead to reach.
+   * @param {number} timeout Timeout in seconds, after which the Promise fails.
+   * @return {!Promise}
+   */
+  waitUntilPlayheadReachesOrFailOnTimeout(mediaElement, timeGoal, timeout) {
+    this.timeoutAfter(timeout).failOnTimeout(true);
+    return this.waitUntilPlayheadReaches(mediaElement, timeGoal);
+  }
+
+  /**
    * Wait for the video to end.
    *
    * @param {!HTMLMediaElement} mediaElement
    * @return {!Promise}
    */
   waitForEnd(mediaElement) {
-    if (mediaElement.ended) {
+    // The name of what we're waiting for.
+    const goalName = 'end of media';
+
+    // The conditions for success.  Don't rely on either time, or the ended
+    // flag, or the ended event, specifically.  Any of these is sufficient.
+    // This flexibility cuts down on test flake on Safari (currently 14) in
+    // particular, where the flag might be set, but the ended event did not
+    // fire.  We also see flake on Firefox (currently 99), where test playbacks
+    // sometimes stop right before duration is reached.  (Duration 60.01, audio
+    // buffered to 60.01, video buffered to exactly 60.)
+    const hasEnded = () => {
+      return mediaElement.currentTime >= mediaElement.duration - 0.1 ||
+          mediaElement.ended;
+    };
+
+    if (hasEnded()) {
       return Promise.resolve();
     }
-    return this.waitForEvent(mediaElement, 'ended');
+
+    // Cleanup on timeout.
+    let timer = null;
+    const cleanup = () => {
+      if (timer) {
+        timer.stop();
+      }
+      this.eventManager_.unlisten(mediaElement, 'timeupdate');
+      this.eventManager_.unlisten(mediaElement, 'ended');
+    };
+
+    const p = new Promise((resolve) => {
+      const check = () => {
+        if (hasEnded()) {
+          cleanup();
+          resolve();
+        }
+      };
+
+      // In Firefox 99, there appears to be some bug in the browser preventing
+      // events from being triggered at the end of the presentation.  So we
+      // check for the end once per second.  Without this, StreamingEngine
+      // integration tests were failing.
+      timer = new shaka.util.Timer(check);
+      timer.tickEvery(/* seconds= */ 1);
+      this.eventManager_.listen(mediaElement, 'timeupdate', check);
+      this.eventManager_.listen(mediaElement, 'ended', check);
+    });
+
+    return this.waitUntilGeneric_(goalName, p, cleanup, mediaElement);
+  }
+
+  /**
+   * Wait for the video to end or for |timeout| seconds to pass, whichever
+   * occurs first.  The Promise is resolved when either of these happens.
+   *
+   * @param {!HTMLMediaElement} target
+   * @param {number} timeout in seconds, after which the Promise succeeds
+   * @return {!Promise}
+   */
+  waitForEndOrTimeout(target, timeout) {
+    this.failOnTimeout(false).timeoutAfter(timeout);
+    return this.waitForEnd(target);
   }
 
   /**
@@ -127,13 +241,26 @@ shaka.test.Waiter = class {
   }
 
   /**
-   * Wait for a certain Promise to be resolved, or reject it on timeout.
+   * Wait for a certain Promise to be resolved, or throw on timeout.
+   *
+   * @param {!Promise} p
+   * @param {string} label A name to give the Promise in error messages.
+   * @return {!Promise}
+   */
+  waitForPromise(p, label) {
+    const cleanup = () => {};
+    const target = null;
+    return this.waitUntilGeneric_(label, p, cleanup, target);
+  }
+
+  /**
+   * Wait for a certain Promise to be resolved, or throw on timeout.
    * Handles all debug logging and timeouts generically.
    *
    * @param {string} goalName
    * @param {!Promise} p
    * @param {function()} cleanupOnTimeout
-   * @param {!EventTarget} target
+   * @param {EventTarget} target
    * @return {!Promise}
    * @private
    */
@@ -168,7 +295,7 @@ shaka.test.Waiter = class {
 
       // Improve the error message with media-specific debug info.
       if (target instanceof HTMLMediaElement) {
-        this.logDebugInfoForMedia_(error.message, target);
+        this.logDebugInfoForMedia_(error, target);
       }
 
       // Reject or resolve based on our settings.
@@ -181,18 +308,29 @@ shaka.test.Waiter = class {
   }
 
   /**
-   * @param {string} message
+   * @param {!Error} error
    * @param {!HTMLMediaElement} mediaElement
    * @private
    */
-  logDebugInfoForMedia_(message, mediaElement) {
-    const buffered =
-        shaka.media.TimeRangesUtils.getBufferedInfo(mediaElement.buffered);
-    shaka.log.error(message,
-        'current time', mediaElement.currentTime,
-        'ready state', mediaElement.readyState,
-        'playback rate', mediaElement.playbackRate,
-        'paused', mediaElement.paused,
-        'buffered', buffered);
+  logDebugInfoForMedia_(error, mediaElement) {
+    let buffered;
+    if (this.player_) {
+      buffered = this.player_.getBufferedInfo();
+    } else if (this.mediaSourceEngine_) {
+      buffered = this.mediaSourceEngine_.getBufferedInfo();
+    } else {
+      buffered = shaka.media.TimeRangesUtils.getBufferedInfo(
+          mediaElement.buffered);
+    }
+
+    error.message += '\n' +
+        `current time: ${mediaElement.currentTime}\n` +
+        `duration: ${mediaElement.duration}\n` +
+        `ready state: ${mediaElement.readyState}\n` +
+        `playback rate: ${mediaElement.playbackRate}\n` +
+        `paused: ${mediaElement.paused}\n` +
+        `ended: ${mediaElement.ended}\n` +
+        `buffered: ${JSON.stringify(buffered)}\n`;
+    shaka.log.error(error.message);
   }
 };
