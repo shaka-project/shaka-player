@@ -10,6 +10,9 @@ describe('HlsParser', () => {
   const Util = shaka.test.Util;
   const originalAlwaysWarn = shaka.log.alwaysWarn;
 
+  const videoInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
+  const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
+
   const vttText = [
     'WEBVTT\n',
     '\n',
@@ -45,39 +48,13 @@ describe('HlsParser', () => {
     parser.stop();
   });
 
-  beforeEach(() => {
-    // TODO: use StreamGenerator?
-    initSegmentData = new Uint8Array([
-      0x00, 0x00, 0x00, 0x30, // size (48)
-      0x6D, 0x6F, 0x6F, 0x76, // type (moov)
-      0x00, 0x00, 0x00, 0x28, // trak size (40)
-      0x74, 0x72, 0x61, 0x6B, // type (trak)
-      0x00, 0x00, 0x00, 0x20, // mdia size (32)
-      0x6D, 0x64, 0x69, 0x61, // type (mdia)
-
-      0x00, 0x00, 0x00, 0x18, // mdhd size (24)
-      0x6D, 0x64, 0x68, 0x64, // type (mdhd)
-      0x00, 0x00, 0x00, 0x00, // version and flags
-
-      0x00, 0x00, 0x00, 0x00, // creation time (0)
-      0x00, 0x00, 0x00, 0x00, // modification time (0)
-      0x00, 0x00, 0x03, 0xe8, // timescale (1000)
+  beforeEach(async () => {
+    const responses = await Promise.all([
+      shaka.test.Util.fetch(videoInitSegmentUri),
+      shaka.test.Util.fetch(videoSegmentUri),
     ]);
-
-    segmentData = new Uint8Array([
-      0x00, 0x00, 0x00, 0x24, // size (36)
-      0x6D, 0x6F, 0x6F, 0x66, // type (moof)
-      0x00, 0x00, 0x00, 0x1C, // traf size (28)
-      0x74, 0x72, 0x61, 0x66, // type (traf)
-
-      0x00, 0x00, 0x00, 0x14, // tfdt size (20)
-      0x74, 0x66, 0x64, 0x74, // type (tfdt)
-      0x01, 0x00, 0x00, 0x00, // version and flags
-
-      0x00, 0x00, 0x00, 0x00, // baseMediaDecodeTime first 4 bytes (0)
-      0x00, 0x00, 0x00, 0x00,  // baseMediaDecodeTime last 4 bytes (0)
-    ]);
-    // segment starts at 0s.
+    initSegmentData = responses[0];
+    segmentData = responses[1];
 
     selfInitializingSegmentData =
         shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
@@ -132,6 +109,7 @@ describe('HlsParser', () => {
         .setResponseText('test:/main.vtt', vttText)
         .setResponseValue('test:/init.mp4', initSegmentData)
         .setResponseValue('test:/init2.mp4', initSegmentData)
+        .setResponseValue('test:/init.test', initSegmentData)
         .setResponseValue('test:/main.mp4', segmentData)
         .setResponseValue('test:/main2.mp4', segmentData)
         .setResponseValue('test:/main.test', segmentData)
@@ -4189,7 +4167,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
-          stream.mime('video/mp2t', 'avc1.42E01E, mp4a.40.2');
+          stream.mime('video/mp4', 'avc1.42E01E');
         });
       });
     });
@@ -4203,10 +4181,10 @@ describe('HlsParser', () => {
     const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
-      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXT-X-MAP:URI="init.test",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
-      'main.mp4',
+      'main.test',
     ].join('');
 
     const config = shaka.util.PlayerConfiguration.createDefault().manifest;
