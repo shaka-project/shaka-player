@@ -379,8 +379,8 @@ describe('MediaSourceEngine', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MEDIA,
           shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
-          {code: 5, message: 'something failed'},
-          jasmine.objectContaining({message: 'fail!'})));
+          jasmine.objectContaining({message: 'fail!'}),
+          {code: 5, message: 'something failed'}));
       await expectAsync(
           mediaSourceEngine.appendBuffer(
               ContentType.AUDIO, buffer, null,
@@ -713,8 +713,8 @@ describe('MediaSourceEngine', () => {
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.MEDIA,
           shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
-          {code: 5},
-          jasmine.objectContaining({message: 'fail!'})));
+          jasmine.objectContaining({message: 'fail!'}),
+          {code: 5}));
       await expectAsync(mediaSourceEngine.remove(ContentType.AUDIO, 1, 5))
           .toBeRejectedWith(expected);
       expect(audioSourceBuffer.remove).toHaveBeenCalledWith(1, 5);
