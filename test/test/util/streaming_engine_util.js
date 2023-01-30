@@ -284,6 +284,7 @@ shaka.test.StreamingEngineUtil = class {
       textStreams: [],
       imageStreams: [],
       sequenceMode: false,
+      type: 'UNKNOWN',
     };
 
     /** @type {shaka.extern.Variant} */

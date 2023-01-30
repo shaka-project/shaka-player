@@ -74,7 +74,8 @@ shaka.extern.StoredContent;
  *   drmInfo: ?shaka.extern.DrmInfo,
  *   appMetadata: Object,
  *   isIncomplete: (boolean|undefined),
- *   sequenceMode: (boolean|undefined)
+ *   sequenceMode: (boolean|undefined),
+ *   type: (string|undefined)
  * }}
  *
  * @property {number} creationTime
@@ -102,6 +103,9 @@ shaka.extern.StoredContent;
  * @property {(boolean|undefined)} sequenceMode
  *   If true, we will append the media segments using sequence mode; that is to
  *   say, ignoring any timestamps inside the media files.
+ * @property {(string|undefined)} type
+ *   Indicates the type of the manifest. It can be <code>'HLS'</code> or
+ *   <code>'DASH'</code>.
  */
 shaka.extern.ManifestDB;
 

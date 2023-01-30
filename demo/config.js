@@ -224,6 +224,8 @@ shakaDemo.Config = class {
             'manifest.hls.useSafariBehaviorForLive')
         .addNumberInput_(MessageIds.LIVE_SEGMENTS_DELAY,
             'manifest.hls.liveSegmentsDelay')
+        .addBoolInput_(MessageIds.HLS_SEQUENCE_MODE,
+            'manifest.hls.sequenceMode')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
@@ -239,7 +241,7 @@ shakaDemo.Config = class {
             /* canBeDecimal= */ false,
             /* canBeZero= */ false,
             /* canBeUnset= */ true)
-        .addBoolInput_(MessageIds.SEQUENCE_MODE,
+        .addBoolInput_(MessageIds.DASH_SEQUENCE_MODE,
             'manifest.dash.sequenceMode')
         .addBoolInput_(MessageIds.DISABLE_AUDIO,
             'manifest.disableAudio')

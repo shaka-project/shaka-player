@@ -219,6 +219,10 @@
     "description": "Text that describes an asset that comes from the Dash Industry Forum asset library.",
     "message": "[PROPER_NAME:DASH-IF]"
   },
+  "DEMO_DASH_SEQUENCE_MODE": {
+    "description": "The name of a configuration value.",
+    "message": "Enable DASH sequence mode"
+  },
   "DEMO_DEFAULT_AUDIO_CODEC": {
     "description": "The name of a configuration value.",
     "message": "Default Audio Codec"
@@ -378,6 +382,10 @@
   "DEMO_HLS": {
     "description": "Text that describes an asset that is packaged in an HLS manifest.",
     "message": "[PROPER_NAME:HLS]"
+  },
+  "DEMO_HLS_SEQUENCE_MODE": {
+    "description": "The name of a configuration value.",
+    "message": "Enable HLS sequence mode"
   },
   "DEMO_HLS_TAB": {
     "description": "The header for a tab within the custom asset creation dialog.",
@@ -802,10 +810,6 @@
   "DEMO_SEGMENT_RELATIVE_VTT_TIMING": {
     "description": "The name of a configuration value.",
     "message": "Enable segment-relative VTT Timing"
-  },
-  "DEMO_SEQUENCE_MODE": {
-    "description": "The name of a configuration value.",
-    "message": "Enable sequence mode"
   },
   "DEMO_SESSION_ID": {
     "description": "The name of a configuration value.",

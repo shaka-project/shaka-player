@@ -155,6 +155,7 @@ describe('DashParser Manifest', () => {
         ],
         shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.sequenceMode = true;
+          manifest.type = shaka.media.ManifestParser.DASH;
           manifest.anyTimeline();
           manifest.minBufferTime = 75;
           manifest.addPartialVariant((variant) => {
@@ -239,6 +240,7 @@ describe('DashParser Manifest', () => {
         ],
         shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.sequenceMode = false;
+          manifest.type = shaka.media.ManifestParser.DASH;
           manifest.anyTimeline();
           manifest.minBufferTime = 75;
           manifest.addPartialVariant((variant) => {
