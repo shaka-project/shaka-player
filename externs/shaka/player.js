@@ -886,7 +886,7 @@ shaka.extern.DashManifestConfiguration;
  *   If true, the media segments are appended to the SourceBuffer in
  *   "sequence mode" (ignoring their internal timestamps).
  *   Defaults to <code>true</code> except on WebOS 3, Tizen 2,
- *   Tizen 3 and PlayStation 4 which defualt value is <code>false</code>.
+ *   Tizen 3 and PlayStation 4 whose default value is <code>false</code>.
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
