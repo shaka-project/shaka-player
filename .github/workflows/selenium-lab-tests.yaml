@@ -8,6 +8,9 @@ on:
       pr:
         description: "A PR number to build and test in the lab.  If empty, will build and test from main."
         required: false
+      test_filter:
+        description: "A filter to run a subset of the tests.  If empty, all tests will run."
+        required: false
   schedule:
     # Runs every night at 2am PST / 10am UTC, testing against the main branch.
     - cron: '0 10 * * *'
@@ -189,6 +192,11 @@ jobs:
             extra_flags="--html-coverage-report --uncompiled"
           else
             extra_flags=""
+          fi
+
+          filter="${{ github.event.inputs.test_filter }}"
+          if [[ "$filter" != "" ]]; then
+            extra_flags="$extra_flags --filter $filter"
           fi
 
           python3 build/test.py \
