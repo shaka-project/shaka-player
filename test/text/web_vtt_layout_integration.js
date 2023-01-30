@@ -252,7 +252,7 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
     // The top center of the cue box should be 85% from the top and
     // horizontally centered.
     // NOTE: The native version is wrong on Chrome and Edge due to layout bugs
-    // in Chrome.  TODO: File crbug about this.
+    // in Chrome.  https://crbug.com/1411464
     it('align to bottom center with restricted size', async () => {
       parseAndDisplay([
         'WEBVTT\n',
