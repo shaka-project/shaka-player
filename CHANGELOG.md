@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.3.4](https://github.com/shaka-project/shaka-player/compare/v4.3.3...v4.3.4) (2023-01-31)
+
+
+### Bug Fixes
+
+* Add mux.js to support.html ([#4923](https://github.com/shaka-project/shaka-player/issues/4923)) ([fde895e](https://github.com/shaka-project/shaka-player/commit/fde895e13c4a935b39aa9bf2bc0c5dce77add0b0))
+* **DASH:** Fix dynamic manifests from edgeware ([#4914](https://github.com/shaka-project/shaka-player/issues/4914)) ([983dea3](https://github.com/shaka-project/shaka-player/commit/983dea3c87796384d9b7f876e73c47545d97e980))
+* Fix MediaCapabilities polyfill on Hisense ([#4927](https://github.com/shaka-project/shaka-player/issues/4927)) ([d36677f](https://github.com/shaka-project/shaka-player/commit/d36677f0db52bff2fef967e787954e8f25889d2f))
+* Fix WebVTT parser failure on REGION blocks ([#4915](https://github.com/shaka-project/shaka-player/issues/4915)) ([f57a954](https://github.com/shaka-project/shaka-player/commit/f57a9541cdff50de63f41247e258673fbed0cf78))
+* **HLS:** Fix detection of WebVTT subtitles in HLS by extension ([#4928](https://github.com/shaka-project/shaka-player/issues/4928)) ([86c58ee](https://github.com/shaka-project/shaka-player/commit/86c58ee1d4f6e0fe56a5aaebf9771024193a9efe)), closes [#4929](https://github.com/shaka-project/shaka-player/issues/4929)
+* **HLS:** IMSC1 subtitles not working in a HLS stream ([#4942](https://github.com/shaka-project/shaka-player/issues/4942)) ([8a9156f](https://github.com/shaka-project/shaka-player/commit/8a9156fa14cd6646900bdf534714ead775fccb15))
+* **VTT:** Fix combining style selectors ([#4934](https://github.com/shaka-project/shaka-player/issues/4934)) ([bd04cf1](https://github.com/shaka-project/shaka-player/commit/bd04cf15223d026bb880ab0cca2a3e6332e8f485))
+* **WebVTT:** Add support to &nbsp;, &lrm; and &rlm; ([#4920](https://github.com/shaka-project/shaka-player/issues/4920)) ([d2e2d49](https://github.com/shaka-project/shaka-player/commit/d2e2d49da0593d2ee2e0e4da7e2ce9acae0798af))
+* **WebVTT:** Add support to voice tag styles ([#4845](https://github.com/shaka-project/shaka-player/issues/4845)) ([4fb19fb](https://github.com/shaka-project/shaka-player/commit/4fb19fb075a89ae6a401c236b65c82d899a069d8))
+* **WebVTT:** Fix horizontal positioning with cue box size ([#4949](https://github.com/shaka-project/shaka-player/issues/4949)) ([cefbe08](https://github.com/shaka-project/shaka-player/commit/cefbe083b684fc1295483e938a8576d9de81a359))
+* **WebVTT:** Fix voices with styles and support to multiple styles ([#4922](https://github.com/shaka-project/shaka-player/issues/4922)) ([981bceb](https://github.com/shaka-project/shaka-player/commit/981bceb233b029b6e77499439627455913a1784d))
+
 ## [4.3.3](https://github.com/shaka-project/shaka-player/compare/v4.3.2...v4.3.3) (2023-01-13)
 
 
