@@ -973,7 +973,8 @@ shaka.extern.ManifestConfiguration;
  *   dispatchAllEmsgBoxes: boolean,
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
- *   parsePrftBox: boolean
+ *   parsePrftBox: boolean,
+ *   segmentPrefetchLimit: number
  * }}
  *
  * @description
@@ -1083,6 +1084,11 @@ shaka.extern.ManifestConfiguration;
  *   start date will not change, and would save parsing the segment multiple
  *   times needlessly.
  *   Defaults to <code>false</code>.
+ * @property {boolean} segmentPrefetchLimit
+ *   The maximum number of segments for each active stream to be prefetched
+ *   ahead of playhead in parallel.
+ *   If <code>0</code>, the segments will be fetched sequentially.
+ *   Defaults to <code>0</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;

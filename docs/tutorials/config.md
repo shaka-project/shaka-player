@@ -78,6 +78,7 @@ player.getConfiguration();
        retryParameters: Object
        startAtSegmentBoundary: false
        safeSeekOffset: 5
+       segmentPrefetchLimit: 0
      textDisplayFactory: Function
 
 
