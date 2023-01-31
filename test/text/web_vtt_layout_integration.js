@@ -248,6 +248,23 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('line-50');
     });
 
+    // Regression case for http://b/259121343
+    // The top center of the cue box should be 85% from the top and
+    // horizontally centered.
+    // NOTE: The native version is wrong on Chrome and Edge due to layout bugs
+    // in Chrome.  https://crbug.com/1411464
+    it('align to bottom center with restricted size', async () => {
+      parseAndDisplay([
+        'WEBVTT\n',
+        '\n',
+        '00:00:00.000 --> 00:00:05.000 ', // continued on next line
+        'line:85% position:50% size:63%\n',
+        'This is a test\n',
+      ].join(''));
+
+      await helper.checkScreenshot('line-85-position-50-size-63');
+    });
+
     // FIXME: UI version is slightly wrong: gaps between lines when bold
     it('bold long', async () => {
       parseAndDisplay([
