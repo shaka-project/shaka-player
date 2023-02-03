@@ -594,7 +594,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (document.pictureInPictureElement) {
           await document.exitPictureInPicture();
         }
-        await this.videoContainer_.requestFullscreen({navigationUI: 'hide'});
+        const fullScreenElement = this.config_.fullScreenElement;
+        await fullScreenElement.requestFullscreen({navigationUI: 'hide'});
 
         if (this.config_.forceLandscapeOnFullscreen && screen.orientation) {
           // Locking to 'landscape' should let it be either
