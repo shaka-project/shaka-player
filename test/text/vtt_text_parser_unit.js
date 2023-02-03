@@ -776,11 +776,35 @@ describe('VttTextParser', () => {
   it('support escaped html payload', () => {
     verifyHelper(
         [
-          {startTime: 20.1, endTime: 40.505, payload: '"Test & 1"\u{a0}'},
+          {
+            startTime: 20.1,
+            endTime: 40.505,
+            payload: '"Test & 1"\u{a0}',
+          },
+          {
+            startTime: 41,
+            endTime: 42,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 41,
+                endTime: 42,
+                payload: 'Test',
+                fontStyle: Cue.fontStyle.ITALIC,
+              },
+              {
+                startTime: 41,
+                endTime: 42,
+                payload: '&',
+              },
+            ],
+          },
         ],
         'WEBVTT\n\n' +
         '00:00:20.100 --> 00:00:40.505\n' +
-        '&quot;Test &amp; 1&quot;&nbsp;',
+        '&quot;Test &amp; 1&quot;&nbsp;\n\n' +
+        '00:00:41.000 --> 00:00:42.000\n' +
+        '<i>Test</i>&amp;',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
