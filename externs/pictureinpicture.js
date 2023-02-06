@@ -52,21 +52,27 @@ HTMLMediaElement.prototype.webkitPresentationMode;
 
 
 /**
- * @see https://wicg.github.io/document-picture-in-picture/#api
  * @constructor
  */
-function documentPictureInPicture() {}
+function DocumentPictureInPicture() {}
 
 
 /**
  * @return {!Promise}
  */
-documentPictureInPicture.prototype.requestWindow = function(options) {};
+DocumentPictureInPicture.prototype.requestWindow = function(options) {};
 
 
 /** @type {Window} */
-documentPictureInPicture.prototype.window;
+DocumentPictureInPicture.prototype.window;
 
 
 /** @type {?function(!Event)} */
-documentPictureInPicture.prototype.onenter;
+DocumentPictureInPicture.prototype.onenter;
+
+
+/**
+ * @see https://wicg.github.io/document-picture-in-picture/#api
+ * @type {!DocumentPictureInPicture}
+ */
+Window.prototype.documentPictureInPicture;
