@@ -149,15 +149,15 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
    */
   async toggleDocumentPictureInPicture_() {
     // Close Picture-in-Picture window if any.
-    if (documentPictureInPicture.window) {
-      documentPictureInPicture.window.close();
+    if (window.documentPictureInPicture.window) {
+      window.documentPictureInPicture.window.close();
       this.onLeavePictureInPicture_();
       return;
     }
 
     // Open a Picture-in-Picture window.
     const pipPlayer = this.localVideo_.parentNode;
-    const pipWindow = await documentPictureInPicture.requestWindow({
+    const pipWindow = await window.documentPictureInPicture.requestWindow({
       width: pipPlayer.offsetWidth,
       height: pipPlayer.offsetHeight,
       copyStyleSheets: true,
