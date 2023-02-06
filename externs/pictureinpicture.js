@@ -49,3 +49,24 @@ HTMLMediaElement.prototype.webkitSupportsPresentationMode = function(mode) {};
 
 /** @type {string} */
 HTMLMediaElement.prototype.webkitPresentationMode;
+
+
+/**
+ * @see https://wicg.github.io/document-picture-in-picture/#api
+ * @constructor
+ */
+function documentPictureInPicture() {}
+
+
+/**
+ * @return {!Promise}
+ */
+documentPictureInPicture.prototype.requestWindow = function(options) {};
+
+
+/** @type {Window} */
+documentPictureInPicture.prototype.window;
+
+
+/** @type {?function(!Event)} */
+documentPictureInPicture.prototype.onenter;
