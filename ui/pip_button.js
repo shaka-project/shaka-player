@@ -174,13 +174,13 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     pipWindow.document.head.append(styles);
 
     // Move player to the Picture-in-Picture window.
-    const parentPlayer = pipPlayer.parentNode;
+    const parentPlayer = pipPlayer.parentNode || document.body;
     pipWindow.document.body.append(pipPlayer);
     this.onEnterPictureInPicture_();
 
     // Listen for the PiP closing event to move the player back.
     pipWindow.addEventListener('unload', () => {
-      parentPlayer.append(pipPlayer);
+      parentPlayer.appendChild(pipPlayer);
     }, {once: true});
   }
 
