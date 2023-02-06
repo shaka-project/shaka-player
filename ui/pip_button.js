@@ -122,6 +122,10 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
    */
   async onPipClick_() {
     try {
+      if ('documentPictureInPicture' in window) {
+        await this.toggleDocumentPictureInPicture_();
+        return;
+      }
       if (!document.pictureInPictureElement) {
         // If you were fullscreen, leave fullscreen first.
         if (document.fullscreenElement) {
@@ -137,6 +141,42 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     }
   }
 
+  /**
+   * The Document Picture-in-Picture API makes it possible to open an
+   * always-on-top window that can be populated with arbitrary HTML content.
+   * https://developer.chrome.com/docs/web-platform/document-picture-in-picture
+   * @private
+   */
+  async toggleDocumentPictureInPicture_() {
+    // Close Picture-in-Picture window if any.
+    if (documentPictureInPicture.window) {
+      documentPictureInPicture.window.close();
+      return;
+    }
+
+    // Open a Picture-in-Picture window.
+    const pipPlayer = this.localVideo_.parentNode;
+    const pipWindow = await documentPictureInPicture.requestWindow({
+      width: pipPlayer.offsetWidth,
+      height: pipPlayer.offsetHeight,
+      copyStyleSheets: true,
+    });
+
+    // Make sure player fits in the Picture-in-Picture window.
+    const styles = document.createElement('style');
+    styles.append(`[data-shaka-player-container] {
+      width: 100% !important; max-height: 100%}`);
+    pipWindow.document.head.append(styles);
+
+    // Move player to the Picture-in-Picture window.
+    const parentPlayer = pipPlayer.parentNode;
+    pipWindow.document.body.append(pipPlayer);
+
+    // Listen for the PiP closing event to move the player back.
+    pipWindow.addEventListener('unload', () => {
+      parentPlayer.append(pipPlayer);
+    }, {once: true});
+  }
 
   /** @private */
   onEnterPictureInPicture_() {
