@@ -111,8 +111,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
    * @private
    */
   isPipAllowed_() {
-    return document.pictureInPictureEnabled &&
-        !this.video.disablePictureInPicture;
+    return documentPictureInPicture ||
+      (document.pictureInPictureEnabled && !this.video.disablePictureInPicture);
   }
 
 
@@ -151,6 +151,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     // Close Picture-in-Picture window if any.
     if (documentPictureInPicture.window) {
       documentPictureInPicture.window.close();
+      this.onLeavePictureInPicture_();
       return;
     }
 
@@ -171,6 +172,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     // Move player to the Picture-in-Picture window.
     const parentPlayer = pipPlayer.parentNode;
     pipWindow.document.body.append(pipPlayer);
+    this.onEnterPictureInPicture_();
 
     // Listen for the PiP closing event to move the player back.
     pipWindow.addEventListener('unload', () => {
