@@ -111,7 +111,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
    * @private
    */
   isPipAllowed_() {
-    return documentPictureInPicture ||
+    return ('documentPictureInPicture' in window) ||
       (document.pictureInPictureEnabled && !this.video.disablePictureInPicture);
   }
 
