@@ -36,6 +36,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     /** @private {HTMLMediaElement} */
     this.localVideo_ = this.controls.getLocalVideo();
 
+    /** @private {HTMLElement } */
+    this.videoContainer_ = this.controls.getVideoContainer();
+
     const LocIds = shaka.ui.Locales.Ids;
     /** @private {!HTMLButtonElement} */
     this.pipButton_ = shaka.util.Dom.createButton();
@@ -156,10 +159,11 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     }
 
     // Open a Picture-in-Picture window.
-    const pipPlayer = this.localVideo_.parentNode;
+    const pipPlayer = this.videoContainer_;
+    const rectPipPlayer = pipPlayer.getBoundingClientRect();
     const pipWindow = await window.documentPictureInPicture.requestWindow({
-      width: pipPlayer.offsetWidth,
-      height: pipPlayer.offsetHeight,
+      width: rectPipPlayer.width,
+      height: rectPipPlayer.height,
       copyStyleSheets: true,
     });
 
