@@ -1185,6 +1185,9 @@ shakaDemo.Main = class {
     if (document.pictureInPictureElement) {
       document.exitPictureInPicture();
     }
+    if (window.documentPictureInPicture.window) {
+      window.documentPictureInPicture.window.close();
+    }
     this.player_.unload();
 
     // The currently-selected asset changed, so update asset cards.

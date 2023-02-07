@@ -167,6 +167,13 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       copyStyleSheets: true,
     });
 
+    // Add placeholder for the player.
+    const parentPlayer = pipPlayer.parentNode || document.body;
+    const placeholder = this.videoContainer_.cloneNode(true);
+    placeholder.style.visibility = 'hidden';
+    placeholder.style.height = getComputedStyle(pipPlayer).height;
+    parentPlayer.appendChild(placeholder);
+
     // Make sure player fits in the Picture-in-Picture window.
     const styles = document.createElement('style');
     styles.append(`[data-shaka-player-container] {
@@ -174,13 +181,12 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     pipWindow.document.head.append(styles);
 
     // Move player to the Picture-in-Picture window.
-    const parentPlayer = pipPlayer.parentNode || document.body;
     pipWindow.document.body.append(pipPlayer);
     this.onEnterPictureInPicture_();
 
     // Listen for the PiP closing event to move the player back.
     pipWindow.addEventListener('unload', () => {
-      parentPlayer.appendChild(pipPlayer);
+      placeholder.replaceWith(pipPlayer);
     }, {once: true});
   }
 
