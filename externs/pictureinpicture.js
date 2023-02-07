@@ -67,8 +67,12 @@ DocumentPictureInPicture.prototype.requestWindow = function(options) {};
 DocumentPictureInPicture.prototype.window;
 
 
-/** @type {?function(!Event)} */
-DocumentPictureInPicture.prototype.onenter;
+/**
+ * @param {string} type
+ * @param {Function} listener
+ */
+DocumentPictureInPicture.prototype.addEventListener =
+    function(type, listener) {};
 
 
 /**

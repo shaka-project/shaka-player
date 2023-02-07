@@ -162,8 +162,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const pipPlayer = this.videoContainer_;
     const rectPipPlayer = pipPlayer.getBoundingClientRect();
     const pipWindow = await window.documentPictureInPicture.requestWindow({
-      width: rectPipPlayer.width,
-      height: rectPipPlayer.height,
+      initialAspectRatio: rectPipPlayer.width / rectPipPlayer.height,
       copyStyleSheets: true,
     });
 
@@ -186,7 +185,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     // Listen for the PiP closing event to move the player back.
     pipWindow.addEventListener('unload', () => {
-      placeholder.replaceWith(pipPlayer);
+      placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
     }, {once: true});
   }
 
