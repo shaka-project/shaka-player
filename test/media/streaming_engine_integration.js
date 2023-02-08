@@ -592,6 +592,7 @@ describe('StreamingEngine', () => {
         textStreams: [],
         imageStreams: [],
         sequenceMode: false,
+        type: 'UNKNOWN',
         variants: [{
           id: 1,
           video: {

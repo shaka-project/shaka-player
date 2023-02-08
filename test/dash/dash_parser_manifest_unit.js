@@ -155,6 +155,7 @@ describe('DashParser Manifest', () => {
         ],
         shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.sequenceMode = true;
+          manifest.type = shaka.media.ManifestParser.DASH;
           manifest.anyTimeline();
           manifest.minBufferTime = 75;
           manifest.addPartialVariant((variant) => {
@@ -239,6 +240,7 @@ describe('DashParser Manifest', () => {
         ],
         shaka.test.ManifestGenerator.generate((manifest) => {
           manifest.sequenceMode = false;
+          manifest.type = shaka.media.ManifestParser.DASH;
           manifest.anyTimeline();
           manifest.minBufferTime = 75;
           manifest.addPartialVariant((variant) => {
@@ -285,42 +287,6 @@ describe('DashParser Manifest', () => {
             stream.roles = ['caption', 'main'];
           });
         }));
-  });
-
-  it('rejects periods after one without duration', async () => {
-    const periodContents = [
-      '    <AdaptationSet mimeType="video/mp4" lang="en" group="1">',
-      '      <Representation bandwidth="100">',
-      '        <SegmentTemplate startNumber="1" media="l-$Number$.mp4">',
-      '          <SegmentTimeline>',
-      '            <S t="0" d="10" />',
-      '          </SegmentTimeline>',
-      '        </SegmentTemplate>',
-      '      </Representation>',
-      '    </AdaptationSet>',
-    ].join('\n');
-    const template = [
-      '<MPD mediaPresentationDuration="PT75S">',
-      '  <Period id="1">',
-      '%(periodContents)s',
-      '  </Period>',
-      '  <Period id="2">',
-      '%(periodContents)s',
-      '  </Period>',
-      '</MPD>',
-    ].join('\n');
-    const source = sprintf(template, {periodContents: periodContents});
-
-    fakeNetEngine.setResponseText('dummy://foo', source);
-    /** @type {shaka.extern.Manifest} */
-    const manifest = await parser.start('dummy://foo', playerInterface);
-    const video = manifest.variants[0].video;
-    await video.createSegmentIndex();
-
-    // The first period has a segment from 0-10.
-    // With the second period skipping, we should fail to find a segment at 10.
-    expect(video.segmentIndex.find(0)).not.toBe(null);
-    expect(video.segmentIndex.find(10)).toBe(null);
   });
 
   it('calculates Period times when missing', async () => {

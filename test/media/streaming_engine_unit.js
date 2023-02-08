@@ -521,7 +521,7 @@ describe('StreamingEngine', () => {
     expectedMseInit.set(ContentType.TEXT, textStream);
 
     expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit,
-        /** sequenceMode= */ false);
+        /** sequenceMode= */ false, /** manifestType= */ 'UNKNOWN');
     expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
 
     expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
@@ -3701,6 +3701,138 @@ describe('StreamingEngine', () => {
       expect(beforeAppendSegment).toHaveBeenCalledWith(
           ContentType.AUDIO, segmentData[ContentType.AUDIO].segments[0]);
     });
+  });
+
+  describe('prefetch segments', () => {
+    const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+
+    beforeEach(() => {
+      shaka.media.SegmentPrefetch = Util.spyFunc(
+          jasmine.createSpy('SegmentPrefetch')
+              .and.callFake((config, stream) =>
+                new shaka.test.FakeSegmentPrefetch(stream, segmentData),
+              ),
+      );
+      setupVod();
+      mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
+      createStreamingEngine();
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 3;
+      streamingEngine.configure(config);
+    });
+
+    it('should use prefetched segment without fetching again', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+
+      await runTest();
+
+      expectHasBuffer();
+      expectSegmentRequest(false);
+    });
+
+    it('should re-use prefetch segment when force clear buffer', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+
+      playing = true;
+      expectNoBuffer();
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+
+      streamingEngine.switchVariant(variant, true, 0, true);
+      presentationTimeInSeconds = 0;
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+    });
+
+    it('should disable prefetch if reset config in middle', async () => {
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+
+      playing = true;
+      expectNoBuffer();
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(false);
+
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 0;
+      streamingEngine.configure(config);
+      streamingEngine.switchVariant(variant, true, 0, true);
+      presentationTimeInSeconds = 0;
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(true);
+    });
+
+    it('should disable prefetch when reset config at begining', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().streaming;
+      config.segmentPrefetchLimit = 0;
+      streamingEngine.configure(config);
+      streamingEngine.switchVariant(variant);
+      await streamingEngine.start();
+      playing = true;
+      expectNoBuffer();
+      await runTest();
+      expectHasBuffer();
+      expectSegmentRequest(true);
+    });
+
+    /**
+     * Expect no buffer has been added to MSE.
+     */
+    function expectNoBuffer() {
+      expect(mediaSourceEngine.initSegments).toEqual({
+        audio: [false, false],
+        video: [false, false],
+        text: [],
+      });
+      expect(mediaSourceEngine.segments).toEqual({
+        audio: [false, false, false, false],
+        video: [false, false, false, false],
+        text: [false, false, false, false],
+      });
+    }
+
+    /**
+     * Expect buffers have been added to MSE.
+     */
+    function expectHasBuffer() {
+      expect(mediaSourceEngine.initSegments).toEqual({
+        audio: [false, true],
+        video: [false, true],
+        text: [],
+      });
+      expect(mediaSourceEngine.segments).toEqual({
+        audio: [true, true, true, true],
+        video: [true, true, true, true],
+        text: [false, false, false, false],
+      });
+    }
+
+    /**
+     * @param {?boolean} hasRequest
+     */
+    function expectSegmentRequest(hasRequest) {
+      const requests = [
+        '0_audio_0', '0_video_0', '0_audio_1',
+        '0_video_1', '1_audio_2', '1_video_2',
+        '1_audio_3', '1_video_3',
+      ];
+
+      for (const request of requests) {
+        if (hasRequest) {
+          netEngine.expectRequest(request, segmentType);
+        } else {
+          netEngine.expectNoRequest(request, segmentType);
+        }
+      }
+    }
   });
 
   /**

@@ -8,6 +8,9 @@ on:
       pr:
         description: "A PR number to build and test in the lab.  If empty, will build and test from main."
         required: false
+      test_filter:
+        description: "A filter to run a subset of the tests.  If empty, all tests will run."
+        required: false
   schedule:
     # Runs every night at 2am PST / 10am UTC, testing against the main branch.
     - cron: '0 10 * * *'
@@ -191,6 +194,11 @@ jobs:
             extra_flags=""
           fi
 
+          filter="${{ github.event.inputs.test_filter }}"
+          if [[ "$filter" != "" ]]; then
+            extra_flags="$extra_flags --filter $filter"
+          fi
+
           python3 build/test.py \
               --no-build \
               --reporters spec --spec-hide-passed \
@@ -240,6 +248,20 @@ jobs:
           # an environment variable set for this, the file should definitely be
           # there.
           if-no-files-found: error
+
+      # Upload new screenshots and diffs on failure; ignore if missing
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          # In this workflow, "browser" is the selenium node name, which can
+          # contain both browser and OS, such as "ChromeLinux".
+          name: screenshots-${{ matrix.browser }}
+          path: |
+            test/test/assets/screenshots/*/*.png-new
+            test/test/assets/screenshots/*/*.png-diff
+          if-no-files-found: ignore
+          retention-days: 5
 
       - name: Report final commit status
         # Will run on success or failure, but not if the workflow is cancelled.
