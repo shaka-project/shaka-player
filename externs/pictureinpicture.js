@@ -52,13 +52,26 @@ HTMLMediaElement.prototype.webkitPresentationMode;
 
 
 /**
+ * @typedef {{
+ *   initialAspectRatio: (number|undefined),
+ *   width: (number|undefined),
+ *   height: (number|undefined),
+ *   copyStyleSheets: (boolean|undefined),
+ * }}
+ */
+var DocumentPictureInPictureOptions;
+
+
+/**
  * @constructor
+ * @implements {EventTarget}
  */
 function DocumentPictureInPicture() {}
 
 
 /**
- * @return {!Promise}
+ * @param {DocumentPictureInPictureOptions} options
+ * @return {!Promise.<Window>}
  */
 DocumentPictureInPicture.prototype.requestWindow = function(options) {};
 
@@ -67,12 +80,18 @@ DocumentPictureInPicture.prototype.requestWindow = function(options) {};
 DocumentPictureInPicture.prototype.window;
 
 
-/**
- * @param {string} type
- * @param {Function} listener
- */
+/** @override */
 DocumentPictureInPicture.prototype.addEventListener =
-    function(type, listener) {};
+    function(type, listener, options) {};
+
+
+/** @override */
+DocumentPictureInPicture.prototype.removeEventListener =
+    function(type, listener, options) {};
+
+
+/** @override */
+DocumentPictureInPicture.prototype.dispatchEvent = function(event) {};
 
 
 /**
