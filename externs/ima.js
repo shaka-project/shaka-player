@@ -513,6 +513,15 @@ google.ima.dai.api.StreamRequest.prototype.streamActivityMonitorId;
 google.ima.dai.api.StreamRequest.prototype.format;
 
 
+/**
+ * @enum {string}
+ */
+google.ima.dai.api.StreamRequest.StreamFormat = {
+  DASH: 'dash',
+  HLS: 'hls',
+};
+
+
 /** @const */
 google.ima.dai.api.VODStreamRequest =
     class extends google.ima.dai.api.StreamRequest {};
