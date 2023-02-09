@@ -61,7 +61,8 @@ The following elements can be added to the UI bar using this configuration value
   starts playing the presentation at an increased speed
 * spacer: adds a chunk of empty space between the adjacent elements.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
-  that support it. Button is invisible on other browsers. Note that it will use the [Document Picture-in-Picture API]() if supported.
+  that support it. Button is invisible on other browsers. Note that it will use the
+  [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
   supports AirPlay.
@@ -84,7 +85,8 @@ The following buttons can be added to the overflow menu:
 * quality: adds a button that controls enabling/disabling of abr and video resolution selection.
 * language: adds a button that controls audio language selection.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
-  that support it. Button is invisible on other browsers.
+  that support it. Button is invisible on other browsers. Note that it will use the 
+  [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * playback_rate: adds a button that controls the playback rate selection.
 * airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
@@ -123,7 +125,8 @@ The following buttons can be added to the context menu:
 * Statistics: adds a button that displays statistics of the video.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
-  that support it. Button is invisible on other browsers.
+  that support it. Button is invisible on other browsers. Note that it will use the 
+  [Document Picture-in-Picture API]() if supported.
 
 Example:
 ```js
