@@ -76,6 +76,8 @@ const ShakaDemoAssetInfo = class {
     /** @type {?string} */
     this.imaContentSrcId = null;
     /** @type {?string} */
+    this.imaManifestType = null;
+    /** @type {?string} */
     this.mimeType = null;
 
 
@@ -249,6 +251,19 @@ const ShakaDemoAssetInfo = class {
    */
   setIMAAssetKey(key) {
     this.imaAssetKey = key;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} type
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setIMAManifestType(type) {
+    this.imaManifestType = type;
     if (!this.features.includes(shakaAssets.Feature.ADS)) {
       this.addFeature(shakaAssets.Feature.ADS);
     }
