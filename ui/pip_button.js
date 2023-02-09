@@ -184,9 +184,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.onEnterPictureInPicture_();
 
     // Listen for the PiP closing event to move the player back.
-    pipWindow.addEventListener('unload', () => {
+    this.eventManager.listenOnce(pipWindow, 'unload', () => {
       placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
-    }, {once: true});
+    });
   }
 
   /** @private */

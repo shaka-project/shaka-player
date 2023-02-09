@@ -32,13 +32,14 @@ shakaDemo.CloseButton = class extends shaka.ui.Element {
     });
 
     if ('documentPictureInPicture' in window) {
-      window.documentPictureInPicture.addEventListener('enter', (event) => {
-        this.button_.style.display = 'none';
-        const pipWindow = window.documentPictureInPicture.window;
-        pipWindow.addEventListener('unload', (event) => {
-          this.button_.style.display = 'block';
-        });
-      });
+      this.eventManager.listen(
+          window.documentPictureInPicture, 'enter', () => {
+            this.button_.style.display = 'none';
+            const pipWindow = window.documentPictureInPicture.window;
+            this.eventManager.listen(pipWindow, 'unload', () => {
+              this.button_.style.display = 'block';
+            });
+          });
     }
 
     // TODO: Make sure that the screenreader description of this control is
