@@ -391,6 +391,10 @@
     "description": "The label on a field that allows users to provide a content source id for a custom asset.",
     "message": "Asset key (for VOD DAI Content)"
   },
+  "DEMO_IMA_MANIFEST_TYPE": {
+    "description": "The label on a field that allows users to provide a manifest type for a custom asset.",
+    "message": "Manifest type (for DAI Content)"
+  },
   "DEMO_IMA_VIDEO_ID": {
     "description": "The label on a field that allows users to provide a video id for a custom asset.",
     "message": "Video ID (for VOD DAI Content)"
