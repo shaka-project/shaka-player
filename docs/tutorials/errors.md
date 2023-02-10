@@ -20,7 +20,7 @@ const handleError = (error) => {
 const player = new shaka.Player(video);
 
 // handle errors that occur after load
-player.addEventListener("error", handleError);
+player.addEventListener('error', handleError);
 
 // handle errors that occur during load
 
@@ -40,7 +40,7 @@ try {
 The `streaming.failureCallback` property of ({@link shaka.extern.PlayerConfiguration}) can be used to add custom handling or error conversion of errors that occur during streaming.
 
 ```typescript
-player.configure("streaming.failureCallback", (error) => {
+player.configure('streaming.failureCallback', (error) => {
   if (error.severity === shaka.util.Error.Severity.CRITICAL) {
     // custom handling of critical error
     // e.g. player.retryStreaming();
@@ -79,16 +79,16 @@ const vodManifestNotFoundHandler = (error) => {
       // throw new shaka.util.Error(
       //   shaka.util.Error.Severity.CRITICAL,
       //   shaka.util.Error.Category.NETWORK,
-      //   "RECOGNIZABLE_ERROR_MESSAGE"
+      //   'RECOGNIZABLE_ERROR_MESSAGE'
       // );
     }
-  }
+          }
 };
 
-nwEngine.addEventListener("retry", vodManifestNotFoundHandler);
+nwEngine.addEventListener('retry', vodManifestNotFoundHandler);
 
-player.addEventListener("loaded", () => {
-  nwEngine.removeEventListener("retry", vodManifestNotFoundHandler);
+player.addEventListener('load'() => {
+  nwEngine.removeEventListe'e;(ör't;yö, vodManifestNotFoundHandler);
 });
 
 ```
