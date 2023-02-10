@@ -9,7 +9,7 @@ on:
         description: "A PR number to build and test in the lab.  If empty, will build and test from main."
         required: false
       test_filter:
-        description: "A filter to run a subset of the tests.  If empty, all tests will run."
+        description: "A regex filter to run a subset of the tests.  If empty, all tests will run."
         required: false
   workflow_call:
     # Allows for reuse from other workflows, such as "Update All Screenshots"
@@ -18,11 +18,15 @@ on:
       pr:
         description: "A PR number to build and test in the lab.  If empty, will build and test from main."
         required: false
+        type: string
       test_filter:
-        description: "A filter to run a subset of the tests.  If empty, all tests will run."
+        description: "A regex filter to run a subset of the tests.  If empty, all tests will run."
         required: false
+        type: string
       ignore_test_status:
         description: "If true, ignore test failures and treat the workflow as a success."
+        required: false
+        type: boolean
   schedule:
     # Runs every night at 2am PST / 10am UTC, testing against the main branch.
     - cron: '0 10 * * *'
@@ -42,12 +46,12 @@ jobs:
       - name: Compute ref
         id: compute
         run: |
-          if [[ "${{ github.event.inputs.pr }}" != "" ]]; then
-            LAB_TEST_REF="refs/pull/${{ github.event.inputs.pr }}/head"
+          if [[ "${{ inputs.pr }}" != "" ]]; then
+            LAB_TEST_REF="refs/pull/${{ inputs.pr }}/head"
           else
             LAB_TEST_REF="main"
           fi
-          echo "REF=$LAB_TEST_REF" >> $GITHUB_OUTPUT
+          echo "REF=$LAB_TEST_REF" | tee -a $GITHUB_OUTPUT
 
   # Configure the build matrix based on our grid's YAML config.
   # The matrix contents will be computed by this first job and deserialized
@@ -112,6 +116,7 @@ jobs:
           ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Set commit status to pending
+        if: ${{ inputs.ignore_test_status == false }}
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / Build
@@ -129,8 +134,9 @@ jobs:
           retention-days: 1
 
       - name: Report final commit status
-        # Will run on success or failure, but not if the workflow is cancelled.
-        if: ${{ success() || failure() }}
+        # Will run on success or failure, but not if the workflow is cancelled
+        # or if we were asked to ignore the test status.
+        if: ${{ (success() || failure()) && inputs.ignore_test_status == false }}
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / Build
@@ -154,6 +160,7 @@ jobs:
           ref: ${{ needs.compute-ref.outputs.REF }}
 
       - name: Set commit status to pending
+        if: ${{ inputs.ignore_test_status == false }}
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / ${{ matrix.browser }}
@@ -197,25 +204,28 @@ jobs:
       # the container.
       - name: Test Player
         run: |
+          # Use of an array keeps elements in tact, and allows an element to
+          # contain spaces without being expanded into multiple arguments in a
+          # shell command.
+          extra_flags=()
+
           # Generate a coverage report from uncompiled code on ChromeLinux.
           # It should be the uncompiled build, or else we won't execute any
           # coverage instrumentation on full-stack player integration tests.
           if [[ "${{ matrix.browser }}" == "ChromeLinux" ]]; then
-            extra_flags="--html-coverage-report --uncompiled"
-          else
-            extra_flags=""
+            extra_flags+=(--html-coverage-report --uncompiled)
           fi
 
-          filter="${{ github.event.inputs.test_filter }}"
-          if [[ "$filter" != "" ]]; then
-            extra_flags="$extra_flags --filter $filter"
+          if [[ "${{ inputs.test_filter }}" != "" ]]; then
+            echo "Adding filter: ${{ inputs.test_filter }}"
+            extra_flags+=(--filter "${{ inputs.test_filter }}")
           fi
 
-          ignore_test_status="${{ github.event.inputs.ignore_test_status }}"
-          if [[ "$ignore_test_status" == "true" ]]; then
-            extra_flags="$extra_flags || true"
-          fi
-
+          # Do not automatically fail when a command fails.  This allows us to
+          # implement the ignore_test_status input by capturing the exit code
+          # and examining it.
+          set +e
+          # Run the tests with any extra flags.
           python3 build/test.py \
               --no-build \
               --reporters spec --spec-hide-passed \
@@ -225,7 +235,18 @@ jobs:
               --grid-config build/shaka-lab.yaml \
               --grid-address selenium-grid.lab:4444 \
               --browsers ${{ matrix.browser }} \
-              $extra_flags
+              "${extra_flags[@]}"
+          # Capture the test exit code immediately after running the tests.
+          # There cannot be any other command between test.py and here.
+          exit_code=$?
+
+          # If ignoring test status, treat this as an exit code of 0 (success).
+          if [[ "${{ inputs.ignore_test_status }}" == "true" ]]; then
+            exit_code=0
+          fi
+
+          # Report the captured (and possibly overridden) exit status.
+          exit $exit_code
 
       - name: Find coverage report (ChromeLinux only)
         id: coverage
@@ -269,7 +290,7 @@ jobs:
       # Upload new screenshots and diffs on failure; ignore if missing
       - name: Upload screenshots
         uses: actions/upload-artifact@v3
-        if: ${{ failure() }}
+        if: ${{ failure() || inputs.ignore_test_status }}
         with:
           # In this workflow, "browser" is the selenium node name, which can
           # contain both browser and OS, such as "ChromeLinux".
@@ -281,8 +302,9 @@ jobs:
           retention-days: 5
 
       - name: Report final commit status
-        # Will run on success or failure, but not if the workflow is cancelled.
-        if: ${{ success() || failure() }}
+        # Will run on success or failure, but not if the workflow is cancelled
+        # or if we were asked to ignore the test status.
+        if: ${{ (success() || failure()) && inputs.ignore_test_status == false }}
         uses: ./.github/workflows/custom-actions/set-commit-status
         with:
           context: Selenium / ${{ matrix.browser }}

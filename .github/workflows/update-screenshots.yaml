@@ -12,52 +12,131 @@ on:
         required: true
 
 jobs:
+  set-pending-status:
+    name: Set Pending Status
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: refs/pull/${{ inputs.pr }}/head
+
+      - name: Set commit status to pending
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Update All Screenshots
+          state: pending
+          token: ${{ secrets.GITHUB_TOKEN }}
+
   run-lab-tests:
     name: Get Selenium Lab Screenshots
+    needs: [set-pending-status]
     uses: ./.github/workflows/selenium-lab-tests.yaml
     with:
-      pr: ${{ github.event.inputs.pr }}
-      test_filter: 'layout'
+      pr: ${{ inputs.pr }}
+      test_filter: layout
       ignore_test_status: true
 
   update-pr:
     name: Update PR
     runs-on: ubuntu-latest
+    needs: [run-lab-tests]
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: refs/pull/${{ github.event.inputs.pr }}/head
+          ref: refs/pull/${{ inputs.pr }}/head
+
+      - name: Set commit status to pending
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Update All Screenshots
+          state: pending
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get artifacts
         uses: actions/download-artifact@v3
+        with:
+          path: new-screenshots
+
+      - name: Move screenshots
+        run: |
+          # The download-artifact action puts zip file contents into folders by
+          # the name of the artifact, so we can't have them downloaded directly
+          # to the screenshots folder.  Here we move them into the correct
+          # locations.
+          cd new-screenshots
+
+          # "$i" is a folder for an artifact (eg "screenshots-ChromeAndroid"),
+          # and it contains a single folder with the name we use in our
+          # screenshots (eg "chrome-Android").  We want the contents of that
+          # inner folder to be copied to test/test/assets/screenshots/, where a
+          # folder with the same name (eg "chrome-Android") already exists.
+          for i in screenshots*; do
+            cp -a $i/* ../test/test/assets/screenshots/
+          done
 
       - name: Update screenshots
         run: |
-          # Unpack screenshots from the lab.
-          for i in screenshots-*.zip; do
-            unzip -d test/test/assets/screenshots/ "$i"
-          done
+          # Install prerequisites.
+          npm ci
 
-          # Update the official screenshots for any that has visibly changed.
-          # This is not a byte-for-byte comparison.
+          # Update the official screenshots for any that have visibly changed.
+          # This is not a byte-for-byte comparison, but based on pixel diffs.
           ./build/updateScreenshots.py
 
           # Emulate the actions bot.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          # Commit the changes.  Ignore failure, in case there are no changes.
+          git add test/test/assets/screenshots/*/*.png || true
+          git commit -m ':robot: Update all screenshots' || true
+
+      - name: Update PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
           # Update the PR.
-          git add test/test/assets/screenshots/*/*.png
-          git commit -m ':robot: Update all screenshots'
+          PR_API_URL="/repos/${{ github.repository }}/pulls/${{ inputs.pr }}"
+          REMOTE=$(gh api $PR_API_URL | jq -r .head.repo.html_url)
+          BRANCH=$(gh api $PR_API_URL | jq -r .head.ref)
 
-          PR_API_URL="/repos/${{ github.repository }}/pulls/${{ github.event.inputs.pr }}"
-          REMOTE=$(gh api $GH_API_URL | jq -r .head.repo.html_url)
-          BRANCH=$(gh api $GH_API_URL | jq -r .head.ref)
-
-          git push "$REMOTE" "$BRANCH"
+          # If there were no changes, this will do nothing, but succeed.
+          git push "$REMOTE" HEAD:"$BRANCH"
 
       - name: Debug
         uses: mxschmitt/action-tmate@v3.6
         with:
           limit-access-to-actor: true
         if: failure()
+
+  set-final-status:
+    name: Set Final Status
+    runs-on: ubuntu-latest
+    needs: [run-lab-tests, update-pr]
+    # Will run on success or failure, but not if the workflow is cancelled.
+    if: ${{ success() || failure() }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: refs/pull/${{ inputs.pr }}/head
+
+      - name: Compute final status
+        id: compute
+        run: |
+          LAB_TEST_STATUS="${{ needs.run-lab-tests.status }}"
+          UPDATE_PR_STATUS="${{ needs.update-pr.status }}"
+
+          # If run-lab-tests succeeded, use the status of update-pr, otherwise
+          # use run-lab-tests (which is "failed" or "error").
+          if [ "$LAB_TEST_STATUS" == "success" ]; then
+            echo "status=$UPDATE_PR_STATUS" >> $GITHUB_OUTPUT
+          else
+            echo "status=$LAST_TEST_STATUS" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Report final status
+        uses: ./.github/workflows/custom-actions/set-commit-status
+        with:
+          context: Update All Screenshots
+          state: ${{ steps.compute.outputs.status }}
+          token: ${{ secrets.GITHUB_TOKEN }}
