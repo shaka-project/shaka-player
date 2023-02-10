@@ -31,7 +31,7 @@ player.load(url).catch(handleError);
 try {
   await player.load(url);
 } catch (e) {
-  errorHandler(e);
+  handleError(e);
 }
 ```
 
