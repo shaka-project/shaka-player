@@ -67,6 +67,7 @@ const vodManifestNotFoundHandler = (event /* shaka.net.NetworkingEngine.RetryEve
 
   if (code === shaka.util.Error.Code.BAD_HTTP_STATUS) {
     if (
+      // each type of error has its own data structure (or none at all), tread with care
       Array.isArray(data) &&
       data[1] === 404 &&
       data[4] === shaka.net.NetworkingEngine.RequestType.MANIFEST
