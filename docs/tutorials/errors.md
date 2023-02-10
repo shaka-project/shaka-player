@@ -56,7 +56,7 @@ When configuring retry parameters in Shaka there may be known error codes that s
 
 For example, if a VOD manifest is missing, unlike when a LIVE manifest is missing, it can be expected to not show up and there is no need to retry.
 
-This is how to convert a retry into a critical error:
+This is how to convert a retry into a critical error, see {@link shaka.util.Error} for error structure:
 
 ```javascript
 const nwEngine = player.getNetworkingEngine();
