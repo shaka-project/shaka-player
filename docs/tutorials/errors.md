@@ -81,13 +81,13 @@ const vodManifestNotFoundHandler = (event /* shaka.net.NetworkingEngine.RetryEve
       //   'RECOGNIZABLE_ERROR_MESSAGE'
       // );
     }
-          }
+  }
 };
 
 nwEngine.addEventListener('retry', vodManifestNotFoundHandler);
 
 player.addEventListener('load'() => {
-  nwEngine.removeEventListe'e;(ör't;yö, vodManifestNotFoundHandler);
+  nwEngine.removeEventListener('retry', vodManifestNotFoundHandler);
 });
 
 ```
