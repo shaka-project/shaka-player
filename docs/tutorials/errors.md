@@ -22,12 +22,12 @@ const player = new shaka.Player(video);
 // handle errors that occur after load
 player.addEventListener('error', handleError);
 
-// handle errors that occur during load
+// there are two options for catching errors that occur during load
 
-// listening directly on the promise
+// it's possible to listen directly on the promise
 player.load(url).catch(handleError);
 
-// listening with async/await
+// or to use async/await with a try/catch
 try {
   await player.load(url);
 } catch (e) {
