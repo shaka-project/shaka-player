@@ -1561,6 +1561,20 @@ shakaDemo.Main = class {
         request.contentSourceId = asset.imaContentSrcId;
         request.videoId = asset.imaVideoId;
       }
+      switch (asset.imaManifestType) {
+        case 'DASH':
+        case 'dash':
+        case 'MPD':
+        case 'mpd':
+          request.format = google.ima.dai.api.StreamRequest.StreamFormat.DASH;
+          break;
+        case 'HLS':
+        case 'hls':
+        case 'M3U8':
+        case 'm3u8':
+          request.format = google.ima.dai.api.StreamRequest.StreamFormat.HLS;
+          break;
+      }
 
       const uri = await adManager.requestServerSideStream(
           request, /* backupUri= */ asset.manifestUri);
