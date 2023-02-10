@@ -49,3 +49,53 @@ HTMLMediaElement.prototype.webkitSupportsPresentationMode = function(mode) {};
 
 /** @type {string} */
 HTMLMediaElement.prototype.webkitPresentationMode;
+
+
+/**
+ * @typedef {{
+ *   initialAspectRatio: (number|undefined),
+ *   width: (number|undefined),
+ *   height: (number|undefined),
+ *   copyStyleSheets: (boolean|undefined),
+ * }}
+ */
+var DocumentPictureInPictureOptions;
+
+
+/**
+ * @constructor
+ * @implements {EventTarget}
+ */
+function DocumentPictureInPicture() {}
+
+
+/**
+ * @param {DocumentPictureInPictureOptions} options
+ * @return {!Promise.<Window>}
+ */
+DocumentPictureInPicture.prototype.requestWindow = function(options) {};
+
+
+/** @type {Window} */
+DocumentPictureInPicture.prototype.window;
+
+
+/** @override */
+DocumentPictureInPicture.prototype.addEventListener =
+    function(type, listener, options) {};
+
+
+/** @override */
+DocumentPictureInPicture.prototype.removeEventListener =
+    function(type, listener, options) {};
+
+
+/** @override */
+DocumentPictureInPicture.prototype.dispatchEvent = function(event) {};
+
+
+/**
+ * @see https://wicg.github.io/document-picture-in-picture/#api
+ * @type {!DocumentPictureInPicture}
+ */
+Window.prototype.documentPictureInPicture;

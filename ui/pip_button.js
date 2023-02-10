@@ -36,6 +36,9 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     /** @private {HTMLMediaElement} */
     this.localVideo_ = this.controls.getLocalVideo();
 
+    /** @private {HTMLElement } */
+    this.videoContainer_ = this.controls.getVideoContainer();
+
     const LocIds = shaka.ui.Locales.Ids;
     /** @private {!HTMLButtonElement} */
     this.pipButton_ = shaka.util.Dom.createButton();
@@ -111,8 +114,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
    * @private
    */
   isPipAllowed_() {
-    return document.pictureInPictureEnabled &&
-        !this.video.disablePictureInPicture;
+    return ('documentPictureInPicture' in window) ||
+      (document.pictureInPictureEnabled && !this.video.disablePictureInPicture);
   }
 
 
@@ -122,6 +125,10 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
    */
   async onPipClick_() {
     try {
+      if ('documentPictureInPicture' in window) {
+        await this.toggleDocumentPictureInPicture_();
+        return;
+      }
       if (!document.pictureInPictureElement) {
         // If you were fullscreen, leave fullscreen first.
         if (document.fullscreenElement) {
@@ -137,6 +144,50 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     }
   }
 
+  /**
+   * The Document Picture-in-Picture API makes it possible to open an
+   * always-on-top window that can be populated with arbitrary HTML content.
+   * https://developer.chrome.com/docs/web-platform/document-picture-in-picture
+   * @private
+   */
+  async toggleDocumentPictureInPicture_() {
+    // Close Picture-in-Picture window if any.
+    if (window.documentPictureInPicture.window) {
+      window.documentPictureInPicture.window.close();
+      this.onLeavePictureInPicture_();
+      return;
+    }
+
+    // Open a Picture-in-Picture window.
+    const pipPlayer = this.videoContainer_;
+    const rectPipPlayer = pipPlayer.getBoundingClientRect();
+    const pipWindow = await window.documentPictureInPicture.requestWindow({
+      initialAspectRatio: rectPipPlayer.width / rectPipPlayer.height,
+      copyStyleSheets: true,
+    });
+
+    // Add placeholder for the player.
+    const parentPlayer = pipPlayer.parentNode || document.body;
+    const placeholder = this.videoContainer_.cloneNode(true);
+    placeholder.style.visibility = 'hidden';
+    placeholder.style.height = getComputedStyle(pipPlayer).height;
+    parentPlayer.appendChild(placeholder);
+
+    // Make sure player fits in the Picture-in-Picture window.
+    const styles = document.createElement('style');
+    styles.append(`[data-shaka-player-container] {
+      width: 100% !important; max-height: 100%}`);
+    pipWindow.document.head.append(styles);
+
+    // Move player to the Picture-in-Picture window.
+    pipWindow.document.body.append(pipPlayer);
+    this.onEnterPictureInPicture_();
+
+    // Listen for the PiP closing event to move the player back.
+    this.eventManager.listenOnce(pipWindow, 'unload', () => {
+      placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
+    });
+  }
 
   /** @private */
   onEnterPictureInPicture_() {
