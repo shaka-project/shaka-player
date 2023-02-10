@@ -61,7 +61,8 @@ The following elements can be added to the UI bar using this configuration value
   starts playing the presentation at an increased speed
 * spacer: adds a chunk of empty space between the adjacent elements.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
-  that support it. Button is invisible on other browsers.
+  that support it. Button is invisible on other browsers. Note that it will use the
+  [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
   supports AirPlay.
@@ -72,6 +73,7 @@ The following elements can be added to the UI bar using this configuration value
 * playback_rate: adds a button that controls the playback rate selection.
 * captions: adds a button that controls the current text track selection (including turning it off).
 <!-- TODO: If we add more buttons that can be put in the order this way, list them here. -->
+[Document Picture-in-Picture API]: https://developer.chrome.com/docs/web-platform/document-picture-in-picture/
 
 Similarly, the 'overflowMenuButtons' configuration option can be used to control
 the contents of the overflow menu.
@@ -83,7 +85,8 @@ The following buttons can be added to the overflow menu:
 * quality: adds a button that controls enabling/disabling of abr and video resolution selection.
 * language: adds a button that controls audio language selection.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
-  that support it. Button is invisible on other browsers.
+  that support it. Button is invisible on other browsers. Note that it will use the 
+  [Document Picture-in-Picture API]() if supported.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * playback_rate: adds a button that controls the playback rate selection.
 * airplay: adds a button that opens a AirPlay dialog. The button is visible only if the browser
@@ -122,7 +125,8 @@ The following buttons can be added to the context menu:
 * Statistics: adds a button that displays statistics of the video.
 * loop: adds a button that controls if the currently selected video is played in a loop.
 * picture_in_picture: adds a button that enables/disables picture-in-picture mode on browsers
-  that support it. Button is invisible on other browsers.
+  that support it. Button is invisible on other browsers. Note that it will use the 
+  [Document Picture-in-Picture API]() if supported.
 
 Example:
 ```js
