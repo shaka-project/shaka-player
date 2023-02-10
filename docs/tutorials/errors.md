@@ -4,7 +4,7 @@ The basics for handling native Error and {@link shaka.util.Error} thrown by Shak
 
 ## Listening To and Handling Errors
 
-```typescript
+```javascript
 const handleError = (error) => {
   if (error instanceof Error) {
     // shaka crashed with an unhandled native error
@@ -39,7 +39,7 @@ try {
 
 The `streaming.failureCallback` property of ({@link shaka.extern.PlayerConfiguration}) can be used to add custom handling or error conversion of errors that occur during streaming.
 
-```typescript
+```javascript
 player.configure('streaming.failureCallback', (error) => {
   if (error.severity === shaka.util.Error.Severity.CRITICAL) {
     // custom handling of critical error
@@ -58,7 +58,7 @@ For example, if a VOD manifest is missing, unlike when a LIVE manifest is missin
 
 This is how to convert a retry into a critical error:
 
-```typescript
+```javascript
 const nwEngine = player.getNetworkingEngine();
 
 const vodManifestNotFoundHandler = (error) => {
