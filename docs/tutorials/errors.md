@@ -72,11 +72,15 @@ const vodManifestNotFoundHandler = (error) => {
       data[1] === 404 &&
       data[4] === shaka.net.NetworkingEngine.RequestType.MANIFEST
     ) {
-      throw new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
-        shaka.util.Error.Category.NETWORK,
-        "MANIFEST_NOT_FOUND",
-      )
+      // Throwing inside a retry callback will immediately stop retries
+      throw error;
+
+      // A proprietary error code can also be thrown
+      // throw new shaka.util.Error(
+      //   shaka.util.Error.Severity.CRITICAL,
+      //   shaka.util.Error.Category.NETWORK,
+      //   "RECOGNIZABLE_ERROR_MESSAGE"
+      // );
     }
   }
 };
