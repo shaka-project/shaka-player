@@ -1,4 +1,11 @@
 /**
+ * @fileoverview Externs for Transmuxer.
+ *
+ * @externs
+ */
+
+
+/**
  * An interface for transmuxer plugins.
  *
  * @interface
