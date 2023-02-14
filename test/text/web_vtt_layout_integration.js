@@ -265,7 +265,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('line-85-position-50-size-63');
     });
 
-    // FIXME: UI version is slightly wrong: gaps between lines when bold
     it('bold long', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -278,7 +277,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('bold-long');
     });
 
-    // FIXME: UI version is slightly wrong: gaps between lines when italic
     it('italic long', async () => {
       parseAndDisplay([
         'WEBVTT\n',
@@ -291,7 +289,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('italic-long');
     });
 
-    // FIXME: UI version is slightly wrong: gaps between lines when italic
     it('underline long', async () => {
       parseAndDisplay([
         'WEBVTT\n',
