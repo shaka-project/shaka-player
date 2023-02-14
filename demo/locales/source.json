@@ -675,6 +675,14 @@
     "description": "Text that describes an asset that uses the MP4 container.",
     "message": "[JARGON:MP4]"
   },
+  "DEMO_MSS": {
+    "description": "Text that describes an asset that is packaged in an MSS manifest.",
+    "message": "[PROPER_NAME:MSS]"
+  },
+  "DEMO_MSS_SEQUENCE_MODE": {
+    "description": "The name of a configuration value.",
+    "message": "Enable MSS sequence mode"
+  },
   "DEMO_MULTIPLE_LANGUAGES": {
     "description": "A tag that marks an asset as having multiple languages.",
     "message": "Multiple languages"
@@ -978,6 +986,10 @@
   "DEMO_UNSUPPORTED_NO_LICENSE_SUPPORT": {
     "description": "An error message that shows why an asset cannot be stored offline: the browser cannot store protected content offline.",
     "message": "Your browser does not support offline licenses for the required key systems."
+  },
+  "DEMO_UNSUPPORTED_NO_MSS_SUPPORT": {
+    "description": "An error message that shows why an asset cannot be stored offline: the browser cannot play MSS (https://en.wikipedia.org/wiki/Adaptive_bitrate_streaming#Microsoft_Smooth_Streaming_(MSS)) content.",
+    "message": "Your browser does not support [PROPER_NAME:MSS] manifests."
   },
   "DEMO_UNSUPPORTED_NO_OFFLINE": {
     "description": "An error message that shows why an asset cannot be stored offline: the browser does not support storing things offline, in general.",

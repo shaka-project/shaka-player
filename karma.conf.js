@@ -164,6 +164,9 @@ module.exports = (config) => {
       // muxjs module next
       'node_modules/mux.js/dist/mux.min.js',
 
+      // codem-isoboxer module next
+      'node_modules/codem-isoboxer/dist/iso_boxer.min.js',
+
       // EME encryption scheme polyfill, compiled into Shaka Player, but outside
       // of the Closure deps system, so not in shaka-player.uncompiled.js.  This
       // is specifically the compiled, minified, cross-browser build of it.
