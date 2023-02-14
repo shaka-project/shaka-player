@@ -37,7 +37,7 @@ try {
 
 ## Custom Handling of Streaming Errors
 
-The `streaming.failureCallback` property of ({@link shaka.extern.PlayerConfiguration}) can be used to add custom handling or error conversion of errors that occur during streaming.
+The `streaming.failureCallback` property of {@link shaka.extern.PlayerConfiguration} can be used to add custom handling or error conversion of errors that occur during streaming.
 
 ```javascript
 player.configure('streaming.failureCallback', (error) => {
