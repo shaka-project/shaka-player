@@ -182,8 +182,8 @@ describe('MediaCapabilities', () => {
 
     it('falls back to isTypeSupported() when cast namespace is not available',
         async () => {
-          // Temporarily remove window.cast to trigger error. It's restored after
-          // every test.
+          // Temporarily remove window.cast to trigger error. It's restored
+          // after every test.
           delete window['cast'];
 
           const isChromecastSpy =
