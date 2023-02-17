@@ -1,0 +1,63 @@
+name: Update All Screenshots
+# Updates all screenshots on an existing PR, assuming permission has been given
+# to maintainers to make edits.
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering on PRs.  They should be reviewed first, to
+    # avoid malicious code executing in the lab.
+    inputs:
+      pr:
+        description: "A PR number to build and test in the lab, then update all the screenshots."
+        required: true
+
+jobs:
+  run-lab-tests:
+    name: Get Selenium Lab Screenshots
+    uses: ./.github/workflows/selenium-lab-tests.yaml
+    with:
+      pr: ${{ github.event.inputs.pr }}
+      test_filter: 'layout'
+      ignore_test_status: true
+
+  update-pr:
+    name: Update PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: refs/pull/${{ github.event.inputs.pr }}/head
+
+      - name: Get artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Update screenshots
+        run: |
+          # Unpack screenshots from the lab.
+          for i in screenshots-*.zip; do
+            unzip -d test/test/assets/screenshots/ "$i"
+          done
+
+          # Update the official screenshots for any that has visibly changed.
+          # This is not a byte-for-byte comparison.
+          ./build/updateScreenshots.py
+
+          # Emulate the actions bot.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Update the PR.
+          git add test/test/assets/screenshots/*/*.png
+          git commit -m ':robot: Update all screenshots'
+
+          PR_API_URL="/repos/${{ github.repository }}/pulls/${{ github.event.inputs.pr }}"
+          REMOTE=$(gh api $GH_API_URL | jq -r .head.repo.html_url)
+          BRANCH=$(gh api $GH_API_URL | jq -r .head.ref)
+
+          git push "$REMOTE" "$BRANCH"
+
+      - name: Debug
+        uses: mxschmitt/action-tmate@v3.6
+        with:
+          limit-access-to-actor: true
+        if: failure()

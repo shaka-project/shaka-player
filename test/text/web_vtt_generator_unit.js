@@ -13,11 +13,17 @@ describe('WebVttGenerator', () => {
     const shakaCue1 = new shaka.text.Cue(20, 40, 'Test');
     shakaCue1.textAlign = shaka.text.Cue.textAlign.LEFT;
     shakaCue1.writingMode = shaka.text.Cue.writingMode.VERTICAL_LEFT_TO_RIGHT;
+    shakaCue1.color = 'red';
+    shakaCue1.backgroundColor = '#f0f';
     const shakaCue2 = new shaka.text.Cue(40, 50, 'Test2');
     shakaCue2.textAlign = shaka.text.Cue.textAlign.RIGHT;
     shakaCue2.writingMode = shaka.text.Cue.writingMode.VERTICAL_RIGHT_TO_LEFT;
+    shakaCue2.color = '#0f0';
+    shakaCue2.backgroundColor = 'lime';
     const shakaCue3 = new shaka.text.Cue(50, 51, 'Test3');
     shakaCue3.textAlign = shaka.text.Cue.textAlign.CENTER;
+    shakaCue3.color = '#ffff00';
+    shakaCue3.backgroundColor = '#00ffff';
     const shakaCue4 = new shaka.text.Cue(52, 53, 'Test4');
     shakaCue4.textAlign = shaka.text.Cue.textAlign.START;
     const shakaCue5 = new shaka.text.Cue(53, 54, 'Test5');
@@ -36,11 +42,11 @@ describe('WebVttGenerator', () => {
         adCuePoints,
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 align:left vertical:lr\n' +
-        'Test\n\n' +
+        '<c.red.bg_magenta>Test</c>\n\n' +
         '00:00:40.000 --> 00:00:50.000 align:right vertical:rl\n' +
-        'Test2\n\n' +
+        '<c.lime.bg_lime>Test2</c>\n\n' +
         '00:00:50.000 --> 00:00:51.000 align:middle\n' +
-        'Test3\n\n' +
+        '<c.yellow.bg_cyan>Test3</c>\n\n' +
         '00:00:52.000 --> 00:00:53.000 align:start\n' +
         'Test4\n\n' +
         '00:00:53.000 --> 00:00:54.000 align:end\n' +

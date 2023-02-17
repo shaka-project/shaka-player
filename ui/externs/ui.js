@@ -85,7 +85,8 @@ shaka.extern.UIVolumeBarColors;
  *   enableFullscreenOnRotation: boolean,
  *   forceLandscapeOnFullscreen: boolean,
  *   enableTooltips: boolean,
- *   keyboardSeekDistance: number
+ *   keyboardSeekDistance: number,
+ *   fullScreenElement: HTMLElement
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -183,6 +184,9 @@ shaka.extern.UIVolumeBarColors;
  *   right keyboard keys when the video is selected. If less than or equal to 0,
  *   no seeking will occur.
  *   Defaults to 5 seconds.
+ * @property {HTMLElement} fullScreenElement
+ *   DOM element on which fullscreen will be done.
+ *   Defaults to Shaka Player Container.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

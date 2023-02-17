@@ -362,6 +362,25 @@ shakaDemo.Custom = class {
     this.makeField_(
         container, assetKeyName, assetKeySetup, assetKeyChange);
 
+    // Make the manifest type field.
+    const manifestTypeSetup = (input, container) => {
+      if (assetInProgress.imaManifestType) {
+        input.value = assetInProgress.imaManifestType;
+      }
+
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const manifestTypeChange = (input) => {
+      assetInProgress.imaManifestType = input.value;
+      this.manifestField_.required =
+        this.checkManifestRequired_(assetInProgress);
+    };
+    const manifestTypeName = shakaDemoMain.getLocalizedString(
+        shakaDemo.MessageIds.IMA_MANIFEST_TYPE);
+    this.makeField_(
+        container, manifestTypeName, manifestTypeSetup, manifestTypeChange);
+
     return adsDiv;
   }
 

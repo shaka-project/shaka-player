@@ -8,6 +8,21 @@ on:
       pr:
         description: "A PR number to build and test in the lab.  If empty, will build and test from main."
         required: false
+      test_filter:
+        description: "A filter to run a subset of the tests.  If empty, all tests will run."
+        required: false
+  workflow_call:
+    # Allows for reuse from other workflows, such as "Update All Screenshots"
+    # workflow.
+    inputs:
+      pr:
+        description: "A PR number to build and test in the lab.  If empty, will build and test from main."
+        required: false
+      test_filter:
+        description: "A filter to run a subset of the tests.  If empty, all tests will run."
+        required: false
+      ignore_test_status:
+        description: "If true, ignore test failures and treat the workflow as a success."
   schedule:
     # Runs every night at 2am PST / 10am UTC, testing against the main branch.
     - cron: '0 10 * * *'
@@ -189,6 +204,16 @@ jobs:
             extra_flags="--html-coverage-report --uncompiled"
           else
             extra_flags=""
+          fi
+
+          filter="${{ github.event.inputs.test_filter }}"
+          if [[ "$filter" != "" ]]; then
+            extra_flags="$extra_flags --filter $filter"
+          fi
+
+          ignore_test_status="${{ github.event.inputs.ignore_test_status }}"
+          if [[ "$ignore_test_status" == "true" ]]; then
+            extra_flags="$extra_flags || true"
           fi
 
           python3 build/test.py \
