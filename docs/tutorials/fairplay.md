@@ -53,12 +53,12 @@ you.
 const req = await fetch('https://example.com/cert.der');
 const cert = await req.arrayBuffer();
 
-player.configure('drm.advanced.com\\.apple\\.fps\\.serverCertificate',
+player.configure('drm.advanced.com\\.apple\\.fps.serverCertificate',
                  new Uint8Array(cert));
 ```
 
 ```js
-player.configure('drm.advanced.com\\.apple\\.fps\\.serverCertificateUri',
+player.configure('drm.advanced.com\\.apple\\.fps.serverCertificateUri',
                  'https://example.com/cert.der');
 ```
 
