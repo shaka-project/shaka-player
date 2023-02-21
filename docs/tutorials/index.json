@@ -9,6 +9,7 @@
   { "license-wrapping": { "title": "License Wrapping" } },
   { "ui": { "title": "UI Library" } },
   { "ui-customization": { "title": "Configuring the UI" } },
+  { "errors": { "title": "Error Handling" } },
   { "a11y": { "title": "Creating accessible buttons" } },
   { "ad_monetization": { "title": "Serving ads with our IMA SDK integration" } },
   { "plugins": { "title": "Plugins and Customizing the Build" } },
