@@ -81,6 +81,20 @@ See: [google.ima.AdsRequest][] for details on the request object.
 
 [google.ima.AdsRequest]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/reference/js/ima.AdsRequest
 
+Control the rendering of ads:
+
+```js
+const adsRenderingSettings = new google.ima.AdsRenderingSettings();
+adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
+adManager.initClientSide(container, video, adsRenderingSettings);
+// Updates the ads rendering settings.
+adManager.updateClientSideAdsRenderingSettings(adsRenderingSettings);
+```
+
+See: [google.ima.AdsRenderingSettings][] for details on the request object.
+
+[google.ima.AdsRenderingSettings]: https://developers.google.com/interactive-media-ads/docs/sdks/html5/client-side/reference/js/google.ima.AdsRenderingSettings
+
 #### Streaming with Server Side Ads Insertion
 
 To integrate Server Side ads into a presentation, you need to have a Google Ad

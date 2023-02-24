@@ -45,6 +45,13 @@ describe('Ad manager', () => {
       request.adTagUrl = 'fakeTag';
 
       expect(() => adManager.requestClientSideAds(request)).toThrow(error);
+
+      const adsRenderingSettings = new google.ima.AdsRenderingSettings();
+      adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
+
+      expect(() =>
+        adManager.updateClientSideAdsRenderingSettings(adsRenderingSettings))
+          .toThrow(error);
     });
 
     it('doesn\'t request ads if CS events return no ad', () => {
@@ -52,6 +59,9 @@ describe('Ad manager', () => {
 
       const request = new google.ima.AdsRequest();
       request.adTagUrl = 'fakeTag';
+
+      const adsRenderingSettings = new google.ima.AdsRenderingSettings();
+      adsRenderingSettings.restoreCustomPlaybackStateOnAdBreakComplete = true;
 
       /** @type {google.ima.AdsLoader} */
       let mockAdsLoaderInstance;
@@ -135,7 +145,7 @@ describe('Ad manager', () => {
       });
 
       // Set up the ad manager.
-      adManager.initClientSide(adContainer, mockVideo);
+      adManager.initClientSide(adContainer, mockVideo, adsRenderingSettings);
       goog.asserts.assert(loadEvent != null, 'loadEvent exists');
       mockAdsLoaderInstance.dispatchEvent(/** @type {!Event} */ (loadEvent));
       expect(loaded).toBe(true);
@@ -197,6 +207,7 @@ describe('Ad manager', () => {
     window['google'].ima.AdsLoader = {};
     window['google'].ima.dai = {};
     window['google'].ima.AdsRequest = class {};
+    window['google'].ima.AdsRenderingSettings = class {};
     window['google'].ima.dai.api = {};
     window['google'].ima.dai.api.StreamRequest = class {};
     window['google'].ima.settings = {};
