@@ -287,25 +287,4 @@ describe('MssParser Manifest', () => {
     expect(initSegmentReference.getEndByte()).toBe(null);
     expect(initSegmentReference.getSegmentData()).toBeDefined();
   });
-
-  // it('check the correct segmentIndex', async () => {
-  // const manifestText = [
-  // '<SmoothStreamingMedia Duration="3600000000">',
-  // '  <StreamIndex Name="audio" Type="audio" Url="{bitrate}/{start time}">',
-  // '    <QualityLevel Bitrate="128000" Channels="2"  CodecPrivateData="',
-  // aacCodecPrivateData,
-  // '" FourCC="AACL"/>',
-  // '    <c t="0" d="30000000" r="2"/>',
-  // '  </StreamIndex>',
-  // '</SmoothStreamingMedia>',
-  // ].join('\n');
-
-  // const baseUri = 'dummy://foo';
-
-  // const references = [
-  //   ManifestParser.makeReference('128000/0', 0, 3, baseUri),
-  //   ManifestParser.makeReference('128000/30000000', 3, 6, baseUri),
-  // ];
-  // await Mss.testSegmentIndex(manifestText, references);
-  // });
 });

@@ -357,10 +357,12 @@ describe('StreamingEngine', () => {
       await waiter.timeoutAfter(60).waitUntilPlayheadReaches(video, 305);
 
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+      const segmentAdvType =
+          shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
       // firstSegmentNumber =
       //   [(segmentAvailabilityEnd - rebufferingGoal) / segmentDuration] + 1
-      netEngine.expectRequest('0_video_29', segmentType);
-      netEngine.expectRequest('0_audio_29', segmentType);
+      netEngine.expectRequest('0_video_29', segmentType, segmentAdvType);
+      netEngine.expectRequest('0_audio_29', segmentType, segmentAdvType);
     });
 
     it('can handle seeks ahead of availability window', async () => {

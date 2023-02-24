@@ -28,7 +28,7 @@ shaka.test.StreamingEngineUtil = class {
   static createFakeNetworkingEngine(getInitSegment, getSegment, delays) {
     const netEngine = new shaka.test.FakeNetworkingEngine();
 
-    netEngine.request.and.callFake((requestType, request) => {
+    netEngine.request.and.callFake((requestType, request, advType) => {
       expect(requestType).toBeTruthy();
       expect(request.uris.length).toBe(1);
 
