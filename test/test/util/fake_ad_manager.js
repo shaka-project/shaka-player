@@ -34,6 +34,9 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   }
 
   /** @override */
+  updateClientSideAdsRenderingSettings() {}
+
+  /** @override */
   initServerSide(adContainer, video) {}
 
   /** @override */
