@@ -5,7 +5,6 @@
  */
 
 describe('MediaCapabilities', () => {
-  const Util = shaka.test.Util;
   const originalCast = window['cast'];
   const originalVendor = navigator.vendor;
   const originalUserAgent = navigator.userAgent;
@@ -168,30 +167,29 @@ describe('MediaCapabilities', () => {
           expect(result.keySystemAccess).toEqual(mockResult);
         });
 
-    it('throws when the cast namespace is not available', async () => {
-      // Temporarily remove window.cast to trigger error. It's restored after
-      // every test.
-      delete window['cast'];
+    it('falls back to isTypeSupported() when cast namespace is not available',
+        async () => {
+          // Temporarily remove window.cast to trigger error. It's restored
+          // after every test.
+          delete window['cast'];
 
-      const isChromecastSpy =
-          spyOn(shaka['util']['Platform'],
-              'isChromecast').and.returnValue(true);
-      const expected = Util.jasmineError(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.CAST,
-          shaka.util.Error.Code.CAST_API_UNAVAILABLE));
-      const isTypeSupportedSpy =
-          spyOn(window['MediaSource'], 'isTypeSupported').and.returnValue(true);
+          const isChromecastSpy =
+              spyOn(shaka['util']['Platform'],
+                  'isChromecast').and.returnValue(true);
+          const isTypeSupportedSpy =
+              spyOn(window['MediaSource'], 'isTypeSupported')
+                  .and.returnValue(true);
 
-      shaka.polyfill.MediaCapabilities.install();
-      await expectAsync(
-          navigator.mediaCapabilities.decodingInfo(mockDecodingConfig))
-          .toBeRejectedWith(expected);
+          shaka.polyfill.MediaCapabilities.install();
+          await navigator.mediaCapabilities.decodingInfo(mockDecodingConfig);
 
-      expect(isTypeSupportedSpy).not.toHaveBeenCalled();
-      // 1 (during install()) + 1 (for video config check).
-      expect(isChromecastSpy).toHaveBeenCalledTimes(2);
-    });
+          expect(mockCanDisplayType).not.toHaveBeenCalled();
+          // 1 (during install()) + 1 (for video config check).
+          expect(isChromecastSpy).toHaveBeenCalledTimes(2);
+          // 1 (fallback in canCastDisplayType()) +
+          // 1 (mockDecodingConfig.audio).
+          expect(isTypeSupportedSpy).toHaveBeenCalledTimes(2);
+        });
 
     it('falls back to isTypeSupported() when canDisplayType() missing',
         async () => {
