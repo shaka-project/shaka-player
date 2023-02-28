@@ -17,6 +17,9 @@ describe('TextEngine', () => {
   let mockDisplayer;
 
   /** @type {!jasmine.Spy} */
+  let mockCueFilter;
+
+  /** @type {!jasmine.Spy} */
   let mockParseInit;
 
   /** @type {!jasmine.Spy} */
@@ -32,6 +35,7 @@ describe('TextEngine', () => {
     mockParseInit = jasmine.createSpy('mockParseInit');
     mockSetSequenceMode = jasmine.createSpy('mockSetSequenceMode');
     mockParseMedia = jasmine.createSpy('mockParseMedia');
+    mockCueFilter = jasmine.createSpy('mockCueFilter');
     // eslint-disable-next-line no-restricted-syntax
     mockParserPlugIn = function() {
       return {
@@ -45,6 +49,7 @@ describe('TextEngine', () => {
     mockDisplayer.removeSpy.and.returnValue(true);
 
     TextEngine.registerParser(dummyMimeType, mockParserPlugIn);
+    TextEngine.setCueFilter(shaka.test.Util.spyFunc(mockCueFilter));
     textEngine = new TextEngine(mockDisplayer);
     textEngine.initParser(
         dummyMimeType,
@@ -54,6 +59,7 @@ describe('TextEngine', () => {
 
   afterEach(() => {
     TextEngine.unregisterParser(dummyMimeType);
+    TextEngine.setCueFilter(null);
   });
 
   describe('isTypeSupported', () => {
@@ -81,6 +87,7 @@ describe('TextEngine', () => {
       mockParseMedia.and.returnValue([1, 2, 3]);
       const p = textEngine.appendBuffer(dummyData, 0, 3);
       expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
+      expect(mockCueFilter).not.toHaveBeenCalled();
       await p;
     });
 
@@ -100,6 +107,8 @@ describe('TextEngine', () => {
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [cue1, cue2],
       ]);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue1);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue2);
 
       expect(mockDisplayer.removeSpy).not.toHaveBeenCalled();
 
@@ -115,6 +124,8 @@ describe('TextEngine', () => {
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
         [cue3, cue4],
       ]);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue3);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue4);
     });
 
     it('does not throw if called right before destroy', async () => {
@@ -139,6 +150,7 @@ describe('TextEngine', () => {
       textEngine.storeAndAppendClosedCaptions(
           [caption], /* startTime= */ 0, /* endTime= */ 2, /* offset= */ 0);
       expect(mockDisplayer.appendSpy).toHaveBeenCalled();
+      expect(mockCueFilter).toHaveBeenCalled();
     });
 
     it('does not append closed captions without selected id', () => {
@@ -154,6 +166,7 @@ describe('TextEngine', () => {
       textEngine.storeAndAppendClosedCaptions(
           [caption], /* startTime= */ 0, /* endTime= */ 2, /* offset= */ 0);
       expect(mockDisplayer.appendSpy).not.toHaveBeenCalled();
+      expect(mockCueFilter).not.toHaveBeenCalled();
     });
 
     it('stores closed captions', () => {
@@ -205,12 +218,12 @@ describe('TextEngine', () => {
       textEngine.setSelectedClosedCaptionId('CC1', 0);
       textEngine.storeAndAppendClosedCaptions(
           [caption], /* startTime= */ 0, /* endTime= */ 2, /* offset= */ 1000);
-      expect(mockDisplayer.appendSpy).toHaveBeenCalledWith([
-        jasmine.objectContaining({
-          startTime: 1000,
-          endTime: 1001,
-        }),
-      ]);
+      const cue = jasmine.objectContaining({
+        startTime: 1000,
+        endTime: 1001,
+      });
+      expect(mockDisplayer.appendSpy).toHaveBeenCalledWith([cue]);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue);
     });
   });
 
@@ -248,6 +261,11 @@ describe('TextEngine', () => {
 
   describe('setTimestampOffset', () => {
     it('passes the offset to the parser', async () => {
+      const cue1 = createFakeCue(0, 1);
+      const cue2 = createFakeCue(2, 3);
+      const cue3 = createFakeCue(4, 5);
+      const cue4 = createFakeCue(6, 7);
+
       mockParseMedia.and.callFake((data, time) => {
         return [
           createFakeCue(time.periodStart + 0,
@@ -264,11 +282,10 @@ describe('TextEngine', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 3, vttOffset: 0},
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
-        [
-          createFakeCue(0, 1),
-          createFakeCue(2, 3),
-        ],
+        [cue1, cue2],
       ]);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue1);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue2);
 
       textEngine.setTimestampOffset(4);
       await textEngine.appendBuffer(dummyData, 4, 7);
@@ -278,11 +295,10 @@ describe('TextEngine', () => {
         {periodStart: 4, segmentStart: 4, segmentEnd: 7, vttOffset: 4},
       ]);
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
-        [
-          createFakeCue(4, 5),
-          createFakeCue(6, 7),
-        ],
+        [cue3, cue4],
       ]);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue3);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue4);
     });
 
     it('vttOffset when segmentRelativeVttTiming is set', async () => {
@@ -430,25 +446,28 @@ describe('TextEngine', () => {
     });
 
     it('limits appended cues', async () => {
+      const cue1 = createFakeCue(0, 1);
+      const cue2 = createFakeCue(1, 2);
+      const cue3 = createFakeCue(1, 2);
+      const cue4 = createFakeCue(2, 3);
+
       textEngine.setAppendWindow(0, 1.9);
       await textEngine.appendBuffer(dummyData, 0, 3);
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
-        [
-          createFakeCue(0, 1),
-          createFakeCue(1, 2),
-        ],
+        [cue1, cue2],
       ]);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue1);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue2);
 
       textEngine.setAppendWindow(1, 2.1);
       await textEngine.appendBuffer(dummyData, 0, 3);
 
       expect(mockDisplayer.appendSpy).toHaveBeenCalledOnceMoreWith([
-        [
-          createFakeCue(1, 2),
-          createFakeCue(2, 3),
-        ],
+        [cue3, cue4],
       ]);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue3);
+      expect(mockCueFilter).toHaveBeenCalledWith(cue4);
     });
 
     it('limits bufferStart', async () => {

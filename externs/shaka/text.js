@@ -545,3 +545,14 @@ shaka.extern.TextDisplayer = class {
  * @exportDoc
  */
 shaka.extern.TextDisplayer.Factory;
+
+
+/**
+ * Defines a filter for text cues.  This filter takes the cue object and changes
+ * it before it is sent to the text displayer. This allows for default values to
+ * be set, or pre-processing to happen, without making a custom text displayer.
+ *
+ * @typedef {!function(shaka.text.Cue)}
+ * @exportDoc
+ */
+shaka.extern.TextCueFilter;
