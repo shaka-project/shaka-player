@@ -8,7 +8,6 @@ describe('VttTextParser', () => {
   const Cue = shaka.text.Cue;
   const CueRegion = shaka.text.CueRegion;
   const originalLogWarning = shaka.log.warning;
-  const anyString = jasmine.any(String);
 
   /** @type {!jasmine.Spy} */
   let logWarningSpy;
@@ -161,38 +160,30 @@ describe('VttTextParser', () => {
   });
 
   it('rejects invalid time values', () => {
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+    verifyHelper([],
         'WEBVTT\n\n00.020    --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
-        anyString);
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+    verifyHelper([],
         'WEBVTT\n\n0:00.020  --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
-        anyString);
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+    verifyHelper([],
         'WEBVTT\n\n00:00.20  --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
-        anyString);
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+    verifyHelper([],
         'WEBVTT\n\n00:100.20 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
-        anyString);
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+    verifyHelper([],
         'WEBVTT\n\n00:00.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
-        anyString);
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+    verifyHelper([],
         'WEBVTT\n\n00:00:00:00.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
-        anyString);
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+    verifyHelper([],
         'WEBVTT\n\n00:61.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
-        anyString);
-    errorHelper(shaka.util.Error.Code.INVALID_TEXT_CUE,
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+    verifyHelper([],
         'WEBVTT\n\n61:00.020 --> 0:00.040\nTest',
-        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0},
-        anyString);
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
   it('supports vertical setting', () => {
@@ -852,11 +843,35 @@ describe('VttTextParser', () => {
   it('support escaped html payload', () => {
     verifyHelper(
         [
-          {startTime: 20.1, endTime: 40.505, payload: '"Test & 1"\u{a0}'},
+          {
+            startTime: 20.1,
+            endTime: 40.505,
+            payload: '"Test & 1"\u{a0}',
+          },
+          {
+            startTime: 41,
+            endTime: 42,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 41,
+                endTime: 42,
+                payload: 'Test',
+                fontStyle: Cue.fontStyle.ITALIC,
+              },
+              {
+                startTime: 41,
+                endTime: 42,
+                payload: '&',
+              },
+            ],
+          },
         ],
         'WEBVTT\n\n' +
         '00:00:20.100 --> 00:00:40.505\n' +
-        '&quot;Test &amp; 1&quot;&nbsp;',
+        '&quot;Test &amp; 1&quot;&nbsp;\n\n' +
+        '00:00:41.000 --> 00:00:42.000\n' +
+        '<i>Test</i>&amp;',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
@@ -910,7 +925,7 @@ describe('VttTextParser', () => {
                 startTime: 20,
                 endTime: 40,
                 payload: 'Test',
-                color: '#FF0',
+                color: 'yellow',
               },
             ],
           },
@@ -922,8 +937,8 @@ describe('VttTextParser', () => {
                 startTime: 40,
                 endTime: 50,
                 payload: 'Test2',
-                color: '#0FF',
-                backgroundColor: '#00F',
+                color: 'cyan',
+                backgroundColor: 'blue',
               },
             ],
           },
@@ -935,8 +950,8 @@ describe('VttTextParser', () => {
                 startTime: 50,
                 endTime: 60,
                 payload: 'Test 3',
-                color: '#F0F',
-                backgroundColor: '#000',
+                color: 'magenta',
+                backgroundColor: 'black',
               },
             ],
           },
@@ -954,7 +969,7 @@ describe('VttTextParser', () => {
                 startTime: 60,
                 endTime: 70,
                 payload: 'Test4.1',
-                color: '#FF0',
+                color: 'yellow',
               },
               {
                 startTime: 60,
@@ -971,7 +986,7 @@ describe('VttTextParser', () => {
                 startTime: 60,
                 endTime: 70,
                 payload: 'Test4.2',
-                color: '#00F',
+                color: 'blue',
               },
             ],
           },
@@ -984,13 +999,13 @@ describe('VttTextParser', () => {
                 startTime: 70,
                 endTime: 80,
                 payload: 'Test5.1',
-                color: '#F00',
+                color: 'red',
               },
               {
                 startTime: 70,
                 endTime: 80,
                 payload: 'Test5.2',
-                color: '#0F0',
+                color: 'lime',
               },
             ],
           },
@@ -1015,7 +1030,7 @@ describe('VttTextParser', () => {
                 startTime: 100,
                 endTime: 110,
                 payload: 'forward slash 1/2 in text',
-                color: '#0F0',
+                color: 'lime',
               },
             ],
           },
@@ -1132,8 +1147,8 @@ describe('VttTextParser', () => {
                 startTime: 10,
                 endTime: 20,
                 payload: 'Example 1',
-                color: '#F00',
-                backgroundColor: '#FF0',
+                color: 'red',
+                backgroundColor: 'yellow',
                 fontSize: '10px',
               },
             ],
@@ -1141,7 +1156,7 @@ describe('VttTextParser', () => {
         ],
         'WEBVTT\n\n' +
         'STYLE\n' +
-        '::cue(.bg_blue) { font-size: 10px; background-color: #FF0 }\n\n' +
+        '::cue(.bg_blue) { font-size: 10px; background-color: yellow }\n\n' +
         '00:00:10.000 --> 00:00:20.000\n' +
         '<c.red.bg_blue>Example 1</c>\n\n',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
@@ -1159,7 +1174,7 @@ describe('VttTextParser', () => {
                 startTime: 10,
                 endTime: 20,
                 payload: '1',
-                color: '#F0F',
+                color: 'magenta',
               },
               {
                 startTime: 10,
@@ -1171,7 +1186,7 @@ describe('VttTextParser', () => {
                 startTime: 10,
                 endTime: 20,
                 payload: '2',
-                color: '#F0F',
+                color: 'magenta',
                 fontStyle: Cue.fontStyle.ITALIC,
               },
             ],
@@ -1196,6 +1211,34 @@ describe('VttTextParser', () => {
         'id:1\n\n' +
         '00:00:10.000 --> 00:00:20.000\n' +
         'test\n\n',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
+  it('supports an extra newline inside the cue body', () => {
+    verifyHelper(
+        [
+          {startTime: 20, endTime: 40, payload: 'Test'},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        'Test\n\nExtra line\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        'Test2',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
+  it('supports an extra newline before the cue body', () => {
+    verifyHelper(
+        [
+          {startTime: 20, endTime: 40, payload: ''},
+          {startTime: 40, endTime: 50, payload: 'Test2'},
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '\nTest\n\n' +
+        '00:00:40.000 --> 00:00:50.000\n' +
+        'Test2',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 

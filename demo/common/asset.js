@@ -76,6 +76,8 @@ const ShakaDemoAssetInfo = class {
     /** @type {?string} */
     this.imaContentSrcId = null;
     /** @type {?string} */
+    this.imaManifestType = null;
+    /** @type {?string} */
     this.mimeType = null;
     /** @type {?string} */
     this.mediaPlaylistFullMimeType = null;
@@ -268,6 +270,19 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
+   * @param {string} type
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setIMAManifestType(type) {
+    this.imaManifestType = type;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
    * @param {string} headerName
    * @param {string} headerValue
    * @return {!ShakaDemoAssetInfo}
@@ -357,7 +372,8 @@ const ShakaDemoAssetInfo = class {
     networkingEngine.clearAllResponseFilters();
 
     if (this.licenseRequestHeaders.size) {
-      const filter = (requestType, request) => {
+      /** @type {!shaka.extern.RequestFilter} */
+      const filter = (requestType, request, advType) => {
         return this.addLicenseRequestHeaders_(this.licenseRequestHeaders,
             requestType,
             request);

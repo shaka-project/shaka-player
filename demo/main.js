@@ -1185,6 +1185,10 @@ shakaDemo.Main = class {
     if (document.pictureInPictureElement) {
       document.exitPictureInPicture();
     }
+    if (window.documentPictureInPicture &&
+        window.documentPictureInPicture.window) {
+      window.documentPictureInPicture.window.close();
+    }
     this.player_.unload();
 
     // The currently-selected asset changed, so update asset cards.
@@ -1560,6 +1564,20 @@ shakaDemo.Main = class {
         request = new google.ima.dai.api.VODStreamRequest();
         request.contentSourceId = asset.imaContentSrcId;
         request.videoId = asset.imaVideoId;
+      }
+      switch (asset.imaManifestType) {
+        case 'DASH':
+        case 'dash':
+        case 'MPD':
+        case 'mpd':
+          request.format = google.ima.dai.api.StreamRequest.StreamFormat.DASH;
+          break;
+        case 'HLS':
+        case 'hls':
+        case 'M3U8':
+        case 'm3u8':
+          request.format = google.ima.dai.api.StreamRequest.StreamFormat.HLS;
+          break;
       }
 
       const uri = await adManager.requestServerSideStream(

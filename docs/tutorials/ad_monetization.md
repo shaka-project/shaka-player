@@ -203,7 +203,7 @@ default, so you should only need to set this if you've enabled it in other parts
 your code.
 
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request) {
+  player.getNetworkingEngine().registerRequestFilter(function(type, request, advType) {
     if (type == shaka.net.NetworkingEngine.RequestType.MANIFEST ||
         type == shaka.net.NetworkingEngine.RequestType.SEGMENT) {
       request.withCredentials = false;

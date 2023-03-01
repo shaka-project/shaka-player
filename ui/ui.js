@@ -34,6 +34,9 @@ shaka.ui.Overlay = class {
     /** @private {shaka.Player} */
     this.player_ = player;
 
+    /** @private {HTMLElement} */
+    this.videoContainer_ = videoContainer;
+
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.defaultConfig_();
 
@@ -240,6 +243,7 @@ shaka.ui.Overlay = class {
       forceLandscapeOnFullscreen: true,
       enableTooltips: false,
       keyboardSeekDistance: 5,
+      fullScreenElement: this.videoContainer_,
     };
 
     // Check AirPlay support

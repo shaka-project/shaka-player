@@ -53,12 +53,12 @@ you.
 const req = await fetch('https://example.com/cert.der');
 const cert = await req.arrayBuffer();
 
-player.configure('drm.advanced.com\\.apple\\.fps\\.serverCertificate',
+player.configure('drm.advanced.com\\.apple\\.fps.serverCertificate',
                  new Uint8Array(cert));
 ```
 
 ```js
-player.configure('drm.advanced.com\\.apple\\.fps\\.serverCertificateUri',
+player.configure('drm.advanced.com\\.apple\\.fps.serverCertificateUri',
                  'https://example.com/cert.der');
 ```
 
@@ -90,7 +90,7 @@ or give the response in a different format.  For more info, see the general
 {@tutorial license-wrapping} tutorial:
 
 ```js
-player.getNetworkingEngine().registerRequestFilter((type, request) => {
+player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
@@ -103,7 +103,7 @@ player.getNetworkingEngine().registerRequestFilter((type, request) => {
   request.body = shaka.util.StringUtils.toUTF8(encodeURIComponent(params));
 });
 
-player.getNetworkingEngine().registerResponseFilter((type, response) => {
+player.getNetworkingEngine().registerResponseFilter((type, response, advType) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
@@ -143,7 +143,7 @@ Note: If the url of the license server has to undergo any transformation
 (eg: add the contentId), you would have to create your filter manually.
 
 ```js
-player.getNetworkingEngine().registerRequestFilter((type, request) => {
+player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
@@ -175,7 +175,7 @@ Note: If the url of the license server has to undergo any transformation
 (eg: add the contentId), you would have to create your filter manually.
 
 ```js
-player.getNetworkingEngine().registerRequestFilter((type, request) => {
+player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }

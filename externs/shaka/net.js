@@ -202,12 +202,16 @@ shaka.extern.HeadersReceived;
 /**
  * Defines a filter for requests.  This filter takes the request and modifies
  * it before it is sent to the scheme plugin.
+ * The RequestType describes the basic type of the request (manifest, segment,
+ * etc). The optional AdvancedRequestType will be provided in the case of a
+ * sub-type of the basic type (playlist manifest, init segment, etc).
  * A request filter can run asynchronously by returning a promise; in this case,
  * the request will not be sent until the promise is resolved.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
- *                     shaka.extern.Request):
-             (Promise|undefined)}
+ *                     shaka.extern.Request,
+ *                     shaka.net.NetworkingEngine.AdvancedRequestType=):
+ *           (Promise|undefined)}
  * @exportDoc
  */
 shaka.extern.RequestFilter;
@@ -216,11 +220,15 @@ shaka.extern.RequestFilter;
 /**
  * Defines a filter for responses.  This filter takes the response and modifies
  * it before it is returned.
+ * The RequestType describes the basic type of the request (manifest, segment,
+ * etc). The optional AdvancedRequestType will be provided in the case of a
+ * sub-type of the basic type (playlist manifest, init segment, etc).
  * A response filter can run asynchronously by returning a promise.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
- *                     shaka.extern.Response):
-              (Promise|undefined)}
+ *                     shaka.extern.Response,
+ *                     shaka.net.NetworkingEngine.AdvancedRequestType=):
+ *            (Promise|undefined)}
  * @exportDoc
  */
 shaka.extern.ResponseFilter;
