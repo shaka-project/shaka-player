@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.2.9](https://github.com/shaka-project/shaka-player/compare/v4.2.8...v4.2.9) (2023-03-01)
+
+
+### Bug Fixes
+
+* **Ads:** Fix CS volume ad ([#5016](https://github.com/shaka-project/shaka-player/issues/5016)) ([70406d0](https://github.com/shaka-project/shaka-player/commit/70406d01f74ef213d1cbd396d9389f91374988af))
+* **Ads:** Fix usage of EventManager on CS ([#5017](https://github.com/shaka-project/shaka-player/issues/5017)) ([4aa25c6](https://github.com/shaka-project/shaka-player/commit/4aa25c6cefa8ebc9f9253873efdfa5eff87475cd))
+* **ads:** Fix VMAP ads stay muted on muted autoplay ([#4995](https://github.com/shaka-project/shaka-player/issues/4995)) ([c80c0bc](https://github.com/shaka-project/shaka-player/commit/c80c0bc9cc89cca1742e9820089b985b0aa1b2f0))
+* Allow the playback of TS without mux.js ([#5041](https://github.com/shaka-project/shaka-player/issues/5041)) ([8a55a25](https://github.com/shaka-project/shaka-player/commit/8a55a252f5b6e29e4e6278772c6591116d43fdd3))
+* Caption can not turn off at iOS Safari ([#4978](https://github.com/shaka-project/shaka-player/issues/4978)) ([0408c91](https://github.com/shaka-project/shaka-player/commit/0408c9166487ee444d48234846f527a60cf23a7b))
+* **Demo:** Allow manifest type for DAI custom assets ([#4977](https://github.com/shaka-project/shaka-player/issues/4977)) ([ea1ab66](https://github.com/shaka-project/shaka-player/commit/ea1ab66f484878cc97c70aeabbf6b22562204ed5))
+* DrmEngine exception thrown when using FairPlay ([#4971](https://github.com/shaka-project/shaka-player/issues/4971)) ([36aab19](https://github.com/shaka-project/shaka-player/commit/36aab19c416d58aae05c5daf8ff229e80184e14f))
+* Failed to set 'currentTime' property on 'HTMLMediaElement' on a Hisense TV ([#4962](https://github.com/shaka-project/shaka-player/issues/4962)) ([b753933](https://github.com/shaka-project/shaka-player/commit/b753933c76d6796cc734984d4a75c207aee71316))
+* Fallback to isTypeSupported when cast namespace is undefined ([#5012](https://github.com/shaka-project/shaka-player/issues/5012)) ([eff0b41](https://github.com/shaka-project/shaka-player/commit/eff0b411b11ed70717e5c9aac526afd9e8a0535f))
+* Fix video/mp2t mimetype conversion. ([#5039](https://github.com/shaka-project/shaka-player/issues/5039)) ([d41602e](https://github.com/shaka-project/shaka-player/commit/d41602e278ef91216bf0d7b1424d057292d2d861))
+* **HLS:** Add `.tsa` and .`tsv` file extensions as valid MPEG2-TS. ([#5034](https://github.com/shaka-project/shaka-player/issues/5034)) ([c72c5f6](https://github.com/shaka-project/shaka-player/commit/c72c5f65d6cc686520eda786ded2bf587ba68c6d))
+* Increase IndexedDB timeout ([#4984](https://github.com/shaka-project/shaka-player/issues/4984)) ([f2d681e](https://github.com/shaka-project/shaka-player/commit/f2d681e0957b86ca341895dbcf1bdcb7cc3ecfbd))
+* **MCap:** Remove robustness when robustness value is default ([#4953](https://github.com/shaka-project/shaka-player/issues/4953)) ([59bbb56](https://github.com/shaka-project/shaka-player/commit/59bbb5662dacca93b7b8becb50d1d4c4140ba516))
+* Prevent content from being restarted after Postroll ads ([#4979](https://github.com/shaka-project/shaka-player/issues/4979)) ([a907a4f](https://github.com/shaka-project/shaka-player/commit/a907a4f98c0d2a5d59c71efb77b228bff5689763)), closes [#4445](https://github.com/shaka-project/shaka-player/issues/4445)
+* Reject TS content on Edge ([#5043](https://github.com/shaka-project/shaka-player/issues/5043)) ([99fb4bb](https://github.com/shaka-project/shaka-player/commit/99fb4bb13c89f38dc43df0833e32a78705d42361))
+* **VTT:** Fix spacing between text lines ([#4961](https://github.com/shaka-project/shaka-player/issues/4961)) ([2bf8526](https://github.com/shaka-project/shaka-player/commit/2bf8526d6f626d7c002f97475e7ff23c2519e014))
+* **WebVTT:** Tags in the WebVTT subtitle are not parsed ([#4960](https://github.com/shaka-project/shaka-player/issues/4960)) ([933ee78](https://github.com/shaka-project/shaka-player/commit/933ee7801d921d8ea2430ba3919ffb9ac2dd8ca2))
+
 ## [4.2.8](https://github.com/shaka-project/shaka-player/compare/v4.2.7...v4.2.8) (2023-01-31)
 
 
