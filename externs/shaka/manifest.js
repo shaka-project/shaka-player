@@ -441,7 +441,7 @@ shaka.extern.FetchCryptoKeysFunction;
  *   The streams in all periods which match the stream. Used for Dash.
  * @property {(shaka.extern.MssPrivateData|undefined)} mssPrivateData
  *   <i>Microsoft Smooth Streaming only.</i> <br>
- *   Private MSS data that is necessary to be able to do transmuxing..
+ *   Private MSS data that is necessary to be able to do transmuxing.
  *
  * @exportDoc
  */
@@ -452,7 +452,7 @@ shaka.extern.Stream;
  * @typedef {{
  *   duration: number,
  *   timescale: number,
- *   codecPrivateData: string
+ *   codecPrivateData: ?string
  * }}
  *
  * @description
@@ -465,7 +465,6 @@ shaka.extern.Stream;
  *   <i>Required.</i> <br>
  *   MSS timescale.
  * @property {?string} codecPrivateData
- *   <i>Required.</i> <br>
  *   MSS codecPrivateData.
  *
  * @exportDoc
