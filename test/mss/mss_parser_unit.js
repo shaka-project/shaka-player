@@ -76,7 +76,7 @@ describe('MssParser Manifest', () => {
       const source = [
         '<SmoothStreamingMedia Duration="1209510000">',
         '  <StreamIndex Name="audio" Type="audio" Url="uri">',
-        '    <QualityLevel Bitrate="128000" Channels="2"  CodecPrivateData="',
+        '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
         aacCodecPrivateData,
         '" FourCC="AACL"/>',
         '    <c d="20201360"/>',
@@ -117,7 +117,7 @@ describe('MssParser Manifest', () => {
       const source = [
         '<SmoothStreamingMedia Duration="1209510000" IsLive="true">',
         '  <StreamIndex Name="audio" Type="audio" Url="uri">',
-        '    <QualityLevel Bitrate="128000" Channels="2"  CodecPrivateData="',
+        '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
         aacCodecPrivateData,
         '" FourCC="AACL"/>',
         '    <c d="20201360"/>',
@@ -142,7 +142,7 @@ describe('MssParser Manifest', () => {
       '    <c d="20020000"/>',
       '  </StreamIndex>',
       '  <StreamIndex Name="audio" Type="audio" Url="uri">',
-      '    <QualityLevel Bitrate="128000" Channels="2"  CodecPrivateData="',
+      '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
       aacCodecPrivateData,
       '" FourCC="AACL"/>',
       '    <c d="20201360"/>',
@@ -172,7 +172,7 @@ describe('MssParser Manifest', () => {
       '    <c d="20020000"/>',
       '  </StreamIndex>',
       '  <StreamIndex Name="audio" Type="audio" Url="uri">',
-      '    <QualityLevel Bitrate="128000" Channels="2"  CodecPrivateData="',
+      '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
       aacCodecPrivateData,
       '" FourCC="AACL"/>',
       '    <c d="20201360"/>',
@@ -202,7 +202,7 @@ describe('MssParser Manifest', () => {
       '    <c d="20020000"/>',
       '  </StreamIndex>',
       '  <StreamIndex Name="audio" Type="audio" Url="uri">',
-      '    <QualityLevel Bitrate="128000" Channels="2"  CodecPrivateData="',
+      '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
       aacCodecPrivateData,
       '" FourCC="AACL"/>',
       '    <c d="20201360"/>',
@@ -235,7 +235,7 @@ describe('MssParser Manifest', () => {
       '    <c d="20020000"/>',
       '  </StreamIndex>',
       '  <StreamIndex Name="audio" Type="audio" Url="uri">',
-      '    <QualityLevel Bitrate="128000" Channels="2"  CodecPrivateData="',
+      '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
       aacCodecPrivateData,
       '" FourCC="AACL"/>',
       '    <c d="20201360"/>',
@@ -268,7 +268,7 @@ describe('MssParser Manifest', () => {
     const manifestText = [
       '<SmoothStreamingMedia Duration="3600000000">',
       '  <StreamIndex Name="audio" Type="audio" Url="{bitrate}/{start time}">',
-      '    <QualityLevel Bitrate="128000" Channels="2"  CodecPrivateData="',
+      '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
       aacCodecPrivateData,
       '" FourCC="AACL"/>',
       '    <c t="0" d="30000000" r="12"/>',
@@ -286,5 +286,135 @@ describe('MssParser Manifest', () => {
     expect(initSegmentReference.getStartByte()).toBe(0);
     expect(initSegmentReference.getEndByte()).toBe(null);
     expect(initSegmentReference.getSegmentData()).toBeDefined();
+  });
+
+  it('skip video stream without CodecPrivateData', async () => {
+    const manifestText = [
+      '<SmoothStreamingMedia Duration="1209510000">',
+      '  <StreamIndex Type="video" Url="uri">',
+      '    <QualityLevel Bitrate="2962000" FourCC="H264" MaxHeight="720" ',
+      '    MaxWidth="1280"/>',
+      '    <c d="20020000"/>',
+      '  </StreamIndex>',
+      '  <StreamIndex Name="audio" Type="audio" Url="uri">',
+      '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
+      aacCodecPrivateData,
+      '" FourCC="AACL"/>',
+      '    <c d="20201360"/>',
+      '  </StreamIndex>',
+      '</SmoothStreamingMedia>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    expect(variant.audio).toBeTruthy();
+    expect(variant.video).toBe(null);
+  });
+
+  it('skip video stream without FourCC', async () => {
+    const manifestText = [
+      '<SmoothStreamingMedia Duration="1209510000">',
+      '  <StreamIndex Type="video" Url="uri">',
+      '    <QualityLevel Bitrate="2962000" CodecPrivateData="',
+      h264CodecPrivateData,
+      '" MaxHeight="720" MaxWidth="1280"/>',
+      '    <c d="20020000"/>',
+      '  </StreamIndex>',
+      '  <StreamIndex Name="audio" Type="audio" Url="uri">',
+      '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
+      aacCodecPrivateData,
+      '" FourCC="AACL"/>',
+      '    <c d="20201360"/>',
+      '  </StreamIndex>',
+      '</SmoothStreamingMedia>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    expect(variant.audio).toBeTruthy();
+    expect(variant.video).toBe(null);
+  });
+
+  it('supports audio stream without FourCC', async () => {
+    const manifestText = [
+      '<SmoothStreamingMedia Duration="1209510000">',
+      '  <StreamIndex Type="video" Url="uri">',
+      '    <QualityLevel Bitrate="2962000" CodecPrivateData="',
+      h264CodecPrivateData,
+      '" FourCC="H264" MaxHeight="720" MaxWidth="1280"/>',
+      '    <c d="20020000"/>',
+      '  </StreamIndex>',
+      '  <StreamIndex Name="audio" Type="audio" Url="uri">',
+      '    <QualityLevel Bitrate="128000" Channels="2" CodecPrivateData="',
+      aacCodecPrivateData,
+      '"/>',
+      '    <c d="20201360"/>',
+      '  </StreamIndex>',
+      '</SmoothStreamingMedia>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    expect(variant.audio).toBeTruthy();
+    expect(variant.video).toBeTruthy();
+  });
+
+  it('supports AACL stream without CodecPrivateData', async () => {
+    const manifestText = [
+      '<SmoothStreamingMedia Duration="1209510000">',
+      '  <StreamIndex Type="video" Url="uri">',
+      '    <QualityLevel Bitrate="2962000" CodecPrivateData="',
+      h264CodecPrivateData,
+      '" FourCC="H264" MaxHeight="720" MaxWidth="1280"/>',
+      '    <c d="20020000"/>',
+      '  </StreamIndex>',
+      '  <StreamIndex Name="audio" Type="audio" Url="uri">',
+      '    <QualityLevel Bitrate="128000" Channels="2" FourCC="AACL"/>',
+      '    <c d="20201360"/>',
+      '  </StreamIndex>',
+      '</SmoothStreamingMedia>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    expect(variant.audio).toBeTruthy();
+    expect(variant.video).toBeTruthy();
+  });
+
+  it('supports AACH stream without CodecPrivateData', async () => {
+    const manifestText = [
+      '<SmoothStreamingMedia Duration="1209510000">',
+      '  <StreamIndex Type="video" Url="uri">',
+      '    <QualityLevel Bitrate="2962000" CodecPrivateData="',
+      h264CodecPrivateData,
+      '" FourCC="H264" MaxHeight="720" MaxWidth="1280"/>',
+      '    <c d="20020000"/>',
+      '  </StreamIndex>',
+      '  <StreamIndex Name="audio" Type="audio" Url="uri">',
+      '    <QualityLevel Bitrate="128000" Channels="2" FourCC="AACH"/>',
+      '    <c d="20201360"/>',
+      '  </StreamIndex>',
+      '</SmoothStreamingMedia>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    expect(variant.audio).toBeTruthy();
+    expect(variant.video).toBeTruthy();
   });
 });
