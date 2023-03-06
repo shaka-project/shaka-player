@@ -578,4 +578,260 @@ describe('DashParser SegmentTemplate', () => {
       await Dash.testFails(source, error);
     });
   });
+
+  describe('TimelineSegmentIndex', () => {
+    describe('find', () => {
+      it('finds the correct references', () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        const index = makeTimelineSegmentIndex(info);
+
+        const pos1 = index.find(1.0);
+        expect(pos1).toBe(0);
+        const pos2 = index.find(2.0);
+        expect(pos2).toBe(1);
+
+        // After the end of the last reference but before the end of the period
+        // should return index of the last reference
+        const lastRef = info.timeline[info.timeline.length - 1];
+        const pos3 = index.find(lastRef.end + 0.5);
+        expect(pos3).toBe(info.timeline.length - 1);
+
+        const pos4 = index.find(123.45);
+        expect(pos4).toBeNull();
+      });
+
+      it('finds correct position if time is in gap', () => {
+        const ranges = [
+          {
+            start: 0,
+            end: 2,
+            unscaledStart: 0,
+          },
+          {
+            start: 3,
+            end: 5,
+            unscaledStart: 3 * 90000,
+          },
+        ];
+        const info = makeTemplateInfo(ranges);
+        const index = makeTimelineSegmentIndex(info);
+        const pos = index.find(2.5);
+        expect(pos).toBe(0);
+      });
+
+      it('finds correct position if time === first start time', () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        const index = makeTimelineSegmentIndex(info);
+
+        const pos = index.find(0);
+        expect(pos).toBe(0);
+      });
+
+      it('finds correct position if time === first end time', () => {
+        const ranges = [
+          {
+            start: 0,
+            end: 2,
+            unscaledStart: 0,
+          },
+          {
+            start: 2.1,
+            end: 5,
+            unscaledStart: 3 * 90000,
+          },
+        ];
+        const info = makeTemplateInfo(ranges);
+        const index = makeTimelineSegmentIndex(info);
+
+        const pos = index.find(2.0);
+        expect(pos).toBe(0);
+      });
+
+      it('finds correct position if time === second start time', () => {
+        const ranges = [
+          {
+            start: 0,
+            end: 2,
+            unscaledStart: 0,
+          },
+          {
+            start: 2.1,
+            end: 5,
+            unscaledStart: 3 * 90000,
+          },
+        ];
+        const info = makeTemplateInfo(ranges);
+        const index = makeTimelineSegmentIndex(info);
+
+        const pos = index.find(2.1);
+        expect(pos).toBe(1);
+      });
+
+
+      it('returns null if time === last end time', () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 2));
+        const index = makeTimelineSegmentIndex(info, false);
+
+        const pos = index.find(4.0);
+        expect(pos).toBeNull();
+      });
+
+      it('returns null if time > last end time', () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 2));
+        const index = makeTimelineSegmentIndex(info, false);
+
+        const pos = index.find(6.0);
+        expect(pos).toBeNull();
+      });
+    });
+    describe('get', () => {
+      it('creates a segment reference for a given position', () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        const index = makeTimelineSegmentIndex(info);
+        const pos = index.find(2.0);
+        goog.asserts.assert(pos != null, 'Null position!');
+        const ref = index.get(pos);
+        console.log(JSON.stringify(ref));
+        expect(ref).toEqual(jasmine.objectContaining({
+          'startTime': 2,
+          'endTime': 4,
+          'trueEndTime': 4,
+          'startByte': 0,
+          'endByte': null,
+          'timestampOffset': 0,
+          'appendWindowStart': 0,
+          'appendWindowEnd': 21,
+          'partialReferences': [],
+          'tilesLayout': '',
+          'tileDuration': null,
+        }));
+      });
+
+      it('returns null if a position is unknown', () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        const index = makeTimelineSegmentIndex(info);
+        const ref = index.get(12345);
+        expect(ref).toBeNull();
+      });
+
+      it('returns null if a position < 0', () => {
+        const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
+        const index = makeTimelineSegmentIndex(info);
+        const ref = index.get(-12);
+        expect(ref).toBeNull();
+      });
+    });
+
+    describe('appendTemplateInfo', () => {
+      it('appends new timeline to existing', () => {
+        const initialRanges = makeRanges(0, 2.0, 10);
+        const info = makeTemplateInfo(initialRanges);
+        const index = makeTimelineSegmentIndex(info, false);
+
+        const newStart = initialRanges[initialRanges.length - 1].end;
+        expect(index.find(newStart)).toBeNull();
+
+        const newRanges = makeRanges(newStart, 2.0, 10);
+        const newTemplateInfo = makeTemplateInfo(newRanges);
+
+        const newEnd = newRanges[newRanges.length - 1].end;
+        index.appendTemplateInfo(newTemplateInfo, newEnd);
+        expect(index.find(newStart)).toBe(10);
+        expect(index.find(newEnd - 1.0)).toBe(19);
+      });
+    });
+
+    describe('evict', () => {
+      it('evicts old entries and maintains position', () => {
+        const initialRanges = makeRanges(0, 2.0, 10);
+        const info = makeTemplateInfo(initialRanges);
+        const index = makeTimelineSegmentIndex(info, false);
+
+        index.evict(4.0);
+        expect(index.find(2.0)).toBe(2);
+        expect(index.find(6.0)).toBe(3);
+      });
+    });
+  });
 });
+
+/**
+ * Creates a URI string.
+ *
+ * @param {number} x
+ * @return {string}
+ */
+function uri(x) {
+  return 'http://example.com/video_' + x + '.m4s';
+}
+
+/**
+ *
+ * @param {shaka.dash.SegmentTemplate.SegmentTemplateInfo} info
+ * @param {boolean} delayPeriodEnd
+ * @return {shaka.dash.TimelineSegmentIndex}
+ */
+function makeTimelineSegmentIndex(info, delayPeriodEnd = true) {
+  const baseUris = [
+    'https://someservice.com/cmaf_2s/',
+  ];
+  // Period end may be a bit after the last timeline entry
+  let periodEnd = info.timeline[info.timeline.length - 1].end;
+  if (delayPeriodEnd) {
+    periodEnd += 1.0;
+  }
+  const initSegmentRef = makeInitSegmentReference();
+  return new shaka.dash.TimelineSegmentIndex(info, 'some_rep_id', 10000,
+      baseUris, 0, periodEnd, initSegmentRef);
+}
+
+/**
+ *
+ * @return {shaka.media.InitSegmentReference}
+ */
+function makeInitSegmentReference() {
+  return new shaka.media.InitSegmentReference(() => [], 0, null);
+}
+
+/**
+ * Create a list of continuous time ranges
+ * @param {number} start
+ * @param {number} duration
+ * @param {number} num
+ * @return {Array<shaka.dash.MpdUtils.TimeRange>}
+ */
+function makeRanges(start, duration, num) {
+  const ranges = [];
+  let currentPos = start;
+  for (let i = 0; i < num; i += 1) {
+    ranges.push({
+      start: currentPos,
+      end: currentPos + duration,
+      unscaledStart: currentPos * 90000,
+    });
+    currentPos += duration;
+  }
+  return ranges;
+}
+
+/**
+ * Creates a real SegmentReference.  This is distinct from the fake ones used
+ * in ManifestParser tests because it can be on the left-hand side of an
+ * expect().  You can't expect jasmine.any(Number) to equal
+ * jasmine.any(Number).  :-(
+ *
+ * @param {Array<shaka.dash.MpdUtils.TimeRange>} timeline
+ * @return {shaka.dash.SegmentTemplate.SegmentTemplateInfo}
+ */
+function makeTemplateInfo(timeline) {
+  return {
+    'segmentDuration': null,
+    'timescale': 90000,
+    'startNumber': 1,
+    'scaledPresentationTimeOffset': 0,
+    'unscaledPresentationTimeOffset': 0,
+    'timeline': timeline,
+    'mediaTemplate': 'master_540_2997_$Number%09d$.cmfv',
+    'indexTemplate': null,
+  };
+}
