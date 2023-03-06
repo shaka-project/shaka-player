@@ -198,7 +198,7 @@ describe('DashParser SegmentTemplate', () => {
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
       fakeNetEngine.expectRangeRequest(
-          'http://example.com/index-500.mp4', 0, null);
+          'http://example.com/index-500.mp4', 0, null, /* isInit= */ false);
     });
 
     it('defaults to index with multiple segment sources', async () => {
@@ -226,7 +226,7 @@ describe('DashParser SegmentTemplate', () => {
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
       fakeNetEngine.expectRangeRequest(
-          'http://example.com/index-500.mp4', 0, null);
+          'http://example.com/index-500.mp4', 0, null, /* isInit= */ false);
     });
 
     it('requests init data for WebM', async () => {
@@ -261,9 +261,9 @@ describe('DashParser SegmentTemplate', () => {
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(3);
       fakeNetEngine.expectRangeRequest(
-          'http://example.com/init-500.webm', 0, null);
+          'http://example.com/init-500.webm', 0, null, /* isInit= */ true);
       fakeNetEngine.expectRangeRequest(
-          'http://example.com/index-500.webm', 0, null);
+          'http://example.com/index-500.webm', 0, null, /* isInit= */ false);
     });
 
     it('inherits from Period', async () => {
@@ -295,7 +295,7 @@ describe('DashParser SegmentTemplate', () => {
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
       fakeNetEngine.expectRangeRequest(
-          'http://example.com/index-500.mp4', 0, null);
+          'http://example.com/index-500.mp4', 0, null, /* isInit= */ false);
     });
 
     it('inherits from AdaptationSet', async () => {
@@ -327,7 +327,7 @@ describe('DashParser SegmentTemplate', () => {
 
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(2);
       fakeNetEngine.expectRangeRequest(
-          'http://example.com/index-500.mp4', 0, null);
+          'http://example.com/index-500.mp4', 0, null, /* isInit= */ false);
     });
   });
 
