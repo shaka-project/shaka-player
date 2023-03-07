@@ -727,7 +727,7 @@ describe('DashParser Manifest', () => {
         '    value="http://foo.bar/date" />',
       ]);
 
-      fakeNetEngine.request.and.callFake((type, request) => {
+      fakeNetEngine.request.and.callFake((type, request, advType) => {
         if (request.uris[0] == 'http://foo.bar/manifest') {
           const data = shaka.util.StringUtils.toUTF8(source);
           return shaka.util.AbortableOperation.completed({

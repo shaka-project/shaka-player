@@ -174,9 +174,11 @@ shaka.test.FakeNetworkingEngine = class {
    *
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
+   * @param {shaka.net.NetworkingEngine.AdvancedRequestType=} advType
    */
-  expectRequest(uri, type) {
-    shaka.test.FakeNetworkingEngine.expectRequest(this.request, uri, type);
+  expectRequest(uri, type, advType) {
+    shaka.test.FakeNetworkingEngine.expectRequest(
+        this.request, uri, type, advType);
   }
 
   /**
@@ -184,9 +186,11 @@ shaka.test.FakeNetworkingEngine = class {
    *
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
+   * @param {shaka.net.NetworkingEngine.AdvancedRequestType=} advType
    */
-  expectNoRequest(uri, type) {
-    shaka.test.FakeNetworkingEngine.expectNoRequest(this.request, uri, type);
+  expectNoRequest(uri, type, advType) {
+    shaka.test.FakeNetworkingEngine.expectNoRequest(
+        this.request, uri, type, advType);
   }
 
   /**
@@ -195,10 +199,11 @@ shaka.test.FakeNetworkingEngine = class {
    * @param {string} uri
    * @param {number} startByte
    * @param {?number} endByte
+   * @param {boolean} isInit
    */
-  expectRangeRequest(uri, startByte, endByte) {
+  expectRangeRequest(uri, startByte, endByte, isInit) {
     shaka.test.FakeNetworkingEngine.expectRangeRequest(
-        this.request, uri, startByte, endByte);
+        this.request, uri, startByte, endByte, isInit);
   }
 
   /**
@@ -289,10 +294,17 @@ shaka.test.FakeNetworkingEngine = class {
    * @param {!Object} requestSpy
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
+   * @param {shaka.net.NetworkingEngine.AdvancedRequestType=} advType
    */
-  static expectRequest(requestSpy, uri, type) {
-    expect(requestSpy).toHaveBeenCalledWith(
-        type, jasmine.objectContaining({uris: [uri]}));
+  static expectRequest(requestSpy, uri, type, advType) {
+    // Jasmine "toHaveBeenCalledWith" doesn't handle optional parameters well.
+    if (advType != undefined) {
+      expect(requestSpy).toHaveBeenCalledWith(
+          type, jasmine.objectContaining({uris: [uri]}), advType);
+    } else {
+      expect(requestSpy).toHaveBeenCalledWith(
+          type, jasmine.objectContaining({uris: [uri]}));
+    }
   }
 
   /**
@@ -301,10 +313,17 @@ shaka.test.FakeNetworkingEngine = class {
    * @param {!Object} requestSpy
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
+   * @param {shaka.net.NetworkingEngine.AdvancedRequestType=} advType
    */
-  static expectNoRequest(requestSpy, uri, type) {
-    expect(requestSpy).not.toHaveBeenCalledWith(
-        type, jasmine.objectContaining({uris: [uri]}));
+  static expectNoRequest(requestSpy, uri, type, advType) {
+    // Jasmine "toHaveBeenCalledWith" doesn't handle optional parameters well.
+    if (advType != undefined) {
+      expect(requestSpy).not.toHaveBeenCalledWith(
+          type, jasmine.objectContaining({uris: [uri]}), advType);
+    } else {
+      expect(requestSpy).not.toHaveBeenCalledWith(
+          type, jasmine.objectContaining({uris: [uri]}));
+    }
   }
 
   /**
@@ -314,8 +333,9 @@ shaka.test.FakeNetworkingEngine = class {
    * @param {string} uri
    * @param {number} startByte
    * @param {?number} endByte
+   * @param {boolean} isInit
    */
-  static expectRangeRequest(requestSpy, uri, startByte, endByte) {
+  static expectRangeRequest(requestSpy, uri, startByte, endByte, isInit) {
     const headers = {};
     if (startByte == 0 && endByte == null) {
       // No header required.
@@ -327,12 +347,17 @@ shaka.test.FakeNetworkingEngine = class {
       headers['Range'] = range;
     }
 
+    const advType = isInit ?
+        shaka.net.NetworkingEngine.AdvancedRequestType.INIT_SEGMENT :
+        shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
+
     expect(requestSpy).toHaveBeenCalledWith(
         shaka.net.NetworkingEngine.RequestType.SEGMENT,
         jasmine.objectContaining({
           uris: [uri],
           headers: headers,
-        }));
+        }),
+        advType);
   }
 };
 
