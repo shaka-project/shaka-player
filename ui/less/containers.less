@@ -103,6 +103,10 @@
  * below (Y axis) .shaka-play-button-container. */
 .shaka-canvas-container {
   .overlay-child();
+
+  /* Make sure pointer events can reach the video element in the case of native
+   * controls. */
+  pointer-events: none;
 }
 
 /* Container for controls positioned at the bottom of the video container:
