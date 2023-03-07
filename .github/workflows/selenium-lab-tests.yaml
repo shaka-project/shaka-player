@@ -11,6 +11,9 @@ on:
       test_filter:
         description: "A regex filter to run a subset of the tests.  If empty, all tests will run."
         required: false
+      browser_filter:
+        description: "A list of browsers to run the tests.  If empty, all browsers will run."
+        required: false
   workflow_call:
     # Allows for reuse from other workflows, such as "Update All Screenshots"
     # workflow.
@@ -21,6 +24,10 @@ on:
         type: string
       test_filter:
         description: "A regex filter to run a subset of the tests.  If empty, all tests will run."
+        required: false
+        type: string
+      browser_filter:
+        description: "A list of browsers to run the tests.  If empty, all browsers will run."
         required: false
         type: string
       ignore_test_status:
@@ -79,6 +86,14 @@ jobs:
           const yaml = require(
               '${{ github.workspace }}/node_modules/js-yaml/index.js');
 
+          // Convert the input "browser_filter" into a set of strings.  Take
+          // care to filter so that the empty string turns into an empty set.
+          const browserFilter = new Set( "${{ inputs.browser_filter }}"
+                  .split(/\s+/)
+                  .map(x => x.toLowerCase())
+                  .filter(x => !!x)
+          );
+
           const gridBrowserYaml =
               fs.readFileSync('build/shaka-lab.yaml', 'utf8');
           const gridBrowserMetadata = yaml.load(gridBrowserYaml);
@@ -90,7 +105,14 @@ jobs:
               // Skip variable defs in the YAML file
               continue;
             }
-            if (!gridBrowserMetadata[name].disabled) {
+
+            // A browser is enabled if it's not disabled and (either the browser
+            // filter is empty or it contains the browser name).
+            const enabled = !gridBrowserMetadata[name].disabled &&
+                (browserFilter.size == 0 ||
+                 browserFilter.has(name.toLowerCase()));
+
+            if (enabled) {
               include.push({browser: name});
             }
           }
