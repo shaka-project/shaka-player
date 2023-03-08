@@ -67,9 +67,24 @@ describe('CmcdManager', () => {
     });
   });
 
+  const NetworkingEngine = shaka.net.NetworkingEngine;
+
+  function createNetworkingEngine() {
+    const resolveScheme = jasmine.createSpy('resolve scheme').and.callFake(
+        () => shaka.util.AbortableOperation.completed(
+            {uri: '', data: new ArrayBuffer(5), headers: {}},
+        ));
+
+    NetworkingEngine.registerScheme(
+        'resolve', shaka.test.Util.spyFunc(resolveScheme),
+        NetworkingEngine.PluginPriority.FALLBACK);
+
+    return new NetworkingEngine();
+  }
+
   describe('CmcdManager instance', () => {
     const ObjectUtils = shaka.util.ObjectUtils;
-
+    const networkingEngine = createNetworkingEngine();
     const playerInterface = {
       isLive: () => false,
       getBandwidthEstimate: () => 10000000,
@@ -80,6 +95,9 @@ describe('CmcdManager', () => {
           {start: 35, end: 40},
         ],
       }),
+      getCurrentTime: () => 10,
+      getPlaybackRate: () => 1,
+      getNetworkingEngine: () => networkingEngine,
       getVariantTracks: () => /** @type {Array.<shaka.extern.Track>} */([
         {
           type: 'variant',
@@ -94,8 +112,6 @@ describe('CmcdManager', () => {
           audioBandWidth: 1000000,
         },
       ]),
-      getPlaybackRate: () => 1,
-      getCurrentTime: () => 10,
     };
 
     const sid = '2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3';
@@ -285,6 +301,24 @@ describe('CmcdManager', () => {
         r = ObjectUtils.cloneObject(request);
         cmcdManager.applySegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Request']).not.toContain(',su');
+      });
+
+      it('applies core CMCD params to HEAD requests', async () => {
+        config.useHeaders = false;
+        cmcdManager = new CmcdManager(playerInterface, config);
+
+        const uri = 'resolve://foo';
+        const type = NetworkingEngine.RequestType.MANIFEST;
+        const retry = NetworkingEngine.defaultRetryParameters();
+        const request = NetworkingEngine.makeRequest([uri], retry);
+        request.method = 'HEAD';
+        await networkingEngine.request(type, request);
+
+        const result = request.uris[0];
+        expect(result).toContain('?CMCD=');
+        expect(result).toContain(encodeURIComponent('sid="'));
+        expect(result).toContain(encodeURIComponent('cid="testing"'));
+        expect(result).not.toContain(encodeURIComponent('sf='));
       });
     });
   });
