@@ -6,3 +6,5 @@ docs/api/
 coverage/
 .DS_Store
 .vscode
+/_mytest/
+.idea
