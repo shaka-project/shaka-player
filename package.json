@@ -1,7 +1,7 @@
 {
   "name": "@learnyst/shaka-player",
   "description": "DASH/EME video player library",
-  "version": "3.1.603",
+  "version": "3.1.604",
   "homepage": "https://github.com/learnyst/shaka-player",
   "author": "Google",
   "maintainers": [
