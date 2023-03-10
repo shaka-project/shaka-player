@@ -227,10 +227,3 @@ ui.configure({
   'castAndroidReceiverCompatible': true,
 });
 ```
-
-
-
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial ui-customization}.

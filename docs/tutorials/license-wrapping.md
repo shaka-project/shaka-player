@@ -166,8 +166,3 @@ using a request filter:
 
 Load the page again, and the license response will be accepted by the Widevine
 CDM.  Open the JavaScript console to see what the server sent back.
-
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial ui}.

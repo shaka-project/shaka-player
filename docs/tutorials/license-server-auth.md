@@ -246,8 +246,3 @@ License request can now continue.
 
 If you need them, you can also create asynchronous response filters in the same
 way.
-
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial license-wrapping}.
