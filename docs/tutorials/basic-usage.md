@@ -86,8 +86,3 @@ document.addEventListener('DOMContentLoaded', initApp);
 ```
 
 That's it!
-
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial debugging}.
