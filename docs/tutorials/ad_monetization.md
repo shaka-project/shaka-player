@@ -222,7 +222,3 @@ before instantiating the player.
 // myapp.CustomAdManager is a placeholder name for your ad manager implementation.
 shaka.Player.setAdManagerFactory(() => new myapp.CustomAdManager());
 ```
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial plugins}.

@@ -208,8 +208,3 @@ you should provide an empty string as robustness
 ##### Other key-systems
 
 Values for other key systems are not known to us at this time.
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial license-server-auth}.
-Or check out {@tutorial fairplay}.
