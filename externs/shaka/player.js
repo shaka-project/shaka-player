@@ -1117,6 +1117,17 @@ shaka.extern.MediaSourceConfiguration;
 
 
 /**
+ * @typedef {Object}
+ *
+ * @description
+ *   Ads configuration.
+ *
+ * @exportDoc
+ */
+shaka.extern.AdsConfiguration;
+
+
+/**
  * @typedef {{
  *   enabled: boolean,
  *   useNetworkInformation: boolean,
@@ -1323,6 +1334,7 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
+ *   ads: shaka.extern.AdsConfiguration,
  *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
@@ -1349,6 +1361,8 @@ shaka.extern.OfflineConfiguration;
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
+ * @property {shaka.extern.AdsConfiguration} ads
+ *   Ads configuration and settings.
  * @property {shaka.config.AutoShowText} autoShowText
  *   Controls behavior of auto-showing text tracks on load().
  * @property {shaka.extern.DrmConfiguration} drm
