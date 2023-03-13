@@ -69,22 +69,23 @@ describe('CmcdManager', () => {
 
   const NetworkingEngine = shaka.net.NetworkingEngine;
 
-  function createNetworkingEngine() {
-    const resolveScheme = jasmine.createSpy('resolve scheme').and.callFake(
+  function createNetworkingEngine(cmcd) {
+    const resolveScheme = jasmine.createSpy('cmcd').and.callFake(
         () => shaka.util.AbortableOperation.completed(
             {uri: '', data: new ArrayBuffer(5), headers: {}},
         ));
 
     NetworkingEngine.registerScheme(
-        'resolve', shaka.test.Util.spyFunc(resolveScheme),
+        'cmcd', shaka.test.Util.spyFunc(resolveScheme),
         NetworkingEngine.PluginPriority.FALLBACK);
 
-    return new NetworkingEngine();
+    return new NetworkingEngine(null, null, null, (type, request, context) => {
+      cmcd.applyData(type, request, context);
+    });
   }
 
   describe('CmcdManager instance', () => {
     const ObjectUtils = shaka.util.ObjectUtils;
-    const networkingEngine = createNetworkingEngine();
     const playerInterface = {
       isLive: () => false,
       getBandwidthEstimate: () => 10000000,
@@ -97,7 +98,6 @@ describe('CmcdManager', () => {
       }),
       getCurrentTime: () => 10,
       getPlaybackRate: () => 1,
-      getNetworkingEngine: () => networkingEngine,
       getVariantTracks: () => /** @type {Array.<shaka.extern.Track>} */([
         {
           type: 'variant',
@@ -142,18 +142,25 @@ describe('CmcdManager', () => {
       streamDataCallback: null,
     };
 
-    const manifestInfo = {
-      format: shaka.util.CmcdManager.StreamingFormat.DASH,
+    const createContext = (type) => {
+      return {
+        type: type,
+        stream: /** @type {shaka.extern.Stream} */ ({
+          bandwidth: 5234167,
+          codecs: 'avc1.42001e',
+          mimeType: 'application/mp4',
+          type: 'video',
+        }),
+        segment: /** @type {shaka.media.SegmentReference} */ ({
+          startTime: 0,
+          endTime: 3.33,
+        }),
+      };
     };
 
-    const segmentInfo = {
-      type: 'video',
-      init: false,
-      duration: 3.33,
-      mimeType: 'application/mp4',
-      codecs: 'avc1.42001e',
-      bandwidth: 5234167,
-    };
+    const AdvancedRequestType = NetworkingEngine.AdvancedRequestType;
+    const manifestInfo = createContext(AdvancedRequestType.MPD);
+    const segmentInfo = createContext(AdvancedRequestType.MEDIA_SEGMENT);
 
     describe('configuration', () => {
       it('does not modify requests when disabled', () => {
@@ -306,8 +313,8 @@ describe('CmcdManager', () => {
       it('applies core CMCD params to HEAD requests', async () => {
         config.useHeaders = false;
         cmcdManager = new CmcdManager(playerInterface, config);
-
-        const uri = 'resolve://foo';
+        const networkingEngine = createNetworkingEngine(cmcdManager);
+        const uri = 'cmcd://foo';
         const type = NetworkingEngine.RequestType.MANIFEST;
         const retry = NetworkingEngine.defaultRetryParameters();
         const request = NetworkingEngine.makeRequest([uri], retry);
