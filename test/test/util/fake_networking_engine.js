@@ -174,11 +174,11 @@ shaka.test.FakeNetworkingEngine = class {
    *
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.net.NetworkingEngine.AdvancedRequestType=} advType
+   * @param {shaka.net.NetworkingEngine.RequestContext=} context
    */
-  expectRequest(uri, type, advType) {
+  expectRequest(uri, type, context) {
     shaka.test.FakeNetworkingEngine.expectRequest(
-        this.request, uri, type, advType);
+        this.request, uri, type, context);
   }
 
   /**
@@ -186,11 +186,11 @@ shaka.test.FakeNetworkingEngine = class {
    *
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.net.NetworkingEngine.AdvancedRequestType=} advType
+   * @param {shaka.net.NetworkingEngine.RequestContext=} context
    */
-  expectNoRequest(uri, type, advType) {
+  expectNoRequest(uri, type, context) {
     shaka.test.FakeNetworkingEngine.expectNoRequest(
-        this.request, uri, type, advType);
+        this.request, uri, type, context);
   }
 
   /**
@@ -294,13 +294,13 @@ shaka.test.FakeNetworkingEngine = class {
    * @param {!Object} requestSpy
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.net.NetworkingEngine.AdvancedRequestType=} advType
+   * @param {shaka.net.NetworkingEngine.RequestContext=} context
    */
-  static expectRequest(requestSpy, uri, type, advType) {
+  static expectRequest(requestSpy, uri, type, context) {
     // Jasmine "toHaveBeenCalledWith" doesn't handle optional parameters well.
-    if (advType != undefined) {
+    if (context != undefined) {
       expect(requestSpy).toHaveBeenCalledWith(
-          type, jasmine.objectContaining({uris: [uri]}), advType);
+          type, jasmine.objectContaining({uris: [uri]}), context);
     } else {
       expect(requestSpy).toHaveBeenCalledWith(
           type, jasmine.objectContaining({uris: [uri]}));
@@ -313,13 +313,14 @@ shaka.test.FakeNetworkingEngine = class {
    * @param {!Object} requestSpy
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.net.NetworkingEngine.AdvancedRequestType=} advType
+   * @param {shaka.net.NetworkingEngine.RequestContext=} context
    */
-  static expectNoRequest(requestSpy, uri, type, advType) {
+  static expectNoRequest(requestSpy, uri, type, context) {
     // Jasmine "toHaveBeenCalledWith" doesn't handle optional parameters well.
-    if (advType != undefined) {
+    if (context != undefined) {
       expect(requestSpy).not.toHaveBeenCalledWith(
-          type, jasmine.objectContaining({uris: [uri]}), advType);
+          type, jasmine.objectContaining({uris: [uri]}),
+          jasmine.objectContaining(context));
     } else {
       expect(requestSpy).not.toHaveBeenCalledWith(
           type, jasmine.objectContaining({uris: [uri]}));
@@ -347,7 +348,7 @@ shaka.test.FakeNetworkingEngine = class {
       headers['Range'] = range;
     }
 
-    const advType = isInit ?
+    const type = isInit ?
         shaka.net.NetworkingEngine.AdvancedRequestType.INIT_SEGMENT :
         shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
 
@@ -357,7 +358,7 @@ shaka.test.FakeNetworkingEngine = class {
           uris: [uri],
           headers: headers,
         }),
-        advType);
+        {type: type});
   }
 };
 

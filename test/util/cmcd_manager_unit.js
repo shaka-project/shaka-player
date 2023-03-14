@@ -80,12 +80,7 @@ describe('CmcdManager', () => {
         NetworkingEngine.PluginPriority.FALLBACK);
 
 
-    /**
-     *
-     * @param {shaka.net.NetworkingEngine.RequestType} type
-     * @param {shaka.extern.Request} request
-     * @param {shaka.net.NetworkingEngine.RequestContext=} context
-     */
+    /** @type {shaka.net.NetworkingEngine.OnRequest} */
     function onRequest(type, request, context) {
       cmcd.applyData(type, request, context);
     }

@@ -706,19 +706,21 @@ describe('DashParser Live', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
 
     const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-    const manifestAdv = shaka.net.NetworkingEngine.AdvancedRequestType.MPD;
+    const manifestContext = {
+      type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
+    };
     await parser.start('dummy://foo', playerInterface);
 
     expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
-    fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestAdv);
+    fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
     fakeNetEngine.request.calls.reset();
 
     // Create a mock so we can verify it gives two URIs.
     // The third location is a relative url, and should be resolved as an
     // absolute url.
-    fakeNetEngine.request.and.callFake((type, request, advType) => {
+    fakeNetEngine.request.and.callFake((type, request, context) => {
       expect(type).toBe(manifestRequest);
-      expect(advType).toBe(manifestAdv);
+      expect(context).toBe(manifestContext);
       expect(request.uris).toEqual(
           ['http://foobar', 'http://foobar2', 'dummy://foo/foobar3']);
       const data = shaka.util.StringUtils.toUTF8(manifestText);
@@ -951,7 +953,9 @@ describe('DashParser Live', () => {
 
   describe('stop', () => {
     const manifestRequestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-    const manifestAdvType = shaka.net.NetworkingEngine.AdvancedRequestType.MPD;
+    const manifestContext = {
+      type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
+    };
     const dateRequestType = shaka.net.NetworkingEngine.RequestType.TIMING;
     const manifestUri = 'dummy://foo';
     const dateUri = 'http://foo.bar/date';
@@ -984,7 +988,7 @@ describe('DashParser Live', () => {
       await parser.start(manifestUri, playerInterface);
 
       fakeNetEngine.expectRequest(
-          manifestUri, manifestRequestType, manifestAdvType);
+          manifestUri, manifestRequestType, manifestContext);
       fakeNetEngine.request.calls.reset();
 
       parser.stop();
@@ -1003,7 +1007,7 @@ describe('DashParser Live', () => {
       await expectation;
 
       fakeNetEngine.expectRequest(
-          manifestUri, manifestRequestType, manifestAdvType);
+          manifestUri, manifestRequestType, manifestContext);
       fakeNetEngine.request.calls.reset();
       await updateManifest();
       // An update should not occur.
@@ -1015,7 +1019,7 @@ describe('DashParser Live', () => {
 
       expect(manifest).toBeTruthy();
       fakeNetEngine.expectRequest(
-          manifestUri, manifestRequestType, manifestAdvType);
+          manifestUri, manifestRequestType, manifestContext);
       fakeNetEngine.request.calls.reset();
       /** @type {!shaka.util.PublicPromise} */
       const delay = fakeNetEngine.delayNextRequest();
@@ -1024,7 +1028,7 @@ describe('DashParser Live', () => {
       // The request was made but should not be resolved yet.
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest(
-          manifestUri, manifestRequestType, manifestAdvType);
+          manifestUri, manifestRequestType, manifestContext);
       fakeNetEngine.request.calls.reset();
       parser.stop();
       delay.resolve();
@@ -1046,7 +1050,7 @@ describe('DashParser Live', () => {
       // This is the initial manifest request.
       expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
       fakeNetEngine.expectRequest(
-          manifestUri, manifestRequestType, manifestAdvType);
+          manifestUri, manifestRequestType, manifestContext);
       fakeNetEngine.request.calls.reset();
       // Resolve the manifest request and wait on the UTCTiming request.
       delay.resolve();
