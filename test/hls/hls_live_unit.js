@@ -377,7 +377,7 @@ describe('HlsParser live', () => {
         fakeNetEngine.expectRequest(
             'test:/video',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
-            {type: type});
+            {type});
         expect(manifest.presentationTimeline.isLive()).toBe(false);
 
         fakeNetEngine.request.calls.reset();
@@ -848,7 +848,7 @@ describe('HlsParser live', () => {
         fakeNetEngine.expectRequest(
             'test:/video',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
-            {type: type});
+            {type});
       });
 
       it('request playlist delta updates to skip segments', async () => {

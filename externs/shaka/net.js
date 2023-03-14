@@ -205,7 +205,7 @@ shaka.extern.HeadersReceived;
  * The RequestType describes the basic type of the request (manifest, segment,
  * etc). The optional RequestContext will be provided where applicable to
  * provide additional infomation about the request. A request filter can run
- * asynchronously by returning a promise; in this case,the request will not be
+ * asynchronously by returning a promise; in this case, the request will not be
  * sent until the promise is resolved.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,

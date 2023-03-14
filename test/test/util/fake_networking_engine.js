@@ -359,7 +359,7 @@ shaka.test.FakeNetworkingEngine = class {
           uris: [uri],
           headers: headers,
         }),
-        jasmine.objectContaining({type: type}));
+        jasmine.objectContaining({type}));
   }
 };
 
