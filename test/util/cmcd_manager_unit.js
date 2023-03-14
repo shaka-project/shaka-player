@@ -79,9 +79,19 @@ describe('CmcdManager', () => {
         'cmcd', shaka.test.Util.spyFunc(resolveScheme),
         NetworkingEngine.PluginPriority.FALLBACK);
 
-    return new NetworkingEngine(null, null, null, (type, request, context) => {
+
+    /**
+     *
+     * @param {shaka.net.NetworkingEngine.RequestType} type
+     * @param {shaka.extern.Request} request
+     * @param {shaka.net.NetworkingEngine.RequestContext=} context
+     */
+    function onRequest(type, request, context) {
       cmcd.applyData(type, request, context);
-    });
+    }
+
+    return new NetworkingEngine(undefined, undefined, undefined,
+        onRequest);
   }
 
   describe('CmcdManager instance', () => {
