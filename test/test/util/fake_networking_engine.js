@@ -320,7 +320,7 @@ shaka.test.FakeNetworkingEngine = class {
     if (context != undefined) {
       expect(requestSpy).not.toHaveBeenCalledWith(
           type, jasmine.objectContaining({uris: [uri]}),
-          jasmine.objectContaining(context));
+          jasmine.objectContaining({type: context.type}));
     } else {
       expect(requestSpy).not.toHaveBeenCalledWith(
           type, jasmine.objectContaining({uris: [uri]}));
