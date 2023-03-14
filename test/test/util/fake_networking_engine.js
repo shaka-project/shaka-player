@@ -300,7 +300,8 @@ shaka.test.FakeNetworkingEngine = class {
     // Jasmine "toHaveBeenCalledWith" doesn't handle optional parameters well.
     if (context != undefined) {
       expect(requestSpy).toHaveBeenCalledWith(
-          type, jasmine.objectContaining({uris: [uri]}), context);
+          type, jasmine.objectContaining({uris: [uri]}),
+          jasmine.objectContaining({type: context.type}));
     } else {
       expect(requestSpy).toHaveBeenCalledWith(
           type, jasmine.objectContaining({uris: [uri]}));
@@ -358,7 +359,7 @@ shaka.test.FakeNetworkingEngine = class {
           uris: [uri],
           headers: headers,
         }),
-        {type: type});
+        jasmine.objectContaining({type: type}));
   }
 };
 

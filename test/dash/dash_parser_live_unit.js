@@ -720,7 +720,7 @@ describe('DashParser Live', () => {
     // absolute url.
     fakeNetEngine.request.and.callFake((type, request, context) => {
       expect(type).toBe(manifestRequest);
-      expect(context).toBe(manifestContext);
+      expect(context).toEqual(manifestContext);
       expect(request.uris).toEqual(
           ['http://foobar', 'http://foobar2', 'dummy://foo/foobar3']);
       const data = shaka.util.StringUtils.toUTF8(manifestText);
