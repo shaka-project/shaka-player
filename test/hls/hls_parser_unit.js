@@ -12,6 +12,7 @@ describe('HlsParser', () => {
 
   const videoInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
   const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
+  const videoTsSegmentUri = '/base/test/test/assets/video.ts';
 
   const vttText = [
     'WEBVTT\n',
@@ -37,6 +38,8 @@ describe('HlsParser', () => {
   /** @type {!Uint8Array} */
   let segmentData;
   /** @type {!Uint8Array} */
+  let tsSegmentData;
+  /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
   /** @type {!Uint8Array} */
   let aes128Key;
@@ -52,12 +55,15 @@ describe('HlsParser', () => {
     const responses = await Promise.all([
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
+      shaka.test.Util.fetch(videoTsSegmentUri),
     ]);
     initSegmentData = responses[0];
     segmentData = responses[1];
 
     selfInitializingSegmentData =
         shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
+
+    tsSegmentData = responses[2];
 
     aes128Key = new Uint8Array([
       0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -4467,5 +4473,26 @@ describe('HlsParser', () => {
     expect(actualAudio0.codecs).toBe('');
     expect(actualAudio1.mimeType).toBe('audio/aac');
     expect(actualAudio1.codecs).toBe('');
+  });
+
+  it('parses media playlists directly', async () => {
+    const mediaPlaylist = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXTINF:5,\n',
+      'video1.ts\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', mediaPlaylist)
+        .setResponseValue('test:/video1.ts', tsSegmentData);
+
+    const actualManifest = await parser.start('test:/master', playerInterface);
+    expect(actualManifest.variants.length).toBe(1);
+
+    const video = actualManifest.variants[0].video;
+
+    expect(video.width).toBe(256);
+    expect(video.height).toBe(110);
   });
 });
