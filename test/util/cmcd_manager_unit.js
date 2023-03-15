@@ -68,6 +68,7 @@ describe('CmcdManager', () => {
   });
 
   const NetworkingEngine = shaka.net.NetworkingEngine;
+  const RequestType = NetworkingEngine.RequestType;
 
   function createNetworkingEngine(cmcd) {
     const resolveScheme = jasmine.createSpy('cmcd').and.callFake(
@@ -315,22 +316,114 @@ describe('CmcdManager', () => {
         expect(r.headers['CMCD-Request']).not.toContain(',su');
       });
 
-      it('applies core CMCD params to HEAD requests', async () => {
-        config.useHeaders = false;
-        cmcdManager = new CmcdManager(playerInterface, config);
-        const networkingEngine = createNetworkingEngine(cmcdManager);
+      describe('applies core CMCD params to networking engine requests', () => {
+        let networkingEngine;
         const uri = 'cmcd://foo';
-        const type = NetworkingEngine.RequestType.MANIFEST;
         const retry = NetworkingEngine.defaultRetryParameters();
-        const request = NetworkingEngine.makeRequest([uri], retry);
-        request.method = 'HEAD';
-        await networkingEngine.request(type, request);
 
-        const result = request.uris[0];
-        expect(result).toContain('?CMCD=');
-        expect(result).toContain(encodeURIComponent('sid="'));
-        expect(result).toContain(encodeURIComponent('cid="testing"'));
-        expect(result).not.toContain(encodeURIComponent('sf='));
+        beforeAll(() => {
+          config.useHeaders = false;
+          cmcdManager = new CmcdManager(playerInterface, config);
+          networkingEngine = createNetworkingEngine(cmcdManager);
+        });
+
+        it('HEAD requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          request.method = 'HEAD';
+          await networkingEngine.request(RequestType.MANIFEST, request);
+
+          const result = request.uris[0];
+          expect(result).toContain('?CMCD=');
+          expect(result).toContain(encodeURIComponent('sid="'));
+          expect(result).toContain(encodeURIComponent('cid="testing"'));
+          expect(result).not.toContain(encodeURIComponent('sf='));
+        });
+
+        it('dash manifest requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MPD});
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=m'));
+          expect(result).toContain(encodeURIComponent('sf=d'));
+        });
+
+        it('hls manifest requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MASTER_PLAYLIST});
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=m'));
+          expect(result).toContain(encodeURIComponent('sf=h'));
+        });
+
+        it('hls playlist requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MEDIA_PLAYLIST});
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=m'));
+          expect(result).toContain(encodeURIComponent('sf=h'));
+        });
+
+        it('init segment requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.SEGMENT, request,
+              {type: AdvancedRequestType.INIT_SEGMENT});
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=i'));
+        });
+
+        it('media segment requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.SEGMENT, request,
+              {
+                type: AdvancedRequestType.MEDIA_SEGMENT,
+                stream: {
+                  type: 'video',
+                },
+              });
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=v'));
+        });
+
+        it('key requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.KEY, request);
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=k'));
+        });
+
+        it('license requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.LICENSE, request);
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=k'));
+        });
+
+        it('cert requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.SERVER_CERTIFICATE,
+              request);
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=k'));
+        });
+
+        it('timing requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.TIMING, request);
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=o'));
+        });
       });
     });
   });
