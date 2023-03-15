@@ -117,8 +117,3 @@ URLs in your manifests always use `https:`, or by having it not include the
 scheme (e.g., `//example.com/file.mp4`).
 
 [CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS
-
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial drm-config}.

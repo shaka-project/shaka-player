@@ -269,8 +269,3 @@ PR contributions to [the gallery repo][] are welcome.
 [@lucksy]: https://github.com/lucksy
 [pre-packaged Shaka UI themes]: https://lucksy.github.io/shaka-player-themes/
 [the gallery repo]: https://github.com/lucksy/shaka-player-themes
-
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial a11y} to make your custom buttons accessible to screen readers.

@@ -187,8 +187,3 @@ To sum up, remember these points when debugging your application:
  - Use the debug version of Shaka Player for debugging and integration work
  - Refer to the docs for error codes
  - Increase the log level when you need more detail
-
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial config}.
