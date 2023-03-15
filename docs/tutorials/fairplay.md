@@ -90,7 +90,7 @@ or give the response in a different format.  For more info, see the general
 {@tutorial license-wrapping} tutorial:
 
 ```js
-player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
+player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
@@ -103,7 +103,7 @@ player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
   request.body = shaka.util.StringUtils.toUTF8(encodeURIComponent(params));
 });
 
-player.getNetworkingEngine().registerResponseFilter((type, response, advType) => {
+player.getNetworkingEngine().registerResponseFilter((type, response, context) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
@@ -143,7 +143,7 @@ Note: If the url of the license server has to undergo any transformation
 (eg: add the contentId), you would have to create your filter manually.
 
 ```js
-player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
+player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
@@ -175,7 +175,7 @@ Note: If the url of the license server has to undergo any transformation
 (eg: add the contentId), you would have to create your filter manually.
 
 ```js
-player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
+player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }

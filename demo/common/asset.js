@@ -373,7 +373,7 @@ const ShakaDemoAssetInfo = class {
 
     if (this.licenseRequestHeaders.size) {
       /** @type {!shaka.extern.RequestFilter} */
-      const filter = (requestType, request, advType) => {
+      const filter = (requestType, request, context) => {
         return this.addLicenseRequestHeaders_(this.licenseRequestHeaders,
             requestType,
             request);

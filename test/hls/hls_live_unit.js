@@ -66,8 +66,6 @@ describe('HlsParser live', () => {
 
     config = shaka.util.PlayerConfiguration.createDefault().manifest;
     playerInterface = {
-      modifyManifestRequest: (request, manifestInfo) => {},
-      modifySegmentRequest: (request, segmentInfo) => {},
       filter: () => Promise.resolve(),
       makeTextStreamsForClosedCaptions: (manifest) => {},
       networkingEngine: fakeNetEngine,
@@ -373,10 +371,13 @@ describe('HlsParser live', () => {
             manifest, mediaWithAdditionalSegment + '#EXT-X-ENDLIST\n');
 
         // We saw one request for the video playlist, which signalled "ENDLIST".
+        const type =
+            shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST;
+
         fakeNetEngine.expectRequest(
             'test:/video',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
-            shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST);
+            {type});
         expect(manifest.presentationTimeline.isLive()).toBe(false);
 
         fakeNetEngine.request.calls.reset();
@@ -842,10 +843,12 @@ describe('HlsParser live', () => {
         // Only one request was made, and it was for the playlist.
         // No segment requests were needed to get the start time.
         expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+        const type =
+            shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST;
         fakeNetEngine.expectRequest(
             'test:/video',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
-            shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST);
+            {type});
       });
 
       it('request playlist delta updates to skip segments', async () => {
@@ -888,7 +891,8 @@ describe('HlsParser live', () => {
         fakeNetEngine.expectRequest(
             'test:/video?_HLS_skip=YES',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
-            shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST);
+            {type:
+              shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST});
       });
 
       it('skips older segments', async () => {
