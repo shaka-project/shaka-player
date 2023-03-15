@@ -21,6 +21,9 @@ describe('Ad manager', () => {
     adManager = player.getAdManager();
     expect(adManager instanceof shaka.ads.AdManager).toBe(true);
 
+    const config = shaka.util.PlayerConfiguration.createDefault().ads;
+    adManager.configure(config);
+
     adContainer =
       /** @type {!HTMLElement} */ (document.createElement('div'));
   });
