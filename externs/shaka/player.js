@@ -841,7 +841,8 @@ shaka.extern.DashManifestConfiguration;
  *   mediaPlaylistFullMimeType: string,
  *   useSafariBehaviorForLive: boolean,
  *   liveSegmentsDelay: number,
- *   sequenceMode: boolean
+ *   sequenceMode: boolean,
+ *   ignoreManifestTimestampsInSegmentsMode: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -887,6 +888,13 @@ shaka.extern.DashManifestConfiguration;
  *   "sequence mode" (ignoring their internal timestamps).
  *   Defaults to <code>true</code> except on WebOS 3, Tizen 2,
  *   Tizen 3 and PlayStation 4 whose default value is <code>false</code>.
+ * @property {boolean} ignoreManifestTimestampsInSegmentsMode
+ *   If true, don't adjust the timestamp offset to account for manifest
+ *   segment durations being out of sync with segment durations. In other
+ *   words, assume that there are no gaps in the segments when appending
+ *   to the SourceBuffer, even if the manifest and segment times disagree.
+ *   Only applies when sequenceMode is <code>false</code>.
+ *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;

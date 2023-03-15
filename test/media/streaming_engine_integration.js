@@ -594,6 +594,7 @@ describe('StreamingEngine', () => {
         textStreams: [],
         imageStreams: [],
         sequenceMode: false,
+        ignoreManifestTimestampsInSegmentsMode: false,
         type: 'UNKNOWN',
         variants: [{
           id: 1,

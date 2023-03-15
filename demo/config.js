@@ -226,6 +226,8 @@ shakaDemo.Config = class {
             'manifest.hls.liveSegmentsDelay')
         .addBoolInput_(MessageIds.HLS_SEQUENCE_MODE,
             'manifest.hls.sequenceMode')
+        .addBoolInput_(MessageIds.IGNORE_MANIFEST_TIMESTAMPS_IN_SEGMENTS_MODE,
+            'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
