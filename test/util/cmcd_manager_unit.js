@@ -424,6 +424,16 @@ describe('CmcdManager', () => {
           const result = request.uris[0];
           expect(result).toContain(encodeURIComponent('ot=o'));
         });
+
+        it('not when enabled is false', async () => {
+          config.enabled = false;
+          cmcdManager = new CmcdManager(playerInterface, config);
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.TIMING, request);
+
+          const result = request.uris[0];
+          expect(result).not.toContain('?CMCD=');
+        });
       });
     });
   });
