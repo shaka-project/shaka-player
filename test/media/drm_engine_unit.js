@@ -1514,7 +1514,7 @@ describe('DrmEngine', () => {
 
       // Not mocked.  Run data through real data URI parser to ensure that it is
       // correctly formatted.
-      fakeNetEngine.request.and.callFake((type, request, advType) => {
+      fakeNetEngine.request.and.callFake((type, request, context) => {
         const requestType = shaka.net.NetworkingEngine.RequestType.LICENSE;
 
         // A dummy progress callback.

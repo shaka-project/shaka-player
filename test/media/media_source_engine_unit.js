@@ -639,6 +639,7 @@ describe('MediaSourceEngine', () => {
       };
       const initObject = new Map();
       initObject.set(ContentType.VIDEO, fakeVideoStream);
+      initObject.set(ContentType.TEXT, fakeTextStream);
 
       await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
 

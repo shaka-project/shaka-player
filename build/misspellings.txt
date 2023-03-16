@@ -36,4 +36,6 @@
     r'(?i)varint': 'variant',
     r'(?i)asynchronus': 'asynchronous',
     r'(?i)deafult': 'default',
+    r'(?i)evication': 'eviction',
+    r'(?i)immidiately': 'immediately',
 }

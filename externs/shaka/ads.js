@@ -64,6 +64,15 @@ shaka.extern.IAdManager = class extends EventTarget {
    */
   setLocale(locale) {}
 
+  /**
+   * Called by the Player to provide an updated configuration any time it
+   * changes.
+   * Must be called at least once before init*().
+   *
+   * @param {shaka.extern.AdsConfiguration} config
+   */
+  configure(config) {}
+
   release() {}
 
   onAssetUnload() {}
