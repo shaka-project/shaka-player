@@ -136,6 +136,10 @@ shaka.test.FakeMediaSourceEngine = class {
     /** @type {!jasmine.Spy} */
     this.updateLcevcDil =
         jasmine.createSpy('updateLcevcDil').and.stub();
+
+    /** @type {!jasmine.Spy} */
+    this.resync=
+        jasmine.createSpy('resync').and.stub();
   }
 
   /** @override */
