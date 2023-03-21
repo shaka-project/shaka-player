@@ -996,6 +996,118 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('parses discontinuity tags', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="avc1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-VERSION:3\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:3,\n',
+      'clip0-video-0.ts\n',
+      '#EXTINF:1,\n',
+      'clip0-video-1.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:2,\n',
+      'clip1-video-1.ts\n',
+      '#EXTINF:3,\n',
+      'clip1-video-2.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:1,\n',
+      'media-clip2-video-0.ts\n',
+      '#EXTINF:1,\n',
+      'media-clip2-video-1.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:4,\n',
+      'media-clip3-video-1.ts\n',
+      '#EXT-X-ENDLIST\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    await manifest.variants[0].video.createSegmentIndex();
+
+    const segmentIndex = manifest.variants[0].video.segmentIndex;
+    const references = [];
+
+    for (let i = 0; i < 7; i++) {
+      references.push(segmentIndex.get(i));
+    }
+
+    expect(references[0].discontinuitySequence).toBe(0);
+    expect(references[1].discontinuitySequence).toBe(0);
+    expect(references[2].discontinuitySequence).toBe(1);
+    expect(references[3].discontinuitySequence).toBe(1);
+    expect(references[4].discontinuitySequence).toBe(2);
+    expect(references[5].discontinuitySequence).toBe(2);
+    expect(references[6].discontinuitySequence).toBe(3);
+  });
+
+  it('sets reference timetampOffset based on discontinuity start time',
+      async () => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="avc1"\n',
+          'video\n',
+        ].join('');
+
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-VERSION:3\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXTINF:3,\n',
+          'clip0-video-0.ts\n',
+          '#EXTINF:1,\n',
+          'clip0-video-1.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:2,\n',
+          'clip1-video-1.ts\n',
+          '#EXTINF:3,\n',
+          'clip1-video-2.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:1,\n',
+          'media-clip2-video-0.ts\n',
+          '#EXTINF:1,\n',
+          'media-clip2-video-1.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:4,\n',
+          'media-clip3-video-1.ts\n',
+          '#EXT-X-ENDLIST\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        await manifest.variants[0].video.createSegmentIndex();
+
+        const segmentIndex = manifest.variants[0].video.segmentIndex;
+        const references = [];
+
+        for (let i = 0; i < 7; i++) {
+          references.push(segmentIndex.get(i));
+        }
+
+        expect(references[0].timestampOffset).toBe(0);
+        expect(references[1].timestampOffset).toBe(0);
+        expect(references[2].timestampOffset).toBe(4);
+        expect(references[3].timestampOffset).toBe(4);
+        expect(references[4].timestampOffset).toBe(9);
+        expect(references[5].timestampOffset).toBe(9);
+        expect(references[6].timestampOffset).toBe(11);
+      },
+  );
+
   it('parses characteristics from audio tags', async () => {
     const master = [
       '#EXTM3U\n',
