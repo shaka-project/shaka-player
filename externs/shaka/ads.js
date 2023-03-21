@@ -246,4 +246,44 @@ shaka.extern.IAd = class {
    * @return {string}
    */
   getDescription() {}
+
+  /**
+   * @return {number}
+   */
+  getVastMediaBitrate() {}
+
+  /**
+   * @return {number}
+   */
+  getVastMediaHeight() {}
+
+  /**
+   * @return {number}
+   */
+  getVastMediaWidth() {}
+
+  /**
+   * @return {string}
+   */
+  getAdId() {}
+
+  /**
+   * @return {string}
+   */
+  getCreativeAdId() {}
+
+  /**
+   * @return {string}
+   */
+  getAdvertiserName() {}
+
+  /**
+   * @return {?string}
+   */
+  getMediaUrl() {}
+
+  /**
+   * @return {number}
+   */
+  getTimeOffset() {}
 };

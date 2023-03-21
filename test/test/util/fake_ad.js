@@ -40,6 +40,30 @@ shaka.test.FakeAd = class {
 
     /** @private {string} */
     this.description_ = 'Test Description';
+
+    /** @private {number} */
+    this.vastMediaBitrate_ = 128;
+
+    /** @private {number} */
+    this.vastMediaHeight_ = 720;
+
+    /** @private {number} */
+    this.vastMediaWidth_ = 1280;
+
+    /** @private {string} */
+    this.adId_ = 'Test Ad ID';
+
+    /** @private {string} */
+    this.creativeAdId_ = 'Test Creative Ad ID';
+
+    /** @private {string} */
+    this.advertiserName_ = '';
+
+    /** @private {string} */
+    this.mediaUrl_ = 'fake';
+
+    /** @private {number} */
+    this.timeOffsetInPod_ = 1;
   }
 
   /**
@@ -210,6 +234,70 @@ shaka.test.FakeAd = class {
    */
   getDescription() {
     return this.description_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getVastMediaBitrate() {
+    return this.vastMediaBitrate_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getVastMediaHeight() {
+    return this.vastMediaHeight_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getVastMediaWidth() {
+    return this.vastMediaWidth_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getAdId() {
+    return this.adId_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getCreativeAdId() {
+    return this.creativeAdId_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getAdvertiserName() {
+    return this.advertiserName_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getMediaUrl() {
+    return this.mediaUrl_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getTimeOffset() {
+    return this.timeOffsetInPod_;
   }
 
   /**
