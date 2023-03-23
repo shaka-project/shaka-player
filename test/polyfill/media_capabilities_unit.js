@@ -69,6 +69,7 @@ describe('MediaCapabilities', () => {
       },
     };
     shaka.polyfill.MediaCapabilities.memoizedMediaKeySystemAccessRequests_ = {};
+    supportMap.clear();
 
     mockCanDisplayType = jasmine.createSpy('canDisplayType');
     mockCanDisplayType.and.returnValue(false);

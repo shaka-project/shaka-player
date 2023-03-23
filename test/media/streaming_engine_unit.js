@@ -520,7 +520,8 @@ describe('StreamingEngine', () => {
     expectedMseInit.set(ContentType.TEXT, textStream);
 
     expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit,
-        /** sequenceMode= */ false, /** manifestType= */ 'UNKNOWN');
+        /** sequenceMode= */ false, /** manifestType= */ 'UNKNOWN',
+        /** ignoreManifestTimestampsInSegmentsMode= */ false);
     expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
 
     expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
@@ -3428,7 +3429,12 @@ describe('StreamingEngine', () => {
       netEngine.request.and.callFake((requestType, request, context) => {
         const buffer = new ArrayBuffer(0);
         /** @type {shaka.extern.Response} */
-        const response = {uri: request.uris[0], data: buffer, headers: {}};
+        const response = {
+          uri: request.uris[0],
+          originalUri: request.uris[0],
+          data: buffer,
+          headers: {},
+        };
         return shaka.util.AbortableOperation.completed(response);
       });
 

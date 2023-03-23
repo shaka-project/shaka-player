@@ -6,6 +6,7 @@
     r'(?i)bandwith': 'bandwidth',
     r'(?i)cur+ent': 'current',
     r"(?i)doens?'t": "doesn't",
+    r'(?i)droping': 'dropping',
     r'(?i)ful+screen': 'fullscreen',
     r'(?i)futher': 'further',
     r'(?i)gene?ra?tor': 'generator',
