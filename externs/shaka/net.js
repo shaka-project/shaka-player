@@ -216,7 +216,7 @@ shaka.extern.HeadersReceived;
  *   The duration of the segment in seconds
  * @property {shaka.media.SegmentReference=} segment
  *   The request's segment reference
- * @export
+ * @exportDoc
  */
 shaka.extern.RequestContext;
 
