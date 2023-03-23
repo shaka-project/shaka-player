@@ -3275,7 +3275,12 @@ describe('StreamingEngine', () => {
       netEngine.request.and.callFake((requestType, request) => {
         const buffer = new ArrayBuffer(0);
         /** @type {shaka.extern.Response} */
-        const response = {uri: request.uris[0], data: buffer, headers: {}};
+        const response = {
+          uri: request.uris[0],
+          originalUri: request.uris[0],
+          data: buffer,
+          headers: {},
+        };
         return shaka.util.AbortableOperation.completed(response);
       });
 
