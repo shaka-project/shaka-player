@@ -134,6 +134,7 @@ describe('Playhead', () => {
       minBufferTime: 10,
       offlineSessionIds: [],
       sequenceMode: false,
+      ignoreManifestTimestampsInSegmentsMode: false,
       type: 'UNKNOWN',
     };
 

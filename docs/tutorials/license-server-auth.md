@@ -62,7 +62,7 @@ arbitrary headers to Shaka's requests through a request filter callback.
 Register the filter before calling `player.load()`:
 
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, advType) {
+  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
     // Only add headers to license requests:
     if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
       // This is the specific header name and value the server wants:
@@ -92,7 +92,7 @@ try to use it without setting the parameter, you will see `Error code 6007`
 We can use a request filter to modify the URL and add the required parameter:
 
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, advType) {
+  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
     // Only add headers to license requests:
     if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
       // This is the specific parameter name and value the server wants:
@@ -140,7 +140,7 @@ Our `cookie_auth` endpoint sends back headers that allow credentialed requests,
 so we set a flag in our request filter to send credentials cross-site:
 
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, advType) {
+  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
     if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
       request.allowCrossSiteCredentials = true;
     }
@@ -205,7 +205,7 @@ const authToken = null;
 Now change the request filter:
 
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, advType) {
+  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
     // Only add headers to license requests:
     if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) return;
 
@@ -246,8 +246,3 @@ License request can now continue.
 
 If you need them, you can also create asynchronous response filters in the same
 way.
-
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial license-wrapping}.

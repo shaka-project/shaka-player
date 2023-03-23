@@ -841,7 +841,8 @@ shaka.extern.DashManifestConfiguration;
  *   mediaPlaylistFullMimeType: string,
  *   useSafariBehaviorForLive: boolean,
  *   liveSegmentsDelay: number,
- *   sequenceMode: boolean
+ *   sequenceMode: boolean,
+ *   ignoreManifestTimestampsInSegmentsMode: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -887,6 +888,13 @@ shaka.extern.DashManifestConfiguration;
  *   "sequence mode" (ignoring their internal timestamps).
  *   Defaults to <code>true</code> except on WebOS 3, Tizen 2,
  *   Tizen 3 and PlayStation 4 whose default value is <code>false</code>.
+ * @property {boolean} ignoreManifestTimestampsInSegmentsMode
+ *   If true, don't adjust the timestamp offset to account for manifest
+ *   segment durations being out of sync with segment durations. In other
+ *   words, assume that there are no gaps in the segments when appending
+ *   to the SourceBuffer, even if the manifest and segment times disagree.
+ *   Only applies when sequenceMode is <code>false</code>.
+ *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
@@ -1117,6 +1125,17 @@ shaka.extern.MediaSourceConfiguration;
 
 
 /**
+ * @typedef {Object}
+ *
+ * @description
+ *   Ads configuration.
+ *
+ * @exportDoc
+ */
+shaka.extern.AdsConfiguration;
+
+
+/**
  * @typedef {{
  *   enabled: boolean,
  *   useNetworkInformation: boolean,
@@ -1323,6 +1342,7 @@ shaka.extern.OfflineConfiguration;
 
 /**
  * @typedef {{
+ *   ads: shaka.extern.AdsConfiguration,
  *   autoShowText: shaka.config.AutoShowText,
  *   drm: shaka.extern.DrmConfiguration,
  *   manifest: shaka.extern.ManifestConfiguration,
@@ -1349,6 +1369,8 @@ shaka.extern.OfflineConfiguration;
  *   textDisplayFactory: shaka.extern.TextDisplayer.Factory
  * }}
  *
+ * @property {shaka.extern.AdsConfiguration} ads
+ *   Ads configuration and settings.
  * @property {shaka.config.AutoShowText} autoShowText
  *   Controls behavior of auto-showing text tracks on load().
  * @property {shaka.extern.DrmConfiguration} drm

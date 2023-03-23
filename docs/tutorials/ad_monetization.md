@@ -203,7 +203,7 @@ default, so you should only need to set this if you've enabled it in other parts
 your code.
 
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, advType) {
+  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
     if (type == shaka.net.NetworkingEngine.RequestType.MANIFEST ||
         type == shaka.net.NetworkingEngine.RequestType.SEGMENT) {
       request.withCredentials = false;
@@ -222,7 +222,3 @@ before instantiating the player.
 // myapp.CustomAdManager is a placeholder name for your ad manager implementation.
 shaka.Player.setAdManagerFactory(() => new myapp.CustomAdManager());
 ```
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial plugins}.

@@ -12,6 +12,7 @@ describe('HlsParser', () => {
 
   const videoInitSegmentUri = '/base/test/test/assets/sintel-video-init.mp4';
   const videoSegmentUri = '/base/test/test/assets/sintel-video-segment.mp4';
+  const videoTsSegmentUri = '/base/test/test/assets/video.ts';
 
   const vttText = [
     'WEBVTT\n',
@@ -37,6 +38,8 @@ describe('HlsParser', () => {
   /** @type {!Uint8Array} */
   let segmentData;
   /** @type {!Uint8Array} */
+  let tsSegmentData;
+  /** @type {!Uint8Array} */
   let selfInitializingSegmentData;
   /** @type {!Uint8Array} */
   let aes128Key;
@@ -52,12 +55,15 @@ describe('HlsParser', () => {
     const responses = await Promise.all([
       shaka.test.Util.fetch(videoInitSegmentUri),
       shaka.test.Util.fetch(videoSegmentUri),
+      shaka.test.Util.fetch(videoTsSegmentUri),
     ]);
     initSegmentData = responses[0];
     segmentData = responses[1];
 
     selfInitializingSegmentData =
         shaka.util.Uint8ArrayUtils.concat(initSegmentData, segmentData);
+
+    tsSegmentData = responses[2];
 
     aes128Key = new Uint8Array([
       0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
@@ -989,6 +995,118 @@ describe('HlsParser', () => {
 
     await testHlsParser(master, media, manifest);
   });
+
+  it('parses discontinuity tags', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="avc1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-VERSION:3\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:3,\n',
+      'clip0-video-0.ts\n',
+      '#EXTINF:1,\n',
+      'clip0-video-1.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:2,\n',
+      'clip1-video-1.ts\n',
+      '#EXTINF:3,\n',
+      'clip1-video-2.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:1,\n',
+      'media-clip2-video-0.ts\n',
+      '#EXTINF:1,\n',
+      'media-clip2-video-1.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:4,\n',
+      'media-clip3-video-1.ts\n',
+      '#EXT-X-ENDLIST\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    await manifest.variants[0].video.createSegmentIndex();
+
+    const segmentIndex = manifest.variants[0].video.segmentIndex;
+    const references = [];
+
+    for (let i = 0; i < 7; i++) {
+      references.push(segmentIndex.get(i));
+    }
+
+    expect(references[0].discontinuitySequence).toBe(0);
+    expect(references[1].discontinuitySequence).toBe(0);
+    expect(references[2].discontinuitySequence).toBe(1);
+    expect(references[3].discontinuitySequence).toBe(1);
+    expect(references[4].discontinuitySequence).toBe(2);
+    expect(references[5].discontinuitySequence).toBe(2);
+    expect(references[6].discontinuitySequence).toBe(3);
+  });
+
+  it('sets reference timetampOffset based on discontinuity start time',
+      async () => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="avc1"\n',
+          'video\n',
+        ].join('');
+
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-VERSION:3\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXTINF:3,\n',
+          'clip0-video-0.ts\n',
+          '#EXTINF:1,\n',
+          'clip0-video-1.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:2,\n',
+          'clip1-video-1.ts\n',
+          '#EXTINF:3,\n',
+          'clip1-video-2.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:1,\n',
+          'media-clip2-video-0.ts\n',
+          '#EXTINF:1,\n',
+          'media-clip2-video-1.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:4,\n',
+          'media-clip3-video-1.ts\n',
+          '#EXT-X-ENDLIST\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        await manifest.variants[0].video.createSegmentIndex();
+
+        const segmentIndex = manifest.variants[0].video.segmentIndex;
+        const references = [];
+
+        for (let i = 0; i < 7; i++) {
+          references.push(segmentIndex.get(i));
+        }
+
+        expect(references[0].timestampOffset).toBe(0);
+        expect(references[1].timestampOffset).toBe(0);
+        expect(references[2].timestampOffset).toBe(4);
+        expect(references[3].timestampOffset).toBe(4);
+        expect(references[4].timestampOffset).toBe(9);
+        expect(references[5].timestampOffset).toBe(9);
+        expect(references[6].timestampOffset).toBe(11);
+      },
+  );
 
   it('parses characteristics from audio tags', async () => {
     const master = [
@@ -4467,5 +4585,26 @@ describe('HlsParser', () => {
     expect(actualAudio0.codecs).toBe('');
     expect(actualAudio1.mimeType).toBe('audio/aac');
     expect(actualAudio1.codecs).toBe('');
+  });
+
+  it('parses media playlists directly', async () => {
+    const mediaPlaylist = [
+      '#EXTM3U\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXTINF:5,\n',
+      'video1.ts\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', mediaPlaylist)
+        .setResponseValue('test:/video1.ts', tsSegmentData);
+
+    const actualManifest = await parser.start('test:/master', playerInterface);
+    expect(actualManifest.variants.length).toBe(1);
+
+    const video = actualManifest.variants[0].video;
+
+    expect(video.width).toBe(256);
+    expect(video.height).toBe(110);
   });
 });

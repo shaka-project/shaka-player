@@ -75,6 +75,7 @@
 +../../lib/util/ebml_parser.js
 +../../lib/util/error.js
 +../../lib/util/event_manager.js
++../../lib/util/exp_golomb.js
 +../../lib/util/fairplay_utils.js
 +../../lib/util/fake_event.js
 +../../lib/util/fake_event_target.js

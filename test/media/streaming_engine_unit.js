@@ -453,7 +453,6 @@ describe('StreamingEngine', () => {
         presentationTimeInSeconds != undefined,
         'All tests should have defined an initial presentation time by now!');
     const playerInterface = {
-      modifySegmentRequest: (request, segmentInfo) => {},
       getPresentationTime: () => presentationTimeInSeconds,
       getBandwidthEstimate: Util.spyFunc(getBandwidthEstimate),
       mediaSourceEngine: mediaSourceEngine,
@@ -521,7 +520,8 @@ describe('StreamingEngine', () => {
     expectedMseInit.set(ContentType.TEXT, textStream);
 
     expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit,
-        /** sequenceMode= */ false, /** manifestType= */ 'UNKNOWN');
+        /** sequenceMode= */ false, /** manifestType= */ 'UNKNOWN',
+        /** ignoreManifestTimestampsInSegmentsMode= */ false);
     expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
 
     expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
@@ -568,24 +568,25 @@ describe('StreamingEngine', () => {
         /* isInit= */ true);
 
     const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-    const segmentAdvType =
-        shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
+    const segmentContext = {
+      type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+    };
 
-    netEngine.expectRequest('0_audio_0', segmentType, segmentAdvType);
-    netEngine.expectRequest('0_video_0', segmentType, segmentAdvType);
-    netEngine.expectRequest('0_text_0', segmentType, segmentAdvType);
+    netEngine.expectRequest('0_audio_0', segmentType, segmentContext);
+    netEngine.expectRequest('0_video_0', segmentType, segmentContext);
+    netEngine.expectRequest('0_text_0', segmentType, segmentContext);
 
-    netEngine.expectRequest('0_audio_1', segmentType, segmentAdvType);
-    netEngine.expectRequest('0_video_1', segmentType, segmentAdvType);
-    netEngine.expectRequest('0_text_1', segmentType, segmentAdvType);
+    netEngine.expectRequest('0_audio_1', segmentType, segmentContext);
+    netEngine.expectRequest('0_video_1', segmentType, segmentContext);
+    netEngine.expectRequest('0_text_1', segmentType, segmentContext);
 
-    netEngine.expectRequest('1_audio_2', segmentType, segmentAdvType);
-    netEngine.expectRequest('1_video_2', segmentType, segmentAdvType);
-    netEngine.expectRequest('1_text_2', segmentType, segmentAdvType);
+    netEngine.expectRequest('1_audio_2', segmentType, segmentContext);
+    netEngine.expectRequest('1_video_2', segmentType, segmentContext);
+    netEngine.expectRequest('1_text_2', segmentType, segmentContext);
 
-    netEngine.expectRequest('1_audio_3', segmentType, segmentAdvType);
-    netEngine.expectRequest('1_video_3', segmentType, segmentAdvType);
-    netEngine.expectRequest('1_text_3', segmentType, segmentAdvType);
+    netEngine.expectRequest('1_audio_3', segmentType, segmentContext);
+    netEngine.expectRequest('1_video_3', segmentType, segmentContext);
+    netEngine.expectRequest('1_text_3', segmentType, segmentContext);
   });
 
   describe('unloadTextStream', () => {
@@ -603,18 +604,19 @@ describe('StreamingEngine', () => {
       // is sent.
       await runTest(() => {
         const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-        const segmentAdvType =
-            shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
+        const segmentContext = {
+          type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+        };
 
         if (presentationTimeInSeconds == 1) {
-          netEngine.expectRequest('0_text_0', segmentType, segmentAdvType);
+          netEngine.expectRequest('0_text_0', segmentType, segmentContext);
           netEngine.request.calls.reset();
           streamingEngine.unloadTextStream();
         } else if (presentationTimeInSeconds == 35) {
-          netEngine.expectNoRequest('0_text_0', segmentType, segmentAdvType);
-          netEngine.expectNoRequest('0_text_1', segmentType, segmentAdvType);
-          netEngine.expectNoRequest('1_text_2', segmentType, segmentAdvType);
-          netEngine.expectNoRequest('1_text_3', segmentType, segmentAdvType);
+          netEngine.expectNoRequest('0_text_0', segmentType, segmentContext);
+          netEngine.expectNoRequest('0_text_1', segmentType, segmentContext);
+          netEngine.expectNoRequest('1_text_2', segmentType, segmentContext);
+          netEngine.expectNoRequest('1_text_3', segmentType, segmentContext);
         }
       });
     });
@@ -866,24 +868,24 @@ describe('StreamingEngine', () => {
     expect(mediaSourceEngine.endOfStream).toHaveBeenCalled();
 
     const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-    const segmentAdvType =
-        shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
+    const segmentContext = {
+      type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+    };
+    netEngine.expectRequest('0_audio_0', segmentType, segmentContext);
+    netEngine.expectRequest('0_video_0', segmentType, segmentContext);
+    netEngine.expectRequest('0_text_0', segmentType, segmentContext);
 
-    netEngine.expectRequest('0_audio_0', segmentType, segmentAdvType);
-    netEngine.expectRequest('0_video_0', segmentType, segmentAdvType);
-    netEngine.expectRequest('0_text_0', segmentType, segmentAdvType);
+    netEngine.expectRequest('0_audio_1', segmentType, segmentContext);
+    netEngine.expectRequest('0_video_1', segmentType, segmentContext);
+    netEngine.expectRequest('0_text_1', segmentType, segmentContext);
 
-    netEngine.expectRequest('0_audio_1', segmentType, segmentAdvType);
-    netEngine.expectRequest('0_video_1', segmentType, segmentAdvType);
-    netEngine.expectRequest('0_text_1', segmentType, segmentAdvType);
+    netEngine.expectRequest('1_audio_2', segmentType, segmentContext);
+    netEngine.expectRequest('1_video_2', segmentType, segmentContext);
+    netEngine.expectRequest('1_text_2', segmentType, segmentContext);
 
-    netEngine.expectRequest('1_audio_2', segmentType, segmentAdvType);
-    netEngine.expectRequest('1_video_2', segmentType, segmentAdvType);
-    netEngine.expectRequest('1_text_2', segmentType, segmentAdvType);
-
-    netEngine.expectNoRequest('1_audio_3', segmentType, segmentAdvType);
-    netEngine.expectNoRequest('1_video_3', segmentType, segmentAdvType);
-    netEngine.expectNoRequest('1_text_3', segmentType, segmentAdvType);
+    netEngine.expectNoRequest('1_audio_3', segmentType, segmentContext);
+    netEngine.expectNoRequest('1_video_3', segmentType, segmentContext);
+    netEngine.expectNoRequest('1_text_3', segmentType, segmentContext);
   });
 
   it('does not buffer one media type ahead of another', async () => {
@@ -1158,12 +1160,14 @@ describe('StreamingEngine', () => {
       await Util.fakeEventLoop(5);
 
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-      const segmentAdvType =
-          shaka.net.NetworkingEngine.AdvancedRequestType.INIT_SEGMENT;
+      const segmentContext = {
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.INIT_SEGMENT,
+      };
+
       // Quickly switching back to text1, and text init segment should be
       // fetched again.
-      netEngine.expectRequest('text-20-init', segmentType, segmentAdvType);
-      netEngine.expectNoRequest('text-21-init', segmentType, segmentAdvType);
+      netEngine.expectRequest('text-20-init', segmentType, segmentContext);
+      netEngine.expectNoRequest('text-21-init', segmentType, segmentContext);
       // TODO: huh?
     });
   });
@@ -3100,7 +3104,7 @@ describe('StreamingEngine', () => {
       // For these tests, we don't care about specific data appended.
       // Just return any old ArrayBuffer for any requested segment.
       netEngine = new shaka.test.FakeNetworkingEngine();
-      netEngine.request.and.callFake((requestType, request, advType) => {
+      netEngine.request.and.callFake((requestType, request, context) => {
         const buffer = new ArrayBuffer(0);
         const response = {uri: request.uris[0], data: buffer, headers: {}};
         const bytes = new shaka.net.NetworkingEngine.NumBytesRemainingClass();
@@ -3422,10 +3426,15 @@ describe('StreamingEngine', () => {
 
       // For these tests, we don't care about specific data appended.
       // Just return any old ArrayBuffer for any requested segment.
-      netEngine.request.and.callFake((requestType, request, advType) => {
+      netEngine.request.and.callFake((requestType, request, context) => {
         const buffer = new ArrayBuffer(0);
         /** @type {shaka.extern.Response} */
-        const response = {uri: request.uris[0], data: buffer, headers: {}};
+        const response = {
+          uri: request.uris[0],
+          originalUri: request.uris[0],
+          data: buffer,
+          headers: {},
+        };
         return shaka.util.AbortableOperation.completed(response);
       });
 
@@ -3662,7 +3671,7 @@ describe('StreamingEngine', () => {
       let isRequested = false;
       let isAborted = false;
 
-      netEngine.request.and.callFake((requestType, request, advType) => {
+      netEngine.request.and.callFake((requestType, request, context) => {
         isRequested = true;
 
         const abortOp = () => {
@@ -3838,14 +3847,15 @@ describe('StreamingEngine', () => {
         '1_audio_3', '1_video_3',
       ];
 
-      const segmentAdvType =
-          shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
+      const context = {
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+      };
 
       for (const request of requests) {
         if (hasRequest) {
-          netEngine.expectRequest(request, segmentType, segmentAdvType);
+          netEngine.expectRequest(request, segmentType, context);
         } else {
-          netEngine.expectNoRequest(request, segmentType, segmentAdvType);
+          netEngine.expectNoRequest(request, segmentType, context);
         }
       }
     }

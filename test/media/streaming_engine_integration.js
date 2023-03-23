@@ -252,7 +252,6 @@ describe('StreamingEngine', () => {
 
   function createStreamingEngine() {
     const playerInterface = {
-      modifySegmentRequest: (request, segmentInfo) => {},
       getPresentationTime: () => playhead.getTime(),
       getBandwidthEstimate: () => 1e6,
       mediaSourceEngine: mediaSourceEngine,
@@ -357,12 +356,13 @@ describe('StreamingEngine', () => {
       await waiter.timeoutAfter(60).waitUntilPlayheadReaches(video, 305);
 
       const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
-      const segmentAdvType =
-          shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT;
+      const segmentContext = {
+        type: shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT,
+      };
       // firstSegmentNumber =
       //   [(segmentAvailabilityEnd - rebufferingGoal) / segmentDuration] + 1
-      netEngine.expectRequest('0_video_29', segmentType, segmentAdvType);
-      netEngine.expectRequest('0_audio_29', segmentType, segmentAdvType);
+      netEngine.expectRequest('0_video_29', segmentType, segmentContext);
+      netEngine.expectRequest('0_audio_29', segmentType, segmentContext);
     });
 
     it('can handle seeks ahead of availability window', async () => {
@@ -594,6 +594,7 @@ describe('StreamingEngine', () => {
         textStreams: [],
         imageStreams: [],
         sequenceMode: false,
+        ignoreManifestTimestampsInSegmentsMode: false,
         type: 'UNKNOWN',
         variants: [{
           id: 1,

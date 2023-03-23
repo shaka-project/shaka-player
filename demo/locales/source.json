@@ -447,6 +447,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore Program Date Time from manifest"
   },
+  "DEMO_IGNORE_MANIFEST_TIMESTAMPS_IN_SEGMENTS_MODE": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore Manifest Timestamps in Segments Mode"
+  },
   "DEMO_IGNORE_MIN_BUFFER_TIME": {
     "description": "The name of a configuration value.",
     "message": "Ignore Min Buffer Time"

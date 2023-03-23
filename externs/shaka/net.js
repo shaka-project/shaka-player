@@ -112,6 +112,7 @@ shaka.extern.Request;
 /**
  * @typedef {{
  *   uri: string,
+ *   originalUri: string,
  *   data: BufferSource,
  *   status: (number|undefined),
  *   headers: !Object.<string, string>,
@@ -203,14 +204,14 @@ shaka.extern.HeadersReceived;
  * Defines a filter for requests.  This filter takes the request and modifies
  * it before it is sent to the scheme plugin.
  * The RequestType describes the basic type of the request (manifest, segment,
- * etc). The optional AdvancedRequestType will be provided in the case of a
- * sub-type of the basic type (playlist manifest, init segment, etc).
- * A request filter can run asynchronously by returning a promise; in this case,
- * the request will not be sent until the promise is resolved.
+ * etc). The optional RequestContext will be provided where applicable to
+ * provide additional infomation about the request. A request filter can run
+ * asynchronously by returning a promise; in this case, the request will not be
+ * sent until the promise is resolved.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
  *                     shaka.extern.Request,
- *                     shaka.net.NetworkingEngine.AdvancedRequestType=):
+ *                     shaka.net.NetworkingEngine.RequestContext=):
  *           (Promise|undefined)}
  * @exportDoc
  */
@@ -221,13 +222,13 @@ shaka.extern.RequestFilter;
  * Defines a filter for responses.  This filter takes the response and modifies
  * it before it is returned.
  * The RequestType describes the basic type of the request (manifest, segment,
- * etc). The optional AdvancedRequestType will be provided in the case of a
- * sub-type of the basic type (playlist manifest, init segment, etc).
- * A response filter can run asynchronously by returning a promise.
+ * etc). The optional RequestContext will be provided where applicable to
+ * provide additional infomation about the request. A response filter can run
+ * asynchronously by returning a promise.
  *
  * @typedef {!function(shaka.net.NetworkingEngine.RequestType,
  *                     shaka.extern.Response,
- *                     shaka.net.NetworkingEngine.AdvancedRequestType=):
+ *                     shaka.net.NetworkingEngine.RequestContext=):
  *            (Promise|undefined)}
  * @exportDoc
  */
