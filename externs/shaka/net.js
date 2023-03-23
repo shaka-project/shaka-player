@@ -112,6 +112,7 @@ shaka.extern.Request;
 /**
  * @typedef {{
  *   uri: string,
+ *   originalUri: string,
  *   data: BufferSource,
  *   status: (number|undefined),
  *   headers: !Object.<string, string>,
