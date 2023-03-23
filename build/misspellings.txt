@@ -16,7 +16,7 @@
     r'(?i)mananger': 'manager',
     r'(?i)mani?fe?st': 'manifest',
     r'(?i)mil+isecond': 'millisecond',
-    r'(?i)oc+ur+(?!ed|ing|ence)': 'occur',
+    r'(?i)\boc+ur+(?!ed|ing|ence)': 'occur',
     r'(?i)oc+ur+(ed|ing|ence)': r'occurr\1',
     r'(?i)oc+ur+ance': 'occurrence',
     r'(?i)parrent': 'parent',
