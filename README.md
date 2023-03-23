@@ -228,7 +228,7 @@ Shaka Player supports:
     - Can parse "sidx" box for DASH's SegmentBase@indexRange and
       SegmentTemplate@index
     - Can find and parse "tfdt" box to find segment start time in HLS
-    - For MSS it's necessary [codem-isoboxer][] v0.3.7+
+    - For MSS, [codem-isoboxer][] v0.3.7+ is required
   - WebM
     - Depends on browser support for the container via MediaSource
     - Can parse [cueing data][] elements for DASH's SegmentBase@indexRange and
