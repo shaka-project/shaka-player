@@ -95,6 +95,7 @@ describe('Demo', () => {
           .add('playRangeEnd')
           .add('manifest.dash.keySystemsByURI')
           .add('manifest.hls.mediaPlaylistFullMimeType')
+          .add('manifest.mss.keySystemsBySystemId')
           .add('drm.keySystemsMapping')
           .add('streaming.parsePrftBox');
 

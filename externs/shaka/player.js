@@ -841,7 +841,8 @@ shaka.extern.DashManifestConfiguration;
  *   mediaPlaylistFullMimeType: string,
  *   useSafariBehaviorForLive: boolean,
  *   liveSegmentsDelay: number,
- *   sequenceMode: boolean
+ *   sequenceMode: boolean,
+ *   ignoreManifestTimestampsInSegmentsMode: boolean
  * }}
  *
  * @property {boolean} ignoreTextStreamFailures
@@ -887,9 +888,39 @@ shaka.extern.DashManifestConfiguration;
  *   "sequence mode" (ignoring their internal timestamps).
  *   Defaults to <code>true</code> except on WebOS 3, Tizen 2,
  *   Tizen 3 and PlayStation 4 whose default value is <code>false</code>.
+ * @property {boolean} ignoreManifestTimestampsInSegmentsMode
+ *   If true, don't adjust the timestamp offset to account for manifest
+ *   segment durations being out of sync with segment durations. In other
+ *   words, assume that there are no gaps in the segments when appending
+ *   to the SourceBuffer, even if the manifest and segment times disagree.
+ *   Only applies when sequenceMode is <code>false</code>.
+ *   <i>Defaults to <code>false</code>.</i>
  * @exportDoc
  */
 shaka.extern.HlsManifestConfiguration;
+
+
+/**
+ * @typedef {{
+ *   manifestPreprocessor: function(!Element),
+ *   sequenceMode: boolean,
+ *   keySystemsBySystemId: !Object.<string, string>
+ * }}
+ *
+ * @property {function(!Element)} manifestPreprocessor
+ *   Called immediately after the MSS manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {boolean} sequenceMode
+ *   If true, the media segments are appended to the SourceBuffer in
+ *   "sequence mode" (ignoring their internal timestamps).
+ *   <i>Defaults to <code>false</code>.</i>
+ * @property {Object.<string, string>} keySystemsBySystemId
+ *   A map of system id to key system name. Defaults to default key systems
+ *   mapping handled by Shaka.
+ * @exportDoc
+ */
+shaka.extern.MssManifestConfiguration;
 
 
 /**
@@ -903,7 +934,8 @@ shaka.extern.HlsManifestConfiguration;
  *   defaultPresentationDelay: number,
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
- *   hls: shaka.extern.HlsManifestConfiguration
+ *   hls: shaka.extern.HlsManifestConfiguration,
+ *   mss: shaka.extern.MssManifestConfiguration
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -941,6 +973,8 @@ shaka.extern.HlsManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
+ * @property {shaka.extern.MssManifestConfiguration} mss
+ *   Advanced parameters used by the MSS manifest parser.
  *
  * @exportDoc
  */

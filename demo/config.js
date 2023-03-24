@@ -226,6 +226,8 @@ shakaDemo.Config = class {
             'manifest.hls.liveSegmentsDelay')
         .addBoolInput_(MessageIds.HLS_SEQUENCE_MODE,
             'manifest.hls.sequenceMode')
+        .addBoolInput_(MessageIds.IGNORE_MANIFEST_TIMESTAMPS_IN_SEGMENTS_MODE,
+            'manifest.hls.ignoreManifestTimestampsInSegmentsMode')
         .addNumberInput_(MessageIds.AVAILABILITY_WINDOW_OVERRIDE,
             'manifest.availabilityWindowOverride',
             /* canBeDecimal= */ true,
@@ -252,7 +254,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DISABLE_THUMBNAILS,
             'manifest.disableThumbnails')
         .addBoolInput_(MessageIds.SEGMENT_RELATIVE_VTT_TIMING,
-            'manifest.segmentRelativeVttTiming');
+            'manifest.segmentRelativeVttTiming')
+        .addBoolInput_(MessageIds.MSS_SEQUENCE_MODE,
+            'manifest.mss.sequenceMode');
 
     this.addRetrySection_('manifest', MessageIds.MANIFEST_RETRY_SECTION_HEADER);
   }

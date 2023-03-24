@@ -96,3 +96,6 @@ application:
   - Configuration changes:
     - `streaming.forceTransmuxTS` has been renamed to `streaming.forceTransmux`
       (deprecated in v4.3.0)
+
+  - Plugin changes:
+    - `Transmuxer` plugins now has two new parameters in `transmux()` method.

@@ -19,6 +19,7 @@
  *   offlineSessionIds: !Array.<string>,
  *   minBufferTime: number,
  *   sequenceMode: boolean,
+ *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string
  * }}
  *
@@ -77,6 +78,14 @@
  * @property {boolean} sequenceMode
  *   If true, we will append the media segments using sequence mode; that is to
  *   say, ignoring any timestamps inside the media files.
+ * @property {boolean} ignoreManifestTimestampsInSegmentsMode
+ *   If true, don't adjust the timestamp offset to account for manifest
+ *   segment durations being out of sync with segment durations. In other
+ *   words, assume that there are no gaps in the segments when appending
+ *   to the SourceBuffer, even if the manifest and segment times disagree.
+ *   Only applies when sequenceMode is <code>false</code>, and only for HLS
+ *   streams.
+ *   <i>Defaults to <code>false</code>.</i>
  * @property {string} type
  *   Indicates the type of the manifest. It can be <code>'HLS'</code> or
  *   <code>'DASH'</code>.
@@ -325,7 +334,8 @@ shaka.extern.FetchCryptoKeysFunction;
  *   tilesLayout: (string|undefined),
  *   matchedStreams:
  *      (!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
- *      undefined)
+ *      undefined),
+ *   mssPrivateData: (shaka.extern.MssPrivateData|undefined)
  * }}
  *
  * @description
@@ -438,7 +448,34 @@ shaka.extern.FetchCryptoKeysFunction;
  * @property {(!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
  *   undefined)} matchedStreams
  *   The streams in all periods which match the stream. Used for Dash.
+ * @property {(shaka.extern.MssPrivateData|undefined)} mssPrivateData
+ *   <i>Microsoft Smooth Streaming only.</i> <br>
+ *   Private MSS data that is necessary to be able to do transmuxing.
  *
  * @exportDoc
  */
 shaka.extern.Stream;
+
+
+/**
+ * @typedef {{
+ *   duration: number,
+ *   timescale: number,
+ *   codecPrivateData: ?string
+ * }}
+ *
+ * @description
+ * Private MSS data that is necessary to be able to do transmuxing.
+ *
+ * @property {number} duration
+ *   <i>Required.</i> <br>
+ *   MSS Stream duration.
+ * @property {number} timescale
+ *   <i>Required.</i> <br>
+ *   MSS timescale.
+ * @property {?string} codecPrivateData
+ *   MSS codecPrivateData.
+ *
+ * @exportDoc
+ */
+shaka.extern.MssPrivateData;

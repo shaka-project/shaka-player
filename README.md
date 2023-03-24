@@ -1,9 +1,9 @@
 # ![Shaka Player](docs/shaka-player-logo.png)
 
 Shaka Player is an open-source JavaScript library for adaptive media.  It plays
-adaptive media formats (such as [DASH][] and [HLS][]) in a browser, without
-using plugins or Flash.  Instead, Shaka Player uses the open web standards
-[MediaSource Extensions][] and [Encrypted Media Extensions][].
+adaptive media formats (such as [DASH][], [HLS][] and [MSS][]) in a browser,
+without using plugins or Flash.  Instead, Shaka Player uses the open web
+standards [MediaSource Extensions][] and [Encrypted Media Extensions][].
 
 Shaka Player also supports [offline storage and playback][] of media using
 [IndexedDB][].  Content can be stored on any browser.  Storage of licenses
@@ -18,6 +18,7 @@ For details on what's coming next, see our [development roadmap](roadmap.md).
 
 [DASH]: http://dashif.org/
 [HLS]: https://developer.apple.com/streaming/
+[MSS]: https://learn.microsoft.com/en-us/iis/media/smooth-streaming/smooth-streaming-transport-protocol
 [MediaSource Extensions]: https://www.w3.org/TR/media-source/
 [Encrypted Media Extensions]: https://www.w3.org/TR/encrypted-media/
 [IndexedDB]: https://www.w3.org/TR/IndexedDB-2/
@@ -84,6 +85,7 @@ supported. This supports both DASH and HLS manifests.
 |:----:|:-------------:|:---:|:---:|:-------------------:|
 |DASH  |**Y**          |**Y**| -   |**Y**                |
 |HLS   |**Y**          |**Y**|**Y**| -                   |
+|MSS   |**Y**          | -   | -   | -                   |
 
 You can also create a [manifest parser plugin][] to support custom manifest
 formats.
@@ -159,6 +161,20 @@ HLS features **not** supported:
 [MPEG-5 Part2 LCEVC]: https://www.lcevc.org
 
 
+## MSS features
+
+MSS features supported:
+ - VOD
+ - AAC and H.264
+ - Encrypted content (PlayReady)
+ - TTML/DFXP
+ - Only supported with [codem-isoboxer][]
+
+MSS features **not** supported:
+ - Live
+
+[codem-isoboxer]: https://github.com/Dash-Industry-Forum/codem-isoboxer
+
 ## DRM support matrix
 
 |Browser   |Widevine  |PlayReady|FairPlay |ClearKey⁶ |
@@ -196,6 +212,7 @@ NOTES:
 |:--------:|:--------:|:-------:|:-------:|:--------:|
 |DASH      |**Y**     |**Y**    | -       |**Y**     |
 |HLS       |**Y**     |**Y**    |**Y** ¹  | -        |
+|MSS       | -        |**Y**    | -       | -        |
 
 NOTES:
  - ¹: By default, FairPlay is handled using Apple's native HLS player, when on
@@ -211,6 +228,7 @@ Shaka Player supports:
     - Can parse "sidx" box for DASH's SegmentBase@indexRange and
       SegmentTemplate@index
     - Can find and parse "tfdt" box to find segment start time in HLS
+    - For MSS, [codem-isoboxer][] v0.3.7+ is required
   - WebM
     - Depends on browser support for the container via MediaSource
     - Can parse [cueing data][] elements for DASH's SegmentBase@indexRange and

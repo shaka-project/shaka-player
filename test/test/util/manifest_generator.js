@@ -97,6 +97,8 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.minBufferTime = 0;
     /** @type {boolean} */
     this.sequenceMode = false;
+    /** @type {boolean} */
+    this.ignoreManifestTimestampsInSegmentsMode = false;
     /** @type {string} */
     this.type = 'UNKNOWN';
 
