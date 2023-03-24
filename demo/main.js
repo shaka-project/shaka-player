@@ -743,6 +743,10 @@ shakaDemo.Main = class {
         !this.support_.manifest['m3u8']) {
       return shakaDemo.MessageIds.UNSUPPORTED_NO_HLS_SUPPORT;
     }
+    if (asset.features.includes(shakaAssets.Feature.MSS) &&
+        !this.support_.manifest['ism']) {
+      return shakaDemo.MessageIds.UNSUPPORTED_NO_MSS_SUPPORT;
+    }
 
     // Does the asset contain a playable mime type?
     const mimeTypes = [];
