@@ -194,7 +194,8 @@ describe('DashParser Live', () => {
           template, {updateTime: updateTime, contents: basicLines.join('\n')});
 
       fakeNetEngine.setResponseText('dummy://foo', text);
-      Date.now = () => 0;
+      const baseTime = new Date(2015, 11, 30);
+      Date.now = () => baseTime.getTime();
       const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest).toBeTruthy();
@@ -211,7 +212,7 @@ describe('DashParser Live', () => {
       // seconds long in all of these cases.  So 11 seconds after the
       // manifest was parsed, the first segment should have fallen out of
       // the availability window.
-      Date.now = () => 11 * 1000;
+      Date.now = () => baseTime.getTime() + (11 * 1000);
       await updateManifest();
       // The first reference should have been evicted.
       expect(stream.segmentIndex.find(0)).toBe(firstPosition + 1);
