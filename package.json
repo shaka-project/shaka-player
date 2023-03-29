@@ -19,6 +19,7 @@
     "babel-plugin-istanbul": "^6.1.1",
     "cajon": "^0.4.4",
     "code-prettify": "^0.1.0",
+    "codem-isoboxer": "^0.3.7",
     "color-themes-for-google-code-prettify": "^2.0.4",
     "core-js": "^3.21.1",
     "dialog-polyfill": "^0.5.6",

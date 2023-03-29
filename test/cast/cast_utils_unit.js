@@ -8,6 +8,9 @@ describe('CastUtils', () => {
   const CastUtils = shaka.cast.CastUtils;
   const FakeEvent = shaka.util.FakeEvent;
 
+  /** @type {shaka.extern.Stream} */
+  const fakeStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+
   it('includes every Player member', () => {
     const ignoredMembers = [
       'constructor',  // JavaScript added field
@@ -218,11 +221,11 @@ describe('CastUtils', () => {
         await mediaSourceEngine.init(initObject, false);
         const data = await shaka.test.Util.fetch(initSegmentUrl);
         await mediaSourceEngine.appendBuffer(
-            ContentType.VIDEO, data, null, null,
+            ContentType.VIDEO, data, null, fakeStream,
             /* hasClosedCaptions= */ false);
         const data2 = await shaka.test.Util.fetch(videoSegmentUrl);
         await mediaSourceEngine.appendBuffer(
-            ContentType.VIDEO, data2, null, null,
+            ContentType.VIDEO, data2, null, fakeStream,
             /* hasClosedCaptions= */ false);
       });
 

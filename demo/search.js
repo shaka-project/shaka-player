@@ -359,7 +359,7 @@ shakaDemo.Search = class {
         /* docLink= */ null);
     this.makeSelectInput_(coreContainer,
         shakaDemo.MessageIds.MANIFEST_SEARCH,
-        [Feature.DASH, Feature.HLS], FEATURE);
+        [Feature.DASH, Feature.HLS, Feature.MSS], FEATURE);
     this.makeSelectInput_(coreContainer,
         shakaDemo.MessageIds.CONTAINER_SEARCH,
         [Feature.MP4, Feature.MP2TS, Feature.WEBM, Feature.CONTAINERLESS],

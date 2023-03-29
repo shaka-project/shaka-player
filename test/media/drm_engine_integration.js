@@ -49,6 +49,9 @@ describe('DrmEngine', () => {
   /** @type {!ArrayBuffer} */
   let audioSegment;
 
+  /** @type {shaka.extern.Stream} */
+  const fakeStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -211,10 +214,10 @@ describe('DrmEngine', () => {
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       await drmEngine.attach(video);
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoInitSegment, null,
+          ContentType.VIDEO, videoInitSegment, null, fakeStream,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioInitSegment, null,
+          ContentType.AUDIO, audioInitSegment, null, fakeStream,
           /* hasClosedCaptions= */ false);
       await encryptedEventSeen;
       // With PlayReady, a persistent license policy can cause a different
@@ -250,10 +253,10 @@ describe('DrmEngine', () => {
       const reference = dummyReference(0, 10);
 
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoSegment, reference,
+          ContentType.VIDEO, videoSegment, reference, fakeStream,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioSegment, reference,
+          ContentType.AUDIO, audioSegment, reference, fakeStream,
           /* hasClosedCaptions= */ false);
 
       expect(video.buffered.end(0)).toBeGreaterThan(0);
@@ -309,10 +312,10 @@ describe('DrmEngine', () => {
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
       await drmEngine.attach(video);
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoInitSegment, null,
+          ContentType.VIDEO, videoInitSegment, null, fakeStream,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioInitSegment, null,
+          ContentType.AUDIO, audioInitSegment, null, fakeStream,
           /* hasClosedCaptions= */ false);
       await encryptedEventSeen;
 
@@ -333,10 +336,10 @@ describe('DrmEngine', () => {
       const reference = dummyReference(0, 10);
 
       await mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, videoSegment, reference,
+          ContentType.VIDEO, videoSegment, reference, fakeStream,
           /* hasClosedCaptions= */ false);
       await mediaSourceEngine.appendBuffer(
-          ContentType.AUDIO, audioSegment, reference,
+          ContentType.AUDIO, audioSegment, reference, fakeStream,
           /* hasClosedCaptions= */ false);
 
       expect(video.buffered.end(0)).toBeGreaterThan(0);

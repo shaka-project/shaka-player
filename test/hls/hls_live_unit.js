@@ -372,7 +372,7 @@ describe('HlsParser live', () => {
 
         // We saw one request for the video playlist, which signalled "ENDLIST".
         const type =
-            shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST;
+            shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST;
 
         fakeNetEngine.expectRequest(
             'test:/video',
@@ -844,7 +844,7 @@ describe('HlsParser live', () => {
         // No segment requests were needed to get the start time.
         expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
         const type =
-            shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST;
+            shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST;
         fakeNetEngine.expectRequest(
             'test:/video',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
@@ -892,7 +892,7 @@ describe('HlsParser live', () => {
             'test:/video?_HLS_skip=YES',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
             {type:
-              shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST});
+              shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
       });
 
       it('skips older segments', async () => {

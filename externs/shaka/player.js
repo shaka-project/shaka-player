@@ -902,6 +902,29 @@ shaka.extern.HlsManifestConfiguration;
 
 /**
  * @typedef {{
+ *   manifestPreprocessor: function(!Element),
+ *   sequenceMode: boolean,
+ *   keySystemsBySystemId: !Object.<string, string>
+ * }}
+ *
+ * @property {function(!Element)} manifestPreprocessor
+ *   Called immediately after the MSS manifest has been parsed into an
+ *   XMLDocument. Provides a way for applications to perform efficient
+ *   preprocessing of the manifest.
+ * @property {boolean} sequenceMode
+ *   If true, the media segments are appended to the SourceBuffer in
+ *   "sequence mode" (ignoring their internal timestamps).
+ *   <i>Defaults to <code>false</code>.</i>
+ * @property {Object.<string, string>} keySystemsBySystemId
+ *   A map of system id to key system name. Defaults to default key systems
+ *   mapping handled by Shaka.
+ * @exportDoc
+ */
+shaka.extern.MssManifestConfiguration;
+
+
+/**
+ * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   availabilityWindowOverride: number,
  *   disableAudio: boolean,
@@ -911,7 +934,8 @@ shaka.extern.HlsManifestConfiguration;
  *   defaultPresentationDelay: number,
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
- *   hls: shaka.extern.HlsManifestConfiguration
+ *   hls: shaka.extern.HlsManifestConfiguration,
+ *   mss: shaka.extern.MssManifestConfiguration
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -949,6 +973,8 @@ shaka.extern.HlsManifestConfiguration;
  *   Advanced parameters used by the DASH manifest parser.
  * @property {shaka.extern.HlsManifestConfiguration} hls
  *   Advanced parameters used by the HLS manifest parser.
+ * @property {shaka.extern.MssManifestConfiguration} mss
+ *   Advanced parameters used by the MSS manifest parser.
  *
  * @exportDoc
  */

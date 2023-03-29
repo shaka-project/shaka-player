@@ -173,6 +173,24 @@ google.ima.Ad = class {
 
   /** @return {string} */
   getDescription() {}
+
+  /** @return {number} */
+  getVastMediaBitrate() {}
+
+  /** @return {number} */
+  getVastMediaHeight() {}
+
+  /** @return {number} */
+  getVastMediaWidth() {}
+
+  /** @return {string} */
+  getAdId() {}
+
+  /** @return {string} */
+  getCreativeAdId() {}
+
+  /** @return {?string} */
+  getMediaUrl() {}
 };
 
 
@@ -183,6 +201,9 @@ google.ima.AdPodInfo = class {
 
   /** @return {number} */
   getTotalAds() {}
+
+  /** @return {number} */
+  getTimeOffset() {}
 };
 
 /** @const */
@@ -401,6 +422,18 @@ google.ima.dai.api.Ad = class {
 
   /** @return {string} */
   getDescription() {}
+
+  /** @return {number} */
+  getVastMediaHeight() {}
+
+  /** @return {number} */
+  getVastMediaWidth() {}
+
+  /** @return {string} */
+  getAdId() {}
+
+  /** @return {string} */
+  getCreativeAdId() {}
 };
 
 
@@ -411,6 +444,9 @@ google.ima.dai.api.AdPodInfo = class {
 
   /** @return {number} */
   getTotalAds() {}
+
+  /** @return {number} */
+  getTimeOffset() {}
 };
 
 

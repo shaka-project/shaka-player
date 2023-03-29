@@ -174,7 +174,7 @@ shaka.test.FakeNetworkingEngine = class {
    *
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.net.NetworkingEngine.RequestContext=} context
+   * @param {shaka.extern.RequestContext=} context
    */
   expectRequest(uri, type, context) {
     shaka.test.FakeNetworkingEngine.expectRequest(
@@ -186,7 +186,7 @@ shaka.test.FakeNetworkingEngine = class {
    *
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.net.NetworkingEngine.RequestContext=} context
+   * @param {shaka.extern.RequestContext=} context
    */
   expectNoRequest(uri, type, context) {
     shaka.test.FakeNetworkingEngine.expectNoRequest(
@@ -294,7 +294,7 @@ shaka.test.FakeNetworkingEngine = class {
    * @param {!Object} requestSpy
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.net.NetworkingEngine.RequestContext=} context
+   * @param {shaka.extern.RequestContext=} context
    */
   static expectRequest(requestSpy, uri, type, context) {
     // Jasmine "toHaveBeenCalledWith" doesn't handle optional parameters well.
@@ -314,7 +314,7 @@ shaka.test.FakeNetworkingEngine = class {
    * @param {!Object} requestSpy
    * @param {string} uri
    * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.net.NetworkingEngine.RequestContext=} context
+   * @param {shaka.extern.RequestContext=} context
    */
   static expectNoRequest(requestSpy, uri, type, context) {
     // Jasmine "toHaveBeenCalledWith" doesn't handle optional parameters well.

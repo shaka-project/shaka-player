@@ -254,7 +254,9 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.DISABLE_THUMBNAILS,
             'manifest.disableThumbnails')
         .addBoolInput_(MessageIds.SEGMENT_RELATIVE_VTT_TIMING,
-            'manifest.segmentRelativeVttTiming');
+            'manifest.segmentRelativeVttTiming')
+        .addBoolInput_(MessageIds.MSS_SEQUENCE_MODE,
+            'manifest.mss.sequenceMode');
 
     this.addRetrySection_('manifest', MessageIds.MANIFEST_RETRY_SECTION_HEADER);
   }
