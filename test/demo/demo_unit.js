@@ -97,7 +97,8 @@ describe('Demo', () => {
           .add('manifest.hls.mediaPlaylistFullMimeType')
           .add('manifest.mss.keySystemsBySystemId')
           .add('drm.keySystemsMapping')
-          .add('streaming.parsePrftBox');
+          .add('streaming.parsePrftBox')
+          .add('manifest.raiseFatalErrorOnManifestUpdateRequestFailure');
 
       /**
        * @param {!Object} section
