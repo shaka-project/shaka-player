@@ -640,7 +640,6 @@ describe('DashParser Live', () => {
     expect(updateTick).toHaveBeenCalledTimes(1);
   });
 
-
   it('uses @minimumUpdatePeriod', async () => {
     const lines = [
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
