@@ -79,6 +79,32 @@ describe('WebVttGenerator', () => {
         '<i><u>Test1</u></i><b><i>Test2</i></b>Test3<u>Test4</u>\n\n');
   });
 
+  it('creates style tags for cues with colors', () => {
+    const shakaCue = new shaka.text.Cue(10, 20, '');
+
+    // First cue is red on cyan background.
+    const cue1 = new shaka.text.Cue(10, 20, 'Test1');
+    cue1.color = shaka.text.Cue.defaultTextColor.red;
+    cue1.backgroundColor = shaka.text.Cue.defaultTextBackgroundColor.bg_cyan;
+
+    // Second cue is blue and italic.
+    const cue2 = new shaka.text.Cue(10, 20, 'Test2');
+    cue2.color = shaka.text.Cue.defaultTextColor.blue;
+    cue2.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
+
+    shakaCue.nestedCues = [cue1, cue2];
+
+    const adCuePoints = [];
+
+    verifyHelper(
+        [shakaCue],
+        adCuePoints,
+        'WEBVTT\n\n' +
+        '00:00:10.000 --> 00:00:20.000 align:middle\n' +
+        '<c.red.bg_cyan>Test1</c>' +
+        '<c.blue><i>Test2</i></c>\n\n');
+  });
+
   it('computes the time with ad cue points', () => {
     const shakaCue1 = new shaka.text.Cue(20, 30, 'Test');
     shakaCue1.textAlign = shaka.text.Cue.textAlign.LEFT;

@@ -208,6 +208,31 @@ describe('SimpleTextDisplayer', () => {
           [shakaCue]);
     });
 
+    it('creates style tags for cues with colors', () => {
+      const shakaCue = new shaka.text.Cue(10, 20, '');
+
+      // First cue is red on cyan background.
+      const cue1 = new shaka.text.Cue(10, 20, 'Test1');
+      cue1.color = shaka.text.Cue.defaultTextColor.red;
+      cue1.backgroundColor = shaka.text.Cue.defaultTextBackgroundColor.bg_cyan;
+
+      // Second cue is blue and italic.
+      const cue2 = new shaka.text.Cue(10, 20, 'Test2');
+      cue2.color = shaka.text.Cue.defaultTextColor.blue;
+      cue2.fontStyle = shaka.text.Cue.fontStyle.ITALIC;
+
+      shakaCue.nestedCues = [cue1, cue2];
+
+      const expectedText = '' +
+      '<c.red.bg_cyan>Test1</c>' +
+      '<c.blue><i>Test2</i></c>';
+      verifyHelper(
+          [
+            {startTime: 10, endTime: 20, text: expectedText},
+          ],
+          [shakaCue]);
+    });
+
     it('adds linebreaks when a linebreak cue is seen', () => {
       const shakaCue = new shaka.text.Cue(10, 20, '');
       const nestedCue1 = new shaka.text.Cue(10, 20, 'Test1');
