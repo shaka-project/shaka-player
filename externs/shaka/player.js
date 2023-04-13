@@ -990,8 +990,7 @@ shaka.extern.MssManifestConfiguration;
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
- *   mss: shaka.extern.MssManifestConfiguration,
- *   persistentSessionIds: !Array.<string>
+ *   mss: shaka.extern.MssManifestConfiguration
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
