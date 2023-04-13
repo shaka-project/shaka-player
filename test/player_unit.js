@@ -208,6 +208,7 @@ describe('Player', () => {
       await player.destroy();
 
       expect(abrManager.stop).toHaveBeenCalled();
+      expect(abrManager.destroy).toHaveBeenCalled();
       expect(networkingEngine.destroy).toHaveBeenCalled();
       expect(drmEngine.destroy).toHaveBeenCalled();
       expect(playhead.release).toHaveBeenCalled();
@@ -246,6 +247,7 @@ describe('Player', () => {
       parser.start.and.returnValue(p);
       parser.stop.and.callFake(() => {
         expect(abrManager.stop).not.toHaveBeenCalled();
+        expect(abrManager.destroy).not.toHaveBeenCalled();
         expect(networkingEngine.destroy).not.toHaveBeenCalled();
       });
       shaka.media.ManifestParser.registerParserByMime(
@@ -255,6 +257,7 @@ describe('Player', () => {
       await shaka.test.Util.shortDelay();
       await player.destroy();
       expect(abrManager.stop).toHaveBeenCalled();
+      expect(abrManager.destroy).toHaveBeenCalled();
       expect(networkingEngine.destroy).toHaveBeenCalled();
       expect(parser.stop).toHaveBeenCalled();
       await expectAsync(load).toBeRejected();

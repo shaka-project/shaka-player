@@ -21,3 +21,10 @@ NetworkInformation.prototype.saveData;
  */
 NetworkInformation.prototype.addEventListener =
     function(type, listener) {};
+
+/**
+ * @param {string} type
+ * @param {Function} listener
+ */
+NetworkInformation.prototype.removeEventListener =
+function(type, listener) {};
