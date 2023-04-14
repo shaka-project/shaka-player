@@ -36,6 +36,9 @@ shaka.test.FakeAbrManager = class {
     this.stop = jasmine.createSpy('stop');
 
     /** @type {!jasmine.Spy} */
+    this.release = jasmine.createSpy('release');
+
+    /** @type {!jasmine.Spy} */
     this.enable = jasmine.createSpy('enable');
 
     /** @type {!jasmine.Spy} */
