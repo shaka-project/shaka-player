@@ -45,6 +45,12 @@ shaka.extern.AbrManager = class {
   stop() {}
 
   /**
+   * Request that this object release all internal references.
+   * @exportDoc
+   */
+  release() {}
+
+  /**
    * Updates manager's variants collection.
    *
    * @param {!Array.<!shaka.extern.Variant>} variants
