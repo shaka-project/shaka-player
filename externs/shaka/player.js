@@ -808,8 +808,8 @@ shaka.extern.ProducerReferenceTime;
  * @typedef {{
  *   distinctiveIdentifierRequired: boolean,
  *   persistentStateRequired: boolean,
- *   videoRobustness: string,
- *   audioRobustness: string,
+ *   videoRobustness: string | Array.<string>,
+ *   audioRobustness: string | Array.<string>,
  *   serverCertificate: Uint8Array,
  *   serverCertificateUri: string,
  *   individualizationServer: string,
@@ -827,14 +827,14 @@ shaka.extern.ProducerReferenceTime;
  *   state, e.g., for persistent license storage.
  *   <br>
  *   Defaults to <code>false</code>.
- * @property {string} videoRobustness
+ * @property {string | Array.<string>} videoRobustness
  *   A key-system-specific string that specifies a required security level for
- *   video.
+ *   video. Can be an array of strings to represent multiple robustness.
  *   <br>
  *   Defaults to <code>''</code>, i.e., no specific robustness required.
- * @property {string} audioRobustness
+ * @property {string | Array.<string>} audioRobustness
  *   A key-system-specific string that specifies a required security level for
- *   audio.
+ *   audio. Can be an array of strings to represent multiple robustness.
  *   <br>
  *   Defaults to <code>''</code>, i.e., no specific robustness required.
  * @property {Uint8Array} serverCertificate
