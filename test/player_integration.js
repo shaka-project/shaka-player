@@ -336,6 +336,45 @@ describe('Player', () => {
       player.setTextTrackVisibility(true);
       expect(getTracksActive()).toEqual([false, true]);
     });
+
+    // https://github.com/shaka-project/shaka-player/issues/4821
+    it('loads a single text stream', async () => {
+      player.configure({preferredTextLanguage: 'en'});
+      await player.load('test:sintel_no_text_compiled');
+
+      // Add preferred language text track.
+      const locationUri = new goog.Uri(location.href);
+      const partialUri = new goog.Uri('/base/test/test/assets/text-clip.vtt');
+      const absoluteUri = locationUri.resolve(partialUri);
+      await player.addTextTrackAsync(
+          absoluteUri.toString(), 'en', 'subtitles', 'text/vtt');
+
+      // Add alternate language text track.
+      // Two text tracks with same timings but different text
+      // are necessary for test.
+      const partialUri2 =
+      new goog.Uri('/base/test/test/assets/text-clip-alt.vtt');
+      const absoluteUri2 = locationUri.resolve(partialUri2);
+      await player.addTextTrackAsync(
+          absoluteUri2.toString(), 'fr', 'subtitles', 'text/vtt');
+
+      const textTracks = player.getTextTracks();
+      expect(textTracks.length).toBe(2);
+      expect(textTracks[0].language).toBe('en');
+      expect(textTracks[1].language).toBe('fr');
+
+      // Enable text visibilty and immediately change language.
+      // Only one set of cues should be active.
+      // Cues should be of the selected language track.
+      player.setTextTrackVisibility(true);
+      player.selectTextLanguage('fr');
+      video.currentTime = 5;
+      video.play();
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      expect(video.textTracks[0].activeCues.length).toBe(1);
+      expect(player.getTextTracks()[1].active).toBe(true);
+    });
   });  // describe('setTextTrackVisibility')
 
   describe('plays', () => {
