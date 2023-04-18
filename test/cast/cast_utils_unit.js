@@ -32,6 +32,7 @@ describe('CastUtils', () => {
       'createPlayhead',
       'createMediaSourceEngine',
       'createStreamingEngine',
+      'disableStream',
     ];
 
     const castMembers = CastUtils.PlayerVoidMethods
