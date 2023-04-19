@@ -106,11 +106,10 @@ jobs:
       - name: Install Chrome 38
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Chrome-38'
         run: |
-          # sudo apt-get update
-          # sudo apt-get remove google-chrome-stable
           # Chrome 38 it's a old version included in WebOS 3.0
           # (the oldest device that we support).
-          wget "https://storage.googleapis.com/old-browsers/google-chrome-38.deb"
+          sudo apt -y update && sudo apt -y install libudev0
+          wget https://storage.googleapis.com/old-browsers/google-chrome-38.deb
           sudo dpkg -i "google-chrome-38.deb"
           sudo ln -sf /usr/bin/google-chrome-38 /usr/bin/google-chrome
 
