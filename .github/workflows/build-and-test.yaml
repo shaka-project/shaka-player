@@ -108,21 +108,19 @@ jobs:
         run: |
           # Chrome 38 it's a old version included in WebOS 3.0
           # (the oldest device that we support).
-          sudo apt -y update && sudo apt -y install libudev0
           wget https://storage.googleapis.com/old-browsers/google-chrome-38.deb
           sudo dpkg -i "google-chrome-38.deb"
+
+          # It also requires these packages that aren't installed automatically.
+          # The .deb above is a giant hack without proper dependency tracking.
+          sudo apt -y update
+          sudo apt -y install libudev0 libgtk2.0-0
 
           # Check that this version of Chrome can be executed.
           google-chrome-38 --version
 
           # Symlink it so that it gets launched by Karma.
           sudo ln -sf /usr/bin/google-chrome-38 /usr/bin/google-chrome
-
-      - name: Debug
-        uses: mxschmitt/action-tmate@v3.6
-        with:
-          limit-access-to-actor: true
-        if: failure()
 
       - name: Checkout code
         uses: actions/checkout@v3
