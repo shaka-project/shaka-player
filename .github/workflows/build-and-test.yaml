@@ -176,6 +176,12 @@ jobs:
             --reporters spec --spec-hide-passed \
             ${{ matrix.extra_flags }}
 
+      - name: Debug
+        uses: mxschmitt/action-tmate@v3.6
+        with:
+          limit-access-to-actor: true
+        if: failure()
+
       - name: Find coverage reports
         id: coverage
         if: always() # Even on failure of an earlier step.
