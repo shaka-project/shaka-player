@@ -119,6 +119,9 @@ jobs:
           # Check that this version of Chrome can be executed.
           google-chrome-38 --version
 
+          # Install a launcher that can execute a shell script to launch this
+          npm install karma-script-launcher --save-dev
+
       - name: Checkout code
         uses: actions/checkout@v3
         with:
