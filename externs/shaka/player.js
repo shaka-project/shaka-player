@@ -683,10 +683,58 @@ shaka.extern.AdvancedDrmConfiguration;
 
 /**
  * @typedef {{
+ *   sessionId: string,
+ *   sessionType: string,
+ *   initData: ?Uint8Array,
+ *   initDataType: ?string
+ * }}
+ *
+ * @description
+ * DRM Session Metadata for an active session
+ *
+ * @property {string} sessionId
+ *   Session id
+ * @property {string} sessionType
+ *   Session type
+ * @property {?Uint8Array} initData
+ *   Initialization data in the format indicated by initDataType.
+ * @property {string} initDataType
+ *   A string to indicate what format initData is in.
+ * @exportDoc
+ */
+shaka.extern.DrmSessionMetadata;
+
+
+/**
+ * @typedef {{
+ *   sessionId: string,
+ *   initData: ?Uint8Array,
+ *   initDataType: ?string
+ * }}
+ *
+ * @description
+ * DRM Session Metadata for saved persistent session
+ *
+ * @property {string} sessionId
+ *   Session id
+ * @property {?Uint8Array} initData
+ *   Initialization data in the format indicated by initDataType.
+ * @property {?string} initDataType
+ *   A string to indicate what format initData is in.
+ * @exportDoc
+ */
+shaka.extern.PersistentSessionMetadata;
+
+
+/**
+ * @typedef {{
  *   retryParameters: shaka.extern.RetryParameters,
  *   servers: !Object.<string, string>,
  *   clearKeys: !Object.<string, string>,
  *   delayLicenseRequestUntilPlayed: boolean,
+ *   persistentSessionOnlinePlayback: boolean,
+ *   persistentSessionsMetadata:
+ *       !Array.<shaka.extern.PersistentSessionMetadata>,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
  *   initDataTransform:
  *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
@@ -713,6 +761,13 @@ shaka.extern.AdvancedDrmConfiguration;
  *   <i>Defaults to false.</i> <br>
  *   True to configure drm to delay sending a license request until a user
  *   actually starts playing content.
+ * @property {boolean} persistentSessionOnlinePlayback
+ *   <i>Defaults to false.</i> <br>
+ *   True to configure drm to try playback with given persistent session ids
+ *   before requesting a license. Also prevents the session removal at playback
+ *   stop, as-to be able to re-use it later.
+ * @property {!Array.<PersistentSessionMetadata>} persistentSessionsMetadata
+ *   Persistent sessions metadata to load before starting playback
  * @property {Object.<string, shaka.extern.AdvancedDrmConfiguration>} advanced
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
