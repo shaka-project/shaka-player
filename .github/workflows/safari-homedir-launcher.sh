@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Fail on error
+set -e
+
 # A script to launch a homedir-installed copy of Safari in Karma.  Used with
 # karma-script-launcher and --browsers path/to/script.
 
@@ -12,7 +15,7 @@
 open -a ~/Applications/Safari.app --fresh
 sleep 5
 
-# Then open the browser with the URL, and wait for it to quite.  In fact, the
+# Then open the browser with the URL, and wait for it to quit.  In fact, the
 # browser won't be closed automatically at all, and Karma will kill this script
 # when the tests complete.  But if we don't wait, Karma will error instead.
 open -a ~/Applications/Safari.app --wait-apps "$1"

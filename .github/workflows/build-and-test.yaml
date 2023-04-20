@@ -119,9 +119,6 @@ jobs:
           # Check that this version of Chrome can be executed.
           google-chrome-38 --version
 
-          # Symlink it so that it gets launched by Karma.
-          sudo ln -sf /usr/bin/google-chrome-38 /usr/bin/google-chrome
-
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -163,7 +160,9 @@ jobs:
           browser=${{ matrix.browser }}
 
           if [[ "$browser" == "Chrome-38" ]]; then
-            browser="Chrome"
+            # Replace the browser name with a script that can launch this
+            # browser from the command line.
+            browser="$PWD/.github/workflows/chrome-38-launcher.sh"
           fi
 
           if [[ "$browser" == "Safari-old" ]]; then
