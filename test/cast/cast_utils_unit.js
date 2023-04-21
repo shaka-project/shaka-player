@@ -25,6 +25,7 @@ describe('CastUtils', () => {
       'getManifest', // Too large to proxy
       'getManifestParserFactory',  // Would not serialize.
       'setVideoContainer',
+      'getActiveSessionsMetadata',
 
       // Test helper methods (not @export'd)
       'createDrmEngine',
@@ -32,6 +33,7 @@ describe('CastUtils', () => {
       'createPlayhead',
       'createMediaSourceEngine',
       'createStreamingEngine',
+      'disableStream',
     ];
 
     const castMembers = CastUtils.PlayerVoidMethods
