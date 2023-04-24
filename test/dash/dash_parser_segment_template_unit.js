@@ -581,9 +581,12 @@ describe('DashParser SegmentTemplate', () => {
 
   describe('TimelineSegmentIndex', () => {
     describe('find', () => {
-      it('finds the correct references', () => {
+      it('finds the correct references', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
-        const index = makeTimelineSegmentIndex(info);
+        const infoClone = shaka.util.ObjectUtils.cloneObject(info);
+        const index = await makeTimelineSegmentIndex(infoClone,
+            /* delayPeriodEnd= */ true,
+            /* shouldFit= */ true);
 
         const pos1 = index.find(1.0);
         expect(pos1).toBe(0);
@@ -600,7 +603,7 @@ describe('DashParser SegmentTemplate', () => {
         expect(pos4).toBeNull();
       });
 
-      it('finds correct position if time is in gap', () => {
+      it('finds correct position if time is in gap', async () => {
         const ranges = [
           {
             start: 0,
@@ -614,20 +617,20 @@ describe('DashParser SegmentTemplate', () => {
           },
         ];
         const info = makeTemplateInfo(ranges);
-        const index = makeTimelineSegmentIndex(info);
+        const index = await makeTimelineSegmentIndex(info);
         const pos = index.find(2.5);
         expect(pos).toBe(0);
       });
 
-      it('finds correct position if time === first start time', () => {
+      it('finds correct position if time === first start time', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
-        const index = makeTimelineSegmentIndex(info);
+        const index = await makeTimelineSegmentIndex(info);
 
         const pos = index.find(0);
         expect(pos).toBe(0);
       });
 
-      it('finds correct position if time === first end time', () => {
+      it('finds correct position if time === first end time', async () => {
         const ranges = [
           {
             start: 0,
@@ -641,13 +644,13 @@ describe('DashParser SegmentTemplate', () => {
           },
         ];
         const info = makeTemplateInfo(ranges);
-        const index = makeTimelineSegmentIndex(info);
+        const index = await makeTimelineSegmentIndex(info);
 
         const pos = index.find(2.0);
         expect(pos).toBe(0);
       });
 
-      it('finds correct position if time === second start time', () => {
+      it('finds correct position if time === second start time', async () => {
         const ranges = [
           {
             start: 0,
@@ -661,37 +664,36 @@ describe('DashParser SegmentTemplate', () => {
           },
         ];
         const info = makeTemplateInfo(ranges);
-        const index = makeTimelineSegmentIndex(info);
+        const index = await makeTimelineSegmentIndex(info);
 
         const pos = index.find(2.1);
         expect(pos).toBe(1);
       });
 
 
-      it('returns null if time === last end time', () => {
+      it('returns null if time === last end time', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 2));
-        const index = makeTimelineSegmentIndex(info, false);
+        const index = await makeTimelineSegmentIndex(info, false);
 
         const pos = index.find(4.0);
         expect(pos).toBeNull();
       });
 
-      it('returns null if time > last end time', () => {
+      it('returns null if time > last end time', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 2));
-        const index = makeTimelineSegmentIndex(info, false);
+        const index = await makeTimelineSegmentIndex(info, false);
 
         const pos = index.find(6.0);
         expect(pos).toBeNull();
       });
     });
     describe('get', () => {
-      it('creates a segment reference for a given position', () => {
+      it('creates a segment reference for a given position', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
-        const index = makeTimelineSegmentIndex(info);
+        const index = await makeTimelineSegmentIndex(info);
         const pos = index.find(2.0);
         goog.asserts.assert(pos != null, 'Null position!');
         const ref = index.get(pos);
-        console.log(JSON.stringify(ref));
         expect(ref).toEqual(jasmine.objectContaining({
           'startTime': 2,
           'endTime': 4,
@@ -707,26 +709,26 @@ describe('DashParser SegmentTemplate', () => {
         }));
       });
 
-      it('returns null if a position is unknown', () => {
+      it('returns null if a position is unknown', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
-        const index = makeTimelineSegmentIndex(info);
+        const index = await makeTimelineSegmentIndex(info);
         const ref = index.get(12345);
         expect(ref).toBeNull();
       });
 
-      it('returns null if a position < 0', () => {
+      it('returns null if a position < 0', async () => {
         const info = makeTemplateInfo(makeRanges(0, 2.0, 10));
-        const index = makeTimelineSegmentIndex(info);
+        const index = await makeTimelineSegmentIndex(info);
         const ref = index.get(-12);
         expect(ref).toBeNull();
       });
     });
 
     describe('appendTemplateInfo', () => {
-      it('appends new timeline to existing', () => {
+      it('appends new timeline to existing', async () => {
         const initialRanges = makeRanges(0, 2.0, 10);
         const info = makeTemplateInfo(initialRanges);
-        const index = makeTimelineSegmentIndex(info, false);
+        const index = await makeTimelineSegmentIndex(info, false);
 
         const newStart = initialRanges[initialRanges.length - 1].end;
         expect(index.find(newStart)).toBeNull();
@@ -742,10 +744,10 @@ describe('DashParser SegmentTemplate', () => {
     });
 
     describe('evict', () => {
-      it('evicts old entries and maintains position', () => {
+      it('evicts old entries and maintains position', async () => {
         const initialRanges = makeRanges(0, 2.0, 10);
         const info = makeTemplateInfo(initialRanges);
-        const index = makeTimelineSegmentIndex(info, false);
+        const index = await makeTimelineSegmentIndex(info, false);
 
         index.evict(4.0);
         expect(index.find(2.0)).toBe(2);
@@ -753,6 +755,48 @@ describe('DashParser SegmentTemplate', () => {
       });
     });
   });
+
+  /**
+   *
+   * @param {shaka.dash.SegmentTemplate.SegmentTemplateInfo} info
+   * @param {boolean} delayPeriodEnd
+   * @param {boolean} shouldFit
+   * @return {?}
+   */
+  async function makeTimelineSegmentIndex(info, delayPeriodEnd = true,
+      shouldFit = false) {
+    // Period end may be a bit after the last timeline entry
+    let periodEnd = info.timeline[info.timeline.length - 1].end;
+    if (delayPeriodEnd) {
+      periodEnd += 1.0;
+    }
+
+    const dummySource = Dash.makeSimpleManifestText([
+      '<SegmentTemplate startNumber="0" duration="10"',
+      '    media="$Number$-$Time$-$Bandwidth$.mp4">',
+      '  <SegmentTimeline>',
+      '    <S t="0" d="15" r="2" />',
+      '  </SegmentTimeline>',
+      '</SegmentTemplate>',
+    ], /* duration= */ 45);
+
+    fakeNetEngine.setResponseText('dummy://foo', dummySource);
+    const manifest = await parser.start('dummy://foo', playerInterface);
+
+    expect(manifest.variants.length).toBe(1);
+
+    const stream = manifest.variants[0].video;
+    expect(stream).toBeTruthy();
+    await stream.createSegmentIndex();
+
+    /** @type {?} */
+    const index = stream.segmentIndex;
+    index.release();
+    index.appendTemplateInfo(info, info.timeline[0].start,
+        periodEnd, shouldFit);
+
+    return index;
+  }
 });
 
 /**
@@ -763,26 +807,6 @@ describe('DashParser SegmentTemplate', () => {
  */
 function uri(x) {
   return 'http://example.com/video_' + x + '.m4s';
-}
-
-/**
- *
- * @param {shaka.dash.SegmentTemplate.SegmentTemplateInfo} info
- * @param {boolean} delayPeriodEnd
- * @return {shaka.dash.TimelineSegmentIndex}
- */
-function makeTimelineSegmentIndex(info, delayPeriodEnd = true) {
-  const baseUris = [
-    'https://someservice.com/cmaf_2s/',
-  ];
-  // Period end may be a bit after the last timeline entry
-  let periodEnd = info.timeline[info.timeline.length - 1].end;
-  if (delayPeriodEnd) {
-    periodEnd += 1.0;
-  }
-  const initSegmentRef = makeInitSegmentReference();
-  return new shaka.dash.TimelineSegmentIndex(info, 'some_rep_id', 10000,
-      baseUris, 0, periodEnd, initSegmentRef);
 }
 
 /**
