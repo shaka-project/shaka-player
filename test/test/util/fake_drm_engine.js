@@ -74,6 +74,9 @@ shaka.test.FakeDrmEngine = class {
     /** @type {!jasmine.Spy} */
     this.supportsVariant = jasmine.createSpy('supportsVariant');
     this.supportsVariant.and.returnValue(true);
+
+    /** @type {!jasmine.Spy} */
+    this.setSrcEquals = jasmine.createSpy('setSrcEquals');
   }
 
   /**

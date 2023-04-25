@@ -225,6 +225,9 @@ shaka.test.FakeVideo = class {
 
     /** @type {!jasmine.Spy} */
     this.dispatchEvent = jasmine.createSpy('dispatchEvent');
+
+    /** @type {!jasmine.Spy} */
+    this.canPlayType = jasmine.createSpy('canPlayType');
   }
 };
 
