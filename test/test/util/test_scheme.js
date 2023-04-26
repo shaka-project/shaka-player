@@ -431,6 +431,7 @@ const widevineDrmServers = {
 
 /** @type {AVMetadataType} */
 const axinomMultiDrmVideoSegment = {
+  // Taken from Axinom's v6 test vector.
   initSegmentUri: '/base/test/test/assets/multidrm-video-init.mp4',
   mdhdOffset: 0x1d1,
   segmentUri: '/base/test/test/assets/multidrm-video-segment.mp4',
@@ -445,6 +446,7 @@ const axinomMultiDrmVideoSegment = {
 
 /** @type {AVMetadataType} */
 const axinomMultiDrmAudioSegment = {
+  // Taken from Axinom's v6 test vector.
   initSegmentUri: '/base/test/test/assets/multidrm-audio-init.mp4',
   mdhdOffset: 0x192,
   segmentUri: '/base/test/test/assets/multidrm-audio-segment.mp4',
@@ -459,20 +461,15 @@ const axinomMultiDrmAudioSegment = {
 
 /** @type {!Object.<string, string>} */
 const axinomDrmServers = {
+  // NOTE: These are not Axinom's actual servers.  These are test servers for
+  // Widevine and PlayReady that let us specify the known key IDs and keys for
+  // Axinom's v6 test vectors.  Axinom's own servers started returning 403
+  // errors for these older test vectors, and we were forced to switch to
+  // something stable and independent.
   'com.widevine.alpha':
-      'https://drm-widevine-licensing.axtest.net/AcquireLicense',
+      'https://cwip-shaka-proxy.appspot.com/specific_key?blodJidXR9eARuql0dNLWg=GX8m9XLIZNIzizrl0RTqnA',
   'com.microsoft.playready':
-      'https://drm-playready-licensing.axtest.net/AcquireLicense',
-};
-
-/** @type {!Object.<string, string>} */
-const axinomDrmHeaders = {
-  'X-AxDRM-Message':
-      'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5' +
-      'X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc' +
-      '2FnZSI6eyJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImtleXMiOlt7ImlkIj' +
-      'oiNmU1YTFkMjYtMjc1Ny00N2Q3LTgwNDYtZWFhNWQxZDM0YjVhIn1dfX0.yF7PflO' +
-      'Pv9qHnu3ZWJNZ12jgkqTabmwXbDWk_47tLNE',
+      'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:6e5a1d26-2757-47d7-8046-eaa5d1d34b5a,contentkey:GX8m9XLIZNIzizrl0RTqnA,sl:150)',
 };
 
 /** @type {TextMetadataType} */
@@ -568,7 +565,6 @@ shaka.test.TestScheme.DATA = {
     audio: axinomMultiDrmAudioSegment,
     text: vttSegment,
     licenseServers: axinomDrmServers,
-    licenseRequestHeaders: axinomDrmHeaders,
     duration: 30,
   },
 
@@ -580,7 +576,6 @@ shaka.test.TestScheme.DATA = {
       initData: undefined,
     }),
     licenseServers: axinomDrmServers,
-    licenseRequestHeaders: axinomDrmHeaders,
     duration: 30,
   },
 
