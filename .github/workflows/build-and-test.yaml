@@ -45,6 +45,11 @@ jobs:
           # coverage instrumentation on full-stack player integration tests.
           - os: ubuntu-latest
             browser: Chrome
+            chrome-version: stable
+            extra_flags: "--use-xvfb --html-coverage-report --uncompiled"
+          - os: ubuntu-latest
+            browser: Chrome
+            chrome-version: beta
             extra_flags: "--use-xvfb --html-coverage-report --uncompiled"
           - os: ubuntu-latest
             browser: Firefox
@@ -79,6 +84,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Chrome version
+        if: matrix.browser == 'Chrome'
+        run: chrome --version
+
       # Firefox on Ubuntu appears to not have the right things installed in
       # the environment used by GitHub actions, so make sure that ffmpeg is
       # installed. Otherwise, the browser might not support some codecs that the
