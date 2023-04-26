@@ -996,7 +996,8 @@ shaka.extern.MssManifestConfiguration;
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
- *   mss: shaka.extern.MssManifestConfiguration
+ *   mss: shaka.extern.MssManifestConfiguration,
+ *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1036,6 +1037,9 @@ shaka.extern.MssManifestConfiguration;
  *   Advanced parameters used by the HLS manifest parser.
  * @property {shaka.extern.MssManifestConfiguration} mss
  *   Advanced parameters used by the MSS manifest parser.
+ * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
+ *   If true, manifest update request failures will cause a fatal errror.
+ *   Defaults to <code>false</code> if not provided.
  *
  * @exportDoc
  */
