@@ -67,9 +67,31 @@ describe('CmcdManager', () => {
     });
   });
 
+  const NetworkingEngine = shaka.net.NetworkingEngine;
+  const RequestType = NetworkingEngine.RequestType;
+
+  function createNetworkingEngine(cmcd) {
+    const resolveScheme = jasmine.createSpy('cmcd').and.callFake(
+        () => shaka.util.AbortableOperation.completed(
+            {uri: '', data: new ArrayBuffer(5), headers: {}},
+        ));
+
+    NetworkingEngine.registerScheme(
+        'cmcd', shaka.test.Util.spyFunc(resolveScheme),
+        NetworkingEngine.PluginPriority.FALLBACK);
+
+
+    /** @type {shaka.net.NetworkingEngine.OnRequest} */
+    function onRequest(type, request, context) {
+      cmcd.applyData(type, request, context);
+    }
+
+    return new NetworkingEngine(undefined, undefined, undefined,
+        onRequest);
+  }
+
   describe('CmcdManager instance', () => {
     const ObjectUtils = shaka.util.ObjectUtils;
-
     const playerInterface = {
       isLive: () => false,
       getBandwidthEstimate: () => 10000000,
@@ -80,6 +102,8 @@ describe('CmcdManager', () => {
           {start: 35, end: 40},
         ],
       }),
+      getCurrentTime: () => 10,
+      getPlaybackRate: () => 1,
       getVariantTracks: () => /** @type {Array.<shaka.extern.Track>} */([
         {
           type: 'variant',
@@ -94,8 +118,6 @@ describe('CmcdManager', () => {
           audioBandWidth: 1000000,
         },
       ]),
-      getPlaybackRate: () => 1,
-      getCurrentTime: () => 10,
     };
 
     const sid = '2ed2d1cd-970b-48f2-bfb3-50a79e87cfa3';
@@ -126,18 +148,25 @@ describe('CmcdManager', () => {
       streamDataCallback: null,
     };
 
-    const manifestInfo = {
-      format: shaka.util.CmcdManager.StreamingFormat.DASH,
+    const createContext = (type) => {
+      return {
+        type: type,
+        stream: /** @type {shaka.extern.Stream} */ ({
+          bandwidth: 5234167,
+          codecs: 'avc1.42001e',
+          mimeType: 'application/mp4',
+          type: 'video',
+        }),
+        segment: /** @type {shaka.media.SegmentReference} */ ({
+          startTime: 0,
+          endTime: 3.33,
+        }),
+      };
     };
 
-    const segmentInfo = {
-      type: 'video',
-      init: false,
-      duration: 3.33,
-      mimeType: 'application/mp4',
-      codecs: 'avc1.42001e',
-      bandwidth: 5234167,
-    };
+    const AdvancedRequestType = NetworkingEngine.AdvancedRequestType;
+    const manifestInfo = createContext(AdvancedRequestType.MPD);
+    const segmentInfo = createContext(AdvancedRequestType.MEDIA_SEGMENT);
 
     describe('configuration', () => {
       it('does not modify requests when disabled', () => {
@@ -285,6 +314,126 @@ describe('CmcdManager', () => {
         r = ObjectUtils.cloneObject(request);
         cmcdManager.applySegmentData(r, segmentInfo);
         expect(r.headers['CMCD-Request']).not.toContain(',su');
+      });
+
+      describe('applies core CMCD params to networking engine requests', () => {
+        let networkingEngine;
+        const uri = 'cmcd://foo';
+        const retry = NetworkingEngine.defaultRetryParameters();
+
+        beforeAll(() => {
+          config.useHeaders = false;
+          cmcdManager = new CmcdManager(playerInterface, config);
+          networkingEngine = createNetworkingEngine(cmcdManager);
+        });
+
+        it('HEAD requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          request.method = 'HEAD';
+          await networkingEngine.request(RequestType.MANIFEST, request);
+
+          const result = request.uris[0];
+          expect(result).toContain('?CMCD=');
+          expect(result).toContain(encodeURIComponent('sid="'));
+          expect(result).toContain(encodeURIComponent('cid="testing"'));
+          expect(result).not.toContain(encodeURIComponent('sf='));
+        });
+
+        it('dash manifest requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MPD});
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=m'));
+          expect(result).toContain(encodeURIComponent('sf=d'));
+        });
+
+        it('hls manifest requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MASTER_PLAYLIST});
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=m'));
+          expect(result).toContain(encodeURIComponent('sf=h'));
+        });
+
+        it('hls playlist requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.MANIFEST, request,
+              {type: AdvancedRequestType.MEDIA_PLAYLIST});
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=m'));
+          expect(result).toContain(encodeURIComponent('sf=h'));
+        });
+
+        it('init segment requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.SEGMENT, request,
+              {type: AdvancedRequestType.INIT_SEGMENT});
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=i'));
+        });
+
+        it('media segment requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.SEGMENT, request,
+              {
+                type: AdvancedRequestType.MEDIA_SEGMENT,
+                stream: {
+                  type: 'video',
+                },
+              });
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=v'));
+        });
+
+        it('key requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.KEY, request);
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=k'));
+        });
+
+        it('license requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.LICENSE, request);
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=k'));
+        });
+
+        it('cert requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.SERVER_CERTIFICATE,
+              request);
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=k'));
+        });
+
+        it('timing requests', async () => {
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.TIMING, request);
+
+          const result = request.uris[0];
+          expect(result).toContain(encodeURIComponent('ot=o'));
+        });
+
+        it('not when enabled is false', async () => {
+          config.enabled = false;
+          cmcdManager = new CmcdManager(playerInterface, config);
+          const request = NetworkingEngine.makeRequest([uri], retry);
+          await networkingEngine.request(RequestType.TIMING, request);
+
+          const result = request.uris[0];
+          expect(result).not.toContain('?CMCD=');
+        });
       });
     });
   });

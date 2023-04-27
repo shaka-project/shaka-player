@@ -65,7 +65,7 @@ will see `Error code 6007`, which means `LICENSE_REQUEST_FAILED`.  To wrap the
 license request, we must register a request filter:
 
 ```js
-  player.getNetworkingEngine().registerRequestFilter(function(type, request, advType) {
+  player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
     // Alias some utilities provided by the library.
     const StringUtils = shaka.util.StringUtils;
     const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
@@ -136,7 +136,7 @@ Widevine CDM does not understand this wrapped format, so we must unwrap it first
 using a request filter:
 
 ```js
-  player.getNetworkingEngine().registerResponseFilter(function(type, response, advType) {
+  player.getNetworkingEngine().registerResponseFilter(function(type, response, context) {
     // Alias some utilities provided by the library.
     const StringUtils = shaka.util.StringUtils;
     const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
@@ -166,8 +166,3 @@ using a request filter:
 
 Load the page again, and the license response will be accepted by the Widevine
 CDM.  Open the JavaScript console to see what the server sent back.
-
-
-#### Continue the Tutorials
-
-Next, check out {@tutorial ui}.

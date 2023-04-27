@@ -1,0 +1,6 @@
+# The MSS manifest parser plugin.
+
++../../lib/mss/content_protection.js
++../../lib/mss/mss_parser.js
+
++../../lib/transmuxer/mss_transmuxer.js

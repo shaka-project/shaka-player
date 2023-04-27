@@ -447,6 +447,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore Program Date Time from manifest"
   },
+  "DEMO_IGNORE_MANIFEST_TIMESTAMPS_IN_SEGMENTS_MODE": {
+    "description": "The name of a configuration value.",
+    "message": "Ignore Manifest Timestamps in Segments Mode"
+  },
   "DEMO_IGNORE_MIN_BUFFER_TIME": {
     "description": "The name of a configuration value.",
     "message": "Ignore Min Buffer Time"
@@ -674,6 +678,14 @@
   "DEMO_MP4": {
     "description": "Text that describes an asset that uses the MP4 container.",
     "message": "[JARGON:MP4]"
+  },
+  "DEMO_MSS": {
+    "description": "Text that describes an asset that is packaged in an MSS manifest.",
+    "message": "[PROPER_NAME:MSS]"
+  },
+  "DEMO_MSS_SEQUENCE_MODE": {
+    "description": "The name of a configuration value.",
+    "message": "Enable MSS sequence mode"
   },
   "DEMO_MULTIPLE_LANGUAGES": {
     "description": "A tag that marks an asset as having multiple languages.",
@@ -956,28 +968,32 @@
     "message": "This asset is disabled."
   },
   "DEMO_UNSUPPORTED_NO_DASH_SUPPORT": {
-    "description": "An error message that shows why an asset cannot be stored offline: the browser cannot play MPEG-DASH (https://en.wikipedia.org/wiki/Dynamic_Adaptive_Streaming_over_HTTP) content.",
+    "description": "An error message that shows why an asset cannot be stored or played.",
     "message": "Your browser does not support [PROPER_NAME:MPEG-DASH] manifests."
   },
   "DEMO_UNSUPPORTED_NO_DOWNLOAD": {
-    "description": "An error message that shows why an asset cannot be stored offline: the asset cannot be downloaded by any browser.",
+    "description": "An error message that shows why an asset cannot be stored offline: the asset cannot be downloaded.",
     "message": "This asset cannot be downloaded."
   },
   "DEMO_UNSUPPORTED_NO_FORMAT_SUPPORT": {
-    "description": "An error message that shows why an asset cannot be stored offline: the browser cannot play that sort of video.",
+    "description": "An error message that shows why an asset cannot be stored or played.",
     "message": "Your browser does not support the required video format."
   },
   "DEMO_UNSUPPORTED_NO_HLS_SUPPORT": {
-    "description": "An error message that shows why an asset cannot be stored offline: the browser cannot play HLS (https://en.wikipedia.org/wiki/HTTP_Live_Streaming) content.",
+    "description": "An error message that shows why an asset cannot be stored or played.",
     "message": "Your browser does not support [PROPER_NAME:HLS] manifests."
   },
   "DEMO_UNSUPPORTED_NO_KEY_SUPPORT": {
-    "description": "An error message that shows why an asset cannot be stored offline: the browser does not support the asset's Digital Rights Management system.",
+    "description": "An error message that shows why an asset cannot be stored or played.",
     "message": "Your browser does not support the required key systems."
   },
   "DEMO_UNSUPPORTED_NO_LICENSE_SUPPORT": {
     "description": "An error message that shows why an asset cannot be stored offline: the browser cannot store protected content offline.",
     "message": "Your browser does not support offline licenses for the required key systems."
+  },
+  "DEMO_UNSUPPORTED_NO_MSS_SUPPORT": {
+    "description": "An error message that shows why an asset cannot be stored or played.",
+    "message": "Your browser does not support [PROPER_NAME:MSS] manifests."
   },
   "DEMO_UNSUPPORTED_NO_OFFLINE": {
     "description": "An error message that shows why an asset cannot be stored offline: the browser does not support storing things offline, in general.",

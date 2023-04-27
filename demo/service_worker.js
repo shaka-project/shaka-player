@@ -95,6 +95,9 @@ const OPTIONAL_RESOURCES = [
   // The mux.js transmuxing library for MPEG-2 TS and CEA support.
   '../node_modules/mux.js/dist/mux.min.js',
 
+  // The codem-isoboxer library for MSS support.
+  '../node_modules/codem-isoboxer/dist/iso_boxer.min.js',
+
   // The cast sender SDK.
   'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js',
 

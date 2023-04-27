@@ -64,6 +64,15 @@ shaka.extern.IAdManager = class extends EventTarget {
    */
   setLocale(locale) {}
 
+  /**
+   * Called by the Player to provide an updated configuration any time it
+   * changes.
+   * Must be called at least once before init*().
+   *
+   * @param {shaka.extern.AdsConfiguration} config
+   */
+  configure(config) {}
+
   release() {}
 
   onAssetUnload() {}
@@ -237,4 +246,44 @@ shaka.extern.IAd = class {
    * @return {string}
    */
   getDescription() {}
+
+  /**
+   * @return {number}
+   */
+  getVastMediaBitrate() {}
+
+  /**
+   * @return {number}
+   */
+  getVastMediaHeight() {}
+
+  /**
+   * @return {number}
+   */
+  getVastMediaWidth() {}
+
+  /**
+   * @return {string}
+   */
+  getAdId() {}
+
+  /**
+   * @return {string}
+   */
+  getCreativeAdId() {}
+
+  /**
+   * @return {string}
+   */
+  getAdvertiserName() {}
+
+  /**
+   * @return {?string}
+   */
+  getMediaUrl() {}
+
+  /**
+   * @return {number}
+   */
+  getTimeOffset() {}
 };

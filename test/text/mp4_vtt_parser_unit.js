@@ -171,6 +171,14 @@ describe('Mp4VttParser', () => {
     verifyHelper(cues, result);
   });
 
+  it('handles empty media segments', () => {
+    const parser = new shaka.text.Mp4VttParser();
+    parser.parseInit(vttInitSegment);
+    const time = {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0};
+    const result = parser.parseMedia(new Uint8Array(0), time);
+    verifyHelper([], result);
+  });
+
   it('rejects init segment with no vtt', () => {
     const error = shaka.test.Util.jasmineError(new shaka.util.Error(
         shaka.util.Error.Severity.CRITICAL,

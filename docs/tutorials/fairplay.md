@@ -72,13 +72,13 @@ is used by the browser to generate the license request.  If you don't use the
 default content ID derivation, you need to specify a custom init data transform:
 
 ```js
-player.configure('drm.initDataTransform', (initData, initDataType) => {
+player.configure('drm.initDataTransform', (initData, initDataType, drmInfo) => {
   if (initDataType != 'skd')
     return initData;
   // 'initData' is a buffer containing an 'skd://' URL as a UTF-8 string.
   const skdUri = shaka.util.StringUtils.fromBytesAutoDetect(initData);
   const contentId = getMyContentId(skdUri);
-  const cert = player.drmInfo().serverCertificate;
+  const cert = drmInfo.serverCertificate;
   return shaka.util.FairPlayUtils.initDataTransform(initData, contentId, cert);
 });
 ```
@@ -90,7 +90,7 @@ or give the response in a different format.  For more info, see the general
 {@tutorial license-wrapping} tutorial:
 
 ```js
-player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
+player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
@@ -103,7 +103,7 @@ player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
   request.body = shaka.util.StringUtils.toUTF8(encodeURIComponent(params));
 });
 
-player.getNetworkingEngine().registerResponseFilter((type, response, advType) => {
+player.getNetworkingEngine().registerResponseFilter((type, response, context) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
@@ -143,7 +143,7 @@ Note: If the url of the license server has to undergo any transformation
 (eg: add the contentId), you would have to create your filter manually.
 
 ```js
-player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
+player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
@@ -175,7 +175,7 @@ Note: If the url of the license server has to undergo any transformation
 (eg: add the contentId), you would have to create your filter manually.
 
 ```js
-player.getNetworkingEngine().registerRequestFilter((type, request, advType) => {
+player.getNetworkingEngine().registerRequestFilter((type, request, context) => {
   if (type != shaka.net.NetworkingEngine.RequestType.LICENSE) {
     return;
   }
