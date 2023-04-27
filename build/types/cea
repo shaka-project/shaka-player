@@ -7,9 +7,6 @@
 +../../lib/cea/cea708_service.js
 +../../lib/cea/cea708_window.js
 +../../lib/cea/dtvcc_packet_builder.js
-+../../lib/cea/dummy_cea_parser.js
-+../../lib/cea/i_caption_decoder.js
-+../../lib/cea/i_cea_parser.js
 +../../lib/cea/mp4_cea_parser.js
 +../../lib/cea/sei_processor.js
 +../../lib/cea/ts_cea_parser.js
