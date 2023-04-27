@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.2.21](https://github.com/shaka-project/shaka-player/compare/v3.2.20...v3.2.21) (2023-04-27)
+
+
+### Bug Fixes
+
+* `config.streaming.preferNativeHls` only applies to HLS streams ([#5167](https://github.com/shaka-project/shaka-player/issues/5167)) ([f3e9dab](https://github.com/shaka-project/shaka-player/commit/f3e9dabb3437c126e172ea97e6e793aa9140d3c7)), closes [#5166](https://github.com/shaka-project/shaka-player/issues/5166)
+* **Ads:** Fix usage of EventManager on CS ([#5084](https://github.com/shaka-project/shaka-player/issues/5084)) ([e97264c](https://github.com/shaka-project/shaka-player/commit/e97264c041ed8b24930df0f660d8d50ee60bf2ca))
+* Fix fetch plugin with old implementations ([#5091](https://github.com/shaka-project/shaka-player/issues/5091)) ([0004ade](https://github.com/shaka-project/shaka-player/commit/0004ade02bc6a6ebb84583f433b5f1130797aaeb))
+* Fix handling of CC when switching between codecs ([#5160](https://github.com/shaka-project/shaka-player/issues/5160)) ([2203087](https://github.com/shaka-project/shaka-player/commit/2203087b1e94c328f1fc095b5e17ff690b31453b))
+* Fix HEAD request exception ([#5194](https://github.com/shaka-project/shaka-player/issues/5194)) ([265829b](https://github.com/shaka-project/shaka-player/commit/265829b074f922b550e51fa10ce7f87dd222ffe9)), closes [#5164](https://github.com/shaka-project/shaka-player/issues/5164)
+* Fix missing originalUri in response filters ([#5114](https://github.com/shaka-project/shaka-player/issues/5114)) ([7dafd2f](https://github.com/shaka-project/shaka-player/commit/7dafd2f782e6edc2d7fcf38b0db3884b28a6fd2c))
+* Fix race that allows multiple text streams to be loaded ([#5129](https://github.com/shaka-project/shaka-player/issues/5129)) ([35832b1](https://github.com/shaka-project/shaka-player/commit/35832b1b9c9c3eb08ff64ba90661a2f8f0f2c3db))
+* Fix selectVariantsByLabel using src= ([#5154](https://github.com/shaka-project/shaka-player/issues/5154)) ([7e3adce](https://github.com/shaka-project/shaka-player/commit/7e3adce4a30063d581f25bbe6aab35d54376e95c))
+* Handle empty media segments for Mp4VttParser ([#5131](https://github.com/shaka-project/shaka-player/issues/5131)) ([bbaffe8](https://github.com/shaka-project/shaka-player/commit/bbaffe8865aed2b4957fe4f5155174f823611cc7)), closes [#4429](https://github.com/shaka-project/shaka-player/issues/4429)
+* **HLS:** Adding support for DTS Express in HLS fMP4 ([#5112](https://github.com/shaka-project/shaka-player/issues/5112)) ([#5117](https://github.com/shaka-project/shaka-player/issues/5117)) ([de90328](https://github.com/shaka-project/shaka-player/commit/de90328cec936d3dba986396aefb5d2d69a9b373))
+* Prevent bad calls to MediaSource.endOfStream ([#5071](https://github.com/shaka-project/shaka-player/issues/5071)) ([c56bea6](https://github.com/shaka-project/shaka-player/commit/c56bea6d3e2f01c964db077219031f1dd068ef91)), closes [#5070](https://github.com/shaka-project/shaka-player/issues/5070)
+* Tizen video error fixed by checking the extended MIME type ([#4973](https://github.com/shaka-project/shaka-player/issues/4973)) ([426816e](https://github.com/shaka-project/shaka-player/commit/426816ed01a708fb82e277b3c2fc5c39a1b65fad)), closes [#4634](https://github.com/shaka-project/shaka-player/issues/4634)
+
 ## [3.2.20](https://github.com/shaka-project/shaka-player/compare/v3.2.19...v3.2.20) (2023-03-02)
 
 
