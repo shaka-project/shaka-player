@@ -469,7 +469,7 @@ const axinomDrmServers = {
   'com.widevine.alpha':
       'https://cwip-shaka-proxy.appspot.com/specific_key?blodJidXR9eARuql0dNLWg=GX8m9XLIZNIzizrl0RTqnA',
   'com.microsoft.playready':
-      'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:6e5a1d26-2757-47d7-8046-eaa5d1d34b5a,contentkey:GX8m9XLIZNIzizrl0RTqnA,sl:150)',
+      'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(kid:6e5a1d26-2757-47d7-8046-eaa5d1d34b5a,contentkey:GX8m9XLIZNIzizrl0RTqnA==,sl:150)',
 };
 
 /** @type {TextMetadataType} */
