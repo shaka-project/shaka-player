@@ -80,8 +80,16 @@ table.all tr:nth-child(2n) {
       <tr class="old">
       {% endif %}
         <th>{{ v.version }}</th>
-        <td><a href="{{ v.demo }}">demo</a></td>
-        <td><a href="{{ v.lib }}">non-UI library</a></td>
+        <td>
+          {% if v.demo %}
+          <a href="{{ v.demo }}">demo</a>
+          {% endif %}
+        </td>
+        <td>
+          {% if v.lib %}
+          <a href="{{ v.lib }}">non-UI library</a>
+          {% endif %}
+        </td>
         <td>
           {% if v.ui_lib %}
           <a href="{{ v.ui_lib }}">UI-enabled library</a>
