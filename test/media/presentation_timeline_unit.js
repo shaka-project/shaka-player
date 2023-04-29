@@ -114,6 +114,57 @@ describe('PresentationTimeline', () => {
     return timeline;
   }
 
+  const makeTimeRange = (startTime, endTime) => {
+    return {
+      start: startTime,
+      end: endTime,
+    };
+  };
+
+  describe('notifyTimeRange', () => {
+    it('calculates time based on segment times when available', () => {
+      const timeline = makeLiveTimeline(/* availability= */ 20);
+
+      const timeRanges = [
+        makeTimeRange(0, 10),
+        makeTimeRange(10, 20),
+        makeTimeRange(20, 30),
+        makeTimeRange(30, 40),
+        makeTimeRange(40, 50),
+      ];
+
+
+      // In spite of the current time, the explicit segment times will decide
+      // the availability window.
+      // See https://github.com/shaka-project/shaka-player/issues/999
+      setElapsed(1000);
+      timeline.notifyTimeRange(timeRanges, 0);
+
+      // last segment time (50) - availability (20)
+      expect(timeline.getSegmentAvailabilityStart()).toBe(30);
+    });
+
+    it('ignores segment times when configured to', () => {
+      const timeline = makeLiveTimeline(
+          /* availability= */ 20, /* drift= */ 0,
+          /* autoCorrectDrift= */ false);
+
+      const timeRanges = [
+        makeTimeRange(0, 10),
+        makeTimeRange(10, 20),
+        makeTimeRange(20, 30),
+        makeTimeRange(30, 40),
+        makeTimeRange(40, 50),
+      ];
+
+      setElapsed(100);
+      timeline.notifyTimeRange(timeRanges, 0);
+
+      // now (100) - max segment duration (10) - availability start time (0)
+      expect(timeline.getSegmentAvailabilityEnd()).toBe(90);
+    });
+  });
+
   describe('getSegmentAvailabilityStart', () => {
     it('returns 0 for VOD and IPR', () => {
       const timeline1 = makeVodTimeline(/* duration= */ 60);
