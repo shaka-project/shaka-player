@@ -43,9 +43,10 @@ shaka.test.LayoutTests = class {
       });
     });
 
-    // Wait one extra tick to make sure the font rendering on the page has been
-    // updated.  Without this, we saw some rare test flake in Firefox on Mac.
-    await shaka.test.Util.shortDelay();
+    // Wait one extra second to make sure the font rendering on the page has
+    // been updated.  Without this, we saw some rare test flake in Firefox on
+    // Mac.
+    await shaka.test.Util.delay(1);
   }
 
   /**
