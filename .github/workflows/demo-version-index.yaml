@@ -27,12 +27,12 @@ jobs:
           # We need a list of all tags for this, so fetch the entire history.
           fetch-depth: 0
 
-      - name: Generate static content
-        run: python3 app-engine/demo-version-index/generate.py
-
       - uses: google-github-actions/auth@v0
         with:
           credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
+
+      - name: Generate static content
+        run: python3 app-engine/demo-version-index/generate.py
 
       - uses: google-github-actions/deploy-appengine@v0
         with:

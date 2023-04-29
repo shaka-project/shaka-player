@@ -8,6 +8,7 @@
 
 import collections
 import jinja2
+import json
 import os
 import re
 import subprocess
@@ -22,19 +23,35 @@ V1_URL_TEMPLATE = 'https://{0}-dot-shaka-player-demo.appspot.com/shaka-player.{1
 # Before Google Hosted Libraries, v2 appspot URLs
 V2_URL_TEMPLATE = 'https://{0}-dot-shaka-player-demo.appspot.com/dist/shaka-player.{1}'
 
+# Global list of deployed appspot versions, initialized in generate().
+DEPLOYED_APPSPOT_VERSIONS = []
+
+def tag_to_appspot_version(tag):
+  return tag.replace('.', '-')
+
 def version_to_demo_url(v):
-  return DEMO_URL_TEMPLATE.format(v.replace('.', '-'))
+  appspot_version = tag_to_appspot_version(v)
+
+  if appspot_version in DEPLOYED_APPSPOT_VERSIONS:
+    return DEMO_URL_TEMPLATE.format(appspot_version)
+  else:
+    return None
 
 def version_to_lib_url(v):
+  appspot_version = tag_to_appspot_version(v)
+
   if v == 'nightly':
     return V2_URL_TEMPLATE.format(v, 'compiled.js')
   elif (version_key(v) == version_key('v1.6.5') or
-      version_key(v) >= version_key('v2.0.6')):
+        version_key(v) >= version_key('v2.0.6')):
     return HOSTED_URL_TEMPLATE.format(v.replace('v', ''), 'compiled.js')
-  elif version_key(v) >= version_key('v2.0.0-beta'):
-    return V2_URL_TEMPLATE.format(v.replace('.', '-'), 'compiled.js')
+  elif appspot_version in DEPLOYED_APPSPOT_VERSIONS:
+    if version_key(v) >= version_key('v2.0.0-beta'):
+      return V2_URL_TEMPLATE.format(appspot_version, 'compiled.js')
+    else:
+      return V1_URL_TEMPLATE.format(appspot_version, 'compiled.js')
   else:
-    return V1_URL_TEMPLATE.format(v.replace('.', '-'), 'compiled.js')
+    return None
 
 def version_to_ui_lib_url(v):
   if v == 'nightly':
@@ -121,7 +138,21 @@ def get_release_tags():
   output = subprocess.check_output(['git', 'tag'], text=True)
   return list(filter(is_release_tag, output.split('\n')))
 
+def get_appspot_versions():
+  output = subprocess.check_output([
+    'gcloud',
+    '--project=shaka-player-demo',
+    'app', 'versions', 'list',
+    '--format=json',
+  ], text=True)
+  return list(map(lambda v: v['id'], json.loads(output)))
+
 def generate():
+  # Get all deployed appspot versions.  This global list is used in various
+  # methods above as we process the metadata.
+  global DEPLOYED_APPSPOT_VERSIONS
+  DEPLOYED_APPSPOT_VERSIONS = get_appspot_versions()
+
   # Get all release tags.
   versions = get_release_tags()
   # Now sort, putting prerelease versions ahead of the corresponding release.
