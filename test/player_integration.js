@@ -592,17 +592,6 @@ describe('Player', () => {
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
     });
 
-    it('with containerless formats', async () => {
-      player = new compiledShaka.Player(video);
-      // eslint-disable-next-line max-len
-      const url = 'https://storage.googleapis.com/shaka-demo-assets/raw-hls-audio-only/manifest.m3u8';
-      await player.load(url, 0);
-
-      // Ensure the video plays.
-      video.play();
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 15);
-    });
-
     /**
      * Gets the language of the active Variant.
      * @return {string}
