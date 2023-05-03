@@ -65,6 +65,8 @@ goog.require('shaka.text.WebVttGenerator');
 goog.require('shaka.cea.CeaDecoder');
 goog.require('shaka.cea.Mp4CeaParser');
 goog.require('shaka.cea.TsCeaParser');
+goog.require('shaka.transmuxer.Mp3Transmuxer');
+goog.require('shaka.transmuxer.MpegAudio');
 goog.require('shaka.transmuxer.TransmuxerEngine');
 goog.require('shaka.transmuxer.MssTransmuxer');
 goog.require('shaka.transmuxer.MuxjsTransmuxer');
