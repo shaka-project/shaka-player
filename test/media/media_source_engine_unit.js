@@ -186,9 +186,12 @@ describe('MediaSourceEngine', () => {
   describe('constructor', () => {
     const originalCreateObjectURL =
       shaka.media.MediaSourceEngine.createObjectURL;
+    const originalRevokeObjectURL = window.URL.revokeObjectURL;
     const originalMediaSource = window.MediaSource;
     /** @type {jasmine.Spy} */
     let createObjectURLSpy;
+    /** @type {jasmine.Spy} */
+    let revokeObjectURLSpy;
 
     beforeEach(async () => {
       // Mock out MediaSource so we can test the production version of
@@ -202,6 +205,9 @@ describe('MediaSourceEngine', () => {
       createObjectURLSpy.and.returnValue('blob:foo');
       shaka.media.MediaSourceEngine.createObjectURL =
         Util.spyFunc(createObjectURLSpy);
+
+      revokeObjectURLSpy = jasmine.createSpy('revokeObjectURL');
+      window.URL.revokeObjectURL = Util.spyFunc(revokeObjectURLSpy);
 
       const mediaSourceSpy = jasmine.createSpy('MediaSource');
       // Because this is a fake constructor, it must be callable with "new".
@@ -220,6 +226,7 @@ describe('MediaSourceEngine', () => {
     afterAll(() => {
       shaka.media.MediaSourceEngine.createObjectURL = originalCreateObjectURL;
       window.MediaSource = originalMediaSource;
+      window.URL.revokeObjectURL = originalRevokeObjectURL;
     });
 
     it('creates a MediaSource object and sets video.src', () => {
@@ -230,6 +237,29 @@ describe('MediaSourceEngine', () => {
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
       expect(mockVideo.src).toBe('blob:foo');
+    });
+
+    it('revokes object URL after MediaSource opens', () => {
+      let onSourceOpenListener;
+
+      mockMediaSource.addEventListener.and.callFake((event, callback, _) => {
+        if (event == 'sourceopen') {
+          onSourceOpenListener = callback;
+        }
+      });
+
+      mediaSourceEngine = new shaka.media.MediaSourceEngine(
+          video,
+          new shaka.test.FakeTextDisplayer());
+
+      expect(mockMediaSource.addEventListener).toHaveBeenCalledTimes(1);
+      expect(mockMediaSource.addEventListener.calls.mostRecent().args[0])
+          .toBe('sourceopen');
+      expect(typeof onSourceOpenListener).toBe(typeof Function);
+
+      onSourceOpenListener();
+
+      expect(revokeObjectURLSpy).toHaveBeenCalledWith('blob:foo');
     });
   });
 
