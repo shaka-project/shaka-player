@@ -1872,13 +1872,21 @@ describe('DashParser Manifest', () => {
       '      <Accessibility ',
       '          schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007"',
       '          value="2" />',
-      '      <Accessibility schemeIdUri="foobar" value="bar" />',
       '      <Representation id="text-en" mimeType="text/webvtt">',
       '        <BaseURL>t-en.vtt</BaseURL>',
       '      </Representation>',
       '    </AdaptationSet>',
       '    <AdaptationSet id="1" mimeType="video/mp4">',
       '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="1" mimeType="audio/mp4">',
+      '      <Accessibility ',
+      '          schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007"',
+      '          value="1" />',
+      '      <Representation id="audio-sd" width="640" height="480">',
       '        <BaseURL>v-sd.mp4</BaseURL>',
       '        <SegmentBase indexRange="100-200" />',
       '      </Representation>',
@@ -1893,6 +1901,10 @@ describe('DashParser Manifest', () => {
     const textStream = manifest.textStreams[0];
     expect(textStream.accessibilityPurpose)
         .toBe(shaka.dash.DashParser.AccessibilityPurpose.HARD_OF_HEARING);
+    const variant = manifest.variants[0];
+    expect(variant.video.accessibilityPurpose).toBeUndefined();
+    expect(variant.audio.accessibilityPurpose)
+        .toBe(shaka.dash.DashParser.AccessibilityPurpose.VISUALLY_IMPAIRED);
   });
 
   it('converts Accessibility element to "kind"', async () => {
