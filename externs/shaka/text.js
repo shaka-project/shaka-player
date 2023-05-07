@@ -487,6 +487,24 @@ shaka.extern.TextParserPlugin;
  */
 shaka.extern.TextDisplayer = class {
   /**
+   * Sets the video container the text displayer should use.
+   * @param {HTMLElement} videoContainer
+   *
+   * @exportDoc
+   */
+  setVideoContainer(videoContainer) {}
+
+  /**
+   * Attach the text displayer to a media element.
+   *
+   * @param {HTMLMediaElement} mediaElement
+   *
+   * @exportDoc
+   */
+  attach(mediaElement) {}
+
+
+  /**
    * @override
    * @exportDoc
    */
