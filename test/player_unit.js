@@ -1609,6 +1609,7 @@ describe('Player', () => {
           originalVideoId: 'video-1kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 101,
@@ -1645,6 +1646,7 @@ describe('Player', () => {
           originalVideoId: 'video-2kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 102,
@@ -1681,6 +1683,7 @@ describe('Player', () => {
           originalVideoId: 'video-1kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 103,
@@ -1717,6 +1720,7 @@ describe('Player', () => {
           originalVideoId: 'video-2kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 104,
@@ -1753,6 +1757,7 @@ describe('Player', () => {
           originalVideoId: 'video-1kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 105,
@@ -1789,6 +1794,7 @@ describe('Player', () => {
           originalVideoId: 'video-2kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 106,
@@ -1825,6 +1831,7 @@ describe('Player', () => {
           originalVideoId: 'video-1kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 107,
@@ -1861,6 +1868,7 @@ describe('Player', () => {
           originalVideoId: 'video-2kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
       ];
 
@@ -1900,6 +1908,7 @@ describe('Player', () => {
           originalVideoId: null,
           originalTextId: 'text-es',
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 51,
@@ -1936,6 +1945,7 @@ describe('Player', () => {
           originalVideoId: null,
           originalTextId: 'text-en',
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 52,
@@ -1972,6 +1982,7 @@ describe('Player', () => {
           originalVideoId: null,
           originalTextId: 'text-commentary',
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
       ];
 
@@ -2011,6 +2022,7 @@ describe('Player', () => {
           originalVideoId: null,
           originalTextId: null,
           originalImageId: 'thumbnail',
+          accessibilityPurpose: null,
         },
       ];
 

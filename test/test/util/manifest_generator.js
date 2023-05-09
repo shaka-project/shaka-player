@@ -548,6 +548,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.hdr = undefined;
       /** @type {(string|undefined)} */
       this.tilesLayout = undefined;
+      /** @type {?shaka.dash.DashParser.AccessibilityPurpose} */
+      this.accessibilityPurpose;
     }
 
     /** @type {shaka.extern.Stream} */
