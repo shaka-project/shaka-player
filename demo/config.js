@@ -236,6 +236,8 @@ shakaDemo.Config = class {
         .addTextInput_(MessageIds.CLOCK_SYNC_URI, 'manifest.dash.clockSyncUri')
         .addNumberInput_(MessageIds.DEFAULT_PRESENTATION_DELAY,
             'manifest.defaultPresentationDelay')
+        .addBoolInput_(MessageIds.ENABLE_PATCH_MPD_SUPPORT,
+            'manifest.dash.enablePatchMPDSupport')
         .addBoolInput_(MessageIds.IGNORE_MIN_BUFFER_TIME,
             'manifest.dash.ignoreMinBufferTime')
         .addNumberInput_(MessageIds.INITIAL_SEGMENT_LIMIT,

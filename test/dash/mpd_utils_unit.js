@@ -428,8 +428,10 @@ describe('MpdUtils', () => {
       const segmentTimeline = xml.documentElement;
       console.assert(segmentTimeline);
 
+      const timePoints = shaka.util.XmlUtils.findChildren(segmentTimeline, 'S');
+
       const timeline = MpdUtils.createTimeline(
-          segmentTimeline, timescale, presentationTimeOffset, periodDuration);
+          timePoints, timescale, presentationTimeOffset, periodDuration);
       expect(timeline).toEqual(
           expected.map((c) => jasmine.objectContaining(c)));
     }

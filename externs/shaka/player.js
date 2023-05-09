@@ -829,7 +829,8 @@ shaka.extern.InitDataTransform;
  *   ignoreMaxSegmentDuration: boolean,
  *   keySystemsByURI: !Object.<string, string>,
  *   manifestPreprocessor: function(!Element),
- *   sequenceMode: boolean
+ *   sequenceMode: boolean,
+ *   enablePatchMPDSupport: boolean
  * }}
  *
  * @property {string} clockSyncUri
@@ -887,6 +888,10 @@ shaka.extern.InitDataTransform;
  *   If true, the media segments are appended to the SourceBuffer in
  *   "sequence mode" (ignoring their internal timestamps).
  *   <i>Defaults to <code>false</code>.</i>
+ * @property {boolean} enablePatchMPDSupport
+ *   Enables DASH Patch manifest support.
+ *   This feature is experimental.
+ *   This value defaults to <code>false</code>.
  * @exportDoc
  */
 shaka.extern.DashManifestConfiguration;
