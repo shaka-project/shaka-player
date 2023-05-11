@@ -162,7 +162,8 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const pipPlayer = this.videoContainer_;
     const rectPipPlayer = pipPlayer.getBoundingClientRect();
     const pipWindow = await window.documentPictureInPicture.requestWindow({
-      initialAspectRatio: rectPipPlayer.width / rectPipPlayer.height,
+      width: rectPipPlayer.width,
+      height: rectPipPlayer.height,
       copyStyleSheets: true,
     });
 
