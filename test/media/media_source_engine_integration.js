@@ -447,7 +447,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 5,
         /* appendWindowEnd= */ 18,
-        /* sequenceMode= */ false);
+        /* sequenceMode= */ false,
+        fakeStream,
+        /* streamsByType= */ new Map());
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 0);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
@@ -466,7 +468,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 100,
         /* appendWindowStart= */ 5,
         /* appendWindowEnd= */ 18,
-        /* sequenceMode= */ true);
+        /* sequenceMode= */ true,
+        fakeStream,
+        /* streamsByType= */ new Map());
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 0);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
@@ -486,7 +490,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ 20,
-        /* sequenceMode= */ false);
+        /* sequenceMode= */ false,
+        fakeStream,
+        /* streamsByType= */ new Map());
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
@@ -499,7 +505,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 15,
         /* appendWindowStart= */ 20,
         /* appendWindowEnd= */ 35,
-        /* sequenceMode= */ false);
+        /* sequenceMode= */ false,
+        fakeStream,
+        /* streamsByType= */ new Map());
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
@@ -573,7 +581,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity,
-        /* sequenceMode= */ true);
+        /* sequenceMode= */ true,
+        fakeStream,
+        /* streamsByType= */ new Map());
 
     const segment = generators[videoType].getSegment(0, Date.now() / 1000);
     const partialSegmentLength = Math.floor(segment.byteLength / 3);
