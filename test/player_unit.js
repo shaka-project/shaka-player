@@ -765,6 +765,60 @@ describe('Player', () => {
         expect(streamingEngine.unloadTextStream).not.toHaveBeenCalled();
       });
     });
+
+    describe('when config.streaming.preferNativeHls is set to true', () => {
+      beforeEach(() => {
+        shaka.media.ManifestParser.registerParserByMime(
+            'application/x-mpegurl',
+            () => new shaka.test.FakeManifestParser(manifest));
+      });
+
+      afterEach(() => {
+        shaka.media.ManifestParser.unregisterParserByMime(
+            'application/x-mpegurl');
+        video.canPlayType.calls.reset();
+      });
+
+      it('only applies to HLS streams', async () => {
+        video.canPlayType.and.returnValue('maybe');
+        spyOn(shaka.util.Platform, 'anyMediaElement').and.returnValue(video);
+        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
+        // Make sure player.load() resolves for src=
+        spyOn(shaka.util.MediaReadyState, 'waitForReadyState').and.callFake(
+            (mediaElement, readyState, eventManager, callback) => {
+              callback();
+            });
+
+        player.configure({
+          streaming: {
+            preferNativeHls: true,
+            useNativeHlsOnSafari: false,
+          },
+        });
+
+        await player.load(fakeManifestUri, undefined, 'application/x-mpegurl');
+
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.SRC_EQUALS);
+      });
+
+      it('does not apply to non-HLS streams', async () => {
+        video.canPlayType.and.returnValue('maybe');
+        spyOn(shaka.util.Platform, 'supportsMediaSource').and.returnValue(true);
+        spyOn(shaka.util.Platform, 'isApple').and.returnValue(false);
+
+        player.configure({
+          streaming: {
+            preferNativeHls: true,
+            useNativeHlsOnSafari: false,
+          },
+        });
+
+        await player.load(fakeManifestUri, 0, fakeMimeType);
+
+        expect(player.getLoadMode()).toBe(shaka.Player.LoadMode.MEDIA_SOURCE);
+      });
+    });
   });  // describe('load/unload')
 
   describe('getConfiguration', () => {
@@ -1555,6 +1609,7 @@ describe('Player', () => {
           originalVideoId: 'video-1kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 101,
@@ -1591,6 +1646,7 @@ describe('Player', () => {
           originalVideoId: 'video-2kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 102,
@@ -1627,6 +1683,7 @@ describe('Player', () => {
           originalVideoId: 'video-1kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 103,
@@ -1663,6 +1720,7 @@ describe('Player', () => {
           originalVideoId: 'video-2kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 104,
@@ -1699,6 +1757,7 @@ describe('Player', () => {
           originalVideoId: 'video-1kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 105,
@@ -1735,6 +1794,7 @@ describe('Player', () => {
           originalVideoId: 'video-2kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 106,
@@ -1771,6 +1831,7 @@ describe('Player', () => {
           originalVideoId: 'video-1kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 107,
@@ -1807,6 +1868,7 @@ describe('Player', () => {
           originalVideoId: 'video-2kbps',
           originalTextId: null,
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
       ];
 
@@ -1846,6 +1908,7 @@ describe('Player', () => {
           originalVideoId: null,
           originalTextId: 'text-es',
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 51,
@@ -1882,6 +1945,7 @@ describe('Player', () => {
           originalVideoId: null,
           originalTextId: 'text-en',
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
         {
           id: 52,
@@ -1918,6 +1982,7 @@ describe('Player', () => {
           originalVideoId: null,
           originalTextId: 'text-commentary',
           originalImageId: null,
+          accessibilityPurpose: undefined,
         },
       ];
 
@@ -1957,6 +2022,7 @@ describe('Player', () => {
           originalVideoId: null,
           originalTextId: null,
           originalImageId: 'thumbnail',
+          accessibilityPurpose: null,
         },
       ];
 

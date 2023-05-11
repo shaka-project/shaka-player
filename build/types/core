@@ -54,6 +54,9 @@
 +../../lib/routing/payload.js
 +../../lib/routing/walker.js
 
++../../lib/cea/dummy_cea_parser.js
++../../lib/cea/dummy_caption_decoder.js
+
 +../../lib/text/cue.js
 +../../lib/text/simple_text_displayer.js
 +../../lib/text/text_engine.js
@@ -116,4 +119,4 @@
 +../../third_party/closure-uri/uri.js
 +../../third_party/closure-uri/utils.js
 
-+@cea
++@lcevc

@@ -51,4 +51,14 @@ describe('MimeUtils', () => {
     expect(getNormalizedCodec('dvh1.05')).toBe('dovi');
     expect(getNormalizedCodec('dvhe.05')).toBe('dovi');
   });
+
+  it('isHlsType', () => {
+    const isHlsType = (mimeType) => shaka.util.MimeUtils.isHlsType(mimeType);
+
+    expect(isHlsType('application/x-mpegurl')).toBe(true);
+    expect(isHlsType('application/vnd.apple.mpegurl')).toBe(true);
+    expect(isHlsType('application/dash+xml')).toBe(false);
+    expect(isHlsType('application/vnd.ms-sstr+xml')).toBe(false);
+    expect(isHlsType('foo')).toBe(false);
+  });
 });

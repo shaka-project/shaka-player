@@ -53,7 +53,6 @@ HTMLMediaElement.prototype.webkitPresentationMode;
 
 /**
  * @typedef {{
- *   initialAspectRatio: (number|undefined),
  *   width: (number|undefined),
  *   height: (number|undefined),
  *   copyStyleSheets: (boolean|undefined),

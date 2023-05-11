@@ -225,6 +225,7 @@ shaka.extern.BufferedInfo;
  *   primary: boolean,
  *   roles: !Array.<string>,
  *   audioRoles: Array.<string>,
+ *   accessibilityPurpose: ?shaka.dash.DashParser.AccessibilityPurpose,
  *   forced: boolean,
  *   videoId: ?number,
  *   audioId: ?number,
@@ -301,6 +302,9 @@ shaka.extern.BufferedInfo;
  *   The roles of the audio in the track, e.g. <code>'main'</code> or
  *   <code>'commentary'</code>. Will be null for text tracks or variant tracks
  *   without audio.
+ * @property {?shaka.dash.DashParser.AccessibilityPurpose} accessibilityPurpose
+ *   The DASH accessibility descriptor, if one was provided for this track.
+ *   For text tracks, this describes the text; otherwise, this is for the audio.
  * @property {boolean} forced
  *   True indicates that this in the forced text language for the content.
  *   This flag is based on signals from the manifest.
@@ -736,9 +740,7 @@ shaka.extern.PersistentSessionMetadata;
  *   persistentSessionsMetadata:
  *       !Array.<shaka.extern.PersistentSessionMetadata>,
  *   advanced: Object.<string, shaka.extern.AdvancedDrmConfiguration>,
- *   initDataTransform:
- *       ((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
- *         undefined),
+ *   initDataTransform:(shaka.extern.InitDataTransform|undefined),
  *   logLicenseExchange: boolean,
  *   updateExpirationTime: number,
  *   preferredKeySystems: !Array.<string>,
@@ -772,10 +774,7 @@ shaka.extern.PersistentSessionMetadata;
  *   <i>Optional.</i> <br>
  *   A dictionary which maps key system IDs to advanced DRM configuration for
  *   those key systems.
- * @property
- *     {((function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array)|
- *        undefined)}
- *   initDataTransform
+ * @property {shaka.extern.InitDataTransform|undefined} initDataTransform
  *   <i>Optional.</i><br>
  *   If given, this function is called with the init data from the
  *   manifest/media and should return the (possibly transformed) init data to
@@ -807,6 +806,17 @@ shaka.extern.PersistentSessionMetadata;
  * @exportDoc
  */
 shaka.extern.DrmConfiguration;
+
+/**
+ * @typedef {function(!Uint8Array, string, ?shaka.extern.DrmInfo):!Uint8Array}
+ *
+ * @description
+ * A callback function to handle custom content ID signaling for FairPlay
+ * content.
+ *
+ * @exportDoc
+ */
+shaka.extern.InitDataTransform;
 
 
 /**
@@ -990,7 +1000,8 @@ shaka.extern.MssManifestConfiguration;
  *   segmentRelativeVttTiming: boolean,
  *   dash: shaka.extern.DashManifestConfiguration,
  *   hls: shaka.extern.HlsManifestConfiguration,
- *   mss: shaka.extern.MssManifestConfiguration
+ *   mss: shaka.extern.MssManifestConfiguration,
+ *   raiseFatalErrorOnManifestUpdateRequestFailure: boolean
  * }}
  *
  * @property {shaka.extern.RetryParameters} retryParameters
@@ -1030,6 +1041,9 @@ shaka.extern.MssManifestConfiguration;
  *   Advanced parameters used by the HLS manifest parser.
  * @property {shaka.extern.MssManifestConfiguration} mss
  *   Advanced parameters used by the MSS manifest parser.
+ * @property {boolean} raiseFatalErrorOnManifestUpdateRequestFailure
+ *   If true, manifest update request failures will cause a fatal errror.
+ *   Defaults to <code>false</code> if not provided.
  *
  * @exportDoc
  */

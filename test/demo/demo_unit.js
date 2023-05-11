@@ -98,6 +98,7 @@ describe('Demo', () => {
           .add('manifest.mss.keySystemsBySystemId')
           .add('drm.keySystemsMapping')
           .add('streaming.parsePrftBox')
+          .add('manifest.raiseFatalErrorOnManifestUpdateRequestFailure')
           .add('drm.persistentSessionOnlinePlayback')
           .add('drm.persistentSessionsMetadata');
 

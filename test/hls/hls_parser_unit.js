@@ -560,7 +560,7 @@ describe('HlsParser', () => {
           stream.mime('video/mp4', 'avc1');
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/mp4', '');
+          stream.mime('audio/mp4', 'mp4a.40.34');
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -589,7 +589,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/aac', '');
+          stream.mime('audio/aac', 'mp4a.40.2');
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -617,7 +617,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/mpeg', '');
+          stream.mime('audio/mpeg', 'mp4a.40.34');
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -4618,7 +4618,9 @@ describe('HlsParser', () => {
 
     // Before loading, all MIME types agree, and are defaulted to audio/mp4.
     expect(actualAudio0.mimeType).toBe('audio/mp4');
+    expect(actualAudio0.codecs).toBe('mp4a');
     expect(actualAudio1.mimeType).toBe('audio/mp4');
+    expect(actualAudio1.codecs).toBe('mp4a');
 
     await actualAudio0.createSegmentIndex();
 
@@ -4627,9 +4629,9 @@ describe('HlsParser', () => {
     // This is how we avoid having the unloaded tracks filtered out during
     // startup.
     expect(actualAudio0.mimeType).toBe('audio/aac');
-    expect(actualAudio0.codecs).toBe('');
+    expect(actualAudio0.codecs).toBe('mp4a');
     expect(actualAudio1.mimeType).toBe('audio/aac');
-    expect(actualAudio1.codecs).toBe('');
+    expect(actualAudio1.codecs).toBe('mp4a');
   });
 
   it('parses media playlists directly', async () => {
