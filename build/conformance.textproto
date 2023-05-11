@@ -320,6 +320,7 @@ requirement: {
     "use shaka.test.Util.fetch or NetworkingEngine.request "
     "instead."
   whitelist_regexp: "lib/net/http_fetch_plugin.js"
+  whitelist_regexp: "demo/common/patch_mpd_adapter.js"
 }
 
 # Disallow the use of generators, which are a major performance issue.  See
@@ -375,5 +376,6 @@ requirement: {
     "use shaka.util.XmlUtils.parseXmlString instead."
   whitelist_regexp: "lib/util/xml_utils.js"
   whitelist_regexp: "test/"
+  whitelist_regexp: "demo/common/patch_mpd_adapter.js"
 }
 

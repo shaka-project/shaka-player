@@ -139,6 +139,8 @@ shakaAssets.Feature = {
 
   // Set if the asset is a MPEG-DASH manifest.
   DASH: shakaDemo.MessageIds.DASH,
+  // Enable MPD patch for live DASH
+  ENABLE_DASH_PATCH: shakaDemo.MessageIds.ENABLE_DASH_PATCH,
   // Set if the asset is an HLS manifest.
   HLS: shakaDemo.MessageIds.HLS,
   // Set if the asset is an MSS manifest.
@@ -544,15 +546,27 @@ shakaAssets.testAssets = [
       .setIMAContentSourceId('2528370')
       .setIMAVideoId('tears-of-steel')
       .setIMAManifestType('HLS'),
+  //   new ShakaDemoAssetInfo(
+  //       /* name= */ 'Tears of Steel (live, DASH, Server Side ads)',
+  //       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+  //       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/tos-ttml/dash.mpd',
+  //       /* source= */ shakaAssets.Source.SHAKA)
+  //       .addFeature(shakaAssets.Feature.DASH)
+  //       .addFeature(shakaAssets.Feature.MP4)
+  //       .addFeature(shakaAssets.Feature.SUBTITLES)
+  //       .addFeature(shakaAssets.Feature.LIVE)
+  //       .setIMAAssetKey('PSzZMzAkSXCmlJOWDmRj8Q')
+  //       .setIMAManifestType('DASH'),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Tears of Steel (live, DASH, Server Side ads)',
+      /* name= */ 'Tears of Steel (live, DASH, MPD PATCH)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
-      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/tos-ttml/dash.mpd',
+      /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/tos-ttml/dash.mpd?foo=1',
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.SUBTITLES)
       .addFeature(shakaAssets.Feature.LIVE)
+      .addFeature(shakaAssets.Feature.ENABLE_DASH_PATCH)
       .setIMAAssetKey('PSzZMzAkSXCmlJOWDmRj8Q')
       .setIMAManifestType('DASH'),
   new ShakaDemoAssetInfo(
