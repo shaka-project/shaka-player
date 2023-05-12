@@ -83,6 +83,26 @@ describe('Transmuxer Player', () => {
     await player.unload();
   });
 
+  it('raw MP3', async () => {
+    // eslint-disable-next-line max-len
+    const url = 'https://pl.streamingvideoprovider.com/mp3-playlist/playlist.m3u8';
+
+    await player.load(url, /* startTime= */ null,
+        /* mimeType= */ undefined);
+    video.play();
+    expect(player.isLive()).toBe(false);
+
+    // Wait for the video to start playback.  If it takes longer than 10
+    // seconds, fail the test.
+    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+    // Play for 15 seconds, but stop early if the video ends.  If it takes
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+    await player.unload();
+  });
+
   it('muxed H.264+AAC in TS', async () => {
     // eslint-disable-next-line max-len
     const url = 'https://cf-sf-video.wmspanel.com/local/raw/BigBuckBunny_320x180.mp4/playlist.m3u8';

@@ -98,4 +98,4 @@ application:
       (deprecated in v4.3.0)
 
   - Plugin changes:
-    - `Transmuxer` plugins now has two new parameters in `transmux()` method.
+    - `Transmuxer` plugins now has three new parameters in `transmux()` method.
