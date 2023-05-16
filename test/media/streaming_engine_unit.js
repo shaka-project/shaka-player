@@ -841,8 +841,13 @@ describe('StreamingEngine', () => {
     const gt40 = {
       asymmetricMatch: (val) => val > 40 && val <= 40.1,
     };
+    const streamsByType = new Map();
+    streamsByType.set(ContentType.AUDIO, audioStream);
+    streamsByType.set(ContentType.VIDEO, videoStream);
+
     expect(mediaSourceEngine.setStreamProperties)
-        .toHaveBeenCalledWith('video', 0, lt20, gt40, false);
+        .toHaveBeenCalledWith('video', 0, lt20, gt40, false,
+            videoStream, streamsByType);
   });
 
   // Regression test for https://github.com/shaka-project/shaka-player/issues/3717

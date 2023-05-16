@@ -111,15 +111,22 @@ describe('LanguageUtils', () => {
       expect(LanguageUtils.normalize('EN')).toBe('en');
     });
 
-    it('standardized region', () => {
+    it('standardizes region', () => {
       expect(LanguageUtils.normalize('en-US')).toBe('en-US');
       expect(LanguageUtils.normalize('en-us')).toBe('en-US');
     });
 
-    it('ignored unknown base languages', () => {
+    it('ignores unknown base languages', () => {
       expect(LanguageUtils.normalize('elvish')).toBe('elvish');
       expect(LanguageUtils.normalize(
           'elvish-woodland')).toBe('elvish-WOODLAND');
+    });
+
+    it('supports private use tag', () => {
+      expect(LanguageUtils.normalize('eng-us-x-1')).toBe('en-US-x-1');
+      expect(LanguageUtils.normalize('eng-x-1')).toBe('en-x-1');
+      expect(LanguageUtils.normalize(
+          'elvish-woodland-x-1')).toBe('elvish-WOODLAND-x-1');
     });
   });
 

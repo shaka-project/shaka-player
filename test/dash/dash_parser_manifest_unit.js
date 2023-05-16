@@ -1864,6 +1864,49 @@ describe('DashParser Manifest', () => {
     expect(stream).toBeUndefined();
   });
 
+  it('reads accessibility purpose elements', async () => {
+    const manifestText = [
+      '<MPD minBufferTime="PT75S">',
+      '  <Period id="1" duration="PT30S">',
+      '    <AdaptationSet id="1" contentType="text">',
+      '      <Accessibility ',
+      '          schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007"',
+      '          value="2" />',
+      '      <Representation id="text-en" mimeType="text/webvtt">',
+      '        <BaseURL>t-en.vtt</BaseURL>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="video-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '    <AdaptationSet id="1" mimeType="audio/mp4">',
+      '      <Accessibility ',
+      '          schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007"',
+      '          value="1" />',
+      '      <Representation id="audio-sd" width="640" height="480">',
+      '        <BaseURL>v-sd.mp4</BaseURL>',
+      '        <SegmentBase indexRange="100-200" />',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const textStream = manifest.textStreams[0];
+    expect(textStream.accessibilityPurpose)
+        .toBe(shaka.dash.DashParser.AccessibilityPurpose.HARD_OF_HEARING);
+    const variant = manifest.variants[0];
+    expect(variant.video.accessibilityPurpose).toBeUndefined();
+    expect(variant.audio.accessibilityPurpose)
+        .toBe(shaka.dash.DashParser.AccessibilityPurpose.VISUALLY_IMPAIRED);
+  });
+
   it('converts Accessibility element to "kind"', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
