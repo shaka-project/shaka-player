@@ -68,7 +68,6 @@ shakaDemo.MPDPatchAdapter = class {
    * @param {Element} manifest
    */
   patchMpdPreProcessor(manifest) {
-    console.log('****** manifest preprocessor called');
     // createElementNS is being used here over createElement to preserve
     // the capitalisation of the first letter.
     const patch = document.createElementNS('', 'PatchLocation');
@@ -180,8 +179,6 @@ shakaDemo.MPDPatchAdapter = class {
       }
     }
 
-    console.log('***** processed manifest', manifest);
-
     return additions;
   }
 
@@ -267,7 +264,6 @@ shakaDemo.MPDPatchAdapter = class {
    * @param {string} url
    */
   customPatchHandler(url) {
-    console.log('**** handling custom manifest');
     const manifestUrl = this.getManifestUrlFromPatch_(url);
     const start = (performance && performance.now()) || Date.now();
     const fetchPromise = fetch(manifestUrl).then((response) => {

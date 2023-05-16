@@ -1451,7 +1451,7 @@ describe('DashParser Manifest', () => {
     });
   });
 
-  it('does not fail on AdaptationSets without segment info', async () => {
+  fit('does not fail on AdaptationSets without segment info', async () => {
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',

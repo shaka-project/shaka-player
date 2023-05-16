@@ -1330,7 +1330,6 @@ shakaDemo.Main = class {
 
       if (asset.features.includes(
           shakaAssets.Feature.ENABLE_DASH_PATCH)) {
-        console.log('**** doing the thing');
         this.mpdPatchAdapter_ =
           new shakaDemo.MPDPatchAdapter(manifestUri);
         const patchConfig = {
