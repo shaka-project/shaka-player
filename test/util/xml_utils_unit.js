@@ -439,6 +439,27 @@ describe('XmlUtils', () => {
       const doc = XmlUtils.parseXmlString(xmlString, 'Root');
       expect(doc).toBeNull();
     });
+
+    it('parseXpath', () => {
+      expect(XmlUtils.parseXpath('/MPD')).toEqual([{name: 'MPD', id: null}]);
+      expect(XmlUtils.parseXpath('/MPD/@type'))
+          .toEqual([{name: 'MPD', id: null}]);
+
+      const timelinePath = '/' + [
+        'MPD',
+        'Period[@id=\'6469\']',
+        'AdaptationSet[@id=\'7\']',
+        'SegmentTemplate',
+        'SegmentTimeline',
+      ].join('/');
+      expect(XmlUtils.parseXpath(timelinePath)).toEqual([
+        {name: 'MPD', id: null},
+        {name: 'Period', id: '6469'},
+        {name: 'AdaptationSet', id: '7'},
+        {name: 'SegmentTemplate', id: null},
+        {name: 'SegmentTimeline', id: null},
+      ]);
+    });
   });
 });
 

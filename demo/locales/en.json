@@ -70,6 +70,7 @@
   "DEMO_DISABLE_XLINK_PROCESSING": "Disable Xlink processing",
   "DEMO_DISPATCH_ALL_EMSG_BOXES": "Dispatch all emsg boxes",
   "DEMO_DOCUMENTATION": "Documentation",
+  "DEMO_ENABLE_DASH_PATCH": "Enable mpd patch manifest support",
   "DEMO_DRM_RETRY_SECTION_HEADER": "DRM Retry Parameters",
   "DEMO_DRM_SEARCH": "DRM",
   "DEMO_DRM_SECTION_HEADER": "DRM",

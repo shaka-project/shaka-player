@@ -100,7 +100,8 @@ describe('Demo', () => {
           .add('streaming.parsePrftBox')
           .add('manifest.raiseFatalErrorOnManifestUpdateRequestFailure')
           .add('drm.persistentSessionOnlinePlayback')
-          .add('drm.persistentSessionsMetadata');
+          .add('drm.persistentSessionsMetadata')
+          .add('manifest.dash.enablePatchMPDSupport');
 
       /**
        * @param {!Object} section

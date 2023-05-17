@@ -1558,4 +1558,160 @@ describe('DashParser Live', () => {
       shaka.test.ManifestParser.makeReference('s5.mp4', 8, 10, originalUri),
     ]);
   });
+  describe('Patch MPD', () => {
+    const manifestRequest = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+    const manifestContext = {
+      type: shaka.net.NetworkingEngine.AdvancedRequestType.MPD,
+    };
+    const manifestText = [
+      '<MPD type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z"',
+      '    suggestedPresentationDelay="PT5S"',
+      '    minimumUpdatePeriod="PT' + updateTime + 'S">',
+      '  <PatchLocation>dummy://bar</PatchLocation>',
+      '  <Period id="1">',
+      '    <AdaptationSet id="1" mimeType="video/mp4">',
+      '      <Representation id="3" bandwidth="500">',
+      '        <BaseURL>http://example.com</BaseURL>',
+      '        <SegmentTemplate media="s$Number$.mp4">',
+      '          <SegmentTimeline>',
+      '            <S d="1" t="0" />',
+      '          </SegmentTimeline>',
+      '        </SegmentTemplate>',
+      '      </Representation>',
+      '    </AdaptationSet>',
+      '  </Period>',
+      '</MPD>',
+    ].join('\n');
+
+    beforeEach(() => {
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.dash.enablePatchMPDSupport = true;
+      parser.configure(config);
+
+      fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    });
+
+    it('does not use Mpd.PatchLocation if not configured', async () => {
+      const config = shaka.util.PlayerConfiguration.createDefault().manifest;
+      config.dash.enablePatchMPDSupport = false;
+      parser.configure(config);
+
+      const patchText = [
+        '<Patch>',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText('dummy://bar', patchText);
+
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.request.calls.reset();
+
+      await updateManifest();
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+    });
+
+    it('uses Mpd.PatchLocation', async () => {
+      await parser.start('dummy://foo', playerInterface);
+
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://foo', manifestRequest, manifestContext);
+      fakeNetEngine.request.calls.reset();
+
+      const patchText = [
+        '<Patch xmlns:p="urn:ietf:params:xml:schema:patchops">',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText('dummy://bar', patchText);
+
+      await updateManifest();
+      expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
+      fakeNetEngine.expectRequest('dummy://bar', manifestRequest, manifestContext);
+    });
+
+    it('transforms from dynamic to static', async () => {
+      const patchText = [
+        '<Patch xmlns:p="urn:ietf:params:xml:schema:patchops">',
+        '  <p:replace sel="/MPD/@type">',
+        '    static',
+        '  </p:replace>',
+        '  <p:add sel="/MPD/@mediaPresentationDuration">',
+        '    PT28462.033599998S',
+        '  </p:add>',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText('dummy://bar', patchText);
+
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      expect(manifest.presentationTimeline.isLive()).toBe(true);
+      expect(manifest.presentationTimeline.getDuration()).toBe(Infinity);
+
+      await updateManifest();
+      expect(manifest.presentationTimeline.isLive()).toBe(false);
+      expect(manifest.presentationTimeline.getDuration()).not.toBe(Infinity);
+    });
+
+    it('adds new period', async () => {
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      const patchText = [
+        '<Patch xmlns:p="urn:ietf:params:xml:schema:patchops">',
+        '  <p:add sel="/MPD">',
+        '    <Period id="2" duration="PT10S">',
+        '      <AdaptationSet id="2" mimeType="video/mp4">',
+        '        <Representation id="3" bandwidth="500">',
+        '          <SegmentTemplate media="s$Number$.mp4" duration="2" />',
+        '        </Representation>',
+        '      </AdaptationSet>',
+        '    </Period>',
+        '  </p:add>',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText('dummy://bar', patchText);
+
+      await stream.createSegmentIndex();
+
+      expect(stream.matchedStreams.length).toBe(1);
+
+      await updateManifest();
+      await stream.createSegmentIndex();
+
+      expect(stream.matchedStreams.length).toBe(2);
+    });
+
+    it('adds new segments to the existing period', async () => {
+      const xPath = '/' + [
+        'MPD',
+        'Period[@id=\'1\']',
+        'AdaptationSet[@id=\'1\']',
+        'Representation[@id=\'3\']',
+        'SegmentTemplate',
+        'SegmentTimeline',
+      ].join('/');
+      const patchText = [
+        '<Patch xmlns:p="urn:ietf:params:xml:schema:patchops">',
+        '  <p:add sel="' + xPath + '">',
+        '    <S d="1" t="1" />',
+        '  </p:add>',
+        '</Patch>',
+      ].join('\n');
+      fakeNetEngine.setResponseText('dummy://bar', patchText);
+
+      const manifest = await parser.start('dummy://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      expect(stream).toBeTruthy();
+      await stream.createSegmentIndex();
+      ManifestParser.verifySegmentIndex(stream, [
+        ManifestParser.makeReference('s1.mp4', 0, 1, originalUri),
+      ]);
+
+      await updateManifest();
+      ManifestParser.verifySegmentIndex(stream, [
+        ManifestParser.makeReference('s1.mp4', 0, 1, originalUri),
+        ManifestParser.makeReference('s2.mp4', 1, 2, originalUri),
+      ]);
+    });
+  });
 });

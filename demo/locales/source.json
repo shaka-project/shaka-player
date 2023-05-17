@@ -1075,7 +1075,7 @@
     "description": "Max number of segments to be prefetched ahead of current time position.",
     "message": "Segment Prefetch Limit."
   },
-  "DEMO_ENABLE_PATCH_MPD_SUPPORT": {
+  "DEMO_ENABLE_DASH_PATCH": {
     "description": "The name of a configuration value.",
     "message": "Enable Patch MPD support"
   }
