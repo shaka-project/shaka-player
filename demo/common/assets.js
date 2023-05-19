@@ -140,7 +140,7 @@ shakaAssets.Feature = {
   // Set if the asset is a MPEG-DASH manifest.
   DASH: shakaDemo.MessageIds.DASH,
   // Enable MPD patch for live DASH
-  DEMO_ENABLE_DASH_PATCH: shakaDemo.MessageIds.DEMO_ENABLE_DASH_PATCH,
+  ENABLE_DASH_PATCH: shakaDemo.MessageIds.ENABLE_DASH_PATCH,
   // Set if the asset is an HLS manifest.
   HLS: shakaDemo.MessageIds.HLS,
   // Set if the asset is an MSS manifest.
