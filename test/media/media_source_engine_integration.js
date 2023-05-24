@@ -168,11 +168,11 @@ describe('MediaSourceEngine', () => {
     onMetadata = jasmine.createSpy('onMetadata');
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
-        video,
         textDisplayer,
         shaka.test.Util.spyFunc(onMetadata));
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(config);
+    mediaSourceEngine.attach(video);
 
     mediaSource = /** @type {?} */(mediaSourceEngine)['mediaSource_'];
     expect(video.src).toBeTruthy();

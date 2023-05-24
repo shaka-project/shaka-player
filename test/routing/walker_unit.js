@@ -16,6 +16,7 @@ describe('Walker', () => {
     startTime: null,
     startTimeOfLoad: NaN,
     uri: null,
+    useSrcEquals: false,
   };
 
   // The graph topology that we will be using for our tests.
