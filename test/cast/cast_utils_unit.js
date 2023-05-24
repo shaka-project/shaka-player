@@ -213,11 +213,11 @@ describe('CastUtils', () => {
         }
 
         mediaSourceEngine = new shaka.media.MediaSourceEngine(
-            video,
             new shaka.test.FakeTextDisplayer());
         const config =
             shaka.util.PlayerConfiguration.createDefault().mediaSource;
         mediaSourceEngine.configure(config);
+        mediaSourceEngine.attach(video);
 
         const ContentType = shaka.util.ManifestParserUtils.ContentType;
         const initObject = new Map();

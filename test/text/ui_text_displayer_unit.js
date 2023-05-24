@@ -51,7 +51,9 @@ describe('UITextDisplayer', () => {
 
   beforeEach(() => {
     video.currentTime = 0;
-    textDisplayer = new shaka.text.UITextDisplayer(video, videoContainer);
+    textDisplayer = new shaka.text.UITextDisplayer();
+    textDisplayer.attach(video);
+    textDisplayer.setVideoContainer(videoContainer);
   });
 
   afterEach(async () => {

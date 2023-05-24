@@ -15,6 +15,10 @@ shaka.test.FakeTextDisplayer = class {
     /** @type {!jasmine.Spy} */
     this.destroySpy = jasmine.createSpy('destroy');
     /** @type {!jasmine.Spy} */
+    this.attachSpy = jasmine.createSpy('attach');
+    /** @type {!jasmine.Spy} */
+    this.setVideoContainerSpy = jasmine.createSpy('setVideoContainer');
+    /** @type {!jasmine.Spy} */
     this.appendSpy = jasmine.createSpy('append');
     /** @type {!jasmine.Spy} */
     this.removeSpy = jasmine.createSpy('remove');
@@ -32,6 +36,18 @@ shaka.test.FakeTextDisplayer = class {
   destroy() {
     const func = shaka.test.Util.spyFunc(this.destroySpy);
     return func();
+  }
+
+  /** @override */
+  attach(mediaElement) {
+    const func = shaka.test.Util.spyFunc(this.attachSpy);
+    return func(mediaElement);
+  }
+
+  /** @override */
+  setVideoContainer(videoContainer) {
+    const func = shaka.test.Util.spyFunc(this.setVideoContainerSpy);
+    return func(videoContainer);
   }
 
   /** @override */

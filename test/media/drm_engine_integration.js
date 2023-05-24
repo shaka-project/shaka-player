@@ -115,11 +115,11 @@ describe('DrmEngine', () => {
     eventManager = new shaka.util.EventManager();
 
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
-        video,
         new shaka.test.FakeTextDisplayer());
     const mediaSourceConfig =
         shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(mediaSourceConfig);
+    mediaSourceEngine.attach(video);
 
     const expectedObject = new Map();
     expectedObject.set(ContentType.AUDIO, audioStream);

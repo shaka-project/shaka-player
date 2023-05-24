@@ -289,9 +289,9 @@ shaka.test.DomTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
   /** @override */
   recreateTextDisplayer() {
-    this.textDisplayer = new shaka.text.UITextDisplayer(
-        /** @type {!HTMLMediaElement} */(this.mockVideo),
-        this.videoContainer);
+    this.textDisplayer = new shaka.text.UITextDisplayer();
+    this.textDisplayer.attach(/** @type {!HTMLMediaElement} */(this.mockVideo));
+    this.textDisplayer.setVideoContainer(this.videoContainer);
     this.textDisplayer.setTextVisibility(true);
   }
 
@@ -377,7 +377,8 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
 
   /** @override */
   recreateTextDisplayer() {
-    this.textDisplayer = new shaka.text.SimpleTextDisplayer(this.video);
+    this.textDisplayer = new shaka.text.SimpleTextDisplayer();
+    this.textDisplayer.attach(this.video);
     this.textDisplayer.setTextVisibility(true);
   }
 

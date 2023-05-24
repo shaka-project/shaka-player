@@ -184,13 +184,13 @@ describe('MediaSourceEngine', () => {
     mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
     mockTextDisplayer = new shaka.test.FakeTextDisplayer();
     mediaSourceEngine = new shaka.media.MediaSourceEngine(
-        video,
         mockTextDisplayer);
     mediaSourceEngine.getCaptionParser = () => {
       return mockClosedCaptionParser;
     };
     const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
     mediaSourceEngine.configure(config);
+    mediaSourceEngine.attach(video);
   });
 
   afterEach(() => {
@@ -249,8 +249,8 @@ describe('MediaSourceEngine', () => {
 
     it('creates a MediaSource object and sets video.src', () => {
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
-          video,
           new shaka.test.FakeTextDisplayer());
+      mediaSourceEngine.attach(video);
 
       expect(createMediaSourceSpy).toHaveBeenCalled();
       expect(createObjectURLSpy).toHaveBeenCalled();
@@ -267,8 +267,8 @@ describe('MediaSourceEngine', () => {
       });
 
       mediaSourceEngine = new shaka.media.MediaSourceEngine(
-          video,
           new shaka.test.FakeTextDisplayer());
+      mediaSourceEngine.attach(video);
 
       expect(mockMediaSource.addEventListener).toHaveBeenCalledTimes(1);
       expect(mockMediaSource.addEventListener.calls.mostRecent().args[0])
