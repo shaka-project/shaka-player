@@ -19,9 +19,9 @@ const ParserMode = {
 
 /**
  * @typedef {{
- *    type: string,
- *    xpathLocation: string,
- *    element: Node
+ *   type: string,
+ *   xpathLocation: string,
+ *   element: Node
  * }}
  */
 shakaDemo.MPDPatchAdapter.Patch;
