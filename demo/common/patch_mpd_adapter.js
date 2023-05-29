@@ -18,12 +18,12 @@ const ParserMode = {
 };
 
 /**
-* @typedef {{
-*    type: string,
-*    xpathLocation: string,
-*    element: Node
-* }}
-*/
+ * @typedef {{
+ *    type: string,
+ *    xpathLocation: string,
+ *    element: Node
+ * }}
+ */
 shakaDemo.MPDPatchAdapter.Patch;
 
 /**
@@ -79,7 +79,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} manifest
    * @return {Array<shakaDemo.MPDPatchAdapter.Patch>}
    * @private
@@ -183,7 +182,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Array<shakaDemo.MPDPatchAdapter.Patch>} additions
    * @param {Element} segmentTemplate
    * @param {boolean} addingCompletePeriod
@@ -299,7 +297,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} manifest
    * @param {Array<shakaDemo.MPDPatchAdapter.Patch>} additions
    * @return {Element}
@@ -316,7 +313,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} originalManifest
    * @param {Element} patchManifest
    * @private
@@ -339,7 +335,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} patchElement
    * @param {Array<shakaDemo.MPDPatchAdapter.Patch>} additions
    * @private
@@ -363,7 +358,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {string} url
    * @return {string}
    * @private
@@ -377,7 +371,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} adaptationSet
    * @param {Element} representation
    * @return {string}
@@ -395,7 +388,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} element
    * @return {?Array<Element>}
    * @private
@@ -405,7 +397,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} element
    * @return {Array<Element>}
    * @private
@@ -415,7 +406,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} element
    * @return {Array<Element>}
    * @private
@@ -425,7 +415,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} element
    * @return {Element}
    * @private
@@ -437,7 +426,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} element
    * @return {Element}
    * @private
@@ -449,7 +437,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} element
    * @return {Array<Element>}
    * @private
@@ -459,7 +446,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} period
    * @return {string}
    * @private
@@ -469,7 +455,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} period
    * @param {Element} adaptationSet
    * @param {Element=} representation
@@ -483,7 +468,6 @@ shakaDemo.MPDPatchAdapter = class {
   }
 
   /**
-   *
    * @param {Element} period
    * @param {Element} adaptationSet
    * @param {Element=} representation
