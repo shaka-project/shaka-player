@@ -54,8 +54,6 @@ import shakaBuildHelpers
 shaka_version = shakaBuildHelpers.calculate_version()
 
 common_closure_opts = [
-    '--language_out', 'ECMASCRIPT5',
-
     '--jscomp_error=*',
 
     # Turn off complaints like:
@@ -265,11 +263,12 @@ class Build(object):
 
     return True
 
-  def build_library(self, name, locales, force, is_debug):
+  def build_library(self, name, langout, locales, force, is_debug):
     """Builds Shaka Player using the files in |self.include|.
 
     Args:
       name: The name of the build.
+      langout: Closure Compiler output language.
       locales: A list of strings of locale identifiers.
       force: True to rebuild, False to ignore if no changes are detected.
       is_debug: True to compile for debugging, false for release.
@@ -294,6 +293,7 @@ class Build(object):
     closure = compiler.ClosureCompiler(self.include, build_name)
 
     closure_opts = common_closure_opts + common_closure_defines
+    closure_opts += ['--language_out', langout]
     if is_debug:
       closure_opts += debug_closure_opts + debug_closure_defines
     else:
@@ -363,6 +363,12 @@ def main(args):
       type=str,
       default='ui')
 
+  parser.add_argument(
+      '--langout',
+      help='Set closure compiler output language. Defaults to ECMASCRIPT5.',
+      type=str,
+      default='ECMASCRIPT5')
+
   parsed_args, commands = parser.parse_known_args(args)
 
   # Make the dist/ folder, ignore errors.
@@ -389,11 +395,12 @@ def main(args):
     return 1
 
   name = parsed_args.name
+  langout = parsed_args.langout
   locales = parsed_args.locales
   force = parsed_args.force
   is_debug = parsed_args.mode == 'debug'
 
-  if not custom_build.build_library(name, locales, force, is_debug):
+  if not custom_build.build_library(name, langout, locales, force, is_debug):
     return 1
 
   return 0

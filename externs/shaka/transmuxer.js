@@ -42,9 +42,13 @@ shaka.extern.Transmuxer = class {
   /**
    * Transmux a input data to MP4.
    * @param {BufferSource} data
+   * @param {shaka.extern.Stream} stream
+   * @param {?shaka.media.SegmentReference} reference The segment reference, or
+   *   null for init segments
+   * @param {number} duration
    * @return {!Promise.<!Uint8Array>}
    */
-  transmux(data) {}
+  transmux(data, stream, reference, duration) {}
 };
 
 

@@ -18,6 +18,9 @@ describe('MediaSourceEngine', () => {
   let mediaSourceEngine;
   let generators;
   let metadata;
+
+  /** @type {shaka.extern.Stream} */
+  const fakeStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
   // TODO: add text streams to MSE integration tests
 
   const mp4CeaCue0 = jasmine.objectContaining({
@@ -186,7 +189,7 @@ describe('MediaSourceEngine', () => {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
     const reference = null;
     return mediaSourceEngine.appendBuffer(
-        type, segment, reference, /* hasClosedCaptions= */ false);
+        type, segment, reference, fakeStream, /* hasClosedCaptions= */ false);
   }
 
   function append(type, segmentNumber) {
@@ -194,7 +197,7 @@ describe('MediaSourceEngine', () => {
         .getSegment(segmentNumber, Date.now() / 1000);
     const reference = dummyReference(type, segmentNumber);
     return mediaSourceEngine.appendBuffer(
-        type, segment, reference, /* hasClosedCaptions= */ false);
+        type, segment, reference, fakeStream, /* hasClosedCaptions= */ false);
   }
 
   function appendWithSeekAndClosedCaptions(type, segmentNumber) {
@@ -205,6 +208,7 @@ describe('MediaSourceEngine', () => {
         type,
         segment,
         reference,
+        fakeStream,
         /* hasClosedCaptions= */ true,
         /* seeked= */ true);
   }
@@ -213,7 +217,7 @@ describe('MediaSourceEngine', () => {
     const segment = generators[type].getInitSegment(Date.now() / 1000);
     const reference = null;
     return mediaSourceEngine.appendBuffer(
-        type, segment, reference, /* hasClosedCaptions= */ true);
+        type, segment, reference, fakeStream, /* hasClosedCaptions= */ true);
   }
 
   function appendWithClosedCaptions(type, segmentNumber) {
@@ -221,7 +225,7 @@ describe('MediaSourceEngine', () => {
         .getSegment(segmentNumber, Date.now() / 1000);
     const reference = dummyReference(type, segmentNumber);
     return mediaSourceEngine.appendBuffer(
-        type, segment, reference, /* hasClosedCaptions= */ true);
+        type, segment, reference, fakeStream, /* hasClosedCaptions= */ true);
   }
 
   function buffered(type, time) {
@@ -443,7 +447,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 5,
         /* appendWindowEnd= */ 18,
-        /* sequenceMode= */ false);
+        /* sequenceMode= */ false,
+        fakeStream,
+        /* streamsByType= */ new Map());
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 0);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
@@ -462,7 +468,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 100,
         /* appendWindowStart= */ 5,
         /* appendWindowEnd= */ 18,
-        /* sequenceMode= */ true);
+        /* sequenceMode= */ true,
+        fakeStream,
+        /* streamsByType= */ new Map());
     expect(buffered(ContentType.VIDEO, 0)).toBe(0);
     await append(ContentType.VIDEO, 0);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(5, 1);
@@ -482,7 +490,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ 20,
-        /* sequenceMode= */ false);
+        /* sequenceMode= */ false,
+        fakeStream,
+        /* streamsByType= */ new Map());
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
@@ -495,7 +505,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 15,
         /* appendWindowStart= */ 20,
         /* appendWindowEnd= */ 35,
-        /* sequenceMode= */ false);
+        /* sequenceMode= */ false,
+        fakeStream,
+        /* streamsByType= */ new Map());
     await append(ContentType.VIDEO, 0);
     await append(ContentType.VIDEO, 1);
     expect(bufferStart(ContentType.VIDEO)).toBeCloseTo(0, 1);
@@ -569,7 +581,9 @@ describe('MediaSourceEngine', () => {
         /* timestampOffset= */ 0,
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity,
-        /* sequenceMode= */ true);
+        /* sequenceMode= */ true,
+        fakeStream,
+        /* streamsByType= */ new Map());
 
     const segment = generators[videoType].getSegment(0, Date.now() / 1000);
     const partialSegmentLength = Math.floor(segment.byteLength / 3);
@@ -578,15 +592,16 @@ describe('MediaSourceEngine', () => {
         segment, /* offset= */ 0, /* length= */ partialSegmentLength);
     let reference = dummyReference(videoType, 0);
     await mediaSourceEngine.appendBuffer(
-        videoType, partialSegment, reference, /* hasClosedCaptions= */ false);
+        videoType, partialSegment, reference, fakeStream,
+        /* hasClosedCaptions= */ false);
 
     partialSegment = shaka.util.BufferUtils.toUint8(
         segment,
         /* offset= */ partialSegmentLength);
     reference = dummyReference(videoType, 1);
     await mediaSourceEngine.appendBuffer(
-        videoType, partialSegment, reference, /* hasClosedCaptions= */ false,
-        /* seeked= */ true);
+        videoType, partialSegment, reference, fakeStream,
+        /* hasClosedCaptions= */ false, /* seeked= */ true);
   });
 
   it('extracts CEA-708 captions from dash', async () => {

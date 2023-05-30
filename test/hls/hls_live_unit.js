@@ -89,6 +89,15 @@ describe('HlsParser live', () => {
   });
 
   /**
+   * Gets a spy on the function that sets the update period.
+   * @return {!jasmine.Spy}
+   * @suppress {accessControls}
+   */
+  function updateTickSpy() {
+    return spyOn(parser.updatePlaylistTimer_, 'tickAfter');
+  }
+
+  /**
    * Trigger a manifest update.
    * @suppress {accessControls}
    */
@@ -332,6 +341,34 @@ describe('HlsParser live', () => {
         expect(notifySegmentsSpy).toHaveBeenCalled();
       });
 
+      it('fatal error on manifest update request failure when ' +
+          'raiseFatalErrorOnManifestUpdateRequestFailure is true', async () => {
+        const manifestConfig =
+        shaka.util.PlayerConfiguration.createDefault().manifest;
+        manifestConfig.raiseFatalErrorOnManifestUpdateRequestFailure = true;
+        parser.configure(manifestConfig);
+
+        const updateTick = updateTickSpy();
+
+        await testInitialManifest(master, media);
+        expect(updateTick).toHaveBeenCalledTimes(1);
+
+        /** @type {!jasmine.Spy} */
+        const onError = jasmine.createSpy('onError');
+        playerInterface.onError = shaka.test.Util.spyFunc(onError);
+
+        const error = new shaka.util.Error(
+            shaka.util.Error.Severity.CRITICAL,
+            shaka.util.Error.Category.NETWORK,
+            shaka.util.Error.Code.BAD_HTTP_STATUS);
+        const operation = shaka.util.AbortableOperation.failed(error);
+        fakeNetEngine.request.and.returnValue(operation);
+
+        await delayForUpdatePeriod();
+        expect(onError).toHaveBeenCalledWith(error);
+        expect(updateTick).toHaveBeenCalledTimes(1);
+      });
+
       it('converts to VOD only after all playlists end', async () => {
         const master = [
           '#EXTM3U\n',
@@ -372,7 +409,7 @@ describe('HlsParser live', () => {
 
         // We saw one request for the video playlist, which signalled "ENDLIST".
         const type =
-            shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST;
+            shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST;
 
         fakeNetEngine.expectRequest(
             'test:/video',
@@ -844,7 +881,7 @@ describe('HlsParser live', () => {
         // No segment requests were needed to get the start time.
         expect(fakeNetEngine.request).toHaveBeenCalledTimes(1);
         const type =
-            shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST;
+            shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST;
         fakeNetEngine.expectRequest(
             'test:/video',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
@@ -892,7 +929,7 @@ describe('HlsParser live', () => {
             'test:/video?_HLS_skip=YES',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
             {type:
-              shaka.net.NetworkingEngine.AdvancedRequestType.MASTER_PLAYLIST});
+              shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
       });
 
       it('skips older segments', async () => {

@@ -66,14 +66,23 @@ describe('TextEngine', () => {
       expect(TextEngine.isTypeSupported(dummyMimeType)).toBe(false);
     });
 
-    it('reports support when it\'s closed captions',
-        () => {
-          // Both CEA-608 and CEA-708 is supported by our closed caption parser.
-          expect(TextEngine.isTypeSupported(
-              shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE)).toBe(true);
-          expect(TextEngine.isTypeSupported(
-              shaka.util.MimeUtils.CEA708_CLOSED_CAPTION_MIMETYPE)).toBe(true);
-        });
+    it('reports support for closed captions if decoder is installed', () => {
+      const originalFind = shaka.media.ClosedCaptionParser.findDecoder;
+      const mockFind = jasmine.createSpy('findDecoder').and.returnValue(null);
+      shaka.media.ClosedCaptionParser.findDecoder =
+          shaka.test.Util.spyFunc(mockFind);
+      // Both CEA-608 and CEA-708 is supported by our closed caption parser.
+      expect(TextEngine.isTypeSupported(
+          shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE)).toBe(false);
+      expect(TextEngine.isTypeSupported(
+          shaka.util.MimeUtils.CEA708_CLOSED_CAPTION_MIMETYPE)).toBe(false);
+
+      shaka.media.ClosedCaptionParser.findDecoder = originalFind;
+      expect(TextEngine.isTypeSupported(
+          shaka.util.MimeUtils.CEA608_CLOSED_CAPTION_MIMETYPE)).toBe(true);
+      expect(TextEngine.isTypeSupported(
+          shaka.util.MimeUtils.CEA708_CLOSED_CAPTION_MIMETYPE)).toBe(true);
+    });
   });
 
   describe('appendBuffer', () => {

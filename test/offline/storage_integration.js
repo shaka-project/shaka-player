@@ -1403,6 +1403,7 @@ filterDescribe('Storage', storageSupport, () => {
       originalAudioId: audioId.toString(),
       originalTextId: null,
       originalImageId: null,
+      accessibilityPurpose: null,
     };
   }
 
@@ -1447,6 +1448,7 @@ filterDescribe('Storage', storageSupport, () => {
       originalAudioId: null,
       originalTextId: id.toString(),
       originalImageId: null,
+      accessibilityPurpose: null,
     };
   }
 
@@ -1751,7 +1753,8 @@ filterDescribe('Storage', storageSupport, () => {
    * @suppress {accessControls}
    */
   function loadOfflineSession(drmEngine, sessionName) {
-    return drmEngine.loadOfflineSession_(sessionName);
+    return drmEngine.loadOfflineSession_(
+        sessionName, {initData: null, initDataType: null});
   }
 
   /**

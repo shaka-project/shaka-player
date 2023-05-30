@@ -560,7 +560,7 @@ describe('HlsParser', () => {
           stream.mime('video/mp4', 'avc1');
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/mp4', '');
+          stream.mime('audio/mp4', 'mp4a.40.34');
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -589,7 +589,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/aac', '');
+          stream.mime('audio/aac', 'mp4a.40.2');
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -617,7 +617,7 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
-          stream.mime('audio/mpeg', '');
+          stream.mime('audio/mpeg', 'mp4a.40.34');
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -995,6 +995,118 @@ describe('HlsParser', () => {
 
     await testHlsParser(master, media, manifest);
   });
+
+  it('parses discontinuity tags', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="avc1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-VERSION:3\n',
+      '#EXT-X-TARGETDURATION:5\n',
+      '#EXT-X-MEDIA-SEQUENCE:0\n',
+      '#EXTINF:3,\n',
+      'clip0-video-0.ts\n',
+      '#EXTINF:1,\n',
+      'clip0-video-1.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:2,\n',
+      'clip1-video-1.ts\n',
+      '#EXTINF:3,\n',
+      'clip1-video-2.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:1,\n',
+      'media-clip2-video-0.ts\n',
+      '#EXTINF:1,\n',
+      'media-clip2-video-1.ts\n',
+      '#EXT-X-DISCONTINUITY\n',
+      '#EXTINF:4,\n',
+      'media-clip3-video-1.ts\n',
+      '#EXT-X-ENDLIST\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/video', media);
+
+    const manifest = await parser.start('test:/master', playerInterface);
+    await manifest.variants[0].video.createSegmentIndex();
+
+    const segmentIndex = manifest.variants[0].video.segmentIndex;
+    const references = [];
+
+    for (let i = 0; i < 7; i++) {
+      references.push(segmentIndex.get(i));
+    }
+
+    expect(references[0].discontinuitySequence).toBe(0);
+    expect(references[1].discontinuitySequence).toBe(0);
+    expect(references[2].discontinuitySequence).toBe(1);
+    expect(references[3].discontinuitySequence).toBe(1);
+    expect(references[4].discontinuitySequence).toBe(2);
+    expect(references[5].discontinuitySequence).toBe(2);
+    expect(references[6].discontinuitySequence).toBe(3);
+  });
+
+  it('sets reference timetampOffset based on discontinuity start time',
+      async () => {
+        const master = [
+          '#EXTM3U\n',
+          '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="avc1"\n',
+          'video\n',
+        ].join('');
+
+        const media = [
+          '#EXTM3U\n',
+          '#EXT-X-VERSION:3\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MEDIA-SEQUENCE:0\n',
+          '#EXTINF:3,\n',
+          'clip0-video-0.ts\n',
+          '#EXTINF:1,\n',
+          'clip0-video-1.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:2,\n',
+          'clip1-video-1.ts\n',
+          '#EXTINF:3,\n',
+          'clip1-video-2.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:1,\n',
+          'media-clip2-video-0.ts\n',
+          '#EXTINF:1,\n',
+          'media-clip2-video-1.ts\n',
+          '#EXT-X-DISCONTINUITY\n',
+          '#EXTINF:4,\n',
+          'media-clip3-video-1.ts\n',
+          '#EXT-X-ENDLIST\n',
+        ].join('');
+
+        fakeNetEngine
+            .setResponseText('test:/master', master)
+            .setResponseText('test:/video', media);
+
+        const manifest = await parser.start('test:/master', playerInterface);
+        await manifest.variants[0].video.createSegmentIndex();
+
+        const segmentIndex = manifest.variants[0].video.segmentIndex;
+        const references = [];
+
+        for (let i = 0; i < 7; i++) {
+          references.push(segmentIndex.get(i));
+        }
+
+        expect(references[0].timestampOffset).toBe(0);
+        expect(references[1].timestampOffset).toBe(0);
+        expect(references[2].timestampOffset).toBe(4);
+        expect(references[3].timestampOffset).toBe(4);
+        expect(references[4].timestampOffset).toBe(9);
+        expect(references[5].timestampOffset).toBe(9);
+        expect(references[6].timestampOffset).toBe(11);
+      },
+  );
 
   it('parses characteristics from audio tags', async () => {
     const master = [
@@ -2133,6 +2245,51 @@ describe('HlsParser', () => {
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.mime('application/mp4', 'stpp.ttml.im1t');
+      });
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+    });
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', media)
+        .setResponseText('test:/video', media)
+        .setResponseText('test:/text', media)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    await loadAllStreamsFor(actual);
+    expect(actual).toEqual(manifest);
+  });
+
+  it('parses manifest with MP4+WEBVTT streams', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
+      'CODECS="wvtt",URI="text"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60,SUBTITLES="sub1"\n',
+      'video\n',
+    ].join('');
+
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.addPartialStream(ContentType.VIDEO);
+      });
+      manifest.addPartialTextStream((stream) => {
+        stream.language = 'en';
+        stream.mime('application/mp4', 'wvtt');
       });
       manifest.sequenceMode = sequenceMode;
       manifest.type = shaka.media.ManifestParser.HLS;
@@ -4461,7 +4618,9 @@ describe('HlsParser', () => {
 
     // Before loading, all MIME types agree, and are defaulted to audio/mp4.
     expect(actualAudio0.mimeType).toBe('audio/mp4');
+    expect(actualAudio0.codecs).toBe('mp4a');
     expect(actualAudio1.mimeType).toBe('audio/mp4');
+    expect(actualAudio1.codecs).toBe('mp4a');
 
     await actualAudio0.createSegmentIndex();
 
@@ -4470,9 +4629,9 @@ describe('HlsParser', () => {
     // This is how we avoid having the unloaded tracks filtered out during
     // startup.
     expect(actualAudio0.mimeType).toBe('audio/aac');
-    expect(actualAudio0.codecs).toBe('');
+    expect(actualAudio0.codecs).toBe('mp4a');
     expect(actualAudio1.mimeType).toBe('audio/aac');
-    expect(actualAudio1.codecs).toBe('');
+    expect(actualAudio1.codecs).toBe('mp4a');
   });
 
   it('parses media playlists directly', async () => {

@@ -192,7 +192,8 @@ describe('DashParser Live', () => {
           template, {updateTime: updateTime, contents: basicLines.join('\n')});
 
       fakeNetEngine.setResponseText('dummy://foo', text);
-      Date.now = () => 0;
+      const baseTime = new Date(2015, 11, 30);
+      Date.now = () => baseTime.getTime();
       const manifest = await parser.start('dummy://foo', playerInterface);
 
       expect(manifest).toBeTruthy();
@@ -209,7 +210,7 @@ describe('DashParser Live', () => {
       // seconds long in all of these cases.  So 11 seconds after the
       // manifest was parsed, the first segment should have fallen out of
       // the availability window.
-      Date.now = () => 11 * 1000;
+      Date.now = () => baseTime.getTime() + (11 * 1000);
       await updateManifest();
       // The first reference should have been evicted.
       expect(stream.segmentIndex.find(0)).toBe(firstPosition + 1);
@@ -588,6 +589,8 @@ describe('DashParser Live', () => {
     const onError = jasmine.createSpy('onError');
     playerInterface.onError = Util.spyFunc(onError);
 
+    const updateTick = updateTickSpy();
+
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     await parser.start('dummy://foo', playerInterface);
 
@@ -602,6 +605,39 @@ describe('DashParser Live', () => {
 
     await updateManifest();
     expect(onError).toHaveBeenCalledTimes(1);
+    expect(updateTick).toHaveBeenCalledTimes(2);
+  });
+
+  it('fatal error on manifest update request failure when ' +
+      'raiseFatalErrorOnManifestUpdateRequestFailure is true', async () => {
+    const manifestConfig =
+      shaka.util.PlayerConfiguration.createDefault().manifest;
+    manifestConfig.raiseFatalErrorOnManifestUpdateRequestFailure = true;
+    parser.configure(manifestConfig);
+
+    const updateTick = updateTickSpy();
+
+    const lines = [
+      '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2"/>',
+    ];
+    const manifestText = makeSimpleLiveManifestText(lines, updateTime);
+    /** @type {!jasmine.Spy} */
+    const onError = jasmine.createSpy('onError');
+    playerInterface.onError = Util.spyFunc(onError);
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+    await parser.start('dummy://foo', playerInterface);
+
+    const error = new shaka.util.Error(
+        shaka.util.Error.Severity.CRITICAL,
+        shaka.util.Error.Category.NETWORK,
+        shaka.util.Error.Code.BAD_HTTP_STATUS);
+    const operation = shaka.util.AbortableOperation.failed(error);
+    fakeNetEngine.request.and.returnValue(operation);
+
+    await updateManifest();
+    expect(onError).toHaveBeenCalledWith(error);
+    expect(updateTick).toHaveBeenCalledTimes(1);
   });
 
   it('uses @minimumUpdatePeriod', async () => {

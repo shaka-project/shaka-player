@@ -389,6 +389,7 @@ describe('ManifestConverter', () => {
       spatialAudio: false,
       closedCaptions: null,
       tilesLayout: undefined,
+      accessibilityPurpose: null,
     };
   }
 
@@ -438,6 +439,7 @@ describe('ManifestConverter', () => {
       spatialAudio: false,
       closedCaptions: null,
       tilesLayout: undefined,
+      accessibilityPurpose: null,
     };
   }
 
@@ -486,6 +488,7 @@ describe('ManifestConverter', () => {
       spatialAudio: false,
       closedCaptions: null,
       tilesLayout: undefined,
+      accessibilityPurpose: null,
     };
   }
 
@@ -531,6 +534,7 @@ describe('ManifestConverter', () => {
       spatialAudio: streamDb.spatialAudio,
       closedCaptions: streamDb.closedCaptions,
       tilesLayout: streamDb.tilesLayout,
+      accessibilityPurpose: null,
     };
 
     expect(stream).toEqual(expectedStream);
