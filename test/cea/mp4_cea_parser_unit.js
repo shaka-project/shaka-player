@@ -7,20 +7,30 @@
 describe('Mp4CeaParser', () => {
   const ceaInitSegmentUri = '/base/test/test/assets/cea-init.mp4';
   const ceaSegmentUri = '/base/test/test/assets/cea-segment.mp4';
+  const h265ceaInitSegmentUri = '/base/test/test/assets/h265-cea-init.mp4';
+  const h265ceaSegmentUri = '/base/test/test/assets/h265-cea-segment.mp4';
   const Util = shaka.test.Util;
 
   /** @type {!ArrayBuffer} */
   let ceaInitSegment;
   /** @type {!ArrayBuffer} */
   let ceaSegment;
+  /** @type {!ArrayBuffer} */
+  let h265ceaInitSegment;
+  /** @type {!ArrayBuffer} */
+  let h265ceaSegment;
 
   beforeAll(async () => {
     const responses = await Promise.all([
       shaka.test.Util.fetch(ceaInitSegmentUri),
       shaka.test.Util.fetch(ceaSegmentUri),
+      shaka.test.Util.fetch(h265ceaInitSegmentUri),
+      shaka.test.Util.fetch(h265ceaSegmentUri),
     ]);
     ceaInitSegment = responses[0];
     ceaSegment = responses[1];
+    h265ceaInitSegment = responses[2];
+    h265ceaSegment = responses[3];
   });
 
   /**
@@ -68,6 +78,15 @@ describe('Mp4CeaParser', () => {
     expect(cea708Packets.length).toBe(4);
     expect(cea708Packets[cea708Packets.length - 1].packet)
         .toEqual(expectedCea708Packet);
+  });
+
+  it('parses cea data from an h265 mp4 stream', () => {
+    const ceaParser = new shaka.cea.Mp4CeaParser();
+
+    ceaParser.init(h265ceaInitSegment);
+    const ceaPackets = ceaParser.parse(h265ceaSegment);
+    expect(ceaPackets).toBeDefined();
+    expect(ceaPackets.length).toBe(60);
   });
 
   it('parses an invalid init segment', () => {
