@@ -18,6 +18,7 @@
     "awesomplete": "^1.1.5",
     "babel-plugin-istanbul": "^6.1.1",
     "cajon": "^0.4.4",
+    "clean-package": "^2.2.0",
     "code-prettify": "^0.1.0",
     "codem-isoboxer": "^0.3.7",
     "color-themes-for-google-code-prettify": "^2.0.4",
@@ -96,6 +97,8 @@
   },
   "license": "Apache-2.0",
   "scripts": {
+    "prepack": "clean-package",
+    "postpack": "clean-package restore",
     "prepublishOnly": "python build/checkversion.py && python build/all.py --force"
   },
   "dependencies": {
@@ -103,5 +106,10 @@
   },
   "engines": {
     "node": ">=14"
+  },
+  "clean-package": {
+    "remove": [
+      "engines"
+    ]
   }
 }

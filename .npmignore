@@ -3,6 +3,7 @@
 .gitattributes
 .gitignore
 .release-please*
+*.backup
 *.pyc
 app-engine/
 build/
