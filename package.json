@@ -68,6 +68,7 @@
     "demoDeps": [
       "awesomplete/awesomplete.css",
       "awesomplete/awesomplete.min.js",
+      "codem-isoboxer/dist/iso_boxer.min.js",
       "dialog-polyfill/dialog-polyfill.css",
       "dialog-polyfill/dist/dialog-polyfill.js",
       "eme-encryption-scheme-polyfill/index.js",
