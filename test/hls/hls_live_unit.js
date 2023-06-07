@@ -666,6 +666,7 @@ describe('HlsParser live', () => {
       const preloadRef = makeReference(
           'test:/partial.mp4', 6, 7.5, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ null);
+      preloadRef.markAsPreload();
 
       // ref2 is not fully published yet, so it doesn't have a segment uri.
       const ref2 = makeReference(
@@ -930,7 +931,7 @@ describe('HlsParser live', () => {
         ].join('');
 
         fakeNetEngine.setResponseText(
-            'test:/video?_HLS_skip=YES&_HLS_msn=1', mediaWithSkippedSegments);
+            'test:/video?_HLS_skip=YES&_HLS_msn=2', mediaWithSkippedSegments);
 
         playerInterface.isLowLatencyMode = () => true;
 
@@ -940,7 +941,7 @@ describe('HlsParser live', () => {
         await delayForUpdatePeriod();
 
         fakeNetEngine.expectRequest(
-            'test:/video?_HLS_skip=YES&_HLS_msn=1',
+            'test:/video?_HLS_skip=YES&_HLS_msn=2',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
             {type:
               shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
@@ -974,7 +975,7 @@ describe('HlsParser live', () => {
         // and ref1 should be in the SegmentReferences list.
         // ref3 should be appended to the SegmentReferences list.
         await testUpdate(
-            manifest, mediaWithSkippedSegments, [ref1, ref2, ref3], 1);
+            manifest, mediaWithSkippedSegments, [ref1, ref2, ref3], 2);
       });
 
       it('skips older segments with discontinuity', async () => {
@@ -1039,7 +1040,7 @@ describe('HlsParser live', () => {
         // and ref1,ref2 should be in the SegmentReferences list.
         // ref3,ref4 should be appended to the SegmentReferences list.
         await testUpdate(
-            manifest, mediaWithSkippedSegments2, [ref1, ref2, ref3, ref4], 1);
+            manifest, mediaWithSkippedSegments2, [ref1, ref2, ref3, ref4], 3);
       });
 
       it('updates encryption keys', async () => {
