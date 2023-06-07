@@ -652,7 +652,8 @@ describe('MediaSourceEngine', () => {
   });
 
   it('extracts ID3 metadata from AAC', async () => {
-    if (!MediaSource.isTypeSupported('audio/aac')) {
+    if (!MediaSource.isTypeSupported('audio/aac') ||
+        !shaka.util.Platform.supportsSequenceMode()) {
       return;
     }
     metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
@@ -661,7 +662,7 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject);
+    await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();
