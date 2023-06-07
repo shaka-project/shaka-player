@@ -1227,9 +1227,8 @@ shakaDemo.Main = class {
       // Remove all not-player-applied configurations, by resetting the
       // configuration then re-applying the desired configuration.
       this.player_.resetConfiguration();
-      this.player_.configure(this.desiredConfig_);
+      this.readHash_();
       this.player_.configure(assetConfig);
-      // This uses Player.configure so as to not change |this.desiredConfig_|.
     }
 
     const config = storage ?
