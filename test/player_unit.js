@@ -1291,19 +1291,23 @@ describe('Player', () => {
           lowLatencyMode: true,
           rebufferingGoal: 1,
           inaccurateManifestTolerance: 1,
+          segmentPrefetchLimit: 1,
         },
       });
       expect(player.getConfiguration().streaming.rebufferingGoal).toBe(1);
       expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
           .toBe(1);
+      expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(1);
 
       // When low latency streaming gets enabled, rebufferingGoal will default
-      // to 0.01 if unless specified, and inaccurateManifestTolerance will
-      // default to 0 unless specified.
+      // to 0.01 if unless specified, inaccurateManifestTolerance will
+      // default to 0 unless specified, and segmentPrefetchLimit will
+      // default to 2 unless specified.
       player.configure('streaming.lowLatencyMode', true);
       expect(player.getConfiguration().streaming.rebufferingGoal).toBe(0.01);
       expect(player.getConfiguration().streaming.inaccurateManifestTolerance)
           .toBe(0);
+      expect(player.getConfiguration().streaming.segmentPrefetchLimit).toBe(2);
     });
   });
 
