@@ -544,6 +544,24 @@ describe('HlsParser live', () => {
           expect(manifest.presentationTimeline.getDelay()).toBe(15);
         });
 
+    it('sets presentation delay if defined', async () => {
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-SERVER-CONTROL:HOLD-BACK=2\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PART-INF:PART-TARGET=0.5\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXTINF:2,\n',
+        'main.mp4\n',
+      ].join('');
+
+      const manifest = await testInitialManifest(master, media);
+      // Presentation delay should be the value of 'HOLD-BACK' if not
+      // configured.
+      expect(manifest.presentationTimeline.getDelay()).toBe(2);
+    });
+
     it('sets presentation delay for low latency mode', async () => {
       const mediaWithLowLatency = [
         '#EXTM3U\n',
