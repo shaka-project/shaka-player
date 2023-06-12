@@ -163,28 +163,14 @@ describe('HlsParser live', () => {
    * @param {shaka.extern.Manifest} manifest
    * @param {string} updatedMedia
    * @param {Array=} updatedReferences
-   * @param {?number=} sequenceNumber
    */
-  async function testUpdate(manifest, updatedMedia, updatedReferences=null,
-      sequenceNumber=null) {
+  async function testUpdate(manifest, updatedMedia, updatedReferences=null) {
     // Replace the entries with the updated values.
-    if (sequenceNumber == null) {
-      fakeNetEngine
-          .setResponseText('test:/video', updatedMedia)
-          .setResponseText('test:/redirected/video', updatedMedia)
-          .setResponseText('test:/video2', updatedMedia)
-          .setResponseText('test:/audio', updatedMedia);
-    } else {
-      fakeNetEngine
-          .setResponseText('test:/video?_HLS_msn=' + sequenceNumber,
-              updatedMedia)
-          .setResponseText('test:/redirected/video?_HLS_msn=' + sequenceNumber,
-              updatedMedia)
-          .setResponseText('test:/video2?_HLS_msn=' + sequenceNumber,
-              updatedMedia)
-          .setResponseText('test:/audio?_HLS_msn=' + sequenceNumber,
-              updatedMedia);
-    }
+    fakeNetEngine
+        .setResponseText('test:/video', updatedMedia)
+        .setResponseText('test:/redirected/video', updatedMedia)
+        .setResponseText('test:/video2', updatedMedia)
+        .setResponseText('test:/audio', updatedMedia);
 
     await delayForUpdatePeriod();
 
@@ -911,7 +897,7 @@ describe('HlsParser live', () => {
           '#EXT-X-TARGETDURATION:5\n',
           '#EXT-X-MEDIA-SEQUENCE:0\n',
           '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
-          '#EXT-X-SERVER-CONTROL:CAN-SKIP-UNTIL=60.0\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,\n',
           '#EXTINF:2,\n',
           'main.mp4\n',
           '#EXTINF:2,\n',
@@ -923,7 +909,7 @@ describe('HlsParser live', () => {
           '#EXT-X-TARGETDURATION:5\n',
           '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
           '#EXT-X-MEDIA-SEQUENCE:1\n',
-          '#EXT-X-SERVER-CONTROL:CAN-SKIP-UNTIL=60.0\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,\n',
           '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
           '#EXTINF:2,\n',
           'main2.mp4\n',
@@ -976,7 +962,7 @@ describe('HlsParser live', () => {
         // and ref1 should be in the SegmentReferences list.
         // ref3 should be appended to the SegmentReferences list.
         await testUpdate(
-            manifest, mediaWithSkippedSegments, [ref1, ref2, ref3], 2);
+            manifest, mediaWithSkippedSegments, [ref1, ref2, ref3]);
       });
 
       it('skips older segments with discontinuity', async () => {
@@ -1041,7 +1027,7 @@ describe('HlsParser live', () => {
         // and ref1,ref2 should be in the SegmentReferences list.
         // ref3,ref4 should be appended to the SegmentReferences list.
         await testUpdate(
-            manifest, mediaWithSkippedSegments2, [ref1, ref2, ref3, ref4], 3);
+            manifest, mediaWithSkippedSegments2, [ref1, ref2, ref3, ref4]);
       });
 
       it('updates encryption keys', async () => {
