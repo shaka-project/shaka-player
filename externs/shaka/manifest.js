@@ -326,7 +326,7 @@ shaka.extern.FetchCryptoKeysFunction;
  *   trickModeVideo: ?shaka.extern.Stream,
  *   emsgSchemeIdUris: ?Array.<string>,
  *   roles: !Array.<string>,
- *   accessibilityPurpose: ?shaka.dash.DashParser.AccessibilityPurpose,
+ *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
  *   forced: boolean,
  *   channelsCount: ?number,
  *   audioSamplingRate: ?number,
@@ -425,7 +425,8 @@ shaka.extern.FetchCryptoKeysFunction;
  * @property {!Array.<string>} roles
  *   The roles of the stream as they appear on the manifest,
  *   e.g. 'main', 'caption', or 'commentary'.
- * @property {?shaka.dash.DashParser.AccessibilityPurpose} accessibilityPurpose
+ * @property {?shaka.media.ManifestParser.AccessibilityPurpose}
+ *     accessibilityPurpose
  *   The DASH accessibility descriptor, if one was provided for this stream.
  * @property {boolean} forced
  *   <i>Defaults to false.</i> <br>
