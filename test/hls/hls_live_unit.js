@@ -634,14 +634,17 @@ describe('HlsParser live', () => {
         '#EXT-X-MEDIA-SEQUENCE:0\n',
         // ref includes partialRef, partialRef2
         // partialRef
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=200@0\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=200@0,',
+        'INDEPENDENT=YES\n',
         // partialRef2
-        '#EXT-X-PART:DURATION=2,URI="partial2.mp4",BYTERANGE=230@200\n',
+        '#EXT-X-PART:DURATION=2,URI="partial2.mp4",BYTERANGE=230@200,',
+        'INDEPENDENT=YES\n',
         '#EXTINF:4,\n',
         'main.mp4\n',
         // ref2 includes partialRef3, preloadRef
         // partialRef3
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0,',
+        'INDEPENDENT=YES\n',
         // preloadRef
         '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210,',
         'BYTERANGE-LENGTH=210\n',
@@ -668,6 +671,7 @@ describe('HlsParser live', () => {
           'test:/partial.mp4', 6, 7.5, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ 419);
       preloadRef.markAsPreload();
+      preloadRef.markAsNonIndependent();
 
       // ref2 is not fully published yet, so it doesn't have a segment uri.
       const ref2 = makeReference(
@@ -693,7 +697,8 @@ describe('HlsParser live', () => {
         'main.mp4\n',
         // ref2 includes partialRef, but not preloadRef
         // partialRef
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0,',
+        'INDEPENDENT=YES\n',
         // preloadRef
         '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210\n',
       ].join('');
