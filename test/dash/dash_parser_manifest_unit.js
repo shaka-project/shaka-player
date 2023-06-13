@@ -1899,12 +1899,12 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     const textStream = manifest.textStreams[0];
-    expect(textStream.accessibilityPurpose)
-        .toBe(shaka.dash.DashParser.AccessibilityPurpose.HARD_OF_HEARING);
+    expect(textStream.accessibilityPurpose).toBe(
+        shaka.media.ManifestParser.AccessibilityPurpose.HARD_OF_HEARING);
     const variant = manifest.variants[0];
     expect(variant.video.accessibilityPurpose).toBeUndefined();
-    expect(variant.audio.accessibilityPurpose)
-        .toBe(shaka.dash.DashParser.AccessibilityPurpose.VISUALLY_IMPAIRED);
+    expect(variant.audio.accessibilityPurpose).toBe(
+        shaka.media.ManifestParser.AccessibilityPurpose.VISUALLY_IMPAIRED);
   });
 
   it('converts Accessibility element to "kind"', async () => {

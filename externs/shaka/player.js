@@ -225,7 +225,7 @@ shaka.extern.BufferedInfo;
  *   primary: boolean,
  *   roles: !Array.<string>,
  *   audioRoles: Array.<string>,
- *   accessibilityPurpose: ?shaka.dash.DashParser.AccessibilityPurpose,
+ *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
  *   forced: boolean,
  *   videoId: ?number,
  *   audioId: ?number,
@@ -302,7 +302,8 @@ shaka.extern.BufferedInfo;
  *   The roles of the audio in the track, e.g. <code>'main'</code> or
  *   <code>'commentary'</code>. Will be null for text tracks or variant tracks
  *   without audio.
- * @property {?shaka.dash.DashParser.AccessibilityPurpose} accessibilityPurpose
+ * @property {?shaka.media.ManifestParser.AccessibilityPurpose}
+ *     accessibilityPurpose
  *   The DASH accessibility descriptor, if one was provided for this track.
  *   For text tracks, this describes the text; otherwise, this is for the audio.
  * @property {boolean} forced
