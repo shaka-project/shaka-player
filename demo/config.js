@@ -432,7 +432,17 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.MAX_DISABLED_TIME,
             'streaming.maxDisabledTime')
         .addNumberInput_(MessageIds.SEGMENT_PREFETCH_LIMIT,
-            'streaming.segmentPrefetchLimit');
+            'streaming.segmentPrefetchLimit')
+        .addBoolInput_(MessageIds.LIVE_SYNC,
+            'streaming.liveSync')
+        .addNumberInput_(MessageIds.LIVE_SYNC_MAX_LATENCY,
+            'streaming.liveSyncMaxLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false)
+        .addNumberInput_(MessageIds.LIVE_SYNC_PLAYBACK_RATE,
+            'streaming.liveSyncPlaybackRate',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,

@@ -543,6 +543,18 @@
     "description": "The name of a configuration value.",
     "message": "Live segments delay"
   },
+  "DEMO_LIVE_SYNC": {
+    "description": "The name of a configuration value.",
+    "message": "Live sync"
+  },
+  "DEMO_LIVE_SYNC_MAX_LATENCY": {
+    "description": "The name of a configuration value.",
+    "message": "Max latency for live sync"
+  },
+  "DEMO_LIVE_SYNC_PLAYBACK_RATE": {
+    "description": "The name of a configuration value.",
+    "message": "Playback rate for live sync"
+  },
   "DEMO_LOG_LEVEL": {
     "description": "The name of a configuration value.",
     "message": "Log Level"
