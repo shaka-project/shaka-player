@@ -1207,7 +1207,7 @@ shaka.extern.ManifestConfiguration;
  * @property {number} liveSyncPlaybackRate
  *   Playback rate used for latency chasing. It is recommended to use a value
  *   between 1 and 2. Effective only if liveSync is true. Defaults to
- *   <code>1.2</code>.
+ *   <code>1.1</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
