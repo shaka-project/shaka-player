@@ -298,6 +298,9 @@ The Shaka team doesn't have the bandwidth and experience to provide guidance and
 support for integrating Shaka Player with specific frameworks, but some of our
 users have successfully done so and created tutorials to help other beginners.
 
+Shaka + ReactJS Library
+- https://github.com/winoffrg/limeplay
+
 Shaka + ReactJS integrations:
 - https://github.com/matvp91/shaka-player-react
 - https://github.com/amit08255/shaka-player-react-with-ui-config

@@ -822,7 +822,7 @@ function makeInitSegmentReference() {
  * @param {number} start
  * @param {number} duration
  * @param {number} num
- * @return {Array<shaka.dash.MpdUtils.TimeRange>}
+ * @return {Array<shaka.media.PresentationTimeline.TimeRange>}
  */
 function makeRanges(start, duration, num) {
   const ranges = [];
@@ -844,7 +844,7 @@ function makeRanges(start, duration, num) {
  * expect().  You can't expect jasmine.any(Number) to equal
  * jasmine.any(Number).  :-(
  *
- * @param {Array<shaka.dash.MpdUtils.TimeRange>} timeline
+ * @param {Array<shaka.media.PresentationTimeline.TimeRange>} timeline
  * @return {shaka.dash.SegmentTemplate.SegmentTemplateInfo}
  */
 function makeTemplateInfo(timeline) {

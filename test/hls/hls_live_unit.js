@@ -163,28 +163,14 @@ describe('HlsParser live', () => {
    * @param {shaka.extern.Manifest} manifest
    * @param {string} updatedMedia
    * @param {Array=} updatedReferences
-   * @param {?number=} sequenceNumber
    */
-  async function testUpdate(manifest, updatedMedia, updatedReferences=null,
-      sequenceNumber=null) {
+  async function testUpdate(manifest, updatedMedia, updatedReferences=null) {
     // Replace the entries with the updated values.
-    if (sequenceNumber == null) {
-      fakeNetEngine
-          .setResponseText('test:/video', updatedMedia)
-          .setResponseText('test:/redirected/video', updatedMedia)
-          .setResponseText('test:/video2', updatedMedia)
-          .setResponseText('test:/audio', updatedMedia);
-    } else {
-      fakeNetEngine
-          .setResponseText('test:/video?_HLS_msn=' + sequenceNumber,
-              updatedMedia)
-          .setResponseText('test:/redirected/video?_HLS_msn=' + sequenceNumber,
-              updatedMedia)
-          .setResponseText('test:/video2?_HLS_msn=' + sequenceNumber,
-              updatedMedia)
-          .setResponseText('test:/audio?_HLS_msn=' + sequenceNumber,
-              updatedMedia);
-    }
+    fakeNetEngine
+        .setResponseText('test:/video', updatedMedia)
+        .setResponseText('test:/redirected/video', updatedMedia)
+        .setResponseText('test:/video2', updatedMedia)
+        .setResponseText('test:/audio', updatedMedia);
 
     await delayForUpdatePeriod();
 
@@ -558,6 +544,24 @@ describe('HlsParser live', () => {
           expect(manifest.presentationTimeline.getDelay()).toBe(15);
         });
 
+    it('sets presentation delay if defined', async () => {
+      const media = [
+        '#EXTM3U\n',
+        '#EXT-X-SERVER-CONTROL:HOLD-BACK=2\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PART-INF:PART-TARGET=0.5\n',
+        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        '#EXTINF:2,\n',
+        'main.mp4\n',
+      ].join('');
+
+      const manifest = await testInitialManifest(master, media);
+      // Presentation delay should be the value of 'HOLD-BACK' if not
+      // configured.
+      expect(manifest.presentationTimeline.getDelay()).toBe(2);
+    });
+
     it('sets presentation delay for low latency mode', async () => {
       const mediaWithLowLatency = [
         '#EXTM3U\n',
@@ -634,16 +638,20 @@ describe('HlsParser live', () => {
         '#EXT-X-MEDIA-SEQUENCE:0\n',
         // ref includes partialRef, partialRef2
         // partialRef
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=200@0\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=200@0,',
+        'INDEPENDENT=YES\n',
         // partialRef2
-        '#EXT-X-PART:DURATION=2,URI="partial2.mp4",BYTERANGE=230@200\n',
+        '#EXT-X-PART:DURATION=2,URI="partial2.mp4",BYTERANGE=230@200,',
+        'INDEPENDENT=YES\n',
         '#EXTINF:4,\n',
         'main.mp4\n',
         // ref2 includes partialRef3, preloadRef
         // partialRef3
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0,',
+        'INDEPENDENT=YES\n',
         // preloadRef
-        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210\n',
+        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210,',
+        'BYTERANGE-LENGTH=210\n',
       ].join('');
 
       const partialRef = makeReference(
@@ -665,13 +673,14 @@ describe('HlsParser live', () => {
 
       const preloadRef = makeReference(
           'test:/partial.mp4', 6, 7.5, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ null);
+          /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ 419);
       preloadRef.markAsPreload();
+      preloadRef.markAsNonIndependent();
 
       // ref2 is not fully published yet, so it doesn't have a segment uri.
       const ref2 = makeReference(
           '', 4, 7.5, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 419,
           /* timestampOffset= */ 0, [partialRef3, preloadRef]);
 
       await testInitialManifest(master, mediaWithPartialSegments, [ref, ref2]);
@@ -692,7 +701,8 @@ describe('HlsParser live', () => {
         'main.mp4\n',
         // ref2 includes partialRef, but not preloadRef
         // partialRef
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0,',
+        'INDEPENDENT=YES\n',
         // preloadRef
         '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210\n',
       ].join('');
@@ -910,7 +920,7 @@ describe('HlsParser live', () => {
           '#EXT-X-TARGETDURATION:5\n',
           '#EXT-X-MEDIA-SEQUENCE:0\n',
           '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
-          '#EXT-X-SERVER-CONTROL:CAN-SKIP-UNTIL=60.0\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,\n',
           '#EXTINF:2,\n',
           'main.mp4\n',
           '#EXTINF:2,\n',
@@ -922,7 +932,7 @@ describe('HlsParser live', () => {
           '#EXT-X-TARGETDURATION:5\n',
           '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
           '#EXT-X-MEDIA-SEQUENCE:1\n',
-          '#EXT-X-SERVER-CONTROL:CAN-SKIP-UNTIL=60.0\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,\n',
           '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
           '#EXTINF:2,\n',
           'main2.mp4\n',
@@ -975,7 +985,7 @@ describe('HlsParser live', () => {
         // and ref1 should be in the SegmentReferences list.
         // ref3 should be appended to the SegmentReferences list.
         await testUpdate(
-            manifest, mediaWithSkippedSegments, [ref1, ref2, ref3], 2);
+            manifest, mediaWithSkippedSegments, [ref1, ref2, ref3]);
       });
 
       it('skips older segments with discontinuity', async () => {
@@ -1040,7 +1050,7 @@ describe('HlsParser live', () => {
         // and ref1,ref2 should be in the SegmentReferences list.
         // ref3,ref4 should be appended to the SegmentReferences list.
         await testUpdate(
-            manifest, mediaWithSkippedSegments2, [ref1, ref2, ref3, ref4], 3);
+            manifest, mediaWithSkippedSegments2, [ref1, ref2, ref3, ref4]);
       });
 
       it('updates encryption keys', async () => {

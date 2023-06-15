@@ -21,6 +21,8 @@ describe('MediaSourceEngine', () => {
 
   /** @type {shaka.extern.Stream} */
   const fakeStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+  const fakeTsStream =
+      shaka.test.StreamingEngineUtil.createMockVideoStream(1, 'video/mp2t');
   // TODO: add text streams to MSE integration tests
 
   const mp4CeaCue0 = jasmine.objectContaining({
@@ -582,7 +584,7 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity,
         /* sequenceMode= */ true,
-        fakeStream,
+        fakeTsStream,
         /* streamsByType= */ new Map());
 
     const segment = generators[videoType].getSegment(0, Date.now() / 1000);
