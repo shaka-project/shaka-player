@@ -438,7 +438,7 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.LIVE_SYNC_MAX_LATENCY,
             'streaming.liveSyncMaxLatency',
             /* canBeDecimal= */ true,
-            /* canBeZero= */ false)
+            /* canBeZero= */ true)
         .addNumberInput_(MessageIds.LIVE_SYNC_PLAYBACK_RATE,
             'streaming.liveSyncPlaybackRate',
             /* canBeDecimal= */ true,
