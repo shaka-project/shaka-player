@@ -634,56 +634,130 @@ describe('HlsParser live', () => {
         '#EXTM3U\n',
         '#EXT-X-TARGETDURATION:5\n',
         '#EXT-X-PART-INF:PART-TARGET=1.5\n',
-        '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+        '#EXT-X-MAP:URI="init.mp4"\n',
         '#EXT-X-MEDIA-SEQUENCE:0\n',
         // ref includes partialRef, partialRef2
         // partialRef
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=200@0,',
-        'INDEPENDENT=YES\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",INDEPENDENT=YES\n',
         // partialRef2
-        '#EXT-X-PART:DURATION=2,URI="partial2.mp4",BYTERANGE=230@200,',
-        'INDEPENDENT=YES\n',
+        '#EXT-X-PART:DURATION=2,URI="partial2.mp4",INDEPENDENT=YES\n',
         '#EXTINF:4,\n',
         'main.mp4\n',
         // ref2 includes partialRef3, preloadRef
         // partialRef3
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0,',
-        'INDEPENDENT=YES\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",INDEPENDENT=YES\n',
         // preloadRef
-        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210,',
-        'BYTERANGE-LENGTH=210\n',
+        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4"\n',
       ].join('');
 
       const partialRef = makeReference(
           'test:/partial.mp4', 0, 2, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 199);
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
 
       const partialRef2 = makeReference(
           'test:/partial2.mp4', 2, 4, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 200, /* endByte= */ 429);
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
 
       const ref = makeReference(
           'test:/main.mp4', 0, 4, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 429,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
           /* timestampOffset= */ 0, [partialRef, partialRef2]);
 
       const partialRef3 = makeReference(
           'test:/partial.mp4', 4, 6, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 209);
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
 
       const preloadRef = makeReference(
           'test:/partial.mp4', 6, 7.5, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ 419);
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
       preloadRef.markAsPreload();
       preloadRef.markAsNonIndependent();
 
       // ref2 is not fully published yet, so it doesn't have a segment uri.
       const ref2 = makeReference(
           '', 4, 7.5, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 419,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
           /* timestampOffset= */ 0, [partialRef3, preloadRef]);
 
       await testInitialManifest(master, mediaWithPartialSegments, [ref, ref2]);
+    });
+
+    it('parses streams with partial and preload hinted segments and BYTERANGE', async () => { // eslint-disable-line max-len
+      playerInterface.isLowLatencyMode = () => true;
+      const mediaWithPartialSegments = [
+        '#EXTM3U\n',
+        '#EXT-X-TARGETDURATION:5\n',
+        '#EXT-X-PART-INF:PART-TARGET=1.5\n',
+        '#EXT-X-MAP:URI="init.mp4"\n',
+        '#EXT-X-MEDIA-SEQUENCE:0\n',
+        // ref includes partialRef, partialRef2
+        // partialRef
+        '#EXT-X-PART:DURATION=2,URI="ref1.mp4",BYTERANGE=200@0,',
+        'INDEPENDENT=YES\n',
+        // partialRef2
+        '#EXT-X-PART:DURATION=2,URI="ref1.mp4",BYTERANGE=230@200,',
+        'INDEPENDENT=YES\n',
+        '#EXTINF:4,\n',
+        'ref1.mp4\n',
+        // ref2 includes partialRef3, preloadRef
+        // partialRef3
+        '#EXT-X-PART:DURATION=2,URI="ref2.mp4",BYTERANGE=210@0,',
+        'INDEPENDENT=YES\n',
+        // preloadRef
+        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="ref2.mp4",BYTERANGE-START=210,',
+        'BYTERANGE-LENGTH=210\n',
+      ].join('');
+
+      // If ReadableStream is defined we can apply some optimizations
+      if (window.ReadableStream) {
+        const ref = makeReference(
+            'test:/ref1.mp4', 0, 4, /* syncTime= */ null,
+            /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+            /* timestampOffset= */ 0);
+        ref.markAsByterangeOptimization();
+
+        // ref2 is not fully published yet, so it doesn't have a segment uri.
+        const ref2 = makeReference(
+            'test:/ref2.mp4', 4, 7.5, /* syncTime= */ null,
+            /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
+            /* timestampOffset= */ 0);
+        ref2.markAsByterangeOptimization();
+
+        await testInitialManifest(master, mediaWithPartialSegments,
+            [ref, ref2]);
+      } else {
+        const partialRef = makeReference(
+            'test:/ref1.mp4', 0, 2, /* syncTime= */ null,
+            /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 199);
+
+        const partialRef2 = makeReference(
+            'test:/ref1.mp4', 2, 4, /* syncTime= */ null,
+            /* baseUri= */ '', /* startByte= */ 200, /* endByte= */ 429);
+
+        const ref = makeReference(
+            'test:/ref1.mp4', 0, 4, /* syncTime= */ null,
+            /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 429,
+            /* timestampOffset= */ 0, [partialRef, partialRef2]);
+
+        const partialRef3 = makeReference(
+            'test:/ref2.mp4', 4, 6, /* syncTime= */ null,
+            /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 209);
+
+        const preloadRef = makeReference(
+            'test:/ref2.mp4', 6, 7.5, /* syncTime= */ null,
+            /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ 419);
+        preloadRef.markAsPreload();
+        preloadRef.markAsNonIndependent();
+
+        // ref2 is not fully published yet, so it doesn't have a segment uri.
+        const ref2 = makeReference(
+            '', 4, 7.5, /* syncTime= */ null,
+            /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 419,
+            /* timestampOffset= */ 0, [partialRef3, preloadRef]);
+
+        await testInitialManifest(master, mediaWithPartialSegments,
+            [ref, ref2]);
+      }
     });
 
     // Test for https://github.com/shaka-project/shaka-player/issues/4223
@@ -701,10 +775,9 @@ describe('HlsParser live', () => {
         'main.mp4\n',
         // ref2 includes partialRef, but not preloadRef
         // partialRef
-        '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0,',
-        'INDEPENDENT=YES\n',
+        '#EXT-X-PART:DURATION=2,URI="partial.mp4",INDEPENDENT=YES\n',
         // preloadRef
-        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210\n',
+        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4"\n',
       ].join('');
 
       const ref = makeReference(
@@ -714,12 +787,12 @@ describe('HlsParser live', () => {
 
       const partialRef = makeReference(
           'test:/partial.mp4', 4, 6, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 209);
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null);
 
       // ref2 is not fully published yet, so it doesn't have a segment uri.
       const ref2 = makeReference(
           '', 4, 6, /* syncTime= */ null,
-          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ 209,
+          /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
           /* timestampOffset= */ 0, [partialRef]);
 
       await testInitialManifest(master, mediaWithPartialSegments, [ref, ref2]);
