@@ -164,8 +164,10 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     const pipWindow = await window.documentPictureInPicture.requestWindow({
       width: rectPipPlayer.width,
       height: rectPipPlayer.height,
-      copyStyleSheets: true,
     });
+
+    // Copy style sheets to the Picture-in-Picture window.
+    this.copyStyleSheetsToWindow_(pipWindow);
 
     // Add placeholder for the player.
     const parentPlayer = pipPlayer.parentNode || document.body;
@@ -185,9 +187,36 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.onEnterPictureInPicture_();
 
     // Listen for the PiP closing event to move the player back.
-    this.eventManager.listenOnce(pipWindow, 'unload', () => {
+    this.eventManager.listenOnce(pipWindow, 'pagehide', () => {
       placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
     });
+  }
+
+  /** @private */
+  copyStyleSheetsToWindow_(win) {
+    const styleSheets = /** @type {!Iterable<*>} */(document.styleSheets);
+    const allCSS = [...styleSheets]
+        .map((sheet) => {
+          try {
+            return [...sheet.cssRules].map((rule) => rule.cssText).join('');
+          } catch (e) {
+            const link = /** @type {!HTMLLinkElement} */(
+              document.createElement('link'));
+
+            link.rel = 'stylesheet';
+            link.type = sheet.type;
+            link.media = sheet.media;
+            link.href = sheet.href;
+            win.document.head.appendChild(link);
+          }
+          return '';
+        })
+        .filter(Boolean)
+        .join('\n');
+    const style = document.createElement('style');
+
+    style.textContent = allCSS;
+    win.document.head.appendChild(style);
   }
 
   /** @private */

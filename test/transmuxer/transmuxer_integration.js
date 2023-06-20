@@ -84,6 +84,9 @@ describe('Transmuxer Player', () => {
   });
 
   it('raw MP3', async () => {
+    if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"')) {
+      return;
+    }
     // eslint-disable-next-line max-len
     const url = 'https://pl.streamingvideoprovider.com/mp3-playlist/playlist.m3u8';
 

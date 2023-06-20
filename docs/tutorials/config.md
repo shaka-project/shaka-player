@@ -122,18 +122,20 @@ buffering settings) while some will not have any effect until the next call to
 #### Low latency streaming
 
 With `.streaming.lowLatencyMode` set to true,
-`.streaming.inaccurateManifestTolerance` is set to 0 by default, and
-`.streaming.rebufferingGoal` is set to 0.01 by default.
+`.streaming.inaccurateManifestTolerance` is set to 0 by default,
+`.streaming.rebufferingGoal` is set to 0.01 by default, and
+`.streaming.segmentPrefetchLimit` is set to 2 by default.
 
-To customize the values of inaccurateManifestTolerance and rebufferingGoal
-with low latency mode, you can set the fields in the same or subsequent
-call to configure().
+To customize the values of inaccurateManifestTolerance, rebufferingGoal and
+segmentPrefetchLimit with low latency mode, you can set the fields in the same
+or subsequent call to configure().
 ```js
 player.configure({
   streaming: {
     lowLatencyMode: true,
     inaccurateManifestTolerance: 0,
     rebufferingGoal: 0.01,
+    segmentPrefetchLimit: 2,
   }
 });
 
