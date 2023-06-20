@@ -1321,7 +1321,6 @@ shakaDemo.Main = class {
       if (asset.imaAssetKey || (asset.imaContentSrcId && asset.imaVideoId)) {
         manifestUri = await this.getManifestUriFromAdManager_(asset);
       }
-
       await this.player_.load(
           manifestUri,
           /* startTime= */ null,
