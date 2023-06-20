@@ -590,7 +590,8 @@ describe('HlsParser live', () => {
         // partialRef3
         '#EXT-X-PART:DURATION=2,URI="partial.mp4",BYTERANGE=210@0\n',
         // preloadRef
-        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210\n',
+        '#EXT-X-PRELOAD-HINT:TYPE=PART,URI="partial.mp4",BYTERANGE-START=210,',
+        'BYTERANGE-LENGTH=210\n',
       ].join('');
 
       const partialRef = makeReference(
@@ -613,6 +614,7 @@ describe('HlsParser live', () => {
       const preloadRef = makeReference(
           'test:/partial.mp4', 6, 7.5, /* syncTime= */ null,
           /* baseUri= */ '', /* startByte= */ 210, /* endByte= */ null);
+      preloadRef.markAsPreload();
 
       // ref2 is not fully published yet, so it doesn't have a segment uri.
       const ref2 = makeReference(
