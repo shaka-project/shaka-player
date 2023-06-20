@@ -14,7 +14,6 @@ goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.Utils');
 goog.require('shakaDemo.Visualizer');
 goog.require('shakaDemo.VisualizerButton');
-goog.require('shakaDemo.MPDPatchAdapter');
 
 /**
  * Shaka Player demo, main section.
@@ -72,9 +71,6 @@ shakaDemo.Main = class {
 
     /** @private {boolean} */
     this.noInput_ = false;
-
-    /** @private {shakaDemo.MPDPatchAdapter} */
-    this.mpdPatchAdapter_ = null;
 
     /** @private {!HTMLAnchorElement} */
     this.errorDisplayLink_ = /** @type {!HTMLAnchorElement} */(
@@ -1324,26 +1320,6 @@ shakaDemo.Main = class {
       // from the ad manager.
       if (asset.imaAssetKey || (asset.imaContentSrcId && asset.imaVideoId)) {
         manifestUri = await this.getManifestUriFromAdManager_(asset);
-      }
-
-      if (asset.features.includes(
-          shakaAssets.Feature.ENABLE_DASH_PATCH)) {
-        this.mpdPatchAdapter_ =
-          new shakaDemo.MPDPatchAdapter(manifestUri);
-        const patchConfig = {
-          manifest: {
-            dash: {
-              enablePatchMPDSupport: true,
-              manifestPreprocessor:
-                // eslint-disable-next-line
-                (e) => this.mpdPatchAdapter_.patchMpdPreProcessor(e),
-            },
-          },
-        };
-
-        shaka.net.NetworkingEngine.registerScheme('patch',
-            (url) => this.mpdPatchAdapter_.customPatchHandler(url));
-        this.player_.configure(patchConfig);
       }
 
       await this.player_.load(
