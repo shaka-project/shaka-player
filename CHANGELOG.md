@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.2.11](https://github.com/shaka-project/shaka-player/compare/v4.2.10...v4.2.11) (2023-06-20)
+
+
+### Bug Fixes
+
+* **Demo:** Fix deployment of codem-isoboxer in the Demo ([#5257](https://github.com/shaka-project/shaka-player/issues/5257)) ([23d48d4](https://github.com/shaka-project/shaka-player/commit/23d48d4da40362ace5bf2b653ffc35d8a33df21a))
+* **Demo:** Fix error link width to avoid overlap with close button ([#5309](https://github.com/shaka-project/shaka-player/issues/5309)) ([a6f980d](https://github.com/shaka-project/shaka-player/commit/a6f980d382669bf14fb91b63ab4f727f23f9064f))
+* Fix error when network status changes on src= playbacks ([#5305](https://github.com/shaka-project/shaka-player/issues/5305)) ([ce354ba](https://github.com/shaka-project/shaka-player/commit/ce354bab773c9fcac906d666c43a14c0e6f86d2d))
+* **HLS:** Avoid "Possible encoding problem detected!" when is a preload reference ([#5332](https://github.com/shaka-project/shaka-player/issues/5332)) ([763ae6a](https://github.com/shaka-project/shaka-player/commit/763ae6ad53934e12ac76a43138d15df7a20cd9d2))
+* **HLS:** Avoid HLS resync when there is a gap in the stream ([#5284](https://github.com/shaka-project/shaka-player/issues/5284)) ([256cf20](https://github.com/shaka-project/shaka-player/commit/256cf2071e23b315254b083a52aaa24649bd3b3e))
+* **HLS:** Avoid variable substitution if no variables ([#5269](https://github.com/shaka-project/shaka-player/issues/5269)) ([b549b60](https://github.com/shaka-project/shaka-player/commit/b549b6036c4baa2b987f4c0276cc2b0edf623dc0))
+* **HLS:** Parse EXT-X-PART-INF as media playlist tag ([#5311](https://github.com/shaka-project/shaka-player/issues/5311)) ([d78c080](https://github.com/shaka-project/shaka-player/commit/d78c08065c8728dbd9f849b44668e4ca8147785c))
+* **HLS:** Skip EXT-X-PRELOAD-HINT without full byterange info ([#5294](https://github.com/shaka-project/shaka-player/issues/5294)) ([e462711](https://github.com/shaka-project/shaka-player/commit/e462711d2366b89e2b60d42bab2b1da15ca80556))
+* media source object URL revocation ([#5214](https://github.com/shaka-project/shaka-player/issues/5214)) ([80ce378](https://github.com/shaka-project/shaka-player/commit/80ce378a115eaa5c8ddee84de57ed7a503942b50))
+* Ship to NPM without node version restrictions ([#5253](https://github.com/shaka-project/shaka-player/issues/5253)) ([41c1ace](https://github.com/shaka-project/shaka-player/commit/41c1ace953c898232040143b469fcf7971572450)), closes [#5243](https://github.com/shaka-project/shaka-player/issues/5243)
+* unnecessary parsing of in-band pssh when pssh is in the manifest ([#5198](https://github.com/shaka-project/shaka-player/issues/5198)) ([889cc68](https://github.com/shaka-project/shaka-player/commit/889cc68093099e1976dea0b72ee3943fa6f992d5))
+
 ## [4.2.10](https://github.com/shaka-project/shaka-player/compare/v4.2.9...v4.2.10) (2023-04-27)
 
 
