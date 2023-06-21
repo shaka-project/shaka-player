@@ -27,8 +27,8 @@ def main(args):
 
   screenshotsFolder = os.path.join(
       base, 'test', 'test', 'assets', 'screenshots')
-  pixelsChangedTool = os.path.join(
-      base, 'build', 'pixelsChanged.js');
+  imageSimilarityTool = os.path.join(
+      base, 'build', 'imageSimilarity.js');
 
   for platform in os.listdir(screenshotsFolder):
     # This is a subfolder with actual screenshots.
@@ -61,18 +61,18 @@ def main(args):
         if os.path.exists(officialPath):
           output = shakaBuildHelpers.execute_get_output([
               'node',
-              pixelsChangedTool,
+              imageSimilarityTool,
               officialPath,
               fullPath,
           ])
-          pixelsChanged = float(output)
+          similarity = float(output)
         else:
           # No original?  Then everything has changed!
-          pixelsChanged = 1e6
+          similarity = 0
 
-        if pixelsChanged == 0:
-          # Nothing changed, so don't update the image.  This will keep the git
-          # history from getting bigger for no reason.
+        if similarity >= 0.95:
+          # Similar enough to pass tests, so don't update the image.  This will
+          # keep the git history from getting bigger for no reason.
           continue
 
         shutil.move(fullPath, officialPath)
