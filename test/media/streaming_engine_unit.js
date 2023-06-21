@@ -527,8 +527,7 @@ describe('StreamingEngine', () => {
 
     expect(mediaSourceEngine.init).toHaveBeenCalledWith(expectedMseInit,
         /** sequenceMode= */ false, /** manifestType= */ 'UNKNOWN',
-        /** ignoreManifestTimestampsInSegmentsMode= */ false,
-        /** hasTextStreams= */ true);
+        /** ignoreManifestTimestampsInSegmentsMode= */ false);
     expect(mediaSourceEngine.init).toHaveBeenCalledTimes(1);
 
     expect(mediaSourceEngine.setDuration).toHaveBeenCalledTimes(1);
