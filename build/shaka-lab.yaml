@@ -167,5 +167,3 @@ Tizen:
 
 XboxOne:
   browser: xboxone
-  # TODO: Re-enable Xbox (https://github.com/shaka-project/shaka-player/issues/4234)
-  disabled: true
