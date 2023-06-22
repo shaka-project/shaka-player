@@ -722,6 +722,7 @@ describe('HlsParser live', () => {
             /* baseUri= */ '', /* startByte= */ 0, /* endByte= */ null,
             /* timestampOffset= */ 0);
         ref2.markAsByterangeOptimization();
+        ref2.markAsPreload();
 
         await testInitialManifest(master, mediaWithPartialSegments,
             [ref, ref2]);
