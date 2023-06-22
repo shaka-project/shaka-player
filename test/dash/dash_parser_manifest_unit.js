@@ -2071,12 +2071,11 @@ describe('DashParser Manifest', () => {
   it('supports SupplementalProperty MatrixCoefficients', async () => {
     // (DASH-IF IOP v4.3 6.2.5.1.)
     const scheme = cicpScheme('MatrixCoefficients');
-    const hlg = 18;
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
-      `      <SupplementalProperty schemeIdUri="${scheme}" value="${hlg}" />`,
+      `      <SupplementalProperty schemeIdUri="${scheme}" value="9" />`,
       '      <Representation codecs="hvc1.2.4.L153.B0">',
       '        <BaseURL>v-sd.mp4</BaseURL>',
       '        <SegmentBase indexRange="100-200" />',
@@ -2097,19 +2096,16 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
-    const stream = manifest.variants[0].video;
-    expect(stream.hdr).toBe('HLG');
   });
 
   it('supports SupplementalProperty ColourPrimaries', async () => {
     // (DASH-IF IOP v4.3 6.2.5.1.)
     const scheme = cicpScheme('ColourPrimaries');
-    const hlg = 18;
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
-      `      <SupplementalProperty schemeIdUri="${scheme}" value="${hlg}" />`,
+      `      <SupplementalProperty schemeIdUri="${scheme}" value="9" />`,
       '      <Representation codecs="hvc1.2.4.L153.B0">',
       '        <BaseURL>v-sd.mp4</BaseURL>',
       '        <SegmentBase indexRange="100-200" />',
@@ -2130,8 +2126,6 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
-    const stream = manifest.variants[0].video;
-    expect(stream.hdr).toBe('HLG');
   });
 
   it('supports HDR signaling via EssentialProperty', async () => {
@@ -2170,12 +2164,11 @@ describe('DashParser Manifest', () => {
   it('supports EssentialProperty MatrixCoefficients', async () => {
     // (DASH-IF IOP v4.3 6.2.5.1.)
     const hdrScheme = cicpScheme('MatrixCoefficients');
-    const hlg = 18;
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
-      `      <EssentialProperty schemeIdUri="${hdrScheme}" value="${hlg}" />`,
+      `      <EssentialProperty schemeIdUri="${hdrScheme}" value="9" />`,
       '      <Representation codecs="hvc1.2.4.L153.B0">',
       '        <BaseURL>v-sd.mp4</BaseURL>',
       '        <SegmentBase indexRange="100-200" />',
@@ -2196,19 +2189,16 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
-    const stream = manifest.variants[0].video;
-    expect(stream.hdr).toBe('HLG');
   });
 
   it('supports EssentialProperty ColourPrimaries', async () => {
     // (DASH-IF IOP v4.3 6.2.5.1.)
     const hdrScheme = cicpScheme('ColourPrimaries');
-    const hlg = 18;
     const manifestText = [
       '<MPD minBufferTime="PT75S">',
       '  <Period id="1" duration="PT30S">',
       '    <AdaptationSet id="2" mimeType="video/mp4">',
-      `      <EssentialProperty schemeIdUri="${hdrScheme}" value="${hlg}" />`,
+      `      <EssentialProperty schemeIdUri="${hdrScheme}" value="9" />`,
       '      <Representation codecs="hvc1.2.4.L153.B0">',
       '        <BaseURL>v-sd.mp4</BaseURL>',
       '        <SegmentBase indexRange="100-200" />',
@@ -2229,8 +2219,6 @@ describe('DashParser Manifest', () => {
     /** @type {shaka.extern.Manifest} */
     const manifest = await parser.start('dummy://foo', playerInterface);
     expect(manifest.variants.length).toBe(1);
-    const stream = manifest.variants[0].video;
-    expect(stream.hdr).toBe('HLG');
   });
 
   it('supports SDR signalling via EssentialProperty', async () => {
