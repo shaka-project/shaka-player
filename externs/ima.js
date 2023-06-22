@@ -514,6 +514,14 @@ google.ima.dai.api.StreamRequest.prototype.format;
 
 
 /**
+ * @type {Object.<
+ *   google.ima.dai.api.OmidVerificationVendor,
+ *   google.ima.dai.api.OmidAccessMode>}
+ */
+google.ima.dai.api.StreamRequest.prototype.omidAccessModeRules;
+
+
+/**
  * @enum {string}
  */
 google.ima.dai.api.StreamRequest.StreamFormat = {
@@ -598,4 +606,30 @@ google.ima.dai.api.StreamEvent.Type = {
   SKIPPABLE_STATE_CHANGED: 'skippableStateChanged',
   SKIPPED: 'skip',
   VIDEO_CLICKED: 'videoClicked',
+};
+
+
+/**
+ * @enum {number}
+ */
+google.ima.dai.api.OmidVerificationVendor = {
+  OTHER: 1,
+  MOAT: 2,
+  DOUBLEVERIFY: 3,
+  INTEGRAL_AD_SCIENCE: 4,
+  PIXELATE: 5,
+  NIELSEN: 6,
+  COMSCORE: 7,
+  MEETRICS: 8,
+  GOOGLE: 9,
+};
+
+
+/**
+ * @enum {string}
+ */
+google.ima.dai.api.OmidAccessMode = {
+  FULL: 'full',
+  DOMAIN: 'domain',
+  LIMITED: 'limited',
 };
