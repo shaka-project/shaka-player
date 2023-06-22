@@ -111,6 +111,21 @@ describe('Transmuxer Player', () => {
     if (!MediaSource.isTypeSupported('audio/mp4; codecs="ac-3"')) {
       return;
     }
+    // This tests is flaky in some Tizen devices, so we need omit it for now.
+    if (shaka.util.Platform.isTizen()) {
+      return;
+    }
+    // It seems that AC3 on Edge Windows from github actions is not working
+    // (in the lab AC3 is working). The AC3 detection is currently hard-coded
+    // to true, which leads to a failure in GitHub's environment.
+    // We must enable this, once it is resolved:
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
+    const chromeVersion = shaka.util.Platform.chromeVersion();
+    if (shaka.util.Platform.isEdge() &&
+        chromeVersion && chromeVersion <= 116) {
+      return;
+    }
+
     // eslint-disable-next-line max-len
     const url = 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/a2/prog_index.m3u8';
 
