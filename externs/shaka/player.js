@@ -1078,7 +1078,10 @@ shaka.extern.ManifestConfiguration;
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
  *   parsePrftBox: boolean,
- *   segmentPrefetchLimit: number
+ *   segmentPrefetchLimit: number,
+ *   liveSync: boolean,
+ *   liveSyncMaxLatency: number,
+ *   liveSyncPlaybackRate: number
  * }}
  *
  * @description
@@ -1193,6 +1196,18 @@ shaka.extern.ManifestConfiguration;
  *   ahead of playhead in parallel.
  *   If <code>0</code>, the segments will be fetched sequentially.
  *   Defaults to <code>0</code>.
+ * @property {boolean} liveSync
+ *   Enable the live stream sync against the live edge by changing the playback
+ *   rate. Defaults to <code>false</code>.
+ *   Note: on some SmartTVs, if this is activated, it may not work or the sound
+ *   may be lost when activated.
+ * @property {number} liveSyncMaxLatency
+ *   Maximum acceptable latency, in seconds. Effective only if liveSync is
+ *   true. Defaults to <code>1</code>.
+ * @property {number} liveSyncPlaybackRate
+ *   Playback rate used for latency chasing. It is recommended to use a value
+ *   between 1 and 2. Effective only if liveSync is true. Defaults to
+ *   <code>1.1</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
