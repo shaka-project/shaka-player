@@ -1160,7 +1160,7 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
-    it('when characteristics are empty then add \n',
+it('when characteristics are empty then add \n',
       'roles as subtitle in chrome+hls', async () => {
         const master = [
           '#EXTM3U\n',
@@ -1224,7 +1224,7 @@ describe('HlsParser', () => {
 
         const actual = await parser.start('test:/master', playerInterface);
         expect(actual).toEqual(manifest);
-      });
+  });
 
   it('parses characteristics from text tags', async () => {
     const master = [
