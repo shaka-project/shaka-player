@@ -128,7 +128,8 @@ DASH features **not** supported:
 
 HLS features supported:
  - VOD, Live, and Event types
- - Low-latency streaming with partial segments, preload hints, and delta updates
+ - Low-latency streaming with partial segments, preload hints, delta updates and
+   blocking playlist reload
  - Discontinuity
  - ISO-BMFF / MP4 / CMAF support
  - MPEG-2 TS support (transmuxing provided by [mux.js][] v6.2.0+, must be
@@ -142,7 +143,6 @@ HLS features supported:
 
 HLS features **not** supported:
  - I-frame-only playlists: https://github.com/shaka-project/shaka-player/issues/742
- - Low-latency streaming with blocking playlist reload
 
 [mux.js]: https://github.com/videojs/mux.js/releases
 
