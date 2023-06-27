@@ -4,6 +4,8 @@
 +../../lib/transmuxer/ac3.js
 +../../lib/transmuxer/ac3_transmuxer.js
 +../../lib/transmuxer/adts.js
++../../lib/transmuxer/ec3.js
++../../lib/transmuxer/ec3_transmuxer.js
 +../../lib/transmuxer/mp3_transmuxer.js
 +../../lib/transmuxer/mpeg_audio.js
 +../../lib/transmuxer/muxjs_transmuxer.js
