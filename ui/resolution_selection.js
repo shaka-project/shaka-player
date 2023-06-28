@@ -67,7 +67,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   updateResolutionSelection_() {
     /** @type {!Array.<shaka.extern.Track>} */
-    let tracks = this.player.getVariantTracks();
+    let tracks = [];
+    // When played with src=, the variant tracks available from
+    // player.getVariantTracks() represent languages, not resolutions.
+    if (this.player.getLoadMode() != shaka.Player.LoadMode.SRC_EQUALS) {
+      tracks = this.player.getVariantTracks();
+    }
 
     // If there is a selected variant track, then we filter out any tracks in
     // a different language.  Then we use those remaining tracks to display the
