@@ -193,12 +193,8 @@ shaka.ui.LanguageUtils = class {
     // Extract the base language from the locale as a fallback step.
     const language = shaka.util.LanguageUtils.getBase(locale);
 
-    // First try to resolve the full language name.
-    // If that fails, try the base.
-    // Finally, report "unknown".
-    // When there is a loss of specificity (either to a base language or to
-    // "unknown"), we should append the original language code.
-    // Otherwise, there may be multiple identical-looking items in the list.
+    // If Intl.DisplayNames is supported we prefer it, because the list of
+    // languages is up to date.
     if (window.Intl && 'DisplayNames' in Intl) {
       try {
         if (Intl.DisplayNames.supportedLocalesOf([locale]).length) {
@@ -211,6 +207,13 @@ shaka.ui.LanguageUtils = class {
         // Ignore errors and try the fallback
       }
     }
+
+    // First try to resolve the full language name.
+    // If that fails, try the base.
+    // Finally, report "unknown".
+    // When there is a loss of specificity (either to a base language or to
+    // "unknown"), we should append the original language code.
+    // Otherwise, there may be multiple identical-looking items in the list.
     if (locale in mozilla.LanguageMapping) {
       return mozilla.LanguageMapping[locale].nativeName;
     } else if (language in mozilla.LanguageMapping) {
