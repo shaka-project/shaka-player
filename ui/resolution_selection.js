@@ -8,7 +8,6 @@
 goog.provide('shaka.ui.ResolutionSelection');
 
 goog.require('goog.asserts');
-goog.require('shaka.Player');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -120,30 +119,25 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
     const abrEnabled = this.player.getConfiguration().abr.enabled;
 
     // Add new ones
-    if (this.player.getLoadMode() != shaka.Player.LoadMode.SRC_EQUALS) {
-      for (const track of tracks) {
-        const button = shaka.util.Dom.createButton();
-        button.classList.add('explicit-resolution');
-        this.eventManager.listen(button, 'click',
-            () => this.onTrackSelected_(track));
+    for (const track of tracks) {
+      const button = shaka.util.Dom.createButton();
+      button.classList.add('explicit-resolution');
+      this.eventManager.listen(button, 'click',
+          () => this.onTrackSelected_(track));
 
-        const span = shaka.util.Dom.createHTMLElement('span');
-        if (this.player.isAudioOnly()) {
-          span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
-        } else {
-          span.textContent = track.height + 'p';
-        }
-        button.appendChild(span);
+      const span = shaka.util.Dom.createHTMLElement('span');
+      span.textContent = this.player.isAudioOnly() ?
+          Math.round(track.bandwidth / 1000) + ' kbits/s' : track.height + 'p';
+      button.appendChild(span);
 
-        if (!abrEnabled && track == selectedTrack) {
-          // If abr is disabled, mark the selected track's resolution.
-          button.ariaSelected = 'true';
-          button.appendChild(shaka.ui.Utils.checkmarkIcon());
-          span.classList.add('shaka-chosen-item');
-          this.currentSelection.textContent = span.textContent;
-        }
-        this.menu.appendChild(button);
+      if (!abrEnabled && track == selectedTrack) {
+        // If abr is disabled, mark the selected track's resolution.
+        button.ariaSelected = 'true';
+        button.appendChild(shaka.ui.Utils.checkmarkIcon());
+        span.classList.add('shaka-chosen-item');
+        this.currentSelection.textContent = span.textContent;
       }
+      this.menu.appendChild(button);
     }
 
     // Add the Auto button
