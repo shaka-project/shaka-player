@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.ResolutionSelection');
 
 goog.require('goog.asserts');
+goog.require('shaka.Player');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
