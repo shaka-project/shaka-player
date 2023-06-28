@@ -199,6 +199,18 @@ shaka.ui.LanguageUtils = class {
     // When there is a loss of specificity (either to a base language or to
     // "unknown"), we should append the original language code.
     // Otherwise, there may be multiple identical-looking items in the list.
+    if (window.Intl && 'DisplayNames' in Intl) {
+      try {
+        if (Intl.DisplayNames.supportedLocalesOf([locale]).length) {
+          const languageNames =
+              new Intl.DisplayNames([locale], {type: 'language'});
+          const language = languageNames.of(locale);
+          return language.charAt(0).toUpperCase() + language.slice(1);
+        }
+      } catch (e) {
+        // Ignore errors and try the fallback
+      }
+    }
     if (locale in mozilla.LanguageMapping) {
       return mozilla.LanguageMapping[locale].nativeName;
     } else if (language in mozilla.LanguageMapping) {
