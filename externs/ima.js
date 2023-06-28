@@ -516,7 +516,7 @@ google.ima.dai.api.StreamRequest.prototype.format;
 /**
  * @type {Object.<
  *   google.ima.dai.api.OmidVerificationVendor,
- *   google.ima.dai.api.OmidAccessMode>}
+ *   (google.ima.dai.api.OmidAccessMode | undefined)>}
  */
 google.ima.dai.api.StreamRequest.prototype.omidAccessModeRules;
 
