@@ -1652,6 +1652,81 @@ describe('HlsParser', () => {
     }
   });
 
+  it('ignore segments with #EXTINF:0', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
+      'CHANNELS="2",URI="audio"\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1,mp4a",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1"\n',
+      'video\n',
+    ].join('');
+
+    const video = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:0,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    const audio = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+      '#EXTINF:0,\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      'main.mp4\n',
+    ].join('');
+
+    fakeNetEngine
+        .setResponseText('test:/master', master)
+        .setResponseText('test:/audio', audio)
+        .setResponseText('test:/video', video)
+        .setResponseValue('test:/init.mp4', initSegmentData)
+        .setResponseValue('test:/main.mp4', segmentData);
+
+    const actual = await parser.start('test:/master', playerInterface);
+
+    expect(actual.variants.length).toBe(1);
+
+    const variant = actual.variants[0];
+    expect(variant.video).toBeTruthy();
+    expect(variant.audio).toBeTruthy();
+
+    await variant.video.createSegmentIndex();
+    goog.asserts.assert(variant.video.segmentIndex != null,
+        'Null segmentIndex!');
+
+    const firstVideoReference = variant.video.segmentIndex.get(0);
+    const secondVideoReference = variant.video.segmentIndex.get(1);
+    const thirdVideoReference = variant.video.segmentIndex.get(2);
+
+    expect(firstVideoReference).not.toBe(null);
+    expect(secondVideoReference).not.toBe(null);
+    expect(thirdVideoReference).toBe(null);
+
+
+    await variant.audio.createSegmentIndex();
+    goog.asserts.assert(variant.audio.segmentIndex != null,
+        'Null segmentIndex!');
+
+    const firstAudioReference = variant.audio.segmentIndex.get(0);
+    const secondAudioReference = variant.audio.segmentIndex.get(1);
+    const thirdAudioReference = variant.audio.segmentIndex.get(2);
+
+    expect(firstAudioReference).not.toBe(null);
+    expect(secondAudioReference).not.toBe(null);
+    expect(thirdAudioReference).toBe(null);
+  });
+
   it('Disable audio does not create audio streams', async () => {
     const master = [
       '#EXTM3U\n',
