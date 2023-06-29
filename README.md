@@ -139,7 +139,7 @@ HLS features supported:
  - Encrypted content with PlayReady and Widevine
  - Encrypted content with FairPlay (Safari on macOS and iOS 13+ only)
  - Key rotation
- - Raw AAC, MP3, etc (without an MP4 container)
+ - Raw AAC, MP3, AC-3 and EC-3 (without an MP4 container)
 
 HLS features **not** supported:
  - I-frame-only playlists: https://github.com/shaka-project/shaka-player/issues/742
@@ -246,6 +246,18 @@ Shaka Player supports:
     - Supported embedded in MP4 and TS
   - CEA-708
     - Supported embedded in MP4 and TS
+  - Raw AAC
+    - Supported in raw AAC container and transmuxing to AAC in MP4 container
+      (depends on browser support via MediaSource).
+  - Raw MP3
+    - Supported in raw MP3 container and transmuxing to MP3 in MP4 container
+      (depends on browser support via MediaSource).
+  - Raw AC-3
+    - Supported in raw AC-3 container and transmuxing to AC-3 in MP4 container
+      (depends on browser support via MediaSource).
+  - Raw EC-3
+    - Supported in raw EC-3 container and transmuxing to EC-3 in MP4 container
+      (depends on browser support via MediaSource).
   - SubRip (SRT)
     - UTF-8 encoding only
   - LyRiCs (LRC)
@@ -262,6 +274,21 @@ attributes.
 [cueing data]: https://www.webmproject.org/docs/container/#cueing-data
 [text display plugin]: https://nightly-dot-shaka-player-demo.appspot.com/docs/api/shaka.extern.TextDisplayer.html
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
+
+
+## Transmuxer support
+
+Shaka Player supports:
+  - Raw AAC to AAC in MP4
+  - Raw MP3 to MP3 in MP4
+  - Raw AC-3 to AC-3 in MP4
+  - Raw EC-3 to EC-3 in MP4
+  - AAC in MPEG-2 TS to AAC in MP4,
+    with help from [mux.js][] v6.2.0+
+  - H.264 in MPEG-2 TS to H.264 in MP4,
+    with help from [mux.js][] v6.2.0+
+  - Muxed AAC and H.264 in MPEG-2 TS to AAC and H.264 in MP4,
+    with help from [mux.js][] v6.2.0+
 
 
 ## Documentation & Important Links ##
