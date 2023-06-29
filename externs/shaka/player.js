@@ -1526,9 +1526,11 @@ shaka.extern.OfflineConfiguration;
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
  * @property {string} preferredVideoHdrLevel
- *   The preferred HDR level of the video.
+ *   The preferred HDR level of the video. If possible, this will cause the
+ *   player to filter to assets that either have that HDR level, or no HDR level
+ *   at all.
  *   Could be 'SDR', 'PQ', 'HLG', or '' for no preference.
- *   Defaults to 'SDR'.
+ *   Defaults to 'PQ' for HDR screens and 'SDR' otherwise.
  *   Note that one some platforms, such as Chrome, attempting to play PQ content
  *   may cause problems.
  * @property {!Array.<string>} preferredDecodingAttributes
