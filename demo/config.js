@@ -456,6 +456,24 @@ shakaDemo.Config = class {
       this.latestInput_.input().checked = true;
     }
 
+    const hdrLevels = {
+      '': '',
+      'AUTO': 'AUTO',
+      'SDR': 'SDR',
+      'PQ': 'PQ',
+      'HLG': 'HLG',
+    };
+    const localize = (name) => shakaDemoMain.getLocalizedString(name);
+    const hdrLevelNames = {
+      'AUTO': localize(MessageIds.HDR_LEVEL_AUTO),
+      'SDR': localize(MessageIds.HDR_LEVEL_SDR),
+      'PQ': localize(MessageIds.HDR_LEVEL_PQ),
+      'HLG': localize(MessageIds.HDR_LEVEL_HLG),
+      '': localize(MessageIds.HDR_LEVEL_NONE),
+    };
+    this.addSelectInput_(MessageIds.HDR_LEVEL, 'preferredVideoHdrLevel',
+        hdrLevels, hdrLevelNames);
+
     this.addBoolInput_(MessageIds.START_AT_SEGMENT_BOUNDARY,
         'streaming.startAtSegmentBoundary')
         .addBoolInput_(MessageIds.IGNORE_TEXT_FAILURES,
