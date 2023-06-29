@@ -132,8 +132,15 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           () => this.onTrackSelected_(track));
 
       const span = shaka.util.Dom.createHTMLElement('span');
-      span.textContent = this.player.isAudioOnly() ?
-          Math.round(track.bandwidth / 1000) + ' kbits/s' : track.height + 'p';
+      if (this.player.isAudioOnly()) {
+        span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
+      } else {
+        if (track.hdr == 'PQ' || track.hdr == 'HLG') {
+          span.textContent = track.height + 'p (HDR)';
+        } else {
+          span.textContent = track.height + 'p';
+        }
+      }
       button.appendChild(span);
 
       if (!abrEnabled && track == selectedTrack) {
