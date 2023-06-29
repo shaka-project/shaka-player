@@ -371,6 +371,26 @@
     "description": "The header for a tab within the custom asset creation dialog.",
     "message": "Headers"
   },
+  "DEMO_HDR_LEVEL": {
+    "description": "The name of a configuration value.",
+    "message": "Preferred HDR Level"
+  },
+  "DEMO_HDR_LEVEL_HLG": {
+    "description": "The name of a configuration value.",
+    "message": "[PROPER_NAME:HLG]"
+  },
+  "DEMO_HDR_LEVEL_NONE": {
+    "description": "The name of a configuration value.",
+    "message": "No Preference"
+  },
+  "DEMO_HDR_LEVEL_PQ": {
+    "description": "The name of a configuration value.",
+    "message": "[PROPER_NAME:PQ]"
+  },
+  "DEMO_HDR_LEVEL_SDR": {
+    "description": "The name of a configuration value.",
+    "message": "[PROPER_NAME:SDR]"
+  },
   "DEMO_HIGH_DEFINITION": {
     "description": "Text that describes an asset that has a high definition video stream.",
     "message": "High definition"

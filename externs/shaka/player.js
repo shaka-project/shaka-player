@@ -1472,6 +1472,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredVideoCodecs: !Array.<string>,
  *   preferredAudioCodecs: !Array.<string>,
  *   preferredAudioChannelCount: number,
+ *   preferredVideoHdrLevel: string,
  *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
@@ -1524,6 +1525,12 @@ shaka.extern.OfflineConfiguration;
  *   The list of preferred audio codecs, in order of highest to lowest priority.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ * @property {string} preferredVideoHdrLevel
+ *   The preferred HDR level of the video.
+ *   Could be 'SDR', 'PQ', 'HLG', or '' for no preference.
+ *   Defaults to 'SDR'.
+ *   Note that one some platforms, such as Chrome, attempting to play PQ content
+ *   may cause problems.
  * @property {!Array.<string>} preferredDecodingAttributes
  *   The list of preferred attributes of decodingInfo, in the order of their
  *   priorities.
