@@ -150,7 +150,7 @@ describe('HlsParser', () => {
     const master = [
       '#EXTM3U\n',
       '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="eng",',
-      'CHANNELS="16/JOC",URI="audio"\n',
+      'CHANNELS="16/JOC",SAMPLE-RATE="48000",URI="audio"\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="eng",',
       'URI="text"\n',
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub2",LANGUAGE="es",',
@@ -192,6 +192,7 @@ describe('HlsParser', () => {
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
           stream.channelsCount = 16;
+          stream.audioSamplingRate = 48000;
           stream.spatialAudio = true;
           stream.mime('audio/mp4', 'mp4a');
         });
