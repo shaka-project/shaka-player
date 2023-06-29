@@ -93,6 +93,7 @@
   "DEMO_GPAC": "GPAC",
   "DEMO_HEADERS_TAB": "Headers",
   "DEMO_HDR_LEVEL": "Preferred HDR Level",
+  "DEMO_HDR_LEVEL_AUTO": "Auto Detect",
   "DEMO_HDR_LEVEL_HLG": "HLG",
   "DEMO_HDR_LEVEL_NONE": "No Preference",
   "DEMO_HDR_LEVEL_PQ": "PQ",

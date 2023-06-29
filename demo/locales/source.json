@@ -375,6 +375,10 @@
     "description": "The name of a configuration value.",
     "message": "Preferred HDR Level"
   },
+  "DEMO_HDR_LEVEL_AUTO": {
+    "description": "The name of a configuration value.",
+    "message": "Auto Detect"
+  },
   "DEMO_HDR_LEVEL_HLG": {
     "description": "The name of a configuration value.",
     "message": "[PROPER_NAME:HLG]"

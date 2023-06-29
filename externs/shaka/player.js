@@ -1529,8 +1529,8 @@ shaka.extern.OfflineConfiguration;
  *   The preferred HDR level of the video. If possible, this will cause the
  *   player to filter to assets that either have that HDR level, or no HDR level
  *   at all.
- *   Could be 'SDR', 'PQ', 'HLG', or '' for no preference.
- *   Defaults to 'PQ' for HDR screens and 'SDR' otherwise.
+ *   Can be 'SDR', 'PQ', 'HLG', 'AUTO' for auto-detect, or '' for no preference.
+ *   Defaults to 'AUTO'.
  *   Note that one some platforms, such as Chrome, attempting to play PQ content
  *   may cause problems.
  * @property {!Array.<string>} preferredDecodingAttributes

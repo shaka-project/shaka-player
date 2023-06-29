@@ -458,12 +458,14 @@ shakaDemo.Config = class {
 
     const hdrLevels = {
       '': '',
+      'AUTO': 'AUTO',
       'SDR': 'SDR',
       'PQ': 'PQ',
       'HLG': 'HLG',
     };
     const localize = (name) => shakaDemoMain.getLocalizedString(name);
     const hdrLevelNames = {
+      'AUTO': localize(MessageIds.HDR_LEVEL_AUTO),
       'SDR': localize(MessageIds.HDR_LEVEL_SDR),
       'PQ': localize(MessageIds.HDR_LEVEL_PQ),
       'HLG': localize(MessageIds.HDR_LEVEL_HLG),
