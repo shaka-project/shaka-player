@@ -162,7 +162,13 @@ shaka.test.UiUtils = class {
     const video = /** @type {!HTMLVideoElement} */(document.createElement(
         'video'));
 
-    video.muted = true;
+    // Instead of muting the video, set it to a very low volume.  This works
+    // around bizarre slowdowns and disconnection issues seen only on Mac, only
+    // with Edge and Chrome, and only while WebDriver is controlling the
+    // browser.
+    video.muted = false;
+    video.volume = 0.01;
+
     video.width = 600;
     video.height = 400;
 
