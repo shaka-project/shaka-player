@@ -50,19 +50,6 @@ describe('TransmuxerEngine', () => {
       expect(convertedAacCodecs).toBe(expectedAacCodecs);
     });
 
-    it('converts legacy avc1 codec strings', () => {
-      expect(
-          convertCodecs(
-              ContentType.VIDEO, 'video/mp2t; codecs="avc1.100.42"'))
-          .toBe('video/mp4; codecs="avc1.64002a"');
-      expect(
-          convertCodecs(ContentType.VIDEO, 'video/mp2t; codecs="avc1.77.80"'))
-          .toBe('video/mp4; codecs="avc1.4d0050"');
-      expect(
-          convertCodecs(ContentType.VIDEO, 'video/mp2t; codecs="avc1.66.1"'))
-          .toBe('video/mp4; codecs="avc1.420001"');
-    });
-
     // Issue #1991
     it('handles upper-case MIME types', () => {
       expect(convertCodecs(

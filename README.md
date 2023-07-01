@@ -283,10 +283,10 @@ Shaka Player supports:
   - Raw MP3 to MP3 in MP4
   - Raw AC-3 to AC-3 in MP4
   - Raw EC-3 to EC-3 in MP4
-  - AAC in MPEG-2 TS to AAC in MP4,
-    with help from [mux.js][] v6.2.0+
-  - H.264 in MPEG-2 TS to H.264 in MP4,
-    with help from [mux.js][] v6.2.0+
+  - AAC in MPEG-2 TS to AAC in MP4
+  - AC-3 in MPEG-2 TS to AC-3 in MP4
+  - EC-3 in MPEG-2 TS to EC-3 in MP4
+  - H.264 in MPEG-2 TS to H.264 in MP4
   - Muxed AAC and H.264 in MPEG-2 TS to AAC and H.264 in MP4,
     with help from [mux.js][] v6.2.0+
 

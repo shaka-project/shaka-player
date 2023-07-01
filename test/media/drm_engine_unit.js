@@ -715,6 +715,8 @@ describe('DrmEngine', () => {
     it('maps TS MIME types through the transmuxer', async () => {
       const originalIsSupported =
           shaka.transmuxer.TransmuxerEngine.isSupported;
+      const originalConvertCodecs =
+          shaka.transmuxer.TransmuxerEngine.convertCodecs;
 
       try {
         // Mock out isSupported on Transmuxer so that we don't have to care
@@ -723,6 +725,14 @@ describe('DrmEngine', () => {
         shaka.transmuxer.TransmuxerEngine.isSupported =
             (mimeType, contentType) => {
               return mimeType.startsWith('video/mp2t');
+            };
+        shaka.transmuxer.TransmuxerEngine.convertCodecs =
+            (contentType, mimeType) => {
+              let newMimeType = mimeType.replace('mp2t', 'mp4');
+              if (contentType == 'audio') {
+                newMimeType = newMimeType.replace('video', 'audio');
+              }
+              return newMimeType;
             };
 
         // The default mock for this is so unrealistic, some of our test
@@ -761,6 +771,8 @@ describe('DrmEngine', () => {
       } finally {
         // Restore the mock.
         shaka.transmuxer.TransmuxerEngine.isSupported = originalIsSupported;
+        shaka.transmuxer.TransmuxerEngine.convertCodecs =
+            originalConvertCodecs;
       }
     });
   });  // describe('init')
