@@ -33,6 +33,7 @@ shakaDemo.MessageIds = {
   VOD: 'DEMO_VOD',
   WEBM: 'DEMO_WEBM',
   XLINK: 'DEMO_XLINK',
+  LOW_LATENCY_STREAM: 'DEMO_LOW_LATENCY_STREAM',
   /* Key systems. */
   CLEAR: 'DEMO_CLEAR',
   CLEAR_KEY: 'DEMO_CLEAR_KEY',
