@@ -149,6 +149,9 @@ shakaAssets.Feature = {
 
   // Set if the asset has LCEVC.
   LCEVC: shakaDemo.MessageIds.LCEVC,
+
+  // Set if the asset has Low Latency mode.
+  LOW_LATENCY_STREAM: shakaDemo.MessageIds.LOW_LATENCY_STREAM,
 };
 
 
@@ -829,7 +832,8 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.MP4),
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF CEA-608 VOD',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
@@ -854,7 +858,8 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.MP4),
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF THUMBNAILS - Single adaptation set, 7 tiles at 10x1, each thumb 320x180',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
@@ -1241,7 +1246,8 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.APPLE)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.MP4),
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM),
   new ShakaDemoAssetInfo(
       /* name= */ 'Audio only HLS with raw AAC',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
