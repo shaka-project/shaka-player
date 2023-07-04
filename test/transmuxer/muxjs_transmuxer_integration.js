@@ -12,7 +12,6 @@ describe('MuxjsTransmuxer', () => {
   const mp4MimeType = 'video/mp4; codecs="avc1.42E01E"';
   const transportStreamVideoMimeType = 'video/mp2t; codecs="avc1.42E01E"';
   const transportStreamAudioMimeType = 'video/mp2t; codecs="mp4a.40.2"';
-  const aacAudioMimeType = 'audio/aac';
 
   /** @type {!ArrayBuffer} */
   let videoSegment;
@@ -26,10 +25,6 @@ describe('MuxjsTransmuxer', () => {
 
   function useTsTransmuxer() {
     transmuxer = new shaka.transmuxer.MuxjsTransmuxer('video/mp2t');
-  }
-
-  function useAacTransmuxer() {
-    transmuxer = new shaka.transmuxer.MuxjsTransmuxer('audio/aac');
   }
 
   beforeAll(async () => {
@@ -84,14 +79,6 @@ describe('MuxjsTransmuxer', () => {
       expect(convertedAudioCodecs).toBe(expectedAudioCodecs);
     });
 
-    it('returns converted codecs for AAC', () => {
-      useAacTransmuxer();
-      const convertedAacCodecs =
-          convertCodecs(ContentType.AUDIO, aacAudioMimeType);
-      const expectedAacCodecs = 'audio/mp4; codecs="mp4a.40.2"';
-      expect(convertedAacCodecs).toBe(expectedAacCodecs);
-    });
-
     it('converts legacy avc1 codec strings', () => {
       useTsTransmuxer();
       expect(
@@ -113,11 +100,6 @@ describe('MuxjsTransmuxer', () => {
           ContentType.VIDEO, 'video/MP2T; codecs="avc1.420001"'))
           .toBe('video/mp4; codecs="avc1.420001"');
     });
-  });
-
-  it('getOrginalMimeType returns the correct mimeType', () => {
-    useAacTransmuxer();
-    expect(transmuxer.getOrginalMimeType()).toBe(aacAudioMimeType);
   });
 
   describe('transmuxing', () => {

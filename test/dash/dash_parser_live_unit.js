@@ -673,10 +673,9 @@ describe('DashParser Live', () => {
     fakeNetEngine.setResponseText('dummy://foo', manifestText);
     await parser.start('dummy://foo', playerInterface);
 
-    const waitTime = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'];
     expect(tickAfter).toHaveBeenCalledTimes(1);
     const delay = tickAfter.calls.mostRecent().args[0];
-    expect(delay).toBe(waitTime);
+    expect(delay).toBe(0);
   });
 
   it('does not update when @minimumUpdatePeriod is missing', async () => {
@@ -701,8 +700,7 @@ describe('DashParser Live', () => {
       '<SegmentTemplate startNumber="1" media="s$Number$.mp4" duration="2" />',
     ];
     const extraWaitTime = 15.0;
-    const idealUpdateTime = shaka.dash.DashParser['MIN_UPDATE_PERIOD_'];
-    const manifestText = makeSimpleLiveManifestText(lines, idealUpdateTime);
+    const manifestText = makeSimpleLiveManifestText(lines, 3);
 
     let now = 0;
     Date.now = () => now;

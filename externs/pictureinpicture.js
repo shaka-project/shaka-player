@@ -55,7 +55,6 @@ HTMLMediaElement.prototype.webkitPresentationMode;
  * @typedef {{
  *   width: (number|undefined),
  *   height: (number|undefined),
- *   copyStyleSheets: (boolean|undefined),
  * }}
  */
 var DocumentPictureInPictureOptions;

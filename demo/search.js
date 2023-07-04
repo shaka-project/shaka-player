@@ -403,6 +403,8 @@ shakaDemo.Search = class {
         shakaDemo.MessageIds.THUMBNAILS);
     this.makeBooleanInput_(specialContainer, Feature.LCEVC, FEATURE,
         shakaDemo.MessageIds.LCEVC);
+    this.makeBooleanInput_(specialContainer, Feature.LOW_LATENCY_STREAM,
+        FEATURE, shakaDemo.MessageIds.LOW_LATENCY_STREAM);
 
     container.appendChild(this.resultsDiv_);
   }

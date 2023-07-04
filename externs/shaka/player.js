@@ -225,7 +225,7 @@ shaka.extern.BufferedInfo;
  *   primary: boolean,
  *   roles: !Array.<string>,
  *   audioRoles: Array.<string>,
- *   accessibilityPurpose: ?shaka.dash.DashParser.AccessibilityPurpose,
+ *   accessibilityPurpose: ?shaka.media.ManifestParser.AccessibilityPurpose,
  *   forced: boolean,
  *   videoId: ?number,
  *   audioId: ?number,
@@ -302,7 +302,8 @@ shaka.extern.BufferedInfo;
  *   The roles of the audio in the track, e.g. <code>'main'</code> or
  *   <code>'commentary'</code>. Will be null for text tracks or variant tracks
  *   without audio.
- * @property {?shaka.dash.DashParser.AccessibilityPurpose} accessibilityPurpose
+ * @property {?shaka.media.ManifestParser.AccessibilityPurpose}
+ *     accessibilityPurpose
  *   The DASH accessibility descriptor, if one was provided for this track.
  *   For text tracks, this describes the text; otherwise, this is for the audio.
  * @property {boolean} forced
@@ -1077,7 +1078,10 @@ shaka.extern.ManifestConfiguration;
  *   observeQualityChanges: boolean,
  *   maxDisabledTime: number,
  *   parsePrftBox: boolean,
- *   segmentPrefetchLimit: number
+ *   segmentPrefetchLimit: number,
+ *   liveSync: boolean,
+ *   liveSyncMaxLatency: number,
+ *   liveSyncPlaybackRate: number
  * }}
  *
  * @description
@@ -1192,6 +1196,18 @@ shaka.extern.ManifestConfiguration;
  *   ahead of playhead in parallel.
  *   If <code>0</code>, the segments will be fetched sequentially.
  *   Defaults to <code>0</code>.
+ * @property {boolean} liveSync
+ *   Enable the live stream sync against the live edge by changing the playback
+ *   rate. Defaults to <code>false</code>.
+ *   Note: on some SmartTVs, if this is activated, it may not work or the sound
+ *   may be lost when activated.
+ * @property {number} liveSyncMaxLatency
+ *   Maximum acceptable latency, in seconds. Effective only if liveSync is
+ *   true. Defaults to <code>1</code>.
+ * @property {number} liveSyncPlaybackRate
+ *   Playback rate used for latency chasing. It is recommended to use a value
+ *   between 1 and 2. Effective only if liveSync is true. Defaults to
+ *   <code>1.1</code>.
  * @exportDoc
  */
 shaka.extern.StreamingConfiguration;
@@ -1456,6 +1472,7 @@ shaka.extern.OfflineConfiguration;
  *   preferredVideoCodecs: !Array.<string>,
  *   preferredAudioCodecs: !Array.<string>,
  *   preferredAudioChannelCount: number,
+ *   preferredVideoHdrLevel: string,
  *   preferredDecodingAttributes: !Array.<string>,
  *   preferForcedSubs: boolean,
  *   restrictions: shaka.extern.Restrictions,
@@ -1508,6 +1525,14 @@ shaka.extern.OfflineConfiguration;
  *   The list of preferred audio codecs, in order of highest to lowest priority.
  * @property {number} preferredAudioChannelCount
  *   The preferred number of audio channels.
+ * @property {string} preferredVideoHdrLevel
+ *   The preferred HDR level of the video. If possible, this will cause the
+ *   player to filter to assets that either have that HDR level, or no HDR level
+ *   at all.
+ *   Can be 'SDR', 'PQ', 'HLG', 'AUTO' for auto-detect, or '' for no preference.
+ *   Defaults to 'AUTO'.
+ *   Note that one some platforms, such as Chrome, attempting to play PQ content
+ *   may cause problems.
  * @property {!Array.<string>} preferredDecodingAttributes
  *   The list of preferred attributes of decodingInfo, in the order of their
  *   priorities.

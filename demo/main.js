@@ -1227,9 +1227,8 @@ shakaDemo.Main = class {
       // Remove all not-player-applied configurations, by resetting the
       // configuration then re-applying the desired configuration.
       this.player_.resetConfiguration();
-      this.player_.configure(this.desiredConfig_);
+      this.readHash_();
       this.player_.configure(assetConfig);
-      // This uses Player.configure so as to not change |this.desiredConfig_|.
     }
 
     const config = storage ?
@@ -1395,7 +1394,10 @@ shakaDemo.Main = class {
         // NaN != NaN, so there has to be a special check for it to prevent
         // false positives.
         const bothAreNaN = isNaN(currentValue) && isNaN(defaultValue);
-        if (currentValue != defaultValue && !bothAreNaN) {
+        // Strings count as NaN too, so check for them specifically.
+        const bothAreStrings = (typeof currentValue) == 'string' &&
+            (typeof defaultValue) == 'string';
+        if (currentValue != defaultValue && (!bothAreNaN || bothAreStrings)) {
           // Don't bother saving in the hash unless it's a non-default value.
           params.push(hashName + '=' + currentValue);
         }

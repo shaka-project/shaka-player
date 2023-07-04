@@ -21,6 +21,8 @@ describe('MediaSourceEngine', () => {
 
   /** @type {shaka.extern.Stream} */
   const fakeStream = shaka.test.StreamingEngineUtil.createMockVideoStream(1);
+  const fakeTsStream =
+      shaka.test.StreamingEngineUtil.createMockVideoStream(1, 'video/mp2t');
   // TODO: add text streams to MSE integration tests
 
   const mp4CeaCue0 = jasmine.objectContaining({
@@ -582,7 +584,7 @@ describe('MediaSourceEngine', () => {
         /* appendWindowStart= */ 0,
         /* appendWindowEnd= */ Infinity,
         /* sequenceMode= */ true,
-        fakeStream,
+        fakeTsStream,
         /* streamsByType= */ new Map());
 
     const segment = generators[videoType].getSegment(0, Date.now() / 1000);
@@ -652,7 +654,8 @@ describe('MediaSourceEngine', () => {
   });
 
   it('extracts ID3 metadata from AAC', async () => {
-    if (!MediaSource.isTypeSupported('audio/aac')) {
+    if (!MediaSource.isTypeSupported('audio/aac') ||
+        !shaka.util.Platform.supportsSequenceMode()) {
       return;
     }
     metadata = shaka.test.TestScheme.DATA['id3-metadata_aac'];
@@ -661,7 +664,7 @@ describe('MediaSourceEngine', () => {
     const audioType = ContentType.AUDIO;
     const initObject = new Map();
     initObject.set(audioType, getFakeStream(metadata.audio));
-    await mediaSourceEngine.init(initObject);
+    await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
     await append(ContentType.AUDIO, 0);
 
     expect(onMetadata).toHaveBeenCalled();

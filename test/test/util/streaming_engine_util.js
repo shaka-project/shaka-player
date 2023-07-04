@@ -420,9 +420,10 @@ shaka.test.StreamingEngineUtil = class {
    * Creates a mock video Stream.
    *
    * @param {number} id
+   * @param {string=} mimeType
    * @return {shaka.extern.Stream}
    */
-  static createMockVideoStream(id) {
+  static createMockVideoStream(id, mimeType='video/mp4') {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     const Util = shaka.test.Util;
 
@@ -431,7 +432,7 @@ shaka.test.StreamingEngineUtil = class {
       originalId: id.toString(),
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
-      mimeType: 'video/mp4',
+      mimeType: mimeType,
       codecs: 'avc1.42c01e',
       bandwidth: 5000000,
       width: 600,

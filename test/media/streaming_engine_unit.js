@@ -3226,22 +3226,6 @@ describe('StreamingEngine', () => {
           expectedStartDate.toUTCString());
     });
 
-    it('does not raise event if mediatime exceeds Number.MAX_VALUE',
-        async () => {
-          const prftSegment = Uint8ArrayUtils.fromHex(
-              '00000020707266740100000000000001E683B62E8E63CC58'+
-                                              'FFFFFFFFFFFFFFFF');
-          segmentData[ContentType.VIDEO].segments[0] = prftSegment;
-          segmentData[ContentType.VIDEO].initSegments[0] = mdhdSegment;
-
-          streamingEngine.switchVariant(variant);
-          streamingEngine.switchTextStream(textStream);
-          await streamingEngine.start();
-          playing = true;
-          await runTest();
-          expect(onEvent).not.toHaveBeenCalled();
-        });
-
     it('raises an event once only', async () => {
       segmentData[ContentType.VIDEO].segments[0] =
           shaka.util.Uint8ArrayUtils.concat(prftSegment, prftSegment);
