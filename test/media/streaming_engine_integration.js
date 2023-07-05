@@ -597,10 +597,7 @@ describe('StreamingEngine', () => {
         sequenceMode: false,
         ignoreManifestTimestampsInSegmentsMode: false,
         type: 'UNKNOWN',
-        serviceDescription: {
-          maxLatency: null,
-          maxPlaybackRate: null,
-        },
+        serviceDescription: null,
         variants: [{
           id: 1,
           video: {

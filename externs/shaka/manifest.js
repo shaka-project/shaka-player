@@ -21,7 +21,7 @@
  *   sequenceMode: boolean,
  *   ignoreManifestTimestampsInSegmentsMode: boolean,
  *   type: string,
- *   serviceDescription: !shaka.extern.ServiceDescription
+ *   serviceDescription: ?shaka.extern.ServiceDescription
  * }}
  *
  * @description
@@ -90,8 +90,7 @@
  * @property {string} type
  *   Indicates the type of the manifest. It can be <code>'HLS'</code> or
  *   <code>'DASH'</code>.
- * @property {!shaka.extern.ServiceDescription} serviceDescription
- *   <i>Defaults to {}.</i> <br>
+ * @property {?shaka.extern.ServiceDescription} serviceDescription
  *   The service description for the manifest. Used to adapt playbackRate to
  *   decrease latency.
  *

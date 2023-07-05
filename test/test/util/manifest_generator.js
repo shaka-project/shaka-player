@@ -101,11 +101,8 @@ shaka.test.ManifestGenerator.Manifest = class {
     this.ignoreManifestTimestampsInSegmentsMode = false;
     /** @type {string} */
     this.type = 'UNKNOWN';
-    /** @type {!shaka.extern.ServiceDescription} */
-    this.serviceDescription = {
-      maxLatency: null,
-      maxPlaybackRate: null,
-    };
+    /** @type {?shaka.extern.ServiceDescription} */
+    this.serviceDescription = null;
 
 
     /** @type {shaka.extern.Manifest} */
