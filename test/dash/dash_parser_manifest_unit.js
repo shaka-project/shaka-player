@@ -2556,4 +2556,26 @@ describe('DashParser Manifest', () => {
     expect(segments[0][1].startTime).toBe(15);
     expect(segments[1][1].startTime).toBe(15);
   });
+
+  describe('Parses ServiceDescription', () => {
+    it('with PlaybackRate and Latency', async () => {
+      const source = [
+        '<MPD minBufferTime="PT75S" type="dynamic"',
+        '     availabilityStartTime="1970-01-01T00:00:00Z">',
+        '  <ServiceDescription id="0">',
+        '    <Latency max="2000" min="2000" referenceId="0" target="4000" />',
+        '    <PlaybackRate max="1.10" min="0.96" />',
+        '  </ServiceDescription>',
+        '</MPD>',
+      ].join('\n');
+
+      fakeNetEngine.setResponseText('dummy://foo', source);
+
+      /** @type {shaka.extern.Manifest} */
+      const manifest = await parser.start('dummy://foo', playerInterface);
+
+      expect(manifest.serviceDescription.maxLatency).toBe(2);
+      expect(manifest.serviceDescription.maxPlaybackRate).toBe(1.1);
+    });
+  });
 });
