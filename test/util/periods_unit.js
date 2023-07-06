@@ -347,6 +347,7 @@ describe('PeriodCombiner', () => {
     const spanish = variants.find(
         (v) => v.video.height == 1080 && v.language == 'es');
     expect(spanish.audio.originalId).toBe('es*,en,es');
+    expect(spanish.audio.originalLanguage).toBe('es');
     expect(spanish.video.originalId).toBe('1080,480,1080');
 
     // The French track is primary in the last period and has English 480p in
@@ -354,6 +355,7 @@ describe('PeriodCombiner', () => {
     const french = variants.find(
         (v) => v.video.height == 1080 && v.language == 'fr');
     expect(french.audio.originalId).toBe('fr,en,fr*');
+    expect(french.audio.originalLanguage).toBe('fr');
     expect(french.video.originalId).toBe('1080,480,1080');
 
     // Because there's no English in the first or last periods, the English
@@ -361,6 +363,7 @@ describe('PeriodCombiner', () => {
     const english = variants.find(
         (v) => v.video.height == 1080 && v.language == 'en');
     expect(english.audio.originalId).toBe('es*,en,fr*');
+    expect(english.audio.originalLanguage).toBe('en');
     expect(english.video.originalId).toBe('1080,480,1080');
   });
 
@@ -406,7 +409,9 @@ describe('PeriodCombiner', () => {
     const english = variants.find(
         (v) => v.video.height == 1080 && v.language == 'en');
     expect(spanish.audio.originalId).toBe('es,en');
+    expect(spanish.audio.originalLanguage).toBe('es');
     expect(english.audio.originalId).toBe('es,en');
+    expect(english.audio.originalLanguage).toBe('en');
   });
 
   it('Multiple representations of the same resolution', async () => {
@@ -680,7 +685,7 @@ describe('PeriodCombiner', () => {
         ],
         textStreams: [
           makeTextStream('en'),
-          makeTextStream('es'),
+          makeTextStream('spa'),
         ],
         imageStreams: [],
       },
@@ -703,7 +708,9 @@ describe('PeriodCombiner', () => {
     const spanish = textStreams.find((s) => s.language == 'es');
     const english = textStreams.find((s) => s.language == 'en');
     expect(spanish.originalId).toBe(',,es');
+    expect(spanish.originalLanguage).toBe('spa');
     expect(english.originalId).toBe('en,,en');
+    expect(english.originalLanguage).toBe('en');
   });
 
   it('handles image track gaps', async () => {
@@ -1547,7 +1554,8 @@ describe('PeriodCombiner', () => {
         language);
     streamGenerator.primary = primary;
     streamGenerator.channelsCount = channels;
-    streamGenerator.originalId = primary ? language + '*' : language;
+    streamGenerator.originalId = primary ?
+      streamGenerator.language + '*' : streamGenerator.language;
     if (channels != 2) {
       streamGenerator.originalId += `-${channels}c`;
     }
@@ -1568,7 +1576,8 @@ describe('PeriodCombiner', () => {
         /* type= */ shaka.util.ManifestParserUtils.ContentType.TEXT,
         language);
     streamGenerator.primary = primary;
-    streamGenerator.originalId = primary ? language + '*' : language;
+    streamGenerator.originalId = primary ?
+      streamGenerator.language + '*' : streamGenerator.language;
     return streamGenerator.build_();
   }
 
@@ -1583,8 +1592,7 @@ describe('PeriodCombiner', () => {
         /* manifest= */ null,
         /* isPartial= */ false,
         /* id= */ nextId++,
-        /* type= */ shaka.util.ManifestParserUtils.ContentType.IMAGE,
-        /* lang= */ 'und');
+        /* type= */ shaka.util.ManifestParserUtils.ContentType.IMAGE);
     streamGenerator.size(width, height);
     streamGenerator.originalId = height.toString();
     streamGenerator.mime('image/jpeg');

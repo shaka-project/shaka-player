@@ -455,7 +455,7 @@ shaka.test.ManifestGenerator.Stream = class {
    * @param {boolean} isPartial
    * @param {?number} id
    * @param {shaka.util.ManifestParserUtils.ContentType} type
-   * @param {string=} lang
+   * @param {?string=} lang
    * @param {string=} label
    */
   constructor(manifest, isPartial, id, type, lang, label) {
@@ -526,7 +526,9 @@ shaka.test.ManifestGenerator.Stream = class {
       /** @type {!Set.<string>} */
       this.keyIds = new Set();
       /** @type {string} */
-      this.language = lang || 'und';
+      this.language = shaka.util.LanguageUtils.normalize(lang || 'und');
+      /** @type {?string} */
+      this.originalLanguage = lang || null;
       /** @type {?string} */
       this.label = label || null;
       /** @type {boolean} */
