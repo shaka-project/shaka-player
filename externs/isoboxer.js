@@ -45,6 +45,7 @@ var ISOBoxerUtils;
 
 /**
  * @typedef {{
+ *   _parsing: boolean,
  *   type: string,
  *   size: number,
  *   _parent: ISOBox,
@@ -123,6 +124,7 @@ var ISOBoxerUtils;
  *   sample_info_size: Array.<number>,
  *   data_offset: number
  * }}
+ * @property {boolean} _parsing
  * @property {string} type
  * @property {number} size
  * @property {ISOBox} _parent
