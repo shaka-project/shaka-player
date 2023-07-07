@@ -1258,7 +1258,9 @@ shaka.extern.AdsConfiguration;
  *   advanced: shaka.extern.AdvancedAbrConfiguration,
  *   restrictToElementSize: boolean,
  *   restrictToScreenSize: boolean,
- *   ignoreDevicePixelRatio: boolean
+ *   ignoreDevicePixelRatio: boolean,
+ *   clearBufferSwitch: boolean,
+ *   safeMarginSwitch: number
  * }}
  *
  * @property {boolean} enabled
@@ -1300,6 +1302,19 @@ shaka.extern.AdsConfiguration;
  *   If true,device pixel ratio is ignored when restricting the quality to
  *   media element size or screen size.
  *   Defaults false.
+ * @property {boolean} clearBufferSwitch
+ *   If true, the buffer will be cleared during the switch.
+ *   The default automatic behavior is false to have a smoother transition.
+ *   On some device it's better to clear buffer.
+ *   Defaults false.
+ * @property {number} safeMarginSwitch
+ *   Optional amount of buffer (in seconds) to
+ *   retain when clearing the buffer during the automatic switch.
+ *   Useful for switching variant quickly without causing a buffering event.
+ *   Defaults to 0 if not provided. Ignored if clearBuffer is false.
+ *   Can cause hiccups on some browsers if chosen too small, e.g.
+ *   The amount of two segments is a fair minimum to consider as safeMargin
+ *   value.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;
