@@ -483,7 +483,8 @@ describe('StreamUtils', () => {
       });
 
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-          /* usePersistentLicenses= */false, /* srcEquals= */ false);
+          /* usePersistentLicenses= */false, /* srcEquals= */ false,
+          /* preferredKeySystems= */ []);
       expect(manifest.variants.length).toBeTruthy();
       expect(manifest.variants[0].decodingInfos.length).toBe(1);
       expect(manifest.variants[0].decodingInfos[0].supported).toBeTruthy();
@@ -499,7 +500,8 @@ describe('StreamUtils', () => {
       });
 
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-          /* usePersistentLicenses= */false, /* srcEquals= */ true);
+          /* usePersistentLicenses= */false, /* srcEquals= */ true,
+          /* preferredKeySystems= */ []);
       expect(manifest.variants.length).toBeTruthy();
       expect(manifest.variants[0].decodingInfos.length).toBe(1);
       expect(manifest.variants[0].decodingInfos[0].supported).toBeTruthy();
@@ -528,7 +530,8 @@ describe('StreamUtils', () => {
       });
 
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-          /* usePersistentLicenses= */false, /* srcEquals= */ false);
+          /* usePersistentLicenses= */false, /* srcEquals= */ false,
+          /* preferredKeySystems= */ []);
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].decodingInfos.length).toBe(0);
     });
@@ -562,13 +565,46 @@ describe('StreamUtils', () => {
         });
 
         await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-            /* usePersistentLicenses= */ false, /* srcEquals= */ false);
+            /* usePersistentLicenses= */ false, /* srcEquals= */ false,
+            /* preferredKeySystems= */ []);
         expect(decodingInfoSpy.calls.argsFor(0)[0].video.transferFunction)
             .toBe('srgb');
         expect(decodingInfoSpy.calls.argsFor(1)[0].video.transferFunction)
             .toBe('pq');
         expect(decodingInfoSpy.calls.argsFor(2)[0].video.transferFunction)
             .toBe('hlg');
+      } finally {
+        navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
+      }
+    });
+
+    it('includes streams only with preferred key system', async () => {
+      const originalDecodingInfo = navigator.mediaCapabilities.decodingInfo;
+
+      try {
+        navigator.mediaCapabilities.decodingInfo =
+            shaka.test.Util.spyFunc(decodingInfoSpy);
+
+        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+          manifest.addVariant(0, (variant) => {
+            variant.addVideo(1, (stream) => {
+              stream.mime('video/mp4', 'avc1.4d400d');
+              stream.encrypted = true;
+              stream.addDrmInfo('com.widevine.alpha');
+              stream.addDrmInfo('com.microsoft.playready');
+            });
+          });
+        });
+
+        await StreamUtils.getDecodingInfosForVariants(manifest.variants,
+            /* usePersistentLicenses= */ false, /* srcEquals= */ false,
+            /* preferredKeySystems= */ ['com.microsoft.playready']);
+
+        // if preferred key system satisfies us, we shouldn't check other ones.
+        expect(decodingInfoSpy).toHaveBeenCalledTimes(1);
+        expect(decodingInfoSpy.calls.argsFor(0)[0].keySystemConfiguration
+            .keySystem)
+            .toBe('com.microsoft.playready');
       } finally {
         navigator.mediaCapabilities.decodingInfo = originalDecodingInfo;
       }
@@ -906,7 +942,8 @@ describe('StreamUtils', () => {
       });
 
       await StreamUtils.getDecodingInfosForVariants(manifest.variants,
-          /* usePersistentLicenses= */false, /* srcEquals= */ false);
+          /* usePersistentLicenses= */false, /* srcEquals= */ false,
+          /* preferredKeySystems= */ []);
 
       shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
           /* preferredVideoCodecs= */[],
