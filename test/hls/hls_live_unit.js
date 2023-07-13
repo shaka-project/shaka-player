@@ -996,12 +996,12 @@ describe('HlsParser live', () => {
           '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
           '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,\n',
           '#EXTINF:2,\n',
-          'main.mp4\n',
+          'main0.mp4\n',
           '#EXTINF:2,\n',
-          'main2.mp4\n',
+          'main1.mp4\n',
         ].join('');
 
-        const mediaWithSkippedSegments = [
+        const mediaWithSkippedSegments1 = [
           '#EXTM3U\n',
           '#EXT-X-TARGETDURATION:5\n',
           '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
@@ -1010,22 +1010,41 @@ describe('HlsParser live', () => {
           '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
           '#EXTINF:2,\n',
           'main2.mp4\n',
+        ].join('');
+
+        const mediaWithSkippedSegments2 = [
+          '#EXTM3U\n',
+          '#EXT-X-TARGETDURATION:5\n',
+          '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+          '#EXT-X-MEDIA-SEQUENCE:2\n',
+          '#EXT-X-SERVER-CONTROL:CAN-BLOCK-RELOAD=YES,CAN-SKIP-UNTIL=60.0,\n',
+          '#EXT-X-SKIP:SKIPPED-SEGMENTS=1\n',
           '#EXTINF:2,\n',
           'main3.mp4\n',
         ].join('');
 
         fakeNetEngine.setResponseText(
-            'test:/video?_HLS_msn=2&_HLS_skip=YES', mediaWithSkippedSegments);
+            'test:/video?_HLS_msn=2&_HLS_skip=YES', mediaWithSkippedSegments1);
+
+        fakeNetEngine.setResponseText(
+            'test:/video?_HLS_msn=3&_HLS_skip=YES', mediaWithSkippedSegments2);
 
         playerInterface.isLowLatencyMode = () => true;
 
         await testInitialManifest(master, mediaWithDeltaUpdates);
 
         fakeNetEngine.request.calls.reset();
-        await delayForUpdatePeriod();
 
+        await delayForUpdatePeriod();
         fakeNetEngine.expectRequest(
             'test:/video?_HLS_msn=2&_HLS_skip=YES',
+            shaka.net.NetworkingEngine.RequestType.MANIFEST,
+            {type:
+              shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
+
+        await delayForUpdatePeriod();
+        fakeNetEngine.expectRequest(
+            'test:/video?_HLS_msn=3&_HLS_skip=YES',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
             {type:
               shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
