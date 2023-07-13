@@ -1015,7 +1015,7 @@ describe('HlsParser live', () => {
         ].join('');
 
         fakeNetEngine.setResponseText(
-            'test:/video?_HLS_skip=YES&_HLS_msn=2', mediaWithSkippedSegments);
+            'test:/video?_HLS_msn=2&_HLS_skip=YES', mediaWithSkippedSegments);
 
         playerInterface.isLowLatencyMode = () => true;
 
@@ -1025,7 +1025,7 @@ describe('HlsParser live', () => {
         await delayForUpdatePeriod();
 
         fakeNetEngine.expectRequest(
-            'test:/video?_HLS_skip=YES&_HLS_msn=2',
+            'test:/video?_HLS_msn=2&_HLS_skip=YES',
             shaka.net.NetworkingEngine.RequestType.MANIFEST,
             {type:
               shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_PLAYLIST});
