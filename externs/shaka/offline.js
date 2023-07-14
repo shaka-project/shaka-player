@@ -123,7 +123,7 @@ shaka.extern.ManifestDB;
  *   hdr: (string|undefined),
  *   kind: (string|undefined),
  *   language: string,
- *   originalLanguage: ?string,
+ *   originalLanguage: (?string|undefined),
  *   label: ?string,
  *   width: ?number,
  *   height: ?number,
@@ -163,7 +163,7 @@ shaka.extern.ManifestDB;
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
  *   The language of the stream; '' for video.
- * @property {?string} originalLanguage
+ * @property {(?string|undefined)} originalLanguage
  *   The original language, if any, that appeared in the manifest.
  * @property {?string} label
  *   The label of the stream; '' for video.
