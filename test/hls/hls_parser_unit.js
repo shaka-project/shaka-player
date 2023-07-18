@@ -191,6 +191,7 @@ describe('HlsParser', () => {
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.originalLanguage = 'eng';
           stream.channelsCount = 16;
           stream.audioSamplingRate = 48000;
           stream.spatialAudio = true;
@@ -199,11 +200,13 @@ describe('HlsParser', () => {
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
+        stream.originalLanguage = 'eng';
         stream.kind = TextStreamKind.SUBTITLE;
         stream.mime('text/vtt', '');
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'es';
+        stream.originalLanguage = 'es';
         stream.kind = TextStreamKind.SUBTITLE;
         stream.mime('text/vtt', '');
       });
@@ -269,6 +272,7 @@ describe('HlsParser', () => {
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.originalLanguage = 'eng';
           stream.channelsCount = 16;
           stream.spatialAudio = true;
           stream.mime('audio/mp4', 'mp4a');
@@ -276,11 +280,13 @@ describe('HlsParser', () => {
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
+        stream.originalLanguage = 'eng';
         stream.kind = TextStreamKind.SUBTITLE;
         stream.mime('text/vtt', '');
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'es';
+        stream.originalLanguage = 'es';
         stream.kind = TextStreamKind.SUBTITLE;
         stream.mime('text/vtt', '');
       });
@@ -934,6 +940,7 @@ describe('HlsParser', () => {
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.originalLanguage = 'eng';
         });
       });
       manifest.addPartialVariant((variant) => {
@@ -944,6 +951,7 @@ describe('HlsParser', () => {
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'fr';
+          stream.originalLanguage = 'fr';
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -981,6 +989,7 @@ describe('HlsParser', () => {
         variant.addPartialStream(ContentType.VIDEO);
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.originalLanguage = 'en';
         });
       });
       manifest.addPartialVariant((variant) => {
@@ -988,6 +997,7 @@ describe('HlsParser', () => {
         variant.addPartialStream(ContentType.VIDEO);
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'fr';
+          stream.originalLanguage = 'fr';
         });
       });
       manifest.sequenceMode = sequenceMode;
@@ -1141,6 +1151,7 @@ describe('HlsParser', () => {
         variant.addPartialStream(ContentType.VIDEO);
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.originalLanguage = 'en';
         });
       });
       manifest.addPartialVariant((variant) => {
@@ -1148,6 +1159,7 @@ describe('HlsParser', () => {
         variant.addPartialStream(ContentType.VIDEO);
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.originalLanguage = 'en';
           stream.roles = [
             'public.accessibility.describes-video',
             'public.accessibility.describes-music-and-sound',
@@ -1365,6 +1377,7 @@ describe('HlsParser', () => {
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
+        stream.originalLanguage = 'eng';
         stream.forced = true;
         stream.kind = TextStreamKind.SUBTITLE;
         stream.mime('text/vtt', '');
@@ -1433,11 +1446,13 @@ describe('HlsParser', () => {
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
+        stream.originalLanguage = 'eng';
         stream.kind = TextStreamKind.SUBTITLE;
         stream.mime('text/vtt', '');
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'es';
+        stream.originalLanguage = 'es';
         stream.kind = TextStreamKind.SUBTITLE;
         stream.mime('text/vtt', '');
       });
@@ -1566,6 +1581,7 @@ describe('HlsParser', () => {
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
+        stream.originalLanguage = 'eng';
         stream.forced = true;
         stream.kind = TextStreamKind.SUBTITLE;
         stream.mime('text/vtt', '');
@@ -2321,6 +2337,7 @@ describe('HlsParser', () => {
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
+        stream.originalLanguage = 'eng';
         stream.mime('application/mp4', 'stpp.ttml.im1t');
       });
       manifest.sequenceMode = sequenceMode;
@@ -2971,6 +2988,7 @@ describe('HlsParser', () => {
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.originalLanguage = 'eng';
         });
       });
       manifest.addPartialVariant((variant) => {
@@ -3917,6 +3935,7 @@ describe('HlsParser', () => {
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.originalLanguage = 'en';
         });
       });
       manifest.addPartialVariant((variant) => {
@@ -3926,6 +3945,7 @@ describe('HlsParser', () => {
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'fr';
+          stream.originalLanguage = 'fr';
         });
       });
       manifest.addPartialVariant((variant) => {
@@ -3935,6 +3955,7 @@ describe('HlsParser', () => {
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.originalLanguage = 'en';
         });
       });
       manifest.addPartialVariant((variant) => {
@@ -3944,6 +3965,7 @@ describe('HlsParser', () => {
         });
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'fr';
+          stream.originalLanguage = 'fr';
         });
       });
       manifest.sequenceMode = sequenceMode;

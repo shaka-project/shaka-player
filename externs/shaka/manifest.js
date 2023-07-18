@@ -344,6 +344,7 @@ shaka.extern.FetchCryptoKeysFunction;
  *   drmInfos: !Array.<shaka.extern.DrmInfo>,
  *   keyIds: !Set.<string>,
  *   language: string,
+ *   originalLanguage: ?string,
  *   label: ?string,
  *   type: string,
  *   primary: boolean,
@@ -429,6 +430,9 @@ shaka.extern.FetchCryptoKeysFunction;
  *   The Stream's language, specified as a language code. <br>
  *   Audio stream's language must be identical to the language of the containing
  *   Variant.
+ * @property {?string} originalLanguage
+ *   <i>Optional.</i> <br>
+ *   The original language, if any, that appeared in the manifest.
  * @property {?string} label
  *   The Stream's label, unique text that should describe the audio/text track.
  * @property {string} type

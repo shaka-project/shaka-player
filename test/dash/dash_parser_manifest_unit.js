@@ -140,7 +140,7 @@ describe('DashParser Manifest', () => {
           '      <Representation bandwidth="50" width="576" height="432" />',
           '    </AdaptationSet>',
           '    <AdaptationSet mimeType="text/vtt"',
-          '        lang="es" label="spanish">',
+          '        lang="spa" label="spanish">',
           '      <Role value="caption" />',
           '      <Role value="main" />',
           '      <Representation bandwidth="100" />',
@@ -194,6 +194,7 @@ describe('DashParser Manifest', () => {
           });
           manifest.addPartialTextStream((stream) => {
             stream.language = 'es';
+            stream.originalLanguage = 'spa';
             stream.label = 'spanish';
             stream.primary = true;
             stream.mimeType = 'text/vtt';
