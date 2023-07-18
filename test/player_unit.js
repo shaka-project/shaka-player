@@ -1542,6 +1542,7 @@ describe('Player', () => {
         manifest.addTextStream(50, (stream) => {
           stream.originalId = 'text-es';
           stream.language = 'es';
+          stream.originalLanguage = 'es';
           stream.label = 'Spanish';
           stream.bandwidth = 10;
           stream.mimeType = 'text/vtt';
@@ -1550,6 +1551,7 @@ describe('Player', () => {
         manifest.addTextStream(51, (stream) => {
           stream.originalId = 'text-en';
           stream.language = 'en';
+          stream.originalLanguage = 'en';
           stream.label = 'English';
           stream.bandwidth = 10;
           stream.mimeType = 'application/ttml+xml';
@@ -1559,6 +1561,7 @@ describe('Player', () => {
         manifest.addTextStream(52, (stream) => {
           stream.originalId = 'text-commentary';
           stream.language = 'en';
+          stream.originalLanguage = 'en';
           stream.label = 'English';
           stream.bandwidth = 10;
           stream.mimeType = 'application/ttml+xml';
@@ -1584,6 +1587,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 1300,
           language: 'en',
+          originalLanguage: 'en',
           label: null,
           kind: null,
           width: 100,
@@ -1621,6 +1625,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 2300,
           language: 'en',
+          originalLanguage: 'en',
           label: null,
           kind: null,
           width: 200,
@@ -1658,6 +1663,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 1100,
           language: 'en',
+          originalLanguage: 'en',
           label: null,
           kind: null,
           width: 100,
@@ -1695,6 +1701,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 2100,
           language: 'en',
+          originalLanguage: 'en',
           label: null,
           kind: null,
           width: 200,
@@ -1732,6 +1739,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 1100,
           language: 'en',
+          originalLanguage: 'en',
           label: null,
           kind: null,
           width: 100,
@@ -1769,6 +1777,7 @@ describe('Player', () => {
           type: 'variant',
           bandwidth: 2100,
           language: 'en',
+          originalLanguage: 'en',
           label: null,
           kind: null,
           width: 200,
@@ -1807,6 +1816,7 @@ describe('Player', () => {
           bandwidth: 1100,
           language: 'es',
           label: 'es-label',
+          originalLanguage: 'es',
           kind: null,
           width: 100,
           height: 200,
@@ -1844,6 +1854,7 @@ describe('Player', () => {
           bandwidth: 2100,
           language: 'es',
           label: 'es-label',
+          originalLanguage: 'es',
           kind: null,
           width: 200,
           height: 400,
@@ -1882,6 +1893,7 @@ describe('Player', () => {
           active: true,
           type: ContentType.TEXT,
           language: 'es',
+          originalLanguage: 'es',
           label: 'Spanish',
           kind: 'caption',
           mimeType: 'text/vtt',
@@ -1919,6 +1931,7 @@ describe('Player', () => {
           active: false,
           type: ContentType.TEXT,
           language: 'en',
+          originalLanguage: 'en',
           label: 'English',
           kind: 'caption',
           mimeType: 'application/ttml+xml',
@@ -1956,6 +1969,7 @@ describe('Player', () => {
           active: false,
           type: ContentType.TEXT,
           language: 'en',
+          originalLanguage: 'en',
           label: 'English',
           kind: 'caption',
           mimeType: 'application/ttml+xml',
@@ -1996,6 +2010,7 @@ describe('Player', () => {
           active: false,
           type: ContentType.IMAGE,
           language: '',
+          originalLanguage: null,
           label: null,
           kind: null,
           mimeType: 'image/jpeg',

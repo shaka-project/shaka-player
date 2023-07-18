@@ -238,7 +238,8 @@ shaka.extern.BufferedInfo;
  *   originalVideoId: ?string,
  *   originalAudioId: ?string,
  *   originalTextId: ?string,
- *   originalImageId: ?string
+ *   originalImageId: ?string,
+ *   originalLanguage: ?string
  * }}
  *
  * @description
@@ -260,8 +261,10 @@ shaka.extern.BufferedInfo;
  *   The bandwidth required to play the track, in bits/sec.
  *
  * @property {string} language
- *   The language of the track, or <code>'und'</code> if not given.  This is the
- *   exact value provided in the manifest; it may need to be normalized.
+ *   The language of the track, or <code>'und'</code> if not given.  This value
+ *   is normalized as follows - language part is always lowercase and translated
+ *   to ISO-639-1 when possible, locale part is always uppercase,
+ *   i.e. <code>'en-US'</code>.
  * @property {?string} label
  *   The track label, which is unique text that should describe the track.
  * @property {?string} kind
@@ -340,6 +343,10 @@ shaka.extern.BufferedInfo;
  * @property {?string} originalImageId
  *   (image tracks only) The original ID of the image track, if any, as it
  *   appeared in the original manifest.
+ * @property {?string} originalLanguage
+ *   The original language of the track, if any, as it appeared in the original
+ *   manifest.  This is the exact value provided in the manifest; for normalized
+ *   value use <code>language</code> property.
  * @exportDoc
  */
 shaka.extern.Track;

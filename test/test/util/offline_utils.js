@@ -42,6 +42,7 @@ shaka.test.OfflineUtils = class {
       pixelAspectRatio: undefined,
       kind: undefined,
       language: '',
+      originalLanguage: null,
       label: null,
       width: null,
       height: null,
