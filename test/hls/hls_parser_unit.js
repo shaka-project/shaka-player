@@ -1176,12 +1176,12 @@ describe('HlsParser', () => {
       'NAME="English (describes-video)",URI="audio2"\n',
 
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="en",',
-      'NAME="English (caption)",DEFAULT=YES,AUTOSELECT=YES,',
+      'NAME="English (subtitle)",DEFAULT=YES,AUTOSELECT=YES,',
       'URI="text"\n',
 
       '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="en",',
       'NAME="English (caption)",DEFAULT=YES,AUTOSELECT=YES,',
-      'public.accessibility.describes-music-and-sound",',
+      'CHARACTERISTICS="public.accessibility.describes-music-and-sound",',
       'URI="text2"\n',
     ].join('');
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -1191,6 +1191,7 @@ describe('HlsParser', () => {
         variant.addPartialStream(ContentType.VIDEO);
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.language = 'en';
+          stream.roles = [];
         });
       });
       manifest.addPartialVariant((variant) => {
@@ -1207,12 +1208,15 @@ describe('HlsParser', () => {
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.kind = TextStreamKind.SUBTITLE;
+        stream.roles = [
+          'subtitle',
+        ];
       });
       manifest.addPartialTextStream((stream) => {
         stream.language = 'en';
         stream.kind = TextStreamKind.SUBTITLE;
         stream.roles = [
-          'subtitle',
+          'public.accessibility.describes-music-and-sound',
         ];
       });
       manifest.sequenceMode = sequenceMode;
