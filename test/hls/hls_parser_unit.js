@@ -1173,6 +1173,75 @@ describe('HlsParser', () => {
     await testHlsParser(master, media, manifest);
   });
 
+  it('adds subtitle role when characteristics are empty', async () => {
+    const master = [
+      '#EXTM3U\n',
+      '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="avc1",',
+      'RESOLUTION=960x540,FRAME-RATE=60,AUDIO="aud1",SUBTITLES="sub1"\n',
+      'video\n',
+
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
+      'NAME="English",URI="audio"\n',
+
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",LANGUAGE="en",',
+      'CHARACTERISTICS="public.accessibility.describes-video,',
+      'public.accessibility.describes-music-and-sound",',
+      'NAME="English (describes-video)",URI="audio2"\n',
+
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="en",',
+      'NAME="English (subtitle)",DEFAULT=YES,AUTOSELECT=YES,',
+      'URI="text"\n',
+
+      '#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="sub1",LANGUAGE="en",',
+      'NAME="English (caption)",DEFAULT=YES,AUTOSELECT=YES,',
+      'CHARACTERISTICS="public.accessibility.describes-music-and-sound",',
+      'URI="text2"\n',
+    ].join('');
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.language = 'en';
+        variant.addPartialStream(ContentType.VIDEO);
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.language = 'en';
+          stream.roles = [];
+        });
+      });
+      manifest.addPartialVariant((variant) => {
+        variant.language = 'en';
+        variant.addPartialStream(ContentType.VIDEO);
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.language = 'en';
+          stream.roles = [
+            'public.accessibility.describes-video',
+            'public.accessibility.describes-music-and-sound',
+          ];
+        });
+      });
+      manifest.addPartialTextStream((stream) => {
+        stream.language = 'en';
+        stream.kind = TextStreamKind.SUBTITLE;
+        stream.roles = [
+          'subtitle',
+        ];
+      });
+      manifest.addPartialTextStream((stream) => {
+        stream.language = 'en';
+        stream.kind = TextStreamKind.SUBTITLE;
+        stream.roles = [
+          'public.accessibility.describes-music-and-sound',
+        ];
+      });
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+    });
+
+    fakeNetEngine.setResponseText('test:/master', master);
+
+    const actual = await parser.start('test:/master', playerInterface);
+    expect(actual).toEqual(manifest);
+  });
+
   it('parses characteristics from text tags', async () => {
     const master = [
       '#EXTM3U\n',
