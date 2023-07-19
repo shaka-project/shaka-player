@@ -9,8 +9,10 @@ describe('Mp4CeaParser', () => {
   const ceaSegmentUri = '/base/test/test/assets/cea-segment.mp4';
   const h265ceaInitSegmentUri = '/base/test/test/assets/h265-cea-init.mp4';
   const h265ceaSegmentUri = '/base/test/test/assets/h265-cea-segment.mp4';
-  const multipleTrunInitSegmentUri = '/base/test/test/assets/multiple-trun-init.mp4';
-  const multipleTrunSegmentUri = '/base/test/test/assets/multiple-trun-segment.mp4';
+  const multipleTrunInitSegmentUri =
+      '/base/test/test/assets/multiple-trun-init.mp4';
+  const multipleTrunSegmentUri =
+      '/base/test/test/assets/multiple-trun-segment.mp4';
   const Util = shaka.test.Util;
 
   /** @type {!ArrayBuffer} */
