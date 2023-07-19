@@ -9,6 +9,8 @@ describe('Mp4CeaParser', () => {
   const ceaSegmentUri = '/base/test/test/assets/cea-segment.mp4';
   const h265ceaInitSegmentUri = '/base/test/test/assets/h265-cea-init.mp4';
   const h265ceaSegmentUri = '/base/test/test/assets/h265-cea-segment.mp4';
+  const multipleTrunInitSegmentUri = '/base/test/test/assets/multiple-trun-init.mp4';
+  const multipleTrunSegmentUri = '/base/test/test/assets/multiple-trun-segment.mp4';
   const Util = shaka.test.Util;
 
   /** @type {!ArrayBuffer} */
@@ -19,18 +21,27 @@ describe('Mp4CeaParser', () => {
   let h265ceaInitSegment;
   /** @type {!ArrayBuffer} */
   let h265ceaSegment;
+  /** @type {!ArrayBuffer} */
+  let multipleTrunInitSegment;
+  /** @type {!ArrayBuffer} */
+  let multipleTrunSegment;
 
   beforeAll(async () => {
-    const responses = await Promise.all([
+    [
+      ceaInitSegment,
+      ceaSegment,
+      h265ceaInitSegment,
+      h265ceaSegment,
+      multipleTrunInitSegment,
+      multipleTrunSegment,
+    ] = await Promise.all([
       shaka.test.Util.fetch(ceaInitSegmentUri),
       shaka.test.Util.fetch(ceaSegmentUri),
       shaka.test.Util.fetch(h265ceaInitSegmentUri),
       shaka.test.Util.fetch(h265ceaSegmentUri),
+      shaka.test.Util.fetch(multipleTrunInitSegmentUri),
+      shaka.test.Util.fetch(multipleTrunSegmentUri),
     ]);
-    ceaInitSegment = responses[0];
-    ceaSegment = responses[1];
-    h265ceaInitSegment = responses[2];
-    h265ceaSegment = responses[3];
   });
 
   /**
@@ -87,6 +98,16 @@ describe('Mp4CeaParser', () => {
     const ceaPackets = ceaParser.parse(h265ceaSegment);
     expect(ceaPackets).toBeDefined();
     expect(ceaPackets.length).toBe(60);
+  });
+
+  it('parses cea data from a segment with multiple trun boxes', () => {
+    const ceaParser = new shaka.cea.Mp4CeaParser();
+
+    ceaParser.init(multipleTrunInitSegment);
+    const ceaPackets = ceaParser.parse(multipleTrunSegment);
+    // The first trun box references samples with 48 CEA packets.
+    // The second trun box references samples with 132 more, for a total of 180.
+    expect(ceaPackets.length).toBe(180);
   });
 
   it('parses an invalid init segment', () => {
