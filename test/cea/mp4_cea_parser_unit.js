@@ -7,20 +7,33 @@
 describe('Mp4CeaParser', () => {
   const ceaInitSegmentUri = '/base/test/test/assets/cea-init.mp4';
   const ceaSegmentUri = '/base/test/test/assets/cea-segment.mp4';
+  const multipleTrunInitSegmentUri =
+      '/base/test/test/assets/multiple-trun-init.mp4';
+  const multipleTrunSegmentUri =
+      '/base/test/test/assets/multiple-trun-segment.mp4';
   const Util = shaka.test.Util;
 
   /** @type {!ArrayBuffer} */
   let ceaInitSegment;
   /** @type {!ArrayBuffer} */
   let ceaSegment;
+  /** @type {!ArrayBuffer} */
+  let multipleTrunInitSegment;
+  /** @type {!ArrayBuffer} */
+  let multipleTrunSegment;
 
   beforeAll(async () => {
-    const responses = await Promise.all([
+    [
+      ceaInitSegment,
+      ceaSegment,
+      multipleTrunInitSegment,
+      multipleTrunSegment,
+    ] = await Promise.all([
       shaka.test.Util.fetch(ceaInitSegmentUri),
       shaka.test.Util.fetch(ceaSegmentUri),
+      shaka.test.Util.fetch(multipleTrunInitSegmentUri),
+      shaka.test.Util.fetch(multipleTrunSegmentUri),
     ]);
-    ceaInitSegment = responses[0];
-    ceaSegment = responses[1];
   });
 
   /**
@@ -68,6 +81,16 @@ describe('Mp4CeaParser', () => {
     expect(cea708Packets.length).toBe(4);
     expect(cea708Packets[cea708Packets.length - 1].packet)
         .toEqual(expectedCea708Packet);
+  });
+
+  it('parses cea data from a segment with multiple trun boxes', () => {
+    const ceaParser = new shaka.cea.Mp4CeaParser();
+
+    ceaParser.init(multipleTrunInitSegment);
+    const ceaPackets = ceaParser.parse(multipleTrunSegment);
+    // The first trun box references samples with 48 CEA packets.
+    // The second trun box references samples with 132 more, for a total of 180.
+    expect(ceaPackets.length).toBe(180);
   });
 
   it('parses an invalid init segment', () => {
