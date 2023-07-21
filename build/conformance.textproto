@@ -358,7 +358,7 @@ requirement: {
 }
 
 requirement: {
-  type: BANNED_PROPERTY
+  type: BANNED_PROPERTY_CALL
   value: "String.prototype.replaceAll"
   error_message:
     "Using \"String.replaceAll\" is not allowed; "
@@ -375,4 +375,11 @@ requirement: {
     "use shaka.util.XmlUtils.parseXmlString instead."
   whitelist_regexp: "lib/util/xml_utils.js"
   whitelist_regexp: "test/"
+}
+
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Array.prototype.flat"
+  error_message:
+    "Using \"Array.flat\" is not allowed because is not supported on Tizen 3."
 }
