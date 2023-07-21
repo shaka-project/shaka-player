@@ -1,5 +1,30 @@
 # Changelog
 
+## [4.2.12](https://github.com/shaka-project/shaka-player/compare/v4.2.11...v4.2.12) (2023-07-21)
+
+
+### Bug Fixes
+
+* **DASH:** Avoid "Possible encoding problem detected!" when appending chunked data ([#5376](https://github.com/shaka-project/shaka-player/issues/5376)) ([ad9de15](https://github.com/shaka-project/shaka-player/commit/ad9de15043491d5969f44d7d864041c19af3b108))
+* **demo:** Fix deployment of v4.2.x on appspot ([d8b2378](https://github.com/shaka-project/shaka-player/commit/d8b2378ff565a6aec2de2689219001a1c2a16308))
+* **Demo:** Trim custom manifestUri to avoid copy-paste errors ([#5378](https://github.com/shaka-project/shaka-player/issues/5378)) ([d7d2bcb](https://github.com/shaka-project/shaka-player/commit/d7d2bcb6aab0cb4b670889e380f4705444b2848e))
+* **docs:** fix player configuration code in drm config tutorial ([#5359](https://github.com/shaka-project/shaka-player/issues/5359)) ([c5e0f8b](https://github.com/shaka-project/shaka-player/commit/c5e0f8b967d0327eb1d9ab50b4db77990d84a1ed))
+* **DRM:** broken keySystemsMapping due to multiple references of drmInfo ([#5388](https://github.com/shaka-project/shaka-player/issues/5388)) ([8906548](https://github.com/shaka-project/shaka-player/commit/8906548b6c40b0ac3023c80f1bad02496aff0014))
+* Fix captions from MP4s with multiple trun boxes ([#5422](https://github.com/shaka-project/shaka-player/issues/5422)) ([b41186e](https://github.com/shaka-project/shaka-player/commit/b41186e3cfe7e3e2f633a24d5c9c88e8eb025fef)), closes [#5328](https://github.com/shaka-project/shaka-player/issues/5328)
+* Fix DASH rejection of streams with ColourPrimaries and MatrixCoefficients ([#5345](https://github.com/shaka-project/shaka-player/issues/5345)) ([e2968ca](https://github.com/shaka-project/shaka-player/commit/e2968ca7ad5ae5a3b3dea56029d2815214564a52))
+* Fix exception on Tizen due to unsupported Array method ([#5429](https://github.com/shaka-project/shaka-player/issues/5429)) ([0fe4d5c](https://github.com/shaka-project/shaka-player/commit/0fe4d5c6f7dbe5e6254b8173cec5ce796c14f5bf))
+* Fix failure when drivers lag behind browser ([#5423](https://github.com/shaka-project/shaka-player/issues/5423)) ([30f464f](https://github.com/shaka-project/shaka-player/commit/30f464f5f06b0f5e7779e7c4a6dedca6ae90277c))
+* Gap jump at start when first jump lands in a new gap ([#5408](https://github.com/shaka-project/shaka-player/issues/5408)) ([1ead685](https://github.com/shaka-project/shaka-player/commit/1ead685075de79591a5909e4e06ac5dd380e3e92))
+* gap jumping when gap exists at start position ([#5384](https://github.com/shaka-project/shaka-player/issues/5384)) ([bd5bade](https://github.com/shaka-project/shaka-player/commit/bd5badef95428ae515262d104770e88b71493469))
+* **HLS:** Add subtitle role when there are no roles ([#5357](https://github.com/shaka-project/shaka-player/issues/5357)) ([c5a5ddb](https://github.com/shaka-project/shaka-player/commit/c5a5ddbfd0bfca21b686f2ec99c5dedb0da71fba))
+* **HLS:** Fix dvh1 and dvhe detection as video codec ([#5364](https://github.com/shaka-project/shaka-player/issues/5364)) ([3373a41](https://github.com/shaka-project/shaka-player/commit/3373a41f483a8807d4de7effe7310fdf488999a5))
+* **HLS:** Ignore segments with zero duration ([#5371](https://github.com/shaka-project/shaka-player/issues/5371)) ([29b81ea](https://github.com/shaka-project/shaka-player/commit/29b81ea3c12638feb210e79a5ee28a9ece34656f))
+* **media:** Fix region checking in livestreams ([#5361](https://github.com/shaka-project/shaka-player/issues/5361)) ([007a259](https://github.com/shaka-project/shaka-player/commit/007a2593096fae079c068a89dcfea338ec6d677e)), closes [#5213](https://github.com/shaka-project/shaka-player/issues/5213)
+* Populate HDR correctly ([#5369](https://github.com/shaka-project/shaka-player/issues/5369)) ([db67d8d](https://github.com/shaka-project/shaka-player/commit/db67d8d4c257a53b43456f63a68b19bd0ae9f08f))
+* prevent access to null config_ in SimpleAbrManager ([#5362](https://github.com/shaka-project/shaka-player/issues/5362)) ([80973d7](https://github.com/shaka-project/shaka-player/commit/80973d7d033d4a876af1a3376877e3c36a55ecc9))
+* **UI:** Fix resolution selection on src= ([#5367](https://github.com/shaka-project/shaka-player/issues/5367)) ([b570e92](https://github.com/shaka-project/shaka-player/commit/b570e92a3d0d49fe47d9051f48fb55196cc8b38e))
+* **WebVTT:** Add support to middle position ([#5366](https://github.com/shaka-project/shaka-player/issues/5366)) ([6481e29](https://github.com/shaka-project/shaka-player/commit/6481e2902de33aa0b5cd7c2373c764bd3143a866))
+
 ## [4.2.11](https://github.com/shaka-project/shaka-player/compare/v4.2.10...v4.2.11) (2023-06-20)
 
 
