@@ -3130,9 +3130,13 @@ describe('StreamingEngine', () => {
       expect(onManifestUpdate).toHaveBeenCalled();
     });
 
-    it('triggers metadata event', async () => {
+    it('triggers both emsg event and metadata event for ID3', async () => {
       setSegment0(emsgSegmentV0ID3);
       videoStream.emsgSchemeIdUris = [id3SchemeUri];
+
+      onEvent.and.callFake((emsgEvent) => {
+        expect(emsgEvent.type).toBe('emsg');
+      });
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -3141,8 +3145,28 @@ describe('StreamingEngine', () => {
       playing = true;
       await runTest();
 
-      expect(onEvent).not.toHaveBeenCalled();
+      expect(onEvent).toHaveBeenCalled();
       expect(onMetadata).toHaveBeenCalled();
+    });
+
+    it('only triggers emsg event for ID3 if event canceled', async () => {
+      setSegment0(emsgSegmentV0ID3);
+      videoStream.emsgSchemeIdUris = [id3SchemeUri];
+
+      onEvent.and.callFake((emsgEvent) => {
+        expect(emsgEvent.type).toBe('emsg');
+        emsgEvent.preventDefault();
+      });
+
+      // Here we go!
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+
+      expect(onEvent).toHaveBeenCalled();
+      expect(onMetadata).not.toHaveBeenCalled();
     });
 
     it('event start matches presentation time', async () => {
