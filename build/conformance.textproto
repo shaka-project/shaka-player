@@ -358,7 +358,7 @@ requirement: {
 }
 
 requirement: {
-  type: BANNED_PROPERTY
+  type: BANNED_PROPERTY_CALL
   value: "String.prototype.replaceAll"
   error_message:
     "Using \"String.replaceAll\" is not allowed; "
@@ -377,3 +377,9 @@ requirement: {
   whitelist_regexp: "test/"
 }
 
+requirement: {
+  type: BANNED_PROPERTY_CALL
+  value: "Array.prototype.flat"
+  error_message:
+    "Using \"Array.flat\" is not allowed because is not supported on Tizen 3."
+}
