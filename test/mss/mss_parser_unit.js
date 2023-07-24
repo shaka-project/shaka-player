@@ -24,6 +24,27 @@ describe('MssParser Manifest', () => {
 
   const aacCodecPrivateData = '1210';
 
+  // From https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264PR/S
+  //      uperSpeedway_720.ism/Manifest
+  const protectionHeader = 'jAMAAAEAAQCCAzwAVwBSAE0ASABFAEEARABFAFIAIAB4AG0A' +
+      'bABuAHMAPQAiAGgAdAB0AHAAOgAvAC8AcwBjAGgAZQBtAGEAcwAuAG0AaQBjAHIAbwBzA' +
+      'G8AZgB0AC4AYwBvAG0ALwBEAFIATQAvADIAMAAwADcALwAwADMALwBQAGwAYQB5AFIAZQ' +
+      'BhAGQAeQBIAGUAYQBkAGUAcgAiACAAdgBlAHIAcwBpAG8AbgA9ACIANAAuADAALgAwAC4' +
+      'AMAAiAD4APABEAEEAVABBAD4APABQAFIATwBUAEUAQwBUAEkATgBGAE8APgA8AEsARQBZ' +
+      'AEwARQBOAD4AMQA2ADwALwBLAEUAWQBMAEUATgA+ADwAQQBMAEcASQBEAD4AQQBFAFMAQ' +
+      'wBUAFIAPAAvAEEATABHAEkARAA+ADwALwBQAFIATwBUAEUAQwBUAEkATgBGAE8APgA8AE' +
+      'sASQBEAD4AQQBtAGYAagBDAFQATwBQAGIARQBPAGwAMwBXAEQALwA1AG0AYwBlAGMAQQA' +
+      '9AD0APAAvAEsASQBEAD4APABDAEgARQBDAEsAUwBVAE0APgBCAEcAdwAxAGEAWQBaADEA' +
+      'WQBYAE0APQA8AC8AQwBIAEUAQwBLAFMAVQBNAD4APABDAFUAUwBUAE8ATQBBAFQAVABSA' +
+      'EkAQgBVAFQARQBTAD4APABJAEkAUwBfAEQAUgBNAF8AVgBFAFIAUwBJAE8ATgA+ADcALg' +
+      'AxAC4AMQAwADYANAAuADAAPAAvAEkASQBTAF8ARABSAE0AXwBWAEUAUgBTAEkATwBOAD4' +
+      'APAAvAEMAVQBTAFQATwBNAEEAVABUAFIASQBCAFUAVABFAFMAPgA8AEwAQQBfAFUAUgBM' +
+      'AD4AaAB0AHQAcAA6AC8ALwBwAGwAYQB5AHIAZQBhAGQAeQAuAGQAaQByAGUAYwB0AHQAY' +
+      'QBwAHMALgBuAGUAdAAvAHAAcgAvAHMAdgBjAC8AcgBpAGcAaAB0AHMAbQBhAG4AYQBnAG' +
+      'UAcgAuAGEAcwBtAHgAPAAvAEwAQQBfAFUAUgBMAD4APABEAFMAXwBJAEQAPgBBAEgAKwA' +
+      'wADMAagB1AEsAYgBVAEcAYgBIAGwAMQBWAC8AUQBJAHcAUgBBAD0APQA8AC8ARABTAF8A' +
+      'SQBEAD4APAAvAEQAQQBUAEEAPgA8AC8AVwBSAE0ASABFAEEARABFAFIAPgA='
+
   /** @param {!shaka.extern.Manifest} manifest */
   async function loadAllStreamsFor(manifest) {
     const promises = [];
@@ -113,7 +134,7 @@ describe('MssParser Manifest', () => {
       await Mss.testFails(source, error);
     });
 
-    it('ive content ', async () => {
+    it('live content ', async () => {
       const source = [
         '<SmoothStreamingMedia Duration="1209510000" IsLive="true">',
         '  <StreamIndex Name="audio" Type="audio" Url="uri">',
@@ -416,5 +437,37 @@ describe('MssParser Manifest', () => {
     const variant = manifest.variants[0];
     expect(variant.audio).toBeTruthy();
     expect(variant.video).toBeTruthy();
+  });
+
+  it('recognizes PlayReady System ID with mixed cases', async () => {
+    const manifestText = [
+      '<SmoothStreamingMedia Duration="1209510000">',
+      '  <StreamIndex Type="video" Url="uri">',
+      '    <QualityLevel Bitrate="2962000" CodecPrivateData="',
+      h264CodecPrivateData,
+      '" FourCC="H264" MaxHeight="720" MaxWidth="1280"/>',
+      '    <c d="20020000"/>',
+      '  </StreamIndex>',
+      '  <Protection>',
+      '    <ProtectionHeader SystemID="9a04F079-9840-4286-aB92-e65BE0885f95">',
+      protectionHeader,
+      '    </ProtectionHeader>',
+      '  </Protection>',
+      '</SmoothStreamingMedia>',
+    ].join('\n');
+
+    fakeNetEngine.setResponseText('dummy://foo', manifestText);
+
+    /** @type {shaka.extern.Manifest} */
+    const manifest = await parser.start('dummy://foo', playerInterface);
+    const variant = manifest.variants[0];
+    expect(variant.video.drmInfos.length).toBe(1);
+    expect(variant.video.drmInfos[0].keySystem).toBe('com.microsoft.playready');
+    expect(variant.video.drmInfos[0].keySystem).toBe('com.microsoft.playready');
+    // Also able to parse KID correctly
+    expect(variant.video.drmInfos[0].keyIds.size).toBe(1);
+    // Expected KID: https://testweb.playready.microsoft.com/Content/Content2X
+    expect([...(variant.video.drmInfos[0].keyIds)][0]).toBe(
+        '09E367028F33436CA5DD60FFE6671E70'.toLowerCase());
   });
 });
