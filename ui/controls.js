@@ -622,7 +622,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   /** @private */
   async exitFullScreen_() {
     if (document.fullscreenEnabled) {
-      if (screen.orientation) {
+      // There are some platforms (e.g. Safari) where screen.orientation does
+      // not have the "unlock" method.
+      if (screen.orientation && screen.orientation.unlock !== undefined) {
         screen.orientation.unlock();
       }
       await document.exitFullscreen();
