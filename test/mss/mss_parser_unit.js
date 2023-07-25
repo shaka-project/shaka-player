@@ -463,7 +463,6 @@ describe('MssParser Manifest', () => {
     const variant = manifest.variants[0];
     expect(variant.video.drmInfos.length).toBe(1);
     expect(variant.video.drmInfos[0].keySystem).toBe('com.microsoft.playready');
-    expect(variant.video.drmInfos[0].keySystem).toBe('com.microsoft.playready');
     // Also able to parse KID correctly
     expect(variant.video.drmInfos[0].keyIds.size).toBe(1);
     // Expected KID: https://testweb.playready.microsoft.com/Content/Content2X
