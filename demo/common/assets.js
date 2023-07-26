@@ -1322,23 +1322,24 @@ shakaAssets.testAssets = [
   // }}}
 
   // MPEG-5 LCEVC assets {{{
-  /* LCEVC Enabled Content with LCEVC Encoded Stream */
+  /* LCEVC Enhanced Contents */
   new ShakaDemoAssetInfo(
-      /* name= */ 'Big Buck Bunny (LCEVC H264)',
+      /* name= */ 'Big Buck Bunny LCEVC H264 (DASH, MP4)',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
-      /* manifestUri= */ 'https://dyctis843rxh5.cloudfront.net/vnIAZIaowG1K7qOt/master.m3u8',
+      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vn9s0p86SVbJorX6/master.mpd',
       /* source= */ shakaAssets.Source.VNOVA)
-      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.WEBM)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
-      .addDescription('H264 HLS stream with LCEVC enhancement')
+      .addDescription('LCEVC-enhanced test stream. Shows moving squares when LCEVC is decoded successfully.')
       .markAsFeatured('Big Buck Bunny (LCEVC H264)')
       .setExtraConfig({
         streaming: {
           useNativeHlsOnSafari: false,
+        },
+        mediaSource: {
           forceTransmux: true,
         },
         lcevc: {
@@ -1349,21 +1350,21 @@ shakaAssets.testAssets = [
         },
       }),
   new ShakaDemoAssetInfo(
-      /* name= */ 'Game (LCEVC H264)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
-      /* manifestUri= */ 'https://dyctis843rxh5.cloudfront.net/vny72tI8aXJDcTYX/master.m3u8',
+      /* name= */ 'eSports LCEVC H264 (HLS, TS)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vnmITf0oAwlErGf9/master.m3u8',
       /* source= */ shakaAssets.Source.VNOVA)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.WEBM)
+      .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
-      .addDescription('H264 HLS stream with LCEVC enhancement')
-      .markAsFeatured('Game (LCEVC H264)')
+      .addDescription('LCEVC Enhanced eSports content selection.')
       .setExtraConfig({
         streaming: {
           useNativeHlsOnSafari: false,
+        },
+        mediaSource: {
           forceTransmux: true,
         },
         lcevc: {
@@ -1373,6 +1374,56 @@ shakaAssets.testAssets = [
           drawLogo: false,
         },
       }),
-  // }}}
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel LCEVC H264 (HLS, MP4)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ '',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.LCEVC)
+      .addDescription('H264 HLS stream with LCEVC enhancement')
+      .setExtraConfig({
+        streaming: {
+          useNativeHlsOnSafari: false,
+        },
+        mediaSource: {
+          forceTransmux: true,
+        },
+        lcevc: {
+          enabled: true,
+          dynamicPerformanceScaling: true,
+          logLevel: 0,
+          drawLogo: false,
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ ' eSports LCEVC HEVC (DASH, MP4)',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vnxSkAXoDN9YtEfz/master.mpd',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.LCEVC)
+      .addDescription('H264 HLS stream with LCEVC enhancement')
+      .setExtraConfig({
+        streaming: {
+          useNativeHlsOnSafari: false,
+        },
+        mediaSource: {
+          forceTransmux: true,
+        },
+        lcevc: {
+          enabled: true,
+          dynamicPerformanceScaling: true,
+          logLevel: 0,
+          drawLogo: false,
+        },
+      }),
+// }}}
 ];
 /* eslint-enable max-len */

@@ -150,14 +150,14 @@ HLS features **not** supported:
 
 **Only supported on browsers with Media Source Extensions SourceBuffer support**
 
- - MPEG-5 Part2 LCEVC decoding support (decoding provided by [lcevc_dil.js][], must be
+ - MPEG-5 Part2 LCEVC decoding support (decoding provided by [lcevc_dec.js][], must be
    separately included)
 
  - Integration documentation : [docs](docs/design/lcevc-integration.md)
 
  - More on [MPEG-5 Part2 LCEVC][]
 
-[lcevc_dil.js]: https://www.npmjs.com/package/lcevc_dil.js
+[lcevc_dec.js]: https://www.npmjs.com/package/lcevc_dec.js
 [MPEG-5 Part2 LCEVC]: https://www.lcevc.org
 
 
