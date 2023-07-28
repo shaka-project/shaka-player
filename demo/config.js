@@ -488,13 +488,25 @@ shakaDemo.Config = class {
 
   /** @private */
   addMediaSourceSection_() {
+    const localize = (name) => shakaDemoMain.getLocalizedString(name);
+    const strategyOptions = shaka.config.CodecSwitchingStrategy;
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
+    const strategyOptionsNames = {
+      'DISABLED': localize(MessageIds.CODEC_SWITCHING_STRATEGY_DISABLED),
+      'RELOAD': localize(MessageIds.CODEC_SWITCHING_STRATEGY_RELOAD),
+      'SMOOTH': localize(MessageIds.CODEC_SWITCHING_STRATEGY_SMOOTH),
+    };
     this.addSection_(MessageIds.MEDIA_SOURCE_SECTION_HEADER, docLink)
         .addTextInput_(MessageIds.SOURCE_BUFFER_EXTRA_FEATURES,
             'mediaSource.sourceBufferExtraFeatures')
         .addBoolInput_(MessageIds.FORCE_TRANSMUX,
-            'mediaSource.forceTransmux');
+            'mediaSource.forceTransmux')
+        .addSelectInput_(
+            MessageIds.CODEC_SWITCHING_STRATEGY_HEADER,
+            'mediaSource.codecSwitchingStrategy',
+            strategyOptions,
+            strategyOptionsNames);
   }
 
   /** @private */

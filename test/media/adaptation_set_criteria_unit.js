@@ -49,6 +49,90 @@ describe('AdaptationSetCriteria', () => {
       ]);
     });
 
+    it('should not filter varaints when codec switching startegy is smooth '+
+        'and changeType is supported', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10, (stream) => {
+            stream.codecs = 'mp4a.69';
+          });
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(12, (stream) => {
+            stream.codecs = 'mp4a.66';
+          });
+          variant.addVideo(13, (stream) => {
+            stream.codecs = 'hvc1';
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addAudio(14, (stream) => {
+            stream.codecs = 'mp4a.a6';
+          });
+          variant.addVideo(14, (stream) => {
+            stream.codecs = 'dvh1';
+          });
+        });
+      });
+
+      const originalIsChangeTypeSupported = shaka.media.Capabilities
+          .isChangeTypeSupported;
+
+      try {
+        shaka.media.Capabilities.isChangeTypeSupported = () => {
+          return true;
+        };
+
+        const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '',
+            undefined, shaka.config.CodecSwitchingStrategy.SMOOTH);
+        const set = builder.create(manifest.variants);
+
+        expect(Array.from(set.values()).length).toBe(3);
+      } finally {
+        shaka.media.Capabilities
+            .isChangeTypeSupported = originalIsChangeTypeSupported;
+      }
+    });
+
+    it('should filter varaints when codec switching startegy'+
+        'is not SMOOTH', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10, (stream) => {
+            stream.codecs = 'mp4a.69';
+          });
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(12, (stream) => {
+            stream.codecs = 'mp4a.66';
+          });
+          variant.addVideo(13, (stream) => {
+            stream.codecs = 'hvc1';
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.addAudio(14, (stream) => {
+            stream.codecs = 'mp4a.a6';
+          });
+          variant.addVideo(14, (stream) => {
+            stream.codecs = 'dvh1';
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '',
+          undefined, shaka.config.CodecSwitchingStrategy.RELOAD);
+      const set = builder.create(manifest.variants);
+
+      expect(Array.from(set.values()).length).toBe(1);
+    });
+
     it('chooses variants in preferred language and role', () => {
       const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {

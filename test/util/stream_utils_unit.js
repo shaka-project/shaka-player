@@ -636,7 +636,8 @@ describe('StreamUtils', () => {
 
       const noVariant = null;
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, noVariant, manifest);
+          fakeDrmEngine, noVariant, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -673,7 +674,8 @@ describe('StreamUtils', () => {
 
       const noVariant = null;
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, noVariant, manifest);
+          fakeDrmEngine, noVariant, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       // Covers a regression in which we would remove streams with codecs.
       // The first 4 streams should be there because they are always supported.
@@ -691,6 +693,38 @@ describe('StreamUtils', () => {
           jasmine.objectContaining({id: 5}));
     });
 
+    it('does not filter manifest when codec switching is enabled', async () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.addAudio(10, (stream) => {
+            stream.codecs = 'mp4a.69';
+          });
+          variant.addVideo(11, (stream) => {
+            stream.codecs = 'avc1';
+          });
+        });
+      });
+
+      const originalFilterManifestByCurrentVariant =
+          shaka.util.StreamUtils.filterManifestByCurrentVariant;
+
+      try {
+        const filterManifestByCurrentVariantSpy =
+          jasmine.createSpy('filterManifestByCurrentVariant');
+        shaka.util.StreamUtils.filterManifestByCurrentVariant =
+          shaka.test.Util.spyFunc(filterManifestByCurrentVariantSpy);
+
+        await shaka.util.StreamUtils.filterManifest(
+            fakeDrmEngine, /* currentVariant= */ null, manifest,
+            shaka.config.CodecSwitchingStrategy.RELOAD);
+
+        expect(filterManifestByCurrentVariantSpy).not.toHaveBeenCalled();
+      } finally {
+        shaka.util.StreamUtils.filterManifestByCurrentVariant =
+          originalFilterManifestByCurrentVariant;
+      }
+    });
+
     it('filters transport streams', async () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
@@ -705,7 +739,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       // Covers a regression in which we would remove streams with codecs.
       // The last two streams should be removed because their full MIME types
@@ -732,7 +767,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
       expect(manifest.variants.length).toBe(1);
     });
 
@@ -749,7 +785,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       expect(manifest.variants.length).toBe(1);
     });
@@ -767,7 +804,8 @@ describe('StreamUtils', () => {
       });
 
       await shaka.util.StreamUtils.filterManifest(
-          fakeDrmEngine, /* currentVariant= */ null, manifest);
+          fakeDrmEngine, /* currentVariant= */ null, manifest,
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       expect(manifest.variants.length).toBe(1);
     });
@@ -889,7 +927,8 @@ describe('StreamUtils', () => {
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
           /* preferredAudioChannelCount= */2,
-          /* preferredDecodingAttributes= */[]);
+          /* preferredDecodingAttributes= */[],
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
@@ -905,10 +944,30 @@ describe('StreamUtils', () => {
           /* preferredVideoCodecs= */[],
           /* preferredAudioCodecs= */[],
           /* preferredAudioChannelCount= */2,
-          /* preferredDecodingAttributes= */[]);
+          /* preferredDecodingAttributes= */[],
+          shaka.config.CodecSwitchingStrategy.DISABLED);
 
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
+    });
+
+    it('should not filter variants when codec switchiing is endabled', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        addVariant1080Avc1(manifest);
+        addVariant1080Vp9(manifest);
+        addVariant2160Vp9(manifest);
+      });
+
+      const numberOfVariants = manifest.variants.length;
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredAudioChannelCount= */2,
+          /* preferredDecodingAttributes= */[],
+          shaka.config.CodecSwitchingStrategy.SMOOTH);
+
+      expect(manifest.variants.length).toBe(numberOfVariants);
     });
 
     it('chooses variants by decoding attributes', async () => {
@@ -950,7 +1009,8 @@ describe('StreamUtils', () => {
           /* preferredAudioCodecs= */[],
           /* preferredAudioChannelCount= */2,
           /* preferredDecodingAttributes= */
-          [shaka.util.StreamUtils.DecodingAttributes.SMOOTH]);
+          [shaka.util.StreamUtils.DecodingAttributes.SMOOTH],
+          shaka.config.CodecSwitchingStrategy.DISABLED);
       // 2 video codecs are smooth. Choose the one with the lowest bandwidth.
       expect(manifest.variants.length).toBe(1);
       expect(manifest.variants[0].id).toBe(1);

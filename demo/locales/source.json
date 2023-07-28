@@ -163,6 +163,22 @@
     "description": "The header for a section of configuration values.",
     "message": "[JARGON:CMCD]"
   },
+  "DEMO_CODEC_SWITCHING_STRATEGY_HEADER": {
+    "description": "The header for a configuration property.",
+    "message": "Codec Switching Strategy"
+  },
+  "DEMO_CODEC_SWITCHING_STRATEGY_DISABLED": {
+    "description": "The name of a configuration value.",
+    "message": "Disabled"
+  },
+  "DEMO_CODEC_SWITCHING_STRATEGY_RELOAD": {
+    "description": "The name of a configuration value.",
+    "message": "Reload"
+  },
+  "DEMO_CODEC_SWITCHING_STRATEGY_SMOOTH": {
+    "description": "The name of a configuration value.",
+    "message": "Smooth"
+  },
   "DEMO_COMPILED_DEBUG": {
     "description": "A link in the footer, to the debug build of the demo.",
     "message": "Compiled (Debug)"

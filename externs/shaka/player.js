@@ -1222,13 +1222,17 @@ shaka.extern.StreamingConfiguration;
 
 /**
  * @typedef {{
+ *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   sourceBufferExtraFeatures: string,
  *   forceTransmux: boolean
  * }}
  *
  * @description
  *   Media source configuration.
- *
+ * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
+ *  Allow codec switching strategy. Default behavior is disabled.
+ *  Smooth loading uses SourceBuffer.changeType. Reload uses cycling of
+ *  MediaSource.
  * @property {string} sourceBufferExtraFeatures
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
