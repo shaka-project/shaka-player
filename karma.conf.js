@@ -7,15 +7,40 @@
 // Karma configuration
 // Install required modules by running "npm install"
 
-const Jimp = require('jimp');
+// lodash is an indirect dependency, depended on by Karma
+const _ = require('lodash');
 const fs = require('fs');
 const glob = require('glob');
+const Jimp = require('jimp');
 const path = require('path');
 const rimraf = require('rimraf');
 const {ssim} = require('ssim.js');
 const util = require('karma/common/util');
 const which = require('which');
 const yaml = require('js-yaml');
+
+/**
+ * Like Object.assign, but recursive and doesn't clobber objects and arrays.
+ * If two arrays are merged, they are concatenated.
+ * Ex:
+ *   mergeConfigs({ foo: 'bar', args: [1, 2, 3] },
+ *                { baz: 'blah', args: [4, 5, 6] })
+ *       => { foo: 'bar', baz: 'blah', args: [1, 2, 3, 4, 5, 6] }
+ *
+ * @param {Object} first
+ * @param {Object} second
+ * @return {Object}
+ */
+function mergeConfigs(first, second) {
+  return _.mergeWith(
+      first,
+      second,
+      (firstValue, secondValue) => {
+        if (Array.isArray(firstValue)) {
+          return firstValue.concat(secondValue);
+        }
+      });
+}
 
 /**
  * @param {Object} config
@@ -78,7 +103,7 @@ module.exports = (config) => {
       }
 
       // Add standard WebDriver configs.
-      Object.assign(launcher, {
+      mergeConfigs(launcher, {
         base: 'WebDriver',
         config: {hostname: gridHostname, port: gridPort},
         pseudoActivityInterval: 20000,
@@ -87,8 +112,10 @@ module.exports = (config) => {
         version: metadata.version,
       });
 
-      if (metadata.extra_config) {
-        Object.assign(launcher, metadata.extra_config);
+      if (metadata.extra_configs) {
+        for (const config of metadata.extra_configs) {
+          mergeConfigs(launcher, config);
+        }
       }
     }
 
