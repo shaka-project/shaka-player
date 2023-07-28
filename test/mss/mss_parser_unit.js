@@ -43,7 +43,7 @@ describe('MssParser Manifest', () => {
       'QBwAHMALgBuAGUAdAAvAHAAcgAvAHMAdgBjAC8AcgBpAGcAaAB0AHMAbQBhAG4AYQBnAG' +
       'UAcgAuAGEAcwBtAHgAPAAvAEwAQQBfAFUAUgBMAD4APABEAFMAXwBJAEQAPgBBAEgAKwA' +
       'wADMAagB1AEsAYgBVAEcAYgBIAGwAMQBWAC8AUQBJAHcAUgBBAD0APQA8AC8ARABTAF8A' +
-      'SQBEAD4APAAvAEQAQQBUAEEAPgA8AC8AVwBSAE0ASABFAEEARABFAFIAPgA='
+      'SQBEAD4APAAvAEQAQQBUAEEAPgA8AC8AVwBSAE0ASABFAEEARABFAFIAPgA=';
 
   /** @param {!shaka.extern.Manifest} manifest */
   async function loadAllStreamsFor(manifest) {
@@ -466,7 +466,7 @@ describe('MssParser Manifest', () => {
     // Also able to parse KID correctly
     expect(variant.video.drmInfos[0].keyIds.size).toBe(1);
     // Expected KID: https://testweb.playready.microsoft.com/Content/Content2X
-    expect([...(variant.video.drmInfos[0].keyIds)][0]).toBe(
+    expect([...(variant.video.drmInfos[0].keyIds.values())][0]).toBe(
         '09E367028F33436CA5DD60FFE6671E70'.toLowerCase());
   });
 });
