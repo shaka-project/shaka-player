@@ -606,15 +606,27 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
   }
 
   /**
+   * @param {karma.Launcher.Browser.spec} spec
    * @param {wd.remote} webDriverClient A WebDriver client, an object from the
    *   "wd" package, created by "wd.remote()".
    * @return {!Promise.<!Buffer>} A Buffer containing a PNG screenshot
    */
-  function getScreenshot(webDriverClient) {
+  function getScreenshot(spec, webDriverClient) {
     return new Promise((resolve, reject) => {
       webDriverClient.takeScreenshot((error, pngBase64) => {
         if (error) {
           reject(error);
+        } else if (pngBase64.error) {
+          // In some failure cases, pngBase64 is an object with "error",
+          // "message", and "stacktrace" fields.  This happens, for example,
+          // with a timeout from the screenshot command.  This is not an
+          // expected situation, so log it.  The extra newlines keep this from
+          // being overwritten on the terminal when running tests against many
+          // browsers at once.
+          console.log('\n\nUnexpected screenshot failure:\n' +
+              `  Error: ${JSON.stringify(pngBase64)}\n` +
+              `  WebDriver spec: ${JSON.stringify(spec)}\n\n\n`);
+          reject(pngBase64);
         } else {
           // Convert the screenshot to a binary buffer.
           resolve(Buffer.from(pngBase64, 'base64'));
@@ -638,7 +650,8 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
     }
 
     /** @type {!Buffer} */
-    const fullPageScreenshotData = await getScreenshot(webDriverClient);
+    const fullPageScreenshotData =
+        await getScreenshot(browser.spec, webDriverClient);
 
     // Crop the screenshot to the dimensions specified in the test.
     // Jimp is picky about types, so convert these strings to numbers.
@@ -757,7 +770,7 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
         // The result is cached for the sake of performance.
         if (webDriverClient.canTakeScreenshot === undefined) {
           try {
-            await getScreenshot(webDriverClient);
+            await getScreenshot(browser.spec, webDriverClient);
             webDriverClient.canTakeScreenshot = true;
           } catch (error) {
             webDriverClient.canTakeScreenshot = false;
