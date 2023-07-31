@@ -8,7 +8,7 @@ This article describes the V-Nova LCEVC Shaka Player integration.
 # LCEVC Integration
 
 ## Adding V-Nova required files
-### Importing DEC - Decoder Integration Layer
+### Importing LCEVC Decoder
 
 V-Nova LCEVC DEC Libraries are included using the same approach that the other external libraries are currently using. The necessary V-Nova LCEVC DEC files need to be imported in the HTML page that is going to be used by Shaka Player to decode LCEVC. Checks are inplace that make sure the necessary objects are available.
 
@@ -19,7 +19,7 @@ Npm package : <https://www.npmjs.com/package/lcevc_dec.js>
   <script defer src="../node_modules/lcevc_dec.js/dist/lcevc_dec.min.js"></script>
 ```
 
-To allow the Closure compiler to use the objects and methods that are exported by the DEC.js a new `extern` is created.
+To allow the Closure compiler to use the objects and methods that are exported by the LCEVCdec.js a new `extern` is created.
 
 ### Defining an Extern for LCEVC
 

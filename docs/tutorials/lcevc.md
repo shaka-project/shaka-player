@@ -20,11 +20,11 @@ LCEVC Decoder library needs to be included in the HTML page:
  
 - Local `npm install lcevc_dec.js` 
 ```html 
-<script src="dist/lcevc_dec.min.js"></script> 
+<script src="../node_modules/lcevc_dec.js/dist/lcevc_dec.min.js"></script> 
 ``` 
 - Or use CDN.js for latest LCEVC Decoder libraries. 
 ```html 
-<script src=""></script> 
+<script src="https://unpkg.com/lcevc_dec.js@1.0.0/dist/lcevc_dec.min.js"></script> 
 ``` 
  
 Configuration to enable LCEVC enhancement: 
@@ -45,7 +45,7 @@ Sample setup using the Shaka Player UI library:
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/controls.css" /> 
  
     <!-- LCEVC decoder compiled library --> 
-    <script src=""></script> 
+    <script src="https://unpkg.com/lcevc_dec.js@1.0.0/dist/lcevc_dec.min.js"></script> 
  
     <!-- Application source: --> 
     <script src="app.js"></script> 
