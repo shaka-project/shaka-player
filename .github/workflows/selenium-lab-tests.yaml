@@ -255,7 +255,7 @@ jobs:
               --hostname karma.shakalab.rocks \
               --port $KARMA_PORT \
               --grid-config build/shaka-lab.yaml \
-              --grid-address selenium-grid.lab:4444 \
+              --grid-address selenium-grid.lab.shaka:4444 \
               --browsers ${{ matrix.browser }} \
               "${extra_flags[@]}"
           # Capture the test exit code immediately after running the tests.
