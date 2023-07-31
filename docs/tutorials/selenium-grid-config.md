@@ -47,17 +47,20 @@ vars:
 FirefoxMac:
   browser: firefox
   os: Mac
-  extra_config: *firefox_config
+  extra_configs:
+    - *firefox_config
 
 FirefoxWindows:
   browser: firefox
   os: Windows
-  extra_config: *firefox_config
+  extra_configs:
+    - *firefox_config
 
 FirefoxLinux:
   browser: firefox
   os: Linux
-  extra_config: *firefox_config
+  extra_configs:
+    - *firefox_config
 ```
 
 ### Browsers
@@ -75,8 +78,8 @@ browser made available to Karma.  Within each of those keys are the following:
        and must match the string and case used in the Selenium node config.
  - `disabled` (optional): If true, this browser is disabled and will not be
        used unless explicitly requested.
- - `extra_config` (optional): A dictionary of extra configs which will be
-       merged with the WebDriver launcher config in Karma.
+ - `extra_configs` (optional): An array of dictionaries of extra configs which
+       will be merged with the WebDriver launcher config in Karma.
 
 Examples of basic desktop browsers definitions:
 
@@ -96,9 +99,9 @@ Safari:
 SafariTP:
   browser: safari
   os: Mac
-  extra_config:
-    safari.options:
-      technologyPreview: true
+  extra_configs:
+    - safari.options:
+        technologyPreview: true
 
 ChromeWindows:
   browser: chrome
@@ -119,4 +122,53 @@ ChromeLinux:
 FirefoxLinux:
   browser: firefox
   os: Linux
+```
+
+### Composing configs
+
+You can define variables for browser configs that can be composed together in
+`extra_configs`.  For example, below you will see some basic definitions for
+Chrome arguments and parameters, and then an additional config with an argument
+that is only needed for some platforms.  `karma.conf.js` will merge those
+argument lists intelligently when it loads the YAML config.
+
+```yaml
+vars:
+  basic_chrome_config: &basic_chrome_config
+    goog:chromeOptions:
+      args:
+        # Normally, Chrome disallows autoplaying videos in many cases.  Enable
+        # it for testing.
+        - "--autoplay-policy=no-user-gesture-required"
+
+      # Instruct chromedriver not to disable component updater.
+      excludeSwitches:
+        - "disable-component-update"
+
+  headless_chrome_config: &headless_chrome_config
+    goog:chromeOptions:
+      args:
+        # Run in headless mode.
+        - "--headless"
+
+ChromeLinux:
+  browser: chrome
+  os: Mac
+  extra_configs:
+    - *basic_chrome_config
+
+ChromeWindows:
+  browser: chrome
+  os: Mac
+  extra_configs:
+    - *basic_chrome_config
+
+ChromeMac:
+  browser: chrome
+  os: Mac
+  # Take the parameters and arguments for basic_chrome_config, then append the
+  # arguments for headless_chrome_config.
+  extra_configs:
+    - *basic_chrome_config
+    - *headless_chrome_config
 ```
