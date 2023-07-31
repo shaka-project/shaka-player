@@ -36,9 +36,12 @@ function mergeConfigs(first, second) {
       first,
       second,
       (firstValue, secondValue) => {
+        // Merge arrays by concatenation.
         if (Array.isArray(firstValue)) {
           return firstValue.concat(secondValue);
         }
+        // Use lodash's default merge behavior for everything else.
+        return undefined;
       });
 }
 
