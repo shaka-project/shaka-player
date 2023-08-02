@@ -1646,9 +1646,13 @@ describe('DashParser Live', () => {
       expect(manifest.presentationTimeline.isLive()).toBe(true);
       expect(manifest.presentationTimeline.getDuration()).toBe(Infinity);
 
+      /** @type {!jasmine.Spy} */
+      const tickAfter = updateTickSpy();
       await updateManifest();
       expect(manifest.presentationTimeline.isLive()).toBe(false);
       expect(manifest.presentationTimeline.getDuration()).not.toBe(Infinity);
+      // should stop updates after transition to static
+      expect(tickAfter).not.toHaveBeenCalled();
     });
 
     it('adds new period', async () => {
