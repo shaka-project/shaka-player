@@ -11,7 +11,7 @@
  
 ##### More on [MPEG-5 Part2 LCEVC][] 
  
-[lcevc_dec.js]: https://www.npmjs.com/package/lcevc_dil.js 
+[lcevc_dec.js]: https://www.npmjs.com/package/lcevc_dec.js?activeTab=readme
 [MPEG-5 Part2 LCEVC]: https://www.lcevc.org 
  
 #### Configure LCEVC 
