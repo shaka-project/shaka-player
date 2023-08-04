@@ -646,8 +646,10 @@ describe('HlsParser', () => {
     const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
-      'main.flac',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
     ].join('');
 
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -681,8 +683,10 @@ describe('HlsParser', () => {
     const media = [
       '#EXTM3U\n',
       '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
       '#EXTINF:5,\n',
-      'main.opus',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4',
     ].join('');
 
     const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
