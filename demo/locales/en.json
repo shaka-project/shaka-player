@@ -118,6 +118,7 @@
   "DEMO_IGNORE_MANIFEST_PROGRAM_DATE_TIME": "Ignore Program Date Time from manifest",
   "DEMO_IGNORE_MANIFEST_TIMESTAMPS_IN_SEGMENTS_MODE": "Ignore Manifest Timestamps in Segments Mode",
   "DEMO_IGNORE_MIN_BUFFER_TIME": "Ignore Min Buffer Time",
+  "DEMO_ENABLE_AUDIO_GROUPS": "Enable Audio Groups",
   "DEMO_IGNORE_TEXT_FAILURES": "Ignore Text Stream Failures",
   "DEMO_INACCURATE_MANIFEST_TOLERANCE": "Inaccurate Manifest Tolerance",
   "DEMO_INITIAL_SEGMENT_LIMIT": "Initial Segment Limit",

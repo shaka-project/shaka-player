@@ -479,6 +479,10 @@
     "description": "The name of a configuration value.",
     "message": "Ignore Min Buffer Time"
   },
+  "DEMO_ENABLE_AUDIO_GROUPS": {
+    "description": "The name of a configuration value.",
+    "message": "Enable Audio Groups"
+  },
   "DEMO_IGNORE_TEXT_FAILURES": {
     "description": "The name of a configuration value.",
     "message": "Ignore Text Stream Failures"
