@@ -25,15 +25,6 @@ describe('Ad UI', () => {
     shaka.Player.setAdManagerFactory(() => new shaka.test.FakeAdManager());
   });
 
-  afterEach(async () => {
-    await UiUtils.cleanupUI();
-  });
-
-  afterAll(() => {
-    document.head.removeChild(cssLink);
-    shaka.Player.setAdManagerFactory(() => new shaka.ads.AdManager());
-  });
-
   beforeEach(() => {
     container =
       /** @type {!HTMLElement} */ (document.createElement('div'));
@@ -43,6 +34,15 @@ describe('Ad UI', () => {
     container.appendChild(video);
     UiUtils.createUIThroughAPI(container, video);
     adManager = video['ui'].getControls().getPlayer().getAdManager();
+  });
+
+  afterEach(async () => {
+    await UiUtils.cleanupUI();
+  });
+
+  afterAll(() => {
+    document.head.removeChild(cssLink);
+    shaka.Player.setAdManagerFactory(() => new shaka.ads.AdManager());
   });
 
   it('is invisible if no ad is playing', () => {
