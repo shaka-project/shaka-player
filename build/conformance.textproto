@@ -320,6 +320,7 @@ requirement: {
     "use shaka.test.Util.fetch or NetworkingEngine.request "
     "instead."
   whitelist_regexp: "lib/net/http_fetch_plugin.js"
+  whitelist_regexp: "test/test/util/util.js"
 }
 
 # Disallow the use of generators, which are a major performance issue.  See
