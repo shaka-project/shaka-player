@@ -176,7 +176,10 @@ describe('CastUtils', () => {
       }
     });
 
-    describe('TimeRanges', () => {
+    // Disable because these tests are flakey on ChromeLinux, and this whole
+    // module will be removed in
+    // https://github.com/shaka-project/shaka-player/issues/4214
+    xdescribe('TimeRanges', () => {
       /** @type {!HTMLVideoElement} */
       let video;
       /** @type {!shaka.util.EventManager} */
