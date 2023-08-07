@@ -358,11 +358,6 @@ class Launcher:
     networking_commands.add_argument(
         '--tls-cert',
         help='Specify a TLS cert to serve tests over HTTPs.')
-    networking_commands.add_argument(
-        '--lets-encrypt-folder',
-        help="Specify a Let's Encrypt folder to search for the latest key and "
-             "cert, to serve tests over HTTPs.  This overrides --tls-key and "
-             "--tls-cert.")
 
 
     pre_launch_commands.add_argument(
@@ -440,26 +435,6 @@ class Launcher:
         self.karma_config['capture_timeout'] = SELENIUM_CAPTURE_TIMEOUT
       else:
         self.karma_config['capture_timeout'] = LOCAL_CAPTURE_TIMEOUT
-
-    self._HandleLetsEncryptConfig()
-
-  def _HandleLetsEncryptConfig(self):
-    folder = self.parsed_args.lets_encrypt_folder
-    if not folder:
-      return
-
-    max_serial_number = 0
-    # Go through the contents of the folder to find the latest key & cert.
-    for file_name in os.listdir(folder):
-      matches = re.match(r'(?:privkey|fullchain)(\d+).pem', file_name)
-      if matches:
-        serial_number = int(matches.group(1))
-        max_serial_number = max(max_serial_number, serial_number)
-
-    self.karma_config['tls_key'] = os.path.join(
-        folder, 'privkey{}.pem'.format(max_serial_number))
-    self.karma_config['tls_cert'] = os.path.join(
-        folder, 'fullchain{}.pem'.format(max_serial_number))
 
   def ResolveBrowsers(self, default_browsers):
     """Decide what browsers we should use.
