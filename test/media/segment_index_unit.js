@@ -1026,9 +1026,9 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
           return [newRefs.shift()];
         });
       });
-      // Wait long enough for all three new refs to be appended.
-      // Or for all of the new refs to be passed out.
-      await Promise.race([shaka.test.Util.delay(1), done]);
+
+      // Wait for the new refs to be appended.
+      await done;
 
       expect(Array.from(metaIndex)).toEqual(oldRefs.concat(inputRefs2));
     });
