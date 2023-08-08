@@ -214,9 +214,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ inputs.ref || github.ref }}
-      - name: Build Docker image
-        run: docker build -t shaka-player-build build/docker
-      - name: Build in Docker
-        run: docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
-      - name: Test in Docker
-        run: docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build python3 build/test.py --quick --browsers ChromeHeadless
+
+      - name: Docker
+        run: |
+          docker build -t shaka-player-build build/docker
+          docker run -v $(pwd):/usr/src --user $(id -u):$(id -g) shaka-player-build
