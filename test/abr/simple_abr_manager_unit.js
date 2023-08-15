@@ -285,6 +285,7 @@ describe('SimpleAbrManager', () => {
     // cleared.
     expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object), false, 0);
   });
+
   it('does clear the buffer on upgrade with safemargin to 4', () => {
     // Simulate some segments being downloaded at a high rate, to trigger an
     // upgrade.
