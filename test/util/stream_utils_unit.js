@@ -718,6 +718,52 @@ describe('StreamUtils', () => {
       expect(manifest.variants.length).toBe(1);
     });
 
+    it('supports fLaC codec', async () => {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="flac"')) {
+        pending('Codec fLaC is not supported by the platform.');
+      }
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1, (stream) => {
+            stream.mime('audio/mp4', 'fLaC');
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(3, (stream) => {
+            stream.mime('audio/mp4', 'flac');
+          });
+        });
+      });
+
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, /* currentVariant= */ null, manifest);
+
+      expect(manifest.variants.length).toBe(2);
+    });
+
+    it('supports Opus codec', async () => {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="opus"')) {
+        pending('Codec Opus is not supported by the platform.');
+      }
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.addAudio(1, (stream) => {
+            stream.mime('audio/mp4', 'Opus');
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.addAudio(3, (stream) => {
+            stream.mime('audio/mp4', 'opus');
+          });
+        });
+      });
+
+      await shaka.util.StreamUtils.filterManifest(
+          fakeDrmEngine, /* currentVariant= */ null, manifest);
+
+      expect(manifest.variants.length).toBe(2);
+    });
+
     it('supports legacy AVC1 codec', async () => {
       if (!MediaSource.isTypeSupported('video/mp4; codecs="avc1.42001e"')) {
         pending('Codec avc1.42001e is not supported by the platform.');
