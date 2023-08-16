@@ -73,6 +73,7 @@ requirement {
   whitelist_regexp: "demo/"
   whitelist_regexp: "test/"
   whitelist_regexp: "node_modules/"
+  value: "_F_toggleOrdinals"
 }
 
 # Disallow using "!" on nullable numbers in boolean assignment.
