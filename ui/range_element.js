@@ -110,6 +110,11 @@ shaka.ui.RangeElement = class extends shaka.ui.Element {
         this.onChangeEnd();
       }
     });
+
+    this.eventManager.listen(this.bar, 'contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
   }
 
   /** @override */
