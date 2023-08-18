@@ -5,6 +5,8 @@
  */
 
 describe('SrtTextParser', () => {
+  const Cue = shaka.text.Cue;
+
   it('supports no cues', () => {
     verifyHelper([],
         '',
@@ -56,6 +58,77 @@ describe('SrtTextParser', () => {
         '2\n' +
         '00:00:40,000 --> 00:00:50,000\n' +
         'Test2',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
+  it('supports payload stylized', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 10,
+            endTime: 20,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: 'Test',
+                fontWeight: Cue.fontWeight.BOLD,
+              },
+            ],
+          },
+          {
+            startTime: 20,
+            endTime: 30,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 30,
+                payload: 'Test2',
+                fontStyle: Cue.fontStyle.ITALIC,
+              },
+            ],
+          },
+          {
+            startTime: 30,
+            endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 30,
+                endTime: 40,
+                payload: 'Test3',
+                textDecoration: [Cue.textDecoration.UNDERLINE],
+              },
+            ],
+          },
+          {
+            startTime: 40,
+            endTime: 50,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 40,
+                endTime: 50,
+                payload: 'Test4',
+                color: 'red',
+              },
+            ],
+          },
+        ],
+        '1\n' +
+        '00:00:10,000 --> 00:00:20,000\n' +
+        '{b}Test{/b}\n\n' +
+        '2\n' +
+        '00:00:20,000 --> 00:00:30,000\n' +
+        '{i}Test2{/i}\n\n' +
+        '3\n' +
+        '00:00:30,000 --> 00:00:40,000\n' +
+        '{u}Test3{/u}\n\n'+
+        '4\n' +
+        '00:00:40,000 --> 00:00:50,000\n' +
+        '<font color="red">Test4</font>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
