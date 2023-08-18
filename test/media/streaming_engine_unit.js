@@ -3936,19 +3936,24 @@ describe('StreamingEngine', () => {
   describe('prefetch segments', () => {
     const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 
+    let OriginalSegmentPrefetch;
+
     beforeEach(() => {
-      shaka.media.SegmentPrefetch = Util.spyFunc(
-          jasmine.createSpy('SegmentPrefetch')
-              .and.callFake((config, stream) =>
-                new shaka.test.FakeSegmentPrefetch(stream, segmentData),
-              ),
-      );
+      OriginalSegmentPrefetch = shaka.media.SegmentPrefetch;
+      shaka.media.SegmentPrefetch = function(config, stream) {
+        return new shaka.test.FakeSegmentPrefetch(stream, segmentData);
+      };
+
       setupVod();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.segmentPrefetchLimit = 3;
       streamingEngine.configure(config);
+    });
+
+    afterEach(() => {
+      shaka.media.SegmentPrefetch = OriginalSegmentPrefetch;
     });
 
     it('should use prefetched segment without fetching again', async () => {
