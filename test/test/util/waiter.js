@@ -109,6 +109,8 @@ shaka.test.Waiter = class {
    * @return {!Promise}
    */
   waitUntilPlayheadReaches(mediaElement, timeGoal) {
+    this.macPlaybackWorkaround_(mediaElement);
+
     // The name of what we're waiting for
     const goalName = 'movement from ' + mediaElement.currentTime +
                      ' to ' + timeGoal;
@@ -153,6 +155,8 @@ shaka.test.Waiter = class {
    * @return {!Promise}
    */
   waitForEnd(mediaElement) {
+    this.macPlaybackWorkaround_(mediaElement);
+
     // The name of what we're waiting for.
     const goalName = 'end of media';
 
@@ -332,5 +336,20 @@ shaka.test.Waiter = class {
         `ended: ${mediaElement.ended}\n` +
         `buffered: ${JSON.stringify(buffered)}\n`;
     shaka.log.error(error.message);
+  }
+
+  /**
+   * @param {!HTMLMediaElement} mediaElement
+   * @private
+   */
+  macPlaybackWorkaround_(mediaElement) {
+    if (shaka.util.Platform.isMac()) {
+      // Work around bizarre playback slowdowns that only seem to occur with
+      // WebDriver and only on Mac.  Increasing the playback rate allows tests
+      // to complete without timing out.
+      if (mediaElement.playbackRate == 1) {
+        mediaElement.playbackRate = 2;
+      }
+    }
   }
 };
