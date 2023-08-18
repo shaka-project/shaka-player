@@ -3940,6 +3940,7 @@ describe('StreamingEngine', () => {
 
     beforeEach(() => {
       OriginalSegmentPrefetch = shaka.media.SegmentPrefetch;
+      // eslint-disable-next-line no-restricted-syntax
       shaka.media.SegmentPrefetch = function(config, stream) {
         return new shaka.test.FakeSegmentPrefetch(stream, segmentData);
       };
