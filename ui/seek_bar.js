@@ -525,7 +525,13 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       value = 0;
     }
     let thumbnail = this.thumbnails_[value];
-    this.thumbnailTime_.textContent = this.timeFormater_(value);
+    const seekRange = this.player.seekRange();
+    if (this.player.isLive()) {
+      this.thumbnailTime_.textContent =
+          '-' + this.timeFormater_(seekRange.end - value);
+    } else {
+      this.thumbnailTime_.textContent = this.timeFormater_(value);
+    }
     const offsetTop = -10;
     const width = this.thumbnailContainer_.clientWidth;
     let height = Math.floor(width * 9 / 16);
@@ -536,7 +542,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.thumbnailContainer_.style.left = leftPosition + 'px';
     this.thumbnailContainer_.style.visibility = 'visible';
     if (!thumbnail) {
-      const seekRange = this.player.seekRange();
       const playerValue = Math.max(Math.ceil(seekRange.start),
           Math.min(Math.floor(seekRange.end), value));
       thumbnail =
