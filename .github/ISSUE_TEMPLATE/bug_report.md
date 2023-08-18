@@ -12,7 +12,7 @@ assignees: ''
 **Have you read the [FAQ](https://bit.ly/ShakaFAQ) and checked for duplicate open issues?**
 
 
-**If the problem is related to FairPlay, are you read the tutorial?**
+**If the problem is related to FairPlay, have you read the tutorial?**
 <!-- NOTE: https://shaka-player-demo.appspot.com/docs/api/tutorial-fairplay.html -->
 
 
