@@ -567,7 +567,7 @@ describe('Player', () => {
 
       // Ensure the video plays.
       video.play();
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 5, 10);
+      await waiter.timeoutAfter(20).waitUntilPlayheadReaches(video, 5);
 
       // Seek the video, and see if it can continue playing from that point.
       video.currentTime = 20;
@@ -1004,22 +1004,22 @@ describe('Player', () => {
 
       await player.load('test:sintel_long_compiled');
       video.pause();
-      await waitUntilBuffered(10);
+      await waiter.waitUntilBuffered(video, 10);
 
       player.configure('streaming.bufferingGoal', 30);
-      await waitUntilBuffered(30);
+      await waiter.waitUntilBuffered(video, 30);
 
       player.configure('streaming.bufferingGoal', 60);
-      await waitUntilBuffered(60);
-      await Util.delay(0.2);
+      await waiter.waitUntilBuffered(video, 60);
+      await Util.delay(1);
       expect(getBufferedAhead()).toBeLessThan(70);  // 60 + segment_size
 
       // We don't remove buffered content ahead of the playhead, so seek to
       // clear the buffer.
       player.configure('streaming.bufferingGoal', 10);
       video.currentTime = 120;
-      await waitUntilBuffered(10);
-      await Util.delay(0.2);
+      await waiter.waitUntilBuffered(video, 10);
+      await Util.delay(1);
       expect(getBufferedAhead()).toBeLessThan(20);  // 10 + segment_size
     });
 
@@ -1029,20 +1029,22 @@ describe('Player', () => {
 
       await player.load('test:sintel_long_compiled');
       video.pause();
-      await waitUntilBuffered(30);
+      await waiter.waitUntilBuffered(video, 30);
       video.currentTime = 20;
-      await waitUntilBuffered(30);
+      await waiter.waitUntilBuffered(video, 30);
 
       expect(getBufferedBehind()).toBe(20);  // Buffered to start still.
       video.currentTime = 50;
-      await waitUntilBuffered(30);
+      await waiter.waitUntilBuffered(video, 30);
+      await Util.delay(1);
       expect(getBufferedBehind()).toBeLessThan(40);  // 30 + segment_size
 
       player.configure('streaming.bufferBehind', 10);
       // We only evict content when we append a segment, so increase the
       // buffering goal so we append another segment.
       player.configure('streaming.bufferingGoal', 40);
-      await waitUntilBuffered(40);
+      await waiter.waitUntilBuffered(video, 40);
+      await Util.delay(1);
       expect(getBufferedBehind()).toBeLessThanOrEqual(10);
     });
 
@@ -1060,25 +1062,6 @@ describe('Player', () => {
         return 0;
       }
       return video.currentTime - start;
-    }
-
-    async function waitUntilBuffered(amount) {
-      for (let i = 0; i < 50; i++) {
-        // We buffer from an internal segment, so this shouldn't take long to
-        // buffer.
-        await Util.delay(0.1);  // eslint-disable-line no-await-in-loop
-        if (getBufferedAhead() >= amount) {
-          return;
-        }
-      }
-
-      const ranges =
-          shaka.media.TimeRangesUtils.getBufferedInfo(video.buffered);
-      const currentTime = video.currentTime;
-      const target = currentTime + amount;
-
-      throw new Error('Timeout waiting to buffer! ' +
-          JSON.stringify({ranges, currentTime, target}));
     }
   });  // describe('buffering')
 
