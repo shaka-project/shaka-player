@@ -347,7 +347,9 @@ shaka.test.Waiter = class {
       // Work around bizarre playback slowdowns that only seem to occur with
       // WebDriver and only on Mac.  Increasing the playback rate allows tests
       // to complete without timing out.
-      if (mediaElement.playbackRate == 1) mediaElement.playbackRate = 2;
+      if (mediaElement.playbackRate == 1) {
+        mediaElement.playbackRate = 2;
+      }
     }
   }
 };
