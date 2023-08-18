@@ -395,7 +395,7 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
     // The this.video must be played a little now, after the cues were appended,
     // but before the screenshot.
     this.video.playbackRate = 1;
-    this.video.play();
+    await this.video.play();
     await this.waiter.failOnTimeout(false).timeoutAfter(5)
         .waitForMovement(this.video);
     this.video.pause();
@@ -404,7 +404,7 @@ shaka.test.NativeTextLayoutTests = class extends shaka.test.TextLayoutTests {
     this.video.currentTime = time;
     // Get into a playing state, but without movement.
     this.video.playbackRate = 0;
-    this.video.play();
+    await this.video.play();
 
     // Add a short delay to ensure that the system has caught up and that
     // native text displayers have been updated by the browser.
