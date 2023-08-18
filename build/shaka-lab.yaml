@@ -32,10 +32,27 @@ vars:
         # Normally, Chrome disallows autoplaying videos in many cases.  Enable
         # it for testing.
         - "--autoplay-policy=no-user-gesture-required"
+        # Disable GPU to make rendering and layout tests more stable.
+        - "--disable-gpu"
 
-      # Instruct chromedriver not to disable component updater. The
-      # component updater must run in order for the Widevine CDM to be
-      # available when using a new user-data-dir.
+      # Instruct chromedriver not to disable component updater. The component
+      # updater must run in order for the Widevine CDM to be available when
+      # using a new user-data-dir.
+      excludeSwitches:
+        - "disable-component-update"
+
+  basic_edge_config: &basic_edge_config
+    ms:edgeOptions:
+      args:
+        # Normally, Edge disallows autoplaying videos in many cases.  Enable it
+        # for testing.
+        - "--autoplay-policy=no-user-gesture-required"
+        # Disable GPU to make rendering and layout tests more stable.
+        - "--disable-gpu"
+
+      # Instruct edgedriver not to disable component updater. The component
+      # updater must run in order for the Widevine CDM to be available when
+      # using a new user-data-dir.
       excludeSwitches:
         - "disable-component-update"
 
@@ -96,6 +113,8 @@ FirefoxMac:
 EdgeMac:
   browser: msedge
   os: Mac
+  extra_configs:
+    - *basic_edge_config
 
 Safari:
   browser: safari
@@ -127,6 +146,8 @@ FirefoxWindows:
 Edge:
   browser: msedge
   os: Windows
+  extra_configs:
+    - *basic_edge_config
 
 
 ### Linux ###
@@ -146,6 +167,8 @@ FirefoxLinux:
 EdgeLinux:
   browser: msedge
   os: Linux
+  extra_configs:
+    - *basic_edge_config
 
 
 ### Misc ###
