@@ -244,7 +244,7 @@ describe('DrmEngine', () => {
           /* hasClosedCaptions= */ false);
 
       expect(video.buffered.end(0)).toBeGreaterThan(0);
-      video.play();
+      await video.play();
 
       const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(15);
       waiter.setMediaSourceEngine(mediaSourceEngine);
@@ -327,7 +327,7 @@ describe('DrmEngine', () => {
           /* hasClosedCaptions= */ false);
 
       expect(video.buffered.end(0)).toBeGreaterThan(0);
-      video.play();
+      await video.play();
 
       const waiter = new shaka.test.Waiter(eventManager).timeoutAfter(15);
       waiter.setMediaSourceEngine(mediaSourceEngine);
