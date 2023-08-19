@@ -32,10 +32,33 @@ vars:
         # Normally, Chrome disallows autoplaying videos in many cases.  Enable
         # it for testing.
         - "--autoplay-policy=no-user-gesture-required"
+        # Disable browser features that try to save power by suspending media,
+        # throttling timers, etc.
+        - "--disable-background-media-suspend"
+        - "--disable-background-timer-throttling"
+        - "--disable-backgrounding-occluded-windows"
 
-      # Instruct chromedriver not to disable component updater. The
-      # component updater must run in order for the Widevine CDM to be
-      # available when using a new user-data-dir.
+      # Instruct chromedriver not to disable component updater. The component
+      # updater must run in order for the Widevine CDM to be available when
+      # using a new user-data-dir.
+      excludeSwitches:
+        - "disable-component-update"
+
+  basic_edge_config: &basic_edge_config
+    ms:edgeOptions:
+      args:
+        # Normally, Edge disallows autoplaying videos in many cases.  Enable it
+        # for testing.
+        - "--autoplay-policy=no-user-gesture-required"
+        # Disable browser features that try to save power by suspending media,
+        # throttling timers, etc.
+        - "--disable-background-media-suspend"
+        - "--disable-background-timer-throttling"
+        - "--disable-backgrounding-occluded-windows"
+
+      # Instruct edgedriver not to disable component updater. The component
+      # updater must run in order for the Widevine CDM to be available when
+      # using a new user-data-dir.
       excludeSwitches:
         - "disable-component-update"
 
@@ -73,6 +96,11 @@ vars:
       # Allow remote attestation even though the device may be in dev mode.  This
       # is critical for testing involving L1 content licenses.
       - "--allow-ra-in-dev-mode"
+      # Disable browser features that try to save power by suspending media,
+      # throttling timers, etc.
+      - "--disable-background-media-suspend"
+      - "--disable-background-timer-throttling"
+      - "--disable-backgrounding-occluded-windows"
 
   safari_tp_config: &safari_tp_config
     safari.options:
@@ -96,6 +124,8 @@ FirefoxMac:
 EdgeMac:
   browser: msedge
   os: Mac
+  extra_configs:
+    - *basic_edge_config
 
 Safari:
   browser: safari
@@ -127,6 +157,8 @@ FirefoxWindows:
 Edge:
   browser: msedge
   os: Windows
+  extra_configs:
+    - *basic_edge_config
 
 
 ### Linux ###
@@ -146,6 +178,8 @@ FirefoxLinux:
 EdgeLinux:
   browser: msedge
   os: Linux
+  extra_configs:
+    - *basic_edge_config
 
 
 ### Misc ###

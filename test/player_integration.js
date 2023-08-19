@@ -34,6 +34,9 @@ describe('Player', () => {
     await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
     player = new compiledShaka.Player(video);
 
+    // Disable stall detection, which can interfere with playback tests.
+    player.configure('streaming.stallEnabled', false);
+
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
@@ -81,11 +84,15 @@ describe('Player', () => {
       // Unlike the other tests in this file, this uses an uncompiled build of
       // Shaka, so that we don't need to expose shaka.util.Timer.activeTimers.
       player = new shaka.Player(video);
+
+      // Disable stall detection, which can interfere with playback tests.
+      player.configure('streaming.stallEnabled', false);
+
       waiter.setPlayer(player);
 
       // Play the video for a little while.
       await player.load('test:sintel');
-      video.play();
+      await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
       // Destroy the player.
@@ -127,7 +134,7 @@ describe('Player', () => {
             }
           });
       await player.load('test:sintel_compiled');
-      video.play();
+      await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 25, 30);
       expect(results).toEqual(expected);
     });
@@ -139,7 +146,7 @@ describe('Player', () => {
       // This is tested more in player_unit.js.  This is here to test the public
       // API and to check for renaming.
       await player.load('test:sintel_compiled');
-      video.play();
+      await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
       const stats = player.getStats();
@@ -210,7 +217,7 @@ describe('Player', () => {
 
     it('does not cause cues to be null', async () => {
       await player.load('test:sintel_compiled');
-      video.play();
+      await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
       // This TextTrack was created as part of load() when we set up the
@@ -331,7 +338,7 @@ describe('Player', () => {
       await player.load('test:sintel_realistic_compiled');
 
       // Play until a time at which the external cues would be on screen.
-      video.play();
+      await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
@@ -363,7 +370,7 @@ describe('Player', () => {
       await waiter.waitForEvent(player, 'texttrackvisibility');
 
       // Play until a time at which the external cues would be on screen.
-      video.play();
+      await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 4, 20);
 
       expect(player.isTextTrackVisible()).toBe(true);
@@ -434,7 +441,7 @@ describe('Player', () => {
       player.setTextTrackVisibility(true);
       player.selectTextLanguage('fr');
       video.currentTime = 5;
-      video.play();
+      await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
       expect(video.textTracks[0].activeCues.length).toBe(1);
@@ -472,7 +479,7 @@ describe('Player', () => {
 
     it('at higher playback rates', async () => {
       await player.load('test:sintel_compiled');
-      video.play();
+      await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
 
       // Enabling trick play should change our playback rate to the same rate.
@@ -488,13 +495,11 @@ describe('Player', () => {
     });
 
     it('in sequence mode', async () => {
-      const testSchemeMimeType = 'application/x-test-manifest';
-      player = new compiledShaka.Player(video);
-      await player.load('test:sintel_sequence_compiled', 0, testSchemeMimeType);
+      await player.load('test:sintel_sequence_compiled');
       expect(player.getManifest().sequenceMode).toBe(true);
 
       // Ensure the video plays.
-      video.play();
+      await video.play();
       await waiter.timeoutAfter(20).waitUntilPlayheadReaches(video, 5);
 
       // Seek the video, and see if it can continue playing from that point.
@@ -514,9 +519,8 @@ describe('Player', () => {
     // even if one is not specified in load().
     it('immediately after construction with MIME type', async () => {
       const testSchemeMimeType = 'application/x-test-manifest';
-      player = new compiledShaka.Player(video);
       await player.load('test:sintel_compiled', 0, testSchemeMimeType);
-      video.play();
+      await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
     });
 
@@ -555,7 +559,7 @@ describe('Player', () => {
     // Regression test for https://github.com/shaka-project/shaka-player/issues/1187
     it('does not throw on destroy', async () => {
       await player.load('test:sintel_compiled');
-      video.play();
+      await video.play();
       await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 1, 10);
       await player.unload();
       // Before we fixed #1187, the call to destroy() on textDisplayer was
@@ -801,7 +805,7 @@ describe('Player', () => {
       player.configure('streaming.observeQualityChanges', true);
 
       await player.load('test:sintel_compiled');
-      video.play();
+      await video.play();
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -815,7 +819,7 @@ describe('Player', () => {
       player.configure('streaming.observeQualityChanges', false);
 
       await player.load('test:sintel_compiled');
-      video.play();
+      await video.play();
 
       // Wait for the video to start playback.  If it takes longer than 10
       // seconds, fail the test.
@@ -844,7 +848,7 @@ describe('Player', () => {
 
       // Play the stream.
       await player.load('/base/test/test/assets/3675/dash_0.mpd');
-      video.play();
+      await video.play();
 
       // Wait for the stream to be over.
       eventManager.listen(player, 'error', Util.spyFunc(onErrorSpy));
