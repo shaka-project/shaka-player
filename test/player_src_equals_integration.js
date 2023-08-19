@@ -27,6 +27,10 @@ describe('Player Src Equals', () => {
   beforeEach(() => {
     player = new shaka.Player();
     player.addEventListener('error', fail);
+
+    // Disable stall detection, which can interfere with playback tests.
+    player.configure('streaming.stallEnabled', false);
+
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
   });
@@ -101,7 +105,7 @@ describe('Player Src Equals', () => {
     expect(video.duration).not.toBeCloseTo(0);
 
     // Start playback and wait for the playhead to move.
-    video.play();
+    await video.play();
     await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Make sure the playhead is roughly where we expect it to be before
@@ -138,7 +142,7 @@ describe('Player Src Equals', () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
 
     // For playback to begin so that we have some content buffered.
-    video.play();
+    await video.play();
     await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     const buffered = player.getBufferedInfo();
@@ -162,7 +166,7 @@ describe('Player Src Equals', () => {
     await loadWithSrcEquals(SMALL_MP4_CONTENT_URI, /* startTime= */ null);
 
     // Let playback run for a little.
-    video.play();
+    await video.play();
     await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     let videoRateChange = false;
@@ -279,7 +283,7 @@ describe('Player Src Equals', () => {
     expect(video.currentTime).toBeCloseTo(0);
 
     // Start playback and wait. We should see the playhead move.
-    video.play();
+    await video.play();
     await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
     await shaka.test.Util.delay(1.5);
 
@@ -296,7 +300,7 @@ describe('Player Src Equals', () => {
 
     // Wait some time for playback to start so that we will have a load latency
     // value.
-    video.play();
+    await video.play();
     await waiter.waitForMovementOrFailOnTimeout(video, /* timeout= */10);
 
     // Get the stats and check that some stats have been filled in.
