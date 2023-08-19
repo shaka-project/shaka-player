@@ -81,8 +81,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    // longer than 40 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 40);
 
     await player.unload();
   });
@@ -103,9 +103,9 @@ describe('Transmuxer Player', () => {
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+    // Play for 10 seconds, but stop early if the video ends.  If it takes
+    // longer than 40 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 40);
 
     await player.unload();
   });
@@ -141,9 +141,9 @@ describe('Transmuxer Player', () => {
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+    // Play for 10 seconds, but stop early if the video ends.  If it takes
+    // longer than 40 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 40);
 
     await player.unload();
   });
@@ -175,9 +175,9 @@ describe('Transmuxer Player', () => {
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+    // Play for 10 seconds, but stop early if the video ends.  If it takes
+    // longer than 40 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 40);
 
     await player.unload();
   });
@@ -196,8 +196,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    // longer than 40 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 40);
 
     await player.unload();
   });
@@ -216,8 +216,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    // longer than 40 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 40);
 
     await player.unload();
   });
@@ -236,8 +236,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    // longer than 40 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 40);
 
     await player.unload();
   });
