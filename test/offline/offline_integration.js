@@ -33,6 +33,9 @@ filterDescribe('Offline', supportsStorage, () => {
     player = new shaka.Player(video);
     player.addEventListener('error', fail);
 
+    // Disable stall detection, which can interfere with playback tests.
+    player.configure('streaming.stallEnabled', false);
+
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
     waiter.setPlayer(player);
@@ -67,7 +70,7 @@ filterDescribe('Offline', supportsStorage, () => {
 
     await player.load(contentUri);
 
-    video.play();
+    await video.play();
     await playTo(/* end= */ 3, /* timeout= */ 20);
     await player.unload();
     await storage.remove(contentUri);
@@ -103,7 +106,7 @@ filterDescribe('Offline', supportsStorage, () => {
 
         await player.load(contentUri);
 
-        video.play();
+        await video.play();
         await playTo(/* end= */ 3, /* timeout= */ 20);
         await player.unload();
         await storage.remove(contentUri);
@@ -146,7 +149,7 @@ filterDescribe('Offline', supportsStorage, () => {
 
         await player.load(contentUri);
 
-        video.play();
+        await video.play();
         await playTo(/* end= */ 3, /* timeout= */ 20);
         await player.unload();
         await storage.remove(contentUri);

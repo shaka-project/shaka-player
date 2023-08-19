@@ -41,6 +41,20 @@ describe('MSS Player', () => {
   beforeEach(() => {
     player = new compiledShaka.Player(video);
 
+    // Make sure we are playing the lowest res available to avoid test flake
+    // based on network issues.  Note that disabling ABR and setting a low
+    // abr.defaultBandwidthEstimate would not be sufficient, because it
+    // would only affect the choice of track on the first period.  When we
+    // cross a period boundary, the default bandwidth estimate will no
+    // longer be in effect, and AbrManager may choose higher res tracks for
+    // the new period.  Using abr.restrictions.maxHeight will let us force
+    // AbrManager to the lowest resolution, which is its fallback when these
+    // soft restrictions cannot be met.
+    player.configure('abr.restrictions.maxHeight', 1);
+
+    // Disable stall detection, which can interfere with playback tests.
+    player.configure('streaming.stallEnabled', false);
+
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
@@ -61,20 +75,9 @@ describe('MSS Player', () => {
   });
 
   it('MSS VoD', async () => {
-    // Make sure we are playing the lowest res available to avoid test flake
-    // based on network issues.  Note that disabling ABR and setting a low
-    // abr.defaultBandwidthEstimate would not be sufficient, because it
-    // would only affect the choice of track on the first period.  When we
-    // cross a period boundary, the default bandwidth estimate will no
-    // longer be in effect, and AbrManager may choose higher res tracks for
-    // the new period.  Using abr.restrictions.maxHeight will let us force
-    // AbrManager to the lowest resolution, which is its fallback when these
-    // soft restrictions cannot be met.
-    player.configure('abr.restrictions.maxHeight', 1);
-
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ 'application/vnd.ms-sstr+xml');
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -93,16 +96,6 @@ describe('MSS Player', () => {
     if (!support['com.microsoft.playready']) {
       return;
     }
-    // Make sure we are playing the lowest res available to avoid test flake
-    // based on network issues.  Note that disabling ABR and setting a low
-    // abr.defaultBandwidthEstimate would not be sufficient, because it
-    // would only affect the choice of track on the first period.  When we
-    // cross a period boundary, the default bandwidth estimate will no
-    // longer be in effect, and AbrManager may choose higher res tracks for
-    // the new period.  Using abr.restrictions.maxHeight will let us force
-    // AbrManager to the lowest resolution, which is its fallback when these
-    // soft restrictions cannot be met.
-    player.configure('abr.restrictions.maxHeight', 1);
 
     player.configure({
       drm: {
@@ -114,7 +107,7 @@ describe('MSS Player', () => {
 
     await player.load(playreadyUrl, /* startTime= */ null,
         /* mimeType= */ 'application/vnd.ms-sstr+xml');
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
