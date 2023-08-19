@@ -75,6 +75,11 @@ describe('SrtTextParser', () => {
                 payload: 'Test',
                 fontWeight: Cue.fontWeight.BOLD,
               },
+              {
+                startTime: 10,
+                endTime: 20,
+                payload: ' Unstyled',
+              },
             ],
           },
           {
@@ -119,7 +124,7 @@ describe('SrtTextParser', () => {
         ],
         '1\n' +
         '00:00:10,000 --> 00:00:20,000\n' +
-        '{b}Test{/b}\n\n' +
+        '{b}Test{/b} Unstyled\n\n' +
         '2\n' +
         '00:00:20,000 --> 00:00:30,000\n' +
         '{i}Test2{/i}\n\n' +
