@@ -3130,9 +3130,13 @@ describe('StreamingEngine', () => {
       expect(onManifestUpdate).toHaveBeenCalled();
     });
 
-    it('triggers metadata event', async () => {
+    it('triggers both emsg event and metadata event for ID3', async () => {
       setSegment0(emsgSegmentV0ID3);
       videoStream.emsgSchemeIdUris = [id3SchemeUri];
+
+      onEvent.and.callFake((emsgEvent) => {
+        expect(emsgEvent.type).toBe('emsg');
+      });
 
       // Here we go!
       streamingEngine.switchVariant(variant);
@@ -3141,8 +3145,28 @@ describe('StreamingEngine', () => {
       playing = true;
       await runTest();
 
-      expect(onEvent).not.toHaveBeenCalled();
+      expect(onEvent).toHaveBeenCalled();
       expect(onMetadata).toHaveBeenCalled();
+    });
+
+    it('only triggers emsg event for ID3 if event canceled', async () => {
+      setSegment0(emsgSegmentV0ID3);
+      videoStream.emsgSchemeIdUris = [id3SchemeUri];
+
+      onEvent.and.callFake((emsgEvent) => {
+        expect(emsgEvent.type).toBe('emsg');
+        emsgEvent.preventDefault();
+      });
+
+      // Here we go!
+      streamingEngine.switchVariant(variant);
+      streamingEngine.switchTextStream(textStream);
+      await streamingEngine.start();
+      playing = true;
+      await runTest();
+
+      expect(onEvent).toHaveBeenCalled();
+      expect(onMetadata).not.toHaveBeenCalled();
     });
 
     it('event start matches presentation time', async () => {
@@ -3912,19 +3936,26 @@ describe('StreamingEngine', () => {
   describe('prefetch segments', () => {
     const segmentType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 
+    let OriginalSegmentPrefetch;
+
     beforeEach(() => {
-      shaka.media.SegmentPrefetch = Util.spyFunc(
-          jasmine.createSpy('SegmentPrefetch')
-              .and.callFake((config, stream) =>
-                new shaka.test.FakeSegmentPrefetch(stream, segmentData),
-              ),
-      );
+      OriginalSegmentPrefetch = shaka.media.SegmentPrefetch;
+      // eslint-disable-next-line no-restricted-syntax
+      shaka.media.SegmentPrefetch = function(config, stream) {
+        const fake = new shaka.test.FakeSegmentPrefetch(stream, segmentData);
+        return /** @type {?} */(fake);
+      };
+
       setupVod();
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       createStreamingEngine();
       const config = shaka.util.PlayerConfiguration.createDefault().streaming;
       config.segmentPrefetchLimit = 3;
       streamingEngine.configure(config);
+    });
+
+    afterEach(() => {
+      shaka.media.SegmentPrefetch = OriginalSegmentPrefetch;
     });
 
     it('should use prefetched segment without fetching again', async () => {

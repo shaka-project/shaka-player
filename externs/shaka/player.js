@@ -238,7 +238,8 @@ shaka.extern.BufferedInfo;
  *   originalVideoId: ?string,
  *   originalAudioId: ?string,
  *   originalTextId: ?string,
- *   originalImageId: ?string
+ *   originalImageId: ?string,
+ *   originalLanguage: ?string
  * }}
  *
  * @description
@@ -260,8 +261,10 @@ shaka.extern.BufferedInfo;
  *   The bandwidth required to play the track, in bits/sec.
  *
  * @property {string} language
- *   The language of the track, or <code>'und'</code> if not given.  This is the
- *   exact value provided in the manifest; it may need to be normalized.
+ *   The language of the track, or <code>'und'</code> if not given.  This value
+ *   is normalized as follows - language part is always lowercase and translated
+ *   to ISO-639-1 when possible, locale part is always uppercase,
+ *   i.e. <code>'en-US'</code>.
  * @property {?string} label
  *   The track label, which is unique text that should describe the track.
  * @property {?string} kind
@@ -340,6 +343,10 @@ shaka.extern.BufferedInfo;
  * @property {?string} originalImageId
  *   (image tracks only) The original ID of the image track, if any, as it
  *   appeared in the original manifest.
+ * @property {?string} originalLanguage
+ *   The original language of the track, if any, as it appeared in the original
+ *   manifest.  This is the exact value provided in the manifest; for normalized
+ *   value use <code>language</code> property.
  * @exportDoc
  */
 shaka.extern.Track;
@@ -1258,7 +1265,9 @@ shaka.extern.AdsConfiguration;
  *   advanced: shaka.extern.AdvancedAbrConfiguration,
  *   restrictToElementSize: boolean,
  *   restrictToScreenSize: boolean,
- *   ignoreDevicePixelRatio: boolean
+ *   ignoreDevicePixelRatio: boolean,
+ *   clearBufferSwitch: boolean,
+ *   safeMarginSwitch: number
  * }}
  *
  * @property {boolean} enabled
@@ -1300,6 +1309,19 @@ shaka.extern.AdsConfiguration;
  *   If true,device pixel ratio is ignored when restricting the quality to
  *   media element size or screen size.
  *   Defaults false.
+ * @property {boolean} clearBufferSwitch
+ *   If true, the buffer will be cleared during the switch.
+ *   The default automatic behavior is false to have a smoother transition.
+ *   On some device it's better to clear buffer.
+ *   Defaults false.
+ * @property {number} safeMarginSwitch
+ *   Optional amount of buffer (in seconds) to
+ *   retain when clearing the buffer during the automatic switch.
+ *   Useful for switching variant quickly without causing a buffering event.
+ *   Defaults to 0 if not provided. Ignored if clearBuffer is false.
+ *   Can cause hiccups on some browsers if chosen too small, e.g.
+ *   The amount of two segments is a fair minimum to consider as safeMargin
+ *   value.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;

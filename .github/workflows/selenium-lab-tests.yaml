@@ -251,11 +251,12 @@ jobs:
           python3 build/test.py \
               --no-build \
               --reporters spec --spec-hide-passed \
-              --lets-encrypt-folder /etc/shakalab.rocks \
+              --tls-key /etc/letsencrypt/live/karma.shakalab.rocks/privkey.pem \
+              --tls-cert /etc/letsencrypt/live/karma.shakalab.rocks/fullchain.pem \
               --hostname karma.shakalab.rocks \
               --port $KARMA_PORT \
               --grid-config build/shaka-lab.yaml \
-              --grid-address selenium-grid.lab:4444 \
+              --grid-address selenium-grid.lab.shaka:4444 \
               --browsers ${{ matrix.browser }} \
               "${extra_flags[@]}"
           # Capture the test exit code immediately after running the tests.

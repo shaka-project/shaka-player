@@ -149,6 +149,9 @@ shakaAssets.Feature = {
 
   // Set if the asset has LCEVC.
   LCEVC: shakaDemo.MessageIds.LCEVC,
+
+  // Set if the asset has Low Latency mode.
+  LOW_LATENCY_STREAM: shakaDemo.MessageIds.LOW_LATENCY_STREAM,
 };
 
 
@@ -829,7 +832,13 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.SHAKA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.MP4),
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .setExtraConfig({
+        streaming: {
+          lowLatencyMode: true,
+        },
+      }),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF CEA-608 VOD',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
@@ -854,7 +863,13 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.DASH_IF)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.MP4),
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .setExtraConfig({
+        streaming: {
+          lowLatencyMode: true,
+        },
+      }),
   new ShakaDemoAssetInfo(
       /* name= */ 'DASH-IF THUMBNAILS - Single adaptation set, 7 tiles at 10x1, each thumb 320x180',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/dash_if_test_pattern.png',
@@ -905,14 +920,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Microsoft Smooth Streaming',
-      /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
-      /* manifestUri= */ 'https://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest',
-      /* source= */ shakaAssets.Source.DASH_IF)
-      .addFeature(shakaAssets.Feature.MSS)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4),
   // End DASH-IF Assets }}}
 
   // bitcodin assets {{{
@@ -1241,7 +1248,13 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.APPLE)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
-      .addFeature(shakaAssets.Feature.MP4),
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .setExtraConfig({
+        streaming: {
+          lowLatencyMode: true,
+        },
+      }),
   new ShakaDemoAssetInfo(
       /* name= */ 'Audio only HLS with raw AAC',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
@@ -1298,6 +1311,23 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addLicenseServer('com.microsoft.playready', 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,ck:W31bfVt9W31bfVt9W31bfQ==,ckt:aescbc)'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Super Speedway Trailer (MSS - Clear)',
+      /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
+      /* manifestUri= */ 'https://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addFeature(shakaAssets.Feature.MSS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Super Speedway Trailer (MSS - PlayReady)',
+      /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264PR/SuperSpeedway_720.ism/Manifest',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addFeature(shakaAssets.Feature.MSS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)'),
   // }}}
 
   // MPEG-5 LCEVC assets {{{

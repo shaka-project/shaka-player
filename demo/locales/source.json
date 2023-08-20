@@ -159,6 +159,10 @@
     "description": "The name of a configuration value.",
     "message": "Clock Sync URI"
   },
+  "DEMO_CLEAR_BUFFER_SWITCH": {
+    "description": "Clear video buffer on abr rendition switch.",
+    "message": "Clear buffer"
+  },
   "DEMO_CMCD_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "[JARGON:CMCD]"
@@ -847,6 +851,10 @@
     "description": "The header for a section of configuration values.",
     "message": "Restrictions"
   },
+  "DEMO_SAFE_MARGIN_SWITCH": {
+    "description": "Safe margin on abr switch rendition",
+    "message": "safe margin"
+  },
   "DEMO_SAFE_SEEK_OFFSET": {
     "description": "The name of a configuration value.",
     "message": "Safe Seek Offset"
@@ -1110,5 +1118,9 @@
   "DEMO_SEGMENT_PREFETCH_LIMIT": {
     "description": "Max number of segments to be prefetched ahead of current time position.",
     "message": "Segment Prefetch Limit."
+  },
+  "DEMO_LOW_LATENCY_STREAM": {
+    "description": "A tag that marks an asset as low latency.",
+    "message": "Low Latency stream"
   }
 }

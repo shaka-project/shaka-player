@@ -291,6 +291,14 @@ Shaka Player supports:
     with help from [mux.js][] v6.2.0+
 
 
+## Thumbnails support
+
+Shaka Player supports:
+  - Internal DASH thumbnails. Using DASH-IF IOP Image Adaptation Set
+  - Internal HLS thumbnails. Using HLS Image Media Playlist
+  - External WebVTT with images/sprites (only for VoD)
+
+
 ## Documentation & Important Links ##
 
  * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
