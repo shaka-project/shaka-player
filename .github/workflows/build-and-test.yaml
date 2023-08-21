@@ -45,7 +45,7 @@ jobs:
           # coverage instrumentation on full-stack player integration tests.
           - os: ubuntu-latest
             browser: Chrome
-            extra_flags: "--use-xvfb --html-coverage-report --uncompiled"
+            extra_flags: "--use-xvfb"
           - os: ubuntu-latest
             browser: Firefox
             extra_flags: "--use-xvfb"
@@ -70,6 +70,7 @@ jobs:
             browser: Firefox
           - os: windows-latest
             browser: Edge
+            extra_flags: "--html-coverage-report --uncompiled"
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
