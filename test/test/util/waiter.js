@@ -394,7 +394,7 @@ shaka.test.Waiter = class {
    * @private
    */
   macPlaybackWorkaround_(mediaElement) {
-    if (shaka.util.Platform.isMac()) {
+    if (shaka.util.Platform.isMac() && !shaka.util.Platform.safariVersion()) {
       // Work around bizarre playback slowdowns that only seem to occur with
       // WebDriver and only on Mac.  Increasing the playback rate allows tests
       // to complete without timing out.
