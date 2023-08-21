@@ -234,7 +234,7 @@ jobs:
           # Generate a coverage report from uncompiled code on ChromeLinux.
           # It should be the uncompiled build, or else we won't execute any
           # coverage instrumentation on full-stack player integration tests.
-          if [[ "${{ matrix.browser }}" == "ChromeLinux" ]]; then
+          if [[ "${{ matrix.browser }}" == "Edge" ]]; then
             extra_flags+=(--html-coverage-report --uncompiled)
           fi
 
@@ -271,10 +271,10 @@ jobs:
           # Report the captured (and possibly overridden) exit status.
           exit $exit_code
 
-      - name: Find coverage report (ChromeLinux only)
+      - name: Find coverage report (Edge only)
         id: coverage
-        # Run even if an earlier step fails, but only on ChromeLinux.
-        if: ${{ always() && matrix.browser == 'ChromeLinux' }}
+        # Run even if an earlier step fails, but only on Edge.
+        if: ${{ always() && matrix.browser == 'Edge' }}
         shell: bash
         run: |
           # Find the path to the coverage report specifically for Chrome on
@@ -282,7 +282,7 @@ jobs:
           # will vary.  Having a single path will make the artifact zip
           # simpler, whereas using a wildcard in the upload step will result
           # in a zip file with internal directories.
-          coverage_report="$( (ls coverage/Chrome*Linux*/coverage.json || true) | head -1 )"
+          coverage_report="$( (ls coverage/Edge*/coverage.json || true) | head -1 )"
 
           # Show what's there, for debugging purposes.
           ls -l coverage/
@@ -295,7 +295,7 @@ jobs:
             exit 1
           fi
 
-      - name: Upload coverage report (ChromeLinux only)
+      - name: Upload coverage report (Edge only)
         uses: actions/upload-artifact@v3
         # If there's a coverage report, upload it, even if a previous step
         # failed.
