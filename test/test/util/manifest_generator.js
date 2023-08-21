@@ -555,6 +555,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.tilesLayout = undefined;
       /** @type {?shaka.media.ManifestParser.AccessibilityPurpose} */
       this.accessibilityPurpose;
+      /** @type {boolean} */
+      this.external = false;
     }
 
     /** @type {shaka.extern.Stream} */

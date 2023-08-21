@@ -1196,7 +1196,7 @@ describe('MediaSourceEngine', () => {
     });
 
     it('destroys text engines', async () => {
-      mediaSourceEngine.reinitText('text/vtt', false);
+      mediaSourceEngine.reinitText('text/vtt', false, false);
 
       await mediaSourceEngine.destroy();
       expect(mockTextEngine).toBeTruthy();
