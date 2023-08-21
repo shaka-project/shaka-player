@@ -218,6 +218,7 @@ describe('AdaptationSet', () => {
       forced: false,
       trickModeVideo: null,
       type: '',
+      external: false,
     };
   }
 });

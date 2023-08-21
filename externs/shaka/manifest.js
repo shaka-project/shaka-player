@@ -321,7 +321,8 @@ shaka.extern.FetchCryptoKeysFunction;
  *   tilesLayout: (string|undefined),
  *   matchedStreams:
  *      (!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
- *      undefined)
+ *      undefined),
+ *   external: boolean
  * }}
  *
  * @description
@@ -434,6 +435,9 @@ shaka.extern.FetchCryptoKeysFunction;
  * @property {(!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
  *   undefined)} matchedStreams
  *   The streams in all periods which match the stream. Used for Dash.
+ * @property {boolean} external
+ *   Indicate if the stream was added externally.
+ *   Eg: external text tracks.
  *
  * @exportDoc
  */

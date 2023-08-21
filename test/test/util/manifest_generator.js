@@ -544,6 +544,8 @@ shaka.test.ManifestGenerator.Stream = class {
       this.hdr = undefined;
       /** @type {(string|undefined)} */
       this.tilesLayout = undefined;
+      /** @type {boolean} */
+      this.external = false;
     }
 
     /** @type {shaka.extern.Stream} */
