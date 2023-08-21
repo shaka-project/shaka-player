@@ -45,6 +45,9 @@ describe('Transmuxer Player', () => {
     player.configure('mediaSource.forceTransmux', true);
     player.configure('streaming.useNativeHlsOnSafari', false);
 
+    // Disable stall detection, which can interfere with playback tests.
+    player.configure('streaming.stallEnabled', false);
+
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
@@ -70,7 +73,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -93,7 +96,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -131,7 +134,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -165,7 +168,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -185,7 +188,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -205,7 +208,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -225,7 +228,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
