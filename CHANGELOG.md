@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.3.9](https://github.com/shaka-project/shaka-player/compare/v4.3.8...v4.3.9) (2023-08-21)
+
+
+### Bug Fixes
+
+* add MIME type for HTML5 tracks ([#5452](https://github.com/shaka-project/shaka-player/issues/5452)) ([5fb44db](https://github.com/shaka-project/shaka-player/commit/5fb44dba6d7670e24e8df90fe96588ce2a48c92b))
+* Default language to 'und' for native tracks ([#5464](https://github.com/shaka-project/shaka-player/issues/5464)) ([c31f3db](https://github.com/shaka-project/shaka-player/commit/c31f3db9c3efe44dfd28e03db64628827fdf9b5f))
+* Fix exiting fullscreen on Safari ([#5439](https://github.com/shaka-project/shaka-player/issues/5439)) ([81626b2](https://github.com/shaka-project/shaka-player/commit/81626b20ada137305cbaae808315244eaa84906d)), closes [#5437](https://github.com/shaka-project/shaka-player/issues/5437)
+* Fix memory leak on SimpleAbrManager ([#5478](https://github.com/shaka-project/shaka-player/issues/5478)) ([f8cb6ef](https://github.com/shaka-project/shaka-player/commit/f8cb6ef50a5501a92a94e13099a80690fb7b046d))
+* Fix playRangeEnd does not work with HLS streams ([#5494](https://github.com/shaka-project/shaka-player/issues/5494)) ([899eb07](https://github.com/shaka-project/shaka-player/commit/899eb0725f842df21f927a8c63a02e40986bd7fc))
+* gettting maxWidth and maxHeight for restrictToElementSize option ([#5481](https://github.com/shaka-project/shaka-player/issues/5481)) ([053da3b](https://github.com/shaka-project/shaka-player/commit/053da3b7ad60abb2848ad8848cd017d83a4316c6))
+* **HLS:** Fix external subtitles out of sync in HLS ([#5491](https://github.com/shaka-project/shaka-player/issues/5491)) ([38c8a88](https://github.com/shaka-project/shaka-player/commit/38c8a88a9c04e25b02784c00117f6a3ff11e007d))
+* Remove duplicate adaptation event before init ([#5492](https://github.com/shaka-project/shaka-player/issues/5492)) ([75a55b5](https://github.com/shaka-project/shaka-player/commit/75a55b580baebf35a1e26e8cd7920025bc3e1b8a))
+* Support fLaC and Opus codec strings in HLS ([#5454](https://github.com/shaka-project/shaka-player/issues/5454)) ([09bdd61](https://github.com/shaka-project/shaka-player/commit/09bdd61f6e47f4239bf5fbc3d60754f61ec5be94)), closes [#5453](https://github.com/shaka-project/shaka-player/issues/5453)
+* **UI:** Disable right click on range elements ([#5497](https://github.com/shaka-project/shaka-player/issues/5497)) ([1c55e89](https://github.com/shaka-project/shaka-player/commit/1c55e89586e1eb6be620af86061d981349643a28))
+* Update karma-local-wd-launcher to fix Chromedriver &gt;= 115, fix M1 mac ([#5489](https://github.com/shaka-project/shaka-player/issues/5489)) ([1ce673b](https://github.com/shaka-project/shaka-player/commit/1ce673b0442ea401037fc084342a3cd3ff801f21))
+* Update karma-local-wd-launcher to fix Edge &gt;= 115 ([#5506](https://github.com/shaka-project/shaka-player/issues/5506)) ([4a9bc9b](https://github.com/shaka-project/shaka-player/commit/4a9bc9b2cef1f5c352eeebf6998162260a2973db))
+* **WebVTT:** Fix text-shadow in WebVTT not working ([#5499](https://github.com/shaka-project/shaka-player/issues/5499)) ([d78547a](https://github.com/shaka-project/shaka-player/commit/d78547a79b8356b6040dbc73d922b1b87822b541))
+
 ## [4.3.8](https://github.com/shaka-project/shaka-player/compare/v4.3.7...v4.3.8) (2023-07-21)
 
 
