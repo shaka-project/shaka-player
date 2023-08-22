@@ -45,6 +45,8 @@ const ShakaDemoAssetInfo = class {
     this.disabled = false;
     /** @type {!Array.<!shakaAssets.ExtraText>} */
     this.extraText = [];
+    /** @type {!Array.<string>} */
+    this.extraThumbnail = [];
     /** @type {?string} */
     this.certificateUri = null;
     /** @type {?string} */
@@ -299,6 +301,15 @@ const ShakaDemoAssetInfo = class {
   addExtraText(extraText) {
     // TODO: At no point do we actually use the extraText... why does it exist?
     this.extraText.push(extraText);
+    return this;
+  }
+
+  /**
+   * @param {string} )
+   * @return {!ShakaDemoAssetInfo}
+   */
+  addExtraThumbnail(uri) {
+    this.extraThumbnail.push(uri);
     return this;
   }
 
