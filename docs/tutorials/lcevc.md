@@ -22,7 +22,7 @@ LCEVC Decoder library needs to be included in the HTML page:
 ```html 
 <script src="../node_modules/lcevc_dec.js/dist/lcevc_dec.min.js"></script> 
 ``` 
-- Or use CDN.js for latest LCEVC Decoder libraries. 
+- Or use `unpkg.com` for latest LCEVC Decoder libraries.
 ```html 
 <script src="https://unpkg.com/lcevc_dec.js@1.0.0/dist/lcevc_dec.min.js"></script> 
 ``` 
@@ -41,8 +41,8 @@ Sample setup using the Shaka Player UI library:
 <html> 
   <head> 
     <!-- Shaka Player UI compiled library and default CSS for player controls: --> 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.ui.debug.min.js"></script> 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/controls.css" /> 
+    <script src="dist/shaka-player.ui.js"></script> 
+    <link rel="stylesheet" href="dist/controls.css" /> 
  
     <!-- LCEVC decoder compiled library --> 
     <script src="https://unpkg.com/lcevc_dec.js@1.0.0/dist/lcevc_dec.min.js"></script> 
