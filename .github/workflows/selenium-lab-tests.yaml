@@ -221,9 +221,9 @@ jobs:
 
       # Run tests on the Selenium grid in our lab.  This uses a private
       # hostname and TLS cert to get EME tests working on all platforms
-      # (since EME only works on https or localhost).  The variable KARMA_PORT
-      # must be defined by the self-hosted runner, and mapped from the host to
-      # the container.
+      # (since EME only works on https or localhost).  The variable
+      # ALLOCATED_PORT must be defined by the self-hosted runner, and mapped
+      # from the host to the container.
       - name: Test Player
         run: |
           # Use of an array keeps elements intact, and allows an element to
@@ -254,7 +254,7 @@ jobs:
               --tls-key /etc/letsencrypt/live/karma.shakalab.rocks/privkey.pem \
               --tls-cert /etc/letsencrypt/live/karma.shakalab.rocks/fullchain.pem \
               --hostname karma.shakalab.rocks \
-              --port $KARMA_PORT \
+              --port $ALLOCATED_PORT \
               --grid-config build/shaka-lab.yaml \
               --grid-address selenium-grid.lab.shaka:4444 \
               --browsers ${{ matrix.browser }} \
