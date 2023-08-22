@@ -1358,6 +1358,11 @@ shakaDemo.Main = class {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
 
+      for (const extraText of asset.extraText) {
+        this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+            extraText.kind, extraText.mime, extraText.codecs);
+      }
+
       for (const extraThumbnail of asset.extraThumbnail) {
         this.player_.addThumbnailsTrack(extraThumbnail);
       }
