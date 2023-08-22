@@ -1358,6 +1358,10 @@ shakaDemo.Main = class {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
 
+      for (const extraThumbnail of asset.extraThumbnail) {
+        this.player_.addThumbnailsTrack(extraThumbnail);
+      }
+
       // If the asset has an ad tag attached to it, load the ads
       const adManager = this.player_.getAdManager();
       if (adManager && asset.adTagUri) {
