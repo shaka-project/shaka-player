@@ -103,7 +103,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.container.appendChild(this.thumbnailContainer_);
 
     /**
-     * Use to see is the bar is moving with touch o keys.
+     * True if the bar is moving due to touchscreen or keyboard events.
      *
      * @private {boolean}
      */
@@ -527,10 +527,16 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     let thumbnail = this.thumbnails_[value];
     const seekRange = this.player.seekRange();
     if (this.player.isLive()) {
-      this.thumbnailTime_.textContent =
-          '-' + this.timeFormater_(seekRange.end - value);
+      const totalSeconds = seekRange.end - value;
+      if (totalSeconds < 1) {
+        this.thumbnailTime_.textContent =
+            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+      } else {
+        this.thumbnailTime_.textContent =
+            '-' + this.timeFormatter_(totalSeconds);
+      }
     } else {
-      this.thumbnailTime_.textContent = this.timeFormater_(value);
+      this.thumbnailTime_.textContent = this.timeFormatter_(value);
     }
     const offsetTop = -10;
     const width = this.thumbnailContainer_.clientWidth;
@@ -613,8 +619,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         return track.mimeType.toLowerCase() === mimeType &&
             track.bandwidth < estimatedBandwidth * 0.01;
       }).sort((a, b) => {
-        return a.bandwidth - b.bandwidth;
-      }).reverse();
+        return b.bandwidth - a.bandwidth;
+      });
       if (bestOptions && bestOptions.length) {
         return bestOptions[0];
       }
@@ -636,7 +642,7 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
    * @param {number} totalSeconds
    * @private
    */
-  timeFormater_(totalSeconds) {
+  timeFormatter_(totalSeconds) {
     const secondsNumber = Math.round(totalSeconds);
     const hours = Math.floor(secondsNumber / 3600);
     let minutes = Math.floor((secondsNumber - (hours * 3600)) / 60);
