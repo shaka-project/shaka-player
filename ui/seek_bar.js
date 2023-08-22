@@ -249,13 +249,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // and start the new one.
     this.seekTimer_.tickAfter(/* seconds= */ 0.125);
 
-    const min = parseFloat(this.bar.min);
-    const max = parseFloat(this.bar.max);
-    const rect = this.bar.getBoundingClientRect();
-    const value = Math.round(this.getValue());
-    const scale = (max - min) / rect.width;
-    const position = (value - min) / scale;
-    this.showThumbnail_(position, value);
+    if (this.player.getImageTracks().length) {
+      const min = parseFloat(this.bar.min);
+      const max = parseFloat(this.bar.max);
+      const rect = this.bar.getBoundingClientRect();
+      const value = Math.round(this.getValue());
+      const scale = (max - min) / rect.width;
+      const position = (value - min) / scale;
+      this.showThumbnail_(position, value);
+    } else {
+      this.hideThumbnail_();
+    }
   }
 
   /**
