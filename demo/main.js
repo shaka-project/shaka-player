@@ -296,7 +296,32 @@ shakaDemo.Main = class {
       text = text.replace(replaceString, value);
     };
     fillInTemplate('RE:player', shaka.Player.version);
-    fillInTemplate('RE:link', window.location.href);
+    if (this.selectedAsset) {
+      const uriLines = [];
+      const addLine = (key, value) => {
+        uriLines.push(key + '= `' + value + '`');
+      };
+      addLine('uri', this.selectedAsset.manifestUri);
+      if (this.selectedAsset.adTagUri) {
+        addLine('ad tag uri', this.selectedAsset.adTagUri);
+      }
+      if (this.selectedAsset.licenseServers.size) {
+        const uri = this.selectedAsset.licenseServers.values().next().value;
+        addLine('license server', uri);
+        for (const drmSystem of this.selectedAsset.licenseServers.keys()) {
+          if (!shakaDemo.Main.commonDrmSystems.includes(drmSystem)) {
+            addLine('drm system', drmSystem);
+            break;
+          }
+        }
+      }
+      if (this.selectedAsset.certificateUri) {
+        addLine('certificate', this.selectedAsset.certificateUri);
+      }
+      fillInTemplate('RE:uris', uriLines.join('\n'));
+    } else {
+      fillInTemplate('RE:uris', 'No asset');
+    }
     fillInTemplate('RE:browser', navigator.userAgent);
     if (this.selectedAsset &&
         this.selectedAsset.source == shakaAssets.Source.CUSTOM) {
@@ -308,11 +333,14 @@ shakaDemo.Main = class {
       fillInTemplate('RE:customwarning\n', '');
     }
 
+    const urlTerms = [];
+    urlTerms.push('labels=type%3A+bug');
+    urlTerms.push('body=' + encodeURIComponent(text));
+    const url = 'https://github.com/shaka-project/shaka-player/issues/new?' +
+        urlTerms.join('&');
+
     // Navigate to the github issue opening interface, with the
-    // partially-filled template as a preset body.
-    let url = 'https://github.com/shaka-project/shaka-player/issues/new?';
-    url += 'body=' + encodeURIComponent(text);
-    // Open in another tab.
+    // partially-filled template as a preset body, opening in another tab.
     window.open(url, '_blank');
   }
 
@@ -1328,6 +1356,10 @@ shakaDemo.Main = class {
 
       if (this.player_.isAudioOnly()) {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
+      }
+
+      for (const extraThumbnail of asset.extraThumbnail) {
+        this.player_.addThumbnailsTrack(extraThumbnail);
       }
 
       // If the asset has an ad tag attached to it, load the ads

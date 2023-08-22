@@ -1271,6 +1271,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     const keyboardSeekDistance = this.config_.keyboardSeekDistance;
+    const keyboardLargeSeekDistance = this.config_.keyboardLargeSeekDistance;
 
     switch (event.key) {
       case 'ArrowLeft':
@@ -1287,6 +1288,22 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
         if (this.seekBar_ && !isVolumeBar && keyboardSeekDistance > 0) {
           event.preventDefault();
           this.seek_(this.seekBar_.getValue() + keyboardSeekDistance);
+        }
+        break;
+      case 'PageDown':
+        // PageDown is like ArrowLeft, but has a larger jump distance, and does
+        // nothing to volume.
+        if (this.seekBar_ && isSeekBar && keyboardSeekDistance > 0) {
+          event.preventDefault();
+          this.seek_(this.seekBar_.getValue() - keyboardLargeSeekDistance);
+        }
+        break;
+      case 'PageUp':
+        // PageDown is like ArrowRight, but has a larger jump distance, and does
+        // nothing to volume.
+        if (this.seekBar_ && isSeekBar && keyboardSeekDistance > 0) {
+          event.preventDefault();
+          this.seek_(this.seekBar_.getValue() + keyboardLargeSeekDistance);
         }
         break;
       // Jump to the beginning of the video's seek range.

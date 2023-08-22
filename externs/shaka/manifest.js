@@ -388,7 +388,8 @@ shaka.extern.FetchCryptoKeysFunction;
  *   matchedStreams:
  *      (!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
  *      undefined),
- *   mssPrivateData: (shaka.extern.MssPrivateData|undefined)
+ *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
+ *   external: boolean
  * }}
  *
  * @description
@@ -510,6 +511,9 @@ shaka.extern.FetchCryptoKeysFunction;
  * @property {(shaka.extern.MssPrivateData|undefined)} mssPrivateData
  *   <i>Microsoft Smooth Streaming only.</i> <br>
  *   Private MSS data that is necessary to be able to do transmuxing.
+ * @property {boolean} external
+ *   Indicate if the stream was added externally.
+ *   Eg: external text tracks.
  *
  * @exportDoc
  */
