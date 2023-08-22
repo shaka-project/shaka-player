@@ -243,6 +243,7 @@ shaka.ui.Overlay = class {
       forceLandscapeOnFullscreen: true,
       enableTooltips: false,
       keyboardSeekDistance: 5,
+      keyboardLargeSeekDistance: 60,
       fullScreenElement: this.videoContainer_,
     };
 
