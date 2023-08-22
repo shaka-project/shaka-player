@@ -110,14 +110,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.isMoving_ = false;
 
     /**
-     * Thumbnails cache.
-     *
-     * @private {Object}
-     */
-    this.thumbnails_ = {};
-
-
-    /**
      * The timer is activated to hide the thumbnail.
      *
      * @private {shaka.util.Timer}
@@ -476,8 +468,15 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     if (value < 0) {
       value = 0;
     }
-    let thumbnail = this.thumbnails_[value];
     const seekRange = this.player.seekRange();
+    const playerValue = Math.max(Math.ceil(seekRange.start),
+        Math.min(Math.floor(seekRange.end), value));
+    const thumbnail =
+        await this.player.getThumbnails(thumbnailTrack.id, playerValue);
+    if (!thumbnail || !thumbnail.uris.length) {
+      this.hideThumbnail_();
+      return;
+    }
     if (this.player.isLive()) {
       const totalSeconds = seekRange.end - value;
       if (totalSeconds < 1) {
@@ -499,17 +498,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
         Math.max(0, pixelPosition - (width / 2)));
     this.thumbnailContainer_.style.left = leftPosition + 'px';
     this.thumbnailContainer_.style.visibility = 'visible';
-    if (!thumbnail) {
-      const playerValue = Math.max(Math.ceil(seekRange.start),
-          Math.min(Math.floor(seekRange.end), value));
-      thumbnail =
-          await this.player.getThumbnails(thumbnailTrack.id, playerValue);
-      this.thumbnails_[value] = thumbnail;
-    }
-    if (!thumbnail || !thumbnail.uris.length) {
-      this.hideThumbnail_();
-      return;
-    }
     const uri = thumbnail.uris[0].split('#xywh=')[0];
     if (uri !== this.thumbnailImage_.src) {
       try {
