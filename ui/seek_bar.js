@@ -181,68 +181,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.showThumbnail_(mousePosition, value);
     });
 
-    this.eventManager.listen(this.bar, 'keydown', (event) => {
-      this.hideThumbnailTimer_.stop();
-      const leftKeyCode = 37;
-      const rightKeyCode = 39;
-      // Left and Right only
-      if (event.keyCode != leftKeyCode && event.keyCode != rightKeyCode) {
-        return;
-      }
-      this.isMoving_ = true;
-      const min = parseFloat(this.bar.min);
-      const max = parseFloat(this.bar.max);
-      if (event.keyCode == leftKeyCode) {
-        this.bar.value = parseFloat(this.bar.value) - (max - min) * 0.025;
-      } else if (event.keyCode == rightKeyCode) {
-        this.bar.value = parseFloat(this.bar.value) + (max - min) * 0.025;
-      }
-      const rect = this.bar.getBoundingClientRect();
-      const value = Math.round(this.bar.value);
-      const scale = (max - min) / rect.width;
-      const position = (value - min) / scale;
-      this.showThumbnail_(position, value);
-      event.preventDefault();
-    });
-
-    this.eventManager.listen(this.bar, 'keyup', () => {
-      if (this.isMoving_) {
-        this.isMoving_ = false;
-        this.hideThumbnailTimer_.stop();
-        this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
-      }
-    });
-
-    if (navigator.maxTouchPoints > 0) {
-      const touchMove = (event) => {
-        this.isMoving_ = true;
-        const rect = this.bar.getBoundingClientRect();
-        const min = parseFloat(this.bar.min);
-        const max = parseFloat(this.bar.max);
-        // Pixels from the left of the range element
-        const touchPosition = event.changedTouches[0].clientX - rect.left;
-        // Pixels per unit value of the range element.
-        const scale = (max - min) / rect.width;
-        // Mouse position in units, which may be outside the allowed range.
-        const value = Math.round(min + scale * touchPosition);
-        // Show Thumbnail
-        this.showThumbnail_(touchPosition, value);
-        // Update the bar
-        this.bar.value = value;
-        event.preventDefault();
-      };
-      const touchEnd = () => {
-        if (this.isMoving_) {
-          this.isMoving_ = false;
-          this.hideThumbnail_();
-        }
-      };
-      this.eventManager.listen(this.bar, 'touchstart', touchMove);
-      this.eventManager.listen(this.bar, 'touchmove', touchMove);
-      this.eventManager.listen(this.bar, 'touchend', touchEnd);
-      this.eventManager.listen(this.bar, 'touchcancel', touchEnd);
-    }
-
     this.eventManager.listen(this.bar, 'blur', () => {
       if (this.isMoving_) {
         this.isMoving_ = false;
@@ -251,7 +189,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     });
 
     this.eventManager.listen(this.container, 'mouseleave', () => {
-      this.hideThumbnail_();
+      this.hideThumbnailTimer_.stop();
+      this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
     });
 
     // Initialize seek state and label.
@@ -287,6 +226,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.wasPlaying_ = !this.video.paused;
     this.controls.setSeeking(true);
     this.video.pause();
+    this.hideThumbnailTimer_.stop();
+    this.isMoving_ = true;
   }
 
   /**
@@ -314,6 +255,14 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // Calling |start| on an already pending timer will cancel the old request
     // and start the new one.
     this.seekTimer_.tickAfter(/* seconds= */ 0.125);
+
+    const min = parseFloat(this.bar.min);
+    const max = parseFloat(this.bar.max);
+    const rect = this.bar.getBoundingClientRect();
+    const value = Math.round(this.getValue());
+    const scale = (max - min) / rect.width;
+    const position = (value - min) / scale;
+    this.showThumbnail_(position, value);
   }
 
   /**
@@ -330,6 +279,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     if (this.wasPlaying_) {
       this.video.play();
+    }
+
+    if (this.isMoving_) {
+      this.isMoving_ = false;
+      this.hideThumbnailTimer_.stop();
+      this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
     }
   }
 
