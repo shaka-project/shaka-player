@@ -181,13 +181,6 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
       this.showThumbnail_(mousePosition, value);
     });
 
-    this.eventManager.listen(this.bar, 'blur', () => {
-      if (this.isMoving_) {
-        this.isMoving_ = false;
-        this.hideThumbnail_();
-      }
-    });
-
     this.eventManager.listen(this.container, 'mouseleave', () => {
       this.hideThumbnailTimer_.stop();
       this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
