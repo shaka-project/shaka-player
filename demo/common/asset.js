@@ -305,7 +305,7 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {string} )
+   * @param {string} uri
    * @return {!ShakaDemoAssetInfo}
    */
   addExtraThumbnail(uri) {
