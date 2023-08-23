@@ -1129,9 +1129,10 @@ shaka.extern.ManifestConfiguration;
  *   to <code>false</code>.
  * @property {number} gapDetectionThreshold
  *   The maximum distance (in seconds) before a gap when we'll automatically
- *   jump. This value  defaults to <code>0.5</code>.
- * @property {numebr} gapJumpTimerTime
- *   The polling time in seconds to check for gaps in the media.
+ *   jump. This value defaults to <code>0.5</code>.
+ * @property {number} gapJumpTimerTime
+ *   The polling time in seconds to check for gaps in the media. This value
+ *   defaults to <code>0.25</code>.
  * @property {number} durationBackoff
  *   By default, we will not allow seeking to exactly the duration of a
  *   presentation.  This field is the number of seconds before duration we will
