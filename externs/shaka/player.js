@@ -1219,9 +1219,28 @@ shaka.extern.ManifestConfiguration;
  */
 shaka.extern.StreamingConfiguration;
 
+/**
+ * @typedef {(function(
+ *      shaka.extern.Track,
+ *      shaka.extern.Track,
+ *      string) :number|undefined)}
+ *
+ * @description
+ * A comparitor delegate for sorting audio tracks. This method is called only
+ * when codec switching is enabled.
+ * Parameters:
+ *  trackA: shaka.extern.Track
+ *  trackB: shaka.extern.Track
+ *  contentType: string (video or audio)
+ *
+ * @exportDoc
+ */
+shaka.extern.TrackComparator;
+
 
 /**
  * @typedef {{
+ *   trackComparator: shaka.extern.TrackComparator,
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   sourceBufferExtraFeatures: string,
  *   forceTransmux: boolean
@@ -1229,10 +1248,13 @@ shaka.extern.StreamingConfiguration;
  *
  * @description
  *   Media source configuration.
+ * @property {shaka.extern.TrackComparator} trackComparator
+ *   A comparitor delegate for sorting audio tracks. This method is called only
+ *   when codec switching is enabled.
  * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
- *  Allow codec switching strategy. Default behavior is disabled.
- *  Smooth loading uses SourceBuffer.changeType. Reload uses cycling of
- *  MediaSource.
+ *   Allow codec switching strategy. Default behavior is disabled.
+ *   Smooth loading uses SourceBuffer.changeType. Reload uses cycling of
+ *   MediaSource.
  * @property {string} sourceBufferExtraFeatures
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
