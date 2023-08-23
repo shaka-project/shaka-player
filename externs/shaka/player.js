@@ -1069,6 +1069,7 @@ shaka.extern.ManifestConfiguration;
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
  *   gapDetectionThreshold: number,
+ *   gapJumpTimerTime: number,
  *   durationBackoff: number,
  *   safeSeekOffset: number,
  *   stallEnabled: boolean,
@@ -1127,9 +1128,10 @@ shaka.extern.ManifestConfiguration;
  *   time for live streams. This can put us further from the live edge. Defaults
  *   to <code>false</code>.
  * @property {number} gapDetectionThreshold
- *   TThe maximum distance (in seconds) before a gap when we'll automatically
- *   jump. This value  defaults to <code>0.1</code>, except in Edge Legacy,
- *   Tizen, Chromecast that value defaults value is <code>0.5</code>
+ *   The maximum distance (in seconds) before a gap when we'll automatically
+ *   jump. This value  defaults to <code>0.5</code>.
+ * @property {numebr} gapJumpTimerTime
+ *   The polling time in seconds to check for gaps in the media.
  * @property {number} durationBackoff
  *   By default, we will not allow seeking to exactly the duration of a
  *   presentation.  This field is the number of seconds before duration we will

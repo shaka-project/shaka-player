@@ -367,6 +367,10 @@
     "description": "The name of a configuration value.",
     "message": "Gap detection threshold"
   },
+  "DEMO_GAP_JUMP_TIMER_TIME": {
+    "description": "The name of a configuration value.",
+    "message": "Gap jump timer time"
+  },
   "DEMO_GPAC": {
     "description": "Text that describes an asset that comes from the GPAC project asset library.",
     "message": "[PROPER_NAME:GPAC]"

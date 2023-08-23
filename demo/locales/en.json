@@ -91,6 +91,7 @@
   "DEMO_FRONT_INTRO_TWO": "Choose a video to playback; more assets are available via the \"all content\" tab.",
   "DEMO_FUZZ_FACTOR": "Fuzz Factor",
   "DEMO_GAP_DETECTION_THRESHOLD": "Gap detection threshold",
+  "DEMO_GAP_JUMP_TIMER_TIME": "Gap jump timer time",
   "DEMO_GPAC": "GPAC",
   "DEMO_HEADERS_TAB": "Headers",
   "DEMO_HDR_LEVEL": "Preferred HDR Level",
