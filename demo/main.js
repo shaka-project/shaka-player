@@ -1323,6 +1323,11 @@ shakaDemo.Main = class {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
 
+      for (const extraText of asset.extraText) {
+        this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+            extraText.kind, extraText.mime, extraText.codecs);
+      }
+
       // If the asset has an ad tag attached to it, load the ads
       const adManager = this.player_.getAdManager();
       if (adManager && asset.adTagUri) {
