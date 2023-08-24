@@ -1352,8 +1352,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
-      .addDescription('LCEVC-enhanced test stream. Shows moving squares when LCEVC is decoded successfully.')
-      .markAsFeatured('Big Buck Bunny (LCEVC H264)')
       .setExtraConfig({
         lcevc: {
           enabled: true,
@@ -1372,7 +1370,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
-      .addDescription('LCEVC Enhanced eSports content selection.')
       .setExtraConfig({
         streaming: {
           useNativeHlsOnSafari: false,
@@ -1397,7 +1394,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
-      .addDescription('Tears of Steel (LCEVC H264)')
       .setExtraConfig({
         streaming: {
           useNativeHlsOnSafari: false,
@@ -1422,7 +1418,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
-      .addDescription('LCEVC Enhanced eSports content selection.')
       .setExtraConfig({
         lcevc: {
           enabled: true,
