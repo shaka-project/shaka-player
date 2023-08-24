@@ -395,6 +395,9 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.GAP_DETECTION_THRESHOLD,
             'streaming.gapDetectionThreshold',
             /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.GAP_JUMP_TIMER_TIME,
+            'streaming.gapJumpTimerTime',
+            /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.BUFFERING_GOAL,
             'streaming.bufferingGoal',
             /* canBeDecimal= */ true)
