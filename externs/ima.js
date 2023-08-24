@@ -230,6 +230,11 @@ google.ima.ImaSdkSettings = class {
    * @param {google.ima.ImaSdkSettings.VpaidMode} vpaidMode
    */
   setVpaidMode(vpaidMode) {}
+
+  /**
+   * @param {boolean} disable
+   */
+  setDisableCustomPlaybackForIOS10Plus(disable) {}
 };
 
 /**
