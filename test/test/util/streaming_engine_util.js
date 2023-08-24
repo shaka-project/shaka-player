@@ -415,6 +415,7 @@ shaka.test.StreamingEngineUtil = class {
       forced: false,
       spatialAudio: false,
       accessibilityPurpose: null,
+      external: false,
     };
   }
 
@@ -455,6 +456,7 @@ shaka.test.StreamingEngineUtil = class {
       forced: false,
       spatialAudio: false,
       accessibilityPurpose: null,
+      external: false,
     };
   }
 
@@ -492,6 +494,7 @@ shaka.test.StreamingEngineUtil = class {
       forced: false,
       spatialAudio: false,
       accessibilityPurpose: null,
+      external: false,
     };
   }
 };

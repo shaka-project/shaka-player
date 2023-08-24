@@ -137,7 +137,8 @@ shaka.extern.ManifestDB;
  *   audioSamplingRate: ?number,
  *   spatialAudio: boolean,
  *   closedCaptions: Map.<string, string>,
- *   tilesLayout: (string|undefined)
+ *   tilesLayout: (string|undefined),
+ *   external: boolean
  * }}
  *
  * @property {number} id
@@ -200,6 +201,9 @@ shaka.extern.ManifestDB;
  *   The value is a grid-item-dimension consisting of two positive decimal
  *   integers in the format: column-x-row ('4x3'). It describes the arrangement
  *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {boolean} external
+ *   Indicate if the stream was added externally.
+ *   Eg: external text tracks.
  */
 shaka.extern.StreamDB;
 

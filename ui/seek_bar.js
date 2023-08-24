@@ -83,6 +83,41 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
      */
     this.wasPlaying_ = false;
 
+
+    /** @private {!HTMLElement} */
+    this.thumbnailContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.thumbnailContainer_.id = 'shaka-player-ui-thumbnail-container';
+
+    /** @private {!HTMLImageElement} */
+    this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
+      shaka.util.Dom.createHTMLElement('img'));
+    this.thumbnailImage_.id = 'shaka-player-ui-thumbnail-image';
+    this.thumbnailImage_.draggable = false;
+
+    /** @private {!HTMLElement} */
+    this.thumbnailTime_ = shaka.util.Dom.createHTMLElement('div');
+    this.thumbnailTime_.id = 'shaka-player-ui-thumbnail-time';
+
+    this.thumbnailContainer_.appendChild(this.thumbnailImage_);
+    this.thumbnailContainer_.appendChild(this.thumbnailTime_);
+    this.container.appendChild(this.thumbnailContainer_);
+
+    /**
+     * True if the bar is moving due to touchscreen or keyboard events.
+     *
+     * @private {boolean}
+     */
+    this.isMoving_ = false;
+
+    /**
+     * The timer is activated to hide the thumbnail.
+     *
+     * @private {shaka.util.Timer}
+     */
+    this.hideThumbnailTimer_ = new shaka.util.Timer(() => {
+      this.hideThumbnail_();
+    });
+
     /** @private {!Array.<!shaka.extern.AdCuePoint>} */
     this.adCuePoints_ = [];
 
@@ -120,6 +155,29 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
           this.onAdCuePointsChanged_();
         });
 
+    this.eventManager.listen(this.bar, 'mousemove', (event) => {
+      if (!this.player.getImageTracks().length) {
+        this.hideThumbnail_();
+        return;
+      }
+      const rect = this.bar.getBoundingClientRect();
+      const min = parseFloat(this.bar.min);
+      const max = parseFloat(this.bar.max);
+      // Pixels from the left of the range element
+      const mousePosition = event.clientX - rect.left;
+      // Pixels per unit value of the range element.
+      const scale = (max - min) / rect.width;
+      // Mouse position in units, which may be outside the allowed range.
+      const value = Math.round(min + scale * mousePosition);
+      // Show Thumbnail
+      this.showThumbnail_(mousePosition, value);
+    });
+
+    this.eventManager.listen(this.container, 'mouseleave', () => {
+      this.hideThumbnailTimer_.stop();
+      this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
+    });
+
     // Initialize seek state and label.
     this.setValue(this.video.currentTime);
     this.update();
@@ -153,6 +211,8 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     this.wasPlaying_ = !this.video.paused;
     this.controls.setSeeking(true);
     this.video.pause();
+    this.hideThumbnailTimer_.stop();
+    this.isMoving_ = true;
   }
 
   /**
@@ -180,6 +240,18 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     // Calling |start| on an already pending timer will cancel the old request
     // and start the new one.
     this.seekTimer_.tickAfter(/* seconds= */ 0.125);
+
+    if (this.player.getImageTracks().length) {
+      const min = parseFloat(this.bar.min);
+      const max = parseFloat(this.bar.max);
+      const rect = this.bar.getBoundingClientRect();
+      const value = Math.round(this.getValue());
+      const scale = (max - min) / rect.width;
+      const position = (value - min) / scale;
+      this.showThumbnail_(position, value);
+    } else {
+      this.hideThumbnail_();
+    }
   }
 
   /**
@@ -196,6 +268,12 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
 
     if (this.wasPlaying_) {
       this.video.play();
+    }
+
+    if (this.isMoving_) {
+      this.isMoving_ = false;
+      this.hideThumbnailTimer_.stop();
+      this.hideThumbnailTimer_.tickAfter(/* seconds= */ 0.25);
     }
   }
 
@@ -375,6 +453,151 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
   /** @private */
   updateAriaLabel_() {
     this.bar.ariaLabel = this.localization.resolve(shaka.ui.Locales.Ids.SEEK);
+  }
+
+
+  /**
+   * @private
+   */
+  async showThumbnail_(pixelPosition, value) {
+    const thumbnailTrack = this.getThumbnailTrack_();
+    if (!thumbnailTrack) {
+      this.hideThumbnail_();
+      return;
+    }
+    if (value < 0) {
+      value = 0;
+    }
+    const seekRange = this.player.seekRange();
+    const playerValue = Math.max(Math.ceil(seekRange.start),
+        Math.min(Math.floor(seekRange.end), value));
+    const thumbnail =
+        await this.player.getThumbnails(thumbnailTrack.id, playerValue);
+    if (!thumbnail || !thumbnail.uris.length) {
+      this.hideThumbnail_();
+      return;
+    }
+    if (this.player.isLive()) {
+      const totalSeconds = seekRange.end - value;
+      if (totalSeconds < 1) {
+        this.thumbnailTime_.textContent =
+            this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+      } else {
+        this.thumbnailTime_.textContent =
+            '-' + this.timeFormatter_(totalSeconds);
+      }
+    } else {
+      this.thumbnailTime_.textContent = this.timeFormatter_(value);
+    }
+    const offsetTop = -10;
+    const width = this.thumbnailContainer_.clientWidth;
+    let height = Math.floor(width * 9 / 16);
+    this.thumbnailContainer_.style.height = height + 'px';
+    this.thumbnailContainer_.style.top = -(height - offsetTop) + 'px';
+    const leftPosition = Math.min(this.bar.offsetWidth - width,
+        Math.max(0, pixelPosition - (width / 2)));
+    this.thumbnailContainer_.style.left = leftPosition + 'px';
+    this.thumbnailContainer_.style.visibility = 'visible';
+    const uri = thumbnail.uris[0].split('#xywh=')[0];
+    if (uri !== this.thumbnailImage_.src) {
+      try {
+        this.thumbnailContainer_.removeChild(this.thumbnailImage_);
+      } catch (e) {
+        // The image is not a child
+      }
+      this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
+        shaka.util.Dom.createHTMLElement('img'));
+      this.thumbnailImage_.id = 'shaka-player-ui-thumbnail-image';
+      this.thumbnailImage_.draggable = false;
+      this.thumbnailImage_.src = uri;
+      this.thumbnailContainer_.insertBefore(this.thumbnailImage_,
+          this.thumbnailContainer_.firstChild);
+    }
+    const scale = width / thumbnail.width;
+    if (thumbnail.imageHeight) {
+      this.thumbnailImage_.height = thumbnail.imageHeight;
+    } else if (!thumbnail.sprite) {
+      this.thumbnailImage_.style.height = '100%';
+      this.thumbnailImage_.style.objectFit = 'contain';
+    }
+    if (thumbnail.imageWidth) {
+      this.thumbnailImage_.width = thumbnail.imageWidth;
+    } else if (!thumbnail.sprite) {
+      this.thumbnailImage_.style.width = '100%';
+      this.thumbnailImage_.style.objectFit = 'contain';
+    }
+    this.thumbnailImage_.style.left = '-' + scale * thumbnail.positionX + 'px';
+    this.thumbnailImage_.style.top = '-' + scale * thumbnail.positionY + 'px';
+    this.thumbnailImage_.style.transform = 'scale(' + scale + ')';
+    this.thumbnailImage_.style.transformOrigin = 'left top';
+    // Update container height and top
+    height = Math.floor(width * thumbnail.height / thumbnail.width);
+    this.thumbnailContainer_.style.height = height + 'px';
+    this.thumbnailContainer_.style.top = -(height - offsetTop) + 'px';
+  }
+
+
+  /**
+   * @return {?shaka.extern.Track} The thumbnail track.
+   * @private
+   */
+  getThumbnailTrack_() {
+    const imageTracks = this.player.getImageTracks();
+    if (!imageTracks.length) {
+      return null;
+    }
+    const mimeTypesPreference = [
+      'image/avif',
+      'image/webp',
+      'image/jpeg',
+      'image/png',
+      'image/svg+xml',
+    ];
+    for (const mimeType of mimeTypesPreference) {
+      const estimatedBandwidth = this.player.getStats().estimatedBandwidth;
+      const bestOptions = imageTracks.filter((track) => {
+        return track.mimeType.toLowerCase() === mimeType &&
+            track.bandwidth < estimatedBandwidth * 0.01;
+      }).sort((a, b) => {
+        return b.bandwidth - a.bandwidth;
+      });
+      if (bestOptions && bestOptions.length) {
+        return bestOptions[0];
+      }
+    }
+    return imageTracks[0];
+  }
+
+
+  /**
+   * @private
+   */
+  hideThumbnail_() {
+    this.thumbnailContainer_.style.visibility = 'hidden';
+    this.thumbnailTime_.textContent = '';
+  }
+
+
+  /**
+   * @param {number} totalSeconds
+   * @private
+   */
+  timeFormatter_(totalSeconds) {
+    const secondsNumber = Math.round(totalSeconds);
+    const hours = Math.floor(secondsNumber / 3600);
+    let minutes = Math.floor((secondsNumber - (hours * 3600)) / 60);
+    let seconds = secondsNumber - (hours * 3600) - (minutes * 60);
+    if (seconds < 10) {
+      seconds = '0' + seconds;
+    }
+    if (hours > 0) {
+      if (minutes < 10) {
+        minutes = '0' + minutes;
+      }
+      return hours + ':' + minutes + ':' + seconds;
+    } else {
+      return minutes + ':' + seconds;
+    }
   }
 };
 

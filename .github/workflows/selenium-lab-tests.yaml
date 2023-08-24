@@ -221,9 +221,9 @@ jobs:
 
       # Run tests on the Selenium grid in our lab.  This uses a private
       # hostname and TLS cert to get EME tests working on all platforms
-      # (since EME only works on https or localhost).  The variable KARMA_PORT
-      # must be defined by the self-hosted runner, and mapped from the host to
-      # the container.
+      # (since EME only works on https or localhost).  The variable
+      # ALLOCATED_PORT must be defined by the self-hosted runner, and mapped
+      # from the host to the container.
       - name: Test Player
         run: |
           # Use of an array keeps elements intact, and allows an element to
@@ -234,7 +234,7 @@ jobs:
           # Generate a coverage report from uncompiled code on ChromeLinux.
           # It should be the uncompiled build, or else we won't execute any
           # coverage instrumentation on full-stack player integration tests.
-          if [[ "${{ matrix.browser }}" == "ChromeLinux" ]]; then
+          if [[ "${{ matrix.browser }}" == "Edge" ]]; then
             extra_flags+=(--html-coverage-report --uncompiled)
           fi
 
@@ -251,9 +251,10 @@ jobs:
           python3 build/test.py \
               --no-build \
               --reporters spec --spec-hide-passed \
-              --lets-encrypt-folder /etc/shakalab.rocks \
+              --tls-key /etc/letsencrypt/live/karma.shakalab.rocks/privkey.pem \
+              --tls-cert /etc/letsencrypt/live/karma.shakalab.rocks/fullchain.pem \
               --hostname karma.shakalab.rocks \
-              --port $KARMA_PORT \
+              --port $ALLOCATED_PORT \
               --grid-config build/shaka-lab.yaml \
               --grid-address selenium-grid.lab.shaka:4444 \
               --browsers ${{ matrix.browser }} \
@@ -270,10 +271,10 @@ jobs:
           # Report the captured (and possibly overridden) exit status.
           exit $exit_code
 
-      - name: Find coverage report (ChromeLinux only)
+      - name: Find coverage report (Edge only)
         id: coverage
-        # Run even if an earlier step fails, but only on ChromeLinux.
-        if: ${{ always() && matrix.browser == 'ChromeLinux' }}
+        # Run even if an earlier step fails, but only on Edge.
+        if: ${{ always() && matrix.browser == 'Edge' }}
         shell: bash
         run: |
           # Find the path to the coverage report specifically for Chrome on
@@ -281,7 +282,7 @@ jobs:
           # will vary.  Having a single path will make the artifact zip
           # simpler, whereas using a wildcard in the upload step will result
           # in a zip file with internal directories.
-          coverage_report="$( (ls coverage/Chrome*Linux*/coverage.json || true) | head -1 )"
+          coverage_report="$( (ls coverage/Edge*/coverage.json || true) | head -1 )"
 
           # Show what's there, for debugging purposes.
           ls -l coverage/
@@ -294,7 +295,7 @@ jobs:
             exit 1
           fi
 
-      - name: Upload coverage report (ChromeLinux only)
+      - name: Upload coverage report (Edge only)
         uses: actions/upload-artifact@v3
         # If there's a coverage report, upload it, even if a previous step
         # failed.

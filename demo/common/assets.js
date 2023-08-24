@@ -920,14 +920,6 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.THUMBNAILS),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'Microsoft Smooth Streaming',
-      /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
-      /* manifestUri= */ 'https://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest',
-      /* source= */ shakaAssets.Source.DASH_IF)
-      .addFeature(shakaAssets.Feature.MSS)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4),
   // End DASH-IF Assets }}}
 
   // bitcodin assets {{{
@@ -971,6 +963,16 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.OFFLINE),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Art of Motion (DASH) (external thumbnails)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
+      /* manifestUri= */ 'https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/mpds/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd',
+      /* source= */ shakaAssets.Source.BITCODIN)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.THUMBNAILS)
+      .addExtraThumbnail('https://cdn.bitmovin.com/content/assets/art-of-motion-dash-hls-progressive/thumbnails/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.vtt'),
   // End bitcodin assets }}}
 
   // MetaCDN assets {{{
@@ -1319,6 +1321,23 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addLicenseServer('com.microsoft.playready', 'http://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,ck:W31bfVt9W31bfVt9W31bfQ==,ckt:aescbc)'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Super Speedway Trailer (MSS - Clear)',
+      /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
+      /* manifestUri= */ 'https://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addFeature(shakaAssets.Feature.MSS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Super Speedway Trailer (MSS - PlayReady)',
+      /* iconUri= */ 'https://reference.dashif.org/dash.js/latest/samples/lib/img/mss-1.jpg',
+      /* manifestUri= */ 'https://test.playready.microsoft.com/smoothstreaming/SSWSS720H264PR/SuperSpeedway_720.ism/Manifest',
+      /* source= */ shakaAssets.Source.MICROSOFT)
+      .addFeature(shakaAssets.Feature.MSS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addLicenseServer('com.microsoft.playready', 'https://test.playready.microsoft.com/service/rightsmanager.asmx?cfg=(persist:false,sl:150)'),
   // }}}
 
   // MPEG-5 LCEVC assets {{{
@@ -1329,32 +1348,6 @@ shakaAssets.testAssets = [
       /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vn9s0p86SVbJorX6/master.mpd',
       /* source= */ shakaAssets.Source.VNOVA)
       .addFeature(shakaAssets.Feature.DASH)
-      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
-      .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.OFFLINE)
-      .addFeature(shakaAssets.Feature.LCEVC)
-      .addDescription('LCEVC-enhanced test stream. Shows moving squares when LCEVC is decoded successfully.')
-      .markAsFeatured('Big Buck Bunny (LCEVC H264)')
-      .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
-        mediaSource: {
-          forceTransmux: true,
-        },
-        lcevc: {
-          enabled: true,
-          dynamicPerformanceScaling: true,
-          logLevel: 0,
-          drawLogo: false,
-        },
-      }),
-  new ShakaDemoAssetInfo(
-      /* name= */ 'eSports LCEVC H264 (HLS, TS)',
-      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
-      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vnmITf0oAwlErGf9/master.m3u8',
-      /* source= */ shakaAssets.Source.VNOVA)
-      .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.OFFLINE)
@@ -1384,7 +1377,48 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
-      .addDescription('H264 HLS stream with LCEVC enhancement')
+      .setExtraConfig({
+        lcevc: {
+          enabled: true,
+          dynamicPerformanceScaling: true,
+          logLevel: 0,
+          drawLogo: false,
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'eSports LCEVC H264 (HLS, TS)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/shaka.png',
+      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vnmITf0oAwlErGf9/master.m3u8',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.LCEVC)
+      .setExtraConfig({
+        streaming: {
+          useNativeHlsOnSafari: false,
+        },
+        mediaSource: {
+          forceTransmux: true,
+        },
+        lcevc: {
+          enabled: true,
+          dynamicPerformanceScaling: true,
+          logLevel: 0,
+          drawLogo: false,
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel LCEVC H264 (HLS, MP4)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vn2LvEps745ShGtQ/master.m3u8',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.LCEVC)
       .setExtraConfig({
         streaming: {
           useNativeHlsOnSafari: false,
@@ -1409,14 +1443,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
-      .addDescription('H264 HLS stream with LCEVC enhancement')
       .setExtraConfig({
-        streaming: {
-          useNativeHlsOnSafari: false,
-        },
-        mediaSource: {
-          forceTransmux: true,
-        },
         lcevc: {
           enabled: true,
           dynamicPerformanceScaling: true,
@@ -1424,6 +1451,6 @@ shakaAssets.testAssets = [
           drawLogo: false,
         },
       }),
-// }}}
+  // }}}
 ];
 /* eslint-enable max-len */

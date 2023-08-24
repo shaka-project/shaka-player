@@ -286,4 +286,9 @@ shaka.extern.IAd = class {
    * @return {number}
    */
   getTimeOffset() {}
+
+  /**
+   * @return {number}
+   */
+  getPodIndex() {}
 };

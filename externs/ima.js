@@ -204,6 +204,9 @@ google.ima.AdPodInfo = class {
 
   /** @return {number} */
   getTimeOffset() {}
+
+  /** @return {number} */
+  getPodIndex() {}
 };
 
 /** @const */
@@ -447,6 +450,9 @@ google.ima.dai.api.AdPodInfo = class {
 
   /** @return {number} */
   getTimeOffset() {}
+
+  /** @return {number} */
+  getPodIndex() {}
 };
 
 

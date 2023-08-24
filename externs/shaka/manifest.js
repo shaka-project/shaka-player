@@ -101,6 +101,33 @@ shaka.extern.Manifest;
 
 /**
  * @typedef {{
+*   id: string,
+*   audioStreams: !Array.<shaka.extern.Stream>,
+*   videoStreams: !Array.<shaka.extern.Stream>,
+*   textStreams: !Array.<shaka.extern.Stream>,
+*   imageStreams: !Array.<shaka.extern.Stream>
+* }}
+*
+* @description Contains the streams from one DASH period.
+* For use in {@link shaka.util.PeriodCombiner}.
+*
+* @property {string} id
+*   The Period ID.
+* @property {!Array.<shaka.extern.Stream>} audioStreams
+*   The audio streams from one Period.
+* @property {!Array.<shaka.extern.Stream>} videoStreams
+*   The video streams from one Period.
+* @property {!Array.<shaka.extern.Stream>} textStreams
+*   The text streams from one Period.
+* @property {!Array.<shaka.extern.Stream>} imageStreams
+*   The image streams from one Period.
+*
+* @exportDoc
+*/
+shaka.extern.Period;
+
+/**
+ * @typedef {{
  *   initData: !Uint8Array,
  *   initDataType: string,
  *   keyId: ?string
@@ -361,7 +388,8 @@ shaka.extern.FetchCryptoKeysFunction;
  *   matchedStreams:
  *      (!Array.<shaka.extern.Stream>|!Array.<shaka.extern.StreamDB>|
  *      undefined),
- *   mssPrivateData: (shaka.extern.MssPrivateData|undefined)
+ *   mssPrivateData: (shaka.extern.MssPrivateData|undefined),
+ *   external: boolean
  * }}
  *
  * @description
@@ -483,6 +511,9 @@ shaka.extern.FetchCryptoKeysFunction;
  * @property {(shaka.extern.MssPrivateData|undefined)} mssPrivateData
  *   <i>Microsoft Smooth Streaming only.</i> <br>
  *   Private MSS data that is necessary to be able to do transmuxing.
+ * @property {boolean} external
+ *   Indicate if the stream was added externally.
+ *   Eg: external text tracks.
  *
  * @exportDoc
  */
