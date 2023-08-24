@@ -1226,8 +1226,10 @@ shaka.extern.StreamingConfiguration;
  *      string) :number|undefined)}
  *
  * @description
- * A comparitor delegate for sorting audio tracks. This method is called only
- * when codec switching is enabled.
+ * A comparator delegate for sorting audio tracks. This method is called only
+ * when codec switching is enabled. The callback should return a positive
+ * a positive number if the first parameter is preferred and negative if the
+ * second is preferred, and should return 0 if both are equal.
  * Parameters:
  *  trackA: shaka.extern.Track
  *  trackB: shaka.extern.Track
@@ -1249,8 +1251,14 @@ shaka.extern.TrackComparator;
  * @description
  *   Media source configuration.
  * @property {shaka.extern.TrackComparator} trackComparator
- *   A comparitor delegate for sorting audio tracks. This method is called only
- *   when codec switching is enabled.
+ *   A comparator delegate for sorting audio tracks. This method is called only
+ *   when codec switching is enabled. The callback should return a positive
+ *   a positive number if the first parameter is preferred and negative if the
+ *   second is preferred, and should return 0 if both are equal.
+ *   Parameters:
+ *     trackA: shaka.extern.Track
+ *     trackB: shaka.extern.Track
+ *     contentType: string (video or audio)
  * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
  *   Allow codec switching strategy. Default behavior is disabled.
  *   Smooth loading uses SourceBuffer.changeType. Reload uses cycling of
