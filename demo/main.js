@@ -1375,7 +1375,8 @@ shakaDemo.Main = class {
           // If that happens, just proceed to load.
           goog.asserts.assert(this.video_ != null, 'this.video should exist!');
           adManager.initClientSide(
-              this.controls_.getClientSideAdContainer(), this.video_);
+              this.controls_.getClientSideAdContainer(), this.video_,
+              /** adsRenderingSettings= **/ null);
           const adRequest = new google.ima.AdsRequest();
           adRequest.adTagUrl = asset.adTagUri;
           adManager.requestClientSideAds(adRequest);
