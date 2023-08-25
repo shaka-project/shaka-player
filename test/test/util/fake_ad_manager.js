@@ -26,7 +26,7 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   configure(config) {}
 
   /** @override */
-  initClientSide(adContainer, video) {}
+  initClientSide(adContainer, video, adsRenderingSettings) {}
 
   /** @override */
   onAssetUnload() {}
@@ -35,6 +35,9 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   requestClientSideAds(imaRequest) {
     return Promise.resolve('fake:url');
   }
+
+  /** @override */
+  updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
   /** @override */
   initServerSide(adContainer, video) {}
