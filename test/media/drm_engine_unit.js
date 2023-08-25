@@ -214,7 +214,9 @@ describe('DrmEngine', () => {
       const variants = manifest.variants;
       await drmEngine.initForPlayback(variants, manifest.offlineSessionIds);
 
-      expect(variants[0].decodingInfos.length).toBe(2);
+      // should be only one variant, as preferredKeySystems is propagated
+      // to getDecodingInfos
+      expect(variants[0].decodingInfos.length).toBe(1);
       expect(shaka.media.DrmEngine.keySystem(drmEngine.getDrmInfo()))
           .toBe('drm.def');
     });

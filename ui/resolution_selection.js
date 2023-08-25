@@ -8,6 +8,7 @@
 goog.provide('shaka.ui.ResolutionSelection');
 
 goog.require('goog.asserts');
+goog.require('shaka.Player');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.Enums');
 goog.require('shaka.ui.Locales');
@@ -67,7 +68,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
   /** @private */
   updateResolutionSelection_() {
     /** @type {!Array.<shaka.extern.Track>} */
-    let tracks = this.player.getVariantTracks();
+    let tracks = [];
+    // When played with src=, the variant tracks available from
+    // player.getVariantTracks() represent languages, not resolutions.
+    if (this.player.getLoadMode() != shaka.Player.LoadMode.SRC_EQUALS) {
+      tracks = this.player.getVariantTracks();
+    }
 
     // If there is a selected variant track, then we filter out any tracks in
     // a different language.  Then we use those remaining tracks to display the
@@ -126,8 +132,15 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.SettingsMenu {
           () => this.onTrackSelected_(track));
 
       const span = shaka.util.Dom.createHTMLElement('span');
-      span.textContent = this.player.isAudioOnly() ?
-          Math.round(track.bandwidth / 1000) + ' kbits/s' : track.height + 'p';
+      if (this.player.isAudioOnly()) {
+        span.textContent = Math.round(track.bandwidth / 1000) + ' kbits/s';
+      } else {
+        if (track.hdr == 'PQ' || track.hdr == 'HLG') {
+          span.textContent = track.height + 'p (HDR)';
+        } else {
+          span.textContent = track.height + 'p';
+        }
+      }
       button.appendChild(span);
 
       if (!abrEnabled && track == selectedTrack) {

@@ -567,7 +567,7 @@ shakaDemo.Custom = class {
       this.manifestField_ = input;
     };
     const manifestOnChange = (input) => {
-      assetInProgress.manifestUri = input.value;
+      assetInProgress.manifestUri = input.value.trim();
     };
     const manifestURLName = shakaDemoMain.getLocalizedString(
         shakaDemo.MessageIds.MANIFEST_URL);

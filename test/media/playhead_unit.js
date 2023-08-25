@@ -136,6 +136,7 @@ describe('Playhead', () => {
       sequenceMode: false,
       ignoreManifestTimestampsInSegmentsMode: false,
       type: 'UNKNOWN',
+      serviceDescription: null,
     };
 
     config = shaka.util.PlayerConfiguration.createDefault().streaming;

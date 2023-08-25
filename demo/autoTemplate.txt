@@ -1,17 +1,52 @@
-RE:customwarning
 **Have you read the [FAQ](https://bit.ly/ShakaFAQ) and checked for duplicate open issues?**
 
 
-**What link can we use to reproduce this?**
-RE:link
+**If the problem is related to FairPlay, have you read the tutorial?**
+<!-- NOTE: https://shaka-player-demo.appspot.com/docs/api/tutorial-fairplay.html -->
 
 
 **What version of Shaka Player are you using?**
-RE:player
+`RE:player`
+<!-- NOTE:
+  Only some versions of the application are maintained, if your version
+  is older, first update to a newer one. See:
+  https://github.com/shaka-project/shaka-player/blob/main/maintained-branches.md
+--->
+
+
+**Can you reproduce the issue with our latest release version?**
+
+
+**Can you reproduce the issue with the latest code from `main`?**
+
+
+**Are you using the demo app or your own custom app?**
+The demo
+
+
+**If custom app, can you reproduce the issue using our demo app?**
+N/A
 
 
 **What browser and OS are you using?**
-RE:browser
+`RE:browser`
+
+
+**For embedded devices (smart TVs, etc.), what model and firmware version are you using?**
+N/A
+
+
+**What are the manifest and license server URIs?**
+RE:customwarning
+RE:uris
+
+
+**What configuration are you using?  What is the output of `player.getConfiguration()`?**
+<!-- NOTE:
+  You can censor URLs to keep them private, but include them in the email.  You
+  can also use JSON.stringify(obj, null, 2) to print nicely on platforms that
+  don't print objects well in the console.  DON'T SEND '[object Object]'!
+-->
 
 
 **What did you do?**

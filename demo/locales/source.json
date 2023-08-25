@@ -159,6 +159,10 @@
     "description": "The name of a configuration value.",
     "message": "Clock Sync URI"
   },
+  "DEMO_CLEAR_BUFFER_SWITCH": {
+    "description": "Clear video buffer on abr rendition switch.",
+    "message": "Clear buffer"
+  },
   "DEMO_CMCD_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "[JARGON:CMCD]"
@@ -363,6 +367,10 @@
     "description": "The name of a configuration value.",
     "message": "Gap detection threshold"
   },
+  "DEMO_GAP_JUMP_TIMER_TIME": {
+    "description": "The name of a configuration value.",
+    "message": "Gap jump timer time"
+  },
   "DEMO_GPAC": {
     "description": "Text that describes an asset that comes from the GPAC project asset library.",
     "message": "[PROPER_NAME:GPAC]"
@@ -370,6 +378,30 @@
   "DEMO_HEADERS_TAB": {
     "description": "The header for a tab within the custom asset creation dialog.",
     "message": "Headers"
+  },
+  "DEMO_HDR_LEVEL": {
+    "description": "The name of a configuration value.",
+    "message": "Preferred HDR Level"
+  },
+  "DEMO_HDR_LEVEL_AUTO": {
+    "description": "The name of a configuration value.",
+    "message": "Auto Detect"
+  },
+  "DEMO_HDR_LEVEL_HLG": {
+    "description": "The name of a configuration value.",
+    "message": "[PROPER_NAME:HLG]"
+  },
+  "DEMO_HDR_LEVEL_NONE": {
+    "description": "The name of a configuration value.",
+    "message": "No Preference"
+  },
+  "DEMO_HDR_LEVEL_PQ": {
+    "description": "The name of a configuration value.",
+    "message": "[PROPER_NAME:PQ]"
+  },
+  "DEMO_HDR_LEVEL_SDR": {
+    "description": "The name of a configuration value.",
+    "message": "[PROPER_NAME:SDR]"
   },
   "DEMO_HIGH_DEFINITION": {
     "description": "Text that describes an asset that has a high definition video stream.",
@@ -542,6 +574,18 @@
   "DEMO_LIVE_SEGMENTS_DELAY": {
     "description": "The name of a configuration value.",
     "message": "Live segments delay"
+  },
+  "DEMO_LIVE_SYNC": {
+    "description": "The name of a configuration value.",
+    "message": "Live sync"
+  },
+  "DEMO_LIVE_SYNC_MAX_LATENCY": {
+    "description": "The name of a configuration value.",
+    "message": "Max latency for live sync"
+  },
+  "DEMO_LIVE_SYNC_PLAYBACK_RATE": {
+    "description": "The name of a configuration value.",
+    "message": "Playback rate for live sync"
   },
   "DEMO_LOG_LEVEL": {
     "description": "The name of a configuration value.",
@@ -811,6 +855,10 @@
     "description": "The header for a section of configuration values.",
     "message": "Restrictions"
   },
+  "DEMO_SAFE_MARGIN_SWITCH": {
+    "description": "Safe margin on abr switch rendition",
+    "message": "safe margin"
+  },
   "DEMO_SAFE_SEEK_OFFSET": {
     "description": "The name of a configuration value.",
     "message": "Safe Seek Offset"
@@ -1074,5 +1122,9 @@
   "DEMO_SEGMENT_PREFETCH_LIMIT": {
     "description": "Max number of segments to be prefetched ahead of current time position.",
     "message": "Segment Prefetch Limit."
+  },
+  "DEMO_LOW_LATENCY_STREAM": {
+    "description": "A tag that marks an asset as low latency.",
+    "message": "Low Latency stream"
   }
 }

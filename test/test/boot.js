@@ -357,8 +357,8 @@ function configureJasmineEnvironment() {
   // Code in karma-jasmine's adapter will malform test failures when the
   // expectation message contains a stack trace, losing the failure message and
   // mixing up the stack trace of the failure.  To avoid this, we modify
-  // shaka.util.Error not to create a stack trace.  This trace is not available
-  // in production, and there is never any need for it in the tests.
+  // shaka.util.Error not to create a stack trace.  There is never any need for
+  // this trace in the tests.
   // Shimming shaka.util.Error proved too complicated because of a combination
   // of compiler restrictions and ES6 language features, so this is by far the
   // simpler answer.

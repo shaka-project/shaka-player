@@ -45,7 +45,7 @@ jobs:
           # coverage instrumentation on full-stack player integration tests.
           - os: ubuntu-latest
             browser: Chrome
-            extra_flags: "--use-xvfb --html-coverage-report --uncompiled"
+            extra_flags: "--use-xvfb"
           - os: ubuntu-latest
             browser: Firefox
             extra_flags: "--use-xvfb"
@@ -70,6 +70,7 @@ jobs:
             browser: Firefox
           - os: windows-latest
             browser: Edge
+            extra_flags: "--html-coverage-report --uncompiled"
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
@@ -124,6 +125,14 @@ jobs:
 
           # Install a launcher that can execute a shell script to launch this
           npm install karma-script-launcher --save-dev
+
+      # When "Chrome for Testing" is installed on Mac, it gets invoked instead
+      # of simply "Chrome".  This other copy of Chrome, however, doesn't seem
+      # to have basic codecs like AAC and H264 available, causing many of our
+      # test scenarios to fail.  Deleting "Chrome for Testing" fixes this.
+      - name: 'Delete "Chrome for Testing" on Mac'
+        if: matrix.os == 'macos-latest' && matrix.browser == 'Chrome'
+        run: sudo rm -rf /Applications/Google\ Chrome\ for\ Testing.app
 
       # Some CI images (self-hosted or otherwise) don't have the minimum Java
       # version necessary for the compiler (Java 11).

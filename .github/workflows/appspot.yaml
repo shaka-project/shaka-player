@@ -1,0 +1,39 @@
+name: Deploy to Appspot (one-off)
+
+on:
+  workflow_dispatch:
+    # Allows for manual triggering, to correct deployment issues.
+    inputs:
+      ref:
+        description: "A tag name or SHA1 to deploy."
+        required: true
+      subdomain:
+        description: "An appspot subdomain to deploy to.  Be careful!  Do not overwrite an existing subdomain!"
+        required: true
+
+jobs:
+  appspot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: ./.github/workflows/custom-actions/prep-for-appspot
+
+      - uses: google-github-actions/auth@v0
+        with:
+          credentials_json: '${{ secrets.APPENGINE_DEPLOY_KEY }}'
+
+      - uses: google-github-actions/deploy-appengine@v0
+        with:
+          project_id: shaka-player-demo
+          version: ${{ inputs.subdomain }}
+          promote: false

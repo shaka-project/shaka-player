@@ -303,6 +303,7 @@ describe('ManifestConverter', () => {
       mimeType: '',
       codecs: '',
       language: '',
+      originalLanguage: null,
       label: null,
       width: null,
       height: null,
@@ -316,6 +317,7 @@ describe('ManifestConverter', () => {
       audioSamplingRate: null,
       spatialAudio: false,
       closedCaptions: null,
+      external: false,
     };
 
     return streamDB;
@@ -362,6 +364,7 @@ describe('ManifestConverter', () => {
       hdr: undefined,
       kind: undefined,
       language: '',
+      originalLanguage: null,
       label: null,
       width: 250,
       height: 100,
@@ -390,6 +393,7 @@ describe('ManifestConverter', () => {
       closedCaptions: null,
       tilesLayout: undefined,
       accessibilityPurpose: null,
+      external: false,
     };
   }
 
@@ -412,6 +416,7 @@ describe('ManifestConverter', () => {
       hdr: undefined,
       kind: undefined,
       language: 'en',
+      originalLanguage: 'en',
       label: null,
       width: null,
       height: null,
@@ -440,6 +445,7 @@ describe('ManifestConverter', () => {
       closedCaptions: null,
       tilesLayout: undefined,
       accessibilityPurpose: null,
+      external: false,
     };
   }
 
@@ -461,6 +467,7 @@ describe('ManifestConverter', () => {
       hdr: undefined,
       kind: undefined,
       language: 'en',
+      originalLanguage: 'en',
       label: null,
       width: null,
       height: null,
@@ -489,6 +496,7 @@ describe('ManifestConverter', () => {
       closedCaptions: null,
       tilesLayout: undefined,
       accessibilityPurpose: null,
+      external: false,
     };
   }
 
@@ -522,6 +530,7 @@ describe('ManifestConverter', () => {
       encrypted: streamDb.encrypted,
       keyIds: streamDb.keyIds,
       language: streamDb.language,
+      originalLanguage: streamDb.originalLanguage,
       label: streamDb.label,
       type: streamDb.type,
       primary: streamDb.primary,
@@ -535,6 +544,7 @@ describe('ManifestConverter', () => {
       closedCaptions: streamDb.closedCaptions,
       tilesLayout: streamDb.tilesLayout,
       accessibilityPurpose: null,
+      external: streamDb.external,
     };
 
     expect(stream).toEqual(expectedStream);

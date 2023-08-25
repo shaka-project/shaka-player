@@ -295,7 +295,12 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.RESTRICT_TO_SCREEN_SIZE,
             'abr.restrictToScreenSize')
         .addBoolInput_(MessageIds.IGNORE_DEVICE_PIXEL_RATIO,
-            'abr.ignoreDevicePixelRatio');
+            'abr.ignoreDevicePixelRatio')
+        .addBoolInput_(MessageIds.CLEAR_BUFFER_SWITCH,
+            'abr.clearBufferSwitch')
+        .addNumberInput_(MessageIds.SAFE_MARGIN_SWITCH,
+            'abr.safeMarginSwitch',
+            /* canBeDecimal= */ true);
     this.addRetrictionsSection_('abr',
         MessageIds.ADAPTATION_RESTRICTIONS_SECTION_HEADER);
   }
@@ -390,6 +395,9 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.GAP_DETECTION_THRESHOLD,
             'streaming.gapDetectionThreshold',
             /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.GAP_JUMP_TIMER_TIME,
+            'streaming.gapJumpTimerTime',
+            /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.BUFFERING_GOAL,
             'streaming.bufferingGoal',
             /* canBeDecimal= */ true)
@@ -432,7 +440,17 @@ shakaDemo.Config = class {
         .addNumberInput_(MessageIds.MAX_DISABLED_TIME,
             'streaming.maxDisabledTime')
         .addNumberInput_(MessageIds.SEGMENT_PREFETCH_LIMIT,
-            'streaming.segmentPrefetchLimit');
+            'streaming.segmentPrefetchLimit')
+        .addBoolInput_(MessageIds.LIVE_SYNC,
+            'streaming.liveSync')
+        .addNumberInput_(MessageIds.LIVE_SYNC_MAX_LATENCY,
+            'streaming.liveSyncMaxLatency',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ true)
+        .addNumberInput_(MessageIds.LIVE_SYNC_PLAYBACK_RATE,
+            'streaming.liveSyncPlaybackRate',
+            /* canBeDecimal= */ true,
+            /* canBeZero= */ false);
 
     if (!shakaDemoMain.getNativeControlsEnabled()) {
       this.addBoolInput_(MessageIds.ALWAYS_STREAM_TEXT,
@@ -445,6 +463,24 @@ shakaDemo.Config = class {
       this.latestInput_.input().disabled = true;
       this.latestInput_.input().checked = true;
     }
+
+    const hdrLevels = {
+      '': '',
+      'AUTO': 'AUTO',
+      'SDR': 'SDR',
+      'PQ': 'PQ',
+      'HLG': 'HLG',
+    };
+    const localize = (name) => shakaDemoMain.getLocalizedString(name);
+    const hdrLevelNames = {
+      'AUTO': localize(MessageIds.HDR_LEVEL_AUTO),
+      'SDR': localize(MessageIds.HDR_LEVEL_SDR),
+      'PQ': localize(MessageIds.HDR_LEVEL_PQ),
+      'HLG': localize(MessageIds.HDR_LEVEL_HLG),
+      '': localize(MessageIds.HDR_LEVEL_NONE),
+    };
+    this.addSelectInput_(MessageIds.HDR_LEVEL, 'preferredVideoHdrLevel',
+        hdrLevels, hdrLevelNames);
 
     this.addBoolInput_(MessageIds.START_AT_SEGMENT_BOUNDARY,
         'streaming.startAtSegmentBoundary')

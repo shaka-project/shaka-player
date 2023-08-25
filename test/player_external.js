@@ -36,6 +36,24 @@ describe('Player', () => {
   beforeEach(() => {
     player = new compiledShaka.Player(video);
 
+    // Make sure we are playing the lowest res available to avoid test flake
+    // based on network issues.  Note that disabling ABR and setting a low
+    // abr.defaultBandwidthEstimate would not be sufficient, because it
+    // would only affect the choice of track on the first period.  When we
+    // cross a period boundary, the default bandwidth estimate will no
+    // longer be in effect, and AbrManager may choose higher res tracks for
+    // the new period.  Using abr.restrictions.maxHeight will let us force
+    // AbrManager to the lowest resolution, which is its fallback when these
+    // soft restrictions cannot be met.
+    player.configure('abr.restrictions.maxHeight', 1);
+
+    // Make sure that live streams are synced against a good clock.
+    player.configure('manifest.dash.clockSyncUri',
+        'https://shaka-player-demo.appspot.com/time.txt');
+
+    // Disable stall detection, which can interfere with playback tests.
+    player.configure('streaming.stallEnabled', false);
+
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
@@ -92,21 +110,6 @@ describe('Player', () => {
           }
         }
 
-        // Make sure we are playing the lowest res available to avoid test flake
-        // based on network issues.  Note that disabling ABR and setting a low
-        // abr.defaultBandwidthEstimate would not be sufficient, because it
-        // would only affect the choice of track on the first period.  When we
-        // cross a period boundary, the default bandwidth estimate will no
-        // longer be in effect, and AbrManager may choose higher res tracks for
-        // the new period.  Using abr.restrictions.maxHeight will let us force
-        // AbrManager to the lowest resolution, which is its fallback when these
-        // soft restrictions cannot be met.
-        player.configure('abr.restrictions.maxHeight', 1);
-
-        // Make sure that live streams are synced against a good clock.
-        player.configure('manifest.dash.clockSyncUri',
-            'https://shaka-player-demo.appspot.com/time.txt');
-
         // Add asset-specific configuration.
         player.configure(asset.getConfiguration());
 
@@ -125,7 +128,7 @@ describe('Player', () => {
           const isLive = asset.features.includes(Feature.LIVE);
           expect(player.isLive()).toBe(isLive);
         }
-        video.play();
+        await video.play();
 
         // Wait for the video to start playback.  If it takes longer than 20
         // seconds, fail the test.
