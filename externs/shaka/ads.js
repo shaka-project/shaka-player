@@ -80,13 +80,19 @@ shaka.extern.IAdManager = class extends EventTarget {
   /**
    * @param {!HTMLElement} adContainer
    * @param {!HTMLMediaElement} video
+   * @param {?google.ima.AdsRenderingSettings} adsRenderingSettings
    */
-  initClientSide(adContainer, video) {}
+  initClientSide(adContainer, video, adsRenderingSettings) {}
 
   /**
    * @param {!google.ima.AdsRequest} imaRequest
    */
   requestClientSideAds(imaRequest) {}
+
+  /**
+   * @param {!google.ima.AdsRenderingSettings} adsRenderingSettings
+   */
+  updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
   /**
    * @param {!HTMLElement} adContainer
