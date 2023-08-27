@@ -575,7 +575,10 @@ describe('Player', () => {
       await waiter.timeoutAfter(20).waitUntilPlayheadReaches(video, 5);
 
       // Seek the video, and see if it can continue playing from that point.
-      video.currentTime = 20;
+      // If this is a multiple of 10, it tends to flake on Tizen with stall
+      // detection disabled.  So use 25.
+      video.currentTime = 25;
+
       // Expect that we can then reach the end of the video.
       await waiter.timeoutAfter(40).waitForEnd(video);
     });
