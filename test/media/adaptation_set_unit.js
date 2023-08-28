@@ -211,6 +211,7 @@ describe('AdaptationSet', () => {
       keyIds: new Set(),
       label: null,
       language: '',
+      originalLanguage: null,
       mimeType: mimeType,
       originalId: String(id),
       primary: false,
@@ -219,6 +220,7 @@ describe('AdaptationSet', () => {
       trickModeVideo: null,
       type: '',
       accessibilityPurpose: null,
+      external: false,
     };
   }
 });

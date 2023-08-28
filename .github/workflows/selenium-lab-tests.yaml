@@ -148,6 +148,30 @@ jobs:
       - name: Build Player
         run: python3 build/all.py
 
+      - name: Preprocess with Babel
+        run: |
+          # Run the test preprocessor without running the actual tests.
+          # This lets us cache Babel's output and run it only once.
+          # Ignore the exit code, since you get an error code if the filter
+          # excludes all tests.
+          ./build/test.py \
+              --use-xvfb --browsers Chrome \
+              --filter ThisFilterMatchesNoTests || true
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: node_modules/
+          key: node-${{ hashFiles('package-lock.json') }}
+
+      - name: Cache Babel output
+        uses: actions/cache@v3
+        id: babel-cache
+        with:
+          path: .babel-cache
+          key: babel-${{ hashFiles('*.js', 'demo/**.js', 'lib/**.js', 'ui/**.js', 'test/**.js', 'third_party/**.js') }}
+
       - name: Store Player build
         uses: actions/upload-artifact@v3
         with:
@@ -206,6 +230,17 @@ jobs:
         with:
           path: node_modules/
           key: node-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true  # Cached by the build-shaka job above
+          enableCrossOsArchive: true  # Share archives from Linux to Windows
+
+      - name: Cache Babel output
+        uses: actions/cache@v3
+        id: babel-cache
+        with:
+          path: .babel-cache
+          key: babel-${{ hashFiles('*.js', 'demo/**.js', 'lib/**.js', 'ui/**.js', 'test/**.js', 'third_party/**.js') }}
+          fail-on-cache-miss: true  # Cached by the build-shaka job above
+          enableCrossOsArchive: true  # Share archives from Linux to Windows
 
       - name: Install dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
@@ -221,9 +256,9 @@ jobs:
 
       # Run tests on the Selenium grid in our lab.  This uses a private
       # hostname and TLS cert to get EME tests working on all platforms
-      # (since EME only works on https or localhost).  The variable KARMA_PORT
-      # must be defined by the self-hosted runner, and mapped from the host to
-      # the container.
+      # (since EME only works on https or localhost).  The variable
+      # ALLOCATED_PORT must be defined by the self-hosted runner, and mapped
+      # from the host to the container.
       - name: Test Player
         run: |
           # Use of an array keeps elements intact, and allows an element to
@@ -234,7 +269,7 @@ jobs:
           # Generate a coverage report from uncompiled code on ChromeLinux.
           # It should be the uncompiled build, or else we won't execute any
           # coverage instrumentation on full-stack player integration tests.
-          if [[ "${{ matrix.browser }}" == "ChromeLinux" ]]; then
+          if [[ "${{ matrix.browser }}" == "Edge" ]]; then
             extra_flags+=(--html-coverage-report --uncompiled)
           fi
 
@@ -251,11 +286,12 @@ jobs:
           python3 build/test.py \
               --no-build \
               --reporters spec --spec-hide-passed \
-              --lets-encrypt-folder /etc/shakalab.rocks \
+              --tls-key /etc/letsencrypt/live/karma.shakalab.rocks/privkey.pem \
+              --tls-cert /etc/letsencrypt/live/karma.shakalab.rocks/fullchain.pem \
               --hostname karma.shakalab.rocks \
-              --port $KARMA_PORT \
+              --port $ALLOCATED_PORT \
               --grid-config build/shaka-lab.yaml \
-              --grid-address selenium-grid.lab:4444 \
+              --grid-address selenium-grid.lab.shaka:4444 \
               --browsers ${{ matrix.browser }} \
               "${extra_flags[@]}"
           # Capture the test exit code immediately after running the tests.
@@ -270,10 +306,10 @@ jobs:
           # Report the captured (and possibly overridden) exit status.
           exit $exit_code
 
-      - name: Find coverage report (ChromeLinux only)
+      - name: Find coverage report (Edge only)
         id: coverage
-        # Run even if an earlier step fails, but only on ChromeLinux.
-        if: ${{ always() && matrix.browser == 'ChromeLinux' }}
+        # Run even if an earlier step fails, but only on Edge.
+        if: ${{ always() && matrix.browser == 'Edge' }}
         shell: bash
         run: |
           # Find the path to the coverage report specifically for Chrome on
@@ -281,7 +317,7 @@ jobs:
           # will vary.  Having a single path will make the artifact zip
           # simpler, whereas using a wildcard in the upload step will result
           # in a zip file with internal directories.
-          coverage_report="$( (ls coverage/Chrome*Linux*/coverage.json || true) | head -1 )"
+          coverage_report="$( (ls coverage/Edge*/coverage.json || true) | head -1 )"
 
           # Show what's there, for debugging purposes.
           ls -l coverage/
@@ -294,7 +330,7 @@ jobs:
             exit 1
           fi
 
-      - name: Upload coverage report (ChromeLinux only)
+      - name: Upload coverage report (Edge only)
         uses: actions/upload-artifact@v3
         # If there's a coverage report, upload it, even if a previous step
         # failed.

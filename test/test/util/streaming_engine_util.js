@@ -286,6 +286,7 @@ shaka.test.StreamingEngineUtil = class {
       sequenceMode: false,
       ignoreManifestTimestampsInSegmentsMode: false,
       type: 'UNKNOWN',
+      serviceDescription: null,
     };
 
     /** @type {shaka.extern.Variant} */
@@ -401,6 +402,7 @@ shaka.test.StreamingEngineUtil = class {
       type: ContentType.AUDIO,
       label: '',
       language: 'und',
+      originalLanguage: null,
       drmInfos: [],
       encrypted: false,
       keyIds: new Set(),
@@ -413,6 +415,7 @@ shaka.test.StreamingEngineUtil = class {
       forced: false,
       spatialAudio: false,
       accessibilityPurpose: null,
+      external: false,
     };
   }
 
@@ -440,6 +443,7 @@ shaka.test.StreamingEngineUtil = class {
       type: ContentType.VIDEO,
       label: '',
       language: 'und',
+      originalLanguage: null,
       drmInfos: [],
       encrypted: false,
       keyIds: new Set(),
@@ -452,6 +456,7 @@ shaka.test.StreamingEngineUtil = class {
       forced: false,
       spatialAudio: false,
       accessibilityPurpose: null,
+      external: false,
     };
   }
 
@@ -476,6 +481,7 @@ shaka.test.StreamingEngineUtil = class {
       type: ManifestParserUtils.ContentType.TEXT,
       label: '',
       language: 'und',
+      originalLanguage: null,
       drmInfos: [],
       encrypted: false,
       keyIds: new Set(),
@@ -488,6 +494,7 @@ shaka.test.StreamingEngineUtil = class {
       forced: false,
       spatialAudio: false,
       accessibilityPurpose: null,
+      external: false,
     };
   }
 };

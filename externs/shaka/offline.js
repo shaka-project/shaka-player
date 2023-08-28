@@ -123,6 +123,7 @@ shaka.extern.ManifestDB;
  *   hdr: (string|undefined),
  *   kind: (string|undefined),
  *   language: string,
+ *   originalLanguage: (?string|undefined),
  *   label: ?string,
  *   width: ?number,
  *   height: ?number,
@@ -136,7 +137,8 @@ shaka.extern.ManifestDB;
  *   audioSamplingRate: ?number,
  *   spatialAudio: boolean,
  *   closedCaptions: Map.<string, string>,
- *   tilesLayout: (string|undefined)
+ *   tilesLayout: (string|undefined),
+ *   external: boolean
  * }}
  *
  * @property {number} id
@@ -162,6 +164,8 @@ shaka.extern.ManifestDB;
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
  *   The language of the stream; '' for video.
+ * @property {(?string|undefined)} originalLanguage
+ *   The original language, if any, that appeared in the manifest.
  * @property {?string} label
  *   The label of the stream; '' for video.
  * @property {?number} width
@@ -197,6 +201,9 @@ shaka.extern.ManifestDB;
  *   The value is a grid-item-dimension consisting of two positive decimal
  *   integers in the format: column-x-row ('4x3'). It describes the arrangement
  *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {boolean} external
+ *   Indicate if the stream was added externally.
+ *   Eg: external text tracks.
  */
 shaka.extern.StreamDB;
 

@@ -8,3 +8,4 @@ coverage/
 .vscode
 /_mytest/
 .idea
+.babel-cache

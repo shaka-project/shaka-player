@@ -64,6 +64,9 @@ shaka.test.FakeAd = class {
 
     /** @private {number} */
     this.timeOffsetInPod_ = 1;
+
+    /** @private {number} */
+    this.podIndex_ = 1;
   }
 
   /**
@@ -298,6 +301,14 @@ shaka.test.FakeAd = class {
    */
   getTimeOffset() {
     return this.timeOffsetInPod_;
+  }
+
+  /**
+   * @override
+   * @export
+   */
+  getPodIndex() {
+    return this.podIndex_;
   }
 
   /**
