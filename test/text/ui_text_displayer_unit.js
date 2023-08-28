@@ -81,10 +81,10 @@ describe('UITextDisplayer', () => {
     cue.direction = shaka.text.Cue.direction.HORIZONTAL_LEFT_TO_RIGHT;
     cue.fontSize = '10px';
     cue.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
-    cue.fontStyle = 'normal';
+    cue.fontStyle = shaka.text.Cue.fontStyle.NORMAL;
     cue.lineHeight = '2';
     cue.nestedCues = [];
-    cue.textAlign = 'center';
+    cue.textAlign = shaka.text.Cue.textAlign.CENTER;
     cue.writingMode = shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
 
     textDisplayer.setTextVisibility(true);
@@ -126,13 +126,13 @@ describe('UITextDisplayer', () => {
     const cue = new shaka.text.Cue(0, 100, '');
     const nestedCue = new shaka.text.Cue(0, 100, 'Captain\'s log.');
     cue.nestedCues = [nestedCue];
-    nestedCue.textAlign = 'center';
+    nestedCue.textAlign = shaka.text.Cue.textAlign.CENTER;
     nestedCue.writingMode = shaka.text.Cue.writingMode.HORIZONTAL_TOP_TO_BOTTOM;
     nestedCue.color = 'green';
     nestedCue.backgroundColor = 'black';
     nestedCue.fontSize = '10px';
     nestedCue.fontWeight = shaka.text.Cue.fontWeight.NORMAL;
-    nestedCue.fontStyle = 'normal';
+    nestedCue.fontStyle = shaka.text.Cue.fontStyle.NORMAL;
     nestedCue.lineHeight = '2';
     nestedCue.nestedCues = [];
 

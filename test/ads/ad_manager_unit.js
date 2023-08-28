@@ -13,6 +13,8 @@ describe('Ad manager', () => {
   let adManager;
   /** @type {!HTMLElement} */
   let adContainer;
+  /** @type {google.ima.AdsRenderingSettings} */
+  let adsRenderingSettings;
 
   beforeEach(() => {
     window['google'] = null;
@@ -35,7 +37,7 @@ describe('Ad manager', () => {
           shaka.util.Error.Code.CS_IMA_SDK_MISSING);
 
       expect(() => adManager.initClientSide(
-          adContainer, mockVideo)).toThrow(error);
+          adContainer, mockVideo, adsRenderingSettings)).toThrow(error);
     });
 
     it('doesn\'t request ads until CS is initialized', () => {
@@ -138,7 +140,7 @@ describe('Ad manager', () => {
       });
 
       // Set up the ad manager.
-      adManager.initClientSide(adContainer, mockVideo);
+      adManager.initClientSide(adContainer, mockVideo, adsRenderingSettings);
       goog.asserts.assert(loadEvent != null, 'loadEvent exists');
       mockAdsLoaderInstance.dispatchEvent(/** @type {!Event} */ (loadEvent));
       expect(loaded).toBe(true);
@@ -199,11 +201,14 @@ describe('Ad manager', () => {
     window['google'].ima = {};
     window['google'].ima.AdsLoader = {};
     window['google'].ima.dai = {};
+    window['google'].ima.AdsRenderingSettings = class {};
     window['google'].ima.AdsRequest = class {};
     window['google'].ima.dai.api = {};
     window['google'].ima.dai.api.StreamRequest = class {};
     window['google'].ima.settings = {};
     window['google'].ima.settings.setLocale = (locale) => {};
+    // eslint-disable-next-line max-len
+    window['google'].ima.settings.setDisableCustomPlaybackForIOS10Plus = (disable) => {};
     window['google'].ima.AdsManagerLoadedEvent = {};
     window['google'].ima.AdsManagerLoadedEvent.Type = {
       ADS_MANAGER_LOADED: 'ADS_MANAGER_LOADED',

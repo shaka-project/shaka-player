@@ -1358,6 +1358,11 @@ shakaDemo.Main = class {
         this.video_.poster = shakaDemo.Main.audioOnlyPoster_;
       }
 
+      for (const extraText of asset.extraText) {
+        this.player_.addTextTrackAsync(extraText.uri, extraText.language,
+            extraText.kind, extraText.mime, extraText.codecs);
+      }
+
       for (const extraThumbnail of asset.extraThumbnail) {
         this.player_.addThumbnailsTrack(extraThumbnail);
       }
@@ -1370,7 +1375,8 @@ shakaDemo.Main = class {
           // If that happens, just proceed to load.
           goog.asserts.assert(this.video_ != null, 'this.video should exist!');
           adManager.initClientSide(
-              this.controls_.getClientSideAdContainer(), this.video_);
+              this.controls_.getClientSideAdContainer(), this.video_,
+              /** adsRenderingSettings= **/ null);
           const adRequest = new google.ima.AdsRequest();
           adRequest.adTagUrl = asset.adTagUri;
           adManager.requestClientSideAds(adRequest);
