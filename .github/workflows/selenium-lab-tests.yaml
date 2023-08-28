@@ -148,6 +148,30 @@ jobs:
       - name: Build Player
         run: python3 build/all.py
 
+      - name: Preprocess with Babel
+        run: |
+          # Run the test preprocessor without running the actual tests.
+          # This lets us cache Babel's output and run it only once.
+          # Ignore the exit code, since you get an error code if the filter
+          # excludes all tests.
+          ./build/test.py \
+              --use-xvfb --browsers Chrome \
+              --filter ThisFilterMatchesNoTests || true
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: node_modules/
+          key: node-${{ hashFiles('package-lock.json') }}
+
+      - name: Cache Babel output
+        uses: actions/cache@v3
+        id: babel-cache
+        with:
+          path: .babel-cache
+          key: babel-${{ hashFiles('*.js', 'demo/**.js', 'lib/**.js', 'ui/**.js', 'test/**.js', 'third_party/**.js') }}
+
       - name: Store Player build
         uses: actions/upload-artifact@v3
         with:
@@ -206,6 +230,17 @@ jobs:
         with:
           path: node_modules/
           key: node-${{ hashFiles('package-lock.json') }}
+          fail-on-cache-miss: true  # Cached by the build-shaka job above
+          enableCrossOsArchive: true  # Share archives from Linux to Windows
+
+      - name: Cache Babel output
+        uses: actions/cache@v3
+        id: babel-cache
+        with:
+          path: .babel-cache
+          key: babel-${{ hashFiles('*.js', 'demo/**.js', 'lib/**.js', 'ui/**.js', 'test/**.js', 'third_party/**.js') }}
+          fail-on-cache-miss: true  # Cached by the build-shaka job above
+          enableCrossOsArchive: true  # Share archives from Linux to Windows
 
       - name: Install dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
