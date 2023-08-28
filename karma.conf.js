@@ -351,6 +351,8 @@ module.exports = (config) => {
       },
 
       babelPreprocessor: {
+        // Cache results in .babel-cache
+        cachePath: '.babel-cache',
         options: {
           presets: ['@babel/preset-env'],
           // Add source maps so that backtraces refer to the original code.
