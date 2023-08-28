@@ -1246,10 +1246,16 @@ shaka.extern.MediaSourceConfiguration;
 
 
 /**
- * @typedef {Object}
+ * @typedef {{
+ *   customPlayheadTracker: boolean
+ * }}
  *
  * @description
  *   Ads configuration.
+ *
+ * @property {boolean} customPlayheadTracker
+ *   If this is <code>true</code>, we create a custom playhead tracker for
+ *   Client Side.  This value defaults to <code>false</code>.
  *
  * @exportDoc
  */

@@ -119,7 +119,7 @@ google.ima.AdsManager = class {
 /** @const */
 google.ima.AdsManagerLoadedEvent = class extends Event {
   /**
-   * @param {!HTMLElement} video
+   * @param {!(HTMLElement|{currentTime: number})} video
    * @param {!google.ima.AdsRenderingSettings=} adsRenderingSettings
    * @return {!google.ima.AdsManager}
    */
