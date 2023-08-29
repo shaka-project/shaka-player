@@ -493,7 +493,6 @@ shakaDemo.Config = class {
     const MessageIds = shakaDemo.MessageIds;
     const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
     const strategyOptionsNames = {
-      'DISABLED': localize(MessageIds.CODEC_SWITCHING_STRATEGY_DISABLED),
       'RELOAD': localize(MessageIds.CODEC_SWITCHING_STRATEGY_RELOAD),
       'SMOOTH': localize(MessageIds.CODEC_SWITCHING_STRATEGY_SMOOTH),
     };
