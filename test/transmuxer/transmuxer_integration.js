@@ -215,6 +215,10 @@ describe('Transmuxer Player', () => {
         !MediaSource.isTypeSupported('audio/mpeg')) {
       return;
     }
+    // This tests is flaky in some Tizen devices, so we need omit it for now.
+    if (shaka.util.Platform.isTizen()) {
+      return;
+    }
     await player.load('/base/test/test/assets/hls-ts-mp3/manifest.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
