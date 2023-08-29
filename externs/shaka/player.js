@@ -1255,7 +1255,9 @@ shaka.extern.MediaSourceConfiguration;
  *
  * @property {boolean} customPlayheadTracker
  *   If this is <code>true</code>, we create a custom playhead tracker for
- *   Client Side.  This value defaults to <code>false</code>.
+ *   Client Side. This is useful because it allows you to implement the use of
+ *   IMA on platforms that do not support multiple video elements.
+ *   This value defaults to <code>false</code>.
  *
  * @exportDoc
  */
