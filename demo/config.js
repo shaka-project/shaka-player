@@ -98,6 +98,7 @@ shakaDemo.Config = class {
         shakaDemo.MessageIds.RESTRICTIONS_SECTION_HEADER);
     this.addCmcdSection_();
     this.addLcevcSection_();
+    this.addAdsSection_();
   }
 
   /**
@@ -326,6 +327,15 @@ shakaDemo.Config = class {
             'lcevc.dynamicPerformanceScaling')
         .addNumberInput_(MessageIds.LCEVC_LOG_LEVEL, 'lcevc.logLevel')
         .addBoolInput_(MessageIds.LCEVC_DRAW_LOGO, 'lcevc.drawLogo');
+  }
+
+  /** @private */
+  addAdsSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.AdsConfiguration');
+    this.addSection_(MessageIds.ADS_SECTION_HEADER, docLink)
+        .addBoolInput_(MessageIds.CUSTOM_PLAYHEAD_TRACKER,
+            'ads.customPlayheadTracker');
   }
 
   /**
