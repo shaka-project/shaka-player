@@ -88,6 +88,10 @@ describe('Ad manager', () => {
           requestAds(imaRequest) {
             numAdsRequested += 1;
           }
+
+          contentComplete() {
+            // Nothing
+          }
         };
         window['google'].ima.AdsLoader = mockAdsLoader;
 
@@ -100,6 +104,10 @@ describe('Ad manager', () => {
               super();
               mockAdsManagerInstance =
               /** @type {!google.ima.AdsManager} */ (this);
+            }
+
+            destroy() {
+              // Nothing
             }
 
             getCuePoints() {
