@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// TODO(joeyparrish): Rewrite these with StreamGenerator, to avoid flake.
-// With external resources, we can't guarantee that they are delivered on time.
-// The extra-long timeouts below (90s) are to compensate for this.
 describe('Transmuxer Player', () => {
   const Util = shaka.test.Util;
 
@@ -32,19 +29,10 @@ describe('Transmuxer Player', () => {
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
     player = new compiledShaka.Player(video);
 
-    // Make sure we are playing the lowest res available to avoid test flake
-    // based on network issues.  Note that disabling ABR and setting a low
-    // abr.defaultBandwidthEstimate would not be sufficient, because it
-    // would only affect the choice of track on the first period.  When we
-    // cross a period boundary, the default bandwidth estimate will no
-    // longer be in effect, and AbrManager may choose higher res tracks for
-    // the new period.  Using abr.restrictions.maxHeight will let us force
-    // AbrManager to the lowest resolution, which is its fallback when these
-    // soft restrictions cannot be met.
-    player.configure('abr.restrictions.maxHeight', 1);
     player.configure('mediaSource.forceTransmux', true);
     player.configure('streaming.useNativeHlsOnSafari', false);
 
@@ -71,11 +59,7 @@ describe('Transmuxer Player', () => {
   });
 
   it('raw AAC', async () => {
-    // eslint-disable-next-line max-len
-    const url = 'https://storage.googleapis.com/shaka-demo-assets/raw-hls-audio-only/manifest.m3u8';
-
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
+    await player.load('/base/test/test/assets/hls-raw-aac/manifest.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
 
@@ -84,8 +68,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 90 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
     await player.unload();
   });
@@ -94,11 +78,7 @@ describe('Transmuxer Player', () => {
     if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"')) {
       return;
     }
-    // eslint-disable-next-line max-len
-    const url = 'https://pl.streamingvideoprovider.com/mp3-playlist/playlist.m3u8';
-
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
+    await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
 
@@ -107,8 +87,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 90 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
     await player.unload();
   });
@@ -132,11 +112,7 @@ describe('Transmuxer Player', () => {
       return;
     }
 
-    // eslint-disable-next-line max-len
-    const url = 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/a2/prog_index.m3u8';
-
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
+    await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
 
@@ -145,8 +121,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 90 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
     await player.unload();
   });
@@ -166,11 +142,7 @@ describe('Transmuxer Player', () => {
       return;
     }
 
-    // eslint-disable-next-line max-len
-    const url = 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/a3/prog_index.m3u8';
-
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
+    await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
 
@@ -179,18 +151,15 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 90 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
     await player.unload();
   });
 
   it('muxed H.264+AAC in TS', async () => {
     // eslint-disable-next-line max-len
-    const url = 'https://cf-sf-video.wmspanel.com/local/raw/BigBuckBunny_320x180.mp4/playlist.m3u8';
-
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
+    await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
 
@@ -198,19 +167,15 @@ describe('Transmuxer Player', () => {
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    // Play for 15 seconds, but stop early if the video ends.  If it takes
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
     await player.unload();
   });
 
   it('AAC in TS', async () => {
-    // eslint-disable-next-line max-len
-    const url = 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa_audio_1_stereo_128000.m3u8';
-
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
+    await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
 
@@ -219,18 +184,14 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 90 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
     await player.unload();
   });
 
   it('H.264 in TS', async () => {
-    // eslint-disable-next-line max-len
-    const url = 'https://storage.googleapis.com/shaka-demo-assets/apple-advanced-stream-ts/v2/prog_index.m3u8';
-
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
+    await player.load('/base/test/test/assets/hls-ts-h264/prog_index.m3u8');
     await video.play();
     expect(player.isLive()).toBe(false);
 
@@ -239,8 +200,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 90 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
+    // longer than 45 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
     await player.unload();
   });
