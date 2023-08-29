@@ -159,6 +159,10 @@
     "description": "The name of a configuration value.",
     "message": "Clock Sync URI"
   },
+  "DEMO_CLEAR_BUFFER_SWITCH": {
+    "description": "Clear video buffer on abr rendition switch.",
+    "message": "Clear buffer"
+  },
   "DEMO_CMCD_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "[JARGON:CMCD]"
@@ -378,6 +382,10 @@
   "DEMO_GAP_DETECTION_THRESHOLD": {
     "description": "The name of a configuration value.",
     "message": "Gap detection threshold"
+  },
+  "DEMO_GAP_JUMP_TIMER_TIME": {
+    "description": "The name of a configuration value.",
+    "message": "Gap jump timer time"
   },
   "DEMO_GPAC": {
     "description": "Text that describes an asset that comes from the GPAC project asset library.",
@@ -862,6 +870,10 @@
   "DEMO_RESTRICTIONS_SECTION_HEADER": {
     "description": "The header for a section of configuration values.",
     "message": "Restrictions"
+  },
+  "DEMO_SAFE_MARGIN_SWITCH": {
+    "description": "Safe margin on abr switch rendition",
+    "message": "safe margin"
   },
   "DEMO_SAFE_SEEK_OFFSET": {
     "description": "The name of a configuration value.",

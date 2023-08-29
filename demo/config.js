@@ -295,7 +295,12 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.RESTRICT_TO_SCREEN_SIZE,
             'abr.restrictToScreenSize')
         .addBoolInput_(MessageIds.IGNORE_DEVICE_PIXEL_RATIO,
-            'abr.ignoreDevicePixelRatio');
+            'abr.ignoreDevicePixelRatio')
+        .addBoolInput_(MessageIds.CLEAR_BUFFER_SWITCH,
+            'abr.clearBufferSwitch')
+        .addNumberInput_(MessageIds.SAFE_MARGIN_SWITCH,
+            'abr.safeMarginSwitch',
+            /* canBeDecimal= */ true);
     this.addRetrictionsSection_('abr',
         MessageIds.ADAPTATION_RESTRICTIONS_SECTION_HEADER);
   }
@@ -389,6 +394,9 @@ shakaDemo.Config = class {
     this.addSection_(MessageIds.STREAMING_SECTION_HEADER, docLink)
         .addNumberInput_(MessageIds.GAP_DETECTION_THRESHOLD,
             'streaming.gapDetectionThreshold',
+            /* canBeDecimal= */ true)
+        .addNumberInput_(MessageIds.GAP_JUMP_TIMER_TIME,
+            'streaming.gapJumpTimerTime',
             /* canBeDecimal= */ true)
         .addNumberInput_(MessageIds.BUFFERING_GOAL,
             'streaming.bufferingGoal',

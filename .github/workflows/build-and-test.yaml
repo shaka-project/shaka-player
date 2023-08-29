@@ -45,7 +45,7 @@ jobs:
           # coverage instrumentation on full-stack player integration tests.
           - os: ubuntu-latest
             browser: Chrome
-            extra_flags: "--use-xvfb --html-coverage-report --uncompiled"
+            extra_flags: "--use-xvfb"
           - os: ubuntu-latest
             browser: Firefox
             extra_flags: "--use-xvfb"
@@ -70,6 +70,7 @@ jobs:
             browser: Firefox
           - os: windows-latest
             browser: Edge
+            extra_flags: "--html-coverage-report --uncompiled"
 
       # Disable fail-fast so that one matrix-job failing doesn't make the other
       # ones end early.
@@ -86,19 +87,6 @@ jobs:
       - name: Install FFmpeg
         if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Firefox'
         run: sudo apt -y update && sudo apt -y install ffmpeg
-
-      # Edge 107 fails DRM tests due to an outdated Widevine CDM.  Force Edge
-      # to update to 108+.
-      - name: Upgrade Edge
-        if: matrix.os == 'ubuntu-latest' && matrix.browser == 'Edge'
-        run: |
-          # If it's Edge 107, update it.  Otherwise, don't.  This way, we don't
-          # break something later when Edge 108+ is available by default in
-          # GitHub Actions.
-          if apt show microsoft-edge-stable | grep -q '^Version: 107'; then
-            wget https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-stable/microsoft-edge-stable_108.0.1462.46-1_amd64.deb
-            sudo dpkg -i microsoft-edge-stable_108.0.1462.46-1_amd64.deb
-          fi
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -124,6 +112,19 @@ jobs:
 
           # Install a launcher that can execute a shell script to launch this
           npm install karma-script-launcher --save-dev
+
+      # When "Chrome for Testing" is installed on Mac or Windows, it gets
+      # invoked instead of simply "Chrome".  This other copy of Chrome,
+      # however, doesn't seem to have basic codecs like AAC and H264 available,
+      # causing many of our test scenarios to fail.  Deleting "Chrome for
+      # Testing" fixes this.
+      - name: 'Delete "Chrome for Testing" on Mac'
+        if: matrix.os == 'macos-latest' && matrix.browser == 'Chrome'
+        run: sudo rm -rf /Applications/Google\ Chrome\ for\ Testing.app
+      - name: 'Overwrite "Chrome for Testing" on Windows'
+        if: matrix.os == 'windows-latest' && matrix.browser == 'Chrome'
+        shell: bash
+        run: choco install -y googlechrome --ignore-checksums
 
       # Some CI images (self-hosted or otherwise) don't have the minimum Java
       # version necessary for the compiler (Java 11).

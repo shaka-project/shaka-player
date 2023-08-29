@@ -255,33 +255,12 @@ shaka.test.Util = class {
    * @param {string} uri
    * @return {!Promise.<!ArrayBuffer>}
    */
-  static fetch(uri) {
-    return new Promise(((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', uri, /* asynchronous= */ true);
-      xhr.responseType = 'arraybuffer';
-
-      xhr.onload = (event) => {
-        if (xhr.status >= 200 &&
-            xhr.status <= 299 &&
-            !!xhr.response) {
-          resolve(/** @type {!ArrayBuffer} */(xhr.response));
-        } else {
-          let message = '';
-          if (xhr.response) {
-            message = ': ' + shaka.util.StringUtils.fromUTF8(
-                /** @type {!ArrayBuffer} */(xhr.response));
-          }
-          reject(xhr.status + message);
-        }
-      };
-
-      xhr.onerror = (event) => {
-        reject('shaka.test.Util.fetch failed: ' + uri);
-      };
-
-      xhr.send(/* body= */ null);
-    }));
+  static async fetch(uri) {
+    const response = await fetch(uri);
+    if (!response.ok) {
+      throw new Error('shaka.test.Util.fetch failed: ' + uri);
+    }
+    return response.arrayBuffer();
   }
 
   /**

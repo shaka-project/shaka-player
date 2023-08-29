@@ -1069,6 +1069,7 @@ shaka.extern.ManifestConfiguration;
  *   alwaysStreamText: boolean,
  *   startAtSegmentBoundary: boolean,
  *   gapDetectionThreshold: number,
+ *   gapJumpTimerTime: number,
  *   durationBackoff: number,
  *   safeSeekOffset: number,
  *   stallEnabled: boolean,
@@ -1127,9 +1128,11 @@ shaka.extern.ManifestConfiguration;
  *   time for live streams. This can put us further from the live edge. Defaults
  *   to <code>false</code>.
  * @property {number} gapDetectionThreshold
- *   TThe maximum distance (in seconds) before a gap when we'll automatically
- *   jump. This value  defaults to <code>0.1</code>, except in Edge Legacy,
- *   Tizen, Chromecast that value defaults value is <code>0.5</code>
+ *   The maximum distance (in seconds) before a gap when we'll automatically
+ *   jump. This value defaults to <code>0.5</code>.
+ * @property {number} gapJumpTimerTime
+ *   The polling time in seconds to check for gaps in the media. This value
+ *   defaults to <code>0.25</code>.
  * @property {number} durationBackoff
  *   By default, we will not allow seeking to exactly the duration of a
  *   presentation.  This field is the number of seconds before duration we will
@@ -1299,7 +1302,9 @@ shaka.extern.AdsConfiguration;
  *   advanced: shaka.extern.AdvancedAbrConfiguration,
  *   restrictToElementSize: boolean,
  *   restrictToScreenSize: boolean,
- *   ignoreDevicePixelRatio: boolean
+ *   ignoreDevicePixelRatio: boolean,
+ *   clearBufferSwitch: boolean,
+ *   safeMarginSwitch: number
  * }}
  *
  * @property {boolean} enabled
@@ -1341,6 +1346,19 @@ shaka.extern.AdsConfiguration;
  *   If true,device pixel ratio is ignored when restricting the quality to
  *   media element size or screen size.
  *   Defaults false.
+ * @property {boolean} clearBufferSwitch
+ *   If true, the buffer will be cleared during the switch.
+ *   The default automatic behavior is false to have a smoother transition.
+ *   On some device it's better to clear buffer.
+ *   Defaults false.
+ * @property {number} safeMarginSwitch
+ *   Optional amount of buffer (in seconds) to
+ *   retain when clearing the buffer during the automatic switch.
+ *   Useful for switching variant quickly without causing a buffering event.
+ *   Defaults to 0 if not provided. Ignored if clearBuffer is false.
+ *   Can cause hiccups on some browsers if chosen too small, e.g.
+ *   The amount of two segments is a fair minimum to consider as safeMargin
+ *   value.
  * @exportDoc
  */
 shaka.extern.AbrConfiguration;

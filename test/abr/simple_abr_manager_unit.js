@@ -158,7 +158,7 @@ describe('SimpleAbrManager', () => {
       // and variant 5 - for bandwidth = 6e5
       const expectedVariant = (bandwidth == 6e5) ? variants[5] : variants[2];
 
-      expect(switchCallback).toHaveBeenCalledWith(expectedVariant);
+      expect(switchCallback).toHaveBeenCalledWith(expectedVariant, false, 0);
     });
   }
 
@@ -205,7 +205,7 @@ describe('SimpleAbrManager', () => {
     // Expect variants 4 to be chosen
     const expectedVariant = variants[3];
 
-    expect(switchCallback).toHaveBeenCalledWith(expectedVariant);
+    expect(switchCallback).toHaveBeenCalledWith(expectedVariant, false, 0);
   });
 
   it('does not call switchCallback() if not enabled', () => {
@@ -283,7 +283,35 @@ describe('SimpleAbrManager', () => {
 
     // The second parameter is missing to indicate that the buffer should not be
     // cleared.
-    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
+    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object), false, 0);
+  });
+
+  it('does clear the buffer on upgrade with safemargin to 4', () => {
+    // Simulate some segments being downloaded at a high rate, to trigger an
+    // upgrade.
+    const bandwidth = 5e5;
+    const bytesPerSecond = sufficientBWMultiplier * bandwidth / 8.0;
+
+    // Set the clear buffer to true and the safe margin to 4.
+    config.clearBufferSwitch = true;
+    config.safeMarginSwitch = 4;
+    abrManager.configure(config);
+
+    abrManager.setVariants(variants);
+    abrManager.chooseVariant();
+
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+
+    abrManager.enable();
+
+    // Make another call to segmentDownloaded(). switchCallback() will be
+    // called to upgrade.
+    abrManager.segmentDownloaded(1000, bytesPerSecond);
+
+    // The second parameter is missing to indicate that the buffer should not be
+    // cleared.
+    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object), true, 4);
   });
 
   it('does not clear the buffer on downgrade', () => {
@@ -310,7 +338,7 @@ describe('SimpleAbrManager', () => {
 
     // The second parameter is missing to indicate that the buffer should not be
     // cleared.
-    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object));
+    expect(switchCallback).toHaveBeenCalledWith(jasmine.any(Object), false, 0);
   });
 
   it('will respect restrictions', () => {

@@ -12,9 +12,13 @@
  */
 shaka.test.FakeDemoMain = class {
   constructor() {
-    this.video = /** @type {!HTMLVideoElement} */ (
-      document.createElement('video'));
-    this.player = new shaka.Player(this.video);
+    // Using the player's constructor argument to attach a video element seems
+    // to cause flaky timeouts on teardown.  If a video element is needed in
+    // the future, please explicitly call attach(video) and await the result
+    // during the test setup.
+    /** @type {!shaka.Player} */
+    this.player = new shaka.Player();
+
     this.config_ = this.player.getConfiguration();
     this.selectedAsset = null;
 

@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// TODO(joeyparrish): Rewrite these with StreamGenerator, to avoid flake.
+// With external resources, we can't guarantee that they are delivered on time.
+// The extra-long timeouts below (90s) are to compensate for this.
 describe('Transmuxer Player', () => {
   const Util = shaka.test.Util;
 
@@ -45,6 +48,9 @@ describe('Transmuxer Player', () => {
     player.configure('mediaSource.forceTransmux', true);
     player.configure('streaming.useNativeHlsOnSafari', false);
 
+    // Disable stall detection, which can interfere with playback tests.
+    player.configure('streaming.stallEnabled', false);
+
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
     waiter = new shaka.test.Waiter(eventManager);
@@ -70,16 +76,16 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    // Play for 15 seconds, but stop early if the video ends.  If it takes
+    // longer than 90 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
 
     await player.unload();
   });
@@ -93,7 +99,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -101,8 +107,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+    // longer than 90 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
 
     await player.unload();
   });
@@ -131,7 +137,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -139,8 +145,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+    // longer than 90 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
 
     await player.unload();
   });
@@ -165,7 +171,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -173,8 +179,8 @@ describe('Transmuxer Player', () => {
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
     // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+    // longer than 90 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
 
     await player.unload();
   });
@@ -185,7 +191,7 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
@@ -205,16 +211,16 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    // Play for 15 seconds, but stop early if the video ends.  If it takes
+    // longer than 90 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
 
     await player.unload();
   });
@@ -225,16 +231,16 @@ describe('Transmuxer Player', () => {
 
     await player.load(url, /* startTime= */ null,
         /* mimeType= */ undefined);
-    video.play();
+    await video.play();
     expect(player.isLive()).toBe(false);
 
     // Wait for the video to start playback.  If it takes longer than 10
     // seconds, fail the test.
     await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    // Play for 15 seconds, but stop early if the video ends.  If it takes
+    // longer than 90 seconds, fail the test.
+    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 90);
 
     await player.unload();
   });
