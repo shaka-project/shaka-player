@@ -4582,6 +4582,33 @@ describe('HlsParser', () => {
     expect(actualManifest.presentationTimeline.getDuration()).toBe(5);
   });
 
+  it('parses #EXT-X-BITRATE', async () => {
+    const media = [
+      '#EXTM3U\n',
+      '#EXT-X-PLAYLIST-TYPE:VOD\n',
+      '#EXT-X-MAP:URI="init.mp4",BYTERANGE="616@0"\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      '#EXT-X-BITRATE:385\n',
+      'main.mp4',
+    ].join('');
+
+    const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+      manifest.sequenceMode = sequenceMode;
+      manifest.type = shaka.media.ManifestParser.HLS;
+      manifest.anyTimeline();
+      manifest.addPartialVariant((variant) => {
+        variant.bandwidth = 385;
+        variant.addPartialStream(ContentType.VIDEO, (stream) => {
+          stream.mime('video/mp4', 'avc1.42C01E');
+          stream.bandwidth = 385;
+        });
+      });
+    });
+
+    await testHlsParser(media, '', manifest);
+  });
+
   it('honors hls.mediaPlaylistFullMimeType', async () => {
     const media = [
       '#EXTM3U\n',
