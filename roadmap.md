@@ -36,6 +36,9 @@ v4.4 - 2023 Q3
  - HLS support for non-sequence mode (as we had in v3)
  - Partial support for large timestamps
  - UI support for thumbnails on seek
+ - Microsoft SmoothStreaming support
+ - Segment prefetch
+ - Low latency improvements
 
 v4.3 - 2022 Q4
  - Support ID3 tags in mp4
