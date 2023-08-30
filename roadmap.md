@@ -8,20 +8,21 @@ CHANGELOG.md.
 The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
 
-Priority features up next:
- - HLS improvements
-   https://github.com/shaka-project/shaka-player/projects/6
-
 Candidate features for future release cycles:
  - Preload API
    https://github.com/shaka-project/shaka-player/issues/880
  - Official TypeScript defs, generated from source
    https://github.com/shaka-project/shaka-player/issues/1030
- - Codec-switching
-   https://github.com/shaka-project/shaka-player/issues/1528
  - Background fetch for offline storage
    https://github.com/shaka-project/shaka-player/issues/879
  - Smaller, more modular binary
+
+v4.5 - 2023 Q4 or 2024 Q1
+ - Built-in transmuxer support for muxed content streams (audio+video)
+ - Built-in transmuxer support for H265 streams
+ - Remove optional mux.js dependency
+ - Codec switching
+   https://github.com/shaka-project/shaka-player/issues/1528
 
 =====
 
