@@ -1244,10 +1244,13 @@ shaka.extern.StreamingConfiguration;
  * @property {boolean} insertFakeEncryptionInInit
  *   If true, will apply a work-around for non-encrypted init segments on
  *   encrypted content for some platforms.
- *   See https://github.com/shaka-project/shaka-player/issues/2759).
- *   If you end-to-end control the content you are playing, you can set this
- *   value to <code>false</code> to gain a few milliseconds on loading time and
- *   seek time.
+ *   <br><br>
+ *   See https://github.com/shaka-project/shaka-player/issues/2759.
+ *   <br><br>
+ *   If you know you don't need this, you canset this value to
+ *   <code>false</code> to gain a few milliseconds on loading time and seek
+ *   time.
+ *   <br><br>
  *   This value defaults to <code>true</code>.
  * @exportDoc
  */
