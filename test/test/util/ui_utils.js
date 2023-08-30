@@ -169,7 +169,11 @@ shaka.test.UiUtils = class {
     const video = /** @type {!HTMLVideoElement} */(document.createElement(
         'video'));
 
-    video.muted = true;
+    // Tizen has issues with audio-only playbacks on muted video elements.
+    // Don't mute Tizen.
+    if (!shaka.util.Platform.isTizen()) {
+      video.muted = true;
+    }
     video.width = 600;
     video.height = 400;
 
