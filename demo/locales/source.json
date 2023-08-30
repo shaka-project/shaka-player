@@ -355,6 +355,10 @@
     "description": "The name of a configuration value.",
     "message": "Force Transmux"
   },
+  "DEMO_INSERT_FAKE_ENCRYPTION_IN_INIT": {
+    "description": "The name of a configuration value.",
+    "message": "Insert fake encryption in init segments when needed by the platform."
+  },
   "DEMO_FRONT_INTRO_DISMISS": {
     "description": "A button allowing users to dismiss the intro message.",
     "message": "Dismiss"
