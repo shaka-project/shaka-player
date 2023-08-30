@@ -1226,7 +1226,8 @@ shaka.extern.StreamingConfiguration;
 /**
  * @typedef {{
  *   sourceBufferExtraFeatures: string,
- *   forceTransmux: boolean
+ *   forceTransmux: boolean,
+*    insertFakeEncryptionInInit: boolean
  * }}
  *
  * @description
@@ -1240,6 +1241,14 @@ shaka.extern.StreamingConfiguration;
  *   If this is <code>true</code>, we will transmux AAC and TS content even if
  *   not strictly necessary for the assets to be played.
  *   This value defaults to <code>false</code>.
+ * @property {boolean} insertFakeEncryptionInInit
+ *   If true, will apply a work-around for non-encrypted init segments on
+ *   encrypted content for some platforms.
+ *   See https://github.com/shaka-project/shaka-player/issues/2759).
+ *   If you end-to-end control the content you are playing, you can set this
+ *   value to <code>false</code> to gain a few milliseconds on loading time and
+ *   seek time.
+ *   This value defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
