@@ -17,13 +17,6 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
-          # This command instructs the tool to use the config and manifest
-          # files below to decide the next version and the SHA of the previous
-          # release (used to compute the changelog).  This is necessary if
-          # there are more than 250 commits between main branch releases.
-          command: manifest
-          config-file: .release-please-config.json
-          manifest-file: .release-please-manifest.json
           # Required input to specify the release type (node package).
           release-type: node
           # Make sure we create the PR against the correct branch.
