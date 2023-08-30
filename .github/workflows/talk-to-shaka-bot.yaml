@@ -1,0 +1,100 @@
+name: Talk to Shaka Bot (PRs)
+
+# Runs when comments are created or edited.  Jobs below will be filtered to
+# only run on PRs, not regular issues.
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  handle_command:
+    # Only runs on PRs that contain '@shaka-bot' comments.
+    # Note that contains() is not case sensitive.
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '@shaka-bot')
+    runs-on: [ubuntu-latest]
+    env:
+      # This token must have `repo` scope.
+      GH_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
+      THIS_REPO: ${{ github.repository }}
+      COMMENTER: ${{ github.event.comment.user.login }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+      COMMENT_BODY: ${{ github.event.comment.body }}
+    steps:
+      - name: Handle command
+        shell: bash
+        run: |
+          function reply() {
+            echo "@$COMMENTER: $@" | \
+                gh issue comment "$PR_NUMBER" -R "$THIS_REPO" -F -
+          }
+          function reply_from_pipe() {
+            (echo -n "@$COMMENTER: "; cat /dev/stdin) | \
+                gh issue comment "$PR_NUMBER" -R "$THIS_REPO" -F -
+          }
+          function check_permissions() {
+            # Check permissions: this API call fails if the user has no special
+            # permissions on the repo.
+            gh api "/repos/$THIS_REPO/collaborators/$COMMENTER"
+          }
+          function start_workflow() {
+            local WORKFLOW="$1"
+            shift
+            gh workflow run "$WORKFLOW" -R "$THIS_REPO" "$@"
+          }
+
+          # Tokenize the comment by whitespace.
+          tokens=( $COMMENT_BODY )
+
+          # Ignore case in comparisons.
+          shopt -s nocasematch
+
+          command=""
+          for ((i=0; i < ${#tokens[@]}; i++)); do
+            this_token="${tokens[i]}"
+            if [[ "$this_token" == "@shaka-bot" ]]; then
+              command="${tokens[i+1]}"
+              break
+            fi
+          done
+
+          if [[ "$command" == "" ]]; then
+            exit 0
+          fi
+
+          echo "PR $PR_NUMBER, detected command $command"
+
+          case "$command" in
+            help)
+              (
+                echo "I understand the following commands:"
+                echo " - `@shaka-bot help`: Show this help message"
+                echo " - `@shaka-bot test`: Start lab tests (maintainers only)"
+              ) | reply_from_pipe
+              ;;
+
+            test)
+              if ! check_permissions; then
+                reply "Only maintainers may start lab tests."
+                exit 0
+              fi
+
+              if start_workflow selenium-lab-tests.yaml -f "pr=$PR_NUMBER"; then
+                reply "Lab tests started."
+              else
+                (
+                  echo "I failed to start the lab test workflow."
+                  echo ""
+                  echo "Please check GitHub Actions logs for details."
+                ) | reply_from_pipe
+
+                # Fail this workflow to make it easier to find the right run
+                # and its logs.
+                exit 1
+              fi
+              ;;
+
+            *)
+              echo "Unknown command!"
+              ;;
+          esac
+
