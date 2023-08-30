@@ -119,7 +119,7 @@ describe('Transmuxer Player', () => {
 
     it('raw MP3', async () => {
       if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"')) {
-        return;
+        pending('Codec MP3 in MP4 is not supported by the platform.');
       }
       await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
       await video.play();
@@ -138,7 +138,7 @@ describe('Transmuxer Player', () => {
 
     it('raw AC3', async () => {
       if (!isAc3Supported()) {
-        return;
+        pending('Codec AC-3 is not supported by the platform.');
       }
 
       await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
@@ -158,7 +158,7 @@ describe('Transmuxer Player', () => {
 
     it('raw EC3', async () => {
       if (!isEc3Supported()) {
-        return;
+        pending('Codec EC-3 is not supported by the platform.');
       }
 
       await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
@@ -195,7 +195,7 @@ describe('Transmuxer Player', () => {
     it('MP3 in TS', async () => {
       if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"') &&
         !MediaSource.isTypeSupported('audio/mpeg')) {
-        return;
+        pending('Codec MP3 is not supported by the platform.');
       }
       // This tests is flaky in some Tizen devices, so we need omit it for now.
       if (shaka.util.Platform.isTizen()) {
@@ -218,7 +218,7 @@ describe('Transmuxer Player', () => {
 
     it('AC3 in TS', async () => {
       if (!isAc3Supported()) {
-        return;
+        pending('Codec AC-3 is not supported by the platform.');
       }
 
       await player.load('/base/test/test/assets/hls-ts-ac3/prog_index.m3u8');
@@ -238,7 +238,7 @@ describe('Transmuxer Player', () => {
 
     it('EC3 in TS', async () => {
       if (!isEc3Supported()) {
-        return;
+        pending('Codec EC-3 is not supported by the platform.');
       }
 
       await player.load('/base/test/test/assets/hls-ts-ec3/prog_index.m3u8');
