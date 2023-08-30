@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.3.10](https://github.com/shaka-project/shaka-player/compare/v4.3.9...v4.3.10) (2023-08-30)
+
+
+### Bug Fixes
+
+* **Ads:** Initialize correctly the IMA ads manager ([#5541](https://github.com/shaka-project/shaka-player/issues/5541)) ([f15ba16](https://github.com/shaka-project/shaka-player/commit/f15ba16f7742790fad7ed5212c0605b418f37db5))
+* **Demo:** Show correctly external text in the Demo ([#5521](https://github.com/shaka-project/shaka-player/issues/5521)) ([01403c4](https://github.com/shaka-project/shaka-player/commit/01403c43441fe8a2dd305f63fa1394127dfdd89b))
+* Orange set top box is incorrectly categorized as Apple ([#5545](https://github.com/shaka-project/shaka-player/issues/5545)) ([f0f1281](https://github.com/shaka-project/shaka-player/commit/f0f12813772560a0063ad4de521b31391c52d932))
+* **UI:** Fix playback restarts in safari when click on seekbar end ([#5527](https://github.com/shaka-project/shaka-player/issues/5527)) ([8263c73](https://github.com/shaka-project/shaka-player/commit/8263c736b6309afda3add0174a9508b74b3ed379))
+
 ## [4.3.9](https://github.com/shaka-project/shaka-player/compare/v4.3.8...v4.3.9) (2023-08-21)
 
 
