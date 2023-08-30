@@ -169,7 +169,9 @@ shaka.test.UiUtils = class {
     const video = /** @type {!HTMLVideoElement} */(document.createElement(
         'video'));
 
-    video.muted = true;
+    if (!shaka.util.Platform.isTizen()) {
+      video.muted = true;
+    }
     video.width = 600;
     video.height = 400;
 

@@ -22,6 +22,48 @@ describe('Transmuxer Player', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
+  function isAc3Supported() {
+    if (!MediaSource.isTypeSupported('audio/mp4; codecs="ac-3"')) {
+      return false;
+    }
+    // AC3 is flaky in some Tizen devices, so we need omit it for now.
+    if (shaka.util.Platform.isTizen()) {
+      return false;
+    }
+    // It seems that AC3 on Edge Windows from github actions is not working
+    // (in the lab AC3 is working). The AC3 detection is currently hard-coded
+    // to true, which leads to a failure in GitHub's environment.
+    // We must enable this, once it is resolved:
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
+    const chromeVersion = shaka.util.Platform.chromeVersion();
+    if (shaka.util.Platform.isEdge() &&
+        chromeVersion && chromeVersion <= 116) {
+      return false;
+    }
+    return true;
+  }
+
+  function isEc3Supported() {
+    if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
+      return false;
+    }
+    // EC3 is flaky in some Tizen devices, so we need omit it for now.
+    if (shaka.util.Platform.isTizen()) {
+      return false;
+    }
+    // It seems that EC3 on Edge Windows from github actions is not working
+    // (in the lab EC3 is working). The EC3 detection is currently hard-coded
+    // to true, which leads to a failure in GitHub's environment.
+    // We must enable this, once it is resolved:
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
+    const chromeVersion = shaka.util.Platform.chromeVersion();
+    if (shaka.util.Platform.isEdge() &&
+        chromeVersion && chromeVersion <= 116) {
+      return false;
+    }
+    return true;
+  }
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -58,247 +100,197 @@ describe('Transmuxer Player', () => {
     document.body.removeChild(video);
   });
 
-  it('raw AAC', async () => {
-    await player.load('/base/test/test/assets/hls-raw-aac/manifest.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
+  describe('for audio', () => {
+    it('raw AAC', async () => {
+      await player.load('/base/test/test/assets/hls-raw-aac/manifest.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    await player.unload();
-  });
+      await player.unload();
+    });
 
-  it('raw MP3', async () => {
-    if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"')) {
-      return;
-    }
-    await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
+    it('raw MP3', async () => {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"')) {
+        return;
+      }
+      await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    await player.unload();
-  });
+      await player.unload();
+    });
 
-  it('raw AC3', async () => {
-    if (!MediaSource.isTypeSupported('audio/mp4; codecs="ac-3"')) {
-      return;
-    }
-    // This tests is flaky in some Tizen devices, so we need omit it for now.
-    if (shaka.util.Platform.isTizen()) {
-      return;
-    }
-    // It seems that AC3 on Edge Windows from github actions is not working
-    // (in the lab AC3 is working). The AC3 detection is currently hard-coded
-    // to true, which leads to a failure in GitHub's environment.
-    // We must enable this, once it is resolved:
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 116) {
-      return;
-    }
+    it('raw AC3', async () => {
+      if (!isAc3Supported()) {
+        return;
+      }
 
-    await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
+      await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    await player.unload();
-  });
+      await player.unload();
+    });
 
-  it('raw EC3', async () => {
-    if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
-      return;
-    }
-    // This tests is flaky in some Tizen devices, so we need omit it for now.
-    if (shaka.util.Platform.isTizen()) {
-      return;
-    }
-    // It seems that AC3 on Edge Windows from github actions is not working
-    // (in the lab AC3 is working). The AC3 detection is currently hard-coded
-    // to true, which leads to a failure in GitHub's environment.
-    // We must enable this, once it is resolved:
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 116) {
-      return;
-    }
+    it('raw EC3', async () => {
+      if (!isEc3Supported()) {
+        return;
+      }
 
-    await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
+      await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    await player.unload();
-  });
+      await player.unload();
+    });
 
-  it('muxed H.264+AAC in TS', async () => {
-    // eslint-disable-next-line max-len
-    await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
+    it('AAC in TS', async () => {
+      await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    await player.unload();
-  });
+      await player.unload();
+    });
 
-  it('AAC in TS', async () => {
-    await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
-
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
-
-    await player.unload();
-  });
-
-  it('H.264 in TS', async () => {
-    await player.load('/base/test/test/assets/hls-ts-h264/prog_index.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
-
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
-
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
-
-    await player.unload();
-  });
-
-  it('MP3 in TS', async () => {
-    if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"') &&
+    it('MP3 in TS', async () => {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"') &&
         !MediaSource.isTypeSupported('audio/mpeg')) {
-      return;
-    }
-    // This tests is flaky in some Tizen devices, so we need omit it for now.
-    if (shaka.util.Platform.isTizen()) {
-      return;
-    }
-    await player.load('/base/test/test/assets/hls-ts-mp3/manifest.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
+        return;
+      }
+      // This tests is flaky in some Tizen devices, so we need omit it for now.
+      if (shaka.util.Platform.isTizen()) {
+        return;
+      }
+      await player.load('/base/test/test/assets/hls-ts-mp3/manifest.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    await player.unload();
+      await player.unload();
+    });
+
+    it('AC3 in TS', async () => {
+      if (!isAc3Supported()) {
+        return;
+      }
+
+      await player.load('/base/test/test/assets/hls-ts-ac3/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('EC3 in TS', async () => {
+      if (!isEc3Supported()) {
+        return;
+      }
+
+      await player.load('/base/test/test/assets/hls-ts-ec3/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
   });
 
-  it('AC3 in TS', async () => {
-    if (!MediaSource.isTypeSupported('audio/mp4; codecs="ac-3"')) {
-      return;
-    }
-    // This tests is flaky in some Tizen devices, so we need omit it for now.
-    if (shaka.util.Platform.isTizen()) {
-      return;
-    }
-    // It seems that AC3 on Edge Windows from github actions is not working
-    // (in the lab AC3 is working). The AC3 detection is currently hard-coded
-    // to true, which leads to a failure in GitHub's environment.
-    // We must enable this, once it is resolved:
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 116) {
-      return;
-    }
+  describe('for video', () => {
+    it('H.264 in TS', async () => {
+      await player.load('/base/test/test/assets/hls-ts-h264/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    await player.load('/base/test/test/assets/hls-ts-ac3/prog_index.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
-
-    await player.unload();
+      await player.unload();
+    });
   });
 
-  it('EC3 in TS', async () => {
-    if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
-      return;
-    }
-    // This tests is flaky in some Tizen devices, so we need omit it for now.
-    if (shaka.util.Platform.isTizen()) {
-      return;
-    }
-    // It seems that AC3 on Edge Windows from github actions is not working
-    // (in the lab AC3 is working). The AC3 detection is currently hard-coded
-    // to true, which leads to a failure in GitHub's environment.
-    // We must enable this, once it is resolved:
-    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
-    const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 116) {
-      return;
-    }
+  describe('for muxed content', () => {
+    it('H.264+AAC in TS', async () => {
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    await player.load('/base/test/test/assets/hls-ts-ec3/prog_index.m3u8');
-    await video.play();
-    expect(player.isLive()).toBe(false);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
-
-    await player.unload();
+      await player.unload();
+    });
   });
 });
