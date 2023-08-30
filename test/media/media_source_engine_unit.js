@@ -406,7 +406,7 @@ describe('MediaSourceEngine', () => {
       await mediaSourceEngine.init(initObject, false);
     });
 
-    it('should apply the fake encryption on the init segment', async () => {
+    it('should apply fake encryption by default', async () => {
       requiresEncryptionInfoInAllInitSegmentsSpy.and.returnValue(true);
 
       const p = mediaSourceEngine.appendBuffer(
@@ -422,7 +422,7 @@ describe('MediaSourceEngine', () => {
       await p;
     });
 
-    it('should not apply the fake encryption on the init segment', async () => {
+    it('should not apply fake encryption when config is off', async () => {
       requiresEncryptionInfoInAllInitSegmentsSpy.and.returnValue(true);
 
       const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
