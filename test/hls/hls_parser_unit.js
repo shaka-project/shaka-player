@@ -4590,6 +4590,20 @@ describe('HlsParser', () => {
       '#EXTINF:5,\n',
       '#EXT-X-BYTERANGE:121090@616\n',
       '#EXT-X-BITRATE:385\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      'main.mp4\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      '#EXT-X-BITRATE:340\n',
+      'main.mp4\n',
+      '#EXT-X-BYTERANGE:121090@616\n',
+      '#EXTINF:5,\n',
+      '#EXT-X-BITRATE:300\n',
       'main.mp4',
     ].join('');
 
@@ -4598,10 +4612,10 @@ describe('HlsParser', () => {
       manifest.type = shaka.media.ManifestParser.HLS;
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
-        variant.bandwidth = 385;
+        variant.bandwidth = 359000;
         variant.addPartialStream(ContentType.VIDEO, (stream) => {
           stream.mime('video/mp4', 'avc1.42C01E');
-          stream.bandwidth = 385;
+          stream.bandwidth = 359000;
         });
       });
     });
