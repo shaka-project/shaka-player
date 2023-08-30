@@ -512,7 +512,9 @@ shakaDemo.Config = class {
         .addTextInput_(MessageIds.SOURCE_BUFFER_EXTRA_FEATURES,
             'mediaSource.sourceBufferExtraFeatures')
         .addBoolInput_(MessageIds.FORCE_TRANSMUX,
-            'mediaSource.forceTransmux');
+            'mediaSource.forceTransmux')
+        .addBoolInput_(MessageIds.INSERT_FAKE_ENCRYPTION_IN_INIT,
+            'mediaSource.insertFakeEncryptionInInit');
   }
 
   /** @private */
