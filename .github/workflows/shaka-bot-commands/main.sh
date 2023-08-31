@@ -22,7 +22,7 @@ cd "$(dirname "$0")"
 
 # Check required environment variables passed from the workflow.
 # If running this manually while testing changes, supply these.
-check_required_variable GH_TOKEN      # PAT with repo scope
+check_required_variable GH_TOKEN      # With repo & org:read scope, write access
 check_required_variable THIS_REPO     # like shaka-project/shaka-player
 check_required_variable COMMENTER     # like joeyparrish
 check_required_variable PR_NUMBER     # like 1234

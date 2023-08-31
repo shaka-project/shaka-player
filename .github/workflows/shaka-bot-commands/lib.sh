@@ -27,22 +27,27 @@ function check_required_variable() {
   fi
 }
 
+# Leaving a comment requires a token with "repo" scope.
 function reply() {
   echo "@$COMMENTER: $@" | \
       gh issue comment "$PR_NUMBER" -R "$THIS_REPO" -F -
 }
 
+# Leaving a comment requires a token with "repo" scope.
 function reply_from_pipe() {
   (echo -n "@$COMMENTER: "; cat /dev/stdin) | \
       gh issue comment "$PR_NUMBER" -R "$THIS_REPO" -F -
 }
 
+# Checking permissions requires a token with "repo" and "org:read" scopes, and
+# write access.
 function check_permissions() {
   # Check permissions: this API call fails if the commenter has no special
   # permissions on the repo.
   gh api "/repos/$THIS_REPO/collaborators/$COMMENTER"
 }
 
+# Starting a workflow requires a token with "repo" scope and write access.
 function start_workflow() {
   local WORKFLOW="$1"
   shift
