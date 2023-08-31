@@ -48,20 +48,33 @@ function check_permissions() {
 }
 
 # Starting a workflow requires a token with "repo" scope and write access.
+# $1 is the workflow filename.  Subsequent arguments are key=value pairs to be
+# passed as input to the workflow_dispatch event.
 function start_workflow() {
   local WORKFLOW="$1"
   shift
-  gh workflow run "$WORKFLOW" -R "$THIS_REPO" "$@"
+
+  # The gh command wants -f before each key-value pair.  The caller shouldn't
+  # have to know that, so we rebuild the argument array with -f here.
+  local GH_ARGS=()
+  for arg in "$@"; do
+    GH_ARGS+=( "-f" "$arg" )
+  done
+
+  gh workflow run "$WORKFLOW" -R "$THIS_REPO" "${GH_ARGS[@]}"
 }
 
+# Outputs to global variables SHAKA_BOT_COMMAND and SHAKA_BOT_ARGUMENTS (array).
 function parse_command() {
   # Tokenize the comment by whitespace.
   local TOKENS=( $COMMENT_BODY )
 
   local INDEX
-  for ((INDEX=0; INDEX < ${#TOKENS[@]}; INDEX++)); do
+  for (( INDEX=0; INDEX < ${#TOKENS[@]}; INDEX++ )); do
     if [[ "${TOKENS[i]}" == "@shaka-bot" ]]; then
-      echo "${TOKENS[i+1]}"
+      SHAKA_BOT_COMMAND="${TOKENS[i+1]}"
+      # A slice of all tokens starting with index i+2.
+      SHAKA_BOT_ARGUMENTS=( "${TOKENS[@]:i+2}" )
       return 0
     fi
   done

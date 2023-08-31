@@ -20,8 +20,29 @@ if ! check_permissions; then
   exit 0
 fi
 
-if start_workflow selenium-lab-tests.yaml -f "pr=$PR_NUMBER"; then
-  reply "Lab tests started."
+# These are passed to the lab testing workflow.
+WORKFLOW_ARGS=( "pr=$PR_NUMBER" )
+
+case "${SHAKA_BOT_ARGUMENTS[0]}" in
+  # CE devices only.
+  ce) WORKFLOW_ARGS+=( "browser_filter=Tizen Chromecast ChromeAndroid" ) ;;
+
+  # No command argument, no extra workflow arguments.
+  "") ;;
+
+  *)
+    reply "Unrecognized test argument: ${SHAKA_BOT_ARGUMENTS[0]}"
+    exit 1
+    ;;
+esac
+
+if start_workflow selenium-lab-tests.yaml "${WORKFLOW_ARGS[@]}"; then
+  (
+    echo "Lab tests started with arguments:"
+    for arg in "${WORKFLOW_ARGS[@]}"; do
+      echo " - \`$arg\`"
+    done
+  ) | reply_from_pipe
 else
   (
     echo "I failed to start the lab test workflow."

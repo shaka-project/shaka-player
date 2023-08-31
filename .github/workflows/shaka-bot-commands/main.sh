@@ -33,8 +33,9 @@ if [[ "$COMMENTER" == "shaka-bot" ]]; then
   exit 0
 fi
 
-# Parse the command.
-SHAKA_BOT_COMMAND=$(parse_command)
+# Parse the command.  Outputs to globals SHAKA_BOT_COMMAND and
+# SHAKA_BOT_ARGUMENTS (array).
+parse_command
 
 if [[ "$SHAKA_BOT_COMMAND" == "" ]]; then
   # No command found.

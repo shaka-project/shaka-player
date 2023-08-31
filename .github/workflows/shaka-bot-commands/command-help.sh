@@ -18,7 +18,10 @@
 # Using single quotes to avoid executing the things in backticks, which are
 # really markdown.
 (
-  echo 'I understand the following commands:'
+  echo 'I honor the following commands from anyone:'
   echo ' - `@shaka-bot help`: Show this help message'
-  echo ' - `@shaka-bot test`: Start lab tests (maintainers only)'
+  echo ''
+  echo 'I honor the following commands from maintainers only:'
+  echo ' - `@shaka-bot test`: Start lab tests on all devices'
+  echo ' - `@shaka-bot test ce`: Start lab tests on CE devices only (no desktop browsers)'
 ) | reply_from_pipe
