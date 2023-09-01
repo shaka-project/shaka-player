@@ -233,8 +233,7 @@ Shaka Player supports:
       SegmentTemplate@index
     - Not supported in HLS
   - MPEG-2 TS
-    - Can be played on any browser which
-      supports MP4
+    - Can be played on any browser which supports MP4
     - Can find and parse timestamps to find segment start time in HLS
   - WebVTT
     - Supported in both text form and embedded in MP4
@@ -287,10 +286,7 @@ Shaka Player supports:
   - MP3 in MPEG-2 TS to MP3 in MP4
   - MP3 in MPEG-2 TS to raw MP3
   - H.264 in MPEG-2 TS to H.264 in MP4
-  - Muxed AAC and H.264 in MPEG-2 TS to AAC and H.264 in MP4
-  - Muxed AC-3 and H.264 in MPEG-2 TS to AC-3 and H.264 in MP4
-  - Muxed EC-3 and H.264 in MPEG-2 TS to EC-3 and H.264 in MP4
-  - Muxed MP3 and H.264 in MPEG-2 TS to MP3 and H.264 in MP4
+  - Muxed content in MPEG-2 TS with the previous codecs
 
 
 ## Thumbnails support
