@@ -4113,19 +4113,11 @@ describe('HlsParser', () => {
     expect(videoSegments2[2].endTime).toBe(10);
   });
 
-  // Issue #1875
-  it('ignores audio groups on audio-only content', async () => {
-    // NOTE: To reproduce the original issue accurately, the two audio playlist
-    // URIs must differ.  When the issue occurred, the audio-only variant would
-    // be detected as a video stream and combined with the audio group, leading
-    // the player to buffer "video" that was really audio, resulting in
-    // audio-only playback to the exclusion of any other streams.  Since the
-    // root cause of that was the mis-detection, this repro case does not need
-    // to include any audio+video variants.
+  it('allow audio groups on audio-only content', async () => {
     const master = [
       '#EXTM3U\n',
-      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANG="en",URI="audio1"\n',
-      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANG="eo",URI="audio2"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANGUAGE="en",URI="audio1"\n',
+      '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud",LANGUAGE="eo",URI="audio2"\n',
       '#EXT-X-STREAM-INF:BANDWIDTH=200,CODECS="mp4a",AUDIO="aud"\n',
       'audio3\n',
     ].join('');
@@ -4143,7 +4135,14 @@ describe('HlsParser', () => {
       manifest.anyTimeline();
       manifest.addPartialVariant((variant) => {
         variant.bandwidth = 200;
-        variant.language = 'und';
+        variant.language = 'en';
+        variant.addPartialStream(ContentType.AUDIO, (stream) => {
+          stream.mime('audio/mp4', 'mp4a');
+        });
+      });
+      manifest.addPartialVariant((variant) => {
+        variant.bandwidth = 200;
+        variant.language = 'eo';
         variant.addPartialStream(ContentType.AUDIO, (stream) => {
           stream.mime('audio/mp4', 'mp4a');
         });
@@ -4161,7 +4160,7 @@ describe('HlsParser', () => {
 
     const actual = await parser.start('test:/master', playerInterface);
     await loadAllStreamsFor(actual);
-    expect(actual.variants.length).toBe(1);
+    expect(actual.variants.length).toBe(2);
     expect(actual).toEqual(manifest);
   });
 
