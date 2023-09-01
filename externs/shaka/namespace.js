@@ -6,8 +6,8 @@
 
 /**
  * @externs
- * @suppress {constantProperty, duplicate} To prevent compiler errors with the namespace
- *   being declared both here and by goog.provide in the library.
+ * @suppress {constantProperty, duplicate} To prevent compiler errors with the
+ *   namespace being declared both here and by goog.provide in the library.
  */
 
 /** @namespace */
