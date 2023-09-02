@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.11](https://github.com/shaka-project/shaka-player/compare/v4.3.10...v4.3.11) (2023-09-02)
+
+
+### Bug Fixes
+
+* **HLS:** Allow audio groups on audio-only content ([#5578](https://github.com/shaka-project/shaka-player/issues/5578)) ([9028495](https://github.com/shaka-project/shaka-player/commit/90284959bda3c0cadcacbd7acbe0425d3028d9d5))
+
 ## [4.3.10](https://github.com/shaka-project/shaka-player/compare/v4.3.9...v4.3.10) (2023-08-30)
 
 
