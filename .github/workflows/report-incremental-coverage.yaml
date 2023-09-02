@@ -21,7 +21,7 @@ jobs:
         id: compute
         shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
         # Fetches the coverage data from the run that triggered the report,
         # parses it, compares it to the changed lines in the PR, and computes
         # the incremental code coverage.
@@ -36,4 +36,4 @@ jobs:
           message: "Incremental code coverage: ${{ steps.compute.outputs.coverage }}"
           comment_includes: "Incremental code coverage: "
           pr_number: ${{ steps.compute.outputs.pr_number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
