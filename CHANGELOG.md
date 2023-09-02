@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.4.1](https://github.com/shaka-project/shaka-player/compare/v4.4.0...v4.4.1) (2023-09-02)
+
+
+### Bug Fixes
+
+* Fix MediaSourceEngine reset operation ([#5576](https://github.com/shaka-project/shaka-player/issues/5576)) ([8c66b7a](https://github.com/shaka-project/shaka-player/commit/8c66b7a061b044b1e1569fbcf18c094465b94466))
+* Fix Mp4Generator ([#5566](https://github.com/shaka-project/shaka-player/issues/5566)) ([a20f1db](https://github.com/shaka-project/shaka-player/commit/a20f1db194539d43e6851f54f28378c33f98d1d5))
+* Fix PES parsing ([#5559](https://github.com/shaka-project/shaka-player/issues/5559)) ([58e6627](https://github.com/shaka-project/shaka-player/commit/58e6627c5c56057d186823f07f364805d3c26b20))
+* Fix TS transmuxer when the main content is muxed ([#5575](https://github.com/shaka-project/shaka-player/issues/5575)) ([0831b97](https://github.com/shaka-project/shaka-player/commit/0831b979f076b773f8eecb42e72c45bdabbf878b))
+* **HLS:** Allow audio groups on audio-only content ([#5578](https://github.com/shaka-project/shaka-player/issues/5578)) ([17e4ef2](https://github.com/shaka-project/shaka-player/commit/17e4ef25c0f069002c6777e77569cbf90d538449))
+* Prevent codecs override in the transmuxer ([#5568](https://github.com/shaka-project/shaka-player/issues/5568)) ([1286fec](https://github.com/shaka-project/shaka-player/commit/1286fec03da968d71b8f0590421c0d0a39e98d06))
+* Remove debugging code on Simple Text ([#5582](https://github.com/shaka-project/shaka-player/issues/5582)) ([19be642](https://github.com/shaka-project/shaka-player/commit/19be6423ea5366b887d0cf89900d92bfbd573ce5))
+
 ## [4.4.0](https://github.com/shaka-project/shaka-player/compare/v4.4.0...v4.4.0) (2023-08-30)
 
 
