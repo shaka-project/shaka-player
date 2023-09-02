@@ -23,8 +23,6 @@ jobs:
           default-branch: ${{ github.ref_name }}
           # Use a special shaka-bot access token for releases.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-          # Create the PR from the bot account's fork.
-          fork: true
 
       # If we didn't create a release, we may have created or updated a PR.
       # Check out the code, then update the Player version in the PR.
