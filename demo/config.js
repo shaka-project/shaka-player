@@ -98,6 +98,7 @@ shakaDemo.Config = class {
         shakaDemo.MessageIds.RESTRICTIONS_SECTION_HEADER);
     this.addCmcdSection_();
     this.addLcevcSection_();
+    this.addAdsSection_();
   }
 
   /**
@@ -328,6 +329,15 @@ shakaDemo.Config = class {
         .addBoolInput_(MessageIds.LCEVC_DRAW_LOGO, 'lcevc.drawLogo');
   }
 
+  /** @private */
+  addAdsSection_() {
+    const MessageIds = shakaDemo.MessageIds;
+    const docLink = this.resolveExternLink_('.AdsConfiguration');
+    this.addSection_(MessageIds.ADS_SECTION_HEADER, docLink)
+        .addBoolInput_(MessageIds.CUSTOM_PLAYHEAD_TRACKER,
+            'ads.customPlayheadTracker');
+  }
+
   /**
    * @param {string} category
    * @param {!shakaDemo.MessageIds} sectionName
@@ -513,7 +523,9 @@ shakaDemo.Config = class {
             MessageIds.CODEC_SWITCHING_STRATEGY_HEADER,
             'mediaSource.codecSwitchingStrategy',
             strategyOptions,
-            strategyOptionsNames);
+            strategyOptionsNames)
+        .addBoolInput_(MessageIds.INSERT_FAKE_ENCRYPTION_IN_INIT,
+            'mediaSource.insertFakeEncryptionInInit');
   }
 
   /** @private */

@@ -1248,7 +1248,8 @@ shaka.extern.TrackComparator;
  *   trackComparator: shaka.extern.TrackComparator,
  *   codecSwitchingStrategy: shaka.config.CodecSwitchingStrategy,
  *   sourceBufferExtraFeatures: string,
- *   forceTransmux: boolean
+ *   forceTransmux: boolean,
+*    insertFakeEncryptionInInit: boolean
  * }}
  *
  * @description
@@ -1274,16 +1275,35 @@ shaka.extern.TrackComparator;
  *   If this is <code>true</code>, we will transmux AAC and TS content even if
  *   not strictly necessary for the assets to be played.
  *   This value defaults to <code>false</code>.
+ * @property {boolean} insertFakeEncryptionInInit
+ *   If true, will apply a work-around for non-encrypted init segments on
+ *   encrypted content for some platforms.
+ *   <br><br>
+ *   See https://github.com/shaka-project/shaka-player/issues/2759.
+ *   <br><br>
+ *   If you know you don't need this, you canset this value to
+ *   <code>false</code> to gain a few milliseconds on loading time and seek
+ *   time.
+ *   <br><br>
+ *   This value defaults to <code>true</code>.
  * @exportDoc
  */
 shaka.extern.MediaSourceConfiguration;
 
 
 /**
- * @typedef {Object}
+ * @typedef {{
+ *   customPlayheadTracker: boolean
+ * }}
  *
  * @description
  *   Ads configuration.
+ *
+ * @property {boolean} customPlayheadTracker
+ *   If this is <code>true</code>, we create a custom playhead tracker for
+ *   Client Side. This is useful because it allows you to implement the use of
+ *   IMA on platforms that do not support multiple video elements.
+ *   This value defaults to <code>false</code>.
  *
  * @exportDoc
  */
