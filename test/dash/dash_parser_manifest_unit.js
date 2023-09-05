@@ -54,6 +54,7 @@ describe('DashParser Manifest', () => {
       enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
+      onManifestUpdated: () => {},
     };
   });
 
