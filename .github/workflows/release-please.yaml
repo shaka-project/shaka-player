@@ -29,8 +29,6 @@ jobs:
       - uses: actions/checkout@v3
         if: steps.release.outputs.release_created == false
         with:
-          # Checkout the fork, where the PR is generated from.
-          repository: shaka-bot/${{ github.event.repository.name }}
           # Use a special shaka-bot access token for releases.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
       - name: Custom update Player version
@@ -63,8 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          # Check out the origin repo, not the fork, and do it at main, not the
-          # PR branch.
+          # Check out the origin repo, and do it at main, not the PR branch.
           ref: main
           # Use a special shaka-bot access token for releases.
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
