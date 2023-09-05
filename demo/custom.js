@@ -407,19 +407,14 @@ shakaDemo.Custom = class {
       const licenseServerURL = licenseServerUrlInput.value;
       const customDRMSystem = customDrmSystemInput.value;
       if (licenseServerURL) {
-        const filterFairplay =
-            customDRMSystem && customDRMSystem.startsWith('com.apple.fps');
-        // Make a license server entry for every common DRM plugin.
         assetInProgress.licenseServers.clear();
-        for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
-          if (filterFairplay && drmSystem.startsWith('com.apple.fps')) {
-            continue;
-          }
-          assetInProgress.licenseServers.set(drmSystem, licenseServerURL);
-        }
         if (customDRMSystem) {
-          // Make a custom entry too.
           assetInProgress.licenseServers.set(customDRMSystem, licenseServerURL);
+        } else {
+          // Make a license server entry for every common DRM plugin.
+          for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
+            assetInProgress.licenseServers.set(drmSystem, licenseServerURL);
+          }
         }
       } else {
         assetInProgress.licenseServers.clear();
