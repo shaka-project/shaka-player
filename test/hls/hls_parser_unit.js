@@ -90,6 +90,7 @@ describe('HlsParser', () => {
       enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
+      onManifestUpdated: () => {},
     };
 
     parser = new shaka.hls.HlsParser();
