@@ -191,8 +191,13 @@ ChromeAndroid:
     - *basic_chrome_config
     - *android_chrome_config
 
-Chromecast:
+ChromecastUltra:
   browser: chromecast
+  version: Ultra
+
+ChromecastGTV:
+  browser: chromecast
+  version: GTV
 
 Chromebook:
   # TODO(b/145916766): Persistent license tests failing
