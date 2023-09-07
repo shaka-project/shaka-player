@@ -320,7 +320,7 @@ describe('Transmuxer Player', () => {
       }
 
       // eslint-disable-next-line max-len
-      await player.load('/base/test/test/assets/hls-ts-muxed-ac3-h264/prog_index.m3u8');
+      await player.load('/base/test/test/assets/hls-ts-muxed-ac3-h264/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
 
