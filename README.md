@@ -132,8 +132,7 @@ HLS features supported:
    blocking playlist reload
  - Discontinuity
  - ISO-BMFF / MP4 / CMAF support
- - MPEG-2 TS support (transmuxing provided by [mux.js][] v6.2.0+, must be
-   separately included)
+ - MPEG-2 TS support
  - WebVTT and TTML
  - CEA-608/708 captions
  - Encrypted content with PlayReady and Widevine
@@ -144,7 +143,6 @@ HLS features supported:
 HLS features **not** supported:
  - I-frame-only playlists: https://github.com/shaka-project/shaka-player/issues/742
 
-[mux.js]: https://github.com/videojs/mux.js/releases
 
 ## MPEG-5 Part2 LCEVC Support
 
@@ -235,8 +233,7 @@ Shaka Player supports:
       SegmentTemplate@index
     - Not supported in HLS
   - MPEG-2 TS
-    - With help from [mux.js][] v6.2.0+, can be played on any browser which
-      supports MP4
+    - Can be played on any browser which supports MP4
     - Can find and parse timestamps to find segment start time in HLS
   - WebVTT
     - Supported in both text form and embedded in MP4
@@ -289,8 +286,7 @@ Shaka Player supports:
   - MP3 in MPEG-2 TS to MP3 in MP4
   - MP3 in MPEG-2 TS to raw MP3
   - H.264 in MPEG-2 TS to H.264 in MP4
-  - Muxed AAC and H.264 in MPEG-2 TS to AAC and H.264 in MP4,
-    with help from [mux.js][] v6.2.0+
+  - Muxed content in MPEG-2 TS with the previous codecs
 
 
 ## Thumbnails support
