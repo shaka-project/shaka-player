@@ -78,7 +78,6 @@ goog.require('shaka.transmuxer.MpegAudio');
 goog.require('shaka.transmuxer.MpegTsTransmuxer');
 goog.require('shaka.transmuxer.TransmuxerEngine');
 goog.require('shaka.transmuxer.MssTransmuxer');
-goog.require('shaka.transmuxer.MuxjsTransmuxer');
 goog.require('shaka.transmuxer.TsTransmuxer');
 goog.require('shaka.ui.Controls');
 goog.require('shaka.ui.PlayButton');
