@@ -331,6 +331,10 @@
     "description": "The name of a configuration value.",
     "message": "Enabled"
   },
+  "DEMO_ENABLE_AUDIO_GROUPS": {
+    "description": "The name of a configuration value.",
+    "message": "Enable Audio Groups"
+  },
   "DEMO_EXTRA_SHAKA_PLAYER_CONFIG": {
     "description": "A label for a form field where extra Shaka Player configuration can be set",
     "message": "Extra [PROPER_NAME:Shaka Player] configuration ([JARGON:JSON])"

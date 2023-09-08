@@ -114,6 +114,7 @@ shaka.extern.ManifestDB;
  * @typedef {{
  *   id: number,
  *   originalId: ?string,
+ *   groupId: ?string,
  *   primary: boolean,
  *   type: string,
  *   mimeType: string,
@@ -146,6 +147,9 @@ shaka.extern.ManifestDB;
  * @property {?string} originalId
  *   The original ID, if any, that appeared in the manifest.  For example, in
  *   DASH, this is the "id" attribute of the Representation element.
+ * @property {?string} groupId
+ *   The ID of the stream's parent element. In DASH, this will be a unique
+ *   ID that represents the representation's parent adaptation element
  * @property {boolean} primary
  *   Whether the stream set was primary.
  * @property {string} type

@@ -524,6 +524,40 @@ describe('AdaptationSetCriteria', () => {
         manifest.variants[2],
       ]);
     });
+
+    it('filters by audio group if present', () => {
+      const manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(1, (variant) => {
+          variant.language = 'en';
+          variant.bandwidth = 300;
+          variant.addAudio(10, (stream) => {
+            stream.groupId = '1';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.language = 'en';
+          variant.bandwidth = 400;
+          variant.addAudio(11, (stream) => {
+            stream.groupId = '2';
+          });
+        });
+        manifest.addVariant(3, (variant) => {
+          variant.language = 'en';
+          variant.bandwidth = 500;
+          variant.addAudio(12, (stream) => {
+            stream.groupId = '1';
+          });
+        });
+      });
+
+      const builder = new shaka.media.PreferenceBasedCriteria('en', '', 0, '');
+      const set = builder.create(manifest.variants);
+
+      checkSet(set, [
+        manifest.variants[0],
+        manifest.variants[2],
+      ]);
+    });
   });
 
   /**
