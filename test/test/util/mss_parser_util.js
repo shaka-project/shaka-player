@@ -45,6 +45,7 @@ shaka.test.Mss = class {
       enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
+      onManifestUpdated: () => {},
     };
     const manifest = await mssParser.start('dummy://foo', playerInterface);
     const stream = manifest.variants[0].audio;
@@ -81,6 +82,7 @@ shaka.test.Mss = class {
       enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
+      onManifestUpdated: () => {},
     };
     const p = mssParser.start('dummy://foo', playerInterface);
     await expectAsync(p).toBeRejectedWith(

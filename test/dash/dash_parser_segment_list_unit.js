@@ -350,6 +350,7 @@ describe('DashParser SegmentList', () => {
       enableLowLatencyMode: () => {},
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
+      onManifestUpdated: () => {},
     };
     const manifest = await dashParser.start('dummy://foo', playerInterface);
     const stream = manifest.variants[0].video;
