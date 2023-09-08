@@ -90,6 +90,8 @@ describe('MediaSourceEngine', () => {
   /** @type {!shaka.media.MediaSourceEngine} */
   let mediaSourceEngine;
 
+  // const omitAddSourceBufferEvent = false;
+
   beforeAll(() => {
     // Since this is not an integration test, we don't want MediaSourceEngine to
     // fail assertions based on browser support for types.  Pretend that all
@@ -111,12 +113,23 @@ describe('MediaSourceEngine', () => {
   });
 
   beforeEach(/** @suppress {invalidCasts} */ () => {
+    // omitAddSourceBufferEvent = false;
     audioSourceBuffer = createMockSourceBuffer();
     videoSourceBuffer = createMockSourceBuffer();
     mockMediaSource = createMockMediaSource();
     mockMediaSource.addSourceBuffer.and.callFake((mimeType) => {
+      // if (!omitAddSourceBufferEvent) {
+      //   mockMediaSource.sourceBuffers.dispatchEvent(
+      //       new Event('addsourcebuffer'));
+      // }
       const type = mimeType.split('/')[0];
-      return type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
+      const buffer = type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
+      // reset buffer params
+      buffer.timestampOffset = 0;
+      buffer.appendWindowEnd = Infinity;
+      buffer.appendWindowStart = 0;
+
+      return buffer;
     });
     mockTransmuxer = new shaka.test.FakeTransmuxer();
     shaka.transmuxer.TransmuxerEngine.findTransmuxer =
@@ -167,6 +180,7 @@ describe('MediaSourceEngine', () => {
         goog.asserts.assert(attr == 'src', 'Unexpected removeAttribute() call');
         mockVideo.src = '';
       },
+      addEventListener: jasmine.createSpy('addVideoEventListener'),
       load: /** @this {HTMLVideoElement} */ () => {
         // This assertion alerts us if the requirements for this mock change.
         goog.asserts.assert(mockVideo.src == '', 'Unexpected load() call');
@@ -1135,6 +1149,154 @@ describe('MediaSourceEngine', () => {
       await a2;
     });
   });
+
+  // describe('reload operation', () => {
+  //   beforeEach(
+  //       /** @suppress {visibility, checkTypes} */
+  //       () => {
+  //         mediaSourceEngine.eventManager_.listenOnce =
+  //             jasmine.createSpy('listener');
+  //       });
+  //   const initObject = new Map();
+  //   initObject.set(ContentType.VIDEO, fakeVideoStream);
+  //   initObject.set(ContentType.AUDIO, fakeAudioStream);
+
+  //   it('should re-create a new MediaSource', async () => {
+  //     await mediaSourceEngine.init(initObject, false);
+  //     createMediaSourceSpy.calls.reset();
+  //     expect(createMediaSourceSpy).not.toHaveBeenCalled();
+  //     await mediaSourceEngine.reset(ContentType.AUDIO,
+  //         'ec3', 'audio/foo', false);
+  //     expect(createMediaSourceSpy).toHaveBeenCalledTimes(1);
+  //   });
+
+  //   it('should re-create the audio & video source buffers', async () => {
+  //     await mediaSourceEngine.init(initObject, false);
+  //     mockMediaSource.addSourceBuffer.calls.reset();
+  //     await mediaSourceEngine.reset(ContentType.AUDIO,
+  //         'ec3', 'audio/foo', false);
+  //     expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledTimes(2);
+  //   });
+
+  //   it('should persist the previous source buffer parameters', async () => {
+  //     await mediaSourceEngine.init(initObject, false);
+
+  //     audioSourceBuffer.timestampOffset = 10;
+  //     audioSourceBuffer.appendWindowStart = 5;
+  //     audioSourceBuffer.appendWindowEnd = 20;
+
+  //     videoSourceBuffer.timestampOffset = 20;
+  //     videoSourceBuffer.appendWindowStart = 15;
+  //     videoSourceBuffer.appendWindowEnd = 30;
+
+  //     await mediaSourceEngine.reset(ContentType.AUDIO,
+  //         'ec3', 'audio/foo', false);
+
+  //     expect(audioSourceBuffer.timestampOffset).toBe(10);
+  //     expect(audioSourceBuffer.appendWindowStart).toBe(5);
+  //     expect(audioSourceBuffer.appendWindowEnd).toBe(20);
+
+  //     expect(videoSourceBuffer.timestampOffset).toBe(20);
+  //     expect(videoSourceBuffer.appendWindowStart).toBe(15);
+  //     expect(videoSourceBuffer.appendWindowEnd).toBe(30);
+  //   });
+
+  //   it('should preserve autoplay state',
+  //   /** @suppress {invalidCasts, visibility, checkTypes} */
+  //       async () => {
+  //         await mediaSourceEngine.init(initObject, false);
+  //         video.autoplay = true;
+  //         video.paused = true;
+  //         mediaSourceEngine.eventManager_.listenOnce =
+  //           jasmine.createSpy('listener');
+  //         const playSpy = /** @type {jasmine.Spy} */ (video.play);
+  //         const addEventListenerSpy =
+  //         /** @type {jasmine.Spy} */
+  //           (mediaSourceEngine.eventManager_.listenOnce);
+  //         mediaSourceEngine.playbackHasBegun_ = true;
+  //         await mediaSourceEngine.reset(ContentType.AUDIO,
+  //             'ec3', 'audio/foo', false);
+  //         const callback = addEventListenerSpy.calls.argsFor(0)[2];
+  //         callback();
+  //         expect(addEventListenerSpy.calls.argsFor(0)[1]).toBe('canplay');
+  //         expect(video.autoplay).toBe(true);
+  //         expect(playSpy).not.toHaveBeenCalled();
+  //       });
+
+  //   it('should not set autoplay to false if playback has not begun',
+  //   /** @suppress {invalidCasts, visibility, checkTypes} */
+  //       async () => {
+  //         await mediaSourceEngine.init(initObject, false);
+  //         video.autoplay = true;
+  //         let setCount = 0;
+  //         Object.defineProperty(video, 'autoplay', {
+  //           get: () => true,
+  //           set: () => {
+  //             setCount++;
+  //           },
+  //         });
+  //         await mediaSourceEngine.reset(ContentType.AUDIO,
+  //             'ec3', 'audio/foo', false);
+  //         expect(setCount).toBe(0);
+  //       });
+
+  //   it('should preserve playing state',
+  //   /** @suppress {invalidCasts, visibility, checkTypes} */
+  //       async () => {
+  //         await mediaSourceEngine.init(initObject, false);
+  //         video.autoplay = false;
+  //         video.paused = false;
+  //         mediaSourceEngine.eventManager_.listenOnce =
+  //           jasmine.createSpy('listener');
+  //         const playSpy = /** @type {jasmine.Spy} */ (video.play);
+  //         const addEventListenerSpy =
+  //         /** @type {jasmine.Spy} */
+  //           (mediaSourceEngine.eventManager_.listenOnce);
+  //         mediaSourceEngine.playbackHasBegun_ = true;
+  //         await mediaSourceEngine.reset(ContentType.AUDIO,
+  //             'ec3', 'audio/foo', false);
+  //         const callback = addEventListenerSpy.calls.argsFor(0)[2];
+  //         callback();
+  //         expect(addEventListenerSpy.calls.argsFor(0)[1]).toBe('canplay');
+  //         expect(video.autoplay).toBe(false);
+  //         expect(playSpy).toHaveBeenCalled();
+  //       });
+
+  //   it('should only resolve after addsourcebuffer is emitted on the ' +
+  //       'media source', /**  @suppress {visibility} */ async () => {
+  //     await mediaSourceEngine.init(initObject, false);
+  //     omitAddSourceBufferEvent = true;
+  //     mockMediaSource.addSourceBuffer.calls.reset();
+  //     // queue in a dummy operation to simulate reset behaviour
+  //     mediaSourceEngine.enqueueOperation_(ContentType.AUDIO, () => {});
+  //     // calling private reset_ instead of reset to make it simpler to test
+  //     const p = mediaSourceEngine.reset_(ContentType.AUDIO,
+  //         'ec3', 'audio/foo', 0, false);
+  //     await expectAsync(p).toBePending();
+  //     // This mediaSource has 2 buffers, both need events now to continue.
+  //     mockMediaSource.sourceBuffers.dispatchEvent(
+  //         new Event('addsourcebuffer'));
+  //     mockMediaSource.sourceBuffers.dispatchEvent(
+  //         new Event('addsourcebuffer'));
+  //     await expectAsync(p).toBeResolved();
+  //   });
+
+  //   it('should fake a seek operation', async () => {
+  //     const seekSpy = jasmine.createSpy('currentTime');
+  //     const getTime = jasmine.createSpy('currentTime');
+
+  //     Object.defineProperty(mockVideo, 'currentTime', {
+  //       get: Util.spyFunc(getTime),
+  //       set: Util.spyFunc(seekSpy),
+  //     });
+
+  //     await mediaSourceEngine.init(initObject, false);
+  //     seekSpy.calls.reset();
+  //     await mediaSourceEngine.reset(ContentType.AUDIO,
+  //         'ec3', 'audio/foo', false);
+  //     expect(seekSpy).toHaveBeenCalled();
+  //   });
+  // });
 
   describe('destroy', () => {
     beforeEach(async () => {

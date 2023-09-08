@@ -894,7 +894,7 @@ describe('StreamUtils', () => {
     const addVariant2160Vp9 = (manifest) => {
       manifest.addVariant(6, (variant) => {
         variant.bandwidth = 10850316;
-        variant.addAudio(7, (stream) => {
+        variant.addAudio(1, (stream) => {
           stream.bandwidth = 129998;
           stream.codecs = 'opus';
         });
@@ -905,6 +905,26 @@ describe('StreamUtils', () => {
         });
       });
     };
+
+    it('should allow multiple codecs for codec switching', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        addVariant1080Avc1(manifest);
+        addVariant1080Vp9(manifest);
+        addVariant2160Vp9(manifest);
+      });
+
+      manifest.variants[0].video.bandwidth = 1;
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredAudioChannelCount= */2,
+          /* preferredDecodingAttributes= */[]);
+
+      expect(manifest.variants.length).toBe(2);
+      expect(manifest.variants[0].video.codecs)
+          .not.toBe(manifest.variants[1].video.codecs);
+    });
 
     it('chooses preferred audio and video codecs', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
@@ -960,57 +980,6 @@ describe('StreamUtils', () => {
       expect(variants[0].audio.codecs).toBe('opus');
       expect(variants[1].video.codecs).toBe(vp09Codecs);
       expect(variants[1].audio.codecs).toBe('opus');
-    });
-
-    it('chooses variants with different sizes (density) by codecs', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        addVariant1080Avc1(manifest);
-        addVariant1080Vp9(manifest);
-        addVariant2160Vp9(manifest);
-      });
-
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
-          /* preferredVideoCodecs= */[],
-          /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
-          /* preferredDecodingAttributes= */[]);
-
-      expect(manifest.variants.length).toBe(1);
-      expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
-    });
-
-    it('chooses variants with same sizes (density) by codecs', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        addVariant1080Avc1(manifest);
-        addVariant1080Vp9(manifest);
-      });
-
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
-          /* preferredVideoCodecs= */[],
-          /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
-          /* preferredDecodingAttributes= */[]);
-
-      expect(manifest.variants.length).toBe(1);
-      expect(manifest.variants[0].video.codecs).toBe(vp09Codecs);
-    });
-
-    it('should not filter variants when codec switchiing is endabled', () => {
-      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        addVariant1080Avc1(manifest);
-        addVariant1080Vp9(manifest);
-        addVariant2160Vp9(manifest);
-      });
-
-      const numberOfVariants = manifest.variants.length;
-
-      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
-          /* preferredVideoCodecs= */[],
-          /* preferredAudioCodecs= */[],
-          /* preferredAudioChannelCount= */2,
-          /* preferredDecodingAttributes= */[]);
-
-      expect(manifest.variants.length).toBe(numberOfVariants);
     });
 
     it('chooses variants by decoding attributes', async () => {
