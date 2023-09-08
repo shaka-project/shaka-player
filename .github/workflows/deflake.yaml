@@ -1,16 +1,19 @@
 name: Deflake Tests
 
-# Runs when the Selenum nightly test workflow completes.  This will run with
-# full privileges, even if the other workflow doesn't.  That allows us to
-# trigger re-runs if we think the results might be flaky.
+# Runs when the Selenum lab test or PR test workflows complete.  This will run
+# with full privileges, even if the other workflow doesn't.  That allows us to
+# trigger re-runs if we think the results might be flaky.  A test run will be
+# given up to 3 runs to succeed.
 on:
   workflow_run:
-    workflows: [Selenium Lab Tests]
+    workflows:
+      - Selenium Lab Tests
+      - Build and Test PR
     types: [completed]
 
 jobs:
   deflake:
-    if: ${{ github.event.workflow_run.event == 'schedule' && github.event.workflow_run.conclusion == 'failure' }}
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
 
     steps:
