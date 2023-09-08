@@ -62,6 +62,12 @@ vars:
       excludeSwitches:
         - "disable-component-update"
 
+  # Work around https://github.com/MicrosoftEdge/EdgeWebDriver/issues/102#issuecomment-1710724173
+  # by specifying the binary path on Linux.
+  edge_linux_config: &edge_linux_config
+    ms:edgeOptions:
+      binary: /usr/bin/microsoft-edge
+
   android_chrome_config: &android_chrome_config
     goog:chromeOptions:
       args:
@@ -180,6 +186,7 @@ EdgeLinux:
   os: Linux
   extra_configs:
     - *basic_edge_config
+    - *edge_linux_config
 
 
 ### Misc ###
