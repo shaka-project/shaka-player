@@ -139,7 +139,7 @@ In other environments, for example Electron, it is appropriate.
 In those cases, before Shaka Player loads a manifest, you can register the
 existing http plugin for `file://` requests:
 ```js
-shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
+shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin.parse);
 ```
 
 <hr>
