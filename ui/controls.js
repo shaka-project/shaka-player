@@ -643,6 +643,131 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
   }
 
+  /**
+   * @return {boolean}
+   * @export
+   */
+  isPiPAllowed() {
+    if ('documentPictureInPicture' in window &&
+        this.config_.preferDocumentPictureInPicture) {
+      return true;
+    }
+    if (document.pictureInPictureEnabled) {
+      const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+      return !video.disablePictureInPicture;
+    }
+    return false;
+  }
+
+  /**
+   * @return {boolean}
+   * @export
+   */
+  isPiPEnabled() {
+    if ('documentPictureInPicture' in window &&
+        this.config_.preferDocumentPictureInPicture) {
+      return !!window.documentPictureInPicture.window;
+    } else {
+      return !!document.pictureInPictureElement;
+    }
+  }
+
+  /** @export */
+  async togglePiP() {
+    try {
+      if ('documentPictureInPicture' in window &&
+        this.config_.preferDocumentPictureInPicture) {
+        await this.toggleDocumentPictureInPicture_();
+      } else if (!document.pictureInPictureElement) {
+        // If you were fullscreen, leave fullscreen first.
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        }
+        const video = /** @type {HTMLVideoElement} */(this.localVideo_);
+        await video.requestPictureInPicture();
+      } else {
+        await document.exitPictureInPicture();
+      }
+    } catch (error) {
+      this.dispatchEvent(new shaka.util.FakeEvent(
+          'error', (new Map()).set('detail', error)));
+    }
+  }
+
+  /**
+   * The Document Picture-in-Picture API makes it possible to open an
+   * always-on-top window that can be populated with arbitrary HTML content.
+   * https://developer.chrome.com/docs/web-platform/document-picture-in-picture
+   * @private
+   */
+  async toggleDocumentPictureInPicture_() {
+    // Close Picture-in-Picture window if any.
+    if (window.documentPictureInPicture.window) {
+      window.documentPictureInPicture.window.close();
+      return;
+    }
+
+    // Open a Picture-in-Picture window.
+    const pipPlayer = this.videoContainer_;
+    const rectPipPlayer = pipPlayer.getBoundingClientRect();
+    const pipWindow = await window.documentPictureInPicture.requestWindow({
+      width: rectPipPlayer.width,
+      height: rectPipPlayer.height,
+    });
+
+    // Copy style sheets to the Picture-in-Picture window.
+    this.copyStyleSheetsToWindow_(pipWindow);
+
+    // Add placeholder for the player.
+    const parentPlayer = pipPlayer.parentNode || document.body;
+    const placeholder = this.videoContainer_.cloneNode(true);
+    placeholder.style.visibility = 'hidden';
+    placeholder.style.height = getComputedStyle(pipPlayer).height;
+    parentPlayer.appendChild(placeholder);
+
+    // Make sure player fits in the Picture-in-Picture window.
+    const styles = document.createElement('style');
+    styles.append(`[data-shaka-player-container] {
+      width: 100% !important; max-height: 100%}`);
+    pipWindow.document.head.append(styles);
+
+    // Move player to the Picture-in-Picture window.
+    pipWindow.document.body.append(pipPlayer);
+
+    // Listen for the PiP closing event to move the player back.
+    this.eventManager_.listenOnce(pipWindow, 'pagehide', () => {
+      placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
+    });
+  }
+
+  /** @private */
+  copyStyleSheetsToWindow_(win) {
+    const styleSheets = /** @type {!Iterable<*>} */(document.styleSheets);
+    const allCSS = [...styleSheets]
+        .map((sheet) => {
+          try {
+            return [...sheet.cssRules].map((rule) => rule.cssText).join('');
+          } catch (e) {
+            const link = /** @type {!HTMLLinkElement} */(
+              document.createElement('link'));
+
+            link.rel = 'stylesheet';
+            link.type = sheet.type;
+            link.media = sheet.media;
+            link.href = sheet.href;
+            win.document.head.appendChild(link);
+          }
+          return '';
+        })
+        .filter(Boolean)
+        .join('\n');
+    const style = document.createElement('style');
+
+    style.textContent = allCSS;
+    win.document.head.appendChild(style);
+  }
+
+
   /** @export */
   showAdUI() {
     shaka.ui.Utils.setDisplay(this.adPanel_, true);
