@@ -90,8 +90,6 @@ describe('MediaSourceEngine', () => {
   /** @type {!shaka.media.MediaSourceEngine} */
   let mediaSourceEngine;
 
-  // const omitAddSourceBufferEvent = false;
-
   beforeAll(() => {
     // Since this is not an integration test, we don't want MediaSourceEngine to
     // fail assertions based on browser support for types.  Pretend that all
@@ -113,15 +111,10 @@ describe('MediaSourceEngine', () => {
   });
 
   beforeEach(/** @suppress {invalidCasts} */ () => {
-    // omitAddSourceBufferEvent = false;
     audioSourceBuffer = createMockSourceBuffer();
     videoSourceBuffer = createMockSourceBuffer();
     mockMediaSource = createMockMediaSource();
     mockMediaSource.addSourceBuffer.and.callFake((mimeType) => {
-      // if (!omitAddSourceBufferEvent) {
-      //   mockMediaSource.sourceBuffers.dispatchEvent(
-      //       new Event('addsourcebuffer'));
-      // }
       const type = mimeType.split('/')[0];
       const buffer = type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
       // reset buffer params
