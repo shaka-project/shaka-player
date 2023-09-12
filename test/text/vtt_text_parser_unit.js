@@ -903,6 +903,41 @@ describe('VttTextParser', () => {
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
+  it('supports ruby html tags', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20,
+            endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: 'Test',
+                rubyTag: 'ruby',
+              },
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: '2',
+                rubyTag: 'rt',
+              },
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: '3',
+                rubyTag: 'rp',
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '<ruby>Test<rt>2</rt><rp>3</rp></ruby>',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
   it('supports only two digits in the timestamp', () => {
     verifyHelper(
         [
