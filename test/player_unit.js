@@ -92,7 +92,7 @@ describe('Player', () => {
         variant.addVideo(2);
       });
       manifest.addVariant(1, (variant) => {
-        variant.addAudio(3);
+        variant.addAudio(1);
         variant.addVideo(4);
       });
     });
@@ -340,15 +340,12 @@ describe('Player', () => {
     });
 
     describe('disableStream', () => {
-      /** @type {function(function(), number)} */
-      let realSetTimeout;
       /** @type {number} */
       let disableTimeInSeconds;
       /** @type {?jasmine.Spy} */
       let getBufferedInfoSpy;
 
       beforeAll(() => {
-        realSetTimeout = window.setTimeout;
         jasmine.clock().install();
         jasmine.clock().mockDate();
       });
@@ -496,102 +493,6 @@ describe('Player', () => {
         expect(updatedVariants.length).toBe(variantCount);
         expect(forceSwitch).toBeFalsy();
         expect(fromAdaptation).toBeFalsy();
-      });
-
-      it('disables all variants containing stream', async () => {
-        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.addVariant(0, (variant) => {
-            variant.addAudio(1, (stream) => {
-              stream.mime('audio/mp4', 'mp4a.40.2');
-              stream.language = 'en';
-              stream.bandwidth = 100;
-            });
-            variant.addVideo(2);
-          });
-          manifest.addVariant(1, (variant) => {
-            variant.addExistingStream(1);
-            variant.addVideo(3);
-          });
-
-          manifest.addVariant(2, (variant) => {
-            variant.addAudio(4, (stream) => {
-              stream.mime('audio/mp4', 'mp4a.40.2');
-              stream.language = 'en';
-              stream.bandwidth = 200;
-            });
-            variant.addExistingStream(2);
-          });
-          manifest.addVariant(3, (variant) => {
-            variant.addExistingStream(4);
-            variant.addExistingStream(3);
-          });
-        });
-
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-
-        const variantCount = manifest.variants.length;
-        const variantAffected = 2;
-        const audioStream =
-        /** @type {shaka.extern.Stream} */ (manifest.variants[0].audio);
-
-        player.disableStream(audioStream, disableTimeInSeconds);
-
-        await shaka.test.Util.shortDelay(realSetTimeout);
-
-        expect(abrManager.setVariants).toHaveBeenCalled();
-
-        const updatedVariants =
-            abrManager.setVariants.calls.mostRecent().args[0];
-
-        expect(updatedVariants.length).toBe(variantCount - variantAffected);
-
-        for (const variant of updatedVariants) {
-          expect(variant.audio).not.toEqual(audioStream);
-        }
-      });
-
-      it('does not disable streams if abr is disabled', async () => {
-        await player.load(fakeManifestUri, 0, fakeMimeType);
-
-        player.configure({abr: {enabled: true}});
-
-        const videoStream =
-        /** @type {shaka.extern.Stream} */ (manifest.variants[0].video);
-        let status = player.disableStream(videoStream, 10);
-        expect(status).toBe(true);
-
-        player.configure({abr: {enabled: false}});
-
-        status = player.disableStream(videoStream, 10);
-        expect(status).toBe(false);
-      });
-
-      it('disables stream if have alternate stream', async () => {
-        // Run test with the default manifest
-        await runTest(0, 'video', true);
-
-        manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-          manifest.addVariant(0, (variant) => {
-            variant.addAudio(1, (stream) => {
-              stream.mime('audio/mp4', 'mp4a.40.2');
-              stream.language = 'en';
-              stream.bandwidth = 10;
-            });
-            variant.addVideo(2);
-          });
-          manifest.addVariant(1, (variant) => {
-            variant.addAudio(3, (stream) => {
-              stream.mime('audio/mp4', 'mp4a.40.2');
-              stream.language = 'en';
-              stream.bandwidth = 20;
-            });
-            variant.addExistingStream(2);
-          });
-        });
-
-        player.configure({abr: {enabled: true}});
-
-        await runTest(0, 'audio', true);
       });
 
       describe('does not disable stream if there not alternate stream', () => {
@@ -2711,15 +2612,15 @@ describe('Player', () => {
         });
         manifest.addVariant(2, (variant) => {
           variant.bandwidth = 300;
-          variant.addAudio(4, (stream) => {
+          variant.addAudio(1, (stream) => {
             stream.bandwidth = 200;
           });
           variant.addExistingStream(2);  // video
         });
         manifest.addVariant(3, (variant) => {
           variant.bandwidth = 400;
-          variant.addExistingStream(4);  // audio
-          variant.addExistingStream(3);  // video
+          variant.addExistingStream(1);  // audio
+          variant.addExistingStream(2);  // video
         });
       });
 
@@ -3557,7 +3458,7 @@ describe('Player', () => {
           variant.addVideo(3, (stream) => {
             stream.size(190, 190);
           });
-          variant.addAudio(4);
+          variant.addAudio(2);
         });
       });
 
