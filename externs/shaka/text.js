@@ -48,6 +48,13 @@ shaka.extern.TextParser = class {
    * @param {boolean} sequenceMode
    */
   setSequenceMode(sequenceMode) {}
+
+  /**
+   * Notifies the manifest type.
+   *
+   * @param {string} manifestType
+   */
+  setManifestType(manifestType) {}
 };
 
 
