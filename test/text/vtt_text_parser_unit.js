@@ -661,6 +661,7 @@ describe('VttTextParser', () => {
             payload: 'Test',
             color: 'cyan',
             fontSize: '10px',
+            textCombineUpright: 'all',
             textShadow: textShadow,
           },
           {
@@ -669,6 +670,7 @@ describe('VttTextParser', () => {
             payload: 'Test2',
             color: 'cyan',
             fontSize: '10px',
+            textCombineUpright: 'all',
             textShadow: textShadow,
           },
         ],
@@ -678,6 +680,7 @@ describe('VttTextParser', () => {
         'color: cyan;\n'+
         'font-size: 10px;\n'+
         `text-shadow: ${textShadow};\n`+
+        'text-combine-upright: all;\n'+
         '}\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         'Test\n\n' +
