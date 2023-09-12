@@ -207,15 +207,30 @@ describe('VttTextParser', () => {
           {
             startTime: 40,
             endTime: 50,
-            payload: 'Test2',
+            payload: '',
             writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
+            nestedCues: [
+              {
+                startTime: 40,
+                endTime: 50,
+                payload: 'Test',
+                writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
+              },
+              {
+                startTime: 40,
+                endTime: 50,
+                payload: '2',
+                fontWeight: Cue.fontWeight.BOLD,
+                writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
+              },
+            ],
           },
         ],
         'WEBVTT\n\n' +
         '00:00:20.000 --> 00:00:40.000 vertical:rl\n' +
         'Test\n\n' +
         '00:00:40.000 --> 00:00:50.000 vertical:lr\n' +
-        'Test2',
+        'Test<b>2</b>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
