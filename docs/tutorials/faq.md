@@ -106,20 +106,6 @@ configure {@link shaka.extern.StreamingConfiguration|
 
 <hr>
 
-**Q:** Why doesn't my HLS content work?
-
-**A:** If your HLS content uses MPEG2-TS, you may need to enable transmuxing.
-The only browsers capable of playing TS natively are Edge and Chromecast.  You
-will get a `CONTENT_UNSUPPORTED_BY_BROWSER` error on other browsers due to
-their lack of TS support.
-
-You can enable transmuxing by [including mux.js][] v5.6.3+ in your application.
-If Shaka Player detects that mux.js has been loaded, we will use it to transmux
-TS content into MP4 on-the-fly, so that the content can be played by the
-browser.
-
-<hr>
-
 **Q:** Why does it take so long to switch to HD?
 
 **A:** When Shaka Player's `AbrManager` makes a decision to adapt, we don't
@@ -153,7 +139,7 @@ In other environments, for example Electron, it is appropriate.
 In those cases, before Shaka Player loads a manifest, you can register the
 existing http plugin for `file://` requests:
 ```js
-shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin);
+shaka.net.NetworkingEngine.registerScheme('file', shaka.net.HttpXHRPlugin.parse);
 ```
 
 <hr>

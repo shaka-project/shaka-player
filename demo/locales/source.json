@@ -15,6 +15,10 @@
     "description": "The header for a tab within the custom asset creation dialog.",
     "message": "Ads"
   },
+  "DEMO_ADS_SECTION_HEADER": {
+    "description": "The header for a section of configuration values.",
+    "message": "Ads"
+  },
   "DEMO_AD_SEARCH": {
     "description": "A tooltip for an optional search term.",
     "message": "Filters for assets that have advertisements."
@@ -215,6 +219,10 @@
     "description": "The second part of a message instructing users on how to add custom content.",
     "message": "Press the button below to add a custom asset."
   },
+  "DEMO_CUSTOM_PLAYHEAD_TRACKER": {
+    "description": "The name of a configuration value.",
+    "message": "Custom playhead tracker"
+  },
   "DEMO_DASH": {
     "description": "Text that describes an asset that is packaged in a DASH manifest.",
     "message": "[PROPER_NAME:DASH]"
@@ -346,6 +354,10 @@
   "DEMO_FORCE_TRANSMUX": {
     "description": "The name of a configuration value.",
     "message": "Force Transmux"
+  },
+  "DEMO_INSERT_FAKE_ENCRYPTION_IN_INIT": {
+    "description": "The name of a configuration value.",
+    "message": "Insert fake encryption in init segments when needed by the platform."
   },
   "DEMO_FRONT_INTRO_DISMISS": {
     "description": "A button allowing users to dismiss the intro message.",

@@ -94,7 +94,7 @@ describe('MSS Player', () => {
   it('MSS VoD PlayReady', async () => {
     const support = await shaka.media.DrmEngine.probeSupport();
     if (!support['com.microsoft.playready']) {
-      return;
+      pending('PlayReady is not supported by the platform.');
     }
 
     player.configure({

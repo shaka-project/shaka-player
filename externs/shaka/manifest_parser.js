@@ -109,7 +109,8 @@ shaka.extern.ManifestParser = class {
  *   isAutoLowLatencyMode: function():boolean,
  *   enableLowLatencyMode: function(),
  *   updateDuration: function(),
- *   newDrmInfo: function(shaka.extern.Stream)
+ *   newDrmInfo: function(shaka.extern.Stream),
+ *   onManifestUpdated: function()
  * }}
  *
  * @description
@@ -144,6 +145,8 @@ shaka.extern.ManifestParser = class {
  * @property {function(shaka.extern.Stream)} newDrmInfo
  *   Inform the player of new DRM info that needs to be processed for the given
  *   stream.
+ * @property {function()} onManifestUpdated
+ *   Should be called when the manifest is updated.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;

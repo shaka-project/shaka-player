@@ -191,9 +191,6 @@ module.exports = (config) => {
       //   Babel polyfill, required for async/await
       'node_modules/@babel/polyfill/dist/polyfill.js',
 
-      // muxjs module next
-      'node_modules/mux.js/dist/mux.min.js',
-
       // codem-isoboxer module next
       'node_modules/codem-isoboxer/dist/iso_boxer.min.js',
 
@@ -237,6 +234,19 @@ module.exports = (config) => {
       {pattern: 'test/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
+      {pattern: 'test/test/assets/hls-raw-aac/*', included: false},
+      {pattern: 'test/test/assets/hls-raw-ac3/*', included: false},
+      {pattern: 'test/test/assets/hls-raw-ec3/*', included: false},
+      {pattern: 'test/test/assets/hls-raw-mp3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-aac/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-ec3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-mp3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-aac-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-ac3-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-mp3-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-ec3-h264/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/**/*.js', included: false},

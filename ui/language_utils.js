@@ -193,21 +193,6 @@ shaka.ui.LanguageUtils = class {
     // Extract the base language from the locale as a fallback step.
     const language = shaka.util.LanguageUtils.getBase(locale);
 
-    // If Intl.DisplayNames is supported we prefer it, because the list of
-    // languages is up to date.
-    if (window.Intl && 'DisplayNames' in Intl) {
-      try {
-        if (Intl.DisplayNames.supportedLocalesOf([locale]).length) {
-          const languageNames =
-              new Intl.DisplayNames([locale], {type: 'language'});
-          const language = languageNames.of(locale);
-          return language.charAt(0).toUpperCase() + language.slice(1);
-        }
-      } catch (e) {
-        // Ignore errors and try the fallback
-      }
-    }
-
     // First try to resolve the full language name.
     // If that fails, try the base.
     // Finally, report "unknown".

@@ -6,6 +6,8 @@
 +../../lib/transmuxer/adts.js
 +../../lib/transmuxer/ec3.js
 +../../lib/transmuxer/ec3_transmuxer.js
++../../lib/transmuxer/h264.js
 +../../lib/transmuxer/mp3_transmuxer.js
 +../../lib/transmuxer/mpeg_audio.js
-+../../lib/transmuxer/muxjs_transmuxer.js
++../../lib/transmuxer/mpeg_ts_transmuxer.js
++../../lib/transmuxer/ts_transmuxer.js

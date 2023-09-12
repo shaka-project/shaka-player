@@ -17,21 +17,20 @@ jobs:
       - uses: google-github-actions/release-please-action@v3
         id: release
         with:
-          # This command instructs the tool to use the config and manifest
-          # files below to decide the next version and the SHA of the previous
-          # release (used to compute the changelog).  This is necessary if
-          # there are more than 250 commits between main branch releases.
-          command: manifest
-          config-file: .release-please-config.json
-          manifest-file: .release-please-manifest.json
           # Required input to specify the release type (node package).
           release-type: node
           # Make sure we create the PR against the correct branch.
           default-branch: ${{ github.ref_name }}
+          # Use a special shaka-bot access token for releases.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
       # If we didn't create a release, we may have created or updated a PR.
+      # Check out the code, then update the Player version in the PR.
       - uses: actions/checkout@v3
         if: steps.release.outputs.release_created == false
+        with:
+          # Use a special shaka-bot access token for releases.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
       - name: Custom update Player version
         if: steps.release.outputs.release_created == false
         run: |
@@ -45,9 +44,9 @@ jobs:
           sed -e "s/^\\(shaka.Player.version =\\).*/\\1 '$VERSION';/" \
               -i lib/player.js
           git add lib/player.js
-          # Emulate the actions bot.
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Set missing git config for the commit.
+          git config user.name "shaka-bot"
+          git config user.email "shaka-bot@users.noreply.github.com"
           # Update the PR.
           git commit --amend --no-edit
           git push -f
@@ -62,12 +61,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          # Check out the origin repo, and do it at main, not the PR branch.
           ref: main
+          # Use a special shaka-bot access token for releases.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
       - name: Tag the main branch
         run: |
-          # Emulate the actions bot.
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Set missing git config for the tag.
+          git config user.name "shaka-bot"
+          git config user.email "shaka-bot@users.noreply.github.com"
+          # Tag the main branch.
           VERSION=${{ needs.release.outputs.tag_name }}
           git tag -m "$VERSION-main" "$VERSION-main"
           git push origin "$VERSION-main"
@@ -87,10 +90,52 @@ jobs:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Compute NPM tags
+        run: |
+          # NPM publish always sets a tag.  If you don't provide an explicit
+          # tag, you get the "latest" tag by default, but we want "latest" to
+          # always point to the highest version number.  So we set an explicit
+          # tag on every "publish" command, then follow up with a command to
+          # set "latest" only if this release was the highest version yet.
+
+          # The explicit tag is based on the branch.  If the git tag is v4.4.1,
+          # the branch was v4.4.x, and the explicit NPM tag should be
+          # v4.4-latest.
+          GIT_TAG_NAME=${{ needs.release.outputs.tag_name }}
+          NPM_TAG=$(echo "$GIT_TAG_NAME" | cut -f 1-2 -d .)-latest
+          echo "NPM_TAG=$NPM_TAG" >> $GITHUB_ENV
+
+          # We only tag the NPM package as "latest" if this release is the
+          # highest version to date.
+          RELEASE_TAGS=$(git tag | grep ^v[0-9] | grep -Ev -- '-(master|main)')
+          LATEST_RELEASE=$(echo "$RELEASE_TAGS" | sort --version-sort | tail -1)
+
+          if [[ "$GIT_TAG_NAME" == "$LATEST_RELEASE" ]]; then
+            NPM_LATEST=true
+          else
+            NPM_LATEST=false
+          fi
+          echo NPM_LATEST=$NPM_LATEST >> $GITHUB_ENV
+
+          # Debug the decisions made here.
+          echo "Latest release: $LATEST_RELEASE"
+          echo "This release: $GIT_TAG_NAME"
+          echo "NPM tag: $NPM_TAG"
+          echo "NPM latest: $NPM_LATEST"
+
       - run: npm ci
-      - run: npm publish
+      - name: Publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+        run: |
+          # Publish with an explicit tag.
+          npm publish --tag "$NPM_TAG"
+
+          # Add the "latest" tag if needed.
+          if [[ "$NPM_LATEST" == "true" ]]; then
+            NPM_VERSION=$(npm version --json | jq -r '."shaka-player"')
+            npm dist-tag add "shaka-player@$NPM_VERSION" latest
+          fi
 
       - run: npm pack
       - uses: svenstaro/upload-release-action@483c1e56f95e88835747b1c7c60581215016cbf2
@@ -131,10 +176,11 @@ jobs:
           TAG_NAME=${{ needs.release.outputs.tag_name }}
 
           if [[ "$TAG_NAME" == "$LATEST_RELEASE" ]]; then
-            echo APPSPOT_PROMOTE=true >> $GITHUB_ENV
+            APPSPOT_PROMOTE=true
           else
-            echo APPSPOT_PROMOTE=false >> $GITHUB_ENV
+            APPSPOT_PROMOTE=false
           fi
+          APPSPOT_PROMOTE=$APPSPOT_PROMOTE >> $GITHUB_ENV
 
           # Debug the decisions made here.
           echo "Subdomain: $APPSPOT_SUBDOMAIN"
@@ -162,6 +208,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          # Use a special shaka-bot access token for releases.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
       - name: Create release branch
         run: |

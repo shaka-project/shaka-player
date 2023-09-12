@@ -8,22 +8,37 @@ CHANGELOG.md.
 The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
 
-Priority features up next:
- - HLS improvements
-   https://github.com/shaka-project/shaka-player/projects/6
-
 Candidate features for future release cycles:
  - Preload API
    https://github.com/shaka-project/shaka-player/issues/880
  - Official TypeScript defs, generated from source
    https://github.com/shaka-project/shaka-player/issues/1030
- - Codec-switching
-   https://github.com/shaka-project/shaka-player/issues/1528
  - Background fetch for offline storage
    https://github.com/shaka-project/shaka-player/issues/879
  - Smaller, more modular binary
 
+v4.5 - 2023 Q4 or 2024 Q1
+ - Built-in transmuxer support for muxed content streams (audio+video)
+ - Built-in transmuxer support for H265 streams
+ - Remove optional mux.js dependency
+ - Codec switching
+   https://github.com/shaka-project/shaka-player/issues/1528
+
 =====
+
+v4.4 - 2023 Q3
+ - Built-in transmuxer for common cases, no mux.js required:
+   - Raw AAC, AC3, or EC3 to MP4 container
+   - AAC, AC3, EC3, MP3, or H264 in TS to MP4 container
+   - MP3-in-TS to raw MP3
+ - Ads API improvements
+ - CEA parser for TS
+ - HLS support for non-sequence mode (as we had in v3)
+ - Partial support for large timestamps
+ - UI support for thumbnails on seek
+ - Microsoft SmoothStreaming support
+ - Segment prefetch
+ - Low latency improvements
 
 v4.3 - 2022 Q4
  - Support ID3 tags in mp4

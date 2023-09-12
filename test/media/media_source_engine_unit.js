@@ -56,9 +56,9 @@ describe('MediaSourceEngine', () => {
   const buffer2 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (2));
   const buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
 
-  const fakeVideoStream = {mimeType: 'video/foo', drmInfos: []};
-  const fakeAudioStream = {mimeType: 'audio/foo', drmInfos: []};
-  const fakeTextStream = {mimeType: 'text/foo', drmInfos: []};
+  const fakeVideoStream = {mimeType: 'video/mp4', drmInfos: [{}]};
+  const fakeAudioStream = {mimeType: 'audio/mp4', drmInfos: []};
+  const fakeTextStream = {mimeType: 'text/mp4', drmInfos: []};
   const fakeTransportStream = {mimeType: 'tsMimetype', drmInfos: []};
 
   /** @type {shaka.extern.Stream} */
@@ -82,6 +82,10 @@ describe('MediaSourceEngine', () => {
 
   /** @type {!jasmine.Spy} */
   let createMediaSourceSpy;
+  /** @type {!jasmine.Spy} */
+  let requiresEncryptionInfoInAllInitSegmentsSpy;
+  /** @type {!jasmine.Spy} */
+  let fakeEncryptionSpy;
 
   /** @type {!shaka.media.MediaSourceEngine} */
   let mediaSourceEngine;
@@ -138,6 +142,12 @@ describe('MediaSourceEngine', () => {
     // eslint-disable-next-line no-restricted-syntax
     shaka.media.MediaSourceEngine.prototype.createMediaSource =
         Util.spyFunc(createMediaSourceSpy);
+
+    requiresEncryptionInfoInAllInitSegmentsSpy = spyOn(shaka.util.Platform,
+        'requiresEncryptionInfoInAllInitSegments').and.returnValue(false);
+
+    fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')
+        .and.callFake((data) => data + 100);
 
     // MediaSourceEngine uses video to:
     //  - set src attribute
@@ -269,8 +279,8 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       await mediaSourceEngine.init(initObject, false);
-      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('audio/foo');
-      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('video/foo');
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('audio/mp4');
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('video/mp4');
       expect(shaka.text.TextEngine).not.toHaveBeenCalled();
     });
 
@@ -394,6 +404,42 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       initObject.set(ContentType.TEXT, fakeTextStream);
       await mediaSourceEngine.init(initObject, false);
+    });
+
+    it('should apply fake encryption by default', async () => {
+      requiresEncryptionInfoInAllInitSegmentsSpy.and.returnValue(true);
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ false);
+
+      expect(fakeEncryptionSpy).toHaveBeenCalled();
+
+      expect(videoSourceBuffer.appendBuffer)
+          .toHaveBeenCalledWith((buffer + 100));
+      videoSourceBuffer.updateend();
+
+      await p;
+    });
+
+    it('should not apply fake encryption when config is off', async () => {
+      requiresEncryptionInfoInAllInitSegmentsSpy.and.returnValue(true);
+
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.insertFakeEncryptionInInit = false;
+
+      mediaSourceEngine.configure(config);
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ false);
+
+      expect(fakeEncryptionSpy).not.toHaveBeenCalled();
+
+      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      videoSourceBuffer.updateend();
+
+      await p;
     });
 
     it('appends the given data', async () => {

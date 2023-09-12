@@ -1,0 +1,29 @@
+name: Talk to Shaka Bot (PRs)
+
+# Runs when comments are created or edited.  Jobs below will be filtered to
+# only run on PRs, not regular issues.
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  handle_command:
+    # Only runs on PRs that contain '@shaka-bot' comments, but not comments
+    # made by shaka-bot itself, who will sometimes use its own name.
+    # Note that contains() is not case sensitive.
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '@shaka-bot') && github.event.comment.user.login != 'shaka-bot'
+    runs-on: [ubuntu-latest]
+    env:
+      # This token must have "repo" scope, "org:read" scope, and write access.
+      GH_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN }}
+      THIS_REPO: ${{ github.repository }}
+      COMMENTER: ${{ github.event.comment.user.login }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+      COMMENT_BODY: ${{ github.event.comment.body }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Handle command
+        shell: bash
+        run: .github/workflows/shaka-bot-commands/main.sh
