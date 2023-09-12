@@ -1866,9 +1866,8 @@ describe('TtmlTextParser', () => {
             endTime: 60,
             payload: '',
             fontSize: '15px',
-            // Styles from regionStyle should apply only to the nested cue.
-            backgroundColor: '',
-            color: '',
+            backgroundColor: 'transparent',
+            color: 'blue',
             displayAlign: Cue.displayAlign.CENTER,
             textAlign: Cue.textAlign.CENTER,
 
@@ -1970,7 +1969,7 @@ describe('TtmlTextParser', () => {
             startTime: 0,
             endTime: 60,
             payload: '',
-            fontSize: '',
+            fontSize: '16px',
             nestedCues: [
               {
                 startTime: 0,
