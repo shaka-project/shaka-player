@@ -277,7 +277,7 @@ module.exports = (config) => {
       // stable.
       clientDisplayNone: true,
       // Only capture the client's logs if the settings want logging.
-      captureConsole: true, // !!settings.logging && settings.logging != 'none',
+      captureConsole: !!settings.logging && settings.logging != 'none',
       // |args| must be an array; pass a key-value map as the sole client
       // argument.
       args: [{

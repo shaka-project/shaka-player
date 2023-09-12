@@ -43,7 +43,6 @@
   "DEMO_CLEAR_BUFFER_SWITCH": "Clear video buffer on abr rendition switch",
   "DEMO_CMCD_SECTION_HEADER": "CMCD",
   "DEMO_CODEC_SWITCHING_STRATEGY_HEADER": "Codec Switching Strategy",
-  "DEMO_CODEC_SWITCHING_STRATEGY_DISABLED": "disabled",
   "DEMO_CODEC_SWITCHING_STRATEGY_RELOAD": "reload",
   "DEMO_CODEC_SWITCHING_STRATEGY_SMOOTH": "smooth",
   "DEMO_COMPILED_DEBUG": "Compiled (Debug)",

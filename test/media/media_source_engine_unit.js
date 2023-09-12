@@ -1223,7 +1223,8 @@ describe('MediaSourceEngine', () => {
             /** @type {jasmine.Spy} */
                 (mediaSourceEngine.initSourceBuffer_);
             addEventListenerSpy.and.callFake((o, e, c) => {
-              c();
+              c(); // audio
+              c(); // video
             });
             await mediaSourceEngine.reset_(initObject);
             const callback = addListenOnceSpy.calls.argsFor(0)[2];
@@ -1240,17 +1241,31 @@ describe('MediaSourceEngine', () => {
     it('should not set autoplay to false if playback has not begun',
     /** @suppress {invalidCasts, visibility, checkTypes} */
         async () => {
-          await mediaSourceEngine.init(initObject, false);
-          video.autoplay = true;
-          let setCount = 0;
-          Object.defineProperty(video, 'autoplay', {
-            get: () => true,
-            set: () => {
-              setCount++;
-            },
-          });
-          await mediaSourceEngine.reset_(initObject);
-          expect(setCount).toBe(0);
+          const originalInitSourceBuffer = mediaSourceEngine.initSourceBuffer_;
+          try {
+            await mediaSourceEngine.init(initObject, false);
+            video.autoplay = true;
+            let setCount = 0;
+            const addEventListenerSpy =
+            /** @type {jasmine.Spy} */
+              (mediaSourceEngine.eventManager_.listen);
+            addEventListenerSpy.and.callFake((o, e, c) => {
+              c(); // audio
+              c(); // video
+            });
+            mediaSourceEngine.initSourceBuffer_ =
+            jasmine.createSpy('initSourceBuffer');
+            Object.defineProperty(video, 'autoplay', {
+              get: () => true,
+              set: () => {
+                setCount++;
+              },
+            });
+            await mediaSourceEngine.reset_(initObject);
+            expect(setCount).toBe(0);
+          } finally {
+            mediaSourceEngine.initSourceBuffer_ = originalInitSourceBuffer;
+          }
         });
 
     it('should preserve playing state',
@@ -1275,7 +1290,8 @@ describe('MediaSourceEngine', () => {
             /** @type {jasmine.Spy} */
                 (mediaSourceEngine.initSourceBuffer_);
             addEventListenerSpy.and.callFake((o, e, c) => {
-              c();
+              c(); // audio
+              c(); // video
             });
             await mediaSourceEngine.reset_(initObject);
             const callback = addListenOnceSpy.calls.argsFor(0)[2];

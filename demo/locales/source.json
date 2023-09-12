@@ -175,10 +175,6 @@
     "description": "The header for a configuration property.",
     "message": "Codec Switching Strategy"
   },
-  "DEMO_CODEC_SWITCHING_STRATEGY_DISABLED": {
-    "description": "The name of a configuration value.",
-    "message": "Disabled"
-  },
   "DEMO_CODEC_SWITCHING_STRATEGY_RELOAD": {
     "description": "The name of a configuration value.",
     "message": "Reload"
