@@ -213,7 +213,6 @@ filterDescribe('WebVTT layout', shaka.test.TextLayoutTests.supported, () => {
       await helper.checkScreenshot('line-negative-2');
     });
 
-    // FIXME: UI version is wrong: not positioned by line
     it('line 0', async () => {
       parseAndDisplay([
         'WEBVTT\n',
