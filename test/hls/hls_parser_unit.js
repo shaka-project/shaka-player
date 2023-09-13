@@ -3182,9 +3182,9 @@ describe('HlsParser', () => {
         'Null segmentIndex!');
 
     const firstMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(0);
-    expect(firstMp4Segment.hlsAes128Key).toBeDefined();
+    expect(firstMp4Segment.aes128Key).toBeDefined();
     const secondMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(1);
-    expect(secondMp4Segment.hlsAes128Key).toBeNull();
+    expect(secondMp4Segment.aes128Key).toBeNull();
 
     const tsAesEncryptionVideo = actual.variants[2].video;
     await tsAesEncryptionVideo.createSegmentIndex();
@@ -3192,9 +3192,9 @@ describe('HlsParser', () => {
         'Null segmentIndex!');
 
     const firstTsSegment = tsAesEncryptionVideo.segmentIndex.get(0);
-    expect(firstTsSegment.hlsAes128Key).toBeDefined();
+    expect(firstTsSegment.aes128Key).toBeDefined();
     const secondTsSegment = tsAesEncryptionVideo.segmentIndex.get(1);
-    expect(secondTsSegment.hlsAes128Key).toBeNull();
+    expect(secondTsSegment.aes128Key).toBeNull();
   });
 
   it('fails on AES-128 if WebCrypto APIs are not available', async () => {

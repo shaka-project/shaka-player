@@ -223,7 +223,7 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
 
       index.fit(/* windowStart= */ 0, /* windowEnd= */ 10);
       expect(
-          index.references[index.references.length - 1].hlsAes128Key,
+          index.references[index.references.length - 1].aes128Key,
       ).toEqual({method: 'AES-128', firstMediaSequenceNumber: 0});
     });
   });
@@ -1054,11 +1054,11 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
    * @param {number} startTime
    * @param {number} endTime
    * @param {!Array.<!shaka.media.SegmentReference>=} partialReferences
-   * @param {?shaka.extern.HlsAes128Key=} hlsAes128Key
+   * @param {?shaka.extern.aes128Key=} aes128Key
    * @return {shaka.media.SegmentReference}
    */
   function makeReference(uri, startTime, endTime, partialReferences = [],
-      hlsAes128Key = null) {
+      aes128Key = null) {
     return new shaka.media.SegmentReference(
         startTime,
         endTime,
@@ -1074,6 +1074,6 @@ describe('SegmentIndex', /** @suppress {accessControls} */ () => {
         /* tileDuration= */ undefined,
         /* syncTime= */ undefined,
         /* status= */ undefined,
-        /* hlsAes128Key= */ hlsAes128Key);
+        /* aes128Key= */ aes128Key);
   }
 });
