@@ -1144,7 +1144,7 @@ describe('MediaSourceEngine', () => {
     });
   });
 
-  describe('reload operation', () => {
+  describe('reload codec switching', () => {
     beforeEach(
         /** @suppress {visibility, checkTypes} */
         () => {

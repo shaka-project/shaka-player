@@ -906,6 +906,90 @@ describe('StreamUtils', () => {
       });
     };
 
+    it('should filter variants by the best available bandwidth' +
+        ' for video resolution', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.bandwidth = 4058558;
+          variant.addVideo(1, (stream) => {
+            stream.bandwidth = 300000;
+            stream.size(10, 10);
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.bandwidth = 4781002;
+          variant.addVideo(3, (stream) => {
+            stream.bandwidth = 400000;
+            stream.size(10, 10);
+          });
+        });
+        manifest.addVariant(4, (variant) => {
+          variant.addVideo(5, (stream) => {
+            stream.bandwidth = 500000;
+            stream.size(20, 20);
+          });
+        });
+        manifest.addVariant(6, (variant) => {
+          variant.addVideo(7, (stream) => {
+            stream.bandwidth = 600000;
+            stream.size(20, 20);
+          });
+        });
+      });
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+          /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredAudioChannelCount= */2,
+          /* preferredDecodingAttributes= */[]);
+
+      expect(manifest.variants.length).toBe(2);
+      expect(manifest.variants.every((v) => [300000, 500000].includes(
+          v.video.bandwidth))).toBeTruthy();
+    });
+
+    it('should filter variants by the best available bandwidth' +
+    ' for audio language', () => {
+      manifest = shaka.test.ManifestGenerator.generate((manifest) => {
+        manifest.addVariant(0, (variant) => {
+          variant.bandwidth = 4058558;
+          variant.addAudio(1, (stream) => {
+            stream.bandwidth = 100000;
+            stream.language = 'en';
+          });
+        });
+        manifest.addVariant(2, (variant) => {
+          variant.bandwidth = 4781002;
+          variant.addAudio(3, (stream) => {
+            stream.bandwidth = 200000;
+            stream.language = 'en';
+          });
+        });
+        manifest.addVariant(4, (variant) => {
+          variant.addAudio(5, (stream) => {
+            stream.bandwidth = 100000;
+            stream.language = 'es';
+          });
+        });
+        manifest.addVariant(6, (variant) => {
+          variant.addAudio(7, (stream) => {
+            stream.bandwidth = 500000;
+            stream.language = 'es';
+          });
+        });
+      });
+
+      shaka.util.StreamUtils.chooseCodecsAndFilterManifest(manifest,
+      /* preferredVideoCodecs= */[],
+          /* preferredAudioCodecs= */[],
+          /* preferredAudioChannelCount= */2,
+          /* preferredDecodingAttributes= */[]);
+
+      expect(manifest.variants.length).toBe(2);
+      expect(manifest.variants.every((v) => v.audio.bandwidth == 100000))
+          .toBeTruthy();
+    });
+
     it('should allow multiple codecs for codec switching', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         addVariant1080Avc1(manifest);
