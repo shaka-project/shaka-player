@@ -33,6 +33,7 @@ shaka.test.OfflineUtils = class {
     return {
       id,
       originalId: id.toString(),
+      groupId: null,
       primary: false,
       presentationTimeOffset: 0,
       type,

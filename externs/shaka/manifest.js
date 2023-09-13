@@ -355,6 +355,7 @@ shaka.extern.FetchCryptoKeysFunction;
  * @typedef {{
  *   id: number,
  *   originalId: ?string,
+ *   groupId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
  *   closeSegmentIndex: (function()|undefined),
  *   segmentIndex: shaka.media.SegmentIndex,
@@ -403,6 +404,10 @@ shaka.extern.FetchCryptoKeysFunction;
  *   The original ID, if any, that appeared in the manifest.  For example, in
  *   DASH, this is the "id" attribute of the Representation element.  In HLS,
  *   this is the "NAME" attribute.
+ * @property {?string} groupId
+ *   <i>Optional.</i> <br>
+ *   The ID of the stream's parent element. In DASH, this will be a unique
+ *   ID that represents the representation's parent adaptation element
  * @property {shaka.extern.CreateSegmentIndexFunction} createSegmentIndex
  *   <i>Required.</i> <br>
  *   Creates the Stream's segmentIndex (asynchronously).

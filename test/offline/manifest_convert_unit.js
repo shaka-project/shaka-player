@@ -298,6 +298,7 @@ describe('ManifestConverter', () => {
     const streamDB = {
       id,
       originalId: id.toString(),
+      groupId: null,
       primary: false,
       type,
       mimeType: '',
@@ -355,6 +356,7 @@ describe('ManifestConverter', () => {
     return {
       id,
       originalId: id.toString(),
+      groupId: null,
       primary: false,
       type: ContentType.VIDEO,
       mimeType: 'video/mp4',
@@ -407,6 +409,7 @@ describe('ManifestConverter', () => {
     return {
       id,
       originalId: id.toString(),
+      groupId: null,
       primary: false,
       type: ContentType.AUDIO,
       mimeType: 'audio/mp4',
@@ -458,6 +461,7 @@ describe('ManifestConverter', () => {
     return {
       id,
       originalId: id.toString(),
+      groupId: null,
       primary: false,
       type: ContentType.TEXT,
       mimeType: 'text/vtt',
@@ -516,6 +520,7 @@ describe('ManifestConverter', () => {
     const expectedStream = {
       id: jasmine.any(Number),
       originalId: jasmine.any(String),
+      groupId: streamDb.groupId,
       createSegmentIndex: jasmine.any(Function),
       segmentIndex: jasmine.any(shaka.media.SegmentIndex),
       mimeType: streamDb.mimeType,

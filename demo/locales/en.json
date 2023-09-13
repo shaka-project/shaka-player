@@ -82,6 +82,7 @@
   "DEMO_DURATION_BACKOFF": "Duration Backoff",
   "DEMO_EDIT_CUSTOM": "Edit",
   "DEMO_ENABLED": "Enabled",
+  "DEMO_ENABLE_AUDIO_GROUPS": "Enable Audio Groups",
   "DEMO_EXTRA_SHAKA_PLAYER_CONFIG": "Extra Shaka Player configuration (JSON)",
   "DEMO_EXTRA_TAB": "Extra Config",
   "DEMO_FAIRPLAY": "Fairplay DRM",
