@@ -43,7 +43,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     this.remoteIcon_ = shaka.util.Dom.createHTMLElement('i');
     this.remoteIcon_.classList.add('material-icons-round');
     let icon = shaka.ui.Enums.MaterialDesignIcons.CAST;
-    if (shaka.util.Platform.safariVersion() >= 13) {
+    const safariVersion = shaka.util.Platform.safariVersion();
+    if (safariVersion && safariVersion >= 13) {
       icon = shaka.ui.Enums.MaterialDesignIcons.AIRPLAY;
     }
     this.remoteIcon_.textContent = icon;
@@ -104,15 +105,29 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     }
   }
 
+  /** @override */
+  release() {
+    if (this.video.remote && this.callbackId_ != -1) {
+      this.video.remote.cancelWatchAvailability(this.callbackId_);
+    }
+
+    super.release();
+  }
+
   /**
    * @private
    */
   async updateRemoteState_() {
     if (this.video.remote.state == 'disconnected') {
       const handleAvailabilityChange = (availability) => {
-        const loadMode = this.player.getLoadMode();
-        const srcMode = loadMode == shaka.Player.LoadMode.SRC_EQUALS;
-        shaka.ui.Utils.setDisplay(this.remoteButton_, srcMode && availability);
+        if (this.player) {
+          const loadMode = this.player.getLoadMode();
+          const srcMode = loadMode == shaka.Player.LoadMode.SRC_EQUALS;
+          shaka.ui.Utils.setDisplay(
+              this.remoteButton_, srcMode && availability);
+        } else {
+          shaka.ui.Utils.setDisplay(this.remoteButton_, false);
+        }
       };
       try {
         const id = await this.video.remote.watchAvailability(
@@ -135,7 +150,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
     let text = this.localization.resolve(LocIds.CAST);
-    if (shaka.util.Platform.safariVersion() >= 13) {
+    const safariVersion = shaka.util.Platform.safariVersion();
+    if (safariVersion && safariVersion >= 13) {
       text = this.localization.resolve(LocIds.AIRPLAY);
     }
     this.remoteButton_.ariaLabel = text;
