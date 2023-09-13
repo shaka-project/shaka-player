@@ -43,7 +43,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
     this.remoteIcon_ = shaka.util.Dom.createHTMLElement('i');
     this.remoteIcon_.classList.add('material-icons-round');
     let icon = shaka.ui.Enums.MaterialDesignIcons.CAST;
-    if (shaka.util.Platform.safariVersion()) {
+    if (shaka.util.Platform.safariVersion() >= 13) {
       icon = shaka.ui.Enums.MaterialDesignIcons.AIRPLAY;
     }
     this.remoteIcon_.textContent = icon;
@@ -68,6 +68,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
 
     // Setup strings in the correct language
     this.updateLocalizedStrings_();
+
+    shaka.ui.Utils.setDisplay(this.remoteButton_, false);
 
     if (!this.video.remote || this.video.disableRemotePlayback) {
       this.remoteButton_.classList.add('shaka-hidden');
@@ -97,6 +99,8 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
       this.eventManager.listen(this.video.remote, 'disconnect', () => {
         this.updateRemoteState_();
       });
+
+      this.updateRemoteState_();
     }
   }
 
@@ -131,7 +135,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
   updateLocalizedStrings_() {
     const LocIds = shaka.ui.Locales.Ids;
     let text = this.localization.resolve(LocIds.CAST);
-    if (shaka.util.Platform.safariVersion()) {
+    if (shaka.util.Platform.safariVersion() >= 13) {
       text = this.localization.resolve(LocIds.AIRPLAY);
     }
     this.remoteButton_.ariaLabel = text;
