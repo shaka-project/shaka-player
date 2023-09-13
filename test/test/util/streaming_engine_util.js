@@ -394,6 +394,7 @@ shaka.test.StreamingEngineUtil = class {
     return {
       id: id,
       originalId: id.toString(),
+      groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
       mimeType: 'audio/mp4',
@@ -433,6 +434,7 @@ shaka.test.StreamingEngineUtil = class {
     return {
       id: id,
       originalId: id.toString(),
+      groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
       mimeType: mimeType,
@@ -473,6 +475,7 @@ shaka.test.StreamingEngineUtil = class {
     return {
       id: id,
       originalId: id.toString(),
+      groupId: null,
       createSegmentIndex: Util.spyFunc(jasmine.createSpy('createSegmentIndex')),
       segmentIndex: null,
       mimeType: 'text/vtt',

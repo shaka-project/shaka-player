@@ -499,6 +499,8 @@ shaka.test.ManifestGenerator.Stream = class {
 
       /** @type {?string} */
       this.originalId = null;
+      /** @type {?string} */
+      this.groupId = null;
       /** @type {shaka.extern.CreateSegmentIndexFunction} */
       this.createSegmentIndex = shaka.test.Util.spyFunc(create);
       /** @type {shaka.media.SegmentIndex} */
