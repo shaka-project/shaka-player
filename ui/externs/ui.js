@@ -87,8 +87,7 @@ shaka.extern.UIVolumeBarColors;
  *   enableTooltips: boolean,
  *   keyboardSeekDistance: number,
  *   keyboardLargeSeekDistance: number,
- *   fullScreenElement: HTMLElement,
- *   preferDocumentPictureInPicture: boolean
+ *   fullScreenElement: HTMLElement
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -194,10 +193,6 @@ shaka.extern.UIVolumeBarColors;
  * @property {HTMLElement} fullScreenElement
  *   DOM element on which fullscreen will be done.
  *   Defaults to Shaka Player Container.
- * @property {boolean} preferDocumentPictureInPicture
- *   Indicates whether the Document Picture in Picture API is preferred or the
- *   Video Element Picture in Picture API is preferred.
- *   Defaults to true.
  * @exportDoc
  */
 shaka.extern.UIConfiguration;
