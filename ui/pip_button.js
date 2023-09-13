@@ -106,10 +106,6 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
       this.onTracksChanged_();
     });
 
-    this.eventManager.listen(this.player, 'trackschanged', () => {
-      this.onTracksChanged_();
-    });
-
     if ('documentPictureInPicture' in window) {
       this.eventManager.listen(window.documentPictureInPicture, 'enter',
           (e) => {
