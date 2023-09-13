@@ -1147,6 +1147,31 @@ describe('TtmlTextParser', () => {
         {startTime: 62.05, endTime: 3723.2});
   });
 
+  it('supports textCombine setting', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            textCombineUpright: 'all',
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" ' +
+        'tts:writingMode="tb" ' +
+        'tts:textCombine="all"/>' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 60, segmentEnd: 3730, vttOffset: 0},
+        {startTime: 62.05, endTime: 3723.2, region: {id: 'subtitleArea'}},
+        {startTime: 62.05, endTime: 3723.2});
+  });
+
   it('disregards empty divs and ps', () => {
     verifyHelper(
         [
