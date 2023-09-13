@@ -232,3 +232,11 @@ player.getNetworkingEngine()
 player.configure('drm.initDataTransform',
                  FairPlayUtils.expressplayInitDataTransform);
 ```
+
+#### Nagra (legacy Apple Media Keys)
+
+For integration with Nagra the following can be used:
+
+```js
+shaka.polyfill.PatchedMediaKeysApple.install();
+```
