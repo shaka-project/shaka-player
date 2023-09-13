@@ -1,5 +1,18 @@
 # Changelog
 
+## [4.3.12](https://github.com/shaka-project/shaka-player/compare/v4.3.11...v4.3.12) (2023-09-13)
+
+
+### Bug Fixes
+
+* com.apple.fps should work with the default initDataTransform when using legacy Apple Media Keys ([#5603](https://github.com/shaka-project/shaka-player/issues/5603)) ([8017636](https://github.com/shaka-project/shaka-player/commit/8017636821c030822cf426bb8d494246c372cb93))
+* Compute correctly the positionAlign in UITextDisplayer ([#5630](https://github.com/shaka-project/shaka-player/issues/5630)) ([154131a](https://github.com/shaka-project/shaka-player/commit/154131a81c57d8866499676c7c68683f807dfac5))
+* **Demo:** Allow com.apple.fps.1_0 in the custom DRM System field ([#5600](https://github.com/shaka-project/shaka-player/issues/5600)) ([4853af8](https://github.com/shaka-project/shaka-player/commit/4853af8f39a92a57c3e2f5f899a01e76e130c4df))
+* fix preferred track selection on Safari ([#5601](https://github.com/shaka-project/shaka-player/issues/5601)) ([a85174a](https://github.com/shaka-project/shaka-player/commit/a85174a667ee20451742e1acd8d9e89262a4c51e))
+* **TTML:** Fix wrong writing-mode in nested cues ([#5646](https://github.com/shaka-project/shaka-player/issues/5646)) ([e125e53](https://github.com/shaka-project/shaka-player/commit/e125e539cda726cd9c2674211246673008d3fda0))
+* **WebVTT:** Fix support for line:0 vertical alignment ([#5632](https://github.com/shaka-project/shaka-player/issues/5632)) ([5074de7](https://github.com/shaka-project/shaka-player/commit/5074de721f2669c70054a970526cffea295567c5))
+* **WebVTT:** Fix wrong writing-mode in nested cues ([#5641](https://github.com/shaka-project/shaka-player/issues/5641)) ([ba9a852](https://github.com/shaka-project/shaka-player/commit/ba9a852fc68adf0081e5c9d921bd374404113e34))
+
 ## [4.3.11](https://github.com/shaka-project/shaka-player/compare/v4.3.10...v4.3.11) (2023-09-02)
 
 
