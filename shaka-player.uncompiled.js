@@ -99,6 +99,7 @@ goog.require('shaka.ui.Overlay');
 goog.require('shaka.ui.PipButton');
 goog.require('shaka.ui.PlaybackRateSelection');
 goog.require('shaka.ui.PresentationTimeTracker');
+goog.require('shaka.ui.RemoteButton');
 goog.require('shaka.ui.ResolutionSelection');
 goog.require('shaka.ui.RewindButton');
 goog.require('shaka.ui.SkipAdButton');
