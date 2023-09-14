@@ -130,7 +130,7 @@ shaka.ui.RemoteButton = class extends shaka.ui.Element {
         this.controls.isCastAllowed()) {
       shaka.ui.Utils.setDisplay(this.remoteButton_, false);
       if (this.callbackId_ != -1) {
-        await this.video.remote.cancelWatchAvailability(this.callbackId_);
+        this.video.remote.cancelWatchAvailability(this.callbackId_);
         this.callbackId_ = -1;
       }
     } else if (this.video.remote.state == 'disconnected') {
