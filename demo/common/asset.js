@@ -152,7 +152,7 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   addKeySystem(keySystem) {
-    if (this.isClear()) {
+    if (this.isClear() || this.isAes128()) {
       // Once an asset has an actual key system, it's no longer a CLEAR asset.
       this.drm = [];
     }
@@ -165,6 +165,11 @@ const ShakaDemoAssetInfo = class {
   /** @return {boolean} */
   isClear() {
     return this.drm.length == 1 && this.drm[0] == shakaAssets.KeySystem.CLEAR;
+  }
+
+  /** @return {boolean} */
+  isAes128() {
+    return this.drm.length == 1 && this.drm[0] == shakaAssets.KeySystem.AES128;
   }
 
   /**
