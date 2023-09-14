@@ -184,6 +184,7 @@ describe('Player', () => {
   describe('destroy', () => {
     it('cleans up all dependencies', async () => {
       goog.asserts.assert(manifest, 'Manifest should be non-null');
+      await player.load(fakeManifestUri, 0, fakeMimeType);
       const segmentIndexes = [];
       for (const variant of manifest.variants) {
         if (variant.audio) {
@@ -378,15 +379,21 @@ describe('Player', () => {
               stream.mime('audio/mp4', 'mp4a.40.2');
               stream.language = 'en';
             });
-            variant.addVideo(2);
+            variant.addVideo(2, (stream) => {
+              stream.size(10, 10);
+            });
           });
           manifest.addVariant(1, (variant) => {
             variant.addExistingStream(1);
-            variant.addVideo(3);
+            variant.addVideo(3, (stream) => {
+              stream.size(20, 20);
+            });
           });
           manifest.addVariant(2, (variant) => {
             variant.addExistingStream(1);
-            variant.addVideo(4);
+            variant.addVideo(4, (stream) => {
+              stream.size(30, 30);
+            });
           });
         });
       }
@@ -2929,11 +2936,15 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.bandwidth = 500;
-          variant.addVideo(1);
+          variant.addVideo(1, (stream) => {
+            stream.size(10, 10);
+          });
         });
         manifest.addVariant(1, (variant) => {
           variant.bandwidth = 100;
-          variant.addVideo(2);
+          variant.addVideo(2, (stream) => {
+            stream.size(30, 30);
+          });
         });
       });
 
@@ -2968,11 +2979,15 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(1, (variant) => {
           variant.bandwidth = 500;
-          variant.addVideo(10);
+          variant.addVideo(10, (stream) => {
+            stream.size(10, 10);
+          });
         });
         manifest.addVariant(2, (variant) => {
           variant.bandwidth = 100;
-          variant.addVideo(20);
+          variant.addVideo(20, (stream) => {
+            stream.size(30, 30);
+          });
         });
       });
 
@@ -3002,10 +3017,13 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(1, (variant) => {
-          variant.addVideo(2);
+          variant.addVideo(2, (stream) => {
+            stream.size(20, 20);
+          });
         });
       });
 
@@ -3034,10 +3052,13 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(1, (variant) => {
-          variant.addVideo(2);
+          variant.addVideo(2, (stream) => {
+            stream.size(20, 20);
+          });
         });
       });
 
@@ -3133,10 +3154,13 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(1, (variant) => {
-          variant.addVideo(2);
+          variant.addVideo(2, (stream) => {
+            stream.size(20, 20);
+          });
         });
       });
 
@@ -3155,10 +3179,13 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(1, (variant) => {
-          variant.addVideo(2);
+          variant.addVideo(2, (stream) => {
+            stream.size(20, 20);
+          });
         });
       });
 
@@ -3177,10 +3204,13 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(2, (variant) => {
-          variant.addVideo(3);
+          variant.addVideo(3, (stream) => {
+            stream.size(20, 20);
+          });
         });
       });
 
@@ -3200,16 +3230,19 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(2, (variant) => {
           variant.addVideo(3, (stream) => {
             stream.keyIds = new Set(['def']);
+            stream.size(20, 20);
           });
         });
         manifest.addVariant(4, (variant) => {
           variant.addVideo(5, (stream) => {
             stream.keyIds = new Set(['abc', 'def']);
+            stream.size(30, 30);
           });
         });
       });
@@ -3227,10 +3260,13 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(2, (variant) => {
-          variant.addVideo(3);
+          variant.addVideo(3, (stream) => {
+            stream.size(20, 20);
+          });
         });
       });
 
@@ -3250,10 +3286,13 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(2, (variant) => {
-          variant.addVideo(3);
+          variant.addVideo(3, (stream) => {
+            stream.size(20, 20);
+          });
         });
       });
 
@@ -3272,15 +3311,19 @@ describe('Player', () => {
             manifest.addVariant(0, (variant) => {
               variant.addVideo(1, (stream) => {
                 stream.keyIds = new Set(['abc']);
+                stream.size(10, 10);
               });
             });
             manifest.addVariant(2, (variant) => {
               variant.addVideo(3, (stream) => {
                 stream.keyIds = new Set(['xyz']);
+                stream.size(20, 20);
               });
             });
             manifest.addVariant(4, (variant) => {
-              variant.addVideo(5);
+              variant.addVideo(5, (stream) => {
+                stream.size(30, 30);
+              });
             });
           });
 
@@ -3334,15 +3377,21 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.bandwidth = 10;
-          variant.addVideo(1);
+          variant.addVideo(1, (stream) => {
+            stream.size(10, 10);
+          });
         });
         manifest.addVariant(1, (variant) => {
           variant.bandwidth = 1500;
-          variant.addVideo(2);
+          variant.addVideo(2, (stream) => {
+            stream.size(20, 20);
+          });
         });
         manifest.addVariant(2, (variant) => {
           variant.bandwidth = 500;
-          variant.addVideo(3);
+          variant.addVideo(3, (stream) => {
+            stream.size(30, 30);
+          });
         });
       });
 
@@ -3521,18 +3570,21 @@ describe('Player', () => {
           variant.bandwidth = 100;
           variant.addVideo(0, (stream) => {
             stream.codecs = 'good';
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(1, (variant) => {
           variant.bandwidth = 200;
           variant.addVideo(1, (stream) => {
             stream.codecs = 'good';
+            stream.size(20, 20);
           });
         });
         manifest.addVariant(2, (variant) => {
           variant.bandwidth = 300;
           variant.addVideo(2, (stream) => {
             stream.codecs = 'good';
+            stream.size(30, 30);
           });
         });
 
@@ -3541,18 +3593,21 @@ describe('Player', () => {
           variant.bandwidth = 10000;
           variant.addVideo(3, (stream) => {
             stream.codecs = 'bad';
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(4, (variant) => {
           variant.bandwidth = 20000;
           variant.addVideo(4, (stream) => {
             stream.codecs = 'bad';
+            stream.size(20, 20);
           });
         });
         manifest.addVariant(5, (variant) => {
           variant.bandwidth = 30000;
           variant.addVideo(5, (stream) => {
             stream.codecs = 'bad';
+            stream.size(30, 30);
           });
         });
       });
@@ -3573,10 +3628,13 @@ describe('Player', () => {
         manifest.addVariant(0, (variant) => {
           variant.addVideo(1, (stream) => {
             stream.keyIds = new Set(['abc']);
+            stream.size(10, 10);
           });
         });
         manifest.addVariant(2, (variant) => {
-          variant.addVideo(3);
+          variant.addVideo(3, (stream) => {
+            stream.size(20, 20);
+          });
         });
       });
 
@@ -3679,19 +3737,25 @@ describe('Player', () => {
     manifest = shaka.test.ManifestGenerator.generate((manifest) => {
       manifest.addVariant(0, (variant) => {
         variant.bandwidth = 100;
-        variant.addVideo(0);
+        variant.addVideo(0, (stream) => {
+          stream.size(10, 10);
+        });
         variant.addAudio(9);
       });
 
       manifest.addVariant(1, (variant) => {
         variant.bandwidth = 200;
-        variant.addVideo(1);
+        variant.addVideo(1, (stream) => {
+          stream.size(20, 20);
+        });
         variant.addExistingStream(9);  // audio
       });
 
       manifest.addVariant(2, (variant) => {
         variant.bandwidth = 300;
-        variant.addVideo(2);
+        variant.addVideo(2, (stream) => {
+          stream.size(30, 30);
+        });
         variant.addExistingStream(9);  // audio
       });
     });
@@ -3760,15 +3824,21 @@ describe('Player', () => {
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         manifest.addVariant(0, (variant) => {
           variant.bandwidth = /** @type {?} */(undefined);
-          variant.addVideo(0);
+          variant.addVideo(0, (stream) => {
+            stream.size(10, 10);
+          });
         });
         manifest.addVariant(1, (variant) => {
           variant.bandwidth = NaN;
-          variant.addVideo(1);
+          variant.addVideo(1, (stream) => {
+            stream.size(20, 20);
+          });
         });
         manifest.addVariant(2, (variant) => {
           variant.bandwidth = 0;
-          variant.addVideo(2);
+          variant.addVideo(2, (stream) => {
+            stream.size(30, 30);
+          });
         });
       });
 
