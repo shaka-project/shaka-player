@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.4.2](https://github.com/shaka-project/shaka-player/compare/v4.4.1...v4.4.2) (2023-09-13)
+
+
+### Bug Fixes
+
+* com.apple.fps should work with the default initDataTransform when using legacy Apple Media Keys ([#5603](https://github.com/shaka-project/shaka-player/issues/5603)) ([1a6fcf7](https://github.com/shaka-project/shaka-player/commit/1a6fcf71bc27b37ca44dc2dabdf5e4608a12dea4))
+* Compute correctly the positionAlign in UITextDisplayer ([#5630](https://github.com/shaka-project/shaka-player/issues/5630)) ([b19c5e7](https://github.com/shaka-project/shaka-player/commit/b19c5e720882dd9211f9455f12dff0485b121175))
+* **DASH:** Fix race condition error while switching audio tracks ([#5619](https://github.com/shaka-project/shaka-player/issues/5619)) ([c140ea3](https://github.com/shaka-project/shaka-player/commit/c140ea3d3e5550e1e89e7e0ad8fc50d637c0ed57))
+* **Demo:** Allow com.apple.fps.1_0 in the custom DRM System field ([#5600](https://github.com/shaka-project/shaka-player/issues/5600)) ([30597ed](https://github.com/shaka-project/shaka-player/commit/30597ed5d9f64c5ea56fc70043b46a8f8fdd774d))
+* Fix compiled-mode error formatting ([#5623](https://github.com/shaka-project/shaka-player/issues/5623)) ([838cb16](https://github.com/shaka-project/shaka-player/commit/838cb160653692c378afda9ec77b8fbc996cfd56))
+* fix preferred track selection on Safari ([#5601](https://github.com/shaka-project/shaka-player/issues/5601)) ([0e4a021](https://github.com/shaka-project/shaka-player/commit/0e4a02154ee4588c88e7526eac841aca46902c4f))
+* Fix transmuxed audio timestamps ([#5595](https://github.com/shaka-project/shaka-player/issues/5595)) ([258a91f](https://github.com/shaka-project/shaka-player/commit/258a91f2b70da7267067800e5e571a48f5c17be2))
+* **HLS:** Get the correct video codec for TS segments ([#5598](https://github.com/shaka-project/shaka-player/issues/5598)) ([0020afe](https://github.com/shaka-project/shaka-player/commit/0020afe02ef961581cfdcefbc412d7ae454a8128))
+* **HLS:** Show WebVTT subtitles with X-TIMESTAMP-MAP in segments mode ([#5643](https://github.com/shaka-project/shaka-player/issues/5643)) ([58298e2](https://github.com/shaka-project/shaka-player/commit/58298e24758c27a1fa409246098e3c186a0ab1e4))
+* Improve TsParse to avoid parsing errors ([#5615](https://github.com/shaka-project/shaka-player/issues/5615)) ([c57bb6f](https://github.com/shaka-project/shaka-player/commit/c57bb6f89081c0492dbc75a9b7c1ae7580caf0a7))
+* **TTML:** Fix wrong writing-mode in nested cues ([#5646](https://github.com/shaka-project/shaka-player/issues/5646)) ([521c239](https://github.com/shaka-project/shaka-player/commit/521c2398f2503b04be9f79ed62fb17ecb8d000d1))
+* **UI:** Fix broken language names on Google TV ([#5613](https://github.com/shaka-project/shaka-player/issues/5613)) ([4a84d8e](https://github.com/shaka-project/shaka-player/commit/4a84d8e25250871c3e4cda967b13ee80fe371913))
+* **WebVTT:** Fix support for line:0 vertical alignment ([#5632](https://github.com/shaka-project/shaka-player/issues/5632)) ([14cdc11](https://github.com/shaka-project/shaka-player/commit/14cdc11968e0e7782a9924a9a9be84882a031806))
+* **WebVTT:** Fix wrong writing-mode in nested cues ([#5641](https://github.com/shaka-project/shaka-player/issues/5641)) ([8a7e32e](https://github.com/shaka-project/shaka-player/commit/8a7e32e111fbab76e5989a7df8ea8efc00955eb3))
+
 ## [4.4.1](https://github.com/shaka-project/shaka-player/compare/v4.4.0...v4.4.1) (2023-09-02)
 
 
