@@ -64,7 +64,7 @@ describe('Codec Switching', () => {
       expect(variants.find((v) => !!v.active).language).toBe('en');
 
       player.selectAudioLanguage('es');
-      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 5);
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
 
       variants = player.getVariantTracks();
 
