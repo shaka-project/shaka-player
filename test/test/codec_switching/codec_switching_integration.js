@@ -49,6 +49,8 @@ describe('Codec Switching', () => {
     it('can switch codecs', async () => {
       const preferredTextLanguage = 'en';
       player.configure({preferredTextLanguage: preferredTextLanguage});
+      player.configure('streaming.mediaSource.codecSwitchingStrategy', 
+        shaka.config.CodecSwitchingStrategy.RELOAD);
 
       await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
       await video.play();
