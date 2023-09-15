@@ -764,16 +764,21 @@ describe('VttTextParser', () => {
               {
                 startTime: 50,
                 endTime: 60,
-                payload: 'Test',
+                payload: '',
                 fontWeight: Cue.fontWeight.BOLD,
-                fontStyle: Cue.fontStyle.NORMAL,
-              },
-              {
-                startTime: 50,
-                endTime: 60,
-                payload: '5',
-                fontWeight: Cue.fontWeight.BOLD,
-                fontStyle: Cue.fontStyle.ITALIC,
+                nestedCues: [
+                  {
+                    startTime: 50,
+                    endTime: 60,
+                    payload: 'Test',
+                  },
+                  {
+                    startTime: 50,
+                    endTime: 60,
+                    payload: '5',
+                    fontStyle: Cue.fontStyle.ITALIC,
+                  },
+                ],
               },
             ],
           },
@@ -804,16 +809,21 @@ describe('VttTextParser', () => {
               {
                 startTime: 80,
                 endTime: 90,
-                payload: 'Test ',
+                payload: '',
                 fontWeight: Cue.fontWeight.BOLD,
-                fontStyle: Cue.fontStyle.NORMAL,
-              },
-              {
-                startTime: 80,
-                endTime: 90,
-                payload: '7',
-                fontWeight: Cue.fontWeight.BOLD,
-                fontStyle: Cue.fontStyle.ITALIC,
+                nestedCues: [
+                  {
+                    startTime: 80,
+                    endTime: 90,
+                    payload: 'Test ',
+                  },
+                  {
+                    startTime: 80,
+                    endTime: 90,
+                    payload: '7',
+                    fontStyle: Cue.fontStyle.ITALIC,
+                  },
+                ],
               },
             ],
           },
@@ -917,20 +927,27 @@ describe('VttTextParser', () => {
               {
                 startTime: 20,
                 endTime: 40,
-                payload: 'Test',
+                payload: '',
                 rubyTag: 'ruby',
-              },
-              {
-                startTime: 20,
-                endTime: 40,
-                payload: '2',
-                rubyTag: 'rt',
-              },
-              {
-                startTime: 20,
-                endTime: 40,
-                payload: '3',
-                rubyTag: 'rp',
+                nestedCues: [
+                  {
+                    startTime: 20,
+                    endTime: 40,
+                    payload: 'Test',
+                  },
+                  {
+                    startTime: 20,
+                    endTime: 40,
+                    payload: '2',
+                    rubyTag: 'rt',
+                  },
+                  {
+                    startTime: 20,
+                    endTime: 40,
+                    payload: '3',
+                    rubyTag: 'rp',
+                  },
+                ],
               },
             ],
           },
@@ -1036,14 +1053,22 @@ describe('VttTextParser', () => {
               {
                 startTime: 70,
                 endTime: 80,
-                payload: 'Test5.1',
+                payload: '',
                 color: 'red',
-              },
-              {
-                startTime: 70,
-                endTime: 80,
-                payload: 'Test5.2',
-                color: 'lime',
+                nestedCues: [
+                  {
+                    startTime: 70,
+                    endTime: 80,
+                    payload: 'Test5.1',
+                    color: 'red',
+                  },
+                  {
+                    startTime: 70,
+                    endTime: 80,
+                    payload: 'Test5.2',
+                    color: 'lime',
+                  },
+                ],
               },
             ],
           },
@@ -1223,9 +1248,17 @@ describe('VttTextParser', () => {
               {
                 startTime: 10,
                 endTime: 20,
-                payload: '2',
+                payload: '',
                 color: 'magenta',
-                fontStyle: Cue.fontStyle.ITALIC,
+                nestedCues: [
+                  {
+                    startTime: 10,
+                    endTime: 20,
+                    payload: '2',
+                    color: 'magenta',
+                    fontStyle: Cue.fontStyle.ITALIC,
+                  },
+                ],
               },
             ],
           },
@@ -1293,13 +1326,14 @@ describe('VttTextParser', () => {
     parser.setSequenceMode(sequenceMode);
     const result = parser.parseMedia(data, time);
 
-    const expected = cues.map((cue) => {
+    const checkCue = (cue) => {
       if (cue.nestedCues) {
-        cue.nestedCues = cue.nestedCues.map(
-            (nestedCue) => jasmine.objectContaining(nestedCue));
+        cue.nestedCues = cue.nestedCues.map((nestedCue) => checkCue(nestedCue));
       }
       return jasmine.objectContaining(cue);
-    });
+    };
+
+    const expected = cues.map(checkCue);
     expect(result).toEqual(expected);
   }
 
