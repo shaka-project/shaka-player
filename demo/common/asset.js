@@ -152,7 +152,7 @@ const ShakaDemoAssetInfo = class {
    * @return {!ShakaDemoAssetInfo}
    */
   addKeySystem(keySystem) {
-    if (this.isClear() || this.isAes128()) {
+    if (this.isClear()) {
       // Once an asset has an actual key system, it's no longer a CLEAR asset.
       this.drm = [];
     }
