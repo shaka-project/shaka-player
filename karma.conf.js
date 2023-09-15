@@ -245,6 +245,7 @@ module.exports = (config) => {
       {pattern: 'test/test/assets/hls-ts-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-mp3/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-aac-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-aac-h265/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-ac3-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-mp3-h264/*', included: false},
       {pattern: 'test/test/assets/hls-ts-muxed-ec3-h264/*', included: false},
