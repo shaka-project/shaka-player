@@ -6,7 +6,9 @@
 */
 
 // This empty namespace is declared to check if LcevcDec libraries are loaded.
+/** @const */
 var libDPIModule = {};
+/** @const */
 var LCEVCdec = {};
 
 /**
@@ -60,6 +62,13 @@ LCEVCdec.LCEVCdec = class {
    */
   close() {}
 };
+
+/**
+ * The older module interface, for backward compatibility.
+ * Typed to the same interface, but under a different name.
+ * @type {typeof LCEVCdec.LCEVCdec}
+ */
+LCEVCdec.LcevcDil;
 
 /**
  * LCEVC Support Check
