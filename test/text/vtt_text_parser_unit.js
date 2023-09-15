@@ -1333,9 +1333,7 @@ describe('VttTextParser', () => {
       return jasmine.objectContaining(cue);
     };
 
-    const expected = cues.map((cue) => {
-      return checkCue(cue);
-    });
+    const expected = cues.map(checkCue);
     expect(result).toEqual(expected);
   }
 
