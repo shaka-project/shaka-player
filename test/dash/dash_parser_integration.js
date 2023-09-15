@@ -56,16 +56,6 @@ describe('DashParser', () => {
   });
 
   it('supports AES-128 streaming', async () => {
-    const netEngine = player.getNetworkingEngine();
-    netEngine.registerRequestFilter((type, request) => {
-      if (type != shaka.net.NetworkingEngine.RequestType.KEY) {
-        return;
-      }
-      request.uris = [
-        '/base/test/test/assets/dash-aes-128/license',
-      ];
-    });
-
     await player.load('/base/test/test/assets/dash-aes-128/dash.mpd');
     await video.play();
     expect(player.isLive()).toBe(false);
