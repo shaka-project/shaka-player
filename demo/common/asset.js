@@ -12,8 +12,6 @@
 
 goog.provide('ShakaDemoAssetInfo');
 
-goog.require('shakaDemo.MessageIds');
-
 
 /**
  * An object that contains information about an asset.
@@ -115,9 +113,9 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * A sort comparator for comparing two message Ids, ignoring case.
-   * @param {shakaDemo.MessageIds} a
-   * @param {shakaDemo.MessageIds} b
+   * A sort comparator for comparing two messages, ignoring case.
+   * @param {string} a
+   * @param {string} b
    * @return {number}
    * @private
    */

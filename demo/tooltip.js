@@ -7,19 +7,17 @@
 
 goog.provide('shakaDemo.Tooltips');
 
-goog.requireType('shakaDemo.MessageIds');
-
 /**
  * Creates and contains a tooltip.
  */
 shakaDemo.Tooltips = class {
   /**
    * @param {!Element} labeledElement
-   * @param {shakaDemo.MessageIds} message
+   * @param {string} content
    */
-  static make(labeledElement, message) {
+  static make(labeledElement, content) {
     tippy(labeledElement, {
-      content: shakaDemoMain.getLocalizedString(message),
+      content,
       placement: 'bottom',
       arrow: true,
       animation: 'scale',
