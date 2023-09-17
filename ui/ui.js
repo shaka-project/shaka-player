@@ -229,6 +229,7 @@ shaka.ui.Overlay = class {
         buffered: 'rgba(255, 255, 255, 0.54)',
         played: 'rgb(255, 255, 255)',
         adBreaks: 'rgb(255, 204, 0)',
+        chapterMarks: 'rgb(27, 27, 27)'
       },
       volumeBarColors: {
         base: 'rgba(255, 255, 255, 0.54)',
@@ -245,6 +246,7 @@ shaka.ui.Overlay = class {
       keyboardSeekDistance: 5,
       keyboardLargeSeekDistance: 60,
       fullScreenElement: this.videoContainer_,
+      displayChapterMarkers: false
     };
 
     // eslint-disable-next-line no-restricted-syntax

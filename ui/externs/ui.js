@@ -21,7 +21,8 @@ shaka.extern = {};
  *   base: string,
  *   buffered: string,
  *   played: string,
- *   adBreaks: string
+ *   adBreaks: string,
+ *   chapterMarks: string
  * }}
  *
  * @property {string} base
@@ -36,6 +37,10 @@ shaka.extern = {};
  * @property {string} adBreaks
  *   The CSS background color applied to the portion of the seek bar showing
  *   when the ad breaks are scheduled to occur on the timeline.
+ * @property {string} chapterMarks
+ *   The CSS border color applied to sections of the seek bar showing
+ *   when the chapters start and end on the timeline.
+ *   Defaults to dark grey rgb(27, 27, 27).
  * @exportDoc
  */
 shaka.extern.UISeekBarColors;
@@ -87,7 +92,8 @@ shaka.extern.UIVolumeBarColors;
  *   enableTooltips: boolean,
  *   keyboardSeekDistance: number,
  *   keyboardLargeSeekDistance: number,
- *   fullScreenElement: HTMLElement
+ *   fullScreenElement: HTMLElement,
+ *   displayChapterMarkers: boolean
  * }}
  *
  * @property {!Array.<string>} controlPanelElements
@@ -193,6 +199,9 @@ shaka.extern.UIVolumeBarColors;
  * @property {HTMLElement} fullScreenElement
  *   DOM element on which fullscreen will be done.
  *   Defaults to Shaka Player Container.
+ * @property {boolean} displayChapterMarkers
+ *   Whether or not chapter markers are shown on the seek bar. 
+ *   Defaults to false;
  * @exportDoc
  */
 shaka.extern.UIConfiguration;

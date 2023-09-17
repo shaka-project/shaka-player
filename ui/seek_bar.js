@@ -52,6 +52,22 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
     /** @private {!shaka.extern.UIConfiguration} */
     this.config_ = this.controls.getConfig();
 
+    if (this.config_.displayChapterMarkers){
+      /** @type {?HTMLElement} */
+      let chaptersContainer = shaka.util.Dom.createHTMLElement('div');
+      chaptersContainer.classList.add('shaka-chapters');
+
+      chaptersContainer = this.addChapterMarks(chaptersContainer);
+
+      // Insert the chapters container as a first child for proper
+      // positioning.
+
+      if(chaptersContainer){
+        this.container.insertBefore(
+          chaptersContainer, this.container.childNodes[0]);
+      }
+    }
+
     /**
      * This timer is used to introduce a delay between the user scrubbing across
      * the seek bar and the seek being sent to the player.
@@ -407,6 +423,64 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
             'linear-gradient(' + gradient.join(',') + ')';
   }
 
+  /**
+   * @private
+   * @param {?HTMLElement} chaptersContainer
+   * @return {?HTMLElement}
+   */
+  addChapterMarks(chaptersContainer) {
+
+    /** @type {Array.<shaka.extern.Chapter>}*/
+    const chapters = this.player.getChapters('und');
+
+    if(chapters.length < 2){
+      return null;
+    }
+
+    /** @type {{start: number, end: number}} */
+    const seekRange = this.player.seekRange();
+    const seekRangeSize = seekRange.end - seekRange.start;
+    
+    for (const chapter of chapters) {
+
+      if (!chapter.startTime || chapter.startTime < seekRange.start || chapter.startTime >= seekRange.end) {
+        continue;
+      }
+    
+      var end = chapter.endTime < seekRange.end ? chapter.endTime : seekRange.end;
+      const chapterSizePrct = (end - chapter.startTime) * 100 / seekRangeSize;
+
+      /** @type {!HTMLElement} */
+      const chapterEl = shaka.util.Dom.createHTMLElement('div');
+      chapterEl.classList.add('shaka-chapter')
+      chapterEl.style.width = `${chapterSizePrct}%`
+
+      /** @type {!HTMLElement} */
+      const chapterLabel = shaka.util.Dom.createHTMLElement('p');
+      chapterLabel.style.display = "none";
+      chapterLabel.style.borderColor = this.config_.seekBarColors.chapterMarks;
+      chapterLabel.innerText = chapter.title;
+
+      chapterEl.appendChild(chapterLabel);
+
+      /** @type {!HTMLElement} */
+      const chapterHoverBar = shaka.util.Dom.createHTMLElement('div');
+
+      chapterEl.appendChild(chapterHoverBar);
+
+      chapterHoverBar.onmouseover = () => {
+        chapterLabel.style.display = "block";
+      };
+
+      chapterHoverBar.onmouseleave = () => {
+        chapterLabel.style.display = "none";
+      };
+
+      chaptersContainer.appendChild(chapterEl);
+    }
+
+    return chaptersContainer;
+  }
 
   /**
    * @param {string} color
