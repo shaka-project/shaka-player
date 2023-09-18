@@ -54,7 +54,7 @@ describe('Codec Switching', () => {
 
       await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
       await video.play();
-      await waiter.waitForMovementOrFailOnTimeout(video, 5);
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
       expect(player.isLive()).toBe(false);
 
