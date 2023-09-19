@@ -1706,7 +1706,6 @@ shakaDemo.Main = class {
     // Always show the new error if:
     //   1. there is no error showing currently
     //   2. the new error is more severe than the old one
-    // Sadly, we do not (yet?) have localizations for error messages.
     if (this.currentErrorSeverity_ == null ||
         severity > this.currentErrorSeverity_) {
       this.errorDisplayLink_.href = href;
