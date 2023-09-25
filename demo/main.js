@@ -1245,6 +1245,11 @@ shakaDemo.Main = class {
       if (asset.imaAssetKey || (asset.imaContentSrcId && asset.imaVideoId)) {
         manifestUri = await this.getManifestUriFromAdManager_(asset);
       }
+      // If it's a MediaTailor asset, request ad-containing manifest
+      // from the ad manager.
+      if (asset.mediaTailorBaseUrl && asset.mediaTailorManifestUrl) {
+        manifestUri = await this.getManifestUriFromMediaTailorAdManager_(asset);
+      }
       await this.player_.load(
           manifestUri,
           /* startTime= */ null,
@@ -1522,6 +1527,36 @@ shakaDemo.Main = class {
 
       const uri = await adManager.requestServerSideStream(
           request, /* backupUri= */ asset.manifestUri);
+      return uri;
+    } catch (error) {
+      console.log(error);
+      console.warn('Ads code has been prevented from running ' +
+          'or returned an error. Proceeding without ads.');
+
+      return asset.manifestUri;
+    }
+  }
+
+  /**
+   * @param {ShakaDemoAssetInfo} asset
+   * @return {!Promise.<string>}
+   * @private
+   */
+  async getManifestUriFromMediaTailorAdManager_(asset) {
+    const adManager = this.player_.getAdManager();
+    const container = this.controls_.getServerSideAdContainer();
+    try {
+      goog.asserts.assert(this.video_ != null, 'Video should not be null!');
+      goog.asserts.assert(asset.mediaTailorBaseUrl != null,
+          'Media Tailor info not be null!');
+      goog.asserts.assert(asset.mediaTailorManifestUrl != null,
+          'Media Tailor info not be null!');
+      const netEngine = this.player_.getNetworkingEngine();
+      goog.asserts.assert(netEngine, 'There should be a net engine.');
+      adManager.initMediaTailor(container, netEngine, this.video_);
+      const uri = await adManager.requestMediaTailorStream(
+          asset.mediaTailorBaseUrl, asset.mediaTailorManifestUrl,
+          asset.mediaTailorAdsParams, /* backupUri= */ asset.manifestUri);
       return uri;
     } catch (error) {
       console.log(error);

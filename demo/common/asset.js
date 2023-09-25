@@ -78,6 +78,12 @@ const ShakaDemoAssetInfo = class {
     /** @type {?string} */
     this.imaManifestType = null;
     /** @type {?string} */
+    this.mediaTailorBaseUrl = null;
+    /** @type {?string} */
+    this.mediaTailorManifestUrl = null;
+    /** @type {?Object} */
+    this.mediaTailorAdsParams = null;
+    /** @type {?string} */
     this.mimeType = null;
     /** @type {?string} */
     this.mediaPlaylistFullMimeType = null;
@@ -280,6 +286,23 @@ const ShakaDemoAssetInfo = class {
    */
   setIMAManifestType(type) {
     this.imaManifestType = type;
+    if (!this.features.includes(shakaAssets.Feature.ADS)) {
+      this.addFeature(shakaAssets.Feature.ADS);
+    }
+
+    return this;
+  }
+
+  /**
+   * @param {string} baseUrl
+   * @param {string} manifestUrl
+   * @param {?Object=} adsParams
+   * @return {!ShakaDemoAssetInfo}
+   */
+  setMediaTailor(baseUrl, manifestUrl, adsParams=null) {
+    this.mediaTailorBaseUrl = baseUrl;
+    this.mediaTailorManifestUrl = manifestUrl;
+    this.mediaTailorAdsParams = adsParams;
     if (!this.features.includes(shakaAssets.Feature.ADS)) {
       this.addFeature(shakaAssets.Feature.ADS);
     }

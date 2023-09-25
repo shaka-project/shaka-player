@@ -40,6 +40,21 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   updateClientSideAdsRenderingSettings(adsRenderingSettings) {}
 
   /** @override */
+  initMediaTailor(networkingEngine, video) {}
+
+  /** @override */
+  requestMediaTailorStream(baseUrl, manifestUrl, adsParams, backupUrl) {
+    return Promise.resolve('fake:url');
+  }
+
+  /**
+   * @override
+   */
+  getMediaTailorCuePoints() {
+    return [];
+  }
+
+  /** @override */
   initServerSide(adContainer, video) {}
 
   /** @override */
@@ -61,6 +76,11 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   getStats() {
     return this.stats_;
   }
+
+  /**
+   * @override
+   */
+  onManifestUpdated(isLive) {}
 
   /**
    * @override
