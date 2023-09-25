@@ -273,6 +273,26 @@ describe('Transmuxer Player', () => {
 
       await player.unload();
     });
+
+    it('H.265 in TS', async () => {
+      const mimeType = 'video/mp4; codecs="hvc1.2.4.L123.B0"';
+      if (!MediaSource.isTypeSupported(mimeType)) {
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      await player.load('/base/test/test/assets/hls-ts-h265/hevc.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
   });
 
   describe('for muxed content', () => {
