@@ -11,7 +11,6 @@ goog.provide('shakaDemo.NumberInput');
 goog.provide('shakaDemo.SelectInput');
 goog.provide('shakaDemo.TextInput');
 
-goog.require('shakaDemo.MessageIds');
 goog.requireType('shakaDemo.InputContainer');
 
 /**
@@ -121,7 +120,7 @@ shakaDemo.Input.lastId_ = 0;
 shakaDemo.SelectInput = class extends shakaDemo.Input {
   /**
    * @param {!shakaDemo.InputContainer} parentContainer
-   * @param {?shakaDemo.MessageIds} name
+   * @param {?string} name
    * @param {function(!HTMLInputElement, !shakaDemo.Input)} onChange
    * @param {!Object.<string, string>} values
    */
@@ -134,7 +133,7 @@ shakaDemo.SelectInput = class extends shakaDemo.Input {
     this.extra_.classList.add('mdl-textfield__label');
     this.extra_.setAttribute('for', this.input_.id);
     if (name) {
-      this.extra_.textContent = shakaDemoMain.getLocalizedString(name);
+      this.extra_.textContent = name;
     }
     for (const value of Object.keys(values)) {
       const option =
@@ -243,18 +242,14 @@ shakaDemo.NumberInput = class extends shakaDemo.TextInput {
     error.classList.add('mdl-textfield__error');
     this.container_.appendChild(error);
 
-    const MessageIds = shakaDemo.MessageIds;
-    const localize = (name) => shakaDemoMain.getLocalizedString(name);
     if (canBeZero && canBeDecimal) {
-      error.textContent = localize(MessageIds.NUMBER_DECIMAL_WARNING);
+      error.textContent = 'Must be a positive number.';
     } else if (canBeZero) {
-      error.textContent = localize(MessageIds.NUMBER_INTEGER_WARNING);
+      error.textContent = 'Must be a positive integer.';
     } else if (canBeDecimal) {
-      error.textContent =
-          localize(MessageIds.NUMBER_NONZERO_DECIMAL_WARNING);
+      error.textContent = 'Must be a positive, nonzero number.';
     } else {
-      error.textContent =
-          localize(MessageIds.NUMBER_NONZERO_INTEGER_WARNING);
+      error.textContent = 'Must be a positive, nonzero integer.';
     }
 
     this.input_.pattern = '(Infinity|';
