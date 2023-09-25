@@ -3126,8 +3126,10 @@ describe('HlsParser', () => {
 
     const firstMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(0);
     expect(firstMp4Segment.aes128Key).toBeDefined();
+    expect(firstMp4Segment.initSegmentReference.aes128Key).toBeDefined();
     const secondMp4Segment = mp4AesEncryptionVideo.segmentIndex.get(1);
     expect(secondMp4Segment.aes128Key).toBeNull();
+    expect(secondMp4Segment.initSegmentReference.aes128Key).toBeDefined();
 
     const tsAesEncryptionVideo = actual.variants[2].video;
     await tsAesEncryptionVideo.createSegmentIndex();
