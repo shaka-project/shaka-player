@@ -36,8 +36,8 @@ describe('Transmuxer Player', () => {
     // We must enable this, once it is resolved:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
     const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 116) {
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
+        chromeVersion && chromeVersion <= 118) {
       return false;
     }
     return true;
@@ -57,8 +57,8 @@ describe('Transmuxer Player', () => {
     // We must enable this, once it is resolved:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
     const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 116) {
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
+        chromeVersion && chromeVersion <= 118) {
       return false;
     }
     return true;
