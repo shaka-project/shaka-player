@@ -1247,7 +1247,7 @@ shakaDemo.Main = class {
       }
       // If it's a MediaTailor asset, request ad-containing manifest
       // from the ad manager.
-      if (asset.mediaTailorBaseUrl && asset.mediaTailorManifestUrl) {
+      if (asset.mediaTailorUrl) {
         manifestUri = await this.getManifestUriFromMediaTailorAdManager_(asset);
       }
       await this.player_.load(
@@ -1547,16 +1547,14 @@ shakaDemo.Main = class {
     const container = this.controls_.getServerSideAdContainer();
     try {
       goog.asserts.assert(this.video_ != null, 'Video should not be null!');
-      goog.asserts.assert(asset.mediaTailorBaseUrl != null,
-          'Media Tailor info not be null!');
-      goog.asserts.assert(asset.mediaTailorManifestUrl != null,
+      goog.asserts.assert(asset.mediaTailorUrl != null,
           'Media Tailor info not be null!');
       const netEngine = this.player_.getNetworkingEngine();
       goog.asserts.assert(netEngine, 'There should be a net engine.');
       adManager.initMediaTailor(container, netEngine, this.video_);
       const uri = await adManager.requestMediaTailorStream(
-          asset.mediaTailorBaseUrl, asset.mediaTailorManifestUrl,
-          asset.mediaTailorAdsParams, /* backupUri= */ asset.manifestUri);
+          asset.mediaTailorUrl, asset.mediaTailorAdsParams,
+          /* backupUri= */ asset.manifestUri);
       return uri;
     } catch (error) {
       console.log(error);

@@ -107,13 +107,12 @@ shaka.extern.IAdManager = class extends EventTarget {
   getMediaTailorCuePoints() {}
 
   /**
-   * @param {string} baseUrl
-   * @param {string} manifestUrl
+   * @param {string} url
    * @param {Object} adsParams
    * @param {string=} backupUrl
    * @return {!Promise.<string>}
    */
-  requestMediaTailorStream(baseUrl, manifestUrl, adsParams, backupUrl) {}
+  requestMediaTailorStream(url, adsParams, backupUrl) {}
 
   /**
    * @param {!HTMLElement} adContainer

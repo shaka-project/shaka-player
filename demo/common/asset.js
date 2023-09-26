@@ -78,9 +78,7 @@ const ShakaDemoAssetInfo = class {
     /** @type {?string} */
     this.imaManifestType = null;
     /** @type {?string} */
-    this.mediaTailorBaseUrl = null;
-    /** @type {?string} */
-    this.mediaTailorManifestUrl = null;
+    this.mediaTailorUrl = null;
     /** @type {?Object} */
     this.mediaTailorAdsParams = null;
     /** @type {?string} */
@@ -294,14 +292,12 @@ const ShakaDemoAssetInfo = class {
   }
 
   /**
-   * @param {string} baseUrl
-   * @param {string} manifestUrl
+   * @param {string} url
    * @param {?Object=} adsParams
    * @return {!ShakaDemoAssetInfo}
    */
-  setMediaTailor(baseUrl, manifestUrl, adsParams=null) {
-    this.mediaTailorBaseUrl = baseUrl;
-    this.mediaTailorManifestUrl = manifestUrl;
+  setMediaTailor(url, adsParams=null) {
+    this.mediaTailorUrl = url;
     this.mediaTailorAdsParams = adsParams;
     if (!this.features.includes(shakaAssets.Feature.ADS)) {
       this.addFeature(shakaAssets.Feature.ADS);

@@ -43,7 +43,7 @@ shaka.test.FakeAdManager = class extends shaka.util.FakeEventTarget {
   initMediaTailor(networkingEngine, video) {}
 
   /** @override */
-  requestMediaTailorStream(baseUrl, manifestUrl, adsParams, backupUrl) {
+  requestMediaTailorStream(url, adsParams, backupUrl) {
     return Promise.resolve('fake:url');
   }
 
