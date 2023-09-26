@@ -102,11 +102,6 @@ shaka.extern.IAdManager = class extends EventTarget {
   initMediaTailor(adContainer, networkingEngine, video) {}
 
   /**
-   * @return {!Array.<!shaka.extern.AdCuePoint>}
-   */
-  getMediaTailorCuePoints() {}
-
-  /**
    * @param {string} url
    * @param {Object} adsParams
    * @param {string=} backupUrl
@@ -136,6 +131,11 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @return {!Array.<!shaka.extern.AdCuePoint>}
    */
   getServerSideCuePoints() {}
+
+  /**
+   * @return {!Array.<!shaka.extern.AdCuePoint>}
+   */
+  getCuePoints() {}
 
   /**
    * Get statistics for the current playback session. If the player is not
