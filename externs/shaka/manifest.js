@@ -318,10 +318,10 @@ shaka.extern.CreateSegmentIndexFunction;
  * }}
  *
  * @description
- * AES-128 key and iv info from the HLS manifest.
+ * AES-128 key and iv info from the manifest.
  *
  * @property {string} method
- *   The key method defined in the HLS manifest.
+ *   The key method defined in the manifest.
  * @property {webCrypto.CryptoKey|undefined} cryptoKey
  *   Web crypto key object of the AES-128 CBC key. If unset, the "fetchKey"
  *   property should be provided.
@@ -330,15 +330,15 @@ shaka.extern.CreateSegmentIndexFunction;
  *   Should be provided if the "cryptoKey" property is unset.
  *   Should update this object in-place, to set "cryptoKey".
  * @property {(!Uint8Array|undefined)} iv
- *   The IV in the HLS manifest, if defined. See HLS RFC 8216 Section 5.2 for
- *   handling undefined IV.
+ *   The IV in the manifest, if defined. For HLS see HLS RFC 8216 Section 5.2
+ *   for handling undefined IV.
  * @property {number} firstMediaSequenceNumber
  *   The starting Media Sequence Number of the playlist, used when IV is
  *   undefined.
  *
  * @exportDoc
  */
-shaka.extern.HlsAes128Key;
+shaka.extern.aes128Key;
 
 
 /**
@@ -355,6 +355,7 @@ shaka.extern.FetchCryptoKeysFunction;
  * @typedef {{
  *   id: number,
  *   originalId: ?string,
+ *   groupId: ?string,
  *   createSegmentIndex: shaka.extern.CreateSegmentIndexFunction,
  *   closeSegmentIndex: (function()|undefined),
  *   segmentIndex: shaka.media.SegmentIndex,
@@ -403,6 +404,10 @@ shaka.extern.FetchCryptoKeysFunction;
  *   The original ID, if any, that appeared in the manifest.  For example, in
  *   DASH, this is the "id" attribute of the Representation element.  In HLS,
  *   this is the "NAME" attribute.
+ * @property {?string} groupId
+ *   <i>Optional.</i> <br>
+ *   The ID of the stream's parent element. In DASH, this will be a unique
+ *   ID that represents the representation's parent adaptation element
  * @property {shaka.extern.CreateSegmentIndexFunction} createSegmentIndex
  *   <i>Required.</i> <br>
  *   Creates the Stream's segmentIndex (asynchronously).

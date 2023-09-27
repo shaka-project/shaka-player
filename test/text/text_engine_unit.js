@@ -49,7 +49,8 @@ describe('TextEngine', () => {
     textEngine.initParser(
         dummyMimeType,
         /* sequenceMode= */ false,
-        /* segmentRelativeVttTiming= */ false);
+        /* segmentRelativeVttTiming= */ false,
+        shaka.media.ManifestParser.UNKNOWN);
   });
 
   afterEach(() => {
@@ -298,7 +299,8 @@ describe('TextEngine', () => {
       textEngine.initParser(
           dummyMimeType,
           /* sequenceMode= */ false,
-          /* segmentRelativeVttTiming= */ true);
+          /* segmentRelativeVttTiming= */ true,
+          shaka.media.ManifestParser.UNKNOWN);
 
       mockParseMedia.and.callFake((data, time) => {
         return [

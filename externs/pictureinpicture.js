@@ -97,3 +97,14 @@ DocumentPictureInPicture.prototype.dispatchEvent = function(event) {};
  * @type {!DocumentPictureInPicture}
  */
 Window.prototype.documentPictureInPicture;
+
+
+/**
+ * @constructor
+ * @extends {Event}
+ */
+function DocumentPictureInPictureEvent() {}
+
+
+/** @type {Window} */
+DocumentPictureInPictureEvent.prototype.window;

@@ -109,10 +109,10 @@ describe('StreamingEngine', () => {
   /**
    * @param {boolean=} trickMode
    * @param {number=} mediaOffset The offset from 0 for the segment start times
-   * @param {shaka.extern.HlsAes128Key=} hlsAes128Key The AES-128 key to put in
+   * @param {shaka.extern.aes128Key=} aes128Key The AES-128 key to put in
    *   the manifest, if one should exist
    */
-  function setupVod(trickMode, mediaOffset, hlsAes128Key) {
+  function setupVod(trickMode, mediaOffset, aes128Key) {
     // For VOD, we fake a presentation that has 2 Periods of equal duration
     // (20 seconds), where each Period has 1 Variant and 1 text stream.
     //
@@ -219,7 +219,7 @@ describe('StreamingEngine', () => {
         /* firstPeriodStartTime= */ 0,
         /* secondPeriodStartTime= */ 20,
         /* presentationDuration= */ 40,
-        hlsAes128Key);
+        aes128Key);
   }
 
   function setupLive() {
@@ -370,11 +370,11 @@ describe('StreamingEngine', () => {
    * @param {number} firstPeriodStartTime
    * @param {number} secondPeriodStartTime
    * @param {number} presentationDuration
-   * @param {shaka.extern.HlsAes128Key=} hlsAes128Key
+   * @param {shaka.extern.aes128Key=} aes128Key
    */
   function setupManifest(
       firstPeriodStartTime, secondPeriodStartTime, presentationDuration,
-      hlsAes128Key) {
+      aes128Key) {
     const segmentDurations = {
       audio: segmentData[ContentType.AUDIO].segmentDuration,
       video: segmentData[ContentType.VIDEO].segmentDuration,
@@ -397,7 +397,7 @@ describe('StreamingEngine', () => {
         /** @type {!shaka.media.PresentationTimeline} */(timeline),
         [firstPeriodStartTime, secondPeriodStartTime],
         presentationDuration, segmentDurations, initSegmentRanges,
-        timestampOffsets, hlsAes128Key);
+        timestampOffsets, aes128Key);
 
     audioStream = manifest.variants[0].audio;
     videoStream = manifest.variants[0].video;
@@ -3809,8 +3809,8 @@ describe('StreamingEngine', () => {
 
   describe('AES-128', () => {
     let key;
-    /** @type {!shaka.extern.HlsAes128Key} */
-    let hlsAes128Key;
+    /** @type {!shaka.extern.aes128Key} */
+    let aes128Key;
 
     beforeEach(async () => {
       // Get a key.
@@ -3823,10 +3823,10 @@ describe('StreamingEngine', () => {
       // Set up a manifest with AES-128 key info.
       // We don't actually provide the imported key OR the key fetching function
       // here, though, so that the individual tests can choose what the starting
-      // state of the hlsAes128Key object is.
-      hlsAes128Key = {method: 'AES-128', firstMediaSequenceNumber: 0};
+      // state of the aes128Key object is.
+      aes128Key = {method: 'AES-128', firstMediaSequenceNumber: 0};
 
-      setupVod(false, 0, hlsAes128Key);
+      setupVod(false, 0, aes128Key);
       mediaSourceEngine = new shaka.test.FakeMediaSourceEngine(segmentData);
       presentationTimeInSeconds = 0;
       createStreamingEngine();
@@ -3851,22 +3851,22 @@ describe('StreamingEngine', () => {
     }
 
     it('decrypts segments', async () => {
-      hlsAes128Key.cryptoKey = key;
+      aes128Key.cryptoKey = key;
       await runTest();
     });
 
     it('downloads key if not pre-filled', async () => {
-      hlsAes128Key.fetchKey = () => {
-        hlsAes128Key.cryptoKey = key;
-        hlsAes128Key.fetchKey = undefined;
+      aes128Key.fetchKey = () => {
+        aes128Key.cryptoKey = key;
+        aes128Key.fetchKey = undefined;
         return Promise.resolve();
       };
 
       await runTest();
 
       // The key should have been fetched.
-      expect(hlsAes128Key.cryptoKey).not.toBeUndefined();
-      expect(hlsAes128Key.fetchKey).toBeUndefined();
+      expect(aes128Key.cryptoKey).not.toBeUndefined();
+      expect(aes128Key.fetchKey).toBeUndefined();
     });
   });
 

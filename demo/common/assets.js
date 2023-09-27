@@ -11,7 +11,6 @@
  */
 
 goog.require('ShakaDemoAssetInfo');
-goog.require('shakaDemo.MessageIds');
 
 goog.provide('shakaAssets');
 
@@ -24,33 +23,34 @@ goog.provide('shakaAssets');
 const shakaAssets = {};
 
 
-/** @enum {shakaDemo.MessageIds} */
+/** @enum {string} */
 shakaAssets.Source = {
-  CUSTOM: shakaDemo.MessageIds.CUSTOM,
-  SHAKA: shakaDemo.MessageIds.SHAKA,
-  AXINOM: shakaDemo.MessageIds.AXINOM,
-  UNIFIED_STREAMING: shakaDemo.MessageIds.UNIFIED_STREAMING,
-  DASH_IF: shakaDemo.MessageIds.DASH_IF,
-  BITCODIN: shakaDemo.MessageIds.BITCODIN,
-  METACDN: shakaDemo.MessageIds.METACDN,
-  NIMBLE_STREAMER: shakaDemo.MessageIds.NIMBLE_STREAMER,
-  AZURE_MEDIA_SERVICES: shakaDemo.MessageIds.AZURE_MEDIA_SERVICES,
-  GPAC: shakaDemo.MessageIds.GPAC,
-  UPLYNK: shakaDemo.MessageIds.UPLYNK,
-  APPLE: shakaDemo.MessageIds.APPLE,
-  IRT: shakaDemo.MessageIds.IRT,
-  MICROSOFT: shakaDemo.MessageIds.MICROSOFT,
-  VNOVA: shakaDemo.MessageIds.VNOVA,
+  CUSTOM: 'Custom',
+  SHAKA: 'Shaka',
+  AXINOM: 'Axinom',
+  UNIFIED_STREAMING: 'Unified Streaming',
+  DASH_IF: 'DASH-IF',
+  BITCODIN: 'Bitcodin',
+  METACDN: 'MetaCDN',
+  NIMBLE_STREAMER: 'Nimble Streamer',
+  AZURE_MEDIA_SERVICES: 'Azure Media Services',
+  GPAC: 'GPAC',
+  UPLYNK: 'Verizon Digital Media Services',
+  APPLE: 'Apple',
+  IRT: 'IRT',
+  MICROSOFT: 'Microsoft',
+  VNOVA: 'V-Nova',
 };
 
 
-/** @enum {shakaDemo.MessageIds} */
+/** @enum {string} */
 shakaAssets.KeySystem = {
-  CLEAR_KEY: shakaDemo.MessageIds.CLEAR_KEY,
-  FAIRPLAY: shakaDemo.MessageIds.FAIRPLAY,
-  PLAYREADY: shakaDemo.MessageIds.PLAYREADY,
-  WIDEVINE: shakaDemo.MessageIds.WIDEVINE,
-  CLEAR: shakaDemo.MessageIds.CLEAR,
+  CLEAR_KEY: 'Clear Key DRM',
+  FAIRPLAY: 'Fairplay DRM',
+  PLAYREADY: 'PlayReady DRM',
+  WIDEVINE: 'Widevine DRM',
+  AES128: 'AES-128 protection',
+  CLEAR: 'No DRM protection',
 };
 
 
@@ -88,70 +88,71 @@ shakaAssets.identifierForKeySystem = (keySystem) => {
     case KeySystem.FAIRPLAY: return 'com.apple.fps';
     case KeySystem.PLAYREADY: return 'com.microsoft.playready';
     case KeySystem.WIDEVINE: return 'com.widevine.alpha';
+    case KeySystem.AES128: return 'aes128';
     default: return 'no drm protection';
   }
 };
 
 
-/** @enum {shakaDemo.MessageIds} */
+/** @enum {string} */
 shakaAssets.Feature = {
   // Set if the asset has a special trick mode track, for rewinding effects.
-  TRICK_MODE: shakaDemo.MessageIds.TRICK_MODE,
-  XLINK: shakaDemo.MessageIds.XLINK,
+  TRICK_MODE: 'Special trick mode track',
+  XLINK: 'XLink',
 
   // Set if the asset has any subtitle tracks.
-  SUBTITLES: shakaDemo.MessageIds.SUBTITLES,
+  SUBTITLES: 'Subtitles',
   // Set if the asset has any closed caption tracks.
-  CAPTIONS: shakaDemo.MessageIds.CAPTIONS,
+  CAPTIONS: 'Captions',
   // Set if the asset has multiple audio languages.
-  MULTIPLE_LANGUAGES: shakaDemo.MessageIds.MULTIPLE_LANGUAGES,
+  MULTIPLE_LANGUAGES: 'Multiple languages',
   // Set if the asset is audio-only.
-  AUDIO_ONLY: shakaDemo.MessageIds.AUDIO_ONLY,
+  AUDIO_ONLY: 'Audio only',
   // Set if the asset can be stored offline.
-  OFFLINE: shakaDemo.MessageIds.OFFLINE,
+  OFFLINE: 'Downloadable',
   // A synthetic property used in the "all content" tab. Should not be given to
   // assets.
-  STORED: shakaDemo.MessageIds.STORED,
+  STORED: 'Downloaded',
   // Set if the asset has ads. Autoset by calling setAdTagUri() on an asset.
   // Does not need to be set manually.
-  ADS: shakaDemo.MessageIds.ADS,
+  ADS: 'Ads',
 
   // Set if the asset is a livestream.
-  LIVE: shakaDemo.MessageIds.LIVE,
+  LIVE: 'Live',
   // A synthetic property used if the asset is VOD (not-livestream).
-  VOD: shakaDemo.MessageIds.VOD,
+  VOD: 'VOD',
   // Set if the asset has at least one WebM stream.
-  WEBM: shakaDemo.MessageIds.WEBM,
+  WEBM: 'WebM',
   // Set if the asset has at least one mp4 stream.
-  MP4: shakaDemo.MessageIds.MP4,
+  MP4: 'MP4',
   // Set if the asset has at least one MPEG-2 TS stream.
-  MP2TS: shakaDemo.MessageIds.MP2TS,
+  MP2TS: 'MPEG-2 TS',
   // Set if the asset has at least one containerless stream (AAC, etc).
-  CONTAINERLESS: shakaDemo.MessageIds.CONTAINERLESS,
+  CONTAINERLESS: 'Containerless',
 
   // Set if the asset has at least one stream that is at least 720p.
-  HIGH_DEFINITION: shakaDemo.MessageIds.HIGH_DEFINITION,
+  HIGH_DEFINITION: 'High definition',
   // Set if the asset has at least one stream that is at least 4k.
-  ULTRA_HIGH_DEFINITION: shakaDemo.MessageIds.ULTRA_HIGH_DEFINITION,
+  ULTRA_HIGH_DEFINITION: 'Ultra-high definition',
 
   // Set if the asset has at least one stream that is surround sound.
-  SURROUND: shakaDemo.MessageIds.SURROUND,
+  SURROUND: 'Surround sound',
 
   // Set if the asset is a MPEG-DASH manifest.
-  DASH: shakaDemo.MessageIds.DASH,
+  DASH: 'DASH',
   // Set if the asset is an HLS manifest.
-  HLS: shakaDemo.MessageIds.HLS,
+  HLS: 'HLS',
   // Set if the asset is an MSS manifest.
-  MSS: shakaDemo.MessageIds.MSS,
+  MSS: 'MSS',
 
   // Set if the asset has at least one image stream.
-  THUMBNAILS: shakaDemo.MessageIds.THUMBNAILS,
+  THUMBNAILS: 'Thumbnails',
 
   // Set if the asset has LCEVC.
-  LCEVC: shakaDemo.MessageIds.LCEVC,
+  LCEVC: 'LCEVC',
 
   // Set if the asset has Low Latency mode.
-  LOW_LATENCY_STREAM: shakaDemo.MessageIds.LOW_LATENCY_STREAM,
+  LOW_LATENCY_STREAM: 'Low Latency Streams',
 };
 
 
@@ -360,6 +361,7 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel-ts-aes-key-rotation/master.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
+      .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.OFFLINE),
@@ -368,6 +370,7 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel-fmp4-aes/master.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
+      .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE),
@@ -948,6 +951,7 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://bitmovin-a.akamaihd.net/content/art-of-motion_drm/m3u8s/11331.m3u8',
       /* source= */ shakaAssets.Source.BITCODIN)
+      .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
@@ -1087,6 +1091,16 @@ shakaAssets.testAssets = [
         kind: 'subtitle',
         mime: 'text/vtt',
       }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Sintel (DASH, AES-128)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+      /* manifestUri= */ 'https://amssamples.streaming.mediaservices.windows.net/49b57c87-f5f3-48b3-ba22-c55cfdffa9cb/Sintel.ism/manifest(format=mpd-time-csf)',
+      /* source= */ shakaAssets.Source.AZURE_MEDIA_SERVICES)
+      .addKeySystem(shakaAssets.KeySystem.AES128)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.OFFLINE),
   // End Azure Media Services assets }}}
 
   // GPAC assets {{{

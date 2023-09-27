@@ -8,7 +8,6 @@ goog.provide('shakaDemo.AssetCard');
 
 goog.require('goog.asserts');
 goog.require('shakaAssets');
-goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.Tooltips');
 goog.requireType('ShakaDemoAssetInfo');
 
@@ -134,7 +133,7 @@ shakaDemo.AssetCard = class {
 
   /**
    * @param {string} icon
-   * @param {!shakaDemo.MessageIds} title
+   * @param {string} title
    * @private
    */
   addFeatureIcon_(icon, title) {
@@ -190,18 +189,17 @@ shakaDemo.AssetCard = class {
 
   /**
    * Modify an asset to make it clear that it is unsupported.
-   * @param {!shakaDemo.MessageIds} unsupportedReason
+   * @param {string} unsupportedReason
    */
   markAsUnsupported(unsupportedReason) {
     this.card_.classList.add('asset-card-unsupported');
-    this.makeUnsupportedButton_(
-        shakaDemo.MessageIds.UNSUPPORTED, unsupportedReason);
+    this.makeUnsupportedButton_('Not Available', unsupportedReason);
   }
 
   /**
    * Make a button that represents the lack of a working button.
-   * @param {?shakaDemo.MessageIds} buttonName
-   * @param {!shakaDemo.MessageIds} unsupportedReason
+   * @param {?string} buttonName
+   * @param {string} unsupportedReason
    * @return {!Element}
    * @private
    */
@@ -306,16 +304,15 @@ shakaDemo.AssetCard = class {
       return;
     }
 
-    this.makeYesNoDialogue_(parentDiv,
-        shakaDemo.MessageIds.DELETE_STORED_PROMPT, async () => {
-          deleteButton.disabled = true;
-          await this.asset_.unstoreCallback();
-        });
+    this.makeYesNoDialogue_(parentDiv, 'Delete the offline copy?', async () => {
+      deleteButton.disabled = true;
+      await this.asset_.unstoreCallback();
+    });
   }
 
   /**
    * @param {!Element} parentDiv
-   * @param {!shakaDemo.MessageIds} text
+   * @param {string} text
    * @param {function():Promise} callback
    * @private
    */
@@ -330,14 +327,14 @@ shakaDemo.AssetCard = class {
 
     const textElement = document.createElement('h2');
     textElement.classList.add('mdl-typography--title');
-    textElement.textContent = shakaDemoMain.getLocalizedString(text);
+    textElement.textContent = text;
     dialog.appendChild(textElement);
 
     const buttonsDiv = document.createElement('div');
     dialog.appendChild(buttonsDiv);
-    const makeButton = (textId, fn) => {
+    const makeButton = (text, fn) => {
       const button = document.createElement('button');
-      button.textContent = shakaDemoMain.getLocalizedString(textId);
+      button.textContent = text;
       button.classList.add('mdl-button');
       button.classList.add('mdl-button--colored');
       button.classList.add('mdl-js-button');
@@ -348,12 +345,12 @@ shakaDemo.AssetCard = class {
       buttonsDiv.appendChild(button);
       button.blur();
     };
-    makeButton(shakaDemo.MessageIds.PROMPT_YES, async () => {
+    makeButton('Yes', async () => {
       dialog.close();
       await callback();
       this.remakeButtons();
     });
-    makeButton(shakaDemo.MessageIds.PROMPT_NO, () => {
+    makeButton('No', () => {
       dialog.close();
     });
 
@@ -385,9 +382,9 @@ shakaDemo.AssetCard = class {
   /**
    * Adds a button to the bottom of the card that will call |onClick| when
    * clicked. For example, a play or delete button.
-   * @param {?shakaDemo.MessageIds} name
+   * @param {?string} name
    * @param {function()} onclick
-   * @param {shakaDemo.MessageIds=} yesNoDialogText
+   * @param {string=} yesNoDialogText
    * @return {!HTMLButtonElement}
    */
   addButton(name, onclick, yesNoDialogText) {
@@ -397,7 +394,7 @@ shakaDemo.AssetCard = class {
     button.classList.add('mdl-button--colored');
     button.classList.add('mdl-js-button');
     button.classList.add('mdl-js-ripple-effect');
-    button.textContent = name ? shakaDemoMain.getLocalizedString(name) : '';
+    button.textContent = name || '';
     button.addEventListener('click', () => {
       if (!button.hasAttribute('disabled')) {
         if (yesNoDialogText) {

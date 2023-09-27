@@ -646,6 +646,7 @@ describe('VttTextParser', () => {
             payload: 'Test',
             color: 'cyan',
             fontSize: '10px',
+            textCombineUpright: 'all',
             textShadow: textShadow,
           },
           {
@@ -654,6 +655,7 @@ describe('VttTextParser', () => {
             payload: 'Test2',
             color: 'cyan',
             fontSize: '10px',
+            textCombineUpright: 'all',
             textShadow: textShadow,
           },
         ],
@@ -663,6 +665,7 @@ describe('VttTextParser', () => {
         'color: cyan;\n'+
         'font-size: 10px;\n'+
         `text-shadow: ${textShadow};\n`+
+        'text-combine-upright: all;\n'+
         '}\n\n' +
         '00:00:20.000 --> 00:00:40.000\n' +
         'Test\n\n' +
@@ -761,16 +764,21 @@ describe('VttTextParser', () => {
               {
                 startTime: 50,
                 endTime: 60,
-                payload: 'Test',
+                payload: '',
                 fontWeight: Cue.fontWeight.BOLD,
-                fontStyle: Cue.fontStyle.NORMAL,
-              },
-              {
-                startTime: 50,
-                endTime: 60,
-                payload: '5',
-                fontWeight: Cue.fontWeight.BOLD,
-                fontStyle: Cue.fontStyle.ITALIC,
+                nestedCues: [
+                  {
+                    startTime: 50,
+                    endTime: 60,
+                    payload: 'Test',
+                  },
+                  {
+                    startTime: 50,
+                    endTime: 60,
+                    payload: '5',
+                    fontStyle: Cue.fontStyle.ITALIC,
+                  },
+                ],
               },
             ],
           },
@@ -801,16 +809,21 @@ describe('VttTextParser', () => {
               {
                 startTime: 80,
                 endTime: 90,
-                payload: 'Test ',
+                payload: '',
                 fontWeight: Cue.fontWeight.BOLD,
-                fontStyle: Cue.fontStyle.NORMAL,
-              },
-              {
-                startTime: 80,
-                endTime: 90,
-                payload: '7',
-                fontWeight: Cue.fontWeight.BOLD,
-                fontStyle: Cue.fontStyle.ITALIC,
+                nestedCues: [
+                  {
+                    startTime: 80,
+                    endTime: 90,
+                    payload: 'Test ',
+                  },
+                  {
+                    startTime: 80,
+                    endTime: 90,
+                    payload: '7',
+                    fontStyle: Cue.fontStyle.ITALIC,
+                  },
+                ],
               },
             ],
           },
@@ -900,6 +913,48 @@ describe('VttTextParser', () => {
         '<b>Test</b>\n\n' +
         '00:00:40.000 --> 00:00:50.000\n' +
         'Test2',
+        {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
+  });
+
+  it('supports ruby html tags', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 20,
+            endTime: 40,
+            payload: '',
+            nestedCues: [
+              {
+                startTime: 20,
+                endTime: 40,
+                payload: '',
+                rubyTag: 'ruby',
+                nestedCues: [
+                  {
+                    startTime: 20,
+                    endTime: 40,
+                    payload: 'Test',
+                  },
+                  {
+                    startTime: 20,
+                    endTime: 40,
+                    payload: '2',
+                    rubyTag: 'rt',
+                  },
+                  {
+                    startTime: 20,
+                    endTime: 40,
+                    payload: '3',
+                    rubyTag: 'rp',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        'WEBVTT\n\n' +
+        '00:00:20.000 --> 00:00:40.000\n' +
+        '<ruby>Test<rt>2</rt><rp>3</rp></ruby>',
         {periodStart: 0, segmentStart: 0, segmentEnd: 0, vttOffset: 0});
   });
 
@@ -998,14 +1053,22 @@ describe('VttTextParser', () => {
               {
                 startTime: 70,
                 endTime: 80,
-                payload: 'Test5.1',
+                payload: '',
                 color: 'red',
-              },
-              {
-                startTime: 70,
-                endTime: 80,
-                payload: 'Test5.2',
-                color: 'lime',
+                nestedCues: [
+                  {
+                    startTime: 70,
+                    endTime: 80,
+                    payload: 'Test5.1',
+                    color: 'red',
+                  },
+                  {
+                    startTime: 70,
+                    endTime: 80,
+                    payload: 'Test5.2',
+                    color: 'lime',
+                  },
+                ],
               },
             ],
           },
@@ -1185,9 +1248,17 @@ describe('VttTextParser', () => {
               {
                 startTime: 10,
                 endTime: 20,
-                payload: '2',
+                payload: '',
                 color: 'magenta',
-                fontStyle: Cue.fontStyle.ITALIC,
+                nestedCues: [
+                  {
+                    startTime: 10,
+                    endTime: 20,
+                    payload: '2',
+                    color: 'magenta',
+                    fontStyle: Cue.fontStyle.ITALIC,
+                  },
+                ],
               },
             ],
           },
@@ -1255,13 +1326,14 @@ describe('VttTextParser', () => {
     parser.setSequenceMode(sequenceMode);
     const result = parser.parseMedia(data, time);
 
-    const expected = cues.map((cue) => {
+    const checkCue = (cue) => {
       if (cue.nestedCues) {
-        cue.nestedCues = cue.nestedCues.map(
-            (nestedCue) => jasmine.objectContaining(nestedCue));
+        cue.nestedCues = cue.nestedCues.map((nestedCue) => checkCue(nestedCue));
       }
       return jasmine.objectContaining(cue);
-    });
+    };
+
+    const expected = cues.map(checkCue);
     expect(result).toEqual(expected);
   }
 

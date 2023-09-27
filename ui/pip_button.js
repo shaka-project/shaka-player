@@ -16,7 +16,6 @@ goog.require('shaka.ui.Localization');
 goog.require('shaka.ui.OverflowMenu');
 goog.require('shaka.ui.Utils');
 goog.require('shaka.util.Dom');
-goog.require('shaka.util.FakeEvent');
 goog.requireType('shaka.ui.Controls');
 
 
@@ -73,7 +72,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     // Don't display the button if PiP is not supported or not allowed.
     // TODO: Can this ever change? Is it worth creating the button if the below
     // condition is true?
-    if (!this.isPipAllowed_()) {
+    if (!this.controls.isPiPAllowed()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
     }
 
@@ -88,7 +87,7 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
         });
 
     this.eventManager.listen(this.pipButton_, 'click', () => {
-      this.onPipClick_();
+      this.controls.togglePiP();
     });
 
     this.eventManager.listen(this.localVideo_, 'enterpictureinpicture', () => {
@@ -106,117 +105,19 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.eventManager.listen(this.player, 'trackschanged', () => {
       this.onTracksChanged_();
     });
-  }
 
+    if ('documentPictureInPicture' in window) {
+      this.eventManager.listen(window.documentPictureInPicture, 'enter',
+          (e) => {
+            this.onEnterPictureInPicture_();
 
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isPipAllowed_() {
-    return ('documentPictureInPicture' in window) ||
-      (document.pictureInPictureEnabled && !this.video.disablePictureInPicture);
-  }
-
-
-  /**
-   * @return {!Promise}
-   * @private
-   */
-  async onPipClick_() {
-    try {
-      if ('documentPictureInPicture' in window) {
-        await this.toggleDocumentPictureInPicture_();
-        return;
-      }
-      if (!document.pictureInPictureElement) {
-        // If you were fullscreen, leave fullscreen first.
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
-        }
-        await this.video.requestPictureInPicture();
-      } else {
-        await document.exitPictureInPicture();
-      }
-    } catch (error) {
-      this.controls.dispatchEvent(new shaka.util.FakeEvent(
-          'error', (new Map()).set('detail', error)));
+            const event = /** @type {DocumentPictureInPictureEvent} */(e);
+            const pipWindow = event.window;
+            this.eventManager.listenOnce(pipWindow, 'pagehide', () => {
+              this.onLeavePictureInPicture_();
+            });
+          });
     }
-  }
-
-  /**
-   * The Document Picture-in-Picture API makes it possible to open an
-   * always-on-top window that can be populated with arbitrary HTML content.
-   * https://developer.chrome.com/docs/web-platform/document-picture-in-picture
-   * @private
-   */
-  async toggleDocumentPictureInPicture_() {
-    // Close Picture-in-Picture window if any.
-    if (window.documentPictureInPicture.window) {
-      window.documentPictureInPicture.window.close();
-      this.onLeavePictureInPicture_();
-      return;
-    }
-
-    // Open a Picture-in-Picture window.
-    const pipPlayer = this.videoContainer_;
-    const rectPipPlayer = pipPlayer.getBoundingClientRect();
-    const pipWindow = await window.documentPictureInPicture.requestWindow({
-      width: rectPipPlayer.width,
-      height: rectPipPlayer.height,
-    });
-
-    // Copy style sheets to the Picture-in-Picture window.
-    this.copyStyleSheetsToWindow_(pipWindow);
-
-    // Add placeholder for the player.
-    const parentPlayer = pipPlayer.parentNode || document.body;
-    const placeholder = this.videoContainer_.cloneNode(true);
-    placeholder.style.visibility = 'hidden';
-    placeholder.style.height = getComputedStyle(pipPlayer).height;
-    parentPlayer.appendChild(placeholder);
-
-    // Make sure player fits in the Picture-in-Picture window.
-    const styles = document.createElement('style');
-    styles.append(`[data-shaka-player-container] {
-      width: 100% !important; max-height: 100%}`);
-    pipWindow.document.head.append(styles);
-
-    // Move player to the Picture-in-Picture window.
-    pipWindow.document.body.append(pipPlayer);
-    this.onEnterPictureInPicture_();
-
-    // Listen for the PiP closing event to move the player back.
-    this.eventManager.listenOnce(pipWindow, 'pagehide', () => {
-      placeholder.replaceWith(/** @type {!Node} */(pipPlayer));
-    });
-  }
-
-  /** @private */
-  copyStyleSheetsToWindow_(win) {
-    const styleSheets = /** @type {!Iterable<*>} */(document.styleSheets);
-    const allCSS = [...styleSheets]
-        .map((sheet) => {
-          try {
-            return [...sheet.cssRules].map((rule) => rule.cssText).join('');
-          } catch (e) {
-            const link = /** @type {!HTMLLinkElement} */(
-              document.createElement('link'));
-
-            link.rel = 'stylesheet';
-            link.type = sheet.type;
-            link.media = sheet.media;
-            link.href = sheet.href;
-            win.document.head.appendChild(link);
-          }
-          return '';
-        })
-        .filter(Boolean)
-        .join('\n');
-    const style = document.createElement('style');
-
-    style.textContent = allCSS;
-    win.document.head.appendChild(style);
   }
 
   /** @private */
@@ -250,13 +151,14 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
     this.pipNameSpan_.textContent =
       this.localization.resolve(LocIds.PICTURE_IN_PICTURE);
 
-    const ariaLabel = document.pictureInPictureElement ?
+    const enabled = this.controls.isPiPEnabled();
+
+    const ariaLabel = enabled ?
         LocIds.EXIT_PICTURE_IN_PICTURE :
         LocIds.ENTER_PICTURE_IN_PICTURE;
     this.pipButton_.ariaLabel = this.localization.resolve(ariaLabel);
 
-    const currentPipState = document.pictureInPictureElement ?
-        LocIds.ON : LocIds.OFF;
+    const currentPipState = enabled ? LocIds.ON : LocIds.OFF;
 
     this.currentPipState_.textContent =
         this.localization.resolve(currentPipState);
@@ -271,11 +173,11 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
 
     if (isCasting) {
       // Picture-in-picture is not applicable if we're casting
-      if (this.isPipAllowed_()) {
+      if (this.controls.isPiPAllowed()) {
         shaka.ui.Utils.setDisplay(this.pipButton_, false);
       }
     } else {
-      if (this.isPipAllowed_()) {
+      if (this.controls.isPiPAllowed()) {
         shaka.ui.Utils.setDisplay(this.pipButton_, true);
       }
     }
@@ -290,12 +192,12 @@ shaka.ui.PipButton = class extends shaka.ui.Element {
    * @private
    */
   async onTracksChanged_() {
-    if (!this.isPipAllowed_()) {
+    if (!this.controls.isPiPAllowed()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
     } else if (this.player && this.player.isAudioOnly()) {
       shaka.ui.Utils.setDisplay(this.pipButton_, false);
-      if (document.pictureInPictureElement) {
-        await document.exitPictureInPicture();
+      if (this.controls.isPiPEnabled()) {
+        await this.controls.togglePiP();
       }
     } else {
       shaka.ui.Utils.setDisplay(this.pipButton_, true);

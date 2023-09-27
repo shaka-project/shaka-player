@@ -36,8 +36,8 @@ describe('Transmuxer Player', () => {
     // We must enable this, once it is resolved:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
     const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 116) {
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
+        chromeVersion && chromeVersion <= 118) {
       return false;
     }
     return true;
@@ -57,8 +57,8 @@ describe('Transmuxer Player', () => {
     // We must enable this, once it is resolved:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
     const chromeVersion = shaka.util.Platform.chromeVersion();
-    if (shaka.util.Platform.isEdge() &&
-        chromeVersion && chromeVersion <= 116) {
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
+        chromeVersion && chromeVersion <= 118) {
       return false;
     }
     return true;
@@ -273,12 +273,66 @@ describe('Transmuxer Player', () => {
 
       await player.unload();
     });
+
+    it('H.265 in TS', async () => {
+      const chromeVersion = shaka.util.Platform.chromeVersion();
+      if (shaka.util.Platform.isWindows() &&
+          chromeVersion && chromeVersion === 117) {
+        // It appears that Chrome 117 beta in Windows is incorrectly reporting
+        // H.265 in MediaCapabilities
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      const mimeType = 'video/mp4; codecs="hvc1.2.4.L123.B0"';
+      if (!MediaSource.isTypeSupported(mimeType)) {
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      await player.load('/base/test/test/assets/hls-ts-h265/hevc.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
   });
 
   describe('for muxed content', () => {
     it('H.264+AAC in TS', async () => {
       // eslint-disable-next-line max-len
       await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('H.265+AAC in TS', async () => {
+      const chromeVersion = shaka.util.Platform.chromeVersion();
+      if (shaka.util.Platform.isWindows() &&
+          chromeVersion && chromeVersion === 117) {
+        // It appears that Chrome 117 beta in Windows is incorrectly reporting
+        // H.265 in MediaCapabilities
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      if (!MediaSource.isTypeSupported('video/mp4; codecs="hvc1.1.6.L93.90"')) {
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-aac-h265/media.m3u8');
       await video.play();
       expect(player.isLive()).toBe(false);
 

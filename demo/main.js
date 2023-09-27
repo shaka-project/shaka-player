@@ -10,7 +10,6 @@ goog.provide('shakaDemo.Main');
 goog.require('ShakaDemoAssetInfo');
 goog.require('goog.asserts');
 goog.require('shakaDemo.CloseButton');
-goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.Utils');
 goog.require('shakaDemo.Visualizer');
 goog.require('shakaDemo.VisualizerButton');
@@ -122,9 +121,8 @@ shakaDemo.Main = class {
    * This does not dispatch the shaka-main-loaded event, so it will not cause
    * the nav bar buttons to be set up.
    * @param {!shaka.ui.Overlay.FailReasonCode} reasonCode
-   * @return {!Promise}
    */
-  async initFailed(reasonCode) {
+  initFailed(reasonCode) {
     this.initCommon_();
 
     // Set up version links, so the user can switch to compiled mode if
@@ -155,25 +153,19 @@ shakaDemo.Main = class {
       element.classList.add('disabled-by-fail');
     }
 
-    // Because the UI did not load, this will need to set up a localization
-    // object manually.
-    this.localization_ = new shaka.ui.Localization(/* fallbackLocale= */ 'en');
-    this.localization_.changeLocale(navigator.languages || []);
-    await this.setupLocalization_();
-
     // Process a synthetic error about lack of browser support.
     const severity = shaka.util.Error.Severity.CRITICAL;
     let href = '';
     let message = '';
     switch (reasonCode) {
       case shaka.ui.Overlay.FailReasonCode.NO_BROWSER_SUPPORT:
-        message = this.getLocalizedString(
-            shakaDemo.MessageIds.FAILURE_NO_BROWSER_SUPPORT);
+        message = 'Your browser is not supported!';
         href = 'https://github.com/shaka-project/shaka-player#' +
                 'platform-and-browser-support-matrix';
         break;
       case shaka.ui.Overlay.FailReasonCode.PLAYER_FAILED_TO_LOAD:
-        message = this.getLocalizedString(shakaDemo.MessageIds.FAILURE_MISC);
+        message = 'Shaka Player failed to load! If you are using an adblocker' +
+            ', try switching to compiled mode at the bottom of the page.';
         break;
     }
     this.handleError_(severity, message, href);
@@ -205,7 +197,7 @@ shakaDemo.Main = class {
     // Optionally enter noinput mode. This has to happen before setting up the
     // player.
     this.noInput_ = 'noinput' in this.getParams_();
-    await this.setupPlayer_();
+    this.setupPlayer_();
     this.readHash_();
     window.addEventListener('hashchange', () => this.hashChanged_());
 
@@ -392,11 +384,8 @@ shakaDemo.Main = class {
     ui.configure(uiConfig);
   }
 
-  /**
-   * @return {!Promise}
-   * @private
-   */
-  async setupPlayer_() {
+  /** @private */
+  setupPlayer_() {
     const video = /** @type {!HTMLVideoElement} */ (this.video_);
     const ui = video['ui'];
     this.player_ = ui.getControls().getPlayer();
@@ -443,7 +432,6 @@ shakaDemo.Main = class {
     });
 
     this.localization_ = this.controls_.getLocalization();
-    await this.setupLocalization_();
 
     const drawerCloseButton = document.getElementById('drawer-close-button');
     drawerCloseButton.addEventListener('click', () => {
@@ -479,50 +467,6 @@ shakaDemo.Main = class {
       this.hideElement_(drawerCloseButton);
     });
     this.hideElement_(drawerCloseButton);
-  }
-
-  /**
-   * @return {!Promise}
-   * @private
-   */
-  async setupLocalization_() {
-    // Set up localization lazy-loading.
-    const applyNewLocaleIfPossible = () => {
-      this.localizeHTMLElements_();
-      this.dispatchEventWithName_('shaka-main-locale-changed');
-    };
-    const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
-    this.localization_.addEventListener(UNKNOWN_LOCALES, (event) => {
-      for (const locale of event['locales']) {
-        // This will leave promise rejections uncaught; this is acceptable, as
-        // this function is actually expected to fail fairly often, and has
-        // built-in fallback behavior (from localization events) without needing
-        // to catch the promise rejection.
-        this.loadUILocale_(locale).then(() => {
-          if (locale == this.uiLocale_) {
-            applyNewLocaleIfPossible();
-          }
-        });
-      }
-    });
-    const LOCALE_CHANGED = shaka.ui.Localization.LOCALE_CHANGED;
-    this.localization_.addEventListener(LOCALE_CHANGED, (event) => {
-      applyNewLocaleIfPossible();
-    });
-    const initialLocaleLoads = [];
-    initialLocaleLoads.push(this.loadUILocale_(this.uiLocale_));
-    if (this.uiLocale_.includes('-')) {
-      // Also try to load the 'base' localization.
-      // This is so that, for example, the uiLocale_ is set to 'en-US', it will
-      // try to load 'en'.
-      initialLocaleLoads.push(this.loadUILocale_(this.uiLocale_.split('-')[0]));
-    }
-    if (!this.uiLocale_.startsWith('en')) {
-      // Load 'en' as a fallback option, if not already loaded.
-      initialLocaleLoads.push(this.loadUILocale_('en'));
-    }
-    await Promise.all(initialLocaleLoads);
-    this.localizeHTMLElements_();
   }
 
   /** @return {boolean} */
@@ -719,13 +663,13 @@ shakaDemo.Main = class {
    *
    * @param {!ShakaDemoAssetInfo} asset
    * @param {boolean} needOffline True if offline support is required.
-   * @return {?shakaDemo.MessageIds} unsupportedReason
+   * @return {?string} unsupportedReason
    *   Null if asset is supported.
    */
   getAssetUnsupportedReason(asset, needOffline) {
     if (needOffline &&
         (!shaka.offline.Storage.support() || !this.initialStoredList_)) {
-      return shakaDemo.MessageIds.UNSUPPORTED_NO_OFFLINE;
+      return 'Your browser does not support offline storage.';
     }
 
     if (asset.source == shakaAssets.Source.CUSTOM) {
@@ -736,19 +680,19 @@ shakaDemo.Main = class {
 
     // Is the asset disabled?
     if (asset.disabled) {
-      return shakaDemo.MessageIds.UNSUPPORTED_DISABLED;
+      return 'This asset is disabled.';
     }
 
     if (needOffline && !asset.features.includes(shakaAssets.Feature.OFFLINE)) {
-      return shakaDemo.MessageIds.UNSUPPORTED_NO_DOWNLOAD;
+      return 'This asset cannot be downloaded.';
     }
 
-    if (!asset.isClear()) {
+    if (!asset.isClear() && !asset.isAes128()) {
       const hasSupportedDRM = asset.drm.some((drm) => {
         return this.support_.drm[shakaAssets.identifierForKeySystem(drm)];
       });
       if (!hasSupportedDRM) {
-        return shakaDemo.MessageIds.UNSUPPORTED_NO_KEY_SUPPORT;
+        return 'Your browser does not support the required key systems.';
       }
       if (needOffline) {
         const hasSupportedOfflineDRM = asset.drm.some((drm) => {
@@ -757,7 +701,8 @@ shakaDemo.Main = class {
                  this.support_.drm[identifier].persistentState;
         });
         if (!hasSupportedOfflineDRM) {
-          return shakaDemo.MessageIds.UNSUPPORTED_NO_LICENSE_SUPPORT;
+          return 'Your browser does not support offline licenses for the ' +
+              'required key systems.';
         }
       }
     }
@@ -765,15 +710,15 @@ shakaDemo.Main = class {
     // Does the browser support the asset's manifest type?
     if (asset.features.includes(shakaAssets.Feature.DASH) &&
         !this.support_.manifest['mpd']) {
-      return shakaDemo.MessageIds.UNSUPPORTED_NO_DASH_SUPPORT;
+      return 'Your browser does not support MPEG-DASH manifests.';
     }
     if (asset.features.includes(shakaAssets.Feature.HLS) &&
         !this.support_.manifest['m3u8']) {
-      return shakaDemo.MessageIds.UNSUPPORTED_NO_HLS_SUPPORT;
+      return 'Your browser does not support HLS manifests.';
     }
     if (asset.features.includes(shakaAssets.Feature.MSS) &&
         !this.support_.manifest['ism']) {
-      return shakaDemo.MessageIds.UNSUPPORTED_NO_MSS_SUPPORT;
+      return 'Your browser does not support MSS manifests.';
     }
 
     // Does the asset contain a playable mime type?
@@ -794,7 +739,7 @@ shakaDemo.Main = class {
       return this.support_.media[type];
     });
     if (!hasSupportedMimeType) {
-      return shakaDemo.MessageIds.UNSUPPORTED_NO_FORMAT_SUPPORT;
+      return 'Your browser does not support the required video format.';
     }
 
     return null;
@@ -839,55 +784,6 @@ shakaDemo.Main = class {
    */
   getNativeControlsEnabled() {
     return this.nativeControlsEnabled_;
-  }
-
-  /**
-   * Look through all elements in the DOM, and look for things tagged as having
-   * a localized string. Then, localize them.
-   *
-   * @private
-   */
-  localizeHTMLElements_() {
-    for (const element of document.querySelectorAll('[localized-string]')) {
-      const key = element.getAttribute('localized-string');
-      const value = shakaDemo.MessageIds[key];
-      if (value) {
-        element.textContent = this.getLocalizedString(value);
-      }
-    }
-  }
-
-  /**
-   * @param {!shakaDemo.MessageIds} string
-   * @return {string}
-   */
-  getLocalizedString(string) {
-    return this.localization_.resolve(string);
-  }
-
-  /**
-   * @param {string} locale
-   * @return {!Promise}
-   * @private
-   */
-  async loadUILocale_(locale) {
-    if (!locale) {
-      return;
-    }
-
-    const load = async (urlBase) => {
-      const url = urlBase + '/locales/' + locale + '.json';
-
-      try {
-        const text = await this.loadText_(url);
-        const obj = /** @type {!Object.<string, string>} */(JSON.parse(text));
-        const map = new Map(Object.entries(obj));
-        this.localization_.insert(locale, map);
-      } catch (error) {
-        console.warn('Unable to load locale', locale, 'for url', url);
-      }
-    };
-    await Promise.all([load('../ui'), load('../demo')]);
   }
 
   /** @param {string} locale */
@@ -1810,7 +1706,6 @@ shakaDemo.Main = class {
     // Always show the new error if:
     //   1. there is no error showing currently
     //   2. the new error is more severe than the old one
-    // Sadly, we do not (yet?) have localizations for error messages.
     if (this.currentErrorSeverity_ == null ||
         severity > this.currentErrorSeverity_) {
       this.errorDisplayLink_.href = href;
