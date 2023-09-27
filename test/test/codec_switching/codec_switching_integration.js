@@ -46,11 +46,43 @@ describe('Codec Switching', () => {
   });
 
   describe('for audio', () => {
-    it('can switch codecs', async () => {
+    it('can switch codecs RELOAD', async () => {
       const preferredTextLanguage = 'en';
       player.configure({preferredTextLanguage: preferredTextLanguage});
       player.configure('streaming.mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
+
+      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
+      await video.play();
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      expect(player.isLive()).toBe(false);
+
+      let variants = player.getVariantTracks();
+
+      expect(variants.length).toBe(2);
+      expect(variants.find((v) => !!v.active).language).toBe('en');
+
+      player.selectAudioLanguage('es');
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
+
+      variants = player.getVariantTracks();
+
+      expect(variants.find((v) => !!v.active).language).toBe('es');
+
+      await player.unload();
+    });
+
+    it('can switch codecs SMOOTH', async () => {
+      if (shaka.util.Platform.supportsSmoothCodecSwitching() !=
+            shaka.config.CodecSwitchingStrategy.SMOOTH) {
+        pending('Mediasource.ChangeType is not considered ' +
+          'reliable on this device');
+      }
+      const preferredTextLanguage = 'en';
+      player.configure({preferredTextLanguage: preferredTextLanguage});
+      player.configure('streaming.mediaSource.codecSwitchingStrategy',
+          shaka.config.CodecSwitchingStrategy.SMOOTH);
 
       await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
       await video.play();
