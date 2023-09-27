@@ -462,10 +462,10 @@ shakaDemo.Config = class {
         .addBoolInput_('Insert fake encryption in init segments when needed ' +
             'by the platform.', 'mediaSource.insertFakeEncryptionInInit')
         .addSelectInput_(
-          'Codec Switching Strategy',
-          'mediaSource.codecSwitchingStrategy',
-          strategyOptions,
-          strategyOptionsNames);
+            'Codec Switching Strategy',
+            'mediaSource.codecSwitchingStrategy',
+            strategyOptions,
+            strategyOptionsNames);
   }
 
   /** @private */
