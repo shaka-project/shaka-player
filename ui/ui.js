@@ -243,11 +243,14 @@ shaka.ui.Overlay = class {
       forceLandscapeOnFullscreen: true,
       enableTooltips: false,
       keyboardSeekDistance: 5,
+      keyboardLargeSeekDistance: 60,
       fullScreenElement: this.videoContainer_,
     };
 
-    // Check AirPlay support
-    if (window.WebKitPlaybackTargetAvailabilityEvent) {
+    // eslint-disable-next-line no-restricted-syntax
+    if ('remote' in HTMLMediaElement.prototype) {
+      config.overflowMenuButtons.push('remote');
+    } else if (window.WebKitPlaybackTargetAvailabilityEvent) {
       config.overflowMenuButtons.push('airplay');
     }
 

@@ -84,8 +84,7 @@ shakaDemo.Visualizer = class {
     inputContainer.addRow(null, null);
     this.screenshotButton_ = document.createElement('button');
     inputContainer.latestElementContainer.appendChild(this.screenshotButton_);
-    this.screenshotButton_.textContent = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.VISUALIZER_SCREENSHOT_BUTTON);
+    this.screenshotButton_.textContent = 'Take Screenshot';
     this.screenshotButton_.classList.add('mdl-button');
     this.screenshotButton_.classList.add('mdl-button--colored');
     this.screenshotButton_.classList.add('mdl-js-button');
@@ -94,11 +93,10 @@ shakaDemo.Visualizer = class {
       this.takeScreenshot_();
     });
 
-    inputContainer.addRow(
-        shakaDemo.MessageIds.VISUALIZER_AUTO_SCREENSHOT_TOGGLE, null);
+    inputContainer.addRow('Take Screenshot On Stall', null);
     /** @private {!shakaDemo.BoolInput} */
     this.autoScreenshotToggle_ = new shakaDemo.BoolInput(
-        inputContainer, shakaDemo.MessageIds.VISUALIZER_AUTO_SCREENSHOT_TOGGLE,
+        inputContainer, 'Take Screenshot On Stall',
         (input) => {
           this.takeAutoScreenshots_ = input.checked;
         });

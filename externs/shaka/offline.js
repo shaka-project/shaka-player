@@ -114,6 +114,7 @@ shaka.extern.ManifestDB;
  * @typedef {{
  *   id: number,
  *   originalId: ?string,
+ *   groupId: ?string,
  *   primary: boolean,
  *   type: string,
  *   mimeType: string,
@@ -123,6 +124,7 @@ shaka.extern.ManifestDB;
  *   hdr: (string|undefined),
  *   kind: (string|undefined),
  *   language: string,
+ *   originalLanguage: (?string|undefined),
  *   label: ?string,
  *   width: ?number,
  *   height: ?number,
@@ -136,7 +138,8 @@ shaka.extern.ManifestDB;
  *   audioSamplingRate: ?number,
  *   spatialAudio: boolean,
  *   closedCaptions: Map.<string, string>,
- *   tilesLayout: (string|undefined)
+ *   tilesLayout: (string|undefined),
+ *   external: boolean
  * }}
  *
  * @property {number} id
@@ -144,6 +147,9 @@ shaka.extern.ManifestDB;
  * @property {?string} originalId
  *   The original ID, if any, that appeared in the manifest.  For example, in
  *   DASH, this is the "id" attribute of the Representation element.
+ * @property {?string} groupId
+ *   The ID of the stream's parent element. In DASH, this will be a unique
+ *   ID that represents the representation's parent adaptation element
  * @property {boolean} primary
  *   Whether the stream set was primary.
  * @property {string} type
@@ -162,6 +168,8 @@ shaka.extern.ManifestDB;
  *   The kind of text stream; undefined for audio/video.
  * @property {string} language
  *   The language of the stream; '' for video.
+ * @property {(?string|undefined)} originalLanguage
+ *   The original language, if any, that appeared in the manifest.
  * @property {?string} label
  *   The label of the stream; '' for video.
  * @property {?number} width
@@ -197,6 +205,9 @@ shaka.extern.ManifestDB;
  *   The value is a grid-item-dimension consisting of two positive decimal
  *   integers in the format: column-x-row ('4x3'). It describes the arrangement
  *   of Images in a Grid. The minimum valid LAYOUT is '1x1'.
+ * @property {boolean} external
+ *   Indicate if the stream was added externally.
+ *   Eg: external text tracks.
  */
 shaka.extern.StreamDB;
 

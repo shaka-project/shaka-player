@@ -46,9 +46,10 @@ shaka.extern.Transmuxer = class {
    * @param {?shaka.media.SegmentReference} reference The segment reference, or
    *   null for init segments
    * @param {number} duration
+   * @param {string} contentType
    * @return {!Promise.<!Uint8Array>}
    */
-  transmux(data, stream, reference, duration) {}
+  transmux(data, stream, reference, duration, contentType) {}
 };
 
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MPD mediaPresentationDuration="PT0M8.000S" minBufferTime="PT1S" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="static" xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:sea="urn:mpeg:dash:schema:sea:2012" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Period>
+    <AdaptationSet bitstreamSwitching="false" codecs="avc1.64000D" contentType="video" group="1" id="1" maxHeight="136" maxWidth="320" mimeType="video/mp4" profiles="ccff" segmentAlignment="true" startWithSAP="1">
+      <ContentProtection schemeIdUri="urn:mpeg:dash:sea:2012">
+        <sea:SegmentEncryption schemeIdUri="urn:mpeg:dash:sea:aes128-cbc:2013"/>
+        <sea:KeySystem keySystemUri="urn:mpeg:dash:sea:keysys:http:2013"/>
+        <sea:CryptoPeriod IV="0x3782A2D74219AE78CFADF642ABC5E68D" keyUriTemplate="license"/>
+      </ContentProtection>
+      <SegmentTemplate initialization="Fragments(video=i,format=mpd-time-csf)" media="Fragments(video=$Time$,format=mpd-time-csf)" timescale="10000000">
+        <SegmentTimeline>
+          <S d="20000000" r="4"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation bandwidth="395367" codecs="avc1.64000D" height="136" id="1_V_video_8" width="320"/>
+    </AdaptationSet>
+  </Period>
+</MPD>

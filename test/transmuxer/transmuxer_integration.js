@@ -22,6 +22,48 @@ describe('Transmuxer Player', () => {
   /** @type {!shaka.test.Waiter} */
   let waiter;
 
+  function isAc3Supported() {
+    if (!MediaSource.isTypeSupported('audio/mp4; codecs="ac-3"')) {
+      return false;
+    }
+    // AC3 is flaky in some Tizen devices, so we need omit it for now.
+    if (shaka.util.Platform.isTizen()) {
+      return false;
+    }
+    // It seems that AC3 on Edge Windows from github actions is not working
+    // (in the lab AC3 is working). The AC3 detection is currently hard-coded
+    // to true, which leads to a failure in GitHub's environment.
+    // We must enable this, once it is resolved:
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
+    const chromeVersion = shaka.util.Platform.chromeVersion();
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
+        chromeVersion && chromeVersion <= 118) {
+      return false;
+    }
+    return true;
+  }
+
+  function isEc3Supported() {
+    if (!MediaSource.isTypeSupported('audio/mp4; codecs="ec-3"')) {
+      return false;
+    }
+    // EC3 is flaky in some Tizen devices, so we need omit it for now.
+    if (shaka.util.Platform.isTizen()) {
+      return false;
+    }
+    // It seems that EC3 on Edge Windows from github actions is not working
+    // (in the lab EC3 is working). The EC3 detection is currently hard-coded
+    // to true, which leads to a failure in GitHub's environment.
+    // We must enable this, once it is resolved:
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1450313
+    const chromeVersion = shaka.util.Platform.chromeVersion();
+    if (shaka.util.Platform.isWindows() && shaka.util.Platform.isEdge() &&
+        chromeVersion && chromeVersion <= 118) {
+      return false;
+    }
+    return true;
+  }
+
   beforeAll(async () => {
     video = shaka.test.UiUtils.createVideoElement();
     document.body.appendChild(video);
@@ -29,20 +71,15 @@ describe('Transmuxer Player', () => {
         await shaka.test.Loader.loadShaka(getClientArg('uncompiled'));
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await shaka.test.TestScheme.createManifests(compiledShaka, '_compiled');
     player = new compiledShaka.Player(video);
 
-    // Make sure we are playing the lowest res available to avoid test flake
-    // based on network issues.  Note that disabling ABR and setting a low
-    // abr.defaultBandwidthEstimate would not be sufficient, because it
-    // would only affect the choice of track on the first period.  When we
-    // cross a period boundary, the default bandwidth estimate will no
-    // longer be in effect, and AbrManager may choose higher res tracks for
-    // the new period.  Using abr.restrictions.maxHeight will let us force
-    // AbrManager to the lowest resolution, which is its fallback when these
-    // soft restrictions cannot be met.
-    player.configure('abr.restrictions.maxHeight', 1);
     player.configure('mediaSource.forceTransmux', true);
+    player.configure('streaming.useNativeHlsOnSafari', false);
+
+    // Disable stall detection, which can interfere with playback tests.
+    player.configure('streaming.stallEnabled', false);
 
     // Grab event manager from the uncompiled library:
     eventManager = new shaka.util.EventManager();
@@ -63,106 +100,314 @@ describe('Transmuxer Player', () => {
     document.body.removeChild(video);
   });
 
-  it('raw AAC', async () => {
-    // eslint-disable-next-line max-len
-    const url = 'https://storage.googleapis.com/shaka-demo-assets/raw-hls-audio-only/manifest.m3u8';
+  describe('for audio', () => {
+    it('raw AAC', async () => {
+      await player.load('/base/test/test/assets/hls-raw-aac/manifest.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
-    video.play();
-    expect(player.isLive()).toBe(false);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+      await player.unload();
+    });
 
-    await player.unload();
+    it('raw MP3', async () => {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"')) {
+        pending('Codec MP3 in MP4 is not supported by the platform.');
+      }
+      await player.load('/base/test/test/assets/hls-raw-mp3/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('raw AC3', async () => {
+      if (!isAc3Supported()) {
+        pending('Codec AC-3 is not supported by the platform.');
+      }
+
+      await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('raw EC3', async () => {
+      if (!isEc3Supported()) {
+        pending('Codec EC-3 is not supported by the platform.');
+      }
+
+      await player.load('/base/test/test/assets/hls-raw-ac3/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('AAC in TS', async () => {
+      await player.load('/base/test/test/assets/hls-ts-aac/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('MP3 in TS', async () => {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"') &&
+        !MediaSource.isTypeSupported('audio/mpeg')) {
+        pending('Codec MP3 is not supported by the platform.');
+      }
+      // This tests is flaky in some Tizen devices, so we need omit it for now.
+      if (shaka.util.Platform.isTizen()) {
+        return;
+      }
+      await player.load('/base/test/test/assets/hls-ts-mp3/manifest.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('AC3 in TS', async () => {
+      if (!isAc3Supported()) {
+        pending('Codec AC-3 is not supported by the platform.');
+      }
+
+      await player.load('/base/test/test/assets/hls-ts-ac3/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('EC3 in TS', async () => {
+      if (!isEc3Supported()) {
+        pending('Codec EC-3 is not supported by the platform.');
+      }
+
+      await player.load('/base/test/test/assets/hls-ts-ec3/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
   });
 
-  it('raw MP3', async () => {
-    if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"')) {
-      return;
-    }
-    // eslint-disable-next-line max-len
-    const url = 'https://pl.streamingvideoprovider.com/mp3-playlist/playlist.m3u8';
+  describe('for video', () => {
+    it('H.264 in TS', async () => {
+      await player.load('/base/test/test/assets/hls-ts-h264/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
-    video.play();
-    expect(player.isLive()).toBe(false);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    // Play for 15 seconds, but stop early if the video ends.  If it takes
-    // longer than 45 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+      await player.unload();
+    });
 
-    await player.unload();
+    it('H.265 in TS', async () => {
+      const chromeVersion = shaka.util.Platform.chromeVersion();
+      if (shaka.util.Platform.isWindows() &&
+          chromeVersion && chromeVersion === 117) {
+        // It appears that Chrome 117 beta in Windows is incorrectly reporting
+        // H.265 in MediaCapabilities
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      const mimeType = 'video/mp4; codecs="hvc1.2.4.L123.B0"';
+      if (!MediaSource.isTypeSupported(mimeType)) {
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      await player.load('/base/test/test/assets/hls-ts-h265/hevc.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
   });
 
-  it('muxed H.264+AAC in TS', async () => {
-    // eslint-disable-next-line max-len
-    const url = 'https://cf-sf-video.wmspanel.com/local/raw/BigBuckBunny_320x180.mp4/playlist.m3u8';
+  describe('for muxed content', () => {
+    it('H.264+AAC in TS', async () => {
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-aac-h264/playlist.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
-    video.play();
-    expect(player.isLive()).toBe(false);
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+      await player.unload();
+    });
 
-    await player.unload();
-  });
+    it('H.265+AAC in TS', async () => {
+      const chromeVersion = shaka.util.Platform.chromeVersion();
+      if (shaka.util.Platform.isWindows() &&
+          chromeVersion && chromeVersion === 117) {
+        // It appears that Chrome 117 beta in Windows is incorrectly reporting
+        // H.265 in MediaCapabilities
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      if (!MediaSource.isTypeSupported('video/mp4; codecs="hvc1.1.6.L93.90"')) {
+        pending('Codec H.265 is not supported by the platform.');
+      }
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-aac-h265/media.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-  it('AAC in TS', async () => {
-    // eslint-disable-next-line max-len
-    const url = 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa_audio_1_stereo_128000.m3u8';
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
-    video.play();
-    expect(player.isLive()).toBe(false);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      await player.unload();
+    });
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    it('H.264+MP3 in TS', async () => {
+      if (!MediaSource.isTypeSupported('audio/mp4; codecs="mp3"')) {
+        pending('Codec MP3 in MP4 is not supported by the platform.');
+      }
 
-    await player.unload();
-  });
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-mp3-h264/index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
 
-  it('H.264 in TS', async () => {
-    // eslint-disable-next-line max-len
-    const url = 'https://storage.googleapis.com/shaka-demo-assets/apple-advanced-stream-ts/v2/prog_index.m3u8';
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
-    await player.load(url, /* startTime= */ null,
-        /* mimeType= */ undefined);
-    video.play();
-    expect(player.isLive()).toBe(false);
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
 
-    // Wait for the video to start playback.  If it takes longer than 10
-    // seconds, fail the test.
-    await waiter.waitForMovementOrFailOnTimeout(video, 10);
+      await player.unload();
+    });
 
-    // Play for 10 seconds, but stop early if the video ends.  If it takes
-    // longer than 30 seconds, fail the test.
-    await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 30);
+    it('H.264+AC3 in TS', async () => {
+      if (!isAc3Supported()) {
+        pending('Codec AC-3 is not supported by the platform.');
+      }
 
-    await player.unload();
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-ac3-h264/media.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
+
+    it('H.264+EC3 in TS', async () => {
+      if (!isEc3Supported()) {
+        pending('Codec EC-3 is not supported by the platform.');
+      }
+
+      // eslint-disable-next-line max-len
+      await player.load('/base/test/test/assets/hls-ts-muxed-ec3-h264/prog_index.m3u8');
+      await video.play();
+      expect(player.isLive()).toBe(false);
+
+      // Wait for the video to start playback.  If it takes longer than 10
+      // seconds, fail the test.
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      // Play for 15 seconds, but stop early if the video ends.  If it takes
+      // longer than 45 seconds, fail the test.
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 15, 45);
+
+      await player.unload();
+    });
   });
 });

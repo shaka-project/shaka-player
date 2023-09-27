@@ -7,15 +7,43 @@
 // Karma configuration
 // Install required modules by running "npm install"
 
-const Jimp = require('jimp');
+// lodash is an indirect dependency, depended on by Karma
+const _ = require('lodash');
 const fs = require('fs');
 const glob = require('glob');
+const Jimp = require('jimp');
 const path = require('path');
 const rimraf = require('rimraf');
 const {ssim} = require('ssim.js');
 const util = require('karma/common/util');
 const which = require('which');
 const yaml = require('js-yaml');
+
+/**
+ * Like Object.assign, but recursive and doesn't clobber objects and arrays.
+ * If two arrays are merged, they are concatenated.
+ * Ex:
+ *   mergeConfigs({ foo: 'bar', args: [1, 2, 3] },
+ *                { baz: 'blah', args: [4, 5, 6] })
+ *       => { foo: 'bar', baz: 'blah', args: [1, 2, 3, 4, 5, 6] }
+ *
+ * @param {Object} first
+ * @param {Object} second
+ * @return {Object}
+ */
+function mergeConfigs(first, second) {
+  return _.mergeWith(
+      first,
+      second,
+      (firstValue, secondValue) => {
+        // Merge arrays by concatenation.
+        if (Array.isArray(firstValue)) {
+          return firstValue.concat(secondValue);
+        }
+        // Use lodash's default merge behavior for everything else.
+        return undefined;
+      });
+}
 
 /**
  * @param {Object} config
@@ -78,7 +106,7 @@ module.exports = (config) => {
       }
 
       // Add standard WebDriver configs.
-      Object.assign(launcher, {
+      mergeConfigs(launcher, {
         base: 'WebDriver',
         config: {hostname: gridHostname, port: gridPort},
         pseudoActivityInterval: 20000,
@@ -87,8 +115,10 @@ module.exports = (config) => {
         version: metadata.version,
       });
 
-      if (metadata.extra_config) {
-        Object.assign(launcher, metadata.extra_config);
+      if (metadata.extra_configs) {
+        for (const config of metadata.extra_configs) {
+          mergeConfigs(launcher, config);
+        }
       }
     }
 
@@ -161,9 +191,6 @@ module.exports = (config) => {
       //   Babel polyfill, required for async/await
       'node_modules/@babel/polyfill/dist/polyfill.js',
 
-      // muxjs module next
-      'node_modules/mux.js/dist/mux.min.js',
-
       // codem-isoboxer module next
       'node_modules/codem-isoboxer/dist/iso_boxer.min.js',
 
@@ -207,6 +234,22 @@ module.exports = (config) => {
       {pattern: 'test/**/*.js', included: false},
       {pattern: 'test/test/assets/*', included: false},
       {pattern: 'test/test/assets/3675/*', included: false},
+      {pattern: 'test/test/assets/dash-aes-128/*', included: false},
+      {pattern: 'test/test/assets/hls-raw-aac/*', included: false},
+      {pattern: 'test/test/assets/hls-raw-ac3/*', included: false},
+      {pattern: 'test/test/assets/hls-raw-ec3/*', included: false},
+      {pattern: 'test/test/assets/hls-raw-mp3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-aac/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-ac3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-ec3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-h265/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-mp3/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-aac-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-aac-h265/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-ac3-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-mp3-h264/*', included: false},
+      {pattern: 'test/test/assets/hls-ts-muxed-ec3-h264/*', included: false},
       {pattern: 'dist/shaka-player.ui.js', included: false},
       {pattern: 'dist/locales.js', included: false},
       {pattern: 'demo/**/*.js', included: false},
@@ -324,6 +367,8 @@ module.exports = (config) => {
       },
 
       babelPreprocessor: {
+        // Cache results in .babel-cache
+        cachePath: '.babel-cache',
         options: {
           presets: ['@babel/preset-env'],
           // Add source maps so that backtraces refer to the original code.
@@ -606,15 +651,27 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
   }
 
   /**
+   * @param {karma.Launcher.Browser.spec} spec
    * @param {wd.remote} webDriverClient A WebDriver client, an object from the
    *   "wd" package, created by "wd.remote()".
    * @return {!Promise.<!Buffer>} A Buffer containing a PNG screenshot
    */
-  function getScreenshot(webDriverClient) {
+  function getScreenshot(spec, webDriverClient) {
     return new Promise((resolve, reject) => {
       webDriverClient.takeScreenshot((error, pngBase64) => {
         if (error) {
           reject(error);
+        } else if (pngBase64.error) {
+          // In some failure cases, pngBase64 is an object with "error",
+          // "message", and "stacktrace" fields.  This happens, for example,
+          // with a timeout from the screenshot command.  This is not an
+          // expected situation, so log it.  The extra newlines keep this from
+          // being overwritten on the terminal when running tests against many
+          // browsers at once.
+          console.log('\n\nUnexpected screenshot failure:\n' +
+              `  Error: ${JSON.stringify(pngBase64)}\n` +
+              `  WebDriver spec: ${JSON.stringify(spec)}\n\n\n`);
+          reject(pngBase64);
         } else {
           // Convert the screenshot to a binary buffer.
           resolve(Buffer.from(pngBase64, 'base64'));
@@ -638,7 +695,8 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
     }
 
     /** @type {!Buffer} */
-    const fullPageScreenshotData = await getScreenshot(webDriverClient);
+    const fullPageScreenshotData =
+        await getScreenshot(browser.spec, webDriverClient);
 
     // Crop the screenshot to the dimensions specified in the test.
     // Jimp is picky about types, so convert these strings to numbers.
@@ -757,7 +815,7 @@ function WebDriverScreenshotMiddlewareFactory(launcher) {
         // The result is cached for the sake of performance.
         if (webDriverClient.canTakeScreenshot === undefined) {
           try {
-            await getScreenshot(webDriverClient);
+            await getScreenshot(browser.spec, webDriverClient);
             webDriverClient.canTakeScreenshot = true;
           } catch (error) {
             webDriverClient.canTakeScreenshot = false;

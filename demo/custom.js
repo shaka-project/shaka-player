@@ -12,7 +12,6 @@ goog.require('ShakaDemoAssetInfo');
 goog.require('shakaDemo.AssetCard');
 goog.require('shakaDemo.Input');
 goog.require('shakaDemo.InputContainer');
-goog.require('shakaDemo.MessageIds');
 goog.require('shakaDemo.TextInput');
 
 /** @type {?shakaDemo.Custom} */
@@ -70,9 +69,6 @@ shakaDemo.Custom = class {
     });
     document.addEventListener('shaka-main-offline-progress', () => {
       this.updateOfflineProgress_();
-    });
-    document.addEventListener('shaka-main-locale-changed', () => {
-      this.remakeSavedList_();
     });
     document.addEventListener('shaka-main-page-changed', () => {
       if (!this.savedList_.childNodes.length &&
@@ -142,9 +138,8 @@ shakaDemo.Custom = class {
       const div = document.createElement('div');
       headersDiv.appendChild(div);
       const containerStyle = shakaDemo.InputContainer.Style.VERTICAL;
-      const headerText = shakaDemo.MessageIds.LICENSE_HEADER_TITLE;
       const container = new shakaDemo.InputContainer(
-          div, headerText, containerStyle,
+          div, 'License Header', containerStyle,
           /* docLink= */ null);
 
       const collisionCheckEntry = {
@@ -209,9 +204,7 @@ shakaDemo.Custom = class {
       const nameOnChange = (input) => {
         onChange(input.value, headerValue);
       };
-      const licenseHeaderName = shakaDemoMain.getLocalizedString(
-          shakaDemo.MessageIds.LICENSE_HEADER_NAME);
-      this.makeField_(container, licenseHeaderName, nameSetup, nameOnChange);
+      this.makeField_(container, 'Header Name', nameSetup, nameOnChange);
 
       const valueSetup = (input, container) => {
         if (headerValue) {
@@ -221,9 +214,7 @@ shakaDemo.Custom = class {
       const valueOnChange = (input) => {
         onChange(headerName, input.value);
       };
-      const licenseHeaderValue = shakaDemoMain.getLocalizedString(
-          shakaDemo.MessageIds.LICENSE_HEADER_VALUE);
-      this.makeField_(container, licenseHeaderValue, valueSetup, valueOnChange);
+      this.makeField_(container, 'Header Value', valueSetup, valueOnChange);
     };
     if (assetInProgress.licenseRequestHeaders.size == 0) {
       // It starts out with a single empty row, but each time you start filling
@@ -269,8 +260,8 @@ shakaDemo.Custom = class {
     const fullMimeTypeOnChange = (input) => {
       assetInProgress.setMediaPlaylistFullMimeType(input.value);
     };
-    const fullMimeTypeName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.HLS_FULL_MIME_TYPE);
+    const fullMimeTypeName =
+        'Full Mime Type for Playing Media Playlists Directly';
     this.makeField_(
         container, fullMimeTypeName, fullMimeTypeSetup, fullMimeTypeOnChange);
 
@@ -300,10 +291,7 @@ shakaDemo.Custom = class {
     const adTagOnChange = (input) => {
       assetInProgress.adTagUri = input.value;
     };
-    const adTagURLName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.AD_TAG_URL);
-    this.makeField_(
-        container, adTagURLName, adTagSetup, adTagOnChange);
+    this.makeField_(container, 'Ad Tag URL', adTagSetup, adTagOnChange);
 
     // Make the content source id field.
     const contentSrcIdSetup = (input, container) => {
@@ -319,8 +307,7 @@ shakaDemo.Custom = class {
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
-    const contentSrcIdName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.IMA_CONTENT_SRC_ID);
+    const contentSrcIdName = 'Content source ID (for VOD DAI Content)';
     this.makeField_(
         container, contentSrcIdName, contentSrcIdSetup, contentSrcIdOnChange);
 
@@ -338,10 +325,8 @@ shakaDemo.Custom = class {
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
-    const videoIdName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.IMA_VIDEO_ID);
-    this.makeField_(
-        container, videoIdName, videoIdSetup, videoIdOnChange);
+    const videoIdName = 'Video ID (for VOD DAI Content)';
+    this.makeField_(container, videoIdName, videoIdSetup, videoIdOnChange);
 
     // Make the asset key field.
     const assetKeySetup = (input, container) => {
@@ -357,10 +342,8 @@ shakaDemo.Custom = class {
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
-    const assetKeyName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.IMA_ASSET_KEY);
-    this.makeField_(
-        container, assetKeyName, assetKeySetup, assetKeyChange);
+    const assetKeyName = 'Asset key (for LIVE DAI Content)';
+    this.makeField_(container, assetKeyName, assetKeySetup, assetKeyChange);
 
     // Make the manifest type field.
     const manifestTypeSetup = (input, container) => {
@@ -376,8 +359,7 @@ shakaDemo.Custom = class {
       this.manifestField_.required =
         this.checkManifestRequired_(assetInProgress);
     };
-    const manifestTypeName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.IMA_MANIFEST_TYPE);
+    const manifestTypeName = 'Manifest type (for DAI Content)';
     this.makeField_(
         container, manifestTypeName, manifestTypeSetup, manifestTypeChange);
 
@@ -407,14 +389,14 @@ shakaDemo.Custom = class {
       const licenseServerURL = licenseServerUrlInput.value;
       const customDRMSystem = customDrmSystemInput.value;
       if (licenseServerURL) {
-        // Make a license server entry for every common DRM plugin.
         assetInProgress.licenseServers.clear();
-        for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
-          assetInProgress.licenseServers.set(drmSystem, licenseServerURL);
-        }
         if (customDRMSystem) {
-          // Make a custom entry too.
           assetInProgress.licenseServers.set(customDRMSystem, licenseServerURL);
+        } else {
+          // Make a license server entry for every common DRM plugin.
+          for (const drmSystem of shakaDemo.Main.commonDrmSystems) {
+            assetInProgress.licenseServers.set(drmSystem, licenseServerURL);
+          }
         }
       } else {
         assetInProgress.licenseServers.clear();
@@ -437,10 +419,8 @@ shakaDemo.Custom = class {
     const licenseOnChange = (input) => {
       setLicenseServerURLs();
     };
-    const licenseServerURLName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.LICENSE_SERVER_URL);
     this.makeField_(
-        container, licenseServerURLName, licenseSetup, licenseOnChange);
+        container, 'Custom License Server URL', licenseSetup, licenseOnChange);
 
     // Make the license certificate URL field.
     const certSetup = (input, container) => {
@@ -451,10 +431,8 @@ shakaDemo.Custom = class {
     const certOnChange = (input) => {
       assetInProgress.certificateUri = input.value;
     };
-    const licenseCertificateURLName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.LICENSE_CERTIFICATE_URL);
     this.makeField_(
-        container, licenseCertificateURLName, certSetup, certOnChange);
+        container, 'Custom License Certificate URL', certSetup, certOnChange);
 
     // Make the drm system field.
     const drmSetup = (input, container) => {
@@ -470,10 +448,7 @@ shakaDemo.Custom = class {
     const drmOnChange = (input) => {
       setLicenseServerURLs();
     };
-    const DRMSystemName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.DRM_SYSTEM);
-    this.makeField_(
-        container, DRMSystemName, drmSetup, drmOnChange);
+    this.makeField_(container, 'Custom DRM System', drmSetup, drmOnChange);
 
     return drmDiv;
   }
@@ -508,8 +483,7 @@ shakaDemo.Custom = class {
       // Make an error that shows up if you did not provide valid JSON.
       const error = document.createElement('span');
       error.classList.add('mdl-textfield__error');
-      error.textContent = shakaDemoMain.getLocalizedString(
-          shakaDemo.MessageIds.INVALID_JSON_CONFIG_ERROR);
+      error.textContent = 'Invalid JSON configuration';
 
       container.appendChild(error);
     };
@@ -526,8 +500,7 @@ shakaDemo.Custom = class {
         inputWrapper.setValid(false);
       }
     };
-    const extraConfigLabel = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.EXTRA_SHAKA_PLAYER_CONFIG);
+    const extraConfigLabel = 'Extra Shaka Player configuration (JSON)';
     this.makeField_(
         container, extraConfigLabel, extraSetup, extraOnChange,
         /* isTextArea= */ true);
@@ -557,8 +530,7 @@ shakaDemo.Custom = class {
       // Make an error that shows up if you did not provide an URL.
       const error = document.createElement('span');
       error.classList.add('mdl-textfield__error');
-      error.textContent = shakaDemoMain.getLocalizedString(
-          shakaDemo.MessageIds.MANIFEST_URL_ERROR);
+      error.textContent = 'Must have a manifest URL, or IMA DAI id fields';
       container.appendChild(error);
 
       // Add a regex that will detect empty strings.
@@ -567,12 +539,9 @@ shakaDemo.Custom = class {
       this.manifestField_ = input;
     };
     const manifestOnChange = (input) => {
-      assetInProgress.manifestUri = input.value;
+      assetInProgress.manifestUri = input.value.trim();
     };
-    const manifestURLName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.MANIFEST_URL);
-    this.makeField_(
-        container, manifestURLName, manifestSetup, manifestOnChange);
+    this.makeField_(container, 'Manifest URL', manifestSetup, manifestOnChange);
 
     // Make the name field.
     const nameSetup = (input, container) => {
@@ -582,8 +551,7 @@ shakaDemo.Custom = class {
       // Make an error that shows up if you have an empty/duplicate name.
       const error = document.createElement('span');
       error.classList.add('mdl-textfield__error');
-      error.textContent = shakaDemoMain.getLocalizedString(
-          shakaDemo.MessageIds.NAME_ERROR);
+      error.textContent = 'Must be a unique name.';
       container.appendChild(error);
 
       // Make a regex that will detect duplicates.
@@ -604,10 +572,7 @@ shakaDemo.Custom = class {
     const nameOnChange = (input) => {
       assetInProgress.name = input.value;
     };
-    const nameName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.NAME);
-    this.makeField_(
-        container, nameName, nameSetup, nameOnChange);
+    this.makeField_(container, 'Name', nameSetup, nameOnChange);
 
     // Make the icon field.
     const iconSetup = (input, container) => {
@@ -634,11 +599,7 @@ shakaDemo.Custom = class {
         iconDiv.appendChild(img);
       }
     };
-
-    const iconURLName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.ICON_URL);
-    this.makeField_(
-        container, iconURLName, iconSetup, iconOnChange);
+    this.makeField_(container, 'Icon URL', iconSetup, iconOnChange);
 
     // Make the MIME type field.
     const mimeTypeSetup = (input, container) => {
@@ -650,11 +611,7 @@ shakaDemo.Custom = class {
     const mimeTypeOnChange = (input) => {
       assetInProgress.mimeType = input.value || null;
     };
-
-    const mimeTypeName = shakaDemoMain.getLocalizedString(
-        shakaDemo.MessageIds.MIME_TYPE);
-    this.makeField_(
-        container, mimeTypeName, mimeTypeSetup, mimeTypeOnChange);
+    this.makeField_(container, 'MIME Type', mimeTypeSetup, mimeTypeOnChange);
 
     return mainDiv;
   }
@@ -681,9 +638,7 @@ shakaDemo.Custom = class {
     const finishDiv = document.createElement('tr');
 
     const buttonStyle = shakaDemo.Custom.ButtonStyle_.RAISED;
-    const saveString =
-        shakaDemoMain.getLocalizedString(shakaDemo.MessageIds.SAVE_BUTTON);
-    finishDiv.appendChild(this.makeButton_(saveString, buttonStyle, () => {
+    finishDiv.appendChild(this.makeButton_('Save', buttonStyle, () => {
       for (const input of inputsToCheck) {
         if (!input.validity.valid) {
           return;
@@ -695,9 +650,7 @@ shakaDemo.Custom = class {
       this.remakeSavedList_();
       this.dialog_.close();
     }));
-    const cancelString =
-        shakaDemoMain.getLocalizedString(shakaDemo.MessageIds.CANCEL_BUTTON);
-    finishDiv.appendChild(this.makeButton_(cancelString, buttonStyle, () => {
+    finishDiv.appendChild(this.makeButton_('Cancel', buttonStyle, () => {
       this.dialog_.close();
     }));
 
@@ -737,9 +690,8 @@ shakaDemo.Custom = class {
     const tabDiv = document.createElement('tr');
     const tabsToHide = [];
     const buttonsToSwitch = [];
-    const addTabButton = (messageId, tabToShow, startOn) => {
+    const addTabButton = (name, tabToShow, startOn) => {
       const buttonStyle = shakaDemo.Custom.ButtonStyle_.PLAIN;
-      const name = shakaDemoMain.getLocalizedString(messageId);
       const button = this.makeButton_(name, buttonStyle, () => {
         for (const tab of tabsToHide) {
           tab.classList.add('hidden');
@@ -759,18 +711,12 @@ shakaDemo.Custom = class {
         tabToShow.classList.add('hidden');
       }
     };
-    addTabButton(
-        shakaDemo.MessageIds.MAIN_TAB, mainDiv, /* startOn= */ true);
-    addTabButton(
-        shakaDemo.MessageIds.DRM_TAB, drmDiv, /* startOn= */ false);
-    addTabButton(
-        shakaDemo.MessageIds.HEADERS_TAB, headersDiv, /* startOn= */ false);
-    addTabButton(
-        shakaDemo.MessageIds.ADS_TAB, adsDiv, /* startOn= */ false);
-    addTabButton(
-        shakaDemo.MessageIds.HLS_TAB, hlsDiv, /* startOn= */ false);
-    addTabButton(
-        shakaDemo.MessageIds.EXTRA_TAB, extraConfigDiv, /* startOn= */ false);
+    addTabButton('Main', mainDiv, /* startOn= */ true);
+    addTabButton('Drm', drmDiv, /* startOn= */ false);
+    addTabButton('Headers', headersDiv, /* startOn= */ false);
+    addTabButton('Ads', adsDiv, /* startOn= */ false);
+    addTabButton('HLS', hlsDiv, /* startOn= */ false);
+    addTabButton('Extra Config', extraConfigDiv, /* startOn= */ false);
 
     // Append the divs in the desired order.
     this.dialog_.appendChild(tabDiv);
@@ -861,24 +807,24 @@ shakaDemo.Custom = class {
     const savedList = this.savedList_;
     const isFeatured = false;
     return new shakaDemo.AssetCard(savedList, asset, isFeatured, (c) => {
-      c.addButton(shakaDemo.MessageIds.PLAY, () => {
+      c.addButton('Play', () => {
         shakaDemoMain.loadAsset(asset);
         this.updateSelected_();
       });
-      c.addButton(shakaDemo.MessageIds.EDIT_CUSTOM, async () => {
+      c.addButton('Edit', async () => {
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
         }
         this.showAssetDialog_(asset);
       });
-      c.addButton(shakaDemo.MessageIds.DELETE_CUSTOM, async () => {
+      c.addButton('Delete', async () => {
         this.assets_.delete(asset);
         if (asset.unstoreCallback) {
           await asset.unstoreCallback();
         }
         this.saveAssetInfos_(this.assets_);
         this.remakeSavedList_();
-      }, shakaDemo.MessageIds.DELETE_CUSTOM);
+      }, 'Delete this custom asset?');
       c.addStoreButton();
     });
   }
@@ -905,15 +851,10 @@ shakaDemo.Custom = class {
         textElement.textContent = text;
         this.savedList_.appendChild(textElement);
       };
-      makeMessage('title',
-          shakaDemoMain.getLocalizedString(
-              shakaDemo.MessageIds.CUSTOM_INTRO_ONE));
-      makeMessage('body-2',
-          shakaDemoMain.getLocalizedString(
-              shakaDemo.MessageIds.CUSTOM_INTRO_TWO));
+      makeMessage('title', 'Try Shaka Player with your own content!');
+      makeMessage('body-2', 'Press the button below to add a custom asset.');
       makeMessage('body-1',
-          shakaDemoMain.getLocalizedString(
-              shakaDemo.MessageIds.CUSTOM_INTRO_THREE));
+          'Custom assets will remain even after reloading the page.');
     } else {
       // Make asset cards for the assets.
       this.assetCards_ = Array.from(this.assets_).map((asset) => {

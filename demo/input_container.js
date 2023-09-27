@@ -9,7 +9,6 @@ goog.provide('shakaDemo.InputContainer');
 
 
 goog.require('shakaDemo.Tooltips');
-goog.requireType('shakaDemo.MessageIds');
 
 /**
  * Creates elements for containing inputs. It represents a single "section" of
@@ -22,8 +21,8 @@ goog.requireType('shakaDemo.MessageIds');
 shakaDemo.InputContainer = class {
   /**
    * @param {!Element} parentDiv
-   * @param {?shakaDemo.MessageIds} headerText The text to be displayed by
-   *   the header. If null, there will be no header.
+   * @param {?string} headerText The text to be displayed by the header.
+   *   If null, there will be no header.
    * @param {!shakaDemo.InputContainer.Style} style
    * @param {?string} docLink
    */
@@ -46,7 +45,7 @@ shakaDemo.InputContainer = class {
     /** @type {?Element} */
     this.latestElementContainer;
 
-    /** @type {?shakaDemo.MessageIds} */
+    /** @type {?string} */
     this.latestTooltip;
 
     /** @private {number} */
@@ -101,7 +100,7 @@ shakaDemo.InputContainer = class {
 
   /**
    * @param {!Element} parentDiv
-   * @param {shakaDemo.MessageIds} headerText
+   * @param {string} headerText
    * @private
    */
   createHeader_(parentDiv, headerText) {
@@ -123,7 +122,7 @@ shakaDemo.InputContainer = class {
       this.header_ = document.createElement('div');
       this.header_.classList.add('input-header');
     }
-    this.header_.textContent = shakaDemoMain.getLocalizedString(headerText);
+    this.header_.textContent = headerText;
     parentDiv.appendChild(this.header_);
   }
 
@@ -170,8 +169,8 @@ shakaDemo.InputContainer = class {
 
   /**
    * Makes a row, for storing an input.
-   * @param {?shakaDemo.MessageIds} labelString
-   * @param {?shakaDemo.MessageIds} tooltipString
+   * @param {?string} labelString
+   * @param {?string} tooltipString
    * @param {string=} rowClass
    */
   addRow(labelString, tooltipString, rowClass) {
@@ -190,7 +189,7 @@ shakaDemo.InputContainer = class {
       label.setAttribute('for', elementId);
       label.classList.add('input-container-label');
       const labelText = document.createElement('b');
-      labelText.textContent = shakaDemoMain.getLocalizedString(labelString);
+      labelText.textContent = labelString;
       label.appendChild(labelText);
       this.latestRow_.appendChild(label);
     }

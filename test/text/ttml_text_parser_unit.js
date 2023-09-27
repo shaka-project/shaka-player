@@ -1147,6 +1147,31 @@ describe('TtmlTextParser', () => {
         {startTime: 62.05, endTime: 3723.2});
   });
 
+  it('supports textCombine setting', () => {
+    verifyHelper(
+        [
+          {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Test',
+            textCombineUpright: 'all',
+            writingMode: Cue.writingMode.VERTICAL_LEFT_TO_RIGHT,
+          },
+        ],
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling">' +
+        '<layout>' +
+        '<region xml:id="subtitleArea" ' +
+        'tts:writingMode="tb" ' +
+        'tts:textCombine="all"/>' +
+        '</layout>' +
+        '<body region="subtitleArea"><div>' +
+        '<p begin="01:02.05" end="01:02:03.200">Test</p>' +
+        '</div></body></tt>',
+        {periodStart: 0, segmentStart: 60, segmentEnd: 3730, vttOffset: 0},
+        {startTime: 62.05, endTime: 3723.2, region: {id: 'subtitleArea'}},
+        {startTime: 62.05, endTime: 3723.2});
+  });
+
   it('disregards empty divs and ps', () => {
     verifyHelper(
         [
@@ -1282,6 +1307,33 @@ describe('TtmlTextParser', () => {
         '<p begin="01:02.05" end="01:02:03.200" ' +
         'smpte:backgroundImage="#img_0" />' +
         '</div></body></tt>',
+        {periodStart: 0, segmentStart: 60, segmentEnd: 3730, vttOffset: 0},
+        {startTime: 62.05, endTime: 3723.2});
+  });
+
+  it('supports tts:ruby', () => {
+    verifyHelper(
+        [{
+          startTime: 62.05,
+          endTime: 3723.2,
+          payload: '',
+          nestedCues: [{
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Line1',
+          }, {
+            startTime: 62.05,
+            endTime: 3723.2,
+            payload: 'Line2',
+            rubyTag: 'rt',
+          }],
+          rubyTag: 'ruby',
+        }],
+        // With anonymous spans
+        '<tt xmlns:tts="http://www.w3.org/ns/ttml#styling"><body><div>' +
+        '<p begin="01:02.05" end="01:02:03.200" tts:ruby="container">' +
+        '<span tts:ruby="base">Line1</span><span tts:ruby="text">Line2' +
+        '</span></p></div></body></tt>',
         {periodStart: 0, segmentStart: 60, segmentEnd: 3730, vttOffset: 0},
         {startTime: 62.05, endTime: 3723.2});
   });
@@ -1866,9 +1918,8 @@ describe('TtmlTextParser', () => {
             endTime: 60,
             payload: '',
             fontSize: '15px',
-            // Styles from regionStyle should apply only to the nested cue.
-            backgroundColor: '',
-            color: '',
+            backgroundColor: 'transparent',
+            color: 'blue',
             displayAlign: Cue.displayAlign.CENTER,
             textAlign: Cue.textAlign.CENTER,
 
@@ -1970,7 +2021,7 @@ describe('TtmlTextParser', () => {
             startTime: 0,
             endTime: 60,
             payload: '',
-            fontSize: '',
+            fontSize: '16px',
             nestedCues: [
               {
                 startTime: 0,

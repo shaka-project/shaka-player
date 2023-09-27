@@ -41,9 +41,6 @@ shakaDemo.CloseButton = class extends shaka.ui.Element {
             });
           });
     }
-
-    // TODO: Make sure that the screenreader description of this control is
-    // localized!
   }
 };
 

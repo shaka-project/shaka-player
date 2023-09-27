@@ -115,11 +115,18 @@ shaka.test.UiUtils = class {
       // Destroying the UI destroys the controls and player inside.
       destroys.push(ui.destroy());
     }
-    await Promise.all(destroys);
+
+    const allDestroyed = Promise.all(destroys);
+    // 10 seconds should be more than enough to tear down the UI.
+    // Adding this silent timeout fixes several tests that inconsistently hang
+    // during teardown and cause failures in afterEach() clauses.
+    await Promise.race([allDestroyed, shaka.test.Util.delay(10)]);
 
     // Now remove all the containers from the DOM.
     for (const container of containers) {
-      container.parentElement.removeChild(container);
+      if (container.parentElement) {
+        container.parentElement.removeChild(container);
+      }
     }
   }
 
@@ -162,7 +169,11 @@ shaka.test.UiUtils = class {
     const video = /** @type {!HTMLVideoElement} */(document.createElement(
         'video'));
 
-    video.muted = true;
+    // Tizen has issues with audio-only playbacks on muted video elements.
+    // Don't mute Tizen.
+    if (!shaka.util.Platform.isTizen()) {
+      video.muted = true;
+    }
     video.width = 600;
     video.height = 400;
 

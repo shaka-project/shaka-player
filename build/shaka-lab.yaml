@@ -1,7 +1,7 @@
 # Selenium grid config for the Shaka lab.  This is the source of truth for the
 # browsers and devices in the Shaka lab at Google.
 
-# For syntax and general information, see docs/selenium-grid-config.md
+# For syntax and general information, see docs/tutorials/selenium-grid-config.md
 
 
 # A set of variables to contain repeated configurations which can then be
@@ -9,7 +9,7 @@
 # generates an "anchor" with the given name.  Later, you can inject the
 # contents of the variable with "*name".
 vars:
-  firefox_config: &firefox_config
+  basic_firefox_config: &basic_firefox_config
     moz:firefoxOptions:
       # Override Firefox default preferences in the temporary profile created
       # for each test run.
@@ -20,50 +20,61 @@ vars:
         # Overrides Firefox's Linux-specific default setting to disable DRM.
         media.eme.enabled: true
 
-  minimum_chrome_args: &minimum_chrome_args
-    # On Chrome m59+ we can test EME on platforms with pop-up prompts, such as
-    # Android and ChromeOS.  Note that this flag does not take a port number
-    # (domain vs origin).
-    # This flag requires setting --user-data-dir as well, however, webdriver
-    # already takes care of that for us (except on Android).
-    - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
-    # Normally, Chrome disallows autoplaying videos in many cases.  Enable it
-    # for testing.
-    - "--autoplay-policy=no-user-gesture-required"
-
-  minimum_chrome_android_args: &minimum_chrome_android_args
-    # There is no way in YAML to natively merge arrays, so we start by
-    # duplicating the flags from minimum_chrome_args above.
-    - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
-    - "--autoplay-policy=no-user-gesture-required"
-    # On Android we must set --user-data-dir.  WebDriver does not do it for
-    # us as it does on other platforms.  Without --user-data-dir,
-    # --unsafely-allow... does not work.
-    - "--user-data-dir=/data/data/com.android.chrome/cache"
-
-  minimum_chromeos_args: &minimum_chromeos_args
-    # There is no way in YAML to natively merge arrays, so we start by
-    # duplicating the flags from minimum_chrome_args above.
-    - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
-    - "--autoplay-policy=no-user-gesture-required"
-    # Allow remote attestation even though the device may be in dev mode.  This
-    # is critical for testing involving L1 content licenses.
-    - "--allow-ra-in-dev-mode"
-
-  chrome_config: &chrome_config
+  basic_chrome_config: &basic_chrome_config
     goog:chromeOptions:
-      args: *minimum_chrome_args
+      args:
+        # On Chrome m59+ we can test EME on platforms with pop-up prompts, such
+        # as Android and ChromeOS.  Note that this flag does not take a port
+        # number (domain vs origin).  This flag requires setting
+        # --user-data-dir as well, however, webdriver already takes care of
+        # that for us (except on Android).
+        - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
+        # Normally, Chrome disallows autoplaying videos in many cases.  Enable
+        # it for testing.
+        - "--autoplay-policy=no-user-gesture-required"
+        # Disable browser features that try to save power by suspending media,
+        # throttling timers, etc.
+        - "--disable-background-media-suspend"
+        - "--disable-background-timer-throttling"
+        - "--disable-backgrounding-occluded-windows"
 
-      # Instruct chromedriver not to disable component updater. The
-      # component updater must run in order for the Widevine CDM to be
-      # available when using a new user-data-dir.
-      # TODO(http://crbug.com/613581): Remove once Chrome bug is fixed.
+      # Instruct chromedriver not to disable component updater. The component
+      # updater must run in order for the Widevine CDM to be available when
+      # using a new user-data-dir.
       excludeSwitches:
         - "disable-component-update"
 
-  chrome_android_config: &chrome_android_config
+  basic_edge_config: &basic_edge_config
+    ms:edgeOptions:
+      args:
+        # Normally, Edge disallows autoplaying videos in many cases.  Enable it
+        # for testing.
+        - "--autoplay-policy=no-user-gesture-required"
+        # Disable browser features that try to save power by suspending media,
+        # throttling timers, etc.
+        - "--disable-background-media-suspend"
+        - "--disable-background-timer-throttling"
+        - "--disable-backgrounding-occluded-windows"
+
+      # Instruct edgedriver not to disable component updater. The component
+      # updater must run in order for the Widevine CDM to be available when
+      # using a new user-data-dir.
+      excludeSwitches:
+        - "disable-component-update"
+
+  # Work around https://github.com/MicrosoftEdge/EdgeWebDriver/issues/102#issuecomment-1710724173
+  # by specifying the binary path on Linux.
+  edge_linux_config: &edge_linux_config
+    ms:edgeOptions:
+      binary: /usr/bin/microsoft-edge
+
+  android_chrome_config: &android_chrome_config
     goog:chromeOptions:
-      args: *minimum_chrome_android_args
+      args:
+        # On Android we must set --user-data-dir.  WebDriver does not do it for
+        # us as it does on other platforms.  Without --user-data-dir,
+        # --unsafely-allow... does not work.
+        - "--user-data-dir=/data/data/com.android.chrome/cache"
 
       # Once the new session request reaches chromedriver, it will take
       # the androidPackage option as a request to start Chrome through
@@ -71,25 +82,56 @@ vars:
       androidPackage: com.android.chrome
 
   chromeos_config: &chromeos_config
-    # Pass these client-specified arguments through generic-webdriver-server.
+    # Pass Chrome arguments through generic-webdriver-server.
     # This array will be appended after "--" instead of being set through one
     # specific flag.  For example, with ["--foo", "--bar=baz"] in the args,
     # this would generate a command like:
     #   chromeos-webdriver-server.js -- --foo --bar=baz
     # Those parameters will be passed on to Chrome instead of used by the
     # WebDriver server.
-    generic:args: *minimum_chromeos_args
+    generic:args:
+      # On Chrome m59+ we can test EME on platforms with pop-up prompts, such
+      # as Android and ChromeOS.  Note that this flag does not take a port
+      # number (domain vs origin).  This flag requires setting
+      # --user-data-dir as well, however, webdriver already takes care of
+      # that for us (except on Android).
+      - "--unsafely-allow-protected-media-identifier-for-domain=karma.shakalab.rocks"
+      # Normally, Chrome disallows autoplaying videos in many cases.  Enable
+      # it for testing.
+      - "--autoplay-policy=no-user-gesture-required"
+      # Allow remote attestation even though the device may be in dev mode.  This
+      # is critical for testing involving L1 content licenses.
+      - "--allow-ra-in-dev-mode"
+      # Disable browser features that try to save power by suspending media,
+      # throttling timers, etc.
+      - "--disable-background-media-suspend"
+      - "--disable-background-timer-throttling"
+      - "--disable-backgrounding-occluded-windows"
 
+  safari_tp_config: &safari_tp_config
+    safari.options:
+      technologyPreview: true
+
+
+### Mac ###
 
 ChromeMac:
   browser: chrome
   os: Mac
-  extra_config: *chrome_config
+  extra_configs:
+    - *basic_chrome_config
 
 FirefoxMac:
   browser: firefox
   os: Mac
-  extra_config: *firefox_config
+  extra_configs:
+    - *basic_firefox_config
+
+EdgeMac:
+  browser: msedge
+  os: Mac
+  extra_configs:
+    - *basic_edge_config
 
 Safari:
   browser: safari
@@ -100,67 +142,77 @@ SafariTP:
   disabled: true
   browser: safari
   os: Mac
-  extra_config:
-    safari.options:
-      technologyPreview: true
+  extra_configs:
+    - *safari_tp_config
 
-EdgeMac:
-  browser: msedge
-  os: Mac
+
+### Windows ###
 
 ChromeWindows:
   browser: chrome
   os: Windows
-  extra_config: *chrome_config
+  extra_configs:
+    - *basic_chrome_config
 
 FirefoxWindows:
   browser: firefox
   os: Windows
-  extra_config: *firefox_config
-
-IE11:
-  # IE11 support has been removed from the latest release branch.
-  disabled: true
-  browser: internet explorer
-  os: Windows
-  extra_config:
-    se:ieOptions:
-      # The zoom setting must be checked, or screenshot tests will be way off!
-      ignoreZoomSetting: false
-      ignoreProtectedModeSettings: true
+  extra_configs:
+    - *basic_firefox_config
 
 Edge:
   browser: msedge
   os: Windows
+  extra_configs:
+    - *basic_edge_config
+
+
+### Linux ###
 
 ChromeLinux:
   browser: chrome
   os: Linux
-  extra_config: *chrome_config
+  extra_configs:
+    - *basic_chrome_config
 
 FirefoxLinux:
   browser: firefox
   os: Linux
-  extra_config: *firefox_config
+  extra_configs:
+    - *basic_firefox_config
 
 EdgeLinux:
   browser: msedge
   os: Linux
+  extra_configs:
+    - *basic_edge_config
+    - *edge_linux_config
+
+
+### Misc ###
 
 ChromeAndroid:
   browser: chrome
   os: Android
-  extra_config: *chrome_android_config
+  extra_configs:
+    - *basic_chrome_config
+    - *android_chrome_config
 
-Chromecast:
+ChromecastUltra:
   browser: chromecast
+  version: Ultra
+
+ChromecastGTV:
+  browser: chromecast
+  version: GTV
 
 Chromebook:
   # TODO(b/145916766): Persistent license tests failing
   disabled: true
   browser: chromeos
   version: Pixelbook
-  extra_config: *chromeos_config
+  extra_configs:
+    - *chromeos_config
 
 Tizen:
   browser: tizen

@@ -56,9 +56,9 @@ describe('MediaSourceEngine', () => {
   const buffer2 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (2));
   const buffer3 = /** @type {!ArrayBuffer} */ (/** @type {?} */ (3));
 
-  const fakeVideoStream = {mimeType: 'video/foo', drmInfos: []};
-  const fakeAudioStream = {mimeType: 'audio/foo', drmInfos: []};
-  const fakeTextStream = {mimeType: 'text/foo', drmInfos: []};
+  const fakeVideoStream = {mimeType: 'video/mp4', drmInfos: [{}]};
+  const fakeAudioStream = {mimeType: 'audio/mp4', drmInfos: []};
+  const fakeTextStream = {mimeType: 'text/mp4', drmInfos: []};
   const fakeTransportStream = {mimeType: 'tsMimetype', drmInfos: []};
 
   /** @type {shaka.extern.Stream} */
@@ -82,6 +82,10 @@ describe('MediaSourceEngine', () => {
 
   /** @type {!jasmine.Spy} */
   let createMediaSourceSpy;
+  /** @type {!jasmine.Spy} */
+  let requiresEncryptionInfoInAllInitSegmentsSpy;
+  /** @type {!jasmine.Spy} */
+  let fakeEncryptionSpy;
 
   /** @type {!shaka.media.MediaSourceEngine} */
   let mediaSourceEngine;
@@ -138,6 +142,12 @@ describe('MediaSourceEngine', () => {
     // eslint-disable-next-line no-restricted-syntax
     shaka.media.MediaSourceEngine.prototype.createMediaSource =
         Util.spyFunc(createMediaSourceSpy);
+
+    requiresEncryptionInfoInAllInitSegmentsSpy = spyOn(shaka.util.Platform,
+        'requiresEncryptionInfoInAllInitSegments').and.returnValue(false);
+
+    fakeEncryptionSpy = spyOn(shaka.media.ContentWorkarounds, 'fakeEncryption')
+        .and.callFake((data) => data + 100);
 
     // MediaSourceEngine uses video to:
     //  - set src attribute
@@ -269,8 +279,8 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.AUDIO, fakeAudioStream);
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       await mediaSourceEngine.init(initObject, false);
-      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('audio/foo');
-      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('video/foo');
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('audio/mp4');
+      expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledWith('video/mp4');
       expect(shaka.text.TextEngine).not.toHaveBeenCalled();
     });
 
@@ -394,6 +404,42 @@ describe('MediaSourceEngine', () => {
       initObject.set(ContentType.VIDEO, fakeVideoStream);
       initObject.set(ContentType.TEXT, fakeTextStream);
       await mediaSourceEngine.init(initObject, false);
+    });
+
+    it('should apply fake encryption by default', async () => {
+      requiresEncryptionInfoInAllInitSegmentsSpy.and.returnValue(true);
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ false);
+
+      expect(fakeEncryptionSpy).toHaveBeenCalled();
+
+      expect(videoSourceBuffer.appendBuffer)
+          .toHaveBeenCalledWith((buffer + 100));
+      videoSourceBuffer.updateend();
+
+      await p;
+    });
+
+    it('should not apply fake encryption when config is off', async () => {
+      requiresEncryptionInfoInAllInitSegmentsSpy.and.returnValue(true);
+
+      const config = shaka.util.PlayerConfiguration.createDefault().mediaSource;
+      config.insertFakeEncryptionInInit = false;
+
+      mediaSourceEngine.configure(config);
+
+      const p = mediaSourceEngine.appendBuffer(
+          ContentType.VIDEO, buffer, null, fakeStream,
+          /* hasClosedCaptions= */ false);
+
+      expect(fakeEncryptionSpy).not.toHaveBeenCalled();
+
+      expect(videoSourceBuffer.appendBuffer).toHaveBeenCalledWith(buffer);
+      videoSourceBuffer.updateend();
+
+      await p;
     });
 
     it('appends the given data', async () => {
@@ -666,60 +712,6 @@ describe('MediaSourceEngine', () => {
       await appendVideo;
 
       expect(videoSourceBuffer.timestampOffset).toBe(0.50);
-    });
-
-    it('calls abort before setting timestampOffset', async () => {
-      const simulateUpdate = async () => {
-        await Util.shortDelay();
-        videoSourceBuffer.updateend();
-      };
-      const initObject = new Map();
-      initObject.set(ContentType.VIDEO, fakeVideoStream);
-
-      await mediaSourceEngine.init(initObject, /* sequenceMode= */ true);
-
-      // First, mock the scenario where timestampOffset is set to help align
-      // text segments. In this case, SourceBuffer mode is still 'segments'.
-      let reference = dummyReference(0, 1000);
-      let appendVideo = mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, reference, fakeStream,
-          /* hasClosedCaptions= */ false);
-      // Wait for the first appendBuffer(), in segments mode.
-      await simulateUpdate();
-      // Next, wait for abort(), used to reset the parser state for a safe
-      // setting of timestampOffset. Shaka fakes an updateend event on abort(),
-      // so simulateUpdate() isn't needed.
-      await Util.shortDelay();
-      // Next, wait for remove(), used to clear the SourceBuffer from the
-      // initial append.
-      await simulateUpdate();
-      // Next, wait for the second appendBuffer(), falling through to normal
-      // operations.
-      await simulateUpdate();
-      // Lastly, wait for the function-scoped MediaSourceEngine#appendBuffer()
-      // promise to resolve.
-      await appendVideo;
-      expect(videoSourceBuffer.abort).toHaveBeenCalledTimes(1);
-
-      // Second, mock the scenario where timestampOffset is set during an
-      // unbuffered seek or adaptation. SourceBuffer mode is 'sequence' now.
-      reference = dummyReference(0, 1000);
-      appendVideo = mediaSourceEngine.appendBuffer(
-          ContentType.VIDEO, buffer, reference, fakeStream,
-          /* hasClosedCaptions= */ false, /* seeked= */ true);
-      // First, wait for abort(), used to reset the parser state for a safe
-      // setting of timestampOffset.
-      await Util.shortDelay();
-      // The subsequent setTimestampOffset() fakes an updateend event for us, so
-      // simulateUpdate() isn't needed.
-      await Util.shortDelay();
-      // Next, wait for the second appendBuffer(), falling through to normal
-      // operations.
-      await simulateUpdate();
-      // Lastly, wait for the function-scoped MediaSourceEngine#appendBuffer()
-      // promise to resolve.
-      await appendVideo;
-      expect(videoSourceBuffer.abort).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -1250,7 +1242,7 @@ describe('MediaSourceEngine', () => {
     });
 
     it('destroys text engines', async () => {
-      mediaSourceEngine.reinitText('text/vtt', false);
+      mediaSourceEngine.reinitText('text/vtt', false, false);
 
       await mediaSourceEngine.destroy();
       expect(mockTextEngine).toBeTruthy();

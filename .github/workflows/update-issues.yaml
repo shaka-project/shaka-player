@@ -10,6 +10,7 @@ on:
 
 permissions:
   issues: write
+  pull-requests: write
 
 jobs:
   update-issues:
@@ -22,7 +23,8 @@ jobs:
 
       - name: Update Issues
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use SHAKA_BOT_TOKEN if found, otherwise the default GITHUB_TOKEN.
+          GITHUB_TOKEN: ${{ secrets.SHAKA_BOT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           cd update-issues
           npm ci
