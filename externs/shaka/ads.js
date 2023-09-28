@@ -96,6 +96,21 @@ shaka.extern.IAdManager = class extends EventTarget {
 
   /**
    * @param {!HTMLElement} adContainer
+   * @param {!shaka.net.NetworkingEngine} networkingEngine
+   * @param {!HTMLMediaElement} video
+   */
+  initMediaTailor(adContainer, networkingEngine, video) {}
+
+  /**
+   * @param {string} url
+   * @param {Object} adsParams
+   * @param {string=} backupUrl
+   * @return {!Promise.<string>}
+   */
+  requestMediaTailorStream(url, adsParams, backupUrl) {}
+
+  /**
+   * @param {!HTMLElement} adContainer
    * @param {!HTMLMediaElement} video
    */
   initServerSide(adContainer, video) {}
@@ -118,6 +133,11 @@ shaka.extern.IAdManager = class extends EventTarget {
   getServerSideCuePoints() {}
 
   /**
+   * @return {!Array.<!shaka.extern.AdCuePoint>}
+   */
+  getCuePoints() {}
+
+  /**
    * Get statistics for the current playback session. If the player is not
    * playing content, this will return an empty stats object.
    */
@@ -127,6 +147,13 @@ shaka.extern.IAdManager = class extends EventTarget {
    * @param {shaka.extern.TimelineRegionInfo} region
    */
   onDashTimedMetadata(region) {}
+
+  /**
+   * Fired when the manifest is updated.
+   *
+   * @param {boolean} isLive
+   */
+  onManifestUpdated(isLive) {}
 
   /**
    * @param {shaka.extern.ID3Metadata} metadata
