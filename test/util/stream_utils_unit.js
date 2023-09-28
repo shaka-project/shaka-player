@@ -994,6 +994,10 @@ describe('StreamUtils', () => {
       if (!MediaSource.isTypeSupported('video/webm; codecs="vorbis"')) {
         pending('Codec vorbis is not supported by the platform.');
       }
+      // This test is flaky in some Tizen devices, due to codec restrictions.
+      if (shaka.util.Platform.isTizen()) {
+        pending('Skip flaky test in Tizen');
+      }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
         addVariant720Avc1(manifest);
         addVariant720Vp9(manifest);
