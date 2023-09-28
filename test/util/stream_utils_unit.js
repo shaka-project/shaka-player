@@ -866,7 +866,7 @@ describe('StreamUtils', () => {
         variant.bandwidth = 5058558;
         variant.addAudio(1, (stream) => {
           stream.bandwidth = 129998;
-          stream.codecs = 'opus';
+          stream.codecs = 'mp4a.40.2';
         });
         variant.addVideo(2, (stream) => {
           stream.bandwidth = 4928560;
@@ -896,7 +896,7 @@ describe('StreamUtils', () => {
         variant.bandwidth = 10850316;
         variant.addAudio(1, (stream) => {
           stream.bandwidth = 129998;
-          stream.codecs = 'opus';
+          stream.codecs = 'mp4a.40.2';
         });
         variant.addVideo(8, (stream) => {
           stream.bandwidth = 10784324;
@@ -1019,11 +1019,11 @@ describe('StreamUtils', () => {
       const variants =
           shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
               /* preferredVideoCodecs= */['vp09'],
-              /* preferredAudioCodecs= */['opus']);
+              /* preferredAudioCodecs= */['mp4a.40.2']);
 
       expect(variants.length).toBe(1);
       expect(variants[0].video.codecs).toBe(vp09Codecs);
-      expect(variants[0].audio.codecs).toBe('opus');
+      expect(variants[0].audio.codecs).toBe('mp4a.40.2');
     });
 
     it('chooses preferred video codecs', () => {
@@ -1043,7 +1043,7 @@ describe('StreamUtils', () => {
       expect(variants[0].video.codecs).toBe(vp09Codecs);
       expect(variants[0].audio.codecs).toBe('vorbis');
       expect(variants[1].video.codecs).toBe(vp09Codecs);
-      expect(variants[1].audio.codecs).toBe('opus');
+      expect(variants[1].audio.codecs).toBe('mp4a.40.2');
     });
 
     it('chooses preferred audio codecs', () => {
@@ -1057,13 +1057,13 @@ describe('StreamUtils', () => {
       const variants =
           shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
               /* preferredVideoCodecs= */['foo'],
-              /* preferredAudioCodecs= */['opus']);
+              /* preferredAudioCodecs= */['mp4a.40.2']);
 
       expect(variants.length).toBe(2);
       expect(variants[0].video.codecs).toBe(avc1Codecs);
-      expect(variants[0].audio.codecs).toBe('opus');
+      expect(variants[0].audio.codecs).toBe('mp4a.40.2');
       expect(variants[1].video.codecs).toBe(vp09Codecs);
-      expect(variants[1].audio.codecs).toBe('opus');
+      expect(variants[1].audio.codecs).toBe('mp4a.40.2');
     });
 
     it('chooses variants by decoding attributes', async () => {
