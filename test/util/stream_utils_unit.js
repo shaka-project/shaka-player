@@ -858,50 +858,47 @@ describe('StreamUtils', () => {
   });
 
   describe('chooseCodecsAndFilterManifest', () => {
-    const avc1Codecs = 'avc1.640028';
-    const vp09Codecs = 'vp09.00.40.08.00.02.02.02.00';
-
-    const addVariant1080Avc1 = (manifest) => {
+    const addVariant720Avc1 = (manifest) => {
       manifest.addVariant(0, (variant) => {
         variant.bandwidth = 5058558;
         variant.addAudio(1, (stream) => {
           stream.bandwidth = 129998;
-          stream.codecs = 'mp4a.40.2';
+          stream.mime('audio/mp4', 'mp4a.40.2');
         });
         variant.addVideo(2, (stream) => {
           stream.bandwidth = 4928560;
-          stream.codecs = avc1Codecs;
-          stream.size(1920, 1080);
+          stream.size(1280, 720);
+          stream.mime('video/mp4', 'avc1.640028');
+        });
+      });
+    };
+
+    const addVariant720Vp9 = (manifest) => {
+      manifest.addVariant(3, (variant) => {
+        variant.bandwidth = 4911000;
+        variant.addAudio(4, (stream) => {
+          stream.bandwidth = 129998;
+          stream.mime('audio/webm', 'vorbis');
+        });
+        variant.addVideo(5, (stream) => {
+          stream.bandwidth = 4781002;
+          stream.size(1280, 720);
+          stream.mime('video/webm', 'vp9');
         });
       });
     };
 
     const addVariant1080Vp9 = (manifest) => {
-      manifest.addVariant(3, (variant) => {
-        variant.bandwidth = 4911000;
-        variant.addAudio(4, (stream) => {
-          stream.bandwidth = 129998;
-          stream.codecs = 'vorbis';
-        });
-        variant.addVideo(5, (stream) => {
-          stream.bandwidth = 4781002;
-          stream.codecs = vp09Codecs;
-          stream.size(1920, 1080);
-        });
-      });
-    };
-
-    const addVariant2160Vp9 = (manifest) => {
       manifest.addVariant(6, (variant) => {
         variant.bandwidth = 10850316;
         variant.addAudio(1, (stream) => {
           stream.bandwidth = 129998;
-          stream.codecs = 'mp4a.40.2';
+          stream.mime('audio/mp4', 'mp4a.40.2');
         });
         variant.addVideo(8, (stream) => {
           stream.bandwidth = 10784324;
-          stream.codecs = vp09Codecs;
-          stream.size(3840, 2160);
+          stream.size(1920, 1080);
+          stream.mime('video/webm', 'vp9');
         });
       });
     };
@@ -991,10 +988,16 @@ describe('StreamUtils', () => {
     });
 
     it('should allow multiple codecs for codec switching', () => {
+      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+        pending('Codec VP9 is not supported by the platform.');
+      }
+      if (!MediaSource.isTypeSupported('video/webm; codecs="vorbis"')) {
+        pending('Codec vorbis is not supported by the platform.');
+      }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        addVariant1080Avc1(manifest);
+        addVariant720Avc1(manifest);
+        addVariant720Vp9(manifest);
         addVariant1080Vp9(manifest);
-        addVariant2160Vp9(manifest);
       });
 
       manifest.variants[0].video.bandwidth = 1;
@@ -1011,48 +1014,66 @@ describe('StreamUtils', () => {
     });
 
     it('chooses preferred audio and video codecs', () => {
+      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+        pending('Codec VP9 is not supported by the platform.');
+      }
+      if (!MediaSource.isTypeSupported('video/webm; codecs="vorbis"')) {
+        pending('Codec vorbis is not supported by the platform.');
+      }
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        addVariant1080Avc1(manifest);
+        addVariant720Avc1(manifest);
+        addVariant720Vp9(manifest);
         addVariant1080Vp9(manifest);
-        addVariant2160Vp9(manifest);
       });
       const variants =
           shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
-              /* preferredVideoCodecs= */['vp09'],
-              /* preferredAudioCodecs= */['mp4a.40.2']);
+              /* preferredVideoCodecs= */['vp9'],
+              /* preferredAudioCodecs= */['mp4a']);
 
       expect(variants.length).toBe(1);
-      expect(variants[0].video.codecs).toBe(vp09Codecs);
+      expect(variants[0].video.codecs).toBe('vp9');
       expect(variants[0].audio.codecs).toBe('mp4a.40.2');
     });
 
     it('chooses preferred video codecs', () => {
+      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+        pending('Codec VP9 is not supported by the platform.');
+      }
+      if (!MediaSource.isTypeSupported('video/webm; codecs="vorbis"')) {
+        pending('Codec vorbis is not supported by the platform.');
+      }
       // If no preferred audio codecs is specified or can be found, choose the
       // variants with preferred video codecs.
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        addVariant1080Avc1(manifest);
+        addVariant720Avc1(manifest);
+        addVariant720Vp9(manifest);
         addVariant1080Vp9(manifest);
-        addVariant2160Vp9(manifest);
       });
       const variants =
           shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
-              /* preferredVideoCodecs= */['vp09'],
+              /* preferredVideoCodecs= */['vp9'],
               /* preferredAudioCodecs= */[]);
 
       expect(variants.length).toBe(2);
-      expect(variants[0].video.codecs).toBe(vp09Codecs);
+      expect(variants[0].video.codecs).toBe('vp9');
       expect(variants[0].audio.codecs).toBe('vorbis');
-      expect(variants[1].video.codecs).toBe(vp09Codecs);
+      expect(variants[1].video.codecs).toBe('vp9');
       expect(variants[1].audio.codecs).toBe('mp4a.40.2');
     });
 
     it('chooses preferred audio codecs', () => {
+      if (!MediaSource.isTypeSupported('video/webm; codecs="vp9"')) {
+        pending('Codec VP9 is not supported by the platform.');
+      }
+      if (!MediaSource.isTypeSupported('video/webm; codecs="vorbis"')) {
+        pending('Codec vorbis is not supported by the platform.');
+      }
       // If no preferred video codecs is specified or can be found, choose the
       // variants with preferred audio codecs.
       manifest = shaka.test.ManifestGenerator.generate((manifest) => {
-        addVariant1080Avc1(manifest);
+        addVariant720Avc1(manifest);
+        addVariant720Vp9(manifest);
         addVariant1080Vp9(manifest);
-        addVariant2160Vp9(manifest);
       });
       const variants =
           shaka.util.StreamUtils.choosePreferredCodecs(manifest.variants,
@@ -1060,9 +1081,9 @@ describe('StreamUtils', () => {
               /* preferredAudioCodecs= */['mp4a.40.2']);
 
       expect(variants.length).toBe(2);
-      expect(variants[0].video.codecs).toBe(avc1Codecs);
+      expect(variants[0].video.codecs).toBe('avc1.640028');
       expect(variants[0].audio.codecs).toBe('mp4a.40.2');
-      expect(variants[1].video.codecs).toBe(vp09Codecs);
+      expect(variants[1].video.codecs).toBe('vp9');
       expect(variants[1].audio.codecs).toBe('mp4a.40.2');
     });
 
