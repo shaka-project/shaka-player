@@ -45,6 +45,74 @@ describe('Codec Switching', () => {
     document.body.removeChild(video);
   });
 
+  describe('for audio and only-audio content', () => {
+    it('can switch codecs RELOAD', async () => {
+      if (!MediaSource.isTypeSupported('audio/webm; codecs="opus"')) {
+        pending('Codec OPUS in WEBM is not supported by the platform.');
+      }
+      const preferredAudioLanguage = 'en';
+      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure('manifest.disableVideo', true);
+      player.configure('streaming.mediaSource.codecSwitchingStrategy',
+          shaka.config.CodecSwitchingStrategy.RELOAD);
+
+      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
+      await video.play();
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      expect(player.isLive()).toBe(false);
+
+      let variants = player.getVariantTracks();
+
+      expect(variants.length).toBe(2);
+      expect(variants.find((v) => !!v.active).language).toBe('en');
+
+      player.selectAudioLanguage('es');
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
+
+      variants = player.getVariantTracks();
+
+      expect(variants.find((v) => !!v.active).language).toBe('es');
+
+      await player.unload();
+    });
+
+    it('can switch codecs SMOOTH', async () => {
+      if (shaka.util.Platform.supportsSmoothCodecSwitching()) {
+        pending('Mediasource.ChangeType is not considered ' +
+          'reliable on this device');
+      }
+      if (!MediaSource.isTypeSupported('audio/webm; codecs="opus"')) {
+        pending('Codec OPUS in WEBM is not supported by the platform.');
+      }
+      const preferredAudioLanguage = 'en';
+      player.configure({preferredAudioLanguage: preferredAudioLanguage});
+      player.configure('manifest.disableVideo', true);
+      player.configure('streaming.mediaSource.codecSwitchingStrategy',
+          shaka.config.CodecSwitchingStrategy.SMOOTH);
+
+      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
+      await video.play();
+      await waiter.waitForMovementOrFailOnTimeout(video, 10);
+
+      expect(player.isLive()).toBe(false);
+
+      let variants = player.getVariantTracks();
+
+      expect(variants.length).toBe(2);
+      expect(variants.find((v) => !!v.active).language).toBe('en');
+
+      player.selectAudioLanguage('es');
+      await waiter.waitUntilPlayheadReachesOrFailOnTimeout(video, 10, 45);
+
+      variants = player.getVariantTracks();
+
+      expect(variants.find((v) => !!v.active).language).toBe('es');
+
+      await player.unload();
+    });
+  });
+
   describe('for audio', () => {
     it('can switch codecs RELOAD', async () => {
       if (!MediaSource.isTypeSupported('audio/webm; codecs="opus"')) {
