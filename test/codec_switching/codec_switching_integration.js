@@ -56,7 +56,7 @@ describe('Codec Switching', () => {
       player.configure('streaming.mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
-      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
+      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd', 9);
       await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
@@ -91,7 +91,7 @@ describe('Codec Switching', () => {
       player.configure('streaming.mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
-      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
+      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd', 9);
       await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
@@ -123,7 +123,7 @@ describe('Codec Switching', () => {
       player.configure('streaming.mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
-      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
+      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd', 9);
       await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 
@@ -157,7 +157,7 @@ describe('Codec Switching', () => {
       player.configure('streaming.mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
-      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd');
+      await player.load('/base/test/test/assets/dash-multi-codec/dash.mpd', 9);
       await video.play();
       await waiter.waitForMovementOrFailOnTimeout(video, 10);
 

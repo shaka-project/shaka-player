@@ -343,12 +343,6 @@ shaka.test.FakeMediaSourceEngine = class {
 
 
   /** @override */
-  isNecessaryCodecSwitch() {
-    return false;
-  }
-
-
-  /** @override */
   isNecessaryResetMediaSource() {
     return false;
   }
