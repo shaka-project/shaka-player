@@ -298,6 +298,16 @@ Shaka Player supports:
   - External WebVTT with images/sprites (only for VoD)
 
 
+## Monetization with Ads
+
+Shaka Player supports:
+- IMA SDK for Client-Side Ad Insertion
+- IMA DAI SDK for Server-Side Ad Insertion
+- AWS MediaTailor for Client-Side
+- AWS MediaTailor for Server-Side
+- AWS MediaTailor overlays
+
+
 ## Documentation & Important Links ##
 
  * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))

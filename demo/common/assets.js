@@ -40,6 +40,7 @@ shakaAssets.Source = {
   IRT: 'IRT',
   MICROSOFT: 'Microsoft',
   VNOVA: 'V-Nova',
+  AWS: 'AWS',
 };
 
 
@@ -1440,6 +1441,64 @@ shakaAssets.testAssets = [
           drawLogo: false,
         },
       }),
+  // }}}
+
+  // AWS assets {{{
+  /* MediaTailor Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor HLS',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://ad391cc0d55b44c6a86d232548adc225.mediatailor.us-east-1.amazonaws.com/v1/session/d02fedbbc5a68596164208dd24e9b48aa60dadc7/singssai/master.m3u8',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .setMediaTailor('https://ad391cc0d55b44c6a86d232548adc225.mediatailor.us-east-1.amazonaws.com/v1/session/d02fedbbc5a68596164208dd24e9b48aa60dadc7/singssai/master.m3u8'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor Live HLS',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/hls.m3u8',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/hls.m3u8'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor DASH',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-VOD-HLS-DASH/out/v1/b94f3611978f419985a18335bac9d9cb/ddb73bf548a44551a0059c346226445a/eaa5485198bf497284559efb8172425e/index.mpd',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-VOD-HLS-DASH/out/v1/b94f3611978f419985a18335bac9d9cb/ddb73bf548a44551a0059c346226445a/eaa5485198bf497284559efb8172425e/index.mpd',
+          {
+            adsParams: {
+              assetid: 'test2',
+              podduration: '15',
+            },
+          }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor Live DASH',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/dash.mpd',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/dash.mpd'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor Live HLS with overlays',
+      /* iconUri= */ '',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-Overlays/channel/sfp-channel2/hls.m3u8',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-Overlays/channel/sfp-channel2/hls.m3u8'),
   // }}}
 ];
 /* eslint-enable max-len */
