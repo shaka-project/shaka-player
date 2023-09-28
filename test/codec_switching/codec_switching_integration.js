@@ -78,7 +78,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (shaka.util.Platform.supportsSmoothCodecSwitching()) {
+      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
         pending('Mediasource.ChangeType is not considered ' +
           'reliable on this device');
       }
@@ -145,7 +145,7 @@ describe('Codec Switching', () => {
     });
 
     it('can switch codecs SMOOTH', async () => {
-      if (shaka.util.Platform.supportsSmoothCodecSwitching()) {
+      if (!shaka.util.Platform.supportsSmoothCodecSwitching()) {
         pending('Mediasource.ChangeType is not considered ' +
           'reliable on this device');
       }
