@@ -47,8 +47,11 @@ describe('Codec Switching', () => {
 
   describe('for audio', () => {
     it('can switch codecs RELOAD', async () => {
-      const preferredTextLanguage = 'en';
-      player.configure({preferredTextLanguage: preferredTextLanguage});
+      if (!MediaSource.isTypeSupported('audio/webm; codecs="opus"')) {
+        pending('Codec OPUS in WEBM is not supported by the platform.');
+      }
+      const preferredAudioLanguage = 'en';
+      player.configure({preferredAudioLanguage: preferredAudioLanguage});
       player.configure('streaming.mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.RELOAD);
 
@@ -79,8 +82,11 @@ describe('Codec Switching', () => {
         pending('Mediasource.ChangeType is not considered ' +
           'reliable on this device');
       }
-      const preferredTextLanguage = 'en';
-      player.configure({preferredTextLanguage: preferredTextLanguage});
+      if (!MediaSource.isTypeSupported('audio/webm; codecs="opus"')) {
+        pending('Codec OPUS in WEBM is not supported by the platform.');
+      }
+      const preferredAudioLanguage = 'en';
+      player.configure({preferredAudioLanguage: preferredAudioLanguage});
       player.configure('streaming.mediaSource.codecSwitchingStrategy',
           shaka.config.CodecSwitchingStrategy.SMOOTH);
 
