@@ -204,6 +204,16 @@ jobs:
           if-no-files-found: ignore
           retention-days: 5
 
+      - name: Debug
+        uses: mxschmitt/action-tmate@v3.6
+        with:
+          limit-access-to-actor: true
+        # Enable the repo variable ENABLE_DEBUG to debug failures in this
+        # workflow.
+        # FIXME: vars requires pull_request_target trigger
+        #if: failure() && vars.ENABLE_DEBUG != ''
+        if: failure()
+
   build_in_docker:
     # Don't waste time doing a full matrix of test runs when there was an
     # obvious linter error.
