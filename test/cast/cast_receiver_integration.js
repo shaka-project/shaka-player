@@ -139,6 +139,52 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
     }
   });
 
+  describe('state changed event', () => {
+    it('does not trigger a stack overflow', async () => {
+      const p = waitForLoadedData();
+
+      // We had a regression in which polling attributes eventually triggered a
+      // stack overflow because of a state change event that fired every time
+      // we checked the state.  The error itself got swallowed and hidden
+      // inside CastReceiver, but would cause tests to disconnect in some
+      // environments (consistently in GitHub Actions VMs, inconsistently
+      // elsewhere).
+      //
+      // Testing for this is subtle: if we try to catch the error, it will be
+      // caught at a point when the stack has already or is about to overflow.
+      // Then if we call "fail", Jasmine will grow the stack further,
+      // triggering *another* overflow inside of fail(), causing our test to
+      // *pass*.  So we need to fail fast.  The best way I have found is to
+      // catch the very first recursion of pollAttributes_, long before we
+      // overflow, fail, then return early to avoid the actual recursion.
+      const original = receiver.pollAttributes_;
+      let numRecursions = 0;
+      receiver.pollAttributes_ = function() {
+        try {
+          if (numRecursions > 0) {
+            fail('Found recursion in pollAttributes_!');
+            return;
+          }
+
+          numRecursions++;
+          return original.apply(this, arguments);
+        } finally {
+          numRecursions--;
+        }
+      };
+
+      // Start the process of loading by sending a fake init message.
+      fakeConnectedSenders(1);
+      fakeIncomingMessage({
+        type: 'init',
+        initState: fakeInitState,
+        appData: {},
+      }, mockShakaMessageBus);
+
+      await p;
+    });
+  });
+
   describe('without drm', () => {
     it('sends reasonably-sized updates', async () => {
       // Use an unencrypted asset.
