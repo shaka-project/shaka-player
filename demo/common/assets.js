@@ -151,7 +151,7 @@ shakaAssets.Feature = {
   LCEVC: shakaDemo.MessageIds.LCEVC,
 
   // Set if the asset has Low Latency mode.
-  LOW_LATENCY_STREAM: shakaDemo.MessageIds.LOW_LATENCY_STREAM,
+  LOW_LATENCY: shakaDemo.MessageIds.LOW_LATENCY,
 };
 
 
@@ -833,7 +833,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,
@@ -864,7 +864,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,
@@ -1259,7 +1259,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,

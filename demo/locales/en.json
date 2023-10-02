@@ -135,7 +135,7 @@
   "DEMO_LCEVC_DYNAMIC_PERFORMANCE_SCALING": "LCEVC Dynamic Performance scaling",
   "DEMO_LCEVC_LOG_LEVEL": "LCEVC Log Level",
   "DEMO_LCEVC_SECTION_HEADER": "MPEG-5 Part-2 LCEVC",
-  "DEMO_LOW_LATENCY_STREAM": "Low Latency Streams",
+  "DEMO_LOW_LATENCY": "Low Latency Stream",
   "DEMO_LIBRARIES": "Google Hosted Libraries",
   "DEMO_LICENSE": "Apache License",
   "DEMO_LICENSE_CERTIFICATE_URL": "Custom License Certificate URL",

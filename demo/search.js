@@ -374,7 +374,7 @@ shakaDemo.Search = class {
         }), SOURCE);
     this.makeSelectInput_(coreContainer,
         shakaDemo.MessageIds.LIVE_SEARCH,
-        [Feature.LIVE, Feature.VOD], FEATURE);
+        [Feature.LOW_LATENCY, Feature.LIVE, Feature.VOD], FEATURE);
 
     // Special terms.
     const containerStyle = shakaDemo.InputContainer.Style.FLEX;
@@ -403,8 +403,8 @@ shakaDemo.Search = class {
         shakaDemo.MessageIds.THUMBNAILS);
     this.makeBooleanInput_(specialContainer, Feature.LCEVC, FEATURE,
         shakaDemo.MessageIds.LCEVC);
-    this.makeBooleanInput_(specialContainer, Feature.LOW_LATENCY_STREAM,
-        FEATURE, shakaDemo.MessageIds.LOW_LATENCY_STREAM);
+    this.makeBooleanInput_(specialContainer, Feature.LOW_LATENCY,
+        FEATURE, shakaDemo.MessageIds.LOW_LATENCY);
 
     container.appendChild(this.resultsDiv_);
   }
