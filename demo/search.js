@@ -362,7 +362,7 @@ shakaDemo.Search = class {
           return term != shakaAssets.Source.CUSTOM;
         }), SOURCE);
     this.makeSelectInput_(coreContainer, 'Live',
-        [Feature.LIVE, Feature.VOD], FEATURE);
+        [Feature.LOW_LATENCY, Feature.LIVE, Feature.VOD], FEATURE);
 
     // Special terms.
     const containerStyle = shakaDemo.InputContainer.Style.FLEX;
@@ -393,8 +393,6 @@ shakaDemo.Search = class {
         'Filters for assets that have a thumbnail track.');
     this.makeBooleanInput_(specialContainer, Feature.LCEVC, FEATURE,
         'Filters for assets that have an LCEVC enhancement layer.');
-    this.makeBooleanInput_(specialContainer, Feature.LOW_LATENCY_STREAM,
-        FEATURE, 'Filters for assets that have a low-latency stream.');
 
     container.appendChild(this.resultsDiv_);
   }
