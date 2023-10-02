@@ -155,18 +155,41 @@
   .overlay-child();
 }
 
-.shaka-chapter {
-  .overlay-child();
-  display: "inline-block";
+.shaka-chapters {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  z-index: 0;
 }
 
-.shaka-chapter > p {
+.shaka-chapter {
+  height: 100%;
+  position: relative;
+}
+
+.shaka-chapter .chapter-label {
+  position: absolute;
+  top: -2.5em;
   width: 100%;
   text-align: center;
+  font-size: large;
+  font-weight: bold;
+  color: @track-default-color;
+  display: none;
 }
 
-.shaka-chapter > div {
+.shaka-chapter div:hover + .chapter-label {
+  display: block;
+}
+
+.shaka-chapter > div:first-child {
   width: 100%;
-  height: @thumb-size;
-  border: 0 2px 0 0;
+  height: 100%;
+  border-right: 2px solid;
+  position: absolute;
+}
+
+.shaka-chapter:last-child > div:first-child {
+  border-right: none;
 }
