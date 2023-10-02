@@ -95,3 +95,11 @@ LCEVCdec.SupportObject.SupportStatus;
  * @type {string}
  */
 LCEVCdec.SupportObject.SupportError;
+
+/**
+ * Typedef for the module interface.  Both LCEVCdec (new module) and LcevcDil
+ * (old module) implement roughly the same interface.
+ *
+ * @typedef {typeof LCEVCdec}
+ */
+var LCEVCmodule;
