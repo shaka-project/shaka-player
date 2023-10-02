@@ -91,6 +91,7 @@ describe('HlsParser', () => {
       updateDuration: () => {},
       newDrmInfo: shaka.test.Util.spyFunc(newDrmInfoSpy),
       onManifestUpdated: () => {},
+      getBandwidthEstimate: () => 1e6,
     };
 
     parser = new shaka.hls.HlsParser();

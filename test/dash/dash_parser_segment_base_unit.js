@@ -41,6 +41,7 @@ describe('DashParser SegmentBase', () => {
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
+      getBandwidthEstimate: () => 1e6,
     };
   });
 

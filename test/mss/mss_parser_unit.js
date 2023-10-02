@@ -80,6 +80,7 @@ describe('MssParser Manifest', () => {
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
+      getBandwidthEstimate: () => 1e6,
     };
   });
 
