@@ -537,7 +537,7 @@ function downloadContent(manifestUri, title) {
     'downloaded': Date()
   };
 
-  return window.storage.store(manifestUri, metadata);
+  return window.storage.store(manifestUri, metadata).promise;
 }
 
 /*
