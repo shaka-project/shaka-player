@@ -60,6 +60,7 @@ describe('DashParser Manifest', () => {
   });
 
   afterEach(() => {
+    // Dash parser stop is synchronous.
     parser.stop();
   });
 
