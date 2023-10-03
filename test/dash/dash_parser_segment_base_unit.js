@@ -43,6 +43,11 @@ describe('DashParser SegmentBase', () => {
     };
   });
 
+  afterEach(() => {
+    // Dash parser stop is synchronous.
+    parser.stop();
+  });
+
   it('requests init data for WebM', async () => {
     const source = [
       '<MPD mediaPresentationDuration="PT75S">',
