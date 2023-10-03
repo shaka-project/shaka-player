@@ -148,14 +148,14 @@ HLS features **not** supported:
 
 **Only supported on browsers with Media Source Extensions SourceBuffer support**
 
- - MPEG-5 Part2 LCEVC decoding support (decoding provided by [lcevc_dil.js][], must be
+ - MPEG-5 Part2 LCEVC decoding support (decoding provided by [lcevc_dec.js][], must be
    separately included)
 
  - Integration documentation : [docs](docs/design/lcevc-integration.md)
 
  - More on [MPEG-5 Part2 LCEVC][]
 
-[lcevc_dil.js]: https://www.npmjs.com/package/lcevc_dil.js
+[lcevc_dec.js]: https://www.npmjs.com/package/lcevc_dec.js
 [MPEG-5 Part2 LCEVC]: https://www.lcevc.org
 
 
@@ -296,6 +296,16 @@ Shaka Player supports:
   - Internal DASH thumbnails. Using DASH-IF IOP Image Adaptation Set
   - Internal HLS thumbnails. Using HLS Image Media Playlist
   - External WebVTT with images/sprites (only for VoD)
+
+
+## Monetization with Ads
+
+Shaka Player supports:
+- IMA SDK for Client-Side Ad Insertion
+- IMA DAI SDK for Server-Side Ad Insertion
+- AWS MediaTailor for Client-Side
+- AWS MediaTailor for Server-Side
+- AWS MediaTailor overlays
 
 
 ## Documentation & Important Links ##

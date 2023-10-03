@@ -40,6 +40,7 @@ shakaAssets.Source = {
   IRT: 'IRT',
   MICROSOFT: 'Microsoft',
   VNOVA: 'V-Nova',
+  AWS: 'AWS',
 };
 
 
@@ -152,7 +153,7 @@ shakaAssets.Feature = {
   LCEVC: 'LCEVC',
 
   // Set if the asset has Low Latency mode.
-  LOW_LATENCY_STREAM: 'Low Latency Streams',
+  LOW_LATENCY: 'Low Latency',
 };
 
 
@@ -836,7 +837,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,
@@ -867,7 +868,7 @@ shakaAssets.testAssets = [
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,
@@ -1268,12 +1269,12 @@ shakaAssets.testAssets = [
   new ShakaDemoAssetInfo(
       /* name= */ 'Low Latency HLS Live',
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/apple_test_pattern.png',
-      /* manifestUri= */ 'https://ll-hls-test.apple.com/cmaf/master.m3u8',
+      /* manifestUri= */ 'https://ll-hls-test.cdn-apple.com/llhls4/ll-hls-test-04/multi.m3u8',
       /* source= */ shakaAssets.Source.APPLE)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.LIVE)
       .addFeature(shakaAssets.Feature.MP4)
-      .addFeature(shakaAssets.Feature.LOW_LATENCY_STREAM)
+      .addFeature(shakaAssets.Feature.LOW_LATENCY)
       .setExtraConfig({
         streaming: {
           lowLatencyMode: true,
@@ -1363,6 +1364,31 @@ shakaAssets.testAssets = [
       /* source= */ shakaAssets.Source.VNOVA)
       .addFeature(shakaAssets.Feature.DASH)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.OFFLINE)
+      .addFeature(shakaAssets.Feature.LCEVC)
+      .addDescription('LCEVC Enhanced eSports content selection.')
+      .setExtraConfig({
+        streaming: {
+          useNativeHlsOnSafari: false,
+        },
+        mediaSource: {
+          forceTransmux: true,
+        },
+        lcevc: {
+          enabled: true,
+          dynamicPerformanceScaling: true,
+          logLevel: 0,
+          drawLogo: false,
+        },
+      }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Tears of Steel LCEVC H264 (HLS, MP4)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/tears_of_steel.png',
+      /* manifestUri= */ 'https://d3mfda3gpj3dw1.cloudfront.net/vn2LvEps745ShGtQ/master.m3u8',
+      /* source= */ shakaAssets.Source.VNOVA)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE)
       .addFeature(shakaAssets.Feature.LCEVC)
@@ -1440,6 +1466,64 @@ shakaAssets.testAssets = [
           drawLogo: false,
         },
       }),
+  // }}}
+
+  // AWS assets {{{
+  /* MediaTailor Contents */
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor HLS',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sing.png',
+      /* manifestUri= */ 'https://ad391cc0d55b44c6a86d232548adc225.mediatailor.us-east-1.amazonaws.com/v1/session/d02fedbbc5a68596164208dd24e9b48aa60dadc7/singssai/master.m3u8',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .setMediaTailor('https://ad391cc0d55b44c6a86d232548adc225.mediatailor.us-east-1.amazonaws.com/v1/session/d02fedbbc5a68596164208dd24e9b48aa60dadc7/singssai/master.m3u8'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor Live HLS',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/hls.m3u8',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/hls.m3u8'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor DASH',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-VOD-HLS-DASH/out/v1/b94f3611978f419985a18335bac9d9cb/ddb73bf548a44551a0059c346226445a/eaa5485198bf497284559efb8172425e/index.mpd',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-VOD-HLS-DASH/out/v1/b94f3611978f419985a18335bac9d9cb/ddb73bf548a44551a0059c346226445a/eaa5485198bf497284559efb8172425e/index.mpd',
+          {
+            adsParams: {
+              assetid: 'test2',
+              podduration: '15',
+            },
+          }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor Live DASH',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/big_buck_bunny.png',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/dash.mpd',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-DASH/channel/sfp-channel1/dash.mpd'),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Media Tailor Live HLS with overlays',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/re_mars.png',
+      /* manifestUri= */ 'https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-Overlays/channel/sfp-channel2/hls.m3u8',
+      /* source= */ shakaAssets.Source.AWS)
+      .addFeature(shakaAssets.Feature.HLS)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.MP2TS)
+      .addFeature(shakaAssets.Feature.LIVE)
+      .setMediaTailor('https://d305rncpy6ne2q.cloudfront.net/v1/session/94063eadf7d8c56e9e2edd84fdf897826a70d0df/SFP-MediaTailor-Live-HLS-Overlays/channel/sfp-channel2/hls.m3u8'),
   // }}}
 ];
 /* eslint-enable max-len */
