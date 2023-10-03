@@ -47,13 +47,15 @@ shaka.test.Dash = class {
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
     };
-    const manifest = await dashParser.start('dummy://foo', playerInterface);
-    const stream = manifest.variants[0].video;
-    await stream.createSegmentIndex();
+    try {
+      const manifest = await dashParser.start('dummy://foo', playerInterface);
+      const stream = manifest.variants[0].video;
+      await stream.createSegmentIndex();
 
-    shaka.test.ManifestParser.verifySegmentIndex(stream, references);
-
-    dashParser.stop();
+      shaka.test.ManifestParser.verifySegmentIndex(stream, references);
+    } finally {
+      dashParser.stop();
+    }
   }
 
   /**
@@ -86,11 +88,14 @@ shaka.test.Dash = class {
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
     };
-    const p = dashParser.start('dummy://foo', playerInterface);
-    await expectAsync(p).toBeRejectedWith(
-        shaka.test.Util.jasmineError(expectedError));
 
-    dashParser.stop();
+    try {
+      const p = dashParser.start('dummy://foo', playerInterface);
+      await expectAsync(p).toBeRejectedWith(
+          shaka.test.Util.jasmineError(expectedError));
+    } finally {
+      dashParser.stop();
+    }
   }
 
   /**
