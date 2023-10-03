@@ -110,7 +110,8 @@ shaka.extern.ManifestParser = class {
  *   enableLowLatencyMode: function(),
  *   updateDuration: function(),
  *   newDrmInfo: function(shaka.extern.Stream),
- *   onManifestUpdated: function()
+ *   onManifestUpdated: function(),
+ *   getBandwidthEstimate: function():number
  * }}
  *
  * @description
@@ -147,6 +148,8 @@ shaka.extern.ManifestParser = class {
  *   stream.
  * @property {function()} onManifestUpdated
  *   Should be called when the manifest is updated.
+ * @property {function():number} getBandwidthEstimate
+ *   Get the estimated bandwidth in bits per second.
  * @exportDoc
  */
 shaka.extern.ManifestParser.PlayerInterface;

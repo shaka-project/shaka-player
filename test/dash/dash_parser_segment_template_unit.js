@@ -50,6 +50,7 @@ describe('DashParser SegmentTemplate', () => {
       updateDuration: () => {},
       newDrmInfo: (stream) => {},
       onManifestUpdated: () => {},
+      getBandwidthEstimate: () => 1e6,
     };
   });
 
