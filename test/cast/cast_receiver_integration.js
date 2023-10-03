@@ -157,17 +157,18 @@ filterDescribe('CastReceiver', castReceiverIntegrationSupport, () => {
       // *pass*.  So we need to fail fast.  The best way I have found is to
       // catch the very first recursion of pollAttributes_, long before we
       // overflow, fail, then return early to avoid the actual recursion.
-      const original = receiver.pollAttributes_;
+      const original = /** @type {?} */(receiver).pollAttributes_;
       let numRecursions = 0;
-      receiver.pollAttributes_ = function() {
+      // eslint-disable-next-line no-restricted-syntax
+      /** @type {?} */(receiver).pollAttributes_ = function() {
         try {
           if (numRecursions > 0) {
             fail('Found recursion in pollAttributes_!');
-            return;
+            return undefined;
           }
 
           numRecursions++;
-          return original.apply(this, arguments);
+          return original.apply(receiver, arguments);
         } finally {
           numRecursions--;
         }
