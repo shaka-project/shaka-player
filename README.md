@@ -308,6 +308,18 @@ Shaka Player supports:
 - AWS MediaTailor overlays
 
 
+## Content Steering support
+Shaka Player supports Content Steering (v1) in DASH and HLS.
+
+Content Steering features supported:
+- TTL, if missing, the default value is 300 seconds.
+- RELOAD-URI, if missing we use the url provided in the manifest as fallback.
+- PATHWAY-PRIORITY only HOST replacement
+
+Content Steering features **not** supported:
+- PATHWAY-CLONES other replacements than HOST.
+
+
 ## Documentation & Important Links ##
 
  * [Demo](https://shaka-player-demo.appspot.com)([sources](demo/))
