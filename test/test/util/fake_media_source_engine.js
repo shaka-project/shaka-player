@@ -343,7 +343,7 @@ shaka.test.FakeMediaSourceEngine = class {
 
 
   /** @override */
-  isNecessaryResetMediaSource() {
+  isResetMediaSourceNecessary() {
     return false;
   }
 
