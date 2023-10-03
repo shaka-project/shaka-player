@@ -1240,9 +1240,10 @@ shaka.extern.StreamingConfiguration;
  *   Media source configuration.
  *
  * @property {shaka.config.CodecSwitchingStrategy} codecSwitchingStrategy
- *   Allow codec switching strategy. Default behavior is disabled.
- *   Smooth loading uses SourceBuffer.changeType. Reload uses cycling of
- *   MediaSource.
+ *   Allow codec switching strategy. SMOOTH loading uses
+ *   SourceBuffer.changeType. RELOAD uses cycling of MediaSource.
+ *   Defaults to SMOOTH if SMOOTH codec switching is supported, RELOAD
+ *   overwise.
  * @property {string} sourceBufferExtraFeatures
  *   Some platforms may need to pass features when initializing the
  *   sourceBuffer.
