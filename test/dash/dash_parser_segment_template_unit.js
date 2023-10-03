@@ -53,6 +53,11 @@ describe('DashParser SegmentTemplate', () => {
     };
   });
 
+  afterEach(() => {
+    // Dash parser stop is synchronous.
+    parser.stop();
+  });
+
   shaka.test.Dash.makeTimelineTests(
       'SegmentTemplate', 'media="s$Number$.mp4"', []);
 

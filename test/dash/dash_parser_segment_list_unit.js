@@ -371,5 +371,7 @@ describe('DashParser SegmentList', () => {
     ];
     const actual = Array.from(stream.segmentIndex);
     expect(actual).toEqual(expected);
+
+    dashParser.stop();
   });
 });

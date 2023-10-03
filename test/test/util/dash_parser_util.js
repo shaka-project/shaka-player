@@ -52,6 +52,8 @@ shaka.test.Dash = class {
     await stream.createSegmentIndex();
 
     shaka.test.ManifestParser.verifySegmentIndex(stream, references);
+
+    dashParser.stop();
   }
 
   /**
@@ -87,6 +89,8 @@ shaka.test.Dash = class {
     const p = dashParser.start('dummy://foo', playerInterface);
     await expectAsync(p).toBeRejectedWith(
         shaka.test.Util.jasmineError(expectedError));
+
+    dashParser.stop();
   }
 
   /**

@@ -58,6 +58,11 @@ describe('DashParser Manifest', () => {
     };
   });
 
+  afterEach(() => {
+    // Dash parser stop is synchronous.
+    parser.stop();
+  });
+
   /**
    * Makes a series of tests for the given manifest type.
    *
