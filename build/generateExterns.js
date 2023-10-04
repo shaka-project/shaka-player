@@ -626,6 +626,11 @@ function createExternAssignment(name, node, alwaysIncludeConstructor) {
       // Example extern: /** @const {string} */ foo.version;
       return '';
 
+    case 'BinaryExpression':
+      // Example code: /** @const {string} @export */ foo.version = 'a' + 'b';
+      // Example extern: /** @const {string} */ foo.version;
+      return '';
+
     default:
       assert.fail('Unexpected export type: ' + node.type);
       return '';  // Shouldn't be hit, but linter wants a return statement.
