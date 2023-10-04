@@ -743,7 +743,7 @@ shakaDemo.Main = class {
       return shakaDemo.MessageIds.UNSUPPORTED_NO_DOWNLOAD;
     }
 
-    if (!asset.isClear()) {
+    if (!asset.isClear() && !asset.isAes128()) {
       const hasSupportedDRM = asset.drm.some((drm) => {
         return this.support_.drm[shakaAssets.identifierForKeySystem(drm)];
       });

@@ -6,6 +6,7 @@
   "DEMO_AD_TAG_URL": "Ad Tag URL",
   "DEMO_ADS_TAB": "Ads",
   "DEMO_ADS_SECTION_HEADER": "Ads",
+  "DEMO_AES128": "AES-128 protection",
   "DEMO_ALL_CONTENT": "ALL CONTENT",
   "DEMO_ALWAYS_STREAM_TEXT": "Always Stream Text",
   "DEMO_ALWAYS_STREAM_TEXT_WARNING": "Text must always be streamed while native controls are enabled, for captions to work.",

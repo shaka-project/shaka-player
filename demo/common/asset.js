@@ -167,6 +167,11 @@ const ShakaDemoAssetInfo = class {
     return this.drm.length == 1 && this.drm[0] == shakaAssets.KeySystem.CLEAR;
   }
 
+  /** @return {boolean} */
+  isAes128() {
+    return this.drm.length == 1 && this.drm[0] == shakaAssets.KeySystem.AES128;
+  }
+
   /**
    * @param {string} mediaPlaylistFullMimeType
    * @return {!ShakaDemoAssetInfo}

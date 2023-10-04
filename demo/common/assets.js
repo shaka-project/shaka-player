@@ -50,6 +50,7 @@ shakaAssets.KeySystem = {
   FAIRPLAY: shakaDemo.MessageIds.FAIRPLAY,
   PLAYREADY: shakaDemo.MessageIds.PLAYREADY,
   WIDEVINE: shakaDemo.MessageIds.WIDEVINE,
+  AES128: shakaDemo.MessageIds.AES128,
   CLEAR: shakaDemo.MessageIds.CLEAR,
 };
 
@@ -88,6 +89,7 @@ shakaAssets.identifierForKeySystem = (keySystem) => {
     case KeySystem.FAIRPLAY: return 'com.apple.fps';
     case KeySystem.PLAYREADY: return 'com.microsoft.playready';
     case KeySystem.WIDEVINE: return 'com.widevine.alpha';
+    case KeySystem.AES128: return 'aes128';
     default: return 'no drm protection';
   }
 };
@@ -360,6 +362,7 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel-ts-aes-key-rotation/master.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
+      .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
       .addFeature(shakaAssets.Feature.OFFLINE),
@@ -368,6 +371,7 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
       /* manifestUri= */ 'https://storage.googleapis.com/shaka-demo-assets/sintel-fmp4-aes/master.m3u8',
       /* source= */ shakaAssets.Source.SHAKA)
+      .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP4)
       .addFeature(shakaAssets.Feature.OFFLINE),
@@ -948,6 +952,7 @@ shakaAssets.testAssets = [
       /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/art_of_motion.png',
       /* manifestUri= */ 'https://bitmovin-a.akamaihd.net/content/art-of-motion_drm/m3u8s/11331.m3u8',
       /* source= */ shakaAssets.Source.BITCODIN)
+      .addKeySystem(shakaAssets.KeySystem.AES128)
       .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
       .addFeature(shakaAssets.Feature.HLS)
       .addFeature(shakaAssets.Feature.MP2TS)
@@ -1087,6 +1092,16 @@ shakaAssets.testAssets = [
         kind: 'subtitle',
         mime: 'text/vtt',
       }),
+  new ShakaDemoAssetInfo(
+      /* name= */ 'Sintel (DASH, AES-128)',
+      /* iconUri= */ 'https://storage.googleapis.com/shaka-asset-icons/sintel.png',
+      /* manifestUri= */ 'https://amssamples.streaming.mediaservices.windows.net/49b57c87-f5f3-48b3-ba22-c55cfdffa9cb/Sintel.ism/manifest(format=mpd-time-csf)',
+      /* source= */ shakaAssets.Source.AZURE_MEDIA_SERVICES)
+      .addKeySystem(shakaAssets.KeySystem.AES128)
+      .addFeature(shakaAssets.Feature.DASH)
+      .addFeature(shakaAssets.Feature.MP4)
+      .addFeature(shakaAssets.Feature.HIGH_DEFINITION)
+      .addFeature(shakaAssets.Feature.OFFLINE),
   // End Azure Media Services assets }}}
 
   // GPAC assets {{{

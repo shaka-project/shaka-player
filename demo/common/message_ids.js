@@ -34,6 +34,7 @@ shakaDemo.MessageIds = {
   WEBM: 'DEMO_WEBM',
   XLINK: 'DEMO_XLINK',
   /* Key systems. */
+  AES128: 'DEMO_AES128',
   CLEAR: 'DEMO_CLEAR',
   CLEAR_KEY: 'DEMO_CLEAR_KEY',
   FAIRPLAY: 'DEMO_FAIRPLAY',
