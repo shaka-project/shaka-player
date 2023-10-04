@@ -23,6 +23,10 @@
     "description": "The label on a field that allows users to provide a Ad Tag URL for a custom asset.",
     "message": "Ad Tag URL"
   },
+  "DEMO_AES128": {
+    "description": "Text that describes an asset that is not protected with any Digital Rights Management system but it is protected with AES-128.",
+    "message": "[JARGON:AES-128] protection"
+  },
   "DEMO_ALL_CONTENT": {
     "description": "A link in the header, that switches to a page for browsing or searching through the entire content library.",
     "message": "ALL CONTENT"
