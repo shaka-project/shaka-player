@@ -1,5 +1,28 @@
 # Changelog
 
+## [4.4.3](https://github.com/shaka-project/shaka-player/compare/v4.4.2...v4.4.3) (2023-10-04)
+
+
+### Bug Fixes
+
+* Allow PID change in TsParser ([#5681](https://github.com/shaka-project/shaka-player/issues/5681)) ([ac8bb85](https://github.com/shaka-project/shaka-player/commit/ac8bb85bd8b02d0654af9fc7749cae7071c7abc5))
+* **CMCD:** Fix CMCD for some mimetypes in src= ([#5699](https://github.com/shaka-project/shaka-player/issues/5699)) ([8829e1e](https://github.com/shaka-project/shaka-player/commit/8829e1eb21f66479a16bcf85df915be9dc0d8241))
+* **Demo:** Fix url of "Low Latency HLS Live" asset ([#5708](https://github.com/shaka-project/shaka-player/issues/5708)) ([d0dbed3](https://github.com/shaka-project/shaka-player/commit/d0dbed330ee00f33bfb0c6b077bddad1a104c0ec))
+* Fix creation of new Stream object for each manifest request in DASH Live when using CEA ([#5674](https://github.com/shaka-project/shaka-player/issues/5674)) ([fdc1e9f](https://github.com/shaka-project/shaka-player/commit/fdc1e9fe99cdf336fb3dc411b7174eba48acf5bb))
+* Fix some properties on the shaka.text.Cue that are mangled ([#5673](https://github.com/shaka-project/shaka-player/issues/5673)) ([c69e50f](https://github.com/shaka-project/shaka-player/commit/c69e50f508ffeb5108133e39acd60c36b45c788d))
+* **HLS:** Fix audio and video out of sync ([#5658](https://github.com/shaka-project/shaka-player/issues/5658)) ([7df352d](https://github.com/shaka-project/shaka-player/commit/7df352db25c3dc2c14315bb65fd0159b3c195528))
+* **HLS:** Fix display CEA-708 in HLS ([#5694](https://github.com/shaka-project/shaka-player/issues/5694)) ([ed1d954](https://github.com/shaka-project/shaka-player/commit/ed1d95433b21049c6daf0b24d6ded13f46130e94))
+* **HLS:** Fix presentation delay for small live playlists (eg: 3-4 segments) ([#5687](https://github.com/shaka-project/shaka-player/issues/5687)) ([10b03e7](https://github.com/shaka-project/shaka-player/commit/10b03e7b2c026fc2393a7244946feca5b7bebd1b))
+* **HLS:** Skip segments without duration and without partial segments ([#5705](https://github.com/shaka-project/shaka-player/issues/5705)) ([eedad19](https://github.com/shaka-project/shaka-player/commit/eedad19b3e121d117e6748cbf965d58f30db49ca))
+* **HLS:** Support AES-128 in init segment according the RFC ([#5677](https://github.com/shaka-project/shaka-player/issues/5677)) ([9d50f01](https://github.com/shaka-project/shaka-player/commit/9d50f01fbb4d958e347f623450438d526a338c2f))
+* seeking in segment timeline returns incorrect index ([#5716](https://github.com/shaka-project/shaka-player/issues/5716)) ([15b8da0](https://github.com/shaka-project/shaka-player/commit/15b8da05aa70ae73957c68d00c78528a0ec7deb9)), closes [#5664](https://github.com/shaka-project/shaka-player/issues/5664)
+* **WebVTT:** Fix text displayed out of picture and with overlapping lines ([#5662](https://github.com/shaka-project/shaka-player/issues/5662)) ([580b3f7](https://github.com/shaka-project/shaka-player/commit/580b3f7229cb033437d2f4285dfb108358f13afb)), closes [#5661](https://github.com/shaka-project/shaka-player/issues/5661)
+
+
+### Performance Improvements
+
+* Optimization to resolve uris ([#5657](https://github.com/shaka-project/shaka-player/issues/5657)) ([971b2a0](https://github.com/shaka-project/shaka-player/commit/971b2a0074ada35f1891d956d6ec9601ad1ece39))
+
 ## [4.4.2](https://github.com/shaka-project/shaka-player/compare/v4.4.1...v4.4.2) (2023-09-13)
 
 
