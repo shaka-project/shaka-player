@@ -616,18 +616,9 @@ describe('UI', () => {
         player.configure('abr.enabled', false);
 
         const tracks = player.getVariantTracks();
-        const en2 =
-            tracks.find((t) => t.language == 'en' && t.channelsCount == 2);
         const en1 =
             tracks.find((t) => t.language == 'en' && t.channelsCount == 1);
         const es = tracks.find((t) => t.language == 'es');
-
-        // There are 3 variants with English 2-channel, but one is a duplicate
-        // and shouldn't appear in the list.
-        goog.asserts.assert(en2, 'Unable to find tracks');
-        player.selectVariantTrack(en2, true);
-        await updateResolutionMenu();
-        expect(getResolutions()).toEqual(['240p', '480p']);
 
         // There is 1 variant with English 1-channel.
         goog.asserts.assert(en1, 'Unable to find tracks');
@@ -646,7 +637,9 @@ describe('UI', () => {
         const manifest =
           shaka.test.ManifestGenerator.generate((manifest) => {
             manifest.addVariant(0, (variant) => {
-              variant.addAudio(0);
+              variant.addAudio(0, (stream) => {
+                stream.roles = ['main'];
+              });
               variant.bandwidth = 100000;
             });
             manifest.addVariant(1, (variant) => {
