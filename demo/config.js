@@ -448,13 +448,24 @@ shakaDemo.Config = class {
 
   /** @private */
   addMediaSourceSection_() {
+    const strategyOptions = shaka.config.CodecSwitchingStrategy;
+    const strategyOptionsNames = {
+      'RELOAD': 'reload',
+      'SMOOTH': 'smooth',
+    };
+
     const docLink = this.resolveExternLink_('.MediaSourceConfiguration');
     this.addSection_('Media source', docLink)
         .addTextInput_('Source buffer extra features',
             'mediaSource.sourceBufferExtraFeatures')
         .addBoolInput_('Force Transmux', 'mediaSource.forceTransmux')
         .addBoolInput_('Insert fake encryption in init segments when needed ' +
-            'by the platform.', 'mediaSource.insertFakeEncryptionInInit');
+            'by the platform.', 'mediaSource.insertFakeEncryptionInInit')
+        .addSelectInput_(
+            'Codec Switching Strategy',
+            'mediaSource.codecSwitchingStrategy',
+            strategyOptions,
+            strategyOptionsNames);
   }
 
   /** @private */

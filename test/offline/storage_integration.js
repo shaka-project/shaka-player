@@ -1530,10 +1530,7 @@ filterDescribe('Storage', storageSupport, () => {
       manifest.addVariant(3, (variant) => {
         variant.language = frenchCanadian;
         variant.bandwidth = kbps(13);
-        variant.addVideo(4, (stream) => {
-          stream.bandwidth = kbps(10);
-          stream.size(100, 200);
-        });
+        variant.addExistingStream(1);
         variant.addAudio(5, (stream) => {
           stream.language = frenchCanadian;
           stream.bandwidth = kbps(3);

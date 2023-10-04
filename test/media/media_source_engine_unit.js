@@ -116,7 +116,13 @@ describe('MediaSourceEngine', () => {
     mockMediaSource = createMockMediaSource();
     mockMediaSource.addSourceBuffer.and.callFake((mimeType) => {
       const type = mimeType.split('/')[0];
-      return type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
+      const buffer = type == 'audio' ? audioSourceBuffer : videoSourceBuffer;
+      // reset buffer params
+      buffer.timestampOffset = 0;
+      buffer.appendWindowEnd = Infinity;
+      buffer.appendWindowStart = 0;
+
+      return buffer;
     });
     mockTransmuxer = new shaka.test.FakeTransmuxer();
     shaka.transmuxer.TransmuxerEngine.findTransmuxer =
@@ -167,10 +173,12 @@ describe('MediaSourceEngine', () => {
         goog.asserts.assert(attr == 'src', 'Unexpected removeAttribute() call');
         mockVideo.src = '';
       },
+      addEventListener: jasmine.createSpy('addVideoEventListener'),
       load: /** @this {HTMLVideoElement} */ () => {
         // This assertion alerts us if the requirements for this mock change.
         goog.asserts.assert(mockVideo.src == '', 'Unexpected load() call');
       },
+      play: jasmine.createSpy('play'),
     };
     video = /** @type {HTMLMediaElement} */(mockVideo);
     mockClosedCaptionParser = new shaka.test.FakeClosedCaptionParser();
@@ -1136,6 +1144,161 @@ describe('MediaSourceEngine', () => {
     });
   });
 
+  describe('reload codec switching', () => {
+    beforeEach(
+        /** @suppress {visibility, checkTypes} */
+        () => {
+          mediaSourceEngine.eventManager_.listenOnce =
+              jasmine.createSpy('listener');
+          mediaSourceEngine.eventManager_.listen =
+              jasmine.createSpy('eventListener');
+        });
+    const initObject = new Map();
+    initObject.set(ContentType.VIDEO, fakeVideoStream);
+    initObject.set(ContentType.AUDIO, fakeAudioStream);
+
+    it('should re-create a new MediaSource',
+    /** @suppress {visibility} */ async () => {
+          await mediaSourceEngine.init(initObject, false);
+          mediaSourceEngine.reset_(initObject);
+          expect(createMediaSourceSpy).toHaveBeenCalled();
+        });
+
+    it('should re-create the audio & video source buffers',
+    /** @suppress {invalidCasts, visibility, checkTypes} */ async () => {
+          await mediaSourceEngine.init(initObject, false);
+          mediaSourceEngine.reset_(initObject);
+          expect(mockMediaSource.addSourceBuffer).toHaveBeenCalledTimes(2);
+        });
+
+    it('should persist the previous source buffer parameters',
+    /** @suppress {invalidCasts, visibility, checkTypes} */async () => {
+          await mediaSourceEngine.init(initObject, false);
+
+          audioSourceBuffer.timestampOffset = 10;
+          audioSourceBuffer.appendWindowStart = 5;
+          audioSourceBuffer.appendWindowEnd = 20;
+
+          videoSourceBuffer.timestampOffset = 20;
+          videoSourceBuffer.appendWindowStart = 15;
+          videoSourceBuffer.appendWindowEnd = 30;
+
+          mediaSourceEngine.reset_(initObject);
+
+          expect(audioSourceBuffer.timestampOffset).toBe(10);
+          expect(audioSourceBuffer.appendWindowStart).toBe(5);
+          expect(audioSourceBuffer.appendWindowEnd).toBe(20);
+
+          expect(videoSourceBuffer.timestampOffset).toBe(20);
+          expect(videoSourceBuffer.appendWindowStart).toBe(15);
+          expect(videoSourceBuffer.appendWindowEnd).toBe(30);
+        });
+
+    it('should preserve autoplay state',
+    /** @suppress {invalidCasts, visibility, checkTypes} */
+        async () => {
+          const originalInitSourceBuffer = mediaSourceEngine.initSourceBuffer_;
+          try {
+            await mediaSourceEngine.init(initObject, false);
+            video.autoplay = true;
+            video.paused = true;
+            const playSpy = /** @type {jasmine.Spy} */ (video.play);
+            const addListenOnceSpy =
+            /** @type {jasmine.Spy} */
+              (mediaSourceEngine.eventManager_.listenOnce);
+            const addEventListenerSpy =
+            /** @type {jasmine.Spy} */
+                (mediaSourceEngine.eventManager_.listen);
+            mediaSourceEngine.playbackHasBegun_ = true;
+            mediaSourceEngine.initSourceBuffer_ =
+              jasmine.createSpy('initSourceBuffer');
+            const initSourceBufferSpy =
+            /** @type {jasmine.Spy} */
+                (mediaSourceEngine.initSourceBuffer_);
+            addEventListenerSpy.and.callFake((o, e, c) => {
+              c(); // audio
+              c(); // video
+            });
+            await mediaSourceEngine.reset_(initObject);
+            const callback = addListenOnceSpy.calls.argsFor(0)[2];
+            callback();
+            expect(initSourceBufferSpy).toHaveBeenCalled();
+            expect(addListenOnceSpy.calls.argsFor(0)[1]).toBe('canplay');
+            expect(video.autoplay).toBe(true);
+            expect(playSpy).not.toHaveBeenCalled();
+          } finally {
+            mediaSourceEngine.initSourceBuffer_ = originalInitSourceBuffer;
+          }
+        });
+
+    it('should not set autoplay to false if playback has not begun',
+    /** @suppress {invalidCasts, visibility, checkTypes} */
+        async () => {
+          const originalInitSourceBuffer = mediaSourceEngine.initSourceBuffer_;
+          try {
+            await mediaSourceEngine.init(initObject, false);
+            video.autoplay = true;
+            let setCount = 0;
+            const addEventListenerSpy =
+            /** @type {jasmine.Spy} */
+              (mediaSourceEngine.eventManager_.listen);
+            addEventListenerSpy.and.callFake((o, e, c) => {
+              c(); // audio
+              c(); // video
+            });
+            mediaSourceEngine.initSourceBuffer_ =
+            jasmine.createSpy('initSourceBuffer');
+            Object.defineProperty(video, 'autoplay', {
+              get: () => true,
+              set: () => {
+                setCount++;
+              },
+            });
+            await mediaSourceEngine.reset_(initObject);
+            expect(setCount).toBe(0);
+          } finally {
+            mediaSourceEngine.initSourceBuffer_ = originalInitSourceBuffer;
+          }
+        });
+
+    it('should preserve playing state',
+    /** @suppress {invalidCasts, visibility, checkTypes} */
+        async () => {
+          const originalInitSourceBuffer = mediaSourceEngine.initSourceBuffer_;
+          try {
+            await mediaSourceEngine.init(initObject, false);
+            video.autoplay = false;
+            video.paused = false;
+            const playSpy = /** @type {jasmine.Spy} */ (video.play);
+            const addListenOnceSpy =
+            /** @type {jasmine.Spy} */
+              (mediaSourceEngine.eventManager_.listenOnce);
+            const addEventListenerSpy =
+            /** @type {jasmine.Spy} */
+                (mediaSourceEngine.eventManager_.listen);
+            mediaSourceEngine.playbackHasBegun_ = true;
+            mediaSourceEngine.initSourceBuffer_ =
+              jasmine.createSpy('initSourceBuffer');
+            const initSourceBufferSpy =
+            /** @type {jasmine.Spy} */
+                (mediaSourceEngine.initSourceBuffer_);
+            addEventListenerSpy.and.callFake((o, e, c) => {
+              c(); // audio
+              c(); // video
+            });
+            await mediaSourceEngine.reset_(initObject);
+            const callback = addListenOnceSpy.calls.argsFor(0)[2];
+            callback();
+            expect(initSourceBufferSpy).toHaveBeenCalled();
+            expect(addListenOnceSpy.calls.argsFor(0)[1]).toBe('canplay');
+            expect(video.autoplay).toBe(false);
+            expect(playSpy).toHaveBeenCalled();
+          } finally {
+            mediaSourceEngine.initSourceBuffer_ = originalInitSourceBuffer;
+          }
+        });
+  });
+
   describe('destroy', () => {
     beforeEach(async () => {
       captureEvents(audioSourceBuffer, ['updateend', 'error']);
@@ -1259,6 +1422,7 @@ describe('MediaSourceEngine', () => {
   function createMockMediaSource() {
     const mediaSource = {
       readyState: 'open',
+      sourceBuffers: document.createElement('div'),
       addSourceBuffer: jasmine.createSpy('addSourceBuffer'),
       endOfStream: jasmine.createSpy('endOfStream'),
       durationGetter: jasmine.createSpy('duration getter'),
