@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.3.13](https://github.com/shaka-project/shaka-player/compare/v4.3.12...v4.3.13) (2023-10-04)
+
+
+### Bug Fixes
+
+* Allow PID change in TsParser ([#5681](https://github.com/shaka-project/shaka-player/issues/5681)) ([2fcc812](https://github.com/shaka-project/shaka-player/commit/2fcc8129db517ac41745785c70af3406a725c0b4))
+* **CMCD:** Fix CMCD for some mimetypes in src= ([#5699](https://github.com/shaka-project/shaka-player/issues/5699)) ([28bb5d1](https://github.com/shaka-project/shaka-player/commit/28bb5d139d2bbcfe5bb58b7691d9543868cce0be))
+* **Demo:** Fix url of "Low Latency HLS Live" asset ([#5708](https://github.com/shaka-project/shaka-player/issues/5708)) ([728cbfc](https://github.com/shaka-project/shaka-player/commit/728cbfc7b3b028cd5f9ba958e959c9a40234091b))
+* Fix creation of new Stream object for each manifest request in DASH Live when using CEA ([#5674](https://github.com/shaka-project/shaka-player/issues/5674)) ([d9223ee](https://github.com/shaka-project/shaka-player/commit/d9223eef8255e8ac698f23cd7115ef6a388e613c))
+* **HLS:** Fix audio and video out of sync ([#5658](https://github.com/shaka-project/shaka-player/issues/5658)) ([cb9789e](https://github.com/shaka-project/shaka-player/commit/cb9789e6ab084dd7ba77a232bb90f0fdb1c9bc53))
+* **HLS:** Fix display CEA-708 in HLS ([#5694](https://github.com/shaka-project/shaka-player/issues/5694)) ([b639b55](https://github.com/shaka-project/shaka-player/commit/b639b550b692e466c8513f2801d5a7c36b125643))
+* **HLS:** Fix presentation delay for small live playlists (eg: 3-4 segments) ([#5687](https://github.com/shaka-project/shaka-player/issues/5687)) ([ef827a0](https://github.com/shaka-project/shaka-player/commit/ef827a07abe5c0b6514a89d121294fc562d8c17f))
+* **HLS:** Skip segments without duration and without partial segments ([#5705](https://github.com/shaka-project/shaka-player/issues/5705)) ([96dfcc6](https://github.com/shaka-project/shaka-player/commit/96dfcc609ae40b64d79c27a4f75b34c212fc714d))
+* **HLS:** Support AES-128 in init segment according the RFC ([#5677](https://github.com/shaka-project/shaka-player/issues/5677)) ([d30c571](https://github.com/shaka-project/shaka-player/commit/d30c5719ba3e8ee5d53e02100178fdb8ab34df10))
+* **WebVTT:** Fix text displayed out of picture and with overlapping lines ([#5662](https://github.com/shaka-project/shaka-player/issues/5662)) ([ee898e9](https://github.com/shaka-project/shaka-player/commit/ee898e9eceb5fe6bbc27e72d11318962f7a574eb)), closes [#5661](https://github.com/shaka-project/shaka-player/issues/5661)
+
+
+### Performance Improvements
+
+* Optimization to resolve uris ([#5657](https://github.com/shaka-project/shaka-player/issues/5657)) ([0ad925b](https://github.com/shaka-project/shaka-player/commit/0ad925b9eadfe844ce65b341cab5403889786309))
+
 ## [4.3.12](https://github.com/shaka-project/shaka-player/compare/v4.3.11...v4.3.12) (2023-09-13)
 
 
